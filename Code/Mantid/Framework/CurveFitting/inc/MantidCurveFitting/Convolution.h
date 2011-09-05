@@ -51,7 +51,7 @@ namespace Mantid
        */
       class HalfComplex
       {
-        int m_size;           ///< size of the transformed data
+        size_t m_size;           ///< size of the transformed data
         double* m_data; ///< pointer to the transformed data
         bool m_even;          ///< true if the size of the original data is even
       public:
@@ -60,17 +60,17 @@ namespace Mantid
          * @param data :: A pointer to the transformed complex data
          * @param n :: The size of untransformed real data
          */
-        HalfComplex(double* data,const int& n):m_size(n/2+1),m_data(data),m_even(n/2*2==n)
+        HalfComplex(double* data,const size_t& n):m_size(n/2+1),m_data(data),m_even(n/2*2==n)
         {
         }
         /// Returns the size of the transform
-        int size()const{return m_size;}
+        size_t size()const{return m_size;}
         /**
          * The real part of i-th transform coefficient
          * @param i :: The index of the complex transform coefficient
          * @return The real part 
          */
-        double real(int i)const
+        double real(size_t i)const
         {
           if (i >= m_size) return 0.;
           if (i == 0) return m_data[0];
@@ -81,7 +81,7 @@ namespace Mantid
          * @param i :: The index of the complex transform coefficient
          * @return The imaginary part 
          */
-        double imag(int i)const
+        double imag(size_t i)const
         {
           if (i >= m_size) return 0.;
           if (i == 0) return 0;
@@ -94,7 +94,7 @@ namespace Mantid
          * @param re :: The real part of the new value
          * @param im :: The imaginary part of the new value
          */
-        void set(int i,const double& re,const double& im)
+        void set(size_t i,const double& re,const double& im)
         {
           if (i >= m_size) return;
           if (i == 0)// this is purely real
@@ -124,7 +124,7 @@ namespace Mantid
       void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// Add a function. 
-      int addFunction(IFitFunction* f);
+      size_t addFunction(IFitFunction* f);
 
       /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate the resolution function
       void refreshResolution()const;
@@ -138,7 +138,7 @@ namespace Mantid
       /// To keep the Fourier transform of the resolution function (divided by the step in xValues)
       mutable double* m_resolution;
       /// To keep the size of m_resolution
-      mutable int m_resolutionSize;
+      mutable size_t m_resolutionSize;
       /// Temporary data storage used in functionDeriv
       mutable boost::shared_array<double> m_tmp;
       /// Temporary data storage used in functionDeriv

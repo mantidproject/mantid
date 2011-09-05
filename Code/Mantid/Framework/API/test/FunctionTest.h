@@ -7,10 +7,75 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
+
+class MocSpectrum: public ISpectrum
+{
+public:
+  
+  MocSpectrum(size_t nx, size_t ny):m_x(nx),m_y(ny),m_e(ny) {}
+
+  void clearData() {}
+  void setData(const MantidVec&){}
+  void setData(const MantidVec&, const MantidVec&){}
+
+  void setData(const MantidVecPtr&){}
+  void setData(const MantidVecPtr&, const MantidVecPtr&){}
+
+  void setData(const MantidVecPtr::ptr_type&){}
+  void setData(const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&){}
+
+  virtual MantidVec& dataX() {return m_x;}
+  virtual MantidVec& dataY() {return m_y;}
+  virtual MantidVec& dataE() {return m_e;}
+
+  virtual const MantidVec& dataX() const {return m_x;}
+  virtual const MantidVec& dataY() const {return m_y;}
+  virtual const MantidVec& dataE() const {return m_e;}
+
+  virtual size_t getMemorySize() const {return 0;}
+
+  MantidVec m_x,m_y,m_e;
+};
+
+class MocMatrixWorkspace : public MatrixWorkspace
+{
+public:
+  
+  MocMatrixWorkspace(size_t nspec, size_t nx, size_t ny):m_blocksize(ny)
+  {
+    for(size_t i = 0; i < nspec; ++i)
+    {
+      MocSpectrum sp(nx,ny);
+      m_spectra.push_back(sp);
+    }
+  }
+
+  ~MocMatrixWorkspace(){}
+
+  // Section required for iteration
+  /// Returns the number of single indexable items in the workspace
+  virtual std::size_t size() const {return m_spectra.size()*m_blocksize;}
+  /// Returns the size of each block of data returned by the dataY accessors
+  virtual std::size_t blocksize() const {return m_blocksize;}
+  /// Returns the number of histograms in the workspace
+  virtual std::size_t getNumberHistograms() const {return m_spectra.size();}
+
+  /// Return the underlying ISpectrum ptr at the given workspace index.
+  virtual ISpectrum * getSpectrum(const size_t index) {return &m_spectra[index];}
+
+  /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
+  virtual const ISpectrum * getSpectrum(const size_t index) const {return &m_spectra[index];}
+  const std::string id(void) const {return "";}
+  void init(const size_t &,const size_t &,const size_t &) { }
+private:
+  std::vector<MocSpectrum> m_spectra;
+  size_t m_blocksize;
+};
 
 class IFT_Funct: public ParamFunction, public IFunctionMW
 {
@@ -42,10 +107,10 @@ public:
     for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i];
-      out->set(static_cast<int>(i),0,1.);
-      out->set(static_cast<int>(i),1,x);
-      out->set(static_cast<int>(i),2,x*x);
-      out->set(static_cast<int>(i),3,x*x*x);
+      out->set(i,0,1.);
+      out->set(i,1,x);
+      out->set(i,2,x*x);
+      out->set(i,3,x*x*x);
     }
   }
 
@@ -152,9 +217,9 @@ public:
     TS_ASSERT( ! f.isActive(3));
 
     TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_EQUALS(f.activeIndex(1),-1);
+    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(f.activeIndex(2),1);
-    TS_ASSERT_EQUALS(f.activeIndex(3),-1);
+    TS_ASSERT_THROWS(f.activeIndex(3),std::invalid_argument);
 
   }
 
@@ -193,7 +258,7 @@ public:
     TS_ASSERT(   f.isActive(3));
 
     TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_EQUALS(f.activeIndex(1),-1);
+    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(f.activeIndex(2),1);
     TS_ASSERT_EQUALS(f.activeIndex(3),2);
 
@@ -262,9 +327,9 @@ public:
     TS_ASSERT( ! f.isActive(3));
 
     TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_EQUALS(f.activeIndex(1),-1);
+    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(f.activeIndex(2),1);
-    TS_ASSERT_EQUALS(f.activeIndex(3),-1);
+    TS_ASSERT_THROWS(f.activeIndex(3),std::invalid_argument);
 
   }
 
@@ -332,7 +397,7 @@ public:
     TS_ASSERT(   f.isActive(3));
 
     TS_ASSERT_EQUALS(f.activeIndex(0),0);
-    TS_ASSERT_EQUALS(f.activeIndex(1),-1);
+    TS_ASSERT_THROWS(f.activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(f.activeIndex(2),1);
     TS_ASSERT_EQUALS(f.activeIndex(3),2);
 
@@ -425,8 +490,9 @@ public:
 
   void test_setWorkspace_works()
   {
-    FrameworkManager::Instance();
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+    //FrameworkManager::Instance();
+    //MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+    MatrixWorkspace_sptr ws(new MocMatrixWorkspace(10,11,10));
 
     MantidVec& x = ws->dataX(3);
     MantidVec& y = ws->dataY(3);
@@ -449,7 +515,8 @@ public:
   {
     double expected;
     int numpixels = 15000;
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",numpixels,11,10);
+    //MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",numpixels,11,10);
+    MatrixWorkspace_sptr ws(new MocMatrixWorkspace(numpixels,11,10));
     for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
     {
       MantidVec& x = ws->dataX(wi);

@@ -66,7 +66,7 @@ class FunctionHandler;
     for both active and declared parameters must ensure that any changes to one of them 
     immediately reflected on the other so that the two are consistent at any moment.
 
-    IFunctionMD declares method nameOfActive(int i) which returns the name of the declared parameter
+    IFunctionMD declares method nameOfActive(size_t i) which returns the name of the declared parameter
     corresponding to the i-th active parameter. I am not completely sure in the usefulness of it.
 
     IFunctionMD provides methods for tying and untying parameters. Only the declared parameters can be 
@@ -126,7 +126,7 @@ public:
   virtual boost::shared_ptr<const Workspace> getWorkspace()const;
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  virtual int dataSize()const;
+  virtual size_t dataSize()const;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const;
   /// Returns a reference to the fitting weights.
@@ -151,7 +151,7 @@ protected:
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::IMDWorkspace> m_workspace;
   /// Size of the fitted data
-  int m_dataSize;
+  size_t m_dataSize;
   /// Pointer to the fitted data
   boost::shared_array<double> m_data;
   /// Pointer to the fitting weights
@@ -160,7 +160,7 @@ protected:
   //   fields supporting IMDWorkspace iteration
 
   /// maps dimension id to its index in m_dimensions
-  std::map<std::string,int> m_dimensionIndexMap;
+  std::map<std::string,size_t> m_dimensionIndexMap;
   /// dimensions used in this function in the expected order
   std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
 

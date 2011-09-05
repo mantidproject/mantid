@@ -58,7 +58,7 @@ public:
   std::string name()const{return "MultiBG";}
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  virtual int dataSize()const{return static_cast<int>(m_data.size());}
+  virtual size_t dataSize()const{return m_data.size();}
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const{return &m_data[0];}
   virtual const double* getWeights()const{return &m_weights[0];}
@@ -71,8 +71,6 @@ protected:
 
   /// to collect different workspaces found in child functions
   std::vector< std::pair< boost::shared_ptr<const API::MatrixWorkspace>, size_t> > m_spectra;
-  /// corresponding MatrixWorkspace indexes
-  //std::vector< size_t > m_wsIndex;
   /// to store function indices to workspaces: m_funIndex[i] gives vector of indexes of m_spectra for function i
   std::vector< std::vector<size_t> > m_funIndex;
   /// the data vector which is a composition of all fitted spectra

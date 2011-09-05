@@ -24,6 +24,51 @@ namespace CurveFitting
 
 DECLARE_FUNCTION(MultiBG)
 
+/** A Jacobian for individual functions
+ */
+class PartialJacobian: public API::Jacobian
+{
+  API::Jacobian* m_J;  ///< pointer to the overall Jacobian
+  size_t m_iY0;      ///< data array offset in the overall Jacobian for a particular function
+  size_t m_iP0;      ///< parameter offset in the overall Jacobian for a particular function
+  size_t m_iaP0;     ///< offset in the active Jacobian for a particular function
+public:
+  /** Constructor
+   * @param J :: A pointer to the overall Jacobian
+   * @param iP0 :: The parameter index (declared) offset for a particular function
+   * @param iap0 :: The active parameter index (declared) offset for a particular function
+   */
+  PartialJacobian(API::Jacobian* J,size_t iY0, size_t iP0, size_t iap0):m_J(J),m_iY0(iY0),m_iP0(iP0),m_iaP0(iap0)
+  {}
+  /**
+   * Overridden Jacobian::set(...).
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   * @param value :: The derivative value
+   */
+  void set(size_t iY, size_t iP, double value)
+  {
+      m_J->set(m_iY0 + iY,m_iP0 + iP,value);
+  }
+  /**
+   * Overridden Jacobian::get(...).
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   */
+  double get(size_t iY, size_t iP)
+  {
+      return m_J->get(m_iY0 + iY,m_iP0 + iP);
+  }
+ /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
+  *   @param value :: Value to add
+  *   @param iActiveP :: The index of an active parameter.
+  */
+  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  {
+    m_J->addNumberToColumn(value,m_iaP0+iActiveP);
+  }
+};
+
 ///Destructor
 MultiBG::~MultiBG()
 {
@@ -74,55 +119,22 @@ void MultiBG::function(double* out)const
   //std::cerr << std::endl;
 }
 
-/// Derivatives of function with respect to active parameters
 void MultiBG::functionDeriv(API::Jacobian* out)
 {
-    // it is possible that out is NULL
-    if (!out) return;
-    // claculate numerically
-    double stepPercentage = DBL_EPSILON*1000; // step percentage
-    double step; // real step
-    const int nParam = nParams();
-    const int nData  = dataSize();
-
-    //for(size_t i=0; i < nParams(); ++i)
-    //  std::cerr << i << ' ' << getParameter(i) << std::endl;
-    //std::cerr << std::endl;
-
-    std::vector<double> tmpFunctionOutputMinusStep(nData);
-    std::vector<double> tmpFunctionOutputPlusStep(nData);
-
-    function(&tmpFunctionOutputMinusStep[0]);
-
-    for (int iP = 0; iP < nParam; iP++)
+  // it is possible that out is NULL
+  if (!out) return;
+  for(size_t i = 0; i < nFunctions(); i++)
+  {
+    IFitFunction* fun = getFunction(i);
+    size_t nWS =  m_funIndex[i].size();
+    for(size_t k = 0; k < nWS; ++k)
     {
-      if ( isActive(iP) )
-      {
-        const double& val = getParameter(iP);
-        if (fabs(val) < stepPercentage)
-        {
-          step = stepPercentage;
-        }
-        else
-        {
-          step = val*stepPercentage;
-        }
-
-        double paramPstep = val + step;
-        setParameter(iP, paramPstep);
-        function(&tmpFunctionOutputPlusStep[0]);
-
-        step = paramPstep - val;
-        setParameter(iP, val);
-
-        for (int i = 0; i < nData; i++) 
-        {
-          double value = (tmpFunctionOutputPlusStep[i]-tmpFunctionOutputMinusStep[i])/step;
-          out->set(i,iP,value);
-        }
-      }
+      size_t j = m_funIndex[i][k];
+      fun->setWorkspace(m_spectra[k].first,"WorkspaceIndex="+boost::lexical_cast<std::string>(m_spectra[j].second),false);
+      PartialJacobian J(out,m_offset[j],paramOffset(i),activeOffset(i));
+      fun->functionDeriv(&J);
     }
-
+  }
 }
 
 /**

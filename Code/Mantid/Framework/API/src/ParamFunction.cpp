@@ -55,9 +55,9 @@ ParamFunction::~ParamFunction()
  *  @param value :: The new value
  *  @param explicitlySet :: A boolean falgging the parameter as explicitly set (by user)
  */
-void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
+void ParamFunction::setParameter(size_t i, const double& value, bool explicitlySet)
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -74,11 +74,7 @@ void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
  */
 void ParamFunction::setParameterDescription(size_t i, const std::string& description)
 {
-  // Casting this to an int could result in it being turned into a -1
-  // so need to check that also. 
-  // @todo: nParams should return size_t and get rid of -1 error returns
-  int iindex = static_cast<int>(i);
-  if( iindex >= nParams() || iindex < 0 )
+  if( i >= nParams() )
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -89,9 +85,9 @@ void ParamFunction::setParameterDescription(size_t i, const std::string& descrip
  *  @param i :: The parameter index
  *  @return the value of the requested parameter
  */
-double ParamFunction::getParameter(int i)const
+double ParamFunction::getParameter(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -165,7 +161,7 @@ double ParamFunction::getParameter(const std::string& name)const
  * @param name :: The name of the parameter.
  * @return the index of the named parameter
  */
-int ParamFunction::parameterIndex(const std::string& name)const
+size_t ParamFunction::parameterIndex(const std::string& name)const
 {
   std::string ucName(name);
   //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
@@ -184,9 +180,9 @@ int ParamFunction::parameterIndex(const std::string& name)const
  * @param i :: The index of a parameter
  * @return the name of the parameter at the requested index
  */
-std::string ParamFunction::parameterName(int i)const
+std::string ParamFunction::parameterName(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -199,7 +195,7 @@ std::string ParamFunction::parameterName(int i)const
  */
 std::string ParamFunction::parameterDescription(size_t i)const
 {
-  if (static_cast<int>(i) >= nParams())
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -237,7 +233,7 @@ void ParamFunction::declareParameter(const std::string& name,double initValue, c
  * @param i :: The index of an active parameter
  * @return the global index of the requested parameter
  */
-int ParamFunction::indexOfActive(int i)const
+size_t ParamFunction::indexOfActive(size_t i)const
 {
   if (i >= nActive())
     throw std::out_of_range("ParamFunction parameter index out of range.");
@@ -250,7 +246,7 @@ int ParamFunction::indexOfActive(int i)const
  * @param i :: The index of an active parameter
  * @return the name of the active parameter
  */
-std::string ParamFunction::nameOfActive(int i)const
+std::string ParamFunction::nameOfActive(size_t i)const
 {
   return m_parameterNames[indexOfActive(i)];
 }
@@ -270,7 +266,7 @@ std::string ParamFunction::descriptionOfActive(size_t i)const
  * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
-bool ParamFunction::isActive(int i)const
+bool ParamFunction::isActive(size_t i)const
 {
   return std::find(m_indexMap.begin(),m_indexMap.end(),i) != m_indexMap.end();
 }
@@ -278,21 +274,21 @@ bool ParamFunction::isActive(int i)const
 /** This method doesn't create a tie
  * @param i :: A declared parameter index to be removed from active
  */
-void ParamFunction::removeActive(int i)
+void ParamFunction::removeActive(size_t i)
 {
   if (!isActive(i)) return;
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
     throw std::out_of_range("ParamFunction parameter index out of range.");
 
   if (m_indexMap.size() == 0)// This should never happen
   {
-    for(int j=0;j<nParams();j++)
+    for(size_t j=0;j<nParams();j++)
       if (j != i)
         m_indexMap.push_back(j);
   }
   else
   {
-    std::vector<int>::iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
+    std::vector<size_t>::iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
     if (it != m_indexMap.end())
     {
       m_indexMap.erase(it);
@@ -303,14 +299,14 @@ void ParamFunction::removeActive(int i)
 /** Makes a parameter active again. It doesn't change the parameter's tie.
  * @param i :: A declared parameter index to be restored to active
  */
-void ParamFunction::restoreActive(int i)
+void ParamFunction::restoreActive(size_t i)
 {
-  if (i >= nParams()  || i < 0)
+  if (i >= nParams())
     throw std::out_of_range("ParamFunction parameter index out of range.");
 
   if (nParams() == nActive()) return;
 
-  std::vector<int>::iterator it = std::find_if(m_indexMap.begin(),m_indexMap.end(),std::bind2nd(std::greater<int>(),i));
+  std::vector<size_t >::iterator it = std::find_if(m_indexMap.begin(),m_indexMap.end(),std::bind2nd(std::greater<size_t>(),i));
   if (it != m_indexMap.end())
   {
     m_indexMap.insert(it,i);
@@ -323,14 +319,17 @@ void ParamFunction::restoreActive(int i)
 
 /**
  * @param i :: The index of a declared parameter
- * @return The index of declared parameter i in the list of active parameters or -1
+ * @return The index of declared parameter i in the list of active parameters or throws std::invalid_argument
  *         if the parameter is tied.
  */
-int ParamFunction::activeIndex(int i)const
+size_t ParamFunction::activeIndex(size_t i)const
 {
-  std::vector<int>::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
-  if (it == m_indexMap.end()) return -1;
-  return int(it - m_indexMap.begin());
+  std::vector<size_t >::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
+  if (it == m_indexMap.end())
+  {
+    throw std::invalid_argument("Active parameter " + boost::lexical_cast<std::string>(i) + " not found");
+  };
+  return static_cast<size_t>(it - m_indexMap.begin());
 }
 
 /**
@@ -377,7 +376,7 @@ class ReferenceEqual
 public:
   /** Constructor
    */
-  ReferenceEqual(int i):m_i(i){}
+  ReferenceEqual(size_t i):m_i(i){}
   /**Bracket operator
    * @param p :: the parameter you are looking for
    * @return True if found
@@ -392,9 +391,9 @@ public:
  * @param i :: The index of the tied parameter.
  * @return True if successfull
  */
-bool ParamFunction::removeTie(int i)
+bool ParamFunction::removeTie(size_t i)
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -413,9 +412,9 @@ bool ParamFunction::removeTie(int i)
  * @param i :: The index of a declared parameter.
  * @return A pointer to the tie
  */
-ParameterTie* ParamFunction::getTie(int i)const
+ParameterTie* ParamFunction::getTie(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -433,7 +432,7 @@ void ParamFunction::clearTies()
 {
   for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
   {
-    int i = getParameterIndex(**it);
+    size_t i = getParameterIndex(**it);
     restoreActive(i);
     delete *it;
   }
@@ -467,9 +466,9 @@ void ParamFunction::addConstraint(IConstraint* ic)
  * @param i :: The index of a declared parameter.
  * @return A pointer to the constraint or NULL
  */
-IConstraint* ParamFunction::getConstraint(int i)const
+IConstraint* ParamFunction::getConstraint(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -500,7 +499,7 @@ void ParamFunction::removeConstraint(const std::string& parName)
 
 void ParamFunction::setParametersToSatisfyConstraints()
 {
-  for (unsigned int i = 0; i < m_constraints.size(); i++)
+  for (size_t i = 0; i < m_constraints.size(); i++)
   {
     m_constraints[i]->setParamToSatisfyConstraint();
   }
@@ -531,9 +530,9 @@ void ParamFunction::clearAllParameters()
 /// Get the address of the parameter
 /// @param i :: the index of the parameter required
 /// @returns the address of the parameter
-double* ParamFunction::getParameterAddress(int i)
+double* ParamFunction::getParameterAddress(size_t i)
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -541,9 +540,9 @@ double* ParamFunction::getParameterAddress(int i)
 }
 
 /// Checks if a parameter has been set explicitly
-bool ParamFunction::isExplicitlySet(int i)const
+bool ParamFunction::isExplicitlySet(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -551,17 +550,17 @@ bool ParamFunction::isExplicitlySet(int i)const
 }
 
 /**
- * Returns the index of parameter if the ref points to this ParamFunction or -1
+ * Returns the index of parameter if the ref points to this ParamFunction
  * @param ref :: A reference to a parameter
- * @return Parameter index or -1
+ * @return Parameter index or number of nParams() if parameter not found
  */
-int ParamFunction::getParameterIndex(const ParameterReference& ref)const
+size_t ParamFunction::getParameterIndex(const ParameterReference& ref)const
 {
-  if (ref.getFunction() == this && static_cast<int>(ref.getIndex()) < nParams())
+  if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
-    return static_cast<int>(ref.getIndex());
+    return ref.getIndex();
   }
-  return -1;
+  return nParams();
 }
 
 /**

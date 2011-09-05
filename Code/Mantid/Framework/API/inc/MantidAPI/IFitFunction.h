@@ -246,7 +246,7 @@ public:
   virtual const std::string category() const { return "General";}
 
   /// Returns the size of the fitted data (number of double values returned by the function getData())
-  virtual int dataSize()const = 0;
+  virtual size_t dataSize()const = 0;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const = 0;
   virtual const double* getWeights()const = 0;
@@ -257,11 +257,11 @@ public:
   virtual void functionDeriv(Jacobian* out);
 
   /// Set i-th parameter
-  virtual void setParameter(int, const double& value, bool explicitlySet = true) = 0;
+  virtual void setParameter(size_t, const double& value, bool explicitlySet = true) = 0;
   /// Set i-th parameter description
   virtual void setParameterDescription(size_t, const std::string& description) = 0;
   /// Get i-th parameter
-  virtual double getParameter(int i)const = 0;
+  virtual double getParameter(size_t i)const = 0;
   /// Set parameter by name.
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true) = 0;
   /// Set description of parameter by name.
@@ -269,42 +269,42 @@ public:
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const = 0;
   /// Total number of parameters
-  virtual int nParams()const = 0;
+  virtual size_t nParams()const = 0;
   /// Returns the index of parameter name
-  virtual int parameterIndex(const std::string& name)const = 0;
+  virtual size_t parameterIndex(const std::string& name)const = 0;
   /// Returns the name of parameter i
-  virtual std::string parameterName(int i)const = 0;
+  virtual std::string parameterName(size_t i)const = 0;
   /// Returns the description of parameter i
   virtual std::string parameterDescription(size_t i)const = 0;
   /// Checks if a parameter has been set explicitly
-  virtual bool isExplicitlySet(int i)const = 0;
+  virtual bool isExplicitlySet(size_t i)const = 0;
 
   /// Number of active (in terms of fitting) parameters
-  virtual int nActive()const = 0;
+  virtual size_t nActive()const = 0;
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual double activeParameter(int i)const;
+  virtual double activeParameter(size_t i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual void setActiveParameter(int i, double value);
+  virtual void setActiveParameter(size_t i, double value);
   /// Update parameters after a fitting iteration
   virtual void updateActive(const double* in);
   /// Returns "global" index of active parameter i
-  virtual int indexOfActive(int i)const = 0;
+  virtual size_t indexOfActive(size_t i)const = 0;
   /// Returns the name of active parameter i
-  virtual std::string nameOfActive(int i)const = 0;
+  virtual std::string nameOfActive(size_t i)const = 0;
   /// Returns the name of active parameter i
   virtual std::string descriptionOfActive(size_t i)const = 0;
 
   /// Check if a declared parameter i is active
-  virtual bool isActive(int i)const = 0;
+  virtual bool isActive(size_t i)const = 0;
   /// Get active index for a declared parameter i
-  virtual int activeIndex(int i)const = 0;
+  virtual size_t activeIndex(size_t i)const = 0;
   /// Removes a declared parameter i from the list of active
-  virtual void removeActive(int i) = 0;
+  virtual void removeActive(size_t i) = 0;
   /// Restores a declared parameter i to the active status
-  virtual void restoreActive(int i) = 0;
+  virtual void restoreActive(size_t i) = 0;
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
-  virtual int getParameterIndex(const ParameterReference& ref)const = 0;
+  virtual size_t getParameterIndex(const ParameterReference& ref)const = 0;
   /// Get a function containing the parameter refered to by the reference. In case of a simple function
   /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
   /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
@@ -323,14 +323,14 @@ public:
   /// Remove all ties
   virtual void clearTies() = 0;
   /// Removes i-th parameter's tie
-  virtual bool removeTie(int i) = 0;
+  virtual bool removeTie(size_t i) = 0;
   /// Get the tie of i-th parameter
-  virtual ParameterTie* getTie(int i)const = 0;
+  virtual ParameterTie* getTie(size_t i)const = 0;
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
   /// Get constraint of i-th parameter
-  virtual IConstraint* getConstraint(int i)const = 0;
+  virtual IConstraint* getConstraint(size_t i)const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
   /// Add a penalty to the output if some parameters do not satisfy constraints.
@@ -346,7 +346,7 @@ public:
   virtual void setParametersToSatisfyConstraints() {};
 
   /// Returns the number of attributes associated with the function
-  virtual int nAttributes()const{return 0;}
+  virtual size_t nAttributes()const{return 0;}
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
   /// Return a value of attribute attName
@@ -412,7 +412,7 @@ public:
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value :: Value to add
   */
-  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  virtual void addNumberToColumn(const double& value, const size_t& iActiveP) 
   {
     (void)value; (void)iActiveP; // Avoid compiler warning
     throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");

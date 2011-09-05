@@ -68,7 +68,7 @@ class FunctionHandler;
     for both active and declared parameters must ensure that any changes to one of them 
     immediately reflected on the other so that the two are consistent at any moment.
 
-    IFunctionMW declares method nameOfActive(int i) which returns the name of the declared parameter
+    IFunctionMW declares method nameOfActive(size_t i) which returns the name of the declared parameter
     corresponding to the i-th active parameter. I am not completely sure in the usefulness of it.
 
     IFunctionMW provides methods for tying and untying parameters. Only the declared parameters can be 
@@ -128,7 +128,7 @@ public:
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const;
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  virtual int dataSize()const;
+  virtual size_t dataSize()const;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const;
   virtual const double* getWeights()const;
@@ -141,11 +141,11 @@ public:
   /* MatrixWorkspace specific methods */
 
   /// Set the workspace
-  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, int wi, int xMin, int xMax);
+  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, size_t xMin, size_t xMax);
   /// Get the workspace
   virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace()const{return m_workspace;}
   /// Get workspace index
-  virtual int getWorkspaceIndex()const{return m_workspaceIndex;}
+  virtual size_t getWorkspaceIndex()const{return m_workspaceIndex;}
 
   /// Function you want to fit to.
   virtual void functionMW(double* out, const double* xValues, const size_t nData)const = 0;
@@ -164,15 +164,15 @@ protected:
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
-                      int wsIndex)const;
+                      size_t wsIndex)const;
 
   void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
     boost::shared_ptr<const MatrixWorkspace> ws,
-    int wsIndex) const;
+    size_t wsIndex) const;
 
   boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(
     boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-    int wi,
+    size_t wi,
     const std::vector<double>& sd = std::vector<double>()
     );
 
@@ -182,13 +182,13 @@ protected:
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
   /// Spectrum index
-  int m_workspaceIndex;
+  size_t m_workspaceIndex;
   /// Lower bin index
-  int m_xMinIndex;
+  size_t m_xMinIndex;
   /// Upper bin index
-  int m_xMaxIndex;
+  size_t m_xMaxIndex;
   /// Size of the fitted data
-  int m_dataSize;
+  size_t m_dataSize;
   /// Pointer to the fitted data
   const double* m_data;
   /// Pointer to the fitting weights

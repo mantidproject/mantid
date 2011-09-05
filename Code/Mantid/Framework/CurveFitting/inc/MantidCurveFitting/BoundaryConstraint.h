@@ -122,7 +122,7 @@ namespace Mantid
 
       /// index of parameter in list of the active parameters passed by function. This number is
       /// negative if not set
-      int m_activeParameterIndex;
+      size_t m_activeParameterIndex;
 
       /// instantiate m_activeParameterIndex if not already instantiated
       //void instantiateParameterIndex(API::IFitFunction* fn);

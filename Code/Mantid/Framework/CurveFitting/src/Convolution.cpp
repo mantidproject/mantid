@@ -51,7 +51,7 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
     return;
   }
 
-  if (m_resolutionSize != static_cast<int>(nData))
+  if (m_resolutionSize != nData)
   {
     refreshResolution();
   }
@@ -63,7 +63,7 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
   bool odd = n2*2 != static_cast<int>(nData);
   if (m_resolution == 0)
   {
-    m_resolutionSize = static_cast<int>(nData);
+    m_resolutionSize = nData;
     m_resolution = new double[nData];
     // the resolution must be defined on interval -L < xr < L, L == (xValues[nData-1] - xValues[0]) / 2 
     double* xr = new double[nData];
@@ -161,13 +161,13 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
   double dx = nData > 1? xValues[1] - xValues[0]: 1.;
   std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dx));
 
-  HalfComplex res(m_resolution,static_cast<int>(nData));
-  HalfComplex fun(out,static_cast<int>(nData));
+  HalfComplex res(m_resolution,nData);
+  HalfComplex fun(out,nData);
 
   //double df = nData > 1? 1./(xValues[nData-1] - xValues[0]): 1.;
   //std::cerr<<"df="<<df<<'\n';
   //std::ofstream ftrans("trans.txt");
-  for(int i = 0; i <= res.size(); i++)
+  for(size_t i = 0; i <= res.size(); i++)
   {
     // complex multiplication
     double res_r = res.real(i);
@@ -203,7 +203,7 @@ void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const si
   if (nData == 0) return;
   std::vector<double> dp(nParams());
   std::vector<double> param(nParams());
-  for(int i=0;i<nParams();i++)
+  for(size_t i=0;i<nParams();i++)
   {
     double param = getParameter(i);
     if (param != 0.0)
@@ -224,7 +224,7 @@ void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const si
 
   functionMW(m_tmp.get(),xValues, nData);
 
-  for (int j = 0; j < nParams(); j++) 
+  for (size_t j = 0; j < nParams(); j++) 
   {
     double p0 = getParameter(j);
     setParameter(j,p0 + dp[j],false);
@@ -245,16 +245,16 @@ void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const si
  * @param f :: A pointer to the function to add
  * @return The index of the new function which will be 0 for the resolution and 1 for the model
  */
-int Convolution::addFunction(IFitFunction* f)
+size_t Convolution::addFunction(IFitFunction* f)
 {
   if (nFunctions() == 0)
   {
-    for(int i=0;i<f->nParams();i++)
+    for(size_t i=0;i<f->nParams();i++)
     {
       f->removeActive(i);
     }
   }
-  int iFun = 0;
+  size_t iFun = 0;
   if (nFunctions() < 2)
   {
     iFun = CompositeFunction::addFunction(f);

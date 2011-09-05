@@ -10,8 +10,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 
-#include <fstream>
-
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
@@ -52,15 +50,17 @@ public:
 
   MultiBGTest()
   {
-    a.resize(2);    b.resize(2);
-    a[0] = 2.; b[0] = -.10;
-    a[1] = -1.0; b[1] = .10;
-    h = 20.0;
-    s = 1.0;
-    c = 0.1;
     numBins = 31;
     x0 = -10.0;
     dx = 20.0 / static_cast<double>(numBins);
+
+    a.resize(2);    b.resize(2);
+    a[0] = 2.; b[0] = -.10;
+    a[1] = -1.0; b[1] = .10;
+    //a[1] = a[0] + b[0]*(x0 + numBins * dx * 1.5) ; b[1] = -.10;
+    h = 20.0;
+    s = 1.0;
+    c = 0.1;
     Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(2,numBins+1,numBins);
     
@@ -78,11 +78,11 @@ public:
         WS->dataE(spec)[i] = 1.0;//sqrt(fabs(WS->dataY(spec)[i]));
       }
     }
-    std::ofstream fil("MultiBGTestWS.txt");
-    for(size_t i = 0; i < numBins; ++i)
-    {
-      fil << (WS->readX(0)[i] + WS->readX(0)[i+1])/2 << ',' << WS->readY(0)[i] << ',' << WS->readE(0)[i] << ',' << WS->readY(1)[i] << ',' << WS->readE(1)[i] << std::endl;
-    }
+    //std::ofstream fil("MultiBGTestWS.txt");
+    //for(size_t i = 0; i < numBins; ++i)
+    //{
+    //  fil << (WS->readX(0)[i] + WS->readX(0)[i+1])/2 << ',' << WS->readY(0)[i] << ',' << WS->readE(0)[i] << ',' << WS->readY(1)[i] << ',' << WS->readE(1)[i] << std::endl;
+    //}
     AnalysisDataService::Instance().add("MultiBGTestWS",WS);
   }
 
@@ -90,7 +90,7 @@ public:
   {
     AnalysisDataService::Instance().remove("MultiBGTestWS");
   }
-  
+
   void testCorrectDataVectorConstrucion()
   {
     std::string funIni = "composite=MultiBG;name=Gaussian,Height=100.,Sigma=0.00100,PeakCentre=0;"
@@ -161,6 +161,7 @@ public:
     TS_ASSERT(peakDeriv0 != 0.0);
     TS_ASSERT(peakDeriv1 != 0.0);
     TS_ASSERT(peakDeriv2 != 0.0);
+
   }
 
 

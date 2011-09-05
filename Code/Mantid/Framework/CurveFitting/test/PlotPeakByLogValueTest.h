@@ -67,6 +67,7 @@ public:
     alg.setPropertyValue("LogValue","var");
     alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
     alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
     TWS_type result = getTWS("PlotPeakResult");
     TS_ASSERT_EQUALS(result->columnCount(),12);

@@ -66,9 +66,9 @@ void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, co
     }
 }
 
-void Gaussian::setActiveParameter(int i,double value)
+void Gaussian::setActiveParameter(size_t i,double value)
 {
-  int j = indexOfActive(i);
+  size_t j = indexOfActive(i);
 
   if (parameterName(j) == "Sigma") 
     setParameter(j,sqrt(fabs(1./value)),false);
@@ -76,9 +76,9 @@ void Gaussian::setActiveParameter(int i,double value)
     setParameter(j,value,false);
 }
 
-double Gaussian::activeParameter(int i)const
+double Gaussian::activeParameter(size_t i)const
 {
-  int j = indexOfActive(i);
+  size_t j = indexOfActive(i);
 
   if (parameterName(j) == "Sigma") 
     return 1./pow(getParameter(j),2);

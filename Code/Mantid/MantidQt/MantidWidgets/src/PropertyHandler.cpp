@@ -892,7 +892,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
         m_browser->m_autoBackground = NULL;
       }
     }
-    m_parent->replaceFunction(f_old,f);
+    m_parent->replaceFunctionPtr(f_old,f);
     f->setHandler(h);
     // calculate the baseline
     if (h->pfun())
@@ -1043,7 +1043,7 @@ void PropertyHandler::calcBase()
   Mantid::API::MatrixWorkspace_const_sptr ws = fMW->getMatrixWorkspace();
   if (ws)
   {
-    int wi = fMW->getWorkspaceIndex();
+    size_t wi = fMW->getWorkspaceIndex();
     const Mantid::MantidVec& X = ws->readX(wi);
     const Mantid::MantidVec& Y = ws->readY(wi);
     int n = static_cast<int>(Y.size()) - 1;
@@ -1099,7 +1099,7 @@ void PropertyHandler::setCentre(const double& c)
     Mantid::API::MatrixWorkspace_const_sptr ws = m_pf->getMatrixWorkspace();
     if (ws)
     {
-      int wi = m_pf->getWorkspaceIndex();
+      size_t wi = m_pf->getWorkspaceIndex();
       const Mantid::MantidVec& X = ws->readX(wi);
       int n = static_cast<int>(X.size()) - 2;
       if (m_ci < 0) m_ci = 0;

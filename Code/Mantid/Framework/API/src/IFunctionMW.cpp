@@ -47,12 +47,12 @@ namespace API
         throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
       }
 
-      int index = -1;
-      int xMin = -1;
-      int xMax = -1;
+      size_t index = mws->getNumberHistograms();
+      size_t xMin = mws->blocksize();
+      size_t xMax = mws->blocksize();
       double startX = 0;
       double endX = 0;
-      int n = int(mws->blocksize()); // length of each Y vector
+      size_t n = mws->blocksize(); // length of each Y vector
 
       Expression expr;
       expr.parse(slicing);
@@ -85,7 +85,7 @@ namespace API
         index = boost::lexical_cast<int>(expr[1].name());
       }
 
-      if (index < 0)
+      if (index >= mws->getNumberHistograms())
       {
         g_log.warning("WorkspaceIndex not set, defaulting to 0");
         index = 0;
@@ -98,7 +98,7 @@ namespace API
       const MantidVec& y = mws->readY(index);
       const MantidVec& e = mws->readE(index);
 
-      if (xMin < 0)
+      if (xMin >= mws->blocksize())
       {
         xMin = 0;
       }
@@ -112,10 +112,10 @@ namespace API
             break;
           }
         }
-        if (xMin < 0) xMin = 0;
+        if (xMin >= mws->blocksize()) xMin = 0;
       }
 
-      if (xMax < 0)
+      if (xMax >= mws->blocksize())
       {
         xMax = n - 1;
       }
@@ -129,12 +129,12 @@ namespace API
             break;
           }
         }
-        if (xMax < 0) xMax = 0;
+        if (xMax >= mws->blocksize()) xMax = 0;
       }
 
       if (xMin > xMax)
       {
-        int tmp = xMin;
+        size_t tmp = xMin;
         xMin = xMax;
         xMax = tmp;
       }
@@ -144,7 +144,7 @@ namespace API
       m_weights.reset(new double[m_dataSize]);
       bool isHist = x.size() > y.size();
 
-      for (int i = 0; i < static_cast<int>(m_dataSize); ++i)
+      for (size_t i = 0; i < m_dataSize; ++i)
       {
         if (isHist)
         {
@@ -187,7 +187,7 @@ namespace API
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  int IFunctionMW::dataSize()const
+  size_t IFunctionMW::dataSize()const
   {
     return m_dataSize;
   }
@@ -246,7 +246,7 @@ void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const si
  * @param xMin :: The lower bin index
  * @param xMax :: The upper bin index
  */
-void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
+void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,size_t xMin,size_t xMax)
 {
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
@@ -272,7 +272,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
       det = inst->getDetector(det->getID());
     }
 
-    for (int i = 0; i < nParams(); i++)
+    for (size_t i = 0; i < nParams(); i++)
     {
       if ( !isExplicitlySet(i) )
       {
@@ -417,7 +417,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
  */
 double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex)const
+                               size_t wsIndex)const
 {
   double retVal = value;
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
@@ -479,7 +479,7 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
  */
 void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex) const
+                               size_t wsIndex) const
 {
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
 
@@ -557,7 +557,7 @@ void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_arr
     const MantidVec& e = m_workspace->readE(m_workspaceIndex);
     bool isHist = m_workspace->isHistogramData();
 
-    for (int i = 0; i < m_dataSize; ++i)
+    for (size_t i = 0; i < m_dataSize; ++i)
     {
       if (isHist)
       {
@@ -624,7 +624,7 @@ namespace
  */
 boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
   boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-  int wi,
+  size_t wi,
   const std::vector<double>& sd
   )
 {
@@ -723,7 +723,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
 
     functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
-    for (int iP = 0; iP < static_cast<int>(nParam); iP++)
+    for (size_t iP = 0; iP < static_cast<int>(nParam); iP++)
     {
       if ( isActive(iP) )
       {
@@ -748,7 +748,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
         step = paramPstep - val;
         setParameter(iP, val);
 
-        for (int i = 0; i < static_cast<int>(nData); i++) {
+        for (size_t i = 0; i < nData; i++) {
          // out->set(i,iP, 
          //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
           out->set(i,iP, 

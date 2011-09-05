@@ -37,7 +37,7 @@ m_lowerBound(lowerBound),
 m_upperBound(upperBound)
 {
   reset(fun,fun->parameterIndex(paramName)),
-  m_activeParameterIndex = fun->activeIndex(static_cast<int>(getIndex()));
+  m_activeParameterIndex = fun->activeIndex(getIndex());
 }
 
 /** Initialize the constraint from an expression.
@@ -115,7 +115,7 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
 
   try
   {
-    int i = fun->parameterIndex(parName);
+    size_t i = fun->parameterIndex(parName);
     reset(fun,i);
     m_parameterName = parName;
   }
@@ -125,17 +125,17 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
     throw;
   }
 
-  m_activeParameterIndex = getFunction()->activeIndex(static_cast<int>(getIndex()));
+  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
 
-  if (m_activeParameterIndex < 0)
-  {
-    std::ostringstream msg;
-     msg << "Constaint name " << m_parameterName << " is not one of the active parameter"
-      << " names of function " << fun->name() << ". Therefore"
-      << " this constraint applied to this funtion serves no purpose";
-    g_log.error(msg.str());
-    throw std::runtime_error(msg.str());
-  }
+  //if (m_activeParameterIndex < 0)
+  //{
+  //  std::ostringstream msg;
+  //   msg << "Constaint name " << m_parameterName << " is not one of the active parameter"
+  //    << " names of function " << fun->name() << ". Therefore"
+  //    << " this constraint applied to this funtion serves no purpose";
+  //  g_log.error(msg.str());
+  //  throw std::runtime_error(msg.str());
+  //}
 
   if (ilow >= 0)
   {
@@ -165,39 +165,17 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
   }
 }
 
-/* determine which is the active parameter. If constraint name is not amoung
- *  the active parameter of function then return -1
- *
- *  @param fn :: fitting function
- *  @return active parameter index or -1 if no active parameter index found
- */
-//int BoundaryConstraint::determineParameterIndex(IFitFunction* fn)
-//{
-//  //if (m_activeParameterIndex < 0)
-//  //{
-//  int retVal = -1;
-//  for (int i = 0; i < fn->nActive(); i++)
-//  {
-//    if ( m_parameterName.compare(fn->nameOfActive(i)) == 0 )
-//    {
-//      retVal = i;
-//    }
-//  }
-//  return retVal;
-//  //}
-//}
-
 void BoundaryConstraint::setParamToSatisfyConstraint()
 {
-  m_activeParameterIndex = getFunction()->activeIndex(static_cast<int>(getIndex()));
+  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
 
-  if (m_activeParameterIndex < 0)
-  {
-    g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
-      << " names of function " << getFunction()->name() << ". Therefore"
-      << " this constraint applied to this funtion serves no purpose";
-    return;
-  }
+  //if (m_activeParameterIndex < 0)
+  //{
+  //  g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
+  //    << " names of function " << getFunction()->name() << ". Therefore"
+  //    << " this constraint applied to this funtion serves no purpose";
+  //  return;
+  //}
 
   if ( !(m_hasLowerBound || m_hasUpperBound) )
   {
@@ -206,28 +184,28 @@ void BoundaryConstraint::setParamToSatisfyConstraint()
     return;
   }
 
-  double paramValue = getFunction()->getParameter(static_cast<int>(getIndex()));
+  double paramValue = getFunction()->getParameter(getIndex());
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      getFunction()->setParameter(static_cast<int>(getIndex()),m_lowerBound,false);
+      getFunction()->setParameter(getIndex(),m_lowerBound,false);
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      getFunction()->setParameter(static_cast<int>(getIndex()),m_upperBound,false);
+      getFunction()->setParameter(getIndex(),m_upperBound,false);
 }
 
 
 double BoundaryConstraint::check()
 {
-  m_activeParameterIndex = getFunction()->activeIndex(static_cast<int>(getIndex()));
+  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
 
-  if (m_activeParameterIndex < 0)
-  {
-    g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
-      << " names of function " << getFunction()->name() << ". Therefore"
-      << " this constraint applied to this funtion serves no purpose";
-    return 0.0;
-  }
+  //if (m_activeParameterIndex < 0)
+  //{
+  //  g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
+  //    << " names of function " << getFunction()->name() << ". Therefore"
+  //    << " this constraint applied to this funtion serves no purpose";
+  //  return 0.0;
+  //}
 
   if ( !(m_hasLowerBound || m_hasUpperBound) )
   {
@@ -237,7 +215,7 @@ double BoundaryConstraint::check()
   }
 
 
-  double paramValue = getFunction()->getParameter(static_cast<int>(getIndex()));
+  double paramValue = getFunction()->getParameter(getIndex());
 
   double penalty = 0.0;
 
@@ -255,14 +233,14 @@ double BoundaryConstraint::checkDeriv()
 {
   double penalty = 0.0;
 
-  if (m_activeParameterIndex < 0 || !(m_hasLowerBound || m_hasUpperBound))
+  if (/*m_activeParameterIndex < 0 ||*/ !(m_hasLowerBound || m_hasUpperBound))
   {
     // no point in logging any warning here since checkDeriv() will always be called after
     // check() is called 
     return penalty;
   } 
 
-  double paramValue = getFunction()->getParameter(static_cast<int>(getIndex()));
+  double paramValue = getFunction()->getParameter(getIndex());
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
@@ -281,7 +259,7 @@ std::string BoundaryConstraint::asString()const
   {
     ostr << m_lowerBound << '<';
   }
-  ostr << getFunction()->parameterName(static_cast<int>(getIndex()));
+  ostr << getFunction()->parameterName(getIndex());
   if (m_hasUpperBound)
   {
     ostr<< '<' << m_upperBound;

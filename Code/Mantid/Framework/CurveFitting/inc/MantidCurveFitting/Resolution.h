@@ -57,7 +57,7 @@ public:
   }
 
   /// Returns the number of attributes associated with the function
-  int nAttributes()const{return 1;}
+  size_t nAttributes()const{return 1;}
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames()const;
   /// Return a value of attribute attName

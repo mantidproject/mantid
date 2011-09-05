@@ -135,8 +135,8 @@ namespace CurveFitting
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
     // fitting parameter values.
 
-    const int nParam = m_function->nActive();
-    const int nData = m_function->dataSize();
+    const size_t nParam = m_function->nActive();
+    const size_t nData = m_function->dataSize();
     if (nParam == 0)
     {
       g_log.error("There are no active parameters.");
@@ -159,7 +159,7 @@ namespace CurveFitting
     int iter = 0;
     int status = 0;
     double finalCostFuncVal = 0.0;
-    double dof = nData - nParam;  // dof stands for degrees of freedom
+    double dof = static_cast<double>(nData - nParam);  // dof stands for degrees of freedom
 
     // Standard least-squares used if derivative function defined otherwise simplex
     Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
@@ -404,7 +404,7 @@ namespace CurveFitting
    */
   double GenericFit::transformationDerivative(int i)
   {
-    int j = m_function->indexOfActive(i);
+    size_t j = m_function->indexOfActive(i);
     double p0 = m_function->getParameter(j);
     double ap0 = m_function->activeParameter(i);
     double dap = ap0 != 0.0? ap0 * 0.001 : 0.001;

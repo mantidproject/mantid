@@ -32,11 +32,11 @@ std::size_t ParameterReference::getIndex() const
 void ParameterReference::reset(IFitFunction* fun, size_t index)
 {
   IFitFunction* fLocal = fun;
-  int iLocal = static_cast<int>(index);
+  size_t iLocal = index;
   CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
   while (cf)
   {
-    int iFun = static_cast<int>(cf->functionIndex(iLocal)); // TODO squashing the warning breaks the code
+    size_t iFun = cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
     fLocal = cf->getFunction(iFun);
     iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
     cf = dynamic_cast<CompositeFunction*>(fLocal);
@@ -49,13 +49,13 @@ void ParameterReference::reset(IFitFunction* fun, size_t index)
 /// Set the parameter
 void ParameterReference::setParameter(const double& value)
 {
-  m_function->setParameter(static_cast<int>(m_index),value);
+  m_function->setParameter(m_index,value);
 }
 
 /// Get the value of the parameter
 double ParameterReference::getParameter() const
 {
-  return m_function->getParameter(static_cast<int>(m_index));
+  return m_function->getParameter(m_index);
 }
 
 } // namespace API

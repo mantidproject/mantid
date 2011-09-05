@@ -55,11 +55,11 @@ public:
   std::string asString()const;
 
   /// Set i-th parameter
-  void setParameter(int, const double& value, bool explicitlySet = true);
+  void setParameter(size_t, const double& value, bool explicitlySet = true);
   /// Set i-th parameter description
   void setParameterDescription(size_t, const std::string& description);
   /// Get i-th parameter
-  double getParameter(int i)const;
+  double getParameter(size_t i)const;
   /// Set parameter by name.
   void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
   /// Set description of parameter by name.
@@ -67,44 +67,42 @@ public:
   /// Get parameter by name.
   double getParameter(const std::string& name)const;
   /// Total number of parameters
-  int nParams()const;
+  size_t nParams()const;
   /// Returns the index of parameter name
-  int parameterIndex(const std::string& name)const;
-  /// Returns the index of a parameter
-  //int parameterIndex(const double* p)const;
+  size_t parameterIndex(const std::string& name)const;
   /// Returns the name of parameter i
-  std::string parameterName(int i)const;
+  std::string parameterName(size_t i)const;
   /// Returns the description of parameter i
   std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
-  bool isExplicitlySet(int i)const;
+  bool isExplicitlySet(size_t i)const;
 
   /// Number of active (in terms of fitting) parameters
-  int nActive()const;
+  size_t nActive()const;
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  double activeParameter(int i)const;
+  double activeParameter(size_t i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  void setActiveParameter(int i, double value);
+  void setActiveParameter(size_t i, double value);
   /// Update parameters after a fitting iteration
   void updateActive(const double* in);
   /// Returns "global" index of active parameter i
-  int indexOfActive(int i)const;
+  size_t indexOfActive(size_t i)const;
   /// Returns the name of active parameter i
-  std::string nameOfActive(int i)const;
+  std::string nameOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i)const;
 
   /// Check if a parameter is active
-  bool isActive(int i)const;
+  bool isActive(size_t i)const;
   /// Get active index for a declared parameter i
-  int activeIndex(int i)const;
+  size_t activeIndex(size_t i)const;
   /// Removes a parameter from the list of active
-  void removeActive(int i);
+  void removeActive(size_t i);
   /// Restores a declared parameter i to the active status
-  void restoreActive(int i);
+  void restoreActive(size_t i);
 
   /// Return parameter index from a parameter reference.
-  int getParameterIndex(const ParameterReference& ref)const;
+  size_t getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
   IFitFunction* getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
@@ -117,14 +115,14 @@ public:
   // Unhide base class function: removeTie(string). Avoids Intel compiler warning
   using IFitFunction::removeTie;
   /// Removes i-th parameter's tie
-  bool removeTie(int i);
+  bool removeTie(size_t i);
   /// Get the tie of i-th parameter
-  ParameterTie* getTie(int i)const;
+  ParameterTie* getTie(size_t i)const;
 
   /// Overwrite IFitFunction methods
   void addConstraint(IConstraint* ic);
   /// Get constraint of i-th parameter
-  virtual IConstraint* getConstraint(int i)const;
+  virtual IConstraint* getConstraint(size_t i)const;
   void setParametersToSatisfyConstraints();
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
@@ -133,25 +131,25 @@ public:
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
-  virtual int addFunction(IFitFunction* f);
+  virtual size_t addFunction(IFitFunction* f);
   /// Returns the pointer to i-th function
   IFitFunction* getFunction(std::size_t i)const;
   /// Number of functions
   std::size_t nFunctions()const{return m_functions.size();}
   /// Remove a function
-  void removeFunction(int i, bool del=true);
+  void removeFunction(size_t i, bool del=true);
   /// Replace a function
-  void replaceFunction(int i,IFitFunction* f);
+  void replaceFunction(size_t i,IFitFunction* f);
   /// Replace a function
-  void replaceFunction(const IFitFunction* f_old,IFitFunction* f_new);
+  void replaceFunctionPtr(const IFitFunction* f_old,IFitFunction* f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i)const;
   /// Get the function index
   std::size_t functionIndexActive(std::size_t i)const;
   /// Returns the index of parameter i as it declared in its function
-  int parameterLocalIndex(int i)const;
+  size_t parameterLocalIndex(size_t i)const;
   /// Returns the name of parameter i as it declared in its function
-  std::string parameterLocalName(int i)const;
+  std::string parameterLocalName(size_t i)const;
   /// Check the function.
   void checkFunction();
 
@@ -163,32 +161,32 @@ protected:
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
 
-  int paramOffset(int i)const{return m_paramOffsets[i];}
-  int activeOffset(int i)const{return m_activeOffsets[i];}
+  size_t paramOffset(size_t i)const{return m_paramOffsets[i];}
+  size_t activeOffset(size_t i)const{return m_activeOffsets[i];}
 
 private:
 
   /// Extract function index and parameter name from a variable name
-  static void parseName(const std::string& varName,int& index, std::string& name);
+  static void parseName(const std::string& varName,size_t& index, std::string& name);
 
   /// Pointers to the included funtions
   std::vector<IFitFunction*> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
-  std::vector<int> m_activeOffsets;
+  std::vector<size_t> m_activeOffsets;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
-  std::vector<int> m_paramOffsets;
+  std::vector<size_t> m_paramOffsets;
   /// Keeps the function index for each declared parameter  (parameter declared index)
-  std::vector<int> m_IFitFunction;
+  std::vector<size_t> m_IFitFunction;
   /// Keeps the function index for each active parameter (parameter active index)
-  std::vector<int> m_IFitFunctionActive;
+  std::vector<size_t> m_IFitFunctionActive;
   /// Number of active parameters
-  int m_nActive;
+  size_t m_nActive;
   /// Total number of parameters
-  int m_nParams;
+  size_t m_nParams;
   /// Function counter to be used in nextConstraint
-  mutable int m_iConstraintFunction;
+  mutable size_t m_iConstraintFunction;
 
 };
 
@@ -197,15 +195,15 @@ private:
 class PartialJacobian: public Jacobian
 {
   Jacobian* m_J;  ///< pointer to the overall Jacobian
-  int m_iP0;      ///< offset in the overall Jacobian for a particular function
-  int m_iaP0;      ///< offset in the active Jacobian for a particular function
+  size_t m_iP0;      ///< offset in the overall Jacobian for a particular function
+  size_t m_iaP0;      ///< offset in the active Jacobian for a particular function
 public:
   /** Constructor
    * @param J :: A pointer to the overall Jacobian
    * @param iP0 :: The parameter index (declared) offset for a particular function
    * @param iap0 :: The active parameter index (declared) offset for a particular function
    */
-  PartialJacobian(Jacobian* J,int iP0, int iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
+  PartialJacobian(Jacobian* J,size_t iP0, size_t iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
   {}
   /**
    * Overridden Jacobian::set(...).
@@ -230,7 +228,7 @@ public:
   *   @param value :: Value to add
   *   @param iActiveP :: The index of an active parameter.
   */
-  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  virtual void addNumberToColumn(const double& value, const size_t& iActiveP) 
   {
     m_J->addNumberToColumn(value,m_iaP0+iActiveP);
   }

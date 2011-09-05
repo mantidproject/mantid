@@ -128,7 +128,7 @@ namespace Mantid
       
       void 	functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
       
-      int 	nAttributes  () const
+      size_t 	nAttributes  () const
            { return 16;}
            
       std::vector< std::string > getAttributeNames () const;

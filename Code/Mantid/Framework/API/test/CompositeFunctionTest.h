@@ -14,6 +14,70 @@ using namespace Mantid::API;
 
 class CompositeFunctionTest_IFunction;
 
+class CompositeFunctionTest_MocSpectrum: public ISpectrum
+{
+public:
+  
+  CompositeFunctionTest_MocSpectrum(size_t nx, size_t ny):m_x(nx),m_y(ny),m_e(ny) {}
+
+  void clearData() {}
+  void setData(const MantidVec&){}
+  void setData(const MantidVec&, const MantidVec&){}
+
+  void setData(const MantidVecPtr&){}
+  void setData(const MantidVecPtr&, const MantidVecPtr&){}
+
+  void setData(const MantidVecPtr::ptr_type&){}
+  void setData(const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&){}
+
+  virtual MantidVec& dataX() {return m_x;}
+  virtual MantidVec& dataY() {return m_y;}
+  virtual MantidVec& dataE() {return m_e;}
+
+  virtual const MantidVec& dataX() const {return m_x;}
+  virtual const MantidVec& dataY() const {return m_y;}
+  virtual const MantidVec& dataE() const {return m_e;}
+
+  virtual size_t getMemorySize() const {return 0;}
+
+  MantidVec m_x,m_y,m_e;
+};
+
+class CompositeFunctionTest_MocMatrixWorkspace : public MatrixWorkspace
+{
+public:
+  
+  CompositeFunctionTest_MocMatrixWorkspace(size_t nspec, size_t nx, size_t ny):m_blocksize(ny)
+  {
+    for(size_t i = 0; i < nspec; ++i)
+    {
+      CompositeFunctionTest_MocSpectrum sp(nx,ny);
+      m_spectra.push_back(sp);
+    }
+  }
+
+  ~CompositeFunctionTest_MocMatrixWorkspace(){}
+
+  // Section required for iteration
+  /// Returns the number of single indexable items in the workspace
+  virtual std::size_t size() const {return m_spectra.size()*m_blocksize;}
+  /// Returns the size of each block of data returned by the dataY accessors
+  virtual std::size_t blocksize() const {return m_blocksize;}
+  /// Returns the number of histograms in the workspace
+  virtual std::size_t getNumberHistograms() const {return m_spectra.size();}
+
+  /// Return the underlying ISpectrum ptr at the given workspace index.
+  virtual ISpectrum * getSpectrum(const size_t index) {return &m_spectra[index];}
+
+  /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
+  virtual const ISpectrum * getSpectrum(const size_t index) const {return &m_spectra[index];}
+  const std::string id(void) const {return "";}
+  void init(const size_t &,const size_t &,const size_t &) { }
+private:
+  std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
+  size_t m_blocksize;
+};
+
 std::vector<CompositeFunctionTest_IFunction*> CompositeFunctionTest_FunctionDeleted;
 
 class CompositeFunctionTest_IFunction
@@ -335,17 +399,17 @@ public:
     TS_ASSERT( ! mfun->isActive(10));
     TS_ASSERT(   mfun->isActive(11));
 
-    TS_ASSERT_EQUALS(mfun->activeIndex(0),-1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(1),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(0),std::invalid_argument);
+    TS_ASSERT_THROWS(mfun->activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(2),0);
     TS_ASSERT_EQUALS(mfun->activeIndex(3),1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(4),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(4),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(5),2);
-    TS_ASSERT_EQUALS(mfun->activeIndex(6),-1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(7),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(6),std::invalid_argument);
+    TS_ASSERT_THROWS(mfun->activeIndex(7),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(8),3);
     TS_ASSERT_EQUALS(mfun->activeIndex(9),4);
-    TS_ASSERT_EQUALS(mfun->activeIndex(10),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(10),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(11),5);
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
@@ -748,13 +812,13 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterIndex("f2.h"),6);
     TS_ASSERT_EQUALS(mfun->parameterIndex("f2.s"),7);
 
-    TS_ASSERT_EQUALS(mfun->activeIndex(0),-1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(1),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(0),std::invalid_argument);
+    TS_ASSERT_THROWS(mfun->activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(2),0);
     TS_ASSERT_EQUALS(mfun->activeIndex(3),1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(4),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(4),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(5),2);
-    TS_ASSERT_EQUALS(mfun->activeIndex(6),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(6),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(7),3);
 
     TS_ASSERT_EQUALS(mfun->indexOfActive(0),2);
@@ -878,15 +942,15 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterIndex("f3.h"),8);
     TS_ASSERT_EQUALS(mfun->parameterIndex("f3.s"),9);
 
-    TS_ASSERT_EQUALS(mfun->activeIndex(0),-1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(1),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(0),std::invalid_argument);
+    TS_ASSERT_THROWS(mfun->activeIndex(1),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(2),0);
     TS_ASSERT_EQUALS(mfun->activeIndex(3),1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(4),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(4),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(5),2);
     TS_ASSERT_EQUALS(mfun->activeIndex(6),3);
     TS_ASSERT_EQUALS(mfun->activeIndex(7),4);
-    TS_ASSERT_EQUALS(mfun->activeIndex(8),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(8),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(9),5);
 
     TS_ASSERT_EQUALS(mfun->indexOfActive(0),2);
@@ -1095,13 +1159,13 @@ public:
     TS_ASSERT_EQUALS(mfun->activeIndex(3),3);
     TS_ASSERT_EQUALS(mfun->activeIndex(4),4);
     TS_ASSERT_EQUALS(mfun->activeIndex(5),5);
-    TS_ASSERT_EQUALS(mfun->activeIndex(6),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(6),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(7),6);
-    TS_ASSERT_EQUALS(mfun->activeIndex(8),-1);
-    TS_ASSERT_EQUALS(mfun->activeIndex(9),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(8),std::invalid_argument);
+    TS_ASSERT_THROWS(mfun->activeIndex(9),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(10),7);
     TS_ASSERT_EQUALS(mfun->activeIndex(11),8);
-    TS_ASSERT_EQUALS(mfun->activeIndex(12),-1);
+    TS_ASSERT_THROWS(mfun->activeIndex(12),std::invalid_argument);
     TS_ASSERT_EQUALS(mfun->activeIndex(13),9);
 
     clearDeleted();
@@ -1205,7 +1269,7 @@ public:
     mfun->addFunction(cf);
     mfun->addFunction(cub);
 
-    mfun->replaceFunction(cf,g);
+    mfun->replaceFunctionPtr(cf,g);
 
     TS_ASSERT_EQUALS(mfun->asString(),"name=Linear,a=0,b=0;name=Gauss,c=0,h=1,s=1;name=Cubic,c0=0,c1=0,c2=0,c3=0");
 
@@ -1221,8 +1285,10 @@ public:
     mfun->addFunction(bk);
     mfun->addFunction(g1);
 
-    FrameworkManager::Instance();
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+    //FrameworkManager::Instance();
+    //MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+    MatrixWorkspace_sptr ws(new CompositeFunctionTest_MocMatrixWorkspace(10,11,10));
+
     MantidVec& x = ws->dataX(3);
     MantidVec& y = ws->dataY(3);
     for(size_t i=0; i < y.size(); ++i)
