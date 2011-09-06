@@ -91,7 +91,7 @@ namespace Mantid
 
       m_parser->ClearVar();
       m_parser->DefineVar("x",&m_x);
-      for(int i=0;i<nParams();i++)
+      for(size_t i=0;i<nParams();i++)
       {
         m_parser->DefineVar(parameterName(i),getParameterAddress(i));
       }
@@ -124,7 +124,7 @@ namespace Mantid
       if (nData == 0) return;
       std::vector<double> dp(nParams());
       std::vector<double> param(nParams());
-      for(int i=0;i<nParams();i++)
+      for(size_t i=0;i<nParams();i++)
       {
         double param = getParameter(i);
         if (param != 0.0)
@@ -145,7 +145,7 @@ namespace Mantid
 
       functionMW(m_tmp.get(),xValues, nData);
 
-      for (int j = 0; j < nParams(); j++)
+      for (size_t j = 0; j < nParams(); j++)
       {
         double p0 = getParameter(j);
         setParameter(j,p0 + dp[j],false);
