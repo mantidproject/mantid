@@ -82,7 +82,7 @@ namespace Mantid
       virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const = 0;
 
       /// Get the dimension
-      virtual Mantid::Geometry::IMDDimension_sptr getDimensionNum(size_t index)
+      virtual Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const
       {
         if (index==0) return getXDimension();
         if (index==1) return getYDimension();

@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/VMD.h"
 
 
 namespace Mantid
@@ -46,6 +48,7 @@ namespace API
     /// Get the x-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
     {
+      if (m_dimensions.size() < 1) throw std::runtime_error("Workspace does not have any dimensions!");
       return m_dimensions[0];
     }
 
@@ -70,12 +73,14 @@ namespace API
       return m_dimensions[3];
     }
 
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
+    // --------------------------------------------------------------------------------------------
+    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const
     {
       if (index >= m_dimensions.size()) throw std::runtime_error("Workspace does not have a dimension at that index.");
       return m_dimensions[index];
     }
 
+    // --------------------------------------------------------------------------------------------
     /// Get the dimension with the specified id.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
     {
@@ -88,10 +93,32 @@ namespace API
     /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
     std::string getGeometryXML() const;
 
+    // --------------------------------------------------------------------------------------------
+    ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
+    Mantid::Kernel::VMD & getOrigin()
+    { return m_origin; }
+
+    ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
+    const Mantid::Kernel::VMD & getOrigin() const
+    { return m_origin; }
+
+    /// Sets the origin of this geometry.
+    ///@param orig :: the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
+    void setOrigin(const Mantid::Kernel::VMD & orig)
+    { m_origin = orig; }
 
   protected:
     /// Vector of the dimensions used, in the order X Y Z t, etc.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
+
+    /// Pointer to the original workspace, if this workspace is a coordinate transformation from an original workspace.
+    IMDWorkspace_sptr m_originalWorkspace;
+
+    // Vector of the basis vector (in the original workspace) for each dimension of this workspace.
+    std::vector<Mantid::Kernel::VMD> m_basisVectors;
+
+    /// Vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
+    Mantid::Kernel::VMD m_origin;
 
 
   };

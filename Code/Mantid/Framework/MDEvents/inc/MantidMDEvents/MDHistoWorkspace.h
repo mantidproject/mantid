@@ -119,7 +119,7 @@ namespace MDEvents
       return m_dimensions[3];
     }
 
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
+    Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const
     {
       if (index >= m_dimensions.size()) throw std::runtime_error("MDHistoWorkspace does not have a dimension at that index.");
       return m_dimensions[index];

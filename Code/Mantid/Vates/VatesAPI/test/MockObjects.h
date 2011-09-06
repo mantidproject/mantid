@@ -79,7 +79,7 @@ public:
   }
   double getCoordinate(size_t i)const
   {
-    std::string id = m_mockWorkspace->getDimensionNum(i)->getDimensionID();
+    std::string id = m_mockWorkspace->getDimensionNum(i)->getDimensionId();
     std::vector<size_t> indexes;
     Mantid::MDDataObjects::MDWorkspaceIndexCalculator indexCalculator(2); //2d
     indexes.resize(indexCalculator.getNDimensions());
