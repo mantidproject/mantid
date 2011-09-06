@@ -1773,7 +1773,7 @@ void FitPropertyBrowser::addTieToFunction()
     {
       if ( iPar == -1 && fun == h->function() ) // If this is the 'tied from' parameter, remember it
       {
-        iPar = i;
+        iPar = (int)i;
       }
       else  // Otherwise add it to the list of potential 'tyees'
       {

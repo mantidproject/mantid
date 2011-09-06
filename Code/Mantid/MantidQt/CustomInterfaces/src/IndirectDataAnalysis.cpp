@@ -968,7 +968,7 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
     singleFunction = true;
   }
 
-  int index = 0;
+  size_t index = 0;
 
   // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
   const int bgType = m_uiForm.confit_cbBackground->currentIndex();
@@ -1108,7 +1108,7 @@ QtProperty* IndirectDataAnalysis::createStretchedExp(const QString & name)
   return prop;
 }
 
-void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Mantid::API::IFitFunction* comp, QtProperty* group, int index, bool tie)
+void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Mantid::API::IFitFunction* comp, QtProperty* group, size_t index, bool tie)
 {
   // Get subproperties of group and apply them as parameters on the function object
   QList<QtProperty*> props = group->subProperties();
