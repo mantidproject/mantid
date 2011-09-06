@@ -45,53 +45,20 @@ namespace API
     ~MDGeometry();
 
     // --------------------------------------------------------------------------------------------
-    /// Get the x-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
-    {
-      if (m_dimensions.size() < 1) throw std::runtime_error("Workspace does not have any dimensions!");
-      return m_dimensions[0];
-    }
-
-    /// Get the y-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
-    {
-      if (m_dimensions.size() < 2) throw std::runtime_error("Workspace does not have a Y dimension.");
-      return m_dimensions[1];
-    }
-
-    /// Get the z-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
-    {
-      if (m_dimensions.size() < 3) throw std::runtime_error("Workspace does not have a X dimension.");
-      return m_dimensions[2];
-    }
-
-    /// Get the t-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
-    {
-      if (m_dimensions.size() < 4) throw std::runtime_error("Workspace does not have a T dimension.");
-      return m_dimensions[3];
-    }
-
-    // --------------------------------------------------------------------------------------------
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const
-    {
-      if (index >= m_dimensions.size()) throw std::runtime_error("Workspace does not have a dimension at that index.");
-      return m_dimensions[index];
-    }
-
-    // --------------------------------------------------------------------------------------------
-    /// Get the dimension with the specified id.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
-    {
-      for (size_t i=0; i < m_dimensions.size(); ++i)
-        if (m_dimensions[i]->getDimensionId() == id)
-          return m_dimensions[i];
-      throw std::invalid_argument("Dimension tagged " + id + " was not found in the Workspace");
-    }
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
+    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
     /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
     std::string getGeometryXML() const;
+
+    // --------------------------------------------------------------------------------------------
+    Mantid::Kernel::VMD & getBasisVector(size_t index);
+    const Mantid::Kernel::VMD & getBasisVector(size_t index) const;
+    void setBasisVector(size_t index, const Mantid::Kernel::VMD & vec);
 
     // --------------------------------------------------------------------------------------------
     ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
@@ -107,6 +74,7 @@ namespace API
     void setOrigin(const Mantid::Kernel::VMD & orig)
     { m_origin = orig; }
 
+
   protected:
     /// Vector of the dimensions used, in the order X Y Z t, etc.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
@@ -114,7 +82,7 @@ namespace API
     /// Pointer to the original workspace, if this workspace is a coordinate transformation from an original workspace.
     IMDWorkspace_sptr m_originalWorkspace;
 
-    // Vector of the basis vector (in the original workspace) for each dimension of this workspace.
+    /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
     std::vector<Mantid::Kernel::VMD> m_basisVectors;
 
     /// Vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace

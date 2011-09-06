@@ -469,7 +469,7 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
   for (size_t i=0; i < workspace->getNumDims(); i++)
   {
     std::ostringstream mess;
-    IMDDimension_sptr dim = workspace->getDimensionNum(i);
+    IMDDimension_const_sptr dim = workspace->getDimensionNum(i);
     mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
     std::string s = mess.str();
     QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
