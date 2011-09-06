@@ -119,7 +119,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Fitting function failed to initialize");
       }
-      for(int iPar=0;iPar<ifun->nParams();++iPar)
+      for(size_t iPar=0;iPar<ifun->nParams();++iPar)
       {
         result->addColumn("double",ifun->parameterName(iPar));
         result->addColumn("double",ifun->parameterName(iPar)+"_Err");
@@ -225,7 +225,7 @@ namespace Mantid
             row << logValue;
           }
           ifun = FunctionFactory::Instance().createInitialized(resFun);
-          for(int iPar=0;iPar<ifun->nParams();++iPar)
+          for(size_t iPar=0;iPar<ifun->nParams();++iPar)
           {
             row << ifun->getParameter(iPar) << errors[iPar];
           }
