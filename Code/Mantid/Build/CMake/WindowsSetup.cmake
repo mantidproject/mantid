@@ -22,7 +22,9 @@ endif()
 # /MP - Multiprocessor compilation within a project
 # /w34296 - Treat warning C4396, about comparison on unsigned and zero, 
 #           as a level 3 warning
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296" ) 
+# /w34389 - Treat warning C4389, about equality comparison on unsigned 
+#           and signed, as a level 3 warning
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" ) 
 
 ###########################################################################
 # On Windows we want to bundle Python. The necessary libraries are in
