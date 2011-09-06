@@ -114,7 +114,6 @@ int CompAssembly::add(IComponent* comp)
 {
   if (m_isParametrized)
     throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
-    //return static_cast<int>(m_children.size());
 
   if (comp)
   {

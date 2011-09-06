@@ -88,6 +88,20 @@ public:
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
   }
 
+  void testRemove()
+  {
+    CompAssembly bank("BankName");
+    Component* det1 = new Component("Det1Name");
+    bank.add(det1);
+    TS_ASSERT_EQUALS( bank.nelements(), 1 );
+    // Throws if you try to remove a component that's not in there
+    Component* det2 = new Component("Det2Name");
+    TS_ASSERT_THROWS( bank.remove(det2), std::runtime_error );
+    delete det2;
+    // Works on components that are in the assembly
+    TS_ASSERT_EQUALS( bank.remove(det1), 0 );
+    TS_ASSERT_THROWS( bank[0], std::runtime_error );
+  }
 
   //-----------------------------------------------------------------------------
   ICompAssembly_sptr setUpGetChildren()

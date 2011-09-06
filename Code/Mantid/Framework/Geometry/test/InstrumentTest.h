@@ -107,6 +107,22 @@ public:
     }
   }
 
+  void testClone()
+  {
+    Instrument* instr = new Instrument("Inst");
+    instr->setDefaultViewAxis("Y");
+    IComponent* inst = instr;
+    IComponent* copy;
+    TS_ASSERT_THROWS_NOTHING( copy = inst->clone() );
+    TS_ASSERT_DIFFERS( &*copy, &*inst );
+    TS_ASSERT_EQUALS( copy->getName(), inst->getName() );
+    Instrument* copyI = dynamic_cast<Instrument*>(copy);
+    TS_ASSERT( copyI );
+    TS_ASSERT_EQUALS( instr->getDefaultAxis(), copyI->getDefaultAxis() );
+    delete instr;
+    delete copy;
+  }
+
   void testSource()
   {
     Instrument i;
@@ -157,6 +173,35 @@ public:
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) );
     TS_ASSERT_EQUALS( instrument.getDetector(2).get(), d );
     delete d;
+  }
+
+  void testRemoveDetector()
+  {
+    Instrument i;
+    Detector *d = new Detector("det",1,&i);
+    TS_ASSERT_THROWS_NOTHING( i.markAsDetector(d) );
+    TS_ASSERT_EQUALS( i.getDetector(1).get(), d );
+    // Next 2 lines demonstrate what can happen if detector cache and CompAssembly tree are inconsistent
+    // Unfortunately, the way things were written means that this can happen
+    TS_ASSERT_THROWS( i.removeDetector(d), std::runtime_error );
+    TS_ASSERT_THROWS( i.getDetector(1).get(), Exception::NotFoundError );
+    // Now make the 2 calls necessary to do it properly
+    TS_ASSERT_THROWS_NOTHING( i.add(d) );
+    TS_ASSERT_THROWS_NOTHING( i.markAsDetector(d) );
+    TS_ASSERT_EQUALS( i.getDetectorIDs(false).size(), 1 );
+    TS_ASSERT_EQUALS( i.nelements(), 1 );
+    TS_ASSERT_THROWS_NOTHING( i.removeDetector(d) );
+    TS_ASSERT_THROWS( i.getDetector(1).get(), Exception::NotFoundError );
+    TS_ASSERT_EQUALS( i.nelements(), 0 );
+
+    // Now check it does the right thing for a monitor as well
+    Detector *m = new Detector("mon",1,&i);
+    TS_ASSERT_THROWS_NOTHING( i.add(m) );
+    TS_ASSERT_THROWS_NOTHING( i.markAsMonitor(m) );
+    TS_ASSERT_EQUALS( i.getMonitors().size(), 1 );
+    TS_ASSERT_THROWS_NOTHING( i.removeDetector(m) );
+    TS_ASSERT( i.getMonitors().empty() );
+    TS_ASSERT( i.getDetectorIDs(false).empty() );
   }
 
   void test_GetDetectors_With_All_Valid_IDs()

@@ -588,10 +588,9 @@ namespace Mantid
       // Remove the detector from the detector cache
       m_detectorCache.erase(id);
       // Also need to remove from monitor cache if appropriate
-      std::vector<detid_t>::iterator it;
       if ( det->isMonitor() )
       {
-        it = std::find(m_monitorCache.begin(),m_monitorCache.end(),id);
+        std::vector<detid_t>::iterator it = std::find(m_monitorCache.begin(),m_monitorCache.end(),id);
         if ( it != m_monitorCache.end() ) m_monitorCache.erase(it);
       }
 

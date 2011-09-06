@@ -48,10 +48,10 @@
 <!-- Pixel for Detectors-->
 <type is="detector" name="pixel">
   <cuboid id="pixel-shape">
-    <left-front-bottom-point y="-0.000309" x="-0.000309" z="0.0"/>
-    <left-front-top-point y="0.000309" x="-0.000309" z="0.0"/>
-    <left-back-bottom-point y="-0.000309" x="-0.000309" z="-0.0001"/>
-    <right-front-bottom-point y="-0.000309" x="0.000309" z="0.0"/>
+    <left-front-bottom-point y="-0.4" x="-0.4" z="0.0"/>
+    <left-front-top-point y="0.4" x="-0.4" z="0.0"/>
+    <left-back-bottom-point y="-0.4" x="-0.4" z="-0.1"/>
+    <right-front-bottom-point y="-0.4" x="0.4" z="0.0"/>
   </cuboid>
   <algebra val="pixel-shape"/>
 </type>
@@ -65,7 +65,20 @@
 </idlist>
 
 
+<!--  Source and sample-position components and their types -->
 
+<component type="moderator">
+  <location z="-10." /> 
+</component>
+<component type="nickel-holder">
+  <location />
+</component>
 
+<type name="moderator" is="Source">
+  <properties />
+</type>
+<type name="nickel-holder" is="SamplePos">
+  <properties />
+</type>
 
 </instrument>
