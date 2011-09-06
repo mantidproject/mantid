@@ -251,7 +251,7 @@ void CompositeFunction::setActiveParameter(size_t i, double value)
 /// Update parameters after a fitting iteration
 void CompositeFunction::updateActive(const double* in)
 {
-  for(size_t iFun = 0; iFun < int(m_functions.size()); iFun++)
+  for(size_t iFun = 0; iFun < m_functions.size(); iFun++)
   {
     m_functions[ iFun ]->updateActive(in + m_activeOffsets[ iFun ]);
   }

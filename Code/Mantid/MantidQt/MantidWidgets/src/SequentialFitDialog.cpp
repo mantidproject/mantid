@@ -361,7 +361,7 @@ void SequentialFitDialog::accept()
 void SequentialFitDialog::populateParameters()
 {
   QStringList names;
-  for(int i=0;i<m_fitBrowser->m_compositeFunction->nParams();++i)
+  for(size_t i=0;i<m_fitBrowser->m_compositeFunction->nParams();++i)
   {
     names << QString::fromStdString(m_fitBrowser->m_compositeFunction->parameterName(i));
   }

@@ -103,7 +103,7 @@ namespace API
         g_log.warning("WorkspaceIndex not set, defaulting to 0");
         index = 0;
       }
-      else if (index >= static_cast<int>(mws->getNumberHistograms()))
+      else if (index >= mws->getNumberHistograms())
       {
         throw std::range_error("WorkspaceIndex outside range");
       }
@@ -738,7 +738,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
 
     functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
-    for (size_t iP = 0; iP < static_cast<int>(nParam); iP++)
+    for (size_t iP = 0; iP < nParam; iP++)
     {
       if ( isActive(iP) )
       {

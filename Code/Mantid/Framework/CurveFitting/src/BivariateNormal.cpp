@@ -321,14 +321,14 @@ void BivariateNormal::initCommon()
 
   }
   else
-    for (int i = 0; i < nParams() && ParamsOK; i++)
+    for (size_t i = 0; i < nParams() && ParamsOK; i++)
       if (getParameter(i) != LastParams[i])
         ParamsOK = false;
 
   if (!ParamsOK)
   {
 
-    for (int i = 0; i < nParams(); i++)
+    for (size_t i = 0; i < nParams(); i++)
       LastParams[i] = getParameter(i);
 
     std::ostringstream ssxx, ssyy, ssxy;
@@ -437,7 +437,7 @@ void BivariateNormal::initCommon( double* LastParams,double* expVals,
 
   }
 
-    for (int i = 0; i < nParams(); i++)
+    for (size_t i = 0; i < nParams(); i++)
       LastParams[i] = getParameter(i);
     uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
 
@@ -479,9 +479,9 @@ Mantid::API::IFitFunction::Attribute BivariateNormal::getAttribute(const std::st
 {
   int I = -1;
 
-  for (int i = 0; i < nAttributes() && I < 0; i++)
+  for (size_t i = 0; i < nAttributes() && I < 0; i++)
     if (attName.compare(AttNames[i]) == 0)
-      I = i;
+      I = (int)i;
 
   if (I >= 0)
     return Mantid::API::IFitFunction::Attribute(Attrib[I]);
@@ -494,10 +494,10 @@ void BivariateNormal::setAttribute(const std::string &attName,
     const Mantid::API::IFitFunction::Attribute &att)
 {
   int I = -1;
-  for (int i = 0; i < nAttributes() && I < 0; i++)
+  for (size_t i = 0; i < nAttributes() && I < 0; i++)
   {
         if (attName.compare(AttNames[i]) == 0)
-      I = i;
+      I = (int)i;
   }
 
   SIxx = -1;
@@ -516,9 +516,9 @@ bool BivariateNormal::hasAttribute(const std::string &attName) const
 {
   int I = -1;
 
-  for (int i = 0; i < nAttributes() && I < 0; i++)
+  for (size_t i = 0; i < nAttributes() && I < 0; i++)
     if (attName.compare(AttNames[i]) == 0)
-      I = i;
+      I = (int)i;
 
   if (I >= 0)
     return true;

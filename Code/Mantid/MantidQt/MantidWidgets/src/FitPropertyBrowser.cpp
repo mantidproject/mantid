@@ -1278,7 +1278,7 @@ void FitPropertyBrowser::fit()
   try
   {
     m_initialParameters.resize(compositeFunction()->nParams());
-    for(int i=0;i<compositeFunction()->nParams();i++)
+    for(size_t i=0;i<compositeFunction()->nParams();i++)
     {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
     }
@@ -1685,9 +1685,9 @@ void FitPropertyBrowser::getFitResults()
  */
 void FitPropertyBrowser::undoFit()
 {
-  if (static_cast<int>(m_initialParameters.size()) == compositeFunction()->nParams())
+  if (m_initialParameters.size() == compositeFunction()->nParams())
   {
-    for(int i=0;i<compositeFunction()->nParams();i++)
+    for(size_t i=0;i<compositeFunction()->nParams();i++)
     {
       compositeFunction()->setParameter(i,m_initialParameters[i]);
     }
@@ -1706,7 +1706,7 @@ void FitPropertyBrowser::disableUndo()
 /// Tells if undo can be done
 bool FitPropertyBrowser::isUndoEnabled()const
 {
-  return m_initialParameters.size() && compositeFunction()->nParams() == static_cast<int>(m_initialParameters.size());
+  return m_initialParameters.size() && compositeFunction()->nParams() == m_initialParameters.size();
 }
 
 /// Enable/disable the Fit button;
@@ -1764,7 +1764,7 @@ void FitPropertyBrowser::addTieToFunction()
   QStringList fnNames;
 
   int iPar = -1;
-  for(int i=0;i<m_compositeFunction->nParams();i++)
+  for(size_t i=0;i<m_compositeFunction->nParams();i++)
   {
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
     Mantid::API::IFitFunction* fun = ref.getFunction();

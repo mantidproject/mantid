@@ -232,7 +232,7 @@ void PropertyHandler::initParameters()
     m_item->property()->removeSubProperty(m_parameters[i]);
   }
   m_parameters.clear();
-  for(int i=0;i<function()->nParams();i++)
+  for(size_t i=0;i<function()->nParams();i++)
   {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
@@ -1323,7 +1323,7 @@ void PropertyHandler::fit()
     alg->execute();
     std::string fitFun = alg->getPropertyValue("Function");
     Mantid::API::IFitFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(fitFun);
-    for(int i=0;i<f->nParams();++i)
+    for(size_t i=0;i<f->nParams();++i)
     {
       m_fun->setParameter(i,f->getParameter(i));
     }

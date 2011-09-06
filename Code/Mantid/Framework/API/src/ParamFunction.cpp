@@ -571,7 +571,7 @@ size_t ParamFunction::getParameterIndex(const ParameterReference& ref)const
  */
 IFitFunction* ParamFunction::getContainingFunction(const ParameterReference& ref)const
 {
-  if (ref.getFunction() == this && static_cast<int>(ref.getIndex()) < nParams())
+  if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
     return ref.getFunction();
   }

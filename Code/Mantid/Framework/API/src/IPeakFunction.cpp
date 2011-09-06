@@ -117,7 +117,7 @@ void IPeakFunction::functionDerivMW(Jacobian* out, const double* xValues, const 
     }
     else
     {
-      for(int ip = 0; ip < this->nParams(); ++ip)
+      for(size_t ip = 0; ip < this->nParams(); ++ip)
       {
         out->set(i,ip, 0.0);
       }
