@@ -18,17 +18,28 @@ namespace WorkflowAlgorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the workspace to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> Filename - The name of the input event Nexus file to load </LI>
+    <LI> OutputWorkspace - Then name of the output EventWorkspace </LI>
     </UL>
 
     Optional Properties:
     <UL>
-    <LI> MinEfficiency - Minimum efficiency for a pixel to be considered (default: no minimum)</LI>
-    <LI> MaxEfficiency - Maximum efficiency for a pixel to be considered (default: no maximum)</LI>
-    <LI> Factor        - Exponential factor for detector efficiency as a function of wavelength (default: 1.0)</LI>
-    <LI> Error         - Error on Factor property (default: 0.0)</LI>
+    <LI> UseConfigBeam - If true, the beam center defined in the configuration file will be used</LI>
+    <LI> BeamCenterX - Beam position in X pixel coordinates (used only if UseConfigBeam is false)</LI>
+    <LI> BeamCenterY        - Beam position in Y pixel coordinates (used only if UseConfigBeam is false)</LI>
+    <LI> UseConfigWlCuts         - If true, the edges of the TOF distribution will be cut according to the configuration file</LI>
+    <LI> UseConfigMask         - If true, the masking information found in the configuration file will be used</LI>
+    <LI> UseConfig         - If true, the best configuration file found will be used)</LI>
+    <LI> CorrectForFlightPath         - If true, the TOF will be modified for the true flight path from the sample to the detector pixel</LI>
+    <LI> SampleDetectorDistance         - Sample to detector distance to use (overrides meta data), in mm</LI>
+    <LI> SampleDetectorDistanceOffset         - Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm</LI>
     </UL>
+
+    Output Property:
+    <UL>
+    <LI> OutputMessage - Human readable output message </LI>
+    </UL>
+
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
@@ -40,7 +51,7 @@ const double default_slit_positions[3][8] = {{5.0, 10.0, 10.0, 15.0, 20.0, 20.0,
 class DLLExport EQSANSLoad : public API::Algorithm
 {
 public:
-  /// (Empty) Constructor
+  /// Constructor
   EQSANSLoad() : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0),
   m_center_x(0), m_center_y(0), m_moderator_position(0) {
     m_mask_as_string = "";
@@ -80,7 +91,6 @@ private:
   void getSourceSlitSize();
   void moveToBeamCenter();
 
-  //std::vector< std::vector<int> > m_rectangular_masks;
   double m_low_TOF_cut;
   double m_high_TOF_cut;
   double m_center_x;

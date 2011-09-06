@@ -43,18 +43,18 @@ using namespace DataObjects;
 void EQSANSLoad::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
-      "The name of the input event Nexus file to load.");
+      "The name of the input event Nexus file to load");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-      "Then name of the output EventWorkspace.");
-  declareProperty("UseConfigBeam", true);
-  declareProperty("BeamCenterX", EMPTY_DBL());
-  declareProperty("BeamCenterY", EMPTY_DBL());
-  declareProperty("UseConfigWlCuts", false);
-  declareProperty("UseConfigMask", false);
-  declareProperty("UseConfig", true);
-  declareProperty("CorrectForFlightPath", false);
-  declareProperty("SampleDetectorDistance", EMPTY_DBL());
-  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL());
+      "Then name of the output EventWorkspace");
+  declareProperty("UseConfigBeam", true, "If true, the beam center defined in the configuration file will be used");
+  declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
+  declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
+  declareProperty("UseConfigWlCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
+  declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
+  declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
+  declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
+  declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
+  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
   declareProperty("OutputMessage","",Direction::Output);
 
 }
@@ -69,6 +69,8 @@ double getRunPropertyDbl(MatrixWorkspace_sptr inputWS, const std::string& pname)
   return *dp;
 }
 
+/// Find the most appropriate configuration file for a given run
+/// @param run :: run number
 std::string EQSANSLoad::findConfigFile(const int& run)
 {
   // Append the standard location of EQSANS config file to the data search directory list
@@ -109,6 +111,8 @@ std::string EQSANSLoad::findConfigFile(const int& run)
   return config_file;
 }
 
+/// Read rectangular masks from a config file string
+/// @param line :: line (string) from the config file
 void EQSANSLoad::readRectangularMasks(const std::string& line)
 {
   // Looking for rectangular mask
@@ -137,6 +141,8 @@ void EQSANSLoad::readRectangularMasks(const std::string& line)
 
 }
 
+/// Read the TOF cuts from a config file string
+/// @param line :: line (string) from the config file
 void EQSANSLoad::readTOFcuts(const std::string& line)
 {
   Poco::RegularExpression re_key("tof edge discard", Poco::RegularExpression::RE_CASELESS);
@@ -159,6 +165,8 @@ void EQSANSLoad::readTOFcuts(const std::string& line)
   }
 }
 
+/// Read the beam center from a config file string
+/// @param line :: line (string) from the config file
 void EQSANSLoad::readBeamCenter(const std::string& line)
 {
   Poco::RegularExpression re_key("spectrum center", Poco::RegularExpression::RE_CASELESS);
@@ -181,6 +189,8 @@ void EQSANSLoad::readBeamCenter(const std::string& line)
   }
 }
 
+/// Read the moderator position from a config file string
+/// @param line :: line (string) from the config file
 void EQSANSLoad::readModeratorPosition(const std::string& line)
 {
   Poco::RegularExpression re_key("sample location", Poco::RegularExpression::RE_CASELESS);
@@ -202,6 +212,8 @@ void EQSANSLoad::readModeratorPosition(const std::string& line)
   }
 }
 
+/// Read the source slit sizes from a config file string
+/// @param line :: line (string) from the config file
 void EQSANSLoad::readSourceSlitSize(const std::string& line)
 {
   Poco::RegularExpression re_key("wheel", Poco::RegularExpression::RE_CASELESS);
@@ -240,6 +252,7 @@ void EQSANSLoad::readSourceSlitSize(const std::string& line)
   }
 }
 
+/// Get the source slit size from the slit information of the run properties
 void EQSANSLoad::getSourceSlitSize()
 {
   int slit1 = -1;
@@ -288,8 +301,7 @@ void EQSANSLoad::getSourceSlitSize()
   m_output_message += " mm\n";
 }
 
-
-
+/// Move the detector according to the beam center
 void EQSANSLoad::moveToBeamCenter()
 {
   // Check that the center of the detector really is at (0,0)
@@ -322,6 +334,8 @@ void EQSANSLoad::moveToBeamCenter()
 
 }
 
+/// Read a config file
+/// @param filePath :: path of the config file to read
 void EQSANSLoad::readConfigFile(const std::string& filePath)
 {
   // Initialize parameters
@@ -396,9 +410,23 @@ void EQSANSLoad::exec()
   dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
-  Mantid::Kernel::Property* prop = dataWS->run().getProperty("detectorZ");
-  Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  const double sdd = dp->getStatistics().mean;
+  double sdd = 0.0;
+  const double sample_det_dist = getProperty("SampleDetectorDistance");
+  if (!isEmpty(sample_det_dist))
+  {
+    sdd = sample_det_dist;
+  } else {
+    Mantid::Kernel::Property* prop = dataWS->run().getProperty("detectorZ");
+    Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+    sdd = dp->getStatistics().mean;
+
+    // Modify SDD according to offset if given
+    const double sample_det_offset = getProperty("SampleDetectorDistanceOffset");
+    if (!isEmpty(sample_det_offset))
+    {
+      sdd += sample_det_offset;
+    }
+  }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
   // Move the detector to its correct position
