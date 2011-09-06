@@ -14,6 +14,12 @@
 
 namespace Mantid
 {
+
+namespace API
+{
+  class WorkspaceGroup;
+}
+
 namespace CurveFitting
 {
 /** A composite function.
@@ -68,6 +74,10 @@ public:
   void functionDeriv(API::Jacobian* out);
 
 protected:
+
+  boost::shared_ptr<API::WorkspaceGroup> createCalculatedWorkspaceGroup(
+    const std::vector<double>& sd = std::vector<double>()
+    );
 
   /// to collect different workspaces found in child functions
   std::vector< std::pair< boost::shared_ptr<const API::MatrixWorkspace>, size_t> > m_spectra;

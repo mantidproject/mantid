@@ -5,6 +5,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/lambda/lambda.hpp>
 #include <boost/lexical_cast.hpp>
@@ -270,5 +271,20 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std:
   //std::for_each(&m_data[0],&m_data[0]+m_dataSize,std::cerr << _1 << '\n');
 }
 
+/** 
+ * Creates a workspace containing values calculated with this function. It takes a workspace and ws index
+ * of a spectrum which this function may have been fitted to. The output contains the original spectrum 
+ * (wi = 0), the calculated values (ws = 1), and the difference between them (ws = 2).
+ * @param inWS :: input workspace
+ * @param wi :: workspace index
+ * @param sd :: optional standard deviations of the parameters for calculating the error bars
+ * @return created workspase
+ */
+boost::shared_ptr<API::WorkspaceGroup> MultiBG::createCalculatedWorkspaceGroup(
+  const std::vector<double>& sd
+  )
+{
+  return boost::shared_ptr<API::WorkspaceGroup>();
+}
 } // namespace API
 } // namespace Mantid

@@ -10,6 +10,8 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 
+//#include <fstream>
+
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 

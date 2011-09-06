@@ -39,6 +39,19 @@ namespace API
   */
   void IFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool)
   {
+    if (!ws) 
+    {// unset workspace
+      m_workspace.reset();
+      m_workspaceIndex = 0;
+      m_xMinIndex = 0;
+      m_xMaxIndex = 0;
+      m_dataSize = 0;
+      m_data = NULL;
+      m_weights.reset();
+      m_xValues.reset();
+      return;
+    }
+
     try
     {
       MatrixWorkspace_const_sptr mws = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
@@ -248,12 +261,14 @@ void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const si
  */
 void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,size_t xMin,size_t xMax)
 {
+
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
 
   if (m_workspace.get() == workspace.get()) return;
   m_workspace = workspace;
+  if (!workspace) return; // unset the workspace
 
   try
   {

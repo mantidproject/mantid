@@ -127,10 +127,10 @@ void PropertyHandler::init()
     m_workspace = m_browser->m_enumManager->addProperty("Workspace");
     fnProp->addSubProperty(m_workspace);
     m_workspaceIndex = m_browser->m_intManager->addProperty("Workspace Index");
-    fnProp->addSubProperty(m_workspaceIndex);
+    //fnProp->addSubProperty(m_workspaceIndex);
     if (! m_browser->m_workspaceNames.isEmpty() )
     {
-      QStringList names("");
+      QStringList names("All");
       foreach(QString name,m_browser->m_workspaceNames)
       {
         names.append(name);
@@ -1346,7 +1346,7 @@ void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces)
     {
       wsName = oldWorkspaces[index];
     }
-    QStringList names("");
+    QStringList names("All");
     foreach(QString name,m_browser->m_workspaceNames)
     {
       names.append(name);
@@ -1377,11 +1377,17 @@ void PropertyHandler::setFunctionWorkspace()
       Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
       QString wsPar = QString("WorkspaceIndex=%1").arg(m_browser->m_intManager->value(m_workspaceIndex));
       ifun()->setWorkspace(ws,wsPar.toStdString());
+      m_item->property()->insertSubProperty(m_workspaceIndex,m_workspace);
+    }
+    else
+    {
+      ifun()->setWorkspace(Mantid::API::MatrixWorkspace_sptr(),"");
+      m_item->property()->removeSubProperty(m_workspaceIndex);
     }
   }
   else
   {
-    ifun()->setWorkspace(Mantid::API::Workspace_sptr(),"");
+    ifun()->setWorkspace(Mantid::API::MatrixWorkspace_sptr(),"");
   }
 }
 
