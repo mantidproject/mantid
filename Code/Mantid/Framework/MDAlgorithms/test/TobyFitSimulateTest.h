@@ -96,11 +96,6 @@ public:
         throw std::runtime_error("Not implemented");
       }
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string ) const
-      {
-         throw std::runtime_error("Not implemented");
-      }
-
       Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
       {
         throw std::runtime_error("Not implemented");
