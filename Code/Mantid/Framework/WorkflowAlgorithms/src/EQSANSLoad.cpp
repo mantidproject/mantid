@@ -49,7 +49,7 @@ void EQSANSLoad::init()
   declareProperty("UseConfigBeam", true, "If true, the beam center defined in the configuration file will be used");
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
-  declareProperty("UseConfigWlCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
+  declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
@@ -348,7 +348,7 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
 
   // The following should be properties
   bool use_config_mask = getProperty("UseConfigMask");
-  bool use_config_cutoff = getProperty("UseConfigWlCuts");
+  bool use_config_cutoff = getProperty("UseConfigTOFCuts");
   bool use_config_center = getProperty("UseConfigBeam");
 
   std::ifstream file(filePath.c_str());

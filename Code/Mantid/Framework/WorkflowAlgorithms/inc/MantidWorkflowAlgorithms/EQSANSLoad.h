@@ -27,7 +27,7 @@ namespace WorkflowAlgorithms
     <LI> UseConfigBeam - If true, the beam center defined in the configuration file will be used</LI>
     <LI> BeamCenterX - Beam position in X pixel coordinates (used only if UseConfigBeam is false)</LI>
     <LI> BeamCenterY        - Beam position in Y pixel coordinates (used only if UseConfigBeam is false)</LI>
-    <LI> UseConfigWlCuts         - If true, the edges of the TOF distribution will be cut according to the configuration file</LI>
+    <LI> UseConfigTOFCuts         - If true, the edges of the TOF distribution will be cut according to the configuration file</LI>
     <LI> UseConfigMask         - If true, the masking information found in the configuration file will be used</LI>
     <LI> UseConfig         - If true, the best configuration file found will be used)</LI>
     <LI> CorrectForFlightPath         - If true, the TOF will be modified for the true flight path from the sample to the detector pixel</LI>
