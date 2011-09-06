@@ -1,5 +1,6 @@
 set ( SRC_FILES
         src/EQSANSQ2D.cpp
+        src/EQSANSLoad.cpp
         src/SANSSolidAngleCorrection.cpp
         src/EQSANSSensitivityCorrection.cpp
 )
@@ -9,6 +10,8 @@ set ( SRC_UNITY_IGNORE_FILES
 
 set ( INC_FILES
         inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+        inc/MantidWorkflowAlgorithms/EQSANSLoad.h
+        inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
         inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h
 )

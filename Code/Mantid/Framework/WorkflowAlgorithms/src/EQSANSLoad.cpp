@@ -384,12 +384,6 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
     dataWS->mutableRun().addProperty("high_tof_cut", m_high_TOF_cut, "microsecond", true);
   }
 
-  if (use_config_center)
-  {
-    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
-    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
-  }
-
   if (m_moderator_position != 0)
   {
     dataWS->mutableRun().addProperty("moderator_position", m_moderator_position, "mm", true);
@@ -486,17 +480,19 @@ void EQSANSLoad::exec()
 
   // Move the beam center to its proper position
   bool use_config_center = getProperty("UseConfigBeam");
-  const double pixel_ctr_x = getProperty("BeamCenterX");
-  const double pixel_ctr_y = getProperty("BeamCenterY");
-  if (!use_config_center)
+  if (use_config_center)
   {
+    // Using the beam center, which has beam read in from the config file.
+    // We now only need to move the detector.
+    moveToBeamCenter();
+  } else {
+    const double pixel_ctr_x = getProperty("BeamCenterX");
+    const double pixel_ctr_y = getProperty("BeamCenterY");
     if (!isEmpty(pixel_ctr_x) && !isEmpty(pixel_ctr_y))
     {
       m_center_x = pixel_ctr_x;
       m_center_y = pixel_ctr_y;
-      g_log.information() << "Beam center: "
-        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
-        << Poco::NumberFormatter::format(m_center_y, 1) << std::endl;
+      moveToBeamCenter();
     } else {
       EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
       g_log.information() << "No beam finding method: setting to default ["
@@ -509,8 +505,6 @@ void EQSANSLoad::exec()
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
   m_output_message += "   Beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
       + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
-
-  moveToBeamCenter();
 
   // Modify TOF
   m_output_message += "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut, 1)
@@ -560,8 +554,8 @@ void EQSANSLoad::exec()
   dataWS->getAxis(0)->setUnit("Wavelength");
 
   // Rebin so all the wavelength bins are aligned
-  std::string params = Poco::NumberFormatter::format(wl_min, 1)
-      + ",0.1," + Poco::NumberFormatter::format(wl_combined_max, 1);
+  std::string params = Poco::NumberFormatter::format(wl_min, 2)
+      + ",0.1," + Poco::NumberFormatter::format(wl_combined_max, 2);
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
