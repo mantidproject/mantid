@@ -839,9 +839,9 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
         absol = absol.absolute();
         working_path = absol.toString(Poco::Path::PATH_UNIX)+working_path;
     }
-
-    // as poco splt using regular expressions is doing some rubbish, we need to split manually
-    std::list<int64_t> split_pos;
+   // as poco splt using regular expressions is doing some rubbish, we need to do split manually
+   // code below implements perl split(/\\//,string) commamd. (\\ has been converted to / above)
+ 	std::list<int64_t> split_pos;
     split_pos.push_back(-1);
     size_t path_size = working_path.size();
     for(size_t i=0;i<path_size;i++){
@@ -858,7 +858,7 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
     it2++;
 
     int64_t ic(0);
-    for(it2; it2!=split_pos.end();it2++){
+    for(; it2!=split_pos.end();it2++){
         std::string folder = working_path.substr(*it1+1,*it2-*it1-1);
         if(folder.empty()||(folder.size()==1&&folder==".")){ // skip self-references and double slashes;
             it1=it2;
