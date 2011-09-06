@@ -492,7 +492,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 if temp is None:
                     vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
                     vnoiseRun = info.vnoise # noise run for the vanadium
-                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vnoiseRun < 0))
+                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
 
                     if (vnoiseRun > 0):
                         vnoiseRun = self._loadData(vnoiseRun, SUFFIX, (0., 0.))
