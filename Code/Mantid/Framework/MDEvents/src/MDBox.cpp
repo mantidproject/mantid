@@ -611,7 +611,7 @@ namespace MDEvents
    * @param[out] errorSquared :: set to the integrated squared error.
    */
   TMDE(
-  void MDBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const
+  void MDBox)::integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const
   {
     // If the box is cached to disk, you need to retrieve it
     const std::vector<MDE> & events = this->getConstEvents();
@@ -644,7 +644,7 @@ namespace MDEvents
    * @param[out] signal :: set to the integrated signal
    */
   TMDE(
-  void MDBox)::centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const
+  void MDBox)::centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const
   {
     // If the box is cached to disk, you need to retrieve it
     const std::vector<MDE> & events = this->getConstEvents();

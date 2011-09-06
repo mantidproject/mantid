@@ -592,8 +592,6 @@ namespace MDEvents
 
     // Create the output dimension
     MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, min, max, numBins));
-    // Give it the right basis vector
-    out->setBasisVector(basis);
 
     // Put both in the algo for future use
     m_bases.push_back(basis);
@@ -643,8 +641,14 @@ namespace MDEvents
 
     // Create the CoordTransformAffine with these basis vectors
     CoordTransformAffine * ct = new CoordTransformAffine(inD, outD);
-    ct->buildOrthogonal(origin, this->m_bases, VMD(this->m_scaling) );
+    ct->buildOrthogonal(origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
     this->m_transform = ct;
+
+    // Transformation original->binned
+    std::vector<double> unitScaling(outD, 1.0);
+    CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, outD);
+    ctFrom->buildOrthogonal(origin, this->m_bases, VMD(unitScaling) );
+    m_transformFromOriginal = ctFrom;
 
     // Validate
     if (m_transform->getInD() != inD)
@@ -733,23 +737,38 @@ namespace MDEvents
     }
     // Number of output binning dimensions found
     outD = binDimensions.size();
+    // Number of input dimension
+    size_t inD = in_ws->getNumDims();
 
     // Validate
     if (outD == 0)
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
-    if (outD > in_ws->getNumDims())
+    if (outD > inD)
       throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
 
     // Now we build the coordinate transformation object
+    m_origin = VMD(inD);
+    m_bases.clear();
     std::vector<coord_t> origin(outD), scaling(outD);
     for (size_t d=0; d<outD; d++)
     {
       origin[d] = binDimensions[d]->getMinimum();
       scaling[d] = coord_t(1.0) / binDimensions[d]->getBinWidth();
+      // Origin in the input
+      m_origin[ dimensionToBinFrom[d] ] = origin[d];
+      // Create a unit basis vector that corresponds to this
+      VMD basis(inD);
+      basis[ dimensionToBinFrom[d] ] = 1.0;
+      m_bases.push_back(basis);
     }
 
     m_transform = new CoordTransformAligned(in_ws->getNumDims(), outD,
         dimensionToBinFrom, origin, scaling);
+
+    // Transformation original->binned
+    std::vector<double> unitScaling(outD, 1.0);
+    m_transformFromOriginal = new CoordTransformAligned(in_ws->getNumDims(), outD,
+        dimensionToBinFrom, origin, unitScaling);
   }
 
 
@@ -788,6 +807,13 @@ namespace MDEvents
 
     // Create the dense histogram. This allocates the memory
     outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+
+    // Saves the geometry transformation from original to binned in the workspace
+    outWS->setTransformFromOriginal( this->m_transformFromOriginal );
+    //outWS->setTransformToOriginal( this->m_transformToOriginal );
+    for (size_t i=0; i<m_bases.size(); i++)
+      outWS->setBasisVector(i, m_bases[i]);
+    outWS->setOrigin( this->m_origin );
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");

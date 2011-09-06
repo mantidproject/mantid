@@ -77,9 +77,9 @@ namespace MDEvents
 
     void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {};
 
-    void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
+    void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
-    void centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
+    void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
     void splitContentsById(size_t childId);

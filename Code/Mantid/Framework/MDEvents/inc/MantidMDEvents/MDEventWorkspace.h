@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/BoxController.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDGridBox.h"

@@ -1,9 +1,9 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMALIGNED_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMALIGNED_H_
     
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/VectorParameter.h"
+#include "MantidKernel/System.h"
 
 
 namespace Mantid
@@ -53,7 +53,7 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CoordTransformAligned : public CoordTransform
+  class DLLExport CoordTransformAligned : public Mantid::API::CoordTransform
   {
   public:
     CoordTransformAligned(const size_t inD, const size_t outD, const size_t * dimensionToBinFrom,

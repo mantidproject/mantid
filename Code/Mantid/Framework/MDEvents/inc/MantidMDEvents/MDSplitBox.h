@@ -54,10 +54,10 @@ namespace MDEvents
 
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void integrateSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const
+    void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const
     { throw std::runtime_error("Not implemented."); }
 
-    void centroidSphere(CoordTransform & , const coord_t , coord_t * , signal_t & ) const
+    void centroidSphere(Mantid::API::CoordTransform & , const coord_t , coord_t * , signal_t & ) const
     { throw std::runtime_error("Not implemented."); }
 
     // --------------------------------------------------------------------------------------------

@@ -1,19 +1,20 @@
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using Mantid::API::IMDEventWorkspace_sptr;
 
@@ -93,7 +94,12 @@ namespace MDEvents
     std::vector<size_t> dimensionToBinFrom;
 
     /// Coordinate transformation to apply
-    CoordTransform * m_transform;
+    Mantid::API::CoordTransform * m_transform;
+
+    /// Coordinate transformation to save in the output workspace (original->binned)
+    Mantid::API::CoordTransform * m_transformFromOriginal;
+    /// Coordinate transformation to save in the output workspace (binned->original)
+    Mantid::API::CoordTransform * m_transformToOriginal;
 
     /// Set to true if the cut is aligned with the axes
     bool m_axisAligned;

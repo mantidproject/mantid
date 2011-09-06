@@ -24,7 +24,7 @@ private:
   //Helper type.
   class MockCoordTransformAffineParser : public CoordTransformAffineParser
   {
-    virtual CoordTransform* createTransform(Poco::XML::Element*) const
+    virtual Mantid::API::CoordTransform* createTransform(Poco::XML::Element*) const
     {
       return new CoordTransformAffine(1, 1);
     }
@@ -49,7 +49,7 @@ public:
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformDistanceParser parser;
-   CoordTransform* transform = NULL;
+   Mantid::API::CoordTransform* transform = NULL;
    TS_ASSERT_THROWS_NOTHING(transform = parser.createTransform(pRootElem));
 
    //Circular check. Acutally hard to debug, but gives certainty that serialization and deserialization cause no side effects.
@@ -92,7 +92,7 @@ public:
 
    CoordTransformDistanceParser parser;
    parser.setSuccessor(new MockCoordTransformAffineParser);
-   CoordTransform* product = NULL;
+   Mantid::API::CoordTransform* product = NULL;
    TS_ASSERT_THROWS_NOTHING(product = parser.createTransform(pRootElem));
    delete product;
   }

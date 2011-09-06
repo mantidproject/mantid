@@ -21,7 +21,7 @@ namespace Mantid
     {
     public:
       CoordTransformDistanceParser();
-      virtual CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const;
+      virtual Mantid::API::CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const;
       virtual ~CoordTransformDistanceParser();
     private:
       CoordTransformDistanceParser(const CoordTransformDistanceParser&);

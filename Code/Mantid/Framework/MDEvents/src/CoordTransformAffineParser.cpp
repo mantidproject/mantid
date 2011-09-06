@@ -1,6 +1,6 @@
 #include "MantidAPI/SingleValueParameterParser.h"
 #include "MantidMDEvents/AffineMatrixParameterParser.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/CoordTransformAffineParser.h"
 #include <Poco/DOM/Document.h>
@@ -27,10 +27,10 @@ namespace Mantid
     @param coordTransElement : xml coordinate transform element
     @return a fully constructed coordinate transform object.
     */
-    CoordTransform * CoordTransformAffineParser::createTransform(Poco::XML::Element* coordTransElement) const
+    Mantid::API::CoordTransform * CoordTransformAffineParser::createTransform(Poco::XML::Element* coordTransElement) const
     {
-      typedef Mantid::API::SingleValueParameterParser<InDimParameter> InDimParameterParser;
-      typedef Mantid::API::SingleValueParameterParser<OutDimParameter> OutDimParameterParser;
+      typedef Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter> InDimParameterParser;
+      typedef Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter> OutDimParameterParser;
       using namespace Poco::XML;
       if("CoordTransform" != coordTransElement->localName())
       {
@@ -53,12 +53,12 @@ namespace Mantid
       //Add input dimension parameter.
       InDimParameterParser inDimParser;
       Poco::XML::Element* parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(0));
-      InDimParameter* inDim = inDimParser.createWithoutDelegation(parameter);
+      Mantid::API::InDimParameter* inDim = inDimParser.createWithoutDelegation(parameter);
 
       //Add output dimension parameter.
       OutDimParameterParser outDimParser;
       parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(1));
-      OutDimParameter* outDim = outDimParser.createWithoutDelegation(parameter);
+      Mantid::API::OutDimParameter* outDim = outDimParser.createWithoutDelegation(parameter);
 
       //Add affine matrix parameter.
       AffineMatrixParameterParser affineMatrixDimParser;

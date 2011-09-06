@@ -39,6 +39,8 @@ namespace API
 
     // Copy the dimensions array
     m_dimensions = dimensions;
+    // Make sure the basis vectors are big enough
+    m_basisVectors.resize(m_dimensions.size(), Mantid::Kernel::VMD());
   }
 
 
@@ -158,6 +160,53 @@ namespace API
     m_basisVectors[index] = vec;
   }
 
+
+  //---------------------------------------------------------------------------------------------------
+  /// @return true if the geometry is defined relative to another workspace.
+  bool MDGeometry::hasOriginalWorkspace() const
+  {
+    return (m_originalWorkspace);
+  }
+
+  /// @return the original workspace to which the basis vectors relate
+  boost::shared_ptr<IMDWorkspace> MDGeometry::getOriginalWorkspace() const
+  {
+    return m_originalWorkspace;
+  }
+
+  /// Set the original workspace to which the basis vectors relate
+  void MDGeometry::setOriginalWorkspace(boost::shared_ptr<IMDWorkspace> ws)
+  {
+    m_originalWorkspace = ws;
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /// @return Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
+  Mantid::API::CoordTransform * MDGeometry::getTransformFromOriginal() const
+  {
+    return m_transformFromOriginal.get();
+  }
+
+  /** Set Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
+   * @param transform :: CoordTransform pointer (this assumes pointer ownership) */
+  void MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform * transform)
+  {
+    m_transformFromOriginal = boost::shared_ptr<Mantid::API::CoordTransform>(transform);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /// @return Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
+  Mantid::API::CoordTransform * MDGeometry::getTransformToOriginal() const
+  {
+    return m_transformToOriginal.get();
+  }
+
+  /** Set Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
+   * @param transform :: CoordTransform pointer (this assumes pointer ownership) */
+  void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform * transform)
+  {
+    m_transformToOriginal = boost::shared_ptr<Mantid::API::CoordTransform>(transform);
+  }
 
   //---------------------------------------------------------------------------------------------------
   /** @return a XML representation of the geometry of the workspace */

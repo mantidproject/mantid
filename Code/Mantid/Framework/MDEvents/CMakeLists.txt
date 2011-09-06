@@ -5,12 +5,11 @@ set ( SRC_FILES
 	src/BinToMDHistoWorkspace.cpp
 	src/BoxController.cpp
 	src/CloneMDEventWorkspace.cpp
-	src/CoordTransform.cpp
 	src/CoordTransformAffine.cpp
+	src/CoordTransformAffineParser.cpp
 	src/CoordTransformAligned.cpp
 	src/CoordTransformDistance.cpp
 	src/CoordTransformDistanceParser.cpp
-	src/CoordTransformAffineParser.cpp
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/IMDBox.cpp
@@ -50,12 +49,11 @@ set ( INC_FILES
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CloneMDEventWorkspace.h
-	inc/MantidMDEvents/CoordTransform.h
 	inc/MantidMDEvents/CoordTransformAffine.h
+	inc/MantidMDEvents/CoordTransformAffineParser.h
 	inc/MantidMDEvents/CoordTransformAligned.h
 	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
-	inc/MantidMDEvents/CoordTransformAffineParser.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/IMDBox.h
@@ -86,12 +84,11 @@ set ( TEST_FILES
 	test/AffineMatrixParameterTest.h
 	test/BoxControllerTest.h
 	test/CloneMDEventWorkspaceTest.h
+	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
 	test/CoordTransformAlignedTest.h
 	test/CoordTransformDistanceParserTest.h
 	test/CoordTransformDistanceTest.h
-	test/CoordTransformAffineParserTest.h
-	test/CoordTransformTest.h
 	test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/IMDBoxTest.h

@@ -1,14 +1,14 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMAFFINE_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMAFFINE_H_
 
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/SingleValueParameter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/AffineMatrixParameter.h"
-#include "MantidMDEvents/CoordTransform.h"
 #include "MantidKernel/VMD.h"
+#include "MantidMDEvents/AffineMatrixParameter.h"
 
 using Mantid::Kernel::VMD;
 
@@ -30,7 +30,7 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-04-14 10:03:55.944809
    */
-  class DLLExport CoordTransformAffine : public CoordTransform
+  class DLLExport CoordTransformAffine : public Mantid::API::CoordTransform
   {
   public:
     CoordTransformAffine(const size_t inD, const size_t outD);

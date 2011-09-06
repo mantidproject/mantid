@@ -1,6 +1,7 @@
 #ifndef MANTID_API_MDGEOMETRY_H_
 #define MANTID_API_MDGEOMETRY_H_
     
+#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
@@ -70,6 +71,15 @@ namespace API
     void setBasisVector(size_t index, const Mantid::Kernel::VMD & vec);
 
     // --------------------------------------------------------------------------------------------
+    bool hasOriginalWorkspace() const;
+    boost::shared_ptr<IMDWorkspace> getOriginalWorkspace() const;
+    void setOriginalWorkspace(boost::shared_ptr<IMDWorkspace> ws);
+    Mantid::API::CoordTransform * getTransformFromOriginal() const;
+    void setTransformFromOriginal(Mantid::API::CoordTransform * transform);
+    Mantid::API::CoordTransform * getTransformToOriginal() const;
+    void setTransformToOriginal(Mantid::API::CoordTransform * transform);
+
+    // --------------------------------------------------------------------------------------------
     ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
     Mantid::Kernel::VMD & getOrigin()
     { return m_origin; }
@@ -96,6 +106,12 @@ namespace API
 
     /// Vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
     Mantid::Kernel::VMD m_origin;
+
+    /// Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
+    boost::shared_ptr<Mantid::API::CoordTransform> m_transformFromOriginal;
+
+    /// Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
+    boost::shared_ptr<Mantid::API::CoordTransform> m_transformToOriginal;
 
 
   };

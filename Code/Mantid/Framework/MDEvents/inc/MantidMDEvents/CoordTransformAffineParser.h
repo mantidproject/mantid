@@ -15,10 +15,14 @@ namespace Poco
 
 namespace Mantid
 {
-  namespace MDEvents
+  namespace API
   {
     /// Forward declaration
     class CoordTransform;
+  }
+
+  namespace MDEvents
+  {
 
     /** A parser for processing coordinate transform xml
    *
@@ -29,7 +33,7 @@ namespace Mantid
     {
     public:
       CoordTransformAffineParser();
-      virtual CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const;
+      virtual Mantid::API::CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const;
       virtual void setSuccessor(CoordTransformAffineParser* other);
       virtual ~CoordTransformAffineParser();
       typedef boost::shared_ptr<CoordTransformAffineParser> SuccessorType_sptr;

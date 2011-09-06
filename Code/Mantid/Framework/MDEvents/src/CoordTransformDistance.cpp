@@ -1,7 +1,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 
 #include <boost/algorithm/string.hpp>
@@ -101,8 +101,8 @@ namespace MDEvents
       writer.writeNode(xmlstream, pDoc);
 
       // Convert the members to parameters
-      InDimParameter inD_param(inD);
-      OutDimParameter outD_param(outD);
+      Mantid::API::InDimParameter inD_param(inD);
+      Mantid::API::OutDimParameter outD_param(outD);
       CoordCenterVectorParam m_center_param(inD);
       DimensionsUsedVectorParam m_dimensionsUsed_param(inD);
 

@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
 
 #include "MantidMDEvents/CoordTransformAffineParser.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/DOM/DOMParser.h>
@@ -23,7 +23,7 @@ private:
 
   class MockCoordTransformAffineParser : public CoordTransformAffineParser
   {
-    virtual CoordTransform* createTransform(Poco::XML::Element*) const
+    virtual Mantid::API::CoordTransform* createTransform(Poco::XML::Element*) const
     {
       return new CoordTransformAffine(1, 1);
     }
@@ -102,7 +102,7 @@ public:
 
    CoordTransformAffineParser parser;
    parser.setSuccessor(new MockCoordTransformAffineParser);
-   CoordTransform* product = parser.createTransform(pRootElem);
+   Mantid::API::CoordTransform* product = parser.createTransform(pRootElem);
    delete product;
   }
 

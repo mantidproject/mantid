@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include <Poco/File.h>
+#include "MantidAPI/CoordTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -70,8 +71,8 @@ public:
   virtual void centerpointBin(MDBin<MDE,nd> & /*bin*/, bool * ) const
   {}
 
-  virtual void integrateSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
-  virtual void centroidSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
+  virtual void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
+  virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}

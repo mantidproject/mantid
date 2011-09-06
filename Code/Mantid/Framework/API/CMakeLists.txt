@@ -17,6 +17,7 @@ set ( SRC_FILES
 	src/CompositeFunctionMD.cpp
 	src/CompositeFunctionMW.cpp
 	src/ConstraintFactory.cpp
+	src/CoordTransform.cpp
 	src/CostFunctionFactory.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/ExperimentInfo.cpp
@@ -106,6 +107,7 @@ set ( INC_FILES
 	inc/MantidAPI/CompositeFunctionMD.h
 	inc/MantidAPI/CompositeFunctionMW.h
 	inc/MantidAPI/ConstraintFactory.h
+	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
@@ -199,6 +201,7 @@ set ( TEST_FILES
 	test/AnalysisDataServiceTest.h
 	test/AsynchronousTest.h
 	test/CompositeFunctionTest.h
+	test/CoordTransformTest.h
 	test/CostFunctionFactoryTest.h
 	test/ExperimentInfoTest.h
 	test/ExpressionTest.h

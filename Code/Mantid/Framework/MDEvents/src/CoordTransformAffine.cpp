@@ -237,8 +237,8 @@ namespace MDEvents
       // Convert the members to parameters
       AffineMatrixParameter affineMatrixParameter(inD, outD);
       affineMatrixParameter.setMatrix(affineMatrix);
-      InDimParameter inD_param(inD);
-      OutDimParameter outD_param(outD);
+      Mantid::API::InDimParameter inD_param(inD);
+      Mantid::API::OutDimParameter outD_param(outD);
 
       std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
         % inD_param.toXMLString().c_str() % outD_param.toXMLString().c_str() % affineMatrixParameter.toXMLString().c_str());

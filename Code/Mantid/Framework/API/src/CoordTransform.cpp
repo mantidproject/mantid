@@ -2,7 +2,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
@@ -11,7 +11,7 @@ using namespace Mantid::Kernel;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace API
 {
 
   //----------------------------------------------------------------------------------------------
@@ -43,5 +43,5 @@ namespace MDEvents
 
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace API
 

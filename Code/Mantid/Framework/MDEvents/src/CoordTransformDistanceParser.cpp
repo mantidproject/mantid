@@ -27,11 +27,11 @@ namespace Mantid
     @param coordTransElement : xml coordinate transform element
     @return a fully constructed coordinate transform object.
     */
-    CoordTransform* CoordTransformDistanceParser::createTransform(Poco::XML::Element* coordTransElement) const
+    Mantid::API::CoordTransform* CoordTransformDistanceParser::createTransform(Poco::XML::Element* coordTransElement) const
     {
       //Typdef the parameter parsers required.
-      typedef Mantid::API::SingleValueParameterParser<InDimParameter> InDimParameterParser;
-      typedef Mantid::API::SingleValueParameterParser<OutDimParameter> OutDimParameterParser;
+      typedef Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter> InDimParameterParser;
+      typedef Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter> OutDimParameterParser;
       typedef Mantid::API::VectorParameterParser<CoordCenterVectorParam> CoordCenterParser;
       typedef Mantid::API::VectorParameterParser<DimensionsUsedVectorParam> DimsUsedParser;
 
@@ -57,12 +57,12 @@ namespace Mantid
       // Parse the in dimension parameter.
       InDimParameterParser inDimParamParser;
       Poco::XML::Element* parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(0));
-      InDimParameter* inDimParameter = inDimParamParser.createWithoutDelegation(parameter);
+      Mantid::API::InDimParameter* inDimParameter = inDimParamParser.createWithoutDelegation(parameter);
 
       // Parse the out dimension parameter.
       OutDimParameterParser outDimParamParser;
       parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(1));
-      OutDimParameter* outDimParameter = outDimParamParser.createWithoutDelegation(parameter);
+      Mantid::API::OutDimParameter* outDimParameter = outDimParamParser.createWithoutDelegation(parameter);
       UNUSED_ARG(outDimParameter); //not actually used as an input.
 
       // Parse the coordinate centre parameter.

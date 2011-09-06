@@ -1,12 +1,12 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMDISTANCE_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMDISTANCE_H_
 
-#include <boost/scoped_ptr.hpp>
-#include "MantidKernel/System.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/VectorParameter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidMDEvents/CoordTransform.h"
-#include "MantidAPI/VectorParameter.h"
+#include "MantidKernel/System.h"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -30,7 +30,7 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-04-25 14:48:33.517020
    */
-  class DLLExport CoordTransformDistance : public CoordTransform
+  class DLLExport CoordTransformDistance : public Mantid::API::CoordTransform
   {
   public:
     CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);

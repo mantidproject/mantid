@@ -1,16 +1,15 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORM_H_
 #define MANTID_MDEVENTS_COORDTRANSFORM_H_
     
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidMDEvents/AffineMatrixParameter.h"
 #include "MantidAPI/SingleValueParameter.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace API
 {
   /// Unique SingleValueParameter Declaration for InputNDimensions
   DECLARE_SINGLE_VALUE_PARAMETER(InDimParameter, size_t)
@@ -52,6 +51,6 @@ namespace MDEvents
 
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace API
 
 #endif  /* MANTID_MDEVENTS_COORDTRANSFORM_H_ */

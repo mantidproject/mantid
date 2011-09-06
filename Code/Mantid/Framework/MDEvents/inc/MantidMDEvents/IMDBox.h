@@ -8,7 +8,7 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
-#include "MantidMDEvents/CoordTransform.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
@@ -196,10 +196,10 @@ namespace MDEvents
     virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const = 0;
 
     /** Sphere (peak) integration */
-    virtual void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
+    virtual void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
 
     /** Find the centroid around a sphere */
-    virtual void centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
+    virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
 
     // -------------------------------------------------------------------------------------------

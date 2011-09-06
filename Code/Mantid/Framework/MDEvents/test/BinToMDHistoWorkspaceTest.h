@@ -154,6 +154,8 @@ public:
         TS_ASSERT( boost::math::isnan( out->getSignalAt(i) ) ); //The implicit function should have ensured that no bins were present.
       }
     }
+    for (size_t d=0; d<out->getNumDims(); d++)
+      std::cout << out->getBasisVector(d) << std::endl;
     AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
   }
 
@@ -334,6 +336,14 @@ public:
       TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
       TS_ASSERT_DELTA(out->getErrorAt(i), expected_signal, 1e-5);
     }
+
+    // check basis vectors
+    TS_ASSERT_EQUALS( out->getBasisVector(0), baseX);
+    TS_ASSERT_EQUALS( out->getBasisVector(1), baseY);
+    TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ);
+    CoordTransform * ctFrom = out->getTransformFromOriginal();
+    TS_ASSERT(ctFrom);
+
     AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
   }
 
