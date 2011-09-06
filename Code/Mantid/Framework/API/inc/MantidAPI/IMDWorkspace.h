@@ -82,16 +82,7 @@ namespace Mantid
       virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const = 0;
 
       /// Get the dimension
-      virtual Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const
-      {
-        if (index==0) return getXDimension();
-        if (index==1) return getYDimension();
-        if (index==2) return getZDimension();
-        if (index==3) return getTDimension();
-        throw std::runtime_error("IMDWorkspace::getDimensionNum() called with too high of an index.");
-      }
-
-
+      virtual Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const;
 
       /// Get the signal at the specified index.
       virtual signal_t getSignalAt(size_t index1) const

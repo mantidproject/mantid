@@ -49,7 +49,7 @@ namespace API
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
     /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.

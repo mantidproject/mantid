@@ -10,6 +10,18 @@ namespace Mantid
       {
       }
 
+      /// Get the dimension
+      Mantid::Geometry::IMDDimension_const_sptr IMDWorkspace::getDimensionNum(size_t index) const
+      {
+        if (index==0) return this->getXDimension();
+        if (index==1) return this->getYDimension();
+        if (index==2) return this->getZDimension();
+        if (index==3) return this->getTDimension();
+        throw std::runtime_error("IMDWorkspace::getDimensionNum() called with too high of an index.");
+      }
+
+
+
       /**
         * Default implementation throws NotImplementedError exception.
         */

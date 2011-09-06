@@ -54,7 +54,7 @@ namespace API
   }
 
   // --------------------------------------------------------------------------------------------
-  boost::shared_ptr<Mantid::Geometry::IMDDimension> MDGeometry::getDimensionNum(size_t index) const
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimensionNum(size_t index) const
   {
     if (index >= m_dimensions.size()) throw std::runtime_error("Workspace does not have a dimension at that index.");
     return m_dimensions[index];
