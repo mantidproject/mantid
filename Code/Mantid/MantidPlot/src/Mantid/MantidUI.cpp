@@ -2589,13 +2589,13 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
     Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
   if (ws)
   {
-    if ((ws->columnCount() - 1)/2 != fitbrowser->compositeFunction()->nParams()) return;
+    if ((ws->columnCount() - 1)/2 != (int)fitbrowser->compositeFunction()->nParams()) return;
     Table *t = importTableWorkspace(QString::fromStdString(wsName));
     if (!t) return;
     QString parName;
     if (fitbrowser->compositeFunction()->nFunctions() == 1)
     {
-      int i = fitbrowser->compositeFunction()->parameterIndex(ui->cbParameter->currentText().toStdString());
+      size_t i = fitbrowser->compositeFunction()->parameterIndex(ui->cbParameter->currentText().toStdString());
       parName = QString::fromStdString(fitbrowser->compositeFunction()->getFunction(0)->parameterName(i));
     }
     else
