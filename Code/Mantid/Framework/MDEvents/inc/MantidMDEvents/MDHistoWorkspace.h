@@ -134,12 +134,6 @@ namespace MDEvents
       throw std::invalid_argument("Dimension tagged " + id + " was not found in the MDHistoWorkspace");
     }
 
-    /// Get the dimension ids in their order
-    const std::vector<std::string> getDimensionIDs() const
-    {
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
-    }
-
     /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
     std::string getGeometryXML() const;
 

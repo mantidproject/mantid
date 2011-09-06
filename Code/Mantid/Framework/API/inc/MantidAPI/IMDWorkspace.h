@@ -83,12 +83,13 @@ namespace Mantid
 
       /// Get the dimension
       virtual Mantid::Geometry::IMDDimension_sptr getDimensionNum(size_t index)
-      { (void) index;
-      throw std::runtime_error("Not implemented yet.");
+      {
+        if (index==0) return getXDimension();
+        if (index==1) return getYDimension();
+        if (index==2) return getZDimension();
+        if (index==3) return getTDimension();
+        throw std::runtime_error("IMDWorkspace::getDimensionNum() called with too high of an index.");
       }
-
-      /// Get the dimension ids in their order
-      virtual const std::vector<std::string> getDimensionIDs() const = 0;
 
 
 

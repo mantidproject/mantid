@@ -149,14 +149,6 @@ public:
         throw std::runtime_error("Not implemented");
     }
 
-    const std::vector<std::string> getDimensionIDs() const
-    {
-        // just one dimensional data in energy (if en is correct)
-        std::vector<std::string> ids;
-        ids.push_back("en");
-        return ids;
-    }
-
     virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
     {
         //throw std::runtime_error("Not implemented");

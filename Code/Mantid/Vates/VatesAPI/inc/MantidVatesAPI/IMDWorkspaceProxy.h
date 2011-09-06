@@ -81,8 +81,6 @@ public:
 
   virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
-  virtual const std::vector<std::string> getDimensionIDs() const;
-
   virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
 
   virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const;

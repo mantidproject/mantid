@@ -1479,14 +1479,6 @@ namespace Mantid
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
     }
 
-    const std::vector<std::string> MatrixWorkspace::getDimensionIDs() const
-    {
-      std::vector<std::string> keys;
-      keys.push_back( xDimensionId);
-      keys.push_back( yDimensionId);
-      return keys;
-    }
-
     const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t dim1Increment) const
     { 
       if (dim1Increment >= this->dataX(0).size())

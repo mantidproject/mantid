@@ -66,11 +66,6 @@ boost::shared_ptr<const Mantid::Geometry::IMDDimension> IMDWorkspaceProxy::getDi
   return m_workspace->getDimension(id);
 }
 
-const std::vector<std::string> IMDWorkspaceProxy::getDimensionIDs() const
-{
-  return m_workspace->getDimensionIDs();
-}
-
 const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getPoint(size_t index) const
 {
   return m_workspace->getPoint(index);

@@ -101,7 +101,6 @@ namespace GaussianThresholdRangeTestHelpers
     MOCK_CONST_METHOD0(getTDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
     MOCK_CONST_METHOD1(getDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>(std::string id));
     MOCK_METHOD1(getDimensionNum,boost::shared_ptr<Mantid::Geometry::IMDDimension>(size_t index));
-    MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNumDims, size_t());
     MOCK_CONST_METHOD1(getSignalNormalizedAt, signal_t(size_t index1));

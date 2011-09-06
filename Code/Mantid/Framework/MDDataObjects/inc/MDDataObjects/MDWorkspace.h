@@ -147,9 +147,6 @@ namespace Mantid
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
-      /// Get the dimension ids in their order
-      virtual const std::vector<std::string> getDimensionIDs() const;
-
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
 

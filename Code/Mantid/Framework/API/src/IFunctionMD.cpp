@@ -216,10 +216,9 @@ namespace API
     {
       throw std::runtime_error("Method IFunctionMD::useAllDimensions() can only be called after setting the workspace");
     }
-    std::vector<std::string> ids = m_workspace->getDimensionIDs();
-    for(size_t i = 0; i < ids.size(); ++ i)
+    for(size_t i = 0; i < m_workspace->getNumDims(); ++ i)
     {
-      useDimension(ids[i]);
+      useDimension(m_workspace->getDimensionNum(i)->getDimensionId());
     }
     this->initDimensions();
   }

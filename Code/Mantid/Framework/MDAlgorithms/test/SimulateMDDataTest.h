@@ -86,11 +86,6 @@ public:
         return m_points;
     }
 
-    const std::vector<std::string> getDimensionIDs() const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
     virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t) const
     {
         throw std::runtime_error("Not implemented");

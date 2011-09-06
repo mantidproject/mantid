@@ -81,10 +81,6 @@ private:
     {
       throw std::runtime_error("Not Implemented");
     }
-    virtual const std::vector<std::string> getDimensionIDs() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
 
     //constructor allows a workspace name to be provide.
   MockIMDWorkspace(std::string name)

@@ -167,18 +167,6 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
 		return m_spMDImage->get_const_MDGeometry().get_constDimension(id,true); 
     }
 
-    const std::vector<std::string> MDWorkspace::getDimensionIDs() const
-    {
-      MDGeometryOld const & geometry = m_spMDImage->get_const_MDGeometry();
-      std::vector<boost::shared_ptr<IMDDimension> > vecDimensions = geometry.getDimensions();
-      std::vector<std::string> vecDimensionIds(vecDimensions.size());
-      for(unsigned int i = 0; i < vecDimensions.size() ; i++)
-      {
-        vecDimensionIds[i] = vecDimensions[i]->getDimensionId();
-      }
-      return vecDimensionIds;
-    }
-
     const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(size_t index) const
     {
       if(index >= this->getNPoints())

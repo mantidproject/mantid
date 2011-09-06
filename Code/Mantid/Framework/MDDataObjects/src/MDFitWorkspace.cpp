@@ -118,16 +118,6 @@ namespace Mantid{
       throw std::invalid_argument("MDFitWorkspace does not have dimension " + id); 
     }
 
-    const std::vector<std::string> MDFitWorkspace::getDimensionIDs() const
-    {
-      std::vector<std::string> vecDimensionIds(m_dimensions.size());
-      for(unsigned int i = 0; i < m_dimensions.size() ; i++)
-      {
-        vecDimensionIds[i] = m_dimensions[i]->getDimensionId();
-      }
-      return vecDimensionIds;
-    }
-
     const Mantid::Geometry::SignalAggregate & MDFitWorkspace::getPoint(size_t index) const
     {
       if(index >= m_points.size())
