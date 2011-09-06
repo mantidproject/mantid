@@ -142,29 +142,23 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
       return m_spMDImage->get_const_MDGeometry().getNumDims();
     }
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const
-    { 
-      return m_spMDImage->get_const_MDGeometry().getXDimension(); 
-    }
-
-    boost::shared_ptr< const Mantid::Geometry::IMDDimension> MDWorkspace::getYDimension() const
-    { 
-      return m_spMDImage->get_const_MDGeometry().getYDimension();
-    }
-
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getZDimension() const
-    { 
-      return m_spMDImage->get_const_MDGeometry().getZDimension();
-    }
-
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getTDimension() const
-    { 
-      return m_spMDImage->get_const_MDGeometry().getTDimension();
-    }
-
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimension(std::string id) const
     { 
 		return m_spMDImage->get_const_MDGeometry().get_constDimension(id,true); 
+    }
+
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getDimensionNum(size_t index) const
+    {
+      if (index==0)
+        return m_spMDImage->get_const_MDGeometry().getXDimension();
+      else if (index==1)
+        return m_spMDImage->get_const_MDGeometry().getYDimension();
+      else if (index==2)
+        return m_spMDImage->get_const_MDGeometry().getZDimension();
+      else if (index==3)
+        return m_spMDImage->get_const_MDGeometry().getTDimension();
+      else
+        throw std::runtime_error("MDWorkspace::getDimensionNum() bad index");
     }
 
     const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(size_t index) const

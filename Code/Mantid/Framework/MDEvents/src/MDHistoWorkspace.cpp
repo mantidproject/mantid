@@ -2,9 +2,12 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidKernel/Utils.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 using Mantid::Kernel::Utils::NestedForLoop::SetUp;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::IMDDimension_sptr;
+using Mantid::Geometry::IMDDimension;
 
 namespace Mantid
 {
@@ -45,11 +48,11 @@ namespace MDEvents
    */
   void MDHistoWorkspace::init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
   {
-    if (dimensions.size() == 0)
-      throw std::invalid_argument("0 valid dimensions were given to the MDHistoWorkspace constructor!");
+    std::vector<IMDDimension_sptr> dim2;
+    for (size_t i=0; i<dimensions.size(); i++) dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
+    MDGeometry::initGeometry(dim2);
 
     // Copy the dimensions array
-    m_dimensions = dimensions;
     numDimensions = m_dimensions.size();
 
     // For indexing.
@@ -82,7 +85,7 @@ namespace MDEvents
     // Compute the volume of each cell.
     coord_t volume = 1.0;
     for (size_t i=0; i < numDimensions; ++i)
-      volume *= m_dimensions[i]->getBinWidth();
+      volume *= dimensions[i]->getBinWidth();
     m_inverseVolume = 1.0 / volume;
   }
 
@@ -175,40 +178,6 @@ namespace MDEvents
   }
 
 
-  //---------------------------------------------------------------------------------------------------
-  /** @return a XML representation of the geometry of the workspace */
-  std::string MDHistoWorkspace::getGeometryXML() const
-  {
-    using Mantid::Geometry::MDGeometryBuilderXML;
-    using Mantid::Geometry::StrictDimensionPolicy;
-    MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
-    // Add all dimensions.
-    for(size_t i = 0; i <this->m_dimensions.size(); i++)
-    {
-      xmlBuilder.addOrdinaryDimension(this->m_dimensions[i]);
-    }
-    // Add mapping dimensions
-    const size_t nDimensions = m_dimensions.size();
-    if(nDimensions > 0)
-    {
-     xmlBuilder.addXDimension(this->getXDimension());
-    }
-    if(nDimensions > 1)
-    {
-     xmlBuilder.addYDimension(this->getYDimension());
-    }
-    if(nDimensions > 2)
-    {
-     xmlBuilder.addZDimension(this->getZDimension());
-    }
-    if(nDimensions > 3)
-    {
-     xmlBuilder.addTDimension(this->getTDimension());
-    }
-     // Create the xml.
-    return xmlBuilder.create();
-  }
-
   /*
   Get non-collapsed dimensions
   @return vector of collapsed dimensions in the workspace geometry.
@@ -216,12 +185,11 @@ namespace MDEvents
   Mantid::Geometry::VecIMDDimension_const_sptr MDHistoWorkspace::getNonIntegratedDimensions() const
   {
     using namespace Mantid::Geometry;
-    typedef std::vector<Mantid::Geometry::MDHistoDimension_sptr> VecMDHistoDimension_sptr;
     VecIMDDimension_const_sptr vecCollapsedDimensions;
-    VecMDHistoDimension_sptr::const_iterator it = this->m_dimensions.begin();
+    std::vector<Mantid::Geometry::IMDDimension_sptr>::const_iterator it = this->m_dimensions.begin();
     for(; it != this->m_dimensions.end(); ++it)
     {
-      MDHistoDimension_sptr current = (*it);
+      IMDDimension_sptr current = (*it);
       if(!current->getIsIntegrated())
       {
         vecCollapsedDimensions.push_back(current);

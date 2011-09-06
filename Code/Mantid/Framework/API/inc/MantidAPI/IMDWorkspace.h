@@ -12,6 +12,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <stdarg.h>
+#include "MantidAPI/MDGeometry.h"
 
 namespace Mantid
 {
@@ -52,7 +53,7 @@ namespace Mantid
     */
 
 
-    class MANTID_API_DLL IMDWorkspace : public Workspace
+    class MANTID_API_DLL IMDWorkspace : public Workspace, public Mantid::API::MDGeometry
     {
     public:
       
@@ -60,29 +61,8 @@ namespace Mantid
         // TODO: -- what is its meaning for the matrix workspace, may be different or the same? different logic of the operations
       virtual uint64_t getNPoints() const = 0;
 
-      /// Get the number of dimensions
-      virtual size_t getNumDims() const = 0;
-
-      /// Get the x-dimension mapping.
-      virtual Mantid::Geometry::IMDDimension_const_sptr getXDimension() const = 0;
-
-      /// Get the y-dimension mapping.
-      virtual Mantid::Geometry::IMDDimension_const_sptr getYDimension() const = 0;
-
-      /// Get the z-dimension mapping.
-      virtual Mantid::Geometry::IMDDimension_const_sptr getZDimension() const = 0;
-
-      /// Get the t-dimension mapping.
-      virtual Mantid::Geometry::IMDDimension_const_sptr getTDimension() const = 0;
-
-      /// Get the dimension with the specified id.
-      virtual Mantid::Geometry::IMDDimension_const_sptr getDimension(std::string id) const = 0;
-
       /// Get those dimensions which have not been collapsed.
       virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const = 0;
-
-      /// Get the dimension
-      virtual Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const;
 
       /// Get the signal at the specified index.
       virtual signal_t getSignalAt(size_t index1) const
@@ -223,9 +203,6 @@ namespace Mantid
 
       /// Horace sytle implementations need to have access to the underlying file. 
       virtual std::string getWSLocation() const = 0;
-
-      /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
-      virtual std::string getGeometryXML() const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
       virtual IMDIterator* createIterator() const;

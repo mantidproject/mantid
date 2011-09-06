@@ -1300,10 +1300,14 @@ namespace Mantid
       return (uint64_t)(this->size());
     }
 
+    //================================= FOR MDGEOMETRY ====================================================
+
     size_t MatrixWorkspace::getNumDims() const
     {
       return 2;
     }
+
+
 
     const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(size_t index) const
     {
@@ -1433,28 +1437,22 @@ namespace Mantid
     };
 
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getXDimension() const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimensionNum(size_t index)const
     { 
-      Axis* xAxis = this->getAxis(0);
-      MWDimension* dimension = new MWDimension(xAxis, xDimensionId);
-      return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
-    }
-
-    boost::shared_ptr< const Mantid::Geometry::IMDDimension> MatrixWorkspace::getYDimension() const
-    { 
-      Axis* yAxis = this->getAxis(1);
-      MWDimension* dimension = new MWDimension(yAxis, yDimensionId);
-      return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
-    }
-
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getZDimension() const
-    { 
-      throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
-    }
-
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getTDimension() const
-    { 
-      throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
+      if (index == 0)
+      {
+        Axis* xAxis = this->getAxis(0);
+        MWDimension* dimension = new MWDimension(xAxis, xDimensionId);
+        return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+      }
+      else if (index == 1)
+      {
+        Axis* yAxis = this->getAxis(1);
+        MWDimension* dimension = new MWDimension(yAxis, yDimensionId);
+        return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
+      }
+      else
+        throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
     }
 
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimension(std::string id) const
@@ -1523,11 +1521,6 @@ namespace Mantid
       throw std::logic_error("Cannot access the workspace location on a MatrixWS");
     }
 
-    std::string MatrixWorkspace::getGeometryXML() const
-    {
-      throw std::runtime_error("Cannot access the workspace location on a MatrixWS");
-      //TODO: the matrix workspace as an IMD Workspace does have an effective geometry.
-    }
 
   } // namespace API
 } // Namespace Mantid

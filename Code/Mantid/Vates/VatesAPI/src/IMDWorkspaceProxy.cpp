@@ -145,32 +145,21 @@ IMDWorkspaceProxy::~IMDWorkspaceProxy()
 {
 }
 
-Mantid::Geometry::IMDDimension_const_sptr IMDWorkspaceProxy::getXDimension(void) const
+/** Remap a given dimension to the one in the base workspace */
+Mantid::Geometry::IMDDimension_const_sptr IMDWorkspaceProxy::getDimensionNum(size_t index) const
 {
-  //Find the effective xDimension
-  MemFuncGetter mFunc = find(m_xDimension->getDimensionId());
-  return (m_workspace.get()->*mFunc)();
-}
-
-Mantid::Geometry::IMDDimension_const_sptr IMDWorkspaceProxy::getYDimension(void) const
-{
-  //Find the effective yDimension
-  MemFuncGetter mFunc = find(m_yDimension->getDimensionId());
-  return (m_workspace.get()->*mFunc)();
-}
-
-Mantid::Geometry::IMDDimension_const_sptr IMDWorkspaceProxy::getZDimension(void) const
-{
-  //Find the effective zDimension
-  MemFuncGetter mFunc = find(m_zDimension->getDimensionId());
-  return (m_workspace.get()->*mFunc)();
-}
-
-Mantid::Geometry::IMDDimension_const_sptr IMDWorkspaceProxy::getTDimension(void) const
-{
-  //Find the effective tDimension
-  MemFuncGetter mFunc = find(m_tDimension->getDimensionId());
-  return (m_workspace.get()->*mFunc)();
+  std::string id;
+  if (index == 0)
+    id = m_xDimension->getDimensionId();
+  else if (index == 1)
+    id = m_yDimension->getDimensionId();
+  else if (index == 2)
+    id = m_zDimension->getDimensionId();
+  else if (index == 3)
+    id = m_tDimension->getDimensionId();
+  else
+    throw std::runtime_error("Unexpected index in IMDWorkspaceProxy::getDimensionNum()");
+  return m_workspace->getDimension(id);
 }
 
 

@@ -47,37 +47,11 @@ private:
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
     MOCK_CONST_METHOD0(getWSLocation,std::string());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
-
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
-    {
-      UNUSED_ARG(id);
-      throw std::runtime_error("Not Implemented");
-    }
     const Mantid::Geometry::SignalAggregate& getCell(...) const
     {
       throw std::runtime_error("Not Implemented");
     }
     virtual uint64_t getNPoints() const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-    virtual size_t getNumDims() const
     {
       throw std::runtime_error("Not Implemented");
     }

@@ -60,11 +60,8 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(3).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(0);
+    pMockWs->addDimension(new FakeIMDDimension("x"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(0);
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
@@ -84,11 +81,8 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(3).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(0);
+    pMockWs->addDimension(new FakeIMDDimension("x"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(0);
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
@@ -108,11 +102,8 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(3).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(0);
+    pMockWs->addDimension(new FakeIMDDimension("x"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(0);
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
@@ -228,7 +219,7 @@ public:
 
     //1D Workspace with 2000 points
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x", 2000))));
+    pMockWs->addDimension(new FakeIMDDimension("x", 2000));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
 

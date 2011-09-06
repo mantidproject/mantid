@@ -78,14 +78,7 @@ private:
     MOCK_CONST_METHOD0(getWSLocation,std::string());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
 
-    MOCK_CONST_METHOD0(getXDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getYDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getZDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getTDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD1(getDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>(std::string id));
-    MOCK_METHOD1(getDimensionNum,boost::shared_ptr<Mantid::Geometry::IMDDimension>(size_t index));
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
-    MOCK_CONST_METHOD0(getNumDims, size_t());
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
     const Mantid::Geometry::SignalAggregate& getCell(...) const
@@ -143,14 +136,10 @@ private:
         using Mantid::Geometry::IMDDimension_const_sptr;
 
         MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-        EXPECT_CALL(*pWorkspace, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-            createXDimension())));
-        EXPECT_CALL(*pWorkspace, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-            createYDimension())));
-        EXPECT_CALL(*pWorkspace, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-            createZDimension())));
-        EXPECT_CALL(*pWorkspace, getTDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-            createTDimension())));
+        pWorkspace->addDimension(createXDimension());
+        pWorkspace->addDimension(createYDimension());
+        pWorkspace->addDimension(createZDimension());
+        pWorkspace->addDimension(createTDimension());
         return pWorkspace;
     }
 

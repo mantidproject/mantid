@@ -257,22 +257,15 @@ namespace Mantid
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
 
 
-      // ---------------- IMDWorkspace Methods --------------------------------
+      // ---------------------------------- MDGeometry methods -------------------------------
+      virtual size_t getNumDims() const;
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
+      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
+
+      // ---------------- IMDWorkspace Methods --------------------------------
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
-      /// Get the number of dimensions
-      virtual size_t getNumDims() const;
-      /// Get the x-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
-      /// Get the y-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
-      /// Get the z-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
-      /// Get the t-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
-      /// Get the dimension with the specified id.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
       /// Get the cell at the specified index/increment.
@@ -285,15 +278,13 @@ namespace Mantid
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const;
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
-      /// Provide the location of the underlying file. 
-      virtual std::string getWSLocation() const;
-      /// Provide the underlying xml for 
-      virtual std::string getGeometryXML() const;
       /// Dimension id for x-dimension.
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
       /// Getter for collapsed dimensions.
+      /// Provide the location of the underlying file.
+      virtual std::string getWSLocation() const;
       Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
       {
         throw std::runtime_error("Not yet implemented");

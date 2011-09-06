@@ -76,13 +76,13 @@ public:
   void testGetZDimension()
   {
     WorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getZDimension(), std::logic_error);
+    TSM_ASSERT_THROWS_ANYTHING("Current implementation should throw runtime error.", matrixWS.getZDimension());
   }
 
   void testGettDimension()
   {
     WorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getTDimension(), std::logic_error);
+    TSM_ASSERT_THROWS_ANYTHING("Current implementation should throw runtime error.", matrixWS.getTDimension());
   }
 
   void testGetDimensionThrows()
@@ -181,12 +181,6 @@ public:
   void testGetWSLocationThrows()
   {
     TSM_ASSERT_THROWS("Getting the workspace location should not be possible.", workspace.getWSLocation(), std::logic_error);
-  }
-
-  void testGetGeometryXMLThrows()
-  {
-    //Characterisation test for existing behaviour.
-    TSM_ASSERT_THROWS("No proper formulation of an underlying geometry yet in MatrixWorkspace", workspace.getGeometryXML(), std::runtime_error);
   }
 
 };

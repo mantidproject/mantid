@@ -59,14 +59,7 @@ public:
   /// Destructor.
   virtual ~IMDWorkspaceProxy();
 
-  /// Get X Dimension via internal memberfunction-to-dimension id map.
-  virtual Mantid::Geometry::IMDDimension_const_sptr getXDimension(void) const;
-  /// Get Y Dimension via internal memberfunction-to-dimension id map.
-  virtual Mantid::Geometry::IMDDimension_const_sptr getYDimension(void) const;
-  /// Get Z Dimension via internal memberfunction-to-dimension id map.
-  virtual Mantid::Geometry::IMDDimension_const_sptr getZDimension(void) const;
-  /// Get t Dimension
-  virtual Mantid::Geometry::IMDDimension_const_sptr getTDimension(void) const;
+  Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const;
 
   boost::function<double(size_t, size_t, size_t, size_t)> getMappedSignalAt();
   //-----------------------------------------------------------------------------------------------

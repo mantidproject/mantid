@@ -132,20 +132,11 @@ namespace Mantid
       /// Get the number of dimensions
       virtual size_t getNumDims() const;
 
-      /// Get the x-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
-
-      /// Get the y-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
-
-      /// Get the z-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
-
-      /// Get the t-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
-
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+
+      /// Get the dimension with the specified id.
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
 
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;

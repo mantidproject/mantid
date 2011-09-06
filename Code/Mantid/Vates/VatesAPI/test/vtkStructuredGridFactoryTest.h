@@ -51,14 +51,7 @@ namespace vtkStructuredGridFactoryTestHelpers
     MOCK_CONST_METHOD0(getWSLocation,std::string());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
 
-    MOCK_CONST_METHOD0(getXDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getYDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getZDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getTDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD1(getDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>(std::string id));
-    MOCK_METHOD1(getDimensionNum,boost::shared_ptr<Mantid::Geometry::IMDDimension>(size_t index));
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
-    MOCK_CONST_METHOD0(getNumDims, size_t());
     MOCK_CONST_METHOD4(getSignalAt, signal_t(size_t index1, size_t index2, size_t index3, size_t index4));
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
@@ -88,15 +81,11 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->addDimension(new FakeIMDDimension("x"));
+    pMockWs->addDimension(new FakeIMDDimension("y"));
+    pMockWs->addDimension(new FakeIMDDimension("z"));
+    pMockWs->addDimension(new FakeIMDDimension("t"));
     EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(8).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(8).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("y"))));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(8).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("t"))));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -124,14 +113,10 @@ public:
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
     EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(8).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(8).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("y"))));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(8).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("t"))));
+    pMockWs->addDimension(new FakeIMDDimension("x"));
+    pMockWs->addDimension(new FakeIMDDimension("y"));
+    pMockWs->addDimension(new FakeIMDDimension("z"));
+    pMockWs->addDimension(new FakeIMDDimension("t"));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -163,14 +148,10 @@ public:
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
     EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(0); //Shouldn't access getSignal At
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(3).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(3).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("y"))));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(3).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("t"))));
+    pMockWs->addDimension(new FakeIMDDimension("x"));
+    pMockWs->addDimension(new FakeIMDDimension("y"));
+    pMockWs->addDimension(new FakeIMDDimension("z"));
+    pMockWs->addDimension(new FakeIMDDimension("t"));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -195,8 +176,10 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(3)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("t"))));
+    pMockWs->addDimension(new FakeIMDDimension("z"));
+    pMockWs->addDimension(new FakeIMDDimension("y"));
+    pMockWs->addDimension(new FakeIMDDimension("z"));
+    pMockWs->addDimension(new FakeIMDDimension("t"));
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
@@ -216,14 +199,10 @@ public:
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
     EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
-      IMDDimension_const_sptr(new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
-      IMDDimension_const_sptr(new FakeIMDDimension("y"))));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
-      IMDDimension_const_sptr(new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      new FakeIMDDimension("t"))));
+    pMockWs->addDimension(new FakeIMDDimension("x"));
+    pMockWs->addDimension(new FakeIMDDimension("y"));
+    pMockWs->addDimension(new FakeIMDDimension("z"));
+    pMockWs->addDimension(new FakeIMDDimension("t"));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -263,8 +242,7 @@ public:
 
     IMDDimension* nullDimension = NULL;
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      nullDimension)));
+    pMockWs->addDimension(nullDimension);
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
     vtkStructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
@@ -297,10 +275,10 @@ public:
 
     //20 by 20 by 20 by 20 workspace.
     pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x", 100))));
-    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("y", 100))));
-    EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("z", 100))));
-    EXPECT_CALL(*pMockWs, getTDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("t", 100))));
+    pMockWs->addDimension(new FakeIMDDimension("x", 100));
+    pMockWs->addDimension(new FakeIMDDimension("y", 100));
+    pMockWs->addDimension(new FakeIMDDimension("z", 100));
+    pMockWs->addDimension(new FakeIMDDimension("t", 100));
   }
 
   void testGenerateVTKDataSet()

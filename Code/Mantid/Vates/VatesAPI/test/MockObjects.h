@@ -142,14 +142,7 @@ public:
   MOCK_CONST_METHOD0(getWSLocation,std::string());
   MOCK_CONST_METHOD0(getGeometryXML,std::string());
 
-  MOCK_CONST_METHOD0(getXDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-  MOCK_CONST_METHOD0(getYDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-  MOCK_CONST_METHOD0(getZDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-  MOCK_CONST_METHOD0(getTDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-  MOCK_CONST_METHOD1(getDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>(std::string id));
-  MOCK_METHOD1(getDimensionNum,boost::shared_ptr<Mantid::Geometry::IMDDimension>(size_t index));
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
-  MOCK_CONST_METHOD0(getNumDims, size_t());
   MOCK_CONST_METHOD1(getSignalNormalizedAt, Mantid::signal_t(size_t index1));
   MOCK_CONST_METHOD2(getSignalNormalizedAt, double(size_t index1, size_t index2));
   MOCK_CONST_METHOD3(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3));

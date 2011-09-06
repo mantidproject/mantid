@@ -60,25 +60,6 @@ private:
 
 public:
 
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const 
-      {
-        return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(new Mantid::Geometry::TestIMDDimension());
-      }
-
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
-      {
-        throw std::runtime_error("Not implemented");
-      }
-
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
-      {
-        throw std::runtime_error("Not implemented");
-      }
-
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
-      {
-        throw std::runtime_error("Not implemented");
-      }
 
       virtual uint64_t getNPoints() const 
       {
@@ -127,8 +108,6 @@ public:
 
       /// return ID specifying the workspace kind
       virtual const std::string id() const {return "TestIMDDWorkspace";}
-      /// return number of dimensions in MD workspace
-      virtual size_t getNumDims()const{return 4;}
       /// Get the footprint in memory in bytes - return 0 for now
       virtual size_t getMemorySize() const {return 0;};
       virtual std::string getWSLocation() const
@@ -144,6 +123,10 @@ public:
    {
       m_points=0;
       m_cells=0;
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
    }
 
    TestCut(std::vector<Mantid::Geometry::MDCell> pContribCells ) :
@@ -151,6 +134,10 @@ public:
    {
       m_cells=pContribCells.size();
       m_points=0;
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
+      this->addDimension(new Mantid::Geometry::TestIMDDimension());
    }
    ~TestCut() {};
 };

@@ -1,10 +1,9 @@
 #ifndef MANTID_API_MDGEOMETRY_H_
 #define MANTID_API_MDGEOMETRY_H_
     
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 
 
@@ -12,6 +11,8 @@ namespace Mantid
 {
 namespace API
 {
+
+  class IMDWorkspace;
 
   /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
     
@@ -43,17 +44,25 @@ namespace API
   public:
     MDGeometry();
     ~MDGeometry();
+    void initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions);
+
+    // --------------------------------------------------------------------------------------------
+    // These are the main methods for dimensions, that CAN be overridden (e.g. by MatrixWorkspace)
+    virtual size_t getNumDims() const;
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+
 
     // --------------------------------------------------------------------------------------------
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
 
-    /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
-    std::string getGeometryXML() const;
+    virtual std::string getGeometryXML() const;
+
+    void addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim);
+    void addDimension(Mantid::Geometry::IMDDimension * dim);
 
     // --------------------------------------------------------------------------------------------
     Mantid::Kernel::VMD & getBasisVector(size_t index);
@@ -80,7 +89,7 @@ namespace API
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
 
     /// Pointer to the original workspace, if this workspace is a coordinate transformation from an original workspace.
-    IMDWorkspace_sptr m_originalWorkspace;
+    boost::shared_ptr<IMDWorkspace> m_originalWorkspace;
 
     /// Vector of the basis vector (in the original workspace) for each dimension of this workspace.
     std::vector<Mantid::Kernel::VMD> m_basisVectors;

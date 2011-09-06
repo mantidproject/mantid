@@ -1,13 +1,14 @@
 #ifndef MANTID_MDEVENTS_MDHISTOWORKSPACE_H_
 #define MANTID_MDEVENTS_MDHISTOWORKSPACE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Exception.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPoint.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/System.h"
 
 
 namespace Mantid
@@ -53,12 +54,6 @@ namespace MDEvents
       return m_length;
     }
 
-    /// Get the number of dimensions
-    size_t getNumDims() const
-    {
-      return numDimensions;
-    }
-
     // --------------------------------------------------------------------------------------------
     /** @return a const reference to the indexMultiplier array.
      * To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
@@ -91,53 +86,6 @@ namespace MDEvents
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error);
 
 
-    // --------------------------------------------------------------------------------------------
-    /// Get the x-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
-    {
-      return m_dimensions[0];
-    }
-
-    /// Get the y-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
-    {
-      if (m_dimensions.size() < 2) throw std::runtime_error("MDHistoWorkspace does not have a Y dimension.");
-      return m_dimensions[1];
-    }
-
-    /// Get the z-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
-    {
-      if (m_dimensions.size() < 3) throw std::runtime_error("MDHistoWorkspace does not have a X dimension.");
-      return m_dimensions[2];
-    }
-
-    /// Get the t-dimension mapping.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
-    {
-      if (m_dimensions.size() < 4) throw std::runtime_error("MDHistoWorkspace does not have a T dimension.");
-      return m_dimensions[3];
-    }
-
-    Mantid::Geometry::IMDDimension_const_sptr getDimensionNum(size_t index) const
-    {
-      if (index >= m_dimensions.size()) throw std::runtime_error("MDHistoWorkspace does not have a dimension at that index.");
-      return m_dimensions[index];
-    }
-
-    /// Get the dimension with the specified id.
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
-    {
-      for (size_t i=0; i < m_dimensions.size(); ++i)
-        if (m_dimensions[i]->getDimensionId() == id)
-          return m_dimensions[i];
-      throw std::invalid_argument("Dimension tagged " + id + " was not found in the MDHistoWorkspace");
-    }
-
-    /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
-    std::string getGeometryXML() const;
-
-
 
     /// Sets the signal at the specified index.
     void setSignalAt(size_t index, signal_t value)
@@ -150,8 +98,6 @@ namespace MDEvents
     {
       m_errors[index] = value;
     }
-
-
 
 
     /// Get the error of the signal at the specified index.
@@ -337,9 +283,6 @@ namespace MDEvents
 
     /// Length of the m_signals / m_errors arrays.
     size_t m_length;
-
-    /// Vector of the dimensions used, in the order X Y Z t
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
     /// To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
     size_t * indexMultiplier;
