@@ -273,7 +273,7 @@ public:
     double df = 1./Dx; // this is the x-step of the transformed data
     double pi= acos(0.)*2;
     double cc = pi*pi*df*df/a;
-    for(int i=0;i<hout.size();i++)
+    for(int i=0;i<(int)hout.size();i++)
     {
       TS_ASSERT_DELTA(hout.real(i),h*sqrt(pi/a)*exp(-cc*i*i),1e-7);
     }
