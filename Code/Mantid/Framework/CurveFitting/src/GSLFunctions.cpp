@@ -174,7 +174,7 @@ namespace CurveFitting
     }
 
     int j = 0;
-    for(int i=0;i<fun->nParams();++i)
+    for(size_t i=0;i<fun->nParams();++i)
     {
       if (fun->isActive(i))
       {

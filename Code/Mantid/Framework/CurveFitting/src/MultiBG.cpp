@@ -284,6 +284,7 @@ boost::shared_ptr<API::WorkspaceGroup> MultiBG::createCalculatedWorkspaceGroup(
   const std::vector<double>& sd
   )
 {
+  UNUSED_ARG(sd)
   return boost::shared_ptr<API::WorkspaceGroup>();
 }
 } // namespace API

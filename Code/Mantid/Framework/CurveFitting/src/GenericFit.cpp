@@ -246,7 +246,7 @@ namespace CurveFitting
     else
       g_log.warning() << reportOfFit << "  " << costfun->shortName() << 
          " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
-    for (int i = 0; i < m_function->nParams(); i++)
+    for (size_t i = 0; i < m_function->nParams(); i++)
     {
       g_log.debug() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
     }
@@ -276,7 +276,7 @@ namespace CurveFitting
       // take standard deviations to be the square root of the diagonal elements of
       // the covariance matrix
       int iPNotFixed = 0;
-      for(int i=0; i < m_function->nParams(); i++)
+      for(size_t i=0; i < m_function->nParams(); i++)
       {
         standardDeviations.push_back(1.0);
         if (m_function->isActive(i))
@@ -305,7 +305,7 @@ namespace CurveFitting
         Mantid::API::ITableWorkspace_sptr m_covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
         m_covariance->addColumn("str","Name");
         std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
-        for(int i=0; i < m_function->nParams(); i++) 
+        for(size_t i=0; i < m_function->nParams(); i++)
         {
           if (m_function->isActive(i)) 
           {
@@ -314,11 +314,11 @@ namespace CurveFitting
           }
         }
 
-        for(int i=0; i<nParam; i++)
+        for(size_t i=0; i<nParam; i++)
         {
           Mantid::API::TableRow row = m_covariance->appendRow();
           row << paramThatAreFitted[i];
-          for(int j=0; j<nParam; j++)
+          for(size_t j=0; j<nParam; j++)
           {
             if (j == i)
               row << 100.0;
@@ -347,7 +347,7 @@ namespace CurveFitting
       if ( isDerivDefined ) 
         m_result->addColumn("double","Error");
 
-      for(int i=0;i<m_function->nParams();i++)
+      for(size_t i=0;i<m_function->nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
         row << m_function->parameterName(i) << m_function->getParameter(i);
@@ -373,7 +373,7 @@ namespace CurveFitting
     std::vector<double> params,errors;
     std::vector<std::string> parNames;
 
-    for(int i=0;i<m_function->nParams();i++)
+    for(size_t i=0;i<m_function->nParams();i++)
     {
       parNames.push_back(m_function->parameterName(i));
       params.push_back(m_function->getParameter(i));

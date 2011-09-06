@@ -115,7 +115,7 @@ int LevenbergMarquardtMinimizer::iterate()
   // GSL 1.14 changed return value from GSL_CONTINUE->GSL_ENOPROG for non-converging fits at 10 iterations
   if( retVal == GSL_CONTINUE || retVal == GSL_ENOPROG ) 
   {
-    for (int i = 0; i < m_function->nActive(); i++)
+    for (size_t i = 0; i < m_function->nActive(); i++)
     {
       m_function->setActiveParameter(i,gsl_vector_get(m_gslSolver->x,i));
     }
