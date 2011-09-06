@@ -180,7 +180,7 @@ MDImage::set_imgArray_shape()
 
   }
   if(this->MD_IMG_array.data_size!=this->pMDGeometry->getGeometryExtend()){
-    g_log.error()<<" size of MD image array = " << MD_IMG_array.data_size<<" and differs from the size, described by MDGeometry = "<<pMDGeometry->getGeometryExtend()<<std::endl;
+    g_log.error()<<" size of MD image array = " << MD_IMG_array.data_size<<" and differs from the size, described by MDGeometryOld = "<<pMDGeometry->getGeometryExtend()<<std::endl;
     throw(std::logic_error(" MD geometry and MD_image_Data are not synchroneous any more. BUGGG!!! "));
   }
   this->MD_IMG_array.npixSum = 0;
@@ -206,7 +206,7 @@ MDImage::initialize(const MDGeometryDescription &transf,const MDGeometryBasis *c
       g_log.error()<<" MDImage::initialize: construction geometry from its description without the basis is imkpossible\n";
       throw(std::invalid_argument("Constructing geometry from geometry description without the Geometry basis is impossible"));
     }else{
-      this->pMDGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*pBasis,transf));
+      this->pMDGeometry = std::auto_ptr<MDGeometryOld>(new MDGeometryOld(*pBasis,transf));
     }
   }
   // initiate initial dimensions
@@ -255,9 +255,9 @@ MDImage::validateNPix(void)
 
 }
 //
-MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry): 
+MDImage::MDImage(Mantid::Geometry::MDGeometryOld* pGeometry): 
     nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0),
-    pMDGeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry))
+    pMDGeometry(std::auto_ptr<Mantid::Geometry::MDGeometryOld>(pGeometry))
 {
   // empty initialisation; currently not supported as will throw later;
   if(!pGeometry)return;

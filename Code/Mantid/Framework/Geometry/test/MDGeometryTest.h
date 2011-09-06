@@ -20,21 +20,21 @@ using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using namespace Mantid::Geometry;
 
-class testMDGeometry: public MDGeometry
+class testMDGeometry: public MDGeometryOld
 {
 public:
 	testMDGeometry(const MDGeometryBasis &basis):
-	  MDGeometry(basis){};
+	  MDGeometryOld(basis){};
 
-	  boost::shared_ptr<MDDimension> getDimension(unsigned int num){ return MDGeometry::getDimension(num);  }
-	  boost::shared_ptr<MDDimension> getDimension(const std::string &ID, bool doThrow=true){ return MDGeometry::getDimension(ID,doThrow);  }
+	  boost::shared_ptr<MDDimension> getDimension(unsigned int num){ return MDGeometryOld::getDimension(num);  }
+	  boost::shared_ptr<MDDimension> getDimension(const std::string &ID, bool doThrow=true){ return MDGeometryOld::getDimension(ID,doThrow);  }
 };
 
 
 class MDGeometryTest : public CxxTest::TestSuite
 {
   // helper method to construct a near-complete geometry.
-  static MDGeometry* constructGeometry()
+  static MDGeometryOld* constructGeometry()
   {
     std::set<MDBasisDimension> basisDimensions;
     basisDimensions.insert(MDBasisDimension("q1", true, 0));
@@ -63,7 +63,7 @@ class MDGeometryTest : public CxxTest::TestSuite
     MDGeometryDescription description(dimensions, dimX, dimY, dimZ, dimTemp, rotationMatrix);
 
     //Create a geometry.
-    return new MDGeometry(basis, description);
+    return new MDGeometryOld(basis, description);
 
   }
 
@@ -235,7 +235,7 @@ void testMDGeometryUnitRotations(){
      }
   }
  void testDimArrangementByGeometry(){
-     // here we check if the dimension returned in a way, as they are arranged in MDGeometry
+     // here we check if the dimension returned in a way, as they are arranged in MDGeometryOld
      std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions();
      std::vector<std::string> dimID(4);
      dimID[0]="p";
@@ -271,7 +271,7 @@ void testMDGeometryUnitRotations(){
   }
   void testReducedBasisRotations(){
 	  // build default geometrh
-	  std::auto_ptr<MDGeometry>  pGeom = std::auto_ptr<MDGeometry>(constructGeometry());
+	  std::auto_ptr<MDGeometryOld>  pGeom = std::auto_ptr<MDGeometryOld>(constructGeometry());
 	  // and default description for this geometry
 	  std::auto_ptr<MDGeometryDescription> pDescr = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*pGeom));
 	  // set the geometry description

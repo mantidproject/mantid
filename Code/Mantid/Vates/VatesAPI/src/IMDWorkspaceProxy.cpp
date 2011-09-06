@@ -122,7 +122,7 @@ void IMDWorkspaceProxy::initalize()
 {
   m_function = getMappedSignalAt();
 
-  //Create a mapping of MDGeometry member functions to dimension ids. Keyed by the id.
+  //Create a mapping of MDGeometryOld member functions to dimension ids. Keyed by the id.
   m_fmap[m_workspace->getXDimension()->getDimensionId()] = &IMDWorkspace::getXDimension;
   m_fmap[m_workspace->getYDimension()->getDimensionId()] = &IMDWorkspace::getYDimension;
   m_fmap[m_workspace->getZDimension()->getDimensionId()] = &IMDWorkspace::getZDimension;

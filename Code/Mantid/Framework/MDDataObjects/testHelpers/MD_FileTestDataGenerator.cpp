@@ -178,7 +178,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     size_t buf_size = pix_buf.size();
 
     UNUSED_ARG(dnd);
-    //const Geometry::MDGeometry &CurrentGeom = dnd.get_const_MDGeometry();
+    //const Geometry::MDGeometryOld &CurrentGeom = dnd.get_const_MDGeometry();
 
     size_t pix_size= this->pTestDataSource->sizeofMDDataPoint();
     size_t prev_cells_sizes(0);

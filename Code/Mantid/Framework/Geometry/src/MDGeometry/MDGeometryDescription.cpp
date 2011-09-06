@@ -35,7 +35,7 @@ MDGeometryDescription::getRotations()const
 
 
 /// this extracts the size and shape of the current DND object
-MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin):
+MDGeometryDescription::MDGeometryDescription(const MDGeometryOld &origin):
     nContributedPixels(0),
     Rotations(3,3,true)
 {
@@ -188,7 +188,7 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
 
 //
 void
-MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
+MDGeometryDescription::build_from_geometry(const MDGeometryOld &origin)
 {
 	this->setRotationMatrix(origin.getRotations());
 	

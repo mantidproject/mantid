@@ -47,7 +47,7 @@ namespace Mantid
 {
  namespace Geometry
  {
- class MDGeometry;
+ class MDGeometryOld;
  class IMDDimension;
  }
  namespace VATES

@@ -6,7 +6,7 @@ namespace Mantid
 namespace API
 {
 std::string 
-MDPropertyGeometry::setValue(const Geometry::MDGeometry &origin)
+MDPropertyGeometry::setValue(const Geometry::MDGeometryOld &origin)
 {
   this->build_from_geometry(origin);
   return this->Kernel::PropertyWithValue<std::string>::setValue(this->toXMLstring());

@@ -40,7 +40,7 @@ namespace Mantid{
 class MANTID_GEOMETRY_DLL MDDimensionRes :   public MDDimension
 {
    // this is to initiate and set the Dimensions from the Geometry
-    friend class MDGeometry;
+    friend class MDGeometryOld;
 public:
     virtual ~MDDimensionRes(void);
 

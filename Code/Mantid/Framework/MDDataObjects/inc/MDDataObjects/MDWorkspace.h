@@ -68,7 +68,7 @@ namespace Mantid
     boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImage> imageData);
 
     //Seam method.
-    boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(const Mantid::Geometry::MDGeometry* geometry);
+    boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(const Mantid::Geometry::MDGeometryOld* geometry);
 
     typedef std::map<size_t, Mantid::Geometry::MDPoint> MDPointMap;
     typedef std::map<size_t, Mantid::Geometry::MDCell> MDCellMap;
@@ -85,7 +85,7 @@ namespace Mantid
       virtual const std::string id() const { return "MD-Workspace"; }
 
 	  ///OBSOLETE? or should be modified as does not work properly at the moment  Total share pointers mess;
-      void init(boost::shared_ptr<IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
+      void init(boost::shared_ptr<IMD_FileFormat> spFile, Mantid::Geometry::MDGeometryOld* geometry);
 	  /** initialize from another workspace but with different MD image and (sub) set of data points; 
 	   the basis and the instrument description(s) are the same and copied from the source
 
@@ -111,7 +111,7 @@ namespace Mantid
     
 	  /// get variois components of the workspace
 	  Mantid::Geometry::MDGeometryBasis &   get_const_MDBaisis()  const{return *(m_spMDBasis);}
-      Mantid::Geometry::MDGeometry const&   get_const_MDGeometry()const{return (m_spMDImage->get_const_MDGeometry());}
+      Mantid::Geometry::MDGeometryOld const&   get_const_MDGeometry()const{return (m_spMDImage->get_const_MDGeometry());}
       Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage);}
       Mantid::MDDataObjects::MDDataPoints & get_const_MDDPoints() const{return *(m_spDataPoints);}
       IMD_FileFormat                      & get_const_FileReader()const{return *(m_spFile);}      

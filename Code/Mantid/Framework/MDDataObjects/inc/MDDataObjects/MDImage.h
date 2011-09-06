@@ -55,10 +55,10 @@ class DLLExport MDImage
 {
 public:
   /// Embedded type information
-  typedef Mantid::Geometry::MDGeometry GeometryType;
+  typedef Mantid::Geometry::MDGeometryOld GeometryType;
 
   /// default constructor
-  MDImage(Mantid::Geometry::MDGeometry* p_MDGeometry=NULL);
+  MDImage(Mantid::Geometry::MDGeometryOld* p_MDGeometry=NULL);
 
   /// the constructor which builds empty image from geometry the description (calling proper geometry initialise inside)
   MDImage(const Geometry::MDGeometryDescription &Description, const Geometry::MDGeometryBasis & pBasis);
@@ -89,9 +89,9 @@ public:
   virtual long getMemorySize()const{return static_cast<long>(MD_IMG_array.data_array_size*sizeof(MD_image_point));}
 
   /// get constant pointer (reference for GCC not to complain) to geometry for modification in algorithms. (sp may be better?)
-  Geometry::MDGeometry &  getGeometry(){ return *pMDGeometry; }
+  Geometry::MDGeometryOld &  getGeometry(){ return *pMDGeometry; }
   /// get const pointer to const geometry for everything else
-  Geometry::MDGeometry const & get_const_MDGeometry()const{ return *pMDGeometry; }
+  Geometry::MDGeometryOld const & get_const_MDGeometry()const{ return *pMDGeometry; }
 
   //******************************************************************************************************
   //******************************************************************************************************
@@ -176,7 +176,7 @@ protected:
 
 private:
 
-  std::auto_ptr<Geometry::MDGeometry> pMDGeometry;
+  std::auto_ptr<Geometry::MDGeometryOld> pMDGeometry;
 
   //
   MD_img_data    MD_IMG_array;
@@ -196,7 +196,7 @@ private:
   /// function allocates memory for the MD image and resets all necessary auxilary settings;
   void alloc_image_data();
 
-  /// function sets the shape of existing MD array according to MDGeometry;
+  /// function sets the shape of existing MD array according to MDGeometryOld;
   void set_imgArray_shape();
 
 };

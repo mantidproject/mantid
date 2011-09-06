@@ -43,7 +43,7 @@
 namespace Mantid{
        namespace MDDataObjects{
 /** the structure describes an cell of MD_image array
-     the connectivity of this point with other ppoints of this array can be established using MDGeometry
+     the connectivity of this point with other ppoints of this array can be established using MDGeometryOld
   */
 struct MD_image_point
 {

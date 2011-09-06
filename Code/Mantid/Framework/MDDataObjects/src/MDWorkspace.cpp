@@ -28,13 +28,13 @@ namespace Mantid{
      }
 
      //Seam method.
-     boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(Mantid::Geometry::MDGeometry* geometry)
+     boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(Mantid::Geometry::MDGeometryOld* geometry)
      {
        return boost::shared_ptr<Mantid::MDDataObjects::MDImage>(new MDImage(geometry));
 	 }
 //
 //
-     void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.
+     void MDWorkspace::init(boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> spFile, Mantid::Geometry::MDGeometryOld* geometry) //TODO: this provides a 'seam' for simplier move to DataHandling in future.
      {
        this->m_spFile = spFile;
        this->m_spMDImage = getImageData(geometry);
@@ -80,14 +80,14 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 	this->m_spMDBasis = boost::shared_ptr<MDGeometryBasis>(new MDGeometryBasis(SourceWorkspace->get_const_MDBaisis()));
 
 	// build old or new geometry
-	std::auto_ptr<MDGeometry> pGeometry;
+	std::auto_ptr<MDGeometryOld> pGeometry;
 	// no changes to new workspace is defined and we are initiating the new workspace as a copy of an old workspace;
 	if(!transf){
 		std::auto_ptr<MDGeometryDescription> oldShape = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(SourceWorkspace->get_const_MDGeometry()));
 		// we have basis and description, now can build geometry
-		pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,*oldShape));
+		pGeometry = std::auto_ptr<MDGeometryOld>(new MDGeometryOld(*m_spMDBasis,*oldShape));
 	}else{
-		pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,*transf));
+		pGeometry = std::auto_ptr<MDGeometryOld>(new MDGeometryOld(*m_spMDBasis,*transf));
 	}
 	//
    this->m_spMDImage = boost::shared_ptr<MDImage>(new MDImage(pGeometry.get()));
@@ -169,7 +169,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
 
     const std::vector<std::string> MDWorkspace::getDimensionIDs() const
     {
-      MDGeometry const & geometry = m_spMDImage->get_const_MDGeometry();
+      MDGeometryOld const & geometry = m_spMDImage->get_const_MDGeometry();
       std::vector<boost::shared_ptr<IMDDimension> > vecDimensions = geometry.getDimensions();
       std::vector<std::string> vecDimensionIds(vecDimensions.size());
       for(unsigned int i = 0; i < vecDimensions.size() ; i++)
@@ -217,7 +217,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment);
-      MDGeometry const & geometry = m_spMDImage->get_const_MDGeometry();
+      MDGeometryOld const & geometry = m_spMDImage->get_const_MDGeometry();
       IMDDimension_sptr xDimension = geometry.getXDimension();
 
       MDCellMap::const_iterator iter = m_mdCellMap.find(dim1Increment);
@@ -232,7 +232,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment, size_t dim2Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment);
-      MDGeometry const & geometry = m_spMDImage->get_const_MDGeometry();
+      MDGeometryOld const & geometry = m_spMDImage->get_const_MDGeometry();
       IMDDimension_sptr xDimension = geometry.getXDimension();
       IMDDimension_sptr yDimension = geometry.getYDimension();
 
@@ -261,7 +261,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment);
-      MDGeometry const & geometry = m_spMDImage->get_const_MDGeometry();
+      MDGeometryOld const & geometry = m_spMDImage->get_const_MDGeometry();
       IMDDimension_sptr xDimension = geometry.getXDimension();
       IMDDimension_sptr yDimension = geometry.getYDimension();
       IMDDimension_sptr zDimension = geometry.getZDimension();
@@ -291,7 +291,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
-      MDGeometry const & geometry = m_spMDImage->get_const_MDGeometry();
+      MDGeometryOld const & geometry = m_spMDImage->get_const_MDGeometry();
       IMDDimension_sptr xDimension = geometry.getXDimension();
       IMDDimension_sptr yDimension = geometry.getYDimension();
       IMDDimension_sptr zDimension = geometry.getZDimension();

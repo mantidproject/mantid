@@ -79,7 +79,7 @@ private:
     basisDimensions.insert(MDBasisDimension("u3", false, 3));
 
 	boost::shared_ptr<OrientedLattice>spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
-	MDGeometry* pGeometry = new MDGeometry(MDGeometryBasis(basisDimensions,spCell));
+	MDGeometryOld* pGeometry = new MDGeometryOld(MDGeometryBasis(basisDimensions,spCell));
     return std::auto_ptr<MDImage>(new MDImage(pGeometry));
   }
   // helper variable providing default pixels description

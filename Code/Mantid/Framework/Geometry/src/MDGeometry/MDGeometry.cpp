@@ -13,15 +13,15 @@ namespace Mantid{
 
 
     //----------------------------------------------------------------
-Logger& MDGeometry::g_log=Kernel::Logger::get("MDWorkspaces");
+Logger& MDGeometryOld::g_log=Kernel::Logger::get("MDWorkspaces");
 
 void
-MDGeometry::setRanges(MDGeometryDescription const &trf) 
+MDGeometryOld::setRanges(MDGeometryDescription const &trf) 
 {
   size_t n_new_dims=trf.getNumDims();
   boost::shared_ptr<MDDimension> pDim;
   if(n_new_dims>m_basis.getNumDims()){
-    g_log.error()<<" MDGeometry::setRanges transformation sets more ranges then already defined\n";
+    g_log.error()<<" MDGeometryOld::setRanges transformation sets more ranges then already defined\n";
     throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
   }
 
@@ -47,7 +47,7 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
   DblMatrix Rot = trf.getRotations();
   DblMatrix test(3,3);
   test.identityMatrix();
-  // set the directions of the reciprocal dimensions availible as proper rotations of MDGeometry basis
+  // set the directions of the reciprocal dimensions availible as proper rotations of MDGeometryOld basis
   if(!Rot.equals(test,FLT_EPSILON)){
       V3D newDirection;
       std::map<std::string,boost::shared_ptr<MDDimension> >::iterator itDim; //=this->dimensions_map.begin();
@@ -58,8 +58,8 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
           std::string dimTag = itBasis->getId();
           itDim = this->dimensions_map.find(dimTag);
           if(itDim==this->dimensions_map.end()){
-              g_log.error()<<" Can not find the dimension with ID: "<<dimTag<<" among reciprocal dimensions; MDGeometryBasis and MDGeometry are inconsistent\n";
-              throw(std::logic_error("MDGeometryBasis and MDGeometry are inconsistent"));
+              g_log.error()<<" Can not find the dimension with ID: "<<dimTag<<" among reciprocal dimensions; MDGeometryBasis and MDGeometryOld are inconsistent\n";
+              throw(std::logic_error("MDGeometryBasis and MDGeometryOld are inconsistent"));
           }
           newDirection = Rot*itBasis->getDirection();
           itDim->second->setDirection(newDirection);
@@ -71,7 +71,7 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
 
 }
 std::vector<boost::shared_ptr<IMDDimension> >
-MDGeometry::getDimensions(bool sort_by_bais)const
+MDGeometryOld::getDimensions(bool sort_by_bais)const
 {
     unsigned int i;
     std::vector<boost::shared_ptr<IMDDimension> > dims(this->getNumDims());
@@ -83,7 +83,7 @@ MDGeometry::getDimensions(bool sort_by_bais)const
         for(i=0;i<this->getNumDims();i++){
             it = dimensions_map.find(dimID[i]);
             if(it == dimensions_map.end()){
-                 g_log.error()<<" MDGeometry::getDimensions: dimension with tag: "<<dimID[i]<<" does not exist in current geometry\n";
+                 g_log.error()<<" MDGeometryOld::getDimensions: dimension with tag: "<<dimID[i]<<" does not exist in current geometry\n";
                  throw(std::logic_error("Geometry::getDimension: wrong dimension tag"));
             }
       
@@ -99,7 +99,7 @@ MDGeometry::getDimensions(bool sort_by_bais)const
 }
     //
 void 
-MDGeometry::initialize(const MDGeometryDescription &trf)
+MDGeometryOld::initialize(const MDGeometryDescription &trf)
 {
     std::vector<std::string> dimID = trf.getDimensionsTags();
     this->initialize(dimID);
@@ -110,7 +110,7 @@ MDGeometry::initialize(const MDGeometryDescription &trf)
 
     //
 void 
-MDGeometry::initialize(const std::vector<std::string> &DimensionTags)
+MDGeometryOld::initialize(const std::vector<std::string> &DimensionTags)
 {
   bool congruent_geometries(true);
 
@@ -141,7 +141,7 @@ MDGeometry::initialize(const std::vector<std::string> &DimensionTags)
 }
 //
 void 
-MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
+MDGeometryOld::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 {
   size_t n_new_dims=tags.size();
   if(n_new_dims>m_basis.getNumDims()){
@@ -238,7 +238,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 }
 //
 boost::shared_ptr<IMDDimension>
-  MDGeometry::getYDimension(void)const
+  MDGeometryOld::getYDimension(void)const
 {
   if(m_basis.getNumDims()<2){
     throw(std::invalid_argument("No Y dimension is defined in this workspace"));
@@ -247,7 +247,7 @@ boost::shared_ptr<IMDDimension>
 }
 //
 boost::shared_ptr<IMDDimension> 
-  MDGeometry::getZDimension(void)const
+  MDGeometryOld::getZDimension(void)const
 {
   if(m_basis.getNumDims()<3){
     throw(std::invalid_argument("No Z dimension is defined in this workspace"));
@@ -256,7 +256,7 @@ boost::shared_ptr<IMDDimension>
 }
 //
 boost::shared_ptr<IMDDimension>
-MDGeometry::getTDimension(void)const
+MDGeometryOld::getTDimension(void)const
 {
   if(m_basis.getNumDims()<4){
     throw(std::invalid_argument("No T dimension is defined in this workspace"));
@@ -265,7 +265,7 @@ MDGeometry::getTDimension(void)const
 }
 //
 std::vector<boost::shared_ptr<IMDDimension> >
-MDGeometry::getIntegratedDimensions(void)const
+MDGeometryOld::getIntegratedDimensions(void)const
 {
   std::vector<boost::shared_ptr<IMDDimension> > tmp;
 
@@ -283,7 +283,7 @@ MDGeometry::getIntegratedDimensions(void)const
 }
 //  protected;
 boost::shared_ptr<MDDimension>
-MDGeometry::getDimension(size_t i)
+MDGeometryOld::getDimension(size_t i)
 {
       
   if(i>=m_basis.getNumDims()){
@@ -294,14 +294,14 @@ MDGeometry::getDimension(size_t i)
 }
 //  protected;
 boost::shared_ptr<MDDimension>
-MDGeometry::getDimension(const std::string &tag,bool do_throw)
+MDGeometryOld::getDimension(const std::string &tag,bool do_throw)
 {
   boost::shared_ptr<MDDimension> pDim;
   std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
   it = dimensions_map.find(tag);
   if(it == dimensions_map.end()){
     if(do_throw){
-      g_log.error()<<" MDGeometry::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
+      g_log.error()<<" MDGeometryOld::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
       throw(std::invalid_argument("Geometry::getDimension: wrong dimension tag"));
     }else{
         return pDim;
@@ -313,7 +313,7 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)
 }
 
 boost::shared_ptr<const MDDimension>
-MDGeometry::get_constDimension(size_t i)const
+MDGeometryOld::get_constDimension(size_t i)const
 {
       
       if(i>=m_basis.getNumDims()){
@@ -323,14 +323,14 @@ MDGeometry::get_constDimension(size_t i)const
       return theDimension[i];
 }
 boost::shared_ptr<const MDDimension>
-MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
+MDGeometryOld::get_constDimension(const std::string &tag,bool do_throw)const
 {
       boost::shared_ptr<MDDimension> pDim;
       std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
       it = dimensions_map.find(tag);
       if(it == dimensions_map.end()){
         if(do_throw){
-          g_log.error()<<" MDGeometry::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
+          g_log.error()<<" MDGeometryOld::getDimension: dimension with tag: "<<tag<<" does not exist in current geometry\n";
           throw(std::invalid_argument("Geometry::getDimension: wrong dimension tag"));
         }else{
             return pDim;
@@ -341,7 +341,7 @@ MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
       return pDim;
 }
 
-MDGeometry::MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description):
+MDGeometryOld::MDGeometryOld(const MDGeometryBasis &basis, const MDGeometryDescription &description):
 n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 {
   this->theDimension.resize(basis.getNumDims());
@@ -350,7 +350,7 @@ n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
   this->initialize(description);
 }
 
-MDGeometry::MDGeometry(const MDGeometryBasis &basis) :
+MDGeometryOld::MDGeometryOld(const MDGeometryBasis &basis) :
 n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 {
   this->theDimension.resize(basis.getNumDims());
@@ -358,7 +358,7 @@ n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 }
 //
 DblMatrix 
-MDGeometry::getRotations()const
+MDGeometryOld::getRotations()const
 {
 
     DblMatrix rez(3,3);
@@ -393,7 +393,7 @@ MDGeometry::getRotations()const
     return rez;
 }
 
-std::string MDGeometry::toXMLString() const
+std::string MDGeometryOld::toXMLString() const
 {
   MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
   // Add all dimensions.
@@ -411,7 +411,7 @@ std::string MDGeometry::toXMLString() const
 }
 
 void 
-MDGeometry::init_empty_dimensions()
+MDGeometryOld::init_empty_dimensions()
  {
    std::set<MDBasisDimension> recID=this->m_basis.getReciprocalDimensions();
    std::set<MDBasisDimension> nonRecID=this->m_basis.getNonReciprocalDimensions();
@@ -445,12 +445,12 @@ MDGeometry::init_empty_dimensions()
 
 }
 
-MDGeometry::~MDGeometry(void)
+MDGeometryOld::~MDGeometryOld(void)
 {
 }
 
 std::vector<std::string> 
-MDGeometry::getBasisTags(void)const 
+MDGeometryOld::getBasisTags(void)const 
 {
   std::vector<std::string> tags(this->m_basis.getNumDims()); 
   std::set<MDBasisDimension> basisDimensions = this->m_basis.getBasisDimensions(); 
@@ -464,7 +464,7 @@ MDGeometry::getBasisTags(void)const
 }
 //
 bool 
-MDGeometry::operator == (const MDGeometry &other)const
+MDGeometryOld::operator == (const MDGeometryOld &other)const
 {
     if(this->getGeometryExtend()!=other.getGeometryExtend())return false;
 
@@ -478,7 +478,7 @@ MDGeometry::operator == (const MDGeometry &other)const
 }
 //
 bool 
-MDGeometry::operator != (const MDGeometry &other)const
+MDGeometryOld::operator != (const MDGeometryOld &other)const
 {
     if(this->getGeometryExtend()!=other.getGeometryExtend())return true;
 

@@ -130,7 +130,7 @@ virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
 
   protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
-    friend class MDGeometry;
+    friend class MDGeometryOld;
     // set all non-inter-dimension-dependent values on the dimesion from the dimension description
     virtual void initialize(const DimensionDescription &descr); //, const std::vector<double> &rotation_mat=std::vector<double>Rot(9) );
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it; Part of initialisation routine if rotations are present
@@ -153,7 +153,7 @@ virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
     void   setExpanded(double rxMin, double rxMax,unsigned int nBins);
     /// set shift in the direction of this dimension
     void  setShift(double newShift){data_shift= newShift;}
-    /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
+    /// should not be public to everybody as chanded by  MDGeometryOld while reshaping or rebinning;
     void  setStride(size_t newStride){nStride=newStride; }
  
 

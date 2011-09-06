@@ -103,7 +103,7 @@ namespace Mantid
           return in;
        }
       /// set geometry description on the basis of an existing geometry; Should return XML description of the property (set as value of this porpety) or empty string if this property is unacceptable
-      virtual std::string setValue(const Geometry::MDGeometry &origin);
+      virtual std::string setValue(const Geometry::MDGeometryOld &origin);
      /// set geometry description on the basis of an XML string; returns what usually property with value string returns
       virtual std::string setValue(const std::string &XMLstring);
       /// Virtual destructor

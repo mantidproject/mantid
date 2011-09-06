@@ -32,7 +32,7 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
   };
   
   //Helper constructional method.
-  static Mantid::Geometry::MDGeometry* constructMDGeometry()
+  static Mantid::Geometry::MDGeometryOld* constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -42,7 +42,7 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
     basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
     boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice());
-    return new MDGeometry(MDGeometryBasis(basisDimensions, spCell));
+    return new MDGeometryOld(MDGeometryBasis(basisDimensions, spCell));
   }
 
 public:
@@ -71,7 +71,7 @@ public:
 //    TS_ASSERT_THROWS( WorkspaceProperty<Workspace>("test","",3), std::out_of_range )
   }
   void testServices(){
-      boost::scoped_ptr<MDGeometry> pGeom(constructMDGeometry());
+      boost::scoped_ptr<MDGeometryOld> pGeom(constructMDGeometry());
       
       TS_ASSERT_THROWS_NOTHING(manager.declareProperty( new MDPropertyGeometry("geometryDescription","ws1",Direction::Input),"this property describes the geometry obtained from string"));
       manager.declareProperty( new MDPropertyGeometry("geom2Description",*pGeom,Direction::Input),"this property describes the geometry obtained from object");

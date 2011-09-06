@@ -90,7 +90,7 @@ public:
   MDGeometryDescription(size_t numDims=4, size_t nReciprocalDims=3);
   /// another type of default constructor if description is NULL or copy constructor if not
   MDGeometryDescription(MDGeometryDescription const* const);
-  MDGeometryDescription(const MDGeometry &origin);
+  MDGeometryDescription(const MDGeometryOld &origin);
   virtual ~MDGeometryDescription(void);
   /** sets the transformation matrix, () which would transform MDDPoints from MDDData system of coordinates
    *  into MDImage system of coordinates  As there are no info about 
@@ -110,7 +110,7 @@ public:
   size_t getImageSize()const;
 
  
-  void build_from_geometry(const MDGeometry &origin);
+  void build_from_geometry(const MDGeometryOld &origin);
 
   std::string toXMLstring(void)const{return std::string("TEST PROPERTY");}
   bool fromXMLstring(const std::string &)

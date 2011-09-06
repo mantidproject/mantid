@@ -37,7 +37,7 @@ class DynamicRebinFromXMLAlgorithmTest: public CxxTest::TestSuite
 private:
 
   //Helper method to create the geometry.
-  static Mantid::Geometry::MDGeometry* constructMDGeometry()
+  static Mantid::Geometry::MDGeometryOld* constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -47,7 +47,7 @@ private:
     basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
     boost::shared_ptr<OrientedLattice> cell(new OrientedLattice());
-    return new MDGeometry(MDGeometryBasis(basisDimensions, cell));
+    return new MDGeometryOld(MDGeometryBasis(basisDimensions, cell));
   }
 
   //Helper stock constructional method.
@@ -309,7 +309,7 @@ public:
     //Characteristic of existing behaviour rather than correct behaviour!
     TSM_ASSERT_EQUALS("The xml generated from the dimension description did not match the expectation.", geomDescription->toXMLstring(), "TEST PROPERTY"); 
 
-    //Note that the MDGeometry description orders dimensions passed to it internally.
+    //Note that the MDGeometryOld description orders dimensions passed to it internally.
     TSM_ASSERT_EQUALS("Wrong number of bins returned for first dimension", 7,  geomDescription->pDimDescription(0)->nBins);
     TSM_ASSERT_EQUALS("Wrong number of bins returned for second dimension", 5, geomDescription->pDimDescription(1)->nBins);
     TSM_ASSERT_EQUALS("Wrong number of bins returned for third dimension", 6,  geomDescription->pDimDescription(2)->nBins);

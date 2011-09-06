@@ -58,7 +58,7 @@ private:
     virtual ~MockFileFormat(void){};
   };
 
-  static std::auto_ptr<MDGeometry> getMDGeometry()
+  static std::auto_ptr<MDGeometryOld> getMDGeometry()
   {
     std::set<MDBasisDimension> basisDimensions;
     basisDimensions.insert(MDBasisDimension("q1", true, 0));
@@ -68,7 +68,7 @@ private:
 
     
     boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
-    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, spCell)));
+    return std::auto_ptr<MDGeometryOld>(new MDGeometryOld(MDGeometryBasis(basisDimensions, spCell)));
   } 
 //
   void setFakeImageValuesIncompletely(){
@@ -95,7 +95,7 @@ public:
 	void testMDImageConstructorFromEmptyGeometry(){
 		// an image initiated by an emtpy geometry is not empty and consists of one cell
 		std::auto_ptr<MDImage> pImg;
-		std::auto_ptr<MDGeometry> pGeom = getMDGeometry();
+		std::auto_ptr<MDGeometryOld> pGeom = getMDGeometry();
 		TSM_ASSERT_THROWS_NOTHING("MDImage constructor builds Image object and should not throw",pImg = std::auto_ptr<MDImage>(new MDImage(pGeom.get())));
 		// the responsibility for geometry is now with Image
 		pGeom.release();

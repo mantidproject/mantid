@@ -165,7 +165,7 @@ namespace Mantid{
       UNUSED_ARG(dim3Increment);
 
       //MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment);
-      //MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      //MDGeometryOld const * const geometry = m_spMDImage->getGeometry();
       //IMDDimension_sptr xDimension = geometry->getXDimension();
       //IMDDimension_sptr yDimension = geometry->getYDimension();
       //IMDDimension_sptr zDimension = geometry->getZDimension();
@@ -201,7 +201,7 @@ namespace Mantid{
       UNUSED_ARG(dim4Increment);
 
       //MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
-      //MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      //MDGeometryOld const * const geometry = m_spMDImage->getGeometry();
       //IMDDimension_sptr xDimension = geometry->getXDimension();
       //IMDDimension_sptr yDimension = geometry->getYDimension();
       //IMDDimension_sptr zDimension = geometry->getZDimension();

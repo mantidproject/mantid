@@ -122,7 +122,7 @@ CpRebinningNx3::~CpRebinningNx3()
 }
 //
 void 
-CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target)
+CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometryOld &Source,const Geometry::MDGeometryDescription &target)
 {
   unsigned int  i,ic,j;
   this->n_starting_cell = 0;

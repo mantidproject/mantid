@@ -89,7 +89,7 @@ protected:
   /// pointer to the source image data --> provides number of pixels which may contribute into the cut;
     MDDataObjects::MDImage        const *const pSourceImg;
     /// these are the parts of the source workspace
-    Geometry::MDGeometry  const         *const pSourceGeom;  
+    Geometry::MDGeometryOld  const         *const pSourceGeom;  
    /// pointer to the MD array of source image points
     MDDataObjects::MD_image_point const *const pSourceImgData; 
   /// pointer to the class which provides MDDataPoints (DataPixels, events);
@@ -108,7 +108,7 @@ protected:
     Geometry::MDGeometryDescription const * const pTargetDescr;
 
     /// pointer to the target geometry
-    Geometry::MDGeometry                *      pTargetGeom;  
+    Geometry::MDGeometryOld                *      pTargetGeom;  
 	/// target image
 	boost::shared_ptr<MDDataObjects::MDImage>  spTargetImage;
    /// number of the cells in the target image 

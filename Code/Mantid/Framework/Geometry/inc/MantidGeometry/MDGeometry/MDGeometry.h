@@ -47,16 +47,16 @@ namespace Mantid{
 
     class  MDGeometryDescription;
 
-    class MANTID_GEOMETRY_DLL MDGeometry
+    class MANTID_GEOMETRY_DLL MDGeometryOld
     {
     public:
       ///Embedded type information.
       //typedef MDDimension_sptr Dimension_sptr_type;
       typedef IMDDimension_sptr Dimension_sptr_type;
 
-      MDGeometry(const MDGeometryBasis &basis);
-      MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description);
-    /** function resets MDGeometryBasis and MDGeometry to new state;
+      MDGeometryOld(const MDGeometryBasis &basis);
+      MDGeometryOld(const MDGeometryBasis &basis, const MDGeometryDescription &description);
+    /** function resets MDGeometryBasis and MDGeometryOld to new state;
       *   
           *  modified substantially from initial idea
           *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
@@ -64,7 +64,7 @@ namespace Mantid{
       void initialize(const MDGeometryDescription &trf);
 
 
-      virtual ~MDGeometry(void);
+      virtual ~MDGeometryOld(void);
 
       // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
       boost::shared_ptr<IMDDimension> getXDimension(void)const{return (theDimension[0]);}
@@ -75,7 +75,7 @@ namespace Mantid{
       /** obtains pointers to all dimensions defined in the geometry
        * Initially, the dimensions are arranged in the order defined for a particular kind of experiments and this order is 
        * defined in MDBasis.
-       * The dimensions in MDGeometry are arranged in the order a user wants to see the MD image
+       * The dimensions in MDGeometryOld are arranged in the order a user wants to see the MD image
        *
        * if sort_by_basis is false, the dimensions returned in the order, as specified by MDImage
        * if sort_by_basis is true, the dimensions are returned in the order, defined by the order of dimensions in the MD basis
@@ -113,9 +113,9 @@ namespace Mantid{
 
           /// comparison operator == for a geometry; Incomplete operator -> only dimensions are compared while basises are not. They have to!!!
           /// TODO: ref #2886 Make full comparison operators for geometry
-          bool operator==(const MDGeometry &geom2)const;
+          bool operator==(const MDGeometryOld &geom2)const;
           /// comparison operator != for a geometry;
-          bool operator!=(const MDGeometry &geom2)const;
+          bool operator!=(const MDGeometryOld &geom2)const;
 
     protected: 
      /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
@@ -142,7 +142,7 @@ namespace Mantid{
       /// the map used for fast search of a dumension from its tag. 
       std::map<std::string,boost::shared_ptr<MDDimension> > dimensions_map;
       //Defaults should do: ->NO?
-      MDGeometry& operator=(const MDGeometry&);   
+      MDGeometryOld& operator=(const MDGeometryOld&);   
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
 

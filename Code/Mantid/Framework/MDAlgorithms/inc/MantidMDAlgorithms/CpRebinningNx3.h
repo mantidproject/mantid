@@ -87,7 +87,7 @@ protected:
 
 // working and auxiliary variables;
     /// build transformation matrix from the slicing data --> filled in all operation variables above
-    virtual void build_scaled_transformation_matrix(const Geometry::MDGeometry &Source,const Geometry::MDGeometryDescription &target);
+    virtual void build_scaled_transformation_matrix(const Geometry::MDGeometryOld &Source,const Geometry::MDGeometryDescription &target);
      /// first cell the rebinning process should begin
     size_t n_starting_cell;
     /// nuber of pixels read(processed) when rebinning 

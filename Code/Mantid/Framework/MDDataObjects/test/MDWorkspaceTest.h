@@ -22,13 +22,13 @@ class MDWorkspaceTest :    public CxxTest::TestSuite
 private:
 
   /// Fake geometry. Simply required so that dimensions can be created with ranges on-the-spot.
-  class FakeMDGeometry : public Mantid::Geometry::MDGeometry
+  class FakeMDGeometry : public Mantid::Geometry::MDGeometryOld
   {
   public:
-    FakeMDGeometry(const Mantid::Geometry::MDGeometryBasis& basis) : MDGeometry(basis)
+    FakeMDGeometry(const Mantid::Geometry::MDGeometryBasis& basis) : MDGeometryOld(basis)
     {
     }
-	// This function can not be exposed to anywhere withing MD workspace, except testing MDGeometry, 
+	// This function can not be exposed to anywhere withing MD workspace, except testing MDGeometryOld, 
 	// as changing number of bins invalidates MD image structures and MDDataPoints structures
     void setNumberOfBins(const int indexOfDimension, const int nBins)
     {
@@ -47,8 +47,8 @@ private:
     }
   };
 
-  //Helper constructional method sets-up a MDGeometry with a valid MDGeometryBasis instance.
-  static Mantid::Geometry::MDGeometry* constructMDGeometry()
+  //Helper constructional method sets-up a MDGeometryOld with a valid MDGeometryBasis instance.
+  static Mantid::Geometry::MDGeometryOld* constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
@@ -489,7 +489,7 @@ public:
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
-    MDGeometry* geometry = constructMDGeometry();
+    MDGeometryOld* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
 
@@ -512,7 +512,7 @@ public:
 
     MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
     EXPECT_CALL(*mockFile, getFileName()).Times(1).WillOnce(testing::Return("somelocalfile.sqw"));
-    MDGeometry* geometry = constructMDGeometry();
+    MDGeometryOld* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
 
@@ -527,7 +527,7 @@ public:
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
     MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
-    MDGeometry* geometry = constructMDGeometry();
+    MDGeometryOld* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
 
