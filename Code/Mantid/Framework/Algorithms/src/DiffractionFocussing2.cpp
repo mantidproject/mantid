@@ -204,7 +204,8 @@ void DiffractionFocussing2::exec()
     }
 
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+    Geometry::IDetector_const_sptr det = matrixInputW->getDetector(static_cast<size_t>(i));
+    if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
 
     // Get the references to Y and E output and rebin
     MantidVec& Yout=outSpec->dataY();
