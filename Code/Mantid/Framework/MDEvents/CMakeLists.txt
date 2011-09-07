@@ -44,6 +44,7 @@ set ( SRC_UNITY_IGNORE_FILES
 
 # Header files
 set ( INC_FILES
+    inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h

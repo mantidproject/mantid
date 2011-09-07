@@ -22,77 +22,77 @@ class StringsTest : public CxxTest::TestSuite
 {
 public: 
   void testSplitEmptyPath(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT(" should return 0",!split_path("",result));	
-	  TSM_ASSERT(" final path should be emtpy",result.empty());
+      std::vector<std::string> result;
+      TSM_ASSERT(" should return 0",!split_path("",result));	
+      TSM_ASSERT(" final path should be emtpy",result.empty());
   }
   void testSplitRemoveSpaces(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT_EQUALS(" should return 1",1,split_path("aaaa bbbb",result));	
-	  TSM_ASSERT_EQUALS("should replace spaces","aaaa_bbbb",result[0]);
+      std::vector<std::string> result;
+      TSM_ASSERT_EQUALS(" should return 1",1,split_path("aaaa bbbb",result));	
+      TSM_ASSERT_EQUALS("should replace spaces","aaaa_bbbb",result[0]);
   }
   void testSplitIn2(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT_EQUALS("should split in 2",2,split_path("aaaa\\bbbbb",result));	
-	  TS_ASSERT_EQUALS("aaaa",result[0]);	
+      std::vector<std::string> result;
+      TSM_ASSERT_EQUALS("should split in 2",2,split_path("aaaa\\bbbbb",result));	
+      TS_ASSERT_EQUALS("aaaa",result[0]);	
       TS_ASSERT_EQUALS("bbbbb",result[1]);	
 
   }
   void testSplitIn2IgnoreEdges(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT_EQUALS("should split in 2",2,split_path("/aaaa\\bbbbb/",result));	
-	  TS_ASSERT_EQUALS("aaaa",result[0]);	
+      std::vector<std::string> result;
+      TSM_ASSERT_EQUALS("should split in 2",2,split_path("/aaaa\\bbbbb/",result));	
+      TS_ASSERT_EQUALS("aaaa",result[0]);	
       TS_ASSERT_EQUALS("bbbbb",result[1]);	
 
   }
   void testSplitIn3IgnoreEdgesDelete1(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT_EQUALS("should split in 2",2,split_path("/aaaa\\bbbbb/./cccccc/../",result));	
-	  TS_ASSERT_EQUALS("aaaa",result[0]);	
+      std::vector<std::string> result;
+      TSM_ASSERT_EQUALS("should split in 2",2,split_path("/aaaa\\bbbbb/./cccccc/../",result));	
+      TS_ASSERT_EQUALS("aaaa",result[0]);	
       TS_ASSERT_EQUALS("bbbbb",result[1]);	
 
   }
   void testSplitIn3IgnoreEdgesDelete1b(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT_EQUALS("should split in 3",3,split_path("/aaaa\\bbbbb/./cccccc/../ee",result));	
-	  TS_ASSERT_EQUALS("aaaa",result[0]);	
+      std::vector<std::string> result;
+      TSM_ASSERT_EQUALS("should split in 3",3,split_path("/aaaa\\bbbbb/./cccccc/../ee",result));	
+      TS_ASSERT_EQUALS("aaaa",result[0]);	
       TS_ASSERT_EQUALS("bbbbb",result[1]);	
       TS_ASSERT_EQUALS("ee",result[2]);	
 
   }
   void testSplitExpandFullPath(){
-	  Poco::Path test;
-	  test = test.absolute();
-	  std::string wkPath = test.toString();
-	  std::vector<std::string> base;
-	  size_t depth= split_path(wkPath,base);
+      Poco::Path test;
+      test = test.absolute();
+      std::string wkPath = test.toString();
+      std::vector<std::string> base;
+      size_t depth= split_path(wkPath,base);
 
-	  std::vector<std::string> result;
-	  TS_ASSERT_EQUALS(depth+2,split_path("./aaaa\\bbbbb/./",result));	
-	  TS_ASSERT_EQUALS("aaaa",result[depth]);	
+      std::vector<std::string> result;
+      TS_ASSERT_EQUALS(depth+2,split_path("./aaaa\\bbbbb/./",result));	
+      TS_ASSERT_EQUALS("aaaa",result[depth]);	
       TS_ASSERT_EQUALS("bbbbb",result[depth+1]);	
 
 
   }
   void testSplitExpandMoveUpPath(){
-	  Poco::Path test;
-	  test = test.absolute();
-	  std::string wkPath = test.toString();
-	  std::vector<std::string> base;
-	  size_t depth= split_path(wkPath,base);
+      Poco::Path test;
+      test = test.absolute();
+      std::string wkPath = test.toString();
+      std::vector<std::string> base;
+      size_t depth= split_path(wkPath,base);
 
-	  std::vector<std::string> result;
-	  TS_ASSERT_EQUALS(depth+1,split_path("../aaaa\\bbbbb/./",result));	
-	  TS_ASSERT_EQUALS("aaaa",result[depth-1]);	
+      std::vector<std::string> result;
+      TS_ASSERT_EQUALS(depth+1,split_path("../aaaa\\bbbbb/./",result));	
+      TS_ASSERT_EQUALS("aaaa",result[depth-1]);	
       TS_ASSERT_EQUALS("bbbbb",result[depth]);	
 
 
   }
   void testSplitTrhowOutOfrange(){
-	  std::vector<std::string> result;
-	  TSM_ASSERT_EQUALS("should return empty path",0,split_path("/aaaa\\bbbbb/../../",result));	
-	  TSM_ASSERT_EQUALS("should return empty path",0,result.size());
-	  TSM_ASSERT_THROWS(" this path should go out of range",split_path("/aaaa\\bbbbb/../../../",result),std::invalid_argument);
+      std::vector<std::string> result;
+      TSM_ASSERT_EQUALS("should return empty path",0,split_path("/aaaa\\bbbbb/../../",result));	
+      TSM_ASSERT_EQUALS("should return empty path",0,result.size());
+      TSM_ASSERT_THROWS(" this path should go out of range",split_path("/aaaa\\bbbbb/../../../",result),std::invalid_argument);
 
   }
   void testExtractWord()

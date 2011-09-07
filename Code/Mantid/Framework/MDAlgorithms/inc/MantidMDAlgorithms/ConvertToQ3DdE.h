@@ -3,14 +3,9 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -64,39 +59,22 @@ namespace MDAlgorithms
     void init();
     void exec();
 
-    template <class T>
-    void convertEventList(int workspaceIndex);
-
-    /// The input event workspace
-    DataObjects::EventWorkspace_sptr in_ws;
-    /// The output MDEventWorkspace<3>
-    MDEvents::MDEventWorkspace3Lean::sptr ws;
-    /// Do we clear events on the input during loading?
-    bool ClearInputWorkspace;
-    /// Perform LorentzCorrection on the fly.
-    bool LorentzCorrection;
     /// Map of all the detectors in the instrument
     detid2det_map allDetectors;
-    /// Primary flight path (source to sample)
-    double l1;
-    /// Beam direction and length
-    Kernel::V3D beamline;
-    /// Path length between source and sample
-    double beamline_norm;
-    /// Beam direction (unit vector)
-    Kernel::V3D beamDir;
-    /// Sample position
-    Kernel::V3D samplePos;
     /// Progress reporter (shared)
     Kernel::ProgressBase * prog;
     /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
     Kernel::Matrix<double> mat;
 
+  /// logger -> to provide logging, for MD dataset file operations
+    static Mantid::Kernel::Logger& convert_log;
 
+   template <class T>
+   void convertEventList(int workspaceIndex);
   };
 
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace MDAlgorithms
 
 #endif  /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

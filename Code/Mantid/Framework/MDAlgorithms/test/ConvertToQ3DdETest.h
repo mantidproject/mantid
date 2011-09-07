@@ -1,5 +1,5 @@
-#ifndef MANTID_MD_CONVERT2_QXYZ_DE_TEST_H_
-#define MANTID_MD_CONVERT2_QXYZ_DE_TEST_H_
+#ifndef MANTID_MD_CONVERT2_QxyzDE_TEST_H_
+#define MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -24,15 +24,31 @@ using namespace Mantid::MDEvents;
 
 class ConvertToQ3DdETest : public CxxTest::TestSuite
 {
+ std::auto_ptr<ConvertToQ3DdE> pAlg;
 public:
-    
-  void test_Init()
-  {
-    ConvertToQ3DdE alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-  }
-  
+static ConvertToQ3DdETest *createSuite() { return new ConvertToQ3DdETest(); }
+static void destroySuite(ConvertToQ3DdETest * suite) { delete suite; }    
+
+void testInit(){
+
+    TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
+    TS_ASSERT( pAlg->isInitialized() )
+
+    TSM_ASSERT_EQUALS("should be 2 propeties here",2,(size_t)(pAlg->getProperties().size()));
+}
+
+void testExecThrow(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::CreateGroupedWorkspace2DWithRingsAndBoxes();
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+ 
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferWS"));
+
+    TSM_ASSERT_THROWS("Calculating workspace parameters should not throw", pAlg->execute(),std::invalid_argument);
+   // TSM_ASSERT("parameters calculations should complete successfully", pAlg->isExecuted() );
+}
 
 
   ///** Test various combinations of OutputDimensions parameter */
@@ -139,7 +155,9 @@ public:
   //  do_test_MINITOPAZ(TOF);
   //}
 
-
+ConvertToQ3DdETest(){
+    pAlg = std::auto_ptr<ConvertToQ3DdE>(new ConvertToQ3DdE());
+}
 
 };
 
