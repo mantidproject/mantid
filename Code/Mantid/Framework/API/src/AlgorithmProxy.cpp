@@ -197,7 +197,7 @@ namespace Mantid
     {
       if (!m_alg) return;
       std::vector<const Poco::AbstractObserver*>::reverse_iterator o = m_externalObservers.rbegin();
-      for(;o != m_externalObservers.rend();o++)
+      for(;o != m_externalObservers.rend();++o)
         m_alg->addObserver(**o);
       m_externalObservers.clear();
     }

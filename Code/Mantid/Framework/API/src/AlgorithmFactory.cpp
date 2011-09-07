@@ -157,7 +157,7 @@ namespace Mantid
 
         //for each category
         std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
-        for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; itCategories++)
+        for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; ++itCategories)
         {
           //if the entry is not in the set of hidden categories
           if (hiddenCategories.find(*itCategories) == hiddenCategories.end())
@@ -206,7 +206,7 @@ namespace Mantid
 
       //for each category of the algorithm
       std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
-      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; itCategories++)
+      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; ++itCategories)
       {
         bool isHidden = true;
         //check if the category is hidden
@@ -268,7 +268,7 @@ namespace Mantid
     //results vector
     std::vector<Algorithm_descriptor> res;
 
-    for(std::vector<std::string>::const_iterator s=sv.begin();s!=sv.end();s++)
+    for(std::vector<std::string>::const_iterator s=sv.begin();s!=sv.end();++s)
     {
       if (s->empty()) continue;
       Algorithm_descriptor desc;
@@ -290,7 +290,7 @@ namespace Mantid
       std::vector<std::string> categories = alg->categories();
       //for each category
       std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
-      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; itCategories++)
+      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; ++itCategories)
       {
         desc.category = *itCategories;
         //if the entry is not in the set of hidden categories

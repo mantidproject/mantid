@@ -432,7 +432,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
       {
         *it -= 1;
       }
-      it++;
+      ++it;
     }
   }
 
@@ -449,7 +449,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
       {
         *it -= 1;
       }
-      it++;
+      ++it;
     }
   }
 

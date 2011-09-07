@@ -182,7 +182,7 @@ namespace Mantid
         {
           cfun = dynamic_cast<CompositeFunction*>(createFunction(term.terms()[1].name()));
           if (!cfun) inputError(expr.str());
-          it++;
+          ++it;
         }
         else if (term.terms()[0].name() == "name")
         {
@@ -203,7 +203,7 @@ namespace Mantid
           {
             cfun = dynamic_cast<CompositeFunction*>(createSimple(term));
             if (!cfun) inputError(expr.str());
-            it++;
+            ++it;
           }
           else if (firstTerm->terms()[0].name() == "name")
           {
@@ -226,7 +226,7 @@ namespace Mantid
         inputError(expr.str());
       }
 
-      for(;it!=terms.end();it++)
+      for(;it!=terms.end();++it)
       {
         const Expression& term = it->bracketsRemoved();
         IFitFunction* fun = NULL;

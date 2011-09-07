@@ -111,9 +111,9 @@ void Expression::add_operators(const std::vector<std::string>& ops)
 void Expression::add_unary(const std::set<std::string>& ops)
 {
   m_operators->unary = ops;
-  for(std::set<std::string>::const_iterator it=ops.begin();it!=ops.end();it++)
+  for(std::set<std::string>::const_iterator it=ops.begin();it!=ops.end();++it)
   {
-    for(std::string::const_iterator c=it->begin();c!=it->end();c++)
+    for(std::string::const_iterator c=it->begin();c!=it->end();++c)
     {
       m_operators->symbols.insert(*c);
     }
@@ -491,7 +491,7 @@ void Expression::setFunct(const std::string& name)
   std::string::size_type i = std::string::npos;
 
   bool inQuotes = false;
-  for(std::string::const_iterator c = name.begin(); c != name.end(); c++)
+  for(std::string::const_iterator c = name.begin(); c != name.end(); ++c)
   {
     if (*c == '"')
     {

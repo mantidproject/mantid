@@ -39,12 +39,12 @@ ParamFunction& ParamFunction::operator=(const ParamFunction& f)
 /// Destructor
 ParamFunction::~ParamFunction()
 {
-  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
+  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); ++it)
   {
     delete *it;
   }
   m_ties.clear();
-  for(std::vector<IConstraint*>::iterator it = m_constraints.begin();it!= m_constraints.end();it++)
+  for(std::vector<IConstraint*>::iterator it = m_constraints.begin();it!= m_constraints.end();++it)
   {
     delete *it;
   }
@@ -432,7 +432,7 @@ ParameterTie* ParamFunction::getTie(size_t i)const
  */
 void ParamFunction::clearTies()
 {
-  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
+  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); ++it)
   {
     size_t i = getParameterIndex(**it);
     restoreActive(i);
@@ -488,7 +488,7 @@ IConstraint* ParamFunction::getConstraint(size_t i)const
 void ParamFunction::removeConstraint(const std::string& parName)
 {
   size_t iPar = parameterIndex(parName);
-  for(std::vector<IConstraint*>::iterator it=m_constraints.begin();it!=m_constraints.end();it++)
+  for(std::vector<IConstraint*>::iterator it=m_constraints.begin();it!=m_constraints.end();++it)
   {
     if (iPar == (**it).getIndex())
     {
@@ -512,12 +512,12 @@ void ParamFunction::setParametersToSatisfyConstraints()
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters()
 {
-  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
+  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); ++it)
   {
     delete *it;
   }
   m_ties.clear();
-  for(std::vector<IConstraint*>::iterator it = m_constraints.begin();it!= m_constraints.end();it++)
+  for(std::vector<IConstraint*>::iterator it = m_constraints.begin();it!= m_constraints.end();++it)
   {
     delete *it;
   }

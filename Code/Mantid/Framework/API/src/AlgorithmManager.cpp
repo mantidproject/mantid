@@ -103,7 +103,7 @@ namespace Mantid
      */
     IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
-      for( std::deque<IAlgorithm_sptr>::const_iterator a = m_managed_algs.begin();a!=m_managed_algs.end();a++)
+      for( std::deque<IAlgorithm_sptr>::const_iterator a = m_managed_algs.begin();a!=m_managed_algs.end();++a)
       {
         if ((**a).getAlgorithmID() == id) return *a;
       }

@@ -463,7 +463,7 @@ namespace Mantid
         else
         {
           //Allow multiple detectors per workspace index
-          for (std::vector<detid_t>::iterator it = detList.begin(); it != detList.end(); it++)
+          for (std::vector<detid_t>::iterator it = detList.begin(); it != detList.end(); ++it)
             (*map)[ *it ] = workspaceIndex;
         }
 
@@ -574,7 +574,7 @@ namespace Mantid
 
       // Try every detector in the list
       std::vector<detid_t>::const_iterator it;
-      for (it = it_start; it != it_end; it++)
+      for (it = it_start; it != it_end; ++it)
       {
         bool foundDet = false;
         size_t foundWI = 0;
@@ -612,7 +612,7 @@ namespace Mantid
 
       // Try every detector in the list
       std::vector<detid_t>::const_iterator it;
-      for (it = it_start; it != it_end; it++)
+      for (it = it_start; it != it_end; ++it)
       {
         bool foundDet = false;
         specid_t foundSpecNum = 0;
@@ -909,7 +909,7 @@ namespace Mantid
       double deg2rad = (M_PI/180.0);
       std::set<const IComponent*>::iterator itComp;
       std::multimap<const IComponent*, m_PositionEntry > :: const_iterator itRTP;
-      for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); itComp++)
+      for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); ++itComp)
       {
         retComp = rtp_positionEntry.equal_range(*itComp);
         bool rSet = false;

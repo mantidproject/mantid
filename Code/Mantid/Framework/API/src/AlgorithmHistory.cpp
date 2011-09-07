@@ -96,7 +96,7 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
   std::vector<Kernel::PropertyHistory>::const_iterator it;
   os << std::string(indent,' ') << "Parameters:" <<std::endl;
 
-  for (it=m_properties.begin();it!=m_properties.end();it++)
+  for (it=m_properties.begin();it!=m_properties.end();++it)
   {
     it->printSelf( os, indent+2 );
   }

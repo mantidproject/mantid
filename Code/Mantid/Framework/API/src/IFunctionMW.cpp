@@ -177,7 +177,7 @@ namespace API
       {
         const MatrixWorkspace::MaskList& mlist = mws->maskedBins(index);
         MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-        for(;it!=mlist.end();it++)
+        for(;it!=mlist.end();++it)
         {
           m_weights[it->first - xMin] = 0.;
         }
@@ -592,7 +592,7 @@ void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_arr
     {
       const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(m_workspaceIndex);
       MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-      for(;it!=mlist.end();it++)
+      for(;it!=mlist.end();++it)
       {
         m_weights[it->first - m_xMinIndex] = 0.;
       }
