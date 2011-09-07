@@ -46,4 +46,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS NexusCPPTest DESTINATION ${LIB_DIR} )
+install ( TARGETS NexusCPP DESTINATION ${LIB_DIR} )
