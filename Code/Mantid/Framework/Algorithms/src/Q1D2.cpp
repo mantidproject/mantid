@@ -130,7 +130,8 @@ void Q1D2::exec()
     }
     
     const size_t numWavbins = m_dataWS->readY(i).size()-wavStart;
-    //make just one call to new to reduce CPU overhead on each thread, access is these three arrays is via iterators
+    // make just one call to new to reduce CPU overhead on each thread, access to these 
+    // three "arrays" is via iterators
     MantidVec _noDirectUseStorage_(3*numWavbins);
     //normalization term
     MantidVec::iterator norms = _noDirectUseStorage_.begin();
@@ -144,6 +145,7 @@ void Q1D2::exec()
 
     // now read the data from the input workspace, calculate Q for each bin
     convertWavetoQ(i, doGravity, wavStart, QIn);
+
     // Pointers to the counts data and it's error
     MantidVec::const_iterator YIn = m_dataWS->readY(i).begin()+wavStart;
     MantidVec::const_iterator EIn = m_dataWS->readE(i).begin()+wavStart;
@@ -159,6 +161,7 @@ void Q1D2::exec()
       // ignore counts that are out of the output range
       if ( (loc != QOut.begin()) && (loc != QOut.end()) )
       {
+        // the actual Q-bin to add something to
         const size_t bin = loc - QOut.begin() - 1;
         PARALLEL_CRITICAL(q1d_counts_sum)
         {
@@ -179,7 +182,6 @@ void Q1D2::exec()
       const ISpectrum * inSpec = m_dataWS->getSpectrum(i);
       ISpectrum * outSpec = outputWS->getSpectrum(0);
       outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-      //updateSpecMap(i, specMap, inSpecMap, outputWS);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -253,6 +255,7 @@ void Q1D2::examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorks
 
   g_log.debug() << "All input workspaces were found to be valid\n";
 }
+
 /** Detector independent parts of the wavelength cut off calculation
 *  @param RCut the radius cut off, should be value of the property RadiusCut
 *  @param WCut this wavelength cut off, should be equal to the value WaveCut
@@ -265,6 +268,7 @@ void Q1D2::initizeCutOffs(const double RCut, const double WCut)
     m_RCut = RCut;
   }
 }
+
 /** Creates the output workspace, its size, units, etc.
 *  @param binParams the bin boundary specification using the same same syntax as param the Rebin algorithm
 *  @param specMap a spectra map that the new workspace should use and take owner ship of
@@ -291,6 +295,7 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
 
   return outputWS;
 }
+
 /** Finds the first index number of the first wavelength bin that should included based on the
 *  the calculation: W = Wcut (Rcut-R)/Rcut
 *  @param specInd spectrum that is being analysed
@@ -311,7 +316,8 @@ size_t Q1D2::waveLengthCutOff(const size_t specInd) const
   const MantidVec & Xs = m_dataWS->readX(specInd);
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
-/** Calcualtes the normalization term for each output bin
+
+/** Calculate the normalization term for each output bin
 *  @param[in] offSet the inex number of the first bin in the input wavelengths that is actually being used
 *  @param[in] specInd the spectrum to calculate
 *  @param[in] pixelAdj if not NULL this is workspace contains single bins with the adjustments, e.g. detector efficencies, for the given spectrum index
@@ -338,6 +344,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd, A
   }
   normToBinWidth(wavStart, specInd, norm, normETo2);
 }
+
 /** Calculates the normalisation for the spectrum specified by the index number that was passed
 *  as the solid anlge multiplied by the pixelAdj that was passed
 *  @param[in] pixelAdj if not NULL this is workspace contains single bins with the adjustments, e.g. detector efficencies, for the given spectrum index
@@ -366,6 +373,7 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t s
     error = 0.0;
   }
 }
+
 /** Calculates the contribution to the normalization terms from each bin in a spectrum
 *  @param[in] c pointer to the start of a contigious array of wavelength dependent normalization terms
 *  @param[in] Dc pointer to the start of a contigious array that corrosponds to wavelength dependent term, having its error
@@ -379,7 +387,7 @@ void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator b
   //(Da)^2 = ((Db*a/b)^2 + (Dc*a/c)^2) = (Db*c)^2 + (Dc*b)^2
   // the variable names relate to those above as: existing values (b=bInOut) multiplied by the additional errors (Dc=binNormEs), existing errors (Db=sqrt(e2InOut)) times new factor (c=binNorms)
 
-  //use the fact that errors array follows straight after the normalization array
+  //use the fact that error array follows straight after the normalization array
   const MantidVec::const_iterator end = e2InOut;
   for( ; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut)
   {
@@ -389,6 +397,7 @@ void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator b
     *bInOut = (*bInOut)*(*c);
   }
 }
+
 /** Add the bin widths, scaled to bin masking, to the normalization
 *  @param[in] offSet the inex number of the first bin in the input wavelengths that is actually being used
 *  @param[in] specIndex the spectrum to calculate
@@ -396,18 +405,7 @@ void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator b
 *  @param[in,out] errorSquared the running total of the square of the uncertainty in the normalization
 */
 void Q1D2::normToBinWidth(const size_t offSet, const size_t specIndex, const MantidVec::iterator theNorms, const MantidVec::iterator errorSquared) const
-{
-/*  //normally this is false but handling this would mean more combinations of distribution/raw counts workspaces could be accepted
-  if (m_convToDistr)
-  {
-    for(int i = 0; i < theNorms.size(); ++i)
-    {
-      const double width = ???;
-      *(theNorms+i) *= width;
-      *(errorSquared+i) *= width*width;
-    }
-  }*/
-  
+{  
   // if any bins are masked it is normally a small proportion
   if ( m_dataWS->hasMaskedBins(specIndex) )
   {
@@ -510,42 +508,6 @@ void Q1D2::getQBinPlus1(const MantidVec & OutQs, const double QToFind, MantidVec
 
   // we are lost, normally the order of the Q values means we only get here on the first iteration. It's slow
   loc = std::lower_bound(OutQs.begin(), OutQs.end(), QToFind);
-}
-/** Map all the detectors onto the spectrum of the output
-*  @param[in] specIndex the spectrum to add
-*  @param[out] specMap the map in the output workspace to write to
-*  @param[in] inSpecMap spectrum data
-*  @param[out] outputWS the workspace with the spectra axis
-*/
-void Q1D2::updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const
-{
-  Axis* const spectraAxis = m_dataWS->getAxis(1);
-  if (spectraAxis->isSpectra())
-  {
-    specid_t newSpectrumNo = outputWS->getAxis(1)->spectraNo(0); // = spectraAxis->spectraNo(specIndex);
-    specMap->addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(specIndex)));
-  }
-}
-/** Divides the number of counts in each output Q bin by the wrighting ("number that would expected to arrive")
-*  The errors are propogated using the uncorrolated error estimate for multiplication/division
-*  @param[in] normSum the weighting for each bin
-*  @param[in] normError2 square of the error on the normalization
-*  @param[in, out] counts counts in each bin
-*  @param[in, out] errors input the _square_ of the error on each bin, output the total error (unsquared)
-*/
-void Q1D2::normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & counts, MantidVec & errors) const
-{
-  for (size_t k = 0; k < counts.size(); ++k)
-  {
-    // the normalisation is a = b/c where b = counts c =normalistion term
-    const double c = normSum[k];
-    const double a = counts[k] /= c;
-    // when a = b/c, the formula for Da, the error on a, in terms of Db, etc. is (Da/a)^2 = (Db/b)^2 + (Dc/c)^2
-    //(Da)^2 = ((Db/b)^2 + (Dc/c)^2)*(b^2/c^2) = ((Db/c)^2 + (b*Dc/c^2)^2) = (Db^2 + (b*Dc/c)^2)/c^2 = (Db^2 + (Dc*a)^2)/c^2
-    //this will work as long as c>0, but then the above formula above can't deal with 0 either
-    const double aOverc = a/c;
-    errors[k] = std::sqrt(errors[k]/(c*c) + normError2[k]*aOverc*aOverc);
-  }
 }
 
 } // namespace Algorithms

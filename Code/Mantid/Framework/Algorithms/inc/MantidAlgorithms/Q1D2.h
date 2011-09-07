@@ -77,7 +77,6 @@ private:
   void normToBinWidth(const size_t offSet, const size_t specIndex, const MantidVec::iterator theNorms, const MantidVec::iterator errorSquared) const;
   void convertWavetoQ(const size_t specInd, const bool doGravity, const size_t offset, MantidVec::iterator Qs) const;
   void getQBinPlus1(const MantidVec & OutQs, const double QToFind, MantidVec::const_iterator & loc) const;
-  void updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const;
   void normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & YOut, MantidVec & errors) const;
 };
 
