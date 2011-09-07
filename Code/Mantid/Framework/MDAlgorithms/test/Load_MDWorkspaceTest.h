@@ -33,16 +33,16 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
         TSM_ASSERT_THROWS("This file should not exist",loader.setPropertyValue("inFilename","file_not_exist.sqw"),std::invalid_argument);
         // and so this, but file has to be there
         TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","test_horace_reader.sqw"));
-		// does not load actual file and use test data instead
+        // does not load actual file and use test data instead
         Geometry::MDGeometryDescription DefaultGeom(4,3);
         DefaultGeom.nContributedPixels=100000000; // number selected to prohibit the loading of the test dataset in memory
         DefaultGeom.pDimDescription(0)->nBins=10; // number of bins selected to reduce test excecution time;
         DefaultGeom.pDimDescription(1)->nBins=10;
         DefaultGeom.pDimDescription(2)->nBins=10;
         DefaultGeom.pDimDescription(3)->nBins=10;
-		loader.set_test_mode(DefaultGeom);
+        loader.set_test_mode(DefaultGeom);
       //  TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","fe_demo.sqw"));
-		 TSM_ASSERT_THROWS_NOTHING("Requesting loading all pixels in memory should not throw",loader.setPropertyValue("LoadPixels","1"));
+         TSM_ASSERT_THROWS_NOTHING("Requesting loading all pixels in memory should not throw",loader.setPropertyValue("LoadPixels","1"));
      }
      void testMDWSExec(){
          // does it add it to analysis data service? -- no

@@ -5,7 +5,7 @@ set ( SRC_FILES
 	src/BoxImplicitFunctionParser.cpp
 	src/BoxInterpreter.cpp
 	src/CenterpieceRebinning.cpp
-	src/CobaltSpinWaveDSHO.cpp
+	src/CobaltSpinWaveDSHO.cpp	
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/TobyFitSimulate.cpp
 	src/Vector3DParameterParser.cpp
 	src/VectorMathematics.cpp
+	src/ConvertToQ3DdE.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -48,6 +49,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/CpRebinningNx3.h
 	inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+	inc/MantidMDAlgorithms/ConvertToQ3DdE.h 
 	inc/MantidMDAlgorithms/DepthParameter.h
 	inc/MantidMDAlgorithms/DynamicCPRRebinning.h
 	inc/MantidMDAlgorithms/DynamicRebinFromXML.h
@@ -102,6 +104,7 @@ set ( TEST_FILES
 	test/TobyFitSimulateTest.h
 	test/VectorMathematicsTest.h
 	test/WidthParameterTest.h
+	test/ConvertToQ3DdETest.h
 )
 
 set ( GMOCK_TEST_FILES
@@ -141,7 +144,7 @@ set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+include_directories ( inc ../MDDataObjects/inc ../MDEvents/inc)
 
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 

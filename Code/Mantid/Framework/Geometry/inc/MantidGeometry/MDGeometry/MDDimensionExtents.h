@@ -18,6 +18,11 @@ namespace Geometry
 
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
 
+// the statement to exclude using macro min(a,b) in visual C++ uder win
+#ifdef min
+#undef min
+#endif
+
   //===============================================================================================
   /** Simple class that holds the extents (min/max)
    * of a given dimension in a MD workspace or MDBox
@@ -25,7 +30,6 @@ namespace Geometry
   class DLLExport MDDimensionExtents
   {
   public:
-
     /** Empty constructor - reset everything.
      *  */
     MDDimensionExtents() :

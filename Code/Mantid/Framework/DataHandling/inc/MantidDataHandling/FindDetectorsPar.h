@@ -18,7 +18,7 @@
 
     Output Properties:
     <UL>Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:</UL>
-    <UL><LI> azimuthal             -   A columnt  containing the detectors azimutal angles</LI> </UL>
+    <UL><LI> azimuthal             - A columnt  containing the detectors azimutal angles</LI> </UL>
     <UL><LI> polar                 - A column  containing the detectors polar angles</LI>    </UL>
     <UL><LI> secondary_flightpath  - A column containing the distance from detectors to the sample center</LI></UL>
     <UL><LI> azimuthal_width       - A column  containing the detectors azimuthal angular width</LI></UL>
