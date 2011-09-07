@@ -102,7 +102,7 @@ namespace Mantid
           
         }
       
-        for (;rhsItr!=rhsWSGrp.end();rhsItr++)
+        for (;rhsItr!=rhsWSGrp.end();++rhsItr)
         {	++nPeriod;
         setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
         bStatus=alg->execute();
@@ -124,7 +124,7 @@ namespace Mantid
           }
          
         }
-        for (;lhsItr!=lhsWSGrp.end();lhsItr++)
+        for (;lhsItr!=lhsWSGrp.end();++lhsItr)
         {	++nPeriod;
         setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
         bStatus=alg->execute();
@@ -163,7 +163,7 @@ namespace Mantid
       std::string currentPropName("");
 
       std::vector<Mantid::Kernel::Property*>::const_iterator propItr=props.begin();
-      for (propItr=props.begin();propItr!=props.end();propItr++)
+      for (propItr=props.begin();propItr!=props.end();++propItr)
       {
         if(isWorkspaceProperty(*propItr))
         {
@@ -379,7 +379,7 @@ bool PairedGroupAlgorithm::isGroupWorkspacesofSimilarNames(const std::string& in
       std::vector<Mantid::Kernel::Property*>::const_iterator itr;
       std::string prevPropName("");
       std::string currentPropName("");
-      for (itr=prop.begin();itr!=prop.end();itr++)
+      for (itr=prop.begin();itr!=prop.end();++itr)
       {	
         if(isWorkspaceProperty(*itr))
         {

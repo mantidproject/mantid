@@ -26,7 +26,7 @@ namespace API
   /// Destructor
   ParameterTie::~ParameterTie()
   {
-    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();++it)
     {
       delete it->first;
     }
@@ -54,7 +54,7 @@ namespace API
    */
   void ParameterTie::set(const std::string& expr)
   {
-    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();++it)
     {
       delete it->first;
     }
@@ -90,7 +90,7 @@ namespace API
 
     std::map<std::string,int> varNames;
     int i = 0;
-    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();++it)
     {
       varNames[m_function1->parameterName(m_function1->getParameterIndex(it->second))] = i;
       i++;
@@ -110,7 +110,7 @@ namespace API
     double res = 0;
     try
     {
-      for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+      for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();++it)
       {
         *(it->first) = it->second.getParameter();
       }
@@ -158,7 +158,7 @@ namespace API
 
         int iTemp = boost::lexical_cast<int>(res[1]);
         int i = 0;
-        for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+        for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();++it)
         {
           if (i == iTemp)
           {
@@ -186,7 +186,7 @@ namespace API
    */
   bool ParameterTie::findParametersOf(const IFitFunction* fun)const
   {
-    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();++it)
     {
       if (it->second.getFunction() == fun)
       {
