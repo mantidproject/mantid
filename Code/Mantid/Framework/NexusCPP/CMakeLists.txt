@@ -20,13 +20,13 @@ set ( TEST_FILES
 find_package ( Nexus REQUIRED )
 include_directories ( ${NEXUS_INCLUDE_DIR} src)
 
-add_definitions ( -DIN_NEXUSCPP_LIBRARY )
+add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 
 # Add the target for this directory
 add_library ( NexusCPP ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( NexusCPP PROPERTIES OUTPUT_NAME MantidNexusCPP 
-                                         COMPILE_DEFINITIONS IN_MANTID_NEXUS )
+                                         COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP )
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusCPP PROPERTY FOLDER "MantidFramework" )
 
