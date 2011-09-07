@@ -12,6 +12,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
+//#ifdef MAKE_VATES
+//#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
+//#endif
 
 #include <QStringList>
 
@@ -19,6 +22,8 @@ using namespace MantidQt::API;
 
 //Initialize the logger
 Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
+
+Mantid::Kernel::AbstractInstantiator<QWidget> *InterfaceManagerImpl::m_vatesGuiFactory = NULL;
 
 //----------------------------------
 // Public member functions
@@ -149,3 +154,18 @@ InterfaceManagerImpl::~InterfaceManagerImpl()
 {
 }
 
+void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<QWidget> *factory)
+{
+  this->m_vatesGuiFactory = factory;
+}
+
+QWidget *InterfaceManagerImpl::createVatesSimpleGui() const
+{
+  QWidget *vsg = NULL;
+  vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
+  if (!vsg)
+  {
+    g_log.error() << "Error creating Vates Simple GUI" << std::endl;
+  }
+  return vsg;
+}

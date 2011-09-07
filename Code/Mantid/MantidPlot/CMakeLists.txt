@@ -685,6 +685,9 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 # Internal icon links
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
 
+# Need the Vates config header
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidQt/API/inc )
+
 ###########################################################################
 # Add the dependencies
 ###########################################################################

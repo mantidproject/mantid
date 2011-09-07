@@ -69,6 +69,7 @@ VatesSimpleGuiQtWidgets
 pqApplicationComponents
 pqComponents
 ${QT_LIBRARIES}
+MantidQtAPI
 )
 
 install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${LIB_DIR} )

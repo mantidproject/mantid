@@ -6,6 +6,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidKernel/DynamicFactory.h"
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqLoadDataReaction.h>
@@ -30,6 +33,7 @@ namespace Vates
 {
 namespace SimpleGui
 {
+REGISTER_VATESGUI(MdViewerWidget)
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
 {

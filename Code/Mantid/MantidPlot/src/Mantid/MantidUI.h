@@ -328,6 +328,9 @@ public slots:
     void importWorkspace();
     void importBoxDataTable();
 
+    // Invoke the Vates Simple User Interface
+    void showVatesSimpleInterface();
+
     // #539: For adding Workspace History display to MantidPlot
     void showAlgorithmHistory();
 

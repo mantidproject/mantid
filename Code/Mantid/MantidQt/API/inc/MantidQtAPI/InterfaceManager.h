@@ -6,6 +6,9 @@
 //----------------------------------
 #include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Instantiator.h"
+
+//#include "VatesConfig.h"
 
 #include <QString>
 
@@ -78,11 +81,14 @@ public:
   
   /// Create a new instance of the correct type of AlgorithmDialog
   AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
-				bool forScript = false, const QString & preset_values = QString(), 
-				const QString & optional_msg = QString(), const QString & enabled_names = QString());
+        bool forScript = false, const QString & preset_values = QString(),
+        const QString & optional_msg = QString(), const QString & enabled_names = QString());
 				
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
+
+  QWidget *createVatesSimpleGui() const;
+  void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<QWidget> *factory);
 
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
@@ -101,6 +107,8 @@ private:
 
   //A static reference to the Logger
   static Mantid::Kernel::Logger & g_log;
+
+  static Mantid::Kernel::AbstractInstantiator<QWidget> *m_vatesGuiFactory;
 };
 
 #ifdef _WIN32
@@ -113,4 +121,14 @@ typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManager
 }
 }
 
+/**
+ * Used to register Vates GUI
+ */
+#define REGISTER_VATESGUI(TYPE) \
+  namespace { \
+  Mantid::Kernel::RegistrationHelper \
+  register_vatesgui \
+  (((MantidQt::API::InterfaceManager::Instance().registerVatesGuiFactory \
+  (new Mantid::Kernel::Instantiator<TYPE, QWidget>())), 0)); \
+}
 #endif //MANTIDQT_API_DIALOGMANAGER

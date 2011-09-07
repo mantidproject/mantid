@@ -9,6 +9,7 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
+#include <MantidQtAPI/VatesConfig.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
@@ -233,6 +234,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_showBoxData = new QAction(tr("Show Box Data Table"),this);
   connect(m_showBoxData,SIGNAL(activated()),m_mantidUI,SLOT(importBoxDataTable()));
+
+  m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
+  connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI, SLOT(showVatesSimpleInterface()));
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
@@ -772,6 +776,9 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   (void) WS;
 
   menu->addAction(m_showBoxData); // Show MD Box data
+#ifdef MAKE_VATES
+  menu->addAction(m_showVatesGui); // Show the Vates simple interface
+#endif
   menu->addAction(m_showHist);  // Algorithm history
 }
 

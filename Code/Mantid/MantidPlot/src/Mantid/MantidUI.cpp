@@ -474,6 +474,33 @@ void MantidUI::importBoxDataTable()
   }
 }
 
+void MantidUI::showVatesSimpleInterface()
+{
+  std::cout << "MantidUI::showVatesSimpleInterface()" << std::endl;
+  QString wsName = getSelectedWorkspaceName();
+  try
+  {
+    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+    if (!ws) return;
+    std::cout << "Vates Simple Interface coming soon." << std::endl;
+    /*
+    QWidget *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
+    if (vsui)
+    {
+      vsui->show();
+    }
+    else
+    {
+      return;
+    }
+    */
+  }
+  catch (...)
+  {
+  }
+}
+
 /** #539: For adding Workspace History display to MantidPlot
 	Show Algorithm History Details in a window .
  */
