@@ -63,6 +63,9 @@ namespace Mantid
       /// Private assignment operator. 
       Sample& operator=(const Sample& rhs);
 
+      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void loadNexus(::NeXus::File * file, const std::string & group);
+
       /// index operator for accessing multiple samples
       Sample& operator[] (const int index);
       /// the number of samples

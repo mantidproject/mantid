@@ -132,7 +132,7 @@ namespace Mantid
      */
     void Material::saveNexus(::NeXus::File * file, const std::string & group) const
     {
-      file->makeGroup(group, "NXsample", 1);
+      file->makeGroup(group, "NXdata", 1);
       file->putAttr("version", 1);
       file->putAttr("name", m_name);
       file->writeData("element_Z", m_element.z_number);
@@ -149,7 +149,7 @@ namespace Mantid
      */
     void Material::loadNexus(::NeXus::File * file, const std::string & group)
     {
-      file->openGroup(group, "NXsample");
+      file->openGroup(group, "NXdata");
       file->getAttr("name", m_name);
 
       // Find the element

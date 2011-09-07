@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -304,6 +305,36 @@ namespace Mantid
     {
       m_samples.push_back(childSample);
     }
+
+
+    /** Save the object to an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to create
+     */
+    void Sample::saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXsample", 1);
+      file->putAttr("name", m_name);
+      file->putAttr("version", 1);
+      m_material.saveNexus(file, "material");
+      // Write out the other (indexes 1+) samples
+      file->writeData("num_other_samples", m_samples.size() );
+      for (size_t i=0; i<m_samples.size(); i++)
+        m_samples[i]->saveNexus(file, "sample" + Mantid::Kernel::Strings::toString(i+1));
+      //TODO: Sample, environment
+      file->closeGroup();
+    }
+
+    /** Load the object from an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to open
+     */
+    void Sample::loadNexus(::NeXus::File * file, const std::string & group)
+    {
+      file->openGroup(group, "NXsample");
+      file->closeGroup();
+    }
+
 
   }
 }
