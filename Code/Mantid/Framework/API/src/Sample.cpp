@@ -313,16 +313,16 @@ namespace Mantid
      */
     void Sample::saveNexus(::NeXus::File * file, const std::string & group) const
     {
-      file->makeGroup(group, "NXsample", 1);
-      file->putAttr("name", m_name);
-      file->putAttr("version", 1);
-      m_material.saveNexus(file, "material");
-      // Write out the other (indexes 1+) samples
-      file->writeData("num_other_samples", m_samples.size() );
-      for (size_t i=0; i<m_samples.size(); i++)
-        m_samples[i]->saveNexus(file, "sample" + Mantid::Kernel::Strings::toString(i+1));
-      //TODO: Sample, environment
-      file->closeGroup();
+//      file->makeGroup(group, "NXsample", 1);
+//      file->putAttr("name", m_name);
+//      file->putAttr("version", 1);
+//      m_material.saveNexus(file, "material");
+//      // Write out the other (indexes 1+) samples
+//      file->writeData("num_other_samples", m_samples.size() );
+//      for (size_t i=0; i<m_samples.size(); i++)
+//        m_samples[i]->saveNexus(file, "sample" + Mantid::Kernel::Strings::toString(i+1));
+//      //TODO: Sample, environment
+//      file->closeGroup();
     }
 
     /** Load the object from an open NeXus file.
