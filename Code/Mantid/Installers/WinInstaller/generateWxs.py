@@ -308,7 +308,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
                 fn = fn.replace('+','_')
                 fn = fn.replace('.','_')
                 fileId = 'd'+fn+'_file'+str(ifil)
-                fileName = 'file'+str(ifil)
+                fileName = 'f'+str(ifil)
                 fileLongName = fil
                 addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
     return lst,comp
