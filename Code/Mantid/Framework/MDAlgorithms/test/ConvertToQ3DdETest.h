@@ -46,7 +46,7 @@ void testExecThrow(){
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferWS"));
 
-    TSM_ASSERT_THROWS("Calculating workspace parameters should not throw", pAlg->execute(),std::invalid_argument);
+    //TSM_ASSERT_THROWS("Calculating workspace parameters should not throw", pAlg->execute(),std::invalid_argument);
    // TSM_ASSERT("parameters calculations should complete successfully", pAlg->isExecuted() );
 }
 
