@@ -1,8 +1,10 @@
 set ( SRC_FILES
+		src/ReductionTableHandler.cpp
         src/EQSANSQ2D.cpp
         src/EQSANSLoad.cpp
         src/SANSSolidAngleCorrection.cpp
         src/EQSANSSensitivityCorrection.cpp
+        src/EQSANSDarkCurrentSubtraction.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -12,8 +14,10 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
         inc/MantidWorkflowAlgorithms/EQSANSLoad.h
         inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
+        inc/MantidWorkflowAlgorithms/ReductionTableHandler.h
         inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h
+        inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
 )
               
 set ( TEST_FILES

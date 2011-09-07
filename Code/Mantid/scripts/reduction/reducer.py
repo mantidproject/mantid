@@ -383,6 +383,7 @@ class Reducer(object):
     output_workspaces = []
         
     def __init__(self):
+        self.UID = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
         self._data_files = {}
         self._reduction_steps = []
         
