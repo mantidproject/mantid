@@ -10,6 +10,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <Poco/SAX/Attributes.h>
 
 namespace Mantid
 {
@@ -198,6 +199,8 @@ namespace Mantid
 
       /** Returns the bare pointer to the IComponent parent */
       const IComponent* getBareParent() const { return m_parent; }
+
+      virtual void readXMLAttributes(const Poco::XML::Attributes& attr);
 
     protected:
       /// Parent component in the tree

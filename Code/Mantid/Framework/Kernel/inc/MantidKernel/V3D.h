@@ -118,6 +118,8 @@ namespace Mantid
       void readPrinted(std::istream&);
       void read(std::istream&);
       void write(std::ostream&) const;
+      std::string toString() const;
+      void fromString(const std::string & str);
 
       double volume() const { return fabs(x*y*z); }      ///< Calculate the volume of a cube X*Y*Z
 

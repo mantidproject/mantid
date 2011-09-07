@@ -140,6 +140,9 @@ namespace Mantid
 
       void printSelf(std::ostream&) const;
       void readPrinted(std::istream&);
+      std::string toString() const;
+      void fromString(const std::string & str);
+
     private:
       /// Internal value
       double w;

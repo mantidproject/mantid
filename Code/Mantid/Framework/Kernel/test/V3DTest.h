@@ -367,6 +367,15 @@ public:
     TS_ASSERT(a == V3D(-1.0, -2.0, -4.0) );
   }
 
+  void test_toString()
+  {
+    V3D a(1,2,3);
+    TS_ASSERT_EQUALS( a.toString(), "1 2 3");
+    V3D b;
+    b.fromString("4 5 6");
+    TS_ASSERT_EQUALS( b, V3D(4,5,6) );
+  }
+
 };
 
 #endif

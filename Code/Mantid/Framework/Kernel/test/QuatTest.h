@@ -510,6 +510,15 @@ public:
     TS_ASSERT(rotQ==p);
   }
 
+  void test_toString()
+  {
+    Quat a(1,2,3,4);
+    TS_ASSERT_EQUALS( a.toString(), "[1,2,3,4]");
+    Quat b;
+    b.fromString("[4,5,6,7]");
+    TS_ASSERT_EQUALS( b, Quat(4,5,6,7) );
+  }
+
 };
 
 #endif

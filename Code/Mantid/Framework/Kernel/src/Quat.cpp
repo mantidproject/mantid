@@ -730,6 +730,24 @@ std::istream& operator>>(std::istream& ins,Quat& q)
     return ins;
 }
 
+
+/** @return the quat as a string "[w,a,b,c]" */
+std::string Quat::toString() const
+{
+  std::ostringstream mess;
+  this->printSelf(mess);
+  return mess.str();
+}
+
+/** Sets the Quat using a string
+ * @param str :: the Quat as a string "[w,a,b,c]" */
+void Quat::fromString(const std::string & str)
+{
+  std::istringstream mess(str);
+  this->readPrinted(mess);
+}
+
+
 void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, double& ymax, double& zmax) const
 {
 	// Defensive

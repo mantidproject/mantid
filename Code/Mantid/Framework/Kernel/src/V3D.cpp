@@ -7,6 +7,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
+#include <sstream>
 
 namespace Mantid
 {
@@ -668,10 +669,27 @@ V3D::write(std::ostream& OX) const
   return;
 }
 
-  /**
-    Prints a text representation of itself in format "[x,y,z]"
-    @param os :: the Stream to output to
-  */
+/** @return the vector as a string "X Y Z" */
+std::string V3D::toString() const
+{
+  std::ostringstream mess;
+  this->write(mess);
+  return mess.str();
+}
+
+/** Sets the vector using a string
+ * @param str :: the vector as a string "X Y Z" */
+void V3D::fromString(const std::string & str)
+{
+  std::istringstream mess(str);
+  this->read(mess);
+}
+
+
+/**
+  Prints a text representation of itself in format "[x,y,z]"
+  @param os :: the Stream to output to
+*/
 void
 V3D::printSelf(std::ostream& os) const
 {

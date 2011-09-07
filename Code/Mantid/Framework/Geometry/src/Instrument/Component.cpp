@@ -75,6 +75,15 @@ namespace Geometry
   }
 
 
+  //------------------------------------------------------------------------------------------------
+  /** Reads the XML attributes from Poco XML parser
+   * @param attr :: XML attributes  */
+  void Component::readXMLAttributes(const Poco::XML::Attributes& attr)
+  {
+    std::string pos = attr.getValue("", "pos");
+    std::string rot = attr.getValue("", "rot");
+  }
+
 
   //------------------------------------------------------------------------------------------------
   /** Return true if the Component is, in fact, parametrized
