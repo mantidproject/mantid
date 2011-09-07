@@ -95,7 +95,7 @@ void RemoveLowResTOF::exec()
     Geometry::IObjComponent_const_sptr sample = m_instrument->getSample();
     m_L1 = m_instrument->getSource()->getDistance(*sample);
   }
-  catch (NotFoundError e)
+  catch (NotFoundError & e)
   {
     throw InstrumentDefinitionError("Unable to calculate source-sample distance",
         m_inputWS->getTitle());
