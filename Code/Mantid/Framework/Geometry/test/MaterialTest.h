@@ -49,7 +49,7 @@ public:
   void test_Nexus()
   {
     Material testA("testMaterial", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072, 273, 1.234);
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("MaterialTest.nxs");
 
     TS_ASSERT_THROWS_NOTHING( testA.saveNexus(th.file, "material"); );
