@@ -6,9 +6,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MockObjects.h"
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 using namespace testing;
 using namespace Mantid::VATES;
@@ -20,6 +20,16 @@ class MDEWLoadingPresenterTest : public CxxTest::TestSuite
 {
 
 private: 
+
+  class MockMDLoadingView : public Mantid::VATES::MDLoadingView
+  {
+  public:
+    MOCK_CONST_METHOD0(getTime, double());
+    MOCK_CONST_METHOD0(getRecursionDepth, size_t());
+    MOCK_CONST_METHOD0(getLoadInMemory, bool());
+    MOCK_METHOD1(updateAlgorithmProgress, void(double));
+    ~MockMDLoadingView(){}
+  };
 
   /*
   Helper class allows the behaviour of the abstract base type to be tested. Derives from target abstract class providing 
