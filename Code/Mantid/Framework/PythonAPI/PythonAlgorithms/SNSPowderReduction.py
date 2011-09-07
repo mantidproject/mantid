@@ -501,18 +501,6 @@ class SNSPowderReduction(PythonAlgorithm):
                         ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
                         FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
                                   Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    else:
-                        vnoiseRun = None
-
-                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
-                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
-                              Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
-                                                         AttenuationXSection=2.8, ScatteringXSection=5.1,
-                                                         SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
-                    if vnoiseRun is not None:
                         try:
                             vanDuration = vanRun.getRun().get('duration')
                             vanDuration = vanDuration.value
@@ -527,6 +515,23 @@ class SNSPowderReduction(PythonAlgorithm):
                         vanRun -= vnoiseRun
                         NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                         workspacelist.append(str(vnoiseRun))
+                    else:
+                        vnoiseRun = None
+
+                    vbackRun = self.getProperty("VanadiumBackgroundNumber")
+                    if vbackRun > 0:
+                        vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
+                        vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False)
+                        vanRun -= vbackRun
+
+                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
+                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
+                              Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                    MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
+                                                         AttenuationXSection=2.8, ScatteringXSection=5.1,
+                                                         SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                 else:
                     vanRun = temp
