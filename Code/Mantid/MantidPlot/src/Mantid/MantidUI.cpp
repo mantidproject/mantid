@@ -1557,15 +1557,13 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   }
 
   //Need a new window
-  InstrumentWindow *insWin = new InstrumentWindow(QString("Instrument"),appWindow());
-  insWin->setName(QString("InstrumentWindow:") + wsName);
-  insWin->setWindowTitle(QString("Instrument - ") + wsName);
+  const QString windowName(QString("InstrumentWindow:") + wsName);
+  InstrumentWindow *insWin = new InstrumentWindow(wsName,QString("Instrument"),appWindow(),windowName);
   insWin->selectTab(tab);
 
   appWindow()->d_workspace->addSubWindow(insWin);
   appWindow()->addListViewItem(insWin);
 
-  insWin->setWorkspaceName(wsName.toStdString());
   connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
   connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
   connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));

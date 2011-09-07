@@ -1,7 +1,6 @@
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
-//#include "Instrument3DWidget.h"
 #include "MantidGLWidget.h"
 #include "InstrumentTreeWidget.h"
 #include "../../MdiSubWindow.h"
@@ -16,17 +15,6 @@
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
-#include "MantidAPI/MatrixWorkspace.h"
-
-namespace Mantid
-{
-
-namespace API
-{
-class MatrixWorkspace;
-}
-
-}
 
 class InstrumentActor;
 class OneCurvePlot;
@@ -86,10 +74,9 @@ class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObs
 public:
   enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, RENDERMODE_SIZE };
 
-  InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
+  explicit InstrumentWindow(const QString& wsName, const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
   ~InstrumentWindow();
-  void setWorkspaceName(std::string wsName);
-  QString getWorkspaceName()const{return QString::fromStdString(mWorkspaceName);}
+  QString getWorkspaceName() const { return m_workspaceName; }
   void updateWindow();
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
@@ -107,7 +94,6 @@ public:
   InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
-//  const MantidColorMap & getColorMap() const{return m_instrumentActor->getColorMap();}
 
 protected:
   /// Called just before a show event
@@ -143,7 +129,6 @@ public slots:
   void changeColorMapRange(double minValue, double maxValue);
   void setIntegrationRange(double,double);
 
-  //void componentSelected(const QItemSelection&, const QItemSelection&);
   void setViewDirection(const QString&);
   void pickBackgroundColor();
   void saveImage();
@@ -163,8 +148,6 @@ private slots:
   void unblock();
 
 private:
-
-  //QWidget * createPickTab(QTabWidget* ControlsTab);
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
 
   void loadSettings();
@@ -181,7 +164,8 @@ private:
   QAction *m_createIncludeGroupingFileAction; ///< Create grouping xml file which includes selected detectors
   QAction *m_createExcludeGroupingFileAction; ///< Create grouping xml file which excludes selected detectors
 
-  Mantid::API::MatrixWorkspace_sptr m_workspace;
+  /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
+  const QString m_workspaceName;
   MantidGLWidget* m_InstrumentDisplay;
   InstrumentActor* m_instrumentActor;
   SurfaceType m_surfaceType;       ///< 3D view or unwrapped
@@ -192,7 +176,6 @@ private:
   std::vector<int> mDetectorIDSelectedList;
   InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
 
-  std::string mWorkspaceName; ///< The name of workpace that this window is associated with
   QString mDefaultColorMap; ///< The full path of the default color map
   QString m_savedialog_dir; /// The last used dialog directory
 

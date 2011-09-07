@@ -13,20 +13,9 @@
 //--------------------------------------
 class InstrumentActor;
 
-namespace Mantid
-{
-  namespace Geometry
-  {
-    class Instrument;
-  }
-}
-
 /** The InstrumentTreeWidget is a tree view
- * of the components of an instrument.
- *
- * Author: ???
+ *  of the components of an instrument.
  */
-
 class InstrumentTreeWidget:public QTreeView
 {
   Q_OBJECT
@@ -42,8 +31,6 @@ signals:
   void componentSelected(const Mantid::Geometry::ComponentID);
 private:
   InstrumentActor* m_instrActor;
-  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   InstrumentTreeModel *m_treeModel;
 };
 

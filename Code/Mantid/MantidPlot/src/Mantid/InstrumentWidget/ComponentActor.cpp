@@ -1,6 +1,7 @@
 #include "ComponentActor.h"
 #include "InstrumentActor.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"

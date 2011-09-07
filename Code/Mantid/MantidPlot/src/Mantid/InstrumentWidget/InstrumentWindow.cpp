@@ -48,10 +48,11 @@ using namespace MantidQt::API;
 /**
  * Constructor.
  */
-InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
-  MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false),m_blocked(false)
+InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ):
+  MdiSubWindow(label, app, name, f), WorkspaceObserver(),
+  m_workspaceName(wsName),
+  mViewChanged(false), m_blocked(false)
 {
-  m_instrumentActor = NULL;
   m_surfaceType = FULL3D;
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
@@ -159,6 +160,18 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 
   connect(this,SIGNAL(needSetIntegrationRange(double,double)),this,SLOT(setIntegrationRange(double,double)));
   setAcceptDrops(true);
+
+  // Previously in (now removed) setWorkspaceName method
+  m_InstrumentDisplay->makeCurrent();
+  m_instrumentActor = new InstrumentActor(m_workspaceName);
+  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
+  m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+  setupColorMap();
+  mInstrumentTree->setInstrumentActor(m_instrumentActor);
+  setInfoText(m_InstrumentDisplay->getSurface()->getInfoText());
+
+  setWindowTitle(QString("Instrument - ") + m_workspaceName);
 }
 
 /**
@@ -168,10 +181,7 @@ InstrumentWindow::~InstrumentWindow()
 {
   saveSettings();
   delete m_InstrumentDisplay;
-  if (m_instrumentActor)
-  {
-    delete m_instrumentActor;
-  }
+  delete m_instrumentActor;
 }
 
 /**
@@ -189,7 +199,7 @@ void InstrumentWindow::setSurfaceType(int type)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
-    Mantid::Geometry::Instrument_const_sptr instr = m_workspace->getInstrument();
+    Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
     Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
     Mantid::Kernel::V3D sample_pos = sample->getPos();
     Mantid::Kernel::V3D axis;
@@ -234,27 +244,6 @@ void InstrumentWindow::setSurfaceType(int type)
     QApplication::restoreOverrideCursor();
   }
   update();
-}
-
-/**
- * This method sets the workspace name for the Instrument
- */
-void InstrumentWindow::setWorkspaceName(std::string wsName)
-{
-  mWorkspaceName = wsName;
-  m_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mWorkspaceName));
-  if (m_instrumentActor)
-  {
-    delete m_instrumentActor;
-  }
-  m_InstrumentDisplay->makeCurrent();
-  m_instrumentActor = new InstrumentActor(m_workspace);
-  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
-  m_xIntegration->setUnits(QString::fromStdString(m_workspace->getAxis(0)->unit()->caption()));
-  setSurfaceType(m_surfaceType);
-  setupColorMap();
-  mInstrumentTree->setInstrumentActor(m_instrumentActor);
-  setInfoText(m_InstrumentDisplay->getSurface()->getInfoText());
 }
 
 void InstrumentWindow::setupColorMap()
@@ -385,7 +374,7 @@ void InstrumentWindow::plotSelectedSpectra()
   {
     indices.erase(-1);
   }
-  emit plotSpectra( QString::fromStdString(m_workspace->getName()), indices);
+  emit plotSpectra(m_workspaceName, indices);
 }
 
 /**
@@ -399,7 +388,7 @@ void InstrumentWindow::showDetectorTable()
   {
     indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
   }
-  emit createDetectorTable(QString::fromStdString(m_workspace->getName()), indexes, true);
+  emit createDetectorTable(m_workspaceName, indexes, true);
 }
 
 
@@ -442,7 +431,7 @@ void InstrumentWindow::groupDetectors()
     wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
   }
 
-  QString inputWS = QString::fromStdString(m_workspace->getName());
+  QString inputWS = m_workspaceName;
   QString outputWS = confirmDetectorOperation("grouped", inputWS, static_cast<int>(m_selectedDetectors.size()));
   if( outputWS.isEmpty() ) return;
   QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3;KeepUngroupedSpectra=1";
@@ -464,7 +453,7 @@ void InstrumentWindow::maskDetectors()
     wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
   }
 
-  QString inputWS = QString::fromStdString(m_workspace->getName());
+  QString inputWS = m_workspaceName;
   // Masking can only replace the input workspace so no need to ask for confirmation
   QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
   emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, asString(wksp_indices)),this);
@@ -633,7 +622,7 @@ void InstrumentWindow::saveSettings()
 /// Closes the window if the associated workspace is deleted
 void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace>)
 {
-  if (ws_name == mWorkspaceName)
+  if (ws_name == m_workspaceName.toStdString())
   {
     askOnCloseEvent(false);
     close();
@@ -644,7 +633,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
 					  const boost::shared_ptr<Mantid::API::Workspace>)
 {
   //Replace current workspace
-  if (wsName == mWorkspaceName)
+  if (wsName == m_workspaceName.toStdString())
   {
     //updateWindow();
   }
@@ -665,7 +654,7 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
 {
   (void) saveAsTemplate;
 	QString s="<instrumentwindow>\n";
-	s+="WorkspaceName\t"+QString::fromStdString(mWorkspaceName)+"\n";
+	s+="WorkspaceName\t"+m_workspaceName+"\n";
 	s+=geometry;
 	s+="</instrumentwindow>\n";
 	return s;
@@ -903,9 +892,9 @@ void InstrumentWindow::extractDetsToWorkspace()
   if (!fname.empty())
   {
     Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace",m_workspace->getName());
+    alg->setPropertyValue("InputWorkspace",m_workspaceName.toStdString());
     alg->setPropertyValue("MapFile",fname);
-    alg->setPropertyValue("OutputWorkspace",m_workspace->getName()+"_selection");
+    alg->setPropertyValue("OutputWorkspace",m_workspaceName.toStdString()+"_selection");
     alg->execute();
   }
 
@@ -924,9 +913,9 @@ void InstrumentWindow::sumDetsToWorkspace()
   if (!fname.empty())
   {
     Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace",m_workspace->getName());
+    alg->setPropertyValue("InputWorkspace",m_workspaceName.toStdString());
     alg->setPropertyValue("MapFile",fname);
-    alg->setPropertyValue("OutputWorkspace",m_workspace->getName()+"_sum");
+    alg->setPropertyValue("OutputWorkspace",m_workspaceName.toStdString()+"_sum");
     alg->execute();
   }
 

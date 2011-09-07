@@ -2,18 +2,10 @@
 #define PROJECTION3D_H_
 
 #include "ProjectionSurface.h"
-#include "InstrumentActor.h"
 #include "GLViewport.h"
 #include "GLTrackball.h"
-#include "GLActorCollection.h"
-#include "MantidColorMap.h"
-//#include "GLGroupPickBox.h"
-//#include "DetSelector.h"
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IDetector.h"
 
 #include <QGLWidget>
 #include <QString>
@@ -22,16 +14,9 @@
 #include <boost/scoped_ptr.hpp>
 
 /**
-  \class  GL3DWidget
-  \brief  OpenGL Qt Widget which renders Mantid Geometry ObjComponents
-  \author Chapon Laurent & Srikanth Nagella
-  \date   August 2008
-  \version 1.0
+  TODO: Add description
 
-  This Class takes input as ObjComponents and renders them with in the Qt widget. also
-  provides the user interaction with the rendered object.
-
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
 
@@ -50,7 +35,6 @@
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-
 class Projection3D : public ProjectionSurface
 {
   enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};

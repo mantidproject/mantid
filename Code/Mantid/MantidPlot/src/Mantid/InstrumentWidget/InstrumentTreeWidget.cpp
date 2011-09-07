@@ -22,9 +22,7 @@ InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w):QTreeView(w), m_treeModel
 void InstrumentTreeWidget::setInstrumentActor(InstrumentActor* instrActor)
 {
   m_instrActor = instrActor;
-  m_workspace = instrActor->getWorkspace();
-  m_instrument = instrActor->getInstrument();
-  m_treeModel=new InstrumentTreeModel(m_workspace);
+  m_treeModel=new InstrumentTreeModel(instrActor->getInstrument());
   setModel(m_treeModel);
   setSelectionMode(SingleSelection);
   setSelectionBehavior(SelectRows);
@@ -32,12 +30,13 @@ void InstrumentTreeWidget::setInstrumentActor(InstrumentActor* instrActor)
 
 void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
+  Mantid::Geometry::Instrument_const_sptr instrument = m_instrActor->getInstrument();
   //Check whether its instrument
   boost::shared_ptr<const Mantid::Geometry::IComponent> selectedComponent;
-  if(m_instrument->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()))
-    selectedComponent=boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_instrument);
+  if(instrument->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()))
+    selectedComponent=boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(instrument);
   else
-    selectedComponent=m_instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));
+    selectedComponent=instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));
 
   //get the bounding box for the component
   xmax=ymax=zmax=-DBL_MAX;
@@ -52,10 +51,10 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,doubl
     boost::shared_ptr<const Mantid::Geometry::IObjComponent> tmpObj = boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(tmp);
     if(tmpObj){
       try{
-        //std::cerr << int(tmpObj->getComponentID()) << ' ' << int(m_instrument->getSample()->getComponentID()) << std::endl;
-        if (tmpObj->getComponentID() == m_instrument->getSample()->getComponentID())
+        //std::cerr << int(tmpObj->getComponentID()) << ' ' << int(instrument->getSample()->getComponentID()) << std::endl;
+        if (tmpObj->getComponentID() == instrument->getSample()->getComponentID())
         {
-          boundBox = m_workspace->sample().getShape().getBoundingBox();
+          boundBox = m_instrActor->getWorkspace()->sample().getShape().getBoundingBox();
           boundBox.moveBy(tmpObj->getPos());
         }
         else
@@ -83,15 +82,6 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,doubl
     }
   }
 }
-
-//Mantid::Kernel::V3D InstrumentTreeWidget::getSamplePos()const
-//{
-//  boost::shared_ptr<const Mantid::Geometry::IComponent> sample = m_instrument->getSample();
-//  if(sample!=NULL)
-//    return sample->getPos();
-//  else
-//    return Mantid::Kernel::V3D(0.0,0.0,0.0);
-//}
 
 QModelIndex InstrumentTreeWidget::findComponentByName(const QString & name) const
 {

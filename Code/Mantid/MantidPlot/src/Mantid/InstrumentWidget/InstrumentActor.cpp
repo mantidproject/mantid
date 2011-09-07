@@ -3,16 +3,18 @@
 #include "ObjComponentActor.h"
 #include "SampleActor.h"
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <QSettings>
 
 using namespace Mantid::Geometry;
+using namespace Mantid::API;
 
 double InstrumentActor::m_tolerance = 0.00001;
 
@@ -20,16 +22,19 @@ double InstrumentActor::m_tolerance = 0.00001;
  * Constructor
  * @param workspace :: Workspace
  */
-InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
-  :m_workspace(workspace),
-  m_sampleActor(NULL)
+InstrumentActor::InstrumentActor(const QString wsName)
+  : m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),
+    m_sampleActor(NULL)
 {
-  const size_t nHist = workspace->getNumberHistograms();
+  if (!m_workspace)
+    throw std::logic_error("InstrumentActor passed a workspace that isn't a MatrixWorkspace");
+
+  const size_t nHist = m_workspace->getNumberHistograms();
   m_WkspBinMin = DBL_MAX;
   m_WkspBinMax = -DBL_MAX;
   for (size_t i = 0; i < nHist; ++i)
   {
-    const Mantid::MantidVec & values = workspace->readX(i);
+    const Mantid::MantidVec & values = m_workspace->readX(i);
     double xtest = values.front();
     if( xtest != std::numeric_limits<double>::infinity() )
     {
@@ -74,7 +79,7 @@ InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace>
   accept(findVisitor);
   const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
 
-  m_sampleActor = new SampleActor(*this,workspace->sample(),samplePosActor);
+  m_sampleActor = new SampleActor(*this,m_workspace->sample(),samplePosActor);
   m_scene.addActor(m_sampleActor);
 }
 
@@ -98,7 +103,16 @@ bool InstrumentActor::accept(const GLActorVisitor& visitor)
   return ok;
 }
 
-boost::shared_ptr<const Mantid::Geometry::Instrument> InstrumentActor::getInstrument()const
+/** Returns the workspace relating to this instrument view.
+ *  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
+ *  !!!! USE InstrumentActor::getInstrument BELOW !!!!
+ */
+MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
+{
+  return m_workspace;
+}
+
+Instrument_const_sptr InstrumentActor::getInstrument() const
 {
   return m_workspace->getInstrument();
 }
@@ -108,21 +122,24 @@ const MantidColorMap& InstrumentActor::getColorMap() const
   return m_colorMap;
 }
 
-boost::shared_ptr<const Mantid::Geometry::IDetector> InstrumentActor::getDetector(size_t i)const
+IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
 {
   try
   {
-  return m_workspace->getInstrument()->getDetector(m_detIDs.at(i));
+    // Call the local getInstrument, NOT the one on the workspace
+    return this->getInstrument()->getDetector(m_detIDs.at(i));
   }
   catch(...)
   {
-    return boost::shared_ptr<const Mantid::Geometry::IDetector>();
+    return IDetector_const_sptr();
   }
+  // Add line that can never be reached to quiet compiler complaints
+  return IDetector_const_sptr();
 }
 
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
 {
-  if (!m_workspace) return;
+  if (!getWorkspace()) return;
 
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
@@ -130,7 +147,7 @@ void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
   bool binEntireRange = m_BinMinValue == m_WkspBinMin && m_BinMaxValue == m_WkspBinMax;
 
   //Use the workspace function to get the integrated spectra
-  m_workspace->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, binEntireRange);
+  getWorkspace()->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, binEntireRange);
 
   m_DataMinValue = DBL_MAX;
   m_DataMaxValue = -DBL_MAX;

@@ -12,11 +12,6 @@ namespace Mantid
   {
     class Instrument;
   }
-  namespace API
-  {
-    class Sample;
-    class MatrixWorkspace;
-  }
 }
 
 /**
@@ -33,7 +28,7 @@ class InstrumentTreeModel:public QAbstractItemModel
 {
   Q_OBJECT
 public:
-  InstrumentTreeModel(boost::shared_ptr<const Mantid::API::MatrixWorkspace>, QObject *parent=0);
+  InstrumentTreeModel(boost::shared_ptr<const Mantid::Geometry::Instrument>, QObject *parent=0);
   ~InstrumentTreeModel();
 
   QVariant data(const QModelIndex &index, int role) const;
@@ -45,8 +40,7 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
-  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument; ///< instrument to which the model corresponds to
+  const boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument; ///< instrument to which the model corresponds
 };
 
 #endif

@@ -11,6 +11,7 @@
 #include "DetSelector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>

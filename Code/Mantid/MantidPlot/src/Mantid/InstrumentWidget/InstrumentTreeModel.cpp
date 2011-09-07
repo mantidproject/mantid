@@ -15,11 +15,10 @@ using Mantid::Geometry::IObjComponent;
 /**
  * Constructor for tree model to display instrument tree
  */
-InstrumentTreeModel::InstrumentTreeModel(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, 
-  QObject *parent) : 
-QAbstractItemModel(parent),
-m_workspace(ws),
-m_instrument(ws->getInstrument())
+InstrumentTreeModel::InstrumentTreeModel(boost::shared_ptr<const Mantid::Geometry::Instrument> instrument,
+                                         QObject *parent) :
+  QAbstractItemModel(parent),
+  m_instrument(instrument)
 {
 }
 

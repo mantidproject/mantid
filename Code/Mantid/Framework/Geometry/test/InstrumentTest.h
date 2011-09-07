@@ -112,7 +112,7 @@ public:
     Instrument* instr = new Instrument("Inst");
     instr->setDefaultViewAxis("Y");
     IComponent* inst = instr;
-    IComponent* copy = instr;
+    IComponent* copy(NULL);
     TS_ASSERT_THROWS_NOTHING( copy = inst->clone() );
     TS_ASSERT_DIFFERS( &*copy, &*inst );
     TS_ASSERT_EQUALS( copy->getName(), inst->getName() );
