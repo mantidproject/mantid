@@ -48,6 +48,7 @@ add_subdirectory ( Framework )
 include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
+include_directories ( Framework/NexusCPP/inc )
 set ( CORE_MANTIDLIBS Kernel Geometry API )
 
 add_subdirectory ( MantidQt )
