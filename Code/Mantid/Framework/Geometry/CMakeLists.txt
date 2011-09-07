@@ -1,10 +1,11 @@
 set ( SRC_FILES
+	src/ComponentParser.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
-  src/Instrument.cpp
 	src/IObjComponent.cpp
+	src/Instrument.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/Detector.cpp
@@ -52,7 +53,7 @@ set ( SRC_FILES
 	src/Math/Vertex2DList.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
-  src/Objects/InstrumentRayTracer.cpp
+	src/Objects/InstrumentRayTracer.cpp
 	src/Objects/Material.cpp
 	src/Objects/Object.cpp
 	src/Objects/RuleItems.cpp
@@ -91,6 +92,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         )
         
 set ( INC_FILES
+	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/ReflectionCondition.h
@@ -99,9 +101,9 @@ set ( INC_FILES
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
-  inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/ISpectraDetectorMap.h
+	inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/Detector.h
@@ -183,6 +185,7 @@ set ( TEST_FILES
 	test/BnIdTest.h
 	test/BoundingBoxTest.h
 	test/CompAssemblyTest.h
+	test/ComponentParserTest.h
 	test/ComponentTest.h
 	test/ConeTest.h
 	test/ConvexPolygonTest.h
