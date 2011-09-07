@@ -41,9 +41,9 @@ namespace Algorithms
     /// Run the algorithm
     void exec();
     /// Calculate PDF, i.e., G(r), for a certain r value from S(Q)
-    double CalculateGrFromQ(double r, double& egr, double qmin, double qmax);
+    double CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq);
     /// Calculate PDF, i.e., G(r), for a certain r value from S(d)
-    double CalculateGrFromD(double r, double& egr, double qmin, double qmax);
+    double CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq);
 
   };
 

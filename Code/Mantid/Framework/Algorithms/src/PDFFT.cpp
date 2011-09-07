@@ -39,15 +39,21 @@ void PDFFT::initDocs() {
 void PDFFT::init() {
 	API::WorkspaceUnitValidator<>* uv = new API::WorkspaceUnitValidator<>(
 			"MomentumTransfer");
-	// CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-	// wsValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));
-	// declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator), "An input workspace S(d).");
+
+	// Set up input data type
+	std::vector<std::string> input_options;
+	input_options.push_back("S(Q)");
+	input_options.push_back("S(Q)-1");
+	// Set up output data type
+	std::vector<std::string> outputGoption;
+	outputGoption.push_back("G(r)");
+
 	declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
 			Direction::Input, uv), "An input workspace S(d).");
-	declareProperty(new WorkspaceProperty<> ("OutputGorRWorkspace", "",
+	declareProperty(new WorkspaceProperty<> ("OutputPDFWorkspace", "",
 			Direction::Output), "An output workspace G(r)");
-	declareProperty(new WorkspaceProperty<> ("OutputQSQm1Workspace", "",
-			Direction::Output), "An output workspace for Q(S(Q)-1))");
+	declareProperty("InputSofQType", "S(Q)", new ListValidator(input_options),
+	    "Select the input Workspace type.  It can be S(Q) or S(Q)-1");
   declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20, Direction::Input),
       "Maximum r value of output G(r).");
 	// declareProperty("RMax", 20.0);
@@ -57,6 +63,8 @@ void PDFFT::init() {
 	    "Staring value Q of S(Q) for Fourier Transform");
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 50.0, Direction::Input),
 	    "Ending value of Q of S(Q) for Fourier Transform");
+	declareProperty("PDFType", "GofR", new ListValidator(outputGoption),
+	    "Select the output PDF type");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -73,6 +81,16 @@ void PDFFT::exec() {
 	double qmax = getProperty("Qmax");
 	double qmin = getProperty("Qmin");
   int sizer = static_cast<int>(rmax/deltar);
+  std::string typeSofQ = getProperty("InputSofQType");
+  std::string typeGofR = getProperty("PDFType");
+
+  bool sofq = true;
+  if (typeSofQ == "S(Q)-1"){
+    sofq = false;
+    g_log.information() << "Input is S(Q)-1" << std::endl;
+  } else {
+    g_log.information() << "Input is S(Q)" << std::endl;
+  }
 
 	// 2. Set up G(r) dataX(0)
 	Gspace
@@ -125,7 +143,7 @@ void PDFFT::exec() {
 	  }
 
 		for (int i = 0; i < sizer; i ++){
-	      vg[i] = CalculateGrFromD(vr[i], error, dmin, dmax);
+	      vg[i] = CalculateGrFromD(vr[i], error, dmin, dmax, sofq);
 	      vge[i] = error;
 		}
 
@@ -146,7 +164,7 @@ void PDFFT::exec() {
 		}
 
 		for (int i = 0; i < sizer; i ++){
-			vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax);
+			vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax, sofq);
 			vge[i] = error;
 		}
 
@@ -170,13 +188,12 @@ void PDFFT::exec() {
 	}
 
 	// 4. Set property
-	setProperty("OutputGorRWorkspace", Gspace);
-	setProperty("OutputQSQm1Workspace", QSspace);
+	setProperty("OutputPDFWorkspace", Gspace);
 
 	return;
 }
 
-double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax) {
+double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq) {
 
 	double gr = 0;
 
@@ -191,9 +208,13 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax) 
 	for (size_t i = 1; i < vd.size(); i++) {
 		d = vd[i];
 		if (d >= dmin && d <= dmax) {
-			s = vs[i];
+		  if (sofq){
+		    s = vs[i]-1;
+		  } else {
+		    s = vs[i];
+		  }
 			deltad = vd[i] - vd[i - 1];
-			temp = (s - 1) * sin(2 * M_PI * r / d) * 4 * M_PI * M_PI / (d * d * d)
+			temp = (s) * sin(2 * M_PI * r / d) * 4 * M_PI * M_PI / (d * d * d)
 					* deltad;
 			gr += temp;
 			error += ve[i] * ve[i];
@@ -206,7 +227,7 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax) 
 	return gr;
 }
 
-double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax) {
+double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq) {
 
 	const MantidVec& vq = Sspace->dataX(0);
 	const MantidVec& vs = Sspace->dataY(0);
@@ -219,10 +240,14 @@ double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax) 
 	for (size_t i = 1; i < vq.size(); i++) {
 		q = vq[i];
 		if (q >= qmin && q <= qmax) {
-			s = vs[i];
+		  if (sofq){
+		    s = vs[i]-1;
+		  } else {
+		    s = vs[i];
+		  }
 			deltaq = vq[i] - vq[i - 1];
 			sinus  = sin(q * r) * q * deltaq;
-			fs    += sinus * (s - 1.0);
+			fs    += sinus * (s);
 			error += (sinus*ve[i]) * (sinus*ve[i]);
 		  // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
 		  // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
