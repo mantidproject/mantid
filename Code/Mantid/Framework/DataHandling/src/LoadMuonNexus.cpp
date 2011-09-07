@@ -18,8 +18,8 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 
 namespace Mantid
 {

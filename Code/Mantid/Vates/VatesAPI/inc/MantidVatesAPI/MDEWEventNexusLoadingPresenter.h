@@ -8,8 +8,8 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidMDEvents/LoadMDEW.h"
 
 namespace Mantid

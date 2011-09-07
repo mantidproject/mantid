@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_PRECOMPILEDHEADER_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 
 #endif // MANTID_DATAHANDLING_PRECOMPILEDHEADER_H_

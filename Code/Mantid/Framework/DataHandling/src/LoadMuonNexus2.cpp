@@ -12,8 +12,8 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 
 
 #include "MantidAPI/LoadAlgorithmFactory.h"

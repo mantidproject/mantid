@@ -14,8 +14,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
 
 #include <cmath>

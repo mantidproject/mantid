@@ -7,7 +7,7 @@
 
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/LoadMDEW.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"

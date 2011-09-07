@@ -5,7 +5,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 

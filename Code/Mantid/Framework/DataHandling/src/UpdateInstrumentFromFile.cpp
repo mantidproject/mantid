@@ -8,8 +8,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "LoadRaw/isisraw2.h"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid

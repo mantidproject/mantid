@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <cmath>
 #include <numeric>
 

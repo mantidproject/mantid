@@ -94,6 +94,9 @@ include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
+include_directories (NexusCPP/inc)
+add_subdirectory (NexusCPP)
+
 include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages
 include_directories ( ${MUPARSER_INCLUDE_DIR} )
@@ -153,7 +156,7 @@ add_subdirectory (MDEvents)
 ###########################################################################
 
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
-                     DataHandling Nexus Algorithms CurveFitting ICat
+                     DataHandling Nexus NexusCPP Algorithms CurveFitting ICat
                      Crystal MDDataObjects MDAlgorithms MDEvents WorkflowAlgorithms
 )
 

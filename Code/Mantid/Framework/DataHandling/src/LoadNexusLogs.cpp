@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexusLogs.h"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include <cctype>

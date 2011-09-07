@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_MDLEANEVENT_H_
     
 #include "MantidKernel/System.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <numeric>

@@ -5,7 +5,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/SaveMDEW.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
 

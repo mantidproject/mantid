@@ -15,6 +15,7 @@ Framework/MDEvents
 Framework/MDAlgorithms
 Framework/MDDataObjects
 Framework/Nexus
+Framework/NexusCPP
 )
 
 set ( COMMONVATES_SETUP_DONE TRUE )

@@ -278,6 +278,7 @@ find_package ( OpenCascade REQUIRED )
 include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
 include_directories ( ${OPENGL_INCLUDE_DIR} )
 include_directories ( ${GSL_INCLUDE_DIR} )
+include_directories ( ../NexusCPP/inc/ )
 
 # A few defines needed for OpenCascade on the Mac
 if ( APPLE )
@@ -285,14 +286,14 @@ if ( APPLE )
 endif ()
 
 # Add the target for this directory
-add_library ( Geometry ${SRC_FILES} ${INC_FILES})
+add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
+target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} NexusCPP)
 
 if ( CXXTEST_FOUND )
   # This is required to pick up ComponentCreationHelper.h

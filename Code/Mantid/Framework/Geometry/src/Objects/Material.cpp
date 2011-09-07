@@ -125,6 +125,45 @@ namespace Mantid
       return (m_element.abs_scatt_xs) * (lambda / NeutronAtom::ReferenceLambda);
     }
 
+
+    /** Save the object to an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to create
+     */
+    void Material::saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXsample", 1);
+      file->putAttr("version", 1);
+      file->putAttr("name", m_name);
+      file->writeData("element_Z", m_element.z_number);
+      file->writeData("element_A", m_element.a_number);
+      file->writeData("number_density", m_numberDensity);
+      file->writeData("temperature", m_temperature);
+      file->writeData("pressure", m_pressure);
+      file->closeGroup();
+    }
+
+    /** Load the object from an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to open
+     */
+    void Material::loadNexus(::NeXus::File * file, const std::string & group)
+    {
+      file->openGroup(group, "NXsample");
+      file->getAttr("name", m_name);
+
+      // Find the element
+      uint16_t element_Z, element_A;
+      file->readData("element_Z", element_Z);
+      file->readData("element_A", element_A);
+      m_element = Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A);
+
+      file->readData("number_density", m_numberDensity);
+      file->readData("temperature", m_temperature);
+      file->readData("pressure", m_pressure);
+      file->closeGroup();
+    }
+
   } 
 
 }  

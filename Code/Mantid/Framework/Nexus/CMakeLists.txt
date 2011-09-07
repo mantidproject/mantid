@@ -1,13 +1,8 @@
 set ( SRC_FILES
         src/MuonNexusReader.cpp
         src/NexusClasses.cpp
-        src/NeXusException.cpp
-        src/NeXusFile.cpp
         src/NexusFileIO.cpp
-        src/NeXusStream.cpp
 )
-
-set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
 set ( INC_FILES
         inc/MantidNexus/DllConfig.h
@@ -17,13 +12,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-        test/NexusAPITest.h
 )
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Nexus SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Add the dependency on the nexus library
 find_package ( Nexus REQUIRED )
@@ -43,13 +32,12 @@ include_directories ( inc )
 
 target_link_libraries ( Nexus ${MANTIDLIBS} ${NEXUS_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  cxxtest_add_test ( NexusTest ${TEST_FILES} )
-  target_link_libraries( NexusTest Nexus  )
-  add_dependencies ( FrameworkTests NexusTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# if ( CXXTEST_FOUND )
+#  cxxtest_add_test ( NexusTest ${TEST_FILES} )
+# target_link_libraries( NexusTest Nexus  )
+#  add_dependencies ( FrameworkTests NexusTest )
+#  set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
+# endif ()
 
 ###########################################################################
 # Installation settings

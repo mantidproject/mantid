@@ -8,6 +8,7 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 
 namespace Mantid
@@ -84,6 +85,10 @@ namespace Mantid
       double absorbXSection(const double lambda) const;
       //@}
 
+      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void loadNexus(::NeXus::File * file, const std::string & group);
+
+
     private:
       /// Material name
       std::string m_name;
@@ -95,6 +100,7 @@ namespace Mantid
       double m_temperature;
       /// Pressure
       double m_pressure;
+
     };
 
     /// Typedef for a shared pointer

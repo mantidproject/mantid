@@ -2,7 +2,7 @@
 #define MANTID_NEXUS_PRECOMPILEDHEADER_H_
 
 // NeXus
-#include "MantidNexus/NeXusFile.hpp" 
+#include "MantidNexusCPP/NeXusFile.hpp" 
 
 // STL
 #include <climits>

@@ -12,8 +12,8 @@
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include <Poco/Path.h>

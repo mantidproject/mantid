@@ -5,7 +5,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 

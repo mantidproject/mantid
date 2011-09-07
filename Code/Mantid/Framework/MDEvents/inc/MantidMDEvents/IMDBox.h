@@ -11,7 +11,7 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <iosfwd>
 
 using NeXus::File;
