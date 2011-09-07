@@ -665,7 +665,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
       tAxis->setLabel(2,"Diff");
       ws->replaceAxis(1,tAxis);
 
-      assert(m_xMaxIndex-m_xMinIndex+1 == static_cast<int64_t>(nData));
+      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
 
       for(size_t i=0;i<3;i++)
       {

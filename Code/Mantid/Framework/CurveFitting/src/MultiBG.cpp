@@ -221,6 +221,12 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std:
     }
   }
 
+  // setWorkspace can be called by GUI when the function had not been properly initialized
+  if (m_spectra.empty())
+  {
+    return;
+  }
+
   // make functions without set workspace fit to all workspaces
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {

@@ -13,6 +13,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
@@ -539,7 +540,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
       return;
     }
     Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f);
-    if (!cf || cf->name() != "CompositeFunctionMW")
+    if (!cf || (cf->name() != "CompositeFunctionMW" && cf->name() != "MultiBG"))
     {
       m_compositeFunction = new Mantid::API::CompositeFunctionMW();
       m_compositeFunction->addFunction(f);
@@ -877,6 +878,18 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
+    Mantid::API::MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    if (mws)
+    {
+      size_t wi = static_cast<size_t>(workspaceIndex());
+      if (wi < mws->getNumberHistograms())
+      {
+        setStartX(mws->readX(wi).front());
+        setEndX(mws->readX(wi).back());
+      }
+    }
+
   }
 }
 
@@ -946,9 +959,14 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       disableUndo();
       PropertyHandler* h = getHandler()->findHandler(prop);
       if (!h) return;
-      if (!h->parentHandler()) return;
+      //if (!h->parentHandler()) return;
       Mantid::API::IFitFunction* f = h->changeType(prop);
+      if (!h->parentHandler())
+      {
+        m_compositeFunction = dynamic_cast<Mantid::API::CompositeFunction*>(f);
+      }
       if (f) setCurrentFunction(f);
+      std::cerr << f->name() << std::endl;
       emit functionChanged();
   }
   else if (prop->propertyName() == "Workspace")
@@ -1285,33 +1303,42 @@ void FitPropertyBrowser::fit()
     m_fitActionUndoFit->setEnabled(true);
 
     std::string funStr;
-    if (m_compositeFunction->nFunctions() > 1)
+    if (m_compositeFunction->name() == "MultiBG")
+    {
+      std::string ties;
+      Mantid::API::Expression funExpr;
+      funExpr.parse(*m_compositeFunction);
+      funExpr.toList(";");
+      for(size_t i = 0; i < funExpr.size(); ++i)
+      {
+        const Mantid::API::Expression& e = funExpr[i];
+        if (e.name() == "=" && e.size() == 2 && e[0].name() == "ties")
+        {
+          ties = e[0].name() + "=(" + e[1].str() + ")";
+        }
+      }
+      funStr = "composite=MultiBG;";
+      for(size_t i=0;i<m_compositeFunction->nFunctions();++i)
+      {
+        Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(m_compositeFunction->getFunction(i));
+        if (!f) continue;
+        funStr += f->asString();
+        if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
+        {
+          funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
+            boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
+        }
+        funStr += ";";
+      }
+      funStr += ties;
+    }
+    else if (m_compositeFunction->nFunctions() > 1)
     {
       funStr = *m_compositeFunction;
     }
     else
     {
-      Mantid::API::CompositeFunction* cf =  dynamic_cast<Mantid::API::CompositeFunction*>(m_compositeFunction->getFunction(0));
-      if (cf && cf->name() == "MultiBG")
-      {
-        funStr = "composite=MultiBG;";
-        for(size_t i=0;i<cf->nFunctions();++i)
-        {
-          Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(cf->getFunction(i));
-          if (!f) continue;
-          funStr += f->asString();
-          if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
-          {
-            funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
-              boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
-          }
-          funStr += ";";
-        }
-      }
-      else
-      {
-        funStr = *(m_compositeFunction->getFunction(0));
-      }
+      funStr = *(m_compositeFunction->getFunction(0));
     }
     // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
     if (m_customFittings)
@@ -1477,6 +1504,10 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
+  }
+  if (m_workspaceNames.size() == 1)
+  {
+    setWorkspaceName(QString::fromStdString(wsName));
   }
   getHandler()->updateWorkspaces(oldWorkspaces);
 }

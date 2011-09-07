@@ -102,7 +102,6 @@ void PropertyHandler::init()
   QtProperty* fnProp = m_item->property();
 
   // create Type property
-  int itype = m_browser->m_registeredFunctions.indexOf(QString::fromStdString(m_fun->name()));
   if (!m_type)
   {
     m_type = m_browser->m_enumManager->addProperty("Type");
@@ -115,10 +114,11 @@ void PropertyHandler::init()
     else
     {
       QStringList functionNames;
-      functionNames << QString::fromStdString(m_fun->name());
+      functionNames << "CompositeFunctionMW" << "MultiBG";
       m_browser->m_enumManager->setEnumNames(m_type, functionNames);
     }
   }
+  int itype = m_browser->m_enumManager->enumNames(m_type).indexOf(QString::fromStdString(m_fun->name()));
   m_browser->m_enumManager->setValue(m_type,itype);
 
   // create worspace and workspace index properties if parent is a MultiBG
@@ -819,11 +819,12 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 {
   if (prop == m_type)
   {
-    if (!m_parent) return m_browser->compositeFunction();// dont replace the root composite function
+    //if (!m_parent) return m_browser->compositeFunction();// dont replace the root composite function
 
     // Create new function
     int i = m_browser->m_enumManager->value(prop);
-    const QString& fnName = m_browser->m_registeredFunctions[i];
+    QStringList functionNames = m_browser->m_enumManager->enumNames(prop);
+    const QString& fnName = functionNames[i];
     Mantid::API::IFitFunction* f = NULL;
     try
     {
@@ -892,7 +893,10 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
         m_browser->m_autoBackground = NULL;
       }
     }
-    m_parent->replaceFunctionPtr(f_old,f);
+    if (m_parent)
+    {
+      m_parent->replaceFunctionPtr(f_old,f);
+    }
     f->setHandler(h);
     // calculate the baseline
     if (h->pfun())
