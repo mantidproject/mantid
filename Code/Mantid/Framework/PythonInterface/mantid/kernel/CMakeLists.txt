@@ -5,14 +5,20 @@
 set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
 set ( EXPORT_FILES
+  src/IPropertyManager.cpp
   src/Property.cpp
   src/Quat.cpp
   src/V3D.cpp
 )  
 
+set ( SRC_FILES
+  src/PropertyMarshal.cpp
+)
+
 set ( INC_FILES 
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
+  ${HEADER_DIR}/kernel/PropertyMarshal.h
 )
 
 set ( PY_FILES 

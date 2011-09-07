@@ -37,8 +37,8 @@ class AlgorithmTest(unittest.TestCase):
         alg.set_child(True) # Just to keep the output from the data service
         alg.execute()
 
-        #self.assertEquals(alg.get_property('SpectrumMax').value, nspec)
-        #self.assertEquals(type(alg.get_property('SpectrumMax')), int)
+        self.assertEquals(alg.get_property('SpectrumMax').value, nspec)
+        self.assertEquals(type(alg.get_property('SpectrumMax')), int)
         #self.assertEquals(type(alg.get_property('OutputWorkspace')), int)
                 
         ws = alg.get_property('OutputWorkspace').value

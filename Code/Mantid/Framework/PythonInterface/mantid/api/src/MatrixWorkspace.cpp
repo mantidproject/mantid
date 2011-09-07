@@ -18,6 +18,7 @@ void export_MatrixWorkspace()
   register_ptr_to_python<MatrixWorkspace_sptr>();
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     ;
+
 }
 
 void export_MatrixWorkspaceProperty()

@@ -2,6 +2,12 @@
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/numeric.hpp>
 
+#include "MantidPythonInterface/kernel/PropertyMarshal.h"
+
+using Mantid::PythonInterface::PropertyMarshal;
+using Mantid::PythonInterface::TypedHandler;
+
+
 // Forward declare
 @EXPORT_DECLARE@
 
@@ -11,6 +17,12 @@ BOOST_PYTHON_MODULE(_kernel)
   boost::python::docstring_options docstrings(true, true, false);
   // Use numpy arrays
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+  
+  // Map builtin type objects to templated setter functions for properties
+  PropertyMarshal::insert(&PyInt_Type, new TypedHandler<int>());
+  PropertyMarshal::insert(&PyBool_Type, new TypedHandler<bool>());
+  PropertyMarshal::insert(&PyFloat_Type, new TypedHandler<double>());
+  PropertyMarshal::insert(&PyString_Type, new TypedHandler<std::string>());  
 
 @EXPORT_FUNCTIONS@
 }

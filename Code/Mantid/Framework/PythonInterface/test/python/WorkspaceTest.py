@@ -25,3 +25,8 @@ class WorkspaceTest(unittest.TestCase):
         mem = ws_prop.value.get_memory_size()
         self.assertTrue( (mem > 0) )
         
+    # Disabled until the get/set property stuff in IPropertyManager can be a little more forgiving.
+    def xtest_ws_as_input_to_algorithm(self): 
+        alg = run_algorithm('LoadRaw', Filename='ALF15739.raw', OutputWorkspace='ALF15739', SpectrumMax=1, child=True)
+        ws = alg.get_property('OutputWorkspace').value
+        alg = run_algorithm('ConvertUnits', Target='dSpacing', InputWorkspace=ws, OutputWorkspace=ws, child=True)
