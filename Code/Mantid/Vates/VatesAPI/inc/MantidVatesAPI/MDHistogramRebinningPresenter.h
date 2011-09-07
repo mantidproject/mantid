@@ -2,43 +2,12 @@
 #define MANTID_VATES_MD_REBINNING_HISTOGRAM_PRESENTER
 
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-
-#include <vtkUnstructuredGrid.h>
-#include <vtkDataSet.h>
-#include <vtkBox.h> 
-#include <vtkFieldData.h>
-
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
-
-#include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-
-#include "MantidMDAlgorithms/NullImplicitFunction.h" 
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/DynamicRebinFromXML.h"
-#include "MantidMDAlgorithms/Load_MDWorkspace.h"
-
 #include "MantidVatesAPI/MDRebinningPresenter.h"
-#include "MantidVatesAPI/MDHistogramRebinningPresenter.h"
-#include "MantidVatesAPI/RebinningActionManager.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidVatesAPI/MDRebinningView.h"
-#include "MantidVatesAPI/Clipper.h"
-#include "MantidVatesAPI/vtkDataSetToGeometry.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-#include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/IMDWorkspaceProxy.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
-#include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
-#include "MantidVatesAPI/vtkDataSetToWsLocation.h"
-#include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/vtkDataSetToGeometry.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+
 
 //Forward declarations
 class vtkDataSet;
@@ -46,6 +15,10 @@ class vtkBox;
 
 namespace Mantid
 {
+  namespace Geometry
+  {
+    class MDGeometryXMLParser;
+  }
   namespace VATES
   {
 
@@ -74,7 +47,11 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+    class RebinningActionManager;
+    class ProgressAction;
+    class WorkspaceProvider;
     class MDRebinningView;
+    class Clipper;
     class DLLExport MDHistogramRebinningPresenter : public MDRebinningPresenter
     {
     public:

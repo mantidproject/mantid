@@ -12,9 +12,11 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkImplicitFunction.h"
 #include "vtkPointData.h"
-#include "vtkBox.h"
+#include "vtkPlane.h"
 
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
@@ -40,6 +42,7 @@
 #include "MantidVatesAPI/MDRebinningViewAdapter.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+
 
 #include <boost/functional/hash.hpp>
 #include <sstream>
@@ -300,7 +303,7 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
 {
   using namespace Mantid::VATES;
 
-  enum Status{Bad=0, Good=1};
+  enum Status{Bad=0, Good=1}; 
   Status status=Good;
   if (Pending == m_setup)
   {

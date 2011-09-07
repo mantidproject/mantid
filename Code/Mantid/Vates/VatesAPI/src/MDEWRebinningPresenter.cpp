@@ -1,5 +1,26 @@
 #include "MantidVatesAPI/MDEWRebinningPresenter.h"
 #include "MantidVatesAPI/MDRebinningView.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
+#include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidVatesAPI/RebinningActionManager.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetToGeometry.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
+#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidVatesAPI/vtkDataSetToWsLocation.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include <vtkDataSet.h>
+#include <vtkFieldData.h>
+#include <vtkPlane.h>
+
 
 namespace Mantid
 {

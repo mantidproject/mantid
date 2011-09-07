@@ -1,31 +1,14 @@
 #ifndef MDEW_REBINNING_PRESENTER_H
 #define MDEW_REBINNING_PRESENTER_H
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidMDAlgorithms/NullImplicitFunction.h"
-#include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include "MantidVatesAPI/MDRebinningPresenter.h"
-#include "MantidVatesAPI/RebinningActionManager.h"
-#include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/vtkDataSetToGeometry.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
-#include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
-#include "MantidVatesAPI/vtkDataSetToWsLocation.h"
-#include "MantidVatesAPI/vtkDataSetToWsName.h"
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
-#include <vtkDataSet.h>
-#include <vtkFieldData.h>
-#include <vtkPlane.h>
 
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/vtkDataSetToGeometry.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include <boost/scoped_ptr.hpp>
+
+class vtkPlane;
 namespace Mantid
 {
   namespace VATES
@@ -56,7 +39,11 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+
     class MDRebinningView;
+    class RebinningActionManager;
+    class WorkspaceProvider;
+
     class DLLExport MDEWRebinningPresenter : public MDRebinningPresenter
     {
     public:
