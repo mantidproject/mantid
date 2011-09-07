@@ -150,14 +150,15 @@ target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories(../CurveFitting/inc ../MDEvents/inc ../Nexus/inc)	
+  include_directories(../CurveFitting/inc ../MDEvents/inc ../Nexus/inc ../TestHelpers/inc 
+          ../DataHandling/inc ../DataObjects/inc )	
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API DataHandling Nexus 
       ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API  DataHandling Nexus )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
