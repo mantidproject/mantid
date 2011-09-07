@@ -510,6 +510,28 @@ void Q1D2::getQBinPlus1(const MantidVec & OutQs, const double QToFind, MantidVec
   loc = std::lower_bound(OutQs.begin(), OutQs.end(), QToFind);
 }
 
+/** Divides the number of counts in each output Q bin by the wrighting ("number that would expected to arrive")
+*  The errors are propogated using the uncorrolated error estimate for multiplication/division
+*  @param[in] normSum the weighting for each bin
+*  @param[in] normError2 square of the error on the normalization
+*  @param[in, out] counts counts in each bin
+*  @param[in, out] errors input the _square_ of the error on each bin, output the total error (unsquared)
+*/
+void Q1D2::normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & counts, MantidVec & errors) const
+{
+  for (size_t k = 0; k < counts.size(); ++k)
+  {
+    // the normalisation is a = b/c where b = counts c =normalistion term
+    const double c = normSum[k];
+    const double a = counts[k] /= c;
+    // when a = b/c, the formula for Da, the error on a, in terms of Db, etc. is (Da/a)^2 = (Db/b)^2 + (Dc/c)^2
+    //(Da)^2 = ((Db/b)^2 + (Dc/c)^2)*(b^2/c^2) = ((Db/c)^2 + (b*Dc/c^2)^2) = (Db^2 + (b*Dc/c)^2)/c^2 = (Db^2 + (Dc*a)^2)/c^2
+    //this will work as long as c>0, but then the above formula above can't deal with 0 either
+    const double aOverc = a/c;
+    errors[k] = std::sqrt(errors[k]/(c*c) + normError2[k]*aOverc*aOverc);
+  }
+}
+
 } // namespace Algorithms
 } // namespace Mantid
 
