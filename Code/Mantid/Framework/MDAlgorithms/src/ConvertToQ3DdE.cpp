@@ -291,117 +291,117 @@ namespace MDAlgorithms
 //    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
   }
 
- //----------------------------------------------------------------------------------------------
-  /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
-   *
-   * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
-   * @param workspaceIndex :: index into the workspace
-   */
-  template <class T>
-  void ConvertToQ3DdE::convertEventList(int workspaceIndex)
-  {
-    EventList & el = in_ws->getEventList(workspaceIndex);
-    size_t numEvents = el.getNumberEvents();
+ ////----------------------------------------------------------------------------------------------
+ // /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
+ //  *
+ //  * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
+ //  * @param workspaceIndex :: index into the workspace
+ //  */
+ // template <class T>
+ // void ConvertToQ3DdE::convertEventList(int workspaceIndex)
+ // {
+ //   EventList & el = in_ws->getEventList(workspaceIndex);
+ //   size_t numEvents = el.getNumberEvents();
 
-    // Get the position of the detector there.
-    std::set<detid_t>& detectors = el.getDetectorIDs();
-    if (detectors.size() > 0)
-    {
-      // The 3D MDEvents that will be added into the MDEventWorkspce
-      std::vector<MDE> out_events;
-      out_events.reserve( el.getNumberEvents() );
+ //   // Get the position of the detector there.
+ //   std::set<detid_t>& detectors = el.getDetectorIDs();
+ //   if (detectors.size() > 0)
+ //   {
+ //     // The 3D MDEvents that will be added into the MDEventWorkspce
+ //     std::vector<MDE> out_events;
+ //     out_events.reserve( el.getNumberEvents() );
 
-      // Get the detector (might be a detectorGroup for multiple detectors)
-      IDetector_const_sptr det = in_ws->getDetector(workspaceIndex);
+ //     // Get the detector (might be a detectorGroup for multiple detectors)
+ //     IDetector_const_sptr det = in_ws->getDetector(workspaceIndex);
 
-      // Vector between the sample and the detector
-      V3D detPos = det->getPos() - samplePos;
+ //     // Vector between the sample and the detector
+ //     V3D detPos = det->getPos() - samplePos;
 
-      // Neutron's total travelled distance
-      double distance = detPos.norm() + l1;
+ //     // Neutron's total travelled distance
+ //     double distance = detPos.norm() + l1;
 
-      // Detector direction normalized to 1
-      V3D detDir = detPos / detPos.norm();
+ //     // Detector direction normalized to 1
+ //     V3D detDir = detPos / detPos.norm();
 
-      // The direction of momentum transfer in the inelastic convention ki-kf
-      //  = input beam direction (normalized to 1) - output beam direction (normalized to 1)
-      V3D Q_dir_lab_frame = beamDir - detDir;
+ //     // The direction of momentum transfer in the inelastic convention ki-kf
+ //     //  = input beam direction (normalized to 1) - output beam direction (normalized to 1)
+ //     V3D Q_dir_lab_frame = beamDir - detDir;
 
-      // Multiply by the rotation matrix to convert to Q in the sample frame (take out goniometer rotation)
-      // (or to HKL, if that's what the matrix is)
-      V3D Q_dir = mat * Q_dir_lab_frame;
+ //     // Multiply by the rotation matrix to convert to Q in the sample frame (take out goniometer rotation)
+ //     // (or to HKL, if that's what the matrix is)
+ //     V3D Q_dir = mat * Q_dir_lab_frame;
 
-      // For speed we extract the components.
-      double Q_dir_x = Q_dir.X();
-      double Q_dir_y = Q_dir.Y();
-      double Q_dir_z = Q_dir.Z();
+ //     // For speed we extract the components.
+ //     double Q_dir_x = Q_dir.X();
+ //     double Q_dir_y = Q_dir.Y();
+ //     double Q_dir_z = Q_dir.Z();
 
-      // For lorentz correction, calculate  sin(theta))^2
-      double sin_theta_squared = 0;
-      if (LorentzCorrection)
-      {
-        // Scattering angle = angle between neutron beam direction and the detector (scattering) direction
-        double theta = detDir.angle(beamDir);
-        sin_theta_squared = sin(theta);
-        sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
-      }
+ //     // For lorentz correction, calculate  sin(theta))^2
+ //     double sin_theta_squared = 0;
+ //     if (LorentzCorrection)
+ //     {
+ //       // Scattering angle = angle between neutron beam direction and the detector (scattering) direction
+ //       double theta = detDir.angle(beamDir);
+ //       sin_theta_squared = sin(theta);
+ //       sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
+ //     }
 
-      /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
-       * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h) * 1e-10; */
-      const double wavenumber_in_angstrom_times_tof_in_microsec =
-          (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h);
+ //     /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
+ //      * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h) * 1e-10; */
+ //     const double wavenumber_in_angstrom_times_tof_in_microsec =
+ //         (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h);
 
-      //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
-      //std::cout << Q_dir.norm() << " Qdir norm" << std::endl;
+ //     //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
+ //     //std::cout << Q_dir.norm() << " Qdir norm" << std::endl;
 
-      // This little dance makes the getting vector of events more general (since you can't overload by return type).
-      typename std::vector<T> * events_ptr;
-      getEventsFrom(el, events_ptr);
-      typename std::vector<T> & events = *events_ptr;
+ //     // This little dance makes the getting vector of events more general (since you can't overload by return type).
+ //     typename std::vector<T> * events_ptr;
+ //     getEventsFrom(el, events_ptr);
+ //     typename std::vector<T> & events = *events_ptr;
 
-      // Iterators to start/end
-      typename std::vector<T>::iterator it = events.begin();
-      typename std::vector<T>::iterator it_end = events.end();
+ //     // Iterators to start/end
+ //     typename std::vector<T>::iterator it = events.begin();
+ //     typename std::vector<T>::iterator it_end = events.end();
 
-      for (; it != it_end; it++)
-      {
-        // Get the wavenumber in ang^-1 using the previously calculated constant.
-        double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
+ //     for (; it != it_end; it++)
+ //     {
+ //       // Get the wavenumber in ang^-1 using the previously calculated constant.
+ //       double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
 
-        // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
-        coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
+ //       // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
+ //       coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
 
-        if (LorentzCorrection)
-        {
-          //double lambda = 1.0/wavenumber;
-          // (sin(theta))^2 / wavelength^4
-          float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
-          // Push the MDLeanEvent but correct the weight.
-          out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
-        }
-        else
-        {
-          // Push the MDLeanEvent with the same weight
-          out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
-        }
-      }
+ //       if (LorentzCorrection)
+ //       {
+ //         //double lambda = 1.0/wavenumber;
+ //         // (sin(theta))^2 / wavelength^4
+ //         float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
+ //         // Push the MDLeanEvent but correct the weight.
+ //         out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
+ //       }
+ //       else
+ //       {
+ //         // Push the MDLeanEvent with the same weight
+ //         out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
+ //       }
+ //     }
 
-      // Clear out the EventList to save memory
-      if (ClearInputWorkspace)
-      {
-        // Track how much memory you cleared
-        size_t memoryCleared = el.getMemorySize();
-        // Clear it now
-        el.clear();
-        // For Linux with tcmalloc, make sure memory goes back, if you've cleared 200 Megs
-        MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, (size_t)2e8);
-      }
+ //     // Clear out the EventList to save memory
+ //     if (ClearInputWorkspace)
+ //     {
+ //       // Track how much memory you cleared
+ //       size_t memoryCleared = el.getMemorySize();
+ //       // Clear it now
+ //       el.clear();
+ //       // For Linux with tcmalloc, make sure memory goes back, if you've cleared 200 Megs
+ //       MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, (size_t)2e8);
+ //     }
 
-      // Add them to the MDEW
-      ws->addEvents(out_events);
-    }
-    prog->reportIncrement(numEvents, "Adding Events");
-  }
+ //     // Add them to the MDEW
+ //     ws->addEvents(out_events);
+ //   }
+ //   prog->reportIncrement(numEvents, "Adding Events");
+ // }
 
 
 
