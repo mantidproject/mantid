@@ -50,7 +50,7 @@ private:
   char *FileName;
 
   /// Controller/Presenter.
-  Mantid::VATES::MDEWEventNexusLoadingPresenter<vtkMDEWNexusReader>* m_presenter;
+  Mantid::VATES::MDEWEventNexusLoadingPresenter* m_presenter;
 
   /// Flag indicating that file loading algorithm should attempt to fully load the file into memory.
   bool m_loadInMemory;

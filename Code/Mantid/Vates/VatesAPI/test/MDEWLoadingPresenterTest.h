@@ -25,12 +25,12 @@ private:
   Helper class allows the behaviour of the abstract base type to be tested. Derives from target abstract class providing 
   dummy implemenations of pure virtual methods.
   */
-  class ConcreteMDEWLoadingPresenter : public MDEWLoadingPresenter<MockMDLoadingView>
+  class ConcreteMDEWLoadingPresenter : public MDEWLoadingPresenter
   {
   private:
-    typedef MDEWLoadingPresenter<MockMDLoadingView> BaseClass;
+    typedef MDEWLoadingPresenter BaseClass;
   public:
-    ConcreteMDEWLoadingPresenter(MockMDLoadingView* view) : MDEWLoadingPresenter<MockMDLoadingView>("", view)
+    ConcreteMDEWLoadingPresenter(MockMDLoadingView* view) : MDEWLoadingPresenter("", view)
     {
     }
 

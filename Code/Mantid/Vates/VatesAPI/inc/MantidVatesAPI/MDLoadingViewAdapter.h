@@ -1,16 +1,17 @@
-#ifndef SQW_LOADING_PRESENTER_H_
-#define SQW_LOADING_PRESENTER_H_
+#ifndef MANTID_VATES_MD_LOADING_VIEW_ADAPTER_H
+#define MANTID_VATES_MD_LOADING_VIEW_ADAPTER_H
 
-#include "MantidVatesAPI/MDEWLoadingPresenter.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 namespace Mantid
 {
   namespace VATES
   {
-    /** 
-    @class SQWLoadingPresenter, MVP loading presenter for .*sqw file types.
+
+     /** 
+    @class MDLoadingViewAdapter, Templated type for wrapping non-MDLoadingView types. Adapter pattern.
     @author Owen Arnold, Tessella plc
-    @date 16/08/2011
+    @date 07/09/2011
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -32,19 +33,37 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MDLoadingView;
-    class DLLExport SQWLoadingPresenter : public MDEWLoadingPresenter
+    template<typename ViewType>
+    class DLLExport MDLoadingViewAdapter : public MDLoadingView
     {
+    private:
+      ViewType* m_adaptee;
     public:
-      SQWLoadingPresenter(MDLoadingView* view, const std::string fileName);
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
-      virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
-      virtual void executeLoadMetadata();
-      virtual ~SQWLoadingPresenter();
-      virtual bool canReadFile() const;
-    };
 
-   
+      MDLoadingViewAdapter(ViewType* adaptee) : m_adaptee(adaptee)
+      {
+      }
+
+      virtual double getTime() const
+      {
+        return m_adaptee->getTime();
+      }
+
+      virtual size_t getRecursionDepth() const
+      {
+        return m_adaptee->getRecursionDepth();
+      }
+
+      virtual bool getLoadInMemory() const
+      {
+        return m_adaptee->getLoadInMemory();
+      }
+
+      virtual ~MDLoadingViewAdapter()
+      {
+        //Do not delete adaptee.
+      }
+    };
   }
 }
 

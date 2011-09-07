@@ -16,6 +16,7 @@
 #include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
 vtkCxxRevisionMacro(vtkSQWEventReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSQWEventReader);
@@ -147,7 +148,7 @@ int vtkSQWEventReader::RequestInformation(
 {
   if(m_presenter == NULL)
   {
-    m_presenter = new SQWLoadingPresenter<vtkSQWEventReader>(this, FileName);
+    m_presenter = new SQWLoadingPresenter(new MDLoadingViewAdapter<vtkSQWEventReader>(this), FileName);
     m_presenter->executeLoadMetadata();
     setTimeRange(outputVector);
   }
@@ -161,7 +162,7 @@ void vtkSQWEventReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkSQWEventReader::CanReadFile(const char* fname)
 {
-  SQWLoadingPresenter<vtkSQWEventReader> temp(this, fname);
+  SQWLoadingPresenter temp(new MDLoadingViewAdapter<vtkSQWEventReader>(this), fname);
   return temp.canReadFile();
 }
 

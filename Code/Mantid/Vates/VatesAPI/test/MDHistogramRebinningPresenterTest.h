@@ -31,7 +31,6 @@ public:
 
   void testConstruction()
   {
-    MockMDRebinningView view;
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     MockClipper* pClipper = new MockClipper;
 
@@ -41,14 +40,12 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, new MockMDRebinningView, pClipper, wsProvider);
     TSM_ASSERT("Geometry should be available immediately after construction.", !presenter.getAppliedGeometryXML().empty());
   }
 
   void testConstructionThrowsWhenNoFieldData()
   {
-    MockMDRebinningView view;
-
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
 
@@ -62,15 +59,13 @@ public:
 
     FakeProgressAction progressAction;
 
-    MDHistogramRebinningPresenter<MockMDRebinningView>* presenter;
-    TSM_ASSERT_THROWS("Should not process without field data. Should throw!",presenter = new MDHistogramRebinningPresenter<MockMDRebinningView>(dataSet, pRequest, &view, pClipper, wsProvider), std::logic_error);
+    MDHistogramRebinningPresenter* presenter;
+    TSM_ASSERT_THROWS("Should not process without field data. Should throw!",presenter = new MDHistogramRebinningPresenter(dataSet, pRequest, new MockMDRebinningView, pClipper, wsProvider), std::logic_error);
 
   }
 
   void testConstructionThrowsWhenCannotProvideWorkspace()
   {
-    MockMDRebinningView view;
-
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
 
@@ -84,20 +79,20 @@ public:
 
     FakeProgressAction progressAction;
 
-    MDHistogramRebinningPresenter<MockMDRebinningView>* presenter;
-    TSM_ASSERT_THROWS("No workspace provided. Should throw!",presenter = new MDHistogramRebinningPresenter<MockMDRebinningView>(dataSet, pRequest, &view, pClipper, wsProvider), std::invalid_argument);
+    MDHistogramRebinningPresenter* presenter;
+    TSM_ASSERT_THROWS("No workspace provided. Should throw!",presenter = new MDHistogramRebinningPresenter(dataSet, pRequest, new MockMDRebinningView, pClipper, wsProvider), std::invalid_argument);
 
   }
 
   void testUpdateModelWithNoChanges()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(0); //Since nothing has changed, no requests should be made.
@@ -110,22 +105,22 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   void testUpdateModelWithDifferentMaxThreshold()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).Times(2).WillRepeatedly(Return(1)); //Maxthreshold non-zero
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).Times(2).WillRepeatedly(Return(1)); //Maxthreshold non-zero
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Maxthreshold updated should reflect on request.
@@ -138,22 +133,22 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   void testUpdateModelWithDifferentMinThreshold()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0)); 
-    EXPECT_CALL(view, getMinThreshold()).Times(2).WillRepeatedly(Return(1)); //Minthreshold non-zero
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    MockMDRebinningView* view =new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0)); 
+    EXPECT_CALL(*view, getMinThreshold()).Times(2).WillRepeatedly(Return(1)); //Minthreshold non-zero
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Minthreshold updated should reflect on request.
@@ -166,22 +161,22 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   void testUpdateModelWithDifferentTimestep()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).Times(2).WillRepeatedly(Return(1)); //Timestep updated
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    MockMDRebinningView* view =new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).Times(2).WillRepeatedly(Return(1)); //Timestep updated
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
    
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Timestep updated should reflect on request.
@@ -194,22 +189,22 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   void testUpdateModelWithSwapped4DGeometry()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+     MockMDRebinningView* view =new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "en", "qz");
-    EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
    
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Swapping request should be made.
@@ -222,22 +217,22 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   void testUpdateModelWithMoreXBins()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+     MockMDRebinningView* view =new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11");
-    EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
    
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //From standard 4D swapping
@@ -251,22 +246,22 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   void testUpdateModelWithMoreXYBins()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    MockMDRebinningView* view = new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11", "11");
-    EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str()));
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //From standard 4D swapping
@@ -280,23 +275,23 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
   
   void testUpdateModelWithMoreXYZBins()
   {
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
+    MockMDRebinningView* view = new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11", "11", "11");
-    EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str()));
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //From standard 4D swapping
@@ -310,10 +305,10 @@ public:
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
@@ -324,13 +319,13 @@ public:
      Test that it executes and fully rebins on first pass, then that it does not rebin again on the second pass.
     ****/
 
-    MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false)); //NoChange
+    MockMDRebinningView* view = new  MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillOnce(Return(0)); //NoChange
+    EXPECT_CALL(*view, getMaxThreshold()).WillOnce(Return(0)); //NoChange
+    EXPECT_CALL(*view, getMinThreshold()).WillOnce(Return(0)); //NoChange
+    EXPECT_CALL(*view, getApplyClip()).WillOnce(Return(false)); //NoChange
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str())); // NoChange
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str())); // NoChange
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(_)).Times(0);
@@ -350,11 +345,11 @@ public:
 
     FakeProgressAction progressAction;
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
+    MDHistogramRebinningPresenter presenter(dataSet, pRequest, view, pClipper, wsProvider);
     presenter.updateModel();
     vtkDataSet* product = presenter.execute(pDataSetFactory, progressAction);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pDataSetFactory));
     delete pDataSetFactory;

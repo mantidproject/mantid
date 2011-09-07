@@ -37,6 +37,7 @@
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/MedianAndBelowThresholdRange.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/MDRebinningViewAdapter.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
@@ -313,14 +314,14 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
     try
     {
       ADSWorkspaceProvider<Mantid::API::IMDWorkspace> wsProvider;
-      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDHistogramRebinningPresenter<vtkMDEWRebinningCutter>(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), this, new ClipperAdapter(vtkPVClipDataSet::New()), wsProvider));
+      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDHistogramRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), new ClipperAdapter(vtkPVClipDataSet::New()), wsProvider));
       m_presenter = temp;
     }
     catch(std::invalid_argument&)
     {
       //Try to use another type of presenter with this view. One for MDEWs.
       ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> wsProvider;
-      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDEWRebinningPresenter<vtkMDEWRebinningCutter>(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), this, wsProvider));
+      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDEWRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), wsProvider));
       m_presenter = temp;
     }
     catch(std::logic_error&)

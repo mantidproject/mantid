@@ -11,10 +11,12 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkPVClipDataSet.h"
 #include "vtkBox.h"
+#include "vtkUnstructuredGrid.h"
 
 #include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
 vtkCxxRevisionMacro(vtkMDEWNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkMDEWNexusReader);
@@ -145,7 +147,7 @@ int vtkMDEWNexusReader::RequestInformation(
 {
   if(m_presenter == NULL)
   {
-    m_presenter = new MDEWEventNexusLoadingPresenter<vtkMDEWNexusReader>(this, FileName);
+    m_presenter = new MDEWEventNexusLoadingPresenter(new MDLoadingViewAdapter<vtkMDEWNexusReader>(this), FileName);
     m_presenter->executeLoadMetadata();
     setTimeRange(outputVector);
   }
@@ -159,7 +161,7 @@ void vtkMDEWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkMDEWNexusReader::CanReadFile(const char* fname)
 {
-  MDEWEventNexusLoadingPresenter<vtkMDEWNexusReader> temp(this, fname);
+  MDEWEventNexusLoadingPresenter temp(new MDLoadingViewAdapter<vtkMDEWNexusReader>(this), fname);
   return temp.canReadFile();
 }
 

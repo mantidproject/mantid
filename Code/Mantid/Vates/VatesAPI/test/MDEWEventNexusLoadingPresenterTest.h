@@ -40,40 +40,34 @@ public:
 
 void testConstructWithEmptyFileThrows()
 {
-  MockMDLoadingView view;
-
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter<MockMDLoadingView>(&view, ""), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter(new MockMDLoadingView, ""), std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
   MockMDLoadingView*  pView = NULL;
 
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter<MockMDLoadingView>(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter(pView, "some_file"), std::invalid_argument);
 }
 
 void testConstruct()
 {
-  MockMDLoadingView view;
-
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", MDEWEventNexusLoadingPresenter<MockMDLoadingView>(&view, getSuitableFile()));
+  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", MDEWEventNexusLoadingPresenter(new MockMDLoadingView, getSuitableFile()));
 }
-
 
 void testCanReadFile()
 {
-  MockMDLoadingView view;
-  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getUnhandledFile());
+  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getUnhandledFile());
   TSM_ASSERT("A file of this type cannot and should not be read by this presenter!.", !presenter.canReadFile());
 }
 
 void testExecution()
 {
   //Setup view
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1)); 
-  EXPECT_CALL(view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true)); 
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(AnyNumber());
+  MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
+  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true)); 
+  EXPECT_CALL(*view, updateAlgorithmProgress(_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -82,10 +76,10 @@ void testExecution()
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates object
-  FilterUpdateProgressAction<MockMDLoadingView> progressAction(&view);
+  FilterUpdateProgressAction<MockMDLoadingView> progressAction(view);
 
   //Create the presenter and runit!
-  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, progressAction);
 
@@ -96,7 +90,7 @@ void testExecution()
   TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
   product->Delete();
@@ -104,22 +98,19 @@ void testExecution()
 
 void testCallHasTDimThrows()
 {
-  MockMDLoadingView view;
-  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
-  MockMDLoadingView view;
-  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
-  MockMDLoadingView view;
-  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
 }
 

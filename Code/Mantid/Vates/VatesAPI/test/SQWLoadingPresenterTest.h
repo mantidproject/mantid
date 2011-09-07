@@ -38,43 +38,37 @@ public:
 
 void testConstructWithEmptyFileThrows()
 {
-  MockMDLoadingView view;
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter<MockMDLoadingView>(&view, ""), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter(new MockMDLoadingView, ""), std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
   MockMDLoadingView*  pView = NULL;
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter<MockMDLoadingView>(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter(pView, "some_file"), std::invalid_argument);
 }
 
 void testConstruct()
 {
-  MockMDLoadingView view;
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", SQWLoadingPresenter<MockMDLoadingView>(&view, getSuitableFile()));
+  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", SQWLoadingPresenter(new MockMDLoadingView, getSuitableFile()));
 }
 
 void testCanReadFile()
 {
   MockMDLoadingView view;
 
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT("Should be readable, valid SQW file.", presenter.canReadFile());
 }
 
 void testCanReadFileWithDifferentCaseExtension()
 {
-  MockMDLoadingView view;
-
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, "other.Sqw");
+  SQWLoadingPresenter presenter(new MockMDLoadingView, "other.Sqw");
   TSM_ASSERT("Should be readable, only different in case.", presenter.canReadFile());
 }
 
 void testCannotReadFileWithWrongExtension()
 {
-  MockMDLoadingView view;
-
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getUnhandledFile());
+  SQWLoadingPresenter presenter(new MockMDLoadingView, getUnhandledFile());
   TSM_ASSERT("Should NOT be readable, completely wrong file type.", !presenter.canReadFile());
 }
 
@@ -82,11 +76,11 @@ void testExecution()
 {
   using namespace testing;
    //Setup view
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1)); 
-  EXPECT_CALL(view, getLoadInMemory()).Times(AtLeast(1)); 
-  EXPECT_CALL(view, getTime()).Times(AtLeast(1));
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(AnyNumber());
+  MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
+  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)); 
+  EXPECT_CALL(*view, getTime()).Times(AtLeast(1));
+  EXPECT_CALL(*view, updateAlgorithmProgress(_)).Times(AnyNumber());
 
   //Setup rendering factory
   MockvtkDataSetFactory factory;
@@ -95,10 +89,10 @@ void testExecution()
   EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates object
-  FilterUpdateProgressAction<MockMDLoadingView> progressAction(&view);
+  FilterUpdateProgressAction<MockMDLoadingView> progressAction(view);
 
   //Create the presenter and runit!
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter presenter(view, getSuitableFile());
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, progressAction);
 
@@ -109,7 +103,7 @@ void testExecution()
   TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
 
-  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
   product->Delete();
@@ -117,29 +111,25 @@ void testExecution()
 
 void testCallHasTDimThrows()
 {
-  MockMDLoadingView view;
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
-  MockMDLoadingView view;
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
-  MockMDLoadingView view;
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
 }
 
 void testExecuteLoadMetadata()
 {
-  MockMDLoadingView view;
-  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
   presenter.executeLoadMetadata();
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.getTimeStepValues());
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable());

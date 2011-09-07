@@ -41,6 +41,12 @@ src/vtkThresholdingHexahedronFactory.cpp
 src/vtkThresholdingLineFactory.cpp
 src/vtkThresholdingQuadFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
+src/EventNexusLoadingPresenter.cpp
+src/MDEWLoadingPresenter.cpp
+src/SQWLoadingPresenter.cpp
+src/MDEWEventNexusLoadingPresenter.cpp
+src/MDEWRebinningPresenter.cpp
+src/MDHistogramRebinningPresenter.cpp
 )
 
 set( INC_FILES 
@@ -63,8 +69,10 @@ inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
+inc/MantidVatesAPI/MDLoadingViewAdapter.h
 inc/MantidVatesAPI/MDRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
+inc/MantidVatesAPI/MDRebinningViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
@@ -125,6 +133,8 @@ test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
+test/MDLoadingViewAdapterTest.h
+test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
 test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h

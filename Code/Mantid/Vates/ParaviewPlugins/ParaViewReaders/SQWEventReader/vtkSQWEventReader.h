@@ -49,7 +49,7 @@ private:
   char *FileName;
 
   /// Controller/Presenter.
-  Mantid::VATES::SQWLoadingPresenter<vtkSQWEventReader>* m_presenter;
+  Mantid::VATES::SQWLoadingPresenter* m_presenter;
 
   /// Flag indicating that file loading algorithm should attempt to fully load the file into memory.
   bool m_loadInMemory;
