@@ -173,7 +173,7 @@ namespace Mantid
 
       std::vector<Property*> Prop=getProperties();
       std::vector<Property*>::const_iterator itr;
-      for (itr=Prop.begin();itr!=Prop.end();itr++)
+      for (itr=Prop.begin();itr!=Prop.end();++itr)
       {
         const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
         if (wsProp)
@@ -857,7 +857,7 @@ namespace Mantid
       for(;wsItr!=inputWSNames.end();++wsItr)
       { //set  properties
         std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-        for (itr=props.begin();itr!=props.end();itr++)
+        for (itr=props.begin();itr!=props.end();++itr)
         {
           int outWSCount=0;
 
