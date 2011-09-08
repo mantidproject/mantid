@@ -318,7 +318,7 @@ namespace Mantid
       file->putAttr("version", 1);
       m_material.saveNexus(file, "material");
       // Write out the other (indexes 1+) samples
-      file->writeData("num_other_samples", m_samples.size() );
+      file->writeData("num_other_samples", int(m_samples.size()) );
       for (size_t i=0; i<m_samples.size(); i++)
         m_samples[i]->saveNexus(file, "sample" + Mantid::Kernel::Strings::toString(i+1));
       //TODO: Sample, environment
