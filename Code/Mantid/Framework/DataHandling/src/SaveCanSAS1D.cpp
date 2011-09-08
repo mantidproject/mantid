@@ -63,6 +63,7 @@ void SaveCanSAS1D::init()
   declareProperty("RadiationSource", "Spallation Neutron Source", new Kernel::ListValidator(
       radiation_source));
   declareProperty("Append", false, "If true the output file is not overwritten but appended to"); 
+  declareProperty("Process", "", "Text to append to Process section");
 }
 /** Is called when the input workspace was actually a group, it sets the
  *  for all group members after the first so that the whole group is saved
@@ -163,6 +164,15 @@ void SaveCanSAS1D::exec()
   std::string sasProcess;
   createSASProcessElement(sasProcess);
   m_outFile<<sasProcess;
+
+  // Reduction process, if available
+  const std::string process_xml = getProperty("Process");
+  if (process_xml.size()>0)
+  {
+    m_outFile << "\n\t\t<SASProcess>\n";
+    m_outFile << process_xml;
+    m_outFile << "\n\t\t</SASProcess>\n";
+  }
 
   std::string sasNote="\n\t\t<SASnote>";
   sasNote+="\n\t\t</SASnote>";

@@ -1365,8 +1365,9 @@ class SaveIqAscii(ReductionStep):
     """
         Save the reduced data to ASCII files
     """
-    def __init__(self):
+    def __init__(self, process=None):
         super(SaveIqAscii, self).__init__()
+        self._process = process
         
     def execute(self, reducer, workspace):
         # Determine which directory to use
@@ -1384,10 +1385,15 @@ class SaveIqAscii(ReductionStep):
                 output_list = [output_list]
             for output_ws in output_list:
                 if mtd.workspaceExists(output_ws):
+                    proc_xml = ""
+                    if self._process is not None:
+                        proc = open(self._process, 'r')
+                        proc_xml = proc.read()
+                        
                     filename = os.path.join(output_dir, output_ws+'.txt')
                     SaveAscii(Filename=filename, InputWorkspace=output_ws, Separator="\t", CommentIndicator="# ", WriteXError=True)
                     filename = os.path.join(output_dir, output_ws+'.xml')
-                    SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
+                    SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws, Process=proc_xml)
                     
                     log_text = "I(Q) saved in %s" % (filename)
         

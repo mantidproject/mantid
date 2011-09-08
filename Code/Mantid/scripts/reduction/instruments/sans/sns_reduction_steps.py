@@ -484,8 +484,8 @@ class SaveIqAscii(BaseSaveIqAscii):
     """
         Save the reduced data to ASCII files
     """
-    def __init__(self):
-        super(SaveIqAscii, self).__init__()
+    def __init__(self, process=None):
+        super(SaveIqAscii, self).__init__(process)
         
     def execute(self, reducer, workspace):
         log_text = super(SaveIqAscii, self).execute(reducer, workspace)

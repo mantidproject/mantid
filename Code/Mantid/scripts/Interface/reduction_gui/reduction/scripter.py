@@ -15,6 +15,7 @@ import sys
 import time
 import platform
 import re
+import os
 
 class BaseScriptElement(object):
     """
@@ -251,6 +252,15 @@ class BaseReductionScripter(object):
     def __init__(self, name=""):
         self.instrument_name = name
         self._observers = []
+        self._output_directory = os.path.expanduser('~')
+        if HAS_MANTID:
+            try:
+                head, tail = os.path.split(ConfigService().getUserFilename())
+                if os.path.isdir(head):
+                    self._output_directory = head
+            except:
+                # Doesn't really matter
+                pass
 
     def clear(self):
         """

@@ -3,6 +3,7 @@
     This is a fake version of the Reducer for testing purposes.
 """
 import time
+import os
 from scripter import BaseReductionScripter
 
 class EQSANSReductionScripter(BaseReductionScripter):
@@ -32,13 +33,17 @@ class EQSANSReductionScripter(BaseReductionScripter):
             if item.state() is not None:
                 script += str(item.state())
         
-        script += "SaveIqAscii()\n"
-        script += "Reduce1D()\n"
-        
+        xml_process = "None"
         if file_name is not None:
             f = open(file_name, 'w')
             f.write(script)
             f.close()
+        else:
+            xml_process = os.path.join(self._output_directory, "EQSANS_process.xml")
+            self.to_xml(xml_process)
+            
+        script += "SaveIqAscii(process=\"%s\")\n" % xml_process
+        script += "Reduce1D()\n"
         
         return script
         
