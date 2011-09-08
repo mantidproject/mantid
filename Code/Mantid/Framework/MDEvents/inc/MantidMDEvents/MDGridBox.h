@@ -82,11 +82,11 @@ namespace MDEvents
     void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
-    void splitContentsById(size_t childId);
+    //void splitContentsById(size_t childId); // No definition causes a myriad of warnings on MSVC
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
 
-    void cacheChildrenToDisk();
+    //void cacheChildrenToDisk(); // No definition causes a myriad of warnings on MSVC
 
     void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
