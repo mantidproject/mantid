@@ -17,3 +17,8 @@ VatesViewerInterface::~VatesViewerInterface()
 void VatesViewerInterface::setupPluginMode()
 {
 }
+
+void VatesViewerInterface::loadWorkspace(QString wsname)
+{
+  UNUSED_ARG(wsname);
+}

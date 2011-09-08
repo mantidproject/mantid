@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+class QString;
+
 namespace MantidQt
 {
 namespace API
@@ -51,6 +53,7 @@ public:
   VatesViewerInterface(QWidget *parent);
   /// Default destructor
   virtual ~VatesViewerInterface();
+  virtual void loadWorkspace(QString wsname);
   /// Special function of correct widget invocation for plugin mode
   virtual void setupPluginMode();
 };

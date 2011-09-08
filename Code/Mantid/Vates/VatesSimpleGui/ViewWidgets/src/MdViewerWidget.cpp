@@ -135,8 +135,8 @@ void MdViewerWidget::createAppCoreForPlugin()
 {
   if (!pqApplicationCore::instance())
   {
-    int argc = 0;
-    char *argv[] = {""};
+    int argc = 1;
+    char *argv[] = {"/tmp/MantidPlot"};
     new pqPVApplicationCore(argc, argv);
   }
   else
@@ -282,6 +282,15 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
     emit this->enableMultiSliceViewButton();
   }
   emit this->enableThreeSliceViewButton();
+}
+
+void MdViewerWidget::loadWorkspace(QString wsname)
+{
+  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->originSource = builder->createSource("sources", "MDEW Source", pqActiveObjects::instance().activeServer());
+  vtkSMPropertyHelper(this->originSource->getProxy(), "Mantid Workspace Name").Set(wsname.toStdString().c_str());
+  //this->ui.proxyTabWidget->getObjectInspector()->accept();
+  //this->currentView->render();
 }
 
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)

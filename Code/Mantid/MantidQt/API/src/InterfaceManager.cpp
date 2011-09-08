@@ -160,13 +160,14 @@ void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInsta
   this->m_vatesGuiFactory = factory;
 }
 
-VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui(QWidget* parent) const
+VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui(QWidget* parent, QString wsname) const
 {
   VatesViewerInterface *vsg = NULL;
   vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
   vsg->setParent(parent);
   vsg->setWindowTitle("Vates Simple Interface");
   vsg->setupPluginMode();
+  vsg->loadWorkspace(wsname);
   if (!vsg)
   {
     g_log.error() << "Error creating Vates Simple GUI" << std::endl;

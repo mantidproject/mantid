@@ -14,6 +14,7 @@ class pqPipelineSource;
 
 class QAction;
 class QHBoxLayout;
+class QString;
 
 namespace Mantid
 {
@@ -72,6 +73,8 @@ public:
    * @param action the action to connect data loading to
    */
   void connectLoadDataReaction(QAction *action);
+  /// See MantidQt::API::VatesViewerInterface
+  void loadWorkspace(QString wsname);
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode();
 

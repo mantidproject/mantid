@@ -93,7 +93,7 @@ public:
    * @param parent a parent widget for the simple user interface
    * @return the Vates simple user interface
    */
-  VatesViewerInterface *createVatesSimpleGui(QWidget *parent = 0) const;
+  VatesViewerInterface *createVatesSimpleGui(QWidget *parent, QString wsname) const;
   /**
    * Registration function for the Vates simple interface factory.
    * @param factory the factory instance
