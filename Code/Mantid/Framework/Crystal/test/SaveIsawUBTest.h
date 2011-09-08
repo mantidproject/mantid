@@ -61,10 +61,18 @@ void test_exec()
   if (!ws) return;
 
   SaveIsawUB Salg;
+  FileProperty file1("File1","",Mantid::API::FileProperty::Load);
+
+   file1.setValue("TOPAZ_3007.mat");
+   std::string File1 = file1.value();
+
+   std::string File2( File1);
+   File2 +="A";
+
 
   TS_ASSERT_THROWS_NOTHING( Salg.initialize() )
   TS_ASSERT( Salg.isInitialized() )
-  TS_ASSERT_THROWS_NOTHING( Salg.setPropertyValue("Filename", "TOPAZ_3007A.mat") );
+  TS_ASSERT_THROWS_NOTHING( Salg.setPropertyValue("Filename", File2));
   TS_ASSERT_THROWS_NOTHING( Salg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws") );
   TS_ASSERT_THROWS_NOTHING( Salg.execute(); );
   TS_ASSERT( Salg.isExecuted() );
@@ -72,12 +80,6 @@ void test_exec()
 
   AnalysisDataService::Instance().remove("LoadIsawUBTest_ws");
 
-  FileProperty file1("File1","",Mantid::API::FileProperty::Load);
-  FileProperty file2("File2","",Mantid::API::FileProperty::Load);
-  file1.setValue("TOPAZ_3007.mat");
-  file2.setValue("TOPAZ_3007A.mat");
-  std::string File1 = file1.value();
-  std::string File2 = file2.value();
 
   ifstream F1;
   ifstream F2;
@@ -153,7 +155,7 @@ void test_exec()
     Mantid::Kernel::Strings::readToEndOfLine(F2,true);
   }
 
-  remove( File2.c_str());
+   remove( File2.c_str());
 }
 };
 
