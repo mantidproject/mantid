@@ -123,7 +123,7 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
     std::vector<TofEvent>::iterator it;
     std::vector<TofEvent> clean_events;
 
-    for (it=events.begin(); it<events.end(); it++)
+    for (it=events.begin(); it<events.end(); ++it)
     {
       it->m_tof += frame_offset;
       // Correct for the scattered neutron flight path
@@ -143,7 +143,7 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
       clean_events.push_back(*it);
     }
     events.clear();
-    for (it=clean_events.begin(); it<clean_events.end(); it++)
+    for (it=clean_events.begin(); it<clean_events.end(); ++it)
     {
       events.push_back(*it);
     }

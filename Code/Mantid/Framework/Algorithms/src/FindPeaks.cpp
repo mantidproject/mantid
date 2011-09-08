@@ -138,7 +138,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
 
   for (int spec = start; spec < end; ++spec)
   {
-    for (it = peakCenters.begin(); it != peakCenters.end(); it++)
+    for (it = peakCenters.begin(); it != peakCenters.end(); ++it)
     {
       //Try to fit at this center
       double x_center = *it;

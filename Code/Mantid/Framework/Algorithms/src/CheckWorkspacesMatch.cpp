@@ -336,7 +336,7 @@ bool CheckWorkspacesMatch::checkSpectraMap(MatrixWorkspace_const_sptr ws1, Matri
     }
     std::set<detid_t>::const_iterator it1 = spec1->getDetectorIDs().begin();
     std::set<detid_t>::const_iterator it2 = spec2->getDetectorIDs().begin();
-    for (; it1 != spec1->getDetectorIDs().end(); it1++, it2++)
+    for (; it1 != spec1->getDetectorIDs().end(); ++it1, ++it2)
     {
       if (*it1 != *it2)
       {

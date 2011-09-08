@@ -87,7 +87,7 @@ void MaskDetectorsIf::exec()
 			if (compar_f(val,value))
 			{
 			  std::set<detid_t>::const_iterator it = dets.begin();
-			  for (; it!=dets.end(); it++)
+			  for (; it!=dets.end(); ++it)
 			    umap.insert(std::make_pair<detid_t,bool>(*it,select_on));
 			}
 		}

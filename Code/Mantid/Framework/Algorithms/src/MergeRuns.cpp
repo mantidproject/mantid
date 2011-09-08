@@ -292,7 +292,7 @@ void MergeRuns::execEvent()
 
     //Add all the event lists together as the table says to do
     AdditionTable::iterator it;
-    for (it = table->begin(); it != table->end(); it++)
+    for (it = table->begin(); it != table->end(); ++it)
     {
       int64_t inWI = it->first;
       int64_t outWI = it->second;

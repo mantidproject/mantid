@@ -120,7 +120,7 @@ namespace Mantid
         {
           // Use the same offset for all detectors from this pixel
           std::set<detid_t>::iterator it;
-          for (it = dets.begin(); it != dets.end(); it++)
+          for (it = dets.begin(); it != dets.end(); ++it)
           {
             outputW->setValue(*it, offset);
             if (mask == 0.) maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);

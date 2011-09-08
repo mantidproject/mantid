@@ -136,7 +136,7 @@ void SumSpectra::exec()
     // Loop over spectra
     std::set<int>::iterator it;
     //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
-    for (it = indices.begin(); it != indices.end(); it++)
+    for (it = indices.begin(); it != indices.end(); ++it)
     {
       int i =  *it;
       //Don't go outside the range.
@@ -213,7 +213,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
   // Loop over spectra
   std::set<int>::iterator it;
   //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
-  for (it = indices.begin(); it != indices.end(); it++)
+  for (it = indices.begin(); it != indices.end(); ++it)
   {
     int i =  *it;
     //Don't go outside the range.

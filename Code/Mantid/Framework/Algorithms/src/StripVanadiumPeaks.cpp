@@ -128,7 +128,7 @@ void StripVanadiumPeaks::exec()
 
       //Strip each peak listed
       std::vector<double>::iterator it;
-      for (it = centers.begin(); it != centers.end(); it++)
+      for (it = centers.begin(); it != centers.end(); ++it)
       {
         //Peak center and width
         double center = *it;

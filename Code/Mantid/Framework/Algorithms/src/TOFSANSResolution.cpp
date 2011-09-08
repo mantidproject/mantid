@@ -158,7 +158,7 @@ void TOFSANSResolution::exec()
     std::vector<WeightedEvent>::iterator itev;
     std::vector<WeightedEvent>::iterator itev_end = el.getWeightedEvents().end();
 
-    for (itev = el.getWeightedEvents().begin(); itev != itev_end; itev++)
+    for (itev = el.getWeightedEvents().begin(); itev != itev_end; ++itev)
     {
       if ( itev->m_weight != itev->m_weight ) continue;
       if (std::abs(itev->m_weight) == std::numeric_limits<double>::infinity()) continue;

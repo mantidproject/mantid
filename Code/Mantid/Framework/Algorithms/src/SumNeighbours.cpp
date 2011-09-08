@@ -176,7 +176,7 @@ void SumNeighbours::exec()
   std::vector <std::pair<int, int> >::iterator Iter1;
 
   //Loop through the RectangularDetector's we listed before.
-  for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
+  for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; ++Iter1 )
   {
     int i = (*Iter1).second;
     std::string det_name("");

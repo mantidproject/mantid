@@ -138,7 +138,7 @@ namespace Algorithms
     // Assign incremental number to each group
     std::map<std::string,int> group_map;
     int index=0;
-    for (std::vector<std::string>::const_iterator it=vgroups.begin();it!=vgroups.end();it++)
+    for (std::vector<std::string>::const_iterator it=vgroups.begin();it!=vgroups.end();++it)
       group_map[(*it)]=++index;
 
     // Find Detectors that belong to groups
@@ -275,7 +275,7 @@ namespace Algorithms
       // Make the groups, if any
       std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
       std::map<detid_t, int>::const_iterator it;
-      for (it = detIDtoGroup.begin(); it != it_end; it++)
+      for (it = detIDtoGroup.begin(); it != it_end; ++it)
       {
         int detID = it->first;
         int group = it->second;

@@ -125,7 +125,7 @@ void GeneralisedSecondDifference::exec()
   		MantidVec::const_iterator itInE=refE.begin();
   		MantidVec::iterator itOutE=outE.begin();
   		double err2;
-  		for (;itOutY!=outY.end();itOutY++,itInY++,itOutE++,itInE++)
+  		for (;itOutY!=outY.end();++itOutY,++itInY,++itOutE,++itInE)
   		{
   			//Calculate \sum_{j}Cij.Y(j)
   			(*itOutY)=std::inner_product(itInY,itInY+nsteps,Cij.begin(),0.0);

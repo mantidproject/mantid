@@ -299,7 +299,7 @@ namespace Mantid
         //Ok, this map has as keys the source workspace indices
         GhostSourcesMap * thisGroupsGhostMap = this->groupedGhostMaps[gr];
         GhostSourcesMap::iterator it;
-        for (it = thisGroupsGhostMap->begin(); it != thisGroupsGhostMap->end(); it++)
+        for (it = thisGroupsGhostMap->begin(); it != thisGroupsGhostMap->end(); ++it)
         {
           //This workspace index is causing 16 ghosts in this group.
           int64_t inputWorkspaceIndex = it->first;
