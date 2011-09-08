@@ -64,7 +64,7 @@ namespace Mantid
       ///String description of the type of component
       virtual std::string type() const { return "Instrument"; }
 
-      Instrument(const boost::shared_ptr<Instrument> instr, boost::shared_ptr<ParameterMap> map);
+      Instrument(const boost::shared_ptr<const Instrument> instr, boost::shared_ptr<ParameterMap> map);
       Instrument();
       Instrument(const std::string& name);
       Instrument(const Instrument&);
@@ -155,7 +155,7 @@ namespace Mantid
       using CompAssembly::getChild;
 
       /// Pointer to the 'real' instrument, for parametrized instruments
-      boost::shared_ptr<Instrument> baseInstrument() const;
+      boost::shared_ptr<const Instrument> baseInstrument() const;
 
       /// Pointer to the NOT const ParameterMap holding the parameters of the modified instrument components.
       boost::shared_ptr<ParameterMap> getParameterMap() const;
@@ -173,6 +173,11 @@ namespace Mantid
       /// Set the date at which the instrument definition is no longer valid.
       /// @param val :: date
       void setValidToDate(const Kernel::DateAndTime val) { m_ValidTo = val; }
+
+      // Methods for use with indirect geometry instruments,
+      // where the physical instrument differs from the 'neutronic' one
+      boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
+      void setPhysicalInstrument(boost::shared_ptr<const Instrument>);
 
       // ----- Useful static functions ------
       static double calcConversion(const double l1, const Kernel::V3D &beamline, const double beamline_norm,
@@ -228,7 +233,7 @@ namespace Mantid
       std::string m_defaultViewAxis;
 
       /// Pointer to the "real" instrument, for parametrized Instrument
-      boost::shared_ptr<Instrument> m_instr;
+      boost::shared_ptr<const Instrument> m_instr;
 
       /// Non-const pointer to the parameter map
       boost::shared_ptr<ParameterMap> m_map_nonconst;
@@ -237,6 +242,9 @@ namespace Mantid
       Kernel::DateAndTime m_ValidFrom;
       /// the date at which the instrument definition is no longer valid.
       Kernel::DateAndTime m_ValidTo;
+
+      /// Pointer to the physical instrument, where this differs from the 'neutronic' one (indirect geometry)
+      boost::shared_ptr<const Instrument> m_physicalInstrument;
     };
 
     /// Shared pointer to an instrument object

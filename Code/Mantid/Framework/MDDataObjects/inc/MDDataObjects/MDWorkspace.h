@@ -162,7 +162,7 @@ namespace Mantid
       /// Get the geometry xml.
       virtual std::string getGeometryXML() const;
 
-      void setInstrument(const Geometry::Instrument_sptr& instr);
+      void setInstrument(const Geometry::Instrument_const_sptr& instr);
 
       /// Creates a new iterator pointing to the first cell in the workspace
       Mantid::API::IMDIterator* createIterator() const;
@@ -196,7 +196,7 @@ namespace Mantid
       mutable MDCellMap m_mdCellMap;
 
       // Shared pointer to a base instrument.
-      mutable boost::shared_ptr<Mantid::Geometry::Instrument> sptr_instrument;
+      mutable boost::shared_ptr<const Mantid::Geometry::Instrument> sptr_instrument;
 
       /// The instrument parameter map.
       mutable boost::shared_ptr<Geometry::ParameterMap> m_parmap;

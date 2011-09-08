@@ -57,7 +57,7 @@ public:
       space2D->getSpectrum(j)->setDetectorID(j);
     }
 
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument());
+    Instrument_sptr instr = boost::const_pointer_cast<Instrument>(space->getBaseInstrument());
     for (detid_t i=0; i<6; i++)
     {
       Detector *d = new Detector("det", i,0);

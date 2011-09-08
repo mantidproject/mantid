@@ -42,7 +42,7 @@ using namespace Mantid::NeXus;
 using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument_sptr;
+using Geometry::Instrument_const_sptr;
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
@@ -1176,7 +1176,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
   const std::string & details =  pmap_node.data().front();
   Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-  Instrument_sptr instr = local_workspace->getBaseInstrument();
+  Instrument_const_sptr instr = local_workspace->getBaseInstrument();
   
   int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Poco::StringTokenizer::TOK_TRIM;

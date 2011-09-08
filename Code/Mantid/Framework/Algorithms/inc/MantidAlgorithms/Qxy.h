@@ -70,7 +70,7 @@ private:
   /// Execution code
   void exec();
 
-  API::MatrixWorkspace_sptr setUpOutputWorkspace();
+  API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

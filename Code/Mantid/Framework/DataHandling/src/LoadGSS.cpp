@@ -489,18 +489,9 @@ namespace Mantid
         g_log.information() << "Detector " << detectorids[i] << "  L1+L2 = " << totalflightpaths[i] << "  2Theta = " << twothetas[i] << std::endl;
       }
 
-      // 1. Create a new instrument
-      workspace->setInstrument(boost::shared_ptr<Geometry::Instrument>(new Geometry::Instrument));
-
-      // 2. Get reference to Instrument and set its name
-      boost::shared_ptr<Geometry::Instrument> instrument = workspace->getBaseInstrument();
-      if (instrument.get() == 0)
-      {
-          g_log.error("Trying to use a Parametrized Instrument as an Instrument.");
-          throw std::runtime_error("Trying to use a Parametrized Instrument as an Instrument.");
-      }
-
-      instrument->setName(instrumentname);
+      // 1. Create a new instrument and set its name
+      Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrumentname));
+      workspace->setInstrument(instrument);
 
       // 3. Add dummy source and samplepos to instrument
       Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample",instrument.get());
@@ -561,9 +552,6 @@ namespace Mantid
         << "the beam along z-axis pointing from source to sample, this implies the source is " << l1 << "m in front \n"
         << "of the sample. This value can be changed via the 'instrument.l1' configuration property.\n";
       */
-
-      return;
-
 
       return;
     }

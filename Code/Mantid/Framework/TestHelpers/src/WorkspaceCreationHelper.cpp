@@ -134,8 +134,8 @@ namespace WorkspaceCreationHelper
     if( workspace->getInstrument()->nelements() == 0 ) 
     {
       // We need detectors to be able to mask them.
-      workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
-      boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
+      boost::shared_ptr<Instrument> instrument(new Instrument);
+      workspace->setInstrument(instrument);
       
       std::string xmlShape = "<sphere id=\"shape\"> ";
       xmlShape += "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> " ;

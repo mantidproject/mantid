@@ -71,9 +71,9 @@ void LoadInstrumentFromNexus::exec()
     throw Exception::FileError("Unable to open File:" , m_filename);
   }
   progress(0.5);
-  // Get reference to Instrument and set its name
-  boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
-  instrument->setName(nxload.getInstrumentName());
+  // Create a new Instrument with the right name and add it to the workspace
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(nxload.getInstrumentName()));
+  localWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from nexus file assumed to be relative to sample position

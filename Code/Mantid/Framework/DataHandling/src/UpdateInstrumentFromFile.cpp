@@ -28,6 +28,7 @@ namespace Mantid
     
     using namespace Kernel;
     using namespace API;
+    using Geometry::Instrument;
     using Geometry::Instrument_sptr;
     using Geometry::IDetector_sptr;
     using Kernel::V3D;
@@ -68,7 +69,8 @@ namespace Mantid
       // Retrieve the filename from the properties
       const std::string filename = getPropertyValue("Filename");
       MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-      Instrument_sptr instrument = localWorkspace->getBaseInstrument();
+      // Have to resort to a cast here. Really I think this algorithm should be changing the parameter map.
+      Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getBaseInstrument());
       if (instrument.get() == 0)
       {
         throw std::runtime_error("Input workspace has no defined instrument");

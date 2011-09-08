@@ -77,17 +77,9 @@ void LoadInstrumentFromRaw::exec()
     throw Exception::FileError("Unable to open File:" , m_filename);
   }
 
-  // Clear off any existing instrument for this workspace
-  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
-
-  // Get reference to Instrument and set its name
-  boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
-  if (instrument.get() == 0)
-  {
-      g_log.error("Trying to use a Parametrized Instrument as an Instrument.");
-      throw std::runtime_error("Trying to use a Parametrized Instrument as an Instrument.");
-  }
-  instrument->setName(iraw.i_inst);
+  // Create a new Instrument with the right name and add it to the workspace
+  Geometry::Instrument_sptr instrument(new Instrument(iraw.i_inst));
+  localWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample position

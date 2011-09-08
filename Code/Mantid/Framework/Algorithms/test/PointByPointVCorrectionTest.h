@@ -39,7 +39,9 @@ public:
     MatrixWorkspace_sptr testSample = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,5,0.5,1.5);
     MatrixWorkspace_sptr testVanadium = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,5,0.5,1.5);
     // Make the instruments match
-    testVanadium->setInstrument(testSample->getBaseInstrument());
+    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
+    testSample->setInstrument(inst);
+    testVanadium->setInstrument(inst);
     // Change the Y values
     testSample->dataY(1) = Mantid::MantidVec(5,3.0);
     testVanadium->dataY(1) = Mantid::MantidVec(5,5.5);

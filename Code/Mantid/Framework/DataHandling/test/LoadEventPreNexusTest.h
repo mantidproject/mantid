@@ -184,7 +184,7 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
     //Check if the instrument was loaded correctly
-    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
+    boost::shared_ptr<const Instrument> inst = ew->getBaseInstrument();
     TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
 
     //Mapping between workspace index and spectrum number

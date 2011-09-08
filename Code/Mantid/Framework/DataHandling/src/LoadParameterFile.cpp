@@ -48,6 +48,7 @@ void LoadParameterFile::initDocs()
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
+using Geometry::Instrument_sptr;
 
 /// Empty default constructor
 LoadParameterFile::LoadParameterFile() : Algorithm()
@@ -79,7 +80,8 @@ void LoadParameterFile::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-	boost::shared_ptr<Instrument> instrument = localWorkspace->getBaseInstrument();
+  // TODO: Refactor to remove the need for the const cast
+  Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getBaseInstrument());
 
 
   // Set up the DOM parser and parse xml file

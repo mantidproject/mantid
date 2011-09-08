@@ -292,7 +292,8 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
-    ws2->getBaseInstrument()->setName("different");
+    Mantid::Geometry::Instrument_sptr instrument(new Mantid::Geometry::Instrument("different"));
+    ws2->setInstrument(instrument);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );

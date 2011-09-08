@@ -95,7 +95,7 @@ namespace API
   *getInstrument
   *  @return The instrument class
   */
-  boost::shared_ptr<Instrument> ExperimentInfo::getBaseInstrument() const
+  Instrument_const_sptr ExperimentInfo::getBaseInstrument() const
   {
     return sptr_instrument;
   }

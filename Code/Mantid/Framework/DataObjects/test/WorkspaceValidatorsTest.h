@@ -243,9 +243,11 @@ public:
     TS_ASSERT_EQUALS( instVal->isValid(ws), "The workspace must have an instrument defined" );
 
     // Add a sample pos and then things will be fine
+    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
+    ws->setInstrument(inst);
     Mantid::Geometry::ObjComponent * sample = new Mantid::Geometry::ObjComponent("Sample");
-    ws->getBaseInstrument()->add(sample);  // This takes care of deletion
-    ws->getBaseInstrument()->markAsSamplePos(sample);
+    inst->add(sample);  // This takes care of deletion
+    inst->markAsSamplePos(sample);
     TS_ASSERT_EQUALS( instVal->isValid(ws), "" );
 
     delete instVal;

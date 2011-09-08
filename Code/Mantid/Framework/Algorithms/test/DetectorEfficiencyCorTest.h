@@ -178,8 +178,8 @@ public:
     
     pDoc->release();
 
-    space2D->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
-    boost::shared_ptr<Instrument> instrument = space2D->getBaseInstrument();
+    boost::shared_ptr<Instrument> instrument(new Instrument);
+    space2D->setInstrument(instrument);
     ObjComponent *sample = new ObjComponent("sample", shape, NULL);
     sample->setPos(0,0,0);
     instrument->markAsSamplePos(sample);

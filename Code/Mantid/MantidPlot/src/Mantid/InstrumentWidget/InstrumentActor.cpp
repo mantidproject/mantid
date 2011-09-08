@@ -105,7 +105,7 @@ bool InstrumentActor::accept(const GLActorVisitor& visitor)
 
 /** Returns the workspace relating to this instrument view.
  *  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
- *  !!!! USE InstrumentActor::getInstrument BELOW !!!!
+ *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
 {
@@ -114,7 +114,12 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
 
 Instrument_const_sptr InstrumentActor::getInstrument() const
 {
-  return m_workspace->getInstrument();
+  Instrument_const_sptr retval = m_workspace->getInstrument()->getPhysicalInstrument();
+  if ( ! retval )
+  {
+    retval = m_workspace->getInstrument();
+  }
+  return retval;
 }
 
 const MantidColorMap& InstrumentActor::getColorMap() const

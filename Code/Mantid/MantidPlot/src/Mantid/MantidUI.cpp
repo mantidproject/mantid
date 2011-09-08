@@ -3044,7 +3044,7 @@ void MantidUI::test()
   Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getSelectedWorkspace());
   if (ws)
   {
-    boost::shared_ptr<Mantid::Geometry::Instrument> instr = ws->getBaseInstrument();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getBaseInstrument();
     boost::shared_ptr<Mantid::Geometry::CompAssembly> both = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*instr)[3]);
     if (both)
     {

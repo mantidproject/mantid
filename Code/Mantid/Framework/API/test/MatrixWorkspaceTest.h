@@ -33,8 +33,8 @@ MatrixWorkspace * makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins)
   MatrixWorkspace *ws2 = new WorkspaceTester;
   ws2->initialize(numSpectra,numBins,numBins);
 
-  ws2->setInstrument(Instrument_sptr(new Instrument("TestInstrument")));
-  Instrument_sptr inst = ws2->getBaseInstrument();
+  Instrument_sptr inst(new Instrument("TestInstrument"));
+  ws2->setInstrument(inst);
   // We get a 1:1 map by default so the detector ID should match the spectrum number
   for( size_t i = 0; i < ws2->getNumberHistograms(); ++i )
   {

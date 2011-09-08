@@ -36,7 +36,7 @@ public:
     TS_ASSERT_EQUALS( inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    boost::shared_ptr<Instrument> inst3 = ws.getBaseInstrument();
+    boost::shared_ptr<const Instrument> inst3 = ws.getBaseInstrument();
     TS_ASSERT_EQUALS( inst3.get(), inst1.get());
     TS_ASSERT_EQUALS( inst3->getName(), "MyTestInst");
   }

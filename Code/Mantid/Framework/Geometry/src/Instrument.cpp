@@ -37,7 +37,7 @@ namespace Mantid
      *  @param instr :: instrument for parameter inclusion
      *  @param map :: parameter map to include
      */
-    Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
+    Instrument::Instrument(const Instrument_const_sptr instr, ParameterMap_sptr map)
       : CompAssembly(instr.get(), map.get() ),
       m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
@@ -97,7 +97,7 @@ namespace Mantid
     }
 
     /// Pointer to the 'real' instrument, for parametrized instruments
-    boost::shared_ptr<Instrument> Instrument::baseInstrument() const
+    Instrument_const_sptr Instrument::baseInstrument() const
     {
       if (m_isParametrized)
         return m_instr;
@@ -117,9 +117,42 @@ namespace Mantid
         throw std::runtime_error("Instrument::getParameterMap() called for a non-parametrized instrument.");
     }
 
+    /** INDIRECT GEOMETRY INSTRUMENTS ONLY: Returns the physical instrument,
+     *  if one has been specified as distinct from the 'neutronic' one.
+     *  Otherwise (and most commonly) returns a null pointer, meaning that the holding
+     *  instrument is already the physical instrument.
+     */
+    Instrument_const_sptr Instrument::getPhysicalInstrument() const
+    {
+      if ( m_isParametrized )
+      {
+        if ( m_instr->getPhysicalInstrument() )
+        {
+          // A physical instrument should use the same parameter map as the 'main' instrument
+          return Instrument_const_sptr(new Instrument(m_instr->getPhysicalInstrument(),m_map_nonconst));
+        }
+        else
+        {
+          return Instrument_const_sptr();
+        }
+      }
+      else
+      {
+        return m_physicalInstrument;
+      }
+    }
 
-
-
+    /** INDIRECT GEOMETRY INSTRUMENTS ONLY: Sets the physical instrument.
+     *  The holding instrument is then the 'neutronic' one, and is used in all algorithms.
+     *  @param physInst A pointer to the physical instrument object.
+     */
+    void Instrument::setPhysicalInstrument(Instrument_const_sptr physInst)
+    {
+      if ( !m_isParametrized )
+        m_physicalInstrument = physInst;
+      else
+        throw std::runtime_error("Instrument::setPhysicalInstrument() called on a parametrized instrument.");
+    }
 
     //------------------------------------------------------------------------------------------
     /**	Fills a copy of the detector cache

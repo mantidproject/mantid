@@ -117,17 +117,16 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     } 
 
  //
-    void  MDWorkspace::setInstrument(const Instrument_sptr& instr)
+    void  MDWorkspace::setInstrument(const Instrument_const_sptr& instr)
     {
-      boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
-      if (tmp->isParametrized())
+      if (instr->isParametrized())
       {
-        sptr_instrument = tmp->baseInstrument();
-        m_parmap = tmp->getParameterMap();
+        sptr_instrument = instr->baseInstrument();
+        m_parmap = instr->getParameterMap();
       }
       else
       {
-        sptr_instrument=tmp;
+        sptr_instrument=instr;
       }
     }
 

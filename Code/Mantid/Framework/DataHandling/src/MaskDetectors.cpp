@@ -27,7 +27,7 @@ void MaskDetectors::initDocs()
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument;
+using Geometry::Instrument_const_sptr;
 using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
 
@@ -121,7 +121,7 @@ void MaskDetectors::exec()
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
   bool detsMasked = false;
   std::vector<detid_t>::const_iterator it;
-  boost::shared_ptr<Instrument> instrument = WS->getBaseInstrument();
+  Instrument_const_sptr instrument = WS->getBaseInstrument();
   if ( !detectorList.empty() )
   {
     for (it = detectorList.begin(); it != detectorList.end(); ++it)

@@ -155,7 +155,7 @@ namespace Mantid
       void setupGeometryCache();
 
       /// If appropriate, creates a second instrument containing neutronic detector positions
-      void createNeutronicInstrument(const std::string& idsName);
+      void createNeutronicInstrument();
 
       /// Run the sub-algorithm LoadParameters
       void runLoadParameterFile();

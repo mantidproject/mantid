@@ -208,7 +208,7 @@ private:
 
     // mask the detector
     Geometry::ParameterMap* m_Pmap = &(inputWS->instrumentParameters());    
-    boost::shared_ptr<Instrument> instru = inputWS->getBaseInstrument();
+    boost::shared_ptr<const Instrument> instru = inputWS->getBaseInstrument();
     const Geometry::Detector* toMask =
       dynamic_cast<const Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
     TS_ASSERT(toMask);

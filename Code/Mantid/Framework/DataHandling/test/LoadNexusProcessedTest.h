@@ -77,7 +77,7 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
    }
@@ -122,7 +122,7 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
@@ -166,7 +166,7 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
@@ -211,7 +211,7 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
@@ -254,7 +254,7 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 
@@ -297,7 +297,7 @@ public:
       TS_ASSERT_EQUALS(alghist[3].name(), "LoadNexusProcessed");
     }
     
-    boost::shared_ptr<Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument(); 
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst = matrix_ws->getBaseInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
 

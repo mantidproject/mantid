@@ -90,10 +90,10 @@ namespace Mantid
       /// return a shared_ptr<Detector>
       static boost::shared_ptr<Detector> createDetector(const IDetector *base, const ParameterMap *map);
       /// Create a parameterized component from the given base component and ParameterMap
-      static boost::shared_ptr<Instrument> createInstrument(boost::shared_ptr<Instrument> base, 
+      static boost::shared_ptr<Instrument> createInstrument(boost::shared_ptr<const Instrument> base,
                                                             boost::shared_ptr<ParameterMap> map);
       /// Create a parameterized component from the given base component and ParameterMap
-      /// This has to check to is slower than the aobve functions
+      /// This has to check to is slower than the above functions
       static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base, 
                                                   const ParameterMap * map);
 

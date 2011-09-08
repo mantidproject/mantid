@@ -105,7 +105,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<Instrument> i = output->getBaseInstrument();
+    boost::shared_ptr<const Instrument> i = output->getBaseInstrument();
     boost::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
@@ -642,6 +642,9 @@ public:
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,0.02)+source->getPos()) );
 
+    // Check absence of distinct physical instrument
+    TS_ASSERT( !i->getPhysicalInstrument() );
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
@@ -774,13 +777,12 @@ public:
     TS_ASSERT( loader.execute() );
 
     // This kind of IDF should lead to 2 instrument definitions - the physical and the neutronic
-    TS_ASSERT_EQUALS( IDS.size(), 2 );
+    TS_ASSERT_EQUALS( IDS.size(), 1 );
     std::string name("INDIRECT_Definition.xml2011-08-25T12:00:00");
     TS_ASSERT( IDS.doesExist(name) );
-    TS_ASSERT( IDS.doesExist(name+"-PHYSICAL") );
 
-    Instrument_const_sptr physicalInst = IDS.retrieve(name+"-PHYSICAL");
     Instrument_const_sptr neutronicInst = IDS.retrieve(name);
+    Instrument_const_sptr physicalInst = neutronicInst->getPhysicalInstrument();
     TS_ASSERT_DIFFERS( physicalInst.get(), neutronicInst.get() );
 
     TS_ASSERT_EQUALS( physicalInst->getDetector(1000)->getPos(), V3D(0,0,0) );
@@ -798,7 +800,6 @@ public:
     TS_ASSERT_THROWS( neutronicInst->getDetector(1004), Exception::NotFoundError );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1005)->getPos(), V3D(4,3,0) );
 
-//    TS_FAIL("");
     // Clean up
     IDS.clear();
   }

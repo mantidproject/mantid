@@ -56,11 +56,8 @@ void Qxy::exec()
   const bool doSolidAngle = getProperty("SolidAngleWeighting");
 
   // Create the output Qx-Qy grid
-  MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace();
+  MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace(inputWorkspace);
 
-  // Copy over the instrument name and the workspace title
-  outputWorkspace->getBaseInstrument()->setName(inputWorkspace->getInstrument()->getName());
-  outputWorkspace->setTitle(inputWorkspace->getTitle());
   // Will also need an identically-sized workspace to hold the solid angle/time bin masked weight
   MatrixWorkspace_sptr weights = WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
@@ -215,7 +212,7 @@ void Qxy::exec()
 /** Creates the output workspace, setting the X vector to the bins boundaries in Qx.
  *  @return A pointer to the newly-created workspace
  */
-API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
+API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace)
 {
   const double max = getProperty("MaxQxy");
   const double delta = getProperty("DeltaQ");
@@ -227,7 +224,7 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   bins += 1; // Add 1 - this is a histogram
   
   // Create the output workspace
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",bins-1,bins,bins-1);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,bins-1,bins,bins-1);
 
   // Create a numeric axis to replace the vertical one
   Axis* verticalAxis = new NumericAxis(bins);

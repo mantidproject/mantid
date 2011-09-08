@@ -364,7 +364,7 @@ namespace Mantid
         // Add/overwrite any instrument params with values specified in <component-link> XML elements
         setComponentLinks(m_instrument, pRootElem);
 
-        if ( m_indirectPositions ) createNeutronicInstrument(instrumentFile+"-PHYSICAL");
+        if ( m_indirectPositions ) createNeutronicInstrument();
 
         // Add the instrument to the InstrumentDataService
         InstrumentDataService::Instance().add(instrumentFile,m_instrument);
@@ -1536,12 +1536,12 @@ namespace Mantid
       }
     }
 
-    void LoadInstrument::createNeutronicInstrument(const std::string& idsName)
+    void LoadInstrument::createNeutronicInstrument()
     {
       // Create a copy of the instrument
       Instrument_sptr physical(new Instrument(*m_instrument));
-      // Put the physical instrument in the Instrument Data Service
-      InstrumentDataService::Instance().add(idsName,physical);
+      // Store the physical instrument 'inside' the neutronic instrument
+      m_instrument->setPhysicalInstrument(physical);
 
       // Now we manipulate the original instrument (m_instrument) to hold neutronic positions
       std::map<Geometry::IComponent*,Poco::XML::Element*>::const_iterator it;

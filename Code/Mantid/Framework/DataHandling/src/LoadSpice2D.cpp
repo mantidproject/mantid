@@ -403,7 +403,7 @@ namespace Mantid
     void LoadSpice2D::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins)
     {
       // Get the number of monitor channels
-      boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
+      boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getInstrument();
       std::vector<detid_t> monitors = instrument->getMonitors();
       const int nMonitors = static_cast<int>(monitors.size());
 

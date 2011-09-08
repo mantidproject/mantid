@@ -128,7 +128,7 @@ namespace Mantid
      * @returns A pointer to a parameterized component
      */
     boost::shared_ptr<Instrument> 
-    ParComponentFactory::createInstrument(boost::shared_ptr<Instrument> base, 
+    ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
 					  boost::shared_ptr<ParameterMap> map)
     {
       return boost::shared_ptr<Instrument>(new Instrument(base, map));

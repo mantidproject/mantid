@@ -141,7 +141,7 @@ namespace Mantid
       mutable MDPointMap m_points;
 
       // Shared pointer to a base instrument.
-      mutable boost::shared_ptr<Mantid::Geometry::Instrument> m_instrument;
+      mutable boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
 
       /// The instrument parameter map.
       mutable boost::shared_ptr<Geometry::ParameterMap> m_parmap;
