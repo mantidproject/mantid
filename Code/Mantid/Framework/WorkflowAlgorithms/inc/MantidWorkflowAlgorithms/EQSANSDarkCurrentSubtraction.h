@@ -22,10 +22,10 @@ namespace WorkflowAlgorithms
 
     Optional Properties:
     <UL>
-    <LI> MinEfficiency - Minimum efficiency for a pixel to be considered (default: no minimum)</LI>
-    <LI> MaxEfficiency - Maximum efficiency for a pixel to be considered (default: no maximum)</LI>
-    <LI> Factor        - Exponential factor for detector efficiency as a function of wavelength (default: 1.0)</LI>
-    <LI> Error         - Error on Factor property (default: 0.0)</LI>
+    <LI> Filename      - Data file to use as dark current</LI>
+    <LI> ReductionTableWorkspace - Table workspace to use to keep track of the reduction</LI>
+    <LI> OutputDarkCurrentWorkspace - Name of dark current workspace</LI>
+    <LI> OutputMessage - Human readable output message</LI>
     </UL>
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
