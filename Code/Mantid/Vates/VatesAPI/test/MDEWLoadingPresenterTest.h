@@ -40,7 +40,7 @@ private:
   private:
     typedef MDEWLoadingPresenter BaseClass;
   public:
-    ConcreteMDEWLoadingPresenter(MockMDLoadingView* view) : MDEWLoadingPresenter("", view)
+    ConcreteMDEWLoadingPresenter(MockMDLoadingView* view) : MDEWLoadingPresenter(view)
     {
     }
 

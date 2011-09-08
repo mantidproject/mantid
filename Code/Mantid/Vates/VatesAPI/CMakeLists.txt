@@ -9,11 +9,17 @@ src/Clipper.cpp
 src/Common.cpp
 src/DimensionPresenter.cpp
 src/EscalatingRebinningActionManager.cpp
+src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
 src/GaussianThresholdRange.cpp
 src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
+src/MDEWEventNexusLoadingPresenter.cpp
+src/MDEWRebinningPresenter.cpp
+src/MDHistogramRebinningPresenter.cpp
+src/MDEWLoadingPresenter.cpp
+src/MDEWInMemoryLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
@@ -41,12 +47,7 @@ src/vtkThresholdingHexahedronFactory.cpp
 src/vtkThresholdingLineFactory.cpp
 src/vtkThresholdingQuadFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
-src/EventNexusLoadingPresenter.cpp
-src/MDEWLoadingPresenter.cpp
 src/SQWLoadingPresenter.cpp
-src/MDEWEventNexusLoadingPresenter.cpp
-src/MDEWRebinningPresenter.cpp
-src/MDHistogramRebinningPresenter.cpp
 )
 
 set( INC_FILES 
@@ -65,6 +66,7 @@ inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDEWLoadingPresenter.h
+inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
@@ -136,6 +138,7 @@ test/MultiDimensionalDbPresenterTest.h
 test/MDLoadingViewAdapterTest.h
 test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
+test/MDEWInMemoryLoadingPresenterTest.h
 test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h
 test/MDHistogramRebinningPresenterTest.h

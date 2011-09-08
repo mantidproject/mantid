@@ -1,16 +1,18 @@
-#ifndef MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
-#define MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
+#ifndef MANTID_VATES_MDEW_IN_MEMORY_LOADING_PRESENTER
+#define MANTID_VATES_MDEW_IN_MEMORY_LOADING_PRESENTER
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
+#include <boost/scoped_ptr.hpp>
 
+class vtkDataSet;
 namespace Mantid
 {
   namespace VATES
   {
     /** 
-    @class MDEWEventNexusLoadingPresenter. For loading conversion of MDEW workspaces into render-able vtk objects.
+    @class MDEWInMemoryLoadingPresenter. Presenter for loading MDEWs directly from the ADS, does not touch the disk.
     @author Owen Arnold, Tessella plc
-    @date 09/08/2011
+    @date 08/09/2011
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -34,16 +36,21 @@ namespace Mantid
     */
 
     class MDLoadingView;
-    class DLLExport MDEWEventNexusLoadingPresenter : public MDEWLoadingPresenter
+    class WorkspaceProvider;
+    class vtkDataSetFactory;
+    class DLLExport MDEWInMemoryLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
-      MDEWEventNexusLoadingPresenter(MDLoadingView* view, const std::string fileName);
+      MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
       virtual void executeLoadMetadata();
-      virtual ~MDEWEventNexusLoadingPresenter();
+      virtual ~MDEWInMemoryLoadingPresenter();
       virtual bool canReadFile() const;
     private:
-      const std::string m_filename;
+      /// Repository for accessing workspaces. At this level, does not specify how or where from.
+      boost::scoped_ptr<WorkspaceProvider> m_repository;
+      /// The name of the workspace.
+      const std::string m_wsName;
     };
   }
 }

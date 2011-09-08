@@ -8,7 +8,7 @@ namespace Mantid
   namespace VATES
   {
     /** 
-    @class EventNexusLoadingPresenter, Abstract presenters for loading conversion of MDEW workspaces into render-able vtk objects.
+    @class EventNexusLoadingPresenter. Presenter for loading conversion of MDEW workspaces into render-able vtk objects.
     @author Owen Arnold, Tessella plc
     @date 05/08/2011
 
@@ -43,6 +43,8 @@ namespace Mantid
       virtual std::vector<double> getTimeStepValues() const;
       virtual ~EventNexusLoadingPresenter();
       virtual bool canReadFile() const;
+    private:
+      const std::string m_filename;
     };
 
 

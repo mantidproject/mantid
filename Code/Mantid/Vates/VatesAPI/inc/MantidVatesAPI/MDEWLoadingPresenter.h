@@ -40,7 +40,7 @@ namespace Mantid
     class DLLExport MDEWLoadingPresenter : public MDLoadingPresenter
     {
     public:
-      MDEWLoadingPresenter(std::string filename, MDLoadingView* view);
+      MDEWLoadingPresenter(MDLoadingView* view);
       std::string getGeometryXML() const;
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
@@ -49,7 +49,6 @@ namespace Mantid
       /*---------------------------------------------------------------------------
       Common/shared operations and members for all MDEW file-type loading.
       ---------------------------------------------------------------------------*/
-      const std::string m_filename;
       MDLoadingView* m_view;
       
       Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::StrictDimensionPolicy> xmlBuilder;

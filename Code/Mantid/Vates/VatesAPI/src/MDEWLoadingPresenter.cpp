@@ -1,7 +1,5 @@
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
-
-
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
@@ -18,8 +16,7 @@ namespace Mantid
   namespace VATES
   {
     /// Constructor
-    MDEWLoadingPresenter::MDEWLoadingPresenter(std::string filename, MDLoadingView* view) : 
-    m_filename(filename), 
+    MDEWLoadingPresenter::MDEWLoadingPresenter(MDLoadingView* view) : 
     m_view(view), 
     m_isSetup(false), 
     m_time(-1),

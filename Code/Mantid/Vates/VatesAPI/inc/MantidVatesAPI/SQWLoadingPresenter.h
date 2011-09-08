@@ -42,6 +42,8 @@ namespace Mantid
       virtual void executeLoadMetadata();
       virtual ~SQWLoadingPresenter();
       virtual bool canReadFile() const;
+    private:
+      const std::string m_filename;
     };
 
    

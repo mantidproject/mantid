@@ -19,7 +19,7 @@ namespace Mantid
     @throw invalid_arument if view is null
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
-    SQWLoadingPresenter::SQWLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(filename, view)
+    SQWLoadingPresenter::SQWLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename)
     {
       if(this->m_filename.empty())
       {
