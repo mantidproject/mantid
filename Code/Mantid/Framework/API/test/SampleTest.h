@@ -9,12 +9,14 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidNexusCPP/NexusTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
 using Mantid::API::SampleEnvironment;
+using Mantid::NexusCPP::NexusTestHelper;
 
 class SampleTest : public CxxTest::TestSuite
 {
@@ -185,6 +187,23 @@ public:
     );
     
     TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[3]; (void) sampleRef; );
+  }
+
+  void test_nexus()
+  {
+    NexusTestHelper th(false);
+    th.createFile("SampleTest.nxs");
+
+    Object_sptr shape_sptr = createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    Sample sample;
+    sample.setShape(*shape_sptr);
+    sample.setName("NameOfASample");
+    boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
+    sample2->setName("test name for test_Multiple_Sample - 2");
+    sample.addSample(sample2);
+
+    sample.saveNexus(th.file, "sample");
+
   }
 
   
