@@ -148,7 +148,7 @@ namespace MDAlgorithms
     double Ei = getProperty("EnergyInput");
     if (E_max >Ei){
         convert_log.error()<<"Maximal elergy transferred to matrix="<<E_max<<" exceeds the input energy "<<Ei<<std::endl;
-        throw std::invalid_argument("Maximal transferred energy exceeds imput energy");
+        throw(std::invalid_argument("Maximal transferred energy exceeds imput energy"));
     }
 
     // Try to get the output workspace
