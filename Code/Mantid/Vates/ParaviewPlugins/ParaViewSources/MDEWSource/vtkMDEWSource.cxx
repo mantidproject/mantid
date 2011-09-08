@@ -20,17 +20,23 @@ using namespace Mantid::VATES;
 vtkCxxRevisionMacro(vtkMDEWSource, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkMDEWSource);
 
+/// Constructor
 vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
+/// Destructor
 vtkMDEWSource::~vtkMDEWSource()
 {
   delete m_presenter;
 }
 
+/*
+ Setter for the recursion depth
+ @param depth : recursion depth to use
+*/
 void vtkMDEWSource::SetDepth(int depth)
 {
   size_t temp = depth;
@@ -41,6 +47,10 @@ void vtkMDEWSource::SetDepth(int depth)
   }
 }
 
+/*
+  Setter for the workspace name.
+  @param name : workspace name to extract from ADS.
+*/
 void vtkMDEWSource::SetWsName(std::string name)
 {
   if(m_wsName != name)
@@ -51,7 +61,7 @@ void vtkMDEWSource::SetWsName(std::string name)
 }
 
 
-int vtkMDEWSource::RequestData(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
   if(m_presenter->canReadFile())
   {
@@ -133,21 +143,36 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
   }
 }
 
+/*
+Getter for the recursion depth.
+@return depth
+*/
 size_t vtkMDEWSource::getRecursionDepth() const
 {
   return this->m_depth;
 }
 
+/*
+Getter for the load in memory status
+@return true.
+*/
 bool vtkMDEWSource::getLoadInMemory() const
 {
   return true;
 }
 
+/*Getter for the time
+@return the time.
+*/
 double vtkMDEWSource::getTime() const
 {
   return m_time;
 }
 
+/*
+Setter for the algorithm progress.
+@param :
+*/
 void vtkMDEWSource::updateAlgorithmProgress(double)
 {
 }

@@ -76,8 +76,9 @@ private:
   /// Time.
   double m_time;
 
-
+  /// MVP presenter.
   Mantid::VATES::MDLoadingPresenter* m_presenter;
+
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);
   void setTimeRange(vtkInformationVector* outputVector);
