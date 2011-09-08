@@ -76,7 +76,7 @@ std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
 
   //Now go through all
   detid2det_map::iterator it;
-  for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+  for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
   {
     detid_t detectorID = it->first;
     Geometry::IDetector_const_sptr det = it->second;
