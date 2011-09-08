@@ -67,15 +67,9 @@ if ARCH == '32':
     comp_guid['Plugins'] = '{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}'
     comp_guid['Documents'] = '{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}'
     comp_guid['Logs'] = '{0918C9A4-3481-4f21-B941-983BE21F9674}'
-    comp_guid['IncludeMantidAlgorithms'] = '{EDB85D81-1CED-459a-BF87-E148CEE6F9F6}'
-    comp_guid['IncludeMantidAPI'] = '{4761DDF6-813C-4470-8852-98CB9A69EBC9}'    
-    comp_guid['IncludeMantidCurveFitting'] = '{44d0bdf5-e13a-4a27-8609-e273965ee860}'
-    comp_guid['IncludeMantidDataHandling'] = '{DDD2DD4A-9A6A-4181-AF66-891B99DF8FFE}'
-    comp_guid['IncludeMantidDataObjects'] = '{06445843-7E74-4457-B02E-4850B4911438}'
+    comp_guid['IncludeMantidAPI'] = '{4761DDF6-813C-4470-8852-98CB9A69EBC9}'
     comp_guid['IncludeMantidKernel'] = '{AF40472B-5822-4ff6-8E05-B4DA5224AA87}'
-    comp_guid['IncludeMantidNexus'] = '{BAC18721-6DF1-4870-82FD-2FB37260AE35}'
-    comp_guid['IncludeMantidPythonAPI'] = '{052A15D4-97A0-4ce5-A872-E6871485E734}'
-    comp_guid['IncludeMantidCrystal'] = '{fed5c9b1-d70e-4e2f-ae43-fc3e069c652b}'
+    comp_guid['IncludeMantidNexusCPP'] = '{12cf277b-8224-420c-b54a-8425c0376fc3}'
     comp_guid['Temp'] = '{02D25B60-A114-4f2a-A211-DE88CF648C61}'
     comp_guid['Data'] = '{6D9A0A53-42D5-46a5-8E88-6BB4FB7A5FE1}'
     comp_guid['UserAlgorithms'] = '{A82B4540-3CDB-45fa-A7B3-42F392378D3F}'
@@ -88,15 +82,9 @@ else:
     comp_guid['Plugins'] = '{8ef1c4db-c54d-4bb1-8b66-a9421db24faf}'
     comp_guid['Documents'] = '{bb774537-d0c6-4541-93f2-7aa5f5132d21}'
     comp_guid['Logs'] = '{0cdce87e-976a-40a5-a3d5-73dd8bce9e2e}'
-    comp_guid['IncludeMantidAlgorithms'] = '{e21ee699-be01-419c-8e9a-2678c4da1e6a}'
-    comp_guid['IncludeMantidAPI'] = '{878ff1f2-7d09-4817-972b-3590c45ea0c9}'    
-    comp_guid['IncludeMantidCurveFitting'] = '{a766e379-deb0-4ca3-8578-0036f4722b0a}'
-    comp_guid['IncludeMantidDataHandling'] = '{c937a21a-8fb9-4111-9886-d59d705e2fd8}'
-    comp_guid['IncludeMantidDataObjects'] = '{955f31fd-ac47-475c-911b-55d0cd006fa0}'
+    comp_guid['IncludeMantidAPI'] = '{878ff1f2-7d09-4817-972b-3590c45ea0c9}'
     comp_guid['IncludeMantidKernel'] = '{187317c0-cc23-4a21-bf19-0e347866620c}'
-    comp_guid['IncludeMantidNexus'] = '{7c60491a-36b2-402e-b989-5b8f13667cee}'
-    comp_guid['IncludeMantidPythonAPI'] = '{71c4df47-5564-49ca-8c7c-5ed4d8ceb1e1}'
-    comp_guid['IncludeMantidCrystal'] = '{acb3cd52-bd96-41bf-af7e-8de0e4794b0f}'
+    comp_guid['IncludeMantidNexusCPP'] = '{20327246-8f47-448b-ae2b-8d464c3a69c7}'
     comp_guid['Temp'] = '{212cc3fe-95fb-40d9-a3a7-8421791ac19f}'
     comp_guid['Data'] = '{c9577b5b-75e5-4a4a-b2d5-f4905174627c}'
     comp_guid['UserAlgorithms'] = '{496555f0-f719-4db7-bd8e-5bbcd9fe837d}'
@@ -445,6 +433,7 @@ addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd',MANTIDRELEASE +
 addFileV('MantidAPI','MAPI.dll','MantidAPI.dll',MANTIDRELEASE + '/MantidAPI.dll',MantidDlls)
 addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll',MANTIDRELEASE + '/MantidGeometry.dll',MantidDlls)
 addFileV('MantidKernel','MKern.dll','MantidKernel.dll',MANTIDRELEASE + '/MantidKernel.dll',MantidDlls)
+addFileV('MantidNexusCPP','MNxsCPP.dll','MantidNexusCPP.dll',MANTIDRELEASE + '/MantidNexusCPP.dll',MantidDlls)
 
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQtAPI.dll',MantidDlls)
@@ -584,44 +573,21 @@ addTo(Logs,'CreateFolder',{})
 
 #-------------------  Includes  -------------------------------------
 includeDir = addDirectory('IncludeDir','include','include',InstallDir)
-includeMantidAlgorithmsDir = addDirectory('IncludeMantidAlgorithmsDir','MAlgs','MantidAlgorithms',includeDir)
-IncludeMantidAlgorithms = addComponent('IncludeMantidAlgorithms',comp_guid['IncludeMantidAlgorithms'],includeMantidAlgorithmsDir)
-addAllFiles(FRAMEWORKDIR + '/Algorithms/inc/MantidAlgorithms','alg',IncludeMantidAlgorithms)
-
+# API
 includeMantidAPIDir = addDirectory('IncludeMantidAPIDir','MAPI','MantidAPI',includeDir)
 IncludeMantidAPI = addComponent('IncludeMantidAPI',comp_guid['IncludeMantidAPI'],includeMantidAPIDir)
 addAllFiles(FRAMEWORKDIR + '/API/inc/MantidAPI','api',IncludeMantidAPI)
-
-includeMantidCurveFittingDir = addDirectory('IncludeMantidCurveFittingDir','MAlgs','MantidCurveFitting',includeDir)
-IncludeMantidCurveFitting = addComponent('IncludeMantidCurveFitting',comp_guid['IncludeMantidCurveFitting'],includeMantidCurveFittingDir)
-addAllFiles(FRAMEWORKDIR + '/CurveFitting/inc/MantidCurveFitting','cur',IncludeMantidCurveFitting)
-
-includeMantidDataHandlingDir = addDirectory('IncludeMantidDataHandlingDir','MDH','MantidDataHandling',includeDir)
-IncludeMantidDataHandling = addComponent('IncludeMantidDataHandling',comp_guid['IncludeMantidDataHandling'],includeMantidDataHandlingDir)
-addAllFiles(FRAMEWORKDIR + '/DataHandling/inc/MantidDataHandling','dh',IncludeMantidDataHandling)
-
-includeMantidDataObjectsDir = addDirectory('IncludeMantidDataObjectsDir','MDO','MantidDataObjects',includeDir)
-IncludeMantidDataObjects = addComponent('IncludeMantidDataObjects',comp_guid['IncludeMantidDataObjects'],includeMantidDataObjectsDir)
-addAllFiles(FRAMEWORKDIR + '/DataObjects/inc/MantidDataObjects','do',IncludeMantidDataObjects)
-
+# Geometry
 includeMantidGeometryDirList = addCompList('IncludeMantidGeometryDirList',FRAMEWORKDIR + '/Geometry/inc/MantidGeometry','MantidGeometry',includeDir)[0]
-
+# Kernel
 includeMantidKernelDir = addDirectory('IncludeMantidKernelDir','KER','MantidKernel',includeDir)
 IncludeMantidKernel = addComponent('IncludeMantidKernel',comp_guid['IncludeMantidKernel'],includeMantidKernelDir)
 addAllFiles(FRAMEWORKDIR + '/Kernel/inc/MantidKernel','ker',IncludeMantidKernel)
-
-includeMantidNexusDir = addDirectory('IncludeMantidNexusDir','NEX','MantidNexus',includeDir)
-IncludeMantidNexus = addComponent('IncludeMantidNexus',comp_guid['IncludeMantidNexus'],includeMantidNexusDir)
-addAllFiles(FRAMEWORKDIR + '/Nexus/inc/MantidNexus','nex',IncludeMantidNexus)
-
-includeMantidPythonAPIDir = addDirectory('IncludeMantidPythonAPIDir','PAPI','MantidPythonAPI',includeDir)
-IncludeMantidPythonAPI = addComponent('IncludeMantidPythonAPI',comp_guid['IncludeMantidPythonAPI'],includeMantidPythonAPIDir)
-addAllFiles(FRAMEWORKDIR + '/PythonAPI/inc/MantidPythonAPI','papi',IncludeMantidPythonAPI)
-
-includeMantidCrystalDir = addDirectory('IncludeMantidCrystalDir','PCRY','MantidCrystal',includeDir)
-IncludeMantidCrystal = addComponent('IncludeMantidCrystal',comp_guid['IncludeMantidCrystal'],includeMantidCrystalDir)
-addAllFiles(FRAMEWORKDIR + '/Crystal/inc/MantidCrystal','pcry',IncludeMantidCrystal)
-
+# NexusCPP
+includeMantidNexusCPPDir = addDirectory('IncludeMantidNexusCPPDir','NEXCPP','MantidNexusCPP',includeDir)
+IncludeMantidNexusCPP = addComponent('IncludeMantidNexusCPP',comp_guid['IncludeMantidNexusCPP'],includeMantidNexusCPPDir)
+addAllFiles(FRAMEWORKDIR + '/NexusCPP/inc/MantidNexusCPP','nex',IncludeMantidNexusCPP)
+# Other includes
 boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
 pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
 #-------------------  end of Includes ---------------------------------------
@@ -669,18 +635,6 @@ addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
 scriptsList = addCompList("ScriptsDir", CODEDIR + "/Mantid/scripts","scripts",InstallDir)[0]
-
-#
-# This is causing problems and shouldn't be necessary anymore
-#
-# M. Gigg 2010-11-19: The Excitations directory was renamed. Unfortunately this causes the directory for the new installer to get left around
-# on certain setups that have used the scripts.  I could force a delete of the folder but if a user has added their own scripts then that would remove them too.
-# Here we just remove the pyc files so should be left with an empty directory
-# TODO: Put in a custom command to remove it if it is empty after install. This sounds simply but alas is not...
-# addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
-# addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del /q "[INSTALLDIR]\\scripts\\Excitations\\*.pyc"'})
-# addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
-# addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
 
 #-----------------------------------------------------------------------
 
@@ -740,16 +694,10 @@ for index, mod in enumerate(msm_files):
 
 # Header files
 Includes = addFeature('Includes','Includes','Mantid and third party header files.','2',Complete)
-addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
-addCRef('IncludeMantidCurveFitting',Includes)
-addCRef('IncludeMantidDataHandling',Includes)
-addCRef('IncludeMantidDataObjects',Includes)
 addCRefs(includeMantidGeometryDirList,Includes)
 addCRef('IncludeMantidKernel',Includes)
-addCRef('IncludeMantidNexus',Includes)
-addCRef('IncludeMantidPythonAPI',Includes)
-addCRef('IncludeMantidCrystal',Includes)
+addCRef('IncludeMantidNexusCPP',Includes)
 addCRefs(boostList,Includes)
 addCRefs(pocoList,Includes)
 
