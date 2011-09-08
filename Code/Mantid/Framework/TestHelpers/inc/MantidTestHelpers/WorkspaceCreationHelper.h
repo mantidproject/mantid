@@ -10,6 +10,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -31,11 +32,11 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBin, bool isHist=false, const std::set<int64_t> &
-					       maskedWorkspaceIndices = std::set<int64_t>());
+                           maskedWorkspaceIndices = std::set<int64_t>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist=false,
-					       const std::set<int64_t> & maskedWorkspaceIndices = std::set<int64_t>());
+                           const std::set<int64_t> & maskedWorkspaceIndices = std::set<int64_t>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr maskSpectra(Mantid::DataObjects::Workspace2D_sptr workspace, 
-								    const std::set<int64_t> & maskedWorkspaceIndices);
+                                    const std::set<int64_t> & maskedWorkspaceIndices);
   /** Create a 2D workspace with this many histograms and bins.
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
@@ -79,10 +80,10 @@ namespace WorkspaceCreationHelper
 
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr 
   CreateEventWorkspace(int numPixels, int numBins, int numEvents = 100, double x0=0.0, double binDelta=1.0,
-		       int eventPattern = 1, int start_at_pixelID = 0);
+               int eventPattern = 1, int start_at_pixelID = 0);
 
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateGroupedEventWorkspace(std::vector< std::vector<int> > groups,
-							 int numBins, double binDelta=1.0);
+                             int numBins, double binDelta=1.0);
 
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels, double bin_delta=1.0);
 
@@ -101,6 +102,9 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS void AddTSPEntry(Mantid::API::Run & runInfo, std::string name, double val);
   DLL_TESTHELPERS void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a, double b, double c);
   DLL_TESTHELPERS void SetGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi, double omega);
+
+  // create workspace which should be result of homering (transform to energy in inelastic)
+  DLL_TESTHELPERS Mantid::API::MatrixWorkspace_sptr createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels=100, size_t numBins=20, bool has_oriented_lattice=true);
 
 };
 

@@ -47,11 +47,11 @@ namespace MDAlgorithms
     ~ConvertToQ3DdE();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "Inelastic_ConvertToQ3DdE";};
+    virtual const std::string name() const { return "ConvertToQ3DdE";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDAlgorithms";}
+    virtual const std::string category() const { return "Inelastic;MDAlgorithms";}
     
   private:
     /// Sets documentation strings for this algorithm

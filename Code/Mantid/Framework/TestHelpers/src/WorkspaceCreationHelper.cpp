@@ -11,6 +11,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/Run.h"
 
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/NumericAxis.h"
+
 namespace WorkspaceCreationHelper
 {
 
@@ -548,6 +551,8 @@ namespace WorkspaceCreationHelper
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
   }
 
+  // =====================================================================================
+  // RootOfNumHist == square root of hystohram number;
   MatrixWorkspace_sptr CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins, double binDelta)
   {
     size_t numHist=RootOfNumHist*RootOfNumHist;
@@ -558,7 +563,7 @@ namespace WorkspaceCreationHelper
       ISpectrum * spec = retVal->getSpectrum(g);
       for (int i=1; i<=9; i++)
         spec->addDetectorID(g*9+i);
-      spec->setSpectrumNo(g+1); // Match detector ID and spec NO
+        spec->setSpectrumNo(g+1); // Match detector ID and spec NO
     }
     retVal->generateSpectraMap();
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
@@ -659,6 +664,34 @@ namespace WorkspaceCreationHelper
     AddTSPEntry( ws->mutableRun(), "chi", chi);
     AddTSPEntry( ws->mutableRun(), "omega", omega);
     ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+  }
+
+  //
+     Mantid::API::MatrixWorkspace_sptr createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels, size_t numBins, bool has_oriented_lattice){
+    size_t rHist = (size_t)sqrt(double(numPixels));
+    while(rHist*rHist<numPixels)rHist++;
+
+    Mantid::API::MatrixWorkspace_sptr  ws = CreateGroupedWorkspace2DWithRingsAndBoxes(rHist,10,0.1);
+    ws->replaceAxis(1, new SpectraAxis(rHist, true));
+    NumericAxis *pAxis0 = new NumericAxis(numBins);
+ 
+    for(size_t i=0;i<numBins;i++){
+        double dE = -1+i*0.8;
+        pAxis0->setValue(i,dE);
+    }
+    pAxis0->setUnit("DeltaE");
+    ws->replaceAxis(0,pAxis0); 
+    if(has_oriented_lattice){
+        OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
+        ws->mutableSample().setOrientedLattice(latt);
+
+        AddTSPEntry( ws->mutableRun(), "phi", 2);
+        AddTSPEntry( ws->mutableRun(), "chi", 0);
+        AddTSPEntry( ws->mutableRun(), "omega", 0);
+        ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+    }
+
+    return ws;  
   }
 
 

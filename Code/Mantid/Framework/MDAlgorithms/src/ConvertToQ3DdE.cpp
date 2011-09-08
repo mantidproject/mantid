@@ -1,23 +1,30 @@
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/Progress.h"
 #include "MantidMDAlgorithms/ConvertToQ3DdE.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidDataObjects/EventWorkspace.h"
+
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+
 #include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ProgressText.h"
+#include "MantidAPI/Progress.h"
+
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+//using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
@@ -57,52 +64,116 @@ namespace MDAlgorithms
   ConvertToQ3DdE::~ConvertToQ3DdE()
   {
   }
+   /// MDEvent dimension used 
+  typedef MDEvents::MDEvent<4> MDE;
+  // helper to create empty MDEventWorkspace
+  boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(const std::string dimensionNames[4],const std::string dimensionUnits[4],
+                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax)
+  {
 
+       boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > ws = 
+           boost::shared_ptr<MDEvents::MDEventWorkspace<MDE, 4> >(new MDEvents::MDEventWorkspace<MDE, 4>());
+    
+      // Give all the dimensions
+      for (size_t d=0; d<4; d++)
+      {
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
+        ws->addDimension(MDHistoDimension_sptr(dim));
+      }
+      ws->initialize();
+
+      // Build up the box controller
+      MDEvents::BoxController_sptr bc = ws->getBoxController();
+      bc->setSplitInto(5);
+      bc->setSplitThreshold(1500);
+      bc->setMaxDepth(20);
+      // We always want the box to be split (it will reject bad ones)
+      ws->splitBox();
+      return ws;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void ConvertToQ3DdE::init()
   {
-    //TODO: Make sure in units are okay
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
-        "An input Matrix Workspace 2D, processed by Convert to energy (homer) algorithm.");
+      CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
+      ws_valid->add(new WorkspaceUnitValidator<>("DeltaE"));
+      ws_valid->add(new HistogramValidator<>);
+      ws_valid->add(new InstrumentValidator<>);
+
+
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
+        "An input Matrix Workspace 2D, processed by Convert to energy (homer) algorithm and its x-axis has to be in the units of energy transfer with energy in mev.");
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
+
+     BoundedValidator<double> *minEn = new BoundedValidator<double>();
+     minEn->setLower(0);
+     declareProperty("EnergyInput",100.,minEn,"The value for the incident energy of the neutrons leaving the source (meV)",Direction::Input);
+
     //declareProperty(new PropertyWithValue<bool>("KeepTransformedDetectors", true, Direction::Input), "Store the part of the detectors transfromation into reciprocal space to save/reuse .");
 
  
   }
 
 
-  /// MDEvent dimension used 
-  typedef MDEvent<4> MDE;
-
+ 
 
  
   //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
+  /* Execute the algorithm.   */
   void ConvertToQ3DdE::exec()
   {
     Timer tim, timtotal;
     CPUTimer cputim, cputimtotal;
 
-     // -------- Input workspace -> convert to Event ------------------------------------
+     // -------- Input workspace 
     MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
     Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
 
 
+    // get the energy axis
+    NumericAxis *pEnAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
+    if(!pEnAxis){
+       convert_log.error()<<"Can not get proper energy axis from processed workspace\n";
+       throw(std::invalid_argument("Input workspace is not propwer converted to energy workspace"));
+    }
+    std::vector<double> En_boundaries = pEnAxis->createBinBoundaries();
+    size_t lastInd = inWS2D->getAxis(0)->length();
+    double E_max = En_boundaries[lastInd];
+    double E_min = En_boundaries[0];
 
-    // check the input units
-    if (inWS2D->getAxis(0)->unit()->unitID() != "DeltaE"){
-        convert_log.error()<<"Input workspace"<<inWS2D->getName()<<" has to be converted into energy and have energy as first axis\n";
-        throw std::invalid_argument("Input event workspace's X axis must be in units of DeltaE.");
+    // get and check input energy (TODO: should energy be moved into Run?)
+    double Ei = getProperty("EnergyInput");
+    if (E_max >Ei){
+        convert_log.error()<<"Maximal elergy transferred to matrix="<<E_max<<" exceeds the input energy "<<Ei<<std::endl;
+        throw std::invalid_argument("Maximal transferred energy exceeds imput energy");
     }
 
     // Try to get the output workspace
-    //IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-    //ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDE,4> >( i_out );
+    IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
+    boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > ws  = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDE,4> >( i_out );
+
+    std::string dimensionNames[4] = {"Q_lab_x", "Q_lab_y", "Q_lab_z","DeltaE"};
+    if (ws){
+      // Check that existing workspace dimensions make sense with the desired one (using the name)
+       for(int i=0;i<4;i++){
+        if (ws->getDimension(i)->getName() != dimensionNames[i]){
+           convert_log.error()<<"The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.\n";
+           throw std::runtime_error("The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.");
+        }
+       }
+    }else{
+        std::vector<double> dimMin(4),dimMax(4);
+        dimMin[0]=dimMin[1]=dimMin[2]=-50.;
+        dimMin[3]=E_min;
+        dimMax[0]=dimMax[1]=dimMax[2]= 50.;
+        dimMax[3]=E_max;
+        std::string dimensionUnits[4] = {"Amgstroms^-1", "Amgstroms^-1", "Amgstroms^-1","meV"};
+        ws = create_empty4DEventWS(dimensionNames,dimensionUnits,dimMin,dimMax);
+    }
+    ws->splitBox();
 
     //// Initalize the matrix to 3x3 identity
     //mat = Kernel::Matrix<double>(3,3, true);
@@ -136,41 +207,15 @@ namespace MDAlgorithms
     //}
     //// Q in the lab frame is the default, so nothing special to do.
 
-    //if (ws)
-    //{
-    //  // Check that existing workspace dimensions make sense with the desired one (using the name)
-    //  if (ws->getDimension(0)->getName() != dimensionNames[0])
-    //    throw std::runtime_error("The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.");
-    //}
-
 
 //
 //    // ------------------- Create the output workspace if needed ------------------------
 //    if (!ws)
 //    {
-//      // Create an output workspace with 3 dimensions.
-//      size_t nd = 3;
-//      i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDLeanEvent");
-//      ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(i_out);
-//
-//      // Give all the dimensions
-//      for (size_t d=0; d<nd; d++)
-//      {
-//        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, -50.0, +50.0, 10);
-//        ws->addDimension(MDHistoDimension_sptr(dim));
-//      }
-//      ws->initialize();
-//
-//      // Build up the box controller
-//      BoxController_sptr bc = ws->getBoxController();
-//      bc->setSplitInto(5);
-//      bc->setSplitThreshold(1500);
-//      bc->setMaxDepth(20);
-//      // We always want the box to be split (it will reject bad ones)
-//      ws->splitBox();
+
 //    }
 //
-//    ws->splitBox();
+
 //
 //    if (!ws)
 //      throw std::runtime_error("Error creating a 3D MDEventWorkspace!");
