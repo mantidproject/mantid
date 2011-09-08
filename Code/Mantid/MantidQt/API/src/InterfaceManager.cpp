@@ -6,6 +6,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/GenericDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/VatesViewerInterface.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
@@ -23,7 +24,7 @@ using namespace MantidQt::API;
 //Initialize the logger
 Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
 
-Mantid::Kernel::AbstractInstantiator<QWidget> *InterfaceManagerImpl::m_vatesGuiFactory = NULL;
+Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl::m_vatesGuiFactory = NULL;
 
 //----------------------------------
 // Public member functions
@@ -154,15 +155,18 @@ InterfaceManagerImpl::~InterfaceManagerImpl()
 {
 }
 
-void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<QWidget> *factory)
+void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory)
 {
   this->m_vatesGuiFactory = factory;
 }
 
-QWidget *InterfaceManagerImpl::createVatesSimpleGui() const
+VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui(QWidget* parent) const
 {
-  QWidget *vsg = NULL;
+  VatesViewerInterface *vsg = NULL;
   vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
+  vsg->setParent(parent);
+  vsg->setWindowTitle("Vates Simple Interface");
+  vsg->setupPluginMode();
   if (!vsg)
   {
     g_log.error() << "Error creating Vates Simple GUI" << std::endl;

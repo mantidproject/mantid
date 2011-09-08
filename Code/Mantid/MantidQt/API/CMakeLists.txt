@@ -18,6 +18,7 @@ set ( SRC_FILES src/AlgorithmDialog.cpp
                 src/MantidWidget.cpp
                 src/PythonRunner.cpp
                 src/UserSubWindow.cpp
+                src/VatesViewerInterface.cpp
                 src/WorkspaceObserver.cpp
 )
 
@@ -34,6 +35,7 @@ set ( INC_FILES inc/MantidQtAPI/AlgorithmDialog.h
                 inc/MantidQtAPI/MantidWidget.h
                 inc/MantidQtAPI/PythonRunner.h
                 inc/MantidQtAPI/UserSubWindow.h
+                inc/MantidQtAPI/VatesViewerInterface.h
                 inc/MantidQtAPI/WorkspaceObserver.h
 )
 
@@ -44,6 +46,7 @@ set ( MOC_FILES inc/MantidQtAPI/AlgorithmDialog.h
                 inc/MantidQtAPI/MantidWidget.h
                 inc/MantidQtAPI/PythonRunner.h
                 inc/MantidQtAPI/UserSubWindow.h
+                inc/MantidQtAPI/VatesViewerInterface.h
                 inc/MantidQtAPI/WorkspaceObserver.h
 )
 

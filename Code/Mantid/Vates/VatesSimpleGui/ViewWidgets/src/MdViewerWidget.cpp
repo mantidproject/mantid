@@ -16,14 +16,39 @@
 #include <pqObjectInspectorWidget.h>
 #include <pqParaViewBehaviors.h>
 #include <pqPipelineSource.h>
+#include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMReaderFactory.h>
 
+// Used for plugin mode
+#include <pqAlwaysConnectedBehavior.h>
+#include <pqAutoLoadPluginXMLBehavior.h>
+#include <pqCommandLineOptionsBehavior.h>
+#include <pqCrashRecoveryBehavior.h>
+#include <pqDataTimeStepBehavior.h>
+#include <pqDefaultViewBehavior.h>
+#include <pqDeleteBehavior.h>
+#include <pqFixPathsInStateFilesBehavior.h>
+#include <pqObjectPickingBehavior.h>
+//#include <pqPersistentMainWindowStateBehavior.h>
+#include <pqPipelineContextMenuBehavior.h>
+//#include <pqPluginActionGroupBehavior.h>
+//#include <pqPluginDockWidgetsBehavior.h>
+#include <pqPluginManager.h>
+#include <pqPVNewSourceBehavior.h>
+#include <pqQtMessageHandlerBehavior.h>
+#include <pqSpreadSheetVisibilityBehavior.h>
+#include <pqStandardViewModules.h>
+#include <pqUndoRedoBehavior.h>
+#include <pqViewFrameActionsBehavior.h>
+#include <pqVerifyRequiredPluginBehavior.h>
+
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QModelIndex>
+#include <QWidget>
 
 #include <iostream>
 
@@ -33,16 +58,20 @@ namespace Vates
 {
 namespace SimpleGui
 {
+using namespace MantidQt::API;
+
 REGISTER_VATESGUI(MdViewerWidget)
 
-MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
+MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
-  this->ui.setupUi(this);
-  this->ui.splitter_2->setStretchFactor(1, 1);
+  this->isPluginInitialized = false;
+}
 
-  // Unset the connections since the views aren't up yet.
-  this->removeProxyTabWidgetConnections();
-
+MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
+{
+  // We're in the standalone application mode
+  this->isPluginInitialized = false;
+  this->setupUiAndConnections();
   // FIXME: This doesn't allow a clean split of the classes. I will need
   //        to investigate creating the individual behaviors to see if that
   //        eliminates the dependence on the QMainWindow.
@@ -51,11 +80,28 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
     QMainWindow *mw = qobject_cast<QMainWindow *>(parent);
     new pqParaViewBehaviors(mw, mw);
   }
+  this->setupMainView();
+}
+
+MdViewerWidget::~MdViewerWidget()
+{
+}
+
+void MdViewerWidget::setupUiAndConnections()
+{
+  this->ui.setupUi(this);
+  this->ui.splitter_2->setStretchFactor(1, 1);
+
+  // Unset the connections since the views aren't up yet.
+  this->removeProxyTabWidgetConnections();
 
   QObject::connect(this->ui.modeControlWidget,
                    SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
                    this, SLOT(switchViews(ModeControlWidget::Views)));
+}
 
+void MdViewerWidget::setupMainView()
+{
   // Commented this out to only use Mantid supplied readers
   // Initialize all readers available to ParaView. Now our application can load
   // all types of datasets supported by ParaView.
@@ -74,8 +120,62 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
   this->setParaViewComponentsForView();
 }
 
-MdViewerWidget::~MdViewerWidget()
+void MdViewerWidget::setupPluginMode()
 {
+  this->createAppCoreForPlugin();
+  this->setupUiAndConnections();
+  if (!this->isPluginInitialized)
+  {
+    this->setupParaViewBehaviors();
+  }
+  this->setupMainView();
+}
+
+void MdViewerWidget::createAppCoreForPlugin()
+{
+  if (!pqApplicationCore::instance())
+  {
+    int argc = 0;
+    char *argv[] = {""};
+    new pqPVApplicationCore(argc, argv);
+  }
+  else
+  {
+    this->isPluginInitialized = true;
+  }
+}
+
+void MdViewerWidget::setupParaViewBehaviors()
+{
+  // Register ParaView interfaces.
+  pqPluginManager* pgm = pqApplicationCore::instance()->getPluginManager();
+
+  // * adds support for standard paraview views.
+  pgm->addInterface(new pqStandardViewModules(pgm));
+
+  // Load plugins distributed with application.
+  pqApplicationCore::instance()->loadDistributedPlugins();
+
+  // Define application behaviors.
+  new pqQtMessageHandlerBehavior(this);
+  new pqDataTimeStepBehavior(this);
+  new pqViewFrameActionsBehavior(this);
+  new pqSpreadSheetVisibilityBehavior(this);
+  new pqPipelineContextMenuBehavior(this);
+  new pqDefaultViewBehavior(this);
+  new pqAlwaysConnectedBehavior(this);
+  new pqPVNewSourceBehavior(this);
+  new pqDeleteBehavior(this);
+  new pqUndoRedoBehavior(this);
+  new pqCrashRecoveryBehavior(this);
+  new pqAutoLoadPluginXMLBehavior(this);
+  //new pqPluginDockWidgetsBehavior(mainWindow);
+  new pqVerifyRequiredPluginBehavior(this);
+  //new pqPluginActionGroupBehavior(mainWindow);
+  new pqFixPathsInStateFilesBehavior(this);
+  new pqCommandLineOptionsBehavior(this);
+  //new pqPersistentMainWindowStateBehavior(mainWindow);
+  new pqObjectPickingBehavior(this);
 }
 
 void MdViewerWidget::connectLoadDataReaction(QAction *action)

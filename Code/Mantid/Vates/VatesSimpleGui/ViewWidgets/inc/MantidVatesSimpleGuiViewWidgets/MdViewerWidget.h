@@ -4,6 +4,8 @@
 #include "ui_MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
+#include "MantidQtAPI/VatesViewerInterface.h"
+
 #include <QPointer>
 #include <QWidget>
 
@@ -50,16 +52,18 @@ class ViewBase;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public MantidQt::API::VatesViewerInterface
 {
   Q_OBJECT
 
 public:
+  /// No-op constructor used for plugin mode
+  MdViewerWidget();
   /**
    * Default constructor.
    * @param parent the parent widget for the main window
    */
-  MdViewerWidget(QWidget *parent = 0);
+  MdViewerWidget(QWidget *parent);
   /// Default destructor.
   virtual ~MdViewerWidget();
 
@@ -68,6 +72,8 @@ public:
    * @param action the action to connect data loading to
    */
   void connectLoadDataReaction(QAction *action);
+  /// See MantidQt::API::VatesViewerInterface
+  void setupPluginMode();
 
 protected slots:
   /**
@@ -94,14 +100,23 @@ private:
   ViewBase *currentView; ///< Holder for the current view
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
+  bool isPluginInitialized; ///< Flag for plugin initialization
   QPointer<pqPipelineSource> originSource; ///< Holder for the current source
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
+  /// Function to create the pqPVApplicationCore object in plugin mode
+  void createAppCoreForPlugin();
   /// Disable communication with the proxy tab widget.
   void removeProxyTabWidgetConnections();
   /// Set the signals/slots for the ParaView components based on the view.
   void setParaViewComponentsForView();
+  /// Function run the necessary setup for the main view.
+  void setupMainView();
+  /// Function to mimic ParaView behavior setup without QMainWindow.
+  void setupParaViewBehaviors();
+  /// Function that creates the UI and mode switch connection.
+  void setupUiAndConnections();
   /**
    * Create the requested view on the main window.
    * @param container the UI widget to associate the view mode with

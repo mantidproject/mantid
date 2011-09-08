@@ -45,6 +45,7 @@ namespace API
 //----------------------------------
 class AlgorithmDialog;
 class UserSubWindow;
+class VatesViewerInterface;
 
 /** 
     This class is responsible for creating the correct dialog for an algorithm. If 
@@ -87,8 +88,17 @@ public:
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
 
-  QWidget *createVatesSimpleGui() const;
-  void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<QWidget> *factory);
+  /**
+   * Function that instantiates the Vates simple user interface.
+   * @param parent a parent widget for the simple user interface
+   * @return the Vates simple user interface
+   */
+  VatesViewerInterface *createVatesSimpleGui(QWidget *parent = 0) const;
+  /**
+   * Registration function for the Vates simple interface factory.
+   * @param factory the factory instance
+   */
+  void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory);
 
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
@@ -108,7 +118,8 @@ private:
   //A static reference to the Logger
   static Mantid::Kernel::Logger & g_log;
 
-  static Mantid::Kernel::AbstractInstantiator<QWidget> *m_vatesGuiFactory;
+  /// Handle to the Vates simple user interface factory
+  static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *m_vatesGuiFactory;
 };
 
 #ifdef _WIN32
@@ -129,6 +140,6 @@ typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManager
   Mantid::Kernel::RegistrationHelper \
   register_vatesgui \
   (((MantidQt::API::InterfaceManager::Instance().registerVatesGuiFactory \
-  (new Mantid::Kernel::Instantiator<TYPE, QWidget>())), 0)); \
+  (new Mantid::Kernel::Instantiator<TYPE, VatesViewerInterface>())), 0)); \
 }
 #endif //MANTIDQT_API_DIALOGMANAGER

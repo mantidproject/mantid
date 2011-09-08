@@ -24,6 +24,7 @@
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/VatesViewerInterface.h"
 
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
@@ -484,17 +485,24 @@ void MantidUI::showVatesSimpleInterface()
         AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if (!ws) return;
     std::cout << "Vates Simple Interface coming soon." << std::endl;
-    /*
-    QWidget *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
+
+    QMdiSubWindow *usr_win = new QMdiSubWindow;
+    usr_win->setAttribute(Qt::WA_DeleteOnClose);
+    MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui(usr_win);
     if (vsui)
     {
-      vsui->show();
+      vsui->setWindowTitle("Vates Simple Interface");
+      //m_appWindow->setGeometry(usr_win, vsui);
+      usr_win->setWidget(vsui);
+      usr_win->widget()->show();
+      //vsui->show();
     }
     else
     {
+      delete usr_win;
       return;
     }
-    */
+
   }
   catch (...)
   {
