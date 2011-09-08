@@ -213,7 +213,7 @@ using namespace Mantid::VATES;
 vtkMDEWRebinningCutter::vtkMDEWRebinningCutter() :
 m_presenter(new NullRebinningPresenter()),
   m_clipFunction(NULL),
-  m_clip(ApplyClipping),
+  m_clip(IgnoreClipping),
   m_originalExtents(IgnoreOriginal),
   m_setup(Pending),
   m_timestep(0),
@@ -362,34 +362,6 @@ int vtkMDEWRebinningCutter::FillInputPortInformation(int vtkNotUsed(port), vtkIn
 void vtkMDEWRebinningCutter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-}
-
-void vtkMDEWRebinningCutter::SetApplyClip(int applyClip)
-{
-  Clipping temp = applyClip == 1 ? ApplyClipping : IgnoreClipping;
-  if(temp != m_clip)
-  {
-    m_clip = temp;
-    this->Modified();
-  }
-}
-
-void vtkMDEWRebinningCutter::SetWidth(double width)
-{
-  if(m_width != width)
-  {
-    m_width = width;
-    this->Modified();
-  }
-}
-
-void vtkMDEWRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
-{
-  if (func != m_clipFunction)
-  {
-    this->m_clipFunction = func;
-    this->Modified();
-  }
 }
 
 void vtkMDEWRebinningCutter::SetMaxThreshold(double maxThreshold)

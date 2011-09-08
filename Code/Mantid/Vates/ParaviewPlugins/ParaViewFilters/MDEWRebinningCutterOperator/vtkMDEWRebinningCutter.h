@@ -65,12 +65,9 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
-  void SetClipFunction( vtkImplicitFunction * func);
   void SetMaxThreshold(double maxThreshold);
   void SetMinThreshold(double minThreshold);
   void SetAppliedGeometryXML(std::string xml);
-  void SetApplyClip(int applyClip);
-  void SetWidth(double width);
   const char* GetInputGeometryXML();
   void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
   double GetInputMinThreshold();

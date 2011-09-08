@@ -113,8 +113,8 @@ namespace Mantid
       boost::scoped_ptr<RebinningActionManager> m_request;
       ///The view of this MVP pattern.
       MDRebinningView* m_view;
-      ///Box implicit function used to determine boundaries via evaluation.
-      Mantid::Geometry::MDImplicitFunction_sptr m_box;
+      ///Function
+      Mantid::Geometry::MDImplicitFunction_sptr m_function;
       ///Clipper used to determine boundaries.
       boost::scoped_ptr<Clipper> m_clipper;
       ///Maximum threshold

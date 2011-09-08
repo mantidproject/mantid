@@ -91,8 +91,8 @@ namespace Mantid
       mutable std::string m_wsGeometry;
       ///Serializer of rebinning 
       RebinningKnowledgeSerializer m_serializer;
-      /// Plane with width
-      Mantid::Geometry::MDImplicitFunction_sptr m_plane;
+      /// Function
+      Mantid::Geometry::MDImplicitFunction_sptr m_function;
       /// Flag indicating that clipping should be used.
       bool m_applyClipping;
     };

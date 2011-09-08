@@ -44,7 +44,7 @@ namespace Mantid
       m_timestep(0),
       m_wsGeometry(""),
       m_serializer(LocationNotRequired),
-      m_plane(Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
+      m_function(Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
       m_applyClipping(false)
     {
       using namespace Mantid::API;
@@ -123,7 +123,7 @@ namespace Mantid
     {
       //Add existing functions.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
-      compFunction->addFunction(m_plane);
+      compFunction->addFunction(m_function);
       Mantid::Geometry::MDImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
       if (existingFunctions != NULL)
       {
@@ -172,10 +172,10 @@ namespace Mantid
         if(NULL != plane)
         {
           boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> planeA = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::PlaneImplicitFunction>(constructPlaneFromVTKPlane(plane, width));
-          boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> planeB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::PlaneImplicitFunction>(m_plane);
+          boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> planeB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::PlaneImplicitFunction>(m_function);
           if(!planeB || planeA->operator!=(*planeB.get()))
           {
-            m_plane = planeA;
+            m_function = planeA;
             m_request->ask(RecalculateAll);
           }
         }
@@ -248,7 +248,7 @@ namespace Mantid
         }
         if(m_view->getApplyClip())
         {
-          hist_alg.setPropertyValue("ImplicitFunctionXML", m_plane->toXMLString());
+          hist_alg.setPropertyValue("ImplicitFunctionXML", m_function->toXMLString());
         }
         hist_alg.setPropertyValue("OutputWorkspace", "Histo_ws");
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);

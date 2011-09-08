@@ -50,7 +50,7 @@ namespace Mantid
       m_input(input), 
       m_request(request), 
       m_view(view), 
-      m_box(new Mantid::MDAlgorithms::NullImplicitFunction()), 
+      m_function(new Mantid::MDAlgorithms::NullImplicitFunction()), 
       m_clipper(clipper),
       m_maxThreshold(0),
       m_minThreshold(0),
@@ -110,7 +110,7 @@ namespace Mantid
       //Apply the workspace location after extraction from the input xml.
       m_serializer.setWorkspaceLocation(vtkDataSetToWsLocation::exec(m_input));
       //Set-up a default box.
-      m_box = constructBoxFromInput();
+      m_function = constructBoxFromInput();
     }
 
     /** constructs geometry xml string from dimensions.
@@ -278,11 +278,11 @@ namespace Mantid
         vtkBox* box = dynamic_cast<vtkBox*>(m_view->getImplicitFunction());
         if(NULL != box && hasAppliedClipping)
         {
-          m_box = constructBoxFromVTKBox(box);
+          m_function = constructBoxFromVTKBox(box);
         }
         else
         {
-          m_box = constructBoxFromInput();
+          m_function = constructBoxFromInput();
         }
         //m_request->ask(RecalculateAll);
 
@@ -296,10 +296,10 @@ namespace Mantid
         if(NULL != box)
         {
           boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxA = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(constructBoxFromVTKBox(box));
-          boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(m_box);
+          boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(m_function);
           if(boxA->operator!=(*boxB.get()))
           {
-            m_box = boxA;
+            m_function = boxA;
             m_request->ask(RecalculateAll);
           }
         }
@@ -333,7 +333,7 @@ namespace Mantid
     {
       //Add existing functions.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
-      compFunction->addFunction(m_box);
+      compFunction->addFunction(m_function);
       Mantid::Geometry::MDImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
       if (existingFunctions != NULL)
       {
