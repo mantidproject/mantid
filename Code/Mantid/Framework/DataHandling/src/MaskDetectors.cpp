@@ -5,6 +5,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <set>
 
 namespace Mantid
@@ -54,6 +56,14 @@ void MaskDetectors::init()
   declareProperty(
     new WorkspaceProperty<>("MaskedWorkspace","",Direction::Input, true),
     "If given, the masking from this workspace will be copied.");
+  BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
+  mustBePosInt->setLower(0);
+  declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+          "The index number of the first spectrum to include in the calculation\n"
+          "(default 0)" );
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
+          "The index number of the last spectrum to include in the calculation\n"
+          "(default the last histogram)" );
 }
 
 void MaskDetectors::exec()
@@ -78,7 +88,7 @@ void MaskDetectors::exec()
   }
 
   // Check the provided workspace has the same number of spectra as the input
-  if( prevMasking && prevMasking->getNumberHistograms() != WS->getNumberHistograms() )
+  if( prevMasking && prevMasking->getNumberHistograms() > WS->getNumberHistograms() )
   {
     throw std::runtime_error("Size mismatch between two input workspaces.");
   }
@@ -193,9 +203,12 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, cons
 {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> existingIndices(indexList.begin(), indexList.end());
-  const int64_t numHistograms(maskedWorkspace->getNumberHistograms());
+  int numHistograms = getProperty("EndWorkspaceIndex");
+  if (numHistograms == EMPTY_INT() ) numHistograms = static_cast<int>(maskedWorkspace->getNumberHistograms());
+  int startHistograms = getProperty("StartWorkspaceIndex");
+
   
-  for (int64_t i = 0; i < numHistograms; ++i)
+  for (int64_t i = startHistograms; i < numHistograms; ++i)
   {
     IDetector_const_sptr det;
     try
