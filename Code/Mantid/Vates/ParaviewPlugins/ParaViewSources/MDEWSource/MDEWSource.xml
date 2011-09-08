@@ -1,0 +1,20 @@
+<ServerManagerConfiguration>
+  <!-- Begin MDEWSource -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="MDEW Source" class="vtkMDEWSource">
+	   <IntVectorProperty
+         name="Recursion Depth"
+         command="SetDepth"
+         number_of_elements="1"
+         default_values="1000">
+       </IntVectorProperty>
+	   <StringVectorProperty
+         name="Mantid Workspace Name"
+         command="SetWsName"
+         number_of_elements="1"
+         information_only="0">
+       </StringVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End MDEWSource -->
+</ServerManagerConfiguration>
