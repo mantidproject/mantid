@@ -51,6 +51,7 @@ set ( TEST_FILES
 	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
+	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
 	test/SetGoniometerTest.h
 )
