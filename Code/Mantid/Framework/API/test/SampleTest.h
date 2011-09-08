@@ -191,7 +191,7 @@ public:
 
   void test_nexus()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("SampleTest.nxs");
 
     Object_sptr shape_sptr = createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
