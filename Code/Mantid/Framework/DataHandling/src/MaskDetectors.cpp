@@ -213,7 +213,7 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, cons
     IDetector_const_sptr det;
     try
     {
-      det = maskedWorkspace->getDetector(i);
+      det = maskedWorkspace->getDetector(i-startHistograms);
     }
     catch(Exception::NotFoundError &)
     {
