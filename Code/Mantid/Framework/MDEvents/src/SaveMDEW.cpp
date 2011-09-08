@@ -128,6 +128,8 @@ namespace MDEvents
       // TODO: notes, sample, logs, instrument, process, run_start
     }
 
+    // TODO: For each experiment!
+
     // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
     file->putAttr("definition",  ws->id());
     file->putAttr("title",  ws->getTitle() );

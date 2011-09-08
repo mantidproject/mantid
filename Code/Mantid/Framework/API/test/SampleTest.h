@@ -198,6 +198,7 @@ public:
     Sample sample;
     sample.setShape(*shape_sptr);
     sample.setName("NameOfASample");
+    sample.setWidth(1.234);
     sample.setOrientedLattice( new OrientedLattice(4,5,6,90,91,92) );
     boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
     sample2->setName("test name for test_Multiple_Sample - 2");
@@ -220,6 +221,8 @@ public:
     TS_ASSERT_DELTA(loaded.getOrientedLattice().c(), 6.0, 1e-6);
     TS_ASSERT_EQUALS(loaded.getShape().getBoundingBox().xMax(), sample.getShape().getBoundingBox().xMax() );
     TS_ASSERT_EQUALS(loaded.getShape().getShapeXML(), sample.getShape().getShapeXML() );
+    // Geometry values
+    TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
 
   }
 

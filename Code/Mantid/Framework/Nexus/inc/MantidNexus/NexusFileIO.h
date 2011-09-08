@@ -106,9 +106,10 @@ namespace Mantid
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
 
-    private:
       /// Nexus file handle
       NXhandle fileID;
+
+    private:
       /// Nexus format to use for writing
       NXaccess m_nexusformat;
       /// Nexus compression method

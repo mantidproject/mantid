@@ -339,6 +339,12 @@ namespace Mantid
       else
         file->writeData("num_oriented_lattice", 0 );
 
+      // Legacy info from RAW file (I think)
+      file->writeData("geom_id", m_geom_id);
+      file->writeData("geom_thickness", m_thick);
+      file->writeData("geom_height", m_height);
+      file->writeData("geom_width", m_width);
+
       file->closeGroup();
     }
 
@@ -350,37 +356,59 @@ namespace Mantid
     void Sample::loadNexus(::NeXus::File * file, const std::string & group)
     {
       file->openGroup(group, "NXsample");
-      file->getAttr("name", m_name);
 
-      // Shape (from XML)
-      std::string shape_xml;
-      file->getAttr("shape_xml", shape_xml);
-      shape_xml = Strings::strip(shape_xml);
-      if (!shape_xml.empty())
+      // Version 0 = saveNexusProcessed before Sep 8, 2011
+      int version = 0;
+      try {  file->getAttr("version", version);  }
+      catch (...)   { version=0; }
+
+      if (version == 0)
       {
-        ShapeFactory shapeMaker;
-        m_shape = *shapeMaker.createShape(shape_xml, false /*Don't wrap with <type> tag*/);
+        // Sample NAME field may/may not be present
+        try {  file->readData("name", m_name); }
+        catch (...) {}
       }
 
-      m_material.loadNexus(file, "material");
-      // Load other samples
-      int num_other_samples;
-      file->readData("num_other_samples", num_other_samples);
-      for (int i=0; i < num_other_samples; i++)
+      if (version > 0)
       {
-        boost::shared_ptr<Sample> extra(new Sample);
-        extra->loadNexus(file, "sample" + Strings::toString(i+1));
-        this->addSample(extra);
+        file->getAttr("name", m_name);
+
+        // Shape (from XML)
+        std::string shape_xml;
+        file->getAttr("shape_xml", shape_xml);
+        shape_xml = Strings::strip(shape_xml);
+        if (!shape_xml.empty())
+        {
+          ShapeFactory shapeMaker;
+          m_shape = *shapeMaker.createShape(shape_xml, false /*Don't wrap with <type> tag*/);
+        }
+
+        m_material.loadNexus(file, "material");
+        // Load other samples
+        int num_other_samples;
+        file->readData("num_other_samples", num_other_samples);
+        for (int i=0; i < num_other_samples; i++)
+        {
+          boost::shared_ptr<Sample> extra(new Sample);
+          extra->loadNexus(file, "sample" + Strings::toString(i+1));
+          this->addSample(extra);
+        }
+
+        // OrientedLattice
+        int num_oriented_lattice;
+        file->readData("num_oriented_lattice", num_oriented_lattice );
+        if (num_oriented_lattice > 0)
+        {
+          m_lattice = new OrientedLattice;
+          m_lattice->loadNexus(file, "oriented_lattice");
+        }
       }
 
-      // OrientedLattice
-      int num_oriented_lattice;
-      file->readData("num_oriented_lattice", num_oriented_lattice );
-      if (num_oriented_lattice > 0)
-      {
-        m_lattice = new OrientedLattice;
-        m_lattice->loadNexus(file, "oriented_lattice");
-      }
+      // Legacy info from RAW file (I think)
+      file->readData("geom_id", m_geom_id);
+      file->readData("geom_thickness", m_thick);
+      file->readData("geom_height", m_height);
+      file->readData("geom_width", m_width);
 
       file->closeGroup();
     }

@@ -57,6 +57,9 @@ namespace API
     /// Utility method to get the run number
     int getRunNumber() const;
 
+    void saveNexus(::NeXus::File * file, const std::string & group) const;
+    void loadNexus(::NeXus::File * file, const std::string & group);
+
 
   protected:
     /// The information on the sample environment

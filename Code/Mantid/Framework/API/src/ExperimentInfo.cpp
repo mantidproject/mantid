@@ -219,6 +219,26 @@ namespace API
   }
 
 
+  //--------------------------------------------------------------------------------------------
+  /** Save the object to an open NeXus file.
+   * @param file :: open NeXus file
+   * @param group :: name of the group to create (ignored - all are created at the same open group)
+   */
+  void ExperimentInfo::saveNexus(::NeXus::File * file, const std::string & /*group*/) const
+  {
+    m_sample->saveNexus(file, "sample");
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Load the object from an open NeXus file.
+   * @param file :: open NeXus file
+   * @param group :: name of the group to open
+   */
+  void ExperimentInfo::loadNexus(::NeXus::File * file, const std::string & /*group*/)
+  {
+    //m_sample->loadNexus(file, "sample");
+  }
+
 
 } // namespace Mantid
 } // namespace API
