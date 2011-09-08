@@ -137,7 +137,7 @@ namespace Mantid
       std::map<Kernel::DateAndTime, std::string> logm = icpLog->valueAsMap();
       std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
 
-      for(;it!=logm.end();it++)
+      for(;it!=logm.end();++it)
       {
         std::string scom;
         std::istringstream idata(it->second);
@@ -234,7 +234,7 @@ namespace Mantid
       {
         Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(name);
         std::map<std::string,std::string>::iterator it = change_times.begin();
-        for(;it!=change_times.end();it++)
+        for(;it!=change_times.end();++it)
         {
           std::istringstream istr(it->second);
           double d;
@@ -247,7 +247,7 @@ namespace Mantid
       {
         Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(name);
         std::map<std::string,std::string>::iterator it = change_times.begin();
-        for(;it!=change_times.end();it++)
+        for(;it!=change_times.end();++it)
         {
           logv->addValue(it->first,it->second);
         }
@@ -272,7 +272,7 @@ namespace Mantid
       std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
       if (it->second != period)
         p->addValue(it->first,false);
-      for(;it!=pMap.end();it++)
+      for(;it!=pMap.end();++it)
         p->addValue(it->first, (it->second == period) );
 
       return p;
@@ -285,7 +285,7 @@ namespace Mantid
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
       std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
       std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
-      for(;it!=pMap.end();it++)
+      for(;it!=pMap.end();++it)
         p->addValue(it->first, it->second);
       return p;
     }

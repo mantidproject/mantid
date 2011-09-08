@@ -855,10 +855,10 @@ size_t split_path(const std::string &path, std::vector<std::string> &path_compon
     path_components.resize(n_folders);
     std::list<int64_t>::iterator it1 = split_pos.begin();
     std::list<int64_t>::iterator it2 = it1;
-    it2++;
+    ++it2;
 
     int64_t ic(0);
-    for(; it2!=split_pos.end();it2++){
+    for(; it2!=split_pos.end();++it2){
         std::string folder = working_path.substr(*it1+1,*it2-*it1-1);
         if(folder.empty()||(folder.size()==1&&folder==".")){ // skip self-references and double slashes;
             it1=it2;

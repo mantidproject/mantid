@@ -112,7 +112,7 @@ void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
   std::vector<AlgorithmHistory>::const_iterator it;
   os << std::string(indent,' ') << "Histories:" <<std::endl;
 
-  for (it=m_algorithms.begin();it!=m_algorithms.end();it++)
+  for (it=m_algorithms.begin();it!=m_algorithms.end();++it)
   {
     os << std::endl;
     it->printSelf( os, indent+2 );

@@ -108,7 +108,7 @@ namespace Kernel
         while (m_mruUsed > m_mruSize && (m_mru.size() > 0))
         {
           // Pop the least-used object out the back
-          it--;
+          --it;
           if (it == m_mru.begin()) break; // Avoid going out of bounds
           const ISaveable *toWrite = *it;
           // Can you save it to disk?
@@ -243,7 +243,7 @@ namespace Kernel
     writeBuffer_t::iterator it_end = m_writeBuffer.end();
 
     const ISaveable * obj = NULL;
-    for (; it != it_end; it++)
+    for (; it != it_end; ++it)
     {
       obj = *it;
       if (!obj->dataBusy())
@@ -331,7 +331,7 @@ namespace Kernel
     freeSpace_t::iterator it = p.first;
     if (it != m_free.begin())
     {
-      freeSpace_t::iterator it_before = it; it_before--;
+      freeSpace_t::iterator it_before = it; --it_before;
       // There is a block before
       //std::cout << "There is a block before " << pos << std::endl;
       FreeBlock block_before = *it_before;
@@ -348,7 +348,7 @@ namespace Kernel
       }
     }
     // Get an iterator to the block AFTER this one
-    freeSpace_t::iterator it_after = it; it_after++;
+    freeSpace_t::iterator it_after = it; ++it_after;
     // There is a block after
     if (it_after != m_free.end())
     {
@@ -383,7 +383,7 @@ namespace Kernel
     {
       // Get iterator to the block after "it".
       freeSpace_t::iterator it_after = it;
-      it_after++;
+      ++it_after;
       FreeBlock block_after = *it_after;
 
       if (FreeBlock::merge(thisBlock, *it_after))
@@ -397,7 +397,7 @@ namespace Kernel
       else
       {
         // Move on to the next block
-        it++;
+        ++it;
         thisBlock = *it;
       }
     }
@@ -481,7 +481,7 @@ namespace Kernel
     free.reserve( m_free.size() * 2);
     freeSpace_bySize_t::const_iterator it = m_free_bySize.begin();
     freeSpace_bySize_t::const_iterator it_end = m_free_bySize.end();
-    for (; it != it_end; it++)
+    for (; it != it_end; ++it)
     {
       free.push_back(it->getFilePosition());
       free.push_back(it->getSize());

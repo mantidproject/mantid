@@ -89,7 +89,7 @@ std::ostream& operator<<(std::ostream& s,const TableRow& row)
         return s;
     }
     std::vector< boost::shared_ptr<Column> >::const_iterator ci = row.m_columns.begin();
-    for(;ci!=row.m_columns.end()-1;ci++)
+    for(;ci!=row.m_columns.end()-1;++ci)
     {
         (*ci)->print(s,row.row());
         s << row.m_sep;

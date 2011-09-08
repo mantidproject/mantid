@@ -130,7 +130,7 @@ bool FileValidator::endswith(const std::string &value) const
 
   // check for the ending
   for (std::set<std::string>::const_iterator it = m_extensions.begin();
-       it != m_extensions.end(); it++) {
+       it != m_extensions.end(); ++it) {
     if (has_ending(value, *it)) // original case
       return true;
     if (has_ending(value_copy, *it)) // lower case

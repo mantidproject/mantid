@@ -20,7 +20,7 @@ MANTID_KERNEL_DLL void CleanupSingletons()
 	return;
     }
     std::list<atexit_func_t>::const_iterator it;
-    for(it=cleanup_list->begin(); it != cleanup_list->end(); it++)
+    for(it=cleanup_list->begin(); it != cleanup_list->end(); ++it)
     {
 	(*(*it))();
     }

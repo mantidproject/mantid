@@ -90,7 +90,7 @@ namespace Mantid
     {
       //Iterate through all properties on the RHS
       PropertyMap::const_iterator it;
-      for (it = rhs.m_properties.begin(); it != rhs.m_properties.end(); it++)
+      for (it = rhs.m_properties.begin(); it != rhs.m_properties.end(); ++it)
       {
         //The name on the rhs
         string rhs_name = it->first;
@@ -128,7 +128,7 @@ namespace Mantid
     {
       //Iterate through all properties
       PropertyMap::const_iterator it;
-      for (it = this->m_properties.begin(); it != this->m_properties.end(); it++)
+      for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it)
       {
         //Filter out the property
         Property * prop = it->second;
@@ -152,7 +152,7 @@ namespace Mantid
 
       //Iterate through all properties
       PropertyMap::const_iterator it;
-      for (it = this->m_properties.begin(); it != this->m_properties.end(); it++)
+      for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it)
       {
         //Filter out the property
         Property * prop = it->second;

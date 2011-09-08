@@ -85,7 +85,7 @@ void WorkspaceGroup::deepRemoveAll()
 void WorkspaceGroup::print() const
 {
   std::vector<std::string>::const_iterator itr;
-  for (itr = m_wsNames.begin(); itr != m_wsNames.end(); itr++)
+  for (itr = m_wsNames.begin(); itr != m_wsNames.end(); ++itr)
   {
     g_log.debug() << "Workspace name in group vector =  " << *itr << std::endl;
   }

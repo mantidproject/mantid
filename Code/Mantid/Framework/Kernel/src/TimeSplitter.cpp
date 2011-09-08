@@ -101,7 +101,7 @@ bool isFilter(const TimeSplitterType& a)
 {
   int max=-1;
   TimeSplitterType::const_iterator it;
-  for (it = a.begin(); it!=a.end(); it++)
+  for (it = a.begin(); it!=a.end(); ++it)
     if (it->index() > max)
       max = it->index();
   return (max <= 0);
@@ -166,9 +166,9 @@ TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b
   TimeSplitterType::const_iterator bit;
 
   //For now, a simple double iteration. Can be made smarter if a and b are sorted.
-  for (ait=a.begin(); ait != a.end(); ait++)
+  for (ait=a.begin(); ait != a.end(); ++ait)
   {
-    for (bit=b.begin(); bit != b.end(); bit++)
+    for (bit=b.begin(); bit != b.end(); ++bit)
     {
       if (ait->overlaps(*bit))
       {
@@ -205,7 +205,7 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a)
       //Extend the stop point (the start cannot be extended since the list is sorted)
       if (it->stop() > stop)
         stop = it->stop();
-      it++;
+      ++it;
     }
     //We've reached a gap point. Output this merged interval and move on.
     out.push_back( SplittingInterval(start, stop, 0) );
@@ -234,10 +234,10 @@ TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b
 
   // Add the intervals, but don't add any invalid (empty) ranges
   TimeSplitterType::const_iterator it;;
-  for (it = a.begin(); it != a.end(); it++)
+  for (it = a.begin(); it != a.end(); ++it)
     if (it->stop() > it->start())
       temp.push_back(*it);
-  for (it = b.begin(); it != b.end(); it++)
+  for (it = b.begin(); it != b.end(); ++it)
     if (it->stop() > it->start())
       temp.push_back(*it);
 
@@ -281,7 +281,7 @@ TimeSplitterType operator ~(const TimeSplitterType& a)
     {
       DateAndTime start, stop;
       start = ait->stop();
-      ait++;
+      ++ait;
       if (ait==temp.end())
       { //Reached the end - go to inf
         stop = DateAndTime::maximum();
