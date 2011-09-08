@@ -160,5 +160,42 @@ namespace Geometry
   }
 
 
+  /** Save the object to an open NeXus file.
+   * @param file :: open NeXus file
+   * @param group :: name of the group to create
+   */
+  void OrientedLattice::saveNexus(::NeXus::File * file, const std::string & group) const
+  {
+    file->makeGroup(group, "NXcrystal", 1);
+    file->writeData("unit_cell_a", this->a());
+    file->writeData("unit_cell_b", this->b());
+    file->writeData("unit_cell_c", this->c());
+    file->writeData("unit_cell_alpha", this->alpha());
+    file->writeData("unit_cell_beta", this->beta());
+    file->writeData("unit_cell_gamma", this->gamma());
+    // Save the UB matrix
+    std::vector<double> ub = this->UB.get_vector();
+    std::vector<int> dims(2,3); // 3x3 matrix
+    file->writeData("orientation_matrix", ub, dims);
+
+    file->closeGroup();
+  }
+
+  /** Load the object from an open NeXus file.
+   * @param file :: open NeXus file
+   * @param group :: name of the group to open
+   */
+  void OrientedLattice::loadNexus(::NeXus::File * file, const std::string & group)
+  {
+    file->openGroup(group, "NXcrystal");
+    std::vector<double> ub;
+    file->readData("orientation_matrix", ub);
+    // Turn into a matrix
+    DblMatrix ubMat(ub);
+    // This will set the lattice parameters and the U matrix:
+    this->setUB(ubMat);
+    file->closeGroup();
+  }
+
 }//Namespace Geometry
 }//Namespace Mantid

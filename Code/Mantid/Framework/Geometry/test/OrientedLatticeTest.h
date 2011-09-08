@@ -6,11 +6,13 @@
 #include <iomanip>
 #include <MantidKernel/Matrix.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidNexusCPP/NexusTestHelper.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
+using Mantid::NexusCPP::NexusTestHelper;
 
 class OrientedLatticeTest : public CxxTest::TestSuite
 {
@@ -66,6 +68,25 @@ public:
   }
 
 
+  void test_nexus()
+  {
+    NexusTestHelper th(false);
+    th.createFile("OrientedLatticeTest.nxs");
+    DblMatrix U(3,3,true);
+    OrientedLattice u(1,2,3, 90, 89, 88);
+    u.saveNexus(th.file, "lattice");
+    th.reopenFile();
+
+    OrientedLattice u2;
+    u2.loadNexus(th.file, "lattice");
+    // Was it reloaded correctly?
+    TS_ASSERT_DELTA( u2.a(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( u2.b(), 2.0, 1e-5);
+    TS_ASSERT_DELTA( u2.c(), 3.0, 1e-5);
+    TS_ASSERT_DELTA( u2.alpha(), 90.0, 1e-5);
+    TS_ASSERT_DELTA( u2.beta(), 89.0, 1e-5);
+    TS_ASSERT_DELTA( u2.gamma(), 88.0, 1e-5);
+  }
 
 
 
@@ -187,6 +208,8 @@ public:
     TSM_ASSERT_DELTA("Y-coord should be specified correctly",0.18234563931714265,y,1.e-5);
     TSM_ASSERT_DELTA("Z-coord should be specified correctly",-0.020536948488997286,z,1.e-5);
   }
+
+
 
 };
 

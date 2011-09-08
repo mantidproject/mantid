@@ -1,6 +1,7 @@
 #ifndef MANTID_GEOMETRY_ORIENTEDLATTICE_H_
 #define MANTID_GEOMETRY_ORIENTEDLATTICE_H_
 #include <MantidGeometry/Crystal/UnitCell.h>
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -55,6 +56,9 @@ namespace Geometry
       void setUB(Kernel::DblMatrix& newUB);
 
       Kernel::DblMatrix setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
+
+      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void loadNexus(::NeXus::File * file, const std::string & group);
 
     private:
       Kernel::DblMatrix U;
