@@ -5,6 +5,11 @@
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+
+using namespace Mantid::Kernel;
+using Mantid::Geometry::ShapeFactory;
 
 namespace Mantid
 {
@@ -307,6 +312,7 @@ namespace Mantid
     }
 
 
+    //--------------------------------------------------------------------------------------------
     /** Save the object to an open NeXus file.
      * @param file :: open NeXus file
      * @param group :: name of the group to create
@@ -316,15 +322,27 @@ namespace Mantid
       file->makeGroup(group, "NXsample", 1);
       file->putAttr("name", m_name);
       file->putAttr("version", 1);
+      file->putAttr("shape_xml", m_shape.getShapeXML());
+
       m_material.saveNexus(file, "material");
       // Write out the other (indexes 1+) samples
       file->writeData("num_other_samples", int(m_samples.size()) );
       for (size_t i=0; i<m_samples.size(); i++)
-        m_samples[i]->saveNexus(file, "sample" + Mantid::Kernel::Strings::toString(i+1));
-      //TODO: Sample, environment
+        m_samples[i]->saveNexus(file, "sample" + Strings::toString(i+1));
+      //TODO: SampleEnvironment
+      // OrientedLattice
+      if (hasOrientedLattice())
+      {
+        file->writeData("num_oriented_lattice", 1 );
+        m_lattice->saveNexus(file, "oriented_lattice");
+      }
+      else
+        file->writeData("num_oriented_lattice", 0 );
+
       file->closeGroup();
     }
 
+    //--------------------------------------------------------------------------------------------
     /** Load the object from an open NeXus file.
      * @param file :: open NeXus file
      * @param group :: name of the group to open
@@ -332,6 +350,38 @@ namespace Mantid
     void Sample::loadNexus(::NeXus::File * file, const std::string & group)
     {
       file->openGroup(group, "NXsample");
+      file->getAttr("name", m_name);
+
+      // Shape (from XML)
+      std::string shape_xml;
+      file->getAttr("shape_xml", shape_xml);
+      shape_xml = Strings::strip(shape_xml);
+      if (!shape_xml.empty())
+      {
+        ShapeFactory shapeMaker;
+        m_shape = *shapeMaker.createShape(shape_xml, false /*Don't wrap with <type> tag*/);
+      }
+
+      m_material.loadNexus(file, "material");
+      // Load other samples
+      int num_other_samples;
+      file->readData("num_other_samples", num_other_samples);
+      for (int i=0; i < num_other_samples; i++)
+      {
+        boost::shared_ptr<Sample> extra(new Sample);
+        extra->loadNexus(file, "sample" + Strings::toString(i+1));
+        this->addSample(extra);
+      }
+
+      // OrientedLattice
+      int num_oriented_lattice;
+      file->readData("num_oriented_lattice", num_oriented_lattice );
+      if (num_oriented_lattice > 0)
+      {
+        m_lattice = new OrientedLattice;
+        m_lattice->loadNexus(file, "oriented_lattice");
+      }
+
       file->closeGroup();
     }
 

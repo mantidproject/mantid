@@ -73,36 +73,36 @@ namespace Geometry
       virtual ~UnitCell(); 
 
       // Get and set lattice parameters
-            // Direct lattice parameters, angle in radians. 
-            double a1() const;
+      // Direct lattice parameters, angle in radians.
+      double a1() const;
       double a2() const;
       double a3() const;
       double alpha1() const;
-            double alpha2() const;
-            double alpha3() const;
-            // Direct lattice parameters, angle in degrees.
+      double alpha2() const;
+      double alpha3() const;
+      // Direct lattice parameters, angle in degrees.
       double a() const;    
-            double b() const;
-            double c() const;
-            double alpha() const;
-            double beta() const;
-            double gamma() const;
-            // Reciprocal lattice parameters, angle in radians.
-            double b1() const;
-            double b2() const;
-            double b3() const;
-            double beta1() const;
-            double beta2() const;
-            double beta3() const;
-            // Reciprocal lattice parameters, angle in degrees.
-            double astar() const;
-            double bstar() const;
-            double cstar() const;
-            double alphastar() const;
-            double betastar() const;
-            double gammastar() const;
+      double b() const;
+      double c() const;
+      double alpha() const;
+      double beta() const;
+      double gamma() const;
+      // Reciprocal lattice parameters, angle in radians.
+      double b1() const;
+      double b2() const;
+      double b3() const;
+      double beta1() const;
+      double beta2() const;
+      double beta3() const;
+      // Reciprocal lattice parameters, angle in degrees.
+      double astar() const;
+      double bstar() const;
+      double cstar() const;
+      double alphastar() const;
+      double betastar() const;
+      double gammastar() const;
       // Set lattice
-            void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit=angDegrees);
+      void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit=angDegrees);
       void seta(double _a);
       void setb(double _b);
       void setc(double _c);

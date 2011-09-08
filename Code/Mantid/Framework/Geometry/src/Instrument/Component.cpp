@@ -1,6 +1,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include <Poco/XML/XMLWriter.h>
+#include <Poco/SAX/AttributesImpl.h>
 
 
 namespace Mantid
@@ -73,17 +75,6 @@ namespace Geometry
   Component::~Component()
   {
   }
-
-
-  //------------------------------------------------------------------------------------------------
-  /** Reads the XML attributes from Poco XML parser
-   * @param attr :: XML attributes  */
-  void Component::readXMLAttributes(const Poco::XML::Attributes& attr)
-  {
-    std::string pos = attr.getValue("", "pos");
-    std::string rot = attr.getValue("", "rot");
-  }
-
 
   //------------------------------------------------------------------------------------------------
   /** Return true if the Component is, in fact, parametrized
@@ -549,6 +540,38 @@ namespace Geometry
     comp.printSelf(os);
     return os;
   }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Reads the XML attributes from Poco XML parser
+   * @param attr :: XML attributes  */
+  void Component::readXMLAttributes(const Poco::XML::Attributes& attr)
+  {
+//    std::string pos = attr.getValue("", "pos");
+//    m_pos.fromString(pos);
+//    std::string rot = attr.getValue("", "rot");
+//    m_rot.fromString(rot);
+  }
+
+  void Component::writeXML(Poco::XML::XMLWriter & writer) const
+  {
+    Poco::XML::AttributesImpl attr;
+    attr.addAttribute("", "pos", "", "", m_pos.toString());
+    writer.startElement("", "Component", "", attr);
+    writer.endElement("", "Component", "");
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Append to an open XML string
+   * @param xml :: string to append to. */
+  void Component::appendXML(std::ostream& xmlStream) const
+  {
+    xmlStream << "<pos>";
+    m_pos.write(xmlStream);
+    xmlStream << "</pos>\n";
+    xmlStream << "<rot>" << m_rot << "</rot>\n";
+  }
+
 
   //--------------------------------------------------------------------------
   // Private methods

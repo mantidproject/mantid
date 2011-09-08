@@ -64,7 +64,8 @@ namespace Mantid
       AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin), 
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), 
       bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
-      vtkCacheWriter(A.vtkCacheWriter)
+      vtkCacheWriter(A.vtkCacheWriter),
+      m_shapeXML(A.m_shapeXML)
     {
       handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
 
@@ -99,6 +100,7 @@ namespace Mantid
         bGeometryCaching = A.bGeometryCaching;
         vtkCacheReader = A.vtkCacheReader;
         vtkCacheWriter = A.vtkCacheWriter;
+        m_shapeXML = A.m_shapeXML;
 
         // Need to deep-copy the vector of pointers to surfaces
         SurList.clear();

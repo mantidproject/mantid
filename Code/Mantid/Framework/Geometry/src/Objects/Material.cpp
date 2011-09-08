@@ -2,6 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Objects/Material.h"
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -156,7 +157,11 @@ namespace Mantid
       uint16_t element_Z, element_A;
       file->readData("element_Z", element_Z);
       file->readData("element_A", element_A);
+      try {
       m_element = Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A);
+      }
+      catch (std::runtime_error & e)
+      { /* ignore and use the default */ }
 
       file->readData("number_density", m_numberDensity);
       file->readData("temperature", m_temperature);

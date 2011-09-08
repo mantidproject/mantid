@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <vector>
 #include <Poco/SAX/Attributes.h>
+#include <Poco/XML/XMLWriter.h>
 
 namespace Mantid
 {
@@ -59,6 +60,9 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL Component : public virtual IComponent
     {
     public:
+      /// @return the name of this type
+      virtual std::string typeName() const { return "Component"; }
+
       /// Constructor for parametrized component
       Component(const IComponent* base, const ParameterMap * map);
 
@@ -201,6 +205,8 @@ namespace Mantid
       const IComponent* getBareParent() const { return m_parent; }
 
       virtual void readXMLAttributes(const Poco::XML::Attributes& attr);
+      virtual void writeXML(Poco::XML::XMLWriter & writer) const;
+      virtual void appendXML(std::ostream& xmlStream) const;
 
     protected:
       /// Parent component in the tree

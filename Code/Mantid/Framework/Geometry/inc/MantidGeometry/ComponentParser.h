@@ -50,14 +50,18 @@ namespace Geometry
     /// Signals end of element
     void endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&);
 
+    void characters(const Poco::XML::XMLChar [], int, int);
+
     Component * getComponent();
+
+    size_t size() const
+    { return m_current.size(); }
 
     // These functions must be present as they are abstract in the base class. They are not used them here.
     /// Signals start of XML document
     void startDocument() {} ///<Not used
     void setDocumentLocator(const Poco::XML::Locator*) {} ///< Not used
     void endDocument() {} ///< Not used
-    void characters(const Poco::XML::XMLChar [], int, int) {} ///< Not used
     void ignorableWhitespace(const Poco::XML::XMLChar [], int, int) {} ///< Not used
     void processingInstruction(const Poco::XML::XMLString&, const Poco::XML::XMLString&) {} ///< Not used
     void startPrefixMapping(const Poco::XML::XMLString&, const Poco::XML::XMLString&) {} ///< Not used
@@ -68,6 +72,8 @@ namespace Geometry
     /// The components currently being built up.
     /// The one at the back of the vector is the latest one.
     std::vector<Component*> m_current;
+
+    std::string m_innerText;
 
   };
 } // namespace Geometry

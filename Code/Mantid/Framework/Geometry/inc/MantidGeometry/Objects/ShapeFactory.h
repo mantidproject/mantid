@@ -71,7 +71,7 @@ namespace Mantid
       ~ShapeFactory() {}
 
       boost::shared_ptr<Object> createShape(Poco::XML::Element* pElem);
-      boost::shared_ptr<Object> createShape(std::string shapeXML);
+      boost::shared_ptr<Object> createShape(std::string shapeXML, bool addTypeTag = true);
       
     private:
       std::string parseSphere(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);

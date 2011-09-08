@@ -191,18 +191,35 @@ public:
 
   void test_nexus()
   {
-    NexusTestHelper th(true);
+    NexusTestHelper th(false);
     th.createFile("SampleTest.nxs");
 
     Object_sptr shape_sptr = createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     sample.setShape(*shape_sptr);
     sample.setName("NameOfASample");
+    sample.setOrientedLattice( new OrientedLattice(4,5,6,90,91,92) );
     boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
+    TS_ASSERT( sample.getShape().getShapeXML() != "" );
 
     sample.saveNexus(th.file, "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file, "sample");
+
+    TS_ASSERT_EQUALS(loaded.size(), 2);
+    TS_ASSERT_EQUALS(loaded.getName(), sample.getName());
+    TS_ASSERT_EQUALS(loaded[0].getName(), sample[0].getName());
+    TS_ASSERT_EQUALS(loaded[1].getName(), sample[1].getName());
+    TS_ASSERT_EQUALS(loaded.hasOrientedLattice(), sample.hasOrientedLattice());
+    TS_ASSERT_DELTA(loaded.getOrientedLattice().a(), 4.0, 1e-6);
+    TS_ASSERT_DELTA(loaded.getOrientedLattice().b(), 5.0, 1e-6);
+    TS_ASSERT_DELTA(loaded.getOrientedLattice().c(), 6.0, 1e-6);
+    TS_ASSERT_EQUALS(loaded.getShape().getBoundingBox().xMax(), sample.getShape().getBoundingBox().xMax() );
+    TS_ASSERT_EQUALS(loaded.getShape().getShapeXML(), sample.getShape().getShapeXML() );
 
   }
 
