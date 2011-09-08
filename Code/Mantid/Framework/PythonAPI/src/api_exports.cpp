@@ -475,6 +475,8 @@ using namespace boost::python;
       .def("getWidth", &API::Sample::getWidth)
       .def("__getitem__", &API::Sample::operator[], return_internal_reference<>())
       .def("size", &API::Sample::size)
+      .def("getOrientedLattice", (const OrientedLattice & (Sample::*)() const)&API::Sample::getOrientedLattice, return_value_policy<copy_const_reference>())
+      .def("hasOrientedLattice", &API::Sample::hasOrientedLattice)
      ;
   }
 

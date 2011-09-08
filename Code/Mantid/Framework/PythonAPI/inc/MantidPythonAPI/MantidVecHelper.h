@@ -4,8 +4,8 @@
 //-----------------------------------
 // Includes
 //-----------------------------------
-#include "MantidAPI/MatrixWorkspace.h"  // For MantidVec typedef
 #include "MantidPythonAPI/BoostPython_Silent.h"
+#include "MantidAPI/MatrixWorkspace.h"  // For MantidVec typedef
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid

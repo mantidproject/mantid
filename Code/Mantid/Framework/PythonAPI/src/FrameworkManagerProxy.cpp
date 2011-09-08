@@ -1,6 +1,8 @@
 //---------------------------------------
 // Includes
 //------------------------------------
+#include "MantidPythonAPI/FrameworkManagerProxy.h"
+#include "MantidPythonAPI/PyAlgorithmWrapper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -9,8 +11,6 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
-#include "MantidPythonAPI/FrameworkManagerProxy.h"
-#include "MantidPythonAPI/PyAlgorithmWrapper.h"
 #include <stdexcept>
 #include <fstream>
 #include <sstream>

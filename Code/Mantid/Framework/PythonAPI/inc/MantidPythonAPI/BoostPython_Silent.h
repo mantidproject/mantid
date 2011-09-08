@@ -37,6 +37,7 @@
   #pragma warning(disable:4250)
   #include <boost/python.hpp>
   #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+  #undef snprintf // Nexus defined this and Python redefines it so undefine it here to avoid a warning
   #pragma warning(pop)
 #elif defined __GNUC__
   #pragma GCC system_header
