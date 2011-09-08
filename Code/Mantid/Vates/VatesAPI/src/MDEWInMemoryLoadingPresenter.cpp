@@ -66,7 +66,7 @@ namespace Mantid
     @param factory : visualisation factory to use.
     @param eventHandler : object that encapuslates the direction of the gui change as the algorithm progresses.
     */
-    vtkDataSet* MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory* factory, ProgressAction&)
     {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
