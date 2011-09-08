@@ -71,6 +71,7 @@ namespace WorkflowAlgorithms
     row << key << value << 0 << 0.0;
   }
 
+
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 

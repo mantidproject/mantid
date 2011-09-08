@@ -12,6 +12,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/TableRow.h"
 #include "Poco/File.h"
+#include "Poco/Path.h"
 
 namespace Mantid
 {
@@ -95,14 +96,15 @@ void EQSANSDarkCurrentSubtraction::exec()
   progress.report("Subtracting dark current");
 
   // Look for an entry for the dark current in the reduction table
-  const std::string entryName = "DarkCurrent";
+  Poco::Path path(fileName);
+  const std::string entryName = "DarkCurrent"+path.getBaseName();
   darkWS = reductionHandler.findWorkspaceEntry(entryName);
   darkWSName = reductionHandler.findStringEntry(entryName);
 
   if (darkWSName.size()==0) {
     darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
     if (darkWSName.size()==0)
-      darkWSName = "__dark_current"+getPropertyValue("ReductionTableWorkspace");
+      darkWSName = "__dark_current_"+path.getBaseName();
     setPropertyValue("OutputDarkCurrentWorkspace", darkWSName);
     reductionHandler.addEntry(entryName, darkWSName);
   }
@@ -112,6 +114,10 @@ void EQSANSDarkCurrentSubtraction::exec()
   {
       IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad", 1.0, 2.0);
       loadAlg->setProperty("Filename", fileName);
+      loadAlg->setProperty("UseConfigTOFCuts", true);
+      loadAlg->setProperty("UseConfigMask", true);
+      loadAlg->setProperty("UseConfig", true);
+      loadAlg->setProperty("CorrectForFlightPath", true);
       loadAlg->executeAsSubAlg();
       darkWS = loadAlg->getProperty("OutputWorkspace");
       setProperty("OutputDarkCurrentWorkspace", darkWS);
@@ -130,24 +136,18 @@ void EQSANSDarkCurrentSubtraction::exec()
   progress.report("Subtracting dark current");
 
   // Scale the stored dark current by the counting time
-  const std::string scaledDarkWS = "__scaled_dark_current";
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace", 3.0, 4.0);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
-  rebinAlg->setProperty("WorkspaceToMatch", outputWS);
-  rebinAlg->setProperty("OutputWorkspace", darkWS);
+  rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->executeAsSubAlg();
-  MatrixWorkspace_sptr dataWS = rebinAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
-  darkWS *= scaling_factor;
-  outputWS -= darkWS;
+  scaledDarkWS *= scaling_factor;
+  outputWS = inputWS - scaledDarkWS;
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+darkWSName);
-
-  // Clean up
-  if (AnalysisDataService::Instance().doesExist(scaledDarkWS))
-    AnalysisDataService::Instance().remove(scaledDarkWS);
 
   progress.report("Subtracting dark current");
 }
