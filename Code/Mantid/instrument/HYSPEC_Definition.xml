@@ -14,7 +14,7 @@
   <component type="moderator">
     <location>
       <parameter name="z">
-        <logfile eq="-1.0*value-38.980" id="MSD"/>
+        <logfile eq="-0.001*value-38.980" id="msd"/>
       </parameter>
     </location>
   </component>
@@ -31,12 +31,12 @@
     <component mark-as="monitor" type="monitor">
       <location name="monitor1">
         <parameter name="z">
-          <logfile eq="-1.0*value-3.340" id="MSD"/>
+          <logfile eq="-0.001*value-3.340" id="msd"/>
         </parameter>
       </location>
       <location name="monitor2">
         <parameter name="z">
-          <logfile eq="-1.0*value-1.585" id="MSD"/>
+          <logfile eq="-0.001*value-1.585" id="msd"/>
         </parameter>
       </location>
       <location z="-0.200" name="monitor3"/>
@@ -48,7 +48,7 @@
         <value val="0"/>
       </parameter>
       <parameter name="t-position">
-        <logfile id="S2"/>
+        <logfile id="s2"/>
       </parameter>
       <parameter name="p-position">
         <value val="0"/>
@@ -57,7 +57,7 @@
         <value val="0"/>
       </parameter>
       <parameter name="roty">
-        <logfile id="S2"/>
+        <logfile id="s2"/>
       </parameter>
       <parameter name="rotz">
         <value val="0"/>
