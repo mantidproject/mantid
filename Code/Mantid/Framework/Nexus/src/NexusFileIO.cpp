@@ -427,25 +427,13 @@ using namespace DataObjects;
 
   //-------------------------------------------------------------------------------------
   //
-  // Write sample related information to the nexus file
+  // Write sample logs to an open group.
   //
 
-  int NexusFileIO::writeNexusProcessedSample( const std::string& name, const API::Sample & sample,
-      const Mantid::API::Run& runProperties) const
+  int NexusFileIO::writeNexusSampleLogs( const Mantid::API::Run& runProperties) const
   {
-    NXstatus status;
-
-    // create sample section
-    status=NXmakegroup(fileID,"sample","NXsample");
-    if(status==NX_ERROR)
-      return(2);
-    status=NXopengroup(fileID,"sample","NXsample");
-    //
     std::vector<std::string> attributes,avalues;
-    // only write name if not null
-    if( name.size()>0 )
-      if( ! writeNxValue<std::string>( "name", name, NX_CHAR, attributes, avalues) )
-        return(3);
+
     // Write proton_charge here, if available and there's no log with the same name. Note that TOFRaw has this at the NXentry level, though there is
     // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
     if( runProperties.hasProperty("proton_charge") )
@@ -479,15 +467,6 @@ using namespace DataObjects;
         if( !writeSingleValueLog(prop) ) return 5;
       }
     }
-
-    // Sample geometry
-    attributes = std::vector<std::string>(0);
-    avalues = std::vector<std::string>(0);
-    writeNxValue<int>("geom_id", sample.getGeometryFlag(), NX_INT32, attributes, avalues);
-    writeNxValue<double>("geom_thickness", sample.getThickness(), NX_FLOAT64, attributes, avalues);
-    writeNxValue<double>("geom_width", sample.getWidth(), NX_FLOAT64, attributes, avalues);
-    writeNxValue<double>("geom_height", sample.getHeight(), NX_FLOAT64, attributes, avalues);
-    status=NXclosegroup(fileID);
 
     return(0);
   }

@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 using namespace Mantid::API;
 
@@ -148,11 +149,16 @@ namespace DataHandling
 
 
     Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO();
+
     if( nexusFile->openNexusWrite( m_filename ) != 0 )
     {
       g_log.error("Failed to open file");
       throw Exception::FileError("Failed to open file", m_filename);
     }
+
+    // Equivalent C++ API handle
+    ::NeXus::File * cppFile = new ::NeXus::File(nexusFile->fileID);
+
     prog_init.reportIncrement(1, "Opening file");
     if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
     {
@@ -191,12 +197,16 @@ namespace DataHandling
       else
         nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
 
-      if( nexusFile->writeNexusProcessedSample(matrixWorkspace->sample().getName(), matrixWorkspace->sample(),
-          matrixWorkspace->run()) != 0 )
+      // Save the sample object
+      matrixWorkspace->sample().saveNexus(cppFile, "sample");
+      cppFile->openGroup("sample", "NXsample");
+
+      if( nexusFile->writeNexusSampleLogs(matrixWorkspace->run()) != 0 )
       {
         g_log.error("Failed to write NXsample");
         throw Exception::FileError("Failed to write NXsample", m_filename);
       }
+      cppFile->closeGroup();
       prog_init.reportIncrement(1, "Writing sample");
 
       const int numberOfHist = static_cast<int>(matrixWorkspace->getNumberHistograms());

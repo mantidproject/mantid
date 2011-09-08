@@ -60,9 +60,8 @@ namespace Mantid
       int writeNexusProcessedHeader( const std::string& title) const;
       /// close the nexus file
       int closeNexusFile();
-      /// Write a Nexus sample section
-      int writeNexusProcessedSample( const std::string& title, const API::Sample & sample,
-                     const Mantid::API::Run& runProperties) const;
+      /// Write a lgos section
+      int writeNexusSampleLogs( const Mantid::API::Run& runProperties) const;
       /// write the workspace data
       int writeNexusProcessedData2D( const API::MatrixWorkspace_const_sptr& localworkspace,
                    const bool& uniformSpectra, const std::vector<int>& spec,
