@@ -310,7 +310,11 @@ class SNSPowderReduction(PythonAlgorithm):
                     raise RuntimeError("Encountered tmin (%f) >= tmax (%f)" % (info.tmin, info.tmax))
                 MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=tmax)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
-        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
+        if self._instrument == "VULCAN":
+            AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets",
+                    VULCANDspacemapFile=True)
+        else: 
+            AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
         if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
