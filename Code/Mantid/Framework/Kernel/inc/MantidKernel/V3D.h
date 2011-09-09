@@ -7,6 +7,7 @@
 #include <vector>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -127,6 +128,9 @@ namespace Mantid
       int masterDir(const double Tol =1e-3) const;               ///< Determine if there is a master direction
       bool nullVector(const double Tol =1e-3) const;              ///< Determine if the point is null
       bool coLinear(const V3D&,const V3D&) const;
+
+      void saveNexus(::NeXus::File * file, const std::string & name) const;
+      void loadNexus(::NeXus::File * file, const std::string & name);
 
     private:
 

@@ -7,10 +7,12 @@
 #include <stdexcept>
 #include <string>
 #include "MantidKernel/Quat.h"
+#include "MantidNexusCPP/NexusTestHelper.h"
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::DblMatrix;
+using Mantid::NexusCPP::NexusTestHelper;
 
 class GoniometerTest : public CxxTest::TestSuite
 {
@@ -163,6 +165,30 @@ public:
             G.setRotationAngle("omega", angles[0]);
             TS_ASSERT( rotA.equals(G.getR(), 0.0001) );
           }
+  }
+
+
+
+  /** Save and load to NXS file */
+  void test_nexus()
+  {
+    NexusTestHelper th(false);
+    th.createFile("GoniometerTest.nxs");
+
+    Goniometer G;
+    G.makeUniversalGoniometer();
+    G.setRotationAngle("phi", 45.0);
+    G.setRotationAngle("chi", 23.0);
+    G.setRotationAngle("omega", 7.0);
+    G.saveNexus(th.file, "goniometer");
+
+    // Reload from the file
+    th.reopenFile();
+    Goniometer G2;
+    G2.loadNexus(th.file, "goniometer");
+    TS_ASSERT_EQUALS( G2.getNumberAxes(), 3 );
+    // Rotation matrices should be the same after loading
+    TS_ASSERT_EQUALS( G2.getR(), G.getR() );
   }
 };
 

@@ -6,6 +6,10 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
+#include "MantidKernel/Strings.h"
+
+using namespace Mantid::Kernel;
+using Mantid::Kernel::Strings::toString;
 
 namespace Mantid
 {
@@ -263,6 +267,48 @@ void Goniometer::recalculateR()
   }  
   elements=QGlobal.getRotation();
   R=DblMatrix(elements);
+}
+
+
+
+
+
+//--------------------------------------------------------------------------------------------
+/** Save the object to an open NeXus file.
+ * @param file :: open NeXus file
+ * @param group :: name of the group to create
+ */
+void Goniometer::saveNexus(::NeXus::File * file, const std::string & group) const
+{
+  file->makeGroup(group, "NXpositioner", 1);
+  file->putAttr("version", 1);
+  // Because the order of the axes is very important, they have to be written and read out in the same order
+  file->writeData("num_axes", int(motors.size()) );
+  for (size_t i=0; i<motors.size(); i++)
+    motors[i].saveNexus(file, "axis" + Strings::toString(i));
+  file->closeGroup();
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the object from an open NeXus file.
+ * @param file :: open NeXus file
+ * @param group :: name of the group to open
+ */
+void Goniometer::loadNexus(::NeXus::File * file, const std::string & group)
+{
+  file->openGroup(group, "NXpositioner");
+  int num_axes;
+  file->readData("num_axes", num_axes );
+  motors.clear();
+  for (int i=0; i < num_axes; i++)
+  {
+    GoniometerAxis newAxis;
+    newAxis.loadNexus(file, "axis" + Strings::toString(i));
+    motors.push_back(newAxis);
+  }
+  file->closeGroup();
+  // Refresh cached values
+  recalculateR();
 }
 
 } //Namespace Geometry

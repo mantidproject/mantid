@@ -749,5 +749,35 @@ operator>>(std::istream& IX,V3D& A)
   return IX;
 }
 
+//--------------------------------------------------------------------------------------------
+/** Save the object to an open NeXus file.
+ * @param file :: open NeXus file
+ * @param name :: name of the data to create
+ */
+void V3D::saveNexus(::NeXus::File * file, const std::string & name) const
+{
+  file->makeData(name, ::NeXus::FLOAT64, 3, true);
+  double data[3] = {x,y,z};
+  file->putData( data );
+  file->closeData();
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the object from an open NeXus file.
+ * @param file :: open NeXus file
+ * @param name :: name of the data to open
+ */
+void V3D::loadNexus(::NeXus::File * file, const std::string & name)
+{
+  std::vector<double> data;
+  file->readData(name, data);
+  if (data.size() != 3)
+    throw std::runtime_error("Unexpected data size when reading a V3D NXS field '" + name + "'. Expected 3.");
+  x = data[0];
+  y = data[1];
+  z = data[2];
+}
+
+
 } // Namespace Kernel
 } // Namespace Mantid

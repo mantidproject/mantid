@@ -5,6 +5,7 @@
 #include <MantidKernel/V3D.h>
 #include <MantidGeometry/Crystal/UnitCell.h> //for angle units
 #include <string>
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -55,7 +56,37 @@ namespace Geometry
     int angleunit; ///angle units are angDegrees or angRadians (see UnitCell.h)
     /// Constructor
     GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
+    GoniometerAxis() : name("") {}
+
+    void saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXmotor", true);
+      file->writeData("name", name);
+      file->writeData("angle", angle);
+      file->openData("angle");
+      file->putAttr("unit", (angleunit==angDegrees)?"deg":"rad");
+      file->putAttr("sense", (sense==CW)?"CW":"CCW");
+      rotationaxis.saveNexus(file, "rotationaxis");
+      file->closeGroup();
+    }
+
+    void loadNexus(::NeXus::File * file, const std::string & group)
+    {
+      file->openGroup(group, "NXmotor");
+      file->readData("name", name);
+      file->readData("angle", angle);
+      file->openData("angle");
+      std::string s;
+      file->getAttr("sense", s);
+      sense = (s == "CW") ? CW : CCW;
+      file->getAttr("unit", s);
+      angleunit = (s == "rad") ? angRadians : angDegrees;
+      rotationaxis.loadNexus(file, "rotationaxis");
+      file->closeGroup();
+    }
+
   };
+
 
   class MANTID_GEOMETRY_DLL Goniometer
   {
@@ -89,6 +120,10 @@ namespace Geometry
       void makeUniversalGoniometer();
       // Return Euler angles acording to a convention
       std::vector<double> getEulerAngles(std::string convention="YZX");
+
+      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void loadNexus(::NeXus::File * file, const std::string & group);
+
 
     private:
       /// Global rotation matrix of the goniometer
