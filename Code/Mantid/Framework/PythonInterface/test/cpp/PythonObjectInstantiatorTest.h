@@ -60,7 +60,9 @@ private:
     if( !m_creator )
     {
       std::string propDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
-      propDir += "\\"; // Escape the last backslash so python isn't confused
+#ifdef _WIN32
+      propDir += "\\"; // Escape the last backslash, on Windows, so python isn't confused
+#endif
       //Assume this is where the mantid package is too
       std::string code = "import sys\n"
         "sys.path.append(r'" + propDir + "')\n"
