@@ -83,9 +83,10 @@ foreach ( PYFILE ${PY_FILES} )
   set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
 endforeach ( PYFILE )
 
-# Create a target for non MSVC platforms
+# Create a target for non MSVC platforms so that the layout looks similar to the unix target layout
 if ( MSVC )
   add_custom_target ( mantid DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
+  add_dependencies ( Framework mantid ) # So that mantid target is built which in turn copies to PY_FILES
   set_property ( TARGET mantid PROPERTY FOLDER "MantidFramework/PythonInterface" )
 else ()
   add_custom_target ( PythonInterface DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
