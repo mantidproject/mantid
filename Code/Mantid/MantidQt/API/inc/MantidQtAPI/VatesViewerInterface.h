@@ -44,17 +44,21 @@ class EXPORT_OPT_MANTIDQT_API VatesViewerInterface : public QWidget
 {
   Q_OBJECT
 public:
-  /// Default constructor for plugin mode
+  /// Default constructor for plugin mode.
   VatesViewerInterface();
   /**
-   * Constructor for standalone mode
+   * Constructor for standalone mode.
    * @param parent the parent for the widget
    */
   VatesViewerInterface(QWidget *parent);
-  /// Default destructor
+  /// Default destructor.
   virtual ~VatesViewerInterface();
-  virtual void loadWorkspace(QString wsname);
-  /// Special function of correct widget invocation for plugin mode
+  /**
+   * Function to create the source from the given workspace.
+   * @param wsname the name of the workspace to visualize
+   */
+  virtual void renderWorkspace(QString wsname);
+  /// Special function of correct widget invocation for plugin mode.
   virtual void setupPluginMode();
 };
 

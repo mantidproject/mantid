@@ -58,7 +58,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public Manti
   Q_OBJECT
 
 public:
-  /// No-op constructor used for plugin mode
+  /// No-op constructor used for plugin mode.
   MdViewerWidget();
   /**
    * Default constructor.
@@ -74,7 +74,7 @@ public:
    */
   void connectLoadDataReaction(QAction *action);
   /// See MantidQt::API::VatesViewerInterface
-  void loadWorkspace(QString wsname);
+  void renderWorkspace(QString wsname);
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode();
 
@@ -104,7 +104,6 @@ private:
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
   bool isPluginInitialized; ///< Flag for plugin initialization
-  QPointer<pqPipelineSource> originSource; ///< Holder for the current source
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
@@ -112,6 +111,8 @@ private:
   void createAppCoreForPlugin();
   /// Disable communication with the proxy tab widget.
   void removeProxyTabWidgetConnections();
+  /// Perform first render and final setup for mode buttons.
+  void renderAndFinalSetup();
   /// Set the signals/slots for the ParaView components based on the view.
   void setParaViewComponentsForView();
   /// Function run the necessary setup for the main view.
