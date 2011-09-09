@@ -51,41 +51,41 @@ namespace ComponentCreationHelper
   /**
    * Create a capped cylinder object
    */
-  DLL_TESTHELPERS Mantid::Geometry::Object_sptr 
+  DLLExport Mantid::Geometry::Object_sptr 
   createCappedCylinder(double radius, double height, const Mantid::Kernel::V3D & baseCentre, 
                const Mantid::Kernel::V3D & axis, const std::string & id);
   /**
    * Return the XML for a sphere.
    */
-  DLL_TESTHELPERS std::string sphereXML(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
+  DLLExport std::string sphereXML(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
   /**
    * Create a sphere object
    */
-  DLL_TESTHELPERS Mantid::Geometry::Object_sptr createSphere(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
+  DLLExport Mantid::Geometry::Object_sptr createSphere(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
   /** Create a cuboid shape for your pixels */
-  DLL_TESTHELPERS Mantid::Geometry::Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0, 
+  DLLExport Mantid::Geometry::Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0, 
                                  double z_side_length = -1.0);
   /**
   * Create a component assembly at the origin made up of 4 cylindrical detectors
   */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::CompAssembly> createTestAssemblyOfFourCylinders();
+  DLLExport boost::shared_ptr<Mantid::Geometry::CompAssembly> createTestAssemblyOfFourCylinders();
   /**
    * Create an object component that has a defined shape
    */
-  DLL_TESTHELPERS Mantid::Geometry::ObjComponent * createSingleObjectComponent();
+  DLLExport Mantid::Geometry::ObjComponent * createSingleObjectComponent();
   /**
    * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and r2
    */
-  DLL_TESTHELPERS Mantid::Geometry::Object_sptr createHollowShell(double innerRadius, double outerRadius, 
+  DLLExport Mantid::Geometry::Object_sptr createHollowShell(double innerRadius, double outerRadius, 
                         const Mantid::Kernel::V3D & centre = Mantid::Kernel::V3D());
   /**
    * Create a detector group containing 5 detectors
    */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
+  DLLExport boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
    /**
    * Create a detector group containing n detectors with gaps
    */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet=4,double gap=0.01);
+  DLLExport boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet=4,double gap=0.01);
   /**
    * Create a detector group containing detectors ring
    * R_min -- min radius of the ring
@@ -93,18 +93,18 @@ namespace ComponentCreationHelper
    * z     -- axial z-coordinate of the detectors position; 
     The detectors are the cylinders with 1.5cm height and 0.5 cm radius
    */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min=4.5, const double R_max=5, const double z=4);
+  DLLExport boost::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min=4.5, const double R_max=5, const double z=4);
   /**
    * Create a group of two monitors
    */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
+  DLLExport boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
   /**
    * Create an test instrument with n panels of 9 cylindrical detectors, a source and spherical sample shape.
    *
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.
    */
-  DLL_TESTHELPERS Mantid::Geometry::Instrument_sptr
+  DLLExport Mantid::Geometry::Instrument_sptr
   createTestInstrumentCylindrical(int num_banks, bool verbose = false);
   /**
    * Create a test instrument with n panels of rectangular detectors, pixels*pixels in size, a source and spherical sample shape.
@@ -112,9 +112,9 @@ namespace ComponentCreationHelper
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.
    */
-  DLL_TESTHELPERS Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
+  DLLExport Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
 
-  DLL_TESTHELPERS Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
+  DLLExport Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
 
 }
 

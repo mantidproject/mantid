@@ -361,13 +361,13 @@ namespace Mantid
       // Version 0 = saveNexusProcessed before Sep 8, 2011
       int version = 0;
       try {  file->getAttr("version", version);  }
-      catch (::NeXus::Exception & e)   { version=0; }
+      catch (::NeXus::Exception &)   { version=0; }
 
       if (version == 0)
       {
         // Sample NAME field may/may not be present
         try {  file->readData("name", m_name); }
-        catch (::NeXus::Exception & e) { m_name = ""; }
+        catch (::NeXus::Exception &) { m_name = ""; }
       }
 
       if (version > 0)

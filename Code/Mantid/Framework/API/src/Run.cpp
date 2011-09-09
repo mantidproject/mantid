@@ -83,7 +83,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       {
         right = rhs.m_manager.getProperty(ADDABLE[i]);
       }
-      catch (Exception::NotFoundError & err)
+      catch (Exception::NotFoundError &)
       {
         //if it's not there then ignore it and move on
         continue;
@@ -94,7 +94,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       {
         left = m_manager.getProperty(ADDABLE[i]);
       }
-      catch (Exception::NotFoundError & err)
+      catch (Exception::NotFoundError &)
       {
         //no property on the left-handside, create one and copy the right-handside across verbatum
         m_manager.declareProperty(right->clone(), "");
@@ -131,7 +131,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
           (*lhs_prop) += (*it);
         }*/
       }
-      catch (Exception::NotFoundError & err)
+      catch (Exception::NotFoundError &)
       {
         //copy any properties that aren't already on the left hand side
         Property * copy = (*it)->clone();
@@ -266,7 +266,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     {
       log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("proton_charge") );
     }
-    catch (Exception::NotFoundError & e)
+    catch (Exception::NotFoundError &)
     {
       //g_log.information() << "proton_charge log value not found. Total proton charge set to 0.0\n";
       this->setProtonCharge(0);

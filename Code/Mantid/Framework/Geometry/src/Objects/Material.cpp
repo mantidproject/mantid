@@ -160,7 +160,7 @@ namespace Mantid
       try {
       m_element = Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A);
       }
-      catch (std::runtime_error & e)
+      catch (std::runtime_error &)
       { /* ignore and use the default */ }
 
       file->readData("number_density", m_numberDensity);

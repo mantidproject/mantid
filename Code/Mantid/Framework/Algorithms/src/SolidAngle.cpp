@@ -131,7 +131,7 @@ namespace Mantid
           outputWS->dataY(j)[0] = solidAngle;
           outputWS->dataE(j)[0] = 0;
         } 
-        catch (Exception::NotFoundError & e)
+        catch (Exception::NotFoundError &)
         {
           // Get to here if exception thrown when calculating distance to detector
           failCount++;

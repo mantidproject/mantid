@@ -78,7 +78,7 @@ namespace Mantid
           n = rs.gcount();
           wsResult.append(&buff[0], n);
         } while (n == 300);
-      } catch (ConnectionRefusedException &e) {
+      } catch (ConnectionRefusedException &) {
         g_log.error() << "Connection refused by orbiter\n";
         throw;
       } catch(Poco::IOException &e) {

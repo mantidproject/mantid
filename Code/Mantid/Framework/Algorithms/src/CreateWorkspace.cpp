@@ -120,7 +120,7 @@ void CreateWorkspace::exec()
 
   }
 
-  const bool dataE_provided(dataE.size());
+  const bool dataE_provided(static_cast<bool>(dataE.size()));
   if ( dataE_provided && dataY.size() != dataE.size() )
   {
     throw std::runtime_error("DataE (if provided) must be the same size as DataY");

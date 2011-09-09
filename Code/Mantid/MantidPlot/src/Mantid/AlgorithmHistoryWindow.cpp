@@ -356,8 +356,8 @@ QString AlgorithmHistoryWindow::generateScript()
 
     //erasing the last "," from the parameter list
     //as concatenation is done in loop last "," is erasing 
-    int nIndex=static_cast<int>(algParam.find_last_of(","));
-    if(static_cast<int>(std::string::npos) != nIndex)
+    std::string::size_type nIndex = algParam.find_last_of(",");
+    if(nIndex != std::string::npos )
     {
       algParam=algParam.erase(nIndex);
     }
