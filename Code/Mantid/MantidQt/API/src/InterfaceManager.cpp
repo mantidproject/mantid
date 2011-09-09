@@ -13,9 +13,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
-//#ifdef MAKE_VATES
-//#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
-//#endif
 
 #include <QStringList>
 
