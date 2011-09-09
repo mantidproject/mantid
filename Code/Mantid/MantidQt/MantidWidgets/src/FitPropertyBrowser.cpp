@@ -2601,7 +2601,7 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
 void FitPropertyBrowser::setupMultifit()
 {
   MultifitSetupDialog* dlg = new MultifitSetupDialog(this);
-  int ret = dlg->exec();
+  dlg->exec();
   QStringList ties = dlg->getParameterTies();
   
   if (!ties.isEmpty())
