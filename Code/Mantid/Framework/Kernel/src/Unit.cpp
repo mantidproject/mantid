@@ -720,7 +720,7 @@ void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double
 /* Atomic Distance
  * ===============
  */
-// DECLARE_UNIT(AtomicDistance) Remove it temporarily
+DECLARE_UNIT(AtomicDistance)
 
 void AtomicDistance::toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
     const double&, const int&, const double&, const double&) const{
