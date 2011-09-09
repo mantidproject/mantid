@@ -93,20 +93,25 @@ namespace PropertyNexus
     // Times in second offsets
     std::vector<double> timeSec;
     std::string startStr = "";
-    try
+
+    // Get the entries so that you can check if the "time" field is present
+    std::map<std::string, std::string> entries = file->getEntries();
+    if (entries.find("time") != entries.end())
     {
       file->openData("time");
       file->getData(timeSec);
+      // Optionally get a start
       try
       { file->getAttr("start", startStr); }
       catch (::NeXus::Exception & e) {}
     }
-    catch (::NeXus::Exception & e)
-    { }
 
     std::vector<Kernel::DateAndTime> times;
     if (!timeSec.empty())
     {
+      // Use a default start time
+      if (startStr.empty())
+        startStr = "2000-01-01T00:00:00";
       //Convert time in seconds to DateAndTime
       DateAndTime start(startStr);
       times.reserve(timeSec.size());
@@ -118,31 +123,31 @@ namespace PropertyNexus
     Property * retVal = NULL;
     switch (file->getInfo().type)
     {
-    case FLOAT32:
+    case ::NeXus::FLOAT32:
       retVal = makeProperty<float>(file, group, times);
       break;
-    case FLOAT64:
+    case ::NeXus::FLOAT64:
       retVal = makeProperty<double>(file, group, times);
       break;
-    case INT32:
+    case ::NeXus::INT32:
       retVal = makeProperty<int32_t>(file, group, times);
       break;
-    case UINT32:
+    case ::NeXus::UINT32:
       retVal = makeProperty<uint32_t>(file, group, times);
       break;
-    case INT64:
+    case ::NeXus::INT64:
       retVal = makeProperty<int64_t>(file, group, times);
       break;
-    case UINT64:
+    case ::NeXus::UINT64:
       retVal = makeProperty<uint64_t>(file, group, times);
       break;
-    case CHAR:
+    case ::NeXus::CHAR:
       retVal = makeStringProperty(file, group, times);
       break;
-    case INT8:
-    case UINT8:
-    case INT16:
-    case UINT16:
+    case ::NeXus::INT8:
+    case ::NeXus::UINT8:
+    case ::NeXus::INT16:
+    case ::NeXus::UINT16:
       retVal = NULL;
       break;
     }
