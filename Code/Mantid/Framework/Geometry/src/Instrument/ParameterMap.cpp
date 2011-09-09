@@ -45,7 +45,7 @@ namespace Mantid
         }
       }
       // Check if the caches need invalidating
-      if( name == 'pos' || name == 'rot' ) clearCache();
+      if( name == "pos" || name == "rot" ) clearCache();
     }
 
     /**
