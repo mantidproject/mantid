@@ -1,13 +1,3 @@
-configure_file(inc/MantidQtAPI/VatesConfig.h.in
-${CMAKE_CURRENT_BINARY_DIR}/inc/MantidQtAPI/VatesConfig.h)
-
-#if ( MAKE_VATES )
-#  include_directories ( ../../Vates/VatesSimpleGui/ViewWidgets/inc )
-#  include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../../Vates/VatesSimpleGui/ViewWidgets )
-#  include_directories ( ../../Vates/VatesSimpleGui/QtWidgets/inc )
-#  include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../../Vates/VatesSimpleGui/QtWidgets )
-#endif ( MAKE_VATES )
-
 set ( SRC_FILES src/AlgorithmDialog.cpp
                 src/AlgorithmInputHistory.cpp
                 src/GenericDialog.cpp

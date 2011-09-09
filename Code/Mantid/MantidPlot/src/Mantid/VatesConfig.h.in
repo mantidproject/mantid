@@ -1,0 +1,6 @@
+#ifndef VATESCONFIG_H_
+#define VATESCONFIG_H_
+
+#cmakedefine MAKE_VATES
+
+#endif // VATESCONFIG_H_

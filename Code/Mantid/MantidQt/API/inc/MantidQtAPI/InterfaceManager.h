@@ -8,8 +8,6 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 
-//#include "VatesConfig.h"
-
 #include <QString>
 
 //----------------------------------
