@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/MatrixProperty.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
+	src/NexusTestHelper.cpp
 	src/NeutronAtom.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -142,6 +143,7 @@ set ( INC_FILES
 	inc/MantidKernel/MersenneTwister.h
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NeutronAtom.h
+	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/ProgressBase.h
@@ -277,7 +279,7 @@ target_link_libraries ( Kernel ${MANTIDLIBS} )
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   include_directories ( inc test )
-  target_link_libraries( KernelTest Kernel)
+  target_link_libraries( KernelTest Kernel NexusCPP )
   add_dependencies ( FrameworkTests KernelTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )

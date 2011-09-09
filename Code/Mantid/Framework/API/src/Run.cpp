@@ -350,6 +350,9 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     file->makeGroup(group, "NXgroup", 1);
     file->putAttr("version", 1);
 
+    // Now the goniometer
+    m_goniometer.saveNexus(file, "goniometer");
+
     // Save all the properties as NXlog
     std::vector<Property *> props = m_manager.getProperties();
     for (size_t i=0; i<props.size(); i++)
@@ -385,6 +388,11 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
             m_manager.removeProperty(prop->name() );
           m_manager.declareProperty(prop);
         }
+      }
+      else if (name_class.second == "NXpositioner")
+      {
+        // Goniometer class
+        m_goniometer.loadNexus(file, name_class.first);
       }
       // Go to next one
       name_class = file->getNextEntry();

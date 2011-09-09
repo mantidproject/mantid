@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 //#include "napiconfig.h"
-#include "MantidKernel/System.h"
+#include "../../Kernel/inc/MantidKernel/System.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 

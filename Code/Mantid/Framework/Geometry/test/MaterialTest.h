@@ -6,10 +6,10 @@
 
 #include "MantidGeometry/Objects/Material.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidNexusCPP/NexusTestHelper.h"
+#include "MantidKernel/NexusTestHelper.h"
 
 using Mantid::Geometry::Material;
-using Mantid::NexusCPP::NexusTestHelper;
+using Mantid::Kernel::NexusTestHelper;
 
 class MaterialTest: public CxxTest::TestSuite
 {

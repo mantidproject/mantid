@@ -1,11 +1,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NexusTestHelper.h"
+#include "MantidKernel/NexusTestHelper.h"
 #include <Poco/File.h>
 
 namespace Mantid
 {
-namespace NexusCPP
+namespace Kernel
 {
 
 
@@ -64,5 +64,5 @@ namespace NexusCPP
 
 
 } // namespace Mantid
-} // namespace NexusCPP
+} // namespace Kernel
 

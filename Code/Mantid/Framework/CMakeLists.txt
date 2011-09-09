@@ -91,12 +91,11 @@ add_custom_target ( FrameworkTests ) # target for all framework tests
 add_dependencies ( check FrameworkTests )
 
 include_directories (NexusCPP/inc)
+add_subdirectory (NexusCPP)
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
-
-add_subdirectory (NexusCPP)
 
 include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages

@@ -2,18 +2,15 @@ set ( SRC_FILES
 	src/NeXusException.cpp
 	src/NeXusFile.cpp
 	src/NeXusStream.cpp
-	src/NexusTestHelper.cpp
 )
 
 set ( INC_FILES
 	inc/MantidNexusCPP/NeXusException.hpp
 	inc/MantidNexusCPP/NeXusFile.hpp
 	inc/MantidNexusCPP/NeXusStream.hpp
-	inc/MantidNexusCPP/NexusTestHelper.h
 )
 
 set ( TEST_FILES
-	test/NexusAPITest.h
 )
 
 # Add the dependency on the nexus library
@@ -32,15 +29,8 @@ set_property ( TARGET NexusCPP PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( NexusCPP ${NEXUS_LIBRARIES} ${POCO_LIBRARIES} Kernel )
+target_link_libraries ( NexusCPP ${NEXUS_LIBRARIES} ${POCO_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  cxxtest_add_test ( NexusCPPTest ${TEST_FILES} )
-  target_link_libraries( NexusCPPTest NexusCPP  )
-  add_dependencies ( FrameworkTests NexusCPPTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET NexusCPPTest PROPERTY FOLDER "UnitTests" )
-endif ()
 
 ###########################################################################
 # Installation settings

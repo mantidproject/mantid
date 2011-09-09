@@ -6,13 +6,13 @@
 #include <iomanip>
 #include <MantidKernel/Matrix.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
-#include "MantidNexusCPP/NexusTestHelper.h"
+#include "MantidKernel/NexusTestHelper.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
-using Mantid::NexusCPP::NexusTestHelper;
+using Mantid::Kernel::NexusTestHelper;
 
 class OrientedLatticeTest : public CxxTest::TestSuite
 {

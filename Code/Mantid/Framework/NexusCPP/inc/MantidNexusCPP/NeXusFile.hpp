@@ -7,8 +7,6 @@
 #include <vector>
 #include <napi.h>
 
-#include "MantidKernel/System.h"
-
 #ifdef _WIN32
 
 #ifndef _MSC_VER 

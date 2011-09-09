@@ -8,13 +8,13 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidNexusCPP/NexusTestHelper.h"
+#include "MantidKernel/NexusTestHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using Mantid::NexusCPP::NexusTestHelper;
+using Mantid::Kernel::NexusTestHelper;
 
 // Helper class
 namespace
@@ -171,10 +171,14 @@ public:
     th.createFile("RunTest.nxs");
 
     Run run1;
+    run1.getGoniometer().makeUniversalGoniometer();
     AddTSPEntry(run1, "double_series", 45.0);
     run1.addProperty( new PropertyWithValue<int>("int_val", 1234) );
     run1.addProperty( new PropertyWithValue<std::string>("string_val", "help_im_stuck_in_a_log_file") );
     run1.addProperty( new PropertyWithValue<double>("double_val", 5678.9) );
+    AddTSPEntry(run1, "phi", 12.3);
+    AddTSPEntry(run1, "chi", 45.6);
+    AddTSPEntry(run1, "omega", 78.9);
 
     run1.saveNexus(th.file, "logs");
     th.file->openGroup("logs", "NXgroup");
@@ -189,6 +193,8 @@ public:
     TS_ASSERT( run2.hasProperty("int_val") );
     TS_ASSERT( run2.hasProperty("string_val") );
     TS_ASSERT( run2.hasProperty("double_val") );
+    // This test both uses the goniometer axes AND looks up some values.
+    TS_ASSERT_EQUALS( run2.getGoniometerMatrix(), run1.getGoniometerMatrix() );
 
     // Reload without opening the group (for backwards-compatible reading of old files)
     Run run3;

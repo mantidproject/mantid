@@ -7,7 +7,7 @@
 
 namespace Mantid
 {
-namespace NexusCPP
+namespace Kernel
 {
 
   /** A Helper class for easily writing nexus saving/loading tests.
@@ -55,7 +55,7 @@ namespace NexusCPP
   };
 
 
-} // namespace NexusCPP
+} // namespace Kernel
 } // namespace Mantid
 
 #endif  /* MANTID_NEXUSCPP_NEXUSTESTHELPER_H_ */

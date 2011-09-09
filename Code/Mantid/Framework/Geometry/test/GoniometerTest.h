@@ -7,12 +7,12 @@
 #include <stdexcept>
 #include <string>
 #include "MantidKernel/Quat.h"
-#include "MantidNexusCPP/NexusTestHelper.h"
+#include "MantidKernel/NexusTestHelper.h"
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::DblMatrix;
-using Mantid::NexusCPP::NexusTestHelper;
+using Mantid::Kernel::NexusTestHelper;
 
 class GoniometerTest : public CxxTest::TestSuite
 {

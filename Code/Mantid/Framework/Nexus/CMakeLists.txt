@@ -12,6 +12,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	test/NexusAPITest.h
 )
 
 # Add the dependency on the nexus library
