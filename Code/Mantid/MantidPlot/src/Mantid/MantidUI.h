@@ -365,6 +365,8 @@ public slots:
     bool executeAlgorithm(QString algName, int version = -1);
     //Execute an algorithm with the given parameter list
     void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs = NULL);
+    //Execute an algorithm with the given parameter list
+    void executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
     // Show Qt critical error message box

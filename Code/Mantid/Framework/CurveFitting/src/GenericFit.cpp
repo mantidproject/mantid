@@ -12,6 +12,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <sstream>
 #include <numeric>
 #include <cmath>
@@ -90,6 +92,8 @@ namespace CurveFitting
     // Try to retrieve optional properties
     const int maxInterations = getProperty("MaxIterations");
 
+    Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
+
     std::string funIni = getProperty("Function");
     m_function.reset( API::FunctionFactory::Instance().createInitialized(funIni) );
 
@@ -98,10 +102,12 @@ namespace CurveFitting
       throw std::runtime_error("Function was not set.");
     }
 
+    prog.report("Setting workspace");
     API::Workspace_sptr ws = getProperty("InputWorkspace");
     std::string input = getProperty("Input");
     m_function->setWorkspace(ws,input);
 
+    prog.report("Setting minimizer");
     // force initial parameters to satisfy constraints of function
     m_function->setParametersToSatisfyConstraints();
 
@@ -162,7 +168,6 @@ namespace CurveFitting
     double dof = static_cast<double>(nData - nParam);  // dof stands for degrees of freedom
 
     // Standard least-squares used if derivative function defined otherwise simplex
-    Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
     if ( methodUsed.compare("Simplex") != 0 )
     {
       status = GSL_CONTINUE;
@@ -193,7 +198,7 @@ namespace CurveFitting
         }
         
         status = minimizer->hasConverged();
-        prog.report();
+        prog.report("Iteration "+boost::lexical_cast<std::string>(iter));
       }
 
       finalCostFuncVal = minimizer->costFunctionVal() / dof;
@@ -226,7 +231,7 @@ namespace CurveFitting
         }
 
         status = minimizer->hasConverged();
-        prog.report();
+        prog.report("Iteration "+boost::lexical_cast<std::string>(iter));
       }
 
       finalCostFuncVal = minimizer->costFunctionVal() / dof;

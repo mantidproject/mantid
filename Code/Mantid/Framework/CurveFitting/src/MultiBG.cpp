@@ -184,7 +184,7 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std:
         std::pair< boost::shared_ptr<const API::MatrixWorkspace>, size_t> spectrum = std::make_pair(ws,wi);
         m_funIndex[iFun].push_back(m_spectra.size());
         m_spectra.push_back(spectrum);
-        getFunction(iFun)->setWorkspace(ws,"WorkspaceIndex="+e[2].name());
+        getFunction(iFun)->setWorkspace(ws,"WorkspaceIndex="+e[2].name(),false);
       }
       catch(...)
       {
@@ -236,7 +236,7 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std:
       index.resize(m_spectra.size());
       int i = 0;
       std::for_each(index.begin(),index.end(),_1 = var(i)++);
-      getFunction(iFun)->setWorkspace(m_spectra[0].first,"WorkspaceIndex="+boost::lexical_cast<std::string>(m_spectra[0].second));
+      getFunction(iFun)->setWorkspace(m_spectra[0].first,"WorkspaceIndex="+boost::lexical_cast<std::string>(m_spectra[0].second),false);
     }
   }
 

@@ -159,6 +159,12 @@ public:
   virtual void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),
                              boost::shared_array<double> weights = boost::shared_array<double>());
 
+  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(
+    boost::shared_ptr<const API::MatrixWorkspace> inWS, 
+    size_t wi,
+    const std::vector<double>& sd = std::vector<double>()
+    );
+
 protected:
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
@@ -169,12 +175,6 @@ protected:
   void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
     boost::shared_ptr<const MatrixWorkspace> ws,
     size_t wsIndex) const;
-
-  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> inWS, 
-    size_t wi,
-    const std::vector<double>& sd = std::vector<double>()
-    );
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(Jacobian* out, const double* xValues, const size_t& nData);

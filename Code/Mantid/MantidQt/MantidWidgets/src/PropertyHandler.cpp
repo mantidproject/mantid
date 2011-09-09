@@ -10,6 +10,8 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -122,28 +124,7 @@ void PropertyHandler::init()
   m_browser->m_enumManager->setValue(m_type,itype);
 
   // create worspace and workspace index properties if parent is a MultiBG
-  if (m_parent && m_parent->name() == "MultiBG")
-  {
-    m_workspace = m_browser->m_enumManager->addProperty("Workspace");
-    fnProp->addSubProperty(m_workspace);
-    m_workspaceIndex = m_browser->m_intManager->addProperty("Workspace Index");
-    //fnProp->addSubProperty(m_workspaceIndex);
-    if (! m_browser->m_workspaceNames.isEmpty() )
-    {
-      QStringList names("All");
-      foreach(QString name,m_browser->m_workspaceNames)
-      {
-        names.append(name);
-      }
-      m_browser->m_enumManager->setEnumNames(m_workspace, names);
-      m_browser->m_enumManager->setValue(m_workspace,0);
-      m_browser->m_intManager->setValue(m_workspaceIndex,0);
-    }
-  }
-  else
-  {
-    m_workspace = m_workspaceIndex = NULL;
-  }
+  initWorkspace();
 
   // create attribute properties
   initAttributes();
@@ -306,6 +287,52 @@ void PropertyHandler::initParameters()
       }
       m_constraints.insert(parName,std::pair<QtProperty*,QtProperty*>(loProp,upProp));
     }
+  }
+}
+
+void PropertyHandler::initWorkspace()
+{
+  if (m_parent && m_parent->name() == "MultiBG")
+  {
+    m_workspace = m_browser->m_enumManager->addProperty("Workspace");
+    QtProperty* fnProp = m_item->property();
+    fnProp->addSubProperty(m_workspace);
+    m_workspaceIndex = m_browser->m_intManager->addProperty("Workspace Index");
+    if (! m_browser->m_workspaceNames.isEmpty() )
+    {
+      QStringList names("All");
+      foreach(QString name,m_browser->m_workspaceNames)
+      {
+        names.append(name);
+      }
+      m_browser->m_enumManager->setEnumNames(m_workspace, names);
+      int iWorkspace = 0;
+      int iWorkspaceIndex = 0;
+      if (ifun()->getWorkspace())
+      {
+        Mantid::API::IFunctionMW* ifmw = dynamic_cast<Mantid::API::IFunctionMW*>(ifun());
+        if (ifmw)
+        {
+          std::string wsName = ifmw->getMatrixWorkspace()->getName();
+          iWorkspace = names.indexOf(QString::fromStdString(wsName));
+          if (iWorkspace >= 0)
+          {
+            iWorkspaceIndex = ifmw->getWorkspaceIndex();
+            fnProp->addSubProperty(m_workspaceIndex);
+          }
+          else
+          {
+            iWorkspace = 0;
+          }
+        }
+      }
+      m_browser->m_enumManager->setValue(m_workspace,iWorkspace);
+      m_browser->m_intManager->setValue(m_workspaceIndex,iWorkspaceIndex);
+    }
+  }
+  else
+  {
+    m_workspace = m_workspaceIndex = NULL;
   }
 }
 

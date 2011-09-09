@@ -51,9 +51,6 @@ public:
   /// overrides virtual init() which is called from IFitFunction::setHandler(...)
   void init();
 
-  void initAttributes();
-  void initParameters();
-
   PropertyHandler* addFunction(const std::string& fnName);
   // Removes handled function from its parent function and 
   // properties from the browser
@@ -187,6 +184,12 @@ protected slots:
 
   // 
   void plotRemoved();
+
+protected:
+
+  void initAttributes();
+  void initParameters();
+  void initWorkspace();
 
 private:
   FitPropertyBrowser* m_browser;

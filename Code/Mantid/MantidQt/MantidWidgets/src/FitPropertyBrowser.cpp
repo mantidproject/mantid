@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
+#include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -47,6 +48,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QSignalMapper>
+#include <QMetaMethod>
 
 #include <algorithm>
 
@@ -383,6 +385,12 @@ m_mantidui(mantidui)
   observeDelete();
 
   init();
+
+  if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+  {
+    connect(this,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+      m_mantidui,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+  }
 }
 
 /// Update setup menus according to how these are set in
@@ -591,6 +599,14 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     action = new QAction("Add function",this);
     connect(action,SIGNAL(triggered()),this,SLOT(addFunction()));
     menu->addAction(action);
+
+    if (m_compositeFunction->name() == "MultiBG" && m_compositeFunction->nFunctions() == 1 
+      && Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName()))
+    {
+      action = new QAction("Setup multifit",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(setupMultifit()));
+      menu->addAction(action);
+    }
 
     if (m_peakToolOn)
     {
@@ -1354,23 +1370,18 @@ void FitPropertyBrowser::fit()
         emit rawData(wsName);
       } 
     }
-    if (isWorkspaceAGroup())
+    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
     {
-      Mantid::API::IAlgorithm_sptr alg = 
-        Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
-      alg->initialize();
-      alg->setPropertyValue("InputWorkspace",wsName);
-      alg->setProperty("WorkspaceIndex",workspaceIndex());
-      alg->setProperty("StartX",startX());
-      alg->setProperty("EndX",endX());
-      alg->setPropertyValue("OutputWorkspace",outputName());
-      alg->setPropertyValue("Function",funStr);
-      alg->setPropertyValue("LogValue",getLogValue());
-      //alg->setPropertyValue("Minimizer",minimizer());
-      //alg->setPropertyValue("CostFunction",costFunction());
-
-      observeFinish(alg);
-      alg->executeAsync();
+      QMap<QString,QString> algParams;
+      algParams["InputWorkspace"] = QString::fromStdString(wsName);
+      algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
+      algParams["StartX"] = QString::number(startX());
+      algParams["EndX"] = QString::number(endX());
+      algParams["Output"] = QString::fromStdString(outputName());
+      algParams["Function"] = QString::fromStdString(funStr);
+      algParams["Minimizer"] = QString::fromStdString(minimizer());
+      algParams["CostFunction"] = QString::fromStdString(costFunction());
+      emit executeFit("Fit",algParams,this);
     }
     else
     {
@@ -1416,6 +1427,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
   }
   else
     emit changeWindowTitle("Fit Function");
+  processMultiBGResults();
 }
 
 
@@ -2402,43 +2414,6 @@ void FitPropertyBrowser::removeLogValue()
   m_logValue = NULL;
 }
 
-//void FitPropertyBrowser::validateGroupMember()
-//{
-//  std::string wsName = workspaceName();
-//  Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-//    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
-//  if (!wsg)
-//  {
-//    m_groupMember = workspaceName();
-//    return;
-//  }
-//  std::vector<std::string> names = wsg->getNames();
-//  if (names.empty())
-//  {
-//    m_groupMember = "";
-//    return;
-//  }
-//  if (std::find(names.begin(),names.end(),m_groupMember) != names.end())
-//  {
-//    return;
-//  }
-//  if (names[0] == wsName)
-//  {
-//    if (names.size() > 1)
-//    {
-//      m_groupMember = names[1];
-//    }
-//    else
-//    {
-//      m_groupMember = "";
-//    }
-//  }
-//  else
-//  {
-//    m_groupMember = names[0];
-//  }
-//}
-
 void FitPropertyBrowser::sequentialFit()
 {
   if (workspaceName() == outputName())
@@ -2619,6 +2594,120 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
     emit wsChangePPAssign(wsName);
   }
 }
+
+/**
+ * Call MultifitSetupDialog to populate MultiBG function.
+ */
+void FitPropertyBrowser::setupMultifit()
+{
+  MultifitSetupDialog* dlg = new MultifitSetupDialog(this);
+  int ret = dlg->exec();
+  QStringList ties = dlg->getParameterTies();
+  
+  if (!ties.isEmpty())
+  {
+    QString wsName = QString::fromStdString(workspaceName());
+    Mantid::API::MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
+    if (mws)
+    {
+      Mantid::API::IFitFunction* fun = m_compositeFunction->getFunction(0);
+      QString fun1Ini = QString::fromStdString(*fun);
+      QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace="+wsName+",WSParam=(WorkspaceIndex=0);";
+      QString tieStr;
+      for(size_t i = 1; i < mws->getNumberHistograms(); ++i)
+      {
+        QString comma = i > 1? "," : "";
+        QString fi = comma + "f" + QString::number(i) + ".";
+        for(int j = 0; j < static_cast<int>(fun->nParams()); ++j)
+        {
+          if (!ties[j].isEmpty())
+          {
+            tieStr +=  fi + QString::fromStdString(fun->parameterName(j)) + "=" + ties[j];
+          }
+        }
+        QString wsParam = ",WSParam=(WorkspaceIndex="+QString::number(i);
+        wsParam += ",StartX="+QString::number(startX())+",EndX="+QString::number(endX())+")";
+        funIni += fun1Ini + ",Workspace="+wsName+wsParam+";";
+      }
+      if (!tieStr.isEmpty())
+      {
+        funIni += "ties=("+tieStr+")";
+      }
+      loadFunction(funIni);
+    }
+  }
+}
+
+/// Process and create some output if it is a MultiBG fit
+void FitPropertyBrowser::processMultiBGResults()
+{
+  if (compositeFunction()->name() != "MultiBG") return;
+
+  // if all member functions are of the same type and composition
+  // create a TableWorkspace with parameter series
+
+  // check if member functions are the same
+  QStringList parNames;
+  Mantid::API::IFitFunction* fun0 = compositeFunction()->getFunction(0);
+  for(size_t i = 0; i < fun0->nParams(); ++i)
+  {
+    parNames << QString::fromStdString(fun0->parameterName(i));
+  }
+
+  for(size_t i = 1; i < compositeFunction()->nFunctions(); ++i)
+  {
+    Mantid::API::IFitFunction* fun = compositeFunction()->getFunction(i);
+    for(size_t j = 0; j < fun->nParams(); ++j)
+    {
+      if (parNames.indexOf(QString::fromStdString(fun0->parameterName(j))) < 0)
+      {
+        // Functions are different, stop
+        return;
+      }
+    }
+  }
+
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  // create a TableWorkspace: first column - function index
+  // other colomns - the parameters
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  table->addColumn("int","Index");
+  foreach(QString par,parNames)
+  {
+    table->addColumn("double",par.toStdString());
+  }
+
+  std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
+  for(size_t i = 0; i < compositeFunction()->nFunctions(); ++i)
+  {
+    Mantid::API::TableRow row = table->appendRow();
+    row << int(i);
+    Mantid::API::IFunctionMW* fun = dynamic_cast<Mantid::API::IFunctionMW*>(compositeFunction()->getFunction(i));
+    for(size_t j = 0; j < fun->nParams(); ++j)
+    {
+      row << fun->getParameter(j);
+    }
+    size_t wi = fun->getWorkspaceIndex();
+    Mantid::API::MatrixWorkspace_sptr mws = fun->createCalculatedWorkspace(fun->getMatrixWorkspace(),wi);
+    worspaceNames[i] = workspaceName()+"_"+QString::number(wi).toStdString()+"_Workspace";
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(worspaceNames[i],mws);
+  }
+
+  // Save the table
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName()+"_Param_series",table);
+  try
+  {
+    Mantid::API::IAlgorithm_sptr group = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
+    group->setProperty("InputWorkspaces",worspaceNames);
+    group->setPropertyValue("OutputWorkspace",workspaceName()+"_Workspace");
+    group->execute();
+  }
+  catch(...) {}
+  QApplication::restoreOverrideCursor();
+
+}
+
 
 } // MantidQt
 } // API

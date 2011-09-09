@@ -5,6 +5,7 @@ set ( SRC_FILES src/DiagResults.cpp
                 src/ICatSearch.cpp
                 src/ICatUtils.cpp
                 src/InstrumentSelector.cpp
+                src/MultifitSetupDialog.cpp
                 src/MWDiag.cpp
                 src/MWRunFiles.cpp
                 src/pythonCalc.cpp
@@ -31,6 +32,7 @@ set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/ICatSearch.h
                 inc/MantidQtMantidWidgets/ICatUtils.h
                 inc/MantidQtMantidWidgets/InstrumentSelector.h
+                inc/MantidQtMantidWidgets/MultifitSetupDialog.h
                 inc/MantidQtMantidWidgets/MWDiag.h
                 inc/MantidQtMantidWidgets/MWRunFiles.h
                 inc/MantidQtMantidWidgets/pythonCalc.h
@@ -53,6 +55,7 @@ set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/ICatSearch.h
                 inc/MantidQtMantidWidgets/ICatUtils.h
                 inc/MantidQtMantidWidgets/InstrumentSelector.h
+                inc/MantidQtMantidWidgets/MultifitSetupDialog.h
                 inc/MantidQtMantidWidgets/MWDiag.h
                 inc/MantidQtMantidWidgets/MWRunFiles.h
                 inc/MantidQtMantidWidgets/pythonCalc.h
@@ -71,6 +74,7 @@ set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
                inc/MantidQtMantidWidgets/ICatInvestigation.ui
                inc/MantidQtMantidWidgets/ICatMyDataSearch.ui
                inc/MantidQtMantidWidgets/ICatSearch.ui
+               inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
                inc/MantidQtMantidWidgets/MWDiag.ui
                inc/MantidQtMantidWidgets/MWRunFiles.ui
                inc/MantidQtMantidWidgets/RenameParDialog.ui

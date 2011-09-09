@@ -1105,6 +1105,28 @@ void MantidUI::executeAlgorithm(const QString & algName, const QString & paramLi
 }
 
 /**
+  * Execute an algorithm
+  * @param algName :: The algorithm name
+  * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+  * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+  */
+void MantidUI::executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs)
+{
+  //Get latest version of the algorithm
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  if( !alg ) return;
+  if (obs)
+  {
+    obs->observeFinish(alg);
+  }
+  for(QMap<QString,QString>::Iterator it = paramList.begin(); it != paramList.end(); ++it)
+  {
+    alg->setPropertyValue(it.key().toStdString(),it.value().toStdString());
+  }
+  executeAlgorithmAsync(alg);
+}
+
+/**
  * Find the first input workspace for an algorithm
  * @param algorithm :: A pointer to the algorithm instance
  */

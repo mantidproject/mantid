@@ -236,6 +236,8 @@ signals:
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
   void removeFitCurves();
 
+  void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
+
 private slots:
 
   void enumChanged(QtProperty* prop);
@@ -281,6 +283,7 @@ private slots:
   /* Context menu slots */
   void addFunction();
   void deleteFunction();
+  void setupMultifit();
 
   void executeCustomSetupLoad(const QString& name);
   void executeCustomSetupRemove(const QString& name);
@@ -328,6 +331,8 @@ private:
   void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
+  /// Process and create some output if it is a MultiBG fit
+  void processMultiBGResults();
 
   /// Make sure m_groupMember belongs to the group
   //void validateGroupMember();
