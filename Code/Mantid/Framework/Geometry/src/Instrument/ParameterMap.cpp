@@ -27,6 +27,28 @@ namespace Mantid
     {}
 
     /**
+     * Clear any parameters with the given name
+     * @param name :: The name of the parameter
+     */
+    void ParameterMap::clearParametersByName(const std::string & name)
+    {
+      // Key is component ID so have to search through whole lot
+      for( pmap_it itr = m_map.begin(); itr != m_map.end();)
+      {
+        if(itr->second->name() == name)
+        {
+          m_map.erase(itr++);
+        }
+        else
+        {
+          ++itr;
+        }
+      }
+      // Check if the caches need invalidating
+      if( name == 'pos' || name == 'rot' ) clearCache();
+    }
+
+    /**
      * Add a value into the map
      * @param type :: A string denoting the type, e.g. double, string, fitting
      * @param comp :: A pointer to the component that this parameter is attached to

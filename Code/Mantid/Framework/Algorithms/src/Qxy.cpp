@@ -223,8 +223,12 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_s
   bins *= 2; // go from -max to +max
   bins += 1; // Add 1 - this is a histogram
   
-  // Create the output workspace
+  // Create an output workspace with the same meta-data as the input
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,bins-1,bins,bins-1);
+  // ... but clear the masking from the parameter map as we don't want to carry that over since this is essentially
+  // a 2D rebin
+  ParameterMap & pmap = outputWorkspace->instrumentParameters();
+  pmap.clearParametersByName("masked");
 
   // Create a numeric axis to replace the vertical one
   Axis* verticalAxis = new NumericAxis(bins);

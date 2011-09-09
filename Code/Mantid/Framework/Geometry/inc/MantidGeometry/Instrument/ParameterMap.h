@@ -90,6 +90,8 @@ namespace Geometry
       m_map.clear();
       clearCache();
     }
+    /// Clear any parameters with the given name
+    void clearParametersByName(const std::string & name);
 
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
