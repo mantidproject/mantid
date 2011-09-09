@@ -32,8 +32,8 @@
 #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wformat"
-// This option seems to have disappeared in 4.4.5, but came back in 4.5.x?!?!?
-#if GCC_VERSION < 40405 || GCC_VERSION > 40500
+// This option seems to have disappeared in 4.4.4, but came back in 4.5.x?!?!?
+#if GCC_VERSION < 40404 || GCC_VERSION > 40500
   #pragma GCC diagnostic ignored "-Wunused-result"
 #endif
 #pragma GCC diagnostic ignored "-Wunused"

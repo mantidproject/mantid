@@ -676,7 +676,7 @@ namespace WorkspaceCreationHelper
     NumericAxis *pAxis0 = new NumericAxis(numBins);
  
     for(size_t i=0;i<numBins;i++){
-        double dE = -1+i*0.8;
+        double dE = -1.0 + static_cast<double>(i)*0.8;
         pAxis0->setValue(i,dE);
     }
     pAxis0->setUnit("DeltaE");

@@ -234,7 +234,7 @@ namespace API
    * @param file :: open NeXus file
    * @param group :: name of the group to open
    */
-  void ExperimentInfo::loadNexus(::NeXus::File * file, const std::string & /*group*/)
+  void ExperimentInfo::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/)
   {
     //m_sample->loadNexus(file, "sample");
   }
