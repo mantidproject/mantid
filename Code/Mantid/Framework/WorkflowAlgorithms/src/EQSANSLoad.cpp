@@ -19,6 +19,8 @@
 #include <boost/tokenizer.hpp>
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 
 namespace Mantid
 {
@@ -56,6 +58,7 @@ void EQSANSLoad::init()
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
   declareProperty("OutputMessage","",Direction::Output);
+  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
 
 }
 
@@ -392,6 +395,16 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
 
 void EQSANSLoad::exec()
 {
+  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
+  ReductionTableHandler reductionHandler(reductionTable);
+  if (!reductionTable)
+  {
+    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
+    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
+  }
+  if (reductionHandler.findStringEntry("LoadAlgorithm").size()==0)
+    reductionHandler.addEntry("LoadAlgorithm", toString());
+
   const std::string fileName = getPropertyValue("Filename");
 
   // Output log

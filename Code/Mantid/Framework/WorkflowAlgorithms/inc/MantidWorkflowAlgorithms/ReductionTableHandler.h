@@ -23,14 +23,19 @@ namespace WorkflowAlgorithms
     ReductionTableHandler(DataObjects::TableWorkspace_sptr tableWS);
     DataObjects::TableWorkspace_sptr getTable() { return m_reductionTable; }
     std::string findStringEntry(const std::string& key);
+    int findIntEntry(const std::string& key);
+    double findDoubleEntry(const std::string& key);
     API::MatrixWorkspace_sptr findWorkspaceEntry(const std::string& key);
 
     void addEntry(const std::string& key, const std::string& value);
+    void addEntry(const std::string& key, const int& value);
+    void addEntry(const std::string& key, const double& value);
   private:
     void createTable();
     DataObjects::TableWorkspace_sptr m_reductionTable;
-    static const int PARNAME_COL = 1;
     static const int STRINGENTRY_COL = 1;
+    static const int INTENTRY_COL = 2;
+    static const int DOUBLEENTRY_COL = 3;
   };
 }
 }

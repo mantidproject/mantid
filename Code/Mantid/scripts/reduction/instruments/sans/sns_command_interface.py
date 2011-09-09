@@ -22,7 +22,7 @@ from reduction.find_data import find_data
 
 import mantidsimple
 
-def EQSANS(keep_events=True, use_cpp=False):
+def EQSANS(keep_events=True, use_cpp=True):
     Clear(EqSansReducer)
     ReductionSingleton().set_instrument(sns_instrument.EQSANS())
     NoSolidAngle()
@@ -36,12 +36,11 @@ def FrameSkipping(value=False):
     
 def DarkCurrent(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    red_table = "__reduction_params_"+ReductionSingleton().UID
-    if False:
+    if True:
         ReductionSingleton().set_dark_current_subtracter(mantidsimple.EQSANSDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
-                                                     ReductionTableWorkspace=red_table)
+                                                     ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     else:
         ReductionSingleton().set_dark_current_subtracter(sns_reduction_steps.SubtractDarkCurrent(datafile))
 

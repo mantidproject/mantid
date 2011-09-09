@@ -6,6 +6,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid
 {
@@ -50,6 +51,30 @@ namespace WorkflowAlgorithms
     }
   }
 
+  int ReductionTableHandler::findIntEntry(const std::string& key)
+  {
+    try
+    {
+      int row = 0;
+      m_reductionTable->find(key, row, 0);
+      return m_reductionTable->Int(row, INTENTRY_COL);
+    } catch(std::out_of_range&) {
+      return EMPTY_INT();
+    }
+  }
+
+  double ReductionTableHandler::findDoubleEntry(const std::string& key)
+  {
+    try
+    {
+      int row = 0;
+      m_reductionTable->find(key, row, 0);
+      return m_reductionTable->Double(row, DOUBLEENTRY_COL);
+    } catch(std::out_of_range&) {
+      return EMPTY_DBL();
+    }
+  }
+
   MatrixWorkspace_sptr ReductionTableHandler::findWorkspaceEntry(const std::string& key)
   {
     MatrixWorkspace_sptr pointer;
@@ -68,7 +93,19 @@ namespace WorkflowAlgorithms
   void ReductionTableHandler::addEntry(const std::string& key, const std::string& value)
   {
     TableRow row = m_reductionTable->appendRow();
-    row << key << value << 0 << 0.0;
+    row << key << value << EMPTY_INT() << EMPTY_DBL();
+  }
+
+  void ReductionTableHandler::addEntry(const std::string& key, const int& value)
+  {
+    TableRow row = m_reductionTable->appendRow();
+    row << key << "" << value << EMPTY_DBL();
+  }
+
+  void ReductionTableHandler::addEntry(const std::string& key, const double& value)
+  {
+    TableRow row = m_reductionTable->appendRow();
+    row << key << "" << EMPTY_INT() << value;
   }
 
 

@@ -387,6 +387,9 @@ class Reducer(object):
         self._data_files = {}
         self._reduction_steps = []
         
+    def get_reduction_table_name(self):
+        return "__reduction_parameters_"+self.UID
+    
     def set_instrument(self, configuration):
         if issubclass(configuration.__class__, Instrument):
             self.instrument = configuration

@@ -44,9 +44,6 @@ void EQSANSDarkCurrentSubtraction::init()
       "The name of the input event Nexus file to load as dark current.");
 
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-
-  // Name of the dark current workspace to put the loaded dark current in so
-  // that we don't have to reload it if it already exists.
   declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputDarkCurrentWorkspace","", Direction::Output, true));
   declareProperty("OutputMessage","",Direction::Output);
@@ -55,7 +52,7 @@ void EQSANSDarkCurrentSubtraction::init()
 
 void EQSANSDarkCurrentSubtraction::exec()
 {
-  Progress progress(this,0.0,1.0,5);
+  Progress progress(this,0.0,1.0,6);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -112,16 +109,25 @@ void EQSANSDarkCurrentSubtraction::exec()
   // Load the dark current if we don't have it already
   if (!darkWS)
   {
+    std::string loader = reductionHandler.findStringEntry("LoadAlgorithm");
+    if (loader.size()==0)
+    {
       IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad", 1.0, 2.0);
       loadAlg->setProperty("Filename", fileName);
-      loadAlg->setProperty("UseConfigTOFCuts", true);
-      loadAlg->setProperty("UseConfigMask", true);
-      loadAlg->setProperty("UseConfig", true);
-      loadAlg->setProperty("CorrectForFlightPath", true);
       loadAlg->executeAsSubAlg();
       darkWS = loadAlg->getProperty("OutputWorkspace");
-      setProperty("OutputDarkCurrentWorkspace", darkWS);
+    } else {
+      IAlgorithm_sptr loadAlg = Algorithm::fromString(loader);
+      loadAlg->setChild(true);
+      loadAlg->setProperty("Filename", fileName);
+      loadAlg->setPropertyValue("OutputWorkspace", darkWSName);
+      loadAlg->execute();
+      darkWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(darkWSName));
+      //darkWS = loadAlg->getProperty("OutputWorkspace");
+    }
+    setProperty("OutputDarkCurrentWorkspace", darkWS);
   }
+  progress.report(2, "Loaded dark current");
 
   // Normalize the dark current and data to counting time
   Mantid::Kernel::Property* prop = inputWS->run().getProperty("proton_charge");
@@ -133,23 +139,27 @@ void EQSANSDarkCurrentSubtraction::exec()
   double dark_duration = dp->getStatistics().duration;
   double scaling_factor = duration/dark_duration;
 
-  progress.report("Subtracting dark current");
+  progress.report("Scaling dark current");
 
   // Scale the stored dark current by the counting time
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace", 3.0, 4.0);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
+  rebinAlg->setProperty("OutputWorkspace", darkWS);
   rebinAlg->executeAsSubAlg();
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
   scaledDarkWS *= scaling_factor;
+
+  progress.report("Subtracting dark current");
+
   outputWS = inputWS - scaledDarkWS;
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+darkWSName);
 
-  progress.report("Subtracting dark current");
+  progress.report("Subtracted dark current");
 }
 
 } // namespace WorkflowAlgorithms

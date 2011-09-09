@@ -225,7 +225,8 @@ class LoadRun(ReductionStep):
                        UseConfig=self._use_config,
                        CorrectForFlightPath=self._correct_for_flight_path,
                        SampleDetectorDistance=self._sample_det_dist,
-                       SampleDetectorDistanceOffset=self._sample_det_offset
+                       SampleDetectorDistanceOffset=self._sample_det_offset,
+                       ReductionTableWorkspace=reducer.get_reduction_table_name()
                        )            
             return l.getPropertyValue("OutputMessage")
         
