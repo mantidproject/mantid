@@ -232,6 +232,7 @@ void ConvertToQ3DdE::init()
     // copy experiment info into 
     ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
     uint16_t runIndex = ws->addExperimentInfo(ExperimentInfo);
+    UNUSED_ARG(runIndex); //TODO:
 
     // Initalize the matrix to 3x3 identity
     mat = Kernel::Matrix<double>(3,3, true);
@@ -242,8 +243,7 @@ void ConvertToQ3DdE::init()
     mat = gon * ub;
 
     const size_t numSpec  = inWS2D->getNumberHistograms();
-    const size_t specSize = inWS2D->blocksize();
-    const bool isHist     = inWS2D->isHistogramData();
+    const size_t specSize = inWS2D->blocksize();    
 
     // Initialise the progress reporting object
     Progress progress(this,0.0,1.0,numSpec);
@@ -261,8 +261,8 @@ void ConvertToQ3DdE::init()
       {
    //     PARALLEL_START_INTERUPT_REGION
         const MantidVec& E_transfer = inWS2D->readX(i);
-        const MantidVec& Y = inWS2D->readY(i);
-        const MantidVec& E = inWS2D->readE(i);
+      //TODO: const MantidVec& Y = inWS2D->readY(i);
+      //TODO: const MantidVec& Error = inWS2D->readE(i);
     
         for (size_t j = 0; j < specSize; ++j)
         {
@@ -275,6 +275,9 @@ void ConvertToQ3DdE::init()
             double  qz  = ki - ez*k_tr;
             double  qy  = -ey*k_tr;
             double  qx  = -ex*k_tr;
+            UNUSED_ARG(qx);
+            UNUSED_ARG(qy);
+            UNUSED_ARG(qz);
 
           //performUnaryOperation(XIn,Y[j],E[j],YOut[j],EOut[j]);
         }
@@ -282,8 +285,9 @@ void ConvertToQ3DdE::init()
         progress.report();
  //       PARALLEL_END_INTERUPT_REGION
       }
+ //    PARALLEL_CHECK_INTERUPT_REGION
+      
 
-  //    PARALLEL_CHECK_INTERUPT_REGION
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
