@@ -45,8 +45,6 @@ FUNCTION( SET_PYTHON_PROPERTIES TARGET_NAME )
     # and in .so on the Mac
     set_target_properties ( ${TARGET_NAME} PROPERTIES SUFFIX .so )
   endif ()
-  # No prefix as this is loaded by Python not the OS
-  set ( CMAKE_SHARED_LIBRARY_PREFIX )
   # Debug python library expects imported module names to end in _d
   if ( PYTHON_DEBUG_LIBRARY )
     set_target_properties ( ${TARGET_NAME} PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d )
@@ -58,6 +56,9 @@ ENDFUNCTION()
 ####################################################################################
 # Sub modules 
 ####################################################################################
+# No prefix for any of them as they are loaded by Python not the OS
+set ( CMAKE_SHARED_LIBRARY_PREFIX )
+
 add_subdirectory ( kernel )
 #add_subdirectory ( geometry )
 add_subdirectory ( api )
