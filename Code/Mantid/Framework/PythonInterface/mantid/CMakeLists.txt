@@ -50,7 +50,7 @@ FUNCTION( SET_PYTHON_PROPERTIES TARGET_NAME )
     set_target_properties ( ${TARGET_NAME} PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d )
   endif ()
   # Group within VS
-  set_property ( TARGET ${TARGET_NAME} PROPERTY FOLDER "MantidFramework/PythonInterface" )
+  set_property ( TARGET ${TARGET_NAME} PROPERTY FOLDER "MantidFramework/Python" )
 ENDFUNCTION() 
 
 ####################################################################################
@@ -83,11 +83,6 @@ foreach ( PYFILE ${PY_FILES} )
   set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
 endforeach ( PYFILE )
 
-# Create a target for non MSVC platforms so that the layout looks similar to the unix target layout
-if ( MSVC )
-  add_custom_target ( mantid DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
-  add_dependencies ( Framework mantid ) # So that mantid target is built which in turn copies to PY_FILES
-  set_property ( TARGET mantid PROPERTY FOLDER "MantidFramework/PythonInterface" )
-else ()
-  add_custom_target ( PythonInterface DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
-endif( MSVC )
+# Create an overall target
+add_custom_target ( PythonInterface DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
+set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
