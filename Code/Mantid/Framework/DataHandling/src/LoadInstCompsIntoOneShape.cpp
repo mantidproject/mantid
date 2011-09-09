@@ -65,6 +65,7 @@ namespace Mantid
 void LoadInstCompsIntoOneShape::adjust(Poco::XML::Element* pElem, std::map<std::string,bool>& isTypeAssembly, 
                                        std::map<std::string,Poco::XML::Element*>& getTypeElement)
 {
+  UNUSED_ARG(isTypeAssembly)
   // check if pElem is an element with tag name 'type'
   if ( (pElem->tagName()).compare("type") )
     throw Exception::InstrumentDefinitionError( "Argument to function adjust() must be a pointer to an XML element with tag name type." );
@@ -108,7 +109,7 @@ void LoadInstCompsIntoOneShape::adjust(Poco::XML::Element* pElem, std::map<std::
     // The location element is required to be a child of a component element. 
     // Get this component element
     Element* pCompElem = LoadInstrumentHelper::getParentComponent(pLoc);
-    Element* pType = getTypeElement[pCompElem->getAttribute("type")];
+    //Element* pType = getTypeElement[pCompElem->getAttribute("type")];
 
     // get the type (name) of the <location> element in focus
     //std::string locationTypeName = pType->getAttribute("name");
