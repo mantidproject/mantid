@@ -45,6 +45,8 @@ namespace Algorithms
     /// Calculate PDF, i.e., G(r), for a certain r value from S(d)
     double CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq);
 
+    std::string gtype1;
+
   };
 
 
