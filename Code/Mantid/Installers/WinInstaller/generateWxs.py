@@ -442,8 +442,9 @@ addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + '/Mantid
 # Add Qt Property Browser
 addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + '/QtPropertyBrowser.dll',MantidDlls)
 
-# NeXus dlls for the main path
-addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
+# The other required third_party libraries, excluding the designer stuff
+addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,
+        exclude_files=['QtCLucene4.dll','QtDesigner4.dll','QtDesignerComponents4.dll','QtHelp4.dll', 'QtNetwork4.dll','QtScript4.dll','QtSql4.dll'])
 
 #------------- Bundled Python installation ---------------
 pythonDLLs = addCompList('PythonDLLs',LIBDIR + '/Python27/DLLs','DLLs',binDir)[0]
@@ -490,13 +491,6 @@ else:
 
 QTIPlot = addComponent('QTIPlot',comp_guid['QTIPlot'],binDir)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe',MANTIDRELEASE + '/MantidPlot.exe',QTIPlot)
-# TODO: Currently the MantidLauncher only works for the 32-bit system since the registry access seems more of a pain on a 64 bit system
-# MantidLauncher is not used
-#if ARCH== '32':
-#    MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
-#    startmenuQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
-#    desktopQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
-#else:
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
     
@@ -528,11 +522,6 @@ addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + '/MantidNexu
 addFileV('MantidMDDataObjects', 'MMDO.dll', 'MantidMDDataObjects.dll',MANTIDRELEASE + '/MantidMDDataObjects.dll',Plugins) 
 addFileV('MantidMDAlgorithms', 'MMDA.dll', 'MantidMDAlgorithms.dll',MANTIDRELEASE + '/MantidMDAlgorithms.dll',Plugins) 
 addFileV('MantidMDEvents', 'MMDE.dll', 'MantidMDEvents.dll',MANTIDRELEASE + '/MantidMDEvents.dll',Plugins) 
-# NeXus dlls for the plugins path
-addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
-addFileV('hd425mdll','hd425m.dll','hd425m.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hd425m.dll',Plugins)
-addFileV('hm425mdll','hm425m.dll','hm425m.dll',CODEDIR + '/Third_Party/lib/win'+ ARCH +'/hm425m.dll',Plugins)
-addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
 
 # Python algorithms
 pyalgsList = addCompList("PyAlgsDir",FRAMEWORKDIR + "/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir,exclude_suffix=['.pyc'])[0]
