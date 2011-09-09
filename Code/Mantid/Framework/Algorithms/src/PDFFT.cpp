@@ -45,19 +45,20 @@ void PDFFT::init() {
 	input_options.push_back("S(Q)");
 	input_options.push_back("S(Q)-1");
 	// Set up output data type
+	gtype1 = "G(r)=4pi*r[rho(r)-rho_0]";
 	std::vector<std::string> outputGoption;
-	outputGoption.push_back("G(r)");
+	outputGoption.push_back(gtype1);
 
 	declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
 			Direction::Input, uv), "An input workspace S(d).");
-	declareProperty(new WorkspaceProperty<> ("OutputPDFWorkspace", "",
+	declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "",
 			Direction::Output), "An output workspace G(r)");
 	declareProperty("InputSofQType", "S(Q)", new ListValidator(input_options),
 	    "Select the input Workspace type.  It can be S(Q) or S(Q)-1");
   declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20, Direction::Input),
       "Maximum r value of output G(r).");
 	// declareProperty("RMax", 20.0);
-  declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.01, Direction::Input),
+  declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", -0.00, Direction::Input),
       "Step of r in G(r). ");
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.0, Direction::Input),
 	    "Staring value Q of S(Q) for Fourier Transform");
@@ -77,12 +78,20 @@ void PDFFT::exec() {
 	//
 	// 1. Generate a Workspace for G
 	const double rmax = getProperty("RMax");
-	const double deltar = getProperty("DeltaR");
+	const double deltarc = getProperty("DeltaR");
 	double qmax = getProperty("Qmax");
 	double qmin = getProperty("Qmin");
-  int sizer = static_cast<int>(rmax/deltar);
   std::string typeSofQ = getProperty("InputSofQType");
   std::string typeGofR = getProperty("PDFType");
+
+  // b) Process input, including defaults
+  double deltar;
+  if (deltarc <= 0){
+    deltar = M_PI/qmax;
+  } else {
+    deltar = deltarc;
+  }
+  int sizer = static_cast<int>(rmax/deltar);
 
   bool sofq = true;
   if (typeSofQ == "S(Q)-1"){
@@ -95,6 +104,12 @@ void PDFFT::exec() {
 	// 2. Set up G(r) dataX(0)
 	Gspace
 			= WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
+	Gspace->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+	Unit_sptr unit = Gspace->getAxis(0)->unit();
+	boost::shared_ptr<Units::Label> label = boost::dynamic_pointer_cast<Units::Label>(unit);
+	label->setLabel("AtomicDistance", "Angstrom");
+	// Gspace->getAxis(0)->unit()->setLabel("caption", "label");
+	Gspace->setYUnitLabel("PDF");
 	MantidVec& vr = Gspace->dataX(0);
 	MantidVec& vg = Gspace->dataY(0);
 	MantidVec& vge = Gspace->dataE(0);
@@ -105,12 +120,12 @@ void PDFFT::exec() {
 	Sspace = getProperty("InputWorkspace");
 
 	// 3. Check input workgroup, esp. the UNIT
-	std::string unit;
+	std::string strunit;
 	Unit_sptr& iunit = Sspace->getAxis(0)->unit();
 	if (iunit->unitID() == "dSpacing") {
-	  unit = "d";
+	  strunit = "d";
 	} else if (iunit->unitID() == "MomentumTransfer") {
-	  unit = "Q";
+	  strunit = "Q";
 	} else {
 			g_log.error() << "Unit " << iunit->unitID() << " is not supported"
 					<< std::endl;
@@ -124,7 +139,7 @@ void PDFFT::exec() {
 	int sizesq = static_cast<int>(inputx.size());
 	double error;
 
-	if (unit == "d") {
+	if (strunit == "d") {
 	  // d-Spacing
 	  g_log.information()<< "Fourier Transform in d-Space" << std::endl;
 
@@ -147,7 +162,7 @@ void PDFFT::exec() {
 	      vge[i] = error;
 		}
 
-	} else if (unit == "Q"){
+	} else if (strunit == "Q"){
 	  // Q-spacing
 	  g_log.information()<< "Fourier Transform in Q-Space" << std::endl;
 
@@ -188,7 +203,7 @@ void PDFFT::exec() {
 	}
 
 	// 4. Set property
-	setProperty("OutputPDFWorkspace", Gspace);
+	setProperty("OutputWorkspace", Gspace);
 
 	return;
 }
