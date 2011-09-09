@@ -39,6 +39,10 @@
   <location />
 </component>
 
+<component type="adjusted cuboid 2" idlist="adjust cuboid 2">
+  <location />
+</component>
+
 <component type="cuboid1" idlist="normal cuboid">
   <location z="3"/>
 </component>
@@ -52,6 +56,24 @@
   <algebra val="A : B" />
 </type>
 
+<type name="nested cuboid" is="detector">
+  <component type="cuboid1">
+    <location name="bob the builder" rot="90" axis-x="1" axis-y="0" axis-z="0"/>
+  </component>
+</type>
+
+<type name="adjusted cuboid 2" is="detector">
+  <combine-components-into-one-shape />
+  <component type="cuboid1">
+    <location name="A"/>
+  </component>
+  <component type="nested cuboid">
+    <location name="B" y="20" />
+  </component>
+  <algebra val="A : B" />
+</type>
+
+
 <type name="cuboid1" is="detector"> 
   <cuboid id="bob">
     <left-front-bottom-point x="0.5" y="-5.0" z="-0.5"  />
@@ -63,6 +85,10 @@
 
 <idlist idname="adjust cuboid">
   <id start="1300" end="1300" />
+</idlist>
+
+<idlist idname="adjust cuboid 2">
+  <id start="1350" end="1350" />
 </idlist>
 
 <idlist idname="normal cuboid">
