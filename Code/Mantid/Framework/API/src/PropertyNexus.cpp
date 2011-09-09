@@ -188,10 +188,8 @@ namespace PropertyNexus
     std::vector<double> timeSec(times.size());
     for (size_t i=0; i<times.size(); i++)
       timeSec[i] = double(times[i].total_nanoseconds() - start.total_nanoseconds()) * 1e-9;
-    std::vector<int> dims;
-    dims.push_back( int(timeSec.size()) );
-    file->makeData("time", FLOAT64, dims, true);
-    file->putData(timeSec);
+    file->writeData("time", timeSec);
+    file->openData("time");
     file->putAttr("start", start.to_ISO8601_string() );
     file->closeData();
   }
