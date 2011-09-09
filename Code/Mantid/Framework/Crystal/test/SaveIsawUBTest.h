@@ -49,6 +49,8 @@ void test_exec()
   MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
   AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws);
 
+  std::string File1, File2;
+
   LoadIsawUB alg;
   TS_ASSERT_THROWS_NOTHING( alg.initialize() )
   TS_ASSERT( alg.isInitialized() )
@@ -57,26 +59,23 @@ void test_exec()
   TS_ASSERT_THROWS_NOTHING( alg.execute(); );
   TS_ASSERT( alg.isExecuted() );
 
+  // Get the full path to the found file
+  File1 = alg.getPropertyValue("Filename");
+
   TS_ASSERT(ws);
   if (!ws) return;
 
   SaveIsawUB Salg;
-  FileProperty file1("File1","",Mantid::API::FileProperty::Load);
-
-   file1.setValue("TOPAZ_3007.mat");
-   std::string File1 = file1.value();
-
-   std::string File2( File1);
-   File2 +="A";
-
-
   TS_ASSERT_THROWS_NOTHING( Salg.initialize() )
   TS_ASSERT( Salg.isInitialized() )
-  TS_ASSERT_THROWS_NOTHING( Salg.setPropertyValue("Filename", File2));
+  TS_ASSERT_THROWS_NOTHING( Salg.setPropertyValue("Filename", "TOPAZ_3007_resaved.mat"));
   TS_ASSERT_THROWS_NOTHING( Salg.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws") );
   TS_ASSERT_THROWS_NOTHING( Salg.execute(); );
   TS_ASSERT( Salg.isExecuted() );
   // Check the results
+
+  // Get the full path to the saved file
+  File2 = Salg.getPropertyValue("Filename");
 
   AnalysisDataService::Instance().remove("LoadIsawUBTest_ws");
 
