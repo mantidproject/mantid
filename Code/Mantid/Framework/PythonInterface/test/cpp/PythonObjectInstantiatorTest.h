@@ -31,7 +31,7 @@ public:
   ~PythonObjectInstantiatorTest()
   {
     delete m_creator;
-    //Py_Finalize(); - Causes Python 2.4 to fail. Need to find out why
+    //Py_Finalize(); //- Causes Python 2.4 to fail. Need to find out why
   }
 
   void test_Bare_Pointer()
@@ -60,11 +60,12 @@ private:
     if( !m_creator )
     {
       std::string propDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
+      propDir += "\\"; // Escape the last backslash so python isn't confused
       //Assume this is where the mantid package is too
       std::string code = "import sys\n"
         "sys.path.append(r'" + propDir + "')\n"
-        "from mantid.api import PythonAlgorithm\n"
-        "class PyAlg(PythonAlgorithm):\n"
+        "from mantid.api import Algorithm\n"
+        "class PyAlg(Algorithm):\n"
         "  pass\n";
       PyRun_SimpleString(code.c_str());
       PyObject *main = PyImport_AddModule("__main__");

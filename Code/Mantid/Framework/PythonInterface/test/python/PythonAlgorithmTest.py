@@ -1,23 +1,23 @@
 import unittest
 
-from mantid.api import PythonAlgorithm, algorithm_mgr, register_algorithm
+from mantid.api import Algorithm, algorithm_mgr, register_algorithm
 
-class TestPyAlgDefaultAttrs(PythonAlgorithm):
+class TestPyAlgDefaultAttrs(Algorithm):
     def init_(self):
         pass
     
     def exec_(self):
         pass
 
-class TestPyAlgOverriddenAttrs(PythonAlgorithm):
+class TestPyAlgOverriddenAttrs(Algorithm):
     
-    def name_(self):
+    def name(self):
         return 'CoolAlgorithm'
     
-    def version_(self):
+    def version(self):
         return 2
     
-    def category_(self):
+    def category(self):
         return "BestAlgorithms"
     
     def init_(self):

@@ -1,6 +1,7 @@
 #ifndef MANTID_PYTHONINTERFACE_PROPERTYMARSHAL_H_
 #define MANTID_PYTHONINTERFACE_PROPERTYMARSHAL_H_
 
+#include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -39,7 +40,7 @@ namespace Mantid
      * its virtual functions are overridden in templated derived classes
      * that can extract the correct type from the Python object
      */
-    struct PropertyHandler
+    struct DLLExport PropertyHandler
     {
       /// Virtual Destructor
       virtual ~PropertyHandler() {};
@@ -50,7 +51,7 @@ namespace Mantid
      * A templated marshal that calls the corresponding setProperty method on the given algorithm
      */
     template<typename CType>
-    struct TypedHandler : public PropertyHandler
+    struct DLLExport TypedHandler : public PropertyHandler
     {
       /// Set function to handle Python -> C++ calls and get the correct type
       void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
@@ -66,7 +67,7 @@ namespace Mantid
      * assigned polymorphically. This can be removed when the bug is fixed
      */
     template<>
-    struct TypedHandler<std::string> : public PropertyHandler
+    struct DLLExport TypedHandler<std::string> : public PropertyHandler
     {
       /// Set function to handle Python -> C++ calls and get the correct type
       void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
@@ -82,7 +83,7 @@ namespace Mantid
      * Defines static functions that allow method calls on Python
      * objects to be routed here
      */
-    class PropertyMarshal
+    class DLLExport PropertyMarshal
     {
     public:
       /// Typedef the map of python types to C++ functions

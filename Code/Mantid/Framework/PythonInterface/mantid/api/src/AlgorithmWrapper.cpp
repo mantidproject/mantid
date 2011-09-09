@@ -17,18 +17,27 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::name() const
     {
-      std::string name("");
-      if( boost::python::override fn = this->get_override("name_") )
+      static const char * method = "name";
+      std::string name;
+      if( WrapperHelpers::typeHasAttribute(*this, method) )
       {
-        name = boost::python::call<std::string>(fn.ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
+        name = call<std::string>(get_override(method).ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
       }
       else
       {
-        // Use the class name
-        PyObject *self = boost::python::detail::wrapper_base_::get_owner(*this);
-        name = std::string(self->ob_type->tp_name);
+        name = this->defaultName();
       }
       return name;
+    }
+
+    /**
+     * Returns the base class version of name
+     */
+    const std::string AlgorithmWrapper::defaultName() const
+    {
+      // Use the class name
+      PyObject *self = boost::python::detail::wrapper_base_::get_owner(*this);
+      return std::string(self->ob_type->tp_name);
     }
 
     /**
@@ -37,12 +46,22 @@ namespace Mantid
      */
     int AlgorithmWrapper::version() const
     {
+      static const char * method = "version";
       int version(1);
-      if( boost::python::override fn = this->get_override("version_") )
+      if( WrapperHelpers::typeHasAttribute(*this, method) )
       {
-        version = boost::python::call<int>(fn.ptr());
+        version = call<int>(get_override(method).ptr()); // Avoid a warning with just calling return fn() which docs say you can do.
+      }
+      else
+      {
+        version = this->defaultVersion();
       }
       return version;
+    }
+
+    int AlgorithmWrapper::defaultVersion() const
+    {
+      return 1;
     }
 
     /**
@@ -51,10 +70,11 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::category() const
     {
+      static const char * method = "category";
       std::string cat("PythonAlgorithms");
-      if ( boost::python::override fn = this->get_override("category_") )
+      if (  WrapperHelpers::typeHasAttribute(*this, method) )
       {
-        cat = boost::python::call<std::string>(fn.ptr());
+        cat = boost::python::call<std::string>(this->get_override(method).ptr());
       }
       return cat;
     }

@@ -3,6 +3,9 @@ if ( CMAKE_MAJOR_VERSION EQUAL 2 AND CMAKE_MINOR_VERSION LESS 8 )
   message ( WARNING " Running tests via CTest will not work with this version of CMake. If you need this functionality, upgrade to CMake 2.8." )
 endif ()
 
+# Include useful utils
+include ( MantidUtils )
+
 # Make the default build type Release
 if ( NOT CMAKE_CONFIGURATION_TYPES )
   if ( NOT CMAKE_BUILD_TYPE )

@@ -23,7 +23,7 @@ MACRO( CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE EXPORT_FILES SRCS )
       string( REGEX REPLACE "void " "" EXPORT "${EXPORT}" )
       set ( EXPORT_FUNCTIONS "${EXPORT_FUNCTIONS}\n${EXPORT};" )
     endforeach(EXPORT ${EXPORTS}) 
-  endforeach( CPPFILE ${${EXPORT_FILES}}     )
+  endforeach( CPPFILE ${${EXPORT_FILES}} )
   string( STRIP "${EXPORT_DECLARE}" EXPORT_DECLARE )
   string( STRIP "${EXPORT_FUNCTIONS}" EXPORT_FUNCTIONS )
   
@@ -32,6 +32,28 @@ MACRO( CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE EXPORT_FILES SRCS )
   # Set the sources
   LIST ( APPEND ${SRCS} ${${EXPORT_FILES}} ${OUTPUT_FILE} )
 ENDMACRO( )
+
+####################################################################################
+# Define a function for setting the correct properties on the individual targets
+####################################################################################
+FUNCTION( SET_PYTHON_PROPERTIES TARGET_NAME )
+  # Library name needs to end in .pyd for Windows
+  if ( MSVC )
+    set_target_properties ( ${TARGET_NAME} PROPERTIES SUFFIX .pyd 
+                            COMPILE_FLAGS "/bigobj /w44005 /w44244") # bigobj required for intensive templating
+  elseif ( APPLE )
+    # and in .so on the Mac
+    set_target_properties ( ${TARGET_NAME} PROPERTIES SUFFIX .so )
+  endif ()
+  # No prefix as this is loaded by Python not the OS
+  set ( CMAKE_SHARED_LIBRARY_PREFIX )
+  # Debug python library expects imported module names to end in _d
+  if ( PYTHON_DEBUG_LIBRARY )
+    set_target_properties ( ${TARGET_NAME} PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d )
+  endif ()
+  # Group within VS
+  set_property ( TARGET ${TARGET_NAME} PROPERTY FOLDER "MantidFramework/PythonInterface" )
+ENDFUNCTION() 
 
 ####################################################################################
 # Sub modules 
@@ -60,6 +82,10 @@ foreach ( PYFILE ${PY_FILES} )
   set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
 endforeach ( PYFILE )
 
-# Create a grouped target
-add_custom_target ( PythonInterface DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
-
+# Create a target for non MSVC platforms
+if ( MSVC )
+  add_custom_target ( mantid DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
+  set_property ( TARGET mantid PROPERTY FOLDER "MantidFramework/PythonInterface" )
+else ()
+  add_custom_target ( PythonInterface DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
+endif( MSVC )

@@ -32,13 +32,13 @@ namespace
   // A function to register an algorithm from Python
   void registerAlgorithm(boost::python::object obj)
   {
-    // The current frame should know what a PythonAlgorithm is, or it
+    // The current frame should know what an Algorithm is, or it
     // couldn't create one. Get the class object from the f_globals
     PyObject *defs = PyEval_GetFrame()->f_globals;
-    PyObject *pyalgClass = PyDict_GetItemString(defs, "PythonAlgorithm");
+    PyObject *pyalgClass = PyDict_GetItemString(defs, "Algorithm");
     if( !pyalgClass )
     {
-      throw std::runtime_error("Unable to find PythonAlgorithm definition, cannot register algorithm.\nHas the definition been imported into the current scope");
+      throw std::runtime_error("Unable to find Algorithm definition, cannot register algorithm.\nHas the definition been imported");
     }
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
@@ -52,7 +52,7 @@ namespace
     }
     else
     {
-      throw std::invalid_argument("Cannot register an algorithm that does not derive from PythonAlgorithm.");
+      throw std::invalid_argument("Cannot register an algorithm that does not derive from Algorithm.");
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType));

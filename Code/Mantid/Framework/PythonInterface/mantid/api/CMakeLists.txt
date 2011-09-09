@@ -58,14 +58,8 @@ endforeach ( PYFILE )
 #############################################################################################
 
 add_library ( _api ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
-# Set the target directory to to be inside the Python package
-set_target_properties ( _api PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/api )
-# No prefix as this is loaded by Python not the OS
-set ( CMAKE_SHARED_LIBRARY_PREFIX )
-# Debug python library expects imported module names to end in _d
-if ( PYTHON_DEBUG_LIBRARY )
-  set_target_properties ( _kernel PROPERTIES DEBUG_OUTPUT_NAME _api_d )
-endif ()
-# Add the required dependencies
-target_link_libraries ( _api ${PYTHON_DEPS} )
+set_python_properties( _api )
+move_target ( _api ${OUTPUT_DIR} .pyd )
 
+# Add the required dependencies
+target_link_libraries ( _api _kernel ${PYTHON_DEPS} )

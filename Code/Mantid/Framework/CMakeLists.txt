@@ -110,7 +110,7 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonAPI)
-#add_subdirectory (PythonInterface)
+add_subdirectory (PythonInterface)
 
 find_package ( Matlab )
 if( MATLAB_FOUND )

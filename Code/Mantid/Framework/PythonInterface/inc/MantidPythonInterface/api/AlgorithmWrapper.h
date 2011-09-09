@@ -5,14 +5,18 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <boost/python/wrapper.hpp>
-
+#include "MantidPythonInterface/kernel/WrapperHelpers.h"
 
 namespace Mantid
 {
   namespace PythonInterface
   {
     /**
+      This class wraps the Algorithm class and allows classes in Python
+      to inherit from it.
+
+      This class is treated by Boost Python as if it were of type Algorithm.
+
       @author Martyn Gigg, Tessella plc
 
       Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -35,34 +39,20 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
-    /**
-     * This class simply acts as a marker for now.
-     * It is required so that the export functions
-     * can properly mark Algorithm as a base class
-     * of a PythonAlgorithm.
-     *
-     * Trying to do this with the wrapper below
-     * causes a compilation error
-     */
-    class PythonAlgorithm : public API::Algorithm
-    {};
-
-    /**
-      This class wraps the PythonAlgorithm class and allows classes in Python
-      to inherit from it.
-
-      This class is treated by Boost Python as if it were of type PythonAlgorithm.
-     */
-
-    class AlgorithmWrapper : public PythonAlgorithm, public boost::python::wrapper<PythonAlgorithm>
+    class AlgorithmWrapper : public API::Algorithm, public boost::python::wrapper<API::Algorithm>
     {
     public:
       /// Returns the name of the algorithm
       virtual const std::string name() const;
-      /// Returns a version of the algorithm, default = 1
+      /// A default version, chosen if no override exists
+      const std::string defaultName() const;
+
+      /// Returns a version of the algorithm
       virtual int version() const;
-      /// Returns a category of the algorithm. A default implementation is provided
+      /// A default version, chosen if there is no override
+      int defaultVersion() const;
+
+      /// Returns a category of the algorithm.
       virtual const std::string category() const;
 
     private:

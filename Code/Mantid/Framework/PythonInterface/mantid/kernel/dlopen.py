@@ -6,8 +6,32 @@ by default.
 For Mantid this ensures the singleton symbols are wired up correctly
 """
 import sys
+import os
 import platform
 
+#######################################################################
+# Ensure the correct Mantid shared libaries are found when loading the
+# python shared libraries
+#######################################################################
+if sys.platform.startswith('win32'):
+    _var = 'PATH'
+    _sep = ';'
+else:
+    _sep = ':'
+    if sys.platform.startswith('linux'):
+        _var = 'LD_LIBRARY_PATH'
+    elif sys.platform.startswith('darwin'):
+        _var = 'DYLD_LIBRARY_PATH'
+    else: # Give it a go how it is
+        _var = ''
+        _sep = ''
+_oldpath = os.environ[_var]
+os.environ[_var] = os.environ['MANTIDPATH'] + _sep + _oldpath       
+
+#######################################################################
+# Public api
+#######################################################################
+        
 def setup_dlopen():
     """Set the flags for a call to import a shared library
     such that all symbols are imported.
@@ -22,8 +46,8 @@ def setup_dlopen():
     
     Returns the original flags
     """
+    if platform.system() != "Linux": return None
     old_flags = sys.getdlopenflags()
-    if platform.system() != "Linux": return old_flags
     try:
         import DLFCN as dynload
     except:
@@ -43,4 +67,5 @@ def restore_flags(flags):
     """Restores the dlopen flags to those provided,
     usually with the results from a call to setup_dlopen
     """
+    if flags is None: return
     sys.setdlopenflags(flags)

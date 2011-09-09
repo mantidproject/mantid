@@ -4,6 +4,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/pure_virtual.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 
@@ -38,12 +39,7 @@ void export_algorithmHierarchy()
     ;
 
   register_ptr_to_python<boost::shared_ptr<Algorithm> >();
-  class_<Algorithm, bases<IAlgorithm>, boost::noncopyable>("Algorithm", "Base for all algorithms", no_init)
-    ;
-
-  register_ptr_to_python<boost::shared_ptr<AlgorithmWrapper> >();
-  // We change the name because the boost::python framework makes AlgorithmWrapper appear as it is a PythonAlgorithm
-  class_<AlgorithmWrapper, bases<Algorithm>, boost::noncopyable>("PythonAlgorithm", "Base for all Python algorithms")
+  class_<AlgorithmWrapper, bases<IAlgorithm>, boost::noncopyable>("Algorithm", "Base class for all algorithms")
     ;
 }
 

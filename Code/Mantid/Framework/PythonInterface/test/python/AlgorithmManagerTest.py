@@ -2,10 +2,10 @@ import unittest
 
 from mantid.api import algorithm_mgr
 from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, 
-                        PythonAlgorithm, register_algorithm)
+                        register_algorithm)
 import sys
 
-class IsAnAlgorithm(PythonAlgorithm):
+class IsAnAlgorithm(Algorithm):
     def init_(self):
         pass
     
@@ -40,9 +40,8 @@ class AlgorithmManagerTest(unittest.TestCase):
         alg = algorithm_mgr.create_unmanaged("ConvertUnits")
         self.assertTrue(isinstance(alg, Algorithm))
         
-    def test_pyalg_isinstance_of_PythonAlgorithm(self):
+    def test_pyalg_isinstance_of_Algorithm(self):
         alg = IsAnAlgorithm()
-        self.assertTrue(isinstance(alg, PythonAlgorithm))
         self.assertTrue(isinstance(alg, Algorithm))
         self.assertTrue(isinstance(alg, IAlgorithm))
         
