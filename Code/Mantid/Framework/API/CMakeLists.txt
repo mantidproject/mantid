@@ -59,6 +59,7 @@ set ( SRC_FILES
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
 	src/Progress.cpp
+	src/PropertyNexus.cpp
 	src/RefAxis.cpp
 	src/Run.cpp
 	src/Sample.cpp
@@ -165,6 +166,7 @@ set ( INC_FILES
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/Progress.h
+	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
@@ -223,6 +225,7 @@ set ( TEST_FILES
 	test/NumericAxisTest.h
 	test/ParameterReferenceTest.h
 	test/ParameterTieTest.h
+	test/PropertyNexusTest.h
 	test/RunTest.h
 	test/SampleEnvironmentTest.h
 	test/SampleTest.h

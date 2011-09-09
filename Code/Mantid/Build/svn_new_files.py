@@ -28,7 +28,10 @@ def do_list_new_files():
                 good = ("/src/" in filename)
                 
             if filename.endswith(".h"):
-                good = ("/test/" in filename) or ("/inc/" in filename)
+                if filename.endswith("VatesConfig.h"):
+                    good = False
+                else:
+                	good = ("/test/" in filename) or ("/inc/" in filename)
                 
             if filename.endswith(".py"):
                 if filename.endswith("checkin_except.py") or filename.endswith("svn_new_files.py"):

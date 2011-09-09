@@ -32,6 +32,7 @@ def do_checkin(only_this, exclude_this):
                 (".project" in filename) or\
                 ("LoadDAETest.h" in filename) or\
                 ("Mantid.properties" in filename) or\
+                ("VatesConfig.h" in filename) or\
                 ("Scons_Linux.conf" in filename) or\
                 (filename == ".") :
 #                or ("test/runTests.sh" in filename) :
