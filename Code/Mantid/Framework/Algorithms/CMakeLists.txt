@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AddSampleLog.cpp
 	src/AlignDetectors.cpp
 	src/AnyShapeAbsorption.cpp
+	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/BinaryOperation.cpp
 	src/BlendSq.cpp
@@ -167,6 +168,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
+	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BlendSq.h
@@ -329,6 +331,7 @@ set ( TEST_FILES
 	test/AddSampleLogTest.h
 	test/AlignDetectorsTest.h
 	test/AnyShapeAbsorptionTest.h
+	test/ApplyDetailedBalanceTest.h
 	test/ApplyTransmissionCorrectionTest.h
 	test/BinaryOperationTest.h
 	test/BlendSqTest.h
