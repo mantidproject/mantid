@@ -217,6 +217,8 @@ namespace PropertyNexus
     size_t maxlen=0;
     for(size_t i=0;i<values.size();i++)
       if(values[i].size()>maxlen) maxlen=values[i].size();
+    // Increment by 1 to have the 0 terminator
+    maxlen++;
     // Copy into one array
     char* strs=new char[values.size()*maxlen];
     memset(strs, 0, values.size()*maxlen);
