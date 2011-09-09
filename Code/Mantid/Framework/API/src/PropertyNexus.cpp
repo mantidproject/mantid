@@ -221,7 +221,7 @@ namespace PropertyNexus
     char* strs=new char[values.size()*maxlen];
     memset(strs, 0, values.size()*maxlen);
     for(size_t i=0;i<values.size();i++)
-      strncpy(&strs[i*maxlen],values[i].c_str(),values[i].size()+1 /*+1 to get the null terminator */);
+      strncpy(&strs[i*maxlen],values[i].c_str(),values[i].size());
 
     std::vector<int> dims;
     dims.push_back( int(values.size()) );
