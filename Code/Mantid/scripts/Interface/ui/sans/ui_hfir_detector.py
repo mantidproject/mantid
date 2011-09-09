@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Tue Aug 23 06:54:04 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Fri Sep  9 17:54:46 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -94,7 +94,7 @@ class Ui_Frame(object):
         self.scattering_data = QtGui.QRadioButton(self.beam_center_grpbox)
         self.scattering_data.setObjectName("scattering_data")
         self.horizontalLayout_2.addWidget(self.scattering_data)
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem1 = QtGui.QSpacerItem(40, 0, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()

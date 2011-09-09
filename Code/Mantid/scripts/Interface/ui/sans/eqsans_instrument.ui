@@ -1159,7 +1159,7 @@ Values can be selected by hand by checking the boxes below.</string>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="mask_groupbox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -1181,7 +1181,7 @@ Values can be selected by hand by checking the boxes below.</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_4">
+           <widget class="QLabel" name="mask_help_label">
             <property name="font">
              <font>
               <family>Bitstream Charter</family>

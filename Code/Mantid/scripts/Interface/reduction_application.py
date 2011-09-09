@@ -64,7 +64,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self.reduce_button.hide()
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
         self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
+        self.connect(self.save_button, QtCore.SIGNAL("clicked()"), self._save)  
+        self.connect(self.interface_chk, QtCore.SIGNAL("clicked(bool)"), self._interface_choice)  
         
+        self.interface_chk.setChecked(self.general_settings.advanced)
+            
+
         # Of the widgets that are part of the application, one is the ApplicationWindow.
         # The ApplicationWindow will send a shutting_down() signal when quitting,
         # after which we should close this window.
@@ -204,6 +209,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._new()
         self.setup_layout()
 
+    def _interface_choice(self, advanced_ui=None):
+        if advanced_ui is None:
+            advanced_ui = self.general_settings.advanced
+        self.general_settings.advanced = advanced_ui
+        self._new()
+        self.setup_layout()
+    
     def _change_instrument(self):
         """
             Invoke an instrument selection dialog

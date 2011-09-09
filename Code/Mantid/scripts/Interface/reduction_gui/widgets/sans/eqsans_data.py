@@ -113,6 +113,14 @@ class DataSetsWidget(BaseWidget):
             self._content.bck_transmission_edit.hide()
             self._content.bck_dtransmission_edit.hide()
 
+            if not self._settings.advanced:
+                self._content.theta_dep_chk.hide()
+                self._content.bck_theta_dep_chk.hide()
+                self._content.sample_thickness_label.hide()
+                self._content.sample_thickness_edit.hide()
+                self._content.bck_thickness_label.hide()
+                self._content.bck_thickness_edit.hide()
+
         if not self._in_mantidplot:
             self._content.background_plot_button.hide()
             self._content.bck_empty_plot_button.hide()

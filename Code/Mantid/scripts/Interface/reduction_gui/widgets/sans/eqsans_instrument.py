@@ -177,6 +177,15 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.low_tof_label.hide()
             self._summary.high_tof_label.hide()
             
+            if not self._settings.advanced:
+                self._summary.att_scale_factor_label.hide()
+                self._summary.scale_edit.hide()
+                self._summary.mask_groupbox.hide()  
+                self._summary.solid_angle_chk.hide()
+                self._summary.resolution_chk.hide()
+                self._summary.sample_apert_edit.hide()
+                self._summary.sample_apert_label.hide()
+            
         # We need the EQSANS data proxy for a quick load of a file for masking purposes, but
         # we don't want to show the plot button. Turn this off for the moment.
         if True or not self._in_mantidplot:

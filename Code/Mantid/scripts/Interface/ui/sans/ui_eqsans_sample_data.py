@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_sample_data.ui'
 #
-# Created: Tue Aug 23 06:54:04 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Fri Sep  9 17:54:46 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -71,16 +71,16 @@ class Ui_Frame(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_7)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.label = QtGui.QLabel(self.scrollAreaWidgetContents_2)
+        self.sample_thickness_label = QtGui.QLabel(self.scrollAreaWidgetContents_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setMinimumSize(QtCore.QSize(175, 0))
-        self.label.setMaximumSize(QtCore.QSize(175, 16777215))
-        self.label.setObjectName("label")
-        self.horizontalLayout.addWidget(self.label)
+        sizePolicy.setHeightForWidth(self.sample_thickness_label.sizePolicy().hasHeightForWidth())
+        self.sample_thickness_label.setSizePolicy(sizePolicy)
+        self.sample_thickness_label.setMinimumSize(QtCore.QSize(175, 0))
+        self.sample_thickness_label.setMaximumSize(QtCore.QSize(175, 16777215))
+        self.sample_thickness_label.setObjectName("sample_thickness_label")
+        self.horizontalLayout.addWidget(self.sample_thickness_label)
         spacerItem2 = QtGui.QSpacerItem(78, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem2)
         self.sample_thickness_edit = QtGui.QLineEdit(self.scrollAreaWidgetContents_2)
@@ -466,7 +466,7 @@ class Ui_Frame(object):
         self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_thickness_label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_label.setText(QtGui.QApplication.translate("Frame", "Sample direct beam data file", None, QtGui.QApplication.UnicodeUTF8))

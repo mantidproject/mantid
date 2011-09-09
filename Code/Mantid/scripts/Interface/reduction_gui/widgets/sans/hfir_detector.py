@@ -89,6 +89,20 @@ class DetectorWidget(BaseWidget):
             self._content.sensitivity_dark_file_edit.deleteLater()
             self._content.sensitivity_dark_browse_button.deleteLater()
             self._content.sensitivity_dark_plot_button.deleteLater()
+            
+        if not self._settings.debug and not self._settings.advanced:
+            self._content.flood_center_grpbox.hide()
+            self._content.direct_beam.setChecked(True)
+            self._content.direct_beam.hide()
+            self._content.scattering_data.hide()
+            self._content.beam_radius_edit.hide()
+            self._content.beam_radius_label.hide()
+            self._content.min_sensitivity_edit.hide()
+            self._content.max_sensitivity_edit.hide()
+            self._content.sensitivity_range_label.hide()
+            self._content.sensitivity_min_label.hide()
+            self._content.sensitivity_max_label.hide()
+            
 
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)
@@ -107,12 +121,19 @@ class DetectorWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
+        popup_warning = ""
         # Beam finder
         self._content.x_pos_edit.setText(QtCore.QString("%6.4f" % state.x_position))
         self._content.y_pos_edit.setText(QtCore.QString("%6.4f" % state.y_position))
         self._content.use_beam_finder_checkbox.setChecked(state.use_finder)
         self._content.beam_data_file_edit.setText(QtCore.QString(state.beam_file))
         self._content.beam_radius_edit.setText(QtCore.QString(str(state.beam_radius)))
+        
+        if not self._settings.debug and not self._settings.advanced and not state.use_direct_beam:
+            # Warn the user if we're about to set an option that is not seen!
+            popup_warning += "The reduction you are loading has advanced options for finding the beam center.\n"
+            popup_warning += "Use the advanced interface to see all option. Those options will now be skipped."
+            state.use_direct_beam = True
         
         self._content.direct_beam.setChecked(state.use_direct_beam)
         self._content.scattering_data.setChecked(not state.use_direct_beam)
@@ -129,6 +150,12 @@ class DetectorWidget(BaseWidget):
         if not self._use_sample_dc:
             self._content.sensitivity_dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
         
+        if not self._settings.debug and not self._settings.advanced and not state.use_sample_beam_center:
+            # Warn the user if we're about to set an option that is not seen!
+            popup_warning += "The reduction you are loading has advanced options for the flood field beam center.\n"
+            popup_warning += "Use the advanced interface to see all option. Those options will now be skipped."
+            state.use_sample_beam_center = True
+        
         self._content.use_sample_center_checkbox.setChecked(state.use_sample_beam_center)
         self._content.x_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_x_position))
         self._content.y_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_y_position))
@@ -142,6 +169,9 @@ class DetectorWidget(BaseWidget):
         
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
+        
+        if len(popup_warning)>0:
+            QtGui.QMessageBox.warning(self, "Turn ON advanced interface", popup_warning)
         
     def get_state(self):
         """

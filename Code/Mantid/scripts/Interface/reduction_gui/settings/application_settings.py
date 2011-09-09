@@ -7,6 +7,7 @@ class GeneralSettings(QtCore.QObject):
     """
     data_path = '.'
     debug = False
+    advanced = True
     last_data_ws = ''
     last_file = ''
     instrument_name = ''
@@ -38,6 +39,8 @@ class GeneralSettings(QtCore.QObject):
         settings.setValue("general_data_path", last_dir)
         debug_mode = QtCore.QVariant(self.debug)
         settings.setValue("debug_mode", debug_mode)
+        advanced_mode = QtCore.QVariant(self.advanced)
+        settings.setValue("advanced_mode", advanced_mode)
         
     def from_settings(self, settings):
         """
@@ -46,5 +49,6 @@ class GeneralSettings(QtCore.QObject):
         """
         self.data_path = unicode(settings.value("general_data_path", QtCore.QVariant('.')).toString())
         self.debug = settings.value("debug_mode", QtCore.QVariant('false')).toBool()
+        self.advanced = settings.value("advanced_mode", QtCore.QVariant('true')).toBool()
         self.instrument_name = unicode(settings.value("instrument_name", QtCore.QVariant('.')).toString())
         
