@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/lexical_cast.hpp>
+#include "MantidAPI/PropertyNexus.h"
 
 namespace Mantid
 {
@@ -336,6 +337,61 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     return m_goniometer.getR();
   }
 
+
+
+
+  //--------------------------------------------------------------------------------------------
+  /** Save the object to an open NeXus file.
+   * @param file :: open NeXus file
+   * @param group :: name of the group to create
+   */
+  void Run::saveNexus(::NeXus::File * file, const std::string & group) const
+  {
+    file->makeGroup(group, "NXgroup", 1);
+    file->putAttr("version", 1);
+
+    // Save all the properties as NXlog
+    std::vector<Property *> props = m_manager.getProperties();
+    for (size_t i=0; i<props.size(); i++)
+    {
+      Property * prop = props[i];
+      if (prop)
+        PropertyNexus::saveProperty(file, prop);
+    }
+    file->closeGroup();
+  }
+
+  //--------------------------------------------------------------------------------------------
+  /** Load the object from an open NeXus file.
+   * @param file :: open NeXus file
+   * @param group :: name of the group to open. Empty string to NOT open a group, but
+   * load any NXlog in the current open group.
+   */
+  void Run::loadNexus(::NeXus::File * file, const std::string & group)
+  {
+    if (!group.empty()) file->openGroup(group, "NXgroup");
+
+    file->initGroupDir();
+    std::pair<std::string, std::string> name_class = file->getNextEntry();
+    while (name_class.first != "NULL")
+    {
+      // Only open NXlog types. Skip all others
+      if (name_class.second == "NXlog")
+      {
+        Property * prop = PropertyNexus::loadProperty(file, name_class.first);
+        if (prop)
+        {
+          if (m_manager.existsProperty(prop->name() ))
+            m_manager.removeProperty(prop->name() );
+          m_manager.declareProperty(prop);
+        }
+      }
+      // Go to next one
+      name_class = file->getNextEntry();
+    }
+
+    if (!group.empty()) file->closeGroup();
+  }
 
 } //API namespace
 

@@ -8,11 +8,13 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidNexusCPP/NexusTestHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
+using Mantid::NexusCPP::NexusTestHelper;
 
 // Helper class
 namespace
@@ -160,6 +162,44 @@ public:
     V3D rot = r * V3D(-1,0,0);
     TS_ASSERT_EQUALS( rot, V3D(0, -sqrt(0.5), sqrt(0.5)));
   }
+
+
+  /** Save and load to NXS file */
+  void test_nexus()
+  {
+    NexusTestHelper th(false);
+    th.createFile("RunTest.nxs");
+
+    Run run1;
+    AddTSPEntry(run1, "double_series", 45.0);
+    run1.addProperty( new PropertyWithValue<int>("int_val", 1234) );
+    run1.addProperty( new PropertyWithValue<std::string>("string_val", "help_im_stuck_in_a_log_file") );
+    run1.addProperty( new PropertyWithValue<double>("double_val", 5678.9) );
+
+    run1.saveNexus(th.file, "logs");
+    th.file->openGroup("logs", "NXgroup");
+    th.file->makeGroup("junk_to_ignore", "NXmaterial");
+    th.file->makeGroup("more_junk_to_ignore", "NXsample");
+
+    // ---- Now re-load the same and compare ------
+    th.reopenFile();
+    Run run2;
+    run2.loadNexus(th.file, "logs");
+    TS_ASSERT( run2.hasProperty("double_series") );
+    TS_ASSERT( run2.hasProperty("int_val") );
+    TS_ASSERT( run2.hasProperty("string_val") );
+    TS_ASSERT( run2.hasProperty("double_val") );
+
+    // Reload without opening the group (for backwards-compatible reading of old files)
+    Run run3;
+    th.file->openGroup("logs", "NXgroup");
+    run3.loadNexus(th.file, "");
+    TS_ASSERT( run3.hasProperty("double_series") );
+    TS_ASSERT( run3.hasProperty("int_val") );
+    TS_ASSERT( run3.hasProperty("string_val") );
+    TS_ASSERT( run3.hasProperty("double_val") );
+  }
+
 
 };
 

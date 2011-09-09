@@ -7,6 +7,7 @@
 #include "MantidKernel/TimeSplitter.h"
 #include <vector>
 #include "MantidKernel/Matrix.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 
 namespace Mantid
@@ -138,6 +139,9 @@ namespace Mantid
        */
       void removeLogData(const std::string &name) { return removeProperty(name); }
       //@}
+
+      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void loadNexus(::NeXus::File * file, const std::string & group);
 
     private:
       /// The number of properties that are summed when two workspaces are summed
