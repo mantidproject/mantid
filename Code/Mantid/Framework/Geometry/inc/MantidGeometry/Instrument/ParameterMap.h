@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <typeinfo>
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -239,6 +240,10 @@ namespace Geometry
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
     ///Attempts to retrieve a bounding box from the cache
     bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
+
+    void saveNexus(::NeXus::File * file, const std::string & group) const;
+//    void loadNexus(::NeXus::File * file, const std::string & group, Instrument_const_sptr instr);
+
 
   private:
     ///Assignment operator

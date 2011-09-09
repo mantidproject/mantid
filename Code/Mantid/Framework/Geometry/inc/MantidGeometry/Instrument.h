@@ -196,6 +196,10 @@ namespace Mantid
       void getInstrumentParameters(double & l1, Kernel::V3D & beamline,
           double & beamline_norm, Kernel::V3D & samplePos) const;
 
+      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void loadNexus(::NeXus::File * file, const std::string & group);
+
+
     private:
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);

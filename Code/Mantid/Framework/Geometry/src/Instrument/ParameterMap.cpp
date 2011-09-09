@@ -647,6 +647,77 @@ namespace Mantid
       g_log.error(str);
     }
 
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Save the object to an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to create
+     */
+    void ParameterMap::saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXnote", true);
+      file->putAttr("version", 1);
+      file->writeData("author", "");
+      file->writeData("date", Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+      file->writeData("description", "A string representation of the parameter map. The format is either: |detID:id-value;param-type;param-name;param-value| for a detector or  |comp-name;param-type;param-name;param-value| for other components.");
+      file->writeData("type", "text/plain");
+      std::string s = this->asString();
+      file->writeData("data", s);
+      file->closeGroup();
+    }
+//
+//    //--------------------------------------------------------------------------------------------
+//    /** Load the object from an open NeXus file.
+//     * @param file :: open NeXus file
+//     * @param group :: name of the group to open
+//     * @param instr :: the BASE instrument for the workspace.
+//     */
+//    void ParameterMap::loadNexus(::NeXus::File * file, const std::string & group, Instrument_const_sptr instr)
+//    {
+//      file->openGroup(group, "NXnote");
+//      std::string details;
+//      file->readData("data", details);
+//      file->closeGroup();
+//      if (details.size() <= 1) return;
+//
+//      // Split the string that was made by asString()
+//      int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+//      options += Poco::StringTokenizer::TOK_TRIM;
+//      Poco::StringTokenizer splitter(details, "|", options);
+//
+//      Poco::StringTokenizer::Iterator iend = splitter.end();
+//      for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
+//      {
+//        Poco::StringTokenizer tokens(*itr, ";");
+//        if( tokens.count() != 4 ) continue;
+//        std::string comp_name = tokens[0];
+//        const Geometry::IComponent* comp = 0;
+//        if (comp_name.find("detID:") != std::string::npos)
+//        {
+//          int detID = atoi(comp_name.substr(6).c_str());
+//          comp = instr->getDetector(detID).get();
+//          if (!comp)
+//          {
+//            g_log.warning()<<"Cannot find detector "<<detID<<'\n';
+//            continue;
+//          }
+//        }
+//        else
+//        {
+//          comp = instr->getComponentByName(comp_name).get();
+//          if (!comp)
+//          {
+//            g_log.warning()<<"Cannot find component "<<comp_name<<'\n';
+//            continue;
+//          }
+//        }
+//        if( !comp ) continue;
+//        this->add(tokens[1], comp, tokens[2], tokens[3]);
+//      }
+//    }
+
+
   } // Namespace Geometry
 } // Namespace Mantid
 

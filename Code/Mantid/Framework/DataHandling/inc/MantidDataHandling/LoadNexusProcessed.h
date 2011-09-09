@@ -8,6 +8,7 @@
 #include "MantidAPI/IDataFileChecker.h"
 
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -147,6 +148,9 @@ namespace Mantid
       int64_t m_spec_min;
       /// The value of the spectrum_max property
       int64_t m_spec_max;
+
+      // C++ interface to the NXS file
+      ::NeXus::File * cppFile;
     };
 	/// to sort the algorithmhistory vector
 	bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1, Mantid::NeXus::NXClassInfo elem2);

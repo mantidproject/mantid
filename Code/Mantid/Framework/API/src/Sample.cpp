@@ -353,8 +353,9 @@ namespace Mantid
     /** Load the object from an open NeXus file.
      * @param file :: open NeXus file
      * @param group :: name of the group to open
+     * @return the version tag of the sample group
      */
-    void Sample::loadNexus(::NeXus::File * file, const std::string & group)
+    int Sample::loadNexus(::NeXus::File * file, const std::string & group)
     {
       file->openGroup(group, "NXsample");
 
@@ -406,13 +407,20 @@ namespace Mantid
         }
       }
 
-      // Legacy info from RAW file (I think)
-      file->readData("geom_id", m_geom_id);
-      file->readData("geom_thickness", m_thick);
-      file->readData("geom_height", m_height);
-      file->readData("geom_width", m_width);
+      try
+      {
+        // Legacy info from RAW file (I think)
+        file->readData("geom_id", m_geom_id);
+        file->readData("geom_thickness", m_thick);
+        file->readData("geom_height", m_height);
+        file->readData("geom_width", m_width);
+      }
+      catch (...)
+      { /* Very old files don't have them. Ignore. */ }
 
       file->closeGroup();
+
+      return version;
     }
 
 

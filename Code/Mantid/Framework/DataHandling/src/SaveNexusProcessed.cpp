@@ -199,14 +199,8 @@ namespace DataHandling
 
       // Save the sample object
       matrixWorkspace->sample().saveNexus(cppFile, "sample");
-      cppFile->openGroup("sample", "NXsample");
-
-      if( nexusFile->writeNexusSampleLogs(matrixWorkspace->run()) != 0 )
-      {
-        g_log.error("Failed to write NXsample");
-        throw Exception::FileError("Failed to write NXsample", m_filename);
-      }
-      cppFile->closeGroup();
+      // Save the logs
+      matrixWorkspace->run().saveNexus(cppFile, "logs");
       prog_init.reportIncrement(1, "Writing sample");
 
       const int numberOfHist = static_cast<int>(matrixWorkspace->getNumberHistograms());

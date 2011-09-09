@@ -7,8 +7,10 @@
 #include <vector>
 
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/NexusTestHelper.h"
 
 using Mantid::Kernel::V3D;
+using Mantid::Kernel::NexusTestHelper;
 
 class V3DTest : public CxxTest::TestSuite
 {
@@ -374,6 +376,18 @@ public:
     V3D b;
     b.fromString("4 5 6");
     TS_ASSERT_EQUALS( b, V3D(4,5,6) );
+  }
+
+  void test_nexus()
+  {
+    NexusTestHelper th(true);
+    th.createFile("V3DTest.nxs");
+    V3D a(1,2,3);
+    a.saveNexus(th.file, "vector");
+    th.reopenFile();
+    V3D b;
+    b.loadNexus(th.file, "vector");
+    TS_ASSERT_EQUALS( a, b);
   }
 
 };

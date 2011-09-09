@@ -227,6 +227,8 @@ namespace API
   void ExperimentInfo::saveNexus(::NeXus::File * file, const std::string & /*group*/) const
   {
     m_sample->saveNexus(file, "sample");
+    m_run->saveNexus(file, "logs");
+    // TODO: Parameter map, instrument.
   }
 
   //--------------------------------------------------------------------------------------------
@@ -234,9 +236,10 @@ namespace API
    * @param file :: open NeXus file
    * @param group :: name of the group to open
    */
-  void ExperimentInfo::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/)
+  void ExperimentInfo::loadNexus(::NeXus::File * file, const std::string & /*group*/)
   {
-    //m_sample->loadNexus(file, "sample");
+    m_sample.access().loadNexus(file, "sample");
+    m_run.access().loadNexus(file, "logs");
   }
 
 

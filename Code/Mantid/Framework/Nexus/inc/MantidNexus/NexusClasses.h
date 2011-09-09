@@ -122,9 +122,9 @@ namespace Mantid
       std::string name()const;
       /// Attributes
       NXAttributes attributes;
-    protected:
+      /// Nexus file id
       NXhandle m_fileID;
-      ///< Nexus file id
+    protected:
       std::string m_path;     ///< Keeps the absolute path to the object
       bool m_open;            ///< Set to true if the object has been open
     private:

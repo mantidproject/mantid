@@ -378,7 +378,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     std::pair<std::string, std::string> name_class = file->getNextEntry();
     while (name_class.first != "NULL")
     {
-      // Only open NXlog types. Skip all others
+      // NXLog types are the main one.
       if (name_class.second == "NXlog")
       {
         Property * prop = PropertyNexus::loadProperty(file, name_class.first);
@@ -394,11 +394,29 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         // Goniometer class
         m_goniometer.loadNexus(file, name_class.first);
       }
+      else if (name_class.first == "proton_charge")
+      {
+        // Old files may have a proton_charge field, single value (not even NXlog)
+        double charge;
+        file->readData("proton_charge", charge);
+        this->setProtonCharge(charge);
+      }
+
       // Go to next one
       name_class = file->getNextEntry();
     }
-
     if (!group.empty()) file->closeGroup();
+
+
+    if( this->hasProperty("proton_charge") )
+    {
+      // Old files may have a proton_charge field, single value.
+      // Modern files (e.g. SNS) have a proton_charge TimeSeriesProperty.
+      PropertyWithValue<double> *charge_log = dynamic_cast<PropertyWithValue<double>*>(this->getProperty("proton_charge"));
+      if (charge_log)
+      {  this->setProtonCharge(boost::lexical_cast<double>(charge_log->value()));
+      }
+    }
   }
 
 } //API namespace

@@ -884,6 +884,33 @@ namespace Mantid
     }
 
 
+    //--------------------------------------------------------------------------------------------
+    /** Save the instrument to an open NeXus file.
+     * This saves the name, valid date, source xml file name, and the full XML text
+     * of the definition file.
+     * It also saves the parameter map, in the case of a parametrized instrument.
+     *
+     * @param file :: open NeXus file
+     * @param group :: name of the group to create
+     */
+    void Instrument::saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXinstrument", 1);
+      file->putAttr("version", 1);
+      file->closeGroup();
+    }
+
+    //--------------------------------------------------------------------------------------------
+    /** Load the object from an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to open
+     */
+    void Instrument::loadNexus(::NeXus::File * file, const std::string & group)
+    {
+      file->openGroup(group, "NXinstrument");
+      file->closeGroup();
+    }
+
 
   } // namespace Geometry
 } // Namespace Mantid

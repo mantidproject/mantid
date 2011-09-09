@@ -21,6 +21,7 @@
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -109,6 +110,13 @@ void LoadNexusProcessed::exec()
 
   //Throws an approriate exception if there is a problem with file access
   NXRoot root(getPropertyValue("Filename"));
+
+  // "Open" the same file but with the C++ interface
+  cppFile = new ::NeXus::File(root.m_fileID);
+//  cppFile->openGroup("mantid_workspace_1", "NXentry");
+//  std::cout << "About to open \n";
+//  cppFile->openGroup("sample", "NXsample");
+//  std::cout << "opened! \n";
 
   //Find out how many first level entries there are
   int64_t nperiods = static_cast<int64_t>(root.groups().size());
@@ -646,8 +654,25 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   }
 
   //Get information from all but data group
+
   progress(progressStart+0.05*progressRange,"Reading the sample details...");
-  readSampleGroup(mtd_entry, local_workspace);
+  // Hop to the right point
+  cppFile->openPath(mtd_entry.path());
+  int sampleVersion = local_workspace->mutableSample().loadNexus(cppFile, "sample");
+  if (sampleVersion == 0)
+  {
+    // Old-style (before Sep-9-2011) NXS processed
+    // sample field contains both the logs and the sample details
+    cppFile->openGroup("sample", "NXsample");
+    local_workspace->mutableRun().loadNexus(cppFile, "");
+    cppFile->closeGroup();
+  }
+  else
+  {
+    // Newer style: separate "logs" field for the Run object
+    progress(progressStart+0.06*progressRange,"Reading the sample logs...");
+    local_workspace->mutableRun().loadNexus(cppFile, "logs");
+  }
 
   progress(progressStart+0.1*progressRange,"Reading the instrument details...");
   readInstrumentGroup(mtd_entry, local_workspace);

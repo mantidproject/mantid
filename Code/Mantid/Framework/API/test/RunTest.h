@@ -179,6 +179,7 @@ public:
     AddTSPEntry(run1, "phi", 12.3);
     AddTSPEntry(run1, "chi", 45.6);
     AddTSPEntry(run1, "omega", 78.9);
+    AddTSPEntry(run1, "proton_charge", 78.9);
 
     run1.saveNexus(th.file, "logs");
     th.file->openGroup("logs", "NXgroup");
@@ -204,6 +205,21 @@ public:
     TS_ASSERT( run3.hasProperty("int_val") );
     TS_ASSERT( run3.hasProperty("string_val") );
     TS_ASSERT( run3.hasProperty("double_val") );
+  }
+
+  /** Check for loading the old way of saving proton_charge */
+  void test_legacy_nexus()
+  {
+    NexusTestHelper th(false);
+    th.createFile("RunTest.nxs");
+    th.file->makeGroup("sample", "NXsample", 1);
+    th.file->writeData("proton_charge", 1.234);
+    th.reopenFile();
+    th.file->openGroup("sample", "NXsample");
+    Run run3;
+    run3.loadNexus(th.file, "");
+
+    TS_ASSERT_DELTA( run3.getProtonCharge(), 1.234, 1e-5 );
   }
 
 
