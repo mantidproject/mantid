@@ -488,13 +488,16 @@ void MantidUI::showVatesSimpleInterface()
 
     QMdiSubWindow *usr_win = new QMdiSubWindow;
     usr_win->setAttribute(Qt::WA_DeleteOnClose);
-    MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui(usr_win, wsName);
+    MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
     if (vsui)
     {
-      vsui->setWindowTitle("Vates Simple Interface");
+      vsui->setParent(usr_win);
+      usr_win->setWindowTitle("Vates Simple Interface");
+      vsui->setupPluginMode();
       //m_appWindow->setGeometry(usr_win, vsui);
       usr_win->setWidget(vsui);
       usr_win->widget()->show();
+      vsui->renderWorkspace(wsName);
       //vsui->show();
     }
     else
