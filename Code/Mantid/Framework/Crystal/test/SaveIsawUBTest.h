@@ -134,7 +134,7 @@ void test_exec()
   {
     TS_ASSERT( F1.good() );
     TS_ASSERT( F2.good() );
-    //remove( File2.c_str());
+    remove( File2.c_str());
     return;
   }
 
@@ -155,7 +155,7 @@ void test_exec()
     Mantid::Kernel::Strings::readToEndOfLine(F2,true);
   }
 
-   //remove( File2.c_str());
+   remove( File2.c_str());
 }
 };
 
