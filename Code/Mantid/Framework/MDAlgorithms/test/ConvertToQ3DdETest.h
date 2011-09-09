@@ -34,7 +34,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("should be 3 propeties here",3,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 4 propeties",4,(size_t)(pAlg->getProperties().size()));
 }
 
 void testExecThrow(){
@@ -48,6 +48,7 @@ void testExecThrow(){
 
 
 }
+
 void testWithExistingLatticeTrowsLowEnergy(){
     // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
@@ -59,7 +60,24 @@ void testWithExistingLatticeTrowsLowEnergy(){
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "2."));
 
-   // TSM_ASSERT_THROWS("Should throw as input lower then obtained",pAlg->execute(),std::invalid_argument);
+    pAlg->execute();
+    TSM_ASSERT("Should be not-successful as input energy was lower then obtained",!pAlg->isExecuted());
+
+}
+
+void testExecFine(){
+    // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+ 
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
+
+    pAlg->execute();
+    TSM_ASSERT("Should be successful ",pAlg->isExecuted());
 
 }
 

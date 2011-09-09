@@ -58,7 +58,9 @@ namespace PhysicalConstants
   
   /** 1 meV in wavenumber (cm<SUP>-1</SUP>). Taken from <http://physics.nist.gov/cuu/Constants> on 02/04/2008. */
   static const double meVtoWavenumber = 8.06554465;
-	
+  /**  K-neutron[m^-10] = sqrt(E_neutron[meV]/E_transtormation[mEv]); [G.L. Squires, 1978] may be 2.078 is more accurate?*/
+  static const double E_mev_toNeutronWavenumberSq=2.072; //[meV*Angstrom^2]
+
   /**  Muon lifetime. Taken from MuLan experiment on 08/12/2008. */
   static const double MuonLifetime = 2.197019e-6;
 

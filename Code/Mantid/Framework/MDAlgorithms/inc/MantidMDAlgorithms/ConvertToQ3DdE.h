@@ -3,8 +3,10 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidAPI/IMDEventWorkspace.h"
+
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+
 #include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -40,6 +42,18 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+  /** the lightweight class below contain 3D uint vectors, pointing to the positions of the detectors
+      This vector used to preprocess and catch the partial positions of the detectors in Q-space
+      to avoid repetative calculations, and (possibly) to write these data as part of the physical compression scheme
+      in a very common situation when the physical instrument does not change in all runs, contributed into MD workspace
+   */
+  struct preprocessed_detectors{
+    std::vector<Kernel::V3D>  det_dir; // unit vector pointing from the sample to the detector;
+    std::vector<size_t>       det_id;   // the detector ID;
+    //
+    bool is_defined(void)const{return det_dir.size()>0;}
+    bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
+  };
   class DLLExport ConvertToQ3DdE  : public API::Algorithm
   {
   public:
@@ -68,6 +82,11 @@ namespace MDAlgorithms
 
   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
+
+    // the variable which keeps preprocessed positions of the detectors;
+    static preprocessed_detectors det_loc;
+    // the function, which calculates these positions;
+    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
 
    template <class T>
    void convertEventList(int workspaceIndex);

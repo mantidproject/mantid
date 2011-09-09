@@ -12,7 +12,6 @@
 #include "MantidAPI/Progress.h"
 
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -32,12 +31,15 @@ namespace MDAlgorithms
 {
 // logger for loading workspaces  
    Kernel::Logger& ConvertToQ3DdE::convert_log =Kernel::Logger::get("MD-Algorithms");
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(ConvertToQ3DdE)
+
+// the variable describes the locations of the preprocessed detectors, which can be stored and reused it the algorithm runs for more once;
+preprocessed_detectors ConvertToQ3DdE::det_loc;
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ConvertToQ3DdE)
   
-  /// Sets documentation strings for this algorithm
-  void ConvertToQ3DdE::initDocs()
-  {
+/// Sets documentation strings for this algorithm
+void ConvertToQ3DdE::initDocs()
+{
     this->setWikiSummary("Create a MDEventWorkspace with in the reciprocal space of momentums (Qx, Qy, Qz) and the energy transfer dE from an input transformed to energy workspace. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with in the reciprocal space of momentums (Qx, Qy, Qz) and the energy transfer dE from an input transformed to energy workspace. If the OutputWorkspace exists, then events are added to it.");
     this->setWikiDescription(""
@@ -49,30 +51,30 @@ namespace MDAlgorithms
         "[[CreateMDEventWorkspace]] algorithm first."
         ""
         );
-  }
+}
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  ConvertToQ3DdE::ConvertToQ3DdE()
-  {
-  }
+//----------------------------------------------------------------------------------------------
+/** Constructor
+*/
+ConvertToQ3DdE::ConvertToQ3DdE()
+{
+}
     
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ConvertToQ3DdE::~ConvertToQ3DdE()
-  {
-  }
-   /// MDEvent dimension used 
-  typedef MDEvents::MDEvent<4> MDE;
-  // helper to create empty MDEventWorkspace
-  boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(const std::string dimensionNames[4],const std::string dimensionUnits[4],
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+ConvertToQ3DdE::~ConvertToQ3DdE()
+{
+}
+/// MDEvent dimensions used 
+typedef MDEvents::MDEvent<4> MDE;
+/// helper to create empty MDEventWorkspace woth 4 dimensions 
+boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(const std::string dimensionNames[4],const std::string dimensionUnits[4],
                                                                               const std::vector<double> &dimMin,const std::vector<double> &dimMax)
-  {
+{
 
        boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > ws = 
-           boost::shared_ptr<MDEvents::MDEventWorkspace<MDE, 4> >(new MDEvents::MDEventWorkspace<MDE, 4>());
+       boost::shared_ptr<MDEvents::MDEventWorkspace<MDE, 4> >(new MDEvents::MDEventWorkspace<MDE, 4>());
     
       // Give all the dimensions
       for (size_t d=0; d<4; d++)
@@ -90,13 +92,59 @@ namespace MDAlgorithms
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
       return ws;
-  }
+}
+//
+const double rad2deg = 180.0 / M_PI;
+/// helper function to preprocess the detectors directions
+void 
+ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
+{
 
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void ConvertToQ3DdE::init()
-  {
+    const size_t nHist = inputWS->getNumberHistograms();
+
+    det_loc.det_dir.resize(nHist);
+    det_loc.det_id.resize(nHist);
+     // Loop over the spectra
+   size_t ic(0);
+   for (size_t i = 0; i < nHist; i++){
+
+     Geometry::IDetector_const_sptr spDet;
+     try{
+        spDet= inputWS->getDetector(i);
+     }catch(Kernel::Exception::NotFoundError &){
+        continue;
+     }
+ 
+    // Check that we aren't dealing with monitor...
+    if (spDet->isMonitor())continue;   
+
+     det_loc.det_id[ic] = spDet->getID();
+    // dist     =  spDet->getDistance(*sample);
+     double polar    =  inputWS->detectorTwoTheta(spDet)*rad2deg;
+     double azim     =  spDet->getPhi()*rad2deg;    
+
+     double sPhi=sin(polar);
+     double ez = cos(polar);
+     double ex = sPhi*cos(azim);
+     double ey = sPhi*sin(azim);
+ 
+     det_loc.det_dir[ic].setX(ex);
+     det_loc.det_dir[ic].setY(ey);
+     det_loc.det_dir[ic].setZ(ez);
+
+     ic++;
+   }
+   // 
+   if(ic<nHist){
+       det_loc.det_dir.resize(ic);
+       det_loc.det_id.resize(ic);
+   }
+}
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void ConvertToQ3DdE::init()
+{
       CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
       ws_valid->add(new WorkspaceUnitValidator<>("DeltaE"));
       ws_valid->add(new HistogramValidator<>);
@@ -112,10 +160,12 @@ namespace MDAlgorithms
      minEn->setLower(0);
      declareProperty("EnergyInput",100.,minEn,"The value for the incident energy of the neutrons leaving the source (meV)",Direction::Input);
 
-    //declareProperty(new PropertyWithValue<bool>("KeepTransformedDetectors", true, Direction::Input), "Store the part of the detectors transfromation into reciprocal space to save/reuse .");
+     // this property is mainly for subalgorithms to set-up as they have to identify 
+    declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
+        "Store the part of the detectors transfromation into reciprocal space to save/reuse it later;");
 
  
-  }
+}
 
 
  
@@ -130,7 +180,7 @@ namespace MDAlgorithms
 
      // -------- Input workspace 
     MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
-    Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
+    Workspace2D_sptr inWS2D         = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
 
 
     // get the energy axis
@@ -147,15 +197,16 @@ namespace MDAlgorithms
     // get and check input energy (TODO: should energy be moved into Run?)
     double Ei = getProperty("EnergyInput");
     if (E_max >Ei){
-        convert_log.error()<<"Maximal elergy transferred to matrix="<<E_max<<" exceeds the input energy "<<Ei<<std::endl;
-        throw(std::invalid_argument("Maximal transferred energy exceeds imput energy"));
+        convert_log.error()<<"Maximal elergy transferred to sample eq "<<E_max<<" and exceeds the input energy "<<Ei<<std::endl;
+        throw(std::invalid_argument("Maximal transferred energy exceeds input energy"));
     }
-
+    // the wawe vector of input neutrons;
+    double ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq);
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
     boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > ws  = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDE,4> >( i_out );
 
-    std::string dimensionNames[4] = {"Q_lab_x", "Q_lab_y", "Q_lab_z","DeltaE"};
+    std::string dimensionNames[4] = {"Q_x", "Q_y", "Q_z","DeltaE"};
     if (ws){
       // Check that existing workspace dimensions make sense with the desired one (using the name)
        for(int i=0;i<4;i++){
@@ -174,60 +225,69 @@ namespace MDAlgorithms
         ws = create_empty4DEventWS(dimensionNames,dimensionUnits,dimMin,dimMax);
     }
     ws->splitBox();
+    //BoxController_sptr bc = ws->getBoxController();
+   // if (!bc)
+   //   throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
 
-    //// Initalize the matrix to 3x3 identity
-    //mat = Kernel::Matrix<double>(3,3, true);
+    // copy experiment info into 
+    ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
+    uint16_t runIndex = ws->addExperimentInfo(ExperimentInfo);
 
-    //// ----------------- Handle the type of output -------------------------------------
+    // Initalize the matrix to 3x3 identity
+    mat = Kernel::Matrix<double>(3,3, true);
+    // Set the matrix based on UB etc.
+    Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
+    Kernel::Matrix<double> gon =inWS2D->mutableRun().getGoniometerMatrix();
+    // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
+    mat = gon * ub;
 
-    //std::string dimensionNames[3] = {"Q_lab_x", "Q_lab_y", "Q_lab_z"};
-    //std::string dimensionUnits = "Angstroms^-1";
-    //if (OutputDimensions == "Q (sample frame)")
-    //{
-    //  // Set the matrix based on goniometer angles
-    //  mat = in_ws->mutableRun().getGoniometerMatrix();
-    //  // But we need to invert it, since we want to get the Q in the sample frame.
-    //  mat.Invert();
-    //  // Names
-    //  dimensionNames[0] = "Q_sample_x";
-    //  dimensionNames[1] = "Q_sample_y";
-    //  dimensionNames[2] = "Q_sample_z";
-    //}
-    //else if (OutputDimensions == "HKL")
-    //{
-    //  // Set the matrix based on UB etc.
-    //  Kernel::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
-    //  Kernel::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
-    //  // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
-    //  mat = gon * ub;
-    //  dimensionNames[0] = "H";
-    //  dimensionNames[1] = "K";
-    //  dimensionNames[2] = "L";
-    //  dimensionUnits = "lattice";
-    //}
-    //// Q in the lab frame is the default, so nothing special to do.
+    const size_t numSpec  = inWS2D->getNumberHistograms();
+    const size_t specSize = inWS2D->blocksize();
+    const bool isHist     = inWS2D->isHistogramData();
 
+    // Initialise the progress reporting object
+    Progress progress(this,0.0,1.0,numSpec);
+   // Try to check if one should use preprocessed detector positions or try to calculate the new one
+    bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
+    if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
+ 
+    // allocate the events buffer;
+      std::vector<MDE> out_events;
+      out_events.reserve(specSize);
 
-//
-//    // ------------------- Create the output workspace if needed ------------------------
-//    if (!ws)
-//    {
+      // Loop over every cell in the workspace, calling the abstract correction function
+     // PARALLEL_FOR1(inWS2D)
+      for (int64_t i = 0; i < int64_t(numSpec); ++i)
+      {
+   //     PARALLEL_START_INTERUPT_REGION
+        const MantidVec& E_transfer = inWS2D->readX(i);
+        const MantidVec& Y = inWS2D->readY(i);
+        const MantidVec& E = inWS2D->readE(i);
+    
+        for (size_t j = 0; j < specSize; ++j)
+        {
+            double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
+            double k_tr = sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+   
+            double  ex = det_loc.det_dir[i].X();
+            double  ey = det_loc.det_dir[i].Y();
+            double  ez = det_loc.det_dir[i].Z();
+            double  qz  = ki - ez*k_tr;
+            double  qy  = -ey*k_tr;
+            double  qx  = -ex*k_tr;
 
-//    }
-//
+          //performUnaryOperation(XIn,Y[j],E[j],YOut[j],EOut[j]);
+        }
+        
+        progress.report();
+ //       PARALLEL_END_INTERUPT_REGION
+      }
 
-//
-//    if (!ws)
-//      throw std::runtime_error("Error creating a 3D MDEventWorkspace!");
-//
-//    BoxController_sptr bc = ws->getBoxController();
-//    if (!bc)
-//      throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
-//
-//    // Copy ExperimentInfo (instrument, run, sample) to the output WS
-//    ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());
-//    uint16_t runIndex = ws->addExperimentInfo(ei);
-//    UNUSED_ARG(runIndex);
+  //    PARALLEL_CHECK_INTERUPT_REGION
+
+    // Save the output
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+
 //
 //
 //    // ------------------- Cache values that are common for all ---------------------------
@@ -332,8 +392,6 @@ namespace MDAlgorithms
 //    }
 //
 //
-//    // Save the output
-//    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
   }
 
  ////----------------------------------------------------------------------------------------------
