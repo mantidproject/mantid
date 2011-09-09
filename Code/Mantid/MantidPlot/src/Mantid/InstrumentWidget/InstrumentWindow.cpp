@@ -342,16 +342,26 @@ void InstrumentWindow::spectraInfoDialog()
   const int ndets = static_cast<int>(m_selectedDetectors.size());
   if( ndets == 1 )
   {
-    info = QString("Workspace index: %1\nDetector ID: %2").arg(
-      QString::number(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors.front())),
-      QString::number(m_selectedDetectors.front()));
+    QString wsIndex;
+    try {
+      wsIndex = QString::number(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors.front()));
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      // Detector doesn't have a workspace index relating to it
+      wsIndex = "None";
+    }
+    info = QString("Workspace index: %1\nDetector ID: %2").arg(wsIndex,
+                                               QString::number(m_selectedDetectors.front()));
   }
   else
   {
     std::vector<size_t> wksp_indices;
     for(int i = 0; i < m_selectedDetectors.size(); ++i)
     {
-      wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+      try {
+        wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+      } catch (Mantid::Kernel::Exception::NotFoundError) {
+        continue; // Detector doesn't have a workspace index relating to it
+      }
     }
     info = QString("Index list size: %1\nDetector list size: %2").arg(QString::number(wksp_indices.size()), QString::number(ndets));
   }
@@ -368,11 +378,11 @@ void InstrumentWindow::plotSelectedSpectra()
   std::set<int> indices;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    indices.insert(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-  }
-  if (indices.count(-1) > 0)
-  {
-    indices.erase(-1);
+    try {
+      indices.insert(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      continue; // Detector doesn't have a workspace index relating to it
+    }
   }
   emit plotSpectra(m_workspaceName, indices);
 }
@@ -386,7 +396,11 @@ void InstrumentWindow::showDetectorTable()
   std::vector<int> indexes;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    try {
+      indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      continue; // Detector doesn't have a workspace index relating to it
+    }
   }
   emit createDetectorTable(m_workspaceName, indexes, true);
 }
@@ -428,7 +442,11 @@ void InstrumentWindow::groupDetectors()
   std::vector<int> wksp_indices;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    try {
+      wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      continue; // Detector doesn't have a workspace index relating to it
+    }
   }
 
   QString inputWS = m_workspaceName;
@@ -450,7 +468,11 @@ void InstrumentWindow::maskDetectors()
   std::vector<int> wksp_indices;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    try {
+      wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      continue; // Detector doesn't have a workspace index relating to it
+    }
   }
 
   QString inputWS = m_workspaceName;

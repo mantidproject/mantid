@@ -13,6 +13,7 @@
 
 #include <QSettings>
 
+using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
@@ -114,9 +115,11 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
 
 Instrument_const_sptr InstrumentActor::getInstrument() const
 {
+  // First see if there is a 'physical' instrument available. Use it if there is.
   Instrument_const_sptr retval = m_workspace->getInstrument()->getPhysicalInstrument();
   if ( ! retval )
   {
+    // Otherwise get hold of the 'main' instrument and use that
     retval = m_workspace->getInstrument();
   }
   return retval;
@@ -140,6 +143,21 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
   }
   // Add line that can never be reached to quiet compiler complaints
   return IDetector_const_sptr();
+}
+
+/** Retrieve the workspace index corresponding to a particular detector
+ *  @param id The detector id
+ *  @returns  The workspace index containing data for this detector
+ *  @throws Exception::NotFoundError If the detector is not represented in the workspace
+ */
+size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
+{
+  Mantid::detid2index_map::const_iterator it = m_id2wi_map->find(id);
+  if ( it == m_id2wi_map->end() )
+  {
+    throw NotFoundError("No workspace index for detector",id);
+  }
+  return it->second;
 }
 
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
@@ -185,10 +203,19 @@ void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
   resetColors();
 }
 
+/** Gives the total signal in the spectrum relating to the given detector
+ *  @param id The detector id
+ *  @return The signal, or -1 if the detector is not represented in the workspace
+ */
 double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
 {
-  size_t i = (*m_id2wi_map)[id];
-  return m_specIntegrs.at(i);
+  try {
+    size_t i = getWorkspaceIndex(id);
+    return m_specIntegrs.at(i);
+  } catch (NotFoundError) {
+    // If the detector is not represented in the workspace
+    return -1.0;
+  }
 }
 
 void InstrumentActor::resetColors()
@@ -216,8 +243,13 @@ void InstrumentActor::update()
 
 GLColor InstrumentActor::getColor(Mantid::detid_t id)const
 {
-  size_t i = (*m_id2wi_map)[id];
-  return m_colors.at(i);
+  try {
+    size_t i = getWorkspaceIndex(id);
+    return m_colors.at(i);
+  } catch (NotFoundError) {
+    // Return the first color if the detector is not represented in the workspace
+    return m_colors.front();
+  }
 }
 
 void InstrumentActor::draw(bool picking)const

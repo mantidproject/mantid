@@ -351,11 +351,18 @@ void InstrumentWindowMaskTab::applyMask()
     QStringList detList;
     foreach(int id,dets)
     {
-      detList << QString::number(m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id));
+      try {
+        detList << QString::number(m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id));
+      } catch (Mantid::Kernel::Exception::NotFoundError) {
+        continue; // Detector doesn't have a workspace index relating to it
+      }
     }
-    QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
-    param_list = param_list.arg(m_instrumentWindow->getWorkspaceName(),detList.join(","));
-    emit executeAlgorithm("MaskDetectors",param_list);
+    if ( !detList.empty() )
+    {
+      QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
+      param_list = param_list.arg(m_instrumentWindow->getWorkspaceName(),detList.join(","));
+      emit executeAlgorithm("MaskDetectors",param_list);
+    }
   }
   clearMask();
   QApplication::restoreOverrideCursor();
@@ -405,8 +412,12 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
       }
       foreach(int id,dets)
       {
-        size_t wi = m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id);
-        outputWS->maskWorkspaceIndex(wi);
+        try {
+          size_t wi = m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id);
+          outputWS->maskWorkspaceIndex(wi);
+        } catch (Mantid::Kernel::Exception::NotFoundError) {
+          continue; // Detector doesn't have a workspace index relating to it
+        }
       }
     }
   }

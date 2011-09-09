@@ -94,7 +94,7 @@ public:
   Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
   const std::vector<Mantid::detid_t>& getAllDetIDs()const{return m_detIDs;}
   GLColor getColor(Mantid::detid_t id)const;
-  size_t getWorkspaceIndex(Mantid::detid_t id)const{return (*m_id2wi_map)[id];}
+  size_t getWorkspaceIndex(Mantid::detid_t id) const;
   double getIntegratedCounts(Mantid::detid_t id)const;
   void update();
   void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
@@ -127,7 +127,7 @@ protected:
   double m_DataMinValue, m_DataMaxValue;
   double m_BinMinValue, m_BinMaxValue;
   boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
-  boost::scoped_ptr<Mantid::detid2index_map> m_id2wi_map;
+  boost::scoped_ptr<const Mantid::detid2index_map> m_id2wi_map;
   mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<GLColor> m_colors; ///< colors in order of workspace indexes
   QString m_currentColorMap;

@@ -234,12 +234,18 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   if (detid >= 0)
   {
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-    Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-    size_t wi = instrActor->getWorkspaceIndex(detid);
+    //Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
     Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
     QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
-    text += "Workspace index: " + QString::number(wi) + '\n';
+    QString wsIndex;
+    try {
+      wsIndex = QString::number(instrActor->getWorkspaceIndex(detid));
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      // Detector doesn't have a workspace index relating to it
+      wsIndex = "None";
+    }
+    text += "Workspace index: " + wsIndex + '\n';
     Mantid::Kernel::V3D pos = det->getPos();
     text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z())  + '\n';
     double r,t,p;
@@ -250,7 +256,9 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     {
       text += "Parent assembly: " + QString::fromStdString(parent->getName()) + '\n';
     }
-    text += "Counts: " + QString::number(instrActor->getIntegratedCounts(detid)) + '\n';
+    const double integrated = instrActor->getIntegratedCounts(detid);
+    const QString counts = integrated == -1.0 ? "N/A" : QString::number(integrated);
+    text += "Counts: " + counts + '\n';
     m_selectionInfoDisplay->setText(text);
   }
   else
@@ -337,7 +345,12 @@ void InstrumentWindowPickTab::plotSingle(int detid)
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  size_t wi = instrActor->getWorkspaceIndex(detid);
+  size_t wi;
+  try {
+    wi = instrActor->getWorkspaceIndex(detid);
+  } catch (Mantid::Kernel::Exception::NotFoundError) {
+    return; // Detector doesn't have a workspace index relating to it
+  }
   const Mantid::MantidVec& x = ws->readX(wi);
   const Mantid::MantidVec& y = ws->readY(wi);
   size_t imin,imax;
@@ -362,7 +375,12 @@ void InstrumentWindowPickTab::plotTube(int detid)
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  size_t wi = instrActor->getWorkspaceIndex(detid);
+  size_t wi;
+  try {
+    wi = instrActor->getWorkspaceIndex(detid);
+  } catch (Mantid::Kernel::Exception::NotFoundError) {
+    return; // Detector doesn't have a workspace index relating to it
+  }
   Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
@@ -385,9 +403,13 @@ void InstrumentWindowPickTab::plotTube(int detid)
         Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
         if (idet)
         {
-          size_t index = instrActor->getWorkspaceIndex(idet->getID());
-          const Mantid::MantidVec& Y = ws->readY(index);
-          std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
+          try {
+            size_t index = instrActor->getWorkspaceIndex(idet->getID());
+            const Mantid::MantidVec& Y = ws->readY(index);
+            std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
+          } catch (Mantid::Kernel::Exception::NotFoundError) {
+            continue; // Detector doesn't have a workspace index relating to it
+          }
         }
       }
       Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
@@ -408,12 +430,16 @@ void InstrumentWindowPickTab::plotTube(int detid)
         Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
         if (idet)
         {
-          const int id = idet->getID();
-          size_t index = instrActor->getWorkspaceIndex(id);
-          x.push_back(id);
-          const Mantid::MantidVec& Y = ws->readY(index);
-          double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
-          ymap[id] = sum;
+          try {
+            const int id = idet->getID();
+            size_t index = instrActor->getWorkspaceIndex(id);
+            x.push_back(id);
+            const Mantid::MantidVec& Y = ws->readY(index);
+            double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
+            ymap[id] = sum;
+          } catch (Mantid::Kernel::Exception::NotFoundError) {
+            continue; // Detector doesn't have a workspace index relating to it
+          }
         }
       }
       if (!x.empty())
