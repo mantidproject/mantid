@@ -226,7 +226,7 @@ namespace PropertyNexus
     std::vector<int> dims;
     dims.push_back( int(values.size()) );
     dims.push_back( int(maxlen) );
-    file->makeData("value", CHAR, dims, true);
+    file->makeData("value", ::NeXus::CHAR, dims, true);
     file->putData( (void*) strs );
     file->closeData();
     saveTimeVector(file, prop);
