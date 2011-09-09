@@ -2,7 +2,6 @@
 #define MANTID_ALGORITHMS_PRECOMPILEDHEADER_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
 //Boost
