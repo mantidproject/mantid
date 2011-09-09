@@ -105,7 +105,7 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
 {
   if(m_presenter == NULL && !m_wsName.empty())
   {
-    m_presenter = new MDEWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDEWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDWorkspace>, m_wsName);
+    m_presenter = new MDEWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDEWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
     if(!m_presenter->canReadFile())
     {
       vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
