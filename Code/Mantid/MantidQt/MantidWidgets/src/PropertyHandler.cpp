@@ -317,7 +317,7 @@ void PropertyHandler::initWorkspace()
           iWorkspace = names.indexOf(QString::fromStdString(wsName));
           if (iWorkspace >= 0)
           {
-            iWorkspaceIndex = ifmw->getWorkspaceIndex();
+            iWorkspaceIndex = static_cast<int>(ifmw->getWorkspaceIndex());
             fnProp->addSubProperty(m_workspaceIndex);
           }
           else
