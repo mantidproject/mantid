@@ -54,6 +54,9 @@ public:
   // testing through Loading IDF_for_UNIT_TESTING5.xml method adjust()
   void testAdjust()
   {
+
+    //system("pause");
+
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
@@ -93,6 +96,22 @@ public:
     TS_ASSERT( !ptrRot->isValid(V3D(1.5,10.0,0.5)) );
     TS_ASSERT( ptrRot->isValid(V3D(0.5,10.0,0.0)) );
     TS_ASSERT( ptrRot->isValid(V3D(-0.5,10.0,0.0)) );
+
+    // nested rotated cuboids
+    ptrRot = i->getDetector(1350);
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,0.0,3.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,4.5,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,4.5,3.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,7.5,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,20.0,5.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,-4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.5,20.0,0.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(-0.5,20.0,0.0)) );
+
   }
 
 };

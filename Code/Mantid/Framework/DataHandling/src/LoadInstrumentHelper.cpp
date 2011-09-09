@@ -464,5 +464,32 @@ Poco::XML::Element* LoadInstrumentHelper::getParentComponent(Poco::XML::Element*
   return pCompElem;
 }
 
+//-----------------------------------------------------------------------------------------------------------------------
+/** get name of location element. Will be the name attribute, or the
+  * parent's name attribute, or the parent's type, if all else fails.
+*
+*  @param pElem ::  Poco::XML element that points to a location element
+*  @return name of location element
+*/
+std::string LoadInstrumentHelper::getNameOfLocationElement(Poco::XML::Element* pElem)
+{
+  Element* pCompElem = LoadInstrumentHelper::getParentComponent(pElem);
+
+  std::string retVal;
+
+  if ( pElem->hasAttribute("name") )
+    retVal = pElem->getAttribute("name");
+  else if ( pCompElem->hasAttribute("name") )
+  {
+    retVal = pCompElem->getAttribute("name");
+  }
+  else
+  {
+    retVal = pCompElem->getAttribute("type");
+  }
+
+  return retVal;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

@@ -139,9 +139,6 @@ namespace Mantid
       void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
                                 std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
-      /// get name of location element
-      std::string getNameOfLocationElement(Poco::XML::Element* pElem);
-
       /// Parse position of facing element to V3D
       Kernel::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
       /// Set facing of comp as specified in XML facing element

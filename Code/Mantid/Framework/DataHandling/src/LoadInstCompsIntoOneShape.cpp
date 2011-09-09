@@ -103,7 +103,6 @@ void LoadInstCompsIntoOneShape::adjust(Poco::XML::Element* pElem, std::map<std::
   std::vector<std::string> allLocationName; // used to check if loc names unique
   for (unsigned long i = 0; i < numLocation; i++)
   {
-
     Element* pLoc = static_cast<Element*>(pNL->item(i));
 
     // The location element is required to be a child of a component element. 
@@ -112,7 +111,7 @@ void LoadInstCompsIntoOneShape::adjust(Poco::XML::Element* pElem, std::map<std::
     Element* pType = getTypeElement[pCompElem->getAttribute("type")];
 
     // get the type (name) of the <location> element in focus
-    std::string locationTypeName = pType->getAttribute("name");
+    //std::string locationTypeName = pType->getAttribute("name");
 
     // get the name given to the <location> element in focus
     // note these names are required to be unique for the purpose of 
@@ -125,17 +124,15 @@ void LoadInstCompsIntoOneShape::adjust(Poco::XML::Element* pElem, std::map<std::
             + "a <combine-components-into-one-shape> element must be unique. "
             + "Here error is that " + locationElementName + " appears at least twice. See www.mantidproject.org/IDF." );
 
-    if ( isTypeAssembly[locationTypeName] )
-    {
-      throw Exception::InstrumentDefinitionError( std::string("No <type> with name ")
-            + locationTypeName + " in IDF. See www.mantidproject.org/IDF." );
-    }
-
     // create dummy component to hold coord. sys. of cuboid
-    CompAssembly *baseCoor = new CompAssembly("base");
-    LoadInstrumentHelper::setLocation(baseCoor, pLoc, m_angleConvertConst); 
+    CompAssembly *baseCoor = new CompAssembly("base"); // dummy assembly used to get to end assembly if nested
+    ICompAssembly *endComponent = 0; // end assembly
+    // rotate/translate this dummy component until get to end component(assembly)
+    std::string shapeTypeName = getShapeCoorSysComp(baseCoor, pLoc, getTypeElement, endComponent);
 
-    std::string cuboidStr = translateRotateXMLcuboid(baseCoor, getTypeElement[locationTypeName], locationElementName);
+    std::string cuboidStr = translateRotateXMLcuboid(endComponent, getTypeElement[shapeTypeName], locationElementName);
+
+    delete baseCoor;
 
   	DOMParser pParser;
   	Document* pDoc;
@@ -309,5 +306,59 @@ V3D LoadInstCompsIntoOneShape::parsePosition(Poco::XML::Element* pElem)
 }
 
 
-  } // namespace DataHandling
+//-----------------------------------------------------------------------------------------------------------------------
+/** The input <location> element may contain other nested <location> elements. This method returns the parent appended 
+    which its child components and also name of type of the last child component. 
+*
+*  @param parent :: CompAssembly to append to
+*  @param pLocElem ::  Poco::XML element that points to a location element
+*  @param getTypeElement :: contain pointers to all types 
+*  @return Returns shape type name
+*  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+*/
+std::string LoadInstCompsIntoOneShape::getShapeCoorSysComp(Geometry::ICompAssembly* parent, 
+     Poco::XML::Element* pLocElem, std::map<std::string,Poco::XML::Element*>& getTypeElement,
+     Geometry::ICompAssembly*& endAssembly)
+{
+  // The location element is required to be a child of a component element. Get this component element
+  Element* pCompElem = LoadInstrumentHelper::getParentComponent(pLocElem);
+
+  //Create the assembly that will be appended into the parent.
+  Geometry::ICompAssembly *ass;
+  // The newly added component is required to have a type. Find out what this
+  // type is and find all the location elements of this type. Finally loop over these
+  // location elements
+
+  Element* pType = getTypeElement[pCompElem->getAttribute("type")];
+
+  ass = new Geometry::CompAssembly(LoadInstrumentHelper::getNameOfLocationElement(pLocElem),parent);
+  endAssembly = ass;
+
+  // set location for this newly added comp and set facing if specified in instrument def. file. Also
+  // check if any logfiles are referred to through the <parameter> element.
+
+  LoadInstrumentHelper::setLocation(ass, pLocElem, m_angleConvertConst);
+
+
+  NodeList* pNL = pType->getElementsByTagName("location");
+  if ( pNL->length() == 0 )
+  {
+    pNL->release(); 
+    return pType->getAttribute("name");  
+  }
+  else if ( pNL->length() == 1 )
+  {
+    Element* pElem = static_cast<Element*>(pNL->item(0));
+    pNL->release();  
+    return getShapeCoorSysComp(ass, pElem, getTypeElement, endAssembly);
+  } 
+  else
+  {
+    pNL->release();  
+    throw Exception::InstrumentDefinitionError( std::string("When using <combine-components-into-one-shape> ")
+        + " the containing component elements are not allowed to contain multiple nested components. See www.mantidproject.org/IDF." );
+  }
+}
+
+} // namespace DataHandling
 } // namespace Mantid

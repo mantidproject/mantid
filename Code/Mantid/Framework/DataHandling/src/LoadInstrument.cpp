@@ -504,8 +504,8 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------------------------------------
     /** Assumes second argument is a XML location element and its parent is a component element
     *  which is assigned to be an assembly. This method appends the parent component element of
-    %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
-    %  itself, i.e. it may act recursively.
+    *  the location element to the CompAssembly passed as the 1st arg. Note this method may call
+    *  itself, i.e. it may act recursively.
     *
     *  @param parent :: CompAssembly to append new component to
     *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
@@ -549,11 +549,11 @@ namespace Mantid
       Element* pType = getTypeElement[pCompElem->getAttribute("type")];
       if (pType->hasAttribute("outline") && pType->getAttribute("outline") != "no")
       {
-        ass = new Geometry::ObjCompAssembly(getNameOfLocationElement(pLocElem),parent);
+        ass = new Geometry::ObjCompAssembly(LoadInstrumentHelper::getNameOfLocationElement(pLocElem),parent);
       }
       else
       {
-        ass = new Geometry::CompAssembly(getNameOfLocationElement(pLocElem),parent);
+        ass = new Geometry::CompAssembly(LoadInstrumentHelper::getNameOfLocationElement(pLocElem),parent);
       }
 
       if (VERBOSE) std::cout << "appendAssembly() is creating an assembly called " << ass->getName() << "\n";
@@ -586,7 +586,7 @@ namespace Mantid
           Element* pElem = static_cast<Element*>(pNode);
 
           // check if this location is in the exclude list
-          std::vector<std::string>::const_iterator it = find(excludeList.begin(), excludeList.end(), getNameOfLocationElement(pElem));
+          std::vector<std::string>::const_iterator it = find(excludeList.begin(), excludeList.end(), LoadInstrumentHelper::getNameOfLocationElement(pElem));
           if ( it == excludeList.end() )
           {
 
@@ -695,7 +695,7 @@ namespace Mantid
       if ( category.compare("rectangular_detector") == 0  || category.compare("rectangularDetector") == 0  || category.compare("rectangulardetector") == 0 || category.compare("RectangularDetector") == 0 )
       {
         //-------------- Create a RectangularDetector ------------------------------------------------
-        std::string name = getNameOfLocationElement(pLocElem);
+        std::string name = LoadInstrumentHelper::getNameOfLocationElement(pLocElem);
 
         if (VERBOSE) std::cout << "AppendLeaf: Creating RectangularDetector " << name << ".\n";
 
@@ -778,7 +778,7 @@ namespace Mantid
       else if ( category.compare("detector") == 0 )
       {
         //-------------- Create a Detector ------------------------------------------------
-        std::string name = getNameOfLocationElement(pLocElem);
+        std::string name = LoadInstrumentHelper::getNameOfLocationElement(pLocElem);
 
         // before setting detector ID check that the IDF satisfy the following 
 
@@ -834,7 +834,7 @@ namespace Mantid
       else
       {
         //-------------- Not a Detector nor a RectangularDetector ------------------------------
-        std::string name = getNameOfLocationElement(pLocElem);
+        std::string name = LoadInstrumentHelper::getNameOfLocationElement(pLocElem);
 
         Geometry::ObjComponent *comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
         parent->add(comp);
@@ -1605,36 +1605,6 @@ namespace Mantid
         g_log.information(e.what());
       }
     }
-
-
-
-    //-----------------------------------------------------------------------------------------------------------------------
-    /** get name of location element. Will be the name attribute, or the
-     * parent's name attribute, or the parent's type, if all else fails.
-    *
-    *  @param pElem ::  Poco::XML element that points to a location element
-    *  @return name of location element
-    */
-    std::string LoadInstrument::getNameOfLocationElement(Poco::XML::Element* pElem)
-    {
-      Element* pCompElem = LoadInstrumentHelper::getParentComponent(pElem);
-
-      std::string retVal;
-
-      if ( pElem->hasAttribute("name") )
-        retVal = pElem->getAttribute("name");
-      else if ( pCompElem->hasAttribute("name") )
-      {
-        retVal = pCompElem->getAttribute("name");
-      }
-      else
-      {
-        retVal = pCompElem->getAttribute("type");
-      }
-
-      return retVal;
-    }
-
 
   } // namespace DataHandling
 } // namespace Mantid

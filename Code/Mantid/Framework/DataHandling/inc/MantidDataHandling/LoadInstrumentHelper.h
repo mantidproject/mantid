@@ -113,6 +113,9 @@ namespace Mantid
       /// Get parent component element of location element
       static Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
 
+      /// get name of location element
+      static std::string getNameOfLocationElement(Poco::XML::Element* pElem);
+
     private:
       /// static reference to the logger class
       static Kernel::Logger& g_log;
