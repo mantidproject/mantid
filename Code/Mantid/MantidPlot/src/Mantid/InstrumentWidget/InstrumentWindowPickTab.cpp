@@ -241,9 +241,12 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     QString wsIndex;
     try {
       wsIndex = QString::number(instrActor->getWorkspaceIndex(detid));
+      updatePlot(detid); // Update the plot if the detector links to some data
     } catch (Mantid::Kernel::Exception::NotFoundError) {
       // Detector doesn't have a workspace index relating to it
       wsIndex = "None";
+      m_plot->clearCurve(); // Clear the plot window
+      m_plot->replot();
     }
     text += "Workspace index: " + wsIndex + '\n';
     Mantid::Kernel::V3D pos = det->getPos();
@@ -264,6 +267,8 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   else
   {
     m_selectionInfoDisplay->clear();
+    m_plot->clearCurve(); // Clear the plot window
+    m_plot->replot();
   }
 }
 
@@ -317,8 +322,7 @@ void InstrumentWindowPickTab::integrateTimeBins()
 
 void InstrumentWindowPickTab::updatePick(int detid)
 {
-  updatePlot(detid);
-  updateSelectionInfo(detid);
+  updateSelectionInfo(detid); // Also calls updatePlot
   m_currentDetID = detid;
 }
 
