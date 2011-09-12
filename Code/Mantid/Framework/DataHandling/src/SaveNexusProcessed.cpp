@@ -265,7 +265,9 @@ namespace DataHandling
       // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
       if ( matrixWorkspace->getAxis(1)->isSpectra() )
       {
-        nexusFile->writeNexusProcessedSpectraMap(matrixWorkspace, spec);
+        cppFile->openGroup("instrument", "NXinstrument");
+        matrixWorkspace->saveSpectraMapNexus(cppFile, "detector", spec, ::NeXus::LZW);
+        cppFile->closeGroup();
       }
 
     }  // finish matrix workspace specifics 

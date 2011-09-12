@@ -23,6 +23,7 @@
 #include <set>
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -289,6 +290,11 @@ namespace Mantid
       {
         throw std::runtime_error("Not yet implemented");
       }
+
+      void saveSpectraMapNexus(::NeXus::File * file, const std::string & group, const std::vector<int>& spec,
+          const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+      void loadSpectraMapNexus(::NeXus::File * file, const std::string & group);
+
 
     protected:
       MatrixWorkspace();

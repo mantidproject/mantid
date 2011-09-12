@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/NexusTestHelper.h"
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -408,49 +409,35 @@ public:
   }
 
 
-// TODO: Re-enable this test. JZ Jul 5, 2011
-//  void testMappingFunctions()
-//  {
-//    MatrixWorkspace * wsm = new WorkspaceTesterWithMaps;
-//    //WS index = 0 to 9
-//    //Spectrum = WS + 20
-//    //Detector ID = WS + 100
-//    wsm->initialize(10, 4, 2);
-//
-//    {
-//      index2spec_map * m = wsm->getWorkspaceIndexToSpectrumMap();
-//      for (int i=0; i < 10; i++)
-//        TS_ASSERT_EQUALS((*m)[i], 20+i);
-//      delete m;
-//    }
-//    {
-//      spec2index_map * m = wsm->getSpectrumToWorkspaceIndexMap();
-//      for (int i=0; i < 10; i++)
-//        TS_ASSERT_EQUALS((*m)[i+20], i);
-//      delete m;
-//    }
-//    {
-//      index2detid_map * m = wsm->getWorkspaceIndexToDetectorIDMap();
-//      for (int i=0; i < 10; i++)
-//        TS_ASSERT_EQUALS((*m)[i], i+100);
-//      delete m;
-//    }
-//    {
-//      detid2index_map * m = wsm->getDetectorIDToWorkspaceIndexMap(true);
-//      for (int i=0; i < 10; i++)
-//        TS_ASSERT_EQUALS((*m)[i+100], i);
-//      delete m;
-//    }
-//  }
-
-
-
   void testGetNonIntegratedDimensionsThrows()
   {
     //No implementation yet. 
     MatrixWorkspace *ws = new WorkspaceTester;
     TSM_ASSERT_THROWS("Characterisation tests fail", ws->getNonIntegratedDimensions(), std::runtime_error);
   }
+
+  void test_nexus_spectraMap()
+  {
+    NexusTestHelper th(false);
+    th.createFile("MatrixWorkspaceTest.nxs");
+    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 50);
+    std::vector<int> spec;
+    for (int i=0; i<100; i++)
+    {
+      // Give some funny numbers, so it is not the default
+      ws->getSpectrum(size_t(i))->setSpectrumNo( i * 11 );
+      ws->getSpectrum(size_t(i))->setDetectorID(99-i);
+      spec.push_back(i);
+    }
+    // Save that to the NXS file
+    TS_ASSERT_THROWS_NOTHING( ws->saveSpectraMapNexus(th.file, "detector", spec); );
+
+    // Make another default one
+    MatrixWorkspace * ws2 = makeWorkspaceWithDetectors(100, 50);
+    th.reopenFile();
+    // TODO: Re-load and check
+  }
+
 
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
