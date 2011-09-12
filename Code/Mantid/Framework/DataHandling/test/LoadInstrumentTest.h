@@ -18,7 +18,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
 
 using namespace Mantid;
@@ -171,42 +173,9 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void testExecGEM()
+  /** Check the GEM instrument */
+  void evaluate_GEM(MatrixWorkspace_sptr output)
   {
-    LoadInstrument loaderGEM;
-
-    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
-
-    //create a workspace with some sample data
-    wsName = "LoadInstrumentTestGEM";
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    // Path to test input file assumes Test directory checked out from SVN
-    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
-    inputFile = loaderGEM.getPropertyValue("Filename");
-
-    loaderGEM.setPropertyValue("Workspace", wsName);
-    loaderGEM.setPropertyValue("RewriteSpectraMap", "0"); //Do not overwrite the spectra map
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Workspace") );
-    TS_ASSERT( ! result.compare(wsName));
-
-    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
-
-    TS_ASSERT( loaderGEM.isExecuted() );
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
-
     boost::shared_ptr<Instrument> i = output->getInstrument();
     boost::shared_ptr<const IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
@@ -247,8 +216,71 @@ public:
     // Only one element in spectrum
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS(output->getSpectrum(0)->getDetectorIDs().size(), 1);
+  }
 
+  void testExecGEM()
+  {
+    LoadInstrument loaderGEM;
+
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestGEM";
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file assumes Test directory checked out from SVN
+    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
+    inputFile = loaderGEM.getPropertyValue("Filename");
+
+    loaderGEM.setPropertyValue("Workspace", wsName);
+    loaderGEM.setPropertyValue("RewriteSpectraMap", "0"); //Do not overwrite the spectra map
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Filename") );
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Workspace") );
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
+    TS_ASSERT( loaderGEM.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+    evaluate_GEM(output);
     AnalysisDataService::Instance().remove(wsName);
+
+
+    // OK, now do it using a XML text.
+    std::string xmlText, str;
+    std::ifstream in;
+    in.open(inputFile.c_str());
+    getline(in,str);
+    while ( in ) {
+      xmlText += str + "\n";
+      getline(in,str);  }
+
+    // Re-add an empty WS
+    ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    LoadInstrument alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", "GEM_Definition.xml"); // File won't be loaded
+    alg.setPropertyValue("Workspace", wsName);
+    alg.setPropertyValue("XMLText", xmlText);
+    alg.setPropertyValue("RewriteSpectraMap", "0"); //Do not overwrite the spectra map
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+    // Check that it's the same output
+    evaluate_GEM(output);
   }
 
   void testExecSLS()

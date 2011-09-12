@@ -199,6 +199,10 @@ namespace Mantid
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       void loadNexus(::NeXus::File * file, const std::string & group);
 
+      void setFilename(const std::string & filename);
+      const std::string & getFilename() const;
+      void setXmlText(const std::string & filename);
+      const std::string & getXmlText() const;
 
     private:
       /// Private copy assignment operator
@@ -246,6 +250,12 @@ namespace Mantid
       Kernel::DateAndTime m_ValidFrom;
       /// the date at which the instrument definition is no longer valid.
       Kernel::DateAndTime m_ValidTo;
+
+      /// Path to the original IDF .xml file that was loaded for this instrument
+      std::string m_filename;
+
+      /// Contents of the IDF .xml file that was loaded for this instrument
+      std::string m_xmlText;
 
       /// Pointer to the physical instrument, where this differs from the 'neutronic' one (indirect geometry)
       boost::shared_ptr<const Instrument> m_physicalInstrument;

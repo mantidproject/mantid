@@ -34,6 +34,8 @@
 #include <Poco/Path.h>
 #include <Poco/Exception.h>
 #include <sstream>
+#include <fstream>
+#include <iostream>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -90,6 +92,9 @@ namespace Mantid
       declareProperty("RewriteSpectraMap", true, "If true then the spectra-detector mapping "
                       "for the input workspace will be overwritten with a 1:1 map of spectrum "
                       "number to detector ID");
+      declareProperty("XMLText", "",
+          "Optional: Enter the full XML contents of the Instrument Definition File, instead of a"
+          "loading it from the file. You still need to specify the (original) filename.");
     }
 
 
@@ -105,9 +110,12 @@ namespace Mantid
       // Get the input workspace
       m_workspace = getProperty("Workspace");
 
+      // Direct text of XML file.
+      std::string xmlText = getPropertyValue("XMLText");
+
       // Retrieve the filename from the properties
       m_filename = getPropertyValue("Filename");
-      if ( m_filename.empty() )
+      if ( m_filename.empty() && xmlText.empty() )
       {
         // look to see if an Instrument name provided in which case create
         // IDF filename on the fly
@@ -124,6 +132,19 @@ namespace Mantid
         }
       }
 
+      // Load the XML text into a string
+      if (xmlText.empty())
+      {
+        std::string str;
+        std::ifstream in;
+        in.open(m_filename.c_str());
+        getline(in,str);
+        while ( in ) {
+          xmlText += str + "\n";
+          getline(in,str);
+        }
+      }
+
       // Remove the path from the filename for use with the InstrumentDataService
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
@@ -135,12 +156,16 @@ namespace Mantid
       // Create our new instrument
       m_instrument = Instrument_sptr(new Instrument(instrumentName));
 
+      // Save the XML file path and contents
+      m_instrument->setFilename(m_filename);
+      m_instrument->setXmlText(xmlText);
+
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
       Document* pDoc;
       try
       {
-        pDoc = pParser.parse(m_filename);
+        pDoc = pParser.parseString(xmlText);
       }
       catch(Poco::Exception& exc)
       {

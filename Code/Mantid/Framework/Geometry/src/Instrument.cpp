@@ -883,6 +883,22 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Set the path to the original IDF .xml file that was loaded for this instrument */
+    void Instrument::setFilename(const std::string & filename)
+    { m_filename = filename; }
+
+    /** @return the path to the original IDF .xml file that was loaded for this instrument */
+    const std::string & Instrument::getFilename() const
+    { return m_filename; }
+
+    /** Set the Contents of the IDF .xml file that was loaded for this instrument */
+    void Instrument::setXmlText(const std::string & XmlText)
+    { m_xmlText = XmlText; }
+
+    /** @return Contents of the IDF .xml file that was loaded for this instrument */
+    const std::string & Instrument::getXmlText() const
+    { return m_xmlText; }
 
     //--------------------------------------------------------------------------------------------
     /** Save the instrument to an open NeXus file.
