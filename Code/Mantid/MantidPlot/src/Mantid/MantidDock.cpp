@@ -393,6 +393,10 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
   {
     ws_item->setIcon(0,QIcon(getQPixmap("mantid_wsgroup_xpm")));
   }
+  else if( boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace) )
+  {
+    ws_item->setIcon(0,QIcon(getQPixmap("mantid_mdews_xpm")));
+  }
   // Assume it is a table workspace
   else if( boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace) )
   {
