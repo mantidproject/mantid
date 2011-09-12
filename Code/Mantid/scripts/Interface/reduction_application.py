@@ -316,6 +316,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         self.reduce_button.setEnabled(False)   
         self.export_button.setEnabled(False)
+        self.save_button.setEnabled(False)
         if IS_IN_MANTIDPLOT:
             qti.app.mantidUI.setIsRunning(True)
         self._interface.reduce()
@@ -323,6 +324,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             qti.app.mantidUI.setIsRunning(False)
         self.reduce_button.setEnabled(True)   
         self.export_button.setEnabled(True)
+        self.save_button.setEnabled(True)
         
     def open_file(self, file_path=None):
         """
