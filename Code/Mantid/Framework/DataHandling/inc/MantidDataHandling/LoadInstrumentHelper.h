@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidAPI/ExperimentInfo.h"
 
 //----------------------------------------------------------------------
 // Poco Forward declaration
@@ -100,7 +101,7 @@ namespace Mantid
       /// Return full path of IDF given instrument name (e.g. GEM) and a date
       static std::string getInstrumentFilename(const std::string& instName, const std::string& date);
       /// Return workspace start date as an ISO 8601 string
-      static std::string getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace);
+      static std::string getWorkspaceStartDate(const boost::shared_ptr<API::ExperimentInfo>& workspace);
 
       /// Set location (position) of comp as specified in XML location element
       static void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem, const double angleConvertConst,

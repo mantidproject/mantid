@@ -42,7 +42,7 @@ namespace API
     /// Const version
     const Geometry::ParameterMap& constInstrumentParameters() const;
     // Add parameters to the instrument parameter map
-    void populateInstrumentParameters();
+    virtual void populateInstrumentParameters();
 
     /// Sample accessors
     const Sample& sample() const;
@@ -57,8 +57,8 @@ namespace API
     /// Utility method to get the run number
     int getRunNumber() const;
 
-    void saveNexus(::NeXus::File * file, const std::string & group) const;
-    void loadNexus(::NeXus::File * file, const std::string & group);
+    void saveExperimentInfoNexus(::NeXus::File * file) const;
+    void loadExperimentInfoNexus(::NeXus::File * file);
 
 
   protected:

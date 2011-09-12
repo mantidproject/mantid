@@ -98,29 +98,16 @@ namespace Mantid
     }
 
 
-    //------------------------------------------------------------------------------------------------------------------------------
-    /** Executes the algorithm. Reading in the file and creating and populating
-    *  the output workspace
-    *
-    *  @throw FileError Thrown if unable to parse XML file
-    *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
-    */
-    void LoadInstrument::exec()
+
+    /** Execute the algorithm with the parameters set (either manually or from inputs) */
+    void LoadInstrument::execManually()
     {
-      // Get the input workspace
-      m_workspace = getProperty("Workspace");
-
-      // Direct text of XML file.
-      std::string xmlText = getPropertyValue("XMLText");
-
       // Retrieve the filename from the properties
-      m_filename = getPropertyValue("Filename");
-      if ( m_filename.empty() && xmlText.empty() )
+      if ( m_filename.empty() && m_xmlText.empty() )
       {
         // look to see if an Instrument name provided in which case create
         // IDF filename on the fly
-        std::string instName = getPropertyValue("InstrumentName");
-        if ( instName.empty() )
+        if ( m_instName.empty() )
         {
           g_log.error("Either the InstrumentName or Filename property of LoadInstrument most be specified"); 
           throw Kernel::Exception::FileError("Either the InstrumentName or Filename property of LoadInstrument most be specified to load an IDF" , m_filename);
@@ -128,19 +115,19 @@ namespace Mantid
         else
         {
           const std::string date = LoadInstrumentHelper::getWorkspaceStartDate(m_workspace);
-          m_filename = LoadInstrumentHelper::getInstrumentFilename(instName,date);
+          m_filename = LoadInstrumentHelper::getInstrumentFilename(m_instName,date);
         }
       }
 
       // Load the XML text into a string
-      if (xmlText.empty())
+      if (m_xmlText.empty())
       {
         std::string str;
         std::ifstream in;
         in.open(m_filename.c_str());
         getline(in,str);
         while ( in ) {
-          xmlText += str + "\n";
+          m_xmlText += str + "\n";
           getline(in,str);
         }
       }
@@ -158,14 +145,14 @@ namespace Mantid
 
       // Save the XML file path and contents
       m_instrument->setFilename(m_filename);
-      m_instrument->setXmlText(xmlText);
+      m_instrument->setXmlText(m_xmlText);
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
       Document* pDoc;
       try
       {
-        pDoc = pParser.parseString(xmlText);
+        pDoc = pParser.parseString(m_xmlText);
       }
       catch(Poco::Exception& exc)
       {
@@ -397,9 +384,6 @@ namespace Mantid
       // release XML document
       pDoc->release();
 
-      // Set the monitors output property
-      setProperty("MonitorList",m_instrument->getMonitors());
-
       // Add the instrument to the workspace
       m_workspace->setInstrument(m_instrument);
 
@@ -409,15 +393,54 @@ namespace Mantid
       // check if default parameter file is also present
       runLoadParameterFile();
       
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------------
+    /** Executes the algorithm. Reading in the file and creating and populating
+    *  the output workspace
+    *
+    *  @throw FileError Thrown if unable to parse XML file
+    *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+    */
+    void LoadInstrument::exec()
+    {
+      // Get the input workspace
+      MatrixWorkspace_sptr ws = getProperty("Workspace");
+      m_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      m_filename = getPropertyValue("Filename");
+      m_instName = getPropertyValue("InstrumentName");
+      m_xmlText = getPropertyValue("XMLText");
+
+      execManually();
+
+      // Set the monitors output property
+      setProperty("MonitorList",m_instrument->getMonitors());
+
       // Rebuild the spectra map for this workspace so that it matches the instrument
       // if required
       const bool rewriteSpectraMap = getProperty("RewriteSpectraMap");
-      if( rewriteSpectraMap )
-      {
-        m_workspace->rebuildSpectraMapping();
-      }
+      if( rewriteSpectraMap && ws )
+        ws->rebuildSpectraMapping();
     }
 
+
+    //------------------------------------------------------------------------------------------------------------------------------
+    /** To manually set the parameters
+     *
+     * @param ei :: ExperimentInfo sptr, e.g. a workspace
+     * @param filename :: IDF .xml path (full)
+     * @param instName :: name of the instrument
+     * @param xmlText :: XML contents of IDF
+     */
+    void LoadInstrument::setParametersManually(Mantid::API::ExperimentInfo_sptr ei, const std::string & filename, const std::string & instName, const std::string & xmlText)
+    {
+      m_workspace = ei;
+      m_filename = filename;
+      m_instName = instName;
+      m_xmlText = xmlText;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------------
     /** Checks the validity range in the IDF and adds it to the instrument object
      *  @param pRootElem A pointer to the root element of the instrument definition
      */
@@ -1612,21 +1635,18 @@ namespace Mantid
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Parameters.xml";
 
-      IAlgorithm_sptr loadInstParam = createSubAlgorithm("LoadParameterFile");
-
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
-        loadInstParam->setPropertyValue("Filename", fullPathIDF);
-        loadInstParam->setProperty<MatrixWorkspace_sptr> ("Workspace", m_workspace);
-        loadInstParam->execute();
+        // To allow the use of ExperimentInfo instead of workspace, we call it manually
+        LoadParameterFile::execManually(fullPathIDF, m_workspace);
       } catch (std::invalid_argument& e)
       {
-        g_log.information("LoadParameter: No parameter file found for this instrument");
+        g_log.information("LoadParameterFile: No parameter file found for this instrument");
         g_log.information(e.what());
       } catch (std::runtime_error& e)
       {
-        g_log.information("Unable to successfully run LoadParameter sub-algorithm");
+        g_log.information("Unable to successfully run LoadParameterFile sub-algorithm");
         g_log.information(e.what());
       }
     }

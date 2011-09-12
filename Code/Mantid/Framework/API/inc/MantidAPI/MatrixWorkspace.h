@@ -95,7 +95,7 @@ namespace Mantid
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
       //@}
 
-      void populateInstrumentParameters();
+      virtual void populateInstrumentParameters();
 
       /** @name Nearest neighbours */
       /// Build and populate the NearestNeighbours object
@@ -291,9 +291,11 @@ namespace Mantid
         throw std::runtime_error("Not yet implemented");
       }
 
-      void saveSpectraMapNexus(::NeXus::File * file, const std::string & group, const std::vector<int>& spec,
+      void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
-      void loadSpectraMapNexus(::NeXus::File * file, const std::string & group);
+
+      void saveInstrumentNexus(::NeXus::File * file) const;
+      void loadInstrumentNexus(::NeXus::File * file);
 
 
     protected:
@@ -342,13 +344,6 @@ namespace Mantid
 
       /// Shared pointer to NearestNeighbours object
       mutable boost::shared_ptr<Mantid::Geometry::NearestNeighbours> m_nearestNeighbours;
-
-      /// Used for storing info about "r-position", "t-position" and "p-position" parameters
-      /// as all parameters are processed  
-      struct m_PositionEntry 
-      { m_PositionEntry(std::string& name, double val) : paramName(name), value(val) {} 
-        std::string paramName; 
-        double value; };
 
       /// Static reference to the logger class
       static Kernel::Logger& g_log;

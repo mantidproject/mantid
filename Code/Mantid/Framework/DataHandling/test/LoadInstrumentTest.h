@@ -22,6 +22,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -281,6 +282,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
     // Check that it's the same output
     evaluate_GEM(output);
+  }
+
+  /* Manually load into an ExperimentInfo instead of a workspace */
+  void test_execManually()
+  {
+    LoadInstrument alg;
+    ExperimentInfo_sptr ei(new ExperimentInfo());
+    alg.setParametersManually(ei, "", "GEM", "");
+    TS_ASSERT_THROWS_NOTHING(alg.execManually(););
+    TS_ASSERT_EQUALS ( ei->getInstrument()->getName(), "GEM");
   }
 
   void testExecSLS()

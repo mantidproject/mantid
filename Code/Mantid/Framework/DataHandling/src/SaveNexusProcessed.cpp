@@ -266,7 +266,7 @@ namespace DataHandling
       if ( matrixWorkspace->getAxis(1)->isSpectra() )
       {
         cppFile->openGroup("instrument", "NXinstrument");
-        matrixWorkspace->saveSpectraMapNexus(cppFile, "detector", spec, ::NeXus::LZW);
+        matrixWorkspace->saveSpectraMapNexus(cppFile, spec, ::NeXus::LZW);
         cppFile->closeGroup();
       }
 

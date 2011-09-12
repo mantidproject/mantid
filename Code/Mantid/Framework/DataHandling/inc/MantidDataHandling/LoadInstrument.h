@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -92,6 +93,9 @@ namespace Mantid
 
       /// Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
       void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
+
+      void execManually();
+      void setParametersManually(Mantid::API::ExperimentInfo_sptr ei, const std::string & filename, const std::string & instName, const std::string & xmlText);
 
     private:
       void initDocs();
@@ -194,11 +198,14 @@ namespace Mantid
       double m_angleConvertConst; 
       
       /// Everything can reference the workspace if it needs to
-      boost::shared_ptr<API::MatrixWorkspace> m_workspace;
+      boost::shared_ptr<API::ExperimentInfo> m_workspace;
 
       bool m_indirectPositions; ///< Flag to indicate whether IDF contains physical & neutronic positions
       /// A map containing the neutronic position for each detector. Used when m_indirectPositions is true.
       std::map<Geometry::IComponent*,Poco::XML::Element*> m_neutronicPos;
+
+      std::string m_xmlText;
+      std::string m_instName;
     };
 
   } // namespace DataHandling

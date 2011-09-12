@@ -792,162 +792,7 @@ namespace Mantid
     */
     void MatrixWorkspace::populateInstrumentParameters()
     {
-      // Get instrument and sample
-
-      boost::shared_ptr<const Instrument> instrument = getBaseInstrument();
-      Instrument* inst = const_cast<Instrument*>(instrument.get());
-
-      // Get the data in the logfiles associated with the raw data
-
-      const std::vector<Kernel::Property*>& logfileProp = run().getLogData();
-
-
-      // Get pointer to parameter map that we may add parameters to and information about
-      // the parameters that my be specified in the instrument definition file (IDF)
-
-      Geometry::ParameterMap& paramMap = instrumentParameters();
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
-
-
-      // iterator to browse through the multimap: paramInfoFromIDF
-
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> > :: const_iterator it;
-      std::pair<std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::iterator,
-        std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::iterator> ret;
-
-      // In order to allow positions to be set with r-position, t-position and p-position parameters
-      // The idea is here to simply first check if parameters with names "r-position", "t-position"
-      // and "p-position" are encounted then at the end of this method act on this
-      std::set<const IComponent*> rtp_positionComp;
-      std::multimap<const IComponent*, m_PositionEntry > rtp_positionEntry;
-
-      // loop over all logfiles and see if any of these are associated with parameters in the
-      // IDF
-
-      size_t N = logfileProp.size();
-      for (size_t i = 0; i < N; i++)
-      {
-        // Get the name of the timeseries property
-
-        std::string logName = logfileProp[i]->name();
-
-        // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map
-
-        ret = paramInfoFromIDF.equal_range(logName);
-        for (it=ret.first; it!=ret.second; ++it)
-        {
-          double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
-
-          // special cases of parameter names
-
-          std::string paramN = ((*it).second)->m_paramName;
-          if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
-            paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
-          {
-            paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-          }
-          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
-          {
-            rtp_positionComp.insert(((*it).second)->m_component);
-            rtp_positionEntry.insert(
-              std::pair<const IComponent*, m_PositionEntry >(
-                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
-          }
-          else
-            paramMap.addDouble(((*it).second)->m_component, paramN, value);
-        }
-      }
-
-      // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
-      // All such parameters have been stored using the key = "".
-      ret = paramInfoFromIDF.equal_range("");
-      Kernel::TimeSeriesProperty<double>* dummy = NULL;
-      for (it = ret.first; it != ret.second; ++it)
-      {
-        std::string paramN = ((*it).second)->m_paramName;
-        std::string category = ((*it).second)->m_type;
-
-        // if category is sting no point in trying to generate a double from parameter
-        double value = 0.0;
-        if ( category.compare("string") != 0 )
-          value = ((*it).second)->createParamValue(dummy);
-
-        if ( category.compare("fitting") == 0 )
-        {
-          std::ostringstream str;
-          str << value << " , " << ((*it).second)->m_fittingFunction << " , " << paramN << " , " << ((*it).second)->m_constraint[0] << " , "
-            << ((*it).second)->m_constraint[1] << " , " << ((*it).second)->m_penaltyFactor << " , "
-            << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , "
-            << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
-          paramMap.add("fitting",((*it).second)->m_component, paramN, str.str());
-        }
-        else if ( category.compare("string") == 0 )
-        {
-          paramMap.addString(((*it).second)->m_component, paramN, ((*it).second)->m_value);
-        }
-        else
-        {
-          if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-            paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
-            paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
-          {
-            rtp_positionComp.insert(((*it).second)->m_component);
-            rtp_positionEntry.insert(
-              std::pair<const IComponent*, m_PositionEntry >(
-                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
-          }
-          else
-            paramMap.addDouble(((*it).second)->m_component, paramN, value);
-        }
-      }
-
-      // check if parameters with names "r-position", "t-position"
-      // and "p-position" were encounted
-      std::pair<std::multimap<const IComponent*, m_PositionEntry >::iterator,
-        std::multimap<const IComponent*, m_PositionEntry >::iterator> retComp;
-      double deg2rad = (M_PI/180.0);
-      std::set<const IComponent*>::iterator itComp;
-      std::multimap<const IComponent*, m_PositionEntry > :: const_iterator itRTP;
-      for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); ++itComp)
-      {
-        retComp = rtp_positionEntry.equal_range(*itComp);
-        bool rSet = false;
-        double rVal=0.0;
-        double tVal=0.0;
-        double pVal=0.0;
-        for (itRTP = retComp.first; itRTP!=retComp.second; ++itRTP)
-        {
-          std::string paramN = ((*itRTP).second).paramName;
-          if ( paramN.compare("r-position")==0 )
-          {
-            rSet = true;
-            rVal = ((*itRTP).second).value;
-          }
-          if ( paramN.compare("t-position")==0 )
-          {
-            tVal = deg2rad*((*itRTP).second).value;
-          }
-          if ( paramN.compare("p-position")==0 )
-          {
-            pVal = deg2rad*((*itRTP).second).value;
-          }
-        }
-        if ( rSet )
-        {
-          // convert spherical coordinates to cartesian coordinate values
-          double x = rVal*sin(tVal)*cos(pVal);
-          double y = rVal*sin(tVal)*sin(pVal);
-          double z = rVal*cos(tVal);
-
-          paramMap.addPositionCoordinate(*itComp, "x", x);
-          paramMap.addPositionCoordinate(*itComp, "y", y);
-          paramMap.addPositionCoordinate(*itComp, "z", z);
-        }
-      }
-
+      ExperimentInfo::populateInstrumentParameters();
       // Clear out the nearestNeighbors so that it gets recalculated
       this->m_nearestNeighbours.reset();
     }
@@ -1533,11 +1378,10 @@ namespace Mantid
     //--------------------------------------------------------------------------------------------
     /** Save the spectra detector map to an open NeXus file.
      * @param file :: open NeXus file
-     * @param group :: name of the group to create
      * @param spec :: list of the Workspace Indices to save.
      * @param compression :: NXcompression int to indicate how to compress
      */
-    void MatrixWorkspace::saveSpectraMapNexus(::NeXus::File * file, const std::string & group,
+    void MatrixWorkspace::saveSpectraMapNexus(::NeXus::File * file,
         const std::vector<int>& spec, const ::NeXus::NXcompression compression) const
     {
       // Count the total number of detectors
@@ -1556,7 +1400,7 @@ namespace Mantid
       }
 
       // Start the detector group
-      file->makeGroup(group, "NXdetector", 1);
+      file->makeGroup("detector", "NXdetector", 1);
       file->putAttr("version", 1);
 
       int numberSpec=int(spec.size());
@@ -1653,16 +1497,6 @@ namespace Mantid
       file->closeGroup();
     }
 
-    //--------------------------------------------------------------------------------------------
-    /** Load the spectra and detector map from an open NeXus file.
-     * @param file :: open NeXus file
-     * @param group :: name of the group to open
-     */
-    void MatrixWorkspace::loadSpectraMapNexus(::NeXus::File * file, const std::string & group)
-    {
-      file->openGroup(group, "NXdetector");
-      file->closeGroup();
-    }
 
 
   } // namespace API

@@ -80,9 +80,13 @@ void LoadParameterFile::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
+  execManually(filename, localWorkspace);
+}
+
+void LoadParameterFile::execManually(std::string filename, Mantid::API::ExperimentInfo_sptr localWorkspace)
+{
   // TODO: Refactor to remove the need for the const cast
   Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getBaseInstrument());
-
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -104,7 +108,6 @@ void LoadParameterFile::exec()
   Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
   {
-    g_log.error("XML file: " + filename + "contains no root element.");
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", filename);
   }
 
@@ -116,7 +119,6 @@ void LoadParameterFile::exec()
   localWorkspace->populateInstrumentParameters();
 
   pDoc->release();
-
 }
 
 } // namespace DataHandling

@@ -152,7 +152,7 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
 *  @param workspace :: workspace to get information from
 *  @return workspace start date as a string
 */
-std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace)
+std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<API::ExperimentInfo>& workspace)
 {
     const API::Run& runDetails = workspace->run();
     std::string date;

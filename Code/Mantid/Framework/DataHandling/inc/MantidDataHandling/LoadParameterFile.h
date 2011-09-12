@@ -84,6 +84,8 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument";}
 
+      static void execManually(std::string filename, Mantid::API::ExperimentInfo_sptr localWorkspace);
+
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();

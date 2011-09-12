@@ -430,12 +430,8 @@ public:
       spec.push_back(i);
     }
     // Save that to the NXS file
-    TS_ASSERT_THROWS_NOTHING( ws->saveSpectraMapNexus(th.file, "detector", spec); );
+    TS_ASSERT_THROWS_NOTHING( ws->saveSpectraMapNexus(th.file, spec); );
 
-    // Make another default one
-    MatrixWorkspace * ws2 = makeWorkspaceWithDetectors(100, 50);
-    th.reopenFile();
-    // TODO: Re-load and check
   }
 
 
