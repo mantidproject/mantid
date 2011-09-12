@@ -820,14 +820,21 @@ public:
     TS_ASSERT( loader.execute() );
 
     // This kind of IDF should lead to 2 instrument definitions - the physical and the neutronic
+    // But only 1 goes into the IDS (the neutronic instrument holds the physical instrument within itself)
     TS_ASSERT_EQUALS( IDS.size(), 1 );
     std::string name("INDIRECT_Definition.xml2011-08-25T12:00:00");
     TS_ASSERT( IDS.doesExist(name) );
 
+    // Retrieve the neutronic instrument from the InstrumentDataService
     Instrument_const_sptr neutronicInst = IDS.retrieve(name);
+    // And pull out a handle to the physical instrument from within the neutronic one
     Instrument_const_sptr physicalInst = neutronicInst->getPhysicalInstrument();
+    // They should not be the same object
     TS_ASSERT_DIFFERS( physicalInst.get(), neutronicInst.get() );
+    // Not true in general, but in this case we should not be getting a paramaterized instrument
+    TS_ASSERT( ! physicalInst->isParametrized() );
 
+    // Check the positions of the 6 detectors in the physical instrument
     TS_ASSERT_EQUALS( physicalInst->getDetector(1000)->getPos(), V3D(0,0,0) );
     TS_ASSERT_EQUALS( physicalInst->getDetector(1001)->getPos(), V3D(0,1,0) );
     TS_ASSERT_EQUALS( physicalInst->getDetector(1002)->getPos(), V3D(1,0,0) );
@@ -835,13 +842,21 @@ public:
     TS_ASSERT_EQUALS( physicalInst->getDetector(1004)->getPos(), V3D(2,0,0) );
     TS_ASSERT_EQUALS( physicalInst->getDetector(1005)->getPos(), V3D(2,1,0) );
 
+    // Check the right instrument ended up on the workspace
     TS_ASSERT_EQUALS( neutronicInst.get(), ws->getBaseInstrument().get() );
+    // Check the neutronic positions
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1000)->getPos(), V3D(2,2,0) );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1001)->getPos(), V3D(2,3,0) );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1002)->getPos(), V3D(3,2,0) );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1003)->getPos(), V3D(3,3,0) );
+    // Note that one of the physical pixels doesn't exist in the neutronic space
     TS_ASSERT_THROWS( neutronicInst->getDetector(1004), Exception::NotFoundError );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1005)->getPos(), V3D(4,3,0) );
+
+    // Check the monitor is in the same place in each instrument
+    TS_ASSERT_EQUALS( physicalInst->getMonitor(1)->getPos(), neutronicInst->getMonitor(1)->getPos() );
+    // ...but is not the same object
+    TS_ASSERT_DIFFERS( physicalInst->getMonitor(1).get(), neutronicInst->getMonitor(1).get() );
 
     // Clean up
     IDS.clear();

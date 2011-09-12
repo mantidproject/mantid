@@ -234,7 +234,6 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   if (detid >= 0)
   {
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-    //Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
     Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
     QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';

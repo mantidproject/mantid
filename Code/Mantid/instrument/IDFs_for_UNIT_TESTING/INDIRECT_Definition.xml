@@ -17,10 +17,9 @@
 </defaults>
 
 
-  <component type="panel" idlist="idlist_for_bank1">
-    <location r="0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank1"  xpixels="3" ypixels="2" >
-    </location>
-  </component>
+<component type="panel" idlist="idlist_for_bank1">
+  <location r="0" t="0" rot="0" axis-x="0" axis-y="1" axis-z="0" name="bank1"  xpixels="3" ypixels="2" />
+</component>
 
 <!-- Detector Panel -->
 <type is="detector" name="panel">
@@ -57,13 +56,23 @@
 </type>
 
 
-<!-- detector and monitor IDs -->
+<!-- monitor -->
+<component type="monitor" idlist="monitor">
+  <location z="-1" mark-as="monitor">
+    <neutronic z="-1" /> <!-- Even if the neutronic is in the same place, you have to specify it again (for detectors/monitor) -->
+  </location>
+</component>
 
+<type name="monitor" is="detector" />
+
+<!-- detector and monitor IDs -->
 
 <idlist idname="idlist_for_bank1">
   <id start="1000" end="1005" />
 </idlist>
-
+<idlist idname="monitor">
+  <id val="1" />  
+</idlist>
 
 <!--  Source and sample-position components and their types -->
 
