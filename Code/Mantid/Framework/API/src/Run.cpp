@@ -374,10 +374,14 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   {
     if (!group.empty()) file->openGroup(group, "NXgroup");
 
-    file->initGroupDir();
-    std::pair<std::string, std::string> name_class = file->getNextEntry();
-    while (name_class.first != "NULL")
+    std::map<std::string, std::string> entries;
+    file->getEntries(entries);
+    std::map<std::string, std::string>::iterator it = entries.begin();
+    std::map<std::string, std::string>::iterator it_end = entries.end();
+    for (; it != it_end; ++it)
     {
+      // Get the name/class pair
+      const std::pair<std::string, std::string> & name_class = *it;
       // NXLog types are the main one.
       if (name_class.second == "NXlog")
       {
@@ -401,9 +405,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         file->readData("proton_charge", charge);
         this->setProtonCharge(charge);
       }
-
-      // Go to next one
-      name_class = file->getNextEntry();
     }
     if (!group.empty()) file->closeGroup();
 

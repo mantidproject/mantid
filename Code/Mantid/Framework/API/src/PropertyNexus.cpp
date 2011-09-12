@@ -104,6 +104,7 @@ namespace PropertyNexus
       try
       { file->getAttr("start", startStr); }
       catch (::NeXus::Exception & e) {}
+      file->closeData();
     }
 
     std::vector<Kernel::DateAndTime> times;

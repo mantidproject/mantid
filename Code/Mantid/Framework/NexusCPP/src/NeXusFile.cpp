@@ -959,11 +959,17 @@ pair<string, string> File::getNextEntry() {
   }
 }
 
-map<string, string> File::getEntries() {
-  this->initGroupDir();
-
+map<string, string> File::getEntries()
+{
   map<string, string> result;
+  this->getEntries(result);
+  return result;
+}
 
+void File::getEntries(map<string, string> & result)
+{
+  result.clear();
+  this->initGroupDir();
   pair<string,string> temp;
   while (true) {
     temp = this->getNextEntry();
@@ -975,7 +981,6 @@ map<string, string> File::getEntries() {
     }
   }
 
-  return result;
 }
 
 //-------------------------------------------------------------------------------------------------

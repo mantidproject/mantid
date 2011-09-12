@@ -112,7 +112,7 @@ namespace NeXus {
     /** should be close handle on exit */
     bool m_close_handle;
 
-  public:
+  private:
     /**
      * @return A pair of the next entry available in a listing.
      */
@@ -157,7 +157,13 @@ namespace NeXus {
     /** Destructor. This does close the file. */
     ~File();
 
-    /** Close the file before the constructor is called. */
+    /** Sets whether the destructor should close the file
+     * @param value :: bool, true if the destructor will close the file.
+     */
+    void setCloseHandle(bool value)
+    { m_close_handle = value; }
+
+    /** Close the file before the denstructor is called. */
     void close();
 
     /** Flush the file. */
@@ -599,6 +605,13 @@ namespace NeXus {
      * Return the entries available in the current place in the file.
      */
     std::map<std::string, std::string> getEntries();
+
+    /** Return the entries available in the current place in the file.
+     * Faster than getEntries().
+     *
+     * @param result :: map that is filled with the entries
+     */
+    void getEntries(std::map<std::string, std::string> & result);
 
     /**
      * Get a section of data from the file.
