@@ -108,7 +108,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<const Instrument> i = output->getBaseInstrument();
+    boost::shared_ptr<const Instrument> i = output->getInstrument()->baseInstrument();
     boost::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
@@ -157,13 +157,13 @@ public:
     // Check running algorithm for same XML file leads to same instrument object being attached
     boost::shared_ptr<Instrument> instr(new Instrument());
     output->setInstrument(instr);
-    TS_ASSERT_EQUALS( output->getBaseInstrument(), instr );
+    TS_ASSERT_EQUALS( output->getInstrument()->baseInstrument(), instr );
     LoadInstrument loadAgain;
     TS_ASSERT_THROWS_NOTHING( loadAgain.initialize() );
     loadAgain.setPropertyValue("Filename", inputFile);
     loadAgain.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING( loadAgain.execute() );
-    TS_ASSERT_EQUALS( output->getBaseInstrument(), i );
+    TS_ASSERT_EQUALS( output->getInstrument()->baseInstrument(), i );
 
     // Valid-from/to
     Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
@@ -843,7 +843,7 @@ public:
     TS_ASSERT_EQUALS( physicalInst->getDetector(1005)->getPos(), V3D(2,1,0) );
 
     // Check the right instrument ended up on the workspace
-    TS_ASSERT_EQUALS( neutronicInst.get(), ws->getBaseInstrument().get() );
+    TS_ASSERT_EQUALS( neutronicInst.get(), ws->getInstrument()->baseInstrument().get() );
     // Check the neutronic positions
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1000)->getPos(), V3D(2,2,0) );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1001)->getPos(), V3D(2,3,0) );

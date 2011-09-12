@@ -18,6 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 class WorkspaceGroupTest: public CxxTest::TestSuite
 {
@@ -168,6 +169,10 @@ public:
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins, 1);
     Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins, 1);
+    Instrument_sptr instr(new Instrument);
+    work_in1->setInstrument(instr);
+    work_in2->setInstrument(instr);
+
     int forSpecDetMap[20] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
     //set some dead detectors
@@ -180,8 +185,6 @@ public:
       }
       work_in1->getAxis(1)->spectraNo(i) = i;
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("", i, NULL);
-      boost::shared_ptr<Mantid::Geometry::Instrument> instr = boost::const_pointer_cast<
-          Mantid::Geometry::Instrument>(work_in1->getBaseInstrument());
       instr->add(det);
       instr->markAsDetector(det);
     }
@@ -194,11 +197,6 @@ public:
         work_in2->setData(i, yDead, yDead);
       }
       work_in2->getAxis(1)->spectraNo(i) = i;
-      Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("", i, NULL);
-      boost::shared_ptr<Mantid::Geometry::Instrument> instr = boost::const_pointer_cast<
-          Mantid::Geometry::Instrument>(work_in2->getBaseInstrument());
-      instr->add(det);
-      instr->markAsDetector(det);
     }
     work_in2->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 20));
 

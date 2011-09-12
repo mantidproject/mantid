@@ -43,7 +43,8 @@ public:
       forSpecDetMap[j] = j;
     }
 
-    Instrument_sptr instr = boost::const_pointer_cast<Instrument>(space->getBaseInstrument());
+    Instrument_sptr instr(new Instrument);
+    space->setInstrument(instr);
 
     Detector *d = new Detector("det",0,0);
     instr->markAsDetector(d);

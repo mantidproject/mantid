@@ -31,12 +31,12 @@ public:
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
-    // Instruments don't point to the same base place since they
-    boost::shared_ptr<Instrument> inst2 = ws.getInstrument();
+    // Instruments don't point to the same base place since you get back a parameterized one
+    boost::shared_ptr<const Instrument> inst2 = ws.getInstrument();
     TS_ASSERT_EQUALS( inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    boost::shared_ptr<const Instrument> inst3 = ws.getBaseInstrument();
+    boost::shared_ptr<const Instrument> inst3 = inst2->baseInstrument();
     TS_ASSERT_EQUALS( inst3.get(), inst1.get());
     TS_ASSERT_EQUALS( inst3->getName(), "MyTestInst");
   }

@@ -62,7 +62,7 @@ public:
       //TODO: Check spectrum numbers and detector IDs are copied correctly (perhaps?)
     }
 
-    TS_ASSERT_EQUALS( inWS->getBaseInstrument(), outWS->getBaseInstrument() );
+    TS_ASSERT_EQUALS( inWS->getInstrument(), outWS->getInstrument() );
   }
 
   // TODO: Work out a way of testing under MPI because absent that the test is not very interesting

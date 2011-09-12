@@ -368,13 +368,13 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr5->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
-    TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr2->getBaseInstrument() )
+    TS_ASSERT_EQUALS( outsptr1->getInstrument()->baseInstrument(), outsptr2->getInstrument()->baseInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
-    TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr6->getBaseInstrument() )
+    TS_ASSERT_EQUALS( outsptr1->getInstrument()->baseInstrument(), outsptr6->getInstrument()->baseInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr6->sample()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 
@@ -598,12 +598,10 @@ public:
     TS_ASSERT_DIFFERS( monoutsptr1->dataY(1)[555], monoutsptr5->dataY(1)[555] )
     TS_ASSERT_DIFFERS( monoutsptr1->dataY(1)[555], monoutsptr6->dataY(1)[555] )
 
-    TS_ASSERT_EQUALS( monoutsptr1->getBaseInstrument(), monoutsptr2->getBaseInstrument() )
     TS_ASSERT_DIFFERS( &(monoutsptr1->run()), &(monoutsptr2->run()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr3->run()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr4->run()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr5->run()) )
-    TS_ASSERT_EQUALS( monoutsptr1->getBaseInstrument(), monoutsptr6->getBaseInstrument() )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr6->run()) )
 	
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
@@ -653,12 +651,10 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr5->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
-    TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr2->getBaseInstrument() )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run() ))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run() ) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run() ) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run() ) )
-    TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr6->getBaseInstrument() )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run() ) )
 
 	it=monitorwsNamevec.begin();

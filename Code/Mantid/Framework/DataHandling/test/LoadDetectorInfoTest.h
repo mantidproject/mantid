@@ -78,8 +78,6 @@ public:
     {
 
       boost::shared_ptr<const IDetector> detector =WS->getInstrument()->getDetector(j);
-      boost::shared_ptr<const IComponent> comp =
-          boost::dynamic_pointer_cast<const IComponent>(detector);
 
       const IComponent* baseComp = detector->getComponentID();
 
@@ -304,7 +302,8 @@ public:
       specNums[j] = j+1;
     }
 
-    Instrument_sptr instr = boost::const_pointer_cast<Instrument>(space->getBaseInstrument());
+    Instrument_sptr instr(new Instrument);
+    space->setInstrument(instr);
 
     Detector *d = new Detector("det",0,0);
     instr->markAsDetector(d);

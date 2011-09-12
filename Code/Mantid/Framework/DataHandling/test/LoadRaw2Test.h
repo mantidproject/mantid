@@ -256,10 +256,10 @@ public:
     TS_ASSERT_DIFFERS( output1->dataY(1)[555], output6->dataY(1)[555] )
 
     // Check these are the same
-    TS_ASSERT_EQUALS( output1->getBaseInstrument(), output2->getBaseInstrument() )
+    TS_ASSERT_EQUALS( output1->getInstrument()->getName(), output2->getInstrument()->getName() )
     TS_ASSERT_EQUALS( &(output1->sample()), &(output2->sample()) )
     TS_ASSERT_DIFFERS( &(output1->run()), &(output2->run()) )
-    TS_ASSERT_EQUALS( output1->getBaseInstrument(), output6->getBaseInstrument() )
+    TS_ASSERT_EQUALS( output1->getInstrument()->getName(), output6->getInstrument()->getName() )
     TS_ASSERT_EQUALS( &(output1->sample()), &(output6->sample()) )
     TS_ASSERT_DIFFERS( &(output1->run()), &(output6->run()) )
 

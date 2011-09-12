@@ -39,6 +39,9 @@ public:
     //the x values look like this -1, 2, 5, 8, 11, 14, 17, 20, 23, 26
     WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
 
+    Instrument_sptr instr(new Instrument);
+    work_in->setInstrument(instr);
+
     //yVeryDead is a detector with low counts
     boost::shared_ptr<Mantid::MantidVec> yVeryDead(new Mantid::MantidVec(sizex,0.1));
     //yTooDead gives some counts at the start but has a whole region full of zeros
@@ -63,7 +66,6 @@ public:
       }
       work_in->getAxis(1)->spectraNo(i) = i;
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",i,NULL);
-      boost::shared_ptr<Mantid::Geometry::Instrument> instr = boost::const_pointer_cast<Mantid::Geometry::Instrument>(work_in->getBaseInstrument());
       instr->add(det);
       instr->markAsDetector(det);
     }
