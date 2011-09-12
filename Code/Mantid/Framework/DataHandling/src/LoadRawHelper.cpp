@@ -585,9 +585,9 @@ namespace Mantid
       {
         // If requested update the instrument to positions in the raw file
         const Geometry::ParameterMap & pmap = localWorkspace->instrumentParameters();
-        if( pmap.contains(localWorkspace->getBaseInstrument().get(),"det-pos-source") )
+        if( pmap.contains(localWorkspace->getInstrument()->baseInstrument().get(),"det-pos-source") )
         {
-          boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getBaseInstrument().get(),"det-pos-source");
+          boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getInstrument()->baseInstrument().get(),"det-pos-source");
           std::string value = updateDets->value<std::string>();
           if(value.substr(0,8)  == "datafile" )
           {

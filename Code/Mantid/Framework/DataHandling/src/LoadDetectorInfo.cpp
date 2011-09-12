@@ -409,7 +409,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   Geometry::IDetector_sptr det;
   try
   {
-    det = boost::const_pointer_cast<IDetector>(m_workspace->getBaseInstrument()->getDetector(params.detID));
+    det = boost::const_pointer_cast<IDetector>(m_workspace->getInstrument()->baseInstrument()->getDetector(params.detID));
   }
   catch( std::runtime_error &e)
   {

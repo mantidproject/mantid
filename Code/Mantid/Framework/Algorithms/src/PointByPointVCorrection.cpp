@@ -144,8 +144,7 @@ void PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr& w1
                                              API::MatrixWorkspace_sptr& out)
 {
   // First check that the instrument matches for both input workspaces
-  // Only check base instrument because pointer comparison would fail if parameterized (see "new" in getInstrument)
-  if ( w1->getBaseInstrument() != w2->getBaseInstrument() )
+  if ( w1->getInstrument()->getName() != w2->getInstrument()->getName() )
   {
     g_log.error("The input workspaces have different instrument definitions");
     throw std::runtime_error("The input workspaces have different instrument definitions");

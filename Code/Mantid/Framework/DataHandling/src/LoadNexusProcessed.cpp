@@ -1054,7 +1054,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
   const std::string & details =  pmap_node.data().front();
   Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-  Instrument_const_sptr instr = local_workspace->getBaseInstrument();
+  Instrument_const_sptr instr = local_workspace->getInstrument()->baseInstrument();
   
   int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Poco::StringTokenizer::TOK_TRIM;

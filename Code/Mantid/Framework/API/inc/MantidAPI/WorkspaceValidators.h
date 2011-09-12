@@ -351,7 +351,7 @@ private:
   {
     // Just checks that an instrument has a sample position.
     // Could be extended for more detailed checks if needed.
-    if ( value->getBaseInstrument()->getSample() == NULL )
+    if ( ! value->getInstrument()->getSample() )
     {
       return "The workspace must have an instrument defined";
     }

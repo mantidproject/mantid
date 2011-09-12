@@ -91,17 +91,6 @@ namespace API
   }
 
   //---------------------------------------------------------------------------------------
-  /** Get a shared pointer to the base instrument (i.e. non-parameterized) associated with this workspace
-  *getInstrument
-  *  @return The instrument class
-  */
-  Instrument_const_sptr ExperimentInfo::getBaseInstrument() const
-  {
-    return sptr_instrument;
-  }
-
-
-  //---------------------------------------------------------------------------------------
   /**  Returns a new copy of the instrument parameters
   *    @return a (new) copy of the instruments parameter map
   */
@@ -165,7 +154,7 @@ namespace API
   void ExperimentInfo::populateInstrumentParameters()
   {
     // Get instrument and sample
-    boost::shared_ptr<const Instrument> instrument = getBaseInstrument();
+    boost::shared_ptr<const Instrument> instrument = getInstrument()->baseInstrument();//getBaseInstrument();
     Instrument* inst = const_cast<Instrument*>(instrument.get());
 
     // Get the data in the logfiles associated with the raw data
@@ -175,13 +164,13 @@ namespace API
     // Get pointer to parameter map that we may add parameters to and information about
     // the parameters that my be specified in the instrument definition file (IDF)
     Geometry::ParameterMap& paramMap = instrumentParameters();
-    std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
+    const std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
 
 
     // iterator to browse through the multimap: paramInfoFromIDF
     std::multimap<std::string, boost::shared_ptr<XMLlogfile> > :: const_iterator it;
-    std::pair<std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::iterator,
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::iterator> ret;
+    std::pair<std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::const_iterator,
+      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::const_iterator> ret;
 
     // In order to allow positions to be set with r-position, t-position and p-position parameters
     // The idea is here to simply first check if parameters with names "r-position", "t-position"

@@ -79,7 +79,7 @@ void CalculateTransmission::exec()
   }
 
   // Check that the two input workspaces are from the same instrument
-  if ( sampleWS->getBaseInstrument() != directWS->getBaseInstrument() )
+  if ( sampleWS->getInstrument()->getName() != directWS->getInstrument()->getName() )
   {
     g_log.error("The input workspaces do not come from the same instrument");
     throw std::invalid_argument("The input workspaces do not come from the same instrument");

@@ -181,7 +181,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
     throw std::runtime_error("The MonitorWorkspace must contain only 1 spectrum");
   }
   // Check that the two workspace come from the same instrument
-  if ( monitorWS->getBaseInstrument() != inputWorkspace->getBaseInstrument() )
+  if ( monitorWS->getInstrument()->getName() != inputWorkspace->getInstrument()->getName() )
   {
     throw std::runtime_error("The Input and Monitor workspaces must come from the same instrument");
   }

@@ -70,7 +70,7 @@ namespace Mantid
       const std::string filename = getPropertyValue("Filename");
       MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
       // Have to resort to a cast here. Really I think this algorithm should be changing the parameter map.
-      Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getBaseInstrument());
+      Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
       if (instrument.get() == 0)
       {
         throw std::runtime_error("Input workspace has no defined instrument");

@@ -81,7 +81,7 @@ namespace Mantid
       const Geometry::IComponent* m_component;  ///< the component address
 
       ///Returns parameter value as generated using possibly equation expression etc
-      double createParamValue(Mantid::Kernel::TimeSeriesProperty<double>* logData);
+      double createParamValue(Mantid::Kernel::TimeSeriesProperty<double>* logData) const ;
 
       /// when this const equals 1 it means that angle=degree (default) is set in IDF
       /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 

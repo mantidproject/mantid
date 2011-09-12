@@ -60,7 +60,7 @@ namespace Mantid
     *
     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument definition file
     */
-    double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
+    double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData) const
     {
       // If this parameter is a <look-up-table> or <formula> return 0.0. Such parameter types are 
       // associated with 'fitting' parameters. In some sense this method should never be called

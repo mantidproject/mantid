@@ -143,6 +143,7 @@ namespace Mantid
 
       /// Get information about the parameters described in the instrument definition file and associated parameter files
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return m_logfileCache;}
+      const std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() const {return m_logfileCache;}
 
       /// Get information about the units used for parameters described in the IDF and associated parameter files
       std::map<std::string, std::string>& getLogfileUnit() {return m_logfileUnit;}

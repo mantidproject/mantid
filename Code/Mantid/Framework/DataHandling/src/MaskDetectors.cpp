@@ -121,7 +121,7 @@ void MaskDetectors::exec()
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
   bool detsMasked = false;
   std::vector<detid_t>::const_iterator it;
-  Instrument_const_sptr instrument = WS->getBaseInstrument();
+  Instrument_const_sptr instrument = WS->getInstrument()->baseInstrument();
   if ( !detectorList.empty() )
   {
     for (it = detectorList.begin(); it != detectorList.end(); ++it)

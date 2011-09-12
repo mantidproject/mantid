@@ -140,8 +140,8 @@ namespace Mantid
     {
       whiteBeam1 = getProperty("WhiteBeamBase");
       whiteBeam2 = getProperty("WhiteBeamCompare");
-      if ( whiteBeam1->getBaseInstrument()->getName() !=
-           whiteBeam2->getBaseInstrument()->getName() )
+      if ( whiteBeam1->getInstrument()->getName() !=
+           whiteBeam2->getInstrument()->getName() )
       {
         throw std::invalid_argument("The two input white beam vanadium workspaces must be from the same instrument");
       }
