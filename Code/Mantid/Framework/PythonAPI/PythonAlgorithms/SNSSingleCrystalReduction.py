@@ -100,8 +100,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              Description="Relative time to stop filtering by in seconds. Applies only to sample.")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
-        self.declareProperty("BinInDspace", True,
-                             Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothParams", "20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
@@ -233,9 +231,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             else:
                 binning = [info.tmin, self._binning[0], info.tmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        wksp/=(256*256)
-        #NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
-
         return wksp
 
     def _bin(self, wksp, info, filterLogs=None):
@@ -259,11 +254,13 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
             if len(self._binning) == 3:
                 binning = self._binning
             else:
                 binning = [info.dmin, self._binning[0], info.dmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if not info.has_dspace:
             if len(self._binning) == 3:
@@ -271,7 +268,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             else:
                 binning = [info.tmin, self._binning[0], info.tmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        #NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -300,7 +296,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             if not os.path.isfile(nxsfile):
                 name = str(wksp)
                 name = name.split('_')[1] # remove the instrument name
-                nxsfile = self._findData(int(name), ".nxs")
+                nxsfile = self._findData(int(name), "_histo.nxs")
         self.log().information(nxsfile)
         if "nxs" in self._outTypes:
             SaveToSNSHistogramNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
@@ -323,7 +319,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         if len(self._binning) == 3:
             if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                 raise RuntimeError("Failed to specify the binning")
-        self._bin_in_dspace = self.getProperty("BinInDspace")
+        self._bin_in_dspace = False
         self._instrument = self.getProperty("Instrument")
         mtd.settings['default.facility'] = 'SNS'
         mtd.settings['default.instrument'] = self._instrument
@@ -363,6 +359,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             # first round of processing the sample
             if not self.getProperty("Sum"):
                 samRun = self._loadData(samRun, SUFFIX, filterWall)
+                NormaliseByCurrent(InputWorkspace=samRun, OutputWorkspace=samRun)
                 info = self._getinfo(samRun)
 
             # process the container
@@ -378,6 +375,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                             AdjX=self._xadjpixels, AdjY=self._yadjpixels)
                         CompressEvents(InputWorkspace=canRun, OutputWorkspace=canRun,
                             Tolerance=COMPRESS_TOL_TOF) # 5ns
+                    NormaliseByCurrent(InputWorkspace=canRun, OutputWorkspace=canRun)
                 else:
                     canRun = temp
             else:
@@ -385,9 +383,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
             if canRun is not None:
                 samRun -= canRun
-                canRun = str(canRun)
-                mtd.deleteWorkspace(canRun)
-                mtd.releaseFreeMemory()
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
 
@@ -399,6 +394,15 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
                     vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
+                    #if self._xadjpixels+self._yadjpixels > 0:
+                        #SmoothNeighbours(InputWorkspace=vanRun, OutputWorkspace=vanRun, 
+                            #AdjX=self._xadjpixels, AdjY=self._yadjpixels)
+                        #CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                            #Tolerance=COMPRESS_TOL_TOF) # 5ns
+                    NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    if canRun is not None:
+                        vanRun -= canRun
+                    Integration(InputWorkspace='TOPAZ_3676',OutputWorkspace='VanSumTOF',IncludePartialBins='1')
                     vanRun = self._focus(vanRun, info)
                     ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
@@ -417,11 +421,13 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
             # the final bit of math
             if vanRun is not None:
+                vanI = mtd["VanSumTOF"]
+                FindDetectorsOutsideLimits(InputWorkspace=vanI,OutputWorkspace='VanMask',HighThreshold='1.0000000000000001e+300',LowThreshold='1.0e-300')
+                vanmask = mtd["VanMask"]
+                MaskDetectors(Workspace=vanI,MaskedWorkspace=vanmask)
+                Divide(LHSWorkspace=samRun,RHSWorkspace=vanI,OutputWorkspace=samRun,AllowDifferentNumberSpectra='1')
                 Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
                 normalized = True
-                vanRun = str(vanRun)
-                mtd.deleteWorkspace(vanRun)
-                mtd.releaseFreeMemory()
             else:
                 normalized = False
 
@@ -431,7 +437,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
             self._save(samRun, normalized)
             samRun = str(samRun)
-            #mtd.deleteWorkspace(samRun)
+            mtd.deleteWorkspace(samRun)
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
