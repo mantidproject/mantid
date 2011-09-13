@@ -17,6 +17,7 @@
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidKernel/VMD.h"
 #include <vtkDataSet.h>
 #include <vtkFieldData.h>
 #include <vtkPlane.h>
@@ -161,6 +162,7 @@ namespace Mantid
       //Recalculation is always required if this property is toggled.
       if(m_applyClipping != hasAppliedClipping)
       {
+        m_applyClipping = hasAppliedClipping;
         m_request->ask(RecalculateAll);
       }
 
@@ -210,12 +212,28 @@ namespace Mantid
     }
 
     /**
+    Mantid properties for rebinning algorithm require formatted information.
+    @param basis : basis vector.
+    @param dimension : dimension to extract property value for.
+    @return true available, false otherwise.
+    */
+    std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, Mantid::Geometry::IMDDimension_sptr dimension) const
+    {
+      std::string units = dimension->getUnits();
+      double length = 10; //Hack!
+      size_t nbins = dimension->getNBins();
+      std::string id = dimension->getDimensionId();
+      return boost::str(boost::format("%s, %s, %s, %d, %f") %id %units %basis.toString(",") %length % nbins);
+    }
+
+    /**
     Direct Mantid Algorithms and Workspaces to produce a visual dataset.
     @param factory : Factory, or chain of factories used for Workspace to VTK dataset conversion.
     @param eventHandler : Handler for GUI updates while algorithm progresses.
     */
     vtkDataSet* MDEWRebinningPresenter::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
+      
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
       {
@@ -230,25 +248,56 @@ namespace Mantid
 
         hist_alg.setPropertyValue("InputWorkspace", wsName);
         std::string id; 
-        if(sourceGeometry.hasXDimension())
-        {
-          hist_alg.setPropertyValue("AlignedDimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
-        }
-        if(sourceGeometry.hasYDimension())
-        {
-          hist_alg.setPropertyValue("AlignedDimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
-        }
-        if(sourceGeometry.hasZDimension())
-        {
-          hist_alg.setPropertyValue("AlignedDimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
-        }
-        if(sourceGeometry.hasTDimension())
-        {
-          hist_alg.setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
-        }
+
         if(m_view->getApplyClip())
         {
-          hist_alg.setPropertyValue("ImplicitFunctionXML", m_function->toXMLString());
+          using namespace Mantid::Kernel;
+          vtkPlane* plane = dynamic_cast<vtkPlane*>(m_view->getImplicitFunction());
+          double* pNormal = plane->GetNormal();
+          double* pOrigin = plane->GetOrigin();
+
+          V3D a(pNormal[0], pNormal[1], pNormal[2]);
+          V3D b(-a[1], a[0], 0.0);
+          V3D c = a.cross_prod(b);
+          VMD origin(pOrigin[0], pOrigin[1], pOrigin[2]);
+          hist_alg.setPropertyValue("Origin", origin.toString(",") );
+          hist_alg.setProperty("AxisAligned", false);
+          if(sourceGeometry.hasXDimension())
+          {
+            hist_alg.setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(a), sourceGeometry.getXDimension()));
+          }
+          if(sourceGeometry.hasYDimension())
+          {
+            hist_alg.setPropertyValue("BasisVectorY", extractFormattedPropertyFromDimension(VMD(b), sourceGeometry.getYDimension()));
+          }
+          if(sourceGeometry.hasZDimension())
+          {
+            hist_alg.setPropertyValue("BasisVectorZ", extractFormattedPropertyFromDimension(VMD(c), sourceGeometry.getZDimension()));
+          }
+          if(sourceGeometry.hasTDimension())
+          {
+            hist_alg.setPropertyValue("BasisVectorT", "");
+          }
+        }
+        else
+        {
+          hist_alg.setProperty("AxisAligned", true);
+          if(sourceGeometry.hasXDimension())
+          {
+            hist_alg.setPropertyValue("AlignedDimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
+          }
+          if(sourceGeometry.hasYDimension())
+          {
+            hist_alg.setPropertyValue("AlignedDimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
+          }
+          if(sourceGeometry.hasZDimension())
+          {
+            hist_alg.setPropertyValue("AlignedDimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
+          }
+          if(sourceGeometry.hasTDimension())
+          {
+            hist_alg.setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
+          }
         }
         hist_alg.setPropertyValue("OutputWorkspace", "Histo_ws");
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
@@ -264,7 +313,6 @@ namespace Mantid
 
       factory->initialize(result);
 
-      //vtkUnstructuredGrid* temp = static_cast<vtkUnstructuredGrid*>(factory->create());
       vtkDataSet* temp = factory->create();
 
       persistReductionKnowledge(temp, this->m_serializer, XMLDefinitions::metaDataId().c_str());

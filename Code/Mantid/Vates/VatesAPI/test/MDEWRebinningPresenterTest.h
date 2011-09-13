@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
-
+#include <vtkPlane.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MockObjects.h"
@@ -239,6 +239,136 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
+  }
+
+  void testUpdateModelWithApplyClipping()
+  {
+    //Set up a plane.
+    vtkPlane* plane = vtkPlane::New();
+    plane->SetOrigin(0, 0, 0);
+    plane->SetNormal(1, 0, 0);
+
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(true)); // Clipping applied.
+    EXPECT_CALL(*view, getWidth()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*view, getImplicitFunction()).Times(AtLeast(1)).WillRepeatedly(Return(plane)); //Should now need to fetch the implicit function
+    std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(AtLeast(1)).WillRepeatedly(Return(viewXML.c_str()));
+
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(2); //Clipping changed so should rebin.
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
+    presenter.updateModel();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
+    plane->Delete();
+  }
+
+  void testUpdateModelWithSameClipping()
+  {
+    //Set up a plane.
+    vtkPlane* firstClipping = vtkPlane::New();
+    firstClipping->SetOrigin(0, 0, 0);
+    firstClipping->SetNormal(1, 0, 0);
+
+    //set up another plane with identical parameters.
+    vtkPlane* secondClipping = vtkPlane::New();
+    secondClipping->SetOrigin(0, 0, 0);
+    secondClipping->SetNormal(1, 0, 0);
+
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(true)); // Clipping applied.
+    EXPECT_CALL(*view, getWidth()).WillRepeatedly(Return(1));
+
+    EXPECT_CALL(*view, getImplicitFunction())
+      .Times(AtLeast(1))
+      .WillOnce(Return(firstClipping))
+      .WillOnce(Return(secondClipping)); 
+    
+    //Should now need to fetch the implicit function
+    std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(AtLeast(1)).WillRepeatedly(Return(viewXML.c_str()));
+
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    
+    EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(2); //Should ask on first pass, but not for secondClipping as is identical to first.
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
+    presenter.updateModel();
+    presenter.updateModel();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
+    firstClipping->Delete();
+    secondClipping->Delete();
+  }
+
+  void testUpdateModelWithDifferentClipping()
+  {
+    //Set up a plane.
+    vtkPlane* firstClipping = vtkPlane::New();
+    firstClipping->SetOrigin(0, 0, 0);
+    firstClipping->SetNormal(1, 0, 0);
+
+    //set up another plane with different parameters.
+    vtkPlane* secondClipping = vtkPlane::New();
+    secondClipping->SetOrigin(0, 0, 0);
+    secondClipping->SetNormal(0, 1, 0); 
+
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(true)); // Clipping applied.
+    EXPECT_CALL(*view, getWidth()).WillRepeatedly(Return(1));
+
+    EXPECT_CALL(*view, getImplicitFunction())
+      .Times(AtLeast(1))
+      .WillOnce(Return(firstClipping))
+      .WillOnce(Return(secondClipping)); 
+    
+    //Should now need to fetch the implicit function
+    std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
+    EXPECT_CALL(*view, getAppliedGeometryXML()).Times(AtLeast(1)).WillRepeatedly(Return(viewXML.c_str()));
+
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    
+    EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(3); //Should ask on first pass, but not for secondClipping as is identical to first.
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, view, wsProvider);
+    presenter.updateModel();
+    presenter.updateModel();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
+    firstClipping->Delete();
+    secondClipping->Delete();
   }
 
 
