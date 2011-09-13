@@ -6,32 +6,67 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>634</height>
+    <width>930</width>
+    <height>724</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MultiSliceView</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="1">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="yAxisWidget" native="true"/>
-   </item>
-   <item row="1" column="0">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="xAxisWidget" native="true"/>
-   </item>
-   <item row="1" column="1">
-    <widget class="QFrame" name="renderFrame">
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="yAxisWidget" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="minimumSize">
       <size>
-       <width>700</width>
-       <height>600</height>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="xAxisWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QFrame" name="renderFrame">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>600</width>
+       <height>400</height>
       </size>
      </property>
      <property name="frameShape">
@@ -43,7 +78,20 @@
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="zAxisWidget" native="true"/>
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="zAxisWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
