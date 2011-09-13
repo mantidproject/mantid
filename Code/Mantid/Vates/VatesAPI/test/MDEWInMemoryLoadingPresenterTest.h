@@ -118,7 +118,7 @@ public:
 
     MockWorkspaceProvider* repository = new MockWorkspaceProvider;
     Mantid::API::Workspace_sptr ws = getGoodWorkspace();
-    EXPECT_CALL(*repository, fetchWorkspace(_)).Times(2).WillRepeatedly(Return(ws));
+    EXPECT_CALL(*repository, fetchWorkspace(_)).Times(1).WillRepeatedly(Return(ws));
 
     MDEWInMemoryLoadingPresenter presenter(view, repository, "_");
     

@@ -85,10 +85,14 @@ namespace Mantid
         const int nPointsX = nBinsX;
         Column column(nPointsX);
 
+        Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+        Mantid::coord_t in[3]; 
+        Mantid::coord_t out[3];
+
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
-          posX = minX + (i * incrementX); //Calculate increment in x;
+          in[0] = minX + (i * incrementX); //Calculate increment in x;
           
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
@@ -105,7 +109,10 @@ namespace Mantid
               }
               unstructPoint.isSparse = false;
             }
-            unstructPoint.pointId = points->InsertNextPoint(posX, 0, 0);
+
+            transform->apply(in, out);
+
+            unstructPoint.pointId = points->InsertNextPoint(out);
             column[i] = unstructPoint;
 
           }

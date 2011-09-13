@@ -28,6 +28,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    ws_sptr->setTransformFromOriginal(new NullTransform);
 
     vtkThresholdingHexahedronFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
@@ -54,6 +55,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    ws_sptr->setTransformFromOriginal(new NullTransform);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -75,7 +77,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
-
+    
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
@@ -156,6 +158,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
@@ -206,6 +209,7 @@ public:
 
     //Create the workspace. 20 bins in each dimension.
     m_ws_sptr = getFakeMDHistoWorkspace(1.0, 3, 100);
+    m_ws_sptr->setTransformFromOriginal(new NullTransform);
 
 //    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
 //    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(

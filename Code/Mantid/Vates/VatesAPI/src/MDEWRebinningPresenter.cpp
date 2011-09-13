@@ -220,7 +220,7 @@ namespace Mantid
     std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, Mantid::Geometry::IMDDimension_sptr dimension) const
     {
       std::string units = dimension->getUnits();
-      double length = 10; //Hack!
+      double length = 2; //Hack!
       size_t nbins = dimension->getNBins();
       std::string id = dimension->getDimensionId();
       return boost::str(boost::format("%s, %s, %s, %d, %f") %id %units %basis.toString(",") %length % nbins);
@@ -257,7 +257,7 @@ namespace Mantid
           double* pOrigin = plane->GetOrigin();
 
           V3D a(pNormal[0], pNormal[1], pNormal[2]);
-          V3D b(-a[1], a[0], 0.0);
+          V3D b(a[1], -a[0], 0.0);
           V3D c = a.cross_prod(b);
           VMD origin(pOrigin[0], pOrigin[1], pOrigin[2]);
           hist_alg.setPropertyValue("Origin", origin.toString(",") );

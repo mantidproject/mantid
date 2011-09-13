@@ -60,6 +60,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     pMockWs->addDimension(new FakeIMDDimension("x"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
@@ -81,6 +82,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     pMockWs->addDimension(new FakeIMDDimension("x"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
@@ -102,6 +104,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     pMockWs->addDimension(new FakeIMDDimension("x"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
@@ -125,6 +128,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillOnce(Return(VecIMDDimension_const_sptr(3))); //3 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
@@ -171,6 +175,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(3))); //3 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;

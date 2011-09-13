@@ -121,9 +121,6 @@ namespace VATES
     signal->SetName(m_scalarName.c_str());
     signal->SetNumberOfComponents(1);
 
-    //The following represent actual calculated positions.
-    double posX, posY, posZ;
-
     double signalScalar;
     const int nPointsX = nBinsX+1;
     const int nPointsY = nBinsY+1;
@@ -189,22 +186,27 @@ namespace VATES
 
     std::cout << tim << " to check all the signal values." << std::endl;
 
+    Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+    Mantid::coord_t in[3]; 
+    Mantid::coord_t out[3];
+            
     // Array with the point IDs (only set where needed)
     vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY*nPointsZ];
     index = 0;
     for (int z = 0; z < nPointsZ; z++)
     {
-      posZ = minZ + (z * incrementZ); //Calculate increment in z;
+      in[2] = (minZ + (z * incrementZ)); //Calculate increment in z;
       for (int y = 0; y < nPointsY; y++)
       {
-        posY = minY + (y * incrementY); //Calculate increment in y;
+        in[1] = (minY + (y * incrementY)); //Calculate increment in y;
         for (int x = 0; x < nPointsX; x++)
         {
           // Create the point only when needed
           if (pointNeeded[index])
           {
-            posX = minX + (x * incrementX); //Calculate increment in x;
-            pointIDs[index] = points->InsertNextPoint(posX, posY, posZ);
+            in[0] = (minX + (x * incrementX)); //Calculate increment in x;
+            transform->apply(in, out);
+            pointIDs[index] = points->InsertNextPoint(out);
           }
           index++;
         }

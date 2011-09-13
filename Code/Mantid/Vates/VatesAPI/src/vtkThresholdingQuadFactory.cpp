@@ -129,19 +129,25 @@ namespace Mantid
 
         std::cout << tim << " to check all the signal values." << std::endl;
 
+        Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+        Mantid::coord_t in[3]; 
+        Mantid::coord_t out[3];
+
         // Array with the point IDs (only set where needed)
         vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY];
         index = 0;
         for (int i = 0; i < nPointsX; i++)
         {
-          posX = minX + (i * incrementX); //Calculate increment in x;
+          in[0] = minX + (i * incrementX); //Calculate increment in x;
           for (int j = 0; j < nPointsY; j++)
           {
             // Create the point only when needed
             if (pointNeeded[index])
             {
-              posY = minY + (j * incrementY); //Calculate increment in y;
-              pointIDs[index] = points->InsertNextPoint(posX, posY, 0);
+              in[1] = minY + (j * incrementY); //Calculate increment in y;
+
+              transform->apply(in, out);
+              pointIDs[index] = points->InsertNextPoint(out);
             }
             index++;
           }

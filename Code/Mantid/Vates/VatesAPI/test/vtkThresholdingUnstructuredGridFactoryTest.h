@@ -29,7 +29,7 @@ public:
 
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
-
+    ws_sptr->setTransformFromOriginal(new NullTransform);
 //    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
 //    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
 //    EXPECT_CALL(*pMockWs, getXDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
@@ -70,7 +70,7 @@ public:
 
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
-
+    ws_sptr->setTransformFromOriginal(new NullTransform);
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
@@ -182,6 +182,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
@@ -238,6 +239,7 @@ public:
 
     //Create a 4D workspace 50 ^ 4
     m_ws_sptr = getFakeMDHistoWorkspace(1.0, 4, 50);
+    m_ws_sptr->setTransformFromOriginal(new NullTransform);
 
 //    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
 //    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));

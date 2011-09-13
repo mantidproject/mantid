@@ -20,6 +20,7 @@ using namespace Mantid::VATES;
 //=====================================================================================
 class vtkThresholdingQuadFactoryTest: public CxxTest::TestSuite
 {
+
 public:
   void testCreateMeshOnlyThrows()
   {
@@ -62,6 +63,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     pMockWs->addDimension(new FakeIMDDimension("x"));
     pMockWs->addDimension(new FakeIMDDimension("y"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
@@ -85,6 +87,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     pMockWs->addDimension(new FakeIMDDimension("x"));
     pMockWs->addDimension(new FakeIMDDimension("y"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
@@ -109,6 +112,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     pMockWs->addDimension(new FakeIMDDimension("x"));
     pMockWs->addDimension(new FakeIMDDimension("y"));
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
@@ -184,6 +188,7 @@ public:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    pMockWs->setTransformFromOriginal(new NullTransform);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(1))); //1 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
@@ -240,6 +245,7 @@ public:
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(2)));
 
     m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
+    m_ws_sptr->setTransformFromOriginal(new NullTransform);
   }
 
 	void testGenerateVTKDataSet()
