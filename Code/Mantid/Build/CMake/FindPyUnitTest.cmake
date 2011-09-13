@@ -43,20 +43,10 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file _helper_files )
                            ${_pyunit_outputdir}/${helper_file} )
   endforeach( file ${_helper_files} )
   
-  if( MSVC )
-    # MSVC needs separate tests for Release and Debug as they have to call different
-    # python executables so that the debug libraries will load
-    add_test (NAME ${_pyunit_testname}_Release_py CONFIGURATIONS Release
-              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
+
+  add_test (NAME ${_pyunit_testname}_py
+            COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
               ${PYTHON_EXECUTABLE} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
-    add_test (NAME ${_pyunit_testname}_Debug_py CONFIGURATIONS Debug
-              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-              ${PYTHON_EXECUTABLE_DEBUG} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )  
-  else()
-    add_test (NAME ${_pyunit_testname}_py
-              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-              ${PYTHON_EXECUTABLE} $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
-  endif()
 
   # add all of the individual tests - this introduces a race condition
   #foreach (part ${ARGN})
