@@ -213,7 +213,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingWorkspace=str(wksp)+"group")
+        wksp/=(256*256)
         mtd.deleteWorkspace(str(wksp)+"group")
+        mtd.releaseFreeMemory()
         SortEvents(InputWorkspace=wksp, SortBy="X Value")
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
@@ -359,6 +361,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             # first round of processing the sample
             if not self.getProperty("Sum"):
                 samRun = self._loadData(samRun, SUFFIX, filterWall)
+                SortEvents(InputWorkspace=samRun, SortBy="X Value")
                 NormaliseByCurrent(InputWorkspace=samRun, OutputWorkspace=samRun)
                 info = self._getinfo(samRun)
 
@@ -375,6 +378,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                             AdjX=self._xadjpixels, AdjY=self._yadjpixels)
                         CompressEvents(InputWorkspace=canRun, OutputWorkspace=canRun,
                             Tolerance=COMPRESS_TOL_TOF) # 5ns
+                    SortEvents(InputWorkspace=canRun, SortBy="X Value")
                     NormaliseByCurrent(InputWorkspace=canRun, OutputWorkspace=canRun)
                 else:
                     canRun = temp
@@ -399,10 +403,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                             #AdjX=self._xadjpixels, AdjY=self._yadjpixels)
                         #CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
                             #Tolerance=COMPRESS_TOL_TOF) # 5ns
+                    SortEvents(InputWorkspace=vanRun, SortBy="X Value")
                     NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     if canRun is not None:
                         vanRun -= canRun
-                    Integration(InputWorkspace='TOPAZ_3676',OutputWorkspace='VanSumTOF',IncludePartialBins='1')
+                    Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins='1')
                     vanRun = self._focus(vanRun, info)
                     ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
@@ -425,6 +430,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 FindDetectorsOutsideLimits(InputWorkspace=vanI,OutputWorkspace='VanMask',HighThreshold='1.0000000000000001e+300',LowThreshold='1.0e-300')
                 vanmask = mtd["VanMask"]
                 MaskDetectors(Workspace=vanI,MaskedWorkspace=vanmask)
+                MaskDetectors(Workspace=samRun,MaskedWorkspace=vanmask)
                 Divide(LHSWorkspace=samRun,RHSWorkspace=vanI,OutputWorkspace=samRun,AllowDifferentNumberSpectra='1')
                 Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
                 normalized = True
