@@ -141,7 +141,7 @@ endif ()
 set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
 include_directories( inc  ../Nexus/inc ../API/inc )
-target_link_libraries ( MDEvents ${MANTIDLIBS} Nexus )
+target_link_libraries ( MDEvents ${MANTIDLIBS} Nexus DataHandling )
 
 # Create test file projects
 if ( CXXTEST_FOUND )
