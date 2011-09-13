@@ -83,9 +83,6 @@ namespace Mantid
         signal->SetName(m_scalarName.c_str());
         signal->SetNumberOfComponents(1);
 
-        //The following represent actual calculated positions.
-        double posX, posY;
-
         float signalScalar;
         const int nPointsX = nBinsX+1;
         const int nPointsY = nBinsY+1;

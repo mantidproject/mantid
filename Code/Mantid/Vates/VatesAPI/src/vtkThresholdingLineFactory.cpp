@@ -77,9 +77,6 @@ namespace Mantid
         signal->SetName(m_scalarName.c_str());
         signal->SetNumberOfComponents(1);
 
-        //The following represent actual calculated positions.
-        double posX;
-
         UnstructuredPoint unstructPoint;
         float signalScalar;
         const int nPointsX = nBinsX;
