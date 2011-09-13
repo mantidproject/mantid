@@ -14,6 +14,13 @@
          number_of_elements="1"
          information_only="0">
        </StringVectorProperty>
+	   <StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End MDEWSource -->

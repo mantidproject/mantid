@@ -45,6 +45,7 @@ namespace Mantid
       virtual bool hasTDimensionAvailable() const = 0;
       virtual std::vector<double> getTimeStepValues() const = 0;
       virtual bool canReadFile() const = 0;
+      virtual const std::string& getGeometryXML() const = 0;
       virtual ~MDLoadingPresenter(){}
     };
 

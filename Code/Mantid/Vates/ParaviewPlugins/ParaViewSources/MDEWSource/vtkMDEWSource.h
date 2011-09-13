@@ -58,6 +58,7 @@ public:
 
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double);
+  const char* GetInputGeometryXML();
 
 protected:
   vtkMDEWSource();

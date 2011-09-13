@@ -41,7 +41,7 @@ namespace Mantid
     {
     public:
       MDEWLoadingPresenter(MDLoadingView* view);
-      std::string getGeometryXML() const;
+      const std::string& getGeometryXML() const;
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
       virtual ~MDEWLoadingPresenter();

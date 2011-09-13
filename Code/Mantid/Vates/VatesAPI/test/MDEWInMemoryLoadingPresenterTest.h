@@ -111,6 +111,25 @@ public:
     TSM_ASSERT("Should have worked! Workspace is of correct type and repository says ws is present.!", presenter.canReadFile());
   }
 
+  void testExtractMetadata()
+  {
+    //Setup view
+    MockMDLoadingView* view = new MockMDLoadingView;
+
+    MockWorkspaceProvider* repository = new MockWorkspaceProvider;
+    Mantid::API::Workspace_sptr ws = getGoodWorkspace();
+    EXPECT_CALL(*repository, fetchWorkspace(_)).Times(2).WillRepeatedly(Return(ws));
+
+    MDEWInMemoryLoadingPresenter presenter(view, repository, "_");
+    
+    //Test that it doesn't work when not setup.
+    TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should throw if not run first.", presenter.getGeometryXML(), std::runtime_error);
+    
+    //Test that it does work when setup.
+    presenter.executeLoadMetadata();
+    TSM_ASSERT("Should export geometry xml metadata on request.", !presenter.getGeometryXML().empty())
+  }
+
   void testExecution()
   {
     //Setup view

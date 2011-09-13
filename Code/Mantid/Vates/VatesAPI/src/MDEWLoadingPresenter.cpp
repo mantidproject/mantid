@@ -144,10 +144,10 @@ namespace Mantid
 
     /**
     Gets the geometry in a string format.
-    @return geometry string.
+    @return geometry string ref.
     @throw runtime_error if execute has not been run first.
     */
-    std::string MDEWLoadingPresenter::getGeometryXML() const
+    const std::string& MDEWLoadingPresenter::getGeometryXML() const
     {
       if(!m_isSetup)
       {

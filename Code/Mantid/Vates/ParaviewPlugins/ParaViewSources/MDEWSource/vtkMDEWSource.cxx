@@ -60,6 +60,26 @@ void vtkMDEWSource::SetWsName(std::string name)
   }
 }
 
+/**
+  Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
+  @return geometry xml const * char reference.
+*/
+const char* vtkMDEWSource::GetInputGeometryXML()
+{
+  if(m_presenter == NULL)
+  {
+    return "";
+  }
+  try
+  {
+    return m_presenter->getGeometryXML().c_str();
+  }
+  catch(std::runtime_error&)
+  {
+    return "";
+  }
+}
+
 
 int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
