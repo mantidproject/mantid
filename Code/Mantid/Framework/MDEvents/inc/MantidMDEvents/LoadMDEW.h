@@ -1,8 +1,9 @@
 #ifndef MANTID_MDEVENTS_LOADMDEW_H_
 #define MANTID_MDEVENTS_LOADMDEW_H_
-    
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 
@@ -60,6 +61,8 @@ namespace MDEvents
     /// Helper method
     template<typename MDE, size_t nd>
     void doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    void loadExperimentInfos(Mantid::API::IMDEventWorkspace_sptr ws);
 
     /// Open file handle
     ::NeXus::File * file;

@@ -125,10 +125,24 @@ namespace MDEvents
       // Write out some general information like # of dimensions
       file->writeData("dimensions", int32_t(nd));
       file->putAttr("event_type", MDE::getTypeName());
-      // TODO: notes, sample, logs, instrument, process, run_start
     }
 
-    // TODO: For each experiment!
+    // Save each NEW ExperimentInfo to a spot in the file
+    std::map<std::string,std::string> entries;
+    file->getEntries(entries);
+    for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
+    {
+      ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
+      std::string groupName = "experiment" + Strings::toString(i);
+      if (entries.find(groupName) == entries.end())
+      {
+        // Can't overwrite entries. Just add the new ones
+        file->makeGroup(groupName, "NXgroup", true);
+        file->putAttr("version", 1);
+        ei->saveExperimentInfoNexus(file);
+        file->closeGroup();
+      }
+    }
 
     // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
     file->putAttr("definition",  ws->id());

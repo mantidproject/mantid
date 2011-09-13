@@ -14,6 +14,8 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -55,98 +57,109 @@ public:
    * @param BoxStructureOnly :: true if you only compare the box structure and ignore differences in event lists
    */
   template<typename MDE, size_t nd>
-  static void do_compare_MDEW(boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws,
-      boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1,
+  static void do_compare_MDEW(boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1,
+      boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws2,
       bool BoxStructureOnly = false)
   {
-    TS_ASSERT(ws->getBox());
+    TS_ASSERT(ws1->getBox());
 
     // Compare the initial to the final workspace
-    TS_ASSERT_EQUALS(ws->getBox()->getNumChildren(), ws1->getBox()->getNumChildren());
+    TS_ASSERT_EQUALS(ws1->getBox()->getNumChildren(), ws2->getBox()->getNumChildren());
     if (!BoxStructureOnly)
-    { TS_ASSERT_EQUALS(ws->getNPoints(), ws1->getNPoints()); }
+    { TS_ASSERT_EQUALS(ws1->getNPoints(), ws2->getNPoints()); }
 
-    TS_ASSERT_EQUALS(ws->getBoxController()->getMaxId(), ws1->getBoxController()->getMaxId());
-    // Compare all the details of the box controllers
-    compareBoxControllers(*ws->getBoxController(), *ws1->getBoxController());
+    TS_ASSERT_EQUALS(ws1->getBoxController()->getMaxId(), ws2->getBoxController()->getMaxId());
+    // Compare all the details of the box1 controllers
+    compareBoxControllers(*ws1->getBoxController(), *ws2->getBoxController());
     
-    // Compare every box
+    // Compare every box1
     std::vector<IMDBox<MDE,nd>*> boxes;
     std::vector<IMDBox<MDE,nd>*> boxes1;
 
-    ws->getBox()->getBoxes(boxes, 1000, false);
-    ws1->getBox()->getBoxes(boxes1, 1000, false);
+    ws1->getBox()->getBoxes(boxes, 1000, false);
+    ws2->getBox()->getBoxes(boxes1, 1000, false);
 
     TS_ASSERT_EQUALS( boxes.size(), boxes1.size());
     if (boxes.size() != boxes1.size()) return;
 
     for (size_t j=0; j<boxes.size(); j++)
     {
-      IMDBox<MDE,nd>* box = boxes[j];
-      IMDBox<MDE,nd>* box1 = boxes1[j];
+      IMDBox<MDE,nd>* box1 = boxes[j];
+      IMDBox<MDE,nd>* box2 = boxes1[j];
 
-      //std::cout << "ID: " << box->getId() << std::endl;
-      TS_ASSERT_EQUALS( box->getId(), box1->getId() );
-      TS_ASSERT_EQUALS( box->getDepth(), box1->getDepth() );
-      TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );
-      for (size_t i=0; i<box->getNumChildren(); i++)
+      //std::cout << "ID: " << box1->getId() << std::endl;
+      TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
+      TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
+      TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
+      for (size_t i=0; i<box1->getNumChildren(); i++)
       {
-        TS_ASSERT_EQUALS( box->getChild(i)->getId(), box1->getChild(i)->getId() );
+        TS_ASSERT_EQUALS( box1->getChild(i)->getId(), box2->getChild(i)->getId() );
       }
       for (size_t d=0; d<nd; d++)
       {
-        TS_ASSERT_DELTA( box->getExtents(d).min, box1->getExtents(d).min, 1e-5);
-        TS_ASSERT_DELTA( box->getExtents(d).max, box1->getExtents(d).max, 1e-5);
+        TS_ASSERT_DELTA( box1->getExtents(d).min, box2->getExtents(d).min, 1e-5);
+        TS_ASSERT_DELTA( box1->getExtents(d).max, box2->getExtents(d).max, 1e-5);
       }
-      TS_ASSERT_DELTA( box->getVolume(), box1->getVolume(), 1e-3);
+      TS_ASSERT_DELTA( box1->getVolume(), box2->getVolume(), 1e-3);
       if (!BoxStructureOnly)
       {
-        TS_ASSERT_DELTA( box->getSignal(), box1->getSignal(), 1e-3);
-        TS_ASSERT_DELTA( box->getErrorSquared(), box1->getErrorSquared(), 1e-3);
-        TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
+        TS_ASSERT_DELTA( box1->getSignal(), box2->getSignal(), 1e-3);
+        TS_ASSERT_DELTA( box1->getErrorSquared(), box2->getErrorSquared(), 1e-3);
+        TS_ASSERT_EQUALS( box1->getNPoints(), box2->getNPoints() );
       }
-      TS_ASSERT( box->getBoxController() );
-      TS_ASSERT( box->getBoxController()==ws->getBoxController() );
+      TS_ASSERT( box1->getBoxController() );
+      TS_ASSERT( box1->getBoxController()==ws1->getBoxController() );
 
       // Are both MDGridBoxes ?
-      MDGridBox<MDE,nd>* gridbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
       MDGridBox<MDE,nd>* gridbox1 = dynamic_cast<MDGridBox<MDE,nd>*>(box1);
-      if (gridbox)
+      MDGridBox<MDE,nd>* gridbox2 = dynamic_cast<MDGridBox<MDE,nd>*>(box2);
+      if (gridbox1)
       {
         for (size_t d=0; d<nd; d++)
         {
-          TS_ASSERT_DELTA( gridbox->getBoxSize(d), gridbox1->getBoxSize(d), 1e-4);
+          TS_ASSERT_DELTA( gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), 1e-4);
         }
       }
 
       // Are both MDBoxes (with events)
-      MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
       MDBox<MDE,nd>* mdbox1 = dynamic_cast<MDBox<MDE,nd>*>(box1);
-      if (mdbox)
+      MDBox<MDE,nd>* mdbox2 = dynamic_cast<MDBox<MDE,nd>*>(box2);
+      if (mdbox1)
       {
-        TS_ASSERT( mdbox1 );
+        TS_ASSERT( mdbox2 );
         if (!BoxStructureOnly)
         {
-          const std::vector<MDE > & events = mdbox->getConstEvents();
           const std::vector<MDE > & events1 = mdbox1->getConstEvents();
-          TS_ASSERT_EQUALS( events.size(), events1.size() );
-          if (events.size() == events1.size() && events.size() > 2)
+          const std::vector<MDE > & events2 = mdbox2->getConstEvents();
+          TS_ASSERT_EQUALS( events1.size(), events2.size() );
+          if (events1.size() == events2.size() && events1.size() > 2)
           {
             // Check first and last event
-            for (size_t i=0; i<events.size(); i+=events.size()-1)
+            for (size_t i=0; i<events1.size(); i+=events1.size()-1)
             {
               for (size_t d=0; d<nd; d++)
               {
-                TS_ASSERT_DELTA( events[i].getCenter(d), events1[i].getCenter(d), 1e-4);
+                TS_ASSERT_DELTA( events1[i].getCenter(d), events2[i].getCenter(d), 1e-4);
               }
-              TS_ASSERT_DELTA( events[i].getSignal(), events1[i].getSignal(), 1e-4);
-              TS_ASSERT_DELTA( events[i].getErrorSquared(), events1[i].getErrorSquared(), 1e-4);
+              TS_ASSERT_DELTA( events1[i].getSignal(), events2[i].getSignal(), 1e-4);
+              TS_ASSERT_DELTA( events1[i].getErrorSquared(), events2[i].getErrorSquared(), 1e-4);
             }
           }
-          mdbox->releaseEvents();
           mdbox1->releaseEvents();
+          mdbox2->releaseEvents();
         }// Don't compare if BoxStructureOnly
-      } // is MDBox
+      } // is mdbox1
+    }
+
+    TS_ASSERT_EQUALS(ws1->getNumExperimentInfo(), ws2->getNumExperimentInfo());
+    if (ws1->getNumExperimentInfo() == ws2->getNumExperimentInfo())
+    {
+      for (uint16_t i=0; i < ws1->getNumExperimentInfo(); i++)
+      {
+        ExperimentInfo_sptr ei1 = ws1->getExperimentInfo(i);
+        ExperimentInfo_sptr ei2 = ws2->getExperimentInfo(i);
+        TS_ASSERT_EQUALS(ei1->getInstrument()->getName(), ei2->getInstrument()->getName());
+      }
     }
 
   }
@@ -169,15 +182,20 @@ public:
 //    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
 //        "InputWorkspace", "LoadMDEWTest_ws", "PeakParams", "30000, 5.0, 0.01", "RandomizeSignal", "1");
 
-    std::ostringstream fileStream;
-    fileStream << "LoadMDEWTest" << nd << ".nxs";
+    // ------ Make a ExperimentInfo entry ------------
+    ExperimentInfo_sptr ei(new ExperimentInfo());
+    ei->mutableRun().setProtonCharge(1.234);
+    Mantid::DataHandling::LoadInstrument loadInst;
+    loadInst.setParametersManually(ei, "", "CNCS", "");
+    loadInst.execManually();
+    ws1->addExperimentInfo(ei);
 
-    // Save it
+    // -------- Save it ---------------
     SaveMDEW saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDEWTest_ws" ) );
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", fileStream.str()) );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  "LoadMDEWTest" + Strings::toString(nd) + ".nxs") );
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
@@ -280,6 +298,11 @@ public:
     // Now there are 2002 boxes
     box->splitContents(12);
 
+    // And add an ExperimentInfo thingie
+    ExperimentInfo_sptr ei(new ExperimentInfo());
+    ei->mutableRun().setProtonCharge(2.345);
+    iws->addExperimentInfo(ei);
+
     // Add one event using addEvent(). The event will need to be written out to disk too.
     MDLeanEvent<nd> ev(1.0, 2.3);
     for (size_t d=0; d<nd; d++) ev.setCenter(d, 0.5);
@@ -341,20 +364,14 @@ public:
     // Make a 1D MDEventWorkspace
     boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws1 = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
-    // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
-        "InputWorkspace", "LoadMDEWTest_ws", "UniformParams", "10000", "RandomizeSignal", "1");
-
-    std::ostringstream fileStream;
-    fileStream << "LoadMDEWTest" << 2 << ".nxs";
 
     // Save it
     SaveMDEW saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDEWTest_ws" ) );
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", fileStream.str()) );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDEWTest2.nxs") );
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
@@ -364,9 +381,6 @@ public:
     //------ Now the loading -------------------------------------
     // Name of the output workspace.
     std::string outWSName("LoadMDEWTest_OutputWS");
-
-    CPUTimer tim;
-
     LoadMDEW alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -377,9 +391,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", true));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
-
-    std::cout << tim << " to do the entire MDEW loading without Events." << std::endl;
-
     boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>,2> >(AnalysisDataService::Instance().retrieve(outWSName));
 
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());

@@ -11,6 +11,9 @@
 #include <vector>
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include <boost/algorithm/string.hpp>
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -79,6 +82,78 @@ namespace Mantid
     }
 
 
+    /** Load the ExperimentInfo blocks, if any, in the NXS file
+     *
+     * @param ws :: MDEventWorkspace to load
+     */
+    void LoadMDEW::loadExperimentInfos(IMDEventWorkspace_sptr ws)
+    {
+      // First, find how many experimentX blocks there are
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      std::map<std::string,std::string>::iterator it = entries.begin();
+      std::vector<bool> hasExperimentBlock;
+      uint16_t numExperimentInfo = 0;
+      for (; it != entries.end(); ++it)
+      {
+        std::string name = it->first;
+        if (boost::starts_with(name, "experiment"))
+        {
+          try
+          {
+            uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
+            if (num+1 > numExperimentInfo)
+            {
+              numExperimentInfo = uint16_t(num+uint16_t(1));
+              hasExperimentBlock.resize(numExperimentInfo, false);
+              hasExperimentBlock[num] = true;
+            }
+          }
+          catch (boost::bad_lexical_cast & e)
+          { /* ignore */ }
+        }
+      }
+
+      // Now go through in order, loading and adding
+      for (uint16_t i=0; i < numExperimentInfo; i++)
+      {
+        std::string groupName = "experiment" + Strings::toString(i);
+        if (!numExperimentInfo)
+        {
+          g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
+          break;
+        }
+        file->openGroup(groupName, "NXgroup");
+        ExperimentInfo_sptr ei(new ExperimentInfo);
+        std::string parameterStr;
+        std::string instrumentXml;
+        std::string instrumentName;
+        std::string instrumentFilename;
+        try
+        {
+          // Get the sample, logs, instrument stuff
+          ei->loadExperimentInfoNexus(file, instrumentName, instrumentXml, instrumentFilename, parameterStr);
+          // Load the instrument from XML or file.
+          if (!instrumentName.empty() && !instrumentXml.empty())
+          {
+            Mantid::DataHandling::LoadInstrument loadInst;
+            loadInst.setParametersManually(ei, instrumentFilename, instrumentName, instrumentXml);
+            loadInst.execManually();
+          }
+          // Now do the parameter map
+          ei->readParameterMap(parameterStr);
+          // And set it in the workspace.
+          ws->addExperimentInfo(ei);
+        }
+        catch (std::exception & e)
+        {
+          g_log.information("Error loading section '" + groupName + "' of nxs file.");
+          g_log.information(e.what());
+        }
+        file->closeGroup();
+      }
+
+    }
 
 
     //----------------------------------------------------------------------------------------------
@@ -108,6 +183,9 @@ namespace Mantid
 
       // Use the factory to make the workspace of the right type
       IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDEventWorkspace(numDims, eventType);
+
+      // Now the ExperimentInfo
+      loadExperimentInfos(ws);
 
       // Wrapper to cast to MDEventWorkspace then call the function
       CALL_MDEVENT_FUNCTION(this->doLoad, ws);
