@@ -121,14 +121,14 @@ void MaskDetectors::exec()
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
   bool detsMasked = false;
   std::vector<detid_t>::const_iterator it;
-  Instrument_const_sptr instrument = WS->getInstrument()->baseInstrument();
+  Instrument_const_sptr instrument = WS->getInstrument();
   if ( !detectorList.empty() )
   {
     for (it = detectorList.begin(); it != detectorList.end(); ++it)
     {
       try
       {
-        if ( const Geometry::Detector* det = dynamic_cast<const Geometry::Detector*>(instrument->getDetector(*it).get()) )
+        if ( const Geometry::ComponentID det = instrument->getDetector(*it)->getComponentID() )
         {
           pmap.addBool(det,"masked",true);
           //std::cout << "Manually masking det " << det->getID() << std::endl;

@@ -1054,7 +1054,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
   const std::string & details =  pmap_node.data().front();
   Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-  Instrument_const_sptr instr = local_workspace->getInstrument()->baseInstrument();
+  Instrument_const_sptr instr = local_workspace->getInstrument();
   
   int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Poco::StringTokenizer::TOK_TRIM;
@@ -1073,7 +1073,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
     if (comp_name.find("detID:") != std::string::npos)
     {
       int detID = atoi(comp_name.substr(6).c_str());
-      comp = instr->getDetector(detID).get();
+      comp = instr->getDetector(detID)->getComponentID();
       if (!comp)
       {
         g_log.warning()<<"Cannot find detector "<<detID<<'\n';
@@ -1082,7 +1082,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
     }
     else
     {
-      comp = instr->getComponentByName(comp_name).get();
+      comp = instr->getComponentByName(comp_name)->getComponentID();
       if (!comp)
       {
         g_log.warning()<<"Cannot find component "<<comp_name<<'\n';

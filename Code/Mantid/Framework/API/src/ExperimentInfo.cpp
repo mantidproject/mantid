@@ -154,7 +154,7 @@ namespace API
   void ExperimentInfo::populateInstrumentParameters()
   {
     // Get instrument and sample
-    boost::shared_ptr<const Instrument> instrument = getInstrument()->baseInstrument();//getBaseInstrument();
+    boost::shared_ptr<const Instrument> instrument = getInstrument()->baseInstrument();
     Instrument* inst = const_cast<Instrument*>(instrument.get());
 
     // Get the data in the logfiles associated with the raw data
