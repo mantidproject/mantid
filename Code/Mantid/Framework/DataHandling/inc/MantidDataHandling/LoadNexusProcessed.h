@@ -105,12 +105,10 @@ namespace Mantid
       void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3);
       /// Splits a string of exactly four words into the separate words
       void getWordsInString(const std::string & words3, std::string & w1, std::string & w2, std::string & w3, std::string & w4);
-      ///Read the instrument parameter map
-      void readParameterMap(Mantid::NeXus::NXEntry & mtd_entry, API::MatrixWorkspace_sptr local_workspace);
+
       ///Read the bin masking information
       void readBinMasking(Mantid::NeXus::NXData & wksp_cls, API::MatrixWorkspace_sptr local_workspace);
-      /// Run LoadInstrument sub algorithm
-      void runLoadInstrument(const std::string & inst_name, API::MatrixWorkspace_sptr local_workspace);
+
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
       void loadBlock(Mantid::NeXus::NXDataSetTyped<double> & data, Mantid::NeXus::NXDataSetTyped<double> & errors, int64_t blocksize,
           int64_t nchannels, int64_t &hist, API::MatrixWorkspace_sptr local_workspace);

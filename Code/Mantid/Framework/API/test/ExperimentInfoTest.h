@@ -2,14 +2,23 @@
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/RegularExpression.h>
+#include <set>
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/SingletonHolder.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::NexusTestHelper;
 
 class ExperimentInfoTest : public CxxTest::TestSuite
 {
@@ -110,6 +119,158 @@ public:
 
     ExperimentInfo * ws2 = ws.cloneExperimentInfo();
     do_compare_ExperimentInfo(ws,*ws2);
+  }
+
+
+  struct fromToEntry
+  {
+    std::string path;
+    DateAndTime from;
+    DateAndTime to;
+  };
+
+  // Test that all the IDFs contain valid-to and valid-from dates and that
+  // for a single instrument none of these overlap
+  void testAllDatesInIDFs()
+  {
+    ExperimentInfo helper;
+
+    // Collect all IDF filenames and put them in a multimap where the instrument
+    // identifier is the key
+    std::multimap<std::string, fromToEntry> idfFiles;
+    std::set<std::string> idfIdentifiers;
+
+    Poco::RegularExpression regex(".*_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
+    Poco::DirectoryIterator end_iter;
+    for ( Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString("instrumentDefinition.directory")); dir_itr != end_iter; ++dir_itr )
+    {
+          if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
+
+          std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+
+          if ( regex.match(l_filenamePart) )
+          {
+            std::string validFrom, validTo;
+            helper.getValidFromTo(dir_itr->path(), validFrom, validTo);
+
+            size_t found;
+            found = l_filenamePart.find("_Definition");
+            fromToEntry ft;
+            ft.path = dir_itr->path();
+            ft.from.set_from_ISO8601_string(validFrom);
+            // Valid TO is optional
+            if (validTo.length() > 0)
+              ft.to.set_from_ISO8601_string(validTo);
+            else
+              ft.to.set_from_ISO8601_string("2100-01-01");
+
+            idfFiles.insert( std::pair<std::string,fromToEntry>(l_filenamePart.substr(0,found),
+              ft) );
+            idfIdentifiers.insert(l_filenamePart.substr(0,found));
+          }
+    }
+
+    // iterator to browse through the multimap: paramInfoFromIDF
+    std::multimap<std::string,fromToEntry> :: const_iterator it1, it2;
+    std::pair<std::multimap<std::string,fromToEntry>::iterator,
+    std::multimap<std::string,fromToEntry>::iterator> ret;
+
+    std::set<std::string>::iterator setIt;
+    for (setIt=idfIdentifiers.begin(); setIt != idfIdentifiers.end(); setIt++)
+    {
+      ret = idfFiles.equal_range(*setIt);
+      for (it1 = ret.first; it1 != ret.second; ++it1)
+      {
+        for (it2 = ret.first; it2 != ret.second; ++it2)
+        {
+          if (it1 != it2)
+          {
+            if ( it2->second.from >= it1->second.to || it2->second.to <= it1->second.from )
+            {
+              //std::cout << "\nOK\n";
+            }
+            else
+            {
+              // some more intelligent stuff here later
+              TS_ASSERT_EQUALS("dates in IDF overlap", "0");
+            }
+          }
+        }
+
+      }
+    }
+  }
+
+  //
+  void testHelperFunctions()
+  {
+    ExperimentInfo helper;
+    std::string boevs = helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
+    TS_ASSERT(!boevs.empty());
+  }
+
+  //
+  void testHelper_TOPAZ_No_To_Date()
+  {
+    ExperimentInfo helper;
+    std::string boevs = helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
+    TS_ASSERT(!boevs.empty());
+  }
+
+
+  void test_nexus()
+  {
+    NexusTestHelper th(false);
+    th.createFile("ExperimentInfoTest.nxs");
+    ExperimentInfo ws;
+    boost::shared_ptr<Instrument> inst1(new Instrument());
+    inst1->setName("MyTestInst");
+    inst1->setFilename("TEST_Definition.xml");
+    inst1->setXmlText("<This Is Fake XML></Did You Notice?>");
+    ws.setInstrument(inst1);
+
+    TS_ASSERT_THROWS_NOTHING( ws.saveExperimentInfoNexus(th.file); );
+
+    // ------------------------ Re-load the contents ----------------------
+    ExperimentInfo ws2;
+    std::string parameterStr;
+    std::string instrumentXml;
+    std::string instrumentName;
+    std::string instrumentFilename;
+    th.reopenFile();
+    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, instrumentName, instrumentXml, instrumentFilename, parameterStr) );
+    TS_ASSERT_EQUALS( instrumentName, "MyTestInst" );
+    TS_ASSERT_EQUALS( instrumentFilename, "TEST_Definition.xml" );
+    TS_ASSERT_EQUALS( instrumentXml, "<This Is Fake XML></Did You Notice?>" );
+    TS_ASSERT_EQUALS( parameterStr, "" );
+  }
+
+
+  void test_nexus_empty_instrument()
+  {
+    NexusTestHelper th(false);
+    th.createFile("ExperimentInfoTest.nxs");
+    ExperimentInfo ws;
+    boost::shared_ptr<Instrument> inst1(new Instrument());
+    inst1->setName("");
+    inst1->setFilename("");
+    inst1->setXmlText("");
+    ws.setInstrument(inst1);
+
+    TS_ASSERT_THROWS_NOTHING( ws.saveExperimentInfoNexus(th.file); );
+
+    // ------------------------ Re-load the contents ----------------------
+    ExperimentInfo ws2;
+    std::string parameterStr;
+    std::string instrumentXml;
+    std::string instrumentName;
+    std::string instrumentFilename;
+    th.reopenFile();
+    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, instrumentName, instrumentXml, instrumentFilename, parameterStr) );
+    TS_ASSERT_EQUALS( instrumentName, "" );
+    TS_ASSERT_EQUALS( instrumentFilename, "" );
+    TS_ASSERT_EQUALS( instrumentXml, "" );
+    TS_ASSERT_EQUALS( parameterStr, "" );
   }
 
 

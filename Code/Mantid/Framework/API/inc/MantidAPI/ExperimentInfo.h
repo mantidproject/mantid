@@ -57,10 +57,20 @@ namespace API
     int getRunNumber() const;
 
     void saveExperimentInfoNexus(::NeXus::File * file) const;
-    void loadExperimentInfoNexus(::NeXus::File * file);
+    void loadExperimentInfoNexus(::NeXus::File * file, std::string & instrumentName, std::string & instrumentXml, std::string & instrumentFilename, std::string & parameterStr);
 
+    void readParameterMap(const std::string & parameterStr);
+
+    // Helper methods (made public for tests)
+    std::string getWorkspaceStartDate();
+    static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom, std::string& outValidTo);
+    static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date);
 
   protected:
+
+    /// Static reference to the logger class
+    static Kernel::Logger& g_log;
+
     /// The information on the sample environment
     Kernel::cow_ptr<Sample> m_sample;
     /// The run information
@@ -69,6 +79,7 @@ namespace API
     boost::shared_ptr<Geometry::ParameterMap> m_parmap;
     /// The base (unparametrized) instrument
     Geometry::Instrument_const_sptr sptr_instrument;
+
 
   };
 

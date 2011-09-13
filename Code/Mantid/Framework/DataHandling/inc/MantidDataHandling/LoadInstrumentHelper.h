@@ -95,14 +95,6 @@ namespace Mantid
         //m_tempPosHolder.clear();
       }
 
-      /// Return from an IDF the values of the valid-from and valid-to attributes
-      static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
-                                 std::string& outValidTo);
-      /// Return full path of IDF given instrument name (e.g. GEM) and a date
-      static std::string getInstrumentFilename(const std::string& instName, const std::string& date);
-      /// Return workspace start date as an ISO 8601 string
-      static std::string getWorkspaceStartDate(const boost::shared_ptr<API::ExperimentInfo>& workspace);
-
       /// Set location (position) of comp as specified in XML location element
       static void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem, const double angleConvertConst,
                               const bool deltaOffsets=false);

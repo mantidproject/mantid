@@ -93,13 +93,6 @@ namespace Mantid
 
       /// write the algorithm and environment information
       int writeNexusProcessedProcess(const API::Workspace_const_sptr& localworkspace) const;
-      /// write the source XML file used, if it exists
-      bool writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
-                            const std::string& version) const;
-      /// write an instrument section - currently only the name
-      bool writeNexusInstrument(const Geometry::Instrument_const_sptr& instrument) const;
-     /// write instrument parameters
-      bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws) const;
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
 

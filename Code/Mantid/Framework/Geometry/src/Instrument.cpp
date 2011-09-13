@@ -886,19 +886,32 @@ namespace Mantid
     //--------------------------------------------------------------------------------------------
     /** Set the path to the original IDF .xml file that was loaded for this instrument */
     void Instrument::setFilename(const std::string & filename)
-    { m_filename = filename; }
+    {
+      if (m_isParametrized) m_instr->m_filename = filename;
+      else m_filename = filename;
+    }
 
     /** @return the path to the original IDF .xml file that was loaded for this instrument */
     const std::string & Instrument::getFilename() const
-    { return m_filename; }
+    {
+      if (m_isParametrized) return m_instr->getFilename();
+      else return m_filename;
+    }
 
     /** Set the Contents of the IDF .xml file that was loaded for this instrument */
     void Instrument::setXmlText(const std::string & XmlText)
-    { m_xmlText = XmlText; }
+    {
+      if (m_isParametrized) m_instr->m_xmlText = XmlText;
+      else m_xmlText = XmlText;
+    }
+
 
     /** @return Contents of the IDF .xml file that was loaded for this instrument */
     const std::string & Instrument::getXmlText() const
-    { return m_xmlText; }
+    {
+      if (m_isParametrized) return m_instr->getXmlText();
+      else return m_xmlText;
+    }
 
     //--------------------------------------------------------------------------------------------
     /** Save the instrument to an open NeXus file.

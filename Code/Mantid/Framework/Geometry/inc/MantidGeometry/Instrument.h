@@ -253,10 +253,10 @@ namespace Mantid
       Kernel::DateAndTime m_ValidTo;
 
       /// Path to the original IDF .xml file that was loaded for this instrument
-      std::string m_filename;
+      mutable std::string m_filename;
 
       /// Contents of the IDF .xml file that was loaded for this instrument
-      std::string m_xmlText;
+      mutable std::string m_xmlText;
 
       /// Pointer to the physical instrument, where this differs from the 'neutronic' one (indirect geometry)
       boost::shared_ptr<const Instrument> m_physicalInstrument;

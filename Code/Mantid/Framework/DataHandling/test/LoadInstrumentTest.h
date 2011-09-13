@@ -273,7 +273,8 @@ public:
 
     LoadInstrument alg;
     alg.initialize();
-    alg.setPropertyValue("Filename", "GEM_Definition.xml"); // File won't be loaded
+    alg.setPropertyValue("InstrumentName", "GEM");
+    alg.setPropertyValue("Filename", "GEM_Definition.xml");
     alg.setPropertyValue("Workspace", wsName);
     alg.setPropertyValue("XMLText", xmlText);
     alg.setPropertyValue("RewriteSpectraMap", "0"); //Do not overwrite the spectra map
@@ -292,6 +293,14 @@ public:
     alg.setParametersManually(ei, "", "GEM", "");
     TS_ASSERT_THROWS_NOTHING(alg.execManually(););
     TS_ASSERT_EQUALS ( ei->getInstrument()->getName(), "GEM");
+  }
+
+  void test_execManually_unknown_instrument_throws()
+  {
+    LoadInstrument alg;
+    ExperimentInfo_sptr ei(new ExperimentInfo());
+    alg.setParametersManually(ei, "", "Unknown", "");
+    TS_ASSERT_THROWS_ANYTHING(alg.execManually(););
   }
 
   void testExecSLS()
@@ -405,7 +414,7 @@ public:
 
   void testExecHRP()
   {
-    InstrumentDataService::Instance().remove("HRPD_Definition.xml");
+    InstrumentDataService::Instance().clear();
 
     LoadInstrument loaderHRP;
 

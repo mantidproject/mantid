@@ -94,7 +94,7 @@ namespace Mantid
                       "number to detector ID");
       declareProperty("XMLText", "",
           "Optional: Enter the full XML contents of the Instrument Definition File, instead of a"
-          "loading it from the file. You still need to specify the (original) filename.");
+          "loading it from the file. You still need to specify the instrument name.");
     }
 
 
@@ -114,9 +114,18 @@ namespace Mantid
         }
         else
         {
-          const std::string date = LoadInstrumentHelper::getWorkspaceStartDate(m_workspace);
-          m_filename = LoadInstrumentHelper::getInstrumentFilename(m_instName,date);
+          const std::string date = m_workspace->getWorkspaceStartDate();
+          m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
         }
+      }
+
+      if (!m_filename.empty())
+      {
+        // Remove the path from the filename for use with the InstrumentDataService
+        const std::string::size_type stripPath = m_filename.find_last_of("\\/");
+        std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
+        // Strip off "_Definition.xml"
+        m_instName = instrumentFile.substr(0,instrumentFile.find_first_of("_"));
       }
 
       // Load the XML text into a string
@@ -130,18 +139,12 @@ namespace Mantid
           m_xmlText += str + "\n";
           getline(in,str);
         }
+        in.close();
       }
 
-      // Remove the path from the filename for use with the InstrumentDataService
-      const std::string::size_type stripPath = m_filename.find_last_of("\\/");
-      std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
-
-      // We don't want the instrument name taken out of the XML file itself, it should come from the filename
-      // Strip off "_Definition.xml"
-      const std::string instrumentName = instrumentFile.substr(0,instrumentFile.find_first_of("_"));
-
       // Create our new instrument
-      m_instrument = Instrument_sptr(new Instrument(instrumentName));
+      // We don't want the instrument name taken out of the XML file itself, it should come from the filename (or the property)
+      m_instrument = Instrument_sptr(new Instrument(m_instName));
 
       // Save the XML file path and contents
       m_instrument->setFilename(m_filename);
@@ -173,13 +176,13 @@ namespace Mantid
       // Handle used in the singleton constructor for instrument file should append the value
       // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instrumentFile = instrumentFile + pRootElem->getAttribute("last-modified");
+      std::string instrumentNameMangled = Poco::Path(m_filename).getFileName() + pRootElem->getAttribute("last-modified");
 
       // Check whether the instrument is already in the InstrumentDataService
-      if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
+      if ( InstrumentDataService::Instance().doesExist(instrumentNameMangled) )
       {
         // If it does, just use the one from the one stored there
-        m_instrument = InstrumentDataService::Instance().retrieve(instrumentFile);
+        m_instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
       }
       else
       {
@@ -379,7 +382,7 @@ namespace Mantid
         if ( m_indirectPositions ) createNeutronicInstrument();
 
         // Add the instrument to the InstrumentDataService
-        InstrumentDataService::Instance().add(instrumentFile,m_instrument);
+        InstrumentDataService::Instance().add(instrumentNameMangled,m_instrument);
       }
       // release XML document
       pDoc->release();
@@ -390,8 +393,9 @@ namespace Mantid
       // populate parameter map of workspace 
       m_workspace->populateInstrumentParameters();
 
-      // check if default parameter file is also present
-      runLoadParameterFile();
+      // check if default parameter file is also present, unless loading from
+      if (!m_filename.empty())
+        runLoadParameterFile();
       
     }
 
@@ -410,6 +414,14 @@ namespace Mantid
       m_filename = getPropertyValue("Filename");
       m_instName = getPropertyValue("InstrumentName");
       m_xmlText = getPropertyValue("XMLText");
+
+      m_xmlText = Strings::strip(m_xmlText);
+      if (!m_xmlText.empty() && m_instName.empty())
+        throw std::invalid_argument("LoadInstrument: If you specify XMLText, you also need to specify the InstrumentName parameter.");
+
+      if (!m_xmlText.empty() && m_filename.empty())
+        throw std::invalid_argument("LoadInstrument: If you specify XMLText, you still need to specify the Filename parameter (to find the geometry cache file).");
+
 
       execManually();
 
@@ -1510,7 +1522,11 @@ namespace Mantid
     {
       // Get cached file name
       // If the instrument directory is writable, put them there else use temporary directory
-      std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
+      std::string cacheFilename;
+      if (m_filename.size() > 4)
+        cacheFilename = std::string(m_filename.begin(),m_filename.end()-3);
+      else
+        cacheFilename = m_instName + ".";
 
       cacheFilename += "vtp";
       // check for the geometry cache
@@ -1519,7 +1535,7 @@ namespace Mantid
       Poco::File instrDir(Poco::Path(defFile.path()).parent());
 
       bool cacheAvailable = true;
-      if ((!vtkFile.exists()) || defFile.getLastModified() > vtkFile.getLastModified())
+      if ((!vtkFile.exists()) || (defFile.exists() && (defFile.getLastModified() > vtkFile.getLastModified())))
       {
         g_log.information() << "Cache not available at " << cacheFilename << "\n";
 
@@ -1532,7 +1548,7 @@ namespace Mantid
       if( cacheAvailable == false )
       {
         g_log.information() << "Trying fallback " << fallbackFile.path() << "\n";
-        if ((!fallbackFile.exists()) || defFile.getLastModified() > fallbackFile.getLastModified())
+        if ((!fallbackFile.exists()) || (defFile.exists() && (defFile.getLastModified() > fallbackFile.getLastModified())))
         {
           cacheAvailable = false;
         }

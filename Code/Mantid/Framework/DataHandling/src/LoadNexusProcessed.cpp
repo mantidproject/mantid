@@ -113,10 +113,6 @@ void LoadNexusProcessed::exec()
 
   // "Open" the same file but with the C++ interface
   cppFile = new ::NeXus::File(root.m_fileID);
-//  cppFile->openGroup("mantid_workspace_1", "NXentry");
-//  std::cout << "About to open \n";
-//  cppFile->openGroup("sample", "NXsample");
-//  std::cout << "opened! \n";
 
   //Find out how many first level entries there are
   int64_t nperiods = static_cast<int64_t>(root.groups().size());
@@ -654,28 +650,56 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   }
 
   //Get information from all but data group
+  std::string parameterStr;
+  std::string instrumentXml;
+  std::string instrumentName;
+  std::string instrumentFilename;
 
   progress(progressStart+0.05*progressRange,"Reading the sample details...");
+
   // Hop to the right point
   cppFile->openPath(mtd_entry.path());
-  int sampleVersion = local_workspace->mutableSample().loadNexus(cppFile, "sample");
-  if (sampleVersion == 0)
+  try
   {
-    // Old-style (before Sep-9-2011) NXS processed
-    // sample field contains both the logs and the sample details
-    cppFile->openGroup("sample", "NXsample");
-    local_workspace->mutableRun().loadNexus(cppFile, "");
-    cppFile->closeGroup();
+    local_workspace->loadExperimentInfoNexus(cppFile, instrumentName, instrumentXml, instrumentFilename, parameterStr);
   }
-  else
+  catch (std::exception & e)
   {
-    // Newer style: separate "logs" field for the Run object
-    progress(progressStart+0.06*progressRange,"Reading the sample logs...");
-    local_workspace->mutableRun().loadNexus(cppFile, "logs");
+    g_log.information("Error loading Instrument section of nxs file");
+    g_log.information(e.what());
+  }
+  // ------------ Load the instrument from XML ----------------------------------------
+  progress(progressStart+0.1*progressRange,"Reading the instrument details...");
+  if (!instrumentName.empty() && !instrumentXml.empty())
+  {
+    IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    try
+    {
+      loadInst->setPropertyValue("InstrumentName", instrumentName);
+      loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", local_workspace);
+      loadInst->setProperty("RewriteSpectraMap", false);
+      loadInst->setPropertyValue("XMLText", instrumentXml);
+      loadInst->setPropertyValue("Filename", instrumentFilename);
+      loadInst->execute();
+    }
+    catch( std::invalid_argument&)
+    {
+      g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+    }
+    catch (std::exception & e)
+    {
+      g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+    }
   }
 
-  progress(progressStart+0.1*progressRange,"Reading the instrument details...");
+  // Now assign the spectra-detector map
   readInstrumentGroup(mtd_entry, local_workspace);
+
+  // Parameter map parsing
+  progress(progressStart+0.11*progressRange,"Reading the parameter maps...");
+  local_workspace->readParameterMap(parameterStr);
+
 
   if ( ! local_workspace->getAxis(1)->isSpectra() )
   { // If not a spectra axis, load the axis data into the workspace. (MW 25/11/10)
@@ -693,7 +717,6 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   }
 
   progress(progressStart+0.2*progressRange,"Reading the workspace history...");
-  readParameterMap(mtd_entry, local_workspace);
 
   return boost::static_pointer_cast<API::Workspace>(local_workspace);
 }
@@ -710,19 +733,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 {
   //Instrument information
   NXInstrument inst = mtd_entry.openNXInstrument("instrument");
-  std::string instname("");
-  try
-  {
-    instname = inst.getString("name");
-  }
-  catch(std::runtime_error & )
-  {
-    //return;
-  }
-  if( !instname.empty() )
-  {
-    runLoadInstrument(instname, local_workspace);
-  }
   if ( ! inst.containsGroup("detector") )
   {
     g_log.information() << "Detector block not found. The workspace will not contain any detector information.\n";
@@ -1040,60 +1050,6 @@ void LoadNexusProcessed::getWordsInString(const std::string & words4, std::strin
 }
 
 
-//-------------------------------------------------------------------------------------------------
-/**
- * Read the parameter map from the mantid_workspace_i/instrument_parameter_map group.
- * @param mtd_entry :: The entry object that points to the root node
- * @param local_workspace :: The workspace to read into
- */
-void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
-    API::MatrixWorkspace_sptr local_workspace)
-{
-  NXNote pmap_node = mtd_entry.openNXNote("instrument_parameter_map");
-  if( pmap_node.data().empty() ) return;
-
-  const std::string & details =  pmap_node.data().front();
-  Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-  Instrument_const_sptr instr = local_workspace->getInstrument();
-  
-  int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  options += Poco::StringTokenizer::TOK_TRIM;
-  Poco::StringTokenizer splitter(details, "|", options);
-
-  Poco::StringTokenizer::Iterator iend = splitter.end();
-  //std::string prev_name;
-  for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
-  {
-    Poco::StringTokenizer tokens(*itr, ";");
-    if( tokens.count() != 4 ) continue;
-    std::string comp_name = tokens[0];
-    //if( comp_name == prev_name ) continue; this blocks reading in different parameters of the same component. RNT
-    //prev_name = comp_name;
-    const Geometry::IComponent* comp = 0;
-    if (comp_name.find("detID:") != std::string::npos)
-    {
-      int detID = atoi(comp_name.substr(6).c_str());
-      comp = instr->getDetector(detID)->getComponentID();
-      if (!comp)
-      {
-        g_log.warning()<<"Cannot find detector "<<detID<<'\n';
-        continue;
-      }
-    }
-    else
-    {
-      comp = instr->getComponentByName(comp_name)->getComponentID();
-      if (!comp)
-      {
-        g_log.warning()<<"Cannot find component "<<comp_name<<'\n';
-        continue;
-      }
-    }
-    if( !comp ) continue;
-    pmap.add(tokens[1], comp, tokens[2], tokens[3]);
-  }
-}
-
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -1129,35 +1085,8 @@ void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_
 
 
 
-//-------------------------------------------------------------------------------------------------
-/** Run the sub-algorithm LoadInstrument
- * @param inst_name :: The name written in the Nexus file
- * @param localWorkspace :: The workspace to insert the instrument into
- */
-void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
-    API::MatrixWorkspace_sptr localWorkspace)
-{
 
-  IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-  try
-  {
-    loadInst->setPropertyValue("InstrumentName", inst_name);
-    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
-    loadInst->execute();
-  }
-  catch( std::invalid_argument&)
-  {
-    g_log.information("Invalid argument to LoadInstrument sub-algorithm");
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-  }
-
-}
 
 /**
  * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. This assumes that the

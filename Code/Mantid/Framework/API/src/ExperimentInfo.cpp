@@ -4,20 +4,32 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <map>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
+#include <Poco/RegularExpression.h>
+#include <Poco/SAX/ContentHandler.h>
+#include <Poco/SAX/SAXParser.h>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Poco::XML;
 
 namespace Mantid
 {
 namespace API
 {
 
+  Kernel::Logger& ExperimentInfo::g_log = Kernel::Logger::get("ExperimentInfo");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -376,27 +388,334 @@ namespace API
   }
 
 
+
+
+
+
+
+
+
+
+
+  // used to terminate SAX process
+  class DummyException {
+  public:
+    std::string m_validFrom;
+    std::string m_validTo;
+    DummyException(std::string validFrom, std::string validTo)
+      : m_validFrom(validFrom), m_validTo(validTo) {}
+  };
+
+  // SAX content handler for grapping stuff quickly from IDF
+  class myContentHandler : public Poco::XML::ContentHandler
+  {
+    virtual void startElement(const XMLString &, const XMLString & localName, const XMLString &, const Attributes & attrList )
+    {
+      if (localName == "instrument" )
+      {
+        throw DummyException(static_cast<std::string>(attrList.getValue("","valid-from")),
+            static_cast<std::string>(attrList.getValue("","valid-to")));
+      }
+    }
+    virtual void endElement(const XMLString &, const XMLString &, const XMLString & ) {}
+    virtual void startDocument() {}
+    virtual void endDocument() {}
+    virtual void characters(const XMLChar [], int , int ) {}
+    virtual void endPrefixMapping(const XMLString & ) {}
+    virtual void ignorableWhitespace(const XMLChar [], int , int ) {}
+    virtual void processingInstruction(const XMLString & , const XMLString & ) {}
+    virtual void setDocumentLocator(const Locator * ) {}
+    virtual void skippedEntity(const XMLString & ) {}
+    virtual void startPrefixMapping(const XMLString & , const XMLString & ) {}
+  };
+
+  //---------------------------------------------------------------------------------------
+  /** Return from an IDF the values of the valid-from and valid-to attributes
+  *
+  *  @param IDFfilename :: Full path of an IDF
+  *  @param[out] outValidFrom :: Used to return valid-from date
+  *  @param[out] outValidTo :: Used to return valid-to date
+  */
+  void ExperimentInfo::getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
+    std::string& outValidTo)
+  {
+        SAXParser pParser;
+        // Create on stack to ensure deletion. Relies on pParser also being local variable.
+        myContentHandler  conHand;
+        pParser.setContentHandler(&conHand);
+
+        try
+        {
+          pParser.parse(IDFfilename);
+        }
+        catch(DummyException &e)
+        {
+          outValidFrom = e.m_validFrom;
+          outValidTo = e.m_validTo;
+        }
+        catch(...)
+        {
+          // should throw some sensible here
+        }
+  }
+
+  //---------------------------------------------------------------------------------------
+  /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the
+  *   method returns current date.
+  *
+  *  @param workspace :: workspace to get information from
+  *  @return workspace start date as a string
+  */
+  std::string ExperimentInfo::getWorkspaceStartDate()
+  {
+    std::string date;
+    if ( m_run->hasProperty("run_start") )
+      date = m_run->getProperty("run_start")->value();
+    else
+    {
+      g_log.information("run_start not stored in workspace. Default to current date.");
+      date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+    }
+    return date;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /** A given instrument may have multiple IDFs associated with it. This method return an
+  *  identifier which identify a given IDF for a given instrument. An IDF filename is
+  *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
+  *  then is the part of a filename that identifies the IDF valid at a given date.
+  *
+  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+  *  @param date :: ISO 8601 date
+  *  @return full path of IDF
+  */
+  std::string ExperimentInfo::getInstrumentFilename(const std::string& instrumentName, const std::string& date)
+  {
+    g_log.debug() << "Looking for instrument XML file for " << instrumentName << " that is valid on '" << date << "'\n";
+    // Lookup the instrument (long) name
+    std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
+
+    // Get the search directory for XML instrument definition files (IDFs)
+    std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+
+    Poco::RegularExpression regex(instrument+"_Definition.*\\.xml", Poco::RegularExpression::RE_CASELESS );
+    Poco::DirectoryIterator end_iter;
+    DateAndTime d(date);
+    std::string mostRecentIDF; // store most recent IDF which is returned if no match for the date found
+    DateAndTime refDate("1900-01-31 23:59:59"); // used to help determine the most recent IDF
+    for ( Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr )
+    {
+      if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
+
+      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+      if ( regex.match(l_filenamePart) )
+      {
+        g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
+        std::string validFrom, validTo;
+        getValidFromTo(dir_itr->path(), validFrom, validTo);
+        g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
+        DateAndTime from(validFrom);
+        // Use a default valid-to date if none was found.
+        DateAndTime to;
+        if (validTo.length() > 0)
+          to.set_from_ISO8601_string(validTo);
+        else
+          to.set_from_ISO8601_string("2100-01-01");
+
+        if ( from <= d && d <= to )
+        {
+          return dir_itr->path();
+        }
+        if ( to > refDate )
+        {
+          refDate = to;
+          mostRecentIDF = dir_itr->path();
+        }
+      }
+    }
+
+    // No date match found return most recent
+    return mostRecentIDF;
+  }
+
+
   //--------------------------------------------------------------------------------------------
   /** Save the object to an open NeXus file.
    * @param file :: open NeXus file
    */
   void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File * file) const
   {
+    // Start with instrument info (name, file, full XML text)
+    file->makeGroup("instrument", "NXinstrument", true);
+    file->putAttr("version", 1);
+    file->writeData("name", getInstrument()->getName() );
+
+    // XML contents of instrument, as a NX note
+    file->makeGroup("instrument_xml", "NXnote", true);
+    file->writeData("data", getInstrument()->getXmlText() );
+    file->writeData("type", "text/xml"); // mimetype
+    file->writeData("description", "XML contents of the instrument IDF file.");
+    file->closeGroup();
+
+    file->writeData("instrument_source", Poco::Path(getInstrument()->getFilename()).getFileName());
+
+    // Now the parameter map, as a NXnote
+    const Geometry::ParameterMap& params = constInstrumentParameters();
+    std::string str = params.asString();
+    file->makeGroup("instrument_parameter_map", "NXnote", true);
+    file->writeData("data", str);
+    file->writeData("type", "text/plain"); // mimetype
+    file->closeGroup();
+
+    file->closeGroup(); // (close the instrument group)
+
     m_sample->saveNexus(file, "sample");
     m_run->saveNexus(file, "logs");
-    // TODO: Parameter map, instrument.
   }
 
   //--------------------------------------------------------------------------------------------
   /** Load the object from an open NeXus file.
    * @param file :: open NeXus file
+   * @param[out] instrumentName :: name of the instrument
+   * @param[out] instrumentXml :: full XML of the IDF of the corresponding IDF for the instrument to create.
+   *             This will need to be parsed by the caller (calling LoadInstrument algorithm)
+   * @param[out] instrumentFilename :: bare filename of the .XML file originally loaded
+   * @param[out] parameterStr :: special string for all the parameters.
+   *             Feed that to ExperimentInfo::readParameterMap() after the instrument is done.
    */
-  void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File * file)
+  void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File * file, std::string & instrumentName, std::string & instrumentXml,
+      std::string & instrumentFilename, std::string & parameterStr)
   {
-    m_sample.access().loadNexus(file, "sample");
-    m_run.access().loadNexus(file, "logs");
+    // First, the sample and then the logs
+    int sampleVersion = m_sample.access().loadNexus(file, "sample");
+    if (sampleVersion == 0)
+    {
+      // Old-style (before Sep-9-2011) NXS processed
+      // sample field contains both the logs and the sample details
+      file->openGroup("sample", "NXsample");
+      this->mutableRun().loadNexus(file, "");
+      file->closeGroup();
+    }
+    else
+    {
+      // Newer style: separate "logs" field for the Run object
+      this->mutableRun().loadNexus(file, "logs");
+    }
+
+    // Now the instrument source
+    std::string instrument_source = "";
+    instrumentXml = "";
+    instrumentName = "";
+
+    // Try to get the instrument file
+    file->openGroup("instrument", "NXinstrument");
+    file->readData("name", instrumentName);
+
+    int version = 0;
+    try { file->getAttr("version", version); } catch (...) {}
+    if (version == 0)
+    { // Old style: instrument_source and instrument_parameter_map were at the same level as instrument.
+      file->closeGroup();
+    }
+
+    file->readData("instrument_source", instrumentFilename);
+    file->openGroup("instrument_parameter_map", "NXnote");
+    file->readData("data", parameterStr);
+    file->closeGroup();
+
+    if (version > 0)
+    {
+      file->openGroup("instrument_xml", "NXnote");
+      file->readData("data", instrumentXml );
+      file->closeGroup();
+      file->closeGroup();
+    }
+
+    instrumentFilename = Strings::strip(instrumentFilename);
+    instrumentXml = Strings::strip(instrumentXml);
+    instrumentName = Strings::strip(instrumentName);
+    if (instrumentXml.empty() && !instrumentName.empty())
+    {
+      // XML was not included or was empty.
+      // Use the instrument name to find the file
+      try
+      {
+        std::string filename = this->getInstrumentFilename(instrumentName, getWorkspaceStartDate() );
+        instrumentFilename = Poco::Path(filename).getFileName();
+
+        // And now load the contents
+        instrumentXml = "";
+        std::string str;
+        std::ifstream in;
+        in.open(filename.c_str());
+        getline(in,str);
+        while ( in ) {
+          instrumentXml += str + "\n";
+          getline(in,str);
+        }
+        in.close();
+      }
+      catch (std::exception & e)
+      {
+        g_log.error() << "Error loading instrument IDF file for '" << instrumentName << "'." << std::endl;
+        g_log.error() << e.what() << std::endl;
+      }
+    }
+    else
+      g_log.debug() << "Using instrument IDF XML text contained in .nxs file." << std::endl;
   }
 
+
+  //-------------------------------------------------------------------------------------------------
+  /** Parse the result of ParameterMap.asString() into the ParameterMap
+   * of the current instrument. The instrument needs to have been loaded
+   * already, of course.
+   *
+   * @param parameterStr :: result of ParameterMap.asString()
+   */
+  void ExperimentInfo::readParameterMap(const std::string & parameterStr)
+  {
+    const std::string & details = parameterStr;
+    Geometry::ParameterMap& pmap = this->instrumentParameters();
+    Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
+
+    int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+    options += Poco::StringTokenizer::TOK_TRIM;
+    Poco::StringTokenizer splitter(details, "|", options);
+
+    Poco::StringTokenizer::Iterator iend = splitter.end();
+    //std::string prev_name;
+    for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
+    {
+      Poco::StringTokenizer tokens(*itr, ";");
+      if( tokens.count() != 4 ) continue;
+      std::string comp_name = tokens[0];
+      //if( comp_name == prev_name ) continue; this blocks reading in different parameters of the same component. RNT
+      //prev_name = comp_name;
+      const Geometry::IComponent* comp = 0;
+      if (comp_name.find("detID:") != std::string::npos)
+      {
+        int detID = atoi(comp_name.substr(6).c_str());
+        comp = instr->getDetector(detID).get();
+        if (!comp)
+        {
+          g_log.warning()<<"Cannot find detector "<<detID<<'\n';
+          continue;
+        }
+      }
+      else
+      {
+        comp = instr->getComponentByName(comp_name).get();
+        if (!comp)
+        {
+          g_log.warning()<<"Cannot find component "<<comp_name<<'\n';
+          continue;
+        }
+      }
+      if( !comp ) continue;
+      pmap.add(tokens[1], comp, tokens[2], tokens[3]);
+    }
+  }
 
 //  //--------------------------------------------------------------------------------------------
 //  /** Save the reference to the instrument to an open NeXus file.

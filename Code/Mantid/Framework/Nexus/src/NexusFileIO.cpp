@@ -173,53 +173,6 @@ using namespace DataObjects;
 
 
   //-----------------------------------------------------------------------------------------------
-  bool NexusFileIO::writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
-      const std::string& version) const
-  {
-    //
-    // The name used for the instrument XML definition is stored as part of the file, rather than
-    // the actual instrument data.
-    //
-    std::vector<std::string> attributes,avalues;
-    if(date != "")
-    {
-      attributes.push_back("date");
-      avalues.push_back(date);
-    }
-    if(version != "")
-    {
-      attributes.push_back("Version");
-      avalues.push_back(version);
-    }
-    if( ! writeNxValue<std::string>( "instrument_source", instrumentXml, NX_CHAR, attributes, avalues) )
-      return(false);
-    return(true);
-  }
-
-
-
-  //-----------------------------------------------------------------------------------------------
-  bool NexusFileIO::writeNexusInstrument(const Geometry::Instrument_const_sptr& instrument) const
-  {
-    NXstatus status;
-
-    //write instrument entry
-    status=NXmakegroup(fileID,"instrument","NXinstrument");
-    if(status==NX_ERROR)
-      return(false);
-    status=NXopengroup(fileID,"instrument","NXinstrument");
-    //
-    std::string name=instrument->getName();
-    std::vector<std::string> attributes,avalues;
-    if( ! writeNxValue<std::string>( "name", name, NX_CHAR, attributes, avalues) )
-      return(false);
-
-    status=NXclosegroup(fileID);
-
-    return(true);
-  }
-
-  //-----------------------------------------------------------------------------------------------
   //
   // write an NXdata entry with Float array values
   //
@@ -1101,20 +1054,6 @@ using namespace DataObjects;
 
   }
 
-
-  bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws) const
-  {
-    /** Writes the instrument parameter map if not empty. Must be called inside NXentry group.
-        @param ws :: The workspace
-        @return true for OK, false for error
-     */
-
-    const Geometry::ParameterMap& params = ws->constInstrumentParameters();
-    std::string str = params.asString();
-    if (str.empty()) str = " ";
-    return writeNxNote("instrument_parameter_map"," "," "," ",str);
-
-  }
 
   /**
    * Write bin masking information

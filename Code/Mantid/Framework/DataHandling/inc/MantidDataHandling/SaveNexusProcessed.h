@@ -70,6 +70,8 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
+      void getSpectrumList(std::vector<int> & spec, Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
+
       template<class T>
       static void appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes);
 

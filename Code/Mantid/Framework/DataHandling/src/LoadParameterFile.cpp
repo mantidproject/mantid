@@ -108,7 +108,7 @@ void LoadParameterFile::execManually(std::string filename, Mantid::API::Experime
   Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
   {
-    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", filename);
+    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
   }
 
   // 
