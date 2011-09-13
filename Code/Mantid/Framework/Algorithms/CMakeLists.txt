@@ -474,9 +474,6 @@ set ( TEST_FILES
 	test/WorkspaceGroupTest.h
 )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidAlgorithms/PrecompiledHeader.h MantidAlgorithms Algorithms SRC_FILES INC_FILES )
-
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp 
     src/FFTSmooth2.cpp
@@ -493,6 +490,8 @@ if(UNITY_BUILD)
   enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
+# Add a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidAlgorithms/PrecompiledHeader.h MantidAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

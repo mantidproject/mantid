@@ -261,8 +261,6 @@ set ( GMOCK_TEST_FILES
     test/MDGeometryXMLBuilderTest.h
 )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidGeometry/PrecompiledHeader.h MantidGeometry Geometry SRC_FILES INC_FILES )
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -288,6 +286,8 @@ if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
 endif ()
 
+# Add a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidGeometry/PrecompiledHeader.h MantidGeometry src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library

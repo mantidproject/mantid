@@ -315,11 +315,11 @@ def save_lines_to(lines, fullpath):
 def generate(subproject, classname, overwrite, args):
     
     # Directory at base of subproject
-    basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
+    basedir = os.path.join(os.path.curdir, "Framework",subproject)
     
-    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + args.subfolder + classname + ".h")
-    sourcefile = os.path.join(basedir, "src/" + args.subfolder + classname + ".cpp")
-    testfile = os.path.join(basedir, "test/" + classname + "Test.h")
+    headerfile = os.path.join(basedir, "inc", "Mantid" + subproject, args.subfolder + classname + ".h")
+    sourcefile = os.path.join(basedir, "src", args.subfolder + classname + ".cpp")
+    testfile = os.path.join(basedir, "test", classname + "Test.h")
     
     if args.header and not overwrite and os.path.exists(headerfile):
         print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile

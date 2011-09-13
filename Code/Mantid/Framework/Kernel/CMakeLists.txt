@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/Quat.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
+#	src/DataItem.cpp
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/Statistics.cpp
@@ -157,6 +158,7 @@ set ( INC_FILES
 	inc/MantidKernel/RandomNumberGenerator.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
+#	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/Statistics.h
@@ -257,15 +259,14 @@ set ( TEST_FILES
 	test/VisibleWhenPropertyTest.h
 )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidKernel/PrecompiledHeader.h MantidKernel Kernel SRC_FILES INC_FILES )
-
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 
+# Add a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER ( inc/MantidKernel/PrecompiledHeader.h MantidKernel src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library

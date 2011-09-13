@@ -4,9 +4,9 @@
 #
 #######################################################################
 
-
-# Change the output directory of a library target. Handles the incorrect behaviour
-# of MSVC
+#######################################################################
+# Change the output directory of a library target. Handles the incorrect 
+# behaviour of MSVC
 #   Parameters:
 #      TARGET_NAME - The name of the target
 #      OUTPUT_DIR - The directory to output the target

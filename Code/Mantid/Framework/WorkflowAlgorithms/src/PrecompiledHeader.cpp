@@ -1,0 +1,1 @@
+#include "MantidWorkflowAlgorithms/PrecompiledHeader.h"

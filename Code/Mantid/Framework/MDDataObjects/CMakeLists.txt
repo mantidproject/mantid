@@ -64,15 +64,13 @@ test/MDWorkspaceTest.h
 test/MDWorkspaceIteratorTest.h
 )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MDDataObjects/PrecompiledHeader.h MDDataObjects MDDataObjects SRC_FILES INC_FILES )
-
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(MDDataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MDDataObjects/PrecompiledHeader.h MDDataObjects src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( MDDataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

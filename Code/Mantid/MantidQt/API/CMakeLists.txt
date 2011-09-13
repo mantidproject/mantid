@@ -51,8 +51,6 @@ include_directories ( ../MantidWidgets )
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidQtAPI/PrecompiledHeader.h MantidQtAPI MantidQtAPI ALL_SRC INC_FILES )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -60,6 +58,8 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_API )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidQtAPI/PrecompiledHeader.h MantidQtAPI src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )

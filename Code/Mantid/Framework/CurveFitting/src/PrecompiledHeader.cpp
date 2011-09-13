@@ -1,0 +1,1 @@
+#include "MantidCurveFitting/PrecompiledHeader.h"

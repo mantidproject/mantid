@@ -245,8 +245,6 @@ set ( GMOCK_TEST_FILES
         test/ImplicitFunctionParameterParserFactoryTest.h
 )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidAPI/PrecompiledHeader.h MantidAPI API SRC_FILES INC_FILES )
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -258,6 +256,8 @@ if ( WIN32 )
   set ( WINSOCK ws2_32 )
 endif ()
 
+# Add a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidAPI/PrecompiledHeader.h MantidAPI src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

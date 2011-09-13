@@ -1,0 +1,1 @@
+#include "MantidMDEvents/PrecompiledHeader.h"

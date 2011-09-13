@@ -1,0 +1,1 @@
+#include "MantidVatesAPI/PrecompiledHeader.h"

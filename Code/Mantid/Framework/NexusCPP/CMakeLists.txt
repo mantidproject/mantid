@@ -23,7 +23,8 @@ add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 add_library ( NexusCPP ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( NexusCPP PROPERTIES OUTPUT_NAME MantidNexusCPP 
-                                         COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP )
+                                         COMPILE_DEFINITIONS IN_MANTID_NEXUSCPP 
+                                         COMPILE_FLAGS "/w44275 /w44251" )
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusCPP PROPERTY FOLDER "MantidFramework" )
 

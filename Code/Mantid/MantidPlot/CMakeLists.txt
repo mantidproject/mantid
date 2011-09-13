@@ -681,7 +681,7 @@ set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( src/PrecompiledHeader.h "" MantidPlot ALL_SRC INC_FILES )
+ADD_PRECOMPILED_HEADER( src/PrecompiledHeader.h "" src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 # The generated ui headers will go here:

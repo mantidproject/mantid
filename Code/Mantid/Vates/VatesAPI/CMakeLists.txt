@@ -158,9 +158,6 @@ test/IgnoreZerosThresholdRangeTest.h
 
 include_directories( inc )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidVatesAPI/PrecompiledHeader.h MantidVatesAPI VatesAPI SRC_FILES INC_FILES )
-
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )
   include( UnityBuild )
@@ -169,6 +166,8 @@ endif( UNITY_BUILD )
 
 # For Windows:
 add_definitions( -DIN_MANTID_VATESAPI )
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidVatesAPI/PrecompiledHeader.h MantidVatesAPI src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library( VatesAPI ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library

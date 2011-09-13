@@ -51,9 +51,6 @@ set ( TEST_FILES
 	test/SearchTest.h
 )
 
-# Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidICat/PrecompiledHeader.h MantidICat ICat SRC_FILES INC_FILES )
-
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(ICat SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -64,6 +61,8 @@ find_package ( OpenSSL REQUIRED )
 include_directories ( ${OPENSSL_INCLUDE_DIR} )
 add_definitions ( -DWITH_OPENSSL -DWITH_NONAMESPACES )
 
+# Add a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidICat/PrecompiledHeader.h MantidICat src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( ICat ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
