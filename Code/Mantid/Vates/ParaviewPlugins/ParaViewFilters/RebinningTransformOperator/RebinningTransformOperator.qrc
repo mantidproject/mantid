@@ -1,0 +1,5 @@
+  <RCC>
+    <qresource prefix="" >
+      <file>RebinningTransformOperator.png</file>
+    </qresource>
+  </RCC>

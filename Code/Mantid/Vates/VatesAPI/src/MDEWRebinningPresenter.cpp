@@ -143,7 +143,6 @@ namespace Mantid
     {
       using namespace Mantid::MDAlgorithms;
 
-
       if(m_view->getTimeStep() != m_timestep)
       {
         m_request->ask(RecalculateVisualDataSetOnly);
@@ -220,7 +219,7 @@ namespace Mantid
     std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, Mantid::Geometry::IMDDimension_sptr dimension) const
     {
       std::string units = dimension->getUnits();
-      double length = 2; //Hack!
+      double length = dimension->getMaximum() - dimension->getMinimum();
       size_t nbins = dimension->getNBins();
       std::string id = dimension->getDimensionId();
       return boost::str(boost::format("%s, %s, %s, %d, %f") %id %units %basis.toString(",") %length % nbins);
