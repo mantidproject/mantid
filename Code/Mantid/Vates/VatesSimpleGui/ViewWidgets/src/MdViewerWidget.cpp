@@ -131,6 +131,13 @@ void MdViewerWidget::setupPluginMode()
   this->setupMainView();
 }
 
+void MdViewerWidget::onWindowStateChange(Qt::WindowStates oldstate,
+                                         Qt::WindowStates newstate)
+{
+  UNUSED_ARG(oldstate);
+  UNUSED_ARG(newstate);
+}
+
 void MdViewerWidget::createAppCoreForPlugin()
 {
   if (!pqApplicationCore::instance())
@@ -277,8 +284,15 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 void MdViewerWidget::renderWorkspace(QString wsname)
 {
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->currentView->origSource = builder->createSource("sources", "MDEW Source", pqActiveObjects::instance().activeServer());
-  vtkSMPropertyHelper(this->currentView->origSource->getProxy(), "Mantid Workspace Name").Set(wsname.toStdString().c_str());
+  if (this->currentView->origSource)
+  {
+    builder->destroy(this->currentView->origSource);
+  }
+  this->currentView->origSource = builder->createSource("sources",
+                                                        "MDEW Source",
+                                                        pqActiveObjects::instance().activeServer());
+  vtkSMPropertyHelper(this->currentView->origSource->getProxy(),
+                      "Mantid Workspace Name").Set(wsname.toStdString().c_str());
   this->currentView->origSource->getProxy()->UpdateVTKObjects();
   this->renderAndFinalSetup();
 }

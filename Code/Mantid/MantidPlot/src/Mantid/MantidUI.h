@@ -504,6 +504,8 @@ private:
     // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
     std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
 
+    QMdiSubWindow *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
+
 };
 
 

@@ -72,7 +72,7 @@ MantidUI::MantidUI(ApplicationWindow *aw):
     m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
     m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
     m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
-    m_appWindow(aw)
+    m_appWindow(aw), m_vatesSubWindow(NULL)
 {
   // To be able to use them in queued signals they need to be registered
   static bool registered_addtional_types = false;
@@ -477,35 +477,46 @@ void MantidUI::importBoxDataTable()
 
 void MantidUI::showVatesSimpleInterface()
 {
-  std::cout << "MantidUI::showVatesSimpleInterface()" << std::endl;
   QString wsName = getSelectedWorkspaceName();
   try
   {
     IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if (!ws) return;
-    std::cout << "Vates Simple Interface coming soon." << std::endl;
 
-    QMdiSubWindow *usr_win = new QMdiSubWindow;
-    usr_win->setAttribute(Qt::WA_DeleteOnClose);
-    MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
-    if (vsui)
+    if (m_vatesSubWindow)
     {
-      vsui->setParent(usr_win);
-      usr_win->setWindowTitle("Vates Simple Interface");
-      vsui->setupPluginMode();
-      //m_appWindow->setGeometry(usr_win, vsui);
-      usr_win->setWidget(vsui);
-      usr_win->widget()->show();
-      vsui->renderWorkspace(wsName);
-      //vsui->show();
+      QWidget *vwidget = m_vatesSubWindow->widget();
+      vwidget->show();
+      qobject_cast<MantidQt::API::VatesViewerInterface *>(vwidget)->renderWorkspace(wsName);
+      return;
     }
     else
     {
-      delete usr_win;
-      return;
+      m_vatesSubWindow = new QMdiSubWindow;
+      m_vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+      MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
+      if (vsui)
+      {
+        connect(m_vatesSubWindow,
+                SIGNAL(windowStateChanged(Qt::WindowStates,Qt::WindowStates)),
+                vsui,
+                SLOT(onWindowStateChange(Qt::WindowStates,Qt::WindowStates)));
+        vsui->setParent(m_vatesSubWindow);
+        m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
+        vsui->setupPluginMode();
+        //m_appWindow->setGeometry(usr_win, vsui);
+        m_vatesSubWindow->setWidget(vsui);
+        m_vatesSubWindow->widget()->show();
+        vsui->renderWorkspace(wsName);
+      }
+      else
+      {
+        delete m_vatesSubWindow;
+        m_vatesSubWindow = NULL;
+        return;
+      }
     }
-
   }
   catch (...)
   {
