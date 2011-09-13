@@ -49,7 +49,7 @@ namespace MDAlgorithms
    */
   struct preprocessed_detectors{
     std::vector<Kernel::V3D>  det_dir; // unit vector pointing from the sample to the detector;
-    std::vector<size_t>       det_id;   // the detector ID;
+    std::vector<int32_t>      det_id;   // the detector ID;
     //
     bool is_defined(void)const{return det_dir.size()>0;}
     bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
@@ -73,23 +73,18 @@ namespace MDAlgorithms
     void init();
     void exec();
 
-    /// Map of all the detectors in the instrument
-    detid2det_map allDetectors;
-    /// Progress reporter (shared)
+      /// Progress reporter (shared)
     Kernel::ProgressBase * prog;
-    /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
-    Kernel::Matrix<double> mat;
-
+ 
   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
 
-    // the variable which keeps preprocessed positions of the detectors;
+    // the variable which keeps preprocessed positions of the detectors if any availible;
     static preprocessed_detectors det_loc;
     // the function, which calculates these positions;
     static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
 
-   template <class T>
-   void convertEventList(int workspaceIndex);
+
   };
 
 

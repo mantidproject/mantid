@@ -62,7 +62,7 @@ namespace PhysicalConstants
   /** 1 meV in Kelvin. Taken from <http://physics.nist.gov/cuu/Constants> on 09/09/2011. */
   static const double meVtoKelvin = 11.604519;
 
-  /**  K-neutron[m^-10] = sqrt(E_neutron[meV]/E_transtormation[mEv]);*/
+  /** Transformation coefficient to transform neutron energy into neutron wavevector: K-neutron[m^-10] = sqrt(E_neutron[meV]/E_transtormation[mEv]);*/
   static const double E_mev_toNeutronWavenumberSq=1.0e20*h_bar*h_bar/(2*NeutronMass*meV); //[meV*Angstrom^2]
 
   /**  Muon lifetime. Taken from MuLan experiment on 08/12/2008. */

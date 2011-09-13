@@ -66,9 +66,12 @@ ConvertToQ3DdE::ConvertToQ3DdE()
 ConvertToQ3DdE::~ConvertToQ3DdE()
 {
 }
+
 /// MDEvent dimensions used 
 typedef MDEvents::MDEvent<4> MDE;
-/// helper to create empty MDEventWorkspace woth 4 dimensions 
+//
+const double rad2deg = 180.0 / M_PI;
+/// helper function to create empty MDEventWorkspace with 4 dimensions 
 boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(const std::string dimensionNames[4],const std::string dimensionUnits[4],
                                                                               const std::vector<double> &dimMin,const std::vector<double> &dimMax)
 {
@@ -87,14 +90,14 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(cons
       // Build up the box controller
       MDEvents::BoxController_sptr bc = ws->getBoxController();
       bc->setSplitInto(5);
-      bc->setSplitThreshold(1500);
+//      bc->setSplitThreshold(1500);
+      bc->setSplitThreshold(10);
       bc->setMaxDepth(20);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
       return ws;
 }
-//
-const double rad2deg = 180.0 / M_PI;
+
 /// helper function to preprocess the detectors directions
 void 
 ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
@@ -189,10 +192,9 @@ void ConvertToQ3DdE::init()
        convert_log.error()<<"Can not get proper energy axis from processed workspace\n";
        throw(std::invalid_argument("Input workspace is not propwer converted to energy workspace"));
     }
-    std::vector<double> En_boundaries = pEnAxis->createBinBoundaries();
-    size_t lastInd = inWS2D->getAxis(0)->length();
-    double E_max = En_boundaries[lastInd];
-    double E_min = En_boundaries[0];
+    size_t lastInd = inWS2D->getAxis(0)->length()-1;
+    double E_max = inWS2D->getAxis(0)->operator()(lastInd);
+    double E_min = inWS2D->getAxis(0)->operator()(0);
 
     // get and check input energy (TODO: should energy be moved into Run?)
     double Ei = getProperty("EnergyInput");
@@ -217,7 +219,7 @@ void ConvertToQ3DdE::init()
        }
     }else{
         std::vector<double> dimMin(4),dimMax(4);
-        dimMin[0]=dimMin[1]=dimMin[2]=-50.;
+        dimMin[0]=dimMin[1]=dimMin[2]=-50.; // TODO: should it be a parameter? -- depends on how easy is to extend the Q-space in the md workspace;
         dimMin[3]=E_min;
         dimMax[0]=dimMax[1]=dimMax[2]= 50.;
         dimMax[3]=E_max;
@@ -232,15 +234,16 @@ void ConvertToQ3DdE::init()
     // copy experiment info into 
     ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
     uint16_t runIndex = ws->addExperimentInfo(ExperimentInfo);
-    UNUSED_ARG(runIndex); //TODO:
+ 
 
     // Initalize the matrix to 3x3 identity
-    mat = Kernel::Matrix<double>(3,3, true);
+    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
     Kernel::Matrix<double> gon =inWS2D->mutableRun().getGoniometerMatrix();
     // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
     mat = gon * ub;
+    std::vector<double> rotMat = mat.get_vector();
 
     const size_t numSpec  = inWS2D->getNumberHistograms();
     const size_t specSize = inWS2D->blocksize();    
@@ -251,9 +254,14 @@ void ConvertToQ3DdE::init()
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
     if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
  
+
     // allocate the events buffer;
-      std::vector<MDE> out_events;
-      out_events.reserve(specSize);
+   //   std::vector<MDE> out_events;
+   //   out_events.reserve(specSize);
+    // To track when to split up boxes
+     size_t eventsAdded = 0;
+     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+
 
       // Loop over every cell in the workspace, calling the abstract correction function
      // PARALLEL_FOR1(inWS2D)
@@ -261,9 +269,11 @@ void ConvertToQ3DdE::init()
       {
    //     PARALLEL_START_INTERUPT_REGION
         const MantidVec& E_transfer = inWS2D->readX(i);
-      //TODO: const MantidVec& Y = inWS2D->readY(i);
-      //TODO: const MantidVec& Error = inWS2D->readE(i);
+        const MantidVec& Signal     = inWS2D->readY(i);
+        const MantidVec& Error      = inWS2D->readE(i);
+        int32_t det_id              = det_loc.det_id[i];
     
+       coord_t QE[4];
         for (size_t j = 0; j < specSize; ++j)
         {
             double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
@@ -272,21 +282,27 @@ void ConvertToQ3DdE::init()
             double  ex = det_loc.det_dir[i].X();
             double  ey = det_loc.det_dir[i].Y();
             double  ez = det_loc.det_dir[i].Z();
+            double  qx  =  -ex*k_tr;
+            double  qy  =  -ey*k_tr;
             double  qz  = ki - ez*k_tr;
-            double  qy  = -ey*k_tr;
-            double  qx  = -ex*k_tr;
-            UNUSED_ARG(qx);
-            UNUSED_ARG(qy);
-            UNUSED_ARG(qz);
-
-          //performUnaryOperation(XIn,Y[j],E[j],YOut[j],EOut[j]);
+            QE[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);
+            QE[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);
+            QE[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
+            QE[3]  = (coord_t)E_tr;
+            float ErrSq = float(Error[j]*Error[j]);
+            ws->addEvent(MDE(float(Signal[j]),ErrSq,runIndex,det_id,QE));
         }
-        
-        progress.report();
- //       PARALLEL_END_INTERUPT_REGION
+  
+      // This splits up all the boxes according to split thresholds and sizes.
+        //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+        //ThreadPool tp(NULL);
+        ws->splitAllIfNeeded(NULL);
+        //tp.joinAll();
+
+   //       PARALLEL_END_INTERUPT_REGION
       }
  //    PARALLEL_CHECK_INTERUPT_REGION
-      
+      progress.report();      
 
 
     // Save the output
@@ -312,9 +328,6 @@ void ConvertToQ3DdE::init()
 //    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
 //    ThreadPool tp(ts);
 //
-//    // To track when to split up boxes
-//    size_t eventsAdded = 0;
-//    size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
 //    if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 //
 //    for (size_t wi=0; wi < in_ws->getNumberHistograms(); wi++)

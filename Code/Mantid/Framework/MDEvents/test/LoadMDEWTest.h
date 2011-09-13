@@ -106,7 +106,7 @@ public:
         TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
       }
       TS_ASSERT( box->getBoxController() );
-      TS_ASSERT_EQUALS( box->getBoxController(), ws->getBoxController() );
+      TS_ASSERT( box->getBoxController()==ws->getBoxController() );
 
       // Are both MDGridBoxes ?
       MDGridBox<MDE,nd>* gridbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
