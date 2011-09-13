@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Fri Sep  9 17:54:46 2011
+# Created: Tue Sep 13 11:34:59 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -465,9 +465,9 @@ class Ui_Frame(object):
         self.verticalLayout_7.addLayout(self.horizontalLayout_8)
         self.verticalLayout_6.addLayout(self.verticalLayout_7)
         self.verticalLayout_8.addWidget(self.flood_center_grpbox)
-        spacerItem14 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_8.addItem(spacerItem14)
         self.verticalLayout_9.addWidget(self.sensitivity_grpbox)
+        spacerItem14 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_9.addItem(spacerItem14)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
 
