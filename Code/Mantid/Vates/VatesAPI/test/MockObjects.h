@@ -284,7 +284,7 @@ Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, s
   return ws_sptr;
 }
 
-  static vtkFieldData* createFieldDataWithCharArray(std::string testData)
+  vtkFieldData* createFieldDataWithCharArray(std::string testData)
   {
     vtkFieldData* fieldData = vtkFieldData::New();
     vtkCharArray* charArray = vtkCharArray::New();
@@ -304,7 +304,7 @@ Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, s
     return fieldData;
   }
 
-  static std::string constrctGeometryOnlyXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping
+  std::string constrctGeometryOnlyXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping
     ,std::string xBins = "10",
     std::string yBins = "10",
     std::string zBins = "10",
@@ -364,7 +364,7 @@ Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, s
     return body;
   }
 
-  static std::string constructXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping)
+  std::string constructXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping)
   {
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
       "<MDInstruction>" +
