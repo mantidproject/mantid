@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DataItem.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -47,21 +47,14 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_API_DLL Workspace : public Kernel::DataItem
+class MANTID_API_DLL Workspace
 {
 public:
-    Workspace();
-    // DataItem interface
-    /// Name
-    virtual const std::string name() const { return this->getName(); }
-    /** Marks the workspace as safe for multiple threads to edit data simutaneously.
-     * Workspace creation is always considered to be a single threaded operation.
-     * @return true if the workspace is suitable for multithreaded operations, otherwise false.
-     */
-    virtual bool threadSafe() const { return true; }
-    /** Returns the name of the workspace **/
-    virtual std::string toString() const { return name(); }
+    /// Return the workspace typeID (normally the type name as a string)
+    virtual const std::string id() const = 0;
 
+    Workspace();
+    virtual ~Workspace() {}
     void virtual setTitle(const std::string&);
     void setComment(const std::string&);
     void setName(const std::string&);
@@ -73,6 +66,11 @@ public:
     /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
 
+    /** Marks the workspace as safe for multiple threads to edit data simutaneously.
+     * Workspace creation is always considered to be a single threaded operation.
+     * @return true if the workspace is suitable for multithreaded operations, otherwise false.
+     */
+    virtual bool threadSafe() const { return true; }
 
     /// Returns a reference to the WorkspaceHistory
     WorkspaceHistory& history() { return m_history; }
