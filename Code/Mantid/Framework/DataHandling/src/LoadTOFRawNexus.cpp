@@ -190,9 +190,14 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   X.resize( tof.size(), 0);
   X.assign( tof.begin(), tof.end() );
 
-  // Load the data
-  std::vector<uint32_t> data;
-  file->readData(m_dataField, data);
+  // Load the data. Coerce ints into double.
+  std::vector<double> data;
+  file->openData(m_dataField);
+  file->getDataCoerce(data);
+  file->closeData();
+
+  // TODO: Errors
+
   if (data.size() != numBins * numPixels)
   { file->close(); g_log.warning() << "Invalid size of '" << m_dataField << "' data in " << bankName << std::endl; return; }
 
@@ -225,23 +230,15 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
 
 //-------------------------------------------------------------------------------------------------
-/** Executes the algorithm. Reading in the file and creating and populating
- *  the output workspace
- *
- *  @throw Exception::FileError If the Nexus file cannot be found/opened
- *  @throw std::invalid_argument If the optional properties are set to invalid values
- */
-void LoadTOFRawNexus::exec()
+/** @return the name of the entry that we will load */
+std::string LoadTOFRawNexus::getEntryName(const std::string & filename)
 {
-  // The input properties
-  std::string filename = getPropertyValue("Filename");
-  m_signal = getProperty("Signal");
-
-  // ------------ Find the entry name we want. -------------------------------
   std::string entry_name = "entry";
   ::NeXus::File * file = new ::NeXus::File(filename);
   std::map<std::string,std::string> entries = file->getEntries();
   file->close();
+  delete file;
+
   if (entries.size() == 0)
     throw std::runtime_error("No entries in the NXS file!");
 
@@ -255,8 +252,27 @@ void LoadTOFRawNexus::exec()
   if (entries.size() > 1)
     g_log.notice() << "There are " << entries.size() << " NXentry's in the file. Loading entry '" << entry_name << "' only." << std::endl;
 
-  Progress * prog = new Progress(this, 0.0, 1.0, 10);
+  return entry_name;
+}
 
+//-------------------------------------------------------------------------------------------------
+/** Executes the algorithm. Reading in the file and creating and populating
+ *  the output workspace
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid values
+ */
+void LoadTOFRawNexus::exec()
+{
+  // The input properties
+  std::string filename = getPropertyValue("Filename");
+  m_signal = getProperty("Signal");
+
+  // Find the entry name we want.
+  std::string entry_name = getEntryName(filename);
+
+  // Count pixels and other setup
+  Progress * prog = new Progress(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);

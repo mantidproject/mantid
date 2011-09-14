@@ -100,6 +100,8 @@ private:
   void countPixels(const std::string &nexusfilename, const std::string & entry_name,
        std::vector<std::string> & bankNames);
 
+  std::string getEntryName(const std::string & filename);
+
   /// List of the absolute time of each pulse
   std::vector<Kernel::DateAndTime> pulseTimes;
 
