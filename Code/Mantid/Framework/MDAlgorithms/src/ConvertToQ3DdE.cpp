@@ -299,8 +299,8 @@ void ConvertToQ3DdE::exec(){
    //   std::vector<MDE> out_events;
    //   out_events.reserve(specSize);
     // To track when to split up boxes
-     size_t eventsAdded = 0;
-     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+  //   size_t eventsAdded = 0;
+  //   size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
 
 
       // Loop over every cell in the workspace, calling the abstract correction function
