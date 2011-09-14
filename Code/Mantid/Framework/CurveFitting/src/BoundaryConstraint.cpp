@@ -28,7 +28,6 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  * @param upperBound :: The upper bound
  */
 BoundaryConstraint::BoundaryConstraint(API::IFitFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
-m_activeParameterIndex(-1),
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true), 
@@ -36,8 +35,7 @@ m_hasUpperBound( true),
 m_lowerBound(lowerBound), 
 m_upperBound(upperBound)
 {
-  reset(fun,fun->parameterIndex(paramName)),
-  m_activeParameterIndex = fun->activeIndex(getIndex());
+  reset(fun,fun->parameterIndex(paramName));
 }
 
 /** Initialize the constraint from an expression.
@@ -125,18 +123,6 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
     throw;
   }
 
-  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
-
-  //if (m_activeParameterIndex < 0)
-  //{
-  //  std::ostringstream msg;
-  //   msg << "Constaint name " << m_parameterName << " is not one of the active parameter"
-  //    << " names of function " << fun->name() << ". Therefore"
-  //    << " this constraint applied to this funtion serves no purpose";
-  //  g_log.error(msg.str());
-  //  throw std::runtime_error(msg.str());
-  //}
-
   if (ilow >= 0)
   {
     setLower(values[ilow]);
@@ -167,16 +153,6 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
 
 void BoundaryConstraint::setParamToSatisfyConstraint()
 {
-  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
-
-  //if (m_activeParameterIndex < 0)
-  //{
-  //  g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
-  //    << " names of function " << getFunction()->name() << ". Therefore"
-  //    << " this constraint applied to this funtion serves no purpose";
-  //  return;
-  //}
-
   if ( !(m_hasLowerBound || m_hasUpperBound) )
   {
     g_log.warning() << "No bounds have been set on BoundaryConstraint for parameter " << m_parameterName << ". Therefore"
@@ -197,16 +173,6 @@ void BoundaryConstraint::setParamToSatisfyConstraint()
 
 double BoundaryConstraint::check()
 {
-  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
-
-  //if (m_activeParameterIndex < 0)
-  //{
-  //  g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
-  //    << " names of function " << getFunction()->name() << ". Therefore"
-  //    << " this constraint applied to this funtion serves no purpose";
-  //  return 0.0;
-  //}
-
   if ( !(m_hasLowerBound || m_hasUpperBound) )
   {
     g_log.warning() << "No bounds have been set on BoundaryConstraint for parameter " << m_parameterName << ". Therefore"

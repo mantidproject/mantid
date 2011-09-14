@@ -46,7 +46,6 @@ namespace Mantid
     public:
       /// Default constructor 
       BoundaryConstraint() : 
-        m_activeParameterIndex(-1),
         m_penaltyFactor(1000.0),
         m_parameterName(""),
         m_hasLowerBound( false), 
@@ -54,9 +53,8 @@ namespace Mantid
       {
       }
 
-        /// Constructor with no boundary arguments
-        BoundaryConstraint(const std::string& paramName) : 
-      m_activeParameterIndex(-1),
+      /// Constructor with no boundary arguments
+      BoundaryConstraint(const std::string& paramName) :
         m_penaltyFactor(1000.0),
         m_parameterName(paramName),
         m_hasLowerBound( false), 
@@ -119,16 +117,6 @@ namespace Mantid
       virtual std::string asString()const;
 
     private:
-
-      /// index of parameter in list of the active parameters passed by function. This number is
-      /// negative if not set
-      size_t m_activeParameterIndex;
-
-      /// instantiate m_activeParameterIndex if not already instantiated
-      //void instantiateParameterIndex(API::IFitFunction* fn);
-
-      //int determineParameterIndex(API::IFitFunction* fn);
-
 
       double m_penaltyFactor;
 
