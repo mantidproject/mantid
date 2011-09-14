@@ -131,8 +131,11 @@ namespace Mantid
 
         std::cout << tim << " to check all the signal values." << std::endl;
 
-        //Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
-        NullCoordTransform transform;
+        // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
+        Mantid::API::CoordTransform* transform = NULL;
+        if (m_useTransform)
+          transform = m_workspace->getTransformToOriginal();
+
         Mantid::coord_t in[3]; 
         Mantid::coord_t out[3];
         in[2] = 0;
@@ -149,8 +152,13 @@ namespace Mantid
             if (pointNeeded[index])
             {
               in[1] = minY + (j * incrementY); //Calculate increment in y;
-              transform.apply(in, out);
-              pointIDs[index] = points->InsertNextPoint(out);
+              if (transform)
+              {
+                transform->apply(in, out);
+                pointIDs[index] = points->InsertNextPoint(out);
+              }
+              else
+                pointIDs[index] = points->InsertNextPoint(in);
             }
             index++;
           }
@@ -213,8 +221,8 @@ namespace Mantid
       {
         if(this->hasSuccessor())
         {
-          m_successor->initialize(m_workspace);
           m_successor->setUseTransform(m_useTransform);
+          m_successor->initialize(m_workspace);
           return;
         }
         else

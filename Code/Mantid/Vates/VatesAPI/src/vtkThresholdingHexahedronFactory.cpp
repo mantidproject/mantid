@@ -60,8 +60,8 @@ namespace VATES
     {
       if(this->hasSuccessor())
       {
-        m_successor->initialize(m_workspace);
         m_successor->setUseTransform(m_useTransform);
+        m_successor->initialize(m_workspace);
         return;
       }
       else
@@ -188,13 +188,10 @@ namespace VATES
 
     std::cout << tim << " to check all the signal values." << std::endl;
 
-    //GetTransformFromOriginal doesn't follow RAII!
-    NullCoordTransform defaultTransform;
-    Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
-    if(!transform || !m_useTransform)
-    {
-      transform = &defaultTransform;
-    }
+    // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
+    Mantid::API::CoordTransform* transform = NULL;
+    if (m_useTransform)
+      transform = m_workspace->getTransformToOriginal();
 
     Mantid::coord_t in[3]; 
     Mantid::coord_t out[3];
@@ -214,8 +211,15 @@ namespace VATES
           if (pointNeeded[index])
           {
             in[0] = (minX + (x * incrementX)); //Calculate increment in x;
-            transform->apply(in, out);
-            pointIDs[index] = points->InsertNextPoint(out);
+            if (transform)
+            {
+              transform->apply(in, out);
+              pointIDs[index] = points->InsertNextPoint(out);
+            }
+            else
+            {
+              pointIDs[index] = points->InsertNextPoint(in);
+            }
           }
           index++;
         }

@@ -655,6 +655,21 @@ namespace MDEvents
       throw std::invalid_argument("The number of input dimensions in the CoordinateTransform object is not consistent with the number of dimensions in the input workspace.");
     if (m_transform->getOutD() != outD)
       throw std::invalid_argument("The number of output dimensions in the CoordinateTransform object is not consistent with the number of dimensions specified in the OutDimX, etc. properties.");
+
+    // Now the reverse transformation
+    m_transformToOriginal = NULL;
+    if (outD == inD)
+    {
+      // Can't reverse transform if you lost dimensions.
+      CoordTransformAffine * ctTo = new CoordTransformAffine(inD, outD);
+      Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
+      Matrix<coord_t> toMatrix = fromMatrix;
+      // Invert the affine matrix to get the reverse transformation
+      toMatrix.Invert();
+      ctTo->setMatrix( toMatrix );
+      m_transformToOriginal = ctTo;
+    }
+
   }
 
 
@@ -769,6 +784,9 @@ namespace MDEvents
     std::vector<double> unitScaling(outD, 1.0);
     m_transformFromOriginal = new CoordTransformAligned(in_ws->getNumDims(), outD,
         dimensionToBinFrom, origin, unitScaling);
+
+    // Now the reverse transformation
+    m_transformToOriginal = NULL;
   }
 
 
@@ -810,7 +828,7 @@ namespace MDEvents
 
     // Saves the geometry transformation from original to binned in the workspace
     outWS->setTransformFromOriginal( this->m_transformFromOriginal );
-    //outWS->setTransformToOriginal( this->m_transformToOriginal );
+    outWS->setTransformToOriginal( this->m_transformToOriginal );
     for (size_t i=0; i<m_bases.size(); i++)
       outWS->setBasisVector(i, m_bases[i]);
     outWS->setOrigin( this->m_origin );

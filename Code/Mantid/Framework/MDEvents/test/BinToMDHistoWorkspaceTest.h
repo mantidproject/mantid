@@ -357,6 +357,18 @@ public:
     TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ);
     CoordTransform * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
+    CoordTransform * ctTo = out->getTransformToOriginal();
+    TS_ASSERT(ctTo);
+    if (!ctTo) return;
+
+    // Round-trip transform
+    coord_t originalPoint[3] = {1.0, 2.0, 3.0};
+    coord_t * transformedPoint = new coord_t[3];
+    coord_t * originalBack = new coord_t[3];
+    ctFrom->apply(originalPoint, transformedPoint);
+    ctTo->apply(transformedPoint, originalBack);
+    for (size_t d=0; d<3; d++)
+    { TS_ASSERT_DELTA( originalPoint[d], originalBack[d], 1e-5); }
 
     AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
   }

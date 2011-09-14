@@ -163,8 +163,8 @@ namespace Mantid
       {
         if(this->hasSuccessor())
         {
-          m_successor->initialize(m_workspace);
           m_successor->setUseTransform(m_useTransform);
+          m_successor->initialize(m_workspace);
           return;
         }
         else
