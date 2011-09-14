@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_background.ui'
 #
-# Created: Tue Aug 23 06:54:05 2011
+# Created: Tue Sep 13 11:41:55 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!

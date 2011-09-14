@@ -7,6 +7,7 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_data_refl
 from LoadSNSRoi import LoadSNSRoi
+from SaveSNSRoi import SaveSNSRoi
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -16,6 +17,8 @@ try:
     from mantidsimple import *
     IS_IN_MANTIDPLOT = True
     from reduction import extract_workspace_name
+#    from reduction.instruments.reflectometer.LoadSNSRoi import LoadSNSRoi
+#    from reduction.instruments.reflectometer.SaveSNSRoi import SaveSNSRoi
 except:
     pass
 
@@ -25,21 +28,10 @@ class DataReflWidget(BaseWidget):
     """
     ## Widget name
     name = "Sample"      
+    GeneralSettings.instrument_name = 'REF_L'
+    peak_pixel_range = []
+    background_pixel_range = []
 
-#    # Place holder for data read from file
-#    _sample_detector_distance = None
-#    _sample_detector_distance_supplied = True
-#    _beam_diameter = None
-#    _beam_diameter_supplied = True
-#    _wavelength = None
-#    _wavelength_supplied = True
-#    _wavelength_spread = None
-#    
-#    # Internal data members for mask editor logic
-#    mask_file = ''
-#    mask_reload = False
-#    mask_ws = "__hfir_mask"
-    
     def __init__(self, parent=None, state=None, settings=None, name="REFL", data_proxy=None):      
         super(DataReflWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
@@ -47,185 +39,56 @@ class DataReflWidget(BaseWidget):
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
-#                
+
         self._summary = SummaryFrame(self)
         self.initialize_content()
         self._layout.addWidget(self._summary)
-#        
-#        self._masked_detectors = []
-#        
-#        if state is not None:
-#            self.set_state(state)
-#        else:
-#            instr = ReductionOptions()
-#            instr.instrument_name = name
-#            self.set_state(instr)
-#        
-#        # General GUI settings
-#        if settings is None:
-#            settings = GeneralSettings()
-#        self._settings = settings
-#        # Connect do UI data update
-#        self._settings.data_updated.connect(self._data_updated)
-#        
-#    def _data_updated(self, key, value):
-#        """
-#            Respond to application-level key/value pair updates.
-#            @param key: key string
-#            @param value: value string
-#        """
-#        if key == "sample_detector_distance":
-#            self._sample_detector_distance = value
-#            if not self._summary.sample_dist_chk.isChecked():
-#                self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
-#                util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
-#        elif key == "wavelength":
-#            self._wavelength = value
-#            if not self._summary.wavelength_chk.isChecked():
-#                self._summary.wavelength_edit.setText(QtCore.QString(str(value)))
-#                util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
-#        elif key == "wavelength_spread":
-#            self._wavelength_spread = value
-#            if not self._summary.wavelength_chk.isChecked():
-#                self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
-#        elif key == "beam_diameter":
-#            value_float = float(value)
-#            self._beam_diameter = "%-6.1f" % value_float
-#            if not self._summary.beamstop_chk.isChecked():
-#                self._summary.scale_beam_radius_edit.setText(QtCore.QString(self._beam_diameter))
-#                util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
-#
-#    def content(self):
-#        return self._summary
-#
+
     def initialize_content(self):
         
         # Validators
         self._summary.data_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_from_pixel))
         self._summary.data_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_to_pixel))
-        self._summary.data_background_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_background_from_pixel))
-        self._summary.data_background_to_pixel.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel))
+        self._summary.data_background_from_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_from_pixel1))
+        self._summary.data_background_to_pixel1.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel1))
+        self._summary.data_background_from_pixel2.setValidator(QtGui.QIntValidator(self._summary.data_background_from_pixel2))
+        self._summary.data_background_to_pixel2.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel2))
         self._summary.data_from_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_from_tof))
         self._summary.data_to_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_to_tof))
 
         # Event connections
-        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.data_peak_narrow_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_broad_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_discrete_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked_discrete)
         self.connect(self._summary.data_peak_load_roi, QtCore.SIGNAL("clicked()"), self._data_peak_load_roi_clicked)
-        self.connect(self._summary.data_background_load_button, QtCore.SIGNAL("clicked()"), self._data_background_roi_clicked)
+        self.connect(self._summary.data_peak_save_roi, QtCore.SIGNAL("clicked()"), self._data_peak_save_roi_clicked)
+        self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_peak_save_button)
+        self.connect(self._summary.data_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_peak_save_button)
 
-#        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
-#        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
-#        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
-#    
-#        self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
-#        self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
-#        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
-#        self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-#        self.connect(self._summary.normalization_time_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-#        self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-#
-#        # Q range
-#        self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
-#        self._summary.n_sub_pix_edit.setText(QtCore.QString("1"))
-#            
-#        self._summary.scale_edit.setText(QtCore.QString("1"))
-#            
-#        self._summary.instr_name_label.hide()    
-#        self._dark_clicked(self._summary.dark_current_check.isChecked())  
-#        
-#        # Mask Connections
-#        self.connect(self._summary.mask_browse_button, QtCore.SIGNAL("clicked()"), self._mask_browse_clicked)
-#        self.connect(self._summary.mask_plot_button, QtCore.SIGNAL("clicked()"), self._mask_plot_clicked)
-#        self.connect(self._summary.mask_check, QtCore.SIGNAL("clicked(bool)"), self._mask_checked)
-#  
-#        # Absolute scale connections and validators
-#        self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
-#        self._summary.scale_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_beam_radius_edit))
-#        self._summary.scale_att_trans_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_att_trans_edit))
-#        self.connect(self._summary.scale_data_browse_button, QtCore.SIGNAL("clicked()"), self._scale_data_browse)
-#        self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"), self._scale_data_plot_clicked)
-#        self.connect(self._summary.beamstop_chk, QtCore.SIGNAL("clicked(bool)"), self._beamstop_clicked)
-#        self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
-#        self._scale_clicked(self._summary.scale_chk.isChecked())
-#        
-#        if not self._in_mantidplot:
-#            self._summary.dark_plot_button.hide()
-#            self._summary.scale_data_plot_button.hide()
-#            
-#    def _mask_plot_clicked(self):        
-#        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
-#        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
-#        self._masked_detectors = []
-#        self.mask_reload = False
-#        
-#    def _mask_browse_clicked(self):
-#        fname = self.data_browse_dialog()
-#        if fname:
-#            self._summary.mask_edit.setText(fname)
-#            self.mask_reload = True              
-#        
-#    def _mask_checked(self, is_checked):
-#        self._summary.mask_edit.setEnabled(is_checked)
-#        self._summary.mask_browse_button.setEnabled(is_checked)
-#        self._summary.mask_plot_button.setEnabled(is_checked)
-#        
-#    def _scale_data_plot_clicked(self):
-#        self.show_instrument(file_name=self._summary.scale_data_edit.text)
-#        
-#    def _dark_plot_clicked(self):
-#        self.show_instrument(file_name=self._summary.dark_file_edit.text)
-#        
-#    def _normalization_clicked(self):
-#        if self._summary.normalization_none_radio.isChecked():
-#            self._summary.scale_chk.setChecked(False)
-#            self._scale_clicked(False)
-#            self._summary.scale_chk.setEnabled(False)
-#        else:
-#            self._summary.scale_chk.setEnabled(True)
-#            
-#    def _beamstop_clicked(self, is_checked):
-#        self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
-#        
-#        # Keep track of current value so we can restore it if the check box is clicked again
-#        if self._beam_diameter_supplied != is_checked:
-#            current_value = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
-#            self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(self._beam_diameter)))
-#            util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
-#            self._beam_diameter = current_value
-#            self._beam_diameter_supplied = is_checked
-#        
-#    def _scale_clicked(self, is_checked):
-#        self._summary.direct_beam_label.setEnabled(is_checked)
-#        self._summary.att_trans_label.setEnabled(is_checked)
-#        self._summary.beamstop_chk.setEnabled(is_checked)
-#        self._summary.scale_data_edit.setEnabled(is_checked)
-#        self._summary.scale_data_plot_button.setEnabled(is_checked)
-#        self._summary.scale_data_browse_button.setEnabled(is_checked)
-#        self._summary.scale_att_trans_edit.setEnabled(is_checked)
-#        self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.beamstop_chk.isChecked())
-#        
-#        self._summary.att_scale_factor_label.setEnabled(not is_checked)
-#        self._summary.scale_edit.setEnabled(not is_checked)
-#        
-#    def _scale_data_browse(self):
-#        fname = self.data_browse_dialog()
-#        if fname:
-#            self._summary.scale_data_edit.setText(fname)              
+        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
+        self.connect(self._summary.data_background_load_button, QtCore.SIGNAL("clicked()"), self._data_background_load_roi_clicked)
+        self.connect(self._summary.data_background_from_pixel1, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_background_save_button)
+        self.connect(self._summary.data_background_to_pixel1, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_background_save_button)
+        self.connect(self._summary.data_background_from_pixel2, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_background_save_button)
+        self.connect(self._summary.data_background_to_pixel2, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_background_save_button)
+        self.connect(self._summary.data_background_save_button, QtCore.SIGNAL("clicked()"), self._data_background_save_roi_clicked)
 
     def _data_background_clicked(self, is_checked):
         """
             This is reached when the user clicks the Background switch and will enabled or not
             the widgets that follow that button
         """
-        self._summary.data_background_from_pixel.setEnabled(is_checked)
-        self._summary.data_background_from_pixel_label.setEnabled(is_checked)
-        self._summary.data_background_to_pixel.setEnabled(is_checked)
-        self._summary.data_background_to_pixel_label.setEnabled(is_checked)
+        self._summary.data_background_from_pixel1.setEnabled(is_checked)
+        self._summary.data_background_from_pixel1_label.setEnabled(is_checked)
+        self._summary.data_background_to_pixel1.setEnabled(is_checked)
+        self._summary.data_background_to_pixel1_label.setEnabled(is_checked)
+        self._summary.data_background_from_pixel2.setEnabled(is_checked)
+        self._summary.data_background_from_pixel2_label.setEnabled(is_checked)
+        self._summary.data_background_to_pixel2.setEnabled(is_checked)
+        self._summary.data_background_to_pixel2_label.setEnabled(is_checked)
         self._summary.data_background_load_button.setEnabled(is_checked)
         self._summary.data_background_save_button.setEnabled(is_checked)
+        self._check_status_of_data_background_save_button()
         
     def _data_peak_switch_clicked(self, is_checked):
         """
@@ -238,6 +101,7 @@ class DataReflWidget(BaseWidget):
             self._summary.data_peak_to_pixel.setEnabled(True)
             self._summary.data_peak_nbr_selection_label.setEnabled(False)
             self._summary.data_peak_nbr_selection_value.setEnabled(False)
+            self._check_status_of_data_peak_save_button()
          
     def _data_peak_switch_clicked_discrete(self, is_checked):
         """
@@ -250,6 +114,7 @@ class DataReflWidget(BaseWidget):
             self._summary.data_peak_to_pixel.setEnabled(False)
             self._summary.data_peak_nbr_selection_label.setEnabled(True)
             self._summary.data_peak_nbr_selection_value.setEnabled(True)
+            self._check_status_of_data_peak_save_button()
 
     def _data_peak_load_roi_clicked(self):
         """
@@ -258,30 +123,126 @@ class DataReflWidget(BaseWidget):
         fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Data peak selection - Choose a ROI file")
         if fname:
             #retrieved from and to pixels values
-                myROI = LoadSNSRoi(filename=fname)
-                mode = myROI.getMode()
-                pixelRange = myROI.getPixelRange()
-                
-                if (mode == 'narrow/broad'):
-                    if self._summary.data_peak_discrete_switch.isChecked():
-                       QtGui.QMessageBox.warning(self, "Incompatibility of Formats!",
+            myROI = LoadSNSRoi(filename=fname)
+            mode = myROI.getMode()
+            pixelRange = myROI.getPixelRange()
+            self.peak_pixel_range = pixelRange
+            
+            if (mode == 'narrow/broad'):
+                if self._summary.data_peak_discrete_switch.isChecked():
+                   QtGui.QMessageBox.warning(self, "Incompatibility of Formats!",
                                                       "Selection type and ROI file loaded do not match !")
-                    else:
-                        from_pixel = pixelRange[0]
-                        to_pixel = pixelRange[1]
-                        self._summary.data_peak_from_pixel.setText(str(from_pixel))
-                        self._summary.data_peak_to_pixel.setText(str(to_pixel))
-                        self._summary.data_peak_nbr_selection_value.setText("N/A")
-                else: #file loaded is a discrete ROI-------
-                    if self._summary.data_peak_discrete_switch.isChecked():
-                        _txt = str(len(pixelRange)) + ' -> ' + myROI.retrieveFormatedDiscretePixelRange()
-                        self._summary.data_peak_nbr_selection_value.setText(_txt)
-                    else:
-                        self._summary.data_peak_nbr_selection_value.setText("N/A")
-                        QtGui.QMessageBox.warning(self, "Incompatibility of Formats!",
+                else:
+                    from_pixel = pixelRange[0]
+                    to_pixel = pixelRange[1]
+                    self._summary.data_peak_from_pixel.setText(str(from_pixel))
+                    self._summary.data_peak_to_pixel.setText(str(to_pixel))
+                    self._summary.data_peak_nbr_selection_value.setText("N/A")
+            else: #file loaded is a discrete ROI-------
+                if self._summary.data_peak_discrete_switch.isChecked():
+                    _txt = str(len(pixelRange)) + ' -> ' + myROI.retrieveFormatedDiscretePixelRange()
+                    self._summary.data_peak_nbr_selection_value.setText(_txt)
+                else:
+                    self._summary.data_peak_nbr_selection_value.setText("N/A")
+                    QtGui.QMessageBox.warning(self, "Incompatibility of Formats!",
                                                   "Selection type and ROI file loaded do not match !")
+            self._check_status_of_data_peak_save_button()
 
-    def _data_background_roi_clicked(self):
+    def _check_status_of_data_peak_save_button(self):
+        """
+            This function checks if the SAVE... button of the data peak can be enabled or not
+        """
+        button_status = False
+        if self._summary.data_peak_discrete_switch.isChecked(): #discrete mode
+            pixel_range = self._summary.data_peak_nbr_selection_value.text()
+            if pixel_range != 'N/A':
+                button_status = True
+        else:
+            from_pixel = self._summary.data_peak_from_pixel.text()
+            to_pixel = self._summary.data_peak_to_pixel.text()
+            if from_pixel != '' and to_pixel != '':
+                button_status = True
+        self._summary.data_peak_save_roi.setEnabled(button_status)
+        self._check_for_missing_fields()
+
+    def _check_for_missing_fields(self):
+
+        #peak selection
+        if self._summary.data_peak_discrete_switch.isChecked(): #discrete
+            self._summary.data_peak_from_pixel_missing.setText(" ")
+            self._summary.data_peak_to_pixel_missing.setText(" ")
+            range = self._summary.data_peak_nbr_selection_value.text()
+            if range == 'N/A':
+                self._summary.data_peak_discrete_selection_missing.setText("*")
+            else:
+                self._summary.data_peak_discrete_selection_missing.setText(" ")
+            
+        else: #broad/Narrow
+            self._summary.data_peak_discrete_selection_missing.setText(" ")
+            from_pixel = self._summary.data_peak_from_pixel.text()
+            if from_pixel == '':
+                self._summary.data_peak_from_pixel_missing.setText("*")
+            else:
+                self._summary.data_peak_from_pixel_missing.setText(" ")
+                
+            to_pixel = self._summary.data_peak_to_pixel.text()
+            if to_pixel == '':
+                self._summary.data_peak_to_pixel_missing.setText("*")
+            else:
+                self._summary.data_peak_to_pixel_missing.setText(" ")
+                
+        #background
+        is_checked = self._summary.data_background_switch.isChecked()
+        if is_checked:
+            from_pixel = self._summary.data_background_from_pixel1.text()
+            if from_pixel == '':
+                self._summary.data_background_from_pixel_missing.setText("*")
+            else:
+                self._summary.data_background_from_pixel_missing.setText(" ")
+                
+            to_pixel = self._summary.data_background_to_pixel1.text()
+            if to_pixel == '':
+                self._summary.data_background_to_pixel_missing.setText("*")
+            else:
+                self._summary.data_background_to_pixel_missing.setText(" ")
+            
+        else:
+            self._summary.data_background_from_pixel_missing.setText(" ")
+            self._summary.data_background_to_pixel_missing.setText(" ")
+                
+
+    def _data_peak_save_roi_clicked(self):
+        """
+            Reached by the save peak selection button
+        """
+        fname = self.data_browse_dialog(data_type="*.dat *.txt", title="Data peak ROI file - select or enter a new ROI file name")
+        if fname:
+            #get selection type
+            pixel_range = self.peak_pixel_range
+            if self._summary.data_peak_discrete_switch.isChecked(): #discrete mode
+                SaveSNSRoi(filename=fname, pixel_range=pixel_range, mode='discrete')
+            else: #Narrow/Broad
+                from_pixel = int(self._summary.data_peak_from_pixel.text())
+                to_pixel = int(self._summary.data_peak_to_pixel.text())
+                pixel_range = [from_pixel, to_pixel]
+                SaveSNSRoi(filename=fname, pixel_range=pixel_range, mode='narrow/broad')
+                
+    def _check_status_of_data_background_save_button(self):
+        """
+            This function will check if the background save ROI button can be enabled or not
+        """
+        is_checked = self._summary.data_background_switch.isChecked()
+
+        button_status = False
+        if is_checked is True:
+            from_pixel = self._summary.data_background_from_pixel1.text()
+            to_pixel = self._summary.data_background_to_pixel1.text()
+            if from_pixel != '' and to_pixel != '':
+                button_status = True
+        self._summary.data_background_save_button.setEnabled(button_status)
+        self._check_for_missing_fields()
+                 
+    def _data_background_load_roi_clicked(self):
         """
             Reached by the load background selection button
         """
@@ -291,221 +252,47 @@ class DataReflWidget(BaseWidget):
             myROI = LoadSNSRoi(filename=fname)
             mode = myROI.getMode()
             pixelRange = myROI.getPixelRange()
+            self.background_pixel_range = pixelRange
                 
-        if (mode == 'narrow/broad'):                
-            from_pixel = pixelRange[0]
-            to_pixel = pixelRange[1]
-            self._summary.data_background_from_pixel.setText(str(from_pixel))
-            self._summary.data_background_to_pixel.setText(str(to_pixel))
-        else:
-            QtGui.QMessageBox.warning(self, "Wrong data background ROI file format!",
+            if (mode == 'narrow/broad'):                
+                from_pixel = pixelRange[0]
+                to_pixel = pixelRange[1]
+                self._summary.data_background_from_pixel1.setText(str(from_pixel))
+                self._summary.data_background_to_pixel1.setText(str(to_pixel))
+            else:
+                _pixel_list = myROI.getPixelRange()
+                if len(_pixel_list) == 2:
+                    roi1_from = str(_pixel_list[0][0])
+                    roi1_to = str(_pixel_list[0][1])
+                    roi2_from = str(_pixel_list[1][0])
+                    roi2_to = str(_pixel_list[1][1])
+                    self._summary.data_background_from_pixel1.setText(str(roi1_from))
+                    self._summary.data_background_to_pixel1.setText(str(roi1_to))
+                    self._summary.data_background_from_pixel2.setText(str(roi2_from))
+                    self._summary.data_background_to_pixel2.setText(str(roi2_to))
+                else:
+                    QtGui.QMessageBox.warning(self, "Wrong data background ROI file format!",
                                              "                         Please check the ROI file!")                  
+        self._check_status_of_data_background_save_button()
+     
+    def get_data_peak_selection(self):
+        """
+            This function retrieves the from/to pixels of the data peak selection
+        """ 
+        mode = 'narrow/broad'
+        from_pixel = self._summary.data_peak_from_pixel.text()
+        to_pixel = self._summary.data_peak_to_pixel.text()
+        return [from_pixel, to_pixel]
+
                     
-#    def _det_offset_clicked(self, is_checked):
-#        self._summary.detector_offset_edit.setEnabled(is_checked)
-#        
-#        if is_checked:
-#            self._summary.sample_dist_chk.setChecked(not is_checked)
-#            self._summary.sample_dist_edit.setEnabled(not is_checked)
-#            self._sample_dist_clicked(not is_checked)
-#
-#    def _sample_dist_clicked(self, is_checked):
-#        self._summary.sample_dist_edit.setEnabled(is_checked)
-#        
-#        if is_checked:
-#            self._summary.detector_offset_chk.setChecked(not is_checked)
-#            self._summary.detector_offset_edit.setEnabled(not is_checked)
-#
-#        # Keep track of current value so we can restore it if the check box is clicked again
-#        if self._sample_detector_distance_supplied != is_checked:
-#            current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-#            self._summary.sample_dist_edit.setText(QtCore.QString(str(self._sample_detector_distance)))
-#            util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
-#            self._sample_detector_distance = current_value
-#            
-#            self._sample_detector_distance_supplied = is_checked
-#
-#    def _wavelength_clicked(self, is_checked):
-#        self._summary.wavelength_edit.setEnabled(is_checked)
-#        self._summary.wavelength_spread_edit.setEnabled(is_checked)
-#
-#        # Keep track of current value so we can restore it if the check box is clicked again
-#        if self._wavelength_supplied != is_checked:
-#            current_value = util._check_and_get_float_line_edit(self._summary.wavelength_edit)
-#            self._summary.wavelength_edit.setText(QtCore.QString(str(self._wavelength)))
-#            util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0)
-#            self._wavelength = current_value
-#    
-#            current_value = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
-#            self._summary.wavelength_spread_edit.setText(QtCore.QString(str(self._wavelength_spread)))
-#            util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
-#            self._wavelength_spread = current_value
-#            
-#            self._wavelength_supplied = is_checked
-#
-#
-#    def _dark_clicked(self, is_checked):
-#        self._summary.dark_file_edit.setEnabled(is_checked)
-#        self._summary.dark_browse_button.setEnabled(is_checked)
-#        self._summary.dark_plot_button.setEnabled(is_checked)
-#        
-#    def _dark_browse(self):
-#        fname = self.data_browse_dialog()
-#        if fname:
-#            self._summary.dark_file_edit.setText(fname)      
-#
-#    def set_state(self, state):
-#        """
-#            Populate the UI elements with the data from the given state.
-#            @param state: InstrumentDescription object
-#        """
-#        self._summary.instr_name_label.setText(QtCore.QString(state.instrument_name))
-#        #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-#        #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
-#        #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
-#       
-#        # Absolute scaling
-#        self._summary.scale_chk.setChecked(state.calculate_scale)
-#        self._summary.scale_edit.setText(QtCore.QString(str(state.scaling_factor)))
-#        self._summary.scale_data_edit.setText(QtCore.QString(state.scaling_direct_file))
-#        self._summary.scale_att_trans_edit.setText(QtCore.QString(str(state.scaling_att_trans)))
-#        
-#        self._summary.scale_beam_radius_edit.setText(QtCore.QString("%-6.1f" % state.scaling_beam_diam))
-#        if self._beam_diameter is None:
-#            self._beam_diameter = state.scaling_beam_diam
-#        self._beam_diameter_supplied = state.manual_beam_diam        
-#        self._summary.beamstop_chk.setChecked(state.manual_beam_diam)
-#        util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
-#        
-#        self._scale_clicked(self._summary.scale_chk.isChecked())
-#        
-#        # Detector offset input
-#        self._prepare_field(state.detector_offset != 0, 
-#                            state.detector_offset, 
-#                            self._summary.detector_offset_chk, 
-#                            self._summary.detector_offset_edit)
-#
-#        # Sample-detector distance
-#        self._prepare_field(state.sample_detector_distance != 0, 
-#                            state.sample_detector_distance, 
-#                            self._summary.sample_dist_chk, 
-#                            self._summary.sample_dist_edit)
-#        util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
-#        if self._sample_detector_distance is None:
-#            self._sample_detector_distance = state.sample_detector_distance
-#        self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
-#        
-#        # Sample-detector distance takes precedence over offset if both are non-zero
-#        self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
-#
-#        # Wavelength value
-#        self._prepare_field(state.wavelength != 0, 
-#                            state.wavelength, 
-#                            self._summary.wavelength_chk, 
-#                            self._summary.wavelength_edit,
-#                            state.wavelength_spread,
-#                            self._summary.wavelength_spread_edit)
-#        if self._wavelength is None:
-#            self._wavelength = state.wavelength
-#        if self._wavelength_spread is None:
-#            self._wavelength_spread = state.wavelength_spread
-#        self._wavelength_supplied = self._summary.wavelength_chk.isChecked()
-#        
-#        # Solid angle correction flag
-#        self._summary.solid_angle_chk.setChecked(state.solid_angle_corr)
-#        
-#        # Dark current
-#        self._summary.dark_current_check.setChecked(state.dark_current_corr)
-#        self._summary.dark_file_edit.setText(QtCore.QString(state.dark_current_data))
-#        self._dark_clicked(self._summary.dark_current_check.isChecked())  
-#        
-#        # Normalization
-#        if state.normalization == state.NORMALIZATION_NONE:
-#            self._summary.normalization_none_radio.setChecked(True)
-#        elif state.normalization == state.NORMALIZATION_TIME:
-#            self._summary.normalization_time_radio.setChecked(True)
-#        elif state.normalization == state.NORMALIZATION_MONITOR:
-#            self._summary.normalization_monitor_radio.setChecked(True)
-#        
-#        # Q range
-#        self._summary.n_q_bins_edit.setText(QtCore.QString(str(state.n_q_bins)))
-#        self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
-#        self._summary.log_binning_radio.setChecked(state.log_binning)
-#        
-#        # Mask
-#        self._summary.mask_edit.setText(QtCore.QString(str(state.mask_file)))
-#        self._summary.mask_check.setChecked(state.use_mask_file)
-#        self._mask_checked(state.use_mask_file)
-#        self._masked_detectors = state.detector_ids
-#        self.mask_reload = True
-#
-#    def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
-#        #to_display = str(stored_value) if is_enabled else ''
-#        edit_widget.setEnabled(is_enabled)
-#        chk_widget.setChecked(is_enabled)
-#        edit_widget.setText(QtCore.QString(str(stored_value)))
-#        if suppl_value is not None and suppl_edit is not None:
-#            suppl_edit.setEnabled(is_enabled)
-#            suppl_edit.setText(QtCore.QString(str(suppl_value)))
-#
-#    def get_state(self):
-#        """
-#            Returns an object with the state of the interface
-#        """
-#        m = ReductionOptions()
-#        
-#        m.instrument_name = self._summary.instr_name_label.text()
-#        
-#        # Absolute scaling
-#        m.scaling_factor = util._check_and_get_float_line_edit(self._summary.scale_edit)
-#        m.calculate_scale = self._summary.scale_chk.isChecked()
-#        m.scaling_direct_file = unicode(self._summary.scale_data_edit.text())
-#        m.scaling_att_trans = util._check_and_get_float_line_edit(self._summary.scale_att_trans_edit)
-#        m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
-#        m.manual_beam_diam = self._summary.beamstop_chk.isChecked()
-#        
-#        # Detector offset input
-#        if self._summary.detector_offset_chk.isChecked():
-#            m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
-#            
-#        # Sample-detector distance
-#        if self._summary.sample_dist_chk.isChecked():
-#            m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-#            
-#        # Wavelength value
-#        wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
-#        if self._summary.wavelength_chk.isChecked():
-#            m.wavelength = wavelength
-#            m.wavelength_spread = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
-#            
-#        # Solid angle correction
-#        m.solid_angle_corr = self._summary.solid_angle_chk.isChecked()
-#        
-#        # Dark current
-#        m.dark_current_corr = self._summary.dark_current_check.isChecked()
-#        m.dark_current_data = unicode(self._summary.dark_file_edit.text())
-#        
-#        # Normalization
-#        if self._summary.normalization_none_radio.isChecked():
-#            m.normalization = m.NORMALIZATION_NONE
-#        elif self._summary.normalization_time_radio.isChecked():
-#            m.normalization = m.NORMALIZATION_TIME
-#        elif self._summary.normalization_monitor_radio.isChecked():
-#            m.normalization = m.NORMALIZATION_MONITOR
-#            
-#        # Q range
-#        m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
-#        m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
-#        m.log_binning = self._summary.log_binning_radio.isChecked()
-#        
-#        # Mask detector IDs
-#        m.use_mask_file = self._summary.mask_check.isChecked()
-#        m.mask_file = unicode(self._summary.mask_edit.text())
-#        m.detector_ids = self._masked_detectors
-#        if self._in_mantidplot:
-#            if mtd.workspaceExists(self.mask_ws):
-#                masked_detectors = GetMaskedDetectors(self.mask_ws)
-#                ids_str = masked_detectors.getPropertyValue("DetectorList")
-#                m.detector_ids = map(int, ids_str.split(','))
-#        
-#        return m
+    def _data_background_save_roi_clicked(self):
+        """
+            Reached by the data background save button
+        """
+        fname = self.data_browse_dialog(data_type="*.dat *.txt", title="Background ROI file - select or enter a new ROI file name")
+        if fname:
+             peak_pixel_range = get_data_peak_selection() 
+            
+
+        
+

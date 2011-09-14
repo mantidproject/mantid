@@ -42,7 +42,7 @@ class LoadSNSRoi:
             fh.close()
             self.x_list = list(set(self.x_list))
             self.y_list = list(set(self.y_list))
-        self.calculatePixelRange()
+            self.calculatePixelRange()
             
     def retrieve_x_y_list(self, line):         
         args = line.split('_')

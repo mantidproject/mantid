@@ -6,7 +6,8 @@ import os
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_norm_refl
-from loadSNSRoi import LoadSNSRoi
+from LoadSNSRoi import LoadSNSRoi
+from SaveSNSRoi import SaveSNSRoi
 
 IS_IN_MANTIDPLOT = False
 try:

@@ -2,6 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
+
 # Created: Thu Sep  1 14:52:38 2011
 #      by: PyQt4 UI code generator 4.7.4
 #

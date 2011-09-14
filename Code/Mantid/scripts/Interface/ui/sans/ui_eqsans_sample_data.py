@@ -2,8 +2,10 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_sample_data.ui'
 #
+
 # Created: Fri Sep  9 17:54:46 2011
 #      by: PyQt4 UI code generator 4.7.4
+
 #
 # WARNING! All changes made in this file will be lost!
 
