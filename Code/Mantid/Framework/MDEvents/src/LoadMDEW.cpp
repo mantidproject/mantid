@@ -1,19 +1,18 @@
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/LoadMDEW.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include <vector>
-#include "MantidKernel/Memory.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidDataHandling/LoadInstrument.h"
+#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
