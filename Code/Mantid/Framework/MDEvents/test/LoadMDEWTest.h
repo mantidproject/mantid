@@ -15,7 +15,6 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
