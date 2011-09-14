@@ -35,18 +35,17 @@ void LoadTOFRawNexus::init()
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
       "The name of the NeXus file to load");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output));
-
-//  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-//  mustBePositive->setLower(0);
-//  declareProperty("SpectrumMin", 0, mustBePositive);
-//  declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
-//  declareProperty(new Kernel::ArrayProperty<int>("SpectrumList"));
+  declareProperty("Signal", 1,
+      "Number of the signal to load from the file. Default is 1 = time_of_flight.\n"
+      "Some NXS files have multiple data fields giving binning in other units (e.g. d-spacing or momentum).\n"
+      "Enter the right signal number for your desired field.");
 }
 
 
 
 //-------------------------------------------------------------------------------------------------
-/** Goes thoguh a histogram NXS file and counts the number of pixels
+/** Goes thoguh a histogram NXS file and counts the number of pixels.
+ * It also determines the name of the data field and axis to load
  *
  * @param nexusfilename :: nxs file path
  * @param entry_name :: name of the entry
@@ -54,8 +53,8 @@ void LoadTOFRawNexus::init()
  * @param numBins :: returns # of bins (length of Y vector, add one to get the number of X points)
  * @param bankNames :: returns the list of bank names
  */
-void countPixels(const std::string &nexusfilename, const std::string & entry_name,
-    size_t & numPixels, size_t & numBins, std::vector<std::string> & bankNames)
+void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::string & entry_name,
+     std::vector<std::string> & bankNames)
 {
   numPixels = 0;
   numBins = 0;
@@ -191,8 +190,27 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
  */
 void LoadTOFRawNexus::exec()
 {
+  // The input properties
   std::string filename = getPropertyValue("Filename");
+  m_signal = getProperty("Signal");
+
+  // ------------ Find the entry name we want. -------------------------------
   std::string entry_name = "entry";
+  ::NeXus::File * file = new ::NeXus::File(filename);
+  std::map<std::string,std::string> entries = file->getEntries();
+  file->close();
+  if (entries.size() == 0)
+    throw std::runtime_error("No entries in the NXS file!");
+
+  // name "entry" is normal, but "entry-state0" is the name of the real state for live nexus files.
+  if (entries.find(entry_name) == entries.end())
+    entry_name = "entry-state0";
+  // If that doesn't exist, just take the first entry.
+  if (entries.find(entry_name) == entries.end())
+    entry_name = entries.begin()->first;
+  // Tell the user
+  if (entries.size() > 1)
+    g_log.notice() << "There are " << entries.size() << " NXentry's in the file. Loading entry '" << entry_name << "' only." << std::endl;
 
   Progress * prog = new Progress(this, 0.0, 1.0, 10);
 

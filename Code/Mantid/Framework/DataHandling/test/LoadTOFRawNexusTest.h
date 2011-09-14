@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/AlgorithmHelper.h"
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -125,7 +126,31 @@ public:
     // Quick axes check.
     TS_ASSERT_EQUALS( ws1->getAxis(0)->length(), ws2->getAxis(0)->length())
     TS_ASSERT_EQUALS( ws1->getAxis(1)->length(), ws2->getAxis(1)->length())
+  }
 
+
+  /** Refs #3716: Different signals (binned in q-space, d-space, tof) */
+  void test_signal()
+  {
+    std::string filename = "/home/8oz/data/NOM_2011_09_13T20_59_00Z_histo.nxs";
+    Mantid::API::FrameworkManager::Instance();
+    Mantid::DataHandling::LoadTOFRawNexus ld;
+    ld.initialize();
+    try{ ld.setPropertyValue("Filename", filename); }
+    catch (...)
+    { std::cout << "Test not completed due to missing data file " << filename << std::endl;
+      return;
+    }
+    ld.setPropertyValue("Signal", "5");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+
+    Mantid::API::MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("outWS"));
+    );
   }
 
 };
