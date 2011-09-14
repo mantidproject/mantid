@@ -12,6 +12,8 @@ set ( SRC_FILES
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
+	src/Instrument/InstrumentDefinitionParser.cpp
+	src/Instrument/LoadInstCompsIntoOneShape.cpp
 	src/Instrument/NearestNeighbours.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
@@ -110,6 +112,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
+	inc/MantidGeometry/Instrument/LoadInstCompsIntoOneShape.h
 	inc/MantidGeometry/Instrument/NearestNeighbours.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
@@ -199,11 +203,13 @@ set ( TEST_FILES
 	test/IMDDimensionFactoryTest.h
 	test/IMDDimensionTest.h
 	test/IndexingUtilsTest.h
+	test/InstrumentDefinitionParserTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
 	test/LaszloIntersectionTest.h
 	test/LineIntersectVisitTest.h
 	test/LineTest.h
+	test/LoadInstCompsIntoOneShapeTest.h
 	test/MDBoxImplicitFunctionTest.h
 	test/MDCellTest.h
 	test/MDDimensionTest.h

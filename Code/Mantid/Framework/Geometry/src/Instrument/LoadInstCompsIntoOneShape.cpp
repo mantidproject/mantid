@@ -1,37 +1,30 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidDataHandling/LoadInstCompsIntoOneShape.h"
-#include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
-#include "MantidAPI/Progress.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/LoadInstCompsIntoOneShape.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Interpolation.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Interpolation.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/DOM/AbstractNode.h>
-#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Exception.h>
 #include <sstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
@@ -45,11 +38,10 @@ using Poco::XML::NodeFilter;
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace Geometry
   {
 
     using namespace Kernel;
-    using namespace API;
     using namespace Geometry;
 
 /** Takes as input a <type> element containing a <combine-components-into-one-shape>, and 
@@ -361,5 +353,5 @@ std::string LoadInstCompsIntoOneShape::getShapeCoorSysComp(Geometry::ICompAssemb
   }
 }
 
-} // namespace DataHandling
+} // namespace Geometry
 } // namespace Mantid

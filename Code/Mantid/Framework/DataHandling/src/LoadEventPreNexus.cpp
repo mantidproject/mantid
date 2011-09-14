@@ -23,7 +23,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CPUTimer.h"
@@ -331,7 +330,7 @@ void LoadEventPreNexus::exec()
   if (this->num_pulses > 0)
   {
     // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
-    // (this is used in LoadInstrumentHelper to find the right instrument file to use).
+    // (this is used in LoadInstrument to find the right instrument file to use).
     localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].to_ISO8601_string(), true );
   }
 

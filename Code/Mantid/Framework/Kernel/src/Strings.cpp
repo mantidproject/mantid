@@ -1,16 +1,15 @@
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <vector>
-#include <list>
-#include <string.h>
-#include <Poco/Path.h>
-
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
+#include <cmath>
+#include <fstream>
+#include <iomanip>
 #include <iosfwd>
+#include <iostream>
+#include <list>
+#include <Poco/Path.h>
+#include <sstream>
+#include <string.h>
+#include <vector>
 
 using std::size_t;
 
@@ -20,6 +19,28 @@ namespace Kernel
 {
 namespace Strings
 {
+
+//------------------------------------------------------------------------------------------------
+/** Loads the entire contents of a text file into a string
+ *
+ * @param filename :: full path to file
+ * @return string contents of text file
+ */
+std::string loadFile(const std::string & filename)
+{
+  std::string retVal;
+  std::string str;
+  std::ifstream in;
+  in.open(filename.c_str());
+  getline(in,str);
+  while ( in ) {
+    retVal += str + "\n";
+    getline(in,str);
+  }
+  in.close();
+  return retVal;
+}
+
 
 //------------------------------------------------------------------------------------------------
 /** Return a string with all matching occurence-strings

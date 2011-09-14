@@ -8,7 +8,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <cmath>

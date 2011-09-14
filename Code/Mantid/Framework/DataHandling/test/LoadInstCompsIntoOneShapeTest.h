@@ -4,7 +4,6 @@
 #include "MantidDataHandling/LoadInstCompsIntoOneShape.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"

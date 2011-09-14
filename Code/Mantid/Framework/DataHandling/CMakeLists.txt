@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/FindDetectorsInShape.cpp
+	src/FindDetectorsPar.cpp
 	src/GetMaskedDetectors.cpp
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
@@ -24,43 +25,42 @@ set ( SRC_FILES
 	src/LoadEventNexus.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadGSS.cpp
+	src/LoadISISNexus.cpp
+	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
-	src/LoadInstCompsIntoOneShape.cpp
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
-	src/LoadInstrumentHelper.cpp
-	src/LoadISISNexus.cpp
-        src/LoadISISNexus2.cpp
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
+	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
-        src/LoadMuonNexus2.cpp
-        src/LoadNexus.cpp
-        src/LoadNexusLogs.cpp
-        src/LoadNexusMonitors.cpp
-        src/LoadNexusProcessed.cpp
+	src/LoadMuonNexus2.cpp
+	src/LoadNexus.cpp
+	src/LoadNexusLogs.cpp
+	src/LoadNexusMonitors.cpp
+	src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexusMonitors.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
-        src/LoadRaw/isisraw.cpp
-        src/LoadRaw/isisraw2.cpp
-        src/LoadRaw/item_struct.cpp
-        src/LoadRaw/vms_convert.cpp
-        src/LoadRaw2.cpp
+	src/LoadRaw/isisraw.cpp
+	src/LoadRaw/isisraw2.cpp
+	src/LoadRaw/item_struct.cpp
+	src/LoadRaw/vms_convert.cpp
+	src/LoadRaw2.cpp
 	src/LoadRaw3.cpp
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadSNSEventNexus.cpp
+	src/LoadSNSNexus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
-	src/LoadSNSEventNexus.cpp
-	src/LoadSNSNexus.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
@@ -75,25 +75,23 @@ set ( SRC_FILES
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
-        src/SaveDASC.cpp
-        src/SaveDaveGrp.cpp
+	src/SaveDASC.cpp
+	src/SaveDaveGrp.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
-	src/SaveNexus.cpp
-	src/SaveNexusProcessed.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
+	src/SaveNexus.cpp
+	src/SaveNexusProcessed.cpp
 	src/SavePHX.cpp
 	src/SaveRKH.cpp
 	src/SaveSPE.cpp
+	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
-	src/SaveToSNSHistogramNexus.cpp
 	src/UpdateInstrumentFromFile.cpp
-	src/FindDetectorsPar.cpp
-	src/LoadLogsForSNSPulsedMagnet.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -105,6 +103,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
+	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GetMaskedDetectors.h
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
@@ -121,24 +120,23 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadGSS.h
+	inc/MantidDataHandling/LoadISISNexus.h
+	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
-	inc/MantidDataHandling/LoadInstCompsIntoOneShape.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
-	inc/MantidDataHandling/LoadInstrumentHelper.h
-	inc/MantidDataHandling/LoadISISNexus.h
-        inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
+	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
-        inc/MantidDataHandling/LoadMuonNexus2.h
-        inc/MantidDataHandling/LoadNexus.h
-        inc/MantidDataHandling/LoadNexusLogs.h
-        inc/MantidDataHandling/LoadNexusMonitors.h
-        inc/MantidDataHandling/LoadNexusProcessed.h
+	inc/MantidDataHandling/LoadMuonNexus2.h
+	inc/MantidDataHandling/LoadNexus.h
+	inc/MantidDataHandling/LoadNexusLogs.h
+	inc/MantidDataHandling/LoadNexusMonitors.h
+	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadRKH.h
@@ -168,43 +166,42 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveDASC.h
-        inc/MantidDataHandling/SaveDaveGrp.h
+	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
-	inc/MantidDataHandling/SaveNexus.h
-	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
+	inc/MantidDataHandling/SaveNexus.h
+	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveSPE.h
+	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetScalingPSD.h
-	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
-	inc/MantidDataHandling/FindDetectorsPar.h 
-	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	src/LoadRaw/byte_rel_comp.h
-        src/LoadRaw/isisraw.h
-        src/LoadRaw/isisraw2.h
-        src/LoadRaw/item_struct.h
-        src/LoadRaw/vms_convert.h
+	src/LoadRaw/isisraw.h
+	src/LoadRaw/isisraw2.h
+	src/LoadRaw/item_struct.h
+	src/LoadRaw/vms_convert.h
 )
 
 set ( TEST_FILES
+	#test/LoadSNSNexusTest.h # TODO has no active tests in it
 	test/CompressEventsTest.h
 	test/CreateSampleShapeTest.h
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
 	test/FindDetectorsInShapeTest.h
-	test/FindDetectorsParTest.h	
+	test/FindDetectorsParTest.h
 	test/GetMaskedDetectorsTest.h
 	test/GroupDetectors2Test.h
 	test/GroupDetectorsTest.h
-  test/InstrumentRayTracerTest.h
 	test/ISISDataArchiveTest.h
+	test/InstrumentRayTracerTest.h
 	test/LoadAsciiTest.h
 	test/LoadCalFileTest.h
 	test/LoadCanSAS1dTest.h
@@ -215,38 +212,35 @@ set ( TEST_FILES
 	test/LoadEmptyInstrumentTest.h
 	test/LoadEventNexusTest.h
 	test/LoadEventPreNexusTest.h
-	test/LoadInstrumentFromRawTest.h
-	test/LoadInstrumentHelperTest.h
-	test/LoadInstrumentTest.h
-	test/LoadInstCompsIntoOneShapeTest.h
 	test/LoadISISNexusTest.h
+	test/LoadInstrumentFromRawTest.h
+	test/LoadInstrumentTest.h
 	test/LoadLogTest.h
 	test/LoadLogsFromSNSNexusTest.h
 	test/LoadMappingTableTest.h
 	test/LoadMuonLogTest.h
 	test/LoadMuonNexus2Test.h
-        test/LoadMuonNexusTest.h
-        test/LoadNexusTest.h
-        test/LoadNexusLogsTest.h
-        test/LoadNexusMonitorsTest.h
-        test/LoadNexusProcessedTest.h
+	test/LoadMuonNexusTest.h
+	test/LoadNexusLogsTest.h
+	test/LoadNexusMonitorsTest.h
+	test/LoadNexusProcessedTest.h
+	test/LoadNexusTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNexusMonitorsTest.h
 	test/LoadRKHTest.h
+	test/LoadRSaveNLoadNcspTest.h
 	test/LoadRaw2Test.h
 	test/LoadRaw3Test.h
 	test/LoadRawBin0Test.h
 	test/LoadRawSpectrum0Test.h
 	test/LoadRawTest.h
-	test/LoadRSaveNLoadNcspTest.h
 	test/LoadSNSEventNexusTest.h
-	#test/LoadSNSNexusTest.h # TODO has no active tests in it
 	test/LoadSNSspecTest.h
 	test/LoadSPETest.h
 	test/LoadSaveAsciiTest.h
 	test/LoadSpice2dTest.h
-	test/LoadTest.h
 	test/LoadTOFRawNexusTest.h
+	test/LoadTest.h
 	test/ManagedRawFileWorkspace2DTest.h
 	test/MaskDetectorsInShapeTest.h
 	test/MaskDetectorsTest.h
@@ -257,18 +251,18 @@ set ( TEST_FILES
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h
 	test/SaveDASCTest.h
-        test/SaveDaveGrpTest.h
+	test/SaveDaveGrpTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
-	test/SaveNexusTest.h
-	test/SaveNexusProcessedTest.h
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
+	test/SaveNexusProcessedTest.h
+	test/SaveNexusTest.h
 	test/SavePHXTest.h
 	test/SaveRKHTest.h
 	test/SaveSPETest.h
-	test/SetScalingPSDTest.h
 	test/SaveToSNSHistogramNexusTest.h
+	test/SetScalingPSDTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
 )

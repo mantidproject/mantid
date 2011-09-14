@@ -20,6 +20,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <sstream>
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -28,6 +29,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using Mantid::Geometry::InstrumentDefinitionParser;
 
 
 namespace Mantid
@@ -112,7 +114,7 @@ void LoadParameterFile::execManually(std::string filename, Mantid::API::Experime
   }
 
   // 
-  LoadInstrument loadInstr;
+  InstrumentDefinitionParser loadInstr;
   loadInstr.setComponentLinks(instrument, pRootElem);
 
   // populate parameter map of workspace 

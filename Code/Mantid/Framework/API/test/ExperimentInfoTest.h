@@ -221,12 +221,12 @@ public:
   void test_nexus()
   {
     NexusTestHelper th(false);
-    th.createFile("ExperimentInfoTest.nxs");
+    th.createFile("ExperimentInfoTest1.nxs");
     ExperimentInfo ws;
     boost::shared_ptr<Instrument> inst1(new Instrument());
-    inst1->setName("MyTestInst");
-    inst1->setFilename("TEST_Definition.xml");
-    inst1->setXmlText("<This Is Fake XML></Did You Notice?>");
+    inst1->setName("GEM");
+    inst1->setFilename("GEM_Definition.xml");
+    inst1->setXmlText("");
     ws.setInstrument(inst1);
 
     TS_ASSERT_THROWS_NOTHING( ws.saveExperimentInfoNexus(th.file); );
@@ -234,14 +234,11 @@ public:
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
-    std::string instrumentXml;
-    std::string instrumentName;
-    std::string instrumentFilename;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, instrumentName, instrumentXml, instrumentFilename, parameterStr) );
-    TS_ASSERT_EQUALS( instrumentName, "MyTestInst" );
-    TS_ASSERT_EQUALS( instrumentFilename, "TEST_Definition.xml" );
-    TS_ASSERT_EQUALS( instrumentXml, "<This Is Fake XML></Did You Notice?>" );
+    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, parameterStr) );
+    Instrument_sptr inst = ws2.getInstrument();
+    TS_ASSERT_EQUALS( inst->getName(), "GEM" );
+    TS_ASSERT( inst->getFilename().find("GEM_Definition.xml",0) != std::string::npos );
     TS_ASSERT_EQUALS( parameterStr, "" );
   }
 
@@ -249,7 +246,7 @@ public:
   void test_nexus_empty_instrument()
   {
     NexusTestHelper th(false);
-    th.createFile("ExperimentInfoTest.nxs");
+    th.createFile("ExperimentInfoTest2.nxs");
     ExperimentInfo ws;
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("");
@@ -262,14 +259,10 @@ public:
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
-    std::string instrumentXml;
-    std::string instrumentName;
-    std::string instrumentFilename;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, instrumentName, instrumentXml, instrumentFilename, parameterStr) );
-    TS_ASSERT_EQUALS( instrumentName, "" );
-    TS_ASSERT_EQUALS( instrumentFilename, "" );
-    TS_ASSERT_EQUALS( instrumentXml, "" );
+    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, parameterStr) );
+    Instrument_sptr inst = ws2.getInstrument();
+    TS_ASSERT_EQUALS( inst->getName(), "" );
     TS_ASSERT_EQUALS( parameterStr, "" );
   }
 

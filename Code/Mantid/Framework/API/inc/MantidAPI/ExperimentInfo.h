@@ -57,7 +57,7 @@ namespace API
     int getRunNumber() const;
 
     void saveExperimentInfoNexus(::NeXus::File * file) const;
-    void loadExperimentInfoNexus(::NeXus::File * file, std::string & instrumentName, std::string & instrumentXml, std::string & instrumentFilename, std::string & parameterStr);
+    void loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr);
 
     void readParameterMap(const std::string & parameterStr);
 

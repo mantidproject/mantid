@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <instrument name="For Unit Testing" valid-from   ="1900-01-31 23:59:59"
-                                         valid-to     ="2100-01-31 23:59:59">
+                                         valid-to     ="2100-01-31 23:59:59"
+                                         last-modified="Hello!">
 
   <defaults>
     <length unit="meter"/>

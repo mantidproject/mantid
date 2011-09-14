@@ -126,20 +126,10 @@ namespace Mantid
         file->openGroup(groupName, "NXgroup");
         ExperimentInfo_sptr ei(new ExperimentInfo);
         std::string parameterStr;
-        std::string instrumentXml;
-        std::string instrumentName;
-        std::string instrumentFilename;
         try
         {
-          // Get the sample, logs, instrument stuff
-          ei->loadExperimentInfoNexus(file, instrumentName, instrumentXml, instrumentFilename, parameterStr);
-          // Load the instrument from XML or file.
-          if (!instrumentName.empty() && !instrumentXml.empty())
-          {
-            Mantid::DataHandling::LoadInstrument loadInst;
-            loadInst.setParametersManually(ei, instrumentFilename, instrumentName, instrumentXml);
-            loadInst.execManually();
-          }
+          // Get the sample, logs, instrument
+          ei->loadExperimentInfoNexus(file, parameterStr);
           // Now do the parameter map
           ei->readParameterMap(parameterStr);
           // And set it in the workspace.

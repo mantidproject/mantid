@@ -19,6 +19,8 @@
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <fstream>
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidAPI/InstrumentDataService.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -576,16 +578,15 @@ namespace API
   //--------------------------------------------------------------------------------------------
   /** Load the object from an open NeXus file.
    * @param file :: open NeXus file
-   * @param[out] instrumentName :: name of the instrument
-   * @param[out] instrumentXml :: full XML of the IDF of the corresponding IDF for the instrument to create.
-   *             This will need to be parsed by the caller (calling LoadInstrument algorithm)
-   * @param[out] instrumentFilename :: bare filename of the .XML file originally loaded
    * @param[out] parameterStr :: special string for all the parameters.
    *             Feed that to ExperimentInfo::readParameterMap() after the instrument is done.
    */
-  void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File * file, std::string & instrumentName, std::string & instrumentXml,
-      std::string & instrumentFilename, std::string & parameterStr)
+  void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr)
   {
+    std::string instrumentName;
+    std::string instrumentXml;
+    std::string instrumentFilename;
+
     // First, the sample and then the logs
     int sampleVersion = m_sample.access().loadNexus(file, "sample");
     if (sampleVersion == 0)
@@ -641,19 +642,9 @@ namespace API
       try
       {
         std::string filename = this->getInstrumentFilename(instrumentName, getWorkspaceStartDate() );
-        instrumentFilename = Poco::Path(filename).getFileName();
-
         // And now load the contents
-        instrumentXml = "";
-        std::string str;
-        std::ifstream in;
-        in.open(filename.c_str());
-        getline(in,str);
-        while ( in ) {
-          instrumentXml += str + "\n";
-          getline(in,str);
-        }
-        in.close();
+        instrumentFilename = filename;
+        instrumentXml = Strings::loadFile(filename);
       }
       catch (std::exception & e)
       {
@@ -662,7 +653,37 @@ namespace API
       }
     }
     else
+    {
+      // The filename in the file = just bare file.
+      // So Get the full path back to the instrument directory.
+      instrumentFilename = ConfigService::Instance().getInstrumentDirectory() + "/" + instrumentFilename;
       g_log.debug() << "Using instrument IDF XML text contained in .nxs file." << std::endl;
+    }
+
+
+    // ---------- Now parse that XML to make the instrument -------------------
+    if (!instrumentXml.empty() && !instrumentName.empty())
+    {
+      InstrumentDefinitionParser parser;
+      parser.initialize(instrumentFilename, instrumentName, instrumentXml);
+      std::string instrumentNameMangled = parser.getMangledName();
+      Instrument_sptr instr;
+      // Check whether the instrument is already in the InstrumentDataService
+      if ( InstrumentDataService::Instance().doesExist(instrumentNameMangled) )
+      {
+        // If it does, just use the one from the one stored there
+        instr = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+      }
+      else
+      {
+        // Really create the instrument
+        instr = parser.parseXML(NULL);
+        // Add to data service for later retrieval
+        InstrumentDataService::Instance().add(instrumentNameMangled, instr);
+      }
+      // Now set the instrument
+      this->setInstrument(instr);
+    }
   }
 
 

@@ -651,9 +651,6 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
   //Get information from all but data group
   std::string parameterStr;
-  std::string instrumentXml;
-  std::string instrumentName;
-  std::string instrumentFilename;
 
   progress(progressStart+0.05*progressRange,"Reading the sample details...");
 
@@ -661,36 +658,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   cppFile->openPath(mtd_entry.path());
   try
   {
-    local_workspace->loadExperimentInfoNexus(cppFile, instrumentName, instrumentXml, instrumentFilename, parameterStr);
+    // This loads logs, sample, and instrument.
+    local_workspace->loadExperimentInfoNexus(cppFile, parameterStr);
   }
   catch (std::exception & e)
   {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
-  }
-  // ------------ Load the instrument from XML ----------------------------------------
-  progress(progressStart+0.1*progressRange,"Reading the instrument details...");
-  if (!instrumentName.empty() && !instrumentXml.empty())
-  {
-    IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-    try
-    {
-      loadInst->setPropertyValue("InstrumentName", instrumentName);
-      loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", local_workspace);
-      loadInst->setProperty("RewriteSpectraMap", false);
-      loadInst->setPropertyValue("XMLText", instrumentXml);
-      loadInst->setPropertyValue("Filename", instrumentFilename);
-      loadInst->execute();
-    }
-    catch( std::invalid_argument&)
-    {
-      g_log.information("Invalid argument to LoadInstrument sub-algorithm");
-    }
-    catch (std::exception & e)
-    {
-      g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-    }
   }
 
   // Now assign the spectra-detector map

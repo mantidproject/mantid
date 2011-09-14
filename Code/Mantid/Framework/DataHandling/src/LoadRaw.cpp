@@ -1,23 +1,21 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "LoadRaw/isisraw.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/LoadLog.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <Poco/Path.h>
-
-#include <cmath>
+#include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
-#include "LoadRaw/isisraw.h"
+#include <cmath>
 #include <cstdio> // Required for gcc 4.4
-#include "MantidDataHandling/LoadInstrumentHelper.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include <Poco/Path.h>
 
 namespace Mantid
 {

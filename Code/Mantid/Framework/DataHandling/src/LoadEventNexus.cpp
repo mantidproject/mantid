@@ -1200,7 +1200,7 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
     {
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
-      // (this is used in LoadInstrumentHelper to find the right instrument file to use).
+      // (this is used in LoadInstrument to find the right instrument file to use).
       localWorkspace->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
     }
     else
