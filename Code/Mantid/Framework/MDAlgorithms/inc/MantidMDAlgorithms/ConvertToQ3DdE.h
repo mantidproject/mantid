@@ -48,6 +48,8 @@ namespace MDAlgorithms
       in a very common situation when the physical instrument does not change in all runs, contributed into MD workspace
    */
   struct preprocessed_detectors{
+    Kernel::V3D   minDetPosition;    // minimal and
+    Kernel::V3D   maxDetPosition;    // maxinal position for the detectors
     std::vector<Kernel::V3D>  det_dir; // unit vector pointing from the sample to the detector;
     std::vector<int32_t>      det_id;   // the detector ID;
     //
@@ -66,7 +68,10 @@ namespace MDAlgorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Inelastic;MDAlgorithms";}
-    
+
+  /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
+      and places the resutls into static cash to be used in subsequent calls of this algorithm */
+    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -80,11 +85,10 @@ namespace MDAlgorithms
     static Mantid::Kernel::Logger& convert_log;
 
     // the variable which keeps preprocessed positions of the detectors if any availible;
-    static preprocessed_detectors det_loc;
-    // the function, which calculates these positions;
-    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
+    static preprocessed_detectors det_loc;  
 
-
+   // helper function which does exatly what it says
+   void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
   };
 
 

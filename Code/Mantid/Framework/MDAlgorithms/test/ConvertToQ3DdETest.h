@@ -34,7 +34,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 4 propeties",4,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 6 propeties",6,(size_t)(pAlg->getProperties().size()));
 }
 
 void testExecThrow(){
@@ -64,6 +64,53 @@ void testWithExistingLatticeTrowsLowEnergy(){
     TSM_ASSERT("Should be not-successful as input energy was lower then obtained",!pAlg->isExecuted());
 
 }
+void testExecFailsOnNewWorkspaceNoLimits(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+ 
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
+
+    pAlg->execute();
+    TSM_ASSERT("Should fail as no  min-max limits were specied ",!pAlg->isExecuted());
+
+}
+void testExecFailsOnNewWorkspaceNoMaxLimits(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+ 
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
+
+    pAlg->execute();
+    TSM_ASSERT("Should fail as no max limits were specied ",!pAlg->isExecuted());
+
+}
+void testExecFailsLimits_MinGeMax(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+
+    AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+ 
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxQdE_values", " 50., 50.,-50,-2"));
+
+    pAlg->execute();
+    TSM_ASSERT("Should fail as no max limits were specied ",!pAlg->isExecuted());
+
+}
+
+
 
 void testExecFine(){
     // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
@@ -75,11 +122,34 @@ void testExecFine(){
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxQdE_values", " 50., 50., 50, 20"));
 
     pAlg->execute();
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
 
 }
+void testExecAndAdd(){
+    // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
+
+  // rotate the crystal by two degrees back;
+     ExperimentInfo *pExperInfo=ws2D->cloneExperimentInfo();
+     pExperInfo->mutableSample().getOrientedLattice().setgamma(-2);
+     ws2D->copyExperimentInfoFrom(pExperInfo);
+
+     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+
+ 
+    TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
+
+    pAlg->execute();
+    TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
+}
+
 //TODO: check the results;
 
 

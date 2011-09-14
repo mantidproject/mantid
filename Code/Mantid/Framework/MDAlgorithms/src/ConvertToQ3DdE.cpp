@@ -17,6 +17,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/ArrayProperty.h"
+
+#include <float.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -123,8 +126,8 @@ ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const
 
      det_loc.det_id[ic] = spDet->getID();
     // dist     =  spDet->getDistance(*sample);
-     double polar    =  inputWS->detectorTwoTheta(spDet)*rad2deg;
-     double azim     =  spDet->getPhi()*rad2deg;    
+     double polar    =  inputWS->detectorTwoTheta(spDet);
+     double azim     =  spDet->getPhi();    
 
      double sPhi=sin(polar);
      double ez = cos(polar);
@@ -146,7 +149,8 @@ ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void ConvertToQ3DdE::init()
+void 
+ConvertToQ3DdE::init()
 {
       CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
       ws_valid->add(new WorkspaceUnitValidator<>("DeltaE"));
@@ -167,17 +171,34 @@ void ConvertToQ3DdE::init()
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
         "Store the part of the detectors transfromation into reciprocal space to save/reuse it later;");
 
- 
+     declareProperty(new ArrayProperty<double>("MinQdE_values"),
+         "An array containing minimal values for Q[A^-1] and energy transfer[meV] in a form qx_min,qy_min,qz_min, dE min\n"
+         "(momentum and energy transfer values lower that this one will be ignored if this is set.\n"
+         " If a minimal output workspace range is higer then specified, the workspace range will be used intstead)" );
+
+     declareProperty(new ArrayProperty<double>("MaxQdE_values"),
+         "An array containing maximal values for Q[A^-1] and energy transfer[meV] in a form qx_max,qy_max,qz_max, dE_max\n"
+         "(momentum and energy transfer values higher that this one will be ignored if this is set.\n"
+         " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
+
+
 }
 
-
+void 
+ConvertToQ3DdE::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
+    for(size_t i=0; i<min.size();i++){
+        if(max[i]<=min[i]){
+            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
+            throw(std::invalid_argument("min limit not smaller then max limit"));
+        }
+    }
+}
  
 
  
   //----------------------------------------------------------------------------------------------
   /* Execute the algorithm.   */
-  void ConvertToQ3DdE::exec()
-  {
+void ConvertToQ3DdE::exec(){
     Timer tim, timtotal;
     CPUTimer cputim, cputimtotal;
 
@@ -202,29 +223,47 @@ void ConvertToQ3DdE::init()
         convert_log.error()<<"Maximal elergy transferred to sample eq "<<E_max<<" and exceeds the input energy "<<Ei<<std::endl;
         throw(std::invalid_argument("Maximal transferred energy exceeds input energy"));
     }
+
     // the wawe vector of input neutrons;
     double ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    std::vector<double> QEmin = getProperty("MinQdE_values");
+    std::vector<double> QEmax = getProperty("MaxQdE_values");
+    
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
     boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > ws  = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDE,4> >( i_out );
 
     std::string dimensionNames[4] = {"Q_x", "Q_y", "Q_z","DeltaE"};
     if (ws){
-      // Check that existing workspace dimensions make sense with the desired one (using the name)
+       //check existing worspace limits and agree these with new limits if they were specified;
+       if(QEmin.empty())QEmin.assign(4, FLT_MAX);
+       if(QEmax.empty())QEmax.assign(4,-FLT_MAX);
        for(int i=0;i<4;i++){
-        if (ws->getDimension(i)->getName() != dimensionNames[i]){
-           convert_log.error()<<"The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.\n";
-           throw std::runtime_error("The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.");
-        }
+           // Check that existing workspace dimensions make sense with the desired one (using the name)
+            if (ws->getDimension(i)->getName() != dimensionNames[i]){
+               convert_log.error()<<"The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.\n";
+               throw std::runtime_error("The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.");
+            }
+            // coordinate existing and nwe 
+            double ws_min = ws->getDimension(i)->getMinimum();
+            double ws_max = ws->getDimension(i)->getMaximum();
+            if(ws_min>QEmin[i])QEmin[i]=ws_min;
+            if(ws_max<QEmax[i])QEmax[i]=ws_max;
        }
+       // verify that final limits are correct
+       check_max_morethen_min(QEmin,QEmax);
     }else{
-        std::vector<double> dimMin(4),dimMax(4);
-        dimMin[0]=dimMin[1]=dimMin[2]=-50.; // TODO: should it be a parameter? -- depends on how easy is to extend the Q-space in the md workspace;
-        dimMin[3]=E_min;
-        dimMax[0]=dimMax[1]=dimMax[2]= 50.;
-        dimMax[3]=E_max;
+        if(QEmin.empty()||QEmax.empty()){
+            convert_log.error()<<" min and max Q-dE values can not be empty when creating new workspace";
+            throw(std::invalid_argument(" min-max property is empty"));
+        }
+        if(QEmin.size()!=4||QEmax.size()!=4){
+            convert_log.error()<<" min and max Q-dE values have to had 4 elements each";
+            throw(std::invalid_argument(" min-max is not 4Dimensional"));
+        }
+        check_max_morethen_min(QEmin,QEmax);
         std::string dimensionUnits[4] = {"Amgstroms^-1", "Amgstroms^-1", "Amgstroms^-1","meV"};
-        ws = create_empty4DEventWS(dimensionNames,dimensionUnits,dimMin,dimMax);
+        ws = create_empty4DEventWS(dimensionNames,dimensionUnits,QEmin,QEmax);
     }
     ws->splitBox();
     //BoxController_sptr bc = ws->getBoxController();
@@ -234,6 +273,7 @@ void ConvertToQ3DdE::init()
     // copy experiment info into 
     ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
     uint16_t runIndex = ws->addExperimentInfo(ExperimentInfo);
+
  
 
     // Initalize the matrix to 3x3 identity
@@ -273,21 +313,24 @@ void ConvertToQ3DdE::init()
         const MantidVec& Error      = inWS2D->readE(i);
         int32_t det_id              = det_loc.det_id[i];
     
-       coord_t QE[4];
+        coord_t QE[4];
         for (size_t j = 0; j < specSize; ++j)
         {
             double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
+            if(E_tr<E_min||E_tr>=E_max)continue;
+
             double k_tr = sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
    
             double  ex = det_loc.det_dir[i].X();
             double  ey = det_loc.det_dir[i].Y();
             double  ez = det_loc.det_dir[i].Z();
-            double  qx  =  -ex*k_tr;
+            double  qx  =  -ex*k_tr;                
             double  qy  =  -ey*k_tr;
             double  qz  = ki - ez*k_tr;
-            QE[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);
-            QE[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);
-            QE[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
+
+            QE[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(QE[0]<QEmin[0]||QE[0]>=QEmax[0])continue;
+            QE[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(QE[1]<QEmin[1]||QE[1]>=QEmax[1])continue;
+            QE[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(QE[2]<QEmin[2]||QE[2]>=QEmax[2])continue;
             QE[3]  = (coord_t)E_tr;
             float ErrSq = float(Error[j]*Error[j]);
             ws->addEvent(MDE(float(Signal[j]),ErrSq,runIndex,det_id,QE));
