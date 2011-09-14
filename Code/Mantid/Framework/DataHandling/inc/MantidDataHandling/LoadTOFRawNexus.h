@@ -114,6 +114,12 @@ private:
 
   /// Number of bins
   size_t numBins;
+
+  /// Name of the 'data' field to load (depending on Signal)
+  std::string m_dataField;
+
+  /// Name of the 'axis' field to load (depending on Signal)
+  std::string m_axisField;
 };
 
 } // namespace DataHandling

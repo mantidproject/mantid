@@ -651,6 +651,13 @@ namespace NeXus {
     template <typename NumT>
     NumT getAttr(const AttrInfo& info);
 
+    /** Returns true if the current data field
+     * has the named attribute.
+     *
+     * @param name :: name of the attribute
+     * @return true if attribute is present, false otherwise.
+     */
+    bool hasAttr(const std::string & name);
 
     /**
      * Get the value of an attribute that is a scalar number.

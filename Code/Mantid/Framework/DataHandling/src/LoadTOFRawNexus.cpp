@@ -8,6 +8,8 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
+#include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace Mantid
 {
@@ -58,6 +60,8 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 {
   numPixels = 0;
   numBins = 0;
+  m_dataField = "";
+  m_axisField = "";
   bankNames.clear();
 
   // Create the root Nexus class
@@ -81,6 +85,45 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         // OK, this is some bank data
         file->openGroup(name, it->second);
 
+        // -------------- Find the data field name ----------------------------
+        if (m_dataField.empty())
+        {
+          std::map<std::string, std::string> entries = file->getEntries();
+          std::map<std::string, std::string>::iterator it;
+          for (it = entries.begin(); it != entries.end(); ++it)
+          {
+            file->openData(it->first);
+            if (file->hasAttr("signal"))
+            {
+              int signal = 0;
+              file->getAttr("signal", signal);
+              if (signal == m_signal)
+              {
+                // That's the right signal!
+                m_dataField = it->first;
+                // Find the corresponding X axis
+                if (!file->hasAttr("axes"))
+                  throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                      m_dataField + "' has no 'axes' attribute specifying.");
+
+                std::string axes;
+                file->getAttr("axes", axes);
+                std::vector<std::string> allAxes;
+                boost::split( allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
+                if (allAxes.size() != 3)
+                  throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                      m_dataField + "' which has only " + Strings::toString(allAxes.size()) + " dimension. Expected 3 dimensions.");
+
+                m_axisField = allAxes.back();
+                g_log.information() << "Loading signal " << m_signal << ", " << m_dataField << " with axis " << m_axisField << std::endl;
+                file->closeData();
+                break;
+              }
+            }
+            file->closeData();
+          }
+        }
+
         // Count how many pixels in the bank
         file->openData("pixel_id");
         std::vector<int> dims = file->getInfo().dims;
@@ -95,7 +138,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         }
 
         // Get the size of the X vector
-        file->openData("time_of_flight");
+        file->openData(m_axisField);
         dims = file->getInfo().dims;
         file->closeData();
         if (dims.size() > 0)
@@ -136,10 +179,10 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
   // Load the TOF vector
   std::vector<float> tof;
-  file->readData("time_of_flight", tof);
+  file->readData(m_axisField, tof);
   size_t numBins = tof.size() - 1;
   if (tof.size() <= 1)
-  { file->close(); g_log.warning() << "Invalid time_of_flight data in " << bankName << std::endl; return; }
+  { file->close(); g_log.warning() << "Invalid " << m_axisField << " data in " << bankName << std::endl; return; }
 
   // Make a shared pointer
   MantidVecPtr Xptr;
@@ -149,9 +192,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
   // Load the data
   std::vector<uint32_t> data;
-  file->readData("data", data);
+  file->readData(m_dataField, data);
   if (data.size() != numBins * numPixels)
-  { file->close(); g_log.warning() << "Invalid size of 'data' data in " << bankName << std::endl; return; }
+  { file->close(); g_log.warning() << "Invalid size of '" << m_dataField << "' data in " << bankName << std::endl; return; }
 
   for (size_t i=0; i<numPixels; i++)
   {

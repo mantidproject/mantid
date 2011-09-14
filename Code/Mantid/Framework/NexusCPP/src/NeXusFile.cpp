@@ -1205,6 +1205,22 @@ vector<AttrInfo> File::getAttrInfos() {
   return infos;
 }
 
+bool File::hasAttr(const std::string & name)
+{
+  this->initAttrDir();
+  AttrInfo temp;
+  while(true) {
+    temp = this->getNextAttr();
+    if (temp.name == NULL_STR) {
+      break;
+    }
+    if (temp.name == name)
+      return true;
+  }
+  return false;
+}
+
+
 NXlink File::getGroupID() {
   NXlink link;
   NXstatus status = NXgetgroupID(this->m_file_id, &link);
