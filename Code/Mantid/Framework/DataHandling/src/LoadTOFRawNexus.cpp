@@ -217,7 +217,7 @@ void LoadTOFRawNexus::exec()
   prog->doReport("Counting pixels");
   size_t numPixels=0; size_t numBins=0;
   std::vector<std::string> bankNames;
-  countPixels(filename, entry_name, numPixels, numBins, bankNames);
+  countPixels(filename, entry_name, bankNames);
   g_log.debug() << "Workspace found to have " << numPixels << " pixels and " << numBins << " bins" << std::endl;
 
   prog->setNumSteps(bankNames.size() + 5);
