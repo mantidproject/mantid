@@ -64,7 +64,7 @@ public:
   *   @param value :: Value to add
   *   @param iActiveP :: The index of an active parameter.
   */
-  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  virtual void addNumberToColumn(const double& value, const size_t& iActiveP)
   {
     m_J->addNumberToColumn(value,m_iaP0+iActiveP);
   }

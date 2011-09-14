@@ -60,9 +60,9 @@ namespace Mantid
     /// @param value :: the value
     /// @param iActiveP :: the index of the parameter
     ///  @throw runtime_error Thrown if column of Jacobian to add number to does not exist
-    void addNumberToColumn(const double& value, const int& iActiveP) 
+    void addNumberToColumn(const double& value, const size_t& iActiveP)
     {
-      if (iActiveP < static_cast<int>(m_J->size2) )
+      if (iActiveP < m_J->size2 )
       {
         // add penalty to first and last point and every 10th point in between
         m_J->data[iActiveP] += value;

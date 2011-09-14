@@ -139,7 +139,7 @@ void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* 
  * @param xMin :: The minimum bin index of spectrum spec that will be used in fitting
  * @param xMax :: The maximum bin index of spectrum spec that will be used in fitting
  */
-void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
+void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t spec, size_t xMin, size_t xMax)
 {
   IFunctionMW::setMatrixWorkspace(workspace,spec,xMin,xMax);
   for(size_t i=0;i<nFunctions();i++)
