@@ -560,12 +560,12 @@ namespace DataHandling
               // 1 dimension, with that number of bin boundaries
               dataDimensions[0] = static_cast<int>(X.size());
               // The output TOF axis will be whatever size in the workspace.
-              double       *tof_data;                /* pointer to data buffer to write */
-              tof_data = new double[dataDimensions[0]];
+              float *tof_data;                /* pointer to data buffer to write */
+              tof_data = new float[dataDimensions[0]];
 
               // And fill it with the X data
               for (size_t i=0; i < X.size(); i++)
-                tof_data[i] = X[i];
+                tof_data[i] = float(X[i]);
 
               if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
               if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
