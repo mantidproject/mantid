@@ -63,6 +63,11 @@ void ModeControlWidget::onThreeSliceViewButtonClicked()
   this->ui.standardButton->setEnabled(true);
 }
 
+void ModeControlWidget::setToStandardView()
+{
+  this->onStandardViewButtonClicked();
+}
+
 }
 }
 }

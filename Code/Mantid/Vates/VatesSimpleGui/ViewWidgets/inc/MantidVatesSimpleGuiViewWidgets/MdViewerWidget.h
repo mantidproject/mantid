@@ -85,13 +85,6 @@ protected slots:
    */
   void onDataLoaded(pqPipelineSource *source);
   /**
-   * Do actions necessary during plugin mode when view is activated/deactivated.
-   * @param oldstate the original state of the view widget
-   * @param newstate the new state of the view widget
-   */
-  void onWindowStateChange(Qt::WindowStates oldstate,
-                           Qt::WindowStates newstate);
-  /**
    * Execute the logic for switching views on the main level window.
    * @param v the view mode to switch to
    */

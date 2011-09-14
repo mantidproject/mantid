@@ -131,13 +131,6 @@ void MdViewerWidget::setupPluginMode()
   this->setupMainView();
 }
 
-void MdViewerWidget::onWindowStateChange(Qt::WindowStates oldstate,
-                                         Qt::WindowStates newstate)
-{
-  UNUSED_ARG(oldstate);
-  UNUSED_ARG(newstate);
-}
-
 void MdViewerWidget::createAppCoreForPlugin()
 {
   if (!pqApplicationCore::instance())
@@ -286,6 +279,7 @@ void MdViewerWidget::renderWorkspace(QString wsname)
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   if (this->currentView->origSource)
   {
+    this->ui.modeControlWidget->setToStandardView();
     builder->destroy(this->currentView->origSource);
   }
   this->currentView->origSource = builder->createSource("sources",
