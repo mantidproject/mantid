@@ -17,7 +17,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 using namespace Mantid::MDEvents;
 
 class MakeDiffractionMDEventWorkspaceTest : public CxxTest::TestSuite
