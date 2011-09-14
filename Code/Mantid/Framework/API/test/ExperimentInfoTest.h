@@ -28,7 +28,7 @@ public:
   void test_GetInstrument_default()
   {
     ExperimentInfo ws;
-    boost::shared_ptr<Instrument> i = ws.getInstrument();
+    boost::shared_ptr<const Instrument> i = ws.getInstrument();
     TSM_ASSERT( "ExperimentInfo gets a default, empty Instrument.", i);
     TS_ASSERT_EQUALS( ws.getInstrument()->type(), "Instrument" );
   }
@@ -236,7 +236,7 @@ public:
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, parameterStr) );
-    Instrument_sptr inst = ws2.getInstrument();
+    Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS( inst->getName(), "GEM" );
     TS_ASSERT( inst->getFilename().find("GEM_Definition.xml",0) != std::string::npos );
     TS_ASSERT_EQUALS( parameterStr, "" );
@@ -261,7 +261,7 @@ public:
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, parameterStr) );
-    Instrument_sptr inst = ws2.getInstrument();
+    Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS( inst->getName(), "" );
     TS_ASSERT_EQUALS( parameterStr, "" );
   }

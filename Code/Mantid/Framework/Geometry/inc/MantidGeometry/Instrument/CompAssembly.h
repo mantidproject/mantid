@@ -45,7 +45,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL CompAssembly : public virtual ICompAssembly, public Component
+class MANTID_GEOMETRY_DLL CompAssembly : public ICompAssembly, public Component
 {
 protected:
   typedef std::vector< IComponent* >::iterator comp_it;///< Iterator type
@@ -96,7 +96,7 @@ public:
 
   /** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer  */
   virtual void testIntersectionWithChildren(Track & testRay,
-      std::deque<IComponent_sptr> & searchQueue) const;
+      std::deque<IComponent_const_sptr> & searchQueue) const;
 
 private:
   /// Private copy assignment operator

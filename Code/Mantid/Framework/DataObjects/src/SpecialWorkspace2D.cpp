@@ -30,7 +30,7 @@ namespace DataObjects
    * @param inst :: input instrument that is the base for this workspace
    * @return created SpecialWorkspace2D
    */
-  SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_sptr inst)
+  SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst)
   {
     // Get all the detectors IDs
     detectorIDs = inst->getDetectorIDs(true /*no monitors*/);

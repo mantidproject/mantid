@@ -88,7 +88,7 @@ namespace DataHandling
   void SaveCalFile::saveCalFile(const std::string& calFileName,
       GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MatrixWorkspace_sptr maskWS)
   {
-    Instrument_sptr inst;
+    Instrument_const_sptr inst;
 
     bool doGroup = false;
     if (groupWS) { doGroup = true; inst = groupWS->getInstrument(); }

@@ -27,7 +27,7 @@ namespace DataObjects
    * @param inst :: input instrument that is the base for this workspace
    * @return created OffsetsWorkspace
    */
-  OffsetsWorkspace::OffsetsWorkspace(Geometry::Instrument_sptr inst)
+  OffsetsWorkspace::OffsetsWorkspace(Geometry::Instrument_const_sptr inst)
   : SpecialWorkspace2D(inst)
   {
   }

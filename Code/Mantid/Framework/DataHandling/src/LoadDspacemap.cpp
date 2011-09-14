@@ -85,7 +85,7 @@ namespace DataHandling
   void LoadDspacemap::exec()
   {
     // Get the instrument
-    Instrument_sptr inst = LoadCalFile::getInstrument3Ways(this);
+    Instrument_const_sptr inst = LoadCalFile::getInstrument3Ways(this);
 
     // Read in the calibration data
     const std::string DFileName = getProperty("Filename");

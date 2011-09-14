@@ -81,7 +81,7 @@ public:
   void test_sort()
   {
     PeaksWorkspace_sptr pw(buildPW());
-    Instrument_sptr inst = pw->getInstrument();
+    Instrument_const_sptr inst = pw->getInstrument();
     Peak p0 = pw->getPeak(0); //Peak(inst, 1, 3.0)
     Peak p1(inst, 1, 4.0);
     Peak p2(inst, 1, 5.0);

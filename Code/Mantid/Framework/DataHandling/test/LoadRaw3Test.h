@@ -82,7 +82,7 @@ public:
     //----------------------------------------------------------------------
      //Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
   //  ----------------------------------------------------------------------
-    boost::shared_ptr<Instrument> i = output2D->getInstrument();
+    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
     boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");
@@ -403,7 +403,7 @@ public:
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
-    boost::shared_ptr<Instrument> i = output2D->getInstrument();
+    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
     Mantid::Geometry::IDetector_const_sptr ptrDet = i->getDetector(60);
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
@@ -487,7 +487,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Instrument> i = output2D->getInstrument();
+    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
     boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");

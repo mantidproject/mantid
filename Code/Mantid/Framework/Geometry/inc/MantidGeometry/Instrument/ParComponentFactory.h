@@ -94,7 +94,7 @@ namespace Mantid
                                                             boost::shared_ptr<ParameterMap> map);
       /// Create a parameterized component from the given base component and ParameterMap
       /// This has to check to is slower than the above functions
-      static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base, 
+      static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base,
                                                   const ParameterMap * map);
 
     private:

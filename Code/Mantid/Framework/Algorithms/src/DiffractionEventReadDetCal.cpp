@@ -18,6 +18,7 @@
 #include <numeric>
 #include <cmath>
 #include <iomanip>
+#include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid
 {
@@ -81,7 +82,7 @@ namespace Algorithms
   void DiffractionEventReadDetCal::init()
   {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
                             "The workspace containing the geometry to be calibrated." );
   /*declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
@@ -106,9 +107,7 @@ namespace Algorithms
     MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
     //Get some stuff from the input workspace
-    Instrument_sptr inst = inputW->getInstrument();
-    if (!inst)
-      throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+    Instrument_const_sptr inst = inputW->getInstrument();
     std::string instname = inst->getName();
 
     // set-up minimizer

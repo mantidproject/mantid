@@ -79,7 +79,7 @@ namespace Mantid
       void exec();
 
       /// Find component by detector id
-      boost::shared_ptr<Geometry::IComponent> findByID(boost::shared_ptr<Geometry::IComponent> instr,int id);
+      boost::shared_ptr<const Geometry::IComponent> findByID(boost::shared_ptr<const Geometry::IComponent> instr,int id);
 
       /// Find component by name
       boost::shared_ptr<Geometry::IComponent> findByName(boost::shared_ptr<Geometry::IComponent> instr,const std::string& CName);

@@ -83,9 +83,9 @@ namespace Mantid
       //void runMoveInstrumentComp(const int& detIndex, const Kernel::V3D& shift);
 
       /// get a vector of shared pointers to each detector in the comp
-      void findAll(boost::shared_ptr<Geometry::IComponent> comp);
+      void findAll(boost::shared_ptr<const Geometry::IComponent> comp);
       /// the vector of shared pointers
-      std::vector<boost::shared_ptr<Geometry::IComponent> > m_vectDet;
+      std::vector<boost::shared_ptr<const Geometry::IComponent> > m_vectDet;
       /// apply the shifts in posMap to the detectors in WS
       void movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::V3D>& posMap,
                             std::map<int,double>& scaleMap);

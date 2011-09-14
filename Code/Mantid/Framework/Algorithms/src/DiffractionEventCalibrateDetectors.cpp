@@ -21,6 +21,7 @@
 #include <sstream>
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid
 {
@@ -247,7 +248,7 @@ namespace Algorithms
   void DiffractionEventCalibrateDetectors::init()
   {
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
                             "The workspace containing the geometry to be calibrated." );
 
     declareProperty("Params", "",
@@ -293,9 +294,7 @@ namespace Algorithms
     const std::string rb_params=getProperty("Params");
 
     //Get some stuff from the input workspace
-    Instrument_sptr inst = inputW->getInstrument();
-    if (!inst)
-      throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+    Instrument_const_sptr inst = inputW->getInstrument();
 
     //Build a list of Rectangular Detectors
     std::vector<boost::shared_ptr<RectangularDetector> > detList;

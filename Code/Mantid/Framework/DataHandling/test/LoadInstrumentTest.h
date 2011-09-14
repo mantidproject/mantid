@@ -177,7 +177,7 @@ public:
   /** Check the GEM instrument */
   void evaluate_GEM(MatrixWorkspace_sptr output)
   {
-    boost::shared_ptr<Instrument> i = output->getInstrument();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);

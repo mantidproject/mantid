@@ -68,9 +68,7 @@ public:
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
     //Get some stuff from the input workspace
-    Instrument_sptr ins = output->getInstrument();
-    if (!ins)
-      throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+    Instrument_const_sptr ins = output->getInstrument();
 
     IComponent_const_sptr det = ins->getComponentByName("bank1");
     V3D PosNew = det->getPos();

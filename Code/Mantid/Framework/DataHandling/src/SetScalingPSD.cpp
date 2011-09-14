@@ -275,8 +275,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
   *   @param scaleMap :: A map of integer detectorID and corresponding scaling (in Y)
   */
   std::map<int,Kernel::V3D>::iterator iter = posMap.begin();
-  boost::shared_ptr<Instrument> inst = WS->getInstrument();
-  boost::shared_ptr<IComponent> comp;
+  boost::shared_ptr<const Instrument> inst = WS->getInstrument();
+  boost::shared_ptr<const IComponent> comp;
 
   // Want to get all the detectors to move, but don't want to do this one at a time
   // since the search (based on MoveInstrument findBy methods) is going to be too slow
@@ -294,7 +294,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
   {
       V3D Pos,shift;// New relative position
       comp = m_vectDet[id];
-      boost::shared_ptr<IDetector> det = boost::dynamic_pointer_cast<IDetector>(comp);
+      boost::shared_ptr<const IDetector> det = boost::dynamic_pointer_cast<const IDetector>(comp);
       int idet=0;
       if (det) idet=det->getID();
 
@@ -342,15 +342,15 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
 /** Find all detectors in the comp and push the IComp pointers onto m_vectDet
  * @param comp :: The component to search
  */
-void SetScalingPSD::findAll(boost::shared_ptr<Geometry::IComponent> comp)
+void SetScalingPSD::findAll(boost::shared_ptr<const Geometry::IComponent> comp)
 {
-    boost::shared_ptr<IDetector> det = boost::dynamic_pointer_cast<IDetector>(comp);
+    boost::shared_ptr<const IDetector> det = boost::dynamic_pointer_cast<const IDetector>(comp);
     if (det)
     {
        m_vectDet.push_back(comp);
        return;
     }
-    boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+    boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
     if (asmb)
         for(int i=0;i<asmb->nelements();i++)
         {

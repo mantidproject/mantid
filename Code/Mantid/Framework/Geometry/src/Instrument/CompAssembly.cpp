@@ -332,7 +332,7 @@ void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
  * @param testRay :: Track under test. The results are stored here.
  * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching
  */
-void CompAssembly::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & searchQueue) const
+void CompAssembly::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & searchQueue) const
 {
   int nchildren = this->nelements();
   for( int i = 0; i < nchildren; ++i )

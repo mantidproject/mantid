@@ -51,7 +51,7 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
-      declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input)
+      declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, new InstrumentValidator<>)
           , "A 2D workspace with X values of time of flight");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "", Direction::Output), "Name of the output peaks workspace with integrated intensities.");
       declareProperty("FitSlices", true, "Integrate slices using IntegratePeakTimeSlices algorithm (default).\n"
@@ -93,11 +93,6 @@ namespace Mantid
       //To get the workspace index from the detector ID
       pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
-
-      Instrument_sptr inst = inputW->getInstrument();
-      if (!inst)
-        throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
-    
       EventWorkspace_const_sptr inWS = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
       if (inWS)
       {
@@ -322,9 +317,7 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
 {
 
   //Get some stuff from the input workspace
-  Instrument_sptr inst = inputW->getInstrument();
-  if (!inst)
-    throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+  Instrument_const_sptr inst = inputW->getInstrument();
 
   //Build a list of Rectangular Detectors
   std::vector<boost::shared_ptr<RectangularDetector> > detList;
@@ -545,9 +538,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
   // Number of slices
   int TOFmax = 0;
   //Get some stuff from the input workspace
-  Instrument_sptr inst = inputW->getInstrument();
-  if (!inst)
-    throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+  Instrument_const_sptr inst = inputW->getInstrument();
 
   //Build a list of Rectangular Detectors
   std::vector<boost::shared_ptr<RectangularDetector> > detList;

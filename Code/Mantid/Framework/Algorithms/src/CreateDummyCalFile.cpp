@@ -83,7 +83,7 @@ namespace Mantid
         throw std::invalid_argument("No InputWorkspace");
 
       //Get some stuff from the input workspace
-      Instrument_sptr inst = inputW->getInstrument();
+      Instrument_const_sptr inst = inputW->getInstrument();
       std::string instname = inst->getName();
 
       // Check that the instrument is in store
@@ -148,11 +148,11 @@ namespace Mantid
       vgroups.clear();
 
       // Find Detectors that belong to groups
-      typedef boost::shared_ptr<Geometry::ICompAssembly> sptr_ICompAss;
-      typedef boost::shared_ptr<Geometry::IComponent> sptr_IComp;
-      typedef boost::shared_ptr<Geometry::IDetector> sptr_IDet;
+      typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
+      typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
+      typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
       std::queue< std::pair<sptr_ICompAss,int> > assemblies;
-      sptr_ICompAss current=boost::dynamic_pointer_cast<Geometry::ICompAssembly>(inst);
+      sptr_ICompAss current=boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
       sptr_IDet currentDet;
       sptr_IComp currentIComp;
       sptr_ICompAss currentchild;
@@ -183,7 +183,7 @@ namespace Mantid
           for (int i=0;i<nchilds;++i)
           {
             currentIComp=(*(current.get()))[i]; // Get child
-            currentDet=boost::dynamic_pointer_cast<Geometry::IDetector>(currentIComp);
+            currentDet=boost::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
             if (currentDet.get())// Is detector
             {
               if (overwrite) // Map will contains udet as the key
@@ -193,7 +193,7 @@ namespace Mantid
             }
             else // Is an assembly, push in the queue
             {
-              currentchild=boost::dynamic_pointer_cast<Geometry::ICompAssembly>(currentIComp);
+              currentchild=boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
               if (currentchild.get())
               {
                 child_group=group_map[currentchild->getName()];

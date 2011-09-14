@@ -24,7 +24,7 @@ namespace DataObjects
   {
   public:
     OffsetsWorkspace();
-    OffsetsWorkspace(Geometry::Instrument_sptr inst);
+    OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
     ~OffsetsWorkspace();
     
     /** Gets the name of the workspace type

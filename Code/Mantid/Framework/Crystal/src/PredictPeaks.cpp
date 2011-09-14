@@ -9,6 +9,7 @@
 #include <cmath>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 
 namespace Mantid
@@ -62,7 +63,7 @@ namespace Crystal
    */
   void PredictPeaks::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
         "An input workspace containing:\n"
         "  - The relevant Instrument (calibrated as needed).\n"
         "  - A sample with a UB matrix.\n"
@@ -187,7 +188,6 @@ namespace Crystal
 
     // Get the instrument and its detectors
     inst = inWS->getInstrument();
-    if (!inst) throw std::invalid_argument("No instrument found in input workspace!");
 
     // --- Reflection condition ----
     // Use the primitive by default

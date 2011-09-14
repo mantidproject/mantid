@@ -61,7 +61,7 @@ void RotateInstrumentComponent::exec()
 
   if (X + Y + Z == 0.0) throw std::invalid_argument("The rotation axis must not be a zero vector");
 
-  Instrument_sptr inst = WS->getInstrument();
+  Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
 
   // Find the component to move
@@ -121,15 +121,15 @@ void RotateInstrumentComponent::exec()
   return;
 }
 
-boost::shared_ptr<Geometry::IComponent> RotateInstrumentComponent::findByID(boost::shared_ptr<Geometry::IComponent> comp,int id)
+boost::shared_ptr<const Geometry::IComponent> RotateInstrumentComponent::findByID(boost::shared_ptr<const Geometry::IComponent> comp,int id)
 {
-    boost::shared_ptr<IDetector> det = boost::dynamic_pointer_cast<IDetector>(comp);
+    boost::shared_ptr<const IDetector> det = boost::dynamic_pointer_cast<const IDetector>(comp);
     if (det && det->getID() == id) return comp;
-    boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+    boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
     if (asmb)
         for(int i=0;i<asmb->nelements();i++)
         {
-            boost::shared_ptr<IComponent> res = findByID((*asmb)[i],id);
+            boost::shared_ptr<const IComponent> res = findByID((*asmb)[i],id);
             if (res) return res;
         }
     return boost::shared_ptr<IComponent>();

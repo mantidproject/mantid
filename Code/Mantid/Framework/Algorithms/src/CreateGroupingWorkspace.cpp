@@ -129,7 +129,7 @@ namespace Algorithms
    * @param detIDtoGroup :: output: map of detID: to group number
    * @param prog :: progress report
    */
-  void makeGroupingByNames(std::string GroupNames, Instrument_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog)
+  void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog)
   {
     // Split the names of the group and insert in a vector
     std::vector<std::string> vgroups;
@@ -145,11 +145,11 @@ namespace Algorithms
     if (group_map.size() > 0)
     {
       // Find Detectors that belong to groups
-      typedef boost::shared_ptr<Geometry::ICompAssembly> sptr_ICompAss;
-      typedef boost::shared_ptr<Geometry::IComponent> sptr_IComp;
-      typedef boost::shared_ptr<Geometry::IDetector> sptr_IDet;
+      typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
+      typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
+      typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
       std::queue< std::pair<sptr_ICompAss,int> > assemblies;
-      sptr_ICompAss current=boost::dynamic_pointer_cast<Geometry::ICompAssembly>(inst);
+      sptr_ICompAss current=boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
       sptr_IDet currentDet;
       sptr_IComp currentIComp;
       sptr_ICompAss currentchild;
@@ -175,7 +175,7 @@ namespace Algorithms
           for (int i=0;i<nchilds;++i)
           {
             currentIComp=(*(current.get()))[i]; // Get child
-            currentDet=boost::dynamic_pointer_cast<Geometry::IDetector>(currentIComp);
+            currentDet=boost::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
             if (currentDet.get())// Is detector
             {
               if (top_group > 0)
@@ -185,7 +185,7 @@ namespace Algorithms
             }
             else // Is an assembly, push in the queue
             {
-              currentchild=boost::dynamic_pointer_cast<Geometry::ICompAssembly>(currentIComp);
+              currentchild=boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
               if (currentchild.get())
               {
                 child_group=group_map[currentchild->getName()];
@@ -232,7 +232,7 @@ namespace Algorithms
       throw std::invalid_argument("You must specify either to use the OldCalFilename parameter OR GroupNames but not both!");
 
     // ---------- Get the instrument one of 3 ways ---------------------------
-    Instrument_sptr inst;
+    Instrument_const_sptr inst;
     if (inWS)
     {
       inst = inWS->getInstrument();

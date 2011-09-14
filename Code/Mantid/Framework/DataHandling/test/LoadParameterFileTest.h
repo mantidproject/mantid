@@ -64,7 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     ParameterMap& paramMap = output->instrumentParameters();
-    boost::shared_ptr<Instrument> i = output->getInstrument();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");

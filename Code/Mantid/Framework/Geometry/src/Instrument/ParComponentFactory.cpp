@@ -127,7 +127,7 @@ namespace Mantid
      * @param map A pointer to the ParameterMap
      * @returns A pointer to a parameterized component
      */
-    boost::shared_ptr<Instrument> 
+    boost::shared_ptr<Instrument>
     ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
 					  boost::shared_ptr<ParameterMap> map)
     {
@@ -141,7 +141,7 @@ namespace Mantid
      * @param map A pointer to the ParameterMap
      * @returns A pointer to a parameterized component
      */
-    IComponent_sptr ParComponentFactory::create(IComponent_const_sptr base, 
+    IComponent_sptr ParComponentFactory::create(IComponent_const_sptr base,
 						const ParameterMap * map)
     {
       boost::shared_ptr<const IDetector> det_sptr = boost::dynamic_pointer_cast<const IDetector>(base);

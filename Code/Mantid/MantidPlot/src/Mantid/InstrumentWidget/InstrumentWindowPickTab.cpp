@@ -513,7 +513,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
   // This does need to get the instrument from the workspace as it's doing calculations
   // .....and this method should be an algorithm! Or at least somewhere different to here.
-  Mantid::Geometry::Instrument_sptr instr = ws->getInstrument();
+  Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
   Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
   Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);

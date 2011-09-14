@@ -70,7 +70,7 @@ public:
     marker_mask.setPropertyValue("Workspace", inputWS);
     marker_mask.setPropertyValue("DetectorList","1,3");
     marker_mask.execute();
-    boost::shared_ptr<Instrument> instrument = space->getInstrument();
+    boost::shared_ptr<const Instrument> instrument = space->getInstrument();
     TS_ASSERT( instrument->getDetector(1)->isMasked() )
     TS_ASSERT( instrument->getDetector(3)->isMasked() )
   }

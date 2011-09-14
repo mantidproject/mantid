@@ -58,7 +58,7 @@ namespace Mantid
     public:
 
       /// Constructor taking an instrument
-      InstrumentRayTracer(Instrument_sptr instrument);
+      InstrumentRayTracer(Instrument_const_sptr instrument);
       /// Trace a given track from the instrument source in the given direction 
       /// and compile a list of results that this track intersects.
       void trace(const Kernel::V3D & direction) const;
@@ -76,7 +76,7 @@ namespace Mantid
       void fireRay(Track & testRay, bool checkInstrumentBB = true) const;
 
       /// Pointer to the instrument
-      Instrument_sptr m_instrument;
+      Instrument_const_sptr m_instrument;
       /// Accumulate results in this Track object, aids performance. This is cleared when getResults is called.
       mutable Track m_resultsTrack;
       /// Logger

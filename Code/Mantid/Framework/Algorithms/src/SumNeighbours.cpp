@@ -38,7 +38,7 @@ using namespace DataObjects;
 void SumNeighbours::init()
 {
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
                             "The workspace containing the spectra to be summed." );
   declareProperty(
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
@@ -84,9 +84,7 @@ void SumNeighbours::exec()
   //Get some stuff from the input workspace
   //const size_t numberOfSpectra = inWS->getNumberHistograms();
   const int YLength = static_cast<int>(inWS->blocksize());
-  Instrument_sptr inst = inWS->getInstrument();
-  if (!inst)
-    throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+  Instrument_const_sptr inst = inWS->getInstrument();
 
   EventWorkspace_sptr outWS;
   //Make a brand new EventWorkspace

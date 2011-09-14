@@ -161,7 +161,7 @@ namespace Mantid
           std::vector<Kernel::DateAndTime> & pulseTimes, Algorithm * alg);
 
       /// Load a spectra mapping from the given file
-      static Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, Geometry::Instrument_sptr inst,
+      static Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, Geometry::Instrument_const_sptr inst,
           const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log);
 
     private:

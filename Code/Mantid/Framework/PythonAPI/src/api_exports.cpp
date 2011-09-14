@@ -220,7 +220,7 @@ using namespace boost::python;
     class_<API::Workspace, boost::noncopyable>("Workspace", no_init)
       .def("getTitle", &API::Workspace::getTitle, 
          return_value_policy< return_by_value >())
-      .def("getComment", &API::MatrixWorkspace::getComment, 
+      .def("getComment", &API::MatrixWorkspace::getComment,
          return_value_policy< copy_const_reference >() )
       .def("getMemorySize", &API::Workspace::getMemorySize)
       .def("isDirty", &API::Workspace::isDirty, Workspace_isDirtyOverloader()[return_value_policy< return_by_value >()])
@@ -246,7 +246,7 @@ using namespace boost::python;
     typedef MantidVec&(API::MatrixWorkspace::*data_modifier)(const std::size_t);
 
     //MatrixWorkspace class
-    class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceWrapper, 
+    class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceWrapper,
       boost::noncopyable >("MatrixWorkspace", no_init)
       .def("getNumberHistograms", &API::MatrixWorkspace::getNumberHistograms)
       .def("getNumberBins", &API::MatrixWorkspace::blocksize)
@@ -265,7 +265,7 @@ using namespace boost::python;
       .def("setYUnit", &API::MatrixWorkspace::setYUnit)
       .def("setDistribution", (bool& (API::MatrixWorkspace::*)(const bool))&API::MatrixWorkspace::isDistribution, 
          return_value_policy<return_by_value>() )
-      .def("getInstrument", &API::MatrixWorkspace::getInstrument)
+      .def("getInstrument", (Geometry::Instrument_sptr (API::ExperimentInfo::*)())&API::ExperimentInfo::getInstrument)
       .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&API::MatrixWorkspace::getSpectrum, return_internal_reference<>() )
       .def("getDetector", (Geometry::IDetector_sptr (API::MatrixWorkspace::*) (const size_t) const)&API::MatrixWorkspace::getDetector)
       .def("getRun", &API::MatrixWorkspace::mutableRun, return_internal_reference<>() )

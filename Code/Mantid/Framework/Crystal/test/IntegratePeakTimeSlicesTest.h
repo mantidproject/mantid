@@ -71,7 +71,7 @@ public:
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
       wsPtr->setX(k, x_vals);
 
-    Geometry::Instrument_sptr instP = wsPtr->getInstrument();
+    Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
     IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank1"));
 
     if (bankC->type().compare("RectangularDetector") != 0)
@@ -269,7 +269,7 @@ ISAWIntensityError     98.0362     134.863      164.32     187.991      164.32  
       Workspace2D_sptr wsPtr = boost::dynamic_pointer_cast<Workspace2D>(
           AnalysisDataService::Instance().retrieve("RebinResult"));
 
-      Geometry::Instrument_sptr instP = wsPtr->getInstrument();
+      Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
 
       IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank26"));
 
@@ -321,7 +321,7 @@ private:
   /**
    *   Calculates Q
    */
-  double calcQ(RectangularDetector_const_sptr bankP, boost::shared_ptr<Instrument> instPtr, int row, int col,
+  double calcQ(RectangularDetector_const_sptr bankP, boost::shared_ptr<const Instrument> instPtr, int row, int col,
       double time)
   {
     boost::shared_ptr<Detector> detP = bankP->getAtXY(col, row);

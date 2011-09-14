@@ -80,7 +80,7 @@ namespace API
   *
   * @param instr :: Shared pointer to an instrument.
   */
-  void ExperimentInfo::setInstrument(const Instrument_sptr& instr)
+  void ExperimentInfo::setInstrument(const Instrument_const_sptr& instr)
   {
     if (instr->isParametrized())
     {
@@ -99,7 +99,7 @@ namespace API
   *
   *  @return The instrument class
   */
-  Instrument_sptr ExperimentInfo::getInstrument()const
+  Instrument_const_sptr ExperimentInfo::getInstrument()const
   {
     return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
   }

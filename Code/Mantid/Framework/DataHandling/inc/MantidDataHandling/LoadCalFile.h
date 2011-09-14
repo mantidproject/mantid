@@ -36,7 +36,7 @@ namespace DataHandling
 
     static void getInstrument3WaysInit(Mantid::API::Algorithm * alg);
 
-    static Geometry::Instrument_sptr getInstrument3Ways(API::Algorithm * alg);
+    static Geometry::Instrument_const_sptr getInstrument3Ways(API::Algorithm * alg);
 
     static void readCalFile(const std::string& calFileName,
         Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, Mantid::API::MatrixWorkspace_sptr maskWS);

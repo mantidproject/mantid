@@ -28,7 +28,7 @@ namespace Mantid
      * component.
      * @param instrument :: The instrument to perform the ray tracings on. It must have a defined source.
      */
-    InstrumentRayTracer::InstrumentRayTracer(Instrument_sptr instrument) : m_instrument(instrument)
+    InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument) : m_instrument(instrument)
     {
       if( !m_instrument )
       {
@@ -127,7 +127,7 @@ namespace Mantid
       // Go through the instrument tree and see if we get any hits by
       // (a) first testing the bounding box and if we're inside that then
       // (b) test the lower components.
-      std::deque<IComponent_sptr> nodeQueue;
+      std::deque<IComponent_const_sptr> nodeQueue;
 
       if (checkInstrumentBB)
       {
@@ -140,7 +140,7 @@ namespace Mantid
         m_instrument->testIntersectionWithChildren(testRay, nodeQueue);
       }
 
-      IComponent_sptr node;
+      IComponent_const_sptr node;
       while( !nodeQueue.empty() )
       {
         node = nodeQueue.front();
@@ -150,7 +150,7 @@ namespace Mantid
         // Quick test. If this suceeds moved on to test the children
         if( bbox.doesLineIntersect(testRay) )
         {
-          if( ICompAssembly_sptr assembly = boost::dynamic_pointer_cast<ICompAssembly>(node) )
+          if( ICompAssembly_const_sptr assembly = boost::dynamic_pointer_cast<const ICompAssembly>(node) )
           {
             assembly->testIntersectionWithChildren(testRay, nodeQueue);
           }

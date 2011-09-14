@@ -6,6 +6,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ConfigService.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -36,7 +37,7 @@ namespace Mantid
     using namespace Kernel;
     using API::Progress;
     using API::FileProperty;
-    using Geometry::Instrument_sptr;
+    using Geometry::Instrument_const_sptr;
 
     CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
     {
@@ -49,7 +50,7 @@ namespace Mantid
      */
     void CreateCalFileByNames::init()
     {
-      declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input, new InstrumentValidator<>),
         "A workspace that contains a reference to the instrument of interest.\n"
         "You can use LoadEmptyInstrument if you do not have any data files to load.");
       declareProperty(new FileProperty("GroupingFileName","",FileProperty::Save, ".cal"),
@@ -70,13 +71,9 @@ namespace Mantid
     {
       std::ostringstream mess;
       MatrixWorkspace_const_sptr ws = getProperty("InstrumentWorkspace");
-      if (!ws)
-        throw std::runtime_error("Workspace not found!");
 
       // Get the instrument.
-      Instrument_sptr inst = ws->getInstrument();
-      if (!inst)
-        throw std::runtime_error("No instrument found in the workspace " + ws->getName());
+      Instrument_const_sptr inst = ws->getInstrument();
 
       // Get the names of groups
       std::string groupsname=getProperty("GroupNames");
@@ -101,11 +98,11 @@ namespace Mantid
       vgroups.clear();
 
       // Find Detectors that belong to groups
-      typedef boost::shared_ptr<Geometry::ICompAssembly> sptr_ICompAss;
-      typedef boost::shared_ptr<Geometry::IComponent> sptr_IComp;
-      typedef boost::shared_ptr<Geometry::IDetector> sptr_IDet;
+      typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
+      typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
+      typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
       std::queue< std::pair<sptr_ICompAss,int> > assemblies;
-      sptr_ICompAss current=boost::dynamic_pointer_cast<Geometry::ICompAssembly>(inst);
+      sptr_ICompAss current=boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
       sptr_IDet currentDet;
       sptr_IComp currentIComp;
       sptr_ICompAss currentchild;
@@ -136,7 +133,7 @@ namespace Mantid
           for (int i=0;i<nchilds;++i)
           {
             currentIComp=(*(current.get()))[i]; // Get child
-            currentDet=boost::dynamic_pointer_cast<Geometry::IDetector>(currentIComp);
+            currentDet=boost::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
             if (currentDet.get())// Is detector
             {
               if (overwrite) // Map will contains udet as the key
@@ -146,7 +143,7 @@ namespace Mantid
             }
             else // Is an assembly, push in the queue
             {
-              currentchild=boost::dynamic_pointer_cast<Geometry::ICompAssembly>(currentIComp);
+              currentchild=boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
               if (currentchild.get())
               {
                 child_group=group_map[currentchild->getName()];

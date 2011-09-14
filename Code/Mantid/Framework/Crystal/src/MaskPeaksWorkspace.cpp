@@ -79,7 +79,7 @@ namespace Mantid
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
       //Get some stuff from the input workspace
-      Geometry::Instrument_sptr inst = inputW->getInstrument();
+      Geometry::Instrument_const_sptr inst = inputW->getInstrument();
       if (!inst)
         throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 

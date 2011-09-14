@@ -428,7 +428,7 @@ public:
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = ws->getInstrument();
+    boost::shared_ptr<const Instrument> i = ws->getInstrument();
 
     // check if combined translation works
     boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(1001);
@@ -788,7 +788,7 @@ public:
     IDetector_const_sptr det = ws->getDetector(1);
     TS_ASSERT_EQUALS( (det->getNumberParameter("number-of-x-pixels"))[0], 192);
 
-    Instrument_sptr inst = ws->getInstrument();
+    Instrument_const_sptr inst = ws->getInstrument();
     TS_ASSERT_EQUALS( (inst->getNumberParameter("number-of-x-pixels")).size(), 1);
     TS_ASSERT_EQUALS( (inst->getNumberParameter("number-of-x-pixels"))[0], 192);
 

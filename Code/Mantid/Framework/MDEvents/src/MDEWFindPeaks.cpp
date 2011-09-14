@@ -118,7 +118,7 @@ namespace MDEvents
     // TODO: Do we need to pick a different instrument info?
     ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
     // Instrument associated with workspace
-    Geometry::Instrument_sptr inst = ei->getInstrument();
+    Geometry::Instrument_const_sptr inst = ei->getInstrument();
     // Find the run number
     int runNumber = ei->getRunNumber();
 

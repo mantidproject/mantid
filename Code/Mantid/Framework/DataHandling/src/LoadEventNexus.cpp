@@ -1349,7 +1349,7 @@ void LoadEventNexus::runLoadMonitors()
  * @param entry_name :: name of the NXentry to open.
  * @returns A pointer to a new map or NULL if the block does not exist
  */
-Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Geometry::Instrument_sptr inst,
+Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Geometry::Instrument_const_sptr inst,
                                    const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log)
 {
   ::NeXus::File file(filename);

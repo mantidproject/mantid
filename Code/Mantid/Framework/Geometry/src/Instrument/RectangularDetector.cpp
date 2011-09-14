@@ -373,7 +373,7 @@ int RectangularDetector::maxDetectorID()
  * @param testRay :: Track under test. The results are stored here.
  * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching. Unused.
  */
-void RectangularDetector::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & /*searchQueue*/) const
+void RectangularDetector::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & /*searchQueue*/) const
 {
   /// Base point (x,y,z) = position of pixel 0,0
   V3D basePoint;

@@ -78,7 +78,7 @@ namespace Mantid
       virtual void printTree(std::ostream&) const = 0;
 
       /** Test the intersection of the ray with the children of the component assembly  */
-      virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & searchQueue) const = 0;
+      virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & searchQueue) const = 0;
 
     private:
       /// Private copy assignment operator

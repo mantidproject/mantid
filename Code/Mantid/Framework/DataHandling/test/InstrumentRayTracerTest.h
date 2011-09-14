@@ -74,7 +74,7 @@ public:
   void test_TOPAZ()
   {
     bool verbose=false;
-    Instrument_sptr inst = topazWS->getInstrument();
+    Instrument_const_sptr inst = topazWS->getInstrument();
     // Directly in Z+ = towards the detector center
     for (int azimuth=0; azimuth < 360; azimuth += 3)
       for (int elev=-89; elev < 89; elev += 3)
@@ -94,7 +94,7 @@ public:
   }
 
 private:
-  void showResults(Links & results, Instrument_sptr inst)
+  void showResults(Links & results, Instrument_const_sptr inst)
   {
     Links::const_iterator resultItr = results.begin();
     for (; resultItr != results.end(); resultItr++)

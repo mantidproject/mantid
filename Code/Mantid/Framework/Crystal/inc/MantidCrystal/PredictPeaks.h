@@ -52,7 +52,7 @@ namespace Crystal
     /// Max wavelength parameter
     double wlMax;
     /// Instrument reference
-    Geometry::Instrument_sptr inst;
+    Geometry::Instrument_const_sptr inst;
     /// Output peaks workspace
     Mantid::DataObjects::PeaksWorkspace_sptr pw;
     /// Counter of possible peaks

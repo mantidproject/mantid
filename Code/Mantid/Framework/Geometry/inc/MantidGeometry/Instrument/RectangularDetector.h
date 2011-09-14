@@ -105,7 +105,7 @@ public:
   // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
   using CompAssembly::getBoundingBox;
 
-  virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & searchQueue) const;
+  virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & searchQueue) const;
 
   // ------------ IObjComponent methods ----------------
 

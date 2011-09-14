@@ -65,10 +65,10 @@ public:
       mover.setPropertyValue("Z","30");
       mover.execute();
 
-      Instrument_sptr inst = WS->getInstrument();
+      Instrument_const_sptr inst = WS->getInstrument();
       // get pointer to the first detector in the bank
-      boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>(
-                                              (*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
+      boost::shared_ptr<const IComponent> comp = (*boost::dynamic_pointer_cast<const ICompAssembly>(
+                                              (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
       V3D pos = comp->getPos();
       TS_ASSERT_EQUALS(pos,det1->getPos() + V3D(10,20,30))
@@ -87,10 +87,10 @@ public:
       mover.setPropertyValue("RelativePosition","0");
       mover.execute();
 
-      Instrument_sptr inst = WS->getInstrument();
+      Instrument_const_sptr inst = WS->getInstrument();
       // get pointer to the first detector in the bank
-      boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>(
-                                              (*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
+      boost::shared_ptr<const IComponent> comp = (*boost::dynamic_pointer_cast<const ICompAssembly>(
+                                              (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
       V3D pos = comp->getPos();
       TS_ASSERT_EQUALS(pos,V3D(10,20,30))
@@ -108,9 +108,9 @@ public:
     mover.setPropertyValue("RelativePosition","0");
     mover.execute();
 
-    Instrument_sptr inst = WS->getInstrument();
+    Instrument_const_sptr inst = WS->getInstrument();
     // get pointer to the first detector in the bank
-    boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>((*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
+    boost::shared_ptr<const IComponent> comp = (*boost::dynamic_pointer_cast<const ICompAssembly>((*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
       V3D pos = comp->getPos();
       TS_ASSERT_EQUALS(pos,V3D(10,20,30))

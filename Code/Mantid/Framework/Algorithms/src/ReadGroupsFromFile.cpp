@@ -21,6 +21,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include "MantidAPI/WorkspaceValidators.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -64,7 +65,7 @@ namespace Algorithms
   {
 
     // The name of the instrument
-    declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InstrumentWorkspace", "", Direction::Input),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InstrumentWorkspace", "", Direction::Input, new InstrumentValidator<>),
       "A workspace that contains a reference to the instrument of interest.\n"
       "You can use LoadEmptyInstrument if you do not have any data files to load.");
 
@@ -96,13 +97,9 @@ namespace Algorithms
   {
     std::ostringstream mess;
     MatrixWorkspace_const_sptr ws = getProperty("InstrumentWorkspace");
-    if (!ws)
-      throw std::runtime_error("Workspace not found!");
 
     // Get the instrument.
-    Instrument_sptr inst = ws->getInstrument();
-    if (!inst)
-      throw std::runtime_error("No instrument found in the workspace " + ws->getName());
+    Instrument_const_sptr inst = ws->getInstrument();
 
     // Create a copy (without the data) of the workspace - it will contain the
     Workspace2D_sptr localWorkspace =
