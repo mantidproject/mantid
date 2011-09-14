@@ -37,18 +37,20 @@ void Scale::init()
 void Scale::exec()
 {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS;
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   
   const double factor = getProperty("Factor");
   const std::string op = getPropertyValue("Operation");
   
   if (op == "Multiply")
   {
-    outputWS = inputWS * factor;
+    if (outputWS == inputWS) inputWS *= factor;
+    else outputWS = inputWS * factor;
   }
   else
   {
-    outputWS = inputWS + factor;
+    if (outputWS == inputWS) inputWS += factor;
+    else outputWS = inputWS + factor;
   }
   
   setProperty("OutputWorkspace", outputWS);
