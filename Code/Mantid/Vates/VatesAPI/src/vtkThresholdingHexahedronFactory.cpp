@@ -6,6 +6,7 @@
 #include <vtkImageData.h>
 #include <vtkRectilinearGrid.h>
 #include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/NullCoordTransform.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -60,6 +61,7 @@ namespace VATES
       if(this->hasSuccessor())
       {
         m_successor->initialize(m_workspace);
+        m_successor->setUseTransform(m_useTransform);
         return;
       }
       else
@@ -186,7 +188,14 @@ namespace VATES
 
     std::cout << tim << " to check all the signal values." << std::endl;
 
+    //GetTransformFromOriginal doesn't follow RAII!
+    NullCoordTransform defaultTransform;
     Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+    if(!transform || !m_useTransform)
+    {
+      transform = &defaultTransform;
+    }
+
     Mantid::coord_t in[3]; 
     Mantid::coord_t out[3];
             

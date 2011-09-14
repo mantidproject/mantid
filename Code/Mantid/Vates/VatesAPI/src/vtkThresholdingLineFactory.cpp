@@ -9,6 +9,7 @@
 #include <vector>
 #include <boost/math/special_functions/fpclassify.hpp> 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/NullCoordTransform.h"
 
 using Mantid::API::IMDWorkspace;
 
@@ -82,7 +83,8 @@ namespace Mantid
         const int nPointsX = nBinsX;
         Column column(nPointsX);
 
-        Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+        NullCoordTransform transform;
+        //Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
         Mantid::coord_t in[3]; 
         Mantid::coord_t out[3];
 
@@ -107,7 +109,7 @@ namespace Mantid
               unstructPoint.isSparse = false;
             }
 
-            transform->apply(in, out);
+            transform.apply(in, out);
 
             unstructPoint.pointId = points->InsertNextPoint(out);
             column[i] = unstructPoint;
@@ -162,6 +164,7 @@ namespace Mantid
         if(this->hasSuccessor())
         {
           m_successor->initialize(m_workspace);
+          m_successor->setUseTransform(m_useTransform);
           return;
         }
         else

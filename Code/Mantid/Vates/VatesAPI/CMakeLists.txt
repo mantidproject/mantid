@@ -24,6 +24,7 @@ src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/NoThresholdRange.cpp
+src/NullCoordTransform.cpp
 src/NullRebinningPresenter.cpp
 src/ProgressAction.cpp
 src/RebinningCutterXMLDefinitions.cpp
@@ -76,6 +77,7 @@ inc/MantidVatesAPI/MDRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
 inc/MantidVatesAPI/MDRebinningViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
+inc/MantidVatesAPI/NullCoordTransform.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h

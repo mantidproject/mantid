@@ -4,7 +4,6 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -18,6 +17,7 @@
 #include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
+#include "MantidVatesAPI/NullCoordTransform.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
@@ -35,23 +35,6 @@ namespace
 
 
 const int dimension_size = 9;
-
-
-//=================================================================================================
-///Helper class peforms no transformation.
-class NullTransform : public Mantid::API::CoordTransform
-{
-public:
-  NullTransform() : Mantid::API::CoordTransform(3, 3){}
-  std::string toXMLString() const { throw std::runtime_error("Not Implemented");}
-  void apply(const Mantid::coord_t * inputVector, Mantid::coord_t * outVector) const
-  {
-    for(size_t i = 0; i < 3; i++)
-    {
-      outVector[i] = inputVector[i];
-    }
-  }
-};
 
 //=================================================================================================
 ///Helper class. Usage as fake MDCell.

@@ -10,6 +10,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidVatesAPI/NullCoordTransform.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
@@ -83,6 +84,8 @@ namespace Mantid
         signal->SetName(m_scalarName.c_str());
         signal->SetNumberOfComponents(1);
 
+        //The following represent actual calculated positions.
+
         float signalScalar;
         const int nPointsX = nBinsX+1;
         const int nPointsY = nBinsY+1;
@@ -96,6 +99,8 @@ namespace Mantid
         memset(pointNeeded, 0, nPointsX*nPointsY*sizeof(bool));
         // Array with true where the voxel should be shown
         bool * voxelShown = new bool[nBinsX*nBinsY];
+
+
 
         size_t index = 0;
         for (int i = 0; i < nBinsX; i++)
@@ -126,9 +131,11 @@ namespace Mantid
 
         std::cout << tim << " to check all the signal values." << std::endl;
 
-        Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+        //Mantid::API::CoordTransform* transform = m_workspace->getTransformFromOriginal();
+        NullCoordTransform transform;
         Mantid::coord_t in[3]; 
         Mantid::coord_t out[3];
+        in[2] = 0;
 
         // Array with the point IDs (only set where needed)
         vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY];
@@ -142,8 +149,7 @@ namespace Mantid
             if (pointNeeded[index])
             {
               in[1] = minY + (j * incrementY); //Calculate increment in y;
-
-              transform->apply(in, out);
+              transform.apply(in, out);
               pointIDs[index] = points->InsertNextPoint(out);
             }
             index++;
@@ -208,6 +214,7 @@ namespace Mantid
         if(this->hasSuccessor())
         {
           m_successor->initialize(m_workspace);
+          m_successor->setUseTransform(m_useTransform);
           return;
         }
         else

@@ -28,7 +28,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
-    ws_sptr->setTransformFromOriginal(new NullTransform);
+    ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     vtkThresholdingHexahedronFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
@@ -55,7 +55,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
     // Workspace with value 1.0 everywhere
     MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
-    ws_sptr->setTransformFromOriginal(new NullTransform);
+    ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -158,7 +158,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullTransform);
+    pMockWs->setTransformFromOriginal(new NullCoordTransform);
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
@@ -209,7 +209,7 @@ public:
 
     //Create the workspace. 20 bins in each dimension.
     m_ws_sptr = getFakeMDHistoWorkspace(1.0, 3, 100);
-    m_ws_sptr->setTransformFromOriginal(new NullTransform);
+    m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
 //    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
 //    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(

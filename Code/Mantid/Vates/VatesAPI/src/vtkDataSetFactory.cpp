@@ -6,7 +6,7 @@ namespace Mantid
 namespace VATES
 {
 
-vtkDataSetFactory::vtkDataSetFactory()
+vtkDataSetFactory::vtkDataSetFactory() : m_useTransform(false)
 {
 }
 

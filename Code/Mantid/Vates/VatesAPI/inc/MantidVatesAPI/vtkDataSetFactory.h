@@ -93,6 +93,18 @@ public:
     throw std::runtime_error("vtkDataSetFactory does not implement ::setRecursionDepth"); 
   }
 
+  /// Setter for whether a workspace defined transformation should be used or not.
+  virtual void setUseTransform(bool bUseTransform)
+  {
+    m_useTransform = bUseTransform;
+  }
+
+  /// Getter for the use transform status.
+  virtual bool getUseTransform() const
+  {
+    return m_useTransform;
+  }
+
   /// Dimensionalities of interest.
   enum{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
 
@@ -106,6 +118,9 @@ protected:
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const = 0;
 
+  
+  /// Flag indicating whether a transformation should be used.
+  bool m_useTransform;
 };
 
 typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
