@@ -284,7 +284,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
     vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
     vtkGridFactory->SetSuccessor(p_2dSuccessorFactory);
-    vtkGridFactory->setUseTransform(true);
+    vtkGridFactory->setUseTransform(true); // Use workspace defined transformations. This could be made configurable via the GUI!
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
@@ -337,13 +337,13 @@ int vtkRebinningTransformOperator::RequestInformation(vtkInformation* vtkNotUsed
     m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
     m_setup = SetupDone;
 
-    setTimeRange(outputVector);
     }
     catch(std::exception& e)
     {
       std::string ex = e.what();
     }
   }
+  setTimeRange(outputVector);
   return status;
 }
 

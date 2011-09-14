@@ -61,7 +61,7 @@ void RebinningCutterObjectPanel::constructGeometry(QGridLayout* gLayout)
     }
 
     // Construct custom widget instance.
-    m_geometryWidget = new GeometryWidget(new SynchronisingGeometryPresenter(xmlParser), true);
+    m_geometryWidget = new GeometryWidget(new SynchronisingGeometryPresenter(xmlParser), false);
     gLayout->addWidget(m_geometryWidget, gLayout->rowCount() + 1, 0, Qt::AlignLeft);
 
     connect(m_geometryWidget, SIGNAL(ignoreBinChanges()), this, SLOT(ignoreBinChangesListner()));

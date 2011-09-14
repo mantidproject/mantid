@@ -336,13 +336,13 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
     m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
     m_setup = SetupDone;
 
-    setTimeRange(outputVector);
     }
     catch(std::exception& e)
     {
       std::string ex = e.what();
     }
   }
+  setTimeRange(outputVector);
   return status;
 }
 
