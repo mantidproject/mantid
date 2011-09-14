@@ -59,6 +59,12 @@ namespace Geometry
 
     std::string getMangledName();
 
+    /// Get parent component element of location element
+    static Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
+
+    /// get name of location element
+    static std::string getNameOfLocationElement(Poco::XML::Element* pElem);
+
   private:
     /// Static reference to the logger class
     static Kernel::Logger& g_log;
@@ -71,12 +77,6 @@ namespace Geometry
     Kernel::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
                                    const double angleConvertConst, const bool deltaOffsets=false);
 
-    /// Get parent component element of location element
-    static Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
-
-    /// get name of location element
-    static std::string getNameOfLocationElement(Poco::XML::Element* pElem);
-    
     /// Check the validity range and add it to the instrument object
     void setValidityRange(const Poco::XML::Element* pRootElem);
 
@@ -135,6 +135,32 @@ namespace Geometry
     /// If appropriate, creates a second instrument containing neutronic detector positions
     void createNeutronicInstrument();
 
+    /// Takes as input a <type> element containing a <combine-components-into-one-shape>, and
+    /// adjust the <type> element by replacing its containing <component> elements with <cuboid>'s
+    /// (note for now this will only work for <cuboid>'s and when necessary this can be extended).
+    void adjust(Poco::XML::Element* pElem, std::map<std::string,bool>& isTypeAssembly,
+                std::map<std::string,Poco::XML::Element*>& getTypeElement);
+
+public: //for testing
+    /// return absolute position of point which is set relative to the
+    /// coordinate system of the input component
+    Kernel::V3D getAbsolutPositionInCompCoorSys(Geometry::ICompAssembly* comp, Kernel::V3D);
+
+private:
+    /// This method returns the parent appended which its child components and also name of type of the last child component
+    std::string getShapeCoorSysComp(Geometry::ICompAssembly* parent,
+      Poco::XML::Element* pLocElem, std::map<std::string,Poco::XML::Element*>& getTypeElement,
+      Geometry::ICompAssembly*& endAssembly);
+
+    /// Returns a translated and rotated <cuboid> element
+    std::string translateRotateXMLcuboid(Geometry::ICompAssembly* comp, Poco::XML::Element* cuboidEle,
+                                  std::string& cuboidName);
+
+    /// Return a subelement of an XML element
+    Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
+
+    /// Get position coordinates from XML element
+    Kernel::V3D parsePosition(Poco::XML::Element* pElem);
 
     /// The name and path of the input file
     std::string m_filename;

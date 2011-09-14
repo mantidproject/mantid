@@ -300,6 +300,77 @@ public:
     TS_ASSERT_EQUALS( dets.size(), 100*200 * 2);
   }
 
+
+
+  void testGetAbsolutPositionInCompCoorSys()
+  {
+    CompAssembly base("base");
+    base.setPos(1.0,1.0,1.0);
+    base.rotate(Quat(90.0, V3D(0,0,1)));
+
+    InstrumentDefinitionParser helper;
+    V3D test = helper.getAbsolutPositionInCompCoorSys(&base, V3D(1,0,0));
+
+    TS_ASSERT_DELTA( test.X(),  1.0, 0.0001);
+    TS_ASSERT_DELTA( test.Y(), 2.0, 0.0001);
+    TS_ASSERT_DELTA( test.Z(),  1.0, 0.0001);
+  }
+
+
+  // testing through Loading IDF_for_UNIT_TESTING5.xml method adjust()
+  void testAdjust()
+  {
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml";
+    std::string xmlText = Strings::loadFile(filename);
+    boost::shared_ptr<const Instrument> i;
+
+    // Parse the XML
+    InstrumentDefinitionParser parser;
+    TS_ASSERT_THROWS_NOTHING( parser.initialize(filename, "AdjustTest", xmlText); );
+    TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
+
+    // None rotated cuboid
+    boost::shared_ptr<const IDetector> ptrNoneRot = i->getDetector(1400);
+    TS_ASSERT( !ptrNoneRot->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( ptrNoneRot->isValid(V3D(0.0,0.0,3.0)) );
+    TS_ASSERT( !ptrNoneRot->isValid(V3D(0.0,4.5,0.0)) );
+    TS_ASSERT( ptrNoneRot->isValid(V3D(0.0,4.5,3.0)) );
+    TS_ASSERT( !ptrNoneRot->isValid(V3D(0.0,5.5,3.0)) );
+    TS_ASSERT( !ptrNoneRot->isValid(V3D(4.5,0.0,3.0)) );
+
+    // rotated cuboids
+    boost::shared_ptr<const IDetector> ptrRot = i->getDetector(1300);
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,0.0,3.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,4.5,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,4.5,3.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,7.5,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,10.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,10.0,4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,10.0,5.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,10.0,-4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.5,10.0,0.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.5,10.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(-0.5,10.0,0.0)) );
+
+    // nested rotated cuboids
+    ptrRot = i->getDetector(1350);
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,0.0,3.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,4.5,0.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,4.5,3.0)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,7.5,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(0.0,20.0,5.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.0,20.0,-4.5)) );
+    TS_ASSERT( !ptrRot->isValid(V3D(1.5,20.0,0.5)) );
+    TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
+    TS_ASSERT( ptrRot->isValid(V3D(-0.5,20.0,0.0)) );
+
+  }
+
+
 };
 
 
