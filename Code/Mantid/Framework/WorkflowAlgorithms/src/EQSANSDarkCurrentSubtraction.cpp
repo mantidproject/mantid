@@ -13,6 +13,7 @@
 #include "MantidAPI/TableRow.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace Mantid
 {
@@ -52,7 +53,7 @@ void EQSANSDarkCurrentSubtraction::init()
 
 void EQSANSDarkCurrentSubtraction::exec()
 {
-  Progress progress(this,0.0,1.0,6);
+  Progress progress(this,0.0,1.0,10);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -112,7 +113,7 @@ void EQSANSDarkCurrentSubtraction::exec()
     std::string loader = reductionHandler.findStringEntry("LoadAlgorithm");
     if (loader.size()==0)
     {
-      IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad", 1.0, 2.0);
+      IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsSubAlg();
       darkWS = loadAlg->getProperty("OutputWorkspace");
@@ -127,7 +128,7 @@ void EQSANSDarkCurrentSubtraction::exec()
     }
     setProperty("OutputDarkCurrentWorkspace", darkWS);
   }
-  progress.report(2, "Loaded dark current");
+  progress.report(3, "Loaded dark current");
 
   // Normalize the dark current and data to counting time
   Mantid::Kernel::Property* prop = inputWS->run().getProperty("proton_charge");
@@ -142,7 +143,7 @@ void EQSANSDarkCurrentSubtraction::exec()
   progress.report("Scaling dark current");
 
   // Scale the stored dark current by the counting time
-  IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace", 3.0, 4.0);
+  IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace", 0.4, 0.5);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
@@ -150,11 +151,18 @@ void EQSANSDarkCurrentSubtraction::exec()
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
-  scaledDarkWS *= scaling_factor;
+  IAlgorithm_sptr scaleAlg = createSubAlgorithm("Scale", 0.5, 0.6);
+  scaleAlg->setProperty("InputWorkspace", scaledDarkWS);
+  scaleAlg->setProperty("Factor", scaling_factor);
+  scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
+  scaleAlg->setProperty("Operation", "Multiply");
+  scaleAlg->executeAsSubAlg();
 
-  progress.report("Subtracting dark current");
-
-  outputWS = inputWS - scaledDarkWS;
+  IAlgorithm_sptr minusAlg = createSubAlgorithm("Minus", 0.6, 0.7);
+  minusAlg->setProperty("LHSWorkspace", inputWS);
+  minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
+  minusAlg->setProperty("OutputWorkspace", outputWS);
+  minusAlg->executeAsSubAlg();
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+darkWSName);
