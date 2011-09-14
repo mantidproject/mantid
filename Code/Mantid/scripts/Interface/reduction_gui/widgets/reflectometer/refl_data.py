@@ -154,9 +154,9 @@ class DataReflWidget(BaseWidget):
         """
         button_status = False
         if self._summary.data_peak_discrete_switch.isChecked(): #discrete mode
-            pixel_range = self._summary.data_peak_nbr_selection_value.text()
-            if pixel_range != 'N/A':
-                button_status = True
+            #pixel_range = self._summary.data_peak_nbr_selection_value.text()
+            #if pixel_range != 'N/A':
+            button_status = False
         else:
             from_pixel = self._summary.data_peak_from_pixel.text()
             to_pixel = self._summary.data_peak_to_pixel.text()
@@ -194,14 +194,14 @@ class DataReflWidget(BaseWidget):
         #background
         is_checked = self._summary.data_background_switch.isChecked()
         if is_checked:
-            from_pixel = self._summary.data_background_from_pixel1.text()
-            if from_pixel == '':
+            from_pixel1 = self._summary.data_background_from_pixel1.text()
+            if from_pixel1 == '':
                 self._summary.data_background_from_pixel_missing.setText("*")
             else:
                 self._summary.data_background_from_pixel_missing.setText(" ")
                 
-            to_pixel = self._summary.data_background_to_pixel1.text()
-            if to_pixel == '':
+            to_pixel1 = self._summary.data_background_to_pixel1.text()
+            if to_pixel1 == '':
                 self._summary.data_background_to_pixel_missing.setText("*")
             else:
                 self._summary.data_background_to_pixel_missing.setText(" ")
@@ -239,6 +239,12 @@ class DataReflWidget(BaseWidget):
             to_pixel = self._summary.data_background_to_pixel1.text()
             if from_pixel != '' and to_pixel != '':
                 button_status = True
+            
+            from_pixel = self._summary.data_background_from_pixel2.text()
+            to_pixel = self._summary.data_background_to_pixel2.text()
+            if (from_pixel == '' and to_pixel != '') or (from_pixel != '' and to_pixel == ''):
+                button_status = False
+                
         self._summary.data_background_save_button.setEnabled(button_status)
         self._check_for_missing_fields()
                  
@@ -252,6 +258,7 @@ class DataReflWidget(BaseWidget):
             myROI = LoadSNSRoi(filename=fname)
             mode = myROI.getMode()
             pixelRange = myROI.getPixelRange()
+            
             self.background_pixel_range = pixelRange
                 
             if (mode == 'narrow/broad'):                
@@ -284,6 +291,22 @@ class DataReflWidget(BaseWidget):
         to_pixel = self._summary.data_peak_to_pixel.text()
         return [from_pixel, to_pixel]
 
+    def get_data_back_selection(self):
+        """
+            This function retrives the from/to pixels of roi#1/#2 of data background selection
+        """
+        roi1_from = self._summary.data_background_from_pixel1.text()
+        roi1_to = self._summary.data_background_to_pixel1.text()
+        range1 = [int(roi1_from), int(roi1_to)]
+        
+        roi2_from = self._summary.data_background_from_pixel2.text()
+        if (roi2_from != ''):
+            roi2_to = self._summary.data_background_to_pixel2.text()
+            range2 = [int(roi2_from), int(roi2_to)]
+            _range = [range1, range2]
+        else:
+            _range = [range1]
+        return _range
                     
     def _data_background_save_roi_clicked(self):
         """
@@ -291,8 +314,7 @@ class DataReflWidget(BaseWidget):
         """
         fname = self.data_browse_dialog(data_type="*.dat *.txt", title="Background ROI file - select or enter a new ROI file name")
         if fname:
-             peak_pixel_range = get_data_peak_selection() 
-            
-
-        
+             pixel_range = self.get_data_back_selection()
+             print pixel_range
+             SaveSNSRoi(filename=fname, pixel_range=pixel_range, mode='discrete')
 

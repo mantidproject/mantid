@@ -63,16 +63,17 @@ class LoadSNSRoi:
     
     def calculatePixelRange(self):
         nbr_x = len(self.x_list)
-        if nbr_x < 255: #pixel_x will give from/to pixel range
-            _list = self.x_list
+        if ((nbr_x % 304) == 0):
+            _list = self.y_list #REF_L
         else:
-            _list = self.y_list
+            _list = self.x_list #REF_M
             
         sz = len(_list)
         Pixel_max = _list[-1]
         Pixel_min = _list[0]
 
         delta_pixel = Pixel_max - Pixel_min + 1
+        
         if delta_pixel == sz:
             #narrow or broad
             self.mode = 'narrow/broad'
@@ -83,9 +84,10 @@ class LoadSNSRoi:
             self.retrieveDiscretePixelRange(_list)
             
     def retrieveDiscretePixelRange(self, _list):
+
         start_pixel = _list[0]
         left_pixel = _list[0]
-        for right_pixel in _list[1:-1]:
+        for right_pixel in _list[1:]:
             delta_pixel = right_pixel - left_pixel
             if delta_pixel != 1:
                 new_range = [start_pixel, left_pixel]
