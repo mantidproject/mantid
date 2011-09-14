@@ -359,7 +359,7 @@ void UserFunctionDialog::saveFunction()
 
 void UserFunctionDialog::saveToFile()
 {
-  QFile funFile(QString::fromStdString (Mantid::Kernel::ConfigService::Instance().getPropertiesDir()) + "Mantid.user.functions");
+  QFile funFile(QString::fromStdString (Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) + "Mantid.user.functions");
   if (funFile.open(QIODevice::WriteOnly | QIODevice::Text))
   {
     QMap<QString,QString>::const_iterator it = m_funs.begin();
