@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Tue Sep 13 11:41:55 2011
+# Created: Wed Sep 14 13:43:59 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,22 +39,30 @@ class Ui_SANSReduction(object):
         self.verticalLayout.addWidget(self.tabWidget)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.interface_chk = QtGui.QCheckBox(self.centralwidget)
+        self.interface_chk.setObjectName("interface_chk")
+        self.horizontalLayout.addWidget(self.interface_chk)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.progress_bar = QtGui.QProgressBar(self.centralwidget)
         self.progress_bar.setProperty("value", 24)
         self.progress_bar.setObjectName("progress_bar")
         self.horizontalLayout.addWidget(self.progress_bar)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
         self.reduce_button = QtGui.QPushButton(self.centralwidget)
         self.reduce_button.setObjectName("reduce_button")
         self.horizontalLayout.addWidget(self.reduce_button)
+        self.save_button = QtGui.QPushButton(self.centralwidget)
+        self.save_button.setObjectName("save_button")
+        self.horizontalLayout.addWidget(self.save_button)
         self.export_button = QtGui.QPushButton(self.centralwidget)
         self.export_button.setObjectName("export_button")
         self.horizontalLayout.addWidget(self.export_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
         SANSReduction.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(SANSReduction)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1062, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1062, 25))
         self.menubar.setObjectName("menubar")
         self.file_menu = QtGui.QMenu(self.menubar)
         self.file_menu.setObjectName("file_menu")
@@ -81,8 +89,11 @@ class Ui_SANSReduction(object):
         SANSReduction.setWindowTitle(QtGui.QApplication.translate("SANSReduction", "SANS Reduction", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("SANSReduction", "Tab 1", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QtGui.QApplication.translate("SANSReduction", "Tab 2", None, QtGui.QApplication.UnicodeUTF8))
+        self.interface_chk.setText(QtGui.QApplication.translate("SANSReduction", "Advanced interface", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to execute reduction.", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setText(QtGui.QApplication.translate("SANSReduction", "Reduce", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to save your reduction parameters.", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_button.setText(QtGui.QApplication.translate("SANSReduction", "Save", None, QtGui.QApplication.UnicodeUTF8))
         self.export_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to export the reduction parameters to a python script that can be run in MantidPlot.", None, QtGui.QApplication.UnicodeUTF8))
         self.export_button.setText(QtGui.QApplication.translate("SANSReduction", "Export", None, QtGui.QApplication.UnicodeUTF8))
         self.file_menu.setTitle(QtGui.QApplication.translate("SANSReduction", "File", None, QtGui.QApplication.UnicodeUTF8))
