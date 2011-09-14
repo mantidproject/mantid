@@ -55,6 +55,7 @@ void EQSANSLoad::init()
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
+  declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
   declareProperty("OutputMessage","",Direction::Output);
@@ -573,7 +574,8 @@ void EQSANSLoad::exec()
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   rebinAlg->setPropertyValue("Params", params);
-  rebinAlg->setProperty("PreserveEvents", true);
+  const bool preserveEvents = getProperty("PreserveEvents");
+  rebinAlg->setProperty("PreserveEvents", preserveEvents);
   rebinAlg->executeAsSubAlg();
 
   dataWS->mutableRun().addProperty("event_ws", getPropertyValue("OutputWorkspace"), true);
