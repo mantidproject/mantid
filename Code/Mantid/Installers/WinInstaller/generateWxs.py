@@ -444,7 +444,7 @@ addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 
 
 # The other required third_party libraries, excluding the designer stuff
 addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,
-        exclude_files=['QtCLucene4.dll','QtDesigner4.dll','QtDesignerComponents4.dll','QtHelp4.dll', 'QtNetwork4.dll','QtScript4.dll','QtSql4.dll'])
+        exclude_files=['QtCLucene4.dll','QtDesigner4.dll','QtDesignerComponents4.dll','QtHelp4.dll','QtScript4.dll'])
 
 #------------- Bundled Python installation ---------------
 pythonDLLs = addCompList('PythonDLLs',LIBDIR + '/Python27/DLLs','DLLs',binDir)[0]
