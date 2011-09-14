@@ -45,7 +45,7 @@ if ( ${UNIX_DIST} MATCHES "Ubuntu" )
 endif ( ${UNIX_DIST} MATCHES "Ubuntu" )
 
 #RedHatEnterpriseClient RedHatEnterpriseWorkstation
-if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
   find_program ( RPMBUILD_CMD rpmbuild )
   if ( RPMBUILD_CMD )
     set ( CPACK_GENERATOR "RPM" )
@@ -68,4 +68,4 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
       "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
     
   endif ( RPMBUILD_CMD)
-endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
