@@ -279,8 +279,6 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
   //this->originSource = source;
 
   this->renderAndFinalSetup();
-  const unsigned int a = vtkSMPropertyHelper(this->currentView->origSource->getProxy(), "TimestepValues").GetNumberOfElements();
-  std::cout << "A: " << a << std::endl;
 }
 
 void MdViewerWidget::renderWorkspace(QString wsname)
