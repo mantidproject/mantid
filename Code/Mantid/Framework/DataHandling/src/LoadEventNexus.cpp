@@ -1061,7 +1061,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   }
   file.closeData();
 
-  // TODO get the run number
+  // Get the run number
   file.openData("run_number");
   string run("");
   if (file.getInfo().type == ::NeXus::CHAR) {
@@ -1112,7 +1112,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
     const std::string & top_entry_name, Algorithm * alg)
 {
-  string instrument;
+  string instrument = "";
 
   // Get the instrument name
   ::NeXus::File nxfile(nexusfilename);
@@ -1120,11 +1120,34 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   nxfile.openGroup(top_entry_name, "NXentry");
   // Open the instrument
   nxfile.openGroup("instrument", "NXinstrument");
+  try
+  {
   nxfile.openData("name");
   instrument = nxfile.getStrData();
   alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
+  }
+  catch ( ::NeXus::Exception & e)
+  {
+    // Get the instrument name from the file instead
+    size_t n = nexusfilename.rfind('/');
+    if (n != std::string::npos)
+    {
+      std::string temp = nexusfilename.substr(n+1, nexusfilename.size()-n-1);
+      n = temp.find('_');
+      if (n != std::string::npos && n > 0)
+      {
+        instrument = temp.substr(0, n);
+      }
+    }
+  }
   if (instrument.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
           instrument = "POWGEN";
+  if (instrument.compare("NOM") == 0) // hack for nomad
+          instrument = "NOMAD";
+
+  if (instrument.empty())
+    throw std::runtime_error("Could not find the instrument name in the NXS file or using the filename. Cannot load instrument!");
+
   // Now let's close the file as we don't need it anymore to load the instrument.
   nxfile.close();
 

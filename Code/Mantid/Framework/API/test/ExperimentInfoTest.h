@@ -121,6 +121,24 @@ public:
     do_compare_ExperimentInfo(ws,*ws2);
   }
 
+  void test_clone_then_copy()
+  {
+    ExperimentInfo ws;
+    ws.mutableRun().setProtonCharge(1.234);
+    ws.mutableSample().setName("test");
+    ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
+    boost::shared_ptr<Instrument> inst1(new Instrument());
+    inst1->setName("MyTestInst");
+    ws.setInstrument(inst1);
+
+    ExperimentInfo * ws2 = ws.cloneExperimentInfo();
+
+    ExperimentInfo ws3;
+    ws3.copyExperimentInfoFrom(ws2);
+
+    do_compare_ExperimentInfo(ws,ws3);
+  }
+
 
   struct fromToEntry
   {

@@ -140,6 +140,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         // Get the size of the X vector
         file->openData(m_axisField);
         dims = file->getInfo().dims;
+        // Find the units, if available
+        if (file->hasAttr("units"))
+          file->getAttr("units", m_xUnits);
+        else
+          m_xUnits = "microsecond"; //use default
         file->closeData();
         if (dims.size() > 0)
           numBins = dims[0] - 1;
@@ -191,15 +196,28 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   X.assign( tof.begin(), tof.end() );
 
   // Load the data. Coerce ints into double.
+  std::string errorsField = "";
   std::vector<double> data;
   file->openData(m_dataField);
   file->getDataCoerce(data);
+  if (file->hasAttr("errors"))
+      file->getAttr("errors", errorsField);
   file->closeData();
 
   // TODO: Errors
+  bool hasErrors = !errorsField.empty();
+  std::vector<double> errors;
+  if (hasErrors)
+  {
+    file->openData(errorsField);
+    file->getDataCoerce(errors);
+    file->closeData();
+  }
 
   if (data.size() != numBins * numPixels)
   { file->close(); g_log.warning() << "Invalid size of '" << m_dataField << "' data in " << bankName << std::endl; return; }
+  if (hasErrors && (errors.size() != numBins * numPixels))
+  { file->close(); g_log.warning() << "Invalid size of '" << errorsField << "' errors in " << bankName << std::endl; return; }
 
   for (size_t i=0; i<numPixels; i++)
   {
@@ -218,10 +236,19 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
     MantidVec & Y = spec->dataY();
     Y.assign( data.begin() + i * numBins,  data.begin() + (i+1) * numBins );
 
-    // Now take the sqrt(Y) to give E
     MantidVec & E = spec->dataE();
-    E = Y;
-    std::transform(E.begin(), E.end(), E.begin(), (double(*)(double)) sqrt);
+
+    if (hasErrors)
+    {
+      // Copy the errors from the loaded document
+      E.assign( errors.begin() + i * numBins,  errors.begin() + (i+1) * numBins );
+    }
+    else
+    {
+      // Now take the sqrt(Y) to give E
+      E = Y;
+      std::transform(E.begin(), E.end(), E.begin(), (double(*)(double)) sqrt);
+    }
   }
 
   // Done!
@@ -248,9 +275,9 @@ std::string LoadTOFRawNexus::getEntryName(const std::string & filename)
   // If that doesn't exist, just take the first entry.
   if (entries.find(entry_name) == entries.end())
     entry_name = entries.begin()->first;
-  // Tell the user
-  if (entries.size() > 1)
-    g_log.notice() << "There are " << entries.size() << " NXentry's in the file. Loading entry '" << entry_name << "' only." << std::endl;
+//  // Tell the user
+//  if (entries.size() > 1)
+//    g_log.notice() << "There are " << entries.size() << " NXentry's in the file. Loading entry '" << entry_name << "' only." << std::endl;
 
   return entry_name;
 }
@@ -269,7 +296,7 @@ void LoadTOFRawNexus::exec()
   m_signal = getProperty("Signal");
 
   // Find the entry name we want.
-  std::string entry_name = getEntryName(filename);
+  std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
   Progress * prog = new Progress(this, 0.0, 1.0, 10);
@@ -293,9 +320,13 @@ void LoadTOFRawNexus::exec()
   prog->report("Loading instrument");
   LoadEventNexus::runLoadInstrument(filename, WS, entry_name, this);
 
-  // Load the meta data
+  // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
-  LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+  try
+  { LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+  }
+  catch (std::exception & e)
+  { g_log.warning() << "Error while loading meta data. " << e.what() << std::endl; }
 
   // Set the spectrum number/detector ID at each spectrum. This is consistent with LoadEventNexus for non-ISIS files.
   prog->report("Building Spectra Mapping");
@@ -304,7 +335,8 @@ void LoadTOFRawNexus::exec()
   id_to_wi = WS->getDetectorIDToWorkspaceIndexMap(false);
 
   // Load each bank sequentially
-  for (size_t i=0; i<bankNames.size(); i++)
+  PARALLEL_FOR1(WS)
+  for (int i=0; i<int(bankNames.size()); i++)
   {
     std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
@@ -312,7 +344,13 @@ void LoadTOFRawNexus::exec()
   }
 
   // Set some units
-  WS->getAxis(0)->setUnit("TOF");
+  if (m_xUnits == "Ang")
+    WS->getAxis(0)->setUnit("dSpacing");
+  else if(m_xUnits == "invAng")
+    WS->getAxis(0)->setUnit("MomentumTransfer");
+  else
+    // Default to TOF for any other string
+    WS->getAxis(0)->setUnit("TOF");
   WS->setYUnit("Counts");
 
   // Method that will eventually go away.

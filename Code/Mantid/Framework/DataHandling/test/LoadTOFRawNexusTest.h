@@ -128,20 +128,25 @@ public:
     TS_ASSERT_EQUALS( ws1->getAxis(1)->length(), ws2->getAxis(1)->length())
   }
 
-
-  /** Refs #3716: Different signals (binned in q-space, d-space, tof) */
-  void test_signal()
+  /** Refs #3716: Different signals (binned in q-space, d-space, tof)
+   * File is rather large (and slow to load) so not in SVN.
+   * Test passes if file is not found.
+   *
+   * @param signal :: signal number to load
+   * @param expectedXLength :: # of bins
+   * */
+  Mantid::API::MatrixWorkspace_sptr do_test_signal(int signal, size_t expectedXLength)
   {
-    std::string filename = "/home/8oz/data/NOM_2011_09_13T20_59_00Z_histo.nxs";
+    std::string filename = "/home/8oz/data/NOM_2011_09_14T19_43_31Z_histo.nxs";
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
     ld.initialize();
     try{ ld.setPropertyValue("Filename", filename); }
     catch (...)
     { std::cout << "Test not completed due to missing data file " << filename << std::endl;
-      return;
+      return Mantid::API::MatrixWorkspace_sptr();
     }
-    ld.setPropertyValue("Signal", "5");
+    ld.setProperty("Signal", signal);
     ld.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
@@ -151,7 +156,42 @@ public:
         ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("outWS"));
     );
+    TS_ASSERT(ws);
+    if (!ws) return ws;
+    TS_ASSERT_EQUALS( ws->getAxis(0)->length(), expectedXLength);
+    TS_ASSERT_EQUALS( ws->blocksize(), expectedXLength-1);
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 99*8*128);
+    return ws;
   }
+
+
+  void test_signal_1()
+  {
+    Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(1, 168);
+    if (!ws) return;
+    TS_ASSERT_DELTA( ws->getAxis(0)->operator ()(0,0), 0, 1e-6);
+    TS_ASSERT_DELTA( ws->getAxis(0)->operator ()(1,0), 1000, 1e-6);
+    TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "TOF");
+  }
+
+  void test_signal_5()
+  {
+    Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(5, 2501);
+    if (!ws) return;
+    TS_ASSERT_DELTA( ws->getAxis(0)->operator ()(0,0), 0.02, 1e-6);
+    TS_ASSERT_DELTA( ws->getAxis(0)->operator ()(1,0), 0.04, 1e-6);
+    TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_signal_6()
+  {
+    Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(6, 2521);
+    if (!ws) return;
+    TS_ASSERT_DELTA( ws->getAxis(0)->operator ()(0,0), 0.125, 1e-6);
+    TS_ASSERT_DELTA( ws->getAxis(0)->operator ()(1,0), 0.250, 1e-6);
+    TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "dSpacing");
+  }
+
 
 };
 

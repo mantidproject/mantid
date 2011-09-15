@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <boost/algorithm/string/replace.hpp>
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 
 using std::cout;
 using std::endl;
@@ -73,13 +74,15 @@ void LoadLogsFromSNSNexus::exec()
   // Get the input workspace
   WS = getProperty("Workspace");
 
+  // Find the entry name to use (normally "entry")
+  std::string entry_name = LoadTOFRawNexus::getEntryName(m_filename);
 
   // top level file information
   ::NeXus::File file(m_filename);
   g_log.information() << "NeXus file found: " << file.inquireFile() << endl;
 
   //Start with the base entry
-  file.openGroup("entry", "NXentry");
+  file.openGroup(entry_name, "NXentry");
 
   //Now go to the DAS logs
   file.openGroup("DASlogs", "NXgroup");

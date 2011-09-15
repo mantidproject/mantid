@@ -13,6 +13,7 @@
 #include <Poco/DateTimeFormat.h>
 
 #include <boost/scoped_array.hpp>
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 
 namespace Mantid
 {
@@ -62,37 +63,35 @@ namespace Mantid
     void LoadNexusLogs::exec()
     {
       std::string filename = getPropertyValue("Filename");
-      ::NeXus::File file(filename);
       MatrixWorkspace_sptr workspace = getProperty("Workspace");
       
+
+      // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for ISIS)
+      std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
+
+      ::NeXus::File file(filename);
       // Find the root entry
       try
       {
-        file.openGroup("entry", "NXentry"); // SNS style root
+        file.openGroup(entry_name, "NXentry");
       }
       catch(::NeXus::Exception&)
       {
-        try
-        {
-          file.openGroup("raw_data_1", "NXentry"); //ISIS style root
-        }
-        catch(::NeXus::Exception&)
-        {
-          throw std::invalid_argument("Unknown NeXus file format found in file '" + filename + "'");
-        }
+        throw std::invalid_argument("Unknown NeXus file format found in file '" + filename + "'");
       }
-        // print out the entry level fields
+
+      // print out the entry level fields
       std::map<std::string,std::string> entries = file.getEntries();
       std::map<std::string,std::string>::const_iterator iend = entries.end();
       for(std::map<std::string,std::string>::const_iterator it = entries.begin();
           it != iend; it++)
       {
-        std::string entry_name(it->first);
-        std::string entry_class(it->second);
-        if( entry_name == "DASlogs" || entry_class == "IXrunlog" ||
-            entry_class == "IXselog" )
+        std::string group_name(it->first);
+        std::string group_class(it->second);
+        if( group_name == "DASlogs" || group_class == "IXrunlog" ||
+            group_class == "IXselog" )
         {
-          loadLogs(file, entry_name, entry_class, workspace);
+          loadLogs(file, group_name, group_class, workspace);
         }
       }
       file.close();

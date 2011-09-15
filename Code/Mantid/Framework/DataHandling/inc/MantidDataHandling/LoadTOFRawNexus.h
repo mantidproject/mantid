@@ -78,6 +78,8 @@ public:
   virtual const std::string category() const
   { return "DataHandling";}
 
+  static std::string getEntryName(const std::string & filename);
+
 private:
   /// Overwrites Algorithm method.
   void init();
@@ -100,8 +102,6 @@ private:
   void countPixels(const std::string &nexusfilename, const std::string & entry_name,
        std::vector<std::string> & bankNames);
 
-  std::string getEntryName(const std::string & filename);
-
   /// List of the absolute time of each pulse
   std::vector<Kernel::DateAndTime> pulseTimes;
 
@@ -122,6 +122,9 @@ private:
 
   /// Name of the 'axis' field to load (depending on Signal)
   std::string m_axisField;
+
+  /// Units of the X axis found
+  std::string m_xUnits;
 };
 
 } // namespace DataHandling
