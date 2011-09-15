@@ -315,6 +315,5 @@ class DataReflWidget(BaseWidget):
         fname = self.data_browse_dialog(data_type="*.dat *.txt", title="Background ROI file - select or enter a new ROI file name")
         if fname:
              pixel_range = self.get_data_back_selection()
-             print pixel_range
              SaveSNSRoi(filename=fname, pixel_range=pixel_range, mode='discrete')
 

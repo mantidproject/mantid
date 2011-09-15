@@ -984,8 +984,14 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="norm_peak_save_roi">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="text">
                    <string>Save...</string>
+                  </property>
+                  <property name="checkable">
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>

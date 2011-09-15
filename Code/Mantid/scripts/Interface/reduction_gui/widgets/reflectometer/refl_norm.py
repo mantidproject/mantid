@@ -51,9 +51,11 @@ class NormReflWidget(BaseWidget):
         self.connect(self._summary.norm_peak_load_roi, QtCore.SIGNAL("clicked()"), self._norm_peak_load_roi_clicked)
         self.connect(self._summary.norm_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_peak_save_button)
         self.connect(self._summary.norm_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_peak_save_button)
+        self.connect(self._summary.norm_peak_save_roi, QtCore.SIGNAL("clicked()"), self._norm_data_save_roi_clicked)
         
         self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
         self.connect(self._summary.norm_background_load_button, QtCore.SIGNAL("clicked()"), self._norm_background_roi_clicked)
+        self.connect(self._summary.norm_background_save_button, QtCore.SIGNAL("clicked()"), self._norm_background_save_roi_clicked)
         self.connect(self._summary.norm_background_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_back_save_button)
         self.connect(self._summary.norm_background_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_back_save_button)
 
@@ -69,25 +71,20 @@ class NormReflWidget(BaseWidget):
         self._summary.norm_peak_save_roi.setEnabled(button_status)
         self._check_for_missing_fields()
  
-   def _check_status_of_data_background_save_button(self):
+    def _check_status_of_norm_back_save_button(self):
         """
             This function will check if the background save ROI button can be enabled or not
         """
-        is_checked = self._summary.data_background_switch.isChecked()
+        is_checked = self._summary.norm_background_switch.isChecked()
 
         button_status = False
         if is_checked is True:
-            from_pixel = self._summary.data_background_from_pixel1.text()
-            to_pixel = self._summary.data_background_to_pixel1.text()
+            from_pixel = self._summary.norm_background_from_pixel.text()
+            to_pixel = self._summary.norm_background_to_pixel.text()
             if from_pixel != '' and to_pixel != '':
                 button_status = True
             
-            from_pixel = self._summary.data_background_from_pixel2.text()
-            to_pixel = self._summary.data_background_to_pixel2.text()
-            if (from_pixel == '' and to_pixel != '') or (from_pixel != '' and to_pixel == ''):
-                button_status = False
-                
-        self._summary.data_background_save_button.setEnabled(button_status)
+        self._summary.norm_background_save_button.setEnabled(button_status)
         self._check_for_missing_fields()
         
     def _check_for_missing_fields(self):
@@ -133,9 +130,9 @@ class NormReflWidget(BaseWidget):
         self._summary.norm_background_to_pixel_label.setEnabled(is_checked)
         self._summary.norm_background_to_pixel.setEnabled(is_checked)
         self._summary.norm_background_load_button.setEnabled(is_checked)
-        self._summary.norm_background_save_button.setEnabled(is_checked)
+        #self._summary.norm_background_save_button.setEnabled(is_checked)
         self._check_for_missing_fields()
-
+        self._check_status_of_norm_back_save_button()
     
     def _norm_peak_load_roi_clicked(self):
         """
@@ -148,15 +145,37 @@ class NormReflWidget(BaseWidget):
             mode = myROI.getMode()
             pixelRange = myROI.getPixelRange()
                 
-        if (mode == 'narrow/broad'):                
-            from_pixel = pixelRange[0]
-            to_pixel = pixelRange[1]
-            self._summary.norm_peak_from_pixel.setText(str(from_pixel))
-            self._summary.norm_peak_to_pixel.setText(str(to_pixel))
-        else:
-            QtGui.QMessageBox.warning(self, "Wrong normalization peak ROI file format!",
+            if (mode == 'narrow/broad'):                
+                from_pixel = pixelRange[0]
+                to_pixel = pixelRange[1]
+                self._summary.norm_peak_from_pixel.setText(str(from_pixel))
+                self._summary.norm_peak_to_pixel.setText(str(to_pixel))
+            else:
+                QtGui.QMessageBox.warning(self, "Wrong normalization peak ROI file format!",
                                             "                             Please check the ROI file!")           
- 
+
+    def _norm_data_save_roi_clicked(self):
+        """
+            Reached by the save peak button of the normalization tab
+        """
+        fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Peak ROI file - select or enter a new ROI file name")
+        if fname:
+            from_px = self._summary.norm_peak_from_pixel.text()
+            to_px = self._summary.norm_peak_to_pixel.text()
+            _range = [int(from_px), int(to_px)]
+            SaveSNSRoi(filename=fname, pixel_range=_range, mode='narrow/broad')
+                
+    def _norm_background_save_roi_clicked(self):
+        """
+            Reached by the save ROI of the background/normalization button
+        """
+        fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Background ROI file - select or enter a new ROI file name")
+        if fname:
+            from_px = self._summary.norm_background_from_pixel.text()
+            to_px = self._summary.norm_background_to_pixel.text()
+            _range = [int(from_px), int(to_px)]
+            SaveSNSRoi(filename=fname, pixel_range=_range, mode='narrow/broad')
+    
     def _norm_background_roi_clicked(self):
         """
             Reached by the load background selection button
@@ -168,12 +187,12 @@ class NormReflWidget(BaseWidget):
             mode = myROI.getMode()
             pixelRange = myROI.getPixelRange()
                 
-        if (mode == 'narrow/broad'):                
-            from_pixel = pixelRange[0]
-            to_pixel = pixelRange[1]
-            self._summary.norm_background_from_pixel.setText(str(from_pixel))
-            self._summary.norm_background_to_pixel.setText(str(to_pixel))
-        else:
-            QtGui.QMessageBox.warning(self, "Wrong normalization background ROI file format!",
+            if (mode == 'narrow/broad'):                
+                from_pixel = pixelRange[0]
+                to_pixel = pixelRange[1]
+                self._summary.norm_background_from_pixel.setText(str(from_pixel))
+                self._summary.norm_background_to_pixel.setText(str(to_pixel))
+            else:
+                QtGui.QMessageBox.warning(self, "Wrong normalization background ROI file format!",
                                             "                                   Please check the ROI file!")                  
         
