@@ -43,7 +43,6 @@ public:
 
   void test_exec()
   {
-    Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "CNCS_7860.nxs");

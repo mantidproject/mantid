@@ -399,6 +399,20 @@ namespace Kernel
     }
 
     //-------------------------------------------------------------------------------------------
+    /** Cross product of two vectors. Only works in 3D
+     * @param v :: other vector, also 3D  */
+    VMD cross_prod(const VMD& v) const
+    {
+      if (v.nd != this->nd) throw std::runtime_error("Mismatch in number of dimensions in operation between two VMD vectors.");
+      if (v.nd != 3) throw std::runtime_error("Cross product of vectors only works in 3 dimensions.");
+      V3D a(data[0], data[1], data[2]);
+      V3D b(v.data[0], v.data[1], v.data[2]);
+      V3D c = a.cross_prod(b);
+      VMD out(c);
+      return out;
+    }
+
+    //-------------------------------------------------------------------------------------------
     /** @return the length of this vector */
     double length() const
     {
@@ -433,6 +447,8 @@ namespace Kernel
     {
       return acos( this->scalar_prod(v) / (this->norm() * v.norm()) );
     }
+
+    static std::vector<VMD> makeVectorsOrthogonal(std::vector<VMD> & vectors);
 
   protected:
     /// Number of dimensions

@@ -8,6 +8,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
 #include <sstream>
+#include "MantidKernel/Quat.h"
 
 namespace Mantid
 {
@@ -645,6 +646,45 @@ V3D::masterDir(const double Tol) const
     }
   return idx;
 }
+
+
+
+
+/** Take a list of 2 vectors and makes a 3D orthogonal system out of them
+ * The first vector i0 is taken as such.
+ * The second vector is made perpendicular to i0, in the plane of i0-i1
+ * The third vector is made perpendicular to the plane i0-i1 by performing the cross product of 0 and 1
+ *
+ * @param vectors :: list of 2 vectors
+ * @return list of 3 vectors
+ */
+std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> & vectors)
+{
+  if (vectors.size() != 2)
+    throw std::invalid_argument("makeVectorsOrthogonal() only works with 2 vectors");
+
+  V3D v0 = vectors[0];
+  v0.normalize();
+  V3D v1 = vectors[1];
+  v1.normalize();
+
+  std::vector<V3D> out;
+  out.push_back(v0);
+
+  // Make a rotation 90 degrees from 0 to 1
+  Quat q(v0, v1);
+  q.setRotation(90);
+  // Rotate v1 so it is 90 deg
+  v1 = v0;
+  q.rotate(v1);
+  out.push_back(v1);
+
+  // Finally, the 3rd vector = cross product of 0 and 1
+  V3D v2 = v0.cross_prod(v1);
+  out.push_back(v2);
+  return out;
+}
+
 
 /**
   Read data from a stream.

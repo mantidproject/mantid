@@ -194,13 +194,14 @@ void Quat::getAngleAxis(double& _deg,double& _ax0, double& _ax1, double& _ax2) c
 	return;
 }
 
-/** Set the rotation (both don't change rotation axis). This method has an error
+/** Set the rotation (but don't change rotation axis).
  * @param deg :: angle of rotation
  */
 void Quat::setRotation(const double deg)
 {
-	double deg2rad = M_PI/180.0;
-	w = cos(0.5*deg*deg2rad);
+  double _deg, ax0, ax1, ax2;
+  this->getAngleAxis(_deg, ax0, ax1, ax2);
+  setAngleAxis(deg, V3D(ax0, ax1, ax2));
 }
 
 /** Sets the quat values from four doubles

@@ -114,6 +114,10 @@ namespace Mantid
       double zenith(const V3D&) const;
       // Angle between this and another vector
       double angle(const V3D&) const;
+
+      // Make 2 vectors into 3 orthogonal vectors
+      static std::vector<V3D> makeVectorsOrthogonal(std::vector<V3D> & vectors);
+
       // Send to a stream
       void printSelf(std::ostream&) const;
       void readPrinted(std::istream&);
