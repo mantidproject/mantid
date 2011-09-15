@@ -13,26 +13,30 @@ from cmakelists_utils import *
 #======================================================================
 def move_one(subproject, classname, newproject, oldfilename, newfilename, args):
     """Move one file """
-    text = open(oldfilename, 'r').read()
+    
+    # Do an SVN move
+    cmd = "svn mv " + oldfilename + " " + newfilename
+    print "Running:", cmd
+    os.system(cmd)
+    
+    f = open(newfilename, 'r')
+    text = f.read()
+    f.close()
+    
     # Replace any includes of it
     text = text.replace("Mantid" + subproject + "/" + args.source_subfolder + classname + ".h", 
                         "Mantid" + newproject + "/" + args.dest_subfolder + classname + ".h");
     
     # Replace the namespace declaration
-    text = text.replace("namespace " + subproject, "namespace " + newproject) 
-    
+    text = text.replace("namespace " + subproject, "namespace " + newproject)
+    # Replace the conents
     f = open(newfilename, 'w')
     f.write(text)
     
-    # Delete original?
-    if args.delete:
-        cmd = "svn remove " + oldfilename
-        print "Running:", cmd
-        os.system(cmd)
     
 
 #======================================================================
-def move_all(subproject, classname, newproject, args):
+def move_all(subproject, classname, newproject, newclassname, args):
     
     # Directory at base of subproject
     basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
@@ -43,9 +47,9 @@ def move_all(subproject, classname, newproject, args):
     sourcefile = os.path.join(basedir, "src/" + args.source_subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
 
-    newheaderfile = os.path.join(newbasedir, "inc/Mantid" + newproject + "/" + args.dest_subfolder + classname + ".h")
-    newsourcefile = os.path.join(newbasedir, "src/" + args.dest_subfolder + classname + ".cpp")
-    newtestfile = os.path.join(newbasedir, "test/" + classname + "Test.h")
+    newheaderfile = os.path.join(newbasedir, "inc/Mantid" + newproject + "/" + args.dest_subfolder + newclassname + ".h")
+    newsourcefile = os.path.join(newbasedir, "src/" + args.dest_subfolder + newclassname + ".cpp")
+    newtestfile = os.path.join(newbasedir, "test/" + newclassname + "Test.h")
     
     if args.header and not overwrite and os.path.exists(newheaderfile):
         print "\nError! Header file %s already exists. Use --force to overwrite.\n" % newheaderfile
@@ -66,8 +70,8 @@ def move_all(subproject, classname, newproject, args):
         move_one(subproject, classname, newproject, testfile, newtestfile, args)
     
     # Insert into the cmake list
-    add_to_cmake(newproject, classname, args, args.dest_subfolder)
     remove_from_cmake(subproject, classname, args, args.source_subfolder)
+    add_to_cmake(newproject, newclassname, args, args.dest_subfolder)
     
     print "   Files were removed to Framework/%s/CMakeLists.txt !" % subproject
     print "   Files were added to Framework/%s/CMakeLists.txt !" % newproject
@@ -89,6 +93,8 @@ if __name__ == "__main__":
                         help='Name of the class to create')
     parser.add_argument('newproject', metavar='NEWPROJECT', type=str,
                         help='Name of the project to which to move the class.')
+    parser.add_argument('newclassname', metavar='NEWCLASSNAME', type=str,
+                        help='Name of the new class.')
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,
                         help='Force overwriting existing files. Use with caution!')
@@ -101,9 +107,6 @@ if __name__ == "__main__":
     parser.add_argument('--no-cpp', dest='cpp', action='store_const',
                         const=False, default=True,
                         help="Don't move the cpp file")
-    parser.add_argument('--delete', dest='delete', action='store_const',
-                        const=True, default=False,
-                        help="Delete the original files (default False) using svn remove")
     parser.add_argument('--source-subfolder', dest='source_subfolder', 
                         default="",
                         help='The source is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
@@ -115,6 +118,7 @@ if __name__ == "__main__":
     subproject = args.subproject
     newproject = args.newproject
     classname = args.classname
+    newclassname = args.newclassname
     overwrite = args.force
     
     # Make sure the subfolders end with a /
@@ -126,4 +130,4 @@ if __name__ == "__main__":
         if args.dest_subfolder[-1:] != "/":
             args.dest_subfolder += "/"
     
-    move_all(subproject, classname, newproject, args)
+    move_all(subproject, classname, newproject, newclassname, args)
