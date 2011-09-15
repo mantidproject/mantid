@@ -855,6 +855,12 @@ namespace MDEvents
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");
+    if (!m_axisAligned)
+    {
+      g_log.notice() << "Algorithm does not currently support IterateEvents=False if AxisAligned=False. Setting IterateEvents=True." << std::endl;
+      IterateEvents = true;
+    }
+
     if (IterateEvents)
     {
       CALL_MDEVENT_FUNCTION(this->binByIterating, in_ws);
