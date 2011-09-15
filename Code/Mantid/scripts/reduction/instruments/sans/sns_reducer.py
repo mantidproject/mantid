@@ -17,7 +17,7 @@ class EqSansReducer(SANSReducer):
         ## Normalization
         self._normalizer = sns_reduction_steps.Normalize()
         ## Transmission calculator
-        self._transmission_calculator = sns_reduction_steps.BeamStopTransmission(True)
+        self._transmission_calculator = sans_reduction_steps.BaseTransmission(1.0, 0.0, False)
         
         # Default dark current subtracter class
         self._dark_current_subtracter_class = sns_reduction_steps.SubtractDarkCurrent

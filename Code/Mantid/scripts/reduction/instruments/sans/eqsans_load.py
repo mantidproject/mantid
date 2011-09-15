@@ -186,10 +186,12 @@ class LoadRun(ReductionStep):
         return "   Source aperture diameter = %g mm\n" % S1    
             
     def execute(self, reducer, workspace, force=False):
-        if self._keep_events and self._is_new:
+        #if self._keep_events and self._is_new:
+        if self._is_new:
             return self.new_execute(reducer, workspace, force)
         else:
-            return self.old_execute(reducer, workspace, force)
+            raise RuntimeError, "The old LoadRun algorithm is now obsolete"
+            #return self.old_execute(reducer, workspace, force)
                 
     def new_execute(self, reducer, workspace, force=False):
         output_str = ""      
@@ -226,6 +228,7 @@ class LoadRun(ReductionStep):
                        CorrectForFlightPath=self._correct_for_flight_path,
                        SampleDetectorDistance=self._sample_det_dist,
                        SampleDetectorDistanceOffset=self._sample_det_offset,
+                       PreserveEvents=self._keep_events,
                        ReductionTableWorkspace=reducer.get_reduction_table_name()
                        )            
             return l.getPropertyValue("OutputMessage")

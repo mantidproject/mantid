@@ -568,15 +568,17 @@ void EQSANSLoad::exec()
   dataWS->getAxis(0)->setUnit("Wavelength");
 
   // Rebin so all the wavelength bins are aligned
+  const bool preserveEvents = getProperty("PreserveEvents");
   std::string params = Poco::NumberFormatter::format(wl_min, 2)
       + ",0.1," + Poco::NumberFormatter::format(wl_combined_max, 2);
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
-  rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
+  if (preserveEvents) rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   rebinAlg->setPropertyValue("Params", params);
-  const bool preserveEvents = getProperty("PreserveEvents");
   rebinAlg->setProperty("PreserveEvents", preserveEvents);
   rebinAlg->executeAsSubAlg();
+
+  if (!preserveEvents) dataWS = rebinAlg->getProperty("OutputWorkspace");
 
   dataWS->mutableRun().addProperty("event_ws", getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
