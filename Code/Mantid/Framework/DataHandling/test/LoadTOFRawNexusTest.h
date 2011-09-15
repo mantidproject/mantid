@@ -137,6 +137,8 @@ public:
    * */
   Mantid::API::MatrixWorkspace_sptr do_test_signal(int signal, size_t expectedXLength)
   {
+    Mantid::API::AnalysisDataService::Instance().remove("outWS");
+    MemoryManager::Instance().releaseFreeMemory();
     std::string filename = "/home/8oz/data/NOM_2011_09_14T19_43_31Z_histo.nxs";
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
