@@ -1,13 +1,14 @@
 // Includes
 
-#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -17,6 +18,7 @@ namespace DataHandling
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM( LoadTOFRawNexus )
+DECLARE_LOADALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
@@ -25,7 +27,6 @@ using namespace DataObjects;
 LoadTOFRawNexus::LoadTOFRawNexus()
 {
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /// Initialisation method.
@@ -41,6 +42,84 @@ void LoadTOFRawNexus::init()
       "Number of the signal to load from the file. Default is 1 = time_of_flight.\n"
       "Some NXS files have multiple data fields giving binning in other units (e.g. d-spacing or momentum).\n"
       "Enter the right signal number for your desired field.");
+}
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * Do a quick file type check by looking at the first 100 bytes of the file
+ *  @param filePath :: path of the file including name.
+ *  @param nread :: no.of bytes read
+ *  @param header :: The first 100 bytes of the file as a union
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+bool LoadTOFRawNexus::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
+{
+  std::string ext = this->extension(filePath);
+  // If the extension is nxs then give it a go
+  if( ext.compare("nxs") == 0 ) return true;
+
+  // If not then let's see if it is a HDF file by checking for the magic cookie
+  if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
+  return false;
+}
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * Checks the file by opening it and reading few lines
+ *  @param filePath :: name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file
+ */
+int LoadTOFRawNexus::fileCheck(const std::string& filePath)
+{
+  int confidence(0);
+  typedef std::map<std::string,std::string> string_map_t;
+  bool hasEventData = false;
+  bool hasEntry = false;
+  bool hasData = false;
+  try
+  {
+    string_map_t::const_iterator it;
+    ::NeXus::File file = ::NeXus::File(filePath);
+    string_map_t entries = file.getEntries();
+    for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+    {
+      if ( ((it->first == "entry") || (it->first == "entry-state0") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+      {
+        // Has an entry - is ok sign
+        hasEntry = true;
+        file.openGroup(it->first, it->second);
+        string_map_t entries2 = file.getEntries();
+        for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
+        {
+          if (it2->second == "NXevent_data")
+            hasEventData = true;
+          if (it2->second == "NXdata")
+            hasData = true;
+        }
+        file.closeGroup();
+      }
+    }
+  }
+  catch(::NeXus::Exception&)
+  {
+  }
+
+  if (hasEntry)
+  {
+    if (hasData && hasEventData)
+      // Event data = this is event NXS
+      confidence = 20;
+    else if (hasData && !hasEventData)
+      // No event data = this is the one
+      confidence = 80;
+    else
+      // No data ?
+      confidence = 10;
+  }
+  else
+    confidence = 0;
+
+  return confidence;
 }
 
 
@@ -122,7 +201,12 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
             }
             file->closeData();
           }
+
+          if (m_dataField.empty())
+            throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", was not found in any of the data fields.");
         }
+
+
 
         // Count how many pixels in the bank
         file->openData("pixel_id");

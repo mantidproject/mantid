@@ -10,6 +10,7 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
@@ -56,7 +57,7 @@ namespace DataHandling
 
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
-class DLLExport LoadTOFRawNexus : public API::Algorithm
+class DLLExport LoadTOFRawNexus : public API::IDataFileChecker
 {
 public:
   /// Default Constructor
@@ -79,6 +80,11 @@ public:
   { return "DataHandling";}
 
   static std::string getEntryName(const std::string & filename);
+
+  /// do a quick check that this file can be loaded
+  bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+  /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+  int fileCheck(const std::string& filePath);
 
 private:
   /// Overwrites Algorithm method.

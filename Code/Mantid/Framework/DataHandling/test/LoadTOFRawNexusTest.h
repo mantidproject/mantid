@@ -128,6 +128,21 @@ public:
     TS_ASSERT_EQUALS( ws1->getAxis(1)->length(), ws2->getAxis(1)->length())
   }
 
+  void test_bad_signal_fails()
+  {
+    Mantid::API::Algorithm_sptr alg;
+    // Number points to a 2D data set
+    alg = AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 6,
+        "Filename", "CNCS_7860.nxs", "Signal", "2", "OutputWorkspace", "outWS");
+    TS_ASSERT( !alg->isExecuted() );
+
+    // Number is too big
+    alg = AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 6,
+        "Filename", "CNCS_7860.nxs", "Signal", "6", "OutputWorkspace", "outWS");
+    TS_ASSERT( !alg->isExecuted() );
+
+  }
+
   /** Refs #3716: Different signals (binned in q-space, d-space, tof)
    * File is rather large (and slow to load) so not in SVN.
    * Test passes if file is not found.
