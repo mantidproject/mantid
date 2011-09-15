@@ -16,14 +16,14 @@ endif ()
 set ( USE_TCMALLOC ON CACHE BOOL "Flag for replacing regular malloc with tcmalloc" )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
-  find_package ( Tcmalloc REQUIRED )
+  find_package ( Tcmalloc )
   if ( TCMALLOC_FOUND )
     set ( TCMALLOC_LIBRARY ${TCMALLOC_LIBRARIES} )
     # Make a C++ define to use as flags in, e.g. MemoryManager.cpp
     add_definitions ( -DUSE_TCMALLOC )
   else ()
     # If not found, print a message telling the user to either get it or disable its use in the cache
-    message ( STATUS "TCMalloc not found: either install the google-perftools suite on your system or set the USE_TCMALLOC CMake cache variable to OFF" ) 
+    message ( SEND_ERROR "TCMalloc not found: either install the google-perftools suite on your system or set the USE_TCMALLOC CMake cache variable to OFF" ) 
   endif ()
 endif ()
 
