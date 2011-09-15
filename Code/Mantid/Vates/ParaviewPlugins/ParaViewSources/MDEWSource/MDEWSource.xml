@@ -21,6 +21,14 @@
          information_only="1">
         <SimpleStringInformationHelper /> 
        </StringVectorProperty>
+       <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+      </DoubleVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End MDEWSource -->
