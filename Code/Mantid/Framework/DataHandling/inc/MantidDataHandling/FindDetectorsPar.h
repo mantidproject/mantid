@@ -77,10 +77,7 @@ namespace DataHandling
 *         5th  "          height (m)
 *-----------------------------------------------------------------------
 *2) load an ASCII phx file
-*     Syntax:
-*     >> phx = get_ascii_file(filename,['phx'])
 *
-*     filename            name of phx file
 *
 *     phx(7,ndet)         contents of array
 *
@@ -141,6 +138,9 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
+  /**  the variable defines if algorithm needs to calculate linear ranges for the detectors (dX,dY)  
+  *    instead of azimuthal_width and polar_width */
+  bool return_linear_ranges;
   // number of real (not monitors)detectors, processed by algorithm;
   size_t nDetectors;
   std::vector<double> azimuthal;

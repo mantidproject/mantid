@@ -682,7 +682,7 @@ namespace WorkspaceCreationHelper
     pAxis0->setUnit("DeltaE");
     ws->replaceAxis(0,pAxis0); 
     if(has_oriented_lattice){
-        OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
+        OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
         ws->mutableSample().setOrientedLattice(latt);
 
         AddTSPEntry( ws->mutableRun(), "phi", 2);

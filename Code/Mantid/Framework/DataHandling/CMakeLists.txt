@@ -86,6 +86,7 @@ set ( SRC_FILES
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SavePHX.cpp
+	src/SavePAR.cpp	
 	src/SaveRKH.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
@@ -176,6 +177,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SavePHX.h
+	inc/MantidDataHandling/SavePAR.h	
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
@@ -259,6 +261,7 @@ set ( TEST_FILES
 	test/SaveNexusProcessedTest.h
 	test/SaveNexusTest.h
 	test/SavePHXTest.h
+	test/SavePARTest.h	
 	test/SaveRKHTest.h
 	test/SaveSPETest.h
 	test/SaveToSNSHistogramNexusTest.h

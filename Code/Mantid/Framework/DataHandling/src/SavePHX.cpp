@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 #include <cstdio>
 #include <fstream>
@@ -24,7 +25,7 @@ using namespace Mantid::Geometry;
 
 void SavePHX::init() {
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
-      Direction::Input), "The input workspace");
+      Direction::Input,new InstrumentValidator<>), "The input workspace");
   declareProperty(new FileProperty("Filename", "", FileProperty::Save),
       "The filename to use for the saved data");
 
@@ -56,14 +57,14 @@ void SavePHX::exec() {
 
    // execute the subalgorithm to calculate the detector's parameters;
        IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 1, true, 1);
-	   spCalcDetPar->initialize();
-	   spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
-	    // let's not do this for the time being
+       spCalcDetPar->initialize();
+       spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
+        // let's not do this for the time being
  /* std::string parFileName = this->getPropertyValue("ParFile");
      if(!(parFileName.empty()||parFileName=="not_used.par")){
-	           spCalcDetPar->setPropertyValue("ParFile",parFileName);
-			       }*/
-	  spCalcDetPar->execute();
+               spCalcDetPar->setPropertyValue("ParFile",parFileName);
+                   }*/
+      spCalcDetPar->execute();
       //
      FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
      if(!pCalcDetPar){	  // "can not get pointer to FindDetectorsPar algorithm"

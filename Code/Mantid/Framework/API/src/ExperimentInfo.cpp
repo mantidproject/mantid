@@ -360,7 +360,6 @@ namespace API
   {
     return m_run.access();
   }
-
   //---------------------------------------------------------------------------------------
   /** Utility method to get the run number
    *

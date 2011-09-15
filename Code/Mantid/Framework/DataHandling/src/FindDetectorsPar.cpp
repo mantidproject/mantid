@@ -32,7 +32,9 @@ void FindDetectorsPar::initDocs()
 using namespace Kernel;
 using namespace API;
 // nothing here according to mantid
-FindDetectorsPar::FindDetectorsPar(){};
+FindDetectorsPar::FindDetectorsPar():
+return_linear_ranges(false)
+{};
 FindDetectorsPar::~FindDetectorsPar(){};
 
 void FindDetectorsPar::init()
@@ -44,6 +46,8 @@ void FindDetectorsPar::init()
   declareProperty(
      new WorkspaceProperty<>("InputWorkspace","", Direction::Input,wsValidator),
     "The name of the workspace that will be used as input for the algorithm" );
+ //
+  declareProperty("ReturnLinearRanges",false,"if set to true, the algorithm would return linear detector's ranges (dx,dy) rather then angular ranges (dAzimuthal,dPolar)");
  // optional par or phx file
   std::vector<std::string> fileExts(2);
     fileExts[0]=".par";
@@ -53,10 +57,10 @@ void FindDetectorsPar::init()
     "An optional file that contains of the list of angular parameters for the detectors and detectors groups;\n"
     "If specified, will use data from file instead of the data, calculated from the instument description");
 
-  //
-
+   //
   declareProperty("OutputParTable","","If not empty, a table workspace of that "
       "name will contain the calculated par-values for the detectors");
+
 
 }
 
@@ -89,7 +93,9 @@ FindDetectorsPar::exec()
                               << inputWS->getName()<<std::endl;
           g_log.warning()<<" calculating detectors parameters algorithmically\n";
      }
+  
   }
+  return_linear_ranges = this->getProperty("ReturnLinearRanges");
   
    
   // Get a pointer to the sample
@@ -233,11 +239,16 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,cons
         }
         double dNdet= double(pDets.size());
         dist        = sqrt(dist_sum/dNdet);
+    if(return_linear_ranges){
+        polar_width  = d1_max-d1_min;          // the width of the detector's ring;
+        azim_width   = 2*M_PI*(d1_sum/dNdet);  // the length of the detector's ring
+    }else{
+
         polar_width = (atan2(d1_max,d0)-atan2(d1_min,d0))*rad2deg;
         polar       = atan2(d1_sum/dNdet,d0)*rad2deg;
      
         azim_width *= rad2deg;
-        
+    }        
 }
 
 void 
@@ -267,8 +278,13 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
     double xsize = bbox.xMax() - bbox.xMin();
     double ysize = bbox.zMax() - bbox.zMin(); // bounding box has been rotated according to coord above, so z is along coord[2]
 
-    polar_width  = 2*rad2deg*atan2((xsize/2.0), dist);
-    azim_width   = 2*rad2deg*atan2((ysize/2.0), dist);
+    if(return_linear_ranges){
+        polar_width  = xsize;
+        azim_width   = ysize;
+    }else{
+        polar_width  = 2*rad2deg*atan2((xsize/2.0), dist);
+        azim_width   = 2*rad2deg*atan2((ysize/2.0), dist);
+    }
 }
 
 //

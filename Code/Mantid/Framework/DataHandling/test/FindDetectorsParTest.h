@@ -55,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( findPar->initialize() );
     TS_ASSERT( findPar->isInitialized() );
 
-    TSM_ASSERT_EQUALS("should be 3 propeties here",3,(size_t)(findPar->getProperties().size()));
+    TSM_ASSERT_EQUALS("should be 4 propeties here",4,(size_t)(findPar->getProperties().size()));
   }
 
  void testSNSExec(){
