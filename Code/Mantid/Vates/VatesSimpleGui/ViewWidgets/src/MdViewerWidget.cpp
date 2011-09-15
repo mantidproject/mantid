@@ -10,6 +10,8 @@
 #include "MantidKernel/DynamicFactory.h"
 
 #include <pqActiveObjects.h>
+#include <pqAnimationManager.h>
+#include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
@@ -18,9 +20,14 @@
 #include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
+#include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
+#include <vtkSMProxy.h>
+#include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
+
+#include <pqPipelineRepresentation.h>
 
 // Used for plugin mode
 #include <pqAlwaysConnectedBehavior.h>
@@ -272,6 +279,8 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
   //this->originSource = source;
 
   this->renderAndFinalSetup();
+  const unsigned int a = vtkSMPropertyHelper(this->currentView->origSource->getProxy(), "TimestepValues").GetNumberOfElements();
+  std::cout << "A: " << a << std::endl;
 }
 
 void MdViewerWidget::renderWorkspace(QString wsname)
@@ -288,7 +297,9 @@ void MdViewerWidget::renderWorkspace(QString wsname)
   vtkSMPropertyHelper(this->currentView->origSource->getProxy(),
                       "Mantid Workspace Name").Set(wsname.toStdString().c_str());
   this->currentView->origSource->getProxy()->UpdateVTKObjects();
+
   this->renderAndFinalSetup();
+  this->updateTimesteps();
 }
 
 void MdViewerWidget::renderAndFinalSetup()
@@ -304,6 +315,21 @@ void MdViewerWidget::renderAndFinalSetup()
     emit this->enableMultiSliceViewButton();
   }
   emit this->enableThreeSliceViewButton();
+}
+
+void MdViewerWidget::updateTimesteps()
+{
+  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  srcProxy1->Modified();
+  srcProxy1->UpdatePipelineInformation();
+  srcProxy1->UpdatePipeline();
+  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
+  if (0 != tsv->GetNumberOfElements())
+  {
+    double tEnd = tsv->GetElement(tsv->GetNumberOfElements() - 1);
+    pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
+    vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
+  }
 }
 
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)

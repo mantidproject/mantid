@@ -130,6 +130,8 @@ private:
   ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
+  /// Update the timesteps in the animation control.
+  void updateTimesteps();
 };
 
 }
