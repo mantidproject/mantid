@@ -19,14 +19,29 @@ class LoadTOFRawNexusTest: public CxxTest::TestSuite
 {
 public:
 
-  void testInit()
+  void test_init()
   {
     LoadTOFRawNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
   }
 
-  void xtestExec()
+  void test_confidence()
+  {
+    LoadTOFRawNexus alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    alg.setPropertyValue("Filename", "CNCS_7860.nxs");
+    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 80 );
+    alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 20 );
+    alg.setPropertyValue("Filename", "argus0026577.nxs");
+    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 0 );
+    alg.setPropertyValue("Filename", "PG3_733.nxs");
+    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 0 );
+
+  }
+
+  void test_exec()
   {
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
@@ -140,8 +155,9 @@ public:
     alg = AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 6,
         "Filename", "CNCS_7860.nxs", "Signal", "6", "OutputWorkspace", "outWS");
     TS_ASSERT( !alg->isExecuted() );
-
   }
+
+
 
   /** Refs #3716: Different signals (binned in q-space, d-space, tof)
    * File is rather large (and slow to load) so not in SVN.
@@ -200,7 +216,7 @@ public:
     TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "MomentumTransfer");
   }
 
-  void test_signal_6()
+  void xtest_signal_6()
   {
     Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(6, 2521);
     if (!ws) return;
