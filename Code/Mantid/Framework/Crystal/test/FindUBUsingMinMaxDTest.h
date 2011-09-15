@@ -51,9 +51,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("min_d","8.0") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("max_d","13.0") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("num_initial","20") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinD","8.0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MaxD","13.0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("NumInitial","20") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("tolerance","0.15") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );

@@ -51,7 +51,7 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
   below 1 degree per step, and users will have to be VERY patient, if it is
   decreased much below 1 degree per step.
     The number of peaks used to obtain an initial indexing is specified by
-  the "num_initial" parameter.  Good values for this are typically around 
+  the "NumInitial" parameter.  Good values for this are typically around 
   10-15, though with accurate peak positions, and good values for the lattice 
   paramters, as few as 2 can be used.  Using substantially more than 15 peaks
   initially typically has no benefit and increases execution time.
@@ -254,7 +254,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   below 1 degree per step, and users will have to be VERY patient, if it is
   decreased much below 1 degree per step.
     The number of peaks used to obtain an initial indexing is specified by
-  the "num_initial" parameter.  Good values for this are typically around 
+  the "NumInitial" parameter.  Good values for this are typically around 
   15-25.  The specified q_vectors must correspond to a single crystal.  If
   several crystallites are present or there are other sources of "noise" 
   leading to invalid peaks, this method will not work well.  The method that

@@ -32,5 +32,8 @@ CopySample(InputWorkspace=ws+'_peaks_centered',OutputWorkspace=ws,
 # Re-convert from eventWorkspace to MDWorkspace, this time in HKL space
 MakeDiffractionMDEventWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_MD_hkl',OutputDimensions='HKL',LorentzCorrection='1')
 
+# Save the MD workspace in Q sample frame to a NXS file. 
+SaveMDEW(InputWorkspace=ws+'_MD', Filename='TOPAZ_3131_MD_q_sample.nxs')
+
 # Save to a NXS file. Simultaneously makes the workspace file-backed (releasing some memory).
 SaveMDEW(InputWorkspace=ws+'_MD_hkl', Filename='TOPAZ_3131_MD_hkl.nxs', MakeFileBacked=1)

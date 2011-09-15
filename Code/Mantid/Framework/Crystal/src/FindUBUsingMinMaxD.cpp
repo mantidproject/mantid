@@ -82,15 +82,15 @@ namespace Crystal
     atLeast3Int->setLower(3);
 
     // use negative values, force user to input all parameters
-    this->declareProperty(new PropertyWithValue<double>( "min_d",-1.0,
+    this->declareProperty(new PropertyWithValue<double>( "MinD",-1.0,
           mustBePositive->clone(),Direction::Input),
           "Lower Bound on Lattice Parameters a, b, c");
 
-    this->declareProperty(new PropertyWithValue<double>( "max_d",-1.0,
+    this->declareProperty(new PropertyWithValue<double>( "MaxD",-1.0,
           mustBePositive->clone(),Direction::Input),
           "Upper Bound on Lattice Parameters a, b, c");
 
-    this->declareProperty(new PropertyWithValue<int>( "num_initial", 20,
+    this->declareProperty(new PropertyWithValue<int>( "NumInitial", 20,
           atLeast3Int,Direction::Input), 
           "Number of Peaks to Use on First Pass(20)");
 
@@ -103,9 +103,9 @@ namespace Crystal
    */
   void FindUBUsingMinMaxD::exec()
   {
-    double min_d       = this->getProperty("min_d");
-    double max_d       = this->getProperty("max_d");
-    int    num_initial = this->getProperty("num_initial");
+    double min_d       = this->getProperty("MinD");
+    double max_d       = this->getProperty("MaxD");
+    int    num_initial = this->getProperty("NumInitial");
     double tolerance   = this->getProperty("tolerance");
                                           
     int    base_index         = -1;   // these "could" be properties if need be
