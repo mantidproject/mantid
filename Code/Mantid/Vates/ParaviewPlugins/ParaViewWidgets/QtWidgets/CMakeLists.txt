@@ -11,7 +11,6 @@ set( INC_FILES
 set( HDR_FILES
   GeometryWidget.h
   DimensionWidget.h
-  DimensionWidgetFactory.h
   ThresholdRangeWidget.h
 )
 
