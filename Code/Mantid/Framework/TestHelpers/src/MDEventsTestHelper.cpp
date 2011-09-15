@@ -113,7 +113,7 @@ namespace MDEventsTestHelper
   MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked)
   {
     // Name of the output workspace.
-    std::string outWSName("CloneMDEventWorkspaceTest_OutputWS");
+    std::string outWSName("CloneMDWorkspaceTest_OutputWS");
 
     // ---------- Make a file-backed MDEventWorkspace -----------------------
     MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);

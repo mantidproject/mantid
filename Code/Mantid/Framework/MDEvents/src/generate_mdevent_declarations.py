@@ -53,7 +53,7 @@ factory_top = """
 @param eventType :: string describing the event type (MDEvent or MDLeanEvent)
 @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
 */
-API::IMDEventWorkspace_sptr MDEventFactory::CreateMDEventWorkspace(size_t nd, const std::string & eventType)
+API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(size_t nd, const std::string & eventType)
 {
 
 """
@@ -67,7 +67,7 @@ factory_lines = """    case (%d):
       return boost::shared_ptr<MDEventWorkspace<%s,%d> >(new MDEventWorkspace<%s,%d>);
 """
 factory_bottom = """    default:
-      throw std::invalid_argument("Invalid number of dimensions passed to CreateMDEventWorkspace.");
+      throw std::invalid_argument("Invalid number of dimensions passed to CreateMDWorkspace.");
     } // end switch
   } // end if eventType
 """
@@ -83,7 +83,7 @@ def write_factory(f):
         f.write(factory_bottom)
     # Throw for an invalid event type
     f.write('  // Unknown event type\n')
-    f.write('  throw std::invalid_argument("Unknown event type passed to CreateMDEventWorkspace.");\n')
+    f.write('  throw std::invalid_argument("Unknown event type passed to CreateMDWorkspace.");\n')
     f.write("}\n")
         
 

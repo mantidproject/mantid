@@ -28,7 +28,7 @@ namespace MDEvents
   public:
     MDEventFactory() {}
     ~MDEventFactory() {}
-    static API::IMDEventWorkspace_sptr CreateMDEventWorkspace(size_t nd, const std::string & eventType="MDLeanEvent");
+    static API::IMDEventWorkspace_sptr CreateMDWorkspace(size_t nd, const std::string & eventType="MDLeanEvent");
   };
 
   //### BEGIN AUTO-GENERATED CODE #################################################################

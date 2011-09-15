@@ -51,7 +51,7 @@ void ConvertToQ3DdE::initDocs()
         "\n\n"
         "If the OutputWorkspace does NOT already exist, a default one is created. In order to define "
         "more precisely the parameters of the [[MDEventWorkspace]], use the "
-        "[[CreateMDEventWorkspace]] algorithm first."
+        "[[CreateMDWorkspace]] algorithm first."
         ""
         );
 }

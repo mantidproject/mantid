@@ -171,7 +171,7 @@ namespace Mantid
       file->getAttr("event_type", eventType);
 
       // Use the factory to make the workspace of the right type
-      IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDEventWorkspace(numDims, eventType);
+      IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(numDims, eventType);
 
       // Now the ExperimentInfo
       loadExperimentInfos(ws);

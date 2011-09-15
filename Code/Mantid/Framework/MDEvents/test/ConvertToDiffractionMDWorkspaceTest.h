@@ -4,7 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
+#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -19,13 +19,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
 
-class MakeDiffractionMDEventWorkspaceTest : public CxxTest::TestSuite
+class ConvertToDiffractionMDWorkspaceTest : public CxxTest::TestSuite
 {
 public:
     
   void test_Init()
   {
-    MakeDiffractionMDEventWorkspace alg;
+    ConvertToDiffractionMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -39,7 +39,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
     Algorithm_sptr alg;
 
-    alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
+    alg = AlgorithmHelper::runAlgorithm("ConvertToDiffractionMDWorkspace", 6,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "OutputDimensions", "Q (lab frame)");
@@ -52,7 +52,7 @@ public:
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
 
     // But you can't add to an existing one of the wrong dimensions type
-    alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
+    alg = AlgorithmHelper::runAlgorithm("ConvertToDiffractionMDWorkspace", 6,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "OutputDimensions", "HKL");
@@ -60,7 +60,7 @@ public:
 
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
+    alg = AlgorithmHelper::runAlgorithm("ConvertToDiffractionMDWorkspace", 6,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "OutputDimensions", "HKL");
@@ -91,7 +91,7 @@ public:
       }
     }
 
-    MakeDiffractionMDEventWorkspace alg;
+    ConvertToDiffractionMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(in_ws) );

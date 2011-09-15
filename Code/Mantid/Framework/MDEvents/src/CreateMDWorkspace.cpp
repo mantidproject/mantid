@@ -3,7 +3,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CreateMDEventWorkspace.h"
+#include "MantidMDEvents/CreateMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidKernel/Memory.h"
 #include <math.h>
@@ -17,10 +17,10 @@ namespace MDEvents
   using namespace Mantid::Geometry;
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(CreateMDEventWorkspace)
+  DECLARE_ALGORITHM(CreateMDWorkspace)
   
   /// Sets documentation strings for this algorithm
-  void CreateMDEventWorkspace::initDocs()
+  void CreateMDWorkspace::initDocs()
   {
     this->setWikiSummary(" Creates an empty MDEventWorkspace with a given number of dimensions. ");
     this->setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
@@ -29,14 +29,14 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  CreateMDEventWorkspace::CreateMDEventWorkspace()
+  CreateMDWorkspace::CreateMDWorkspace()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  CreateMDEventWorkspace::~CreateMDEventWorkspace()
+  CreateMDWorkspace::~CreateMDWorkspace()
   {
   }
   
@@ -44,7 +44,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void CreateMDEventWorkspace::init()
+  void CreateMDWorkspace::init()
   {
     declareProperty(new PropertyWithValue<int>("Dimensions",1,Direction::Input), "Number of dimensions that the workspace will have.");
 
@@ -106,7 +106,7 @@ namespace MDEvents
    * @param ws :: MDEventWorkspace to finish
    */
   template<typename MDE, size_t nd>
-  void CreateMDEventWorkspace::finish(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void CreateMDWorkspace::finish(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // ------------ Set up the box controller ----------------------------------
     BoxController_sptr bc = ws->getBoxController();
@@ -171,7 +171,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void CreateMDEventWorkspace::exec()
+  void CreateMDWorkspace::exec()
   {
     // Get the properties and validate them
     std::string eventType = getPropertyValue("EventType");
@@ -199,7 +199,7 @@ namespace MDEvents
       throw std::invalid_argument("You must specify as many units as there are dimensions.");
 
     // Have the factory create it
-    IMDEventWorkspace_sptr out = MDEventFactory::CreateMDEventWorkspace(ndims, eventType);
+    IMDEventWorkspace_sptr out = MDEventFactory::CreateMDWorkspace(ndims, eventType);
 
     // Give all the dimensions
     for (size_t d=0; d<ndims; d++)

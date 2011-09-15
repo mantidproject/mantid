@@ -176,7 +176,7 @@ namespace MDEvents
         cloneLHS = false;
 
       // Clone the lhs workspace into ws1
-      IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDEventWorkspace", 0.0, 0.5, true);
+      IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
       clone->setProperty("InputWorkspace", (cloneLHS ? lhs_ws : rhs_ws) );
       clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
       clone->executeAsSubAlg();

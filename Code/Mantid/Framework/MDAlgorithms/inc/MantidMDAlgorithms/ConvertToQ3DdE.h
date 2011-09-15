@@ -16,7 +16,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-/** MakeDiffractionMDEventWorkspace :
+/** ConvertToDiffractionMDWorkspace :
    *  Transfrom processed inelastic workspace into MD(Event)Workspace with 3 components of momentum transfer plus energy transfer for Indirect?(should be expanded) geometry instrument
    * 
    * @author Alex Buts, ISIS

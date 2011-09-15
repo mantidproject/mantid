@@ -127,7 +127,7 @@ namespace Mantid
     */
     bool EventNexusLoadingPresenter::hasTDimensionAvailable() const
     {
-      return false; //OneStepMDEW uses MakeDiffractionMDEventWorkspace, which always generates 3 dimensional MDEW
+      return false; //OneStepMDEW uses ConvertToDiffractionMDWorkspace, which always generates 3 dimensional MDEW
     }
 
     /*

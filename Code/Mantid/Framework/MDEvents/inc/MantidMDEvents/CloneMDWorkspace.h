@@ -36,14 +36,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CloneMDEventWorkspace  : public API::Algorithm
+  class DLLExport CloneMDWorkspace  : public API::Algorithm
   {
   public:
-    CloneMDEventWorkspace();
-    ~CloneMDEventWorkspace();
+    CloneMDWorkspace();
+    ~CloneMDWorkspace();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "CloneMDEventWorkspace";};
+    virtual const std::string name() const { return "CloneMDWorkspace";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

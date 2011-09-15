@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/CreateMDEventWorkspace.h"
+#include "MantidMDEvents/CreateMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -17,14 +17,14 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-class CreateMDEventWorkspaceTest : public CxxTest::TestSuite
+class CreateMDWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    CreateMDEventWorkspace alg;
+    CreateMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -32,29 +32,29 @@ public:
   /** Validate bad inputs. */
   void test_validation()
   {
-    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 4,
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 4,
         "OutputWorkspace","failed_output",
         "Dimensions", "0")->isExecuted() );
-    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 6,
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 6,
         "OutputWorkspace","failed_output",
         "Dimensions", "3",
         "Extents", "-1,1,-2,2")->isExecuted() );
-    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 6,
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 6,
         "OutputWorkspace","failed_output",
         "Dimensions", "3",
         "Extents", "-1,1,-2,2,3,3,4,4")->isExecuted() );
-    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 8,
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 8,
         "OutputWorkspace","failed_output",
         "Dimensions", "3", "Extents", "-1,1,-2,2,3,3",
         "Names", "One,Two")->isExecuted() );
-    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 12,
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 12,
         "OutputWorkspace","failed_output",
         "Dimensions", "3", "Extents", "-1,1,-2,2,3,3",
         "Names", "One,Two,Three",
         "MinRecursionDepth", "5",
         "MaxRecursionDepth", "4")->isExecuted() );
     // Uses too much memory
-    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 14,
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 14,
         "OutputWorkspace","failed_output",
         "Dimensions", "3", "Extents", "-1,1,-2,2,3,3",
         "Names", "One,Two,Three",
@@ -66,8 +66,8 @@ public:
 
   void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth=0, int expectedNumMDBoxes=216)
   {
-    std::string wsName = "CreateMDEventWorkspaceTest_out";
-    CreateMDEventWorkspace alg;
+    std::string wsName = "CreateMDWorkspaceTest_out";
+    CreateMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("Dimensions", "3");
@@ -150,7 +150,7 @@ public:
 
   void test_exec_MDEvent_fileBacked()
   {
-    do_test_exec("CreateMDEventWorkspaceTest.nxs", false);
+    do_test_exec("CreateMDWorkspaceTest.nxs", false);
   }
 
   void test_exec_MDLeanEvent()
@@ -160,7 +160,7 @@ public:
 
   void test_exec_MDLeanEvent_fileBacked()
   {
-    do_test_exec("CreateMDEventWorkspaceTest.nxs", true);
+    do_test_exec("CreateMDWorkspaceTest.nxs", true);
   }
 
 

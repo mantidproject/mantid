@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
+#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -28,10 +28,10 @@ namespace MDEvents
 
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)
+  DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace)
   
   /// Sets documentation strings for this algorithm
-  void MakeDiffractionMDEventWorkspace::initDocs()
+  void ConvertToDiffractionMDWorkspace::initDocs()
   {
     this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
@@ -43,7 +43,7 @@ namespace MDEvents
         "\n\n"
         "If the OutputWorkspace does NOT already exist, a default one is created. In order to define "
         "more precisely the parameters of the [[MDEventWorkspace]], use the "
-        "[[CreateMDEventWorkspace]] algorithm first."
+        "[[CreateMDWorkspace]] algorithm first."
         ""
         );
   }
@@ -51,14 +51,14 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MakeDiffractionMDEventWorkspace::MakeDiffractionMDEventWorkspace()
+  ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  MakeDiffractionMDEventWorkspace::~MakeDiffractionMDEventWorkspace()
+  ConvertToDiffractionMDWorkspace::~ConvertToDiffractionMDWorkspace()
   {
   }
 
@@ -66,7 +66,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void MakeDiffractionMDEventWorkspace::init()
+  void ConvertToDiffractionMDWorkspace::init()
   {
     //TODO: Make sure in units are okay
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
@@ -104,7 +104,7 @@ namespace MDEvents
    * @param workspaceIndex :: index into the workspace
    */
   template <class T>
-  void MakeDiffractionMDEventWorkspace::convertEventList(int workspaceIndex)
+  void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex)
   {
     EventList & el = in_ws->getEventList(workspaceIndex);
     size_t numEvents = el.getNumberEvents();
@@ -213,7 +213,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void MakeDiffractionMDEventWorkspace::exec()
+  void ConvertToDiffractionMDWorkspace::exec()
   {
     Timer tim, timtotal;
     CPUTimer cputim, cputimtotal;
@@ -300,7 +300,7 @@ namespace MDEvents
     {
       // Create an output workspace with 3 dimensions.
       size_t nd = 3;
-      i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDLeanEvent");
+      i_out = MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
       ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(i_out);
 
       // Give all the dimensions
@@ -368,13 +368,13 @@ namespace MDEvents
       switch (el.getEventType())
       {
       case TOF:
-        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
+        func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
         break;
       case WEIGHTED:
-        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEvent>, &*this, static_cast<int>(wi));
+        func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<WeightedEvent>, &*this, static_cast<int>(wi));
         break;
       case WEIGHTED_NOTIME:
-        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEventNoTime>, &*this, static_cast<int>(wi));
+        func = boost::bind(&ConvertToDiffractionMDWorkspace::convertEventList<WeightedEventNoTime>, &*this, static_cast<int>(wi));
         break;
       default:
         throw std::runtime_error("EventList had an unexpected data type!");

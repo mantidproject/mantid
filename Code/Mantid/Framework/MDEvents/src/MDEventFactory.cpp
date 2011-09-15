@@ -189,7 +189,7 @@ template DLLExport class MDBoxIterator<MDLeanEvent<9>, 9>;
 @param eventType :: string describing the event type (MDEvent or MDLeanEvent)
 @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
 */
-API::IMDEventWorkspace_sptr MDEventFactory::CreateMDEventWorkspace(size_t nd, const std::string & eventType)
+API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(size_t nd, const std::string & eventType)
 {
 
   if (eventType == "MDEvent")
@@ -215,7 +215,7 @@ API::IMDEventWorkspace_sptr MDEventFactory::CreateMDEventWorkspace(size_t nd, co
     case (9):
       return boost::shared_ptr<MDEventWorkspace<MDEvent<9>,9> >(new MDEventWorkspace<MDEvent<9>,9>);
     default:
-      throw std::invalid_argument("Invalid number of dimensions passed to CreateMDEventWorkspace.");
+      throw std::invalid_argument("Invalid number of dimensions passed to CreateMDWorkspace.");
     } // end switch
   } // end if eventType
   if (eventType == "MDLeanEvent")
@@ -241,11 +241,11 @@ API::IMDEventWorkspace_sptr MDEventFactory::CreateMDEventWorkspace(size_t nd, co
     case (9):
       return boost::shared_ptr<MDEventWorkspace<MDLeanEvent<9>,9> >(new MDEventWorkspace<MDLeanEvent<9>,9>);
     default:
-      throw std::invalid_argument("Invalid number of dimensions passed to CreateMDEventWorkspace.");
+      throw std::invalid_argument("Invalid number of dimensions passed to CreateMDWorkspace.");
     } // end switch
   } // end if eventType
   // Unknown event type
-  throw std::invalid_argument("Unknown event type passed to CreateMDEventWorkspace.");
+  throw std::invalid_argument("Unknown event type passed to CreateMDWorkspace.");
 }
 
 } // namespace Mantid

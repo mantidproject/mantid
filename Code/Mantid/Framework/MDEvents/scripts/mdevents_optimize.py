@@ -74,12 +74,12 @@ for SplitInto in SplitInto_list:
         if not mtd["mdew"] is None:
             DeleteWorkspace("mdew")
         
-        CreateMDEventWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
+        CreateMDWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
                                SplitInto=str(SplitInto),SplitThreshold=str(SplitThreshold),
                                MaxRecursionDepth="80",OutputWorkspace="mdew")
         
         start = time.time()
-        MakeDiffractionMDEventWorkspace(InputWorkspace="topaz",OutputWorkspace="mdew")
+        ConvertToDiffractionMDWorkspace(InputWorkspace="topaz",OutputWorkspace="mdew")
         print time.time()-start, " secs to make MDEW."
         par.MakeTime = time.time()-start
 

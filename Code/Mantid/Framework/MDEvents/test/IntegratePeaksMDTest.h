@@ -68,7 +68,7 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 14,
+    AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 14,
         "Dimensions", "3",
         "Extents", "-10,10,-10,10,-10,10",
         "Names", "h,k,l",

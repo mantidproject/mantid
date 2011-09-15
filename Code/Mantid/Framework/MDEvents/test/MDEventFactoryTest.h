@@ -20,14 +20,14 @@ public:
   void test_factory()
   {
     IMDEventWorkspace_sptr ew;
-    ew = MDEventFactory::CreateMDEventWorkspace(4, "MDLeanEvent");
+    ew = MDEventFactory::CreateMDWorkspace(4, "MDLeanEvent");
     TS_ASSERT_EQUALS( ew->getNumDims(), 4);
 
     size_t n = 9;
-    ew = MDEventFactory::CreateMDEventWorkspace(n);
+    ew = MDEventFactory::CreateMDWorkspace(n);
     TS_ASSERT_EQUALS( ew->getNumDims(), n);
 
-    TS_ASSERT_THROWS( ew = MDEventFactory::CreateMDEventWorkspace(0), std::invalid_argument);
+    TS_ASSERT_THROWS( ew = MDEventFactory::CreateMDWorkspace(0), std::invalid_argument);
   }
 
 

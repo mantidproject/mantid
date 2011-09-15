@@ -4,7 +4,7 @@
 #include "LoadMDTest.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/CloneMDEventWorkspace.h"
+#include "MantidMDEvents/CloneMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -16,14 +16,14 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
-class CloneMDEventWorkspaceTest : public CxxTest::TestSuite
+class CloneMDWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    CloneMDEventWorkspace alg;
+    CloneMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -40,22 +40,22 @@ public:
 
   void test_exec_FileBacked_withFilename()
   {
-    do_test(true, "CloneMDEventWorkspaceTest_ws_custom_cloned_name.nxs");
+    do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name.nxs");
   }
 
 
   void do_test(bool fileBacked, std::string Filename = "")
   {
     // Name of the output workspace.
-    std::string outWSName("CloneMDEventWorkspaceTest_OutputWS");
+    std::string outWSName("CloneMDWorkspaceTest_OutputWS");
 
     // Make a fake file-backed (or not) MDEW
-    MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeFileBackedMDEW("CloneMDEventWorkspaceTest_ws", fileBacked);
+    MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeFileBackedMDEW("CloneMDWorkspaceTest_ws", fileBacked);
   
-    CloneMDEventWorkspace alg;
+    CloneMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CloneMDEventWorkspaceTest_ws") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CloneMDWorkspaceTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", Filename) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -77,7 +77,7 @@ public:
     }
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove("CloneMDEventWorkspaceTest_ws");
+    AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");
     AnalysisDataService::Instance().remove(outWSName);
   }
   

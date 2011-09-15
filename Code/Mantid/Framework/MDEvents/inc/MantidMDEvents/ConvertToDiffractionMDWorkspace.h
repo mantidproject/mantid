@@ -10,7 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
+#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,20 +20,20 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** MakeDiffractionMDEventWorkspace :
+  /** ConvertToDiffractionMDWorkspace :
    * Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.
    * 
    * @author Janik Zikovsky, SNS
    * @date 2011-03-01 13:14:48.236513
    */
-  class DLLExport MakeDiffractionMDEventWorkspace  : public API::Algorithm
+  class DLLExport ConvertToDiffractionMDWorkspace  : public API::Algorithm
   {
   public:
-    MakeDiffractionMDEventWorkspace();
-    ~MakeDiffractionMDEventWorkspace();
+    ConvertToDiffractionMDWorkspace();
+    ~ConvertToDiffractionMDWorkspace();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "MakeDiffractionMDEventWorkspace";};
+    virtual const std::string name() const { return "ConvertToDiffractionMDWorkspace";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

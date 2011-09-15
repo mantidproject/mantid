@@ -4,7 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 //#include "MantidNexus/LoadEventNexus.h"
-//#include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
+//#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 
 namespace Mantid
 {
@@ -46,7 +46,7 @@ namespace MDEvents
         "\n\n"
         "The [[LoadEventNexus]] algorithm is called with default parameters to load into an [[EventWorkspace]]."
         "\n\n"
-        "After, the [[MakeDiffractionMDEventWorkspace]] algorithm is called with the new EventWorkspace as input. "
+        "After, the [[ConvertToDiffractionMDWorkspace]] algorithm is called with the new EventWorkspace as input. "
         "The parameters are set to convert to Q in the lab frame, with Lorentz correction, and default size/splitting behavior parameters."
         );
   }
@@ -86,8 +86,8 @@ namespace MDEvents
 
 
     // --------- Now Convert -------------------------------
-    //childAlg = createSubAlgorithm("MakeDiffractionMDEventWorkspace");
-    childAlg = AlgorithmFactory::Instance().create("MakeDiffractionMDEventWorkspace", 1);  // new MakeDiffractionMDEventWorkspace();
+    //childAlg = createSubAlgorithm("ConvertToDiffractionMDWorkspace");
+    childAlg = AlgorithmFactory::Instance().create("ConvertToDiffractionMDWorkspace", 1);  // new ConvertToDiffractionMDWorkspace();
     childAlg->initialize();
     childAlg->setPropertyValue("InputWorkspace", tempWsName);
     childAlg->setProperty<bool>("ClearInputWorkspace", false);

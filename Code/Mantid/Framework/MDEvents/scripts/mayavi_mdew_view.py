@@ -29,7 +29,7 @@ if 1:
 
 
 
-MakeDiffractionMDEventWorkspace(InputWorkspace="nxs",OutputWorkspace="nxs_md")
+ConvertToDiffractionMDWorkspace(InputWorkspace="nxs",OutputWorkspace="nxs_md")
 aa = mtd["nxs_md"]
 a = aa._getHeldObject()
 
@@ -78,5 +78,5 @@ mlab.show()
 #LoadEventNexus(Filename="/home/8oz/data/TOPAZ_2511_event.nxs",OutputWorkspace="top_2511",SingleBankPixelsOnly="0",Precount="1")
 #CompressEvents(InputWorkspace="top_2511",OutputWorkspace="top_2511",Tolerance="0.050000000000000003")
 #
-#MakeDiffractionMDEventWorkspace(InputWorkspace="top_2511",OutputWorkspace="mdew")
+#ConvertToDiffractionMDWorkspace(InputWorkspace="top_2511",OutputWorkspace="mdew")
 #BinToMDHistoWorkspace(InputWorkspace="top_2511_md",DimX="Qx,-10,10,50",DimY="Qy,-10,10,50",DimZ="Qz,-10,10,50",DimT="NONE,0,10,1",OutputWorkspace="top_histo")

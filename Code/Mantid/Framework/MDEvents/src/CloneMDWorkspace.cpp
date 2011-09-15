@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CloneMDEventWorkspace.h"
+#include "MantidMDEvents/CloneMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -15,28 +15,28 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(CloneMDEventWorkspace)
+  DECLARE_ALGORITHM(CloneMDWorkspace)
   
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  CloneMDEventWorkspace::CloneMDEventWorkspace()
+  CloneMDWorkspace::CloneMDWorkspace()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  CloneMDEventWorkspace::~CloneMDEventWorkspace()
+  CloneMDWorkspace::~CloneMDWorkspace()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void CloneMDEventWorkspace::initDocs()
+  void CloneMDWorkspace::initDocs()
   {
     this->setWikiSummary("Clones (copies) an existing MDEventWorkspace into a new one.");
     this->setOptionalMessage("Clones (copies) an existing [[MDEventWorkspace]] into a new one.");
@@ -50,7 +50,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void CloneMDEventWorkspace::init()
+  void CloneMDWorkspace::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
         "An input MDEventWorkspace.");
@@ -72,7 +72,7 @@ namespace MDEvents
    * @param ws ::  MDEventWorkspace to clone
    */
   template<typename MDE, size_t nd>
-  void CloneMDEventWorkspace::doClone(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void CloneMDWorkspace::doClone(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::string outWSName = getPropertyValue("OutputWorkspace");
     Progress prog(this, 0.0, 10.0, 100);
@@ -123,7 +123,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void CloneMDEventWorkspace::exec()
+  void CloneMDWorkspace::exec()
   {
     IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
 

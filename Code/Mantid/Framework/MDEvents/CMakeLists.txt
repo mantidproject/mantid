@@ -5,13 +5,14 @@ set ( SRC_FILES
 	src/BinToMDHistoWorkspace.cpp
 	src/BoxController.cpp
 	src/CentroidPeaksMD.cpp
-	src/CloneMDEventWorkspace.cpp
+	src/CloneMDWorkspace.cpp
+	src/ConvertToDiffractionMDWorkspace.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
 	src/CoordTransformAligned.cpp
 	src/CoordTransformDistance.cpp
 	src/CoordTransformDistanceParser.cpp
-	src/CreateMDEventWorkspace.cpp
+	src/CreateMDWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
 	src/IMDBox.cpp
@@ -26,7 +27,6 @@ set ( SRC_FILES
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
 	src/MDLeanEvent.cpp
-	src/MakeDiffractionMDEventWorkspace.cpp
 	src/MergeMD.cpp
 	src/OneStepMDEW.cpp
 	src/PlusMD.cpp
@@ -49,13 +49,14 @@ set ( INC_FILES
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
-	inc/MantidMDEvents/CloneMDEventWorkspace.h
+	inc/MantidMDEvents/CloneMDWorkspace.h
+	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/CoordTransformAffine.h
 	inc/MantidMDEvents/CoordTransformAffineParser.h
 	inc/MantidMDEvents/CoordTransformAligned.h
 	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
-	inc/MantidMDEvents/CreateMDEventWorkspace.h
+	inc/MantidMDEvents/CreateMDWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
 	inc/MantidMDEvents/IMDBox.h
@@ -72,7 +73,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDLeanEvent.h
-	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
 	inc/MantidMDEvents/MergeMD.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/PlusMD.h
@@ -85,13 +85,14 @@ set ( TEST_FILES
 	test/AffineMatrixParameterTest.h
 	test/BoxControllerTest.h
 	test/CentroidPeaksMDTest.h
-	test/CloneMDEventWorkspaceTest.h
+	test/CloneMDWorkspaceTest.h
+	test/ConvertToDiffractionMDWorkspaceTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
 	test/CoordTransformAlignedTest.h
 	test/CoordTransformDistanceParserTest.h
 	test/CoordTransformDistanceTest.h
-	test/CreateMDEventWorkspaceTest.h
+	test/CreateMDWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
 	test/IMDBoxTest.h
@@ -108,7 +109,6 @@ set ( TEST_FILES
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
-	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/MergeMDTest.h
 	test/OneStepMDEWTest.h
 	test/PlusMDTest.h

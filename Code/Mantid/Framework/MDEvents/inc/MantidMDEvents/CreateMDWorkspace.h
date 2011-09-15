@@ -11,7 +11,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** CreateMDEventWorkspace :
+  /** CreateMDWorkspace :
    *
    * Algorithm to create an empty MDEventWorkspace with a given number of dimensions.
    *
@@ -19,14 +19,14 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-02-25 11:54:52.003137
    */
-  class DLLExport CreateMDEventWorkspace  : public API::Algorithm
+  class DLLExport CreateMDWorkspace  : public API::Algorithm
   {
   public:
-    CreateMDEventWorkspace();
-    ~CreateMDEventWorkspace();
+    CreateMDWorkspace();
+    ~CreateMDWorkspace();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "CreateMDEventWorkspace";};
+    virtual const std::string name() const { return "CreateMDWorkspace";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
