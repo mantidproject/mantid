@@ -21,11 +21,13 @@ if ( USE_TCMALLOC )
     set ( TCMALLOC_LIBRARY ${TCMALLOC_LIBRARIES} )
     # Make a C++ define to use as flags in, e.g. MemoryManager.cpp
     add_definitions ( -DUSE_TCMALLOC )
-  else ()
+  else ( TCMALLOC_FOUND )
     # If not found, print a message telling the user to either get it or disable its use in the cache
     message ( SEND_ERROR "TCMalloc not found: either install the google-perftools suite on your system or set the USE_TCMALLOC CMake cache variable to OFF" ) 
-  endif ()
-endif ()
+  endif ( TCMALLOC_FOUND )
+else ( USE_TCMALLOC )
+  message ( STATUS "Not using TCMalloc" )
+endif ( USE_TCMALLOC )
 
 ###########################################################################
 # Set installation variables
