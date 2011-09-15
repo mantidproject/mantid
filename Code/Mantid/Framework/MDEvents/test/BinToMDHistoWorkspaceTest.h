@@ -276,7 +276,8 @@ public:
   void do_test_transform(int binsX, int binsY, int binsZ,
       double expected_signal,
       size_t expected_numBins,
-      bool IterateEvents=false)
+      bool IterateEvents,
+      bool ForceOrthogonal)
   {
     BinToMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -310,6 +311,12 @@ public:
     VMD baseX(cos(angle), sin(angle), 0.0);
     VMD baseY(-sin(angle), cos(angle), 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
+    // Make a bad (i.e. non-orthogonal) input, to get it fixed.
+    if (ForceOrthogonal)
+    {
+      baseY = VMD(0.0, 1.0, 0);
+      baseZ = VMD(0.5, 0.5, 0.5);
+    }
 
     // Save to NXS file for testing
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
@@ -327,6 +334,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorZ", "OutZ,m," + baseZ.toString(",") + ",10," + Strings::toString(binsZ) ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorT", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Origin", origin.toString(",") ));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ForceOrthogonal", ForceOrthogonal ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
@@ -353,8 +361,10 @@ public:
 
     // check basis vectors
     TS_ASSERT_EQUALS( out->getBasisVector(0), baseX);
-    TS_ASSERT_EQUALS( out->getBasisVector(1), baseY);
-    TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ);
+    if (!ForceOrthogonal)
+    { TS_ASSERT_EQUALS( out->getBasisVector(1), baseY);
+      TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ); }
+
     CoordTransform * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
     CoordTransform * ctTo = out->getTransformToOriginal();
@@ -377,13 +387,22 @@ public:
   void test_exec_with_transform()
   {
     do_test_transform(10, 10, 10,
-        1.0 /*signal*/, 1000 /*# of bins*/, true /*IterateEvents*/);
+        1.0 /*signal*/, 1000 /*# of bins*/, true /*IterateEvents*/,
+        false /* Dont force orthogonal */);
   }
 
   void test_exec_with_transform_unevenSizes()
   {
     do_test_transform(5, 10, 2,
-        10*1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/);
+        10*1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/,
+        false /* Dont force orthogonal */ );
+  }
+
+  void test_exec_with_transform_ForceOrthogonal()
+  {
+    do_test_transform(5, 10, 2,
+        10*1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/,
+        true /* Do force orthogonal */ );
   }
 
 };

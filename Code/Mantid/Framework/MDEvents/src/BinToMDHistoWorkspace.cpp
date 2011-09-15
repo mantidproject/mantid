@@ -120,6 +120,9 @@ namespace MDEvents
         "Origin (in the input workspace) that corresponds to (0,0,0) in the output MDHistoWorkspace.\n"
         "Enter as a comma-separated string." );
     setPropertyGroup("Origin", "Non-Aligned Binning");
+    declareProperty(new PropertyWithValue<bool>("ForceOrthogonal", false, Direction::Input),
+        "Force the input basis vectors to form an orthogonal coordinate system. Only works in 3 dimension!" );
+    setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
 
 
     // --------------- Processing methods and options ---------------------------------------
@@ -619,8 +622,27 @@ namespace MDEvents
       catch (std::exception & e)
       { throw std::invalid_argument("Error parsing the " + propName + " parameter: " + std::string(e.what()) ); }
     }
+
     // Number of output binning dimensions found
     outD = binDimensions.size();
+    if (outD == 0)
+      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
+
+    bool ForceOrthogonal = getProperty("ForceOrthogonal");
+    if (ForceOrthogonal && m_bases[0].getNumDims() == 3 && m_bases.size() >= 2)
+    {
+      std::vector<VMD> firstTwo = m_bases;
+      firstTwo.resize(2, VMD(3));
+      std::vector<VMD> ortho = VMD::makeVectorsOrthogonal(firstTwo);
+      // Set the bases back
+      ortho.resize(m_bases.size(), VMD(3));
+      m_bases = ortho;
+      g_log.information() << "Basis vectors forced to be orthogonal: ";
+      for (size_t i=0; i<m_bases.size(); i++)
+        g_log.information() << m_bases[i].toString(",") << "; ";
+      g_log.information() << std::endl;
+
+    }
 
     // Get the origin
     VMD origin;
@@ -632,8 +654,6 @@ namespace MDEvents
       throw std::invalid_argument("The number of dimensions in the Origin parameter is not consistent with the number of dimensions in the input workspace.");
 
     // Validate
-    if (outD == 0)
-      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
     if (outD > inD)
       throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
     if (m_scaling.size() != outD)
