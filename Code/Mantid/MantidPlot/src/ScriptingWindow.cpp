@@ -370,7 +370,7 @@ void ScriptingWindow::hideEvent(QHideEvent *event)
 {
   Q_UNUSED(event);
   // This ensures the window size is remembered correctly
-  emit hideMe();
+//  emit hideMe();
 }
 
 /**
