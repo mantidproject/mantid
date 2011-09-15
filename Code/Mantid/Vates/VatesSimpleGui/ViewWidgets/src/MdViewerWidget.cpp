@@ -306,6 +306,7 @@ void MdViewerWidget::renderWorkspace(QString wsname)
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
+  this->currentView->onAutoScale();
   this->ui.proxyTabWidget->getObjectInspector()->accept();
 
   const unsigned int val = vtkSMPropertyHelper(\
