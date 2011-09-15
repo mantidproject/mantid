@@ -79,6 +79,8 @@ public:
   void setupPluginMode();
 
 protected slots:
+  /// Check for certain updates when an accept is fired.
+  void checkForUpdates();
   /**
    * Load and render data from the given source.
    * @param source a ParaView compatible source

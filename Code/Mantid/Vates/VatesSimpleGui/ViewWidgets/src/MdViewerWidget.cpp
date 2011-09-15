@@ -235,6 +235,9 @@ void MdViewerWidget::setParaViewComponentsForView()
   this->ui.proxyTabWidget->setView(this->currentView->getView());
   this->ui.proxyTabWidget->setShowOnAccept(true);
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
+  QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
+                   SIGNAL(postaccept()),
+                   this, SLOT(checkForUpdates()));
   if (this->currentView->inherits("MultiSliceView"))
   {
     QObject::connect(this->ui.pipelineBrowser,
@@ -313,6 +316,16 @@ void MdViewerWidget::renderAndFinalSetup()
     emit this->enableMultiSliceViewButton();
   }
   emit this->enableThreeSliceViewButton();
+}
+
+void MdViewerWidget::checkForUpdates()
+{
+  vtkSMProxy *proxy = pqActiveObjects::instance().activeSource()->getProxy();
+  if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
+  {
+    this->currentView->resetDisplay();
+    this->updateTimesteps();
+  }
 }
 
 void MdViewerWidget::updateTimesteps()
