@@ -93,11 +93,11 @@ namespace Crystal
     this->declareProperty(new PropertyWithValue<double>("gamma",-1.0,
           reasonable_angle->clone(),Direction::Input),"Lattice parameter gamma");
 
-    this->declareProperty(new PropertyWithValue<int>( "num_initial", 15,
+    this->declareProperty(new PropertyWithValue<int>( "NumInitial", 15,
           moreThan2Int,Direction::Input), 
           "Number of Peaks to Use on First Pass(15)");
 
-    this->declareProperty(new PropertyWithValue<double>( "tolerance",0.15,
+    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
           mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");
   }
 
@@ -112,8 +112,8 @@ namespace Crystal
     double alpha       = this->getProperty("alpha");
     double beta        = this->getProperty("beta");
     double gamma       = this->getProperty("gamma");
-    int    num_initial = this->getProperty("num_initial");
-    double tolerance   = this->getProperty("tolerance");
+    int    num_initial = this->getProperty("NumInitial");
+    double tolerance   = this->getProperty("Tolerance");
                                           
     int    base_index         = -1;   // these "could" be properties if need be
     double degrees_per_step   = 1.5;
