@@ -109,6 +109,8 @@ private:
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
+  /// Check if an incoming dataset has timesteps for animation control.
+  void checkForTimesteps();
   /// Function to create the pqPVApplicationCore object in plugin mode
   void createAppCoreForPlugin();
   /// Disable communication with the proxy tab widget.

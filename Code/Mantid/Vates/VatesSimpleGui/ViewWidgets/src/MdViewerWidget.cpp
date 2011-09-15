@@ -282,6 +282,21 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
   //this->originSource = source;
 
   this->renderAndFinalSetup();
+  this->checkForTimesteps();
+}
+
+void MdViewerWidget::checkForTimesteps()
+{
+  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
+  if (0 != tsv->GetNumberOfElements())
+  {
+    this->ui.timeControlWidget->setEnabled(true);
+  }
+  else
+  {
+    this->ui.timeControlWidget->setEnabled(false);
+  }
 }
 
 void MdViewerWidget::renderWorkspace(QString wsname)
@@ -341,6 +356,11 @@ void MdViewerWidget::updateTimesteps()
     double tEnd = tsv->GetElement(tsv->GetNumberOfElements() - 1);
     pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
     vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
+    this->ui.timeControlWidget->setEnabled(true);
+  }
+  else
+  {
+    this->ui.timeControlWidget->setEnabled(false);
   }
 }
 
