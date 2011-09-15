@@ -272,7 +272,7 @@ namespace DataHandling
       NXlink * link = new NXlink;
       link->linkType = 1; /* SDS data link */
       NXgetdataID(outId, link);
-      std::string targetPath = "entry/" + bank + "/" + errors_field_name;
+      std::string targetPath = "/entry/" + bank + "/" + errors_field_name;
       strcpy(link->targetPath, targetPath.c_str());
       if (NXmakelink(outId,link) != NX_OK)
         std::cout << "Error while making link to " << targetPath << std::endl;
