@@ -26,7 +26,7 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
 
-  void testExec()
+  void xtestExec()
   {
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
@@ -82,7 +82,7 @@ public:
 
   /** Compare to LoadEventNexus
    * DISABLED because the order of spectra is different. */
-  void test_compare_to_event()
+  void xtest_compare_to_event()
   {
     AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 4,
         "Filename", "CNCS_7860.nxs",
