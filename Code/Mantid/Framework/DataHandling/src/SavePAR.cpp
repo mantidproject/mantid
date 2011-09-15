@@ -97,7 +97,7 @@ void SavePAR::exec() {
       outPAR_file.width(10);
       outPAR_file<< polar[i];
       outPAR_file.width(10);
-      outPAR_file << -azimuthal[i];
+      outPAR_file << (-azimuthal[i]);
       outPAR_file.width(10);
       outPAR_file << polar_width[i];
       outPAR_file.width(10);
