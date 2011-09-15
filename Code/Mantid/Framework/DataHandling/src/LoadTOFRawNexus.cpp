@@ -335,7 +335,7 @@ void LoadTOFRawNexus::exec()
   { LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
   }
   catch (std::exception & e)
-  { g_log.warning() << "Error while loading meta data. " << e.what() << std::endl; }
+  { g_log.warning() << "Error while loading meta data: " << e.what() << std::endl; }
 
   // Set the spectrum number/detector ID at each spectrum. This is consistent with LoadEventNexus for non-ISIS files.
   prog->report("Building Spectra Mapping");

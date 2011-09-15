@@ -5,8 +5,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/AlgorithmHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
 using namespace Mantid;
@@ -139,7 +139,7 @@ public:
   {
     Mantid::API::AnalysisDataService::Instance().remove("outWS");
     MemoryManager::Instance().releaseFreeMemory();
-    std::string filename = "/home/8oz/data/NOM_2011_09_14T19_43_31Z_histo.nxs";
+    std::string filename = "NOM_2011_09_15T16_17_30Z_histo.nxs";
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataHandling::LoadTOFRawNexus ld;
     ld.initialize();
