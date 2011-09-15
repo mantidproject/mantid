@@ -173,7 +173,8 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   // Navigate to the point in the file
   ::NeXus::File * file = new ::NeXus::File(nexusfilename);
   file->openGroup(entry_name, "NXentry");
-  file->openGroup(bankName, "NXdata");
+  file->openGroup("instrument", "NXinstrument");
+  file->openGroup(bankName, "NXdetector");
 
   // Load the pixel IDs
   std::vector<uint32_t> pixel_id;
@@ -204,14 +205,22 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
       file->getAttr("errors", errorsField);
   file->closeData();
 
-  // TODO: Errors
+  // Load the errors
   bool hasErrors = !errorsField.empty();
   std::vector<double> errors;
   if (hasErrors)
   {
-    file->openData(errorsField);
-    file->getDataCoerce(errors);
-    file->closeData();
+    try
+    {
+      file->openData(errorsField);
+      file->getDataCoerce(errors);
+      file->closeData();
+    }
+    catch (...)
+    {
+      g_log.information() << "Error loading the errors field, '" << errorsField << "' for bank " << bankName << ". Will use sqrt(counts). " <<  std::endl;
+      hasErrors = false;
+    }
   }
 
   if (data.size() != numBins * numPixels)
@@ -338,10 +347,13 @@ void LoadTOFRawNexus::exec()
   PARALLEL_FOR1(WS)
   for (int i=0; i<int(bankNames.size()); i++)
   {
+    PARALLEL_START_INTERUPT_REGION
     std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
     loadBank(filename, entry_name, bankName, WS);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Set some units
   if (m_xUnits == "Ang")
