@@ -1,21 +1,19 @@
-#ifndef MANTID_MDEVENTS_LOADMDEW_H_
-#define MANTID_MDEVENTS_LOADMDEW_H_
-
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#ifndef MANTID_MDEVENTS_SAVEMDEW_H_
+#define MANTID_MDEVENTS_SAVEMDEW_H_
+    
 #include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
 namespace MDEvents
 {
 
-  /** Load a .nxs file into a MDEventWorkspace.
+  /** Save a MDEventWorkspace to a .nxs file.
     
     @author Janik Zikovsky
-    @date 2011-07-12
+    @date 2011-07-11
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,14 +35,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMDEW  : public API::Algorithm
+  class DLLExport SaveMD  : public API::Algorithm
   {
   public:
-    LoadMDEW();
-    ~LoadMDEW();
+    SaveMD();
+    ~SaveMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "LoadMDEW";};
+    virtual const std::string name() const { return "SaveMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -60,15 +58,7 @@ namespace MDEvents
 
     /// Helper method
     template<typename MDE, size_t nd>
-    void doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
-    void loadExperimentInfos(Mantid::API::IMDEventWorkspace_sptr ws);
-
-    /// Open file handle
-    ::NeXus::File * file;
-
-    /// Name of that file
-    std::string m_filename;
+    void doSave(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
   };
 
@@ -76,4 +66,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_LOADMDEW_H_ */
+#endif  /* MANTID_MDEVENTS_SAVEMDEW_H_ */

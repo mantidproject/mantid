@@ -17,14 +17,14 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-04-13 18:11:53.496539
    */
-  class DLLExport MDEWPeakIntegration  : public API::Algorithm
+  class DLLExport IntegratePeaksMD  : public API::Algorithm
   {
   public:
-    MDEWPeakIntegration();
-    ~MDEWPeakIntegration();
+    IntegratePeaksMD();
+    ~IntegratePeaksMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "MDEWPeakIntegration";};
+    virtual const std::string name() const { return "IntegratePeaksMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

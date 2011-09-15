@@ -1,8 +1,9 @@
-#ifndef MANTID_MDEVENTS_MDCENTROIDPEAKS_H_
-#define MANTID_MDEVENTS_MDCENTROIDPEAKS_H_
+#ifndef MANTID_MDEVENTS_MDEWFINDPEAKS_H_
+#define MANTID_MDEVENTS_MDEWFINDPEAKS_H_
     
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -12,19 +13,19 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.
+  /** FindPeaksMD : TODO: DESCRIPTION
    * 
-   * @author Janik Zikovsky
-   * @date 2011-06-01
+   * @author
+   * @date 2011-06-02
    */
-  class DLLExport MDCentroidPeaks  : public API::Algorithm
+  class DLLExport FindPeaksMD  : public API::Algorithm
   {
   public:
-    MDCentroidPeaks();
-    ~MDCentroidPeaks();
+    FindPeaksMD();
+    ~FindPeaksMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "MDCentroidPeaks";};
+    virtual const std::string name() const { return "FindPeaksMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -39,17 +40,26 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
-    void integrate(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
-    /// Input MDEventWorkspace
-    Mantid::API::IMDEventWorkspace_sptr inWS;
+    /// Output PeaksWorkspace
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
 
+    /// Estimated radius of peaks. Boxes closer than this are rejected
+    coord_t peakRadiusSquared;
 
+    /// Thresholding factor
+    double DensityThresholdFactor;
 
+    /// Max # of peaks
+    int64_t MaxPeaks;
+
+    /// Progress reporter.
+    Mantid::API::Progress * prog;
   };
 
 
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_MDCENTROIDPEAKS_H_ */
+#endif  /* MANTID_MDEVENTS_MDEWFINDPEAKS_H_ */

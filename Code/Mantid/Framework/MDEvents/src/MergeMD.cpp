@@ -5,7 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MergeMDEW.h"
+#include "MantidMDEvents/MergeMD.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 
 using namespace Mantid::Kernel;
@@ -17,14 +17,14 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(MergeMDEW)
+  DECLARE_ALGORITHM(MergeMD)
   
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MergeMDEW::MergeMDEW()
+  MergeMD::MergeMD()
   : clonedFirst(false)
   {
   }
@@ -32,14 +32,14 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  MergeMDEW::~MergeMDEW()
+  MergeMD::~MergeMD()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void MergeMDEW::initDocs()
+  void MergeMD::initDocs()
   {
     this->setWikiSummary("Merge multiple MDEventWorkspaces from files that obey a common box format.");
     this->setOptionalMessage("Merge multiple MDEventWorkspaces from files that obey a common box format.");
@@ -60,7 +60,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void MergeMDEW::init()
+  void MergeMD::init()
   {
     std::vector<std::string> exts(1, ".nxs");
     declareProperty(new MultipleFileProperty("Filenames", exts),
@@ -81,16 +81,16 @@ namespace MDEvents
    * that is being merged and then adds them onto the output workspace.
    */
   TMDE_CLASS
-  class MergeMDEWLoadTask : public Mantid::Kernel::Task
+  class MergeMDLoadTask : public Mantid::Kernel::Task
   {
   public:
     /** Constructor
      *
-     * @param alg :: MergeMDEW Algorithm - used to pass parameters etc. around
+     * @param alg :: MergeMD Algorithm - used to pass parameters etc. around
      * @param blockNum :: Which block to load?
      * @param outWS :: Output workspace
      */
-    MergeMDEWLoadTask(MergeMDEW * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS)
+    MergeMDLoadTask(MergeMD * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS)
     : m_alg(alg), m_blockNum(blockNum), outWS(outWS)
     {
     }
@@ -135,8 +135,8 @@ namespace MDEvents
 
 
   protected:
-    /// MergeMDEW Algorithm - used to pass parameters etc. around
-    MergeMDEW * m_alg;
+    /// MergeMD Algorithm - used to pass parameters etc. around
+    MergeMD * m_alg;
     /// Which block to load?
     size_t m_blockNum;
     /// Output workspace
@@ -163,7 +163,7 @@ namespace MDEvents
   /** Loads all of the box data required (no events) for later use.
    * Also opens the files and leaves them open */
   template<typename MDE, size_t nd>
-  void MergeMDEW::loadBoxData()
+  void MergeMD::loadBoxData()
   {
     this->progress(0.05, "Loading File Info");
 
@@ -234,7 +234,7 @@ namespace MDEvents
    * @return the MDEventWorkspace sptr.
    */
   template<typename MDE, size_t nd>
-  typename MDEventWorkspace<MDE, nd>::sptr MergeMDEW::createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  typename MDEventWorkspace<MDE, nd>::sptr MergeMD::createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // Use the copy constructor to get the same dimensions etc.
     typename MDEventWorkspace<MDE, nd>::sptr outWS(new MDEventWorkspace<MDE, nd>(*ws));
@@ -259,7 +259,7 @@ namespace MDEvents
     // Save the empty WS and turn it into a file-backed MDEventWorkspace
     if (!outputFile.empty())
     {
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.01, 0.05);
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05);
       saver->setProperty("InputWorkspace", outIWS);
       saver->setPropertyValue("Filename", outputFile);
       saver->setProperty("MakeFileBacked", true);
@@ -283,7 +283,7 @@ namespace MDEvents
    * @param ws :: first MDEventWorkspace in the list to merge
    */
   template<typename MDE, size_t nd>
-  void MergeMDEW::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void MergeMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // First, load all the box data
     this->loadBoxData<MDE,nd>();
@@ -310,7 +310,7 @@ namespace MDEvents
       if (this->eventsPerBox[ib] > 0)
       {
         totalEventsInTasks += eventsPerBox[ib];
-        MergeMDEWLoadTask<MDE,nd> * task = new MergeMDEWLoadTask<MDE,nd>(this, ib, outWS);
+        MergeMDLoadTask<MDE,nd> * task = new MergeMDLoadTask<MDE,nd>(this, ib, outWS);
         ts->push(task);
       }
 
@@ -366,7 +366,7 @@ namespace MDEvents
    * @return the MDEventWorkspace sptr.
    */
   template<typename MDE, size_t nd>
-  typename MDEventWorkspace<MDE, nd>::sptr MergeMDEW::createOutputWSbyCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  typename MDEventWorkspace<MDE, nd>::sptr MergeMD::createOutputWSbyCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     this->clonedFirst = true;
     std::string outputFile = getProperty("OutputFilename");
@@ -374,7 +374,7 @@ namespace MDEvents
     // Convert the output workspace to file-backed
     if (!outputFile.empty())
     {
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.05, 0.10, true);
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.05, 0.10, true);
       saver->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
       saver->setPropertyValue("Filename", outputFile);
       saver->setProperty("MakeFileBacked", true);
@@ -404,11 +404,11 @@ namespace MDEvents
    * a particular box in the output workspace.
    */
   TMDE_CLASS
-  class MergeMDEWLoadToBoxTask : public Mantid::Kernel::Task
+  class MergeMDLoadToBoxTask : public Mantid::Kernel::Task
   {
   public:
-    /// MergeMDEW Algorithm - used to pass parameters etc. around
-    MergeMDEW * m_alg;
+    /// MergeMD Algorithm - used to pass parameters etc. around
+    MergeMD * m_alg;
     /// Which block to load?
     size_t m_blockNum;
     /// Output workspace
@@ -420,11 +420,11 @@ namespace MDEvents
 
     /** Constructor
      *
-     * @param alg :: MergeMDEW Algorithm - used to pass parameters etc. around
+     * @param alg :: MergeMD Algorithm - used to pass parameters etc. around
      * @param blockNum :: Which block to load?
      * @param outWS :: Output workspace
      */
-    MergeMDEWLoadToBoxTask(MergeMDEW * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS,
+    MergeMDLoadToBoxTask(MergeMD * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS,
         typename std::vector<IMDBox<MDE,nd> *> & boxesById, bool parallelSplit)
       : m_alg(alg), m_blockNum(blockNum), outWS(outWS),
         m_boxesById(boxesById), m_parallelSplit(parallelSplit)
@@ -543,7 +543,7 @@ namespace MDEvents
    * @param ws :: first MDEventWorkspace in the list to merge
    */
   template<typename MDE, size_t nd>
-  void MergeMDEW::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void MergeMD::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // First, load all the box data
     this->loadBoxData<MDE,nd>();
@@ -582,7 +582,7 @@ namespace MDEvents
       if (this->eventsPerBox[ib] > 0)
       {
         totalEventsInTasks += eventsPerBox[ib];
-        MergeMDEWLoadToBoxTask<MDE,nd> * task = new MergeMDEWLoadToBoxTask<MDE,nd>(this, ib, outWS, boxesById, true);
+        MergeMDLoadToBoxTask<MDE,nd> * task = new MergeMDLoadToBoxTask<MDE,nd>(this, ib, outWS, boxesById, true);
         task->run();
         delete task;
         //ts->push(task);
@@ -609,7 +609,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Now re-save the MDEventWorkspace to update the file back end */
   template<typename MDE, size_t nd>
-  void MergeMDEW::finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS)
+  void MergeMD::finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS)
   {
     CPUTimer overallTime;
 
@@ -620,21 +620,21 @@ namespace MDEvents
     std::string outputFile = getProperty("OutputFilename");
     if (!outputFile.empty())
     {
-      g_log.notice() << "Starting SaveMDEW to update the file back-end." << std::endl;
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.9, 1.00);
+      g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.9, 1.00);
       saver->setProperty("InputWorkspace", outIWS);
       saver->setProperty("UpdateFileBackEnd", true);
       saver->executeAsSubAlg();
     }
 
-    g_log.information() << overallTime << " to run SaveMDEW." << std::endl;
+    g_log.information() << overallTime << " to run SaveMD." << std::endl;
   }
 
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void MergeMDEW::exec()
+  void MergeMD::exec()
   {
     m_filenames = getProperty("Filenames");
     if (m_filenames.size() == 0)
@@ -642,7 +642,7 @@ namespace MDEvents
     std::string firstFile = m_filenames[0];
 
     // Start by loading the first file but just the box structure, no events, and not file-backed
-    IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.0, 0.05, false);
+    IAlgorithm_sptr loader = createSubAlgorithm("LoadMD", 0.0, 0.05, false);
     loader->setPropertyValue("Filename", firstFile);
     loader->setProperty("MetadataOnly", false);
     loader->setProperty("BoxStructureOnly", true);

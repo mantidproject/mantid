@@ -7,7 +7,7 @@
 
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
-#include "MantidMDEvents/LoadMDEW.h"
+#include "MantidMDEvents/LoadMD.h"
 
 #include <vtkUnstructuredGrid.h>
 
@@ -76,7 +76,7 @@ namespace Mantid
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-        Mantid::MDEvents::LoadMDEW alg;
+        Mantid::MDEvents::LoadMD alg;
         alg.initialize();
         alg.setPropertyValue("Filename", this->m_filename);
         alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
@@ -108,7 +108,7 @@ namespace Mantid
       using namespace Mantid::API;
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-      Mantid::MDEvents::LoadMDEW alg;
+      Mantid::MDEvents::LoadMD alg;
       alg.initialize();
       alg.setPropertyValue("Filename", this->m_filename);
       alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");

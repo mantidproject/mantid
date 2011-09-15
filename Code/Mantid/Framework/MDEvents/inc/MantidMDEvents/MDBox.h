@@ -119,7 +119,7 @@ namespace MDEvents
     bool getInMemory() const
     { return m_inMemory; }
 
-    /** Set whether the box data (from disk) is loaded in memory (for SaveMDEW with MakeFileBacked).
+    /** Set whether the box data (from disk) is loaded in memory (for SaveMD with MakeFileBacked).
      * @param inMem :: true if it is in memory  */
     void setInMemory(const bool inMem)
     { m_inMemory = inMem; }

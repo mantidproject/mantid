@@ -126,10 +126,10 @@ namespace MDEventsTestHelper
     if (fileBacked)
     {
       std::string filename = wsName + ".nxs";
-      Mantid::API::IAlgorithm_sptr saver = AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+      Mantid::API::IAlgorithm_sptr saver = AlgorithmHelper::runAlgorithm("SaveMD", 4,
           "InputWorkspace", wsName.c_str(),
           "Filename", filename.c_str());
-      AlgorithmHelper::runAlgorithm("LoadMDEW", 8,
+      AlgorithmHelper::runAlgorithm("LoadMD", 8,
           "OutputWorkspace", wsName.c_str(),
           "Filename", saver->getPropertyValue("Filename").c_str(),
           "FileBackEnd", "1", "Memory", "0");

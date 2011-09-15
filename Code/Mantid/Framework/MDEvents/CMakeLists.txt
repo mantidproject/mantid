@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AffineMatrixParameterParser.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/BoxController.cpp
+	src/CentroidPeaksMD.cpp
 	src/CloneMDEventWorkspace.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
@@ -12,25 +13,24 @@ set ( SRC_FILES
 	src/CoordTransformDistanceParser.cpp
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
+	src/FindPeaksMD.cpp
 	src/IMDBox.cpp
-	src/LoadMDEW.cpp
+	src/IntegratePeaksMD.cpp
+	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDBoxIterator.cpp
-	src/MDCentroidPeaks.cpp
-	src/MDEWFindPeaks.cpp
-	src/MDEWPeakIntegration.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
 	src/MDLeanEvent.cpp
 	src/MakeDiffractionMDEventWorkspace.cpp
-	src/MergeMDEW.cpp
+	src/MergeMD.cpp
 	src/OneStepMDEW.cpp
-	src/PlusMDEW.cpp
-	src/SaveMDEW.cpp
+	src/PlusMD.cpp
+	src/SaveMD.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -44,11 +44,11 @@ set ( SRC_UNITY_IGNORE_FILES
 
 # Header files
 set ( INC_FILES
-    inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
+	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDEventWorkspace.h
 	inc/MantidMDEvents/CoordTransformAffine.h
 	inc/MantidMDEvents/CoordTransformAffineParser.h
@@ -57,26 +57,26 @@ set ( INC_FILES
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
+	inc/MantidMDEvents/FindPeaksMD.h
 	inc/MantidMDEvents/IMDBox.h
-	inc/MantidMDEvents/LoadMDEW.h
+	inc/MantidMDEvents/IntegratePeaksMD.h
+	inc/MantidMDEvents/LoadMD.h
 	inc/MantidMDEvents/LoadSQW.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDBoxIterator.h
-	inc/MantidMDEvents/MDCentroidPeaks.h
 	inc/MantidMDEvents/MDDimensionStats.h
-	inc/MantidMDEvents/MDEWFindPeaks.h
-	inc/MantidMDEvents/MDEWPeakIntegration.h
+	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
-	inc/MantidMDEvents/MergeMDEW.h
+	inc/MantidMDEvents/MergeMD.h
 	inc/MantidMDEvents/OneStepMDEW.h
-	inc/MantidMDEvents/PlusMDEW.h
-	inc/MantidMDEvents/SaveMDEW.h
+	inc/MantidMDEvents/PlusMD.h
+	inc/MantidMDEvents/SaveMD.h
 )
 
 # Test files. Other source files required.
@@ -84,6 +84,7 @@ set ( TEST_FILES
 	test/AffineMatrixParameterParserTest.h
 	test/AffineMatrixParameterTest.h
 	test/BoxControllerTest.h
+	test/CentroidPeaksMDTest.h
 	test/CloneMDEventWorkspaceTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h
@@ -92,16 +93,15 @@ set ( TEST_FILES
 	test/CoordTransformDistanceTest.h
 	test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h
+	test/FindPeaksMDTest.h
 	test/IMDBoxTest.h
-	test/LoadMDEWTest.h
+	test/IntegratePeaksMDTest.h
+	test/LoadMDTest.h
 	test/LoadSQWTest.h
 	test/MDBinTest.h
 	test/MDBoxIteratorTest.h
 	test/MDBoxTest.h
-	test/MDCentroidPeaksTest.h
 	test/MDDimensionStatsTest.h
-	test/MDEWFindPeaksTest.h
-	test/MDEWPeakIntegrationTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
 	test/MDEventWorkspaceTest.h
@@ -109,10 +109,10 @@ set ( TEST_FILES
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
 	test/MakeDiffractionMDEventWorkspaceTest.h
-	test/MergeMDEWTest.h
+	test/MergeMDTest.h
 	test/OneStepMDEWTest.h
-	test/PlusMDEWTest.h
-	test/SaveMDEWTest.h
+	test/PlusMDTest.h
+	test/SaveMDTest.h
 )
 
 set ( GMOCK_TEST_FILES

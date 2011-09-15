@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
 
-#include "LoadMDEWTest.h"
+#include "LoadMDTest.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/CloneMDEventWorkspace.h"
@@ -67,7 +67,7 @@ public:
     TS_ASSERT(ws2); if (!ws2) return;
     
     // Compare the two workspaces
-    LoadMDEWTest::do_compare_MDEW(ws1, ws2);
+    LoadMDTest::do_compare_MDEW(ws1, ws2);
     
     // Check that the custom file name file exists
     if (fileBacked && !Filename.empty())

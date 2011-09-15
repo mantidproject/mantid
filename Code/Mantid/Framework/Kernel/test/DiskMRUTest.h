@@ -1052,7 +1052,7 @@ public:
   }
 
   /** Demonstrate that calling "save" manually without using the MRU write buffer will slow things down
-   * due to seeking. Was an issue in LoadMDEW */
+   * due to seeking. Was an issue in LoadMD */
   void test_withFakeSeeking_growingData_savingWithoutUsingMRU()
   {
     CPUTimer tim;

@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/SaveMDEW.h"
+#include "MantidMDEvents/SaveMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -18,35 +18,35 @@ using namespace Mantid::API;
 using Mantid::Kernel::CPUTimer;
 
 
-/** Note: See the LoadMDEWTest class
+/** Note: See the LoadMDTest class
  * for a more thorough test that does
  * a round-trip.
  */
-class SaveMDEWTest : public CxxTest::TestSuite
+class SaveMDTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    SaveMDEW alg;
+    SaveMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
   
   void test_exec()
   {
-    do_test_exec(23, "SaveMDEWTest.nxs");
+    do_test_exec(23, "SaveMDTest.nxs");
   }
 
   void test_exec_noEvents()
   {
-    do_test_exec(0, "SaveMDEWTest_noEvents.nxs");
+    do_test_exec(0, "SaveMDTest_noEvents.nxs");
   }
 
   void test_MakeFileBacked()
   {
-    do_test_exec(23, "SaveMDEWTest.nxs", true);
+    do_test_exec(23, "SaveMDTest.nxs", true);
   }
 
 
@@ -63,7 +63,7 @@ public:
     if (numPerBox > 0)
       MDEventsTestHelper::feedMDBox(ws->getBox(), 1, 9e3, 1e-3);
 
-    AnalysisDataService::Instance().addOrReplace("SaveMDEWTest_ws", ws);
+    AnalysisDataService::Instance().addOrReplace("SaveMDTest_ws", ws);
 
     ws->refreshCache();
 
@@ -74,10 +74,10 @@ public:
 
     CPUTimer tim;
 
-    SaveMDEW alg;
+    SaveMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDEWTest_ws") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked", MakeFileBacked) );
     alg.execute();
@@ -99,7 +99,7 @@ public:
 
 
 
-class SaveMDEWTestPerformance : public CxxTest::TestSuite
+class SaveMDTestPerformance : public CxxTest::TestSuite
 {
 public:
   MDEventWorkspace3Lean::sptr  ws;
@@ -112,10 +112,10 @@ public:
     ws->getBoxController()->setSplitInto(5);
     ws->getBoxController()->setSplitThreshold(2000);
 
-    AnalysisDataService::Instance().addOrReplace("SaveMDEWTestPerformance_ws", ws);
+    AnalysisDataService::Instance().addOrReplace("SaveMDTestPerformance_ws", ws);
 
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", "SaveMDEWTestPerformance_ws", "UniformParams", "10000000");
+        "InputWorkspace", "SaveMDTestPerformance_ws", "UniformParams", "10000000");
 
     std::cout << tim << " to fake the data." << std::endl;
     ws->refreshCache();
@@ -130,11 +130,11 @@ public:
   {
     CPUTimer tim;
 
-    SaveMDEW alg;
+    SaveMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDEWTestPerformance_ws") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "SaveMDEWTestPerformance.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDTestPerformance_ws") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "SaveMDTestPerformance.nxs") );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 

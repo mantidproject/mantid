@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidMDEvents/MergeMDEW.h"
+#include "MantidMDEvents/MergeMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
@@ -16,14 +16,14 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
-class MergeMDEWTest : public CxxTest::TestSuite
+class MergeMDTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    MergeMDEW alg;
+    MergeMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -35,7 +35,7 @@ public:
 
   void test_exec_fileBacked()
   {
-    do_test_exec("MergeMDEWTest_OutputWS.nxs");
+    do_test_exec("MergeMDTest_OutputWS.nxs");
   }
   
   void do_test_exec(std::string OutputFilename)
@@ -46,16 +46,16 @@ public:
     for (size_t i=0; i<3; i++)
     {
       std::ostringstream mess;
-      mess << "MergeMDEWTestInput" << i;
+      mess << "MergeMDTestInput" << i;
       MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true);
       inWorkspaces.push_back(ws);
       filenames.push_back(ws->getBoxController()->getFilename());
     }
 
     // Name of the output workspace.
-    std::string outWSName("MergeMDEWTest_OutputWS");
+    std::string outWSName("MergeMDTest_OutputWS");
   
-    MergeMDEW alg;
+    MergeMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Filenames", filenames) );

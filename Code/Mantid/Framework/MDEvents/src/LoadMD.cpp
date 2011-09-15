@@ -9,7 +9,7 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/LoadMDEW.h"
+#include "MantidMDEvents/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -24,27 +24,27 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(LoadMDEW)
+    DECLARE_ALGORITHM(LoadMD)
 
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    LoadMDEW::LoadMDEW()
+    LoadMD::LoadMD()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */
-    LoadMDEW::~LoadMDEW()
+    LoadMD::~LoadMD()
     {
     }
 
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm
-    void LoadMDEW::initDocs()
+    void LoadMD::initDocs()
     {
       this->setWikiSummary("Load a .nxs file into a MDEventWorkspace.");
       this->setOptionalMessage("Load a .nxs file into a MDEventWorkspace.");
@@ -54,7 +54,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
     */
-    void LoadMDEW::init()
+    void LoadMD::init()
     {
 
       std::vector<std::string> exts;
@@ -85,7 +85,7 @@ namespace Mantid
      *
      * @param ws :: MDEventWorkspace to load
      */
-    void LoadMDEW::loadExperimentInfos(IMDEventWorkspace_sptr ws)
+    void LoadMD::loadExperimentInfos(IMDEventWorkspace_sptr ws)
     {
       // First, find how many experimentX blocks there are
       std::map<std::string,std::string> entries;
@@ -148,7 +148,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
     */
-    void LoadMDEW::exec()
+    void LoadMD::exec()
     {
       m_filename = getPropertyValue("Filename");
 
@@ -161,10 +161,10 @@ namespace Mantid
       std::vector<int32_t> vecDims;
       file->readData("dimensions", vecDims);
       if (vecDims.empty())
-        throw std::runtime_error("LoadMDEW:: Error loading number of dimensions.");
+        throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
       size_t numDims = vecDims[0];
       if (numDims <= 0)
-        throw std::runtime_error("LoadMDEW:: number of dimensions <= 0.");
+        throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
 
       //The type of event
       std::string eventType;
@@ -192,7 +192,7 @@ namespace Mantid
     * @param ws :: MDEventWorkspace of the given type
     */
     template<typename MDE, size_t nd>
-    void LoadMDEW::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
+    void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
     {
       // Are we using the file back end?
       bool FileBackEnd = getProperty("FileBackEnd");

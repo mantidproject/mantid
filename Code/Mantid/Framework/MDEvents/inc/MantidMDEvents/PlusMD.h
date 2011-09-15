@@ -11,7 +11,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** PlusMDEW : TODO: DESCRIPTION
+  /** PlusMD : TODO: DESCRIPTION
     
     @author
     @date 2011-08-12
@@ -36,14 +36,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PlusMDEW  : public API::Algorithm
+  class DLLExport PlusMD  : public API::Algorithm
   {
   public:
-    PlusMDEW();
-    ~PlusMDEW();
+    PlusMD();
+    ~PlusMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "PlusMDEW";};
+    virtual const std::string name() const { return "PlusMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

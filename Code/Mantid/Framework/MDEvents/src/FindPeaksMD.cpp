@@ -1,4 +1,4 @@
-#include "MantidMDEvents/MDEWFindPeaks.h"
+#include "MantidMDEvents/FindPeaksMD.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -15,28 +15,28 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(MDEWFindPeaks)
+  DECLARE_ALGORITHM(FindPeaksMD)
   
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MDEWFindPeaks::MDEWFindPeaks()
+  FindPeaksMD::FindPeaksMD()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  MDEWFindPeaks::~MDEWFindPeaks()
+  FindPeaksMD::~FindPeaksMD()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void MDEWFindPeaks::initDocs()
+  void FindPeaksMD::initDocs()
   {
     this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace.");
     this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace.");
@@ -59,7 +59,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void MDEWFindPeaks::init()
+  void FindPeaksMD::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
         "An input MDEventWorkspace with at least 3 dimensions.");
@@ -99,7 +99,7 @@ namespace MDEvents
    * @param ws ::  MDEventWorkspace to integrate
    */
   template<typename MDE, size_t nd>
-  void MDEWFindPeaks::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     if (nd < 3)
       throw std::invalid_argument("Workspace must have at least 3 dimensions.");
@@ -321,7 +321,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void MDEWFindPeaks::exec()
+  void FindPeaksMD::exec()
   {
     bool AppendPeaks = getProperty("AppendPeaks");
 

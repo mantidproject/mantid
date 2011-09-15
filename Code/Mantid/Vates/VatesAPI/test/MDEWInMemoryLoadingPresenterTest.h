@@ -6,7 +6,7 @@
 #include "MantidAPI/FileFinder.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidMDEvents/LoadMDEW.h"
+#include "MantidMDEvents/LoadMD.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include <vtkUnstructuredGrid.h>
@@ -33,7 +33,7 @@ private:
   static Mantid::API::Workspace_sptr getGoodWorkspace()
   {
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
-    Mantid::MDEvents::LoadMDEW alg;
+    Mantid::MDEvents::LoadMD alg;
     alg.initialize();
     alg.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
     alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");

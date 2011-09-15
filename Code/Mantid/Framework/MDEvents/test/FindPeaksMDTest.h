@@ -4,7 +4,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDEWFindPeaks.h"
+#include "MantidMDEvents/FindPeaksMD.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,7 +19,7 @@ using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument_sptr;
 using Mantid::Kernel::PropertyWithValue;
 
-class MDEWFindPeaksTest : public CxxTest::TestSuite
+class FindPeaksMDTest : public CxxTest::TestSuite
 {
 public:
 
@@ -68,7 +68,7 @@ public:
     
   void test_Init()
   {
-    MDEWFindPeaks alg;
+    FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -86,7 +86,7 @@ public:
     // This peak will be rejected as non-physical
     addPeak(500, -5,-5,-5, 0.2);
   
-    MDEWFindPeaks alg;
+    FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "MDEWS") );

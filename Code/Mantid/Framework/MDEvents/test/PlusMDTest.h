@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/PlusMDEW.h"
+#include "MantidMDEvents/PlusMD.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -16,14 +16,14 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
-class PlusMDEWTest : public CxxTest::TestSuite
+class PlusMDTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    PlusMDEW alg;
+    PlusMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -31,19 +31,19 @@ public:
   void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile=true)
   {
     // Make two input workspaces
-    MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDEWTest_lhs", lhs_file);
-    MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDEWTest_rhs", rhs_file);
-    std::string outWSName = "PlusMDEWTest_out";
+    MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
+    std::string outWSName = "PlusMDTest_out";
     if (inPlace == 1)
-      outWSName = "PlusMDEWTest_lhs";
+      outWSName = "PlusMDTest_lhs";
     else if (inPlace == 2)
-      outWSName = "PlusMDEWTest_rhs";
+      outWSName = "PlusMDTest_rhs";
   
-    PlusMDEW alg;
+    PlusMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LHSWorkspace", "PlusMDEWTest_lhs") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("RHSWorkspace", "PlusMDEWTest_rhs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LHSWorkspace", "PlusMDTest_lhs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("RHSWorkspace", "PlusMDTest_rhs") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -65,8 +65,8 @@ public:
 
     if (ws->isFileBacked())
     {
-      // Run SaveMDEW so as to update the file in the back
-      AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+      // Run SaveMD so as to update the file in the back
+      AlgorithmHelper::runAlgorithm("SaveMD", 4,
           "InputWorkspace", outWSName.c_str(),
           "UpdateFileBackEnd", "1");
 

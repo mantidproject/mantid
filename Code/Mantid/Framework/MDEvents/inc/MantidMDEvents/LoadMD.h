@@ -1,19 +1,21 @@
-#ifndef MANTID_MDEVENTS_SAVEMDEW_H_
-#define MANTID_MDEVENTS_SAVEMDEW_H_
-    
+#ifndef MANTID_MDEVENTS_LOADMDEW_H_
+#define MANTID_MDEVENTS_LOADMDEW_H_
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
 namespace MDEvents
 {
 
-  /** Save a MDEventWorkspace to a .nxs file.
+  /** Load a .nxs file into a MDEventWorkspace.
     
     @author Janik Zikovsky
-    @date 2011-07-11
+    @date 2011-07-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,14 +37,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SaveMDEW  : public API::Algorithm
+  class DLLExport LoadMD  : public API::Algorithm
   {
   public:
-    SaveMDEW();
-    ~SaveMDEW();
+    LoadMD();
+    ~LoadMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "SaveMDEW";};
+    virtual const std::string name() const { return "LoadMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -58,7 +60,15 @@ namespace MDEvents
 
     /// Helper method
     template<typename MDE, size_t nd>
-    void doSave(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    void loadExperimentInfos(Mantid::API::IMDEventWorkspace_sptr ws);
+
+    /// Open file handle
+    ::NeXus::File * file;
+
+    /// Name of that file
+    std::string m_filename;
 
   };
 
@@ -66,4 +76,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_SAVEMDEW_H_ */
+#endif  /* MANTID_MDEVENTS_LOADMDEW_H_ */

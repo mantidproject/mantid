@@ -320,7 +320,7 @@ public:
 
     // Save to NXS file for testing
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
-    AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+    AlgorithmHelper::runAlgorithm("SaveMD", 4,
         "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
         "Filename", "BinToMDHistoWorkspaceTest_ws_rotated.nxs");
 

@@ -4,7 +4,7 @@
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/SaveMDEW.h"
+#include "MantidMDEvents/SaveMD.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
@@ -18,27 +18,27 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(SaveMDEW)
+  DECLARE_ALGORITHM(SaveMD)
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  SaveMDEW::SaveMDEW()
+  SaveMD::SaveMD()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  SaveMDEW::~SaveMDEW()
+  SaveMD::~SaveMD()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void SaveMDEW::initDocs()
+  void SaveMD::initDocs()
   {
     this->setWikiSummary("Save a MDEventWorkspace to a .nxs file.");
     this->setOptionalMessage("Save a MDEventWorkspace to a .nxs file.");
@@ -48,7 +48,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void SaveMDEW::init()
+  void SaveMD::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
 
@@ -74,7 +74,7 @@ namespace MDEvents
    * @param ws :: MDEventWorkspace of the given type
    */
   template<typename MDE, size_t nd>
-  void SaveMDEW::doSave(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void SaveMD::doSave(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::string filename = getPropertyValue("Filename");
     bool update = getProperty("UpdateFileBackEnd");
@@ -394,7 +394,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void SaveMDEW::exec()
+  void SaveMD::exec()
   {
     IMDEventWorkspace_sptr ws = getProperty("InputWorkspace");
 

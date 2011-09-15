@@ -3,7 +3,7 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/PlusMDEW.h"
+#include "MantidMDEvents/PlusMD.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
 
@@ -16,27 +16,27 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(PlusMDEW)
+  DECLARE_ALGORITHM(PlusMD)
   
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PlusMDEW::PlusMDEW()
+  PlusMD::PlusMD()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  PlusMDEW::~PlusMDEW()
+  PlusMD::~PlusMD()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void PlusMDEW::initDocs()
+  void PlusMD::initDocs()
   {
     this->setWikiSummary("Merge two MDEventWorkspaces together by combining their events together in one workspace.");
     this->setOptionalMessage("Merge two MDEventWorkspaces together by combining their events together in one workspace.");
@@ -49,7 +49,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void PlusMDEW::init()
+  void PlusMD::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("LHSWorkspace","",Direction::Input),
         "One of the workspaces to add together.");
@@ -66,12 +66,12 @@ namespace MDEvents
    * @param ws ::  MDEventWorkspace to clone
    */
   template<typename MDE, size_t nd>
-  void PlusMDEW::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     typename MDEventWorkspace<MDE, nd>::sptr ws1 = ws;
     typename MDEventWorkspace<MDE, nd>::sptr ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(iws2);
     if (!ws1 || !ws2)
-      throw std::runtime_error("Incompatible workspace types passed to PlusMDEW.");
+      throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
 
     IMDBox<MDE,nd> * box1 = ws1->getBox();
     IMDBox<MDE,nd> * box2 = ws2->getBox();
@@ -141,7 +141,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void PlusMDEW::exec()
+  void PlusMD::exec()
   {
     IMDEventWorkspace_sptr lhs_ws = getProperty("LHSWorkspace");
     IMDEventWorkspace_sptr rhs_ws = getProperty("RHSWorkspace");
@@ -151,7 +151,7 @@ namespace MDEvents
       throw std::invalid_argument("LHS and RHS workspaces must be of the same type and number of dimensions.");
 
     if ((lhs_ws == out_ws) && (rhs_ws == out_ws))
-      throw std::invalid_argument("Sorry, cannot perform PlusMDEW in place with the same WS on LHS and RHS (A = A + A). Please specify a different output workspace.");
+      throw std::invalid_argument("Sorry, cannot perform PlusMD in place with the same WS on LHS and RHS (A = A + A). Please specify a different output workspace.");
 
     bool inPlace = false;
     if (out_ws == rhs_ws)

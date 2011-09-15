@@ -5,12 +5,12 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/LoadMDEW.h"
+#include "MantidMDEvents/LoadMD.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "SaveMDEWTest.h"
+#include "SaveMDTest.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -21,13 +21,13 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class LoadMDEWTest : public CxxTest::TestSuite
+class LoadMDTest : public CxxTest::TestSuite
 {
 public:
     
   void test_Init()
   {
-    LoadMDEW alg;
+    LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -175,11 +175,11 @@ public:
     boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
-    AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+    AnalysisDataService::Instance().addOrReplace("LoadMDTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
-        "InputWorkspace", "LoadMDEWTest_ws", "UniformParams", "10000", "RandomizeSignal", "1");
+        "InputWorkspace", "LoadMDTest_ws", "UniformParams", "10000", "RandomizeSignal", "1");
 //    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
-//        "InputWorkspace", "LoadMDEWTest_ws", "PeakParams", "30000, 5.0, 0.01", "RandomizeSignal", "1");
+//        "InputWorkspace", "LoadMDTest_ws", "PeakParams", "30000, 5.0, 0.01", "RandomizeSignal", "1");
 
     // ------ Make a ExperimentInfo entry ------------
     ExperimentInfo_sptr ei(new ExperimentInfo());
@@ -188,11 +188,11 @@ public:
     ws1->addExperimentInfo(ei);
 
     // -------- Save it ---------------
-    SaveMDEW saver;
+    SaveMD saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDEWTest_ws" ) );
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  "LoadMDEWTest" + Strings::toString(nd) + ".nxs") );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  "LoadMDTest" + Strings::toString(nd) + ".nxs") );
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
@@ -201,11 +201,11 @@ public:
 
     //------ Now the loading -------------------------------------
     // Name of the output workspace.
-    std::string outWSName("LoadMDEWTest_OutputWS");
+    std::string outWSName("LoadMDTest_OutputWS");
 
     CPUTimer tim;
 
-    LoadMDEW alg;
+    LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
@@ -284,7 +284,7 @@ public:
   template <size_t nd>
   void do_test_UpdateFileBackEnd()
   {
-    std::string outWSName("LoadMDEWTest_OutputWS");
+    std::string outWSName("LoadMDTest_OutputWS");
     IMDEventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
     TS_ASSERT(iws); if (!iws) return;
@@ -320,7 +320,7 @@ public:
 
     // There are some new boxes that are not cached to disk at this point.
     // Save it again.
-    SaveMDEW saver;
+    SaveMD saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace", outWSName ) );
@@ -333,7 +333,7 @@ public:
     std::string filename = ws2->getBoxController()->getFilename();
 
     // Now we re-re-load it!
-    LoadMDEW alg;
+    LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
@@ -361,14 +361,14 @@ public:
     // Make a 1D MDEventWorkspace
     boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws1 = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
-    AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+    AnalysisDataService::Instance().addOrReplace("LoadMDTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
 
     // Save it
-    SaveMDEW saver;
+    SaveMD saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDEWTest_ws" ) );
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDEWTest2.nxs") );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDTest2.nxs") );
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
@@ -377,8 +377,8 @@ public:
 
     //------ Now the loading -------------------------------------
     // Name of the output workspace.
-    std::string outWSName("LoadMDEWTest_OutputWS");
-    LoadMDEW alg;
+    std::string outWSName("LoadMDTest_OutputWS");
+    LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );

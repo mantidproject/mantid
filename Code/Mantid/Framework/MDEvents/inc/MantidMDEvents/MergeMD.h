@@ -38,14 +38,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport MergeMDEW  : public API::Algorithm
+  class DLLExport MergeMD  : public API::Algorithm
   {
   public:
-    MergeMDEW();
-    ~MergeMDEW();
+    MergeMD();
+    ~MergeMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "MergeMDEW";};
+    virtual const std::string name() const { return "MergeMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
