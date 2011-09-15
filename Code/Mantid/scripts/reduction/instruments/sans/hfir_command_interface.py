@@ -284,9 +284,4 @@ def DivideByThickness(thickness=1.0):
         ReductionSingleton().set_geometry_correcter(mantidsimple.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
         
 def BckDivideByThickness(thickness=1.0):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    if thickness is None or thickness == 1.0:
-        ReductionSingleton().get_background().set_geometry_correcter(None)
-    else:
-        ReductionSingleton().get_background().set_geometry_correcter(mantidsimple.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
+    print "Background thickness can no longer be set: only the final sample-minus-data workspace can be divided by the sample thickness."

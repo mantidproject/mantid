@@ -343,10 +343,6 @@ class SANSReducer(Reducer):
         # Get the basic 2D steps
         self._reduction_steps = self._2D_steps()
         
-        # Sample geometry correction
-        if self.geometry_correcter is not None:
-            self.append_step(self.geometry_correcter)
-                    
         # Apply transmission correction
         if self._transmission_calculator is not None:
             self.append_step(self._transmission_calculator) 
@@ -357,6 +353,10 @@ class SANSReducer(Reducer):
         
         if self._absolute_scale is not None:
             self.append_step(self._absolute_scale)
+
+        # Sample geometry correction
+        if self.geometry_correcter is not None:
+            self.append_step(self.geometry_correcter)            
                     
         # Perform azimuthal averaging
         if self._azimuthal_averager is not None:

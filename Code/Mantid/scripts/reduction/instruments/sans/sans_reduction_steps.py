@@ -1415,7 +1415,7 @@ class SubtractBackground(ReductionStep):
         Subtracts background from a sample data workspace.
         The processed background workspace is stored for later use.
     """
-    def __init__(self, background_file, transmission=None, geometry=None):
+    def __init__(self, background_file, transmission=None):
         """
             @param background_file: file name of background data set
             @param transmission: ReductionStep object to compute the background transmission
@@ -1424,16 +1424,7 @@ class SubtractBackground(ReductionStep):
         self._background_file = background_file
         self._background_ws = None
         self._transmission = transmission
-        self._geometry_correcter = geometry
     
-    @validate_step
-    def set_geometry_correcter(self, correcter):    
-        """
-            Set the ReductionStep object that takes care of the geometry correction
-            @param subtracter: ReductionStep object
-        """
-        self._geometry_correcter = correcter
-        
     def set_transmission(self, trans):
         """
              Set the reduction step that will apply the transmission correction
@@ -1477,13 +1468,6 @@ class SubtractBackground(ReductionStep):
                     output = output.replace('\n', '\n   |')
                     log_text = "%s\n   %s" % (log_text, output)
         
-            # Geometry correction
-            if self._geometry_correcter is not None:
-                output = self._geometry_correcter.execute(reducer, self._background_ws)
-                if output is not None:
-                    output = output.replace('\n', '\n   |')
-                    log_text = "%s\n   %s" % (log_text, output)                    
-                
             # The transmission correction is set separately
             if self._transmission is not None:
                 output = self._transmission.execute(reducer, self._background_ws)

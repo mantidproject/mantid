@@ -108,9 +108,6 @@ class Background(BaseScriptElement):
                 raise RuntimeError, "Background subtraction was selected but no background data file was entered."            
             script += "Background(\"%s\")\n" % self.background_file
             
-            # Background sample thickness
-            script += "BckDivideByThickness(%g)\n" % self.sample_thickness
-            
             # Background transmission
             if self.bck_transmission_enabled:
                 if not self.calculate_transmission:
@@ -139,7 +136,6 @@ class Background(BaseScriptElement):
             Create XML from the current data.
         """
         xml  = "<Background>\n"
-        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness        
         xml += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
         xml += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
 
