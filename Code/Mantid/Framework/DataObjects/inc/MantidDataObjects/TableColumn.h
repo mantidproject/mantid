@@ -73,7 +73,8 @@ public:
     TableColumn(){
         int length = sizeof(Type);
         std::string name = std::string(typeid(Type).name());
-        if((name.find("i")!=std::string::npos)||(name.find("l")!=std::string::npos)){
+        if((name.find("i")!=std::string::npos)||(name.find("l")!=std::string::npos)||
+            (name.find("x")!=std::string::npos)){
             if(length==4){
                 this->conversion_case=-4;
                 this->m_type=="int";
@@ -127,8 +128,11 @@ public:
     /// return a value casted to double; the users responsibility is to be sure, that the casting is possible
     double operator[](size_t i)const
     {
-        
-
+  /*   try{   
+     return boost::numeric_cast<double>(m_data[i]);
+     }catch(...){
+             return std::numeric_limits<double>::quiet_NaN();    
+     }*/
       const Type *pTp  = &m_data[i];
  
       switch(conversion_case){

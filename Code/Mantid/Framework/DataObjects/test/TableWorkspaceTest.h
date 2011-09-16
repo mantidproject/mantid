@@ -83,7 +83,7 @@ public:
 
       TableColTestHelper<int64_t> Tcl2(-1);
       lrez=(int64_t)Tcl2[0];
-      TSM_ASSERT_EQUALS("10 int64_t not converted, type: "+std::string(typeid(frez).name()),-1,lrez);
+      TSM_ASSERT_EQUALS("10 int64_t not converted, type: "+std::string(typeid(int64_t).name()),-1,lrez);
 
       TableColTestHelper<long> Tcls2(-1);
       lsrez = (long)Tcls2[0];
