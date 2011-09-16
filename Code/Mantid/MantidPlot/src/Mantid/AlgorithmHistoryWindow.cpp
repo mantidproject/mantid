@@ -443,7 +443,7 @@ void AlgorithmHistoryWindow::copytoClipboard()
   genPyScript->execute();
 
   QString script;
-  std::ifstream file(tempFilename, std::ifstream::in);
+  std::ifstream file(tempFilename.c_str(), std::ifstream::in);
   std::stringstream buffer;
 
   // Retrieve script from file.
