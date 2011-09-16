@@ -150,6 +150,8 @@ private slots:
   void fileAboutToShow();
   /// Edit menu is about to show
   void editAboutToShow();
+  /// Window menu is about to show
+  void windowAboutToShow();
   /// Update window flags
   void updateWindowFlags();
   /// Update based on tab changes

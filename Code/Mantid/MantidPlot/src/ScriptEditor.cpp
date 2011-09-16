@@ -158,7 +158,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   m_print->setShortcut(tr("Ctrl+P"));
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
 
-  m_zoomIn = new QAction(("Zoom &In"), this);
+  m_zoomIn = new QAction(("Increase font size"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
   // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
   // it doesn't seem to work for me
@@ -166,7 +166,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
   connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
 
-  m_zoomOut = new QAction(("Zoom &Out"), this);
+  m_zoomOut = new QAction(("Decrease font size"), this);
   m_zoomOut->setShortcut(QKeySequence::ZoomOut);
   connect(m_zoomOut, SIGNAL(activated()),this,SLOT(zoomOut()));
 

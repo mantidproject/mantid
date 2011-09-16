@@ -301,6 +301,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
   initMenus();
   fileAboutToShow();
   editAboutToShow();
+  windowAboutToShow();
 
   // This connection must occur after the objects have been created and initialized
   connect(m_manager, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged()));
@@ -493,6 +494,37 @@ void ScriptingWindow::editAboutToShow()
   m_edit_menu->addAction(m_clear_output);  
 }
 
+void ScriptingWindow::windowAboutToShow()
+{
+  m_window_menu->clear();
+
+  m_window_menu->addAction(m_always_on_top);
+  m_window_menu->addAction(m_hide);
+
+  if( m_manager->count() > 0 )
+  {
+    m_window_menu->insertSeparator();
+    m_window_menu->addAction(m_manager->zoomInAction());
+    m_window_menu->addAction(m_manager->zoomOutAction());
+    m_window_menu->insertSeparator();
+    //Toggle output dock
+    m_toggle_output = m_output_dock->toggleViewAction();
+    m_toggle_output->setText("&Show Output");
+    m_toggle_output->setChecked(true);
+    m_window_menu->addAction(m_toggle_output);
+    //Toggle progress
+    m_window_menu->addAction(m_manager->m_toggle_progress);
+
+    m_window_menu->insertSeparator();
+    //Toggle folding
+    m_window_menu->addAction(m_manager->m_toggle_folding);
+    //Toggle code completion
+    m_window_menu->addAction(m_manager->m_toggle_completion);
+    //Toggle call tips
+    m_window_menu->addAction(m_manager->m_toggle_calltips);
+  }
+}
+
 /**
  *
  */
@@ -514,6 +546,7 @@ void ScriptingWindow::tabSelectionChanged()
   // Ensure that the shortcuts are active
   fileAboutToShow();
   editAboutToShow();
+  windowAboutToShow();
 }
 
 //-------------------------------------------
@@ -559,7 +592,6 @@ void ScriptingWindow::initMenus()
   m_always_on_top = new QAction(tr("Always on &Top"), this);
   m_always_on_top->setCheckable(true);
   connect(m_always_on_top, SIGNAL(toggled(bool)), this, SLOT(updateWindowFlags()));
-  m_window_menu->addAction(m_always_on_top);
   //Hide
   m_hide = new QAction(tr("&Hide"), this);
 #ifdef __APPLE__
@@ -569,24 +601,6 @@ void ScriptingWindow::initMenus()
 #endif
   // Note that we channel the hide through the parent so that we can save the geometry state
   connect(m_hide, SIGNAL(activated()), this, SIGNAL(hideMe()));
-  m_window_menu->addAction(m_hide);
-
-  m_window_menu->insertSeparator();
-  //Toggle output dock
-  m_toggle_output = m_output_dock->toggleViewAction();
-  m_toggle_output->setText("&Show Output");
-  m_toggle_output->setChecked(true);
-  m_window_menu->addAction(m_toggle_output);
-  //Toggle progress
-  m_window_menu->addAction(m_manager->m_toggle_progress);
-
-  m_window_menu->insertSeparator();
-  //Toggle folding
-  m_window_menu->addAction(m_manager->m_toggle_folding);
-  //Toggle code completion
-  m_window_menu->addAction(m_manager->m_toggle_completion);
-  //Toggle call tips
-  m_window_menu->addAction(m_manager->m_toggle_calltips);
 }
 /**
  * calls ScriptManagerWidget saveToString and  
