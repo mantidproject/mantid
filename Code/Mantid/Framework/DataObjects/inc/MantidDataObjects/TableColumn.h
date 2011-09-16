@@ -70,6 +70,32 @@ template <class Type>
 class DLLExport TableColumn: public API::Column
 {
 public:
+    TableColumn(){
+        int length = sizeof(Type);
+        std::string name = std::string(typeid(Type).name());
+        if((name.find("int")!=std::string::npos)||(name.find("long")!=std::string::npos)){
+            if(length==4){
+                this->conversion_case=-4;
+                this->m_type=="int";
+            }
+            if(length==8){
+                this->conversion_case=-8;
+                this->m_type=="int64";
+            }
+        }
+        if(name.find("float")!=std::string::npos){
+            this->conversion_case=4;
+            this->m_type ="float";
+        }
+        if(name.find("double")!=std::string::npos){
+            this->conversion_case=8;
+            this->m_type ="double";
+        }
+        if(this->m_type.empty()){
+            this->conversion_case=0;
+            this->m_type=name;
+        }
+    }
 
     //TableColumn();
     /// Virtual destructor.
@@ -102,15 +128,10 @@ public:
     double operator[](size_t i)const
     {
         
-      int length = sizeof(Type);
-      std::string name = typeid(Type).name();
-      if((name.find("int")!=std::string::npos)||(name.find("long")!=std::string::npos)){
-          length =-length;
-      }
 
       const Type *pTp  = &m_data[i];
  
-      switch(length){
+      switch(conversion_case){
          case -8:
              return (double)(*(reinterpret_cast<const  int64_t*>(pTp)));
          case -4:
@@ -146,6 +167,7 @@ private:
     /// Column data
     std::vector<Type> m_data;
     friend class TableWorkspace;
+    int conversion_case;
 };
 
 /// Shared pointer to a column with aoutomatic type cast and data type check.
