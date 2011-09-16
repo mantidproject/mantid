@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include <Poco/File.h>
 #include <limits>
@@ -151,6 +152,7 @@ FindDetectorsPar::exec()
 }
 // Constant for converting Radians to Degrees
 const double rad2deg = 180.0 / M_PI;
+// functions defines the ouptput table with parameters 
 void 
 FindDetectorsPar::set_output_table()
 {
@@ -171,8 +173,13 @@ FindDetectorsPar::set_output_table()
      m_result->addColumn("double","twoTheta");
      m_result->addColumn("double","azimuthal");
      m_result->addColumn("double","secondary_flightpath");
-     m_result->addColumn("double","polar_width");
-     m_result->addColumn("double","azimuthal_width");
+     if(return_linear_ranges){
+        m_result->addColumn("double","det_width");
+        m_result->addColumn("double","det_height");
+     }else{
+        m_result->addColumn("double","polar_width");
+        m_result->addColumn("double","azimuthal_width");
+     }
      m_result->addColumn("long64","detID");
  
      for(size_t i=0;i<nDetectors;i++){
@@ -180,6 +187,7 @@ FindDetectorsPar::set_output_table()
          row << polar[i] << azimuthal[i] << secondary_flightpath[i] << polar_width[i] << azimuthal_width[i] << (int64_t)det_ID[i];
      }
      setProperty("OutputParTableWS",m_result);
+     API::AnalysisDataService::Instance().addOrReplace(output,m_result);
 
 }
 
@@ -279,8 +287,8 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
     double ysize = bbox.zMax() - bbox.zMin(); // bounding box has been rotated according to coord above, so z is along coord[2]
 
     if(return_linear_ranges){
-        polar_width  = xsize;
-        azim_width   = ysize;
+        polar_width  = xsize;  // width
+        azim_width   = ysize;  // height
     }else{
         polar_width  = 2*rad2deg*atan2((xsize/2.0), dist);
         azim_width   = 2*rad2deg*atan2((ysize/2.0), dist);

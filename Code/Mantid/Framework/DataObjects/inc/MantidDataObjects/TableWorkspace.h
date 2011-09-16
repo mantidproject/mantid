@@ -103,6 +103,7 @@ namespace DataObjects
     int columnCount() const {return static_cast<int>(m_columns.size());}
     /// Gets the shared pointer to a column.
     API::Column_sptr getColumn(const std::string& name);
+    API::Column_const_sptr getColumn(const std::string& name)const;
     /// Gets the shared pointer to a column.
     API::Column_sptr getColumn(int index);
     /// Gets the shared pointer to a column by index - return none-modifyable column.
@@ -174,42 +175,54 @@ namespace DataObjects
     {
       findValue(value,row,col);
     }
+    /** Casts cells through converting their values to/from double without type checking; 
+     * Can produce stuped results in case if the type is in any way not related to  double */
+    template<class U>
+    U cell_cast(size_t nRow, size_t nCol)const{
+        Column_sptr spCol = this->m_columns[nCol];
+        return static_cast<U>(spCol->operator[](nRow));
+    }
+    template<class U>
+    U cell_cast(size_t nRow, const std::string &col_name)const{
+        Column_const_sptr spCol = this->getColumn(col_name);
+        return static_cast<U>(spCol->operator[](nRow));
+    }
 
 private:
-	
-	/// template method to find a given value in a table.
-	template<typename  Type>
-	void findValue(const Type value,int& row,const int & colIndex)
-	{
-		
-		try
-		{
-			TableColumn_ptr<Type> tc_sptr= getColumn(colIndex);
-			std::vector<Type> dataVec=tc_sptr->data();
-			typename std::vector<Type>::iterator itr;
-			itr=std::find(dataVec.begin(),dataVec.end(),value);
-			if(itr!=dataVec.end())
-			{
-				std::vector<int>::difference_type pos;
-				pos=std::distance(dataVec.begin(),itr);
-				//int pos=static_cast<int>itr-dataVec.begin();
-				row=static_cast<int>(pos);
-				
-			}
-			else
-			{
-				throw std::out_of_range("Search object not found in table workspace");
-			 }
-		}
-		catch(std::range_error&)
-		{
-			throw;
-		}
-		catch(std::runtime_error&)
-		{
-			throw;
-		}
-	}
+    
+    /// template method to find a given value in a table.
+    template<typename  Type>
+    void findValue(const Type value,int& row,const int & colIndex)
+    {
+        
+        try
+        {
+            TableColumn_ptr<Type> tc_sptr= getColumn(colIndex);
+            std::vector<Type> dataVec=tc_sptr->data();
+            typename std::vector<Type>::iterator itr;
+            itr=std::find(dataVec.begin(),dataVec.end(),value);
+            if(itr!=dataVec.end())
+            {
+                std::vector<int>::difference_type pos;
+                pos=std::distance(dataVec.begin(),itr);
+                //int pos=static_cast<int>itr-dataVec.begin();
+                row=static_cast<int>(pos);
+                
+            }
+            else
+            {
+                throw std::out_of_range("Search object not found in table workspace");
+             }
+        }
+        catch(std::range_error&)
+        {
+            throw;
+        }
+        catch(std::runtime_error&)
+        {
+            throw;
+        }
+    }
 
     bool addColumn(boost::shared_ptr<API::Column> column);
 
@@ -278,7 +291,7 @@ private:
         /// Constructor
         FindName(const std::string& name):m_name(name){}
         /// Comparison operator
-        bool operator()(boost::shared_ptr<API::Column>& cp)
+        bool operator()(boost::shared_ptr<API::Column>& cp)const
         {
             return cp->name() == m_name;
         }

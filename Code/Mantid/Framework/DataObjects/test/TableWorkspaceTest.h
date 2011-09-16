@@ -26,9 +26,72 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace std;
 
+
+template<class T> 
+class TableColTestHelper:public TableColumn<T>
+{
+public:
+    TableColTestHelper<T>(T value){
+        std::vector<T> &dat = TableColumn<T>::data();
+        dat.resize(1);
+        dat[0]=value;
+    }
+
+};
+
+
 class TableWorkspaceTest : public CxxTest::TestSuite
 {
 public:
+  void testTCcast(){
+      TableColTestHelper<float> Tcf(1.);
+      float frez=(float)Tcf[0];
+      TSM_ASSERT_DELTA("float not converted",1.,frez,1.e-5);
+
+      TableColTestHelper<double> Tdr(1.);
+      double drez=(double)Tcf[0];
+      TSM_ASSERT_DELTA("double not converted",1.,drez,1.e-5);
+
+      TableColTestHelper<int> Tci(1);
+      int irez=(int)Tci[0];
+      TSM_ASSERT_EQUALS("integer not converted",1,irez);
+
+      TableColTestHelper<int64_t> Tcl(1);
+      int64_t lrez=(int64_t)Tcl[0];
+      TSM_ASSERT_EQUALS("int64_t not converted",1,lrez);
+
+      TableColTestHelper<long> Tcls(1);
+      long  lsrez = (long)Tcls[0];
+      TSM_ASSERT_EQUALS("long not converted",1,lsrez);
+
+     TableColTestHelper<size_t> Tcst(1);
+      size_t  strez = (size_t)Tcst[0];
+      TSM_ASSERT_EQUALS("size_t not converted",1,lsrez);
+
+//
+      TableColTestHelper<float> Tcf2(-1.);
+      frez=(float)Tcf2[0];
+      TSM_ASSERT_DELTA("float not converted",-1.,frez,1.e-5);
+
+      TableColTestHelper<double> Tdr2(-1.);
+      drez=(double)Tcf2[0];
+      TSM_ASSERT_DELTA("double not converted",-1.,drez,1.e-5);
+
+      TableColTestHelper<int> Tci2(-1);
+      irez=(int)Tci2[0];
+      TSM_ASSERT_EQUALS("integer not converted",-1,irez);
+
+      TableColTestHelper<int64_t> Tcl2(-1);
+      lrez=(int64_t)Tcl2[0];
+      TSM_ASSERT_EQUALS("int64_t not converted",-1,lrez);
+
+      TableColTestHelper<long> Tcls2(-1);
+      lsrez = (long)Tcls2[0];
+      TSM_ASSERT_EQUALS("long not converted",-1,lsrez);
+
+ 
+
+  }
   void testAll()
   {
     TableWorkspace tw(3);
@@ -141,7 +204,7 @@ public:
         TS_ASSERT_EQUALS(str,"Number");
         TS_ASSERT_EQUALS(j,row1.row());
         row1.Bool(3) = !tw.Bool(row1.row(),3);
-		TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), static_cast<Mantid::API::Boolean>(row1.row()%2 != 0));
+        TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), static_cast<Mantid::API::Boolean>(row1.row()%2 != 0));
     }while(row1.next());
 
   }
@@ -210,54 +273,54 @@ public:
   }
   void testFindMethod()
   {
-	  TableWorkspace tw;
-	  tw.addColumn("str","Name");
-	  tw.addColumn("str","Format");
-	  tw.addColumn("str","Format Version");
-	  tw.addColumn("str","Format Type");
-	  tw.addColumn("str","Create Time");
-	 
-	   for (int i=1;i<10;++i)
-	  {
-		 std::stringstream s;
-		 TableRow t = tw.appendRow();
-		  s<<i;
-		  std::string name="Name";
-		  name+=s.str();
-		 
-		  t<<name;
-		  std::string format="Format";
-		  format+=s.str();
-		  t<<format;
+      TableWorkspace tw;
+      tw.addColumn("str","Name");
+      tw.addColumn("str","Format");
+      tw.addColumn("str","Format Version");
+      tw.addColumn("str","Format Type");
+      tw.addColumn("str","Create Time");
+     
+       for (int i=1;i<10;++i)
+      {
+         std::stringstream s;
+         TableRow t = tw.appendRow();
+          s<<i;
+          std::string name="Name";
+          name+=s.str();
+         
+          t<<name;
+          std::string format="Format";
+          format+=s.str();
+          t<<format;
           std::string formatver="Format Version"; 
-		  formatver+=s.str();
-		  t<<formatver;
-		  std::string formattype="Format Type";
-		  formattype+=s.str();
-		  t<<formattype;
-		  std::string creationtime="Creation Time";
-		  creationtime+=s.str();
-		  t<<creationtime;
+          formatver+=s.str();
+          t<<formatver;
+          std::string formattype="Format Type";
+          formattype+=s.str();
+          t<<formattype;
+          std::string creationtime="Creation Time";
+          creationtime+=s.str();
+          t<<creationtime;
 
-	  }
-	  std::string searchstr="Name3";
-	  int row=0;const int col=0;
-	  tw.find(searchstr,row,col);
-	  TS_ASSERT_EQUALS(row,2);
+      }
+      std::string searchstr="Name3";
+      int row=0;const int col=0;
+      tw.find(searchstr,row,col);
+      TS_ASSERT_EQUALS(row,2);
 
-	  const int formatcol=2;
-	  searchstr="Format Version8";
-	  tw.find(searchstr,row,formatcol);
-	  TS_ASSERT_EQUALS(row,7);
+      const int formatcol=2;
+      searchstr="Format Version8";
+      tw.find(searchstr,row,formatcol);
+      TS_ASSERT_EQUALS(row,7);
 
   }
 
   void testClone()
   {
     TableWorkspace tw(1);
-	  tw.addColumn("str","X");
-	  tw.addColumn("str","Y");
-	  tw.addColumn("str","Z");
+      tw.addColumn("str","X");
+      tw.addColumn("str","Y");
+      tw.addColumn("str","Z");
    
     tw.getColumn(0)->cell<std::string>(0) = "a";
     tw.getColumn(1)->cell<std::string>(0) = "b";

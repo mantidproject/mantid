@@ -234,6 +234,7 @@ public:
     return *(static_cast<T*>(c->void_pointer(row)));
   }
 
+
   /**  Get the reference to the element in row \c row and column \c col if its type is \c int.
          If it doesn't match the actual type of the column a runtime_error exception is thrown.
          @param row :: Row number

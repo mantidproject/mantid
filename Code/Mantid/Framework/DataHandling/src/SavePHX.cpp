@@ -59,6 +59,12 @@ void SavePHX::exec() {
        IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 1, true, 1);
        spCalcDetPar->initialize();
        spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
+       spCalcDetPar->setPropertyValue("ReturnLinearRanges", "0");
+       // in test mode, request the subalgortithm to create output workspace and add it to dataservice
+       if(!det_par_ws_name.empty()){
+           spCalcDetPar->setPropertyValue("OutputParTable",det_par_ws_name);
+       }
+
         // let's not do this for the time being
  /* std::string parFileName = this->getPropertyValue("ParFile");
      if(!(parFileName.empty()||parFileName=="not_used.par")){

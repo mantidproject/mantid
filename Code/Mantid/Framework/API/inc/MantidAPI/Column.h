@@ -74,7 +74,8 @@ public:
 
     /// Type of the column data.
     const std::string& type()const{return m_type;}
-
+    /// return value casted to double
+    virtual double operator[](size_t i)const{return 0.;}
     /// Renames the column.
     void setName(const std::string& str){m_name = str;}
 
@@ -86,8 +87,7 @@ public:
 
     /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info()const = 0;
-
-    /// Is the column to be read-only? @return true by default.
+    /// Is the column to be read-only? @retur true by default.
     virtual bool getReadOnly() const
     { return true; }
 
@@ -113,6 +113,7 @@ public:
     {
         return *static_cast<T*>(void_pointer(index));
     }
+ 
 
     /// Templated method for returning a value (const version). No type checks are done.
     template<class T>
@@ -161,10 +162,12 @@ struct Column_DllExport Boolean
     Boolean(bool b):value(b){}
     /// Returns bool
     operator bool(){return value;}
-	/// equal to operator
-	bool operator==(const Boolean& b)const
-	{return(this->value==b.value);		
-	}
+    /// equal to operator
+    bool operator==(const Boolean& b)const
+    {return(this->value==b.value);		
+    }
+    //
+    operator double(void)const{return double(this->value);}
     bool value;///< boolean value
 };
 

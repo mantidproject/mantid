@@ -7,7 +7,13 @@
 #include "MantidDataHandling/SavePAR.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
+
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+
+
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
@@ -29,6 +35,7 @@ private:
   Mantid::DataHandling::SavePAR parSaver;
   std::string TestOutputFile;
   std::string WSName;
+  std::string TestOutputParTableWSName;
 public:
   static SavePARTest *createSuite() { return new SavePARTest(); }
   static void destroySuite(SavePARTest *suite) { delete suite; }
@@ -54,30 +61,54 @@ public:
     TS_ASSERT_THROWS_NOTHING( parSaver.setPropertyValue("Filename",TestOutputFile) );
     TestOutputFile = parSaver.getPropertyValue("Filename");//get absolute path
      
+    // set resulting test par workspace to compare results against
+    this->TestOutputParTableWSName="TestOutputParWS";
+    parSaver.set_resulting_workspace(TestOutputParTableWSName);
+
+    // exec algorithm
     TS_ASSERT_THROWS_NOTHING(parSaver.execute());
     TS_ASSERT(parSaver.isExecuted());
   }
 
-  void t__tResutlts(){
-      std::vector<std::string> pattern(5),count(5);
-      std::string result;
-      pattern[0]=" 3";
-      pattern[1]="     1.000   170.565     0.000     0.014     0.100         1";
-      pattern[2]="     1.000   169.565     0.000     0.014     0.100         2";
-      pattern[3]="     1.000   168.565     0.000     0.014     0.100         3";
+  void testResutlts(){
+      std::vector<std::string> count(5),column_name(6);
+      std::string result;     
       count[0]=" 0 ";count[1]=" 1 ";count[2]=" 2 ";count[3]=" 3 ";
+
+      // this is column names as they are defined in table workspace, but placed in the positions of the file
+      column_name[0]="secondary_flightpath";
+      column_name[1]="twoTheta";
+      column_name[2]="azimuthal";
+      column_name[3]="det_width";
+      column_name[4]="det_height";
+      column_name[5]="detID";
+
+      API::Workspace_sptr sample = API::AnalysisDataService::Instance().retrieve(TestOutputParTableWSName);
+      DataObjects::TableWorkspace_sptr spTW = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(sample);
+      TSM_ASSERT("should be able to retrieve sample workspace from the dataservice",spTW);
 
       std::ifstream testFile;
       testFile.open(TestOutputFile.c_str());
       TSM_ASSERT(" Can not open test file produced by algorithm PARSaver",testFile.is_open());
       int ic(0);
+      std::vector<float> sample_value(6);
       while(ic<5){
-          std::vector<float> sample = Kernel::VectorHelper::splitStringIntoVector<float>(pattern[ic]);
+          // get data from file
           std::getline(testFile,result);
           if(testFile.eof())break;
           std::vector<float> test  = Kernel::VectorHelper::splitStringIntoVector<float>(result);
-          for(size_t i=0;i<sample.size();i++){
-            TSM_ASSERT_DELTA("wrong string N "+count[ic]+" obtained from file; expecting "+ pattern[ic]+" getting "+result,sample[i],test[i],1e-3);
+
+          // get sample value[s];
+          if(ic==0){
+              sample_value[0] = (float)spTW->rowCount();
+          }else{
+            for(size_t i=0;i<test.size();i++){
+              sample_value[i] =(spTW->cell_cast<float>(ic-1,column_name[i]));
+            }
+          }
+
+          for(size_t i=0;i<test.size();i++){
+              TSM_ASSERT_DELTA("wrong sring: "+count[ic]+" column: "+column_name[i]+" obtained from file;",sample_value[i],test[i],1e-3);
           }
           ic++;
       }
@@ -88,10 +119,12 @@ public:
 private:
     ~SavePARTest(){
         // delete test ws from ds after the test ends
-        AnalysisDataService::Instance().remove(WSName);
+        API::AnalysisDataService::Instance().remove(WSName);
+        API::AnalysisDataService::Instance().remove(TestOutputParTableWSName);
         // delete test output file from the hdd;
         unlink(TestOutputFile.c_str());
     }
+  
 
     MatrixWorkspace_sptr makeWorkspace(const std::string & input) {
     // all the Y values in this new workspace are set to DEFAU_Y, which currently = 2

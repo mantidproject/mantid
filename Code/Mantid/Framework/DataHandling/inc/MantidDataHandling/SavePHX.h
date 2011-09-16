@@ -60,11 +60,19 @@ public:
   virtual const std::string category() const
   { return "DataHandling;Inelastic";}
 
+/** the method used in tests. It requested the subalgorithm, which does the detectors
+   *  position calculations to produce a target workspace. This workspace then can be retrieved 
+      from analysis data service and used to check  the results of the save algorithm. */
+  void set_resulting_workspace(const std::string &ws_name){
+      det_par_ws_name=ws_name;
+  }
 private:
   /// Initialisation code
   void init();
   ///Execution code
   void exec();
+  /// The name of the table workpsace with detectors positions used in tests
+  std::string det_par_ws_name;
 
 };
 } // namespace DataHandling

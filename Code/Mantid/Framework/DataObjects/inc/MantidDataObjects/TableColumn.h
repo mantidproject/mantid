@@ -12,6 +12,7 @@
 #include <typeinfo>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
+#include <limits>
 
 namespace Mantid
 {
@@ -96,6 +97,34 @@ public:
 
     /// Reference to the data.
     std::vector<Type>& data(){return m_data;}
+
+    /// return a value casted to double; the users responsibility is to be sure, that the casting is possible
+    double operator[](size_t i)const
+    {
+        
+      int length = sizeof(Type);
+      std::string name = typeid(Type).name();
+      if((name.find("int")!=std::string::npos)||(name.find("long")!=std::string::npos)){
+          length =-length;
+      }
+
+      const Type *pTp  = &m_data[i];
+ 
+      switch(length){
+         case -8:
+             return (double)(*(reinterpret_cast<const  int64_t*>(pTp)));
+         case -4:
+             return (double)(*(reinterpret_cast<const int *>(pTp)));
+         case 4:
+             return (double)(*(reinterpret_cast<const float *>(pTp)));
+         case 8:
+             return    *(reinterpret_cast<const double *>(pTp));
+         default:
+             return std::numeric_limits<double>::quiet_NaN();    
+     }
+
+    }
+
 protected:
     /// Resize.
     void resize(int count){m_data.resize(count);}

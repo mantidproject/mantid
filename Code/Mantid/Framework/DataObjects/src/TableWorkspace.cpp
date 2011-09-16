@@ -100,6 +100,20 @@ namespace Mantid
         }
         return *ci;
     }
+   /// Gets the shared pointer to a column.
+    API::Column_const_sptr TableWorkspace::getColumn(const std::string& name)const
+    {
+        column_const_it c_it  = m_columns.begin();
+        column_const_it c_end = m_columns.end();
+        for(;c_it!=c_end;c_it++){
+            if(c_it->get()->name() == name){
+                 return *c_it;
+            }
+        }
+        std::string str = "Column " + name + " does not exist.\n";
+        g_log.error(str);
+        throw std::runtime_error(str);
+    }
 
     /// Gets the shared pointer to a column.
     API::Column_sptr TableWorkspace::getColumn(int index)

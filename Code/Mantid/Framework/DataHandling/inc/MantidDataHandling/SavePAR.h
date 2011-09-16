@@ -43,7 +43,7 @@ namespace DataHandling
 /*!  
 *    an ASCII Tobyfit par file format:
 *
-*     par(5,ndet)         contents of array
+*     par(6,ndet)         contents of array
 *
 *         1st column      sample-detector distance
 *         2nd  "          scattering angle (deg)
@@ -73,13 +73,19 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const
   { return "DataHandling;Inelastic";}
-
+  /** the method used in tests. It requested the subalgorithm, which does the detectors
+   *  position calculations to produce a target workspace This workspace then can be retrieved 
+      from analysis data service and used to check  the results of the save algorithm. */
+  void set_resulting_workspace(const std::string &ws_name){
+      det_par_ws_name=ws_name;
+  }
 private:
   /// Initialisation code
   void init();
   ///Execution code
   void exec();
-
+  /// The name of the table workpsace with detectors positions used in tests
+  std::string det_par_ws_name;
 };
 } // namespace DataHandling
 } // namespace Mantid
