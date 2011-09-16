@@ -238,8 +238,6 @@ void vtkMDEWRebinningCutter::configureThresholdRangeMethod()
 int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector**,
   vtkInformationVector *outputVector)
 {
-  try
-  {
   using namespace Mantid::VATES;
 
   //Setup is not complete until metadata has been correctly provided.
@@ -281,11 +279,6 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
 
   }
   return 1;
-  }
-  catch(std::exception& ex)
-  {
-    std::string msg = ex.what();
-  }
 }
 
 int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
@@ -297,8 +290,6 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
   Status status=Good;
   if (Pending == m_setup)
   {
-    try
-    {
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
@@ -326,11 +317,6 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
     m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
     m_setup = SetupDone;
 
-    }
-    catch(std::exception& e)
-    {
-      std::string ex = e.what();
-    }
   }
   setTimeRange(outputVector);
   return status;
