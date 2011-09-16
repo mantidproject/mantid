@@ -20,6 +20,18 @@ class QLineEdit;
 class QLabel;
 class QFileDialog;
 
+//------------------------------------------------------------------------------
+// Mantid Forward declarations
+//------------------------------------------------------------------------------
+
+namespace Mantid 
+{
+  namespace API 
+  {
+    class Workspace;
+  }
+}
+
 class AlgHistoryTreeWidget:public QTreeWidget
 {
   Q_OBJECT
@@ -107,7 +119,7 @@ public:
   AlgorithmHistoryWindow(QWidget *parent) : MantidQt::API::MantidDialog(parent){}
   //AlgorithmHistoryWindow(QWidget *parent,const std::vector<Mantid::API::AlgorithmHistory>&alghist,
   //			 const Mantid::Kernel::EnvironmentHistory&, const QString &wsName);
-  AlgorithmHistoryWindow(QWidget *parent,const Mantid::API::Workspace_sptr);
+  AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
 private slots:
   void updateAll( QString algName,int algVersion,int nIndex);
