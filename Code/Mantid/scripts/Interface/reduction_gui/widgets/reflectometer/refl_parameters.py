@@ -43,7 +43,7 @@ class ParametersReflWidget(BaseWidget):
         self._summary.parameters_q_range_from_value.setValidator(QtGui.QDoubleValidator(self._summary.parameters_q_range_from_value))
         self._summary.parameters_q_range_to_value.setValidator(QtGui.QDoubleValidator(self._summary.parameters_q_range_to_value))
         self._summary.parameters_q_range_nbr_bins_value.setValidator(QtGui.QIntValidator(self._summary.parameters_q_range_nbr_bins_value))
-        self._summary.parameters_q_range_bin_size_value.setValidator(QtGui.QIntValidator(self._summary.parameters_q_range_bin_size_value))
+        self._summary.parameters_q_range_bin_size_value.setValidator(QtGui.QDoubleValidator(self._summary.parameters_q_range_bin_size_value))
 
         # Event connections
         self.connect(self._summary.parameters_q_range_automatic_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_automatic_clicked)
@@ -55,12 +55,112 @@ class ParametersReflWidget(BaseWidget):
         self.connect(self._summary.parameters_q_range_log_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_log_clicked)
         self.connect(self._summary.parameters_output_directory_browse_button, QtCore.SIGNAL("clicked()"), self._browse_output_directory_clicked)
 
-        self.connect(self._summary.parameters_q_range_from_value, QtCore.SIGNAL("textChanged(QString)"), self._check_for_missing_fields)
-        self.connect(self._summary.parameters_q_range_to_value, QtCore.SIGNAL("textChanged(QString)"), self._check_for_missing_fields)
-        self.connect(self._summary.parameters_q_range_nbr_bins_value, QtCore.SIGNAL("textChanged(QString)"), self._check_for_missing_fields)
-        self.connect(self._summary.parameters_q_range_bin_size_value, QtCore.SIGNAL("textChanged(QString)"), self._check_for_missing_fields)
+        self.connect(self._summary.parameters_q_range_from_value, QtCore.SIGNAL("textChanged(QString)"), self._text_field_changed_event)
+        self.connect(self._summary.parameters_q_range_to_value, QtCore.SIGNAL("textChanged(QString)"), self._text_field_changed_event)
+        self.connect(self._summary.parameters_q_range_nbr_bins_value, QtCore.SIGNAL("textChanged(QString)"), self._text_field_changed_event)
+        self.connect(self._summary.parameters_q_range_bin_size_value, QtCore.SIGNAL("textChanged(QString)"), self._text_field_changed_event)
+
+    def _text_field_changed_event(self):
+        """
+            This is reached by the various text field when user change value
+        """
+        self._check_for_missing_fields()
+        self._recalculate_nbr_q_or_bin_size_labels()
+
+    def _calculate_nbr_bins(self, bLinear, from_bin, to_bin, bin_size):
+        """
+            This function will return the number of bins according to the type of binning (linear/log) and
+            the from_bin and to_bin values
+        """
+        
+        from_bin = float(from_bin)
+        to_bin = float(to_bin)
+        bin_size = float(bin_size)
+        
+        if bLinear:
+            _delta = abs(to_bin - from_bin)
+            _nbr_bins = _delta / bin_size
+        else:
+            _nbr_bins=0
+            _x1=0
+            while _x1 < to_bin:
+                _x1 = (1.+bin_size)*from_bin
+                from_bin=_x1
+                _nbr_bins+=1
+        
+        #if _nbr_bins is not an integer, takes the next value
+        return int(math.ceil(_nbr_bins))
+    
+    def _calculate_bin_size(self, bLinear, from_bin, to_bin, nbr_bins):
+        """
+            This will calculate the bin size according to the type of binning (linear/log) and
+            the from_bin and to_bin values
+        """
+        from_bin = float(from_bin)
+        to_bin = float(to_bin)
+        nbr_bins = float(nbr_bins)
+        
+        if bLinear:
+            _bin_size = (to_bin - from_bin) / nbr_bins
+        else:
+            _bin_size = pow(to_bin/from_bin,1./nbr_bins)-1
+        return round(_bin_size,4)
+
+    def _recalculate_nbr_q_or_bin_size_labels(self):
+        """
+            This recalculates the bin size if the user enters the number of Q bins
+            and the nbr of bins if the user select the bin size
+        """
+        
+        from_bin = self._summary.parameters_q_range_from_value.text()
+        to_bin = self._summary.parameters_q_range_to_value.text()
+        
+        if (from_bin == '' or to_bin == ''):
+            if self._summary.parameters_q_bin_size_switch.isChecked(): #Q bin size is selected
+                self._summary.parameters_q_range_bin_size_number_of_q_label.setText("N/A")
+            else:
+                self._summary.parameters_q_range_nbr_bins_bin_size_value.setText("N/A")
+        else:    
+            if self._summary.parameters_q_range_linear_switch.isChecked():
+                bLinear = True
+            else:
+                bLinear = False
+        
+            if self._summary.parameters_q_bin_size_switch.isChecked(): #Q bin size is selected
+                bin_size = self._summary.parameters_q_range_bin_size_value.text()
+                if (bin_size != ''): #only if there is a bin size
+                    if float(bin_size) != 0:
+                        nbr_bins = self._calculate_nbr_bins(bLinear, from_bin, to_bin, bin_size)
+                    else:
+                        nbr_bins = 'N/A'
+                else:
+                    nbr_bins = 'N/A'
+                self._summary.parameters_q_range_bin_size_number_of_q_label.setText(str(nbr_bins))
+
+            else:
+                nbr_bins = self._summary.parameters_q_range_nbr_bins_value.text()
+                if (nbr_bins != ''): #only if there is a number of bins
+                    if (int(nbr_bins) != 0):
+                        bin_size = self._calculate_bin_size(bLinear, from_bin, to_bin, nbr_bins)
+                    else:
+                        bin_size = 'N/A'
+                else:
+                    bin_size = 'N/A'
+                self._summary.parameters_q_range_nbr_bins_bin_size_value.setText(str(bin_size))
+            
+            
+            
+                
+
+
+
 
     def _check_for_missing_fields(self):
+        """
+            This just checks if any of the mandatory field is missing and if it's empty
+            shows a red start on its right side to show the user that a value should be 
+            entered here
+        """
 
         #auto/manual mode
         if self._summary.parameters_q_range_manual_switch.isChecked():
@@ -197,12 +297,14 @@ class ParametersReflWidget(BaseWidget):
         """
         self._summary.parameters_q_range_linear_switch.setChecked(True)
         self._summary.parameters_q_range_log_switch.setChecked(False)
-        
+        self._recalculate_nbr_q_or_bin_size_labels()
+
     def _q_range_log_clicked(self, is_clicked):
         """
             Reached by the Q range log switch
         """
         self._summary.parameters_q_range_linear_switch.setChecked(False)
         self._summary.parameters_q_range_log_switch.setChecked(True)
+        self._recalculate_nbr_q_or_bin_size_labels()
         
   
