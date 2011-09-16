@@ -1386,16 +1386,18 @@ class SaveIqAscii(ReductionStep):
             for output_ws in output_list:
                 if mtd.workspaceExists(output_ws):
                     proc_xml = ""
-                    if self._process is not None:
+                    if self._process is not None and os.path.isfile(self._process):
                         proc = open(self._process, 'r')
                         proc_xml = proc.read()
+                    elif self._process is not None:
+                        log_text += "Could not read %s\n" % self._process
                         
                     filename = os.path.join(output_dir, output_ws+'.txt')
                     SaveAscii(Filename=filename, InputWorkspace=output_ws, Separator="\t", CommentIndicator="# ", WriteXError=True)
                     filename = os.path.join(output_dir, output_ws+'.xml')
                     SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws, Process=proc_xml)
                     
-                    log_text = "I(Q) saved in %s" % (filename)
+                    log_text += "I(Q) saved in %s" % (filename)
         
         if reducer._two_dim_calculator is not None:
             if hasattr(reducer._two_dim_calculator, "get_output_workspace"):

@@ -40,9 +40,10 @@ class EQSANSReductionScripter(BaseReductionScripter):
             f.close()
         else:
             xml_process = os.path.join(self._output_directory, "EQSANS_process.xml")
+            xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
-        script += "SaveIqAscii(process=\"%s\")\n" % xml_process
+        script += "SaveIqAscii(process=%r)\n" % xml_process
         script += "Reduce1D()\n"
         
         return script
