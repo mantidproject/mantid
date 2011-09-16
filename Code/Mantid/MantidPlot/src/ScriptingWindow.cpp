@@ -562,7 +562,11 @@ void ScriptingWindow::initMenus()
   m_window_menu->addAction(m_always_on_top);
   //Hide
   m_hide = new QAction(tr("&Hide"), this);
+#ifdef __APPLE__
+  m_hide->setShortcut(tr("Ctrl+3")); // F3 is used by the window manager on Mac
+#else
   m_hide->setShortcut(tr("F3"));
+#endif
   // Note that we channel the hide through the parent so that we can save the geometry state
   connect(m_hide, SIGNAL(activated()), this, SIGNAL(hideMe()));
   m_window_menu->addAction(m_hide);

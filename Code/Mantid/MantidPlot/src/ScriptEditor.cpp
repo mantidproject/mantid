@@ -160,6 +160,8 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
 
   m_zoomIn = new QAction(("Zoom &In"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
+  // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
+  // it doesn't seem to work for me
   m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
   m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
   connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
@@ -201,6 +203,12 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   }
   else
   {
+#ifdef __APPLE__
+    // Make all fonts 2 points bigger on the Mac because otherwise they're tiny!
+    zoomIn(2);
+#endif
+
+
     m_marker_handle = markerDefine(QsciScintilla::RightArrow);
     setMarginLineNumbers(1,true);
     //Editor properties

@@ -12680,11 +12680,19 @@ void ApplicationWindow::createActions()
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
+#ifdef __APPLE__
+  actionShowScriptWindow->setShortcut(tr("Ctrl+3")); // F3 is used by the window manager on Mac
+#else
   actionShowScriptWindow->setShortcut(tr("F3"));
+#endif
   actionShowScriptWindow->setToggleAction(true);
   connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
   actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
+#ifdef __APPLE__
+  actionShowScriptInterpreter->setShortcut(tr("Ctrl+4")); // F4 is used by the window manager on Mac
+#else
   actionShowScriptInterpreter->setShortcut(tr("F4"));
+#endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
 #endif
@@ -12936,7 +12944,6 @@ void ApplicationWindow::translateActionsStrings()
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));
   actionShowScriptWindow->setToolTip(tr("Script Window"));
-  actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
 
   actionCustomActionDialog->setMenuText(tr("Manage Custom Menus..."));
