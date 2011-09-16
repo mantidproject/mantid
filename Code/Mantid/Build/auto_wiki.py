@@ -9,24 +9,20 @@ import datetime
 import subprocess
 import commands
 import sys
+import fnmatch
 
 mantid_initialized = False
-#
-## Edit page
-#page = site.Pages['Commons:Sandbox']
-#text = page.edit()
-#print 'Text in sandbox:', text.encode('utf-8')
-#page.save(text + u'\nExtra data', summary = 'Test edit')
-#
-## Printing imageusage
-#image = site.Images['Example.jpg']
-#print 'Image', image.name.encode('utf-8'), 'usage:'
-#for page in image.imageusage():
-#    print 'Used:', page.name.encode('utf-8'), '; namespace', page.namespace
-#    print 'Image info:', image.imageinfo
-#
-## Uploading a file
-#site.upload(open('file.jpg'), 'destination.jpg', 'Image description')
+file_matches = []
+
+#======================================================================
+def intialize_files():
+    """ Get path to every header file """
+    global file_matches
+    parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
+    file_matches = []
+    for root, dirnames, filenames in os.walk(parent_dir):
+      for filename in fnmatch.filter(filenames, '*.h'):
+          file_matches.append(os.path.join(root, filename))
 
 #======================================================================
 def initialize(args):

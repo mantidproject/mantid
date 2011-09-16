@@ -22,7 +22,7 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void CreateMDWorkspace::initDocs()
   {
-    this->setWikiSummary(" Creates an empty MDEventWorkspace with a given number of dimensions. ");
+    this->setWikiSummary("Creates an empty MDEventWorkspace with a given number of dimensions. ");
     this->setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
     this->setWikiDescription(""
         "This algorithm creates an empty MDEventWorkspace from scratch. "
