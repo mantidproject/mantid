@@ -46,48 +46,48 @@ public:
   void testTCcast(){
       TableColTestHelper<float> Tcf(1.);
       float frez=(float)Tcf[0];
-      TSM_ASSERT_DELTA("float not converted",1.,frez,1.e-5);
+      TSM_ASSERT_DELTA("float not converted, type: "+std::string(typeid(frez).name()),1.,frez,1.e-5);
 
       TableColTestHelper<double> Tdr(1.);
       double drez=(double)Tcf[0];
-      TSM_ASSERT_DELTA("double not converted",1.,drez,1.e-5);
+      TSM_ASSERT_DELTA("double not converted, type: "+std::string(typeid(drez).name()),1.,drez,1.e-5);
 
       TableColTestHelper<int> Tci(1);
       int irez=(int)Tci[0];
-      TSM_ASSERT_EQUALS("integer not converted",1,irez);
+      TSM_ASSERT_EQUALS("integer not converted, type: "+std::string(typeid(irez).name()),1,irez);
 
       TableColTestHelper<int64_t> Tcl(1);
       int64_t lrez=(int64_t)Tcl[0];
-      TSM_ASSERT_EQUALS("int64_t not converted",1,lrez);
+      TSM_ASSERT_EQUALS("int64_t not converted, type: "+std::string(typeid(lrez).name()),1,lrez);
 
       TableColTestHelper<long> Tcls(1);
       long  lsrez = (long)Tcls[0];
-      TSM_ASSERT_EQUALS("long not converted",1,lsrez);
+      TSM_ASSERT_EQUALS("long not converted, type: "+std::string(typeid(lsrez).name()),1,lsrez);
 
      TableColTestHelper<size_t> Tcst(1);
       size_t  strez = (size_t)Tcst[0];
-      TSM_ASSERT_EQUALS("size_t not converted",1,lsrez);
+      TSM_ASSERT_EQUALS("size_t not converted, type: "+std::string(typeid(strez).name()),1,lsrez);
 
 //
       TableColTestHelper<float> Tcf2(-1.);
       frez=(float)Tcf2[0];
-      TSM_ASSERT_DELTA("float not converted",-1.,frez,1.e-5);
+      TSM_ASSERT_DELTA("float not converted, type: "+std::string(typeid(float).name()),-1.,frez,1.e-5);
 
       TableColTestHelper<double> Tdr2(-1.);
       drez=(double)Tcf2[0];
-      TSM_ASSERT_DELTA("double not converted",-1.,drez,1.e-5);
+      TSM_ASSERT_DELTA("double not converted, type: "+std::string(typeid(double).name()),-1.,drez,1.e-5);
 
       TableColTestHelper<int> Tci2(-1);
       irez=(int)Tci2[0];
-      TSM_ASSERT_EQUALS("integer not converted",-1,irez);
+      TSM_ASSERT_EQUALS("integer not converted, type: "+std::string(typeid(int).name()),-1,irez);
 
       TableColTestHelper<int64_t> Tcl2(-1);
       lrez=(int64_t)Tcl2[0];
-      TSM_ASSERT_EQUALS("int64_t not converted",-1,lrez);
+      TSM_ASSERT_EQUALS("int64_t not converted, type: "+std::string(typeid(frez).name()),-1,lrez);
 
       TableColTestHelper<long> Tcls2(-1);
       lsrez = (long)Tcls2[0];
-      TSM_ASSERT_EQUALS("long not converted",-1,lsrez);
+      TSM_ASSERT_EQUALS("long not converted, type: "+std::string(typeid(long).name()),-1,lsrez);
 
  
 
