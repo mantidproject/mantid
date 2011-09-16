@@ -14,6 +14,12 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QTextStream>
+#include <QTemporaryFile>
+#include <QDir>
+
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -163,15 +169,13 @@ AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(t
 AlgHistScriptButton::~AlgHistScriptButton()
 {
 }
-
-AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const std::vector<AlgorithmHistory> &algHist,const EnvironmentHistory& envHist):
-  MantidDialog(parent),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL)
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const Mantid::API::Workspace_sptr wsptr):
+MantidDialog(parent),m_algHist(wsptr->getHistory().getAlgorithmHistories()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_wsName(wsptr->getName().c_str())
 {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(400);
   setMinimumWidth(570);
   setGeometry(50,150,540,380); 
-
 
   //Create a tree widget to display the algorithm names in the workspacehistory
   m_Historytree = new AlgHistoryTreeWidget(this);
@@ -196,7 +200,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const std::vector
   //Create a GroupBox to display exec date,duration
   if(!m_execSumGrpBox)m_execSumGrpBox=createExecSummaryGrpBox();
   //Create a Groupbox to display environment details
-  if(!m_envHistGrpBox)m_envHistGrpBox=createEnvHistGrpBox(envHist);
+  if(!m_envHistGrpBox)m_envHistGrpBox=createEnvHistGrpBox(wsptr->getHistory().getEnvironmentHistory());
 
   QHBoxLayout *environmentLayout = new QHBoxLayout;
   environmentLayout->addWidget(m_execSumGrpBox, 1);
@@ -288,99 +292,7 @@ void AlgorithmHistoryWindow::handleException( const std::exception& e )
 {
   QMessageBox::critical(0,"Mantid-Error",QString::fromStdString(e.what()));
 }
-QString AlgorithmHistoryWindow::generateScript()
-{
-  QString script;
 
-  std::string algParam("");
-  std::string tempScript("");
-  std::vector<PropertyHistory>algHistProp;
-  IAlgorithm_sptr  ialg_Sptr;
-	
-  typedef std::map<size_t,std::string> orderedHistMap;
-  orderedHistMap ordMap;
-	
-  //getting the properties from the algorithmhistory
-  for (std::vector <AlgorithmHistory>::const_iterator algHistIter=m_algHist.begin( );
-       algHistIter!=m_algHist.end();algHistIter++)
-  {
-    algHistProp=(*algHistIter).getProperties();
-    const std::string algName=(*algHistIter).name();
-    const int nVersion=(*algHistIter).version();
-    size_t nexecCount=(*algHistIter).execCount();
-    //creating an unmanaged instance of the selected algorithm
-    //this is bcoz algorith history is giving dynamically generated workspaces for some 
-    //algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
-    //To eliminate the dynamically generated parameters unmanged instances created and compared with it.
-						
-    ialg_Sptr= AlgorithmManager::Instance().createUnmanaged(algName,nVersion);
-    if(ialg_Sptr)
-    {	
-      ialg_Sptr->initialize();
-    }
-    //iterating through the properties
-    for (std::vector<PropertyHistory>::const_iterator propIter = algHistProp.begin();
-	 propIter != algHistProp.end(); ++propIter )
-    { 
-      std::string name= (*propIter).name();
-      std::string value=(*propIter).value();
-      const unsigned int direction = (*propIter).direction();
-      bool bdefault=propIter->isDefault();
-      bool outputWkspace(false);
-      if( ialg_Sptr->existsProperty(name) && direction == Mantid::Kernel::Direction::Output )
-      {
-        Property *p = ialg_Sptr->getProperty(name);
-        if( dynamic_cast<IWorkspaceProperty*>(p) ) outputWkspace = true;
-      }
-
-      //if it's not a default property  add it to 
-      //algorithm parameters to form the script
-      if(!bdefault)
-      {
-        //if the property name obtained by unmanaged instance of the algorithm
-        //is same as the algorithm history property add it to algParam string
-        //to generate script
-        if( (algName == "Load" || ialg_Sptr->existsProperty(name) ) &&
-          (direction == Direction::Input || direction == Direction::InOut || outputWkspace) 
-          )
-        {
-          std::string sanitisedname=sanitizePropertyName(name);
-          algParam+=sanitisedname;
-          algParam+="='";//"=\"";
-          algParam+=value;
-          algParam+="',";//"\",";
-        }
-      }
-
-    } //end of properties loop
-
-    //erasing the last "," from the parameter list
-    //as concatenation is done in loop last "," is erasing 
-    std::string::size_type nIndex = algParam.find_last_of(",");
-    if(nIndex != std::string::npos )
-    {
-      algParam=algParam.erase(nIndex);
-    }
-    //script string
-    tempScript=tempScript+algName+"(";
-    tempScript=tempScript+algParam+")";
-    tempScript+="\n";
-    //string str=tempScript.toStdString();
-    // writing to map for ordering by execution count
-    ordMap.insert(orderedHistMap::value_type(nexecCount,tempScript));
-    tempScript.clear();
-    algParam.clear();
-
-  }//end of algorithm history for loop
-
-  orderedHistMap::iterator m3_pIter;
-  for (m3_pIter=ordMap.begin( );m3_pIter!=ordMap.end( );m3_pIter++)
-  {
-    QString qtemp=QString::fromStdString(m3_pIter->second);
-    script+=qtemp;
-  }
-  return script;
-}
 void AlgorithmHistoryWindow::writeToScriptFile()
 {
   QString prevDir = MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -398,38 +310,13 @@ void AlgorithmHistoryWindow::writeToScriptFile()
   // An empty string indicates they clicked cancel
   if( filePath.isEmpty() ) return;
   
-  QFile scriptfile(filePath);
-  if (!scriptfile.open(QIODevice::WriteOnly | QIODevice::Text))
-  {
-    QMessageBox::information(this, "Algorithm History", "Unable to write to file. Check you have write permission on this location.");
-    return;
-  }
+  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().create("GeneratePythonScript");
+  genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
+  genPyScript->setPropertyValue("Filename",filePath.toStdString());
 
-  QString script = generateScript();
-  QTextStream out(&scriptfile);
-  out<<"######################################################################\n";
-  out<<"#Python Script Generated by Algorithm History Display \n";
-  out<<"######################################################################\n";
-  out<<script<<"\n";
-  scriptfile.close();
-  //save the file path
+  genPyScript->execute();
+
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
-}
-std::string AlgorithmHistoryWindow::sanitizePropertyName(const std::string & name)
-{
-  std::string arg;
-  std::string::const_iterator sIter = name.begin();
-  std::string::const_iterator sEnd = name.end();
-  for( ; sIter != sEnd; ++sIter )
-  {
-    int letter = (int)(*sIter);
-    if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
-	(letter >= 65 && letter <= 90) )
-    {
-      arg.push_back(*sIter);
-    }
-  }
-  return arg;
 }
 
 void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
@@ -533,14 +420,45 @@ void AlgorithmHistoryWindow::updateExecSummaryGrpBox(const QString& algName,cons
 }
 void AlgorithmHistoryWindow::copytoClipboard()
 {	
-  QString comments ("######################################################################\n"
-		    "#Python Script Generated by Algorithm History Display \n"
-		    "######################################################################\n");
-  QString script = generateScript();
+  // We retrieve a string containing the script by outputting the result of GeneratePythonScript
+  // to a temp file, and parsing it from there.
+
+  // QTemporaryFile will not allow its files to have extensions, and the GeneratePythonScript
+  // validator must contains a list of accepted extensions.  For that reason we choose the
+  // workaround of: 
+  // - create a temp file through QTemporaryFile;
+  // - take its filepath and append ".py" to it;
+  // - use the filepath to create our own temp file, which we will handle the deletion of.
+
+  QTemporaryFile temp;
+  temp.open();
+  temp.close();
+
+  std::string tempFilename = temp.fileName().toStdString() + ".py";
+
+  // Create and run algorithm.
+  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().create("GeneratePythonScript");
+  genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
+  genPyScript->setPropertyValue("Filename",tempFilename);
+  genPyScript->execute();
+
+  QString script;
+  std::ifstream file(tempFilename, std::ifstream::in);
+  std::stringstream buffer;
+
+  // Retrieve script from file.
+  buffer << file.rdbuf();
+  std::string contents(buffer.str());
+  script.append(contents.c_str());
+
+  file.close();
+  remove(tempFilename.c_str());
+
+  // Send to clipboard.
   QClipboard *clipboard = QApplication::clipboard();
-  if(clipboard)
-  {	QString clipboardData=comments+script;
-    clipboard->setText(clipboardData);
+  if(NULL != clipboard)
+  {	
+    clipboard->setText(script);
   }
 }
 

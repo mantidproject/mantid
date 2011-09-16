@@ -105,8 +105,9 @@ class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
   void updateAlgorithmHistoryWindow(QString algName);
 public:
   AlgorithmHistoryWindow(QWidget *parent) : MantidQt::API::MantidDialog(parent){}
-  AlgorithmHistoryWindow(QWidget *parent,const std::vector<Mantid::API::AlgorithmHistory>&alghist,
-			 const Mantid::Kernel::EnvironmentHistory&);
+  //AlgorithmHistoryWindow(QWidget *parent,const std::vector<Mantid::API::AlgorithmHistory>&alghist,
+  //			 const Mantid::Kernel::EnvironmentHistory&, const QString &wsName);
+  AlgorithmHistoryWindow(QWidget *parent,const Mantid::API::Workspace_sptr);
   ~AlgorithmHistoryWindow();
 private slots:
   void updateAll( QString algName,int algVersion,int nIndex);
@@ -123,8 +124,8 @@ private:
   void updateExecSummaryGrpBox(const QString& algName,const int & version,int index);
   void updateAlgHistoryProperties(QString algName,int version,int pos);
   void concatVersionwithName(QString& algName,const int version);
-  QString generateScript();
-  std::string sanitizePropertyName(const std::string & name);
+  //QString generateScript();
+  //std::string sanitizePropertyName(const std::string & name);
   void handleException( const std::exception& e );
   static Mantid::Kernel::Logger& g_log;
 	
@@ -135,6 +136,7 @@ private:
   AlgHistoryProperties * m_histPropWindow; 
   AlgExecSummaryGrpBox *m_execSumGrpBox ;
   AlgEnvHistoryGrpBox * m_envHistGrpBox;
+  QString m_wsName;
 };
 
 class AlgHistoryProperties: public QObject

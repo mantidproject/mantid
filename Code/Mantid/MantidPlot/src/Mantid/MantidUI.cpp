@@ -527,16 +527,17 @@ void MantidUI::showAlgorithmHistory()
 {
   QString wsName=getSelectedWorkspaceName();
   Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
-  if(wsptr)
+  if(NULL != wsptr) 
   {
-    WorkspaceHistory wsHistory= wsptr->getHistory();
-    const std::vector<AlgorithmHistory> & algHistory=wsHistory.getAlgorithmHistories();
-    const Mantid::Kernel::EnvironmentHistory &envHistory = wsHistory.getEnvironmentHistory();
-    //create a  window to display Algorithmic History
-    if(!algHistory.empty())
+    // If the workspace has any AlgorithHistory ...
+    if(!wsptr->getHistory().getAlgorithmHistories().empty())
     {
-      AlgorithmHistoryWindow *palgHist= new AlgorithmHistoryWindow(m_appWindow,algHistory,envHistory);
-      if(palgHist)palgHist->show();
+      // ... create and display the window.
+      AlgorithmHistoryWindow *palgHist = new AlgorithmHistoryWindow(m_appWindow,wsptr);
+      if(NULL != palgHist)
+      {
+          palgHist->show();
+      }
     }
   }
   else
