@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/FlatBackground.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
+	src/GeneratePythonScript.cpp
 	src/GetDetectorOffsets.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
@@ -243,6 +244,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
+	inc/MantidAlgorithms/GeneratePythonScript.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
@@ -398,6 +400,7 @@ set ( TEST_FILES
 	test/FindPeaksTest.h
 	test/FlatBackgroundTest.h
 	test/FlatPlateAbsorptionTest.h
+	test/GeneratePythonScriptTest.h
 	test/GetDetectorOffsetsTest.h
 	test/GetEiTest.h
 	test/GhostCorrectionTest.h
