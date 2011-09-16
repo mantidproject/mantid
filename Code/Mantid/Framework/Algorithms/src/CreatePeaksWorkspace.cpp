@@ -37,6 +37,7 @@ namespace Algorithms
   {
     this->setWikiSummary("Create an empty PeaksWorkspace.");
     this->setOptionalMessage("Create an empty PeaksWorkspace.");
+    this->setWikiDescription("Create an empty PeaksWorkspace. Use [[LoadIsawPeaks]] or [[FindPeaksMD]] to create a peaks workspace with peaks.");
   }
 
   //----------------------------------------------------------------------------------------------
