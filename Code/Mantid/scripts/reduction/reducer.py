@@ -297,64 +297,6 @@ def validate_step(f):
                     return "%s applied" % algorithm.name()
             return f(reducer, _AlgorithmStep())
                     
-        elif False and isinstance(algorithm, types.FunctionType):
-            # If the algorithm is a function, in which case
-            # we expect it to produce an algorithm proxy
-            class _AlgorithmStep(ReductionStep):
-                def __init__(self):
-                    self.algm = algorithm
-                def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
-                    """
-                        Create a new instance of the requested algorithm object, 
-                        set the algorithm properties replacing the input and output
-                        workspaces.
-                        The execution will work for any combination of mandatory/optional
-                        properties. 
-                        @param reducer: Reducer object managing the reduction
-                        @param inputworkspace: input workspace name [optional]
-                        @param outputworkspace: output workspace name [optional]
-                    """
-                    if outputworkspace is None:
-                        outputworkspace = inputworkspace 
-                    kwargs['execute'] = False
-                    proxy = self.algm(*args, **kwargs)
-                    if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
-                        raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
-                    _algm = proxy._getHeldObject()
-                    
-                    # The inspect module has changed in python 2.6 
-                    if sys.version_info[0]==2 and sys.version_info[1]<6:
-                        argspec = inspect.getargspec(self.algm)[0] 
-                    else:
-                        argspec = inspect.getargspec(self.algm).args     
-                    
-                    # Go through provided arguments
-                    if len(args)>len(argspec):
-                        raise RuntimeError, "Could not get call signature for %s" % _algm.name()
-                    
-                    for i in range(len(args)):
-                        if argspec[i] == "InputWorkspace":
-                            _algm.setPropertyValue("InputWorkspace", inputworkspace)
-                        elif argspec[i] == "OutputWorkspace":
-                            _algm.setPropertyValue("OutputWorkspace", outputworkspace)                        
-                        else:
-                            _algm.setPropertyValue(argspec[i], args[i])
-                    
-                    # Go through keyword arguments
-                    for key in kwargs:
-                        if key not in proxy.keys():
-                            continue                        
-                        if key == "InputWorkspace":
-                            _algm.setPropertyValue("InputWorkspace", inputworkspace)
-                        elif key == "OutputWorkspace":
-                            _algm.setPropertyValue("OutputWorkspace", outputworkspace)                        
-                        else:
-                            _algm.setPropertyValue(key, kwargs[key])
-                    mantidsimple.execute_algorithm(proxy)
-                    
-                    return "%s\n\t%s" % (self.algm.__name__, self.algm.__doc__)
-                    
-            return f(reducer, _AlgorithmStep())
         else:
             raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
     return validated_f
