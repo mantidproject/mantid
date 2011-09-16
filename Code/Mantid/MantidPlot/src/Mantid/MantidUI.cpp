@@ -762,7 +762,10 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   }
 
   const size_t nrows = indices.empty()? ws->getNumberHistograms() : indices.size();
-  int ncols = 6;
+  // We have ncols columns all of which all have doubles as values except the last ncharcols columns which are strings.
+  int ncols = 7;
+  int ncharcols = 1;
+  // Prepare column names
   QStringList col_names;
   col_names << "Index" << "Spectrum No" << "Detector ID";
   if( include_data )
@@ -770,7 +773,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     ncols += 2;
     col_names << "Data Value" << "Data Error";  
   }
-  col_names << "R" << "Theta" << "Phi";
+  col_names << "R" << "Theta" << "Phi" << "Monitor";
 
   Table* t = new Table(appWindow()->scriptingEnv(), static_cast<int>(nrows), ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
@@ -780,10 +783,11 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     t->setColName(col, col_names[col]);
     t->setColPlotDesignation(col, Table::None);
   }
+  t->setHeaderColType();
 
   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
-  QList<double> col_values;
+  QList<double> col_values; // List of double valued data for one row
   for( size_t row = 0; row < nrows; ++row )
   {
     size_t ws_index = indices.empty() ? row : indices[row];
@@ -799,11 +803,15 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     }
 
     int detID = 0;
+	bool isMon = false;
     double R(0.0), Theta(0.0), Phi(0.0);
     try
     {
       Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(ws_index);
+	 
       detID = det->getID();
+	  // We want to know whether the detector is a monitor
+	  isMon = det->isMonitor();
       // We want the position of the detector relative to the sample
       Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
       pos.getSpherical(R,Theta,Phi);
@@ -815,6 +823,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     {
       detID = 0;
     }
+	// Prepare double valued data for current row
     if (!col_values.isEmpty()) col_values.clear();
     col_values << static_cast<double>(ws_index) <<  static_cast<double>(currentSpec) << static_cast<double>(detID);
     if( include_data )
@@ -822,12 +831,15 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       col_values << ws->readY(ws_index)[0] << ws->readE(ws_index)[0];
     }
     col_values << R << Theta << Phi;
-    for(int col = 0; col < ncols; ++col)
+	// Set column values for current row
+    for(int col = 0; col < ncols-ncharcols; ++col)
     {
       t->setCell(static_cast<int>(row), col, col_values[col]);
     }
+	t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
 
   }
+
   t->showNormal();
   return t;
 }	
