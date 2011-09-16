@@ -57,15 +57,15 @@ void GeneratePythonScript::exec()
         throw Exception::FileError("Unable to create file: " , filename);
     }
 
-    // Get the algorithm histories of the workspace and then loop through them.
+    // Get the algorithm histories of the workspace.
     const WorkspaceHistory wsHistory = ws->getHistory();
-    std::vector<AlgorithmHistory> algHistories = wsHistory.getAlgorithmHistories();
-    std::vector<AlgorithmHistory>::iterator algHistIter = algHistories.begin();
-
+    
     // Cycle through the AlgorithHistory objects of the workspace, create a string for each one,
     // and then add them along with their order to a map.
+    std::vector<AlgorithmHistory> algHistories = wsHistory.getAlgorithmHistories();
+    std::vector<AlgorithmHistory>::iterator algHistIter = algHistories.begin();
     std::map<size_t,std::string> orderedHistMap;
-    for(algHistIter; algHistIter != algHistories.end(); ++algHistIter)
+    for( ; algHistIter != algHistories.end(); ++algHistIter)
     {
         orderedHistMap.insert(std::map<size_t,std::string>::value_type(
             algHistIter->execCount(),
@@ -102,7 +102,6 @@ std::string GeneratePythonScript::genAlgString(const API::AlgorithmHistory &algH
     // Get the details of this algorithm history.
     const std::string name = algHist.name();
     const int version = algHist.version();
-    const size_t execCount = algHist.execCount();
 
     // Create an unmanaged version of the algorithm, with with we can compare the parameters later.
     const IAlgorithm_sptr ialg_Sptr = AlgorithmManager::Instance().createUnmanaged(name,version);
@@ -116,7 +115,7 @@ std::string GeneratePythonScript::genAlgString(const API::AlgorithmHistory &algH
     std::vector<Kernel::PropertyHistory> props = algHist.getProperties();
     std::vector<Kernel::PropertyHistory>::iterator propsIter = props.begin();
 
-    for(propsIter; propsIter != props.end(); ++propsIter)
+    for( ; propsIter != props.end(); ++propsIter)
     {
         std::string paramString = genParamString(*propsIter, ialg_Sptr, name);
         

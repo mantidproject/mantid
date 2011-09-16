@@ -80,7 +80,8 @@ public:
         TS_ASSERT( alg.isExecuted() );
 
         // Read in the file, and parse each line into a vector of strings.
-        std::ifstream file(alg.getProperty("Filename"), std::ifstream::in);
+        std::string filename = alg.getProperty("Filename");
+        std::ifstream file(filename.c_str(), std::ifstream::in);
         std::vector<std::string> lines;
 
         while (file.good())
@@ -95,7 +96,7 @@ public:
 
         int lineCount = 0;
 
-        for(lineIter; lineIter != lines.end(); ++lineIter) 
+        for( ; lineIter != lines.end(); ++lineIter) 
         {
             TS_ASSERT_EQUALS((*lineIter),result[lineCount]);
             lineCount++;
