@@ -73,7 +73,7 @@ public:
     TableColumn(){
         int length = sizeof(Type);
         std::string name = std::string(typeid(Type).name());
-        if((name.find("int")!=std::string::npos)||(name.find("long")!=std::string::npos)){
+        if((name.find("i")!=std::string::npos)||(name.find("l")!=std::string::npos)){
             if(length==4){
                 this->conversion_case=-4;
                 this->m_type=="int";
@@ -83,11 +83,11 @@ public:
                 this->m_type=="int64";
             }
         }
-        if(name.find("float")!=std::string::npos){
+        if(name.find("f")!=std::string::npos){
             this->conversion_case=4;
             this->m_type ="float";
         }
-        if(name.find("double")!=std::string::npos){
+        if(name.find("d")!=std::string::npos){
             this->conversion_case=8;
             this->m_type ="double";
         }
