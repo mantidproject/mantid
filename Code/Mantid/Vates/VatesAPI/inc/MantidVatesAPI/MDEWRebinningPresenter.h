@@ -112,6 +112,8 @@ namespace Mantid
       double m_lengthB2;
       /// length b3
       double m_lengthB3;
+      /// ForceOrthogonal coords
+      bool m_ForceOrthogonal;
     };
   }
 }

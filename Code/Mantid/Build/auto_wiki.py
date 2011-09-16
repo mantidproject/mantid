@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
-    # Write out for next time
+    # Write out config for next time
     config = ConfigParser.ConfigParser()
     config.add_section("login")
     config.set("login", "username", args.username)

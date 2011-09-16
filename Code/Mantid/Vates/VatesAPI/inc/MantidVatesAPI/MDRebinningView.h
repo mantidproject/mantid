@@ -48,6 +48,7 @@ namespace Mantid
       virtual double getLengthB1() const = 0;
       virtual double getLengthB2() const = 0;
       virtual double getLengthB3() const = 0;
+      virtual bool getForceOrthogonal() const = 0;
       virtual const char* getAppliedGeometryXML() const = 0;
       virtual void updateAlgorithmProgress(double) = 0;
       virtual ~MDRebinningView(){}

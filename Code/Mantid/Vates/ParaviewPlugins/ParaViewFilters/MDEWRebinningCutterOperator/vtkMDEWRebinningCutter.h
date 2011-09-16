@@ -88,6 +88,7 @@ public:
   virtual double getLengthB1() const;
   virtual double getLengthB2() const;
   virtual double getLengthB3() const;
+  virtual bool getForceOrthogonal() const { throw std::runtime_error("Not implemented"); }
 
 
 protected:

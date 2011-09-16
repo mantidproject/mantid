@@ -220,6 +220,7 @@ public:
   MOCK_CONST_METHOD0(getLengthB1, double());
   MOCK_CONST_METHOD0(getLengthB2, double());
   MOCK_CONST_METHOD0(getLengthB3, double());
+  MOCK_CONST_METHOD0(getForceOrthogonal, bool());
 };
 
 class MockClipper: public Mantid::VATES::Clipper

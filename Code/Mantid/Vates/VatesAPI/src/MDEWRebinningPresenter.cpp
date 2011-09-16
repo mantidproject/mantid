@@ -201,6 +201,10 @@ namespace Mantid
         {
           m_request->ask(RecalculateAll);
         }
+        if(m_view->getForceOrthogonal() != m_ForceOrthogonal)
+        {
+          m_request->ask(RecalculateAll);
+        }
         //Update coord transform fields.
         m_origin = temp_origin;
         m_b1 = temp_b1;
@@ -208,6 +212,7 @@ namespace Mantid
         m_lengthB1 = temp_length_b1;
         m_lengthB2 = temp_length_b2;
         m_lengthB3 = temp_length_b3;
+        m_ForceOrthogonal = m_view->getForceOrthogonal();
       }
 
       if(m_view->getAppliedGeometryXML() != m_serializer.getWorkspaceGeometry())
@@ -282,6 +287,7 @@ namespace Mantid
           V3D b3 = m_b1.cross_prod(m_b2);
           hist_alg.setPropertyValue("Origin", VMD(m_origin).toString(",") );
           hist_alg.setProperty("AxisAligned", false);
+          hist_alg.setProperty("ForceOrthogonal", m_ForceOrthogonal );
           if(sourceGeometry.hasXDimension())
           {
             hist_alg.setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));

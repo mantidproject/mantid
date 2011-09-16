@@ -200,7 +200,8 @@ m_presenter(new NullRebinningPresenter()),
   m_thresholdMax(1e9),
   m_thresholdMin(0),
   m_thresholdMethodIndex(0),
-  m_origin(0, 0, 0)
+  m_origin(0, 0, 0),
+  m_ForceOrthogonal(true)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
@@ -489,6 +490,15 @@ void vtkRebinningTransformOperator::SetOrigin(double originX, double originY, do
   }
 }
 
+void vtkRebinningTransformOperator::SetForceOrthogonal(bool temp)
+{
+  if(temp != m_ForceOrthogonal)
+  {
+    m_ForceOrthogonal = temp;
+    this->Modified();
+  }
+}
+
 
 Mantid::Kernel::V3D vtkRebinningTransformOperator::getOrigin()
 {
@@ -518,4 +528,8 @@ double vtkRebinningTransformOperator::getLengthB2() const
 double vtkRebinningTransformOperator::getLengthB3() const
 {
   return m_lengthB3;
+}
+bool vtkRebinningTransformOperator::getForceOrthogonal() const
+{
+  return m_ForceOrthogonal;
 }

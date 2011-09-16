@@ -47,6 +47,11 @@ namespace Mantid
       {
       }
 
+      virtual bool getForceOrthogonal() const
+      {
+        return m_adaptee->getForceOrthogonal();
+      }
+
       virtual Mantid::Kernel::V3D getOrigin() const
       {
         return m_adaptee->getOrigin();

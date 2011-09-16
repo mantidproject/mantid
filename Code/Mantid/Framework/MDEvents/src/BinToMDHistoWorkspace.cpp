@@ -102,6 +102,7 @@ namespace MDEvents
 //            "XML string describing the coordinate transformation that converts from the MDEventWorkspace dimensions to the output dimensions.\n");
 //    setPropertyGroup("TransformationXML", "Non-Aligned Binning");
 
+    IPropertySettings * ps = new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "0") ;
     for (size_t i=0; i<4; i++)
     {
       std::string dim(" "); dim[0] = dimChars[i];
@@ -113,16 +114,19 @@ namespace MDEvents
           "  length: length of this dimension in the input space.\n"
           "  number_of_bins: separate 'length' into this many bins\n"
           "Leave blank for NONE." );
-      setPropertySettings(propName, new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "0") );
+      setPropertySettings(propName, ps->clone() );
       setPropertyGroup(propName, "Non-Aligned Binning");
     }
     declareProperty(new PropertyWithValue<std::string>("Origin","",Direction::Input),
         "Origin (in the input workspace) that corresponds to (0,0,0) in the output MDHistoWorkspace.\n"
         "Enter as a comma-separated string." );
-    setPropertyGroup("Origin", "Non-Aligned Binning");
     declareProperty(new PropertyWithValue<bool>("ForceOrthogonal", false, Direction::Input),
         "Force the input basis vectors to form an orthogonal coordinate system. Only works in 3 dimension!" );
+    // For GUI niceness
+    setPropertyGroup("Origin", "Non-Aligned Binning");
     setPropertyGroup("ForceOrthogonal", "Non-Aligned Binning");
+    setPropertySettings("Origin", ps->clone() );
+    setPropertySettings("ForceOrthogonal", ps->clone() );
 
 
     // --------------- Processing methods and options ---------------------------------------

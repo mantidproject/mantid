@@ -74,6 +74,7 @@ public:
   void SetLengthB2(double length);
   void SetLengthB3(double length);
   void SetOrigin(double originX, double originY, double originZ);
+  void SetForceOrthogonal(bool value);
 
 
   const char* GetInputGeometryXML();
@@ -96,6 +97,7 @@ public:
   virtual double getLengthB1() const;
   virtual double getLengthB2() const;
   virtual double getLengthB3() const;
+  virtual bool getForceOrthogonal() const;
 
 protected:
 
@@ -164,6 +166,8 @@ private:
   double m_lengthB2;
   /// length b3
   double m_lengthB3;
+  /// Do we force the basis vectors to be orthogonal?
+  bool m_ForceOrthogonal;
 
 };
 #endif
