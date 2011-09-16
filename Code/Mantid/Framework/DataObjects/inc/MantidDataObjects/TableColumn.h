@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <limits>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -75,25 +76,20 @@ public:
         std::string name = std::string(typeid(Type).name());
         if((name.find("i")!=std::string::npos)||(name.find("l")!=std::string::npos)||
             (name.find("x")!=std::string::npos)){
-            if(length==4){
-                this->conversion_case=-4;
+            if(length==4){                
                 this->m_type=="int";
             }
             if(length==8){
-                this->conversion_case=-8;
                 this->m_type=="int64";
             }
         }
         if(name.find("f")!=std::string::npos){
-            this->conversion_case=4;
             this->m_type ="float";
         }
         if(name.find("d")!=std::string::npos){
-            this->conversion_case=8;
             this->m_type ="double";
         }
         if(this->m_type.empty()){
-            this->conversion_case=0;
             this->m_type=name;
         }
     }
@@ -128,12 +124,12 @@ public:
     /// return a value casted to double; the users responsibility is to be sure, that the casting is possible
     double operator[](size_t i)const
     {
-  /*   try{   
-     return boost::numeric_cast<double>(m_data[i]);
+     try{   
+        return boost::lexical_cast<double>(m_data[i]);
      }catch(...){
-             return std::numeric_limits<double>::quiet_NaN();    
-     }*/
-      const Type *pTp  = &m_data[i];
+        return std::numeric_limits<double>::quiet_NaN();    
+     }
+ /*     const Type *pTp  = &m_data[i];
  
       switch(conversion_case){
          case -8:
@@ -146,7 +142,7 @@ public:
              return    *(reinterpret_cast<const double *>(pTp));
          default:
              return std::numeric_limits<double>::quiet_NaN();    
-     }
+     }*/
 
     }
 
@@ -170,8 +166,7 @@ protected:
 private:
     /// Column data
     std::vector<Type> m_data;
-    friend class TableWorkspace;
-    int conversion_case;
+    friend class TableWorkspace;  
 };
 
 /// Shared pointer to a column with aoutomatic type cast and data type check.
