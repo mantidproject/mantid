@@ -182,51 +182,19 @@ class BeamStopTransmission(BaseTransmission):
 class SubtractDarkCurrent(ReductionStep):
     """
         Subtract the dark current from the input workspace.
-        Works only if the proton charge time series is available from DASlogs.
     """
     def __init__(self, dark_current_file):
-        super(SubtractDarkCurrent, self).__init__()
         self._dark_current_file = dark_current_file
-        self._dark_current_ws = None
         
     def execute(self, reducer, workspace):
         """
             Subtract the dark current from the input workspace.
-            If no timer workspace is provided, the counting time will be extracted
-            from the input workspace.
-            
             @param reducer: Reducer object for which this step is executed
             @param workspace: input workspace
         """
-        # Sanity check
-        if self._dark_current_file is None:
-            raise RuntimeError, "SubtractDarkCurrent called with no defined dark current file"
-
-        # Check whether the dark current was already loaded, otherwise load it
-        # Load dark current, which will be used repeatedly
-        if self._dark_current_ws is None:
-            filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
-            self._dark_current_ws = ReductionStep._create_unique_name(filepath, "dc")
-            #self._dark_current_ws = "__dc_"+extract_workspace_name(filepath)
-            reducer._data_loader.clone(data_file=filepath).execute(reducer, self._dark_current_ws)
-        # Normalize the dark current data to counting time
-        dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration
-        duration = mtd[workspace].getRun()["proton_charge"].getStatistics().duration
-        scaling_factor = duration/dark_duration
-    
-        # Scale the stored dark current by the counting time
-        scaled_dark_ws = "__scaled_dark_current"
-        RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=scaled_dark_ws)
-        Scale(InputWorkspace=scaled_dark_ws, OutputWorkspace=scaled_dark_ws, Factor=scaling_factor, Operation="Multiply")
-        
-        # Perform subtraction
-        Minus(workspace, scaled_dark_ws, workspace)  
-
-        # Clean up 
-        if mtd.workspaceExists(scaled_dark_ws):
-            mtd.deleteWorkspace(scaled_dark_ws)
-        
-        return "Dark current subtracted [%s]" % extract_workspace_name(self._dark_current_file)
+        alg = EQSANSDarkCurrentSubtraction(InputWorkspace=workspace, Filename=self._dark_current_file, OutputWorkspace=workspace,
+                                     ReductionTableWorkspace=reducer.get_reduction_table_name())        
+        return alg.getPropertyValue("OutputMessage")
     
 class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
     """

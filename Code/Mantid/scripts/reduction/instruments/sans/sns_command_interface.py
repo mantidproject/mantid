@@ -22,26 +22,22 @@ from reduction.find_data import find_data
 
 import mantidsimple
 
-def EQSANS(keep_events=True, use_cpp=True):
+def EQSANS(keep_events=True):
     Clear(EqSansReducer)
     ReductionSingleton().set_instrument(sns_instrument.EQSANS())
     NoSolidAngle()
     AzimuthalAverage()
-    ReductionSingleton().set_data_loader(sns_reduction_steps.LoadRun(keep_events=keep_events, is_new=use_cpp))
+    ReductionSingleton().set_data_loader(sns_reduction_steps.LoadRun(keep_events=keep_events))
     
 def FrameSkipping(value=False):
     raise RuntimeError, "The FrameSkipping command is no longer needed and no longer supported" 
-    #ReductionSingleton().set_frame_skipping(value)
     
 def DarkCurrent(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    if True:
-        ReductionSingleton().set_dark_current_subtracter(mantidsimple.EQSANSDarkCurrentSubtraction, 
+    ReductionSingleton().set_dark_current_subtracter(mantidsimple.EQSANSDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
                                                      ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
-    else:
-        ReductionSingleton().set_dark_current_subtracter(sns_reduction_steps.SubtractDarkCurrent(datafile))
 
 def TotalChargeNormalization(normalize_to_beam=True):
     ReductionSingleton().set_normalizer(sns_reduction_steps.Normalize(normalize_to_beam=normalize_to_beam))
