@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "Poco/NumberFormatter.h"
 
 namespace Mantid
 {
@@ -110,14 +111,16 @@ void EQSANSQ2D::exec()
     const double wavelength_max_f2 = getRunProperty(inputWS, "wavelength_max_frame2");
 
     // Frame 1
-    IAlgorithm_sptr cropAlg = createSubAlgorithm("CropWorkspace", .4, .5);
-    cropAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    cropAlg->setProperty<double>("XMin", wavelength_min);
-    cropAlg->setProperty<double>("XMax", wavelength_max);
-    cropAlg->executeAsSubAlg();
+    std::string params = Poco::NumberFormatter::format(wavelength_min, 2)
+        + ",0.1," + Poco::NumberFormatter::format(wavelength_max, 2);
+    IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.4, 0.5);
+    rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    rebinAlg->setPropertyValue("Params", params);
+    rebinAlg->setProperty("PreserveEvents", false);
+    rebinAlg->executeAsSubAlg();
 
     IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .5, .7);
-    qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", cropAlg->getProperty("OutputWorkspace"));
+    qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
@@ -129,14 +132,16 @@ void EQSANSQ2D::exec()
     setProperty("OutputWorkspaceFrame1", result);
 
     // Frame 2
-    cropAlg = createSubAlgorithm("CropWorkspace", .7, .8);
-    cropAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    cropAlg->setProperty<double>("XMin", wavelength_min_f2);
-    cropAlg->setProperty<double>("XMax", wavelength_max_f2);
-    cropAlg->executeAsSubAlg();
+    params = Poco::NumberFormatter::format(wavelength_min_f2, 2)
+        + ",0.1," + Poco::NumberFormatter::format(wavelength_max_f2, 2);
+    rebinAlg = createSubAlgorithm("Rebin", 0.7, 0.8);
+    rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    rebinAlg->setPropertyValue("Params", params);
+    rebinAlg->setProperty("PreserveEvents", false);
+    rebinAlg->executeAsSubAlg();
 
     qxyAlg = createSubAlgorithm("Qxy", .8, 1.0);
-    qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", cropAlg->getProperty("OutputWorkspace"));
+    qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);

@@ -182,6 +182,7 @@ class BeamStopTransmission(BaseTransmission):
 class SubtractDarkCurrent(ReductionStep):
     """
         Subtract the dark current from the input workspace.
+        TODO: get rid of this by putting the EQSANSDarkCurrentSubtraction in the reduction table
     """
     def __init__(self, dark_current_file):
         self._dark_current_file = dark_current_file
@@ -497,22 +498,10 @@ class SensitivityCorrection(BaseSensitivityCorrection):
         if self._efficiency_ws is None:
             self._compute_efficiency(reducer, workspace)
             
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
-            pixel_adj = mtd[workspace].getRun().getProperty("pixel_adj").value
-            Divide(pixel_adj, self._efficiency_ws, pixel_adj)
-            xvec = mtd[wl_adj].dataX(0)
-            yvec = mtd[wl_adj].dataY(0)
-            evec = mtd[wl_adj].dataE(0)
-            for i in range(mtd[wl_adj].getNumberBins()):
-                wl = (xvec[i+1]+xvec[i])/2.0
-                yvec[i] /= 1.0-math.exp(-0.105*wl)
-                evec[i] /= 1.0-math.exp(-0.105*wl)            
-        else:
-            # Modify for wavelength dependency of the efficiency of the detector tubes
-            EQSANSSensitivityCorrection(InputWorkspace=workspace, EfficiencyWorkspace=self._efficiency_ws,     
-                                        Factor=0.95661, Error=0.005, OutputWorkspace=workspace,
-                                        OutputEfficiencyWorkspace="__wl_efficiency")
+        # Modify for wavelength dependency of the efficiency of the detector tubes
+        EQSANSSensitivityCorrection(InputWorkspace=workspace, EfficiencyWorkspace=self._efficiency_ws,     
+                                    Factor=0.95661, Error=0.005, OutputWorkspace=workspace,
+                                    OutputEfficiencyWorkspace="__wl_efficiency")
         
         # Copy over the efficiency's masked pixels to the reduced workspace
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
