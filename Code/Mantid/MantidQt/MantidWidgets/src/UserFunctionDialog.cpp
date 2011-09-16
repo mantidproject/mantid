@@ -78,7 +78,7 @@ void UserFunctionDialog::loadFunctions()
   setFunction ("Base","rint","rint(x)","Round to nearest integer");
   setFunction ("Built-in","Gauss","h*exp(-s*(x-c)^2)");
   setFunction ("Built-in","ExpDecay","h*exp(-x/t)");
-  QFile funFile(QString::fromStdString (Mantid::Kernel::ConfigService::Instance().getPropertiesDir()) + "Mantid.user.functions");
+  QFile funFile(QString::fromStdString (Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) + "Mantid.user.functions");
   if (funFile.exists() && funFile.open(QIODevice::ReadOnly | QIODevice::Text))
   {
     QTextStream in(&funFile);
