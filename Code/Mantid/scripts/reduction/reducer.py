@@ -52,18 +52,15 @@ def validate_loader(f):
             algorithm = algorithm._getHeldObject()
             
         if isinstance(algorithm, types.StringType):
-            raise RuntimeError, "Use an algorithm function you moron"
-        
-        if isinstance(algorithm, types.StringType):
             # If we have a string, assume it's an algorithm name
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
                     self.algorithm = None
                     self._data_file = None
-                    if "filename" in kwargs:
-                        self._data_file = kwargs["filename"]
                 def get_algorithm(self):
                     return self.algorithm
+                def setProperty(self, key, value):
+                    kwargs[key]=value                    
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 
@@ -97,16 +94,16 @@ def validate_loader(f):
                         kwargs[key] = arg
 
                     # Override input and output workspaces
-                    if "Workspace" in propertyOrder:
-                        algorithm.setPropertyValue("Workspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
-                    if "OutputWorkspace" in propertyOrder:
-                        algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
-                    if "Filename" in propertyOrder:
-                        algorithm.setPropertyValue("Filename", data_file)
+                    if "Workspace" in kwargs:
+                        kwargs["Workspace"] = inputworkspace
+                    if "OutputWorkspace" in kwargs:
+                        kwargs["OutputWorkspace"] = inputworkspace
+                    if "Filename" in kwargs:
+                        kwargs["Filename"] = data_file
 
                     if "AlternateName" in kwargs and \
                         kwargs["AlternateName"] in propertyOrder:
-                        algorithm.setPropertyValue(kwargs["AlternateName"], data_file)
+                        kwargs[kwargs["AlternateName"]] = data_file
 
                     # set the properties of the algorithm                    
                     ialg = proxy._getHeldObject()
@@ -115,6 +112,8 @@ def validate_loader(f):
                         ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
                         
                     proxy.execute()
+                    if "OutputMessage" in propertyOrder:
+                        return proxy.getPropertyValue("OutputMessage")
                     return "%s applied" % proxy.name()
             return f(reducer, _AlgorithmStep())
         
@@ -124,10 +123,10 @@ def validate_loader(f):
                 def __init__(self):
                     self.algorithm = algorithm
                     self._data_file = None
-                    if "filename" in kwargs:
-                        self._data_file = kwargs["filename"]
                 def get_algorithm(self):
                     return self.algorithm
+                def setProperty(self, key, value):
+                    kwargs[key]=value                    
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 
@@ -218,6 +217,8 @@ def validate_step(f):
                     self.algorithm = None
                 def get_algorithm(self):
                     return self.algorithm
+                def setProperty(self, key, value):
+                    kwargs[key]=value                    
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 
@@ -268,6 +269,8 @@ def validate_step(f):
                     self.algorithm = algorithm
                 def get_algorithm(self):
                     return self.algorithm
+                def setProperty(self, key, value):
+                    kwargs[key]=value                    
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 

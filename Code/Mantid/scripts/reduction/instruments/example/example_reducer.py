@@ -85,14 +85,18 @@ if __name__ == '__main__':
     r = ExampleReducer()
     
     # Append a fake data file
-    r.append_data_file("~/sample_data.txt")
+    r.append_data_file("AsciiExample.txt")
     
     # Example of a standard algorithm used as a reduction step. Note that InputWorkspace and OutputWorkspace
     # are overwritten by the Reducer. They can be set to Non at this point.
     #r.set_first_step(CreateWorkspace, OutputWorkspace=None, DataX='1', DataY='1', DataE='1')
-    step = ExampleLoader()
-    step.initialize()
-    r.set_first_step(step)
+    
+    #step = ExampleLoader()
+    #step.initialize()
+    #r.set_first_step(step)
+    
+    r.set_first_step(LoadAscii, Filename=None, OutputWorkspace=None)
+    #r._first_step.setProperty("Separator", "Tab")
     
     # Set up an algorithm to be used as part of a reduction step
     alg = mtd._createAlgProxy("Scale")

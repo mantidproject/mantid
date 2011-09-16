@@ -28,12 +28,13 @@ class ExampleLoader(PythonAlgorithm):
         return "ExampleLoader"
 
     def PyInit(self):
-        self.declareProperty("File_name", "")
+        self.declareProperty("Filename", "")
         self.declareProperty("OutputWorkspace", "")
 
     def PyExec(self):
-        filename = self.getProperty("File_name")
+        filename = self.getProperty("Filename")
         output_ws = self.getProperty("OutputWorkspace")
+        LoadAscii(filename, output_ws)
         
         print filename, output_ws
 
