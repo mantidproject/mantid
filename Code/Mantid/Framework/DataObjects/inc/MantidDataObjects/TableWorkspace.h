@@ -179,12 +179,12 @@ namespace DataObjects
      * Can produce stuped results in case if the type is in any way not related to  double */
     template<class U>
     U cell_cast(size_t nRow, size_t nCol)const{
-        Column_sptr spCol = this->m_columns[nCol];
+        API::Column_sptr spCol = this->m_columns[nCol];
         return static_cast<U>(spCol->operator[](nRow));
     }
     template<class U>
     U cell_cast(size_t nRow, const std::string &col_name)const{
-        Column_const_sptr spCol = this->getColumn(col_name);
+        API::Column_const_sptr spCol = this->getColumn(col_name);
         return static_cast<U>(spCol->operator[](nRow));
     }
 
