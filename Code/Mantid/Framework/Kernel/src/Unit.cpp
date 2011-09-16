@@ -717,21 +717,6 @@ void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double
   }
 }
 
-/* Atomic Distance
- * ===============
- */
-DECLARE_UNIT(AtomicDistance)
-
-void AtomicDistance::toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
-    const double&, const int&, const double&, const double&) const{
-  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
-}
-void AtomicDistance::fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
-    const double&, const int&, const double&, const double&) const{
-  // g_log.error() <<  << std::endl;
-  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" from time of flight");
-}
-
 } // namespace Units
 
 } // namespace Kernel

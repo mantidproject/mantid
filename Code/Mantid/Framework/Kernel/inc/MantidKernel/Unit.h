@@ -331,25 +331,6 @@ public:
   ~DeltaE_inWavenumber() {}
 };
 
-/// Atomic distance in Angstrom
-class MANTID_KERNEL_DLL AtomicDistance : public Unit
-{
-public:
-  const std::string unitID() const; ///< "AtomicDistance"
-  const std::string caption() const { return "Atomic Distance"; }
-  const std::string label() const {return "Angstrom"; }
-
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-
-  /// Constructor
-  AtomicDistance() : Unit() {}
-  /// Destructor
-  ~AtomicDistance() {}
-};
-
 } // namespace Units
 
 } // namespace Kernel
