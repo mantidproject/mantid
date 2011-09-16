@@ -159,7 +159,9 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
 
   m_zoomIn = new QAction(("Zoom &In"), this);
-  m_zoomIn->setShortcut(QKeySequence::ZoomIn);
+  // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
+  m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
+  m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
   connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
 
   m_zoomOut = new QAction(("Zoom &Out"), this);
