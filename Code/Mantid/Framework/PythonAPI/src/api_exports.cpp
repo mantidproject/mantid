@@ -134,6 +134,7 @@ using namespace boost::python;
       .def("categories", &API::IAlgorithm::categories)
       .def("alias", &API::IAlgorithm::alias)
       .def("getOptionalMessage", &API::IAlgorithm::getOptionalMessage)
+      .def("getWikiSummary", &API::IAlgorithm::getWikiSummary)
       .def("getWikiDescription", &API::IAlgorithm::getWikiDescription)
       .def("initialize", &API::IAlgorithm::initialize)
       .def("execute", &API::IAlgorithm::execute)

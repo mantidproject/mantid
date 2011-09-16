@@ -92,7 +92,7 @@ def make_wiki(algo_name):
     
     out = ""
     out += "== Summary ==\n\n"
-    out += alg._ProxyObject__obj.getOptionalMessage().replace("\n", " ") + "\n\n"
+    out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
@@ -198,7 +198,7 @@ def validate_wiki(args, algos):
 
         # Validate the algorithm itself
         alg = mtd.createAlgorithm(algo)
-        summary = alg._ProxyObject__obj.getOptionalMessage()
+        summary = alg._ProxyObject__obj.getWikiSummary()
         if len(summary) == 0: 
             print "- Summary is missing (in the code)."
             wikidoc = find_section_text(lines, "Summary")
@@ -223,6 +223,19 @@ def validate_wiki(args, algos):
     print "\n\n"
     print "Algorithms with missing wiki page:\n", " ".join(missing) 
 
+
+#======================================================================
+def find_orphan_wiki():
+    """ Look for pages on the wiki that do NOT correspond to an algorithm """
+    category = site.Pages['Category:Algorithms']
+    temp = mtd._getRegisteredAlgorithms(True)
+    algos = [x for (x, version) in temp]
+            
+    for page in category:
+        algo_name = page.name
+        if not (algo_name.startswith("Category:")):
+            if not (algo_name in algos) :
+                print "Algorithm %s was not found." % algo_name
 
 #======================================================================
 def do_algorithm(args, algo):
@@ -270,6 +283,10 @@ if __name__ == "__main__":
     parser.add_argument('--show-missing', dest='show_missing', action='store_const',
                         const=True, default=False,
                         help="When validating, pull missing in-code documentation from the wiki and show it.")
+    
+    parser.add_argument('--find-orphans', dest='find_orphans', action='store_const',
+                        const=True, default=False,
+                        help="Look for 'orphan' wiki pages that are set as Category:Algorithms but do not have a matching Algorithm in Mantid.")
 
     args = parser.parse_args()
     
@@ -282,9 +299,16 @@ if __name__ == "__main__":
     config.write(f)
     f.close()
     
+    if not args.validate_wiki and len(args.algos)==0:
+        parser.error("You must specify at least one algorithm if not using --validate")
+
     # Open the site
     initialize(args)
     initialize_Mantid()
+    
+    if args.find_orphans:
+        find_orphan_wiki()
+        sys.exit(1)
 
     if args.validate_wiki:
         # Validate a few, or ALL algos
