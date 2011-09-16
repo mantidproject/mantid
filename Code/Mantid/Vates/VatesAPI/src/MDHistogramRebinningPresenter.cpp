@@ -272,37 +272,8 @@ namespace Mantid
       bool hasAppliedClipping = m_view->getApplyClip();
       if(hasAppliedClipping != m_applyClip)
       {
-        //check it's a box.
-        //extract a box.
-        //compare boxes.
-        vtkBox* box = dynamic_cast<vtkBox*>(m_view->getImplicitFunction());
-        if(NULL != box && hasAppliedClipping)
-        {
-          m_function = constructBoxFromVTKBox(box);
-        }
-        else
-        {
-          m_function = constructBoxFromInput();
-        }
-        //m_request->ask(RecalculateAll);
-
+        m_function = constructBoxFromInput();
         m_applyClip = m_view->getApplyClip();
-      }
-
-      //Should always do clipping comparison
-      if(hasAppliedClipping == true)
-      {
-        vtkBox* box = dynamic_cast<vtkBox*>(m_view->getImplicitFunction());
-        if(NULL != box)
-        {
-          boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxA = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(constructBoxFromVTKBox(box));
-          boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(m_function);
-          if(boxA->operator!=(*boxB.get()))
-          {
-            m_function = boxA;
-            m_request->ask(RecalculateAll);
-          }
-        }
       }
 
       addFunctionKnowledge();

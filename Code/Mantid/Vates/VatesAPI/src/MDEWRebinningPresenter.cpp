@@ -168,18 +168,46 @@ namespace Mantid
       //Should always do clipping comparison if clipping has been set to on.
       if(m_applyClipping == true)
       {
-        vtkPlane* plane = dynamic_cast<vtkPlane*>(m_view->getImplicitFunction());
-        WidthParameter width(m_view->getWidth());
-        if(NULL != plane)
+        using Mantid::Kernel::V3D;
+        //Check all parameters, which define the clipping.
+        V3D temp_origin = m_view->getOrigin();
+        V3D temp_b1 = m_view->getB1();
+        V3D temp_b2 = m_view->getB2();
+        double temp_length_b1 = m_view->getLengthB1();
+        double temp_length_b2 = m_view->getLengthB2();
+        double temp_length_b3 = m_view->getLengthB3();
+
+        if(temp_origin != m_origin)
         {
-          boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> planeA = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::PlaneImplicitFunction>(constructPlaneFromVTKPlane(plane, width));
-          boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> planeB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::PlaneImplicitFunction>(m_function);
-          if(!planeB || planeA->operator!=(*planeB.get()))
-          {
-            m_function = planeA;
-            m_request->ask(RecalculateAll);
-          }
+          m_request->ask(RecalculateAll);
         }
+        if(temp_b1 != m_b1)
+        {
+          m_request->ask(RecalculateAll);
+        }
+        if(temp_b2 != m_b2)
+        {
+          m_request->ask(RecalculateAll);
+        }
+        if(temp_length_b1 != m_lengthB1)
+        {
+          m_request->ask(RecalculateAll);
+        }
+        if(temp_length_b2 != m_lengthB2)
+        {
+          m_request->ask(RecalculateAll);
+        }
+        if(temp_length_b3 != m_lengthB3)
+        {
+          m_request->ask(RecalculateAll);
+        }
+        //Update coord transform fields.
+        m_origin = temp_origin;
+        m_b1 = temp_b1;
+        m_b2 = temp_b2;
+        m_lengthB1 = temp_length_b1;
+        m_lengthB2 = temp_length_b2;
+        m_lengthB3 = temp_length_b3;
       }
 
       if(m_view->getAppliedGeometryXML() != m_serializer.getWorkspaceGeometry())
@@ -216,10 +244,9 @@ namespace Mantid
     @param dimension : dimension to extract property value for.
     @return true available, false otherwise.
     */
-    std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, Mantid::Geometry::IMDDimension_sptr dimension) const
+    std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, double length,  Mantid::Geometry::IMDDimension_sptr dimension) const
     {
       std::string units = dimension->getUnits();
-      double length = dimension->getMaximum() - dimension->getMinimum();
       size_t nbins = dimension->getNBins();
       std::string id = dimension->getDimensionId();
       return boost::str(boost::format("%s, %s, %s, %d, %f") %id %units %basis.toString(",") %length % nbins);
@@ -251,27 +278,21 @@ namespace Mantid
         if(m_view->getApplyClip())
         {
           using namespace Mantid::Kernel;
-          vtkPlane* plane = dynamic_cast<vtkPlane*>(m_view->getImplicitFunction());
-          double* pNormal = plane->GetNormal();
-          double* pOrigin = plane->GetOrigin();
 
-          V3D a(pNormal[0], pNormal[1], pNormal[2]);
-          V3D b(a[1], -a[0], 0.0);
-          V3D c = a.cross_prod(b);
-          VMD origin(pOrigin[0], pOrigin[1], pOrigin[2]);
-          hist_alg.setPropertyValue("Origin", origin.toString(",") );
+          V3D b3 = m_b1.cross_prod(m_b2);
+          hist_alg.setPropertyValue("Origin", VMD(m_origin).toString(",") );
           hist_alg.setProperty("AxisAligned", false);
           if(sourceGeometry.hasXDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(a), sourceGeometry.getXDimension()));
+            hist_alg.setPropertyValue("BasisVectorX", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
           }
           if(sourceGeometry.hasYDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorY", extractFormattedPropertyFromDimension(VMD(b), sourceGeometry.getYDimension()));
+            hist_alg.setPropertyValue("BasisVectorY", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
           }
           if(sourceGeometry.hasZDimension())
           {
-            hist_alg.setPropertyValue("BasisVectorZ", extractFormattedPropertyFromDimension(VMD(c), sourceGeometry.getZDimension()));
+            hist_alg.setPropertyValue("BasisVectorZ", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
           }
           if(sourceGeometry.hasTDimension())
           {

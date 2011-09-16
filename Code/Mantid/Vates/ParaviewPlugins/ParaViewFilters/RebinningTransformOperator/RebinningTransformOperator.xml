@@ -13,17 +13,6 @@
       <DataTypeDomain name="input_type">
           <DataType value="vtkDataSet"/>
       </DataTypeDomain>
-        <ProxyProperty name="ClipFunction" command="SetClipFunction" label="Rebinning Cut Type">
-           <ProxyGroupDomain name="groups">
-               <Group name="implicit_functions"/>
-           </ProxyGroupDomain>
-           <ProxyListDomain name="proxy_list">
-              <Proxy group="implicit_functions" name="Plane" />
-           </ProxyListDomain>
-           <Documentation>
-             This property specifies the parameters of the clip function (an implicit plane) used to clip/rebin the dataset.
-           </Documentation>
-        </ProxyProperty>
         <DoubleVectorProperty 
         name="TimestepValues"
         information_only="1">
@@ -32,16 +21,39 @@
           Available timestep values.
         </Documentation>
        </DoubleVectorProperty>
-	   <IntVectorProperty
-         name="Apply Clipping"
-         command="SetApplyClip"
-         number_of_elements="1"
-         default_values="1">
-         <BooleanDomain name="bool"/>
-       </IntVectorProperty>
 	   <DoubleVectorProperty
-         name="Width"
-         command="SetWidth"
+         name="B1"
+         command="SetB1"
+         number_of_elements="3"
+		 default_values="1 0 0">
+       </DoubleVectorProperty>
+	   <DoubleVectorProperty
+         name="B2"
+         command="SetB2"
+         number_of_elements="3"
+		 default_values="0 1 0">
+       </DoubleVectorProperty>
+	   <DoubleVectorProperty
+         name="Origin"
+         command="SetOrigin"
+         number_of_elements="3"
+		 default_values="0 0 0">
+       </DoubleVectorProperty>
+	   <DoubleVectorProperty
+         name="Length B1"
+         command="SetLengthB1"
+         number_of_elements="1"
+		 default_values="1">
+       </DoubleVectorProperty>
+	   <DoubleVectorProperty
+         name="Length B2"
+         command="SetLengthB2"
+         number_of_elements="1"
+		 default_values="1">
+       </DoubleVectorProperty>
+	   <DoubleVectorProperty
+         name="Length B3"
+         command="SetLengthB3"
          number_of_elements="1"
 		 default_values="1">
        </DoubleVectorProperty>

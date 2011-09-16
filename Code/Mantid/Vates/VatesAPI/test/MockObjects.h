@@ -202,8 +202,6 @@ public:
 class MockMDRebinningView : public MDRebinningView 
 {
 public:
-  MOCK_CONST_METHOD0(getImplicitFunction,
-    vtkImplicitFunction*());
   MOCK_CONST_METHOD0(getMaxThreshold,
     double());
   MOCK_CONST_METHOD0(getMinThreshold,
@@ -216,7 +214,12 @@ public:
     const char*());
   MOCK_METHOD1(updateAlgorithmProgress,
     void(double));
-  MOCK_CONST_METHOD0(getWidth, double());
+  MOCK_CONST_METHOD0(getOrigin, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(getB1, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(getB2, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(getLengthB1, double());
+  MOCK_CONST_METHOD0(getLengthB2, double());
+  MOCK_CONST_METHOD0(getLengthB3, double());
 };
 
 class MockClipper: public Mantid::VATES::Clipper

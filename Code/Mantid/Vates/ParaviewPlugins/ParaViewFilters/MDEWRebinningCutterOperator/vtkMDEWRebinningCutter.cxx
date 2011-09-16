@@ -134,14 +134,6 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/** Getter for the implicit function
-@return The implicit function
-*/
-vtkImplicitFunction* vtkMDEWRebinningCutter::getImplicitFunction() const
-{
-  return m_clipFunction;
-}
-
 /** Getter for the max threshold
 @return max threshold
 */
@@ -190,15 +182,6 @@ void vtkMDEWRebinningCutter::updateAlgorithmProgress(double progress)
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
   this->UpdateProgress(progress);
   progressMutex.unlock();
-}
-
-/**
-Getter for the implicit function width.
-@return width
-*/
-double vtkMDEWRebinningCutter::getWidth() const
-{
-  return this->m_width;
 }
 
 
@@ -255,6 +238,8 @@ void vtkMDEWRebinningCutter::configureThresholdRangeMethod()
 int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector**,
   vtkInformationVector *outputVector)
 {
+  try
+  {
   using namespace Mantid::VATES;
 
   //Setup is not complete until metadata has been correctly provided.
@@ -296,6 +281,11 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
 
   }
   return 1;
+  }
+  catch(std::exception& ex)
+  {
+    std::string msg = ex.what();
+  }
 }
 
 int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
@@ -462,4 +452,35 @@ void vtkMDEWRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
     }
   }
 }
+
+Mantid::Kernel::V3D vtkMDEWRebinningCutter::getOrigin()
+{
+  throw std::runtime_error("Not implemented on vtkMDEWRebinningCutter.");
+}
+
+Mantid::Kernel::V3D vtkMDEWRebinningCutter::getB1()
+{
+  throw std::runtime_error("Not implemented on vtkMDEWRebinningCutter.");
+}
+
+Mantid::Kernel::V3D vtkMDEWRebinningCutter::getB2()
+{
+  throw std::runtime_error("Not implemented on vtkMDEWRebinningCutter.");
+}
+
+double vtkMDEWRebinningCutter::getLengthB1() const
+{
+  throw std::runtime_error("Not implemented on vtkMDEWRebinningCutter.");
+}
+
+double vtkMDEWRebinningCutter::getLengthB2() const
+{
+  throw std::runtime_error("Not implemented on vtkMDEWRebinningCutter.");
+}
+
+double vtkMDEWRebinningCutter::getLengthB3() const
+{
+  throw std::runtime_error("Not implemented on vtkMDEWRebinningCutter.");
+}
+
 

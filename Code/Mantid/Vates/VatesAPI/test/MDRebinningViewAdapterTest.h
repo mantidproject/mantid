@@ -1,6 +1,7 @@
 #ifndef MD_REBINNING_VIEW_ADAPTER_TEST_H
 #define MD_REBINNING_VIEW_ADAPTER_TEST_H
 
+#include "MantidKernel/V3D.h"
 #include "MantidVatesAPI/MDRebinningViewAdapter.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -17,16 +18,21 @@ public:
   
   void testWireUp()
   {
+    Mantid::Kernel::V3D v;
     //Set expectations on adaptee
     MockMDRebinningView view;
-    EXPECT_CALL(view, getImplicitFunction()).Times(1);
-    EXPECT_CALL(view, getWidth()).Times(1);
     EXPECT_CALL(view, getMaxThreshold()).Times(1);
     EXPECT_CALL(view, getMinThreshold()).Times(1);
     EXPECT_CALL(view, getApplyClip()).Times(1);
     EXPECT_CALL(view, getTimeStep()).Times(1);
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(1);
     EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(1);
+    EXPECT_CALL(view, getOrigin()).Times(1).WillOnce(Return(v));
+    EXPECT_CALL(view, getB1()).Times(1).WillOnce(Return(v));
+    EXPECT_CALL(view, getB2()).Times(1).WillOnce(Return(v));
+    EXPECT_CALL(view, getLengthB1()).Times(1);
+    EXPECT_CALL(view, getLengthB2()).Times(1);
+    EXPECT_CALL(view, getLengthB3()).Times(1);
 
     //Create adapter using adaptee
     MDRebinningViewAdapter<MockMDRebinningView> view_adapter(&view);
@@ -35,14 +41,18 @@ public:
     MDRebinningView& alias = view_adapter;
     
     //Test running adaptees invokes expecations and exits cleanly
-    TS_ASSERT_THROWS_NOTHING(alias.getImplicitFunction());
-    TS_ASSERT_THROWS_NOTHING(alias.getWidth());
     TS_ASSERT_THROWS_NOTHING(alias.getMaxThreshold());
     TS_ASSERT_THROWS_NOTHING(alias.getMinThreshold());
     TS_ASSERT_THROWS_NOTHING(alias.getApplyClip());
     TS_ASSERT_THROWS_NOTHING(alias.getTimeStep());
     TS_ASSERT_THROWS_NOTHING(alias.getAppliedGeometryXML());
     TS_ASSERT_THROWS_NOTHING(alias.updateAlgorithmProgress(0));
+    TS_ASSERT_THROWS_NOTHING(alias.getLengthB1());
+    TS_ASSERT_THROWS_NOTHING(alias.getLengthB2());
+    TS_ASSERT_THROWS_NOTHING(alias.getLengthB3());
+    TS_ASSERT_THROWS_NOTHING(alias.getB1());
+    TS_ASSERT_THROWS_NOTHING(alias.getB2());
+    TS_ASSERT_THROWS_NOTHING(alias.getOrigin());
 
     //Check the expectations.
     TSM_ASSERT("Not wired-up correctly", Mock::VerifyAndClearExpectations(&view));

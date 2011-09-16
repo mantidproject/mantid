@@ -62,7 +62,7 @@ void RebinningTransformObjectPanel::constructGeometry(QGridLayout* gLayout)
 
     // Construct custom widget instance.
     m_geometryWidget = new GeometryWidget(new SynchronisingGeometryPresenter(xmlParser), true);
-    gLayout->addWidget(m_geometryWidget, gLayout->rowCount() + 1, 0, Qt::AlignLeft);
+    gLayout->addWidget(m_geometryWidget, gLayout->rowCount() + 1, 0, 1, 2, Qt::AlignLeft);
 
     connect(m_geometryWidget, SIGNAL(ignoreBinChanges()), this, SLOT(ignoreBinChangesListner()));
 
@@ -99,7 +99,7 @@ void RebinningTransformObjectPanel::constructThresholdRanges(QGridLayout* gLayou
     if(m_thresholdWidget == NULL)
     {
       m_thresholdWidget = new ThresholdRangeWidget(inputMinThreshold, inputMaxThreshold);
-      gLayout->addWidget(m_thresholdWidget, gLayout->rowCount() + 1, 0, Qt::AlignCenter);
+      gLayout->addWidget(m_thresholdWidget, gLayout->rowCount() + 1, 0, 1, 2, Qt::AlignCenter);
     }
     else
     {

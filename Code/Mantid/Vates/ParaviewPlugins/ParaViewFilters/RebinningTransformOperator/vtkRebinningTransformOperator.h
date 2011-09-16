@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/V3D.h"
 #include <string>
 
 /**
@@ -56,7 +57,6 @@ enum Clipping{ ApplyClipping, IgnoreClipping};
 ///Type marks wheter original extents should be used over box extents.
 enum OrignalExtents{ ApplyOriginal, IgnoreOriginal};
 
-class vtkImplicitFunction;
 class VTK_EXPORT vtkRebinningTransformOperator : public vtkUnstructuredGridAlgorithm//, public Mantid::VATES::MDRebinningView
 {
 public:
@@ -65,12 +65,17 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
-  void SetClipFunction( vtkImplicitFunction * func);
   void SetMaxThreshold(double maxThreshold);
   void SetMinThreshold(double minThreshold);
   void SetAppliedGeometryXML(std::string xml);
-  void SetApplyClip(int applyClip);
-  void SetWidth(double width);
+  void SetB1(double a, double b, double c);
+  void SetB2(double a, double b, double c);
+  void SetLengthB1(double length);
+  void SetLengthB2(double length);
+  void SetLengthB3(double length);
+  void SetOrigin(double originX, double originY, double originZ);
+
+
   const char* GetInputGeometryXML();
   void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
   double GetInputMinThreshold();
@@ -80,15 +85,17 @@ public:
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress);
 
-
-
-  virtual vtkImplicitFunction* getImplicitFunction() const;
   virtual double getMaxThreshold() const;
   virtual double getMinThreshold() const;
   virtual bool getApplyClip() const;
   virtual double getTimeStep() const;
   virtual const char* getAppliedGeometryXML() const;
-  virtual double getWidth() const;
+  virtual Mantid::Kernel::V3D getOrigin();
+  virtual Mantid::Kernel::V3D getB1();
+  virtual Mantid::Kernel::V3D getB2();
+  virtual double getLengthB1() const;
+  virtual double getLengthB2() const;
+  virtual double getLengthB3() const;
 
 protected:
 
@@ -127,10 +134,6 @@ private:
   /// handles overwriting of time ranges.
   void setTimeRange(vtkInformationVector* outputVector);
 
-  /// Clip function provided by ClipFunction ProxyProperty
-  vtkImplicitFunction * m_clipFunction;
-  /// Cached vtkDataSet. Enables fast visualization where possible.
-
   /// Flag indicating that the clip boundaries should be use to construct the rebinning region.
   Clipping m_clip;
   /// Original extents should be used.
@@ -145,12 +148,22 @@ private:
   Mantid::signal_t m_thresholdMin;
   /// Threshold range calculator.
   Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
-  /// Plane width.
-  double m_width;
   /// Method of thresholding to use.
   int m_thresholdMethodIndex;
   /// Mutex for progress updates
   Mantid::Kernel::Mutex progressMutex;
+  /// Origin
+  Mantid::Kernel::V3D m_origin;
+  /// b1 direction vector
+  Mantid::Kernel::V3D m_b1;
+  /// b2 direction vector
+  Mantid::Kernel::V3D m_b2;
+  /// length b1
+  double m_lengthB1;
+  /// length b2
+  double m_lengthB2;
+  /// length b3
+  double m_lengthB3;
 
 };
 #endif

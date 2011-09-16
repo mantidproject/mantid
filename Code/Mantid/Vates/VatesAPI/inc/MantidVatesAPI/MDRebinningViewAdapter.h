@@ -47,14 +47,34 @@ namespace Mantid
       {
       }
 
-      virtual vtkImplicitFunction* getImplicitFunction() const
+      virtual Mantid::Kernel::V3D getOrigin() const
       {
-        return m_adaptee->getImplicitFunction();
+        return m_adaptee->getOrigin();
       }
 
-      virtual double getWidth() const
+      virtual Mantid::Kernel::V3D getB1() const
       {
-        return m_adaptee->getWidth();
+        return m_adaptee->getB1();
+      }
+
+      virtual Mantid::Kernel::V3D getB2() const
+      {
+        return m_adaptee->getB2();
+      }
+
+      virtual double getLengthB1() const
+      {
+        return m_adaptee->getLengthB1();
+      }
+
+      virtual double getLengthB2() const
+      {
+        return m_adaptee->getLengthB2();
+      }
+
+      virtual double getLengthB3() const
+      {
+        return m_adaptee->getLengthB3();
       }
 
       virtual double getMaxThreshold() const

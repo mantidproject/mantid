@@ -2,6 +2,7 @@
 #define MANTID_VATES_MD_REBINNING_VIEW
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 
 class vtkImplicitFunction;
 namespace Mantid
@@ -37,13 +38,16 @@ namespace Mantid
     class DLLExport MDRebinningView
     {
     public:
-
-      virtual vtkImplicitFunction* getImplicitFunction() const = 0;
-      virtual double getWidth() const = 0;
       virtual double getMaxThreshold() const = 0;
       virtual double getMinThreshold() const = 0;
       virtual bool getApplyClip() const = 0;
       virtual double getTimeStep() const = 0;
+      virtual Mantid::Kernel::V3D getOrigin() const = 0;
+      virtual Mantid::Kernel::V3D getB1() const = 0;
+      virtual Mantid::Kernel::V3D getB2() const = 0;
+      virtual double getLengthB1() const = 0;
+      virtual double getLengthB2() const = 0;
+      virtual double getLengthB3() const = 0;
       virtual const char* getAppliedGeometryXML() const = 0;
       virtual void updateAlgorithmProgress(double) = 0;
       virtual ~MDRebinningView(){}

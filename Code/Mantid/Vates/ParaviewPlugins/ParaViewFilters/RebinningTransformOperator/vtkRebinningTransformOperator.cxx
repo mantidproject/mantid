@@ -10,9 +10,7 @@
 #include "vtkPVClipDataSet.h"
 #include "vtkSmartPointer.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkImplicitFunction.h"
 #include "vtkPointData.h"
-#include "vtkPlane.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -134,13 +132,6 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/** Getter for the implicit function
-@return The implicit function
-*/
-vtkImplicitFunction* vtkRebinningTransformOperator::getImplicitFunction() const
-{
-  return m_clipFunction;
-}
 
 /** Getter for the max threshold
 @return max threshold
@@ -192,16 +183,6 @@ void vtkRebinningTransformOperator::updateAlgorithmProgress(double progress)
   progressMutex.unlock();
 }
 
-/**
-Getter for the implicit function width.
-@return width
-*/
-double vtkRebinningTransformOperator::getWidth() const
-{
-  return this->m_width;
-}
-
-
 vtkCxxRevisionMacro(vtkRebinningTransformOperator, "$Revision: 1.0 $")
   ;
 vtkStandardNewMacro(vtkRebinningTransformOperator)
@@ -212,14 +193,14 @@ using namespace Mantid::VATES;
 ///Constructor.
 vtkRebinningTransformOperator::vtkRebinningTransformOperator() :
 m_presenter(new NullRebinningPresenter()),
-  m_clipFunction(NULL),
   m_clip(ApplyClipping),
   m_originalExtents(IgnoreOriginal),
   m_setup(Pending),
   m_timestep(0),
   m_thresholdMax(1e9),
   m_thresholdMin(0),
-  m_thresholdMethodIndex(0)
+  m_thresholdMethodIndex(0),
+  m_origin(0, 0, 0)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
@@ -365,34 +346,6 @@ void vtkRebinningTransformOperator::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 }
 
-void vtkRebinningTransformOperator::SetApplyClip(int applyClip)
-{
-  Clipping temp = applyClip == 1 ? ApplyClipping : IgnoreClipping;
-  if(temp != m_clip)
-  {
-    m_clip = temp;
-    this->Modified();
-  }
-}
-
-void vtkRebinningTransformOperator::SetWidth(double width)
-{
-  if(m_width != width)
-  {
-    m_width = width;
-    this->Modified();
-  }
-}
-
-void vtkRebinningTransformOperator::SetClipFunction(vtkImplicitFunction * func)
-{
-  if (func != m_clipFunction)
-  {
-    this->m_clipFunction = func;
-    this->Modified();
-  }
-}
-
 void vtkRebinningTransformOperator::SetMaxThreshold(double maxThreshold)
 {
   if (maxThreshold != m_thresholdMax)
@@ -455,20 +408,7 @@ double vtkRebinningTransformOperator::GetInputMaxThreshold()
 
 unsigned long vtkRebinningTransformOperator::GetMTime()
 {
-  unsigned long mTime = this->Superclass::GetMTime();
-  unsigned long time;
-
-  if (this->m_clipFunction != NULL)
-  {
-
-    time = this->m_clipFunction->GetMTime();
-    if(time > mTime)
-    {
-      mTime = time;
-    }
-  }
-
-  return mTime;
+  return vtkUnstructuredGridAlgorithm::GetMTime();
 }
 
 
@@ -492,3 +432,90 @@ void vtkRebinningTransformOperator::setTimeRange(vtkInformationVector* outputVec
   }
 }
 
+void vtkRebinningTransformOperator::SetB1(double a, double b, double c)
+{
+  Mantid::Kernel::V3D temp(a, b, c);
+  if(m_b1 != temp)
+  {
+    m_b1 = temp;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetB2(double a, double b, double c)
+{
+  Mantid::Kernel::V3D temp(a, b, c);
+  if(m_b2 != temp)
+  {
+    m_b2 = temp;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetLengthB1(double length)
+{
+  if(length != m_lengthB1)
+  {
+    m_lengthB1 = length;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetLengthB2(double length)
+{
+  if(length != m_lengthB2)
+  {
+    m_lengthB2 = length;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetLengthB3(double length)
+{
+  if(length != m_lengthB3)
+  {
+    m_lengthB3 = length;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetOrigin(double originX, double originY, double originZ)
+{
+  Mantid::Kernel::V3D temp(originX, originY, originZ);
+  if(temp != m_origin)
+  {
+    m_origin = temp;
+    this->Modified();
+  }
+}
+
+
+Mantid::Kernel::V3D vtkRebinningTransformOperator::getOrigin()
+{
+  return m_origin;
+}
+
+Mantid::Kernel::V3D vtkRebinningTransformOperator::getB1()
+{
+  return m_b1;
+}
+
+Mantid::Kernel::V3D vtkRebinningTransformOperator::getB2()
+{
+  return m_b2;
+}
+
+double vtkRebinningTransformOperator::getLengthB1() const
+{
+  return m_lengthB1;
+}
+
+double vtkRebinningTransformOperator::getLengthB2() const
+{
+  return m_lengthB2;
+}
+
+double vtkRebinningTransformOperator::getLengthB3() const
+{
+  return m_lengthB3;
+}

@@ -75,7 +75,7 @@ namespace Mantid
       Mantid::Geometry::MDImplicitFunction_sptr constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width);
       void persistReductionKnowledge(vtkDataSet* out_ds, const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
       std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
-      std::string extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, Mantid::Geometry::IMDDimension_sptr dimension) const;
+      std::string extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, double length, Mantid::Geometry::IMDDimension_sptr dimension) const;
       void addFunctionKnowledge();
 
       ///Parser used to process input vtk to extract metadata.
@@ -100,6 +100,18 @@ namespace Mantid
       Mantid::Geometry::MDImplicitFunction_sptr m_function;
       /// Flag indicating that clipping should be used.
       bool m_applyClipping;
+      /// Origin
+      Mantid::Kernel::V3D m_origin;
+      /// b1 direction vector
+      Mantid::Kernel::V3D m_b1;
+      /// b2 direction vector
+      Mantid::Kernel::V3D m_b2;
+      /// length b1
+      double m_lengthB1;
+      /// length b2
+      double m_lengthB2;
+      /// length b3
+      double m_lengthB3;
     };
   }
 }

@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/V3D.h"
 #include <string>
 
 /**
@@ -76,16 +77,18 @@ public:
 
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress);
-
-
-
-  virtual vtkImplicitFunction* getImplicitFunction() const;
   virtual double getMaxThreshold() const;
   virtual double getMinThreshold() const;
   virtual bool getApplyClip() const;
   virtual double getTimeStep() const;
   virtual const char* getAppliedGeometryXML() const;
-  virtual double getWidth() const;
+  virtual Mantid::Kernel::V3D getOrigin();
+  virtual Mantid::Kernel::V3D getB1();
+  virtual Mantid::Kernel::V3D getB2();
+  virtual double getLengthB1() const;
+  virtual double getLengthB2() const;
+  virtual double getLengthB3() const;
+
 
 protected:
 
@@ -142,8 +145,6 @@ private:
   Mantid::signal_t m_thresholdMin;
   /// Threshold range calculator.
   Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
-  /// Plane width.
-  double m_width;
   /// Method of thresholding to use.
   int m_thresholdMethodIndex;
   /// Mutex for progress updates
