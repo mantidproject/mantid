@@ -103,7 +103,7 @@ namespace PropertyNexus
       // Optionally get a start
       try
       { file->getAttr("start", startStr); }
-      catch (::NeXus::Exception & e) {}
+      catch (::NeXus::Exception &) {}
       file->closeData();
     }
 

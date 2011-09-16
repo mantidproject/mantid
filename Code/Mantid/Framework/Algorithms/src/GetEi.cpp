@@ -140,7 +140,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, s
   {
     monWI = WS->getIndexFromSpectrumNumber(mon0Spec);
   }
-  catch (std::runtime_error & e)
+  catch (std::runtime_error &)
   {
     g_log.error() << "Could not find the workspace index for the monitor at spectrum " << mon0Spec << "\n";
     g_log.error() << "Error retrieving data for the first monitor" << std::endl;
@@ -162,7 +162,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, s
   {
     monWI = WS->getIndexFromSpectrumNumber(mon0Spec);
   }
-  catch (std::runtime_error & e)
+  catch (std::runtime_error &)
   {
     g_log.error() << "Could not find the workspace index for the monitor at spectrum " << mon0Spec << "\n";
     g_log.error() << "Error retrieving data for the second monitor\n";

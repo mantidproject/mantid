@@ -108,7 +108,7 @@ namespace Mantid
               hasExperimentBlock[num] = true;
             }
           }
-          catch (boost::bad_lexical_cast & e)
+          catch (boost::bad_lexical_cast &)
           { /* ignore */ }
         }
       }
