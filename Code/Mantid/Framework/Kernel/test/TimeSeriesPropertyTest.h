@@ -79,6 +79,27 @@ public:
     TS_ASSERT_EQUALS( sString.substr(0,27), "2007-Nov-30 16:17:00  test\n" );
   }
 
+  void test_timesAsVector()
+  {
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT( p->addValue("2007-11-30T16:17:20",5.55) );
+    TS_ASSERT( p->addValue("2007-11-30T16:17:00",9.99) );
+    TS_ASSERT( p->addValue("2007-11-30T16:17:10",5.55) );
+    TS_ASSERT( p->addValue("2007-11-30T16:17:30",5.55) );
+    std::vector<double> timeSec;
+    timeSec = p->timesAsVectorSeconds();
+    TS_ASSERT_DELTA( timeSec[0], 0.0, 1e-6);
+    TS_ASSERT_DELTA( timeSec[1], 10.0, 1e-6);
+    TS_ASSERT_DELTA( timeSec[2], 20.0, 1e-6);
+    TS_ASSERT_DELTA( timeSec[3], 30.0, 1e-6);
+    std::vector<DateAndTime> time;
+    time = p->timesAsVector();
+    TS_ASSERT_EQUALS( time[0], DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS( time[1], DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS( time[2], DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS( time[3], DateAndTime("2007-11-30T16:17:30"));
+  }
+
   void test_addValues()
   {
     size_t num=1000;

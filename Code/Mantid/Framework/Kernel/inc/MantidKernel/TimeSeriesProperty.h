@@ -421,6 +421,22 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  /**  Return the time series's times as a vector<double>, where
+   * the time is the number of seconds since the start.
+    */
+  std::vector<double> timesAsVectorSeconds() const
+  {
+    std::vector<double> out;
+    if (m_propertySeries.size() == 0)
+      return out;
+    typename timeMap::const_iterator p = m_propertySeries.begin();
+    Kernel::DateAndTime start = p->first;
+    for (; p != m_propertySeries.end(); p++)
+      out.push_back( DateAndTime::seconds_from_duration(p->first - start) );
+    return out;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Add a value to the map
    *  @param time :: The time as a boost::posix_time::ptime value
    *  @param value :: The associated value

@@ -71,13 +71,14 @@ if __name__ == "__main__":
     except:
         pass
     
-    parser = argparse.ArgumentParser(description='Generate the Wiki documentation for a '
-                                      'particular algorithm and set it in the text.')
+    parser = argparse.ArgumentParser(description='Generate the Wiki documentation for one '
+                                      'or more algorithms, and updates the mantidproject.org website')
+    
     parser.add_argument('algo', metavar='ALGORITHM', type=str, nargs='+',
-                        help='Name of the algorithm(s) to generate')
+                        help='Name of the algorithm(s) to generate wiki docs.')
     
     parser.add_argument('--user', dest='username', default=defaultuser,
-                        help="User name, to log into the www.mantidproject.org wiki. Default: '%s'." % defaultuser)
+                        help="User name, to log into the www.mantidproject.org wiki. Default: '%s'. This value is saved to a .ini file so that you don't need to specify it after." % defaultuser)
 
     parser.add_argument('--password', dest='password', default=defaultpassword,
                         help="Password, to log into the www.mantidproject.org wiki. Default: '%s'. Note this is saved plain text to a .ini file!" % defaultpassword)

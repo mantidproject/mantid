@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	#	src/Q1DTOF.cpp
 	src/AbsorptionCorrection.cpp
+	src/AddLogDerivative.cpp
 	src/AddSampleLog.cpp
 	src/AlignDetectors.cpp
 	src/AnyShapeAbsorption.cpp
@@ -166,6 +167,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
+	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -330,6 +332,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
 	test/AlignDetectorsTest.h
 	test/AnyShapeAbsorptionTest.h

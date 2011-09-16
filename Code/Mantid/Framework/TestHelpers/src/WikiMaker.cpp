@@ -134,9 +134,6 @@ int main(int argc, char *argv[])
   // Make it!
   std::string res = makeWikiText(alg);
 
-  // Output to screen
-  std::cout << "\n\n" << res;
-
   if (filename != "")
   {
     std::ofstream myfile;
@@ -145,6 +142,10 @@ int main(int argc, char *argv[])
     myfile.close();
     std::cout << "\n\n... Written to: " << filename << "\n\n";
   }
+  else
+    // Output to screen
+    std::cout << "\n\n" << res;
+
 
   std::cout << "\n\nhttp://www.mantidproject.org/index.php?title=" << alg->name() << "&action=edit\n\n";
 
