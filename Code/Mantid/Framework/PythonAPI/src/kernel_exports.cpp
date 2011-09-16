@@ -105,9 +105,12 @@ namespace PythonAPI
       .add_property("name", make_function(&Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>()))
       .add_property("isValid", &Mantid::Kernel::Property::isValid)
       .add_property("value", &Mantid::Kernel::Property::value)
+      .add_property("documentation", make_function(&Mantid::Kernel::Property::documentation, return_value_policy<copy_const_reference>()))
       .add_property("allowedValues", &Mantid::Kernel::Property::allowedValues)
       .add_property("direction", &Mantid::Kernel::Property::direction)
       .add_property("units", &Mantid::Kernel::Property::units)
+      .add_property("type", make_function(&Mantid::Kernel::Property::type))
+      .add_property("getDefault", make_function(&Mantid::Kernel::Property::getDefault))
       .add_property("isDefault", &Mantid::Kernel::Property::isDefault)
       ;
 

@@ -8,7 +8,9 @@ import time
 import datetime
 import subprocess
 import commands
+import sys
 
+mantid_initialized = False
 #
 ## Edit page
 #page = site.Pages['Commons:Sandbox']
@@ -33,8 +35,117 @@ def initialize(args):
     print "Connecting to site mantidproject.org"
     site = mwclient.Site('www.mantidproject.org', path='/')
     print "Logging in."
-    site.login(args.username, args.password) # Optional
+#    site.login(args.username, args.password) # Optional
     
+    
+#======================================================================
+def initialize_Mantid():
+    """ Start mantid framework """
+    global mtd
+    global mantid_initialized
+    if mantid_initialized:   return
+    sys.path.append(os.getcwd())
+    import MantidFramework
+    from MantidFramework import mtd
+    mtd.initialise()
+    mantid_initialized = True
+
+    
+#======================================================================
+def find_missing_wiki(args):
+    """ Look for any missing wiki pages """
+    initialize_Mantid()
+    algos = mtd._getRegisteredAlgorithms(True)
+    missing = []
+    
+    for (algo, version) in algos:
+        print "Looking for %s" % algo
+        page = site.Pages[algo]
+        contents = page.edit()
+        if len(contents) == 0:
+            print "%s is MISSING FROM WIKI ---->" % (algo)
+            missing.append(algo)
+            
+    print "Missing algorithms:\n", missing 
+
+
+#======================================================================
+def make_property_table_line(propnum, p):
+    """ Make one line of property table
+    propnum :: number of the prop
+    p :: Property object
+    """
+    out = ""
+    # The property number
+    out += "|" + str(propnum) + "\n"
+    # Name of the property
+    out += "|" + p.name + "\n"
+    # Direction
+    direction_string = ["Input", "Output", "InOut", "None"]
+    out += "|" + direction_string[p.direction] + "\n"
+    # Type (as string)
+    out += "|" + str(p.type) + "\n"
+    # Default?
+    if (p.isValid == ""): #Nothing was set, but it's still valid = NOT mandatory
+      out += "| " + str(p.getDefault) + "\n"
+    else:
+      out += "|Mandatory\n"
+    # Documentation
+    out += "|" + p.documentation.replace("\n", " ") + "\n"
+    # End of table line
+    out += "|-\n"
+    return out
+    
+    
+        
+#======================================================================
+def make_wiki(algo_name):
+    """ Return wiki text for a given algorithm """ 
+    initialize_Mantid()
+    alg = mtd.createAlgorithm(algo_name)
+    
+    out = ""
+    out += "== Summary ==\n\n"
+    out += alg._ProxyObject__obj.getOptionalMessage().replace("\n", " ") + "\n\n"
+    out += "== Properties ==\n\n"
+    
+    out += """{| border="1" cellpadding="5" cellspacing="0" 
+!Order\n!Name\n!Direction\n!Type\n!Default\n!Description
+|-\n"""
+
+    # Do all the properties
+    props = alg._ProxyObject__obj.getProperties()
+    propnum = 1
+    for prop in props:
+        out += make_property_table_line(propnum, prop)
+        propnum += 1
+        
+        
+    # Close the table
+    out += "|}\n\n"
+
+
+    out += "== Description ==\n"
+    out += "\n"
+    desc = alg.getWikiDescription()
+    if (desc == ""):
+      out += "INSERT FULL DESCRIPTION HERE\n"
+    else:
+      out += desc + "\n"
+    out += "\n"
+    out += "[[Category:Algorithms]]\n"
+    
+    # All other categories
+    categories = alg.categories()
+    for categ in categories:
+      out += "[[Category:" + categ + "]]\n"
+
+    out +=  "{{AlgorithmLinks|" + algo_name + "}}\n"
+
+    print out
+    return out
+
+
 
 #======================================================================
 def do_algorithm(args, algo):
@@ -48,12 +159,13 @@ def do_algorithm(args, algo):
     contents = f.read()
     f.close()
     
-    print "Saving page to www.mantidproject.org/%s" % algo
-    #Open the page with the name of the algo
-    page = site.Pages[algo]
-    text = page.edit()
-    #print 'Text in page:', text.encode('utf-8')
-    page.save(contents, summary = 'Bot: replace contents by auto_wiki.py script, using output from WikiMaker.' )
+    if False:
+        print "Saving page to www.mantidproject.org/%s" % algo
+        #Open the page with the name of the algo
+        page = site.Pages[algo]
+        text = page.edit()
+        #print 'Text in page:', text.encode('utf-8')
+        page.save(contents, summary = 'Bot: replace contents by auto_wiki.py script, using output from WikiMaker.' )
     
     #print contents
 
@@ -74,7 +186,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate the Wiki documentation for one '
                                       'or more algorithms, and updates the mantidproject.org website')
     
-    parser.add_argument('algo', metavar='ALGORITHM', type=str, nargs='+',
+    parser.add_argument('algo', metavar='ALGORITHM', type=str, nargs='*',
                         help='Name of the algorithm(s) to generate wiki docs.')
     
     parser.add_argument('--user', dest='username', default=defaultuser,
@@ -82,6 +194,10 @@ if __name__ == "__main__":
 
     parser.add_argument('--password', dest='password', default=defaultpassword,
                         help="Password, to log into the www.mantidproject.org wiki. Default: '%s'. Note this is saved plain text to a .ini file!" % defaultpassword)
+    
+    parser.add_argument('--missing', dest='find_missing', action='store_const',
+                        const=True, default=False,
+                        help="Look for missing wiki pages using the list of registered algorithms.")
 
     args = parser.parse_args()
     
@@ -95,8 +211,12 @@ if __name__ == "__main__":
     f.close()
     
     # Open the site
-    initialize(args)
+    #initialize(args)
     
-    for algo in args.algo:
-        do_algorithm(args, algo)
+    if args.find_missing:
+        find_missing_wiki(args)
+    else:
+        for algo in args.algo:
+            make_wiki(algo)
+            #do_algorithm(args, algo)
         
