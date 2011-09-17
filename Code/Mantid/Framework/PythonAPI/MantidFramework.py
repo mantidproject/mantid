@@ -893,19 +893,17 @@ class IAlgorithmProxy(ProxyObject):
         del kwargs["Enable"] # no longer needed
         disabled_list = [s.lstrip(' ') for s in kwargs.get("Disable", "").split(',')]
         del kwargs["Disable"] # no longer needed
-        Message = kwargs.get("Message", "")
+        message = kwargs.get("Message", "")
         del kwargs["Message"]
-        values = '|'
-        final_enabled = ''
-
+        presets = '|'
         # configure everything for the dialog
         for name in kwargs.keys():
-            valpair = mtd._convertToPair(name, kwargs[name], enabled_list, disabled_list)
-            values += valpair[0] + '|'
-            final_enabled += valpair[1] + ','
+            value = kwargs[name]
+            if value is not None:
+                presets += name + '=' + _makeString(value) + '|'
 
         # finally run the configured dialog
-        dialog = qti.app.mantidUI.createPropertyInputDialog(self.name(), values, Message, final_enabled)
+        dialog = qti.app.mantidUI.createPropertyInputDialog(self.name(), presets, message, enabled_list, disabled_list)
         if dialog == False:
             sys.exit('Information: Script execution cancelled')
 
@@ -1118,23 +1116,6 @@ class MantidPyFramework(FrameworkManager):
             algs.append((name, tuple(algs_dict[name])))
 
         return algs
-
-    def _convertToPair(self, param_name, param_value, enabled_list, disabled_list):
-        """
-        A utility function for the dialog routines that decides if the parameter
-        should be added to the final list of parameters that have their widgets enabled
-        """
-        if param_value == None:
-          if not param_name in disabled_list:
-            return ('', param_name)
-          else:
-            return ('', '')
-        else:
-          strval = _makeString(param_value)
-          if param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):
-            return (param_name + '=' + strval.lstrip('?'), param_name)
-          else:
-            return (param_name + '=' + strval, '')
 
     #### private methods ###########################################################
     

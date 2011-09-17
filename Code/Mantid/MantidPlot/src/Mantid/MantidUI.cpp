@@ -1075,22 +1075,23 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
  */
 MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
-  QString presets(""), enabled("");
+  QHash<QString, QString> presets;
+  QStringList enabled;
   //If a workspace is selected in the dock then set this as a preset for the dialog
   QString selected = getSelectedWorkspaceName();
   if( !selected.isEmpty() )
   {
     QString property_name = findInputWorkspaceProperty(alg);
-    presets = "|" + property_name + "=" + selected + "|";
-    enabled = property_name + ",";
+    presets.insert(property_name,selected);
+    // Keep it enabled
+    enabled.append(property_name);
   }
   //Check if a workspace is selected in the dock and set this as a preference for the input workspace
-
   //This is an optional message displayed at the top of the GUI.
   QString optional_msg(alg->getOptionalMessage().c_str());
 
   MantidQt::API::AlgorithmDialog *dlg =
-      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, optional_msg , enabled);
+      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, optional_msg,enabled);
   return dlg;
 }
 
@@ -1933,7 +1934,7 @@ void MantidUI::cancelAllRunningAlgorithms()
 }
 
 bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
-    const QString & optional_msg,  const QString & enabled_names)
+    const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
   if( !alg )
@@ -1941,9 +1942,22 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
     return false;
   }
 
+  //PyQt can't pass a dictionary across the boundary as a dictionary can contain arbitrary data types
+  QHash<QString,QString> presets;
+  QStringList chopped = preset_values.split('|', QString::SkipEmptyParts);
+  QStringListIterator itr(chopped);
+  while( itr.hasNext() )
+  {
+    QString namevalue = itr.next();
+    QString name = namevalue.section('=', 0, 0);
+    // Simplified removes trims from start and end and replaces all n counts of whitespace with a single whitespace
+    QString value = namevalue.section('=', 1, 1).simplified();
+    presets.insert(name, value);
+  }
+
   MantidQt::API::AlgorithmDialog *dlg =
       MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
-          true, preset_values, optional_msg, enabled_names);
+          true, presets, optional_msg, enabled, disabled);
   return (dlg->exec() == QDialog::Accepted);
 }
 

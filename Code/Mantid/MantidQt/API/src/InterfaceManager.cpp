@@ -36,8 +36,8 @@ Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
-						    bool forScript, const QString & preset_values,
-						    const QString & optional_msg,  const QString & enabled_names)
+  bool forScript, const QHash<QString,QString>& preset_values,
+  const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
   AlgorithmDialog* dlg = NULL;
   if( AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog") )
@@ -70,7 +70,7 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
   dlg->setPresetValues(preset_values);
   dlg->isForScript(forScript);
   dlg->setOptionalMessage(optional_msg);
-  dlg->setEnabledNames(enabled_names);
+  dlg->addEnabledAndDisableLists(enabled, disabled);
 
   // Setup the layout
   dlg->initializeLayout();

@@ -32,7 +32,7 @@ using namespace MantidQt::API;
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
   QDialog(parent), m_algorithm(NULL), m_algName(""), m_algProperties(), 
   m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(), 
-  m_enabledNames(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), 
+  m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), 
   m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
   m_signal_mapper(new QSignalMapper())
 {
@@ -436,11 +436,16 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
   }
   else
   {
-    // Algorithm dialog was called from PYTHON
-    // Disable any arguments that were specified in the command
-    if( isInEnabledList(propName) ) return true;
+    // Algorithm dialog was called from a script(i.e. Python)
+    // Keep things enabled if requested
+    if( m_enabled.contains(propName) ) return true;
 
-    if( property->isValid().empty() && m_python_arguments.contains(propName) )
+    /**
+    * The control is disabled if
+    *   (1) It is contained in the disabled list or
+    *   (2) A user passed a value into the dialog
+    */
+    if( m_disabled.contains(propName) || m_python_arguments.contains(propName) )
     {
       return false;
     }
@@ -962,38 +967,53 @@ void AlgorithmDialog::parse()
   * Set a list of values for the properties
   * @param presetValues :: A string containing a list of "name=value" pairs with each separated by an '|' character
   */
-void AlgorithmDialog::setPresetValues(const QString & presetValues)
+void AlgorithmDialog::setPresetValues(const QHash<QString,QString> & presetValues)
 {
   if( presetValues.isEmpty() ) return;
-  QStringList presets = presetValues.split('|', QString::SkipEmptyParts);
-  QStringListIterator itr(presets);
+  QHashIterator<QString,QString> itr(presetValues);
   m_python_arguments.clear();
   while( itr.hasNext() )
   {
-    QString namevalue = itr.next();
-    QString name = namevalue.section('=', 0, 0);
+    itr.next();
+    QString name = itr.key();
     m_python_arguments.append(name);
-    // Simplified removes trims from start and end and replaces all n counts of whitespace with a single whitespace
-    QString value = namevalue.section('=', 1, 1).simplified();
-    storePropertyValue(name, value.trimmed());
+    QString value = itr.value();
+    storePropertyValue(name, value);
   }
   setPropertyValues();
 }
 
 /** 
- * Set comma-separated list of enabled parameter names
- * @param enabledNames :: A comma-separated list of parameter names to keep enabled
+ * Set list of enabled and disabled parameter names
+ * @param enabled:: A list of parameter names to keep enabled
+ * @param disbaled:: A list of parameter names whose widgets should be disabled
  */
-void AlgorithmDialog::setEnabledNames(const QString & enabledNames)
+void AlgorithmDialog::addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled)
 {
-  if( enabledNames.isEmpty() ) return;
-  
-  m_enabledNames = enabledNames.split(',', QString::SkipEmptyParts);
+  m_enabled = enabled;
+  m_disabled = disabled;
 }
 
-bool AlgorithmDialog::isInEnabledList(const QString& propName) const
+/**
+ * Returns true if the parameter name has been explicity requested to be kept enabled. If the parameter
+ * has been explicity requested to be disabled then return false as well as if neither have been specified
+ */
+bool AlgorithmDialog::requestedToKeepEnabled(const QString& propName) const
 {
-  return m_enabledNames.contains(propName);
+  bool enabled(true);
+  if( m_disabled.contains(propName) ) 
+  {
+    enabled = false;
+  }
+  else if( m_enabled.contains(propName) ) // Definitely enable
+  {
+    enabled = true;
+  }
+  else //Nothing was specified
+  {
+    enabled = false;
+  }
+  return enabled;
 }
 
 /**

@@ -63,6 +63,7 @@ namespace MantidQt
     */
     void LoadDialog::suggestWSName()
     {
+      if( !m_form.workspaceEdit->isEnabled() ) return;
       QString suggestion;
       if( m_form.fileWidget->isValid() )
       {

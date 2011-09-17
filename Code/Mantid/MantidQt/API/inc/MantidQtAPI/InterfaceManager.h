@@ -9,6 +9,8 @@
 #include "MantidKernel/Instantiator.h"
 
 #include <QString>
+#include <QStringList>
+#include <QHash>
 
 //----------------------------------
 // Qt Forward declarations
@@ -80,9 +82,9 @@ public:
   
   /// Create a new instance of the correct type of AlgorithmDialog
   AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
-        bool forScript = false, const QString & preset_values = QString(),
-        const QString & optional_msg = QString(), const QString & enabled_names = QString());
-				
+        bool forScript = false, const QHash<QString,QString> & preset_values = QHash<QString,QString>(),
+        const QString & optional_msg = QString(), const QStringList & enabled=QStringList(), const QStringList & disabled=QStringList());
+
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
 

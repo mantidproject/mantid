@@ -230,11 +230,11 @@ private:
   /// Parse out the input from the dialog
   void parse();
   /// Set a list of suggested values  
-  void setPresetValues(const QString & presetValues);
+  void setPresetValues(const QHash<QString,QString> & presetValues);
   /// Set comma-separated-list of enabled parameter names
-  void setEnabledNames(const QString & enabledNames);
-  /// Test if the given name's widget should be left enabled
-  bool isInEnabledList(const QString& propName) const;
+  void addEnabledAndDisableLists(const QStringList & enabled, const QStringList & disabled);
+  /// Test if the given name's widget has been explicity asked to be enabled
+  bool requestedToKeepEnabled(const QString& propName) const;
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
   /// Set an optional message to be displayed at the top of the dialog
@@ -267,7 +267,9 @@ protected:
   /// A list of property names that have been passed from Python
   QStringList m_python_arguments;
   /// A list of property names that should have their widgets enabled
-  QStringList m_enabledNames;
+  QStringList m_enabled;
+  /// A list of property names that the user has requested to be disabled (overrides those in enabled)
+  QStringList m_disabled;
   /// The message string to be displayed at the top of the widget; if it exists.
   QString m_strMessage;
   /// Is the message string empty or not

@@ -252,7 +252,7 @@ public:
   MultiLayer* plotBin(const QString& wsName, int bin, bool errors = false);
   void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
-				 const QString & optional_msg,  const QString & enabled_names);
+				 const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled);
 /// Group selected workspaces
   void groupWorkspaces();
   /// UnGroup selected groupworkspace
