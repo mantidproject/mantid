@@ -270,20 +270,21 @@ namespace Mantid
         {
           // If an input workspace, get the list of workspaces currently in the ADS
           std::set<std::string> vals = AnalysisDataService::Instance().getObjectNames();
-          if (m_optional)
+          if (m_optional) // Insert an empty option
           {
             vals.insert("");
           }
-          else
+          // Copy-construct a temporary workspace property to test the validity of each workspace
+          WorkspaceProperty<TYPE> tester(*this);
+          std::set<std::string>::iterator it;
+          for (it = vals.begin(); it != vals.end();)
           {
-            // Copy-construct a temporary workspace property to test the validity of each workspace
-            WorkspaceProperty<TYPE> tester(*this);
-            std::set<std::string>::iterator it;
-            for (it = vals.begin(); it != vals.end(); ++it)
-            {
-              // Remove any workspace that's not valid for this algorithm
-              if (!tester.setValue(*it).empty()) vals.erase(it);
+            // Remove any workspace that's not valid for this algorithm
+            if (!tester.setValue(*it).empty()) 
+            { 
+              vals.erase(it++); //Post-fix so that it erase the previous when returned
             }
+            else ++it;
           }
           return vals;
         }
