@@ -12,7 +12,10 @@ import sys
 import fnmatch
 
 mantid_initialized = False
-file_matches = []
+header_files = []
+header_files_bare = []
+python_files = []
+python_files_bare = []
 
 #======================================================================
 def intialize_files():
@@ -22,15 +25,35 @@ def intialize_files():
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
       for filename in fnmatch.filter(filenames, '*.h'):
-          file_matches.append(os.path.join(root, filename))
+          fullfile = os.path.join(root, filename)
+          header_files.append(fullfile)
+          header_files_bare.append( os.path.split(fullfile)[1] )
+      for filename in fnmatch.filter(filenames, '*.py'):
+          fullfile = os.path.join(root, filename)
+          python_files.append(fullfile)
+          python_files_bare.append( os.path.split(fullfile)[1] )
 
 #======================================================================
-def initialize(args):
+def find_algo_file(algo):
+    """Find the files for a given algorithm"""
+    source = ''
+    header = algo + ".h"
+    pyfile = algo + ".py"
+    if header in header_files_bare:
+        n = header_files_bare.index(header, )
+        source = header_files[n]
+    elif pyfile in python_files_bare:
+        n = python_files_bare.index(pyfile, )
+        source = python_files[n]
+    return source
+
+#======================================================================
+def initialize_wiki(args):
     global site
     # Init site object
     print "Connecting to site mantidproject.org"
     site = mwclient.Site('www.mantidproject.org', path='/')
-    print "Logging in."
+    print "Logging in as %s" % args.username
     site.login(args.username, args.password) # Optional
     
     
@@ -46,10 +69,48 @@ def initialize_Mantid():
     mtd.initialise()
     mantid_initialized = True
 
-    
-    
-    
+#======================================================================
+def get_all_algorithms():
+    """REturns a list of all algorithm names"""
+    temp = mtd._getRegisteredAlgorithms(True)
+    algos = [x for (x, version) in temp]
+    return algos
 
+#======================================================================
+def find_misnamed_algos():
+    """Prints out algos that have mismatched class names and algorithm names"""
+    algos = get_all_algorithms()
+    print "\n--- The following algorithms have misnamed class files."
+    print   "--- No file matching their algorithm name could be found.\n"
+    for algo in algos:
+        source = find_algo_file(algo)
+        if source=='':
+            print "%s was NOT FOUND" % (algo, )
+            
+#======================================================================
+def pull_wiki_description(algo):
+    """Pull out the wiki description from the algo code
+    and place it in the algo's header file under comments tag."""
+    alg = mtd.createAlgorithm(algo)
+    desc = alg.getWikiDescription().split('\n')
+    source = find_algo_file(algo)
+    if source != '':
+        f = open(source,'r')
+        lines = f.read().split('\n')
+        f.close()
+        n = 0
+        namespaces = 0
+        while namespaces < 2 and n < len(lines):
+            line = lines[n].strip()
+            if line.startswith('namespace '): namespaces += 1
+            n += 1
+        n += 1
+        if namespaces < 2:
+            n = 0
+        lines = lines[:n] + ['/*WIKI*'] + desc + ['*WIKI*/'] + lines[n:]
+        
+        print lines
+            
 
 #======================================================================
 def make_property_table_line(propnum, p):
@@ -191,6 +252,10 @@ def validate_wiki(args, algos):
             missing.append(algo)
         else:
             lines = wiki.split('\n')
+            
+        source = find_algo_file(algo)
+        if source=='':
+            print "- Source file not found."
 
         # Validate the algorithm itself
         alg = mtd.createAlgorithm(algo)
@@ -224,8 +289,7 @@ def validate_wiki(args, algos):
 def find_orphan_wiki():
     """ Look for pages on the wiki that do NOT correspond to an algorithm """
     category = site.Pages['Category:Algorithms']
-    temp = mtd._getRegisteredAlgorithms(True)
-    algos = [x for (x, version) in temp]
+    algos = get_all_algorithms()
             
     for page in category:
         algo_name = page.name
@@ -283,6 +347,10 @@ if __name__ == "__main__":
     parser.add_argument('--find-orphans', dest='find_orphans', action='store_const',
                         const=True, default=False,
                         help="Look for 'orphan' wiki pages that are set as Category:Algorithms but do not have a matching Algorithm in Mantid.")
+    
+    parser.add_argument('--find-misnamed', dest='find_misnamed', action='store_const',
+                        const=True, default=False,
+                        help="Look for algorithms where the name of the algorithm does not match any filename.")
 
     args = parser.parse_args()
     
@@ -294,13 +362,21 @@ if __name__ == "__main__":
     f = open(config_filename, 'w')
     config.write(f)
     f.close()
-    
-    if not args.validate_wiki and len(args.algos)==0:
+
+    if not args.validate_wiki and not args.find_misnamed and not args.find_orphans and len(args.algos)==0:
         parser.error("You must specify at least one algorithm if not using --validate")
 
-    # Open the site
-    initialize(args)
     initialize_Mantid()
+    intialize_files()
+    
+#    pull_wiki_description('LoadMD')
+#    sys.exit(1)
+
+    if args.find_misnamed:
+        find_misnamed_algos()
+        sys.exit(1)
+    
+    initialize_wiki(args)
     
     if args.find_orphans:
         find_orphan_wiki()
@@ -310,8 +386,7 @@ if __name__ == "__main__":
         # Validate a few, or ALL algos
         algos = args.algos
         if len(algos) == 0:
-            temp = mtd._getRegisteredAlgorithms(True)
-            algos = [x for (x, version) in temp]
+            algos = get_all_algorithms()
         validate_wiki(args, algos)
     else:
         for algo in args.algos:
