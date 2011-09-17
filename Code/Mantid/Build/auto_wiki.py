@@ -221,13 +221,14 @@ def find_property_doc(lines, propname):
     return ""
     
 #======================================================================
-def find_section_text(lines, section, go_to_end):
+def find_section_text(lines, section, go_to_end, section2):
     """ Search WIKI text to find a section text there """
     if len(lines) == 0:
         return ""
     n = 0
     for line in lines:
-        if line.strip().startswith("== %s" % section):
+        if line.strip().startswith("== %s" % section) \
+            or (section2 != "" and line.strip().startswith("== %s" % section2)):
             # Section started
             n += 1
             doc = ""
@@ -273,14 +274,14 @@ def validate_wiki(args, algos):
         alg = mtd.createAlgorithm(algo)
         summary = alg._ProxyObject__obj.getWikiSummary()
         if len(summary) == 0: 
-            print "- Summary is missing (in the code)."
-            wikidoc = find_section_text(lines, "Summary", go_to_end=False)
+            #print "- Summary is missing (in the code)."
+            wikidoc = find_section_text(lines, "Summary", go_to_end=False, section2="")
             if args.show_missing: print wikidoc
             
         desc = alg._ProxyObject__obj.getWikiDescription()
         if len(desc) == 0: 
-            print "- Wiki Description is missing (in the code)."
-            desc = find_section_text(lines, "Description", go_to_end=True)
+            #print "- Wiki Description is missing (in the code)."
+            desc = find_section_text(lines, "Description", True, "Introduction")
             if args.show_missing: print desc
             
         add_wiki_description(algo, desc)
