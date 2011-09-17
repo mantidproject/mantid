@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/MultipleScatteringAbsorption.h"
+#include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -13,7 +13,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
-DECLARE_ALGORITHM(MultipleScatteringAbsorption)   // Register the class into the algorithm factory
+DECLARE_ALGORITHM(MultipleScatteringCylinderAbsorption)   // Register the class into the algorithm factory
 
 using namespace Kernel;
 using namespace API;
@@ -57,7 +57,7 @@ using std::vector;
 /**
  * Initialize the properties to default values
  */
-void MultipleScatteringAbsorption::init()
+void MultipleScatteringCylinderAbsorption::init()
 {
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
                   "",Direction::Input, new InstrumentValidator<>), "The name of the input workspace.");
@@ -74,7 +74,7 @@ void MultipleScatteringAbsorption::init()
 /** 
  * Execute the algorithm
  */
-void MultipleScatteringAbsorption::exec()
+void MultipleScatteringCylinderAbsorption::exec()
 {
   // common information
   API::MatrixWorkspace_sptr in_WS = getProperty("InputWorkspace");
@@ -127,7 +127,7 @@ void MultipleScatteringAbsorption::exec()
 /**
  * Set up the Z table for the specified two theta angle (in degrees).
  */
-void MultipleScatteringAbsorption::ZSet(const double angle_rad, vector<double>& Z)
+void MultipleScatteringCylinderAbsorption::ZSet(const double angle_rad, vector<double>& Z)
 {
   double theta_rad = angle_rad * .5;
   int l, J;
@@ -160,7 +160,7 @@ void MultipleScatteringAbsorption::ZSet(const double angle_rad, vector<double>& 
 /**
  * Evaluate the AttFac function for a given sigir and sigsr.
  */
-double MultipleScatteringAbsorption::AttFac(const double sigir, const double sigsr,
+double MultipleScatteringCylinderAbsorption::AttFac(const double sigir, const double sigsr,
                                             const vector<double>& Z)
 {
   double facti = 1.0;
@@ -188,7 +188,7 @@ double MultipleScatteringAbsorption::AttFac(const double sigir, const double sig
  *  Calculate the wavelength at a specified total path in meters and
  *  time-of-flight in microseconds.
  */
-inline double MultipleScatteringAbsorption::wavelength( double path_length_m, double tof_us )
+inline double MultipleScatteringCylinderAbsorption::wavelength( double path_length_m, double tof_us )
 {
   return ANGST_PER_US_PER_M * tof_us / path_length_m;
 }
@@ -198,7 +198,7 @@ inline double MultipleScatteringAbsorption::wavelength( double path_length_m, do
  * Alter the values in the y_vals[] to account for multiple scattering.
  * Parameter total_path is in meters, and the sample radius is in cm.
  */
-void MultipleScatteringAbsorption::apply_msa_correction( 
+void MultipleScatteringCylinderAbsorption::apply_msa_correction( 
                 double total_path, double angle_deg, double radius,
                 double coeff1,  double coeff2, double coeff3,
                 vector<double>& tof, vector<double>& y_val)

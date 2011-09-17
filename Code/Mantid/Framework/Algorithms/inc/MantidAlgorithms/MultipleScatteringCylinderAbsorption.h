@@ -42,15 +42,15 @@ namespace Algorithms
                   <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MultipleScatteringAbsorption : public API::Algorithm
+class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm
 {
 public:
 
   /// Default constructor
-  MultipleScatteringAbsorption() : API::Algorithm() {};
+  MultipleScatteringCylinderAbsorption() : API::Algorithm() {};
 
   /// Destructor
-  virtual ~MultipleScatteringAbsorption() {};
+  virtual ~MultipleScatteringCylinderAbsorption() {};
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "MultipleScatteringCylinderAbsorption";}
@@ -76,7 +76,7 @@ private:
   // Wavelength function
   double wavelength( double path_length_m, double tof_us );
 
-  /** MultipleScatteringAbsorption correction calculation.  This
+  /** MultipleScatteringCylinderAbsorption correction calculation.  This
    *  method will change the values in the y_val array to correct for
    *  multiple scattering absorption.
    *

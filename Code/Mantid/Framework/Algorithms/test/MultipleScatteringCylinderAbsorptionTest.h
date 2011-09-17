@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidAlgorithms/MultipleScatteringAbsorption.h"
+#include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -16,7 +16,7 @@ using namespace Mantid::Kernel;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::MantidVec;
 
-class MultipleScatteringAbsorptionTest : public CxxTest::TestSuite
+class MultipleScatteringCylinderAbsorptionTest : public CxxTest::TestSuite
 {
 public:
   void testName()
@@ -36,7 +36,7 @@ public:
   
   void testInit()
   {
-    Mantid::Algorithms::MultipleScatteringAbsorption   algorithm_b;
+    Mantid::Algorithms::MultipleScatteringCylinderAbsorption   algorithm_b;
     TS_ASSERT_THROWS_NOTHING( algorithm_b.initialize() );
     TS_ASSERT( algorithm_b.isInitialized() );
 
@@ -78,7 +78,7 @@ public:
     AnalysisDataService::Instance().add("TestInputWS",wksp);
 
     // create and execute the algorithm
-    Mantid::Algorithms::MultipleScatteringAbsorption   algorithm_c;
+    Mantid::Algorithms::MultipleScatteringCylinderAbsorption   algorithm_c;
     TS_ASSERT_THROWS_NOTHING(algorithm_c.initialize() );
     TS_ASSERT( algorithm_c.isInitialized() );
 
@@ -130,7 +130,7 @@ public:
   }
 
 private:
-  Mantid::Algorithms::MultipleScatteringAbsorption algorithm;
+  Mantid::Algorithms::MultipleScatteringCylinderAbsorption algorithm;
 
 };
 

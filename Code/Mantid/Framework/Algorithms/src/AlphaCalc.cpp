@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/MuonAlphaCalc.h"
+#include "MantidAlgorithms/AlphaCalc.h"
 
 namespace Mantid
 {
@@ -16,12 +16,12 @@ using namespace Kernel;
 using API::Progress;
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM( MuonAlphaCalc)
+DECLARE_ALGORITHM( AlphaCalc)
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
-void MuonAlphaCalc::init()
+void AlphaCalc::init()
 {
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
@@ -45,7 +45,7 @@ void MuonAlphaCalc::init()
 /** Executes the algorithm
  *
  */
-void MuonAlphaCalc::exec()
+void AlphaCalc::exec()
 {
   std::vector<int> forwardSpectraList = getProperty("ForwardSpectra");
   std::vector<int> backwardSpectraList = getProperty("BackwardSpectra");

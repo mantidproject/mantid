@@ -46,13 +46,13 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MuonAlphaCalc : public API::Algorithm
+    class DLLExport AlphaCalc : public API::Algorithm
     {
     public:
       /// Default constructor
-      MuonAlphaCalc() : API::Algorithm() {};
+      AlphaCalc() : API::Algorithm() {};
       /// Destructor
-      virtual ~MuonAlphaCalc() {};
+      virtual ~AlphaCalc() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "AlphaCalc";}
       /// Algorithm's version for identification overriding a virtual method

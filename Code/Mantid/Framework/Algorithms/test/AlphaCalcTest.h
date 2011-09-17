@@ -7,7 +7,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/MuonAlphaCalc.h"
+#include "MantidAlgorithms/AlphaCalc.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -16,7 +16,7 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class MuonAlphaCalcTest : public CxxTest::TestSuite
+class AlphaCalcTest : public CxxTest::TestSuite
 {
 public:
 
@@ -92,7 +92,7 @@ public:
 
 
 private:
-  MuonAlphaCalc alphaCalc;
+  AlphaCalc alphaCalc;
   Mantid::DataHandling::LoadMuonNexus loader;
 
 };

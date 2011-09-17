@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AddLogDerivative.cpp
 	src/AddSampleLog.cpp
 	src/AlignDetectors.cpp
+	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
@@ -100,10 +101,9 @@ set ( SRC_FILES
 	src/MergeRuns.cpp
 	src/Minus.cpp
 	src/MonteCarloAbsorption.cpp
-	src/MultipleScatteringAbsorption.cpp
+	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
-	src/MuonAlphaCalc.cpp
 	src/MuonAsymmetryCalc.cpp
 	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
@@ -170,6 +170,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
+	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
@@ -267,10 +268,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
-	inc/MantidAlgorithms/MultipleScatteringAbsorption.h
+	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
-	inc/MantidAlgorithms/MuonAlphaCalc.h
 	inc/MantidAlgorithms/MuonAsymmetryCalc.h
 	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
@@ -335,6 +335,7 @@ set ( TEST_FILES
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
 	test/AlignDetectorsTest.h
+	test/AlphaCalcTest.h
 	test/AnyShapeAbsorptionTest.h
 	test/ApplyDetailedBalanceTest.h
 	test/ApplyTransmissionCorrectionTest.h
@@ -421,10 +422,9 @@ set ( TEST_FILES
 	test/MergeRunsTest.h
 	test/MinusTest.h
 	test/MonteCarloAbsorptionTest.h
-	test/MultipleScatteringAbsorptionTest.h
+	test/MultipleScatteringCylinderAbsorptionTest.h
 	test/MultiplyRangeTest.h
 	test/MultiplyTest.h
-	test/MuonAlphaCalcTest.h
 	test/MuonAsymmetryCalcTest.h
 	test/MuonRemoveExpDecayTest.h
 	test/NormaliseByCurrentTest.h

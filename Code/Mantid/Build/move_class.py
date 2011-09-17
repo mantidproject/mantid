@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
                         help='The subproject under Framework/; e.g. Kernel')
     parser.add_argument('classname', metavar='CLASSNAME', type=str,
-                        help='Name of the class to create')
+                        help='Name of the class to move')
     parser.add_argument('newproject', metavar='NEWPROJECT', type=str,
                         help='Name of the project to which to move the class.')
     parser.add_argument('newclassname', metavar='NEWCLASSNAME', type=str,
