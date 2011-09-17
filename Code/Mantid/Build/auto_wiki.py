@@ -106,9 +106,10 @@ def add_wiki_description(algo, wikidesc):
         if namespaces < 2:
             n = 0
         #What lines are we adding?
-        adding = ['/*WIKI* Place wiki page description between the *WIKI* markers:'] + wikidesc + ['*WIKI*/'] 
         if source.endswith(".py"):
-            adding = ['"""'] + adding + ['"""']
+            adding = ['"""*WIKI* Place wiki page description between the *WIKI* markers:'] + wikidesc + ['*WIKI*"""'] 
+        else:
+            adding = ['/*WIKI* Place wiki page description between the *WIKI* markers:'] + wikidesc + ['*WIKI*/'] 
     
         lines = lines[:n] + adding + lines[n:]
         
