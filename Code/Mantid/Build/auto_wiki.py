@@ -88,11 +88,9 @@ def find_misnamed_algos():
             print "%s was NOT FOUND" % (algo, )
             
 #======================================================================
-def pull_wiki_description(algo):
-    """Pull out the wiki description from the algo code
-    and place it in the algo's header file under comments tag."""
-    alg = mtd.createAlgorithm(algo)
-    desc = alg.getWikiDescription().split('\n')
+def add_wiki_description(algo, wikidesc):
+    """Adds a wiki description  in the algo's header file under comments tag."""
+    wikidesc = wikidesc.split('\n')
     source = find_algo_file(algo)
     if source != '':
         f = open(source,'r')
@@ -107,9 +105,18 @@ def pull_wiki_description(algo):
         n += 1
         if namespaces < 2:
             n = 0
-        lines = lines[:n] + ['/*WIKI*'] + desc + ['*WIKI*/'] + lines[n:]
+        #What lines are we adding?
+        adding = ['/*WIKI* Place wiki page description between the *WIKI* markers:'] + wikidesc + ['*WIKI*/'] 
+        if source.endswith(".py"):
+            adding = ['"""'] + adding + ['"""']
+    
+        lines = lines[:n] + adding + lines[n:]
         
-        print lines
+        text = "\n".join(lines)
+        f = open(source,'w')
+        f.write(text)
+        f.close()
+        
             
 
 #======================================================================
@@ -210,7 +217,7 @@ def find_property_doc(lines, propname):
     return ""
     
 #======================================================================
-def find_section_text(lines, section):
+def find_section_text(lines, section, go_to_end):
     """ Search WIKI text to find a section text there """
     if len(lines) == 0:
         return ""
@@ -222,7 +229,8 @@ def find_section_text(lines, section):
             doc = ""
             # collect the documents till next section or the end 
             newline = lines[n]
-            while not newline.strip().startswith('==') and not newline.strip().startswith('[[Category'):
+            while (go_to_end or not newline.strip().startswith('==')) \
+                  and not newline.strip().startswith('[[Category'):
                 doc += newline + '\n'
                 n += 1
                 if n < len(lines):
@@ -262,13 +270,16 @@ def validate_wiki(args, algos):
         summary = alg._ProxyObject__obj.getWikiSummary()
         if len(summary) == 0: 
             print "- Summary is missing (in the code)."
-            wikidoc = find_section_text(lines, "Summary")
+            wikidoc = find_section_text(lines, "Summary", go_to_end=False)
             if args.show_missing: print wikidoc
             
         desc = alg._ProxyObject__obj.getWikiDescription()
         if len(desc) == 0: 
             print "- Wiki Description is missing (in the code)."
-            if args.show_missing: print find_section_text(lines, "Description")
+            desc = find_section_text(lines, "Description", go_to_end=True)
+            if args.show_missing: print desc
+            
+        add_wiki_description(algo, desc)
             
         props = alg._ProxyObject__obj.getProperties()
         for prop in props:
