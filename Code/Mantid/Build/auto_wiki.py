@@ -91,11 +91,11 @@ def find_misnamed_algos():
 def add_wiki_description(algo, wikidesc):
     """Adds a wiki description  in the algo's header file under comments tag."""
     wikidesc = wikidesc.split('\n')
-    if len("".join(wikidesc)) == 0:
-        print "No wiki description found to add!!!!"
-        return 
     source = find_algo_file(algo)
     if source != '':
+        if len("".join(wikidesc)) == 0:
+            print "No wiki description found to add!!!!"
+        
         f = open(source,'r')
         lines = f.read().split('\n')
         f.close()
