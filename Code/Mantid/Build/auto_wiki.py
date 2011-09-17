@@ -91,6 +91,9 @@ def find_misnamed_algos():
 def add_wiki_description(algo, wikidesc):
     """Adds a wiki description  in the algo's header file under comments tag."""
     wikidesc = wikidesc.split('\n')
+    if len("".join(wikidesc)) == 0:
+        print "No wiki description found to add!!!!"
+        return 
     source = find_algo_file(algo)
     if source != '':
         f = open(source,'r')
@@ -107,9 +110,9 @@ def add_wiki_description(algo, wikidesc):
             n = 0
         #What lines are we adding?
         if source.endswith(".py"):
-            adding = ['"""*WIKI* Place wiki page description between the *WIKI* markers:'] + wikidesc + ['*WIKI*"""'] 
+            adding = ['"""*WIKI* Place wiki page description between the *WIKI* markers:', ''] + wikidesc + ['*WIKI*"""'] 
         else:
-            adding = ['/*WIKI* Place wiki page description between the *WIKI* markers:'] + wikidesc + ['*WIKI*/'] 
+            adding = ['/*WIKI* Place wiki page description between the *WIKI* markers:', ''] + wikidesc + ['*WIKI*/'] 
     
         lines = lines[:n] + adding + lines[n:]
         
@@ -282,16 +285,16 @@ def validate_wiki(args, algos):
             
         add_wiki_description(algo, desc)
             
-        props = alg._ProxyObject__obj.getProperties()
-        for prop in props:
-            if len(prop.documentation) == 0:
-                print "- Property %s has no documentation/tooltip (in the code)." % prop.name,
-                wikidoc = find_property_doc(lines, prop.name)
-                if len(wikidoc) > 0:
-                    print "Found in wiki"
-                    if args.show_missing: print "   \"%s\"" % wikidoc
-                else:
-                    print "Not found in wiki."
+#        props = alg._ProxyObject__obj.getProperties()
+#        for prop in props:
+#            if len(prop.documentation) == 0:
+#                print "- Property %s has no documentation/tooltip (in the code)." % prop.name,
+#                wikidoc = find_property_doc(lines, prop.name)
+#                if len(wikidoc) > 0:
+#                    print "Found in wiki"
+#                    if args.show_missing: print "   \"%s\"" % wikidoc
+#                else:
+#                    print "Not found in wiki."
             
     print "\n\n"
     print "Algorithms with missing wiki page:\n", " ".join(missing) 
