@@ -89,11 +89,6 @@ namespace Crystal
     Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
     out <<  expDate.to_ISO8601_string() << std::endl;
 
-    out << "This is the header format:" << std::endl;
-
-    out << "0     1     2    3    4      5       6       7        8       9              10           11          12        13       14      15    16" << std::endl;
-    out << "-" << header.substr(1, header.size()-1) << std::endl;
-
     out << "6         L1    T0_SHIFT" <<  std::endl;
     out << "7 "<< std::setw( 10 )  ;
     out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
