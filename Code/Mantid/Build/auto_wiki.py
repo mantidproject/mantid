@@ -9,6 +9,7 @@ import datetime
 import subprocess
 import commands
 import sys
+import codecs
 import fnmatch
 
 mantid_initialized = False
@@ -100,29 +101,47 @@ def add_wiki_description(algo, wikidesc):
         lines = f.read().split('\n')
         f.close()
         n = 0
-        namespaces = 0
-        while namespaces < 2 and n < len(lines):
+        while  n < len(lines):
             line = lines[n].strip()
-            if line.startswith('namespace '): namespaces += 1
             n += 1
-        n += 1
-        if namespaces < 2:
-            n = 0
+            if line.startswith('#define'): break
+            
+        if n >= len(lines): n = 0
+        
         #What lines are we adding?
         if source.endswith(".py"):
-            adding = ['"""*WIKI* Place wiki page description between the *WIKI* markers:', ''] + wikidesc + ['*WIKI*"""'] 
+            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
         else:
-            adding = ['/*WIKI* Place wiki page description between the *WIKI* markers:', ''] + wikidesc + ['*WIKI*/'] 
+            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
     
         lines = lines[:n] + adding + lines[n:]
         
         text = "\n".join(lines)
-        f = open(source,'w')
+        f = codecs.open(source, encoding='utf-8', mode='w+')
         f.write(text)
         f.close()
         
-            
-
+        
+#======================================================================
+def get_wiki_description(algo):
+    source = find_algo_file(algo)
+    if source == '': 
+        alg = mtd.createAlgorithm(algo_name)
+        return alg.getWikiDescription()
+    else:
+        f = open(source,'r')
+        lines = f.read().split('\n')
+        f.close()
+        n = 0
+        while not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*'):
+            n += 1
+        desc = ""
+        n += 1
+        while not lines[n].startswith("*WIKI*"):
+            desc += lines[n] + "\n"
+            n += 1
+        return desc
+    
 #======================================================================
 def make_property_table_line(propnum, p):
     """ Make one line of property table
@@ -181,7 +200,7 @@ def make_wiki(algo_name):
 
     out += "== Description ==\n"
     out += "\n"
-    desc = alg.getWikiDescription()
+    desc = get_wiki_description(algo_name)
     if (desc == ""):
       out += "INSERT FULL DESCRIPTION HERE\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
@@ -275,28 +294,28 @@ def validate_wiki(args, algos):
         alg = mtd.createAlgorithm(algo)
         summary = alg._ProxyObject__obj.getWikiSummary()
         if len(summary) == 0: 
-            #print "- Summary is missing (in the code)."
+            print "- Summary is missing (in the code)."
             wikidoc = find_section_text(lines, "Summary", go_to_end=False, section2="")
             if args.show_missing: print wikidoc
             
-        desc = alg._ProxyObject__obj.getWikiDescription()
-        if len(desc) == 0: 
-            #print "- Wiki Description is missing (in the code)."
-            desc = find_section_text(lines, "Description", True, "Introduction")
-            if args.show_missing: print desc
+#        desc = alg._ProxyObject__obj.getWikiDescription()
+#        if len(desc) == 0: 
+#            print "- Wiki Description is missing (in the code)."
+#            desc = find_section_text(lines, "Description", True, "Introduction")
+#            if args.show_missing: print desc
             
-        add_wiki_description(algo, desc)
+        #add_wiki_description(algo, desc)
             
-#        props = alg._ProxyObject__obj.getProperties()
-#        for prop in props:
-#            if len(prop.documentation) == 0:
-#                print "- Property %s has no documentation/tooltip (in the code)." % prop.name,
-#                wikidoc = find_property_doc(lines, prop.name)
-#                if len(wikidoc) > 0:
-#                    print "Found in wiki"
-#                    if args.show_missing: print "   \"%s\"" % wikidoc
-#                else:
-#                    print "Not found in wiki."
+        props = alg._ProxyObject__obj.getProperties()
+        for prop in props:
+            if len(prop.documentation) == 0:
+                print "- Property %s has no documentation/tooltip (in the code)." % prop.name,
+                wikidoc = find_property_doc(lines, prop.name)
+                if len(wikidoc) > 0:
+                    print "Found in wiki"
+                    if args.show_missing: print "   \"%s\"" % wikidoc
+                else:
+                    print "Not found in wiki."
             
     print "\n\n"
     print "Algorithms with missing wiki page:\n", " ".join(missing) 
