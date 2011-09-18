@@ -47,13 +47,16 @@ void SmoothNeighbours::init()
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-  mustBePositive->setLower(1);
+  mustBePositive->setLower(0);
 
   declareProperty("AdjX", 1, mustBePositive,
     "The number of X (horizontal) adjacent pixels to average together. " );
 
   declareProperty("AdjY", 1, mustBePositive->clone(),
     "The number of Y (vertical) adjacent pixels to average together. " );
+
+  declareProperty("ZeroEdgePixels", 0, mustBePositive->clone(),
+    "The number of pixels to zero at edges. " );
 
 
 }
@@ -66,6 +69,7 @@ void SmoothNeighbours::exec()
   // Try and retrieve the optional properties
   AdjX = getProperty("AdjX");
   AdjY = getProperty("AdjY");
+  int Edge = getProperty("ZeroEdgePixels");
 
   // Get the input workspace
   EventWorkspace_const_sptr inWS = getProperty("InputWorkspace");
@@ -159,9 +163,9 @@ void SmoothNeighbours::exec()
     if (det)
     {
       size_t outWI = 0;
-      for (int j=0; j < det->xpixels(); j++)
+      for (int j=Edge; j < det->xpixels()-Edge; j++)
       {
-        for (int k=0; k < det->ypixels(); k++)
+        for (int k=Edge; k < det->ypixels()-Edge; k++)
         {
 
           int count = 0;
