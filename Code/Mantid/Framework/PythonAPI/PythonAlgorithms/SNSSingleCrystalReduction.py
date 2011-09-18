@@ -146,7 +146,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension, **kwargs):
+    def _loadNeXusData(self, runnumber, bank, extension, **kwargs):
         if self.getProperty("CompressOnRead"):
             kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
         else:
@@ -155,7 +155,14 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         filename = name + extension
 
         try: # first just try loading the file
-            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly='0', LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
+            #Normalise by sum of counts in upstream monitor
+            Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', EndWorkspaceIndex='0')
+            temp = mtd['Mon']
+            Divide(LHSWorkspace=alg.workspace(), RHSWorkspace=temp, OutputWorkspace=alg.workspace(), AllowDifferentNumberSpectra='1')
+            mtd.deleteWorkspace(str(name)+'_monitors')
+            mtd.deleteWorkspace('Mon')
+            mtd.releaseFreeMemory()
 
             return alg.workspace()
         except:
@@ -171,11 +178,18 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly='0', LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
+        #Normalise by sum of counts in upstream monitor
+        Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', EndWorkspaceIndex='0')
+        temp = mtd['Mon']
+        Divide(LHSWorkspace=alg.workspace(), RHSWorkspace=temp, OutputWorkspace=alg.workspace(), AllowDifferentNumberSpectra='1')
+        mtd.deleteWorkspace(str(name)+'_monitors')
+        mtd.deleteWorkspace('Mon')
+        mtd.releaseFreeMemory()
 
         return alg.workspace()
 
-    def _loadData(self, runnumber, extension, filterWall=None):
+    def _loadData(self, runnumber, bank, extension, filterWall=None):
         filter = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
@@ -187,11 +201,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             return None
 
         if extension.endswith(".nxs"):
-            return self._loadNeXusData(runnumber, extension, **filter)
+            return self._loadNeXusData(runnumber, bank, extension, **filter)
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _focus(self, wksp, info, filterLogs=None):
+    def _focus(self, wksp, bank, info, filterLogs=None):
         if wksp is None:
             return None
         # take care of filtering events
@@ -208,18 +222,18 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))            
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        groups = ""
-        numrange = 60
-        for num in xrange(1,numrange):
-            comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
-            if not comp == None:
-               groups+=("bank%d," % (num) )
-        print groups
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        #groups = ""
+        #numrange = 60
+        #for num in xrange(1,numrange):
+            #comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
+            #if not comp == None:
+               #groups+=("bank%d," % (num) )
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=bank, OutputWorkspace=str(wksp)+"group")
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingWorkspace=str(wksp)+"group")
-        wksp/=(256*256)
+        #Scale peaks to heights that work well with integration
+        wksp*=160
         mtd.deleteWorkspace(str(wksp)+"group")
         mtd.releaseFreeMemory()
         SortEvents(InputWorkspace=wksp, SortBy="X Value")
@@ -353,7 +367,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             samRun = None
             info = None
             for temp in samRuns:
-                temp = self._loadData(temp, SUFFIX, filterWall)
+                temp = self._loadData(temp, bank, SUFFIX, filterWall)
                 tempinfo = self._getinfo(temp)
                 if samRun is None:
                     samRun = temp
@@ -361,95 +375,126 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 else:
                     Plus(samRun, temp, samRun)
                     mtd.deleteWorkspace(str(temp))
+                    mtd.releaseFreeMemory()
             samRuns = [samRun]
+        Banks = ["bank17","bank18","bank26","bank27","bank36","bank37","bank38","bank39","bank46","bank47","bank48","bank49","bank57","bank58"]
 
         for samRun in samRuns:
-            # first round of processing the sample
-            if not self.getProperty("Sum"):
-                samRun = self._loadData(samRun, SUFFIX, filterWall)
-                SortEvents(InputWorkspace=samRun, SortBy="X Value")
-                NormaliseByCurrent(InputWorkspace=samRun, OutputWorkspace=samRun)
-                info = self._getinfo(samRun)
-
-            # process the container
-            canRun = self.getProperty("BackgroundNumber")
-            if canRun <= 0:
-                canRun = info.can
-            if canRun > 0:
-                temp = mtd["%s_%d" % (self._instrument, canRun)]
-                if temp is None:
-                    canRun = self._loadData(canRun, SUFFIX, (0., 0.))
-                    if self._xadjpixels+self._yadjpixels > 0:
-                        SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, 
-                            AdjX=self._xadjpixels, AdjY=self._yadjpixels)
-                        CompressEvents(InputWorkspace=canRun, OutputWorkspace=canRun,
-                            Tolerance=COMPRESS_TOL_TOF) # 5ns
-                    SortEvents(InputWorkspace=canRun, SortBy="X Value")
-                    NormaliseByCurrent(InputWorkspace=canRun, OutputWorkspace=canRun)
+            samRunnum = samRun
+            for bank in Banks:
+                # first round of processing the sample
+                if not self.getProperty("Sum"):
+                    samRun = self._loadData(samRunnum, bank, SUFFIX, filterWall)
+                    SortEvents(InputWorkspace=samRun, SortBy="X Value")
+                    info = self._getinfo(samRun)
+    
+                # process the container
+                canRun = self.getProperty("BackgroundNumber")
+                if canRun <= 0:
+                    canRun = info.can
+                if canRun > 0:
+                    temp = mtd["%s_%d" % (self._instrument, canRun)]
+                    if temp is None:
+                        canRun = self._loadData(canRun, bank, SUFFIX, (0., 0.))
+                        if self._xadjpixels+self._yadjpixels > 0:
+                            SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, 
+                                AdjX=self._xadjpixels, AdjY=self._yadjpixels, ZeroEdgePixels=20)
+                            CompressEvents(InputWorkspace=canRun, OutputWorkspace=canRun,
+                                Tolerance=COMPRESS_TOL_TOF) # 5ns
+                        SortEvents(InputWorkspace=canRun, SortBy="X Value")
+                    else:
+                        canRun = temp
                 else:
-                    canRun = temp
-            else:
-                canRun = None
-
-            if canRun is not None:
-                samRun -= canRun
-                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                               Tolerance=COMPRESS_TOL_TOF) # 10ns
-
-            # process the vanadium run
-            vanRun = self.getProperty("VanadiumNumber")
-            if vanRun <= 0:
-                vanRun = info.van
-            if vanRun > 0:
-                temp = mtd["%s_%d" % (self._instrument, vanRun)]
-                if temp is None:
-                    vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
-                    #if self._xadjpixels+self._yadjpixels > 0:
-                        #SmoothNeighbours(InputWorkspace=vanRun, OutputWorkspace=vanRun, 
-                            #AdjX=self._xadjpixels, AdjY=self._yadjpixels)
-                        #CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
-                            #Tolerance=COMPRESS_TOL_TOF) # 5ns
-                    SortEvents(InputWorkspace=vanRun, SortBy="X Value")
-                    NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                    if canRun is not None:
-                        vanRun -= canRun
-                    Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins='1')
-                    vanRun = self._focus(vanRun, info)
-                    ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
-                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
-                              Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
-                                                         AttenuationXSection=2.8, ScatteringXSection=5.1,
-                                                         SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
-                    SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    canRun = None
+    
+                if canRun is not None:
+                    samRun -= canRun
+                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                   Tolerance=COMPRESS_TOL_TOF) # 10ns
+    
+                # process the vanadium run
+                vanRun = self.getProperty("VanadiumNumber")
+                if vanRun <= 0:
+                    vanRun = info.van
+                if vanRun > 0:
+                    temp = mtd["%s_%d" % (self._instrument, vanRun)]
+                    if temp is None:
+                        vanRun = self._loadData(vanRun, bank, SUFFIX, (0., 0.))
+                        if self._xadjpixels+self._yadjpixels > 0:
+                            SmoothNeighbours(InputWorkspace=vanRun, OutputWorkspace=vanRun, 
+                                AdjX=0, AdjY=0, ZeroEdgePixels=20)
+                            CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                                Tolerance=COMPRESS_TOL_TOF) # 5ns
+                        SortEvents(InputWorkspace=vanRun, SortBy="X Value")
+                        if canRun is not None:
+                            vanRun -= canRun
+                            mtd.deleteWorkspace(str(canRun))
+                            mtd.releaseFreeMemory()
+                            CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                                   Tolerance=COMPRESS_TOL_TOF) # 10ns
+                        Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins='1')
+                        vanRun = self._focus(vanRun, bank, info)
+                        ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                        ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                        StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
+                        ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                        FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
+                                  Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                        #MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
+                                                             #AttenuationXSection=2.8, ScatteringXSection=5.1,
+                                                             #SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
+                        SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    else:
+                        vanRun = temp
                 else:
-                    vanRun = temp
-            else:
-                vanRun = None
+                    vanRun = None
+    
+                # the final bit of math
+                if vanRun is not None:
+                    vanI = mtd["VanSumTOF"]
+                    FindDetectorsOutsideLimits(InputWorkspace=vanI,OutputWorkspace='VanMask',
+                        HighThreshold='1.0e+300',LowThreshold='1.0e-300')
+                    vanmask = mtd["VanMask"]
+                    MaskDetectors(Workspace=vanI,MaskedWorkspace=vanmask)
+                    MaskDetectors(Workspace=samRun,MaskedWorkspace=vanmask)
+                    mtd.deleteWorkspace('VanMask')
+                    mtd.releaseFreeMemory()
+                    SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
+                        AdjX=0, AdjY=0, ZeroEdgePixels=20)
+                    Divide(LHSWorkspace=samRun,RHSWorkspace=vanI,OutputWorkspace=samRun,AllowDifferentNumberSpectra=True)
+                    mtd.deleteWorkspace(str(vanI))
+                    mtd.releaseFreeMemory()
+                    Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
+                    mtd.deleteWorkspace(str(vanRun))
+                    mtd.releaseFreeMemory()
+                    FindDetectorsOutsideLimits(InputWorkspace=samRun,OutputWorkspace='SamMask',
+                        HighThreshold='1.0e+300',LowThreshold='1.0e-300')
+                    sammask = mtd["SamMask"]
+                    MaskDetectors(Workspace=samRun,MaskedWorkspace=sammask)
+                    mtd.deleteWorkspace('SamMask')
+                    mtd.releaseFreeMemory()
+                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                           Tolerance=COMPRESS_TOL_TOF) # 5ns
+                    mtd.releaseFreeMemory()
+                    normalized = True
+                else:
+                    normalized = False
 
-            # the final bit of math
-            if vanRun is not None:
-                vanI = mtd["VanSumTOF"]
-                FindDetectorsOutsideLimits(InputWorkspace=vanI,OutputWorkspace='VanMask',HighThreshold='1.0000000000000001e+300',LowThreshold='1.0e-300')
-                vanmask = mtd["VanMask"]
-                MaskDetectors(Workspace=vanI,MaskedWorkspace=vanmask)
-                MaskDetectors(Workspace=samRun,MaskedWorkspace=vanmask)
-                Divide(LHSWorkspace=samRun,RHSWorkspace=vanI,OutputWorkspace=samRun,AllowDifferentNumberSpectra='1')
-                Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
-                normalized = True
-            else:
-                normalized = False
+                if bank is "bank17":
+                    samRunstr = str(samRun)
+                    RenameWorkspace(InputWorkspace=samRun,OutputWorkspace=samRunstr+"_total")
+                    samRunT = mtd[samRunstr+"_total"]
+                else:
+                    samRunT += samRun
+                    mtd.deleteWorkspace(str(samRun))
+                    mtd.releaseFreeMemory()
 
             # write out the files
+            RenameWorkspace(InputWorkspace=samRunT,OutputWorkspace=samRunstr)
+            samRun = mtd[samRunstr]
             samRun = self._bin(samRun, info)
-            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                           Tolerance=COMPRESS_TOL_TOF) # 5ns
             self._save(samRun, normalized)
-            samRun = str(samRun)
-            mtd.deleteWorkspace(samRun)
+            #mtd.deleteWorkspace(str(samRun))
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
