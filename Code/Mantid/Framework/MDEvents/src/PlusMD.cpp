@@ -40,10 +40,6 @@ namespace MDEvents
   {
     this->setWikiSummary("Merge two MDEventWorkspaces together by combining their events together in one workspace.");
     this->setOptionalMessage("Merge two MDEventWorkspaces together by combining their events together in one workspace.");
-    this->setWikiDescription(""
-        "This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: "
-        "it combines the events from the two workspaces together to form one large workspace."
-        "\n\n");
   }
 
   //----------------------------------------------------------------------------------------------

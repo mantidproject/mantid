@@ -40,15 +40,6 @@ namespace MDEvents
   {
     this->setWikiSummary("Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.");
     this->setOptionalMessage("Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.");
-    this->setWikiDescription(
-        "This algorithm is used in the Paraview event nexus loader to both load an event nexus file and convert it into a "
-        "[[MDEventWorkspace]] for use in visualization."
-        "\n\n"
-        "The [[LoadEventNexus]] algorithm is called with default parameters to load into an [[EventWorkspace]]."
-        "\n\n"
-        "After, the [[ConvertToDiffractionMDWorkspace]] algorithm is called with the new EventWorkspace as input. "
-        "The parameters are set to convert to Q in the lab frame, with Lorentz correction, and default size/splitting behavior parameters."
-        );
   }
 
   //----------------------------------------------------------------------------------------------

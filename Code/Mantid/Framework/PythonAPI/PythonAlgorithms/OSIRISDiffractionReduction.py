@@ -1,3 +1,15 @@
+"""*WIKI* 
+
+
+== Usage ==
+
+== Source Code ==
+The source code for the Python Algorithm may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/Framework/PythonAPI/PythonAlgorithms/OSIRISDiffractionReduction.py OSIRISDiffractionReduction.py]
+
+The source code for the reducer class which is used may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/scripts/Inelastic/osiris_diffraction_reducer.py osiris_diffraction_reducer.py]
+
+
+*WIKI*"""
 from MantidFramework import *
 from mantidsimple import *
 

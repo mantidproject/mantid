@@ -1,5 +1,17 @@
 #ifndef MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
 #define MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
+/*WIKI* 
+
+The algorithm places the user defined geometric shape within the virtual instrument and masks any detector detectors that in contained within it.  A detector is considered to be contained it its central location point is contained within the shape.
+
+===Subalgorithms used===
+MaskDetectorsInShape runs the following algorithms as child algorithms:
+* [[FindDetectorsInShape ]] - To determine the detectors that are contained in the user defined shape.
+* [[MaskDetectors]] - To mask the detectors found.
+
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

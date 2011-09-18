@@ -1,5 +1,15 @@
 #ifndef MANTID_ALGORITHMS_STRIPPEAKS_H_
 #define MANTID_ALGORITHMS_STRIPPEAKS_H_
+/*WIKI* 
+
+
+This algorithm is intended to automatically find all the peaks in a dataset and subtract them, leaving just the residual 'background'. 
+
+====Subalgorithms used====
+The [[FindPeaks]] algorithm is used to identify the peaks in the data.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

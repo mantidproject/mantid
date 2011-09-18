@@ -58,7 +58,6 @@ namespace Algorithms
     string descr("Shifts the indexes of the specified log. This will make the log shorter by the specified shift.");
     this->setWikiSummary(descr);
     this->setOptionalMessage(descr);
-    this->setWikiDescription("");
   }
 
   //----------------------------------------------------------------------------------------------

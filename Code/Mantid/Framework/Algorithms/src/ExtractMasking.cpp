@@ -18,14 +18,6 @@ namespace Mantid
     {
       this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace. ");
       this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
-      this->setWikiDescription(""
-          "The masking from the InputWorkspace property is extracted by creating a new MatrixWorkspace with a single X bin where:"
-          "\n\n"
-          "  0 = masked;"
-          "\n\n"
-          "  1 = unmasked."
-          "\n\n"
-          "The spectra containing 0 are also marked as masked and the instrument link is preserved so that the instrument view functions correctly. ");
     }
     
 

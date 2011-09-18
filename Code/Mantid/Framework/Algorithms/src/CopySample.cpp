@@ -36,9 +36,6 @@ namespace Algorithms
   {
     this->setWikiSummary("Copy some/all the sample information from one workspace to another.");
     this->setOptionalMessage("Copy some/all the sample information from one workspace to another.");
-    this->setWikiDescription("The algorithm copies some/all the sample information from one workspace to another."
-                             "For MD workspaces, if no input sample number is specified, or not found, it will copy the "
-                             "first sample. For MD workspaces, if no output sample number is specified, it will copy to all samples.");
   }
 
   //----------------------------------------------------------------------------------------------

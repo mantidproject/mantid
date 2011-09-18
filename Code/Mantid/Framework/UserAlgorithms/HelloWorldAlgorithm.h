@@ -1,5 +1,9 @@
 #ifndef USER_ALGORITHMS_HELLOWORLDALGORITHM_H_
 #define USER_ALGORITHMS_HELLOWORLDALGORITHM_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

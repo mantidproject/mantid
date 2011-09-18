@@ -45,15 +45,6 @@ void ConvertToQ3DdE::initDocs()
 {
     this->setWikiSummary("Create a MDEventWorkspace with in the reciprocal space of momentums (Qx, Qy, Qz) and the energy transfer dE from an input transformed to energy workspace. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with in the reciprocal space of momentums (Qx, Qy, Qz) and the energy transfer dE from an input transformed to energy workspace. If the OutputWorkspace exists, then events are added to it.");
-    this->setWikiDescription(""
-        "The algorithm takes data from the transformed to energy matrix workspace, "
-        "converts it into reciprocal space and energy transfer, and places the resulting 4D MDEvents into a [[MDEventWorkspace]]."
-        "\n\n"
-        "If the OutputWorkspace does NOT already exist, a default one is created. In order to define "
-        "more precisely the parameters of the [[MDEventWorkspace]], use the "
-        "[[CreateMDWorkspace]] algorithm first."
-        ""
-        );
 }
 
 //----------------------------------------------------------------------------------------------

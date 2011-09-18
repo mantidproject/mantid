@@ -1,5 +1,9 @@
 #ifndef MANTID_CURVEFITTING_GAUSSIAN1D_H_
 #define MANTID_CURVEFITTING_GAUSSIAN1D_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

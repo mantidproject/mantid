@@ -32,9 +32,6 @@ namespace Mantid
     {
       this->setWikiSummary("Rebins both axes of a 2D workspace.");
       this->setOptionalMessage("Rebins both axes of a 2D workspace using the given parameters");
-      this->setWikiDescription("The input bin parameters are used to form an output grid. The overlap "
-                               "of the polygons is tested to compute the required signal weight for the "
-                               "new bin on the workspace");
     }
 
     //--------------------------------------------------------------------------

@@ -42,13 +42,6 @@ namespace Crystal
     this->setWikiSummary( summary );
 
     this->setOptionalMessage("Index the peaks using the UB from the sample.");
-
-    std::string description("Given a PeaksWorkspace with a UB matrix stored ");
-    description += "with the sample, this algorithm will use UB inverse to ";
-    description += "index the peaks.  Any peak with any Miller index more ";
-    description += "than the specified tolerance away from an integer will ";
-    description += "have its (h,k,l) set to (0,0,0).";
-    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------

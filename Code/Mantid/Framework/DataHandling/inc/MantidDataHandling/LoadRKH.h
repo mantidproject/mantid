@@ -1,5 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADRKH_H_
 #define MANTID_DATAHANDLING_LOADRKH_H_
+/*WIKI* 
+
+Loads the given file in the RKH text format, which can be a file with three columns of numbers. If the FirstColumnValue is a recognised [[Unit_Factory|Mantid unit]] the workspace is created with just one spectrum. Alteratively if FirstColumnValue is set to 'SpectrumNumber' then the workspace can have many spectra with the spectrum ID's equal to the first column in the file.
+
+
+*WIKI*/
 
 //---------------------------------------------------
 // Includes

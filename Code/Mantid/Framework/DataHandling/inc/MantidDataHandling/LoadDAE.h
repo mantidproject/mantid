@@ -1,5 +1,20 @@
 #ifndef MANTID_DATAHANDLING_LOADDAE_H_
 #define MANTID_DATAHANDLING_LOADDAE_H_
+/*WIKI* 
+
+
+The LoadRaw algorithm reads data from the DAE in a [[Workspace2D]], which will naturally contain histogram data with each spectrum going into a separate histogram. The time bin boundaries (X values) will be common to all histograms and will have their [[units]] set to time-of-flight. The Y values will contain the counts and will be unit-less (i.e. no division by bin width or normalisation of any kind). The errors, currently assumed Gaussian, will be set to be the square root of the number of counts in the bin.
+
+=== Optional properties ===
+If only a portion of the data is required, then the optional 'spectrum' properties can be set before execution of the algorithm. Prior to loading of the data the values provided are checked and the algorithm will fail if they are found to be outside the limits of the dataset.
+
+=== Multiperiod data === 
+If the data have multiple periods this will be detected and the different periods will be output as separate workspaces, which after the first one will have the period number appended (e.g. OutputWorkspace_period).
+Each workspace will share the same [[Instrument]], SpectraToDetectorMap and [[Sample]] objects.
+If the optional 'spectrum' properties are set for a multiperiod dataset, then they will ignored.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,5 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADDSPACEMAP_H_
 #define MANTID_DATAHANDLING_LOADDSPACEMAP_H_
+/*WIKI* 
+
+Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.
+
+The resulting workspace can then be used with, e.g. [[AlignDetectors]] to perform calibration.
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

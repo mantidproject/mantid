@@ -1,5 +1,9 @@
 #ifndef MANTID_ALGORITHMS_TOFSANSRESOLUTION_H_
 #define MANTID_ALGORITHMS_TOFSANSRESOLUTION_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,5 +1,12 @@
 #ifndef MANTID_DATAHANDLING_LOADDAVEGRP_H_
 #define MANTID_DATAHANDLING_LOADDAVEGRP_H_
+/*WIKI* 
+
+
+This algorithm loads data from a DAVE grouped ASCII file. These have been generated at the SNS for all the inelastic beamlines, hence the choice in the defaults for the axis units.
+
+
+*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDataFileChecker.h"

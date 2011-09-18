@@ -1,5 +1,9 @@
 #ifndef MANTID_ALGORITHM_DIVIDE_H_
 #define MANTID_ALGORITHM_DIVIDE_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

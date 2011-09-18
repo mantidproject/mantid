@@ -1,5 +1,10 @@
 #ifndef MANTID_ALGORITHMS_CORRECTKIKF_H_
 #define MANTID_ALGORITHMS_CORRECTKIKF_H_
+/*WIKI* 
+
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

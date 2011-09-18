@@ -88,12 +88,6 @@ namespace Mantid
     {
       this->setWikiSummary("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a SQW file.");
       this->setOptionalMessage("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a SQW file.");
-      this->setWikiDescription(""
-        "The algorithm takes every pixel defined in the SQW horace file and converts it into an event. SQW DND/Image data is used to format dimension, with which to work."
-        "After the algorithm completes a fully formed [[MDEventWorkspace]] is provided.\n"
-        "If the OutputWorkspace does NOT already exist, a default one is created. This is not the only route to generating MDEventWorkspaces."
-        ""
-        );
     }
 
     /// Add a dimension after reading info from file.

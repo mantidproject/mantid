@@ -1,5 +1,9 @@
 #ifndef MANTID_DATAHANDLING_MaskPeaksWorkspace_H_
 #define MANTID_DATAHANDLING_MaskPeaksWorkspace_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

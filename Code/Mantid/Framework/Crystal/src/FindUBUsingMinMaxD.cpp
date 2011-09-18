@@ -46,25 +46,6 @@ namespace Crystal
     std::string message("Calculate the UB matrix from a peaks workspace, ");
     message += "given min(a,b,c) and max(a,b,c).";
     this->setOptionalMessage( message );
-
-    std::string description("Given a set of peaks, and given a range of ");
-    description += "possible a,b,c values, this algorithm will attempt to ";
-    description += "find a UB matrix, that fits the data.  The algorithm ";
-    description += "searches over a range of possible directions and unit ";
-    description += "cell lengths for directions and lengths that match plane ";
-    description += "normals and plane spacings in reciprocal space.  It ";
-    description += "then chooses three of these vectors with the shortest ";
-    description += "lengths that are linearly independent and that are ";
-    description += "separated by at least a minimum angle.  The minimum angle ";
-    description += "is calculated from the specified min and max d values.  ";
-    description += "A UB matrix is formed using these three vectors ";
-    description += "and the resulting UB matrix is optimized using ";
-    description += "a least squares method. If the specified peaks are ";
-    description += "accurate and belong to a single crystal, this method ";
-    description += "should produce some UB matrix that indexes the peaks. ";
-    description += "However, other software will usually be needed to adjust ";
-    description += "this UB to match a desired conventional cell.";
-    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------

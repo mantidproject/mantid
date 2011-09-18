@@ -45,8 +45,6 @@ namespace GPUAlgorithms
   {
     this->setWikiSummary("A dummy algorithm to test the capabilities of the GPU card for computation.");
     this->setOptionalMessage("A dummy algorithm to test the capabilities of the GPU card for computation.");
-    this->setWikiDescription(""
-    		"A dummy algorithm to test the capabilities of the GPU card for computation.");
   }
 
   //----------------------------------------------------------------------------------------------

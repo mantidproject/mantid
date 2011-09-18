@@ -1,5 +1,9 @@
 #ifndef MANTID_MDEVENTS_SAVEMDEW_H_
 #define MANTID_MDEVENTS_SAVEMDEW_H_
+/*WIKI* 
+
+Save a MDEventWorkspace to a .nxs file.
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

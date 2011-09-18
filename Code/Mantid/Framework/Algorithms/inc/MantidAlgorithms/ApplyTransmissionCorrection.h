@@ -1,5 +1,14 @@
 #ifndef MANTID_ALGORITHMS_APPLYTRANSMISSIONCORRECTION_H_
 #define MANTID_ALGORITHMS_APPLYTRANSMISSIONCORRECTION_H_
+/*WIKI* 
+
+The transmission can be given as a MatrixWorkspace or given directly as numbers. One or the other method must be used.
+
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
+
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

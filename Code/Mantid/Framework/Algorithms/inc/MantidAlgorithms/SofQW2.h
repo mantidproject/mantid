@@ -1,5 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SOFQW2_H_
 #define MANTID_ALGORITHMS_SOFQW2_H_
+/*WIKI* 
+
+Converts a 2D workspace from units of spectrum number/energy transfer to  the intensity as a function of momentum transfer and energy. The rebinning is done as a weighted  sum of overlapping polygons.
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

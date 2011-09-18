@@ -1,3 +1,9 @@
+"""*WIKI* 
+
+
+The purpose of this algorithm is to subtract collected background data from the sample data pixel-by-pixel and divide by the Vanadium sample data.  The Vanadium data is focussed on each detector, peaks removed, and smoothed.  Time of flight limits, and binning can be changed as well as bad pulses removed.  Must have both Event NeXus and NeXus file for RunNumber in OutputDirectory or available using output from FindNeXus.  NeXus file is used for saving the output in NeXus format.
+
+*WIKI*"""
 from MantidFramework import *
 from mantidsimple import *
 import os

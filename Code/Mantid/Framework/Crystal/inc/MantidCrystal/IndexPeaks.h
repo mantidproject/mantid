@@ -1,5 +1,9 @@
 #ifndef MANTID_CRYSTAL_INDEX_PEAKS_H_
 #define MANTID_CRYSTAL_INDEX_PEAKS_H_
+/*WIKI* 
+
+Given a PeaksWorkspace with a UB matrix stored with the sample, this algorithm will use UB inverse to index the peaks.  Any peak with any Miller index more than the specified tolerance away from an integer will have its (h,k,l) set to (0,0,0).
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

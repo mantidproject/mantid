@@ -1,5 +1,11 @@
 #ifndef MANTID_ALGORITHMS_CLONEWORKSPACE_H_
 #define MANTID_ALGORITHMS_CLONEWORKSPACE_H_
+/*WIKI* 
+
+This algorithm performs a deep copy of all of the information in the workspace. It maintains events if the input is an [[EventWorkspace]].
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

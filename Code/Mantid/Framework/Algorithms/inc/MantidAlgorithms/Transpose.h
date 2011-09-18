@@ -1,5 +1,10 @@
 #ifndef MANTID_ALGORITHMS_TRANSPOSE_H_
 #define MANTID_ALGORITHMS_TRANSPOSE_H_
+/*WIKI* 
+
+See above.
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

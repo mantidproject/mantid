@@ -1,5 +1,9 @@
 #ifndef MANTID_DATAHANDLING_SAVEDSPACEMAP_H_
 #define MANTID_DATAHANDLING_SAVEDSPACEMAP_H_
+/*WIKI* 
+
+The POWGEN d-space map file format is a binary list of the conversion. It needs to be a minimum size, determined by the PadDetID parameter.
+*WIKI*/
     
 #include "MantidAPI/Algorithm.h" 
 #include "MantidDataObjects/OffsetsWorkspace.h"

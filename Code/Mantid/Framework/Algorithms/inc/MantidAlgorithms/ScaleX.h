@@ -1,5 +1,11 @@
 #ifndef MANTID_ALGORITHM_SCALEX_H_
 #define MANTID_ALGORITHM_SCALEX_H_
+/*WIKI* 
+
+Scales the X axis of the input workspace by the amount requested. 
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

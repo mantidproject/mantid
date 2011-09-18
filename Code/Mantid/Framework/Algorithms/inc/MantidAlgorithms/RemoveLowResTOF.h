@@ -1,5 +1,9 @@
 #ifndef REMOVELOWRESTOF_H_
 #define REMOVELOWRESTOF_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 //includes
 #include "MantidAPI/Algorithm.h"

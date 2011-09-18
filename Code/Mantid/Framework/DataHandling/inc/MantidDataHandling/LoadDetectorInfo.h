@@ -1,5 +1,21 @@
 #ifndef MANTID_DATAHANDLING_LOADDETECTORINFO_H_
 #define MANTID_DATAHANDLING_LOADDETECTORINFO_H_
+/*WIKI* 
+
+The detection time delay for each detector is subtracted from the time of flight bin boundaries in the spectrum associated with that detector. It is required that all the monitors have the same time delay and if this is non-zero the delay time is added to all TOF values. It is important that the units of the input workspace are TOF in microseconds, that [[GroupDetectors]] has not been run and this algorithm is only applied once to a workspace.
+
+Values for the partial pressure of 3He and wall thickness are added into the parameter map for each detector in a form that can be read by [[DetectorEfficiencyCor]]. That is, the values are assumed to be in atmosheres and meters, respectively, and the properties are stored internally in the workspace parameter map as "3He(atm)" and "wallT(m)".  The values are likely to be read from the same RAW file that the workspace was loaded from or a DAT file that corrosponds to the same run or series of experimental runs.
+
+Spectra whose associated detector data are not found in the input DAT or RAW file will not have their time of flight bin boundaries adjusted. Similarly nothing will be written to the parameter map for those detectors, the algorithm will continue to process data as normal but a warning will be written to the log. Detectors that are listed in the input file but do not exist in the instrument definition file will be ignored and details will be written to the log.
+
+If all the time offsets are the same and the file ''appears'' to contain enough data for all detectors all detector spectra will use same bin boundaries, where possible. This will make the algorithm run much more quickly and use less memory.
+
+When using a RAW file the time offset for each detector is read from the "hold off" table in the file's header while pressure and wall thickness data must be present in the user table array. The format for .DAT files is specfied in the document "DETECTOR.DAT format" written by Prof G Toby Perring ("detector format.doc")
+
+If the RelocateDets option is set to true, it is false by default, then the detectors are moved to the corresponding positions specified in the data file provided.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

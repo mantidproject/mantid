@@ -1,5 +1,9 @@
 #ifndef MD_MANTID_ALGORITHMS_DYNAMICREBINFROMXML_H
 #define MD_MANTID_ALGORITHMS_DYNAMICREBINFROMXML_H
+/*WIKI* 
+
+
+*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"

@@ -1,5 +1,13 @@
 #ifndef SAVEPHX_H_
 #define SAVEPHX_H_
+/*WIKI* 
+
+
+Saves the geometry information of the detectors in a workspace into a PHX format ASCII file.
+
+
+
+*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

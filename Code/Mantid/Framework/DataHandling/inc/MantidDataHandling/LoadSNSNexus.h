@@ -1,5 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADSNSNEXUS_H_
 #define MANTID_DATAHANDLING_LOADSNSNEXUS_H_
+/*WIKI* 
+
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

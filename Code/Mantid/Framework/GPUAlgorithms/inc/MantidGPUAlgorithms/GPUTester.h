@@ -1,5 +1,9 @@
 #ifndef MANTID_GPUALGORITHMS_GPUTESTER_H_
 #define MANTID_GPUALGORITHMS_GPUTESTER_H_
+/*WIKI* 
+
+A dummy algorithm to test the capabilities of the GPU card for computation.
+*WIKI*/
     
 #include "MantidAPI/Algorithm.h"
 #include "MantidGPUAlgorithms/GPUAlgorithm.h"

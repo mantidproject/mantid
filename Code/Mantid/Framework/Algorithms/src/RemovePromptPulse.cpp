@@ -52,7 +52,6 @@ namespace Algorithms
     string msg("Remove the prompt pulse for a time of flight measurement.");
     this->setWikiSummary(msg);
     this->setOptionalMessage(msg);
-    //this->setWikiDescription("TODO: Enter the text to be placed in the Description section of the wiki page.");
   }
 
   //----------------------------------------------------------------------------------------------

@@ -44,18 +44,6 @@ namespace Crystal
   {
     this->setWikiSummary("Define the goniometer motors used in an experiment by giving the axes and directions of rotations.");
     this->setOptionalMessage("Define the goniometer motors used in an experiment by giving the axes and directions of rotations.");
-    this->setWikiDescription(""
-        "Use this algorithm to define your goniometer. "
-        "Enter each axis in the order of rotation, starting with the one closest to the sample. \n"
-        "\n"
-        "You may enter up to 6 axes, for which you must define (separated by commas): \n"
-        "* The name of the axis, which MUST match the name in your sample logs.\n"
-        "* The X, Y, Z components of the vector of the axis of rotation. Right-handed coordinates with +Z=beam direction; +Y=Vertically up (against gravity); +X to the left.\n"
-        "* The sense of rotation as 1 or -1: 1 for counter-clockwise, -1 for clockwise rotation.\n"
-        "\n"
-        "The run's sample logs will be used in order to determine the actual angles of rotation: "
-        "for example, if you have an axis called 'phi', then the first value of the log called "
-        "'phi' will be used as the rotation angle. Units are assumed to be degrees.");
   }
 
   //----------------------------------------------------------------------------------------------

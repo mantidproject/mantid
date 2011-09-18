@@ -1,5 +1,11 @@
 #ifndef MANTID_ALGORITHMS_MULTIPLYRANGE_H_
 #define MANTID_ALGORITHMS_MULTIPLYRANGE_H_
+/*WIKI* 
+
+
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,5 +1,12 @@
 #ifndef MANTID_ALGORITHMS_EXTRACTSINGLESPECTRUM_H_
 #define MANTID_ALGORITHMS_EXTRACTSINGLESPECTRUM_H_
+/*WIKI* 
+
+
+Extracts a single spectrum from a [[Workspace2D]] and stores it in a new workspace.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

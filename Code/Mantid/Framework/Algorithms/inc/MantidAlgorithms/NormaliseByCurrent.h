@@ -1,5 +1,17 @@
 #ifndef MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_
 #define MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_
+/*WIKI* 
+
+
+Normalises a workspace according to the good proton charge figure taken from the RAW file, which is stored in the workspace's [[Sample]] object). Every data point (and its error) is divided by that number.
+
+Note that units are not fully dealt with at the moment - the output will have identical units to the input workspace (i.e. will not reflect that fact that it should show "/ uA.hour").
+
+=== EventWorkspaces ===
+If the input workspace is an [[EventWorkspace]], then the output will be as well. Weighted events are used to scale by the current (see the [[Divide]] algorithm, which is a subalgorithm being used).
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

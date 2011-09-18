@@ -1,5 +1,11 @@
 #ifndef MANTID_MDEVENTS_PLUSMDEW_H_
 #define MANTID_MDEVENTS_PLUSMDEW_H_
+/*WIKI* 
+
+This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: it combines the events from the two workspaces together to form one large workspace.
+
+
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

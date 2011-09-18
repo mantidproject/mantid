@@ -48,20 +48,6 @@ namespace Crystal
     std::string message("Calculate the UB matrix from a peaks workspace, ");
     message += "containing indexed peaks.";
     this->setOptionalMessage( message );
-
-    std::string description( "Given a set of peaks at least three of which " );
-    description += "have been assigned Miller indices, this algorithm will ";
-    description += "find the UB matrix, that best maps the integer (h,k,l) ";
-    description += "values to the corresponding Q vectors.  The set of ";
-    description += "indexed peaks must include three linearly independent ";
-    description += "Q vectors.  The (h,k,l) values from the peaks ";
-    description += "are first rounded to form integer (h,k,l) values.  The ";
-    description += "algorithm then forms a possibly over-determined linear ";
-    description += "system of equations representing the mapping from (h,k,l) ";
-    description += "to Q for each indexed peak.  The system of linear ";
-    description += "equations is then solved in the least squares sense, ";
-    description += "using QR factorization.";
-    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------

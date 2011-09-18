@@ -1,5 +1,12 @@
 #ifndef MANTID_ALGORITHMS_PEAKINTEGRATION_H_
 #define MANTID_ALGORITHMS_PEAKINTEGRATION_H_
+/*WIKI* 
+
+
+Integrate and calculate error of integration of each peak from single crystal data and place results into peak workspace.  Uses IkedaCarpenter function to fit TOF.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

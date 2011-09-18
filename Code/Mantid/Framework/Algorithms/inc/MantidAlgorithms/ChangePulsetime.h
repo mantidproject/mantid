@@ -1,5 +1,12 @@
 #ifndef MANTID_ALGORITHMS_CHANGEPULSETIME_H_
 #define MANTID_ALGORITHMS_CHANGEPULSETIME_H_
+/*WIKI* 
+
+
+Modifies the pulse time (wall-clock time) of all the events in the specified spectra of an EventWorkspace, by adding the given number of seconds.
+
+
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

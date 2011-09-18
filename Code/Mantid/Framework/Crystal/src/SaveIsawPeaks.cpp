@@ -44,7 +44,6 @@ namespace Crystal
   {
     this->setWikiSummary("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
     this->setOptionalMessage("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
-    this->setWikiDescription("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
   }
 
   //----------------------------------------------------------------------------------------------

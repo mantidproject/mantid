@@ -44,14 +44,6 @@ namespace MDEvents
   {
     this->setWikiSummary("Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.");
     this->setOptionalMessage("Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.");
-    this->setWikiDescription(
-        "This algorithm starts with a PeaksWorkspace containing the expected positions of peaks in reciprocal space. "
-        "It calculates the centroid of the peak by calculating the average of the coordinates of all events within a given "
-        "radius of the peak, weighted by the weight (signal) of the event."
-        "\n\n"
-//        "To speed up the calculation, the centroid of the boxes contained within the radius is used (rather than going "
-//        "through all individual events)."
-        );
   }
 
   //----------------------------------------------------------------------------------------------

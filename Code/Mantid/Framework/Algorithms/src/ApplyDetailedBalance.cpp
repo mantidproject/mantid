@@ -45,7 +45,6 @@ namespace Algorithms
   {
     this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
     this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
-    this->setWikiDescription("TODO: Enter the text to be placed in the Description section of the wiki page.");
   }
 
   //----------------------------------------------------------------------------------------------

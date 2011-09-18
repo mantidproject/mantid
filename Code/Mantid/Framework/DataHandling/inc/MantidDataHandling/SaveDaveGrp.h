@@ -1,5 +1,9 @@
 #ifndef MANTID_DATAHANDLING_SAVEDAVEGRP_H_
 #define MANTID_DATAHANDLING_SAVEDAVEGRP_H_
+/*WIKI* 
+
+Saves a 2D workspace to DAVE grouped data format file.See http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

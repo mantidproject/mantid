@@ -47,7 +47,6 @@ namespace DataHandling
   {
     this->setWikiSummary("Load SNS's DelayTime log file and Pulse ID file of Pulsed Magnet ");
     this->setOptionalMessage("Both log files are in binary format");
-    this->setWikiDescription("Load SNS's Delay Time log file and Pulse ID file for pulsed magnet.  The log information is added to an existing Workspace as Property ");
   }
 
   //----------------------------------------------------------------------------------------------

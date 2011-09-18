@@ -1,5 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADLOGSFORSNSPULSEDMAGNET_H_
 #define MANTID_DATAHANDLING_LOADLOGSFORSNSPULSEDMAGNET_H_
+/*WIKI* 
+
+Load SNS's Delay Time log file and Pulse ID file for pulsed magnet.  The log information is added to an existing Workspace as Property 
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

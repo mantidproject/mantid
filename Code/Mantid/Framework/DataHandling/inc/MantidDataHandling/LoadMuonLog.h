@@ -1,5 +1,15 @@
 #ifndef MANTID_DATAHANDLING_LOADMUONLOG_H_
 #define MANTID_DATAHANDLING_LOADMUONLOG_H_
+/*WIKI* 
+
+The Algorithm is very similar to [[LoadLog]] except that the source of the data is a Muon Nexus file.
+
+===Parent algorithm===
+LoadMuonLog is also a child algorithm of [[LoadMuonNexus]], i.e. it gets called whenever LoadMuonNexus is executed. 
+
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

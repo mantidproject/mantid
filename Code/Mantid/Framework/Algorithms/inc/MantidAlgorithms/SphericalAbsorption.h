@@ -1,5 +1,12 @@
 #ifndef MANTID_ALGORITHMS_SPHERICALABSORPTION_H_
 #define MANTID_ALGORITHMS_SPHERICALABSORPTION_H_
+/*WIKI* 
+
+
+Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a '''spherical''' sample. Sample data must be divided by these corrections.  Algorithm calls AnvredCorrection.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

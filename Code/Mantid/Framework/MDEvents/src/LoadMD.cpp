@@ -48,7 +48,6 @@ namespace Mantid
     {
       this->setWikiSummary("Load a .nxs file into a MDEventWorkspace.");
       this->setOptionalMessage("Load a .nxs file into a MDEventWorkspace.");
-      this->setWikiDescription("Load a .nxs file into a MDEventWorkspace.");
     }
 
     //----------------------------------------------------------------------------------------------

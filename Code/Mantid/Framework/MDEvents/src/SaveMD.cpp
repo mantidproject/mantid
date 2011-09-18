@@ -42,7 +42,6 @@ namespace MDEvents
   {
     this->setWikiSummary("Save a MDEventWorkspace to a .nxs file.");
     this->setOptionalMessage("Save a MDEventWorkspace to a .nxs file.");
-    this->setWikiDescription("Save a MDEventWorkspace to a .nxs file.");
   }
 
   //----------------------------------------------------------------------------------------------

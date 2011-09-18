@@ -1,5 +1,13 @@
 #ifndef MANTID_MDEVENTS_ONESTEPMDEW_H_
 #define MANTID_MDEVENTS_ONESTEPMDEW_H_
+/*WIKI* 
+
+This algorithm is used in the Paraview event nexus loader to both load an event nexus file and convert it into a [[MDEventWorkspace]] for use in visualization.
+
+The [[LoadEventNexus]] algorithm is called with default parameters to load into an [[EventWorkspace]].
+
+After, the [[ConvertToDiffractionMDWorkspace]] algorithm is called with the new EventWorkspace as input. The parameters are set to convert to Q in the lab frame, with Lorentz correction, and default size/splitting behavior parameters.
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

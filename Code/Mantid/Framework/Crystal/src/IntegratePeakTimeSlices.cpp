@@ -129,25 +129,7 @@ namespace Mantid
     void IntegratePeakTimeSlices::initDocs()
     {
       this->setWikiSummary("Integrates each time slice around a peak adding the results to the peak object");
-
       this->setOptionalMessage("The algorithm uses CurveFitting::BivariateNormal for fitting a time slice");
-
-      std::string description =
-        "This algorithm fits a bivariate normal distribution( plus background) to the \n";
-
-      description +=
-        "data on each time slice. This algorithm only works for peaks on Rectangular  \n";
-
-      description +=
-        "Detector.  The rectangular area used for the fitting is calculated based on \n";
-
-
-      description +=
-         "the dQ parameter.  A good value for dQ is .1667/largest unit cell length.";
-
-      this->setWikiDescription(
-             description
-             );
     }
 
 

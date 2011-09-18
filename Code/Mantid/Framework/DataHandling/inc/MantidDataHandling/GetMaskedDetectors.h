@@ -1,5 +1,17 @@
 #ifndef MANTID_DATAHANDLING_GETMASKEDDETECTORS_H_
 #define MANTID_DATAHANDLING_GETMASKEDDETECTORS_H_
+/*WIKI* 
+
+This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with [[MaskDetectors]] or it's like.
+
+== Python Usage ==
+To make use of this algorithm in Python, you must take the property result. This is slightly different to most Python Algorithms, as the output isn't a workspace.
+
+ alg = GetMaskedDetectors('workspace-name-here')
+ property = alg.getPropertyValue("DetectorList")
+ print property
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -45,9 +45,6 @@ namespace Crystal
   {
     this->setWikiSummary("Load an ISAW-style ASCII UB matrix and lattice parameters file, and place its information into a workspace.");
     this->setOptionalMessage("Load an ISAW-style ASCII UB matrix and lattice parameters file, and place its information into a workspace.");
-    this->setWikiDescription(
-        "The ISAW UB Matrix file format is: TODO"
-        );
   }
 
   //----------------------------------------------------------------------------------------------

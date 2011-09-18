@@ -1,5 +1,9 @@
 #ifndef SAVEPAR_H_
 #define SAVEPAR_H_
+/*WIKI* 
+
+
+*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

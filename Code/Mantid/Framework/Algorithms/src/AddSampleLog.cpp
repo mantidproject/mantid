@@ -22,12 +22,6 @@ void AddSampleLog::initDocs()
 {
   this->setWikiSummary("Used to insert a value into the sample logs in a workspace.");
   this->setOptionalMessage("Used to insert a value into the sample logs in a workspace.");
-  this->setWikiDescription(
-      "Workspaces contain information in logs. Often these detail what happened to the sample during the experiment. This algorithm allows one named log to be entered. "
-      "\n\n"
-      "The log can be either a String, a Number, or a Number Series. If you select Number Series, the current time will be used "
-      "as the time of the log entry, and the number in the text used as the (only) value."
-      );
 }
 
 using namespace Kernel;

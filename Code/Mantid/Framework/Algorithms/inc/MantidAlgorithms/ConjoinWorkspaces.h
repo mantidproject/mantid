@@ -1,5 +1,18 @@
 #ifndef MANTID_ALGORITHMS_CONJOINWORKSPACES_H_
 #define MANTID_ALGORITHMS_CONJOINWORKSPACES_H_
+/*WIKI* 
+
+
+This algorithm can be useful when working with large datasets. It enables the raw file to be loaded in two parts (not necessarily of equal size), the data processed in turn and the results joined back together into a single dataset. This can help avoid memory problems either because intermediate workspaces will be smaller and/or because the data will be much reduced after processing.
+
+The output of the algorithm, in which the data from the second input workspace will be appended to the first, will be stored under the name of the first input workspace. Workspace data members other than the data (e.g. instrument etc.) will be copied from the first input workspace (but if they're not identical anyway, then you probably shouldn't be using this algorithm!). Both input workspaces will be deleted.
+
+==== Restrictions on the input workspace ====
+
+The input workspaces must come from the same instrument, have common units and bins and no detectors that contribute to spectra should overlap.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,5 +1,12 @@
 #ifndef MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
 #define MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
+/*WIKI* 
+
+
+This can also be performed using the [[Rebin]] algorithm and having the "PreserveEvents" parameter set to false.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

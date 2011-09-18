@@ -1,5 +1,11 @@
 #ifndef MANTID_ALGORITHM_GROUP_H_
 #define MANTID_ALGORITHM_GROUP_H_
+/*WIKI* 
+
+This algorithm takes two or more workspaces as input and creates an output workspace group.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

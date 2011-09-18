@@ -1,3 +1,9 @@
+"""*WIKI* 
+
+Transmission counts is the signal going through a pinhole in the middle of the beam stop (after hitting the sample). The number of counts is equal to the neutron flux times the transmission N_trans = T*Phi. The transmission T is obtained by normalizing the N_trans by the monitor or accelerator current. T = N_trans/current. Dividing the pixel counts by T we account for transmission.         
+
+
+*WIKI*"""
 from MantidFramework import *
 from mantidsimple import *
 import math

@@ -6,6 +6,13 @@
  */
 #ifndef INTEGRATEPEAKTIMESLICES_H_
 #define INTEGRATEPEAKTIMESLICES_H_
+/*WIKI* 
+
+This algorithm fits a bivariate normal distribution( plus background) to the 
+data on each time slice. This algorithm only works for peaks on Rectangular  
+Detector.  The rectangular area used for the fitting is calculated based on 
+the dQ parameter.  A good value for dQ is .1667/largest unit cell length.
+*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeak.h"

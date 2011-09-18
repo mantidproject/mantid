@@ -48,9 +48,6 @@ namespace Crystal
   {
     this->setWikiSummary("Save a UB matrix and lattice parameters from a workspace to an ISAW-style ASCII file.");
     this->setOptionalMessage("Save a UB matrix and lattice parameters from a workspace to an ISAW-style ASCII file.");
-    this->setWikiDescription(
-        "The ISAW UB Matrix file format is the transpose of the Mantid orientation matrix( |Q|=1/d) with columns beam,back, and up"
-        );
   }
 
   //----------------------------------------------------------------------------------------------

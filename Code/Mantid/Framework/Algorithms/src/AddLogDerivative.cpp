@@ -40,14 +40,6 @@ namespace Algorithms
   {
     this->setWikiSummary("Add a sample log that is the first or second derivative of an existing sample log.");
     this->setOptionalMessage("Add a sample log that is the first or second derivative of an existing sample log.");
-    this->setWikiDescription(""
-        "This algorithm performs a simple numerical derivative of the values in a sample log."
-        "\n\n"
-        "The 1st order derivative is simply: dy = (y1-y0) / (t1-t0), which is placed in the log at t=(t0+t1)/2"
-        "\n\n"
-        "Higher order derivatives are obtained by performing the equation above N times. Since this is a simple numerical derivative, "
-        "you can expect the result to quickly get noisy at higher derivatives."
-        "");
   }
 
   //----------------------------------------------------------------------------------------------

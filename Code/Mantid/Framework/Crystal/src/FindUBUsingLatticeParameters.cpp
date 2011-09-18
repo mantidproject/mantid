@@ -45,15 +45,6 @@ namespace Crystal
     std::string message("Calculate the UB matrix from a peaks workspace, ");
     message += "given lattice parameters.";
     this->setOptionalMessage( message );
-
-    std::string description("Given a set of peaks, and given lattice ");
-    description += "parameters (<math>a,b,c,alpha,beta,gamma</math>), ";
-    description += "this algorithm will find the UB matrix, that best fits ";
-    description += "the data.  The algorithm searches over a large range ";
-    description += "of possible orientations for the orientation for which ";
-    description += "the rotated B matrix best fits the data.  It then uses a ";
-    description += "least squares approach to optimize the complete UB matrix.";
-    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------

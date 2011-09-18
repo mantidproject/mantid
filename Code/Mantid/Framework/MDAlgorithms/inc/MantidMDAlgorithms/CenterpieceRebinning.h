@@ -1,5 +1,9 @@
 #ifndef H_CENTERPIECE_REBINNING
 #define H_CENTERPIECE_REBINNING
+/*WIKI* 
+
+
+*WIKI*/
 
 
 #include "MantidAPI/MDPropertyGeometry.h"

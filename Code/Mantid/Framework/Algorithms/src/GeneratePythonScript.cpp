@@ -24,7 +24,6 @@ void GeneratePythonScript::initDocs()
 {
     this->setWikiSummary("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
     this->setOptionalMessage("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
-    this->setWikiDescription("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

@@ -42,17 +42,6 @@ namespace DataHandling
   {
     this->setWikiSummary("Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
     this->setOptionalMessage("Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-    this->setWikiDescription(""
-        "This algorithm saves an ARIEL-style 5-column ASCII .cal file."
-        "\n\n"
-        "The format is\n"
-        "* Number: ignored."
-        "* UDET: detector ID."
-        "* Offset: calibration offset. Comes from the OffsetsWorkspace, or 0.0 if none is given.\n"
-        "* Select: 1 if selected (not masked out). Comes from the MaskWorkspace, or 1 if none is given.\n"
-        "* Group: group number. Comes from the GroupingWorkspace, or 1 if none is given.\n"
-        "\n\n");
-
   }
 
   //----------------------------------------------------------------------------------------------

@@ -1,5 +1,16 @@
 #ifndef MANTID_DATAHANDLING_SAVESPE_H_
 #define MANTID_DATAHANDLING_SAVESPE_H_
+/*WIKI* 
+
+
+Saves the data in a workspace into a file in the ASCII 'SPE' format (as described [[Media:Spe_file_format.pdf|here]]).
+
+==== Restrictions on the input workspace ====
+
+The input workspace must have units of Momentum Transfer ('DeltaE') and contain histogram data with common binning on all spectra.
+
+
+*WIKI*/
 
 //---------------------------------------------------
 // Includes

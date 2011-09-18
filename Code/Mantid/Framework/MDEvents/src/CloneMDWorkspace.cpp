@@ -40,11 +40,6 @@ namespace MDEvents
   {
     this->setWikiSummary("Clones (copies) an existing MDEventWorkspace into a new one.");
     this->setOptionalMessage("Clones (copies) an existing [[MDEventWorkspace]] into a new one.");
-    this->setWikiDescription(""
-        "This algorithm will clones an existing MDEventWorkspace into a new one."
-        "\n\n"
-        "If the InputWorkspace is a file-backed MDEventWorkspace, then the algorithm will copy"
-        " the original file into a new one with the suffix '_clone' added to its filename, in the same directory.");
   }
 
   //----------------------------------------------------------------------------------------------

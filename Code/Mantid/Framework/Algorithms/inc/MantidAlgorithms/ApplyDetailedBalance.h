@@ -1,5 +1,9 @@
 #ifndef MANTID_ALGORITHMS_APPLYDETAILEDBALANCE_H_
 #define MANTID_ALGORITHMS_APPLYDETAILEDBALANCE_H_
+/*WIKI* 
+
+TODO: Enter the text to be placed in the Description section of the wiki page.
+*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

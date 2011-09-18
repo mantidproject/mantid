@@ -1,5 +1,11 @@
 #ifndef MANTID_DATAHANDLING_DELETETABLEROWS_H_
 #define MANTID_DATAHANDLING_DELETETABLEROWS_H_
+/*WIKI* 
+
+If the specified rows exist they will be deleted form the workspace. If the row list is empty the algorithm does nothing.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

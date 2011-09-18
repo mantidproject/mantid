@@ -1,5 +1,24 @@
 #ifndef MANTID_ALGORITHMS_DIFFRACTIONEVENTREADDETCAL_H_
 #define MANTID_ALGORITHMS_DIFFRACTIONEVENTREADDETCAL_H_
+/*WIKI* 
+
+
+Moves the detectors in an instrument using the origin and 2 vectors of the rotated plane from an ISAW DetCal file.
+
+
+
+==Usage==
+'''Python'''
+    DiffractionEventReadDetCal("SNAP_4111","SNAP.DetCal")
+
+'''C++'''
+    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("DiffractionEventReadDetCal");
+    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
+    alg->setPropertyValue("Filename", "SNAP.DetCal");
+    alg->execute();
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

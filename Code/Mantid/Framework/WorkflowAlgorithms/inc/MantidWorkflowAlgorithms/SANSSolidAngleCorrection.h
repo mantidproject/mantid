@@ -1,5 +1,13 @@
 #ifndef MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_
 #define MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_
+/*WIKI* 
+
+Performs a solid angle correction on all detector (non-monitor) spectra. 
+
+See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
+
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes
