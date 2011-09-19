@@ -127,7 +127,6 @@ namespace Mantid
       catch(::NeXus::Exception&)
       {
       }
-      std::cout << "LoadMD::fileCheck() says " << confidence << std::endl;
       return confidence;
     }
 
