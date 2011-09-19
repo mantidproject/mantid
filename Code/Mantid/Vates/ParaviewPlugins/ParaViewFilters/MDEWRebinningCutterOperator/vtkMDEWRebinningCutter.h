@@ -139,7 +139,7 @@ private:
   /// Flag indicating whether set up has occurred or not
   SetupStatus m_setup;
   /// Flag containing the timestep.
-  int m_timestep;
+  double m_timestep;
   /// Threshold max value.
   Mantid::signal_t m_thresholdMax;
   /// Threhsold min value.
