@@ -95,6 +95,13 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
       setMinValue(logmin);
       m_minValueBox->blockSignals(false);
     }
+    if (maxValue <= 0)
+    {
+      maxValue = 10.;
+      m_maxValueBox->blockSignals(true);
+      setMaxValue(maxValue);
+      m_maxValueBox->blockSignals(false);
+    }
     m_scaleWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(logmin, maxValue), colorMap);
   }
@@ -123,7 +130,10 @@ void ColorMapWidget::setMinValue(double value)
 {
   setMinValueText(value);
   updateScale();
-  minValueChanged();
+  if (!m_minValueBox->signalsBlocked())
+  {
+    minValueChanged();
+  }
 }
 
 /**
@@ -134,7 +144,10 @@ void ColorMapWidget::setMaxValue(double value)
 {
   setMaxValueText(value);
   updateScale();
-  maxValueChanged();
+  if (!m_maxValueBox->signalsBlocked())
+  {
+    maxValueChanged();
+  }
 }
 
 /**

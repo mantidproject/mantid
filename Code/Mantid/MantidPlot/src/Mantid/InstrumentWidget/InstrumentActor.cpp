@@ -184,7 +184,7 @@ void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
     {
       m_DataMinValue = sum;
     }
-    else if( sum > m_DataMaxValue )
+    if( sum > m_DataMaxValue )
     {
       m_DataMaxValue = sum;
     }
