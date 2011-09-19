@@ -112,8 +112,6 @@ public:
   ~ScriptingWindow();
   /// Override the closeEvent
   void closeEvent(QCloseEvent *event);
-  /// Override the hideEvent
-  void hideEvent(QHideEvent *event);		      
   /// Override the showEvent
   void showEvent(QShowEvent *event);		      
   /// Is a script running?

@@ -366,14 +366,6 @@ void ScriptingWindow::closeEvent(QCloseEvent *event)
   event->accept();
 }
 
-/// Override the hideEvent
-void ScriptingWindow::hideEvent(QHideEvent *event)
-{
-  Q_UNUSED(event);
-  // This ensures the window size is remembered correctly
-//  emit hideMe();
-}
-
 /**
  * Override the showEvent function
  * @param event :: A pointer to the event object
