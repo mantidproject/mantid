@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
+#include <boost/lexical_cast.hpp>
 #include <gsl/gsl_blas.h>
 #include <iostream>
 
@@ -87,6 +88,13 @@ void LevenbergMarquardtMinimizer::initialize(API::IFitFunction* function, const 
 
   // setup GSL solver
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, m_data->n, m_data->p);
+  if (!m_gslSolver)
+  {
+    throw std::runtime_error("Levenberg-Marquardt minimizer failed to initialize. \n"+
+      boost::lexical_cast<std::string>(m_data->n)+" data points, "+
+      boost::lexical_cast<std::string>(m_data->p)+" fitting parameters. "
+      );
+  }
   gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams);
 
   m_function = function;
