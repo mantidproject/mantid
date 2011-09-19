@@ -210,6 +210,10 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         self._tolerance = 1.3
         self._compute_resolution = False
         self._sample_aperture_radius = 5.0
+        self._independent_binning = True
+        
+    def use_independent_binning(self, flag=True):
+        self._independent_binning = flag
         
     def compute_resolution(self, sample_aperture_diameter=10.0):
         """
@@ -270,8 +274,11 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             raise RuntimeError, "Could not get the wavelength band for frame 2"
         
         # Compute binning
-        qmin, qstep, qmax = self._get_binning(reducer, workspace, min(wl_min_f1, wl_min_f2), max(wl_max_f1, wl_max_f2))
-        self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
+        if self._independent_binning:
+            self._binning = None
+        else:
+            qmin, qstep, qmax = self._get_binning(reducer, workspace, min(wl_min_f1, wl_min_f2), max(wl_max_f1, wl_max_f2))
+            self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
         # Average second frame
         Rebin(workspace, workspace+'_frame2', "%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), False)
         ReplaceSpecialValues(workspace+'_frame2', workspace+'_frame2', NaNValue=0.0,NaNError=0.0)
@@ -291,6 +298,8 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                               SampleApertureRadius=self._sample_aperture_radius)                                                                        
             
         # Average first frame
+        if self._independent_binning:
+            self._binning = None
         Rebin(workspace, workspace+'_frame1', "%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1), False)
         ReplaceSpecialValues(workspace+'_frame1', workspace+'_frame1', NaNValue=0.0,NaNError=0.0)
         

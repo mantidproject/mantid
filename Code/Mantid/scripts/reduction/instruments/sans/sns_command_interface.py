@@ -128,3 +128,6 @@ def SensitivityDirectBeamCenter(datafile):
 def Resolution(sample_aperture_diameter=10.0):
     ReductionSingleton().get_azimuthal_averager().compute_resolution(sample_aperture_diameter=sample_aperture_diameter)
     
+def IndependentBinning(independent_binning=True):
+    ReductionSingleton().get_azimuthal_averager().use_independent_binning(independent_binning)
+    
