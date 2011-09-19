@@ -204,6 +204,7 @@ namespace Mantid
       }
       size_t numSpectra(0);
       bool haveErrors(false);
+      bool haveXErrors(false);
       // Assume single data set with no errors
       if( numCols == 2 )
       {
@@ -214,6 +215,13 @@ namespace Mantid
       {
         numSpectra = (numCols - 1)/2;
         haveErrors = true;
+      }
+      // Data with errors on both X and Y (4-column file)
+      else if( numCols == 4 )
+      {
+        numSpectra = 1;
+        haveErrors = true;
+        haveXErrors = true;
       }
       else
       {
@@ -263,6 +271,16 @@ namespace Mantid
           else
           {
             spectra[i].dataE().push_back(0.0);
+          }
+          if( haveXErrors )
+          {
+            // Note: we only have X errors with 4-column files.
+            // We are only here when i=0.
+            spectra[i].dataDx().push_back(values[3]);
+          }
+          else
+          {
+            spectra[i].dataDx().push_back(0.0);
           }
         }
         ++numBins;
