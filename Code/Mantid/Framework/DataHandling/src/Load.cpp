@@ -12,6 +12,7 @@
 
 #include <cctype>
 #include <algorithm>
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -124,17 +125,27 @@ namespace Mantid
         ++citr )
       {
         IDataFileChecker_sptr loader = API::LoadAlgorithmFactory::Instance().create(*citr);
-        if( loader->quickFileCheck(filePath, nread, header) )
+        try
         {
-          int pref = loader->fileCheck(filePath);
-          // Can't just pick the first as there might be one later in the list with a higher
-          // preference
-          if( pref > highestPref )
+          if( loader->quickFileCheck(filePath, nread, header) )
           {
-            highestPref = pref;
-            winningLoader = loader;
+            int pref = loader->fileCheck(filePath);
+            // Can't just pick the first as there might be one later in the list with a higher
+            // preference
+            if( pref > highestPref )
+            {
+              highestPref = pref;
+              winningLoader = loader;
+            }
           }
         }
+        catch (std::exception & e)
+        {
+          g_log.debug() << "Error running file check of " <<  loader->name() << std::endl;
+          g_log.debug() << e.what() << std::endl;
+
+        }
+
       }
 
       if( !winningLoader )
@@ -144,6 +155,7 @@ namespace Mantid
         throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
                                  "Check that the file is a supported type.");
       }
+      g_log.debug() << "Winning loader is " <<  winningLoader->name() << std::endl;
       setPropertyValue("LoaderName", winningLoader->name());
       winningLoader->initialize();
       setUpLoader(winningLoader);
@@ -361,8 +373,8 @@ namespace Mantid
         return loader->getProperty(propName);
       }
       catch(std::runtime_error&)
-      {
-      }
+      { }
+
       // Try a MatrixWorkspace
       try
       {
@@ -370,8 +382,8 @@ namespace Mantid
         return childWS;
       }
       catch(std::runtime_error&)
-      {
-      }
+      { }
+
       // EventWorkspace
       try
       {
@@ -379,8 +391,27 @@ namespace Mantid
         return childWS;
       }
       catch(std::runtime_error&)
+      { }
+
+      // IMDEventWorkspace
+      try
       {
+        IMDEventWorkspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
       }
+      catch(std::runtime_error&)
+      { }
+
+      // Just workspace?
+      try
+      {
+        Workspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
+      }
+      catch(std::runtime_error&)
+      { }
+
+      g_log.debug() << "Workspace property " << propName << " did not return to MatrixWorkspace, EventWorkspace, or IMDEventWorkspace." << std::endl;
       return Workspace_sptr();
     }
 

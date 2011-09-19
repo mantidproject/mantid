@@ -10,6 +10,7 @@ Load a .nxs file into a MDEventWorkspace.
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
@@ -41,7 +42,7 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMD  : public API::Algorithm
+  class DLLExport LoadMD : public API::IDataFileChecker
   {
   public:
     LoadMD();
@@ -53,7 +54,12 @@ namespace MDEvents
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDEvents";}
-    
+
+    /// do a quick check that this file can be loaded
+    bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+    int fileCheck(const std::string& filePath);
+
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();

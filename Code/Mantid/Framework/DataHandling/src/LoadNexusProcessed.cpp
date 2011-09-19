@@ -8,20 +8,20 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {

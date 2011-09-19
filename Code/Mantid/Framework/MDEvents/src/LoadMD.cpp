@@ -1,6 +1,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -11,6 +12,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
@@ -24,7 +26,8 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(LoadMD)
+    DECLARE_ALGORITHM(LoadMD);
+    DECLARE_LOADALGORITHM(LoadMD);
 
 
     //----------------------------------------------------------------------------------------------
@@ -78,6 +81,58 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
     }
+
+
+
+    //-------------------------------------------------------------------------------------------------
+    /** Do a quick file type check by looking at the first 100 bytes of the file
+     *  @param filePath :: path of the file including name.
+     *  @param nread :: no.of bytes read
+     *  @param header :: The first 100 bytes of the file as a union
+     *  @return true if the given file is of type which can be loaded by this algorithm
+     */
+    bool LoadMD::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
+    {
+      std::string ext = this->extension(filePath);
+      // If the extension is nxs then give it a go
+      if( ext.compare("nxs") == 0 ) return true;
+
+      // If not then let's see if it is a HDF file by checking for the magic cookie
+      if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
+      return false;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    /** Checks the file by opening it and reading few lines
+     *  @param filePath :: name of the file inluding its path
+     *  @return an integer value how much this algorithm can load the file
+     */
+    int LoadMD::fileCheck(const std::string& filePath)
+    {
+      int confidence(0);
+      typedef std::map<std::string,std::string> string_map_t;
+      try
+      {
+        string_map_t::const_iterator it;
+        ::NeXus::File file = ::NeXus::File(filePath);
+        string_map_t entries = file.getEntries();
+        for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+        {
+          if ( (it->first == "MDEventWorkspace") && (it->second == "NXentry") )
+            confidence = 95;
+
+        }
+        file.close();
+      }
+      catch(::NeXus::Exception&)
+      {
+      }
+      std::cout << "LoadMD::fileCheck() says " << confidence << std::endl;
+      return confidence;
+    }
+
+
+
 
 
     /** Load the ExperimentInfo blocks, if any, in the NXS file
