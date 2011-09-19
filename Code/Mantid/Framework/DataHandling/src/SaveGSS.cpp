@@ -4,7 +4,6 @@
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
-//#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>

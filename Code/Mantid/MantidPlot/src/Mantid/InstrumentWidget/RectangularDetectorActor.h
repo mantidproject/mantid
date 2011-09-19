@@ -45,10 +45,6 @@ namespace Geometry
   class ICompAssembly;
   class Object;
 }
-namespace API
-{
-  class IInstrument;
-}
 
 }
 

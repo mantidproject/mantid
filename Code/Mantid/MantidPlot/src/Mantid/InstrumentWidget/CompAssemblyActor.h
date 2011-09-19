@@ -43,7 +43,6 @@ namespace Kernel
 }
 namespace Geometry
 {
-  class IInstrument;
   class ICompAssembly;
   class Object;
 }

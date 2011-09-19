@@ -115,7 +115,6 @@ namespace Mantid
 {
   namespace API
   {
-    class IInstrument;
     class MatrixWorkspace;
   }
 }
