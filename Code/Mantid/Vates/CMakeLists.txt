@@ -83,6 +83,13 @@ if( ParaView_FOUND AND USE_PARAVIEW )
         Call EnvVarUpdate
         Pop  \\\$0
 		
+		Push \\\"MANTIDPARAVIEWPATH\\\"
+        Push \\\"A\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\bin\\\"
+        Call EnvVarUpdate
+        Pop  \\\$0
+		
 		")
 	
 	  # On unistall reverse stages listed above.
@@ -104,6 +111,13 @@ if( ParaView_FOUND AND USE_PARAVIEW )
         Push \\\"R\\\"
         Push \\\"HKCU\\\"
         Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
+        Call un.EnvVarUpdate
+        Pop  \\\$0
+		
+		Push \\\"MANTIDPARAVIEWPATH\\\"
+        Push \\\"R\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\bin\\\"
         Call un.EnvVarUpdate
         Pop  \\\$0
 		")
