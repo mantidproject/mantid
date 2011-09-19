@@ -386,10 +386,14 @@ m_mantidui(mantidui)
 
   init();
 
-  if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+  // Should only be done for the fitBrowser which is part of MantidPlot
+  if (!m_customFittings)
   {
-    connect(this,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-      m_mantidui,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+    {
+      connect(this,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+        m_mantidui,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    }
   }
 }
 
@@ -1370,18 +1374,36 @@ void FitPropertyBrowser::fit()
         emit rawData(wsName);
       } 
     }
-    if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+    if (!m_customFittings)
     {
-      QMap<QString,QString> algParams;
-      algParams["InputWorkspace"] = QString::fromStdString(wsName);
-      algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
-      algParams["StartX"] = QString::number(startX());
-      algParams["EndX"] = QString::number(endX());
-      algParams["Output"] = QString::fromStdString(outputName());
-      algParams["Function"] = QString::fromStdString(funStr);
-      algParams["Minimizer"] = QString::fromStdString(minimizer());
-      algParams["CostFunction"] = QString::fromStdString(costFunction());
-      emit executeFit("Fit",algParams,this);
+      if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
+      {
+        QMap<QString,QString> algParams;
+        algParams["InputWorkspace"] = QString::fromStdString(wsName);
+        algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
+        algParams["StartX"] = QString::number(startX());
+        algParams["EndX"] = QString::number(endX());
+        algParams["Output"] = QString::fromStdString(outputName());
+        algParams["Function"] = QString::fromStdString(funStr);
+        algParams["Minimizer"] = QString::fromStdString(minimizer());
+        algParams["CostFunction"] = QString::fromStdString(costFunction());
+        emit executeFit("Fit",algParams,this);
+      }
+      else
+      {
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+        alg->initialize();
+        alg->setPropertyValue("InputWorkspace",wsName);
+        alg->setProperty("WorkspaceIndex",workspaceIndex());
+        alg->setProperty("StartX",startX());
+        alg->setProperty("EndX",endX());
+        alg->setPropertyValue("Output",outputName());
+        alg->setPropertyValue("Function",funStr);
+        alg->setPropertyValue("Minimizer",minimizer());
+        alg->setPropertyValue("CostFunction",costFunction());
+        observeFinish(alg);
+        alg->executeAsync();
+      }
     }
     else
     {
@@ -1395,10 +1417,10 @@ void FitPropertyBrowser::fit()
       alg->setPropertyValue("Function",funStr);
       alg->setPropertyValue("Minimizer",minimizer());
       alg->setPropertyValue("CostFunction",costFunction());
-
       observeFinish(alg);
       alg->executeAsync();
     }
+
   }
   catch(std::exception& e)
   {
@@ -2587,10 +2609,11 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
     //m_groupMember = workspaceName();
     removeLogValue();
   }
-  emit workspaceNameChanged(wsName);
+  
   // If fit property browser is a custom fitting then emit signal that workspace has changed and to assign a new peak picker tool to it
   if (m_customFittings)
   {
+    emit workspaceNameChanged(wsName);
     emit wsChangePPAssign(wsName);
   }
 }
