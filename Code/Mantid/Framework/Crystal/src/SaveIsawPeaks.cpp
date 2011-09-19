@@ -201,7 +201,7 @@ namespace Crystal
         if (ids.size() > 0)
         {
           // Write the bank header
-          out << "0 NRUN DETNUM    CHI    PHI  OMEGA MONCNT" << std::endl;
+          out << "0 NRUN DETNUM    CHI      PHI    OMEGA   MONCNT" << std::endl;
           out <<  "1" <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
               std::right <<  bank;
 
@@ -213,9 +213,9 @@ namespace Crystal
           double chi = angles[1];
           double omega = angles[0];
 
-          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi;
-          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi;
-          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega;
+          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi << " ";
+          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi << " ";
+          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega << " ";
           out  <<  std::setw( 7 ) <<  (int)( 0 ) <<  std::endl;
 
           out << header << std::endl;
@@ -270,13 +270,13 @@ namespace Crystal
             out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
               << p.getDSpacing() << " ";
 
-            out << std::setw( 8 ) << std::fixed << (p.getBinCount()) << std::setw( 10 ) << " "
+            out << std::setw( 8 ) << std::fixed << int(p.getBinCount()) << std::setw( 10 ) << " "
               << std::fixed << std::setprecision( 2 ) << p.getIntensity() << " ";
 
             out << std::setw( 7 ) << std::fixed << std::setprecision( 2 )
               << p.getSigmaIntensity() << " ";
 
-            int thisReflag = 0;
+            int thisReflag = 310;
             out << std::setw( 5 ) << thisReflag;
 
             out << std::endl;
