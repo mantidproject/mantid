@@ -269,13 +269,14 @@ namespace DataHandling
       else
       { if (NXmakedata (outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR; }
       if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
-      NXlink * link = new NXlink;
-      link->linkType = 1; /* SDS data link */
-      NXgetdataID(outId, link);
-      std::string targetPath = "/entry/" + bank + "/" + errors_field_name;
-      strcpy(link->targetPath, targetPath.c_str());
-      if (NXmakelink(outId,link) != NX_OK)
-        std::cout << "Error while making link to " << targetPath << std::endl;
+
+//      NXlink * link = new NXlink;
+//      link->linkType = 1; /* SDS data link */
+//      NXgetdataID(outId, link);
+//      std::string targetPath = "/entry/" + bank + "/" + errors_field_name;
+//      strcpy(link->targetPath, targetPath.c_str());
+//      if (NXmakelink(outId,link) != NX_OK)
+//        g_log.debug() << "Error while making link to " << targetPath << std::endl;
 
       if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
       if (NXclosedata (outId) != NX_OK) return NX_ERROR;
