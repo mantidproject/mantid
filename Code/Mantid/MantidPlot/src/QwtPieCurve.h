@@ -94,12 +94,11 @@ public:
 	QList <PieLabel *> labelsList(){return d_texts_list;};
 
 private:
-// RJT: These methods cause Intel compiler warnings and aren't called anyway, so just comment them out
-//	void draw(QPainter *painter,const QwtScaleMap &xMap,
-//		const QwtScaleMap &yMap, int from, int to) const;
-//	void drawSlices(QPainter *painter, const QwtScaleMap &xMap,
-//		const QwtScaleMap &yMap, int from, int to) const;
-//	void drawDisk(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap) const;
+	void draw(QPainter *painter,const QwtScaleMap &xMap,
+		const QwtScaleMap &yMap, int from, int to) const;
+	void drawSlices(QPainter *painter, const QwtScaleMap &xMap,
+		const QwtScaleMap &yMap, int from, int to) const;
+	void drawDisk(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap) const;
 
 	int d_pie_ray;
 	int d_first_color;

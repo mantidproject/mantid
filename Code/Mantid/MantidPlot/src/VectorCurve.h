@@ -50,9 +50,8 @@ public:
 
 	QwtDoubleRect boundingRect() const;
 
-// RJT: These methods cause Intel compiler warnings and aren't called anyway, so just comment them out
-//	void draw(QPainter *painter,const QwtScaleMap &xMap,
-//		const QwtScaleMap &yMap, int from, int to) const;
+	void draw(QPainter *painter,const QwtScaleMap &xMap,
+		const QwtScaleMap &yMap, int from, int to) const;
 
 	void drawVector(QPainter *painter, const QwtScaleMap &xMap,
 		const QwtScaleMap &yMap, int from, int to) const;

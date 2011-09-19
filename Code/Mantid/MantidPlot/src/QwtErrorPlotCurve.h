@@ -86,7 +86,6 @@ public:
 	void loadData();
 
 private:
-  // RJT: These methods cause Intel compiler warnings and aren't called anyway, so just comment them out
 	virtual void draw(QPainter *painter,const QwtScaleMap &xMap,
 		const QwtScaleMap &yMap, int from, int to) const;
 

@@ -61,22 +61,22 @@ pen = vc->pen;
 vectorEnd = (QwtArrayData *)vc->vectorEnd->copy();
 }
 
-//void VectorCurve::draw(QPainter *painter,
-//    const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
-//{
-//    if ( !painter || dataSize() <= 0 )
-//        return;
-//
-//    if (to < 0)
-//        to = dataSize() - 1;
-//
-//	QwtPlotCurve::draw(painter, xMap, yMap, from, to);
-//
-//    painter->save();
-//    painter->setPen(pen);
-//    drawVector(painter, xMap, yMap, from, to);
-//    painter->restore();
-//}
+void VectorCurve::draw(QPainter *painter,
+    const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
+{
+    if ( !painter || dataSize() <= 0 )
+        return;
+
+    if (to < 0)
+        to = dataSize() - 1;
+
+	QwtPlotCurve::draw(painter, xMap, yMap, from, to);
+
+    painter->save();
+    painter->setPen(pen);
+    drawVector(painter, xMap, yMap, from, to);
+    painter->restore();
+}
 
 void VectorCurve::drawVector(QPainter *painter,
     const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
