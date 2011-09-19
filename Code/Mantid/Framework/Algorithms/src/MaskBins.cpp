@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskBins.h"
 #include <limits>
+#include <sstream>
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -63,9 +64,10 @@ void MaskBins::exec()
 
   if (m_startX > m_endX)
   {
-    const std::string failure("XMax must be greater than XMin.");
-    g_log.error(failure);
-    throw std::invalid_argument(failure);
+    std::stringstream msg;
+    msg << "XMax (" << m_startX << ") must be greater than XMin (" << m_endX << ")";
+    g_log.error(msg.str());
+    throw std::invalid_argument(msg.str());
   }
   
   //---------------------------------------------------------------------------------
