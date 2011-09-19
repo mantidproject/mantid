@@ -16,6 +16,8 @@ FindPeaksMD(InputWorkspace=ws+'_MD',MaxPeaks='50',OutputWorkspace=ws+'_peaks')
 # Find the UB matrix using the peaks and known lattice parameters
 FindUBUsingLatticeParameters(PeaksWorkspace=ws+'_peaks',a='10.3522',b='6.0768',c='4.7276',
 		alpha='90',beta='90',gamma='90', NumInitial='20', Tolerance='0.12')
+# And index to HKL		
+IndexPeaks(PeaksWorkspace=ws+'_peaks', Tolerance='0.12')
 		
 # Centroid the peaks
 CentroidPeaksMD(InputWorkspace=ws+'_MD',CoordinatesToUse='Q (sample frame)',
@@ -24,13 +26,21 @@ CentroidPeaksMD(InputWorkspace=ws+'_MD',CoordinatesToUse='Q (sample frame)',
 # Find UB again using the centroided-peaks. Should give about the same result
 FindUBUsingLatticeParameters(PeaksWorkspace=ws+'_peaks_centered',a='10.3522',b='6.0768',c='4.7276',
 		alpha='90',beta='90',gamma='90', NumInitial='20', Tolerance='0.12')
-		
+# And index to HKL		
+IndexPeaks(PeaksWorkspace=ws+'_peaks_centered', Tolerance='0.12')
+
 # Copy the UB matrix back to the original workspace
 CopySample(InputWorkspace=ws+'_peaks_centered',OutputWorkspace=ws,
 		CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
 		
 # Re-convert from eventWorkspace to MDWorkspace, this time in HKL space
 ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_MD_hkl',OutputDimensions='HKL',LorentzCorrection='1')
+
+# Integrate in reciprocal space (HKL)
+IntegratePeaksMD(InputWorkspace=ws+'_MD_hkl', CoordinatesToUse='HKL', PeakRadius=0.1, BackgroundRadius=0.0, \
+				PeaksWorkspace=ws+'_peaks_centered', OutputWorkspace=ws+'_peaks_centered_integ')
+IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', PeakRadius=0.1, BackgroundRadius=0.0, \
+				PeaksWorkspace=ws+'_peaks_centered', OutputWorkspace=ws+'_peaks_centered_integ')
 
 # Save the MD workspace in Q sample frame to a NXS file. 
 SaveMD(InputWorkspace=ws+'_MD', Filename='TOPAZ_3131_MD_q_sample.nxs')
