@@ -52,12 +52,14 @@ void vtkPeaksReader::SetWidth(double width)
 
 int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
+
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   vtkPolyData *output = vtkPolyData::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
+  Mantid::API::FrameworkManager::Instance();
 
    //Ensure that the Peaks Workspace is only generated once
   if(!m_isSetup) 
