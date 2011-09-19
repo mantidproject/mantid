@@ -1,6 +1,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include <Poco/Environment.h>
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
@@ -139,12 +140,22 @@ InterfaceManagerImpl::InterfaceManagerImpl()
     if( nloaded == 0 )
     {
       g_log.warning() << "Unable to load Qt plugin libraries.\n"
-			  << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
-			  << "the correct location."
-			  << std::endl;
+        << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
+        << "the correct location."
+        << std::endl;
     }
   }
 
+  if (Poco::Environment::has("MANTIDPARAVIEWPATH"))
+  {
+    std::string vatesLibPath = Poco::Environment::get("MANTIDPARAVIEWPATH");
+    int nloaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(vatesLibPath);
+    if( nloaded == 0)
+    {
+      g_log.error() << "MANTIDPARAVIEWPATH env variable defined, but libraries cannot be loaded"
+        << std::endl;
+    }
+  } 
 }
 
 /// Destructor
@@ -157,13 +168,32 @@ void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInsta
   this->m_vatesGuiFactory = factory;
 }
 
+/*
+Getter to determine if vates components have been installed.
+@return true if they are available.
+*/
+bool InterfaceManagerImpl::hasVatesLibraries() const
+{
+  return NULL != this->m_vatesGuiFactory;
+}
+
+
+
 VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui() const
 {
   VatesViewerInterface *vsg = NULL;
-  vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
-  if (!vsg)
+  if(m_vatesGuiFactory == NULL)
   {
-    g_log.error() << "Error creating Vates Simple GUI" << std::endl;
+    g_log.error() << "InterfaceManagerImpl::createVatesSimpleGui is null" << std::endl;
+    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManagerImpl::createVatesSimpleGui", "m_vatesGuiFactory");
   }
-  return vsg;
+  else 
+  {
+    vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
+    if (!vsg)
+    {
+      g_log.error() << "Error creating Vates Simple GUI" << std::endl;
+    }
+    return vsg;
+  }
 }

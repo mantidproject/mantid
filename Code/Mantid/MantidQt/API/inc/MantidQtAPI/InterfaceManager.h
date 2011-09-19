@@ -102,6 +102,9 @@ public:
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 
+  /// Getter for vates libraries availablity
+  bool hasVatesLibraries() const;
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<InterfaceManagerImpl>;
   
