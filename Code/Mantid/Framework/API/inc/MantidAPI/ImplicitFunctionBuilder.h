@@ -14,9 +14,7 @@ namespace Mantid
 
     namespace API
     {
-        /** A base class for absorption correction algorithms.
-
-        This class is the abstract type for building IImplicitFunctions
+        /** This class is the abstract type for building IImplicitFunctions
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010

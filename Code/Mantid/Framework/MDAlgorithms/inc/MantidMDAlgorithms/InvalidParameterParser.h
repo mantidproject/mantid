@@ -24,9 +24,7 @@ namespace Mantid
 {
     namespace MDAlgorithms
     {
-        /** A base class for absorption correction algorithms.
-
-        XML Parser for invalid parameter types
+        /** XML Parser for invalid parameter types
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010

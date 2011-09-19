@@ -34,9 +34,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "ImplicitFunctionParameter.h"
 
-/** A base class for absorption correction algorithms.
-
- XML Parser for parameter types
+/** XML Parser for parameter types for ImplicitFunctions
 
  @author Owen Arnold, Tessella plc
  @date 01/10/2010
