@@ -579,6 +579,7 @@ addAllFiles(FRAMEWORKDIR + '/NexusCPP/inc/MantidNexusCPP','nex',IncludeMantidNex
 # Other includes
 boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
 pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
+
 #-------------------  end of Includes ---------------------------------------
 
 sconsList = addCompList('scons',CODEDIR + '/Third_Party/src/scons-local','scons-local',InstallDir)[0]
@@ -613,12 +614,16 @@ addAllFilesExt(USERALGORITHMSDIR,'ualg','h',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'build.bat','UA_build.bat',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'createAlg.py','UA_ca.py',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'SConstruct','UA_Scon',UserAlgorithms)
+# NeXus API header
+addFileV('NAPI', 'napi.h', 'napi.h', CODEDIR + '/Third_Party/include/napi.h', includeDir)
+# Mantid
 addFileV('MantidKernel_lib','MKernel.lib','MantidKernel.lib',MANTIDRELEASE + '/MantidKernel.lib',UserAlgorithms)
 addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib',MANTIDRELEASE + '/MantidGeometry.lib',UserAlgorithms)
 addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib',MANTIDRELEASE + '/MantidAPI.lib',UserAlgorithms)
 addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib',MANTIDRELEASE + '/MantidDataObjects.lib',UserAlgorithms)
 addFileV('MantidCurveFitting_lib','MFit.lib','MantidCurveFitting.lib',MANTIDRELEASE + '/MantidCurveFitting.lib',UserAlgorithms)
 addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/PocoFoundation.lib',UserAlgorithms)
+addFileV('poco_xml_lib','poco_x.lib','PocoXML.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/PocoXML.lib',UserAlgorithms)
 addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/boost_date_time-vc100-mt-1_43.lib',UserAlgorithms)
 
 
