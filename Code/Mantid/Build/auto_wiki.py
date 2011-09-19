@@ -126,7 +126,7 @@ def add_wiki_description(algo, wikidesc):
 def get_wiki_description(algo):
     source = find_algo_file(algo)
     if source == '': 
-        alg = mtd.createAlgorithm(algo_name)
+        alg = mtd.createAlgorithm(algo)
         return alg.getWikiDescription()
     else:
         f = open(source,'r')
