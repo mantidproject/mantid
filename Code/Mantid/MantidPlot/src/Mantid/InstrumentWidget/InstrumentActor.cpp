@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <QSettings>
+#include <QMessageBox>
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
@@ -73,6 +74,13 @@ InstrumentActor::InstrumentActor(const QString wsName)
   blockSignals(false);
 
   m_id2wi_map.reset(m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+
+  // If the instrument is empty, maybe only having the sample and source
+  if (getInstrument()->nelements() < 3)
+  {
+    QMessageBox::warning(NULL,"MantidPlot - Warning","The instrument is probably empty","OK");
+  }
+
   // this adds actors for all instrument components to the scene and fills in m_detIDs
   m_scene.addActor(new CompAssemblyActor(*this,getInstrument()->getComponentID()));
 
