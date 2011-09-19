@@ -413,7 +413,7 @@ void DiffractionFocussing2::execEvent()
       }
       //i is the workspace index (of the input)
       const int group = groupAtWorkspaceIndex[wi];
-      if (group < 1) // Not in a group
+      if (group < 1 || group > nGroups) // Not in a group, or invalid group #
         continue;
       size_required[group] += eventW->getEventList(wi).getNumberEvents();
       // Also record a list of workspace indices
