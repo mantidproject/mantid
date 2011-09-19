@@ -67,6 +67,7 @@ if ARCH == '32':
     comp_guid['Plugins'] = '{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}'
     comp_guid['Documents'] = '{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}'
     comp_guid['Logs'] = '{0918C9A4-3481-4f21-B941-983BE21F9674}'
+    comp_guid['Includes'] = '{e86d1741-bc2b-4a9f-a6a7-3f7905aaf3aa}'
     comp_guid['IncludeMantidAPI'] = '{4761DDF6-813C-4470-8852-98CB9A69EBC9}'
     comp_guid['IncludeMantidKernel'] = '{AF40472B-5822-4ff6-8E05-B4DA5224AA87}'
     comp_guid['IncludeMantidNexusCPP'] = '{12cf277b-8224-420c-b54a-8425c0376fc3}'
@@ -82,6 +83,7 @@ else:
     comp_guid['Plugins'] = '{8ef1c4db-c54d-4bb1-8b66-a9421db24faf}'
     comp_guid['Documents'] = '{bb774537-d0c6-4541-93f2-7aa5f5132d21}'
     comp_guid['Logs'] = '{0cdce87e-976a-40a5-a3d5-73dd8bce9e2e}'
+    comp_guid['Includes'] = '{a291f307-477c-4169-9bdb-65f76eb413bf}'
     comp_guid['IncludeMantidAPI'] = '{878ff1f2-7d09-4817-972b-3590c45ea0c9}'
     comp_guid['IncludeMantidKernel'] = '{187317c0-cc23-4a21-bf19-0e347866620c}'
     comp_guid['IncludeMantidNexusCPP'] = '{20327246-8f47-448b-ae2b-8d464c3a69c7}'
@@ -562,6 +564,7 @@ addTo(Logs,'CreateFolder',{})
 
 #-------------------  Includes  -------------------------------------
 includeDir = addDirectory('IncludeDir','include','include',InstallDir)
+Includes = addComponent('Includes',comp_guid['Includes'],includeDir)
 # API
 includeMantidAPIDir = addDirectory('IncludeMantidAPIDir','MAPI','MantidAPI',includeDir)
 IncludeMantidAPI = addComponent('IncludeMantidAPI',comp_guid['IncludeMantidAPI'],includeMantidAPIDir)
@@ -577,6 +580,8 @@ includeMantidNexusCPPDir = addDirectory('IncludeMantidNexusCPPDir','NEXCPP','Man
 IncludeMantidNexusCPP = addComponent('IncludeMantidNexusCPP',comp_guid['IncludeMantidNexusCPP'],includeMantidNexusCPPDir)
 addAllFiles(FRAMEWORKDIR + '/NexusCPP/inc/MantidNexusCPP','nex',IncludeMantidNexusCPP)
 # Other includes
+# NeXus API header
+addFileV('NAPI', 'napi.h', 'napi.h', CODEDIR + '/Third_Party/include/napi.h', Includes)
 boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
 pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
 
@@ -614,8 +619,6 @@ addAllFilesExt(USERALGORITHMSDIR,'ualg','h',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'build.bat','UA_build.bat',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'createAlg.py','UA_ca.py',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'SConstruct','UA_Scon',UserAlgorithms)
-# NeXus API header
-addFileV('NAPI', 'napi.h', 'napi.h', CODEDIR + '/Third_Party/include/napi.h', includeDir)
 # Mantid
 addFileV('MantidKernel_lib','MKernel.lib','MantidKernel.lib',MANTIDRELEASE + '/MantidKernel.lib',UserAlgorithms)
 addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib',MANTIDRELEASE + '/MantidGeometry.lib',UserAlgorithms)
