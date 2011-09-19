@@ -47,7 +47,6 @@ namespace Mantid
     bool LoadAscii::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       std::string extn=extension(filePath);
-      //bool bascii(false);
       if (!extn.compare("dat")||!extn.compare("csv")|| !extn.compare("txt")|| !extn.compare("")) //If the file is of type ascii then have a go
       {
         return true;
@@ -61,7 +60,6 @@ namespace Mantid
             is_ascii =false;
         }
         return (is_ascii);
-        //return(is_ascii|| bascii?true:false);
       }
     }
 
@@ -343,7 +341,7 @@ namespace Mantid
         std::string value = *itr;
         boost::trim(value);
         boost::to_lower(value);
-        if (value == "nan") //ignores nans (not a number) and replaces them with a nan
+        if (value == "nan"|| value == "1.#qnan") //ignores nans (not a number) and replaces them with a nan
         { 
           double nan = std::numeric_limits<double>::quiet_NaN();//(0.0/0.0);
           values[i] = nan;
