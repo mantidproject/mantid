@@ -41,6 +41,14 @@ namespace Mantid
     {
     }
 
+    //----------------------------------------------------------------------------------------------
+    /// Sets documentation strings for this algorithm
+    void DynamicRebinFromXML::initDocs()
+    {
+      this->setWikiSummary("Take a MDWorkspace and bin it on a regular grid. Input is taken in the xml geometry/implicit function schema. GeometryDescription is created on the fly.).");
+      this->setOptionalMessage("Take a MDEventWorkspace and bin into into a dense, multi-dimensional histogram workspace (MDHistoWorkspace).");
+    }
+
     /// Default (empty) destructor
     DynamicRebinFromXML::~DynamicRebinFromXML()
     {}

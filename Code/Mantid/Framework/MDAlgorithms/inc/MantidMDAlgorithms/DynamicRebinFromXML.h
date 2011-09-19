@@ -66,6 +66,9 @@ public:
   virtual const std::string category() const { return "General"; } ///< @return the algorithms category
   virtual int version() const { return (1); } ///< @return version number of algorithm
 
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
+
 protected:
       /// Get the name of the workspace from xml.
     virtual std::string getWorkspaceName(Poco::XML::Element* pRootElem) const;
