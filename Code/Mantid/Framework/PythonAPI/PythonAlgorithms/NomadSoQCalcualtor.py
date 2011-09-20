@@ -21,7 +21,7 @@ class NomadSoQCalculator(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Algorithm"
+        return "Diffraction"
 
     def name(self):
         """ Mantid required
@@ -156,9 +156,6 @@ class NomadSoQCalculator(PythonAlgorithm):
         for ws in workspaces:
             Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=rebinparam, PreserveEvents=False)
 
-        # 4. Extended region
-
-    
         return
 
 

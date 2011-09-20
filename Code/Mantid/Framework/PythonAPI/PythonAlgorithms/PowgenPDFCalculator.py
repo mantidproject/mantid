@@ -23,7 +23,7 @@ class PowgenPDFCalculator(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Algorithm"
+        return "Diffraction"
 
     def name(self):
         """ Mantid required
@@ -96,9 +96,10 @@ class PowgenPDFCalculator(PythonAlgorithm):
         print "POWGEN PDF Fourier Transform: Qmax = %f, Rmax = %f, dR = %f" % (qmax, rmax, dr)
 
         # 1. Call C++ for PDF, i.e., G(r)
-        PDFFourierTransform(InputWorkspace=soqws, OutputGorRWorkspace=pdfwsname,
-                OutputQSQm1Workspace="QSQm1", RMax=rmax, DeltaR=dr,
-                Qmin=qmin, Qmax=qmax)
+        PDFFourierTransform(InputWorkspace=soqws, OutputPDFWorkspace=pdfwsname,
+                InputSofQType="S(Q)", RMax=rmax, DeltaR=dr,
+                Qmin=qmin, Qmax=qmax,
+                PDFType="G(r)")
 
         return
 

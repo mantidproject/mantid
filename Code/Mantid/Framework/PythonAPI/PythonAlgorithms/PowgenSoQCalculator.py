@@ -15,6 +15,8 @@ from MantidFramework import *
 from mantidsimple import *
 import math
 
+RUNNUMBERHEADER = "PG3_"
+
 class PowgenSoQCalculator(PythonAlgorithm):
     """ Calculate S(Q) for POWGEN
     The output S(Q) is raw S(Q) before user input the best effective density of 
@@ -46,7 +48,7 @@ class PowgenSoQCalculator(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Algorithm"
+        return "Diffraction"
 
     def name(self):
         """ Mantid required
@@ -131,10 +133,10 @@ class PowgenSoQCalculator(PythonAlgorithm):
         # result: bkgruns = ["PG3_2585", "PG3_2586"] 
         # result: canruns = ["PG3_2583", "PG3_2584"] 
         # result: vanruns = ["PG3_2548", "PG3_2577"] 
-        self.samwsdict = self.sortRuns(samruns)
-        self.bkgwsdict = self.sortRuns(bkgruns)
-        self.canwsdict = self.sortRuns(canruns)
-        self.vanwsdict = self.sortRuns(vanruns)
+        self.samwsdict = self.sortRuns(samRuns)
+        self.bkgwsdict = self.sortRuns(bakRuns)
+        self.canwsdict = self.sortRuns(canRuns)
+        self.vanwsdict = self.sortRuns(vanRuns)
 
         # b) Detector range
         self.SofQUserRange = self.parseDetectorRange(detectorrangeinq)
@@ -266,9 +268,12 @@ class PowgenSoQCalculator(PythonAlgorithm):
     def sortRuns(self, runnumbers):
         """ Sort runs to a dictionary
         """
+        global RUNNUMBERHEADER
+
         # 1. Get workspace
         workspaces = []
         for runnum in runnumbers:
+            runnum = RUNNUMBERHEADER+str(runnum)
             ws = mtd[runnum]
             if ws is None:
                 raise NotImplementedError("Run %s is not available in Mantid" % (runnum)) 

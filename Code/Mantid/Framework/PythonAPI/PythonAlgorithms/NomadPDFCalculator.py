@@ -23,7 +23,7 @@ class NomadPDFCalculator(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Algorithm"
+        return "Diffraction"
 
     def name(self):
         """ Mantid required
