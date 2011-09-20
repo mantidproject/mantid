@@ -208,9 +208,12 @@ void ConvertToQ3DdE::exec(){
        convert_log.error()<<"Can not get proper energy axis from processed workspace\n";
        throw(std::invalid_argument("Input workspace is not propwer converted to energy workspace"));
     }
-    size_t lastInd = inWS2D->getAxis(0)->length()-1;
-    double E_max = inWS2D->getAxis(0)->operator()(lastInd);
-    double E_min = inWS2D->getAxis(0)->operator()(0);
+    //size_t lastInd = inWS2D->getAxis(0)->length()-1;
+    //double E_max = inWS2D->getAxis(0)->operator()(lastInd);
+    //double E_min = inWS2D->getAxis(0)->operator()(0);
+
+    double E_max = inWS2D->readX(0).front();
+    double E_min = inWS2D->readX(0).back();
     if(E_min>=E_max){
         convert_log.error()<<" expecting to process energy form "<<E_min<<" to "<<E_max<<" but Emin>=Emax\n";
         throw(std::invalid_argument(" Emin>=Emax"));
@@ -307,7 +310,8 @@ void ConvertToQ3DdE::exec(){
 //      boost::function<void ()> func;
 //        func = boost::bind(&ConvertToQ3DdE::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
 //
-      // Loop over every cell in the workspace, calling the abstract correction function
+      size_t n_added_events(0);
+      size_t SPLIT_LEVEL(1000);
      // PARALLEL_FOR1(inWS2D)
       for (int64_t i = 0; i < int64_t(numSpec); ++i)
       {
@@ -341,18 +345,26 @@ void ConvertToQ3DdE::exec(){
             QE[3]  = (coord_t)E_tr;
             float ErrSq = float(Error[j]*Error[j]);
             ws->addEvent(MDE(float(Signal[j]),ErrSq,runIndex,det_id,QE));
+            n_added_events++;
         }
   
       // This splits up all the boxes according to split thresholds and sizes.
         //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
         //ThreadPool tp(NULL);
-        ws->splitAllIfNeeded(NULL);
+        if(n_added_events>SPLIT_LEVEL){
+            ws->splitAllIfNeeded(NULL);
+            n_added_events=0;
+        }
         //tp.joinAll();
         progress.report(i);  
    //       PARALLEL_END_INTERUPT_REGION
       }
  //    PARALLEL_CHECK_INTERUPT_REGION
-      progress.report();      
+        if(n_added_events>0){
+            ws->splitAllIfNeeded(NULL);
+            n_added_events=0;
+        }
+        progress.report();      
 
 
     // Save the output
