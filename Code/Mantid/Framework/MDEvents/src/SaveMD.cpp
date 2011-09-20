@@ -8,6 +8,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -56,14 +57,18 @@ namespace MDEvents
     declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
         "The name of the Nexus file to write, as a full or relative path.\n"
         "Optional if UpdateFileBackEnd is checked.");
+    // Filename is NOT used if UpdateFileBackEnd
+    setPropertySettings("Filename", new EnabledWhenProperty(this,"UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
     declareProperty("UpdateFileBackEnd", false,
         "Only for MDEventWorkspaces with a file back end: check this to update the NXS file on disk\n"
         "to reflect the current data structure. Filename parameter is ignored.");
+    setPropertySettings("UpdateFileBackEnd", new EnabledWhenProperty(this,"MakeFileBacked", IS_EQUAL_TO, "0"));
 
     declareProperty("MakeFileBacked", false,
         "For an MDEventWorkspace that was created in memory:\n"
         "This saves it to a file AND makes the workspace into a file-backed one.");
+    setPropertySettings("MakeFileBacked", new EnabledWhenProperty(this,"UpdateFileBackEnd", IS_EQUAL_TO, "0"));
   }
 
   //----------------------------------------------------------------------------------------------
