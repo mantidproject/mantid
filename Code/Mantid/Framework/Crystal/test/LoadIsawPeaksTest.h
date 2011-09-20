@@ -2,7 +2,7 @@
 #define MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/Matrix.h"
@@ -18,14 +18,14 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class LoadPeaksFileTest : public CxxTest::TestSuite
+class LoadIsawPeaksTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    LoadPeaksFile alg;
+    LoadIsawPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -34,7 +34,7 @@ public:
   /** Test for the older TOPAZ geometry. */
   void xtest_exec_TOPAZ_1241()
   {
-    LoadPeaksFile alg;
+    LoadIsawPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("Filename", "TOPAZ_1241.integrate");
@@ -75,7 +75,7 @@ public:
   /* Test for the newer TOPAZ geometry */
   void test_exec_TOPAZ_2479()
   {
-    LoadPeaksFile alg;
+    LoadIsawPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("Filename", "TOPAZ_2479.peaks");

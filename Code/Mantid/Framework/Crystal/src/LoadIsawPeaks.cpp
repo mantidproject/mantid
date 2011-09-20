@@ -1,5 +1,5 @@
 #include "MantidAPI/FileProperty.h"
-#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IComponent.h"
@@ -27,7 +27,7 @@ namespace Crystal
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadPeaksFile)
+  DECLARE_ALGORITHM(LoadIsawPeaks)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -38,21 +38,21 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadPeaksFile::LoadPeaksFile()
+  LoadIsawPeaks::LoadIsawPeaks()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  LoadPeaksFile::~LoadPeaksFile()
+  LoadIsawPeaks::~LoadIsawPeaks()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void LoadPeaksFile::initDocs()
+  void LoadIsawPeaks::initDocs()
   {
     this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
     this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
@@ -61,7 +61,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void LoadPeaksFile::init()
+  void LoadIsawPeaks::init()
   {
     std::vector<std::string> exts;
     exts.push_back(".peaks");
@@ -80,7 +80,7 @@ namespace Crystal
    * @param in :: stream of the input file
    * @return the first word on the next line
    */
-  std::string LoadPeaksFile::readHeader( PeaksWorkspace_sptr outWS, std::ifstream& in )
+  std::string LoadIsawPeaks::readHeader( PeaksWorkspace_sptr outWS, std::ifstream& in )
   {
     std::string tag;
     std::string r = getWord( in ,  false );
@@ -292,7 +292,7 @@ namespace Crystal
    *
    * @param filename :: path to the .peaks file
    */
-  void LoadPeaksFile::appendFile( PeaksWorkspace_sptr outWS, std::string filename)
+  void LoadIsawPeaks::appendFile( PeaksWorkspace_sptr outWS, std::string filename)
   {
 
     // Open the file
@@ -366,7 +366,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void LoadPeaksFile::exec()
+  void LoadIsawPeaks::exec()
   {
     // Create the workspace
     PeaksWorkspace_sptr ws(new PeaksWorkspace());

@@ -1,18 +1,18 @@
 set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculateUMatrix.cpp
-        src/FindUBUsingLatticeParameters.cpp
-        src/FindUBUsingMinMaxD.cpp
-        src/FindUBUsingIndexedPeaks.cpp
-        src/IndexPeaks.cpp
+	src/FindUBUsingIndexedPeaks.cpp
+	src/FindUBUsingLatticeParameters.cpp
+	src/FindUBUsingMinMaxD.cpp
+	src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
+	src/LoadIsawPeaks.cpp
 	src/LoadIsawUB.cpp
-	src/LoadPeaksFile.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/PeakIntegration.cpp
 	src/PredictPeaks.cpp
 	src/SaveIsawPeaks.cpp
-        src/SaveIsawUB.cpp
+	src/SaveIsawUB.cpp
 	src/SavePeaksFile.cpp
 	src/SetGoniometer.cpp
 )
@@ -21,18 +21,18 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/CalculateUMatrix.h
+	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
-	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
+	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
-	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SaveIsawPeaks.h
-        inc/MantidCrystal/SaveIsawUB.h
+	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SetGoniometer.h
 )
@@ -40,18 +40,18 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/CalculateUMatrixTest.h
-        test/FindUBUsingLatticeParametersTest.h
-        test/FindUBUsingMinMaxDTest.h
-        test/FindUBUsingIndexedPeaksTest.h
-        test/IndexPeaksTest.h
+	test/FindUBUsingIndexedPeaksTest.h
+	test/FindUBUsingLatticeParametersTest.h
+	test/FindUBUsingMinMaxDTest.h
+	test/IndexPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
+	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h
-	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
 	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
-	 test/SaveIsawUBTest.h
+	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
 	test/SetGoniometerTest.h
 )

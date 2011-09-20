@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_LOADPEAKSFILE_H_
-#define MANTID_CRYSTAL_LOADPEAKSFILE_H_
+#ifndef MANTID_CRYSTAL_LOADISAWPEAKS_H_
+#define MANTID_CRYSTAL_LOADISAWPEAKS_H_
 /*WIKI* 
 
 Reads an ISAW-style .peaks or .integrate file into a PeaksWorkspace. Any detector calibration information is ignored.
@@ -16,20 +16,20 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** LoadPeaksFile : Load an ISAW-style .peaks file
+  /** LoadIsawPeaks : Load an ISAW-style .peaks file
    * into a PeaksWorkspace
    * 
    * @author Janik Zikovsky, SNS
    * @date 2011-03-07 15:22:11.897153
    */
-  class DLLExport LoadPeaksFile  : public API::Algorithm
+  class DLLExport LoadIsawPeaks  : public API::Algorithm
   {
   public:
-    LoadPeaksFile();
-    ~LoadPeaksFile();
+    LoadIsawPeaks();
+    ~LoadIsawPeaks();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "LoadPeaksFile";};
+    virtual const std::string name() const { return "LoadIsawPeaks";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -53,4 +53,4 @@ namespace Crystal
 } // namespace Mantid
 } // namespace Crystal
 
-#endif  /* MANTID_CRYSTAL_LOADPEAKSFILE_H_ */
+#endif  /* MANTID_CRYSTAL_LOADISAWPEAKS_H_ */

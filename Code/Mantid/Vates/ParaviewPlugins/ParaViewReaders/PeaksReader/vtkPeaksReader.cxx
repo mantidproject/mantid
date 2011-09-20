@@ -11,7 +11,7 @@
 #include <vtkCubeSource.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -65,7 +65,7 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   if(!m_isSetup) 
   {
     // This actually loads the peaks file
-    Mantid::API::IAlgorithm_sptr alg(new Mantid::Crystal::LoadPeaksFile());
+    Mantid::API::IAlgorithm_sptr alg(new Mantid::Crystal::LoadIsawPeaks());
     alg->initialize();
     alg->setPropertyValue("Filename", this->FileName);
     alg->setPropertyValue("OutputWorkspace", "LoadedPeaksWS");

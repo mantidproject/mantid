@@ -73,7 +73,7 @@ public:
 LoadEventNexus(Filename="/home/8oz/data/TOPAZ_3007_event.nxs",OutputWorkspace="TOPAZ_3007",FilterByTime_Stop="1500",SingleBankPixelsOnly="0",CompressTolerance="0.050000000000000003")
 
 # The found peaks
-LoadPeaksFile(Filename="/home/8oz/Code/Mantid/Test/AutoTestData/TOPAZ_3007.peaks",OutputWorkspace="TOPAZ_3007_peaks")
+LoadIsawPeaks(Filename="/home/8oz/Code/Mantid/Test/AutoTestData/TOPAZ_3007.peaks",OutputWorkspace="TOPAZ_3007_peaks")
 
 SortEvents(InputWorkspace="TOPAZ_3007")
 LoadIsawUB(InputWorkspace="TOPAZ_3007",Filename="/home/8oz/Code/Mantid/Test/AutoTestData/TOPAZ_3007.mat")
@@ -101,7 +101,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
         "InputWorkspace", "TOPAZ_3007");
 
     // Get a reference list of HKLs
-    AlgorithmHelper::runAlgorithm("LoadPeaksFile", 4,
+    AlgorithmHelper::runAlgorithm("LoadIsawPeaks", 4,
         "Filename", "TOPAZ_3007.peaks",
         "OutputWorkspace", "TOPAZ_3007_peaks");
 

@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <Poco/File.h>
 
-#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -35,7 +35,7 @@ public:
   //TODO: re-enable
   void xtest_exec()
   {
-    LoadPeaksFile alg;
+    LoadIsawPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("Filename", "TOPAZ_1204.peaks");

@@ -8,7 +8,7 @@
 #include <iomanip>
 
 #include "MantidCrystal/CalculateUMatrix.h"
-#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 
@@ -33,7 +33,7 @@ public:
   {
     // Name of the output workspace.
     std::string WSName("peaks");
-    LoadPeaksFile loader;
+    LoadIsawPeaks loader;
     TS_ASSERT_THROWS_NOTHING( loader.initialize() );
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
