@@ -76,6 +76,8 @@ public:
   /// @param index :: The index
   /// @param value :: The new value
   virtual void setValue(const std::size_t& index, const double& value) = 0;
+  /// change all axis valuesand set them form the vector supplied;
+  virtual void setValues(const std::vector<double> &new_axis_values)=0;
   virtual const specid_t& spectraNo(const std::size_t& index) const;
   virtual specid_t& spectraNo(const std::size_t& index);
 

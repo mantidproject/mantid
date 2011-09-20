@@ -59,6 +59,13 @@ void NumericAxis::setValue(const size_t& index, const double& value)
 
   m_values[index] = value;
 }
+/** Sets all axis values from the vedctor provided
+ */
+void NumericAxis::setValues(const std::vector<double> &new_axis_values)
+{
+      this->m_values = new_axis_values;
+}
+
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 :: Reference to the axis to compare to
@@ -66,16 +73,16 @@ void NumericAxis::setValue(const size_t& index, const double& value)
  */
 bool NumericAxis::operator==(const Axis& axis2) const
 {
-	if (length()!=axis2.length())
+    if (length()!=axis2.length())
   {
-		return false;
+        return false;
   }
   const NumericAxis* spec2 = dynamic_cast<const NumericAxis*>(&axis2);
   if (!spec2)
   {
     return false;
   }
-	return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
+    return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
 }
 
 /** Returns a text label which shows the value at index and identifies the

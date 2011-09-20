@@ -57,6 +57,7 @@ public:
   virtual std::size_t length() const{return m_values.size();}
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
   virtual void setValue(const std::size_t& index, const double& value);
+  virtual void setValues(const std::vector<double> &new_axis_values);
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;
   /// Create bin boundaries from the point values

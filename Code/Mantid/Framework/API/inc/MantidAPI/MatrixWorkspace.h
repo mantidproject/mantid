@@ -233,7 +233,7 @@ namespace Mantid
       int axes() const;
       Axis* getAxis(const std::size_t& axisIndex) const;
       void replaceAxis(const std::size_t& axisIndex, Axis* const newAxis);
-
+      void setAllX(const std::size_t& axisIndex, const std::vector<double> &XValues_new);
       /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
       virtual bool isHistogramData() const;
 

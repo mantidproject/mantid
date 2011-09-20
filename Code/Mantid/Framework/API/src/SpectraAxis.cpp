@@ -116,6 +116,16 @@ void SpectraAxis::setValue(const size_t& index, const double& value)
 
   m_values[index] = static_cast<specid_t>(value);
 }
+/** Sets all axis values to new casting them from double
+ */
+void SpectraAxis::setValues(const std::vector<double> &new_axis_values)
+{
+    this->m_values.resize(new_axis_values.size());
+    for(size_t i=0;i<m_values.size();i++){
+       this->m_values[i]= (specid_t)(new_axis_values[i]);
+    }
+
+}
 
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required

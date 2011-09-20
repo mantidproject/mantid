@@ -161,6 +161,10 @@ ConvertToQ3DdE::init()
      // this property is mainly for subalgorithms to set-up as they have to identify 
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
         "Store the part of the detectors transfromation into reciprocal space to save/reuse it later;");
+    // // this property is mainly for subalgorithms to set-up as they have to identify 
+    //declareProperty(new ArrayProperty<double>("u"), "first base vecotor");
+    //declareProperty(new ArrayProperty<double>("v"), "second base vecotors");
+
 
      declareProperty(new ArrayProperty<double>("MinQdE_values"),
          "An array containing minimal values for Q[A^-1] and energy transfer[meV] in a form qx_min,qy_min,qz_min, dE min\n"
@@ -207,6 +211,10 @@ void ConvertToQ3DdE::exec(){
     size_t lastInd = inWS2D->getAxis(0)->length()-1;
     double E_max = inWS2D->getAxis(0)->operator()(lastInd);
     double E_min = inWS2D->getAxis(0)->operator()(0);
+    if(E_min>=E_max){
+        convert_log.error()<<" expecting to process energy form "<<E_min<<" to "<<E_max<<" but Emin>=Emax\n";
+        throw(std::invalid_argument(" Emin>=Emax"));
+    }
 
     // get and check input energy (TODO: should energy be moved into Run?)
     double Ei = getProperty("EnergyInput");
@@ -293,7 +301,12 @@ void ConvertToQ3DdE::exec(){
   //   size_t eventsAdded = 0;
   //   size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
 
-
+//    // Create the thread pool that will run all of these.
+//    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
+//    ThreadPool tp(ts);
+//      boost::function<void ()> func;
+//        func = boost::bind(&ConvertToQ3DdE::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
+//
       // Loop over every cell in the workspace, calling the abstract correction function
      // PARALLEL_FOR1(inWS2D)
       for (int64_t i = 0; i < int64_t(numSpec); ++i)
@@ -307,6 +320,9 @@ void ConvertToQ3DdE::exec(){
         coord_t QE[4];
         for (size_t j = 0; j < specSize; ++j)
         {
+            // drop emtpy events 
+            if(Signal[j]<FLT_EPSILON)continue;
+
             double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
             if(E_tr<E_min||E_tr>=E_max)continue;
 
@@ -332,7 +348,7 @@ void ConvertToQ3DdE::exec(){
         //ThreadPool tp(NULL);
         ws->splitAllIfNeeded(NULL);
         //tp.joinAll();
-
+        progress.report(i);  
    //       PARALLEL_END_INTERUPT_REGION
       }
  //    PARALLEL_CHECK_INTERUPT_REGION

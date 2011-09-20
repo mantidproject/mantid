@@ -129,6 +129,8 @@ namespace Mantid
           // The Workspace2D is created with an EMPTY CONSTRUCTOR
           outputWS = WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1);
           WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+ 
+       
 
           //Initialize progress reporting.
           Progress prog(this,0.0,1.0, histnumber);
@@ -164,6 +166,8 @@ namespace Mantid
             outputWS->replaceAxis( i, inputWS->getAxis(i)->clone(outputWS.get()) );
             outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
           }
+          // set x-values for new x-axis according to the rebinning values;
+          outputWS->setAllX(0,*XValues_new);
 
           //Copy the units over too.
           for (int i=0; i < outputWS->axes(); ++i)

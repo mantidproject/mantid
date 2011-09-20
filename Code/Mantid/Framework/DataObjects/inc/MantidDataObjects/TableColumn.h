@@ -124,26 +124,12 @@ public:
     /// return a value casted to double; the users responsibility is to be sure, that the casting is possible
     double operator[](size_t i)const
     {
-     try{   
-        return boost::lexical_cast<double>(m_data[i]);
-     }catch(...){
-        return std::numeric_limits<double>::quiet_NaN();    
-     }
- /*     const Type *pTp  = &m_data[i];
+        try{   
+            return boost::lexical_cast<double>(m_data[i]);
+        }catch(...){
+            return std::numeric_limits<double>::quiet_NaN();    
+        }
  
-      switch(conversion_case){
-         case -8:
-             return (double)(*(reinterpret_cast<const  int64_t*>(pTp)));
-         case -4:
-             return (double)(*(reinterpret_cast<const int *>(pTp)));
-         case 4:
-             return (double)(*(reinterpret_cast<const float *>(pTp)));
-         case 8:
-             return    *(reinterpret_cast<const double *>(pTp));
-         default:
-             return std::numeric_limits<double>::quiet_NaN();    
-     }*/
-
     }
 
 protected:

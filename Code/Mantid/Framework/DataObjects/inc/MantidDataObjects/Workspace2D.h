@@ -82,7 +82,7 @@ public:
 
 
   /** sets the monitorWorkspace indexlist
-	@param mList :: a vector holding the monitor workspace indexes
+    @param mList :: a vector holding the monitor workspace indexes
   */
   void setMonitorList(std::vector<specid_t>& mList){m_monitorList=mList;}
 
