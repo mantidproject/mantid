@@ -401,7 +401,14 @@ namespace Mantid
         {
           for(size_t i = 0; i < filenames.size(); ++i)
           {
-            path = arch->getPath(filenames[i] + *ext);
+            try
+            {
+              path = arch->getPath(filenames[i] + *ext);
+            }
+            catch(...)
+            {
+              return "";
+            }
             Poco::Path pathPattern(path);
             if (ext->find("*") != std::string::npos)
             {
