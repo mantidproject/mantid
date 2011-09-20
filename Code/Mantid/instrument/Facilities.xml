@@ -273,6 +273,7 @@
    
    <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
     <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
    </instrument> 
 
   <instrument name="VISION" shortname="VIS" beamline="16B">
