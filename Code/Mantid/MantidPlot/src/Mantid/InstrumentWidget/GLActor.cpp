@@ -12,16 +12,12 @@ bool GLActor::accept(const GLActorVisitor& visitor)
 
 GLColor GLActor::makePickColor(size_t pickID)
 {
-  if (pickID > 0)
-  {
-    unsigned char r,g,b;
     pickID += 1;
+    unsigned char r,g,b;
     r=(unsigned char)(pickID/65536);
     g=(unsigned char)((pickID%65536)/256);
     b=(unsigned char)((pickID%65536)%256);
     return GLColor(r,g,b);
-  }
-  return GLColor();
 }
 
 size_t GLActor::decodePickColor(const GLColor& c)
