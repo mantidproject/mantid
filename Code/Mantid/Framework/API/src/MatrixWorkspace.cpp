@@ -840,18 +840,7 @@ namespace Mantid
       delete m_axes[axisIndex];
       m_axes[axisIndex] = newAxis;
     }
-    //
-    void MatrixWorkspace::setAllX(const std::size_t& axisIndex, const std::vector<double> &XValues_new)
-    {
-      if ( axisIndex >= m_axes.size() )
-      {
-        g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
-        throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
-      }
-      // If we're OK, then replace values for the old axis
-      this->m_axes[axisIndex]->setValues(XValues_new);
 
-    }
 
     //----------------------------------------------------------------------------------------------------
     /// Returns the units of the data in the workspace

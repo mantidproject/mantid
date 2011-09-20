@@ -54,12 +54,6 @@ void TextAxis::setValue(const size_t& index, const double& value)
   UNUSED_ARG(value)
   throw std::domain_error("setValue method cannot be used on a TextAxis.");
 }
-//
-void TextAxis::setValues(const std::vector<double> &new_axis_values)
-{
-    UNUSED_ARG(new_axis_values);
-    throw std::domain_error("setValues method cannot be used on a TextAxis.");
-}
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 :: Reference to the axis to compare to
