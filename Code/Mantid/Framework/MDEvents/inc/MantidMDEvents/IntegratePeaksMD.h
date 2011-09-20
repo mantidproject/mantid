@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDEWPEAKINTEGRATION_H_
-#define MANTID_MDEVENTS_MDEWPEAKINTEGRATION_H_
+#ifndef MANTID_MDEVENTS_INTEGRATEPEAKSMD_H_
+#define MANTID_MDEVENTS_INTEGRATEPEAKSMD_H_
 /*WIKI* 
 
 This algorithm takes two input workspaces: a MDEventWorkspace containing the events in multi-dimensional space, as well as a PeaksWorkspace containing single-crystal peak locations.
@@ -56,4 +56,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_MDEWPEAKINTEGRATION_H_ */
+#endif  /* MANTID_MDEVENTS_INTEGRATEPEAKSMD_H_ */

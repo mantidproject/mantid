@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_LOADMDEW_H_
-#define MANTID_MDEVENTS_LOADMDEW_H_
+#ifndef MANTID_MDEVENTS_LOADMD_H_
+#define MANTID_MDEVENTS_LOADMD_H_
 /*WIKI* 
 
 Load a .nxs file into a MDEventWorkspace.
@@ -86,4 +86,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_LOADMDEW_H_ */
+#endif  /* MANTID_MDEVENTS_LOADMD_H_ */

@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_PLUSMDEW_H_
-#define MANTID_MDEVENTS_PLUSMDEW_H_
+#ifndef MANTID_MDEVENTS_PLUSMD_H_
+#define MANTID_MDEVENTS_PLUSMD_H_
 /*WIKI* 
 
 This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: it combines the events from the two workspaces together to form one large workspace.
@@ -77,4 +77,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_PLUSMDEW_H_ */
+#endif  /* MANTID_MDEVENTS_PLUSMD_H_ */

@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_SAVEMDEW_H_
-#define MANTID_MDEVENTS_SAVEMDEW_H_
+#ifndef MANTID_MDEVENTS_SAVEMD_H_
+#define MANTID_MDEVENTS_SAVEMD_H_
 /*WIKI* 
 
 Save a MDEventWorkspace to a .nxs file.
@@ -70,4 +70,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_SAVEMDEW_H_ */
+#endif  /* MANTID_MDEVENTS_SAVEMD_H_ */

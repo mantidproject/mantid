@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_
-#define MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_
+#ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
+#define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
 /*WIKI* 
 
 The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space, and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]].
@@ -88,4 +88,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */
+#endif  /* MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */

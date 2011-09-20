@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_CLONEMDEVENTWORKSPACE_H_
-#define MANTID_MDEVENTS_CLONEMDEVENTWORKSPACE_H_
+#ifndef MANTID_MDEVENTS_CLONEMDWORKSPACE_H_
+#define MANTID_MDEVENTS_CLONEMDWORKSPACE_H_
 /*WIKI* 
 
 This algorithm will clones an existing MDEventWorkspace into a new one.
@@ -72,4 +72,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_CLONEMDEVENTWORKSPACE_H_ */
+#endif  /* MANTID_MDEVENTS_CLONEMDWORKSPACE_H_ */

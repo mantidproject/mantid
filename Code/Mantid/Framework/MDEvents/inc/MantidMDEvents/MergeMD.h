@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MERGEMDEW_H_
-#define MANTID_MDEVENTS_MERGEMDEW_H_
+#ifndef MANTID_MDEVENTS_MERGEMD_H_
+#define MANTID_MDEVENTS_MERGEMD_H_
 /*WIKI* 
 
 This algorithm is meant to merge a large number of large MDEventWorkspaces together into one file-backed MDEventWorkspace, without exceeding available memory.
@@ -134,4 +134,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_MERGEMDEW_H_ */
+#endif  /* MANTID_MDEVENTS_MERGEMD_H_ */

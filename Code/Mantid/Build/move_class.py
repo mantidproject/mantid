@@ -11,7 +11,7 @@ from cmakelists_utils import *
 
     
 #======================================================================
-def move_one(subproject, classname, newproject, oldfilename, newfilename, args):
+def move_one(subproject, classname, newproject, newclassname, oldfilename, newfilename, args):
     """Move one file """
     
     # Do an SVN move
@@ -25,8 +25,13 @@ def move_one(subproject, classname, newproject, oldfilename, newfilename, args):
     
     # Replace any includes of it
     text = text.replace("Mantid" + subproject + "/" + args.source_subfolder + classname + ".h", 
-                        "Mantid" + newproject + "/" + args.dest_subfolder + classname + ".h");
-    
+                        "Mantid" + newproject + "/" + args.dest_subfolder + newclassname + ".h")
+                        
+    #Replace the guard
+    old_guard = "MANTID_%s_%s_H_" % (subproject.upper(), classname.upper())
+    new_guard = "MANTID_%s_%s_H_" % (newproject.upper(), newclassname.upper())
+    text = text.replace(old_guard, new_guard)
+
     # Replace the namespace declaration
     text = text.replace("namespace " + subproject, "namespace " + newproject)
     # Replace the conents
@@ -63,11 +68,11 @@ def move_all(subproject, classname, newproject, newclassname, args):
       
     print
     if args.header:
-        move_one(subproject, classname, newproject, headerfile, newheaderfile, args)
+        move_one(subproject, classname, newproject, newclassname, headerfile, newheaderfile, args)
     if args.cpp:
-        move_one(subproject, classname, newproject, sourcefile, newsourcefile, args)
+        move_one(subproject, classname, newproject, newclassname, sourcefile, newsourcefile, args)
     if args.test:
-        move_one(subproject, classname, newproject, testfile, newtestfile, args)
+        move_one(subproject, classname, newproject, newclassname, testfile, newtestfile, args)
     
     # Insert into the cmake list
     remove_from_cmake(subproject, classname, args, args.source_subfolder)

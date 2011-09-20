@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_CREATEMDEVENTWORKSPACE_H_
-#define MANTID_MDEVENTS_CREATEMDEVENTWORKSPACE_H_
+#ifndef MANTID_MDEVENTS_CREATEMDWORKSPACE_H_
+#define MANTID_MDEVENTS_CREATEMDWORKSPACE_H_
 /*WIKI* 
 
 This algorithm creates an empty MDEventWorkspace from scratch. The workspace can have any number of dimensions (up to ~20). Each dimension must have its name, units, extents specified as comma-spearated string.
@@ -58,4 +58,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_CREATEMDEVENTWORKSPACE_H_ */
+#endif  /* MANTID_MDEVENTS_CREATEMDWORKSPACE_H_ */

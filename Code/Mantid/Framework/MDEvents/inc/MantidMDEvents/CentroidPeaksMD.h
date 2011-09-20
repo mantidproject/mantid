@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDCENTROIDPEAKS_H_
-#define MANTID_MDEVENTS_MDCENTROIDPEAKS_H_
+#ifndef MANTID_MDEVENTS_CENTROIDPEAKSMD_H_
+#define MANTID_MDEVENTS_CENTROIDPEAKSMD_H_
 /*WIKI* 
 
 This algorithm starts with a PeaksWorkspace containing the expected positions of peaks in reciprocal space. It calculates the centroid of the peak by calculating the average of the coordinates of all events within a given radius of the peak, weighted by the weight (signal) of the event.
@@ -58,4 +58,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_MDCENTROIDPEAKS_H_ */
+#endif  /* MANTID_MDEVENTS_CENTROIDPEAKSMD_H_ */

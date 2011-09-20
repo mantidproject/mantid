@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDEWFINDPEAKS_H_
-#define MANTID_MDEVENTS_MDEWFINDPEAKS_H_
+#ifndef MANTID_MDEVENTS_FINDPEAKSMD_H_
+#define MANTID_MDEVENTS_FINDPEAKSMD_H_
 /*WIKI* 
 
 This algorithm is used to find single-crystal peaks in a multi-dimensional workspace. It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW.
@@ -76,4 +76,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_MDEWFINDPEAKS_H_ */
+#endif  /* MANTID_MDEVENTS_FINDPEAKSMD_H_ */
