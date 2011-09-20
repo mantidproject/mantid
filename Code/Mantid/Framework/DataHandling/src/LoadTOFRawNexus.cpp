@@ -434,7 +434,7 @@ void LoadTOFRawNexus::exec()
   id_to_wi = WS->getDetectorIDToWorkspaceIndexMap(false);
 
   // Load each bank sequentially
-  PARALLEL_FOR1(WS)
+  //PARALLEL_FOR1(WS)
   for (int i=0; i<int(bankNames.size()); i++)
   {
     PARALLEL_START_INTERUPT_REGION
