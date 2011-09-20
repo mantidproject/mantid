@@ -27,7 +27,7 @@ class ConvertVULCANCalFile(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Algorithm"
+        return "Diffraction"
 
     def name(self):
         """ Mantid require
@@ -37,7 +37,7 @@ class ConvertVULCANCalFile(PythonAlgorithm):
     def PyInit(self):
         """ Python initialization:  Define input parameters
         """
-        numbankslist = ["1", "6"]
+        numbankslist = ["1", "2", "6"]
         filetypes = ["VULCAN-ASCII"]
 
         self.declareProperty("NumberBanks", "6", Validator=ListValidator(numbankslist),
@@ -67,11 +67,16 @@ class ConvertVULCANCalFile(PythonAlgorithm):
         if numbanks == 1:
             # 1-bank
             groupname = "VULCAN"        
+        elif numbanks == 2:
+            # 2-bank
+            groupname = "Group1,Group2"
         elif numbanks == 6:
             # 6-bank
             groupname = "bank21,bank22,bank23,bank26,bank27,bank28"
         else:
             raise NotImplementedError("%d-Bank Case Is Not Supported" % (numbanks))
+
+        print "User selected %s-bank output.  Group Name = %s" % (numbanks, groupname)
 
         # 3. Create
         LoadDspacemap(Filename=str(idlcalfilename), InstrumentName=self._instrument, 
