@@ -1285,8 +1285,6 @@ public:
     mfun->addFunction(bk);
     mfun->addFunction(g1);
 
-    //FrameworkManager::Instance();
-    //MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
     MatrixWorkspace_sptr ws(new CompositeFunctionTest_MocMatrixWorkspace(10,11,10));
 
     MantidVec& x = ws->dataX(3);

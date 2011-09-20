@@ -61,7 +61,7 @@ public:
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "MD-Algorithms";}
+      virtual const std::string category() const { return "MDAlgorithms";}
 
 
      /** set up Target geometry description to describe the input workspace e.g. the rebinning would be

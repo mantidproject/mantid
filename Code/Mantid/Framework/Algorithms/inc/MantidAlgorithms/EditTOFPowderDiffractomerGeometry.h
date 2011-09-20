@@ -40,6 +40,8 @@ namespace Algorithms
     EditTOFPowderDiffractomerGeometry();
     ~EditTOFPowderDiffractomerGeometry();
     virtual const std::string name() const { return "EditTOFPowderDiffractomerGeometry"; }
+    /// Algorithm's category for identification overriding a virtual method
+    virtual const std::string category() const { return "Diffraction";}
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1; }
     

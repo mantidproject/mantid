@@ -60,7 +60,7 @@ public:
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "MD-Algorithms";}
+      virtual const std::string category() const { return "MDAlgorithms";}
      /** The function sets load algorithm into test mode, namely it conects the algorithm to the test file reader,
 	     which provides test workspace (generated and not from a data file)* The test mode is dropped immidiately after
 		 the algorithm has been executed, so if you need a test mode for next load operation, you should set it again */

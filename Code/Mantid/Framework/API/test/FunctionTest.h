@@ -490,8 +490,6 @@ public:
 
   void test_setWorkspace_works()
   {
-    //FrameworkManager::Instance();
-    //MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
     MatrixWorkspace_sptr ws(new MocMatrixWorkspace(10,11,10));
 
     MantidVec& x = ws->dataX(3);
@@ -515,7 +513,6 @@ public:
   {
     double expected;
     int numpixels = 15000;
-    //MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",numpixels,11,10);
     MatrixWorkspace_sptr ws(new MocMatrixWorkspace(numpixels,11,10));
     for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
     {
