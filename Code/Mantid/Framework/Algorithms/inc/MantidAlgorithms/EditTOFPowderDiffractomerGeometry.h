@@ -34,15 +34,21 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport EditTOFPowderDiffractomerGeometry 
+  class DLLExport EditTOFPowderDiffractomerGeometry : public API::Algorithm
   {
   public:
     EditTOFPowderDiffractomerGeometry();
     ~EditTOFPowderDiffractomerGeometry();
+    virtual const std::string name() const { return "EditTOFPowderDiffractomerGeometry"; }
+    /// Algorithm's version for identification overriding a virtual method
+    virtual int version() const { return 1; }
     
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
+    // virtual std::string name();
+    // virtual int version();
+
     /// Initialise the properties
     void init();
     /// Run the algorithm
