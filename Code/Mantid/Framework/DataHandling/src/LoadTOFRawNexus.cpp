@@ -254,6 +254,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string & entry_name,
     const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS)
 {
+  // To avoid segfaults on RHEL5/6 and Fedora
+  m_fileMutex.lock();
+
   // Navigate to the point in the file
   ::NeXus::File * file = new ::NeXus::File(nexusfilename);
   file->openGroup(entry_name, "NXentry");
@@ -265,14 +268,14 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   file->readData("pixel_id", pixel_id);
   size_t numPixels = pixel_id.size();
   if (numPixels == 0)
-  { file->close(); g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl; return; }
+  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl; return; }
 
   // Load the TOF vector
   std::vector<float> tof;
   file->readData(m_axisField, tof);
   size_t numBins = tof.size() - 1;
   if (tof.size() <= 1)
-  { file->close(); g_log.warning() << "Invalid " << m_axisField << " data in " << bankName << std::endl; return; }
+  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid " << m_axisField << " data in " << bankName << std::endl; return; }
 
   // Make a shared pointer
   MantidVecPtr Xptr;
@@ -308,9 +311,13 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   }
 
   if (data.size() != numBins * numPixels)
-  { file->close(); g_log.warning() << "Invalid size of '" << m_dataField << "' data in " << bankName << std::endl; return; }
+  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '" << m_dataField << "' data in " << bankName << std::endl; return; }
   if (hasErrors && (errors.size() != numBins * numPixels))
-  { file->close(); g_log.warning() << "Invalid size of '" << errorsField << "' errors in " << bankName << std::endl; return; }
+  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '" << errorsField << "' errors in " << bankName << std::endl; return; }
+
+  // Have all the data I need
+  m_fileMutex.unlock();
+  file->close();
 
   for (size_t i=0; i<numPixels; i++)
   {
@@ -345,7 +352,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   }
 
   // Done!
-  file->close();
 }
 
 

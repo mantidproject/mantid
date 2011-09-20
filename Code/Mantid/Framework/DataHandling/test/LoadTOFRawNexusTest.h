@@ -41,7 +41,7 @@ public:
 
   }
 
-  void xtest_exec()
+  void test_exec()
   {
     Mantid::DataHandling::LoadTOFRawNexus ld;
     ld.initialize();

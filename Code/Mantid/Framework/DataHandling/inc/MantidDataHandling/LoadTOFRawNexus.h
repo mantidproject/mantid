@@ -15,6 +15,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/IDataFileChecker.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -135,6 +136,9 @@ private:
 
   /// Units of the X axis found
   std::string m_xUnits;
+
+  /// Mutex to avoid simultaneous file access
+  Kernel::Mutex m_fileMutex;
 };
 
 } // namespace DataHandling
