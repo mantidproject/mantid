@@ -226,14 +226,22 @@ namespace DataHandling
       detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap( false );
     }
 
+    // not all of these should be doubles, but to make reading work read as double then recast to int
+    int n,udet,select,group;
+    double n_d, udet_d, offset, select_d, group_d;
+
     std::string str;
     while(getline(grFile,str))
     {
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int n,udet,select,group;
-      double offset;
-      istr >> n >> udet >> offset >> select >> group;
+
+      // read in everything as double then cast as appropriate
+      istr >> n_d >> udet_d >> offset >> select_d >> group_d;
+      n = static_cast<int>(n_d);
+      udet = static_cast<int>(udet_d);
+      select = static_cast<int>(select_d);
+      group = static_cast<int>(group_d);
 
       if (doOffsets)
       {
