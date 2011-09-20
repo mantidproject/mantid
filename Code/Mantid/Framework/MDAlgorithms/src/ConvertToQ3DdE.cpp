@@ -212,8 +212,8 @@ void ConvertToQ3DdE::exec(){
     //double E_max = inWS2D->getAxis(0)->operator()(lastInd);
     //double E_min = inWS2D->getAxis(0)->operator()(0);
 
-    double E_max = inWS2D->readX(0).front();
-    double E_min = inWS2D->readX(0).back();
+    double E_min = inWS2D->readX(0).front();
+    double E_max = inWS2D->readX(0).back();
     if(E_min>=E_max){
         convert_log.error()<<" expecting to process energy form "<<E_min<<" to "<<E_max<<" but Emin>=Emax\n";
         throw(std::invalid_argument(" Emin>=Emax"));
