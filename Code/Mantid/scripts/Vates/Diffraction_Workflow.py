@@ -33,17 +33,21 @@ IndexPeaks(PeaksWorkspace=ws+'_peaks_centered', Tolerance='0.12')
 CopySample(InputWorkspace=ws+'_peaks_centered',OutputWorkspace=ws,
 		CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
 		
-# Re-convert from eventWorkspace to MDWorkspace, this time in HKL space
-ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_MD_hkl',OutputDimensions='HKL',LorentzCorrection='1')
-
-# Integrate in reciprocal space (HKL)
-IntegratePeaksMD(InputWorkspace=ws+'_MD_hkl', CoordinatesToUse='HKL', PeakRadius=0.1, BackgroundRadius=0.0, \
-				PeaksWorkspace=ws+'_peaks_centered', OutputWorkspace=ws+'_peaks_centered_integ')
+# Integrate in reciprocal space 
 IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', PeakRadius=0.1, BackgroundRadius=0.0, \
 				PeaksWorkspace=ws+'_peaks_centered', OutputWorkspace=ws+'_peaks_centered_integ')
+
+# Integrate the non-centroided ones
+IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', PeakRadius=0.1, BackgroundRadius=0.0, \
+				PeaksWorkspace=ws+'_peaks', OutputWorkspace=ws+'_peaks_integ')
 
 # Save the MD workspace in Q sample frame to a NXS file. 
 SaveMD(InputWorkspace=ws+'_MD', Filename='TOPAZ_3131_MD_q_sample.nxs')
 
-# Save to a NXS file. Simultaneously makes the workspace file-backed (releasing some memory).
-SaveMD(InputWorkspace=ws+'_MD_hkl', Filename='TOPAZ_3131_MD_hkl.nxs', MakeFileBacked=1)
+
+# ------ Now predict peaks and integrate those -----------
+if False:
+	PredictPeaks(InputWorkspace=ws, MinDSpacing=0.75, OutputWorkspace=ws+'_peaks_predicted')
+	# Does not work quite well, see ticket #3772
+	IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', PeakRadius=0.1, BackgroundRadius=0.0, \
+					PeaksWorkspace=ws+'_peaks_predicted', OutputWorkspace=ws+'_peaks_predicted_integ')
