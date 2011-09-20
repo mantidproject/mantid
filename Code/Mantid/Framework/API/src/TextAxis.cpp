@@ -26,6 +26,15 @@ Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
   return new TextAxis(*this);
 }
 
+Axis* TextAxis::clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace)
+{
+  UNUSED_ARG(parentWorkspace)
+  TextAxis * newAxis = new TextAxis(*this);
+  newAxis->m_values.clear();
+  newAxis->m_values.resize(length);
+  return newAxis;
+}
+
 /** Get the axis value at the position given
  *  @param  index The position along the axis for which the value is required
  *  @param  verticalIndex Needed for the subclass (RefAxis) method, but ignored (and defaulted) here

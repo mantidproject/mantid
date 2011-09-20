@@ -52,6 +52,7 @@ public:
   NumericAxis(const std::size_t& length);
   virtual ~NumericAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
+  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL);
   ///Is the axis numeric - always true for this class
   virtual bool isNumeric() const{return true;}
   virtual std::size_t length() const{return m_values.size();}

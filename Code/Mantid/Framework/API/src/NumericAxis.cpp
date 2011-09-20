@@ -28,6 +28,15 @@ Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
   return new NumericAxis(*this);
 }
 
+Axis* NumericAxis::clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace)
+{
+  UNUSED_ARG(parentWorkspace)
+  NumericAxis * newAxis = new NumericAxis(*this);
+  newAxis->m_values.clear();
+  newAxis->m_values.resize(length);
+  return newAxis;
+}
+
 /** Get the axis value at the position given
  *  @param  index The position along the axis for which the value is required
  *  @param  verticalIndex Needed for the subclass (RefAxis) method, but ignored (and defaulted) here

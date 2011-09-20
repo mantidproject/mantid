@@ -134,21 +134,24 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
     }
     else
     {
-      if (! parent->getAxis(i)->isSpectra())
+      if (! parent->getAxis(i)->isSpectra()) // WHY???
       {
-        if (parent->getAxis(i)->isNumeric())
-        {
-          Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(newAxisLength);
-          child->replaceAxis(i, newAxis);
-          child->getAxis(i)->unit() = parent->getAxis(i)->unit();
-        }
-        if (parent->getAxis(i)->isText())
-        {
-          Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(newAxisLength);
-          child->replaceAxis(i, newAxis);
-        }        
+        delete child->m_axes[i];
+        // Call the 'different length' clone variant
+        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength,child.get());
+//        if (parent->getAxis(i)->isNumeric())
+//        {
+//          Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(newAxisLength);
+//          child->replaceAxis(i, newAxis);
+//          child->getAxis(i)->unit() = parent->getAxis(i)->unit();
+//        }
+//        if (parent->getAxis(i)->isText())
+//        {
+//          Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(newAxisLength);
+//          child->replaceAxis(i, newAxis);
+//        }
       }
-      child->getAxis(i)->title() = parent->getAxis(i)->title();
+//      child->getAxis(i)->title() = parent->getAxis(i)->title();
     }
   }
 

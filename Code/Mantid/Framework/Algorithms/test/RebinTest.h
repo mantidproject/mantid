@@ -10,6 +10,8 @@
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -178,6 +180,11 @@ public:
     bool dist=rebindata->isDistribution();
     TS_ASSERT(dist);
 
+    // Test the axes are of the correct type
+    TS_ASSERT_EQUALS( rebindata->axes(), 2 );
+    TS_ASSERT( dynamic_cast<RefAxis*>(rebindata->getAxis(0)) );
+    TS_ASSERT( dynamic_cast<SpectraAxis*>(rebindata->getAxis(1)) );
+
     AnalysisDataService::Instance().remove("test_in2D");
     AnalysisDataService::Instance().remove("test_out");
   }
@@ -240,6 +247,11 @@ public:
     TS_ASSERT_EQUALS( E.size(), 25);
     TS_ASSERT_DELTA( E[0], sqrt(8.0), 1e-5);
     TS_ASSERT_DELTA( E[1], sqrt(8.0), 1e-5);
+
+    // Test the axes are of the correct type
+    TS_ASSERT_EQUALS( outWS->axes(), 2 );
+    TS_ASSERT( dynamic_cast<RefAxis*>(outWS->getAxis(0)) );
+    TS_ASSERT( dynamic_cast<SpectraAxis*>(outWS->getAxis(1)) );
 
     AnalysisDataService::Instance().remove(inName);
     AnalysisDataService::Instance().remove(outName);

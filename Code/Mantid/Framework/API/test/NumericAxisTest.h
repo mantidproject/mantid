@@ -31,6 +31,7 @@ public:
   NumericAxisTest()
   {
     numericAxis = new NumericAxis(5);
+    numericAxis->title() = "A numeric axis";
   }
   
   ~NumericAxisTest()
@@ -40,7 +41,7 @@ public:
   
   void testConstructor()
   {
-    TS_ASSERT_EQUALS( numericAxis->title(), "" );
+    TS_ASSERT_EQUALS( numericAxis->title(), "A numeric axis" );
     TS_ASSERT( numericAxis->unit().get() );
     for (int i=0; i<5; ++i)
     {
@@ -70,6 +71,19 @@ public:
     delete newNumAxis;
   }
   
+  void testCloneDifferentLength()
+  {
+    numericAxis->setValue(0,9.9);
+    Axis* newNumAxis = numericAxis->clone(1);
+    TS_ASSERT_DIFFERS( newNumAxis, numericAxis );
+    TS_ASSERT( newNumAxis->isNumeric() );
+    TS_ASSERT_EQUALS( newNumAxis->title(), "A numeric axis" );
+    TS_ASSERT_EQUALS( newNumAxis->unit()->unitID(), "Empty" );
+    TS_ASSERT_EQUALS( newNumAxis->length(), 1 );
+    TS_ASSERT_EQUALS( (*newNumAxis)(0), 0.0 );
+    delete newNumAxis;
+  }
+
   void testTitle()
   {
     numericAxis->title() = "something else";

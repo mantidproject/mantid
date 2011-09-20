@@ -46,6 +46,7 @@ public:
   virtual ~RefAxis();
 
   Axis* clone(const MatrixWorkspace* const parentWorkspace);
+  Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
   virtual std::size_t length() const{return m_size;}
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex) const;
   virtual void setValue(const std::size_t& index, const double& value);

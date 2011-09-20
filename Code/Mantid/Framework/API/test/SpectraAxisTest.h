@@ -33,6 +33,7 @@ public:
   SpectraAxisTest()
   {
     spectraAxis = new SpectraAxis(5);
+    spectraAxis->title() = "A spectra axis";
   }
   
   ~SpectraAxisTest()
@@ -42,7 +43,7 @@ public:
   
   void testConstructorWithLengthAndDefaultInit()
   {
-    TS_ASSERT_EQUALS( spectraAxis->title(), "" );
+    TS_ASSERT_EQUALS( spectraAxis->title(), "A spectra axis" );
     TS_ASSERT( spectraAxis->unit().get() );
     for (int i=0; i<5; ++i)
     {
@@ -118,6 +119,18 @@ public:
     delete newSpecAxis;
   }
   
+  void testCloneDifferentLength()
+  {
+    Axis* newSpecAxis = spectraAxis->clone(2);
+    TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis );
+    TS_ASSERT( newSpecAxis->isSpectra() );
+    TS_ASSERT_EQUALS( newSpecAxis->title(), "A spectra axis" );
+    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Empty" );
+    TS_ASSERT_EQUALS( newSpecAxis->length(), 2 );
+    TS_ASSERT_EQUALS( (*newSpecAxis)(1), 0.0 );
+    delete newSpecAxis;
+  }
+
   void testTitle()
   {
     spectraAxis->title() = "something";

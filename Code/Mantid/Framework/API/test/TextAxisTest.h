@@ -79,6 +79,20 @@ public:
     }
   }
 
+  void testCloneDifferentLength()
+  {
+    Axis * ta = new TextAxis(2);
+    ta->title() = "A text axis";
+    Axis* newTextAxis = ta->clone(1);
+    TS_ASSERT_DIFFERS( newTextAxis, ta );
+    TS_ASSERT( newTextAxis->isText() );
+    TS_ASSERT_EQUALS( newTextAxis->title(), "A text axis" );
+    TS_ASSERT_EQUALS( newTextAxis->unit()->unitID(), "Empty" );
+    TS_ASSERT_EQUALS( newTextAxis->length(), 1 );
+    delete ta;
+    delete newTextAxis;
+  }
+
 
 };
 

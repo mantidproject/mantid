@@ -51,6 +51,8 @@ public:
 
   /// Virtual constructor
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL) = 0;
+  /// Virtual constructor for axis of different length
+  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL) = 0;
 
   const std::string& title() const;
   std::string& title();

@@ -52,6 +52,7 @@ public:
   TextAxis(const std::size_t& length);
   virtual ~TextAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
+  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL);
   virtual std::size_t length() const{return m_values.size();}
   /// If this is a TextAxis, always return true for this class
   virtual bool isText() const{return true;}

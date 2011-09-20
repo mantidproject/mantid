@@ -14,9 +14,8 @@ namespace API
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
 RefAxis::RefAxis(const size_t& length, const MatrixWorkspace* const parentWorkspace) : 
-  NumericAxis(length),  m_parentWS(parentWorkspace)
+  NumericAxis(length),  m_parentWS(parentWorkspace), m_size(length)
 {
-  m_size = length;
 }
 
 /** Private, specialised copy constructor. Needed because it's necessary to pass in
@@ -39,6 +38,13 @@ RefAxis::~RefAxis()
 Axis* RefAxis::clone(const MatrixWorkspace* const parentWorkspace)
 { 
   return new RefAxis(*this, parentWorkspace); 
+}
+
+Axis* RefAxis::clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace)
+{
+  RefAxis * newAxis = new RefAxis(*this, parentWorkspace);
+  newAxis->m_size = length;
+  return newAxis;
 }
 
 /** Get the axis value at the position given. In this case, the values are held in the
