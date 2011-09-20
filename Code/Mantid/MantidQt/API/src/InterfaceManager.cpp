@@ -184,7 +184,7 @@ VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui() const
   VatesViewerInterface *vsg = NULL;
   if(m_vatesGuiFactory == NULL)
   {
-    g_log.error() << "InterfaceManagerImpl::createVatesSimpleGui is null" << std::endl;
+    g_log.error() << "InterfaceManagerImpl::createVatesSimpleGui is null. Mantid Vates package is probably not installed." << std::endl;
     throw Mantid::Kernel::Exception::NullPointerException("InterfaceManagerImpl::createVatesSimpleGui", "m_vatesGuiFactory");
   }
   else 
