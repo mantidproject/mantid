@@ -898,18 +898,20 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
-    Mantid::API::MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-    if (mws)
+    if (!m_customFittings)
     {
-      size_t wi = static_cast<size_t>(workspaceIndex());
-      if (wi < mws->getNumberHistograms())
+      Mantid::API::MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+      if (mws)
       {
-        setStartX(mws->readX(wi).front());
-        setEndX(mws->readX(wi).back());
+        size_t wi = static_cast<size_t>(workspaceIndex());
+        if (wi < mws->getNumberHistograms())
+        {
+          setStartX(mws->readX(wi).front());
+          setEndX(mws->readX(wi).back());
+        }
       }
     }
-
   }
 }
 
