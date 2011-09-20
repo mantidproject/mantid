@@ -51,7 +51,6 @@ set ( SRC_FILES
 	src/DetectorEfficiencyVariation.cpp
 	src/DiffractionEventCalibrateDetectors.cpp
 	src/DiffractionEventReadDetCal.cpp
-	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
 	src/DspacemaptoCal.cpp
@@ -217,7 +216,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DetectorEfficiencyVariation.h
 	inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
 	inc/MantidAlgorithms/DiffractionEventReadDetCal.h
-	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/DspacemaptoCal.h
