@@ -82,7 +82,9 @@ namespace Mantid
         g_log.error() << "Connection refused by orbiter\n";
         throw;
       } catch(Poco::IOException &e) {
-        g_log.debug() << "Poco::IOException: \'" << e.message() << "\'\n"; // REMOVE
+        g_log.debug() << e.name() << " thrown.\n";
+        g_log.error() << e.message() << "\n";
+        throw;
       }
 
       //Look for spaces, and split on them.
