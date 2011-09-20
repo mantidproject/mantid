@@ -270,7 +270,7 @@ m_mantidui(mantidui)
 
   m_fitMenu = new QMenu(this);
   m_fitActionFit = new QAction("Fit",this);
-  m_fitActionSeqFit = new QAction("Sequencial Fit",this);
+  m_fitActionSeqFit = new QAction("Sequential Fit",this);
   m_fitActionUndoFit = new QAction("Undo Fit",this);
   m_fitMapper = new QSignalMapper(this);
   m_fitMapper->setMapping(m_fitActionFit,"Fit");
