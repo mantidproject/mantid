@@ -1,13 +1,14 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include <fstream>
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/V3D.h"
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -51,7 +52,8 @@ namespace Crystal
    */
   void SaveIsawPeaks::init()
   {
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<PeaksWorkspace>()),
+        "An input PeaksWorkspace with an instrument.");
 
     std::vector<std::string> exts;
     exts.push_back(".peaks");
