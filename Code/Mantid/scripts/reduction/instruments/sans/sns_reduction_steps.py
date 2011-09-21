@@ -315,26 +315,41 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         if self._scale:
             iq_f1 = mtd[workspace+'_frame1'+self._suffix].dataY(0)
             iq_f2 = mtd[workspace+'_frame2'+self._suffix].dataY(0)
+            q_f1 = mtd[workspace+'_frame1'+self._suffix].dataX(0)
+            q_f2 = mtd[workspace+'_frame2'+self._suffix].dataX(0)
             
             scale_f1 = 0.0
             scale_f2 = 0.0
             scale_factor = 1.0
+            qmin = None
+            qmax = None
+            
+            # Get Q range to consider
             for i in range(len(iq_f1)):
-                if iq_f1[i]>0 and iq_f2[i]>0:
-                    scale_f1 += iq_f1[i]
-                    scale_f2 += iq_f2[i]
+                if iq_f1[i]>0:
+                    if qmin is None or q_f1[i]<qmin: qmin = q_f1[i]
+                    if qmax is None or q_f1[i]>qmax: qmax = q_f1[i]
+            
+            qmin2 = q_f2[len(q_f2)-1]
+            qmax2 = q_f2[0]
+            for i in range(len(iq_f2)):
+                if iq_f2[i]>0:
+                    if qmin2 is None or q_f2[i]<qmin2: qmin2 = q_f2[i]
+                    if qmax2 is None or q_f2[i]>qmax2: qmax2 = q_f2[i]
+                    
+            qmin = max(qmin, qmin2)
+            qmax = min(qmax, qmax2)
+
+            for i in range(len(iq_f1)):
+                if q_f1[i]>=qmin and q_f1[i]<=qmax:
+                    scale_f1 += iq_f1[i]*(q_f1[i+1]-q_f1[i])
+            
+            for i in range(len(iq_f2)):
+                if q_f2[i]>=qmin and q_f2[i]<=qmax:
+                    scale_f2 += iq_f2[i]*(q_f2[i+1]-q_f2[i])
+            
             if scale_f1>0 and scale_f2>0:
                 scale_factor = scale_f2/scale_f1
-                scale_f1 = 0.0
-                scale_f2 = 0.0
-                for i in range(len(iq_f1)):
-                    if iq_f1[i]>0 and iq_f2[i]>0 \
-                    and scale_factor*iq_f1[i]/iq_f2[i]<self._tolerance \
-                    and iq_f2[i]/(scale_factor*iq_f1[i])<self._tolerance:
-                        scale_f1 += iq_f1[i]
-                        scale_f2 += iq_f2[i]
-                if scale_f1>0 and scale_f2>0:
-                    scale_factor = scale_f2/scale_f1
             
             Scale(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace=workspace+'_frame1'+self._suffix, Factor=scale_factor, Operation="Multiply")
             
