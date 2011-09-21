@@ -326,14 +326,18 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             
             # Get Q range to consider
             for i in range(len(iq_f1)):
-                if iq_f1[i]>0:
+                if iq_f1[i]<=0:
+                    break
+                else:
                     if qmin is None or q_f1[i]<qmin: qmin = q_f1[i]
                     if qmax is None or q_f1[i]>qmax: qmax = q_f1[i]
             
             qmin2 = q_f2[len(q_f2)-1]
             qmax2 = q_f2[0]
             for i in range(len(iq_f2)):
-                if iq_f2[i]>0:
+                if iq_f2[i]<=0:
+                    break
+                else:
                     if qmin2 is None or q_f2[i]<qmin2: qmin2 = q_f2[i]
                     if qmax2 is None or q_f2[i]>qmax2: qmax2 = q_f2[i]
                     
