@@ -390,11 +390,15 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
   {
     if (exclude)
     {
-      Mantid::index2detid_map * i2d = outputWS->getWorkspaceIndexToDetectorIDMap();
       for(size_t i = 0; i < wsSize; ++i)
       {
-        int id = (*i2d)[i];
-        if (dets.contains(id))
+        Mantid::Geometry::IDetector_const_sptr det = outputWS->getDetector(i);
+        int id = -1;
+        if (det)
+        {
+          id = det->getID();
+        }
+        if (id > 0 && dets.contains(id))
         {
           outputWS->dataY(i)[0] = 1.0;
         }
