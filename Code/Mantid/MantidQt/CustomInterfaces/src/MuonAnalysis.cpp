@@ -1447,6 +1447,7 @@ void MuonAnalysis::makeRaw(const std::string & wsName)
 {
   UNUSED_ARG(wsName)
   //Load back original without bunching
+  //Maybe have a boolean sent if made raw, if this is true then after fit addRawData() will need to be called.
 }
 
 
@@ -2593,15 +2594,24 @@ void MuonAnalysis::setAppendingRun(int inc)
 */
 void MuonAnalysis::changeRun(int amountToChange)
 {
+  int fileStart(-1);
   int firstFileNumber(-1);
   int lastFileNumber(-1);
 
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
 
-  //Find where the run number begins
+  //Find where the file begins
   for (int i = 0; i<currentFile.size(); i++)
   {
-    if(currentFile[i].isDigit())
+    if(currentFile[i] == '/')  //.isDigit())
+    {
+      fileStart = i+1;
+    }
+  }
+
+  for (int i = fileStart; i<currentFile.size(); i++)
+  {
+    if(currentFile[i].isDigit())  //.isDigit())
     {
       firstFileNumber = i;
       break;
