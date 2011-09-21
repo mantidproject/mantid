@@ -112,7 +112,18 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                       spreader_transmission=spreader_transmission, 
                                                                                       spreader_transmission_err=spreader_transmission_err,
                                                                                       theta_dependent=theta_dependent))
-  
+
+def SetTransmissionBeamCenter(x, y):
+    if ReductionSingleton().get_transmission() is None:
+        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
+    ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))
+
+def TransmissionDirectBeamCenter(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
+    if ReductionSingleton().get_transmission() is None:
+        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
+    ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
+
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
 
@@ -227,6 +238,22 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                           spreader_transmission=spreader_transmission, 
                                                                                           spreader_transmission_err=spreader_transmission_err,
                                                                                           theta_dependent=theta_dependent))
+
+def SetBckTransmissionBeamCenter(x, y):
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    if ReductionSingleton().get_background().get_transmission() is None:
+        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
+    ReductionSingleton().get_background().get_transmission().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))
+
+def BckTransmissionDirectBeamCenter(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    if ReductionSingleton().get_background().get_transmission() is None:
+        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
+    ReductionSingleton().get_background().get_transmission().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
+
 
 def BckTransmissionDarkCurrent(dark_current=None):
     if ReductionSingleton().get_background() is None:

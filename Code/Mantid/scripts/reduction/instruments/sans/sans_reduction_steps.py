@@ -172,6 +172,7 @@ class BaseTransmission(ReductionStep):
         self._error = float(error)
         self._theta_dependent = theta_dependent
         self._dark_current_data = None
+        self._beam_finder = None
         
     def set_theta_dependence(self, theta_dependence=True):
         """
@@ -192,6 +193,10 @@ class BaseTransmission(ReductionStep):
     def get_transmission(self):
         return [self._trans, self._error]
     
+    @validate_step
+    def set_beam_finder(self, beam_finder):
+        self._beam_finder = beam_finder
+        
     def execute(self, reducer, workspace):
         if self._theta_dependent:
             ApplyTransmissionCorrection(InputWorkspace=workspace, 
@@ -313,14 +318,25 @@ class DirectBeamTransmission(BaseTransmission):
             Load files necessary to compute transmission.
             Return their names.
         """
+        output_str = ""
+        # If we need to get a special beam center position, do it now:
+        if self._beam_finder is not None:
+            output_str = "   %s\n" % self._beam_finder.execute(reducer)
+        
         sample_ws = "__transmission_sample"
         filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
-        reducer._data_loader.clone(data_file=filepath).execute(reducer, sample_ws)
-        output_str = "   Sample: %s\n" % extract_workspace_name(self._sample_file)
+        loader = reducer._data_loader.clone(data_file=filepath)
+        if self._beam_finder is not None:
+            loader.set_beam_center(self._beam_finder.get_beam_center())
+        loader.execute(reducer, sample_ws)
+        output_str += "   Sample: %s\n" % extract_workspace_name(self._sample_file)
         
         empty_ws = "__transmission_empty"
         filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
-        reducer._data_loader.clone(data_file=filepath).execute(reducer, empty_ws)
+        loader = reducer._data_loader.clone(data_file=filepath)
+        if self._beam_finder is not None:
+            loader.set_beam_center(self._beam_finder.get_beam_center())
+        loader.execute(reducer, empty_ws)
         output_str += "   Empty: %s" % extract_workspace_name(self._empty_file)
         
         # Subtract dark current
