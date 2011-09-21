@@ -45,8 +45,12 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 			else:
 				group = 0
 			det = inputWorkspace.getDetector(i)
-			detID = det.getID()
-			calFile.write(self.FormatLine(i,detID,0.0,1,group))
+			if type(det) == DetectorGroup:
+				detIDs = det.getDetectorIDs()
+			else:
+				detIDs = [det.getID()]
+			for id in detIDs:
+				calFile.write(self.FormatLine(i,id,0.0,1,group))
 		calFile.close()
 
 
