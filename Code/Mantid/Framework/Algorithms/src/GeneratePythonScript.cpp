@@ -31,7 +31,7 @@ void GeneratePythonScript::initDocs()
 */
 void GeneratePythonScript::init()
 {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "An input workspace.");
 
     std::vector<std::string> exts;
     exts.push_back(".py");
@@ -45,7 +45,7 @@ void GeneratePythonScript::init()
 */
 void GeneratePythonScript::exec()
 {
-    const MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+    const Workspace_const_sptr ws = getProperty("InputWorkspace");
     const std::string filename = getPropertyValue("Filename");
     std::ofstream file(filename.c_str(), std::ofstream::trunc);
     

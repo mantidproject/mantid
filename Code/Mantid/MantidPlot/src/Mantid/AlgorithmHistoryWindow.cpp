@@ -288,10 +288,6 @@ AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
     return 0;
   }
 }
-void AlgorithmHistoryWindow::handleException( const std::exception& e )
-{
-  QMessageBox::critical(0,"Mantid-Error",QString::fromStdString(e.what()));
-}
 
 void AlgorithmHistoryWindow::writeToScriptFile()
 {
@@ -310,11 +306,20 @@ void AlgorithmHistoryWindow::writeToScriptFile()
   // An empty string indicates they clicked cancel
   if( filePath.isEmpty() ) return;
   
-  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().create("GeneratePythonScript");
+  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
+  genPyScript->initialize();
+  genPyScript->setChild(true); // Use as utility
+  genPyScript->setRethrows(true); // Make it throw to catch errors messages and display them in a more obvious place for this window
   genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
   genPyScript->setPropertyValue("Filename",filePath.toStdString());
-
-  genPyScript->execute();
+  try
+  {
+    genPyScript->execute();
+  }
+  catch(std::exception &)
+  {
+    QMessageBox::information(this, "Generate Python Script", "Unable to generate script, see log window for details.");
+  }
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
 }
@@ -437,10 +442,21 @@ void AlgorithmHistoryWindow::copytoClipboard()
   std::string tempFilename = temp.fileName().toStdString() + ".py";
 
   // Create and run algorithm.
-  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().create("GeneratePythonScript");
+  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
+  genPyScript->initialize();
+  genPyScript->setChild(true); // Use as utility
+  genPyScript->setRethrows(true); // Make it throw to catch errors messages and display them in a more obvious place for this window
   genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
   genPyScript->setPropertyValue("Filename",tempFilename);
-  genPyScript->execute();
+  try
+  {
+    genPyScript->execute();
+  }
+  catch(std::exception &)
+  {
+    QMessageBox::information(this, "Generate Python Script", "Unable to generate script, see log window for details.");
+    return;
+  }
 
   QString script;
   std::ifstream file(tempFilename.c_str(), std::ifstream::in);

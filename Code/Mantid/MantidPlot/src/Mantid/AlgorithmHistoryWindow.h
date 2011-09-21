@@ -117,8 +117,6 @@ class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
   void updateAlgorithmHistoryWindow(QString algName);
 public:
   AlgorithmHistoryWindow(QWidget *parent) : MantidQt::API::MantidDialog(parent){}
-  //AlgorithmHistoryWindow(QWidget *parent,const std::vector<Mantid::API::AlgorithmHistory>&alghist,
-  //			 const Mantid::Kernel::EnvironmentHistory&, const QString &wsName);
   AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
 private slots:
@@ -136,9 +134,6 @@ private:
   void updateExecSummaryGrpBox(const QString& algName,const int & version,int index);
   void updateAlgHistoryProperties(QString algName,int version,int pos);
   void concatVersionwithName(QString& algName,const int version);
-  //QString generateScript();
-  //std::string sanitizePropertyName(const std::string & name);
-  void handleException( const std::exception& e );
   static Mantid::Kernel::Logger& g_log;
 	
 private:
