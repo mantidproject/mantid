@@ -34,17 +34,18 @@ class EQSANSReductionScripter(BaseReductionScripter):
                 script += str(item.state())
         
         xml_process = "None"
-        if file_name is not None:
-            f = open(file_name, 'w')
-            f.write(script)
-            f.close()
-        else:
+        if file_name is None:
             xml_process = os.path.join(self._output_directory, "EQSANS_process.xml")
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
         script += "SaveIqAscii(process=%r)\n" % xml_process
         script += "Reduce1D()\n"
+
+        if file_name is not None:
+            f = open(file_name, 'w')
+            f.write(script)
+            f.close()
         
         return script
         
