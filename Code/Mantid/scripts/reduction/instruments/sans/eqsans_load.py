@@ -44,7 +44,6 @@ class LoadRun(ReductionStep):
         
         # Flag to tell us whether we should do the full reduction with events
         self._keep_events = keep_events
-        self._is_new = True
    
     def clone(self, data_file=None, keep_events=None):
         if data_file is None:
@@ -133,7 +132,7 @@ class LoadRun(ReductionStep):
         if mtd.workspaceExists(workspace):
             mtd.deleteWorkspace(workspace)
         
-    def execute(self, reducer, workspace, force=False):
+    def execute(self, reducer, workspace):
         output_str = ""      
         # If we don't have a data file, look up the workspace handle
         # Only files that are used for computing data corrections have
@@ -144,7 +143,6 @@ class LoadRun(ReductionStep):
                 data_file = reducer._data_files[workspace]
             elif workspace in reducer._extra_files:
                 data_file = reducer._extra_files[workspace]
-                force = True
             else:
                 raise RuntimeError, "SNSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
         else:
