@@ -10,7 +10,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  DECLARE_ALGORITHM(EditTOFPowderDiffractomerGeometry);
+  //DECLARE_ALGORITHM(EditTOFPowderDiffractomerGeometry);
 
   //---------------------------------------------- ------------------------------------------------
   /** Constructor
