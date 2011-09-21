@@ -66,14 +66,14 @@ std::string workspaceFileName;
 
    std::auto_ptr<IMD_FileFormat> pFileReader;
    if(test_mode){
-		pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str(),test_data,pTestGeometryDescription.get());
+        pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str(),test_data,pTestGeometryDescription.get());
    }else{
-		if(existsProperty("inFilename")){
-			workspaceFileName = this->getPropertyValue("inFilename");
-			workspaceFileName = Poco::Path(Poco::Path::current()).resolve(workspaceFileName).toString();
-		}
+        if(existsProperty("inFilename")){
+            workspaceFileName = this->getPropertyValue("inFilename");
+            workspaceFileName = Poco::Path(Poco::Path::current()).resolve(workspaceFileName).toString();
+        }
 
-		pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str());
+        pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str());
    }
    if(!pFileReader.get()){
          ldmdws_log.error()<<" can not obtain file reader for MD file";
@@ -85,33 +85,33 @@ std::string workspaceFileName;
 
    MDGeometryDescription geomDescr(pBasis->getNumDims(),pBasis->getNumReciprocalDims());
 
-	// read the geometry description
+    // read the geometry description
    pFileReader->read_MDGeomDescription(geomDescr);
 
-	// obtain the MDPoint description now (and MDPointsDescription in a future)
-	MDPointDescription pd = pFileReader->read_pointDescriptions();
+    // obtain the MDPoint description now (and MDPointsDescription in a future)
+    MDPointDescription pd = pFileReader->read_pointDescriptions();
 
     // workspace now takes control for the file reader; initial pointer becomes invalid
-	// this function will read MDImage and initiate MDDataPoints accordingly
+    // this function will read MDImage and initiate MDDataPoints accordingly
     inputWS->init(pFileReader,pBasis,geomDescr,pd);
 
     ldmdws_log.information()<<" successfully loaded residental parts of the MDWorkspace: \""<<inputWS->getName()
-		                    <<"\" for file \""<<workspaceFileName<<"\"in memory\n";
+                            <<"\" for file \""<<workspaceFileName<<"\"in memory\n";
 
-	bool loadPix =  this->getProperty("LoadPixels");
-	if(loadPix){
-		IMD_FileFormat& Reader = inputWS->get_const_FileReader();	
+    bool loadPix =  this->getProperty("LoadPixels");
+    if(loadPix){
+        IMD_FileFormat& Reader = inputWS->get_const_FileReader();	
         bool load_success=Reader.read_pix(*(inputWS->get_spMDDPoints()),true);
 
-		if(load_success){
-			ldmdws_log.information()<<" successfully loaded "<<inputWS->get_spMDDPoints()->getNumPixels()<<" pixels in memory\n";
-		}else{
-			ldmdws_log.information()<<" can not load "<<inputWS->get_spMDDPoints()->getNumPixels()<<" pixels in memory\n";
-			this->setPropertyValue("LoadPixels","0");
-		}
-	}
-	// clear test mode if it was eventually set-up above
-	test_mode=false;
+        if(load_success){
+            ldmdws_log.information()<<" successfully loaded "<<inputWS->get_spMDDPoints()->getNumPixels()<<" pixels in memory\n";
+        }else{
+            ldmdws_log.information()<<" can not load "<<inputWS->get_spMDDPoints()->getNumPixels()<<" pixels in memory\n";
+            this->setPropertyValue("LoadPixels","0");
+        }
+    }
+    // clear test mode if it was eventually set-up above
+    test_mode=false;
     pTestGeometryDescription.reset();
 }
 } // end namespaces

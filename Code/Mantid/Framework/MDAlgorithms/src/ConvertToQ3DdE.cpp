@@ -209,8 +209,8 @@ void ConvertToQ3DdE::exec(){
        throw(std::invalid_argument("Input workspace is not propwer converted to energy workspace"));
     }
     //size_t lastInd = inWS2D->getAxis(0)->length()-1;
-    //double E_max = inWS2D->getAxis(0)->operator()(lastInd);
-    //double E_min = inWS2D->getAxis(0)->operator()(0);
+   // double E_max = inWS2D->getAxis(0)->operator()(lastInd);
+   // double E_min = inWS2D->getAxis(0)->operator()(0);
 
     double E_min = inWS2D->readX(0).front();
     double E_max = inWS2D->readX(0).back();
@@ -364,6 +364,7 @@ void ConvertToQ3DdE::exec(){
             ws->splitAllIfNeeded(NULL);
             n_added_events=0;
         }
+        ws->refreshCache();
         progress.report();      
 
 
