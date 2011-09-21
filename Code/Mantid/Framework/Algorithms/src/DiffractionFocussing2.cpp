@@ -337,6 +337,15 @@ void DiffractionFocussing2::execEvent()
     g_log.debug("Focussing EventWorkspace in-place.");
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
+  Geometry::Instrument_const_sptr instrument = eventW->getInstrument();
+  Geometry::IObjComponent_const_sptr source;
+  Geometry::IObjComponent_const_sptr sample;
+  if (instrument != NULL)
+  {
+    source = instrument->getSource();
+    sample = instrument->getSample();
+  }
+
   Progress * prog;
   prog = new Progress(this,0.2,0.35,nHist);
 
@@ -366,6 +375,15 @@ void DiffractionFocussing2::execEvent()
       if (max > nHist) max = nHist;
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
       {
+        // Check for masking. TODO: Most of the pointer checks are redundant
+        if (instrument != NULL)
+        {
+          if ( source != NULL && sample != NULL )
+          {
+            Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
+            if ( det->isMasked() ) continue;
+          }
+        }
         const int group = groupAtWorkspaceIndex[wi];
         if (group == 1)
         {
@@ -392,14 +410,6 @@ void DiffractionFocussing2::execEvent()
     // ------------- Pre-allocate Event Lists ----------------------------
     std::vector< std::vector<int> > ws_indices(nGroups+1);
     std::vector<size_t> size_required(nGroups+1,0);
-    Geometry::Instrument_const_sptr instrument = eventW->getInstrument();
-    Geometry::IObjComponent_const_sptr source;
-    Geometry::IObjComponent_const_sptr sample;
-    if (instrument != NULL)
-    {
-      source = instrument->getSource();
-      sample = instrument->getSample();
-    }
 
     for (int wi=0;wi<nHist;wi++)
     {
