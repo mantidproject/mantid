@@ -83,7 +83,7 @@ class EQSANSConfig(object):
 
             # Looking for beam center
             #Spectrum center            = 89.6749, 129.693 [pixel]
-            if line.lower().find("spectrum center")>=0:
+            if not line.strip().startswith("#") and line.lower().find("spectrum center")>=0:
                 ctr = re.search("=[ ]*([0-9]+.[0-9]*)[ ]*[ ,][ ]*([0-9]+.[0-9]+)", line)
                 if ctr is not None:
                     self.center_x = float(ctr.group(1))
@@ -91,20 +91,20 @@ class EQSANSConfig(object):
 
             # Sample-detector distance
             #Sample to detector        = 4000 [mm]
-            if line.lower().find("sample to detector")>=0:
+            if not line.strip().startswith("#") and line.lower().find("sample to detector")>=0:
                 dist = re.search("=[ ]*([0-9]+.?[0-9]*)", line)
                 if dist is not None:
                     self.sample_detector_dist = float(dist.group(1))
 
             # Prompt pulse width
             #Prompt pulse halfwidth          = 20 [microseconds]
-            if line.lower().find("prompt pulse")>=0:
+            if not line.strip().startswith("#") and line.lower().find("prompt pulse")>=0:
                 width = re.search("=[ ]*([0-9]+.?[0-9]*)", line)
                 if width is not None:
                     self.prompt_pulse_width = float(width.group(1))
                     
             # Slits
-            if line.lower().find("wheel")>=0:
+            if not line.strip().startswith("#") and line.lower().find("wheel")>=0:
                 slit = re.search("([1-8]) wheel[ ]*([1-3])[ \t]*=[ \t]*(\w+)", line.lower())
                 if slit is not None:
                     slit_number = int(slit.group(1))-1
@@ -118,7 +118,7 @@ class EQSANSConfig(object):
                     
             # Distance between moderator and sample
             # Sample Location         = 14160
-            if line.lower().find("sample location")>=0:
+            if not line.strip().startswith("#") and line.lower().find("sample location")>=0:
                 pos = re.search("=[ ]*([0-9]+)", line)
                 if pos is not None:
                     self.moderator_position = float(pos.group(1))
