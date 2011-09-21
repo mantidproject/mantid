@@ -222,18 +222,12 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))            
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        #groups = ""
-        #numrange = 60
-        #for num in xrange(1,numrange):
-            #comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
-            #if not comp == None:
-               #groups+=("bank%d," % (num) )
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=bank, OutputWorkspace=str(wksp)+"group")
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingWorkspace=str(wksp)+"group")
         #Scale peaks to heights that work well with integration
-        wksp*=160
+        wksp*=1000
         mtd.deleteWorkspace(str(wksp)+"group")
         mtd.releaseFreeMemory()
         SortEvents(InputWorkspace=wksp, SortBy="X Value")
@@ -381,6 +375,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
         for samRun in samRuns:
             samRunnum = samRun
+            wmin = 0
+            wmax = 256*256-1
             for bank in Banks:
                 # first round of processing the sample
                 if not self.getProperty("Sum"):
@@ -426,13 +422,14 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                             CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
                                 Tolerance=COMPRESS_TOL_TOF) # 5ns
                         SortEvents(InputWorkspace=vanRun, SortBy="X Value")
+                        Rebin(InputWorkspace=vanRun, OutputWorkspace=vanRun, Params=self._binning)
+                        MedianDetectorTest(vanRun, "VanMask", SignificanceTest=0.0, LowThreshold=1.0e-300, HighThreshold=1.0e+300,
+                            StartWorkspaceIndex=wmin, EndWorkspaceIndex=wmax, RangeLower=str(abs(self._binning[0])), RangeUpper=str(abs(self._binning[2])))
+                        Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins='1')
                         if canRun is not None:
                             vanRun -= canRun
-                            mtd.deleteWorkspace(str(canRun))
-                            mtd.releaseFreeMemory()
                             CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
                                    Tolerance=COMPRESS_TOL_TOF) # 10ns
-                        Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins='1')
                         vanRun = self._focus(vanRun, bank, info)
                         ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                         ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
@@ -452,33 +449,31 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 # the final bit of math
                 if vanRun is not None:
                     vanI = mtd["VanSumTOF"]
-                    FindDetectorsOutsideLimits(InputWorkspace=vanI,OutputWorkspace='VanMask',
-                        HighThreshold='1.0e+300',LowThreshold='1.0e-300')
-                    vanmask = mtd["VanMask"]
-                    MaskDetectors(Workspace=vanI,MaskedWorkspace=vanmask)
-                    MaskDetectors(Workspace=samRun,MaskedWorkspace=vanmask)
+                    vanI *=400
+                    vanI +=1.e-300
+                    maskWS = mtd["VanMask"]
+                    MaskDetectors(vanI, MaskedWorkspace=maskWS, StartWorkspaceIndex=wmin, EndWorkspaceIndex=wmax)
+                    samRun /= vanI
                     mtd.deleteWorkspace('VanMask')
                     mtd.releaseFreeMemory()
-                    SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
-                        AdjX=0, AdjY=0, ZeroEdgePixels=20)
-                    Divide(LHSWorkspace=samRun,RHSWorkspace=vanI,OutputWorkspace=samRun,AllowDifferentNumberSpectra=True)
                     mtd.deleteWorkspace(str(vanI))
                     mtd.releaseFreeMemory()
-                    Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
+                    samRun /= vanRun
                     mtd.deleteWorkspace(str(vanRun))
-                    mtd.releaseFreeMemory()
-                    FindDetectorsOutsideLimits(InputWorkspace=samRun,OutputWorkspace='SamMask',
-                        HighThreshold='1.0e+300',LowThreshold='1.0e-300')
-                    sammask = mtd["SamMask"]
-                    MaskDetectors(Workspace=samRun,MaskedWorkspace=sammask)
-                    mtd.deleteWorkspace('SamMask')
-                    mtd.releaseFreeMemory()
-                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                           Tolerance=COMPRESS_TOL_TOF) # 5ns
                     mtd.releaseFreeMemory()
                     normalized = True
                 else:
                     normalized = False
+
+                #Scale peaks to heights that work well with integration
+                samRun*=10000
+                SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
+                    AdjX=0, AdjY=0, ZeroEdgePixels=20)
+                wmin += 256*256
+                wmax += 256*256
+                if canRun is not None:
+                    mtd.deleteWorkspace(str(canRun))
+                    mtd.releaseFreeMemory()
 
                 if bank is "bank17":
                     samRunstr = str(samRun)
@@ -494,7 +489,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             samRun = mtd[samRunstr]
             samRun = self._bin(samRun, info)
             self._save(samRun, normalized)
-            #mtd.deleteWorkspace(str(samRun))
+            mtd.deleteWorkspace(str(samRun))
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
