@@ -237,7 +237,7 @@ namespace Mantid
 
             outWS->dataY(3)[i-is] = Y + Y1;
             outWS->dataX(3)[i-is] = logp->lastValue();
-            outWS->dataE(3)[i-is] = sqrt(E) + sqrt(E1);
+            outWS->dataE(3)[i-is] = sqrt(E*E+E1*E1);
 
             // move to last for safety since some grouping takes place in the
             // calcIntAsymmetry call below
