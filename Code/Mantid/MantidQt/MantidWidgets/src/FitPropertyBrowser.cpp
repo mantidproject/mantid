@@ -177,28 +177,37 @@ m_mantidui(mantidui)
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
-    /* Create function group */
-
+  /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
+  QtProperty* settingsGroup(NULL);
 
-     /* Create input - output properties */
-
-  QtProperty* settingsGroup = m_groupManager->addProperty("Settings");
+  if (!m_customFittings)
+  {  
+    /* Create input - output properties */  
+    settingsGroup = m_groupManager->addProperty("Settings");    
+    m_startX = addDoubleProperty("StartX");
+    m_endX = addDoubleProperty("EndX");
+  }
+  else
+  {
+    // Seperates the data and the settings into two seperate categories
+    settingsGroup = m_groupManager->addProperty("Data");
+    
+    // Have slightly different names as requested by the muon scientists. 
+    m_startX = addDoubleProperty(QString("Start (%1s)" ).arg(QChar(0x03BC))); //(mu); 
+    m_endX = addDoubleProperty(QString("End (%1s)" ).arg(QChar(0x03BC)));
+  }
 
   m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
-  m_startX = addDoubleProperty("StartX");
-  m_endX = addDoubleProperty("EndX");
   m_output = m_stringManager->addProperty("Output");
-  m_minimizer = m_enumManager->addProperty("Minimizer");
-
+  m_minimizer = m_enumManager->addProperty("Minimizer");  
   m_minimizers << "Levenberg-Marquardt"
                << "Simplex"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS";
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
-
   m_costFunction = m_enumManager->addProperty("Cost function");
   m_costFunctions << "Least squares"
                   << "Ignore positive peaks";
@@ -207,23 +216,23 @@ m_mantidui(mantidui)
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
   bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff,plotDiff);
-
+  
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_output);
-  settingsGroup->addSubProperty(m_minimizer);
   
   // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
-  if (!m_customFittings)
+  // Include minimiser and plot difference under a different settings section.
+  if (!customFittings)
   {
-    settingsGroup->addSubProperty(m_costFunction);
-  }
-
+  settingsGroup->addSubProperty(m_minimizer);
+  settingsGroup->addSubProperty(m_costFunction);
   settingsGroup->addSubProperty(m_plotDiff);
-
-     /* Create editors and assign them to the managers */
+  }
+  
+  /* Create editors and assign them to the managers */
 
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
@@ -249,16 +258,17 @@ m_mantidui(mantidui)
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
-  // Custom settings that are specific to the muon analysis group
+  // Custom settings that are specific and asked for by the muon scientists.
   if (m_customFittings)
   {
-    QtProperty* customGroup = m_groupManager->addProperty("Custom");
-    m_data = m_enumManager->addProperty("Data");
-    m_dataTypes << "Bunch"
-                << "Raw";
-    m_enumManager->setEnumNames(m_data, m_dataTypes);
-    customGroup->addSubProperty(m_data);
-    m_customGroup = m_browser->addProperty(customGroup);
+    QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
+    m_data = m_boolManager->addProperty("Fit To binned data");
+    bool data = settings.value("Fit To binned data",QVariant(false)).toBool();
+    m_boolManager->setValue(m_data,data);
+    customSettingsGroup->addSubProperty(m_minimizer);
+    customSettingsGroup->addSubProperty(m_plotDiff);
+    customSettingsGroup->addSubProperty(m_data);
+    m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
   }
 
   QVBoxLayout* layout = new QVBoxLayout(w);
@@ -939,18 +949,6 @@ void FitPropertyBrowser::setOutputName(const std::string& name)
   m_stringManager->setValue(m_output,QString::fromStdString(name));
 }
 
-/**
-* Find out what data has been selected. The current options to choose 
-* from are raw data and bunched data.
-*
-* return :: data type as a string
-*/
-std::string FitPropertyBrowser::data() const
-{
-  int i = m_enumManager->value(m_data);
-  return m_dataTypes[i].toStdString();
-}
-
 /// Get the minimizer
 std::string FitPropertyBrowser::minimizer()const
 {
@@ -1071,7 +1069,14 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   {
     // call setWorkspace to change maxX in functions
     setWorkspace(m_compositeFunction);
-    getHandler()->setAttribute("StartX",value);
+    if (!m_customFittings)
+    {
+      getHandler()->setAttribute("StartX",value);
+    }
+    else
+    {
+      getHandler()->setAttribute(QString("Start (%1s)" ).arg(QChar(0x03BC)), value); // (mu)
+    }
     emit startXChanged(startX());
     return;
   }
@@ -1079,7 +1084,14 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   {
     // call setWorkspace to change minX in functions
     setWorkspace(m_compositeFunction);
-    getHandler()->setAttribute("EndX",value);
+    if (!m_customFittings)
+    {
+      getHandler()->setAttribute("EndX",value);
+    }
+    else
+    {
+      getHandler()->setAttribute(QString("End (%1s)" ).arg(QChar(0x03BC)), value); 
+    }
     emit endXChanged(endX());
     return;
   }
@@ -1365,18 +1377,29 @@ void FitPropertyBrowser::fit()
     // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
     if (m_customFittings)
     {
-      // Find out if it bunch has been selected and rebunch if appropraite
-      std::string dType(data());
-      if (dType == "Bunch")
+      // Find out if it bunch has been selected and rebunch if appropraite 
+      if (data())
       {
         emit bunchData(wsName);
       }
-      else //Raw must have been selected (only 2 options implemented so far)
+      else //Raw must have been selected
       {
         emit rawData(wsName);
       } 
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+      alg->initialize();
+      alg->setPropertyValue("InputWorkspace",wsName);
+      alg->setProperty("WorkspaceIndex",workspaceIndex());
+      alg->setProperty("StartX",startX());
+      alg->setProperty("EndX",endX());
+      alg->setPropertyValue("Output",outputName());
+      alg->setPropertyValue("Function",funStr);
+      alg->setPropertyValue("Minimizer",minimizer());
+      alg->setPropertyValue("CostFunction",costFunction());
+      observeFinish(alg);
+      alg->executeAsync();
     }
-    if (!m_customFittings)
+    else
     {
       if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
       {
@@ -1407,22 +1430,6 @@ void FitPropertyBrowser::fit()
         alg->executeAsync();
       }
     }
-    else
-    {
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-      alg->initialize();
-      alg->setPropertyValue("InputWorkspace",wsName);
-      alg->setProperty("WorkspaceIndex",workspaceIndex());
-      alg->setProperty("StartX",startX());
-      alg->setProperty("EndX",endX());
-      alg->setPropertyValue("Output",outputName());
-      alg->setPropertyValue("Function",funStr);
-      alg->setPropertyValue("Minimizer",minimizer());
-      alg->setPropertyValue("CostFunction",costFunction());
-      observeFinish(alg);
-      alg->executeAsync();
-    }
-
   }
   catch(std::exception& e)
   {
@@ -2551,6 +2558,11 @@ void FitPropertyBrowser::setDecimals(int d)
 bool FitPropertyBrowser::plotDiff()const
 {
   return m_boolManager->value(m_plotDiff);
+}
+
+bool FitPropertyBrowser::data()const
+{
+  return m_boolManager->value(m_data);
 }
 
 void FitPropertyBrowser::setTextPlotGuess(const QString text) 

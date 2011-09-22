@@ -122,8 +122,6 @@ public:
   std::string outputName()const;
   /// Set the output name
   void setOutputName(const std::string&);
-  /// Get the data type
-  std::string data() const;
   /// Get the minimizer
   std::string minimizer()const;
   /// Get the cost function
@@ -191,6 +189,9 @@ public:
 
   /// Returns true if the difference plot should be drawn
   bool plotDiff()const;
+
+  /// Returns true if the fit should be done against binned (bunched) data.
+  bool data()const;
 
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
@@ -379,7 +380,7 @@ private:
   /// Group for input/output settings
   QtBrowserItem* m_settingsGroup;
   /// Group for custom options available on muon analysis widget
-  QtBrowserItem* m_customGroup;
+  QtBrowserItem* m_customSettingsGroup;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
