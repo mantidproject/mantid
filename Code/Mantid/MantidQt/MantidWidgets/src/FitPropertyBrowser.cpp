@@ -987,7 +987,6 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
         m_compositeFunction = dynamic_cast<Mantid::API::CompositeFunction*>(f);
       }
       if (f) setCurrentFunction(f);
-      std::cerr << f->name() << std::endl;
       emit functionChanged();
   }
   else if (prop->propertyName() == "Workspace")
@@ -1262,6 +1261,7 @@ void FitPropertyBrowser::populateFunctionNames()
   {
     std::string fnName = names[i];
     QString qfnName = QString::fromStdString(fnName);
+    if (qfnName == "MultiBG") continue;
     m_registeredFunctions << qfnName;
     boost::shared_ptr<Mantid::API::IFitFunction> f = boost::shared_ptr<Mantid::API::IFitFunction>(
       Mantid::API::FunctionFactory::Instance().createFitFunction(fnName));
