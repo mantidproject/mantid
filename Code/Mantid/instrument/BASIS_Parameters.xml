@@ -8,14 +8,30 @@
 </parameter>
 
 <!-- These properties are neceessary for use in the Indirect CTE interface. -->
-<!--
+
 <parameter name="analysers" type="string">
     <value val="silicon" />
 </parameter>
 <parameter name="refl-silicon" type="string">
     <value val="111" />
 </parameter>
--->
+
+<!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.MonitorArea" >
+  <value val="1.276e-3" />
+</parameter>
+<parameter name="Workflow.MonitorThickness" >
+  <value val="0.025" />
+</parameter>
+<parameter name="Workflow.MonitorScalingFactor">
+  <value val="1e6" />
+</parameter>
+<parameter name="Workflow.UnwrapMonitor" type="string">
+    <value val="BaseOnTimeRegime" />
+</parameter>
+<parameter name="Workflow.NamingConvention" type="string">
+    <value val="AnalyserReflection" />
+</parameter>
 
 </component-link>
 
