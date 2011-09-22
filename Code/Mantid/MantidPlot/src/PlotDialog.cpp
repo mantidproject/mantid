@@ -1782,7 +1782,7 @@ void PlotDialog::insertTabs(int plot_type)
 		privateTabWidget->showPage(linePage);
 		return;
 	}
-	else if (plot_type == Graph::ColorMap || plot_type == Graph::GrayScale || plot_type == Graph::Contour)
+	else if (plot_type == Graph::ColorMap || plot_type == Graph::GrayScale || plot_type == Graph::Contour || plot_type == Graph::ColorMapContour)
   	{
   		privateTabWidget->addTab(spectrogramPage, tr("Colors"));
 		privateTabWidget->addTab(contourLinesPage, tr("Contour Lines"));
@@ -1872,7 +1872,8 @@ int PlotDialog::setPlotType(CurveTreeItem *item)
 				boxPlotType->setCurrentIndex(1);
 		} else if (curveType == Graph::Box)
 			boxPlotType->addItem( tr( "Box" ) );
-		else if (curveType == Graph::ColorMap || curveType == Graph::GrayScale || curveType == Graph::Contour)
+		else if (curveType == Graph::ColorMap || curveType == Graph::GrayScale || curveType == Graph::Contour
+		    || curveType == Graph::ColorMapContour)
   	    	boxPlotType->insertItem(tr("Contour") + " / " + tr("Image"));
 		else {
 			boxPlotType->addItem( tr( "Line" ) );
