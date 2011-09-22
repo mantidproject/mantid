@@ -381,6 +381,7 @@ m_mantidui(mantidui)
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(currentItemChanged(QtBrowserItem*)));
+  connect(this,SIGNAL(multifitFinished()),this,SLOT(processMultiBGResults()));
 
   createCompositeFunction();
 
@@ -1401,6 +1402,7 @@ void FitPropertyBrowser::fit()
     }
     else
     {
+      // try to run Fit form m_mantidui which enables the progress bar
       if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
       {
         QMap<QString,QString> algParams;
@@ -1415,7 +1417,7 @@ void FitPropertyBrowser::fit()
         emit executeFit("Fit",algParams,this);
       }
       else
-      {
+      {// no progress bar here
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
         alg->initialize();
         alg->setPropertyValue("InputWorkspace",wsName);
@@ -1458,7 +1460,10 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
   }
   else
     emit changeWindowTitle("Fit Function");
-  processMultiBGResults();
+  if (m_compositeFunction->name() == "MultiBG")
+  {
+    emit multifitFinished();
+  }
 }
 
 
@@ -2697,7 +2702,7 @@ void FitPropertyBrowser::processMultiBGResults()
     Mantid::API::IFitFunction* fun = compositeFunction()->getFunction(i);
     for(size_t j = 0; j < fun->nParams(); ++j)
     {
-      if (parNames.indexOf(QString::fromStdString(fun0->parameterName(j))) < 0)
+      if (parNames.indexOf(QString::fromStdString(fun->parameterName(j))) < 0)
       {
         // Functions are different, stop
         return;
@@ -2715,6 +2720,7 @@ void FitPropertyBrowser::processMultiBGResults()
     table->addColumn("double",par.toStdString());
   }
 
+  // Create WorkspaceGroup with the fit results
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for(size_t i = 0; i < compositeFunction()->nFunctions(); ++i)
   {
