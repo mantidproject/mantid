@@ -11,6 +11,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
     """
     # Files found
     files_found = []
+    filename = str(filename).strip()
     
     # List of directory to look into
     # The preferred way to operate is to have a symbolic link in a work directory,
@@ -58,7 +59,7 @@ def find_data(file, instrument=''):
         @param instrument: if supplied, FindNeXus will be tried as a last resort
     """
     # First, assume a file name
-    file = str(file)
+    file = str(file).strip()
     instrument = str(instrument)
     file_path = FileFinder.getFullPath(file)
     if os.path.isfile(file_path):
