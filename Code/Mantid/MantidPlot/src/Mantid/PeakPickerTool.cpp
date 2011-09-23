@@ -900,7 +900,7 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
     if (!alreadyPlotted)
     {
       fc = new FunctionCurve(
-        h->ifun(), "",
+        h->ifun(), QString::fromStdString(m_fitPropertyBrowser->workspaceName()),
         //QString::fromStdString(m_fitPropertyBrowser->groupMember()),//m_browser->workspaceName()),
         m_fitPropertyBrowser->workspaceIndex(),
         h->functionName());
