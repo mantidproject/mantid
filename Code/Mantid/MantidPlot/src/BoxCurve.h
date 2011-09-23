@@ -78,10 +78,12 @@ public:
     void loadData();
 
 private:
+	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
 	void draw(QPainter *painter,const QwtScaleMap &xMap,
 		const QwtScaleMap &yMap, int from, int to) const;
 	void drawBox(QPainter *painter, const QwtScaleMap &xMap,
 				const QwtScaleMap &yMap, double *dat, int size) const;
+	using DataCurve::drawSymbols; // Unhide base class method (avoids Intel compiler warning)
 	void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
 				const QwtScaleMap &yMap, double *dat, int size) const;
 

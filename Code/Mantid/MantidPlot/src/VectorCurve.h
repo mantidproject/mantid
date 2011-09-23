@@ -50,6 +50,7 @@ public:
 
 	QwtDoubleRect boundingRect() const;
 
+	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
 	void draw(QPainter *painter,const QwtScaleMap &xMap,
 		const QwtScaleMap &yMap, int from, int to) const;
 

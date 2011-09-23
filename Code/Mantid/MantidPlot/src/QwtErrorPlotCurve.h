@@ -86,6 +86,7 @@ public:
 	void loadData();
 
 private:
+	using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
 	virtual void draw(QPainter *painter,const QwtScaleMap &xMap,
 		const QwtScaleMap &yMap, int from, int to) const;
 
