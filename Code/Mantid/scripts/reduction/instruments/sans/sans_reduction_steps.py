@@ -74,7 +74,9 @@ class BaseBeamFinder(ReductionStep):
                 if reducer._data_files[k]==filepath:
                     workspace = k                    
                    
-        reducer._data_loader.clone(filepath).execute(reducer, workspace)
+        loader = reducer._data_loader.clone(filepath)
+        loader.set_beam_center([None, None])
+        loader.execute(reducer, workspace)
 
         # Mask edges of the detector
         # This is here mostly to allow a direct comparison with old HFIR code and 
@@ -578,8 +580,8 @@ class LoadRun(ReductionStep):
             Sets the beam center to be used when loading the file
             @param beam_center: [pixel_x, pixel_y]
         """
-        if beam_center is None:
-            self._beam_center = None
+        if beam_center is None or beam_center == [None, None]:
+            self._beam_center = beam_center
         
         # Check that we have pixel numbers (int)            
         elif type(beam_center) == list:
