@@ -39,14 +39,14 @@ namespace Crystal
 
   const double radtodeg_half = 180.0/M_PI/2.;
 
-  class DLLExport Savehkl  : public API::Algorithm
+  class DLLExport SaveHKL  : public API::Algorithm
   {
   public:
-    Savehkl();
-    ~Savehkl();
+    SaveHKL();
+    ~SaveHKL();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "Savehkl";};
+    virtual const std::string name() const { return "SaveHKL";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

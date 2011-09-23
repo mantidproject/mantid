@@ -1,6 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidCrystal/Savehkl.h"
+#include "MantidCrystal/SaveHKL.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -21,27 +21,27 @@ namespace Crystal
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(Savehkl)
+  DECLARE_ALGORITHM(SaveHKL)
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  Savehkl::Savehkl()
+  SaveHKL::SaveHKL()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  Savehkl::~Savehkl()
+  SaveHKL::~SaveHKL()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void Savehkl::initDocs()
+  void SaveHKL::initDocs()
   {
     this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
     this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
@@ -50,7 +50,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void Savehkl::init()
+  void SaveHKL::init()
   {
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<PeaksWorkspace>()),
         "An input PeaksWorkspace with an instrument.");
@@ -77,7 +77,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void Savehkl::exec()
+  void SaveHKL::exec()
   {
 
     std::string filename = getPropertyValue("Filename");
@@ -96,6 +96,8 @@ namespace Crystal
     {
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
       long pos = out.tellp();
+      out.seekp (pos - 135);
+      out >> runcount;
       out.seekp (pos - 73);
       runcount ++;
     }
@@ -185,7 +187,7 @@ namespace Crystal
                 <<  std::setw( 4 ) << Utils::round(-p.getK())
                 <<  std::setw( 4 ) << Utils::round(-p.getL());
 
-            out << std::setw( 8 ) <<  std::fixed << std::setprecision( 2 ) << p.getIntensity();
+            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << p.getIntensity();
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << p.getSigmaIntensity();
 
@@ -241,7 +243,7 @@ namespace Crystal
   *
   *       a. j. schultz, june, 2008
   */
-  double Savehkl::absor_sphere(double& twoth, double& wl, double& tbar)
+  double SaveHKL::absor_sphere(double& twoth, double& wl, double& tbar)
   {
     int i;
     double mu, mur;         //mu is the linear absorption coefficient,
