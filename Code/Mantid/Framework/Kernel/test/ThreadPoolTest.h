@@ -143,25 +143,7 @@ class ThreadPoolTest : public CxxTest::TestSuite
 {
 public:
 
-  /** Test that shows that OPENMP does not use a thread pool idea to optimally allocate threads
-   * (unless you use schedule(dynamic) )! */
-  void xtestOpenMP()
-  {
-    Timer overall;
-    int num = 16;
-    //PARALLEL_FOR_NO_WSP_CHECK()
-//#pragma omp parallel for schedule(dynamic)
-    for (int i=0; i<num; i++)
-    {
-      double delay = num-i;
-      PARALLEL_CRITICAL(test1)
-      std::cout << std::setw(5) << i << ": Thread " << PARALLEL_THREAD_NUMBER << " will delay for " << delay << " seconds." << std::endl;
-      TimeWaster::waste_time(delay);
-      PARALLEL_CRITICAL(test1)
-      std::cout << std::setw(5) << i << ": is done." << std::endl;
-    }
-    std::cout << overall.elapsed() << " secs total.\n";
-  }
+
 
   /** Make it waste time, 0 to 16 seconds
    * DISABLED because it is (intentionally) slow. */
@@ -185,37 +167,6 @@ public:
 
     std::cout << overall.elapsed() << " secs total." << std::endl;
   }
-
-  /** Speed comparison of test
-   * DISABLED: because it is not necessary
-   */
-  void xtest_compare()
-  {
-    size_t total=0;
-    ThreadScheduler * sched = new ThreadSchedulerLargestCost();
-    for (size_t i=0; i<100000; i++)
-    {
-      total += 1;
-      sched->push(new FunctionTask( boost::bind(TimeWaster::waste_time, i), static_cast<double>(i) ));
-    }
-  }
-
-//
-//  void xtest_Boost_single_threads()
-//  {
-//    Mantid::Kernel::Timer overall;
-//    double time;
-//    size_t num = 10000;
-//
-//    for (size_t i=0; i < num; i++)
-//    {
-//      DoNothingBoost myDoNothing;
-//      boost::thread workerThread(myDoNothing);
-//      workerThread.join();
-//    }
-//    time = overall.elapsed();
-//    std::cout << "Boost: " <<std::setw(15) << time << " secs total = " << std::setw(15) << (num*1.0/time) << " per second" << std::endl;
-//  }
 
 
   void test_Constructor()

@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/CoordTransform.cpp
 	src/CostFunctionFactory.cpp
 	src/DeprecatedAlgorithm.cpp
+	src/EnabledWhenWorkspaceIsType.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FileFinder.cpp
@@ -113,6 +114,7 @@ set ( INC_FILES
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DllConfig.h
+	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FileFinder.h
@@ -205,6 +207,7 @@ set ( TEST_FILES
 	test/CompositeFunctionTest.h
 	test/CoordTransformTest.h
 	test/CostFunctionFactoryTest.h
+	test/EnabledWhenWorkspaceIsTypeTest.h
 	test/ExperimentInfoTest.h
 	test/ExpressionTest.h
 	test/FileFinderTest.h

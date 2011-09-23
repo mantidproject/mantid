@@ -234,8 +234,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 
+  /**
+   *
+   * @param filename_root :: base of the file to save
+   * @param type :: event type to create
+   * @param outputFile[out] :: returns the output file
+   * @param makeDifferentTypes :: mix event types
+   * @param clearfiles :: clear files after saving
+   * @param PreserveEvents :: save as event list
+   * @return
+   */
   static EventWorkspace_sptr do_testExec_EventWorkspaces(std::string filename_root, EventType type,
-      std::string & outputFile,  bool makeDifferentTypes, bool clearfiles)
+      std::string & outputFile,  bool makeDifferentTypes, bool clearfiles,
+      bool PreserveEvents=true)
   {
     std::vector< std::vector<int> > groups(5);
     groups[0].push_back(10);
@@ -279,6 +290,7 @@ public:
     alg.setPropertyValue("Filename", outputFile);
     outputFile = alg.getPropertyValue("Filename");
     alg.setPropertyValue("Title", title);
+    alg.setProperty("PreserveEvents", PreserveEvents);
 
     // Clear the existing file, if any
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
@@ -317,8 +329,13 @@ public:
     do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_", WEIGHTED_NOTIME, outputFile, true, clearfiles);
   }
 
+  void testExec_EventWorkspace_DontPreserveEvents()
+  {
+    std::string outputFile;
+    do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, false /* DONT preserve events */);
+  }
 
-  void xtestExec_LoadedEventWorkspace()
+  void xtestExec_LoadedEventWorkspace()  /** Disabled because it takes >3 seconds */
   {
 
     //----- Now we re-load with precounting and compare memory use ----

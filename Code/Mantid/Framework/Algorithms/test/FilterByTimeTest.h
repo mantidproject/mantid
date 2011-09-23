@@ -14,6 +14,7 @@
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -41,9 +42,11 @@ public:
   }
 
 
-  void xtestTooManyParams()
+  void testTooManyParams()
   {
-    setUp_Event();
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(1,1);
+    AnalysisDataService::Instance().addOrReplace("eventWS", ws);
+
     //Do the filtering now.
     FilterByTime * alg = new FilterByTime();
     alg->initialize();
@@ -71,15 +74,6 @@ public:
     alg->setPropertyValue("AbsoluteStopTime", "2010-03");
     alg->execute();
     TS_ASSERT( !alg->isExecuted() );
-
-//    alg = new FilterByTime(); alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "eventWS");
-//    alg->setPropertyValue("OutputWorkspace", "out");
-//    alg->setPropertyValue("AbsoluteStartTime", "2010-09-01T01:01:01");
-//    alg->setPropertyValue("AbsoluteStopTime", "2010-09-01T02:01:01");
-//    alg->execute();
-//    TS_ASSERT( alg->isExecuted() );
-
   }
 
   void testExecEventWorkspace_relativeTime_and_absolute_time()

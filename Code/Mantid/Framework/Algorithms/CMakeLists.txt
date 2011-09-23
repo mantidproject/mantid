@@ -419,7 +419,6 @@ set ( TEST_FILES
 	test/LogarithmTest.h
 	test/MaskBinsTest.h
 	test/MedianDetectorTestTest.h
-	test/MemoryLeakTest.h
 	test/MergeRunsTest.h
 	test/MinusTest.h
 	test/MonteCarloAbsorptionTest.h

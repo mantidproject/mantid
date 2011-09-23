@@ -1402,7 +1402,6 @@ void FitPropertyBrowser::fit()
     }
     else
     {
-      // try to run Fit form m_mantidui which enables the progress bar
       if (m_mantidui->metaObject()->indexOfMethod("executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)") >= 0)
       {
         QMap<QString,QString> algParams;
@@ -1417,7 +1416,7 @@ void FitPropertyBrowser::fit()
         emit executeFit("Fit",algParams,this);
       }
       else
-      {// no progress bar here
+      {
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
         alg->initialize();
         alg->setPropertyValue("InputWorkspace",wsName);

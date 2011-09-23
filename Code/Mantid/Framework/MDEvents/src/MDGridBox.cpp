@@ -798,7 +798,7 @@ namespace MDEvents
         else
         {
           // This box does NOT have enough events to be worth splitting
-          if (!box->getOnDisk() && this->m_BoxController->isFileBacked() &&
+          if (box->dataAdded() && this->m_BoxController->isFileBacked() &&
               !mru.shouldStayInMemory(box->getId(), box->getNPoints()) )
           {
             // The box is NOT on disk but the workspace is file-backed.

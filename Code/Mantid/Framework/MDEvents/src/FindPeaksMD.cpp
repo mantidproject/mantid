@@ -138,10 +138,12 @@ namespace MDEvents
       g_log.warning() << e.what() << std::endl;
     }
 
+    /// Arbitrary scaling factor for density to make more manageable numbers, especially for older file formats.
+    signal_t densityScalingFactor = 1e-6;
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
-    thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor;
+    thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * densityScalingFactor;
     g_log.notice() << "Threshold signal density: " << thresholdDensity << std::endl;
 
     // We will fill this vector with pointers to all the boxes (up to a given depth)
@@ -165,7 +167,7 @@ namespace MDEvents
     for (it1 = boxes.begin(); it1 != it1_end; it1++)
     {
       boxPtr box = *it1;
-      double density = box->getSignalNormalized();
+      double density = box->getSignalNormalized() * densityScalingFactor;
       // Skip any boxes with too small a signal density.
       if (density > thresholdDensity)
         sortedBoxes.insert(dens_box(density,box));
@@ -290,7 +292,7 @@ namespace MDEvents
       { /* Ignore errors in ray-tracer TODO: Handle for WISH data later */ }
 
       // The "bin count" used will be the box density.
-      p.setBinCount( box->getSignalNormalized() );
+      p.setBinCount( box->getSignalNormalized() * densityScalingFactor);
 
       // Save the run number found before.
       p.setRunNumber(runNumber);

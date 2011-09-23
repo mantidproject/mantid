@@ -794,6 +794,7 @@ public:
     do_test_addEvents_inParallel(NULL);
   }
 
+  /** Disabled because parallel RefreshCache is not implemented. Might not be ever? */
   void xtest_addEvents_inParallel_then_refreshCache_inParallel()
   {
     ThreadScheduler * ts = new ThreadSchedulerFIFO();

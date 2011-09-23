@@ -115,6 +115,8 @@ public:
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.1);
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.1);
     TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(),  12345);
+    // Bin count = density of the box / 1e6
+    TS_ASSERT_DELTA( ws->getPeak(0).getBinCount(),  0.213623, 0.001);
 
     if (MaxPeaks > 1)
     {

@@ -7,8 +7,10 @@ If the OutputWorkspace does NOT already exist, a default one is created. This is
 *WIKI*/
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <fstream>
+#include <string>
 
 namespace Mantid
 {
@@ -47,6 +49,12 @@ namespace MDEvents
     
     /// File stream containing binary file data.
     std::ifstream m_fileStream;
+
+    /// Progress bar
+    Mantid::API::Progress * m_prog;
+
+    /// OutputFilename param
+    std::string m_outputFile;
   
   private:
     /// Sets documentation strings for this algorithm

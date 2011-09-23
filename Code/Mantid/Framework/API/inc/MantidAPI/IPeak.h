@@ -45,6 +45,7 @@ namespace API
 
     virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
     virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
+    virtual bool findDetector() = 0;
 
     virtual void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame, double detectorDistance=1.0) = 0;
     virtual void setQLabFrame(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0) = 0;

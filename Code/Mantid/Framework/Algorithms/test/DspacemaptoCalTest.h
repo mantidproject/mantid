@@ -147,7 +147,7 @@ public:
     loaderDSP.execute();
     TS_ASSERT( loaderDSP.isExecuted() );
 
-    std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
+    std::string outputFile = "VULCAN_dspacemaptocal_test.cal";
 
     CreateGroupingWorkspace createrDSP;
 
@@ -155,7 +155,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(createrDSP.isInitialized());
     createrDSP.setPropertyValue("InstrumentName", "VULCAN");
     createrDSP.setPropertyValue("OutputWorkspace", "grp");
-    createrDSP.setPropertyValue("GroupNames", "");
+    createrDSP.setPropertyValue("GroupNames", "Group1,Group2");
 
     TS_ASSERT_THROWS_NOTHING(createrDSP.execute());
     GroupingWorkspace_sptr groupWS = createrDSP.getProperty("OutputWorkspace");
@@ -163,10 +163,11 @@ public:
     SaveCalFile alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupingWorkspace", groupWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupingWorkspace", "grp") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", outputFile) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
+    outputFile = alg.getPropertyValue("Filename");
    
     std::string filename = alg.getPropertyValue("Filename");
 
@@ -219,16 +220,16 @@ public:
 
 
       // remove file created by this algorithm
-      //Poco::File(outputFile).remove();
+      Poco::File(outputFile).remove();
     }
   }
 
-  void xtestVulcan_ASCII()
+  void testVulcan_ASCII()
   {
     doTestVulcan("pid_offset_vulcan_new.dat", "VULCAN-ASCII");
   }
 
-  void xtestVulcan_Binary()
+  void testVulcan_Binary()
   {
     doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
   }

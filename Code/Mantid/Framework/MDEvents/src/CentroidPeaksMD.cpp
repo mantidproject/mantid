@@ -143,11 +143,19 @@ namespace MDEvents
 
         // Save it back in the peak object, in the dimension specified.
         if (CoordinatesToUse == "Q (lab frame)")
+        {
           p.setQLabFrame( vecCentroid, detectorDistance);
+          p.findDetector();
+        }
         else if (CoordinatesToUse == "Q (sample frame)")
+        {
           p.setQSampleFrame( vecCentroid, detectorDistance);
+          p.findDetector();
+        }
         else if (CoordinatesToUse == "HKL")
+        {
           p.setHKL( vecCentroid );
+        }
 
 
         g_log.information() << "Peak " << i << " at " << pos << ": signal "

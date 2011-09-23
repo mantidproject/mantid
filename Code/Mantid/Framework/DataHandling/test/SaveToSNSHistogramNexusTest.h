@@ -20,8 +20,7 @@ public:
     TS_ASSERT( algToBeTested.isInitialized() );
   }
   
-  /* Test is disabled because it is slow and requires large files */
-  void xtestExec()
+   void xtestExec() ///< Test is disabled because it is slow and requires large files
   {
     IAlgorithm_sptr alg( AlgorithmFactory::Instance().create("LoadSNSEventNexus", 1) );
     alg->initialize();

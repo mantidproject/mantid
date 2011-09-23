@@ -284,22 +284,6 @@ public:
     }
   }
 
-  void xtest_buildBinaryOperationTable_groupedLHS_by_groupedRHS_veryLarge()
-  {
-    std::vector< std::vector<int> > lhs(16000), rhs(16);
-    for (int i=0; i<160000; i++)
-    {
-      // 10 detectors per pixel in lhs
-      lhs[i/10].push_back(i);
-      // 10000 detectors in each on the rhs
-      rhs[i/10000].push_back(i);
-    }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
-    for (int i=0; i<16000; i++)
-    {
-      TS_ASSERT_EQUALS( (*table)[i], i/1000);
-    }
-  }
 
 };
 

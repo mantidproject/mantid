@@ -94,9 +94,8 @@ public:
     TS_ASSERT_EQUALS( ws->getTitle(), "test after manual intervention");
   }
 
-  /** Compare to LoadEventNexus
-   * DISABLED because the order of spectra is different. */
-  void xtest_compare_to_event()
+  /** Compare to LoadEventNexus */
+  void xtest_compare_to_event() ///< DISABLED because it takes ~ 4 seconds.
   {
     AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 4,
         "Filename", "CNCS_7860.nxs",
@@ -215,6 +214,7 @@ public:
     TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "MomentumTransfer");
   }
 
+  /** Disabled because it is slow */
   void xtest_signal_6()
   {
     Mantid::API::MatrixWorkspace_sptr ws = do_test_signal(6, 2521);

@@ -674,28 +674,22 @@ public:
   /** Nov 29 2010, ticket #1974
    * SegFault on data access through MRU list.
    * Test that parallelization is thread-safe
+   *
    */
-  void xtestSegFault()
+  void xtestSegFault() ///<Disabled because ~2.5 seconds.
   {
-    //std::cout << omp_get_num_threads() << " threads available\n";
-    //std::cout << " Starting testSegFault 1 \n\n";    std::cout.flush();
-
     int numpix = 100000;
     EventWorkspace_const_sptr ew1 = WorkspaceCreationHelper::CreateRandomEventWorkspace(50, numpix);
 
-    //std::cout << " Starting testSegFault 2 \n\n";    std::cout.flush();
-    //#pragma omp parallel for
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i < numpix; i++)
     {
-      //std::cout << "Thread " << PARALLEL_THREAD_NUMBER << " is starting with " << i << "\n";
       for (int j=0; j < 10; j++)
       {
         MantidVec Y = ew1->dataY(i);
         const MantidVec & E = ew1->dataE(i);
         MantidVec E2 = E;
       }
-      //std::cout << "Thread " << PARALLEL_THREAD_NUMBER << " should be done with " << i << "\n";
     }
   }
 

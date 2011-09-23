@@ -3,19 +3,19 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveNexusProcessed.h"
-#include "MantidNexus/NexusFileIO.h"
+#include "MantidAPI/EnabledWhenWorkspaceIsType.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FileProperty.h"
-
+#include "MantidNexus/NexusFileIO.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include <boost/shared_ptr.hpp>
+#include <cmath>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-
-#include <cmath>
-#include <boost/shared_ptr.hpp>
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 using namespace Mantid::API;
 
@@ -82,6 +82,11 @@ namespace DataHandling
     //declareProperty("EntryNumber", 0, mustBePositive);
     declareProperty("Append",false,"Determines whether .nxs file needs to be\n"
         "over written or appended");
+
+    declareProperty("PreserveEvents", true,
+        "For EventWorkspaces, preserve the events when saving (default).\n"
+        "If false, will save the 2D histogram version of the workspace with the current binning parameters.");
+    setPropertySettings("PreserveEvents", new EnabledWhenWorkspaceIsType<EventWorkspace>(this, "InputWorkspace", true));
   }
 
 
@@ -170,6 +175,9 @@ namespace DataHandling
     m_filename = getPropertyValue("Filename");
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
+    // Do we prserve events?
+    bool PreserveEvents = getProperty("PreserveEvents");
+
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
     ITableWorkspace_const_sptr tableWorkspace = boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
     // check if inputWorkspace is something we know how to save
@@ -226,7 +234,7 @@ namespace DataHandling
       this->getSpectrumList(spec, matrixWorkspace);
 
       // Write out the data (2D or event)
-      if (m_eventWorkspace)
+      if (m_eventWorkspace && PreserveEvents)
       {
         this->execEvent(nexusFile,uniformSpectra,spec);
       }

@@ -1,20 +1,22 @@
-#include "MantidMDEvents/LoadSQW.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
-#include <iostream>
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/ThreadPool.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidMDEvents/LoadSQW.h"
+#include <iostream>
+#include "MantidMDEvents/MDBox.h"
+#include "MantidKernel/Memory.h"
 
-using Mantid::Kernel::ThreadSchedulerFIFO;
-using Mantid::Kernel::ThreadPool;
-using Mantid::API::Progress;
-using Mantid::Kernel::CPUTimer;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -25,7 +27,21 @@ namespace Mantid
 
     /// Constructor
     LoadSQW::LoadSQW()
+    : m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100))
     {
+    }
+
+    /// Destructor
+    LoadSQW::~LoadSQW()
+    {
+      delete m_prog;
+    }
+
+    /// Provide wiki documentation.
+    void LoadSQW::initDocs()
+    {
+      this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
+      this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
     }
 
     /// Initalize the algorithm
@@ -35,11 +51,19 @@ namespace Mantid
       fileExtensions[0]=".sqw";
       declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load,fileExtensions), "File of type SQW format");
       declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>("OutputWorkspace","", Kernel::Direction::Output),
-        "Output IMDEventWorkspace reflecting sqw data read-in");
+        "Name of the output MDEventWorkspace that will contain the SQW data read in.");
       declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
         "Load Metadata without events.");
+      std::vector<std::string> fileExtensions2(1);
+      fileExtensions[0]=".nxs";
+      declareProperty(new API::FileProperty("OutputFilename","", API::FileProperty::OptionalSave, fileExtensions2),
+          "If the input SQW file is too large to fit in memory, specify an output NXS file.\n"
+          "The MDEventWorkspace will be create with this file as its back-end.");
     }
 
+
+
+    //------------------------------------------------------------------------------------------------
     /// Execute the algorithm
     void LoadSQW::exec()
     {
@@ -57,38 +81,214 @@ namespace Mantid
       addDimensions(pWs);
       
       // Set some reasonable values for the box controller
-      pWs->getBoxController()->setSplitInto(3);
-      pWs->getBoxController()->setSplitThreshold(400);
+      BoxController_sptr bc = pWs->getBoxController();
+      bc->setSplitInto(3);
+      bc->setSplitThreshold(3000);
 
       // Initialize the workspace.
       pWs->initialize();
       // Start with a MDGridBox.
       pWs->splitBox();
 
+      // Save the empty WS and turn it into a file-backed MDEventWorkspace (on option)
+      m_outputFile = getPropertyValue("OutputFilename");
+
+      if (!m_outputFile.empty())
+      {
+        MemoryStats stat;
+        if ((m_nDataPoints * sizeof(MDLeanEvent<4>) * 2 / 1024) < stat.availMem())
+          g_log.notice() << "You have enough memory available to load the " << m_nDataPoints << " points into memory; this would be faster than using a file back-end." << std::endl;
+
+        IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05, true);
+        saver->setProperty("InputWorkspace", ws);
+        saver->setPropertyValue("Filename", m_outputFile);
+        saver->setProperty("MakeFileBacked", true);
+        saver->executeAsSubAlg();
+        m_prog->resetNumSteps(100, 0.05, 0.75);
+      }
+      else
+      {
+        MemoryStats stat;
+        if ( (size_t(double(m_nDataPoints) * 1.5) * sizeof(MDLeanEvent<4>) / 1024) > stat.availMem()  )
+          g_log.warning() << "You may not have enough physical memory available to load the " << m_nDataPoints << " points into memory. You can cancel and specify OutputFilename to load to a file back-end." << std::endl;
+      }
+
+      bc = pWs->getBoxController();
+      bc->setCacheParameters( sizeof(MDLeanEvent<4>), 0, 1000000, 10000000);
+      std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getDiskMRU().getMemoryStr() << std::endl;
+
+      //Persist the workspace.
+      API::IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
+      if(i_out)
+        throw std::runtime_error("Cannot currently handle overwriting of an existing workspace.");
+      setProperty("OutputWorkspace", ws);
+
       // Read events into the workspace.
       bool bMetadataOnly = getProperty("MetadataOnly");
       if(!bMetadataOnly)
-      {
         addEvents(pWs);
-      }
 
-      //Persist the workspace.
-      
-      API::IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-      if(i_out)
+      progress(m_outputFile.empty() ? 0.96 : 0.76, "Refreshing cache");
+      pWs->refreshCache();
+
+      if (!m_outputFile.empty())
       {
-        throw std::runtime_error("Cannot currently handle overriting of an existing workspace.");
+        g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
+        IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.76, 1.00);
+        saver->setProperty("InputWorkspace", ws);
+        saver->setProperty("UpdateFileBackEnd", true);
+        saver->executeAsSubAlg();
       }
-      
-      setProperty("OutputWorkspace", ws);
     }
 
-    /// Provide wiki documentation.
-    void LoadSQW::initDocs()
+
+
+
+    /// Add events after reading pixels/datapoints from file.
+    void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
     {
-      this->setWikiSummary("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a SQW file.");
-      this->setOptionalMessage("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a SQW file.");
+      CPUTimer tim;
+
+      size_t maxNPix = ~size_t(0);
+      if(m_nDataPoints > maxNPix)
+      {
+        throw new std::runtime_error("Not possible to fit all datapoints into memory");
+      }
+
+      const size_t ncolumns = 9; //qx, qy, qz, en, s, err, irunid, idetid, ien
+      const size_t column_size = 4; //types stored as either float32 or unsigned integer (both 4byte).
+      const size_t column_size_2 = column_size * 2; //offset, gives qz
+      const size_t column_size_3 = column_size * 3; //offset, gives en
+      const size_t column_size_4 = column_size * 4; //offset, gives s
+      const size_t column_size_5 = column_size * 5; //offset, gives err
+      const size_t pixel_width = ncolumns * column_size;
+      const size_t data_buffer_size = pixel_width * m_nDataPoints;
+      g_log.information() << m_nDataPoints << " data points in this SQW file." << std::endl;
+
+      // Load from the input file is smallish blocks
+      size_t blockSize = pixel_width * 1000000;
+
+      // Report progress once per block
+      int numBlocks = int((data_buffer_size + blockSize-1) / blockSize) ;
+      m_prog->setNumSteps( numBlocks );
+      m_prog->setNotifyStep(0.1);
+
+      // For tracking when to split boxes
+      size_t eventsAdded = 0;
+      size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+      BoxController_sptr bc = ws->getBoxController();
+      DiskMRU & mru = bc->getDiskMRU();
+
+      for (int blockNum=0; blockNum < numBlocks; blockNum++)
+      {
+        // Start point in the file
+        size_t inputFileOffset = size_t(blockNum) * blockSize;
+
+        // Limit the size of the block
+        size_t currentBlockSize = blockSize;
+        if ((inputFileOffset + currentBlockSize) > data_buffer_size)
+          currentBlockSize = data_buffer_size - inputFileOffset;
+
+        // Load the block from the file
+        std::vector<char> vecBuffer = std::vector<char>(currentBlockSize);
+        char* pData = &vecBuffer[0];
+        this->m_fileStream.seekg(this->m_dataPositions.pix_start + inputFileOffset, std::ios::beg);
+        this->m_fileStream.read(pData,currentBlockSize);
+
+        // Go through each pixel in the input
+        int currentNumPixels = int(currentBlockSize / pixel_width);
+        eventsAdded += size_t(currentNumPixels);
+
+        // Add the events in parallel
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for (int i=0; i < currentNumPixels; i++)
+        {
+          size_t current_pix = size_t(i*pixel_width);
+          coord_t centers[4] =        //for(size_t current_pix = 0; current_pix < currentBlockSize; current_pix += pixel_width)
+
+          {
+              *(reinterpret_cast<float*>(pData + current_pix)),
+              *(reinterpret_cast<float*>(pData + current_pix + column_size)),
+              *(reinterpret_cast<float*>(pData + current_pix + column_size_2)),
+              *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
+          };
+          float error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
+          ws->addEvent(MDLeanEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
+        }
+
+
+//        MemoryStats stat;
+//        size_t bytesAvail = stat.availMem() * 1024;
+//        // Estimate how many extra bytes will (temporarily) be used when splitting events
+//        size_t bytesNeededToSplit = eventsAdded * sizeof(MDLeanEvent<4>) / 2;
+
+        // Split:
+        // 1. When < 1 GB of memory is free
+        // 2. When too little memory might be available for the splitting operation
+        // 3. When enough events have been added that it makes sense
+        // 4. At the last block being added
+
+
+//        if ((bytesAvail < 1000000000) || (bytesAvail < bytesNeededToSplit) ||
+//            bc->shouldSplitBoxes(eventsAdded*2, lastNumBoxes) || (blockNum == numBlocks-1) )
+
+
+        if (eventsAdded > 19000000 )
+        {
+          g_log.information() << "Splitting boxes after " << eventsAdded << " events added." << std::endl;
+          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+
+          // This splits up all the boxes according to split thresholds and sizes.
+          Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+          ThreadPool tp(ts);
+          ws->splitAllIfNeeded(ts);
+          tp.joinAll();
+
+          // Flush the cache - this will save things out to disk
+          mru.flushCache();
+          // Flush memory
+          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+          lastNumBoxes = bc->getTotalNumMDBoxes();
+          eventsAdded = 0;
+        }
+
+//
+//        if (false)
+//        {
+//          std::vector<IMDBox<MDLeanEvent<4>,4>*> boxes;
+//          ws->getBox()->getBoxes(boxes, 100, true);
+//          size_t modified = 0;
+//          size_t inmem = 0;
+//          size_t ondisk = 0;
+//          size_t events = 0;
+//          for (size_t i=0; i<boxes.size(); i++)
+//          {
+//            MDBox<MDLeanEvent<4>,4>* box = dynamic_cast<MDBox<MDLeanEvent<4>,4>*>(boxes[i]);
+//            if (box)
+//            {
+//              //box->save();
+//              if (box->dataAdded() || box->dataModified())
+//                modified++;
+//              if (box->getInMemory())
+//                inmem++;
+//              if (box->getOnDisk())
+//                ondisk++;
+//              events += box->getEventVectorSize();
+//            }
+//          }
+//          g_log.information() << modified << " of " << boxes.size() << " MDBoxes have data added or modified." << std::endl;
+//          g_log.information() << inmem << " MDBoxes are in memory." << std::endl;
+//          //g_log.information() << ondisk << " MDBoxes are on disk." << std::endl;
+//          g_log.information() << double(events)/1e6 << " million events in memory." << std::endl;
+//        }
+
+        // Report progress once per block.
+        m_prog->report();
+      }
+
+
     }
+
 
     /// Add a dimension after reading info from file.
     void LoadSQW::addDimensions(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
@@ -217,97 +417,14 @@ namespace Mantid
       ws->addDimension(qy.create());
       ws->addDimension(qz.create());
       ws->addDimension(en.create());
-    }
 
-    /// Add events after reading pixels/datapoints from file.
-    void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
-    {
-      CPUTimer tim;
-
-      size_t maxNPix = ~size_t(0);
-      if(m_nDataPoints > maxNPix)
-      {
-        throw new std::runtime_error("Not possible to fit all datapoints into memory");
-      }
-
-      const size_t ncolumns = 9; //qx, qy, qz, en, s, err, irunid, idetid, ien
-      const size_t column_size = 4; //types stored as either float32 or unsigned integer (both 4byte).
-      const size_t column_size_2 = column_size * 2; //offset, gives qz
-      const size_t column_size_3 = column_size * 3; //offset, gives en
-      const size_t column_size_4 = column_size * 4; //offset, gives s
-      const size_t column_size_5 = column_size * 5; //offset, gives err
-      const size_t pixel_width = ncolumns * column_size;
-      const size_t data_buffer_size = pixel_width * m_nDataPoints;
-
-      std::vector<char> vecBuffer = std::vector<char>(data_buffer_size);
-      char* pData = &vecBuffer[0];
-
-      Progress * prog = new Progress(this, 0.0, 1.0, 50);
-
-      prog->report("Loading file");
-
-      this->m_fileStream.seekg(this->m_dataPositions.pix_start, std::ios::beg);
-      this->m_fileStream.read(pData,data_buffer_size);
-      float error;
-
-      std::cout << tim << " to load the data from file." << std::endl;
-
-      prog->report("Loading pixels");
-
-      // Perform the loading/splitting in chunks
-      size_t startBlock = 0;
-      size_t lastChunkSize = 10000;
-      size_t endBlock = lastChunkSize*pixel_width;
-      // Don't go past the end
-      if (endBlock > data_buffer_size) endBlock = data_buffer_size;
-
-      while (startBlock < data_buffer_size)
-      {
-        prog->report("Making Events");
-        for(size_t current_pix = startBlock; current_pix < endBlock; current_pix+=pixel_width)
-        {
-          coord_t centers[4] =
-          {
-              *(reinterpret_cast<float*>(pData + current_pix)),
-              *(reinterpret_cast<float*>(pData + current_pix + column_size)),
-              *(reinterpret_cast<float*>(pData + current_pix + column_size_2)),
-              *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
-          };
-          error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
-          ws->addEvent(MDLeanEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
-        }
-
-        std::cout << tim << " to make and add the events." << std::endl;
-
-        prog->report("Splitting boxes");
-
-        // This splits up all the boxes according to split thresholds and sizes.
-        Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-        ThreadPool tp(ts);
-        ws->splitAllIfNeeded(ts);
-        tp.joinAll();
-
-        std::cout << tim << " to split the MDBoxes." << std::endl;
-
-        // Get ready for the next chunk. Grow them by a factor of 2 each time.
-        startBlock = endBlock;
-        lastChunkSize *= 2;
-        endBlock = startBlock + lastChunkSize*pixel_width;
-        // Don't go past the end
-        if (endBlock > data_buffer_size) endBlock = data_buffer_size;
-      }
-
-      prog->report("Refreshing cache");
-      ws->refreshCache();
-
-      delete prog;
+//      std::cout << qx.create()->getNBins() << " bins in x\n";
+//      std::cout << qy.create()->getNBins() << " bins in y\n";
+//      std::cout << qz.create()->getNBins() << " bins in z\n";
+//      std::cout << en.create()->getNBins() << " bins in en\n";
 
     }
 
-    /// Destructor
-    LoadSQW::~LoadSQW()
-    {
-    }
 
     /*==================================================================================
     Region: Functions in the following region are candidates for refactoring. Copied from MD_FileHoraceReader

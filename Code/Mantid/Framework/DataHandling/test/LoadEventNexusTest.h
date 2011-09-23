@@ -354,75 +354,10 @@ public:
     doTestSingleBank(true, true);
   }
 
-
   void test_SingleBank_ThatDoesntExist()
   {
     doTestSingleBank(false, false, "bankDoesNotExist", true);
-    //doTestSingleBank(true, false, "bankDoesNotExist", true);
   }
-
-  void xtest_LargeFile()
-  {
-    Mantid::API::FrameworkManager::Instance();
-    LoadEventNexus ld;
-    std::string outws_name = "cncs";
-    ld.initialize();
-    ld.setPropertyValue("Filename","/home/8oz/data/TOPAZ_1786_event.nxs");
-    ld.setPropertyValue("OutputWorkspace",outws_name);
-
-    ld.execute();
-    TS_ASSERT( ld.isExecuted() );
-
-    DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
-    //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
-
-    size_t totSize=0;
-    size_t totCap=0;
-    for (size_t i=0; i<WS->getNumberHistograms(); i++)
-    {
-      EventList & el = WS->getEventList(i);
-      totSize += el.getEvents().size();
-      totCap += el.getEvents().capacity();
-      //std::cout << i << ": size "<< el.getEvents().size() << "; capacity " << el.getEvents().capacity() << "\n";
-    }
-    std::cout << "tot size "<< totSize << "; capacity " << totCap << "\n";
-  }
-
-
-  //    void do_LoadWithPrecount(bool precount)
-  //    {
-  //    	Timer time;
-  //      Mantid::API::FrameworkManager::Instance();
-  //      LoadEventNexus * ld = new LoadEventNexus();
-  //      std::string outws_name = "TOPAZ_1715";
-  //      ld->initialize();
-  //      ld->setPropertyValue("Filename","/home/8oz/data/TOPAZ_1715_event.nxs");
-  ////      ld->setPropertyValue("Filename","/home/8oz/data/SEQ_4533_event.nxs");
-  //      ld->setPropertyValue("OutputWorkspace",outws_name);
-  //      ld->setPropertyValue("FilterByTof_Min", "-1e10");
-  //      ld->setPropertyValue("FilterByTof_Max", "1e10");
-  //      ld->setPropertyValue("FilterByTime_Start", "-1e10");
-  //      ld->setPropertyValue("FilterByTime_Stop", "1e10");
-  ////      ld->setProperty("Precount", precount);
-  //      ld->execute();
-  //      TS_ASSERT( ld->isExecuted() );
-  //
-  //      std::cout << time.elapsed() << " seconds to load.\n";
-  //
-  //      DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
-  //      //Valid WS and it is an EventWorkspace
-  //      TS_ASSERT( WS );
-  //      //Pixels have to be padded
-  //      TS_ASSERT_EQUALS( WS->getNumberHistograms(), 65536 * 15);
-  //      TS_ASSERT_EQUALS( WS->getNumberEvents(), 2942639);
-  //    }
-  //
-  //    void testTOPAZ()
-  //    {
-  //      do_LoadWithPrecount(false);
-  ////      do_LoadWithPrecount(true);
-  //    }
 
 
 };

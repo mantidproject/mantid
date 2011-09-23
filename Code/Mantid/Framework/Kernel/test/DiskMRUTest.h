@@ -205,58 +205,6 @@ public:
   }
 
 
-
-  /** Speed comparisons. Boost is faster! */
-  void xtest_to_compare_to_stl()
-  {
-    size_t num = 1000000;
-    std::vector<ISaveableTester*> data;
-    for (size_t i=0; i<num; i++)
-    {
-      data.push_back( new ISaveableTester(i) );
-    }
-
-    DiskMRU::mru_t list;
-    CPUTimer tim;
-    for (size_t i=0; i<num; i++)
-    {
-      std::pair<DiskMRU::mru_t::iterator,bool> p;
-      p = list.push_front(data[i]);
-    }
-    std::cout << tim << " to fill the list." << std::endl;
-
-    std::set<ISaveable*> mySet;
-    for (size_t i=0; i<num; i++)
-    {
-      mySet.insert(data[i]);
-    }
-    std::cout << tim << " to fill a set[*]." << std::endl;
-
-    std::map<size_t, ISaveable*> myMap;
-    for (size_t i=0; i<num; i++)
-    {
-      ISaveable * s = data[i];
-      myMap[s->getId()] = s;
-    }
-    std::cout << tim << " to fill a map[size_t, *]." << std::endl;
-
-    std::multimap<size_t, size_t> mmap;
-    for (size_t i=0; i<num; i++)
-    {
-      mmap.insert(std::pair<size_t,size_t>(i,i));
-    }
-    std::cout << tim << " to fill a multimap[size_t, size_t]." << std::endl;
-
-    std::map<size_t, size_t> map;
-    for (size_t i=0; i<num; i++)
-    {
-      map[i] = i;
-    }
-    std::cout << tim << " to fill a map[size_t, size_t]." << std::endl;
-
-  }
-
-
   //--------------------------------------------------------------------------------
   /** Getting and setting the cache sizes */
   void test_set_and_get_methods()

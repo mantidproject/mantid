@@ -1632,42 +1632,6 @@ public:
   }
 
 
-  /** Odd problem with events exactly at bin boundaries */
-  void xtest_divide_then_bin()
-  {
-    EventList el2;
-    el2.addEventQuickly( TofEvent(1234.567) ); // Funny bin number
-    el2.addEventQuickly( TofEvent(2000.0) );
-    MantidVec X;
-    X.push_back(1234.567); // Specify the bin boundary in DOUBLE precision
-    X.push_back(2000.0);
-    X.push_back(3000.0);
-    MantidVec Y;
-    Y.push_back(2.0);
-    Y.push_back(2.0);
-    MantidVec E;
-    E.push_back(1.0);
-    E.push_back(1.0);
-
-    MantidVec hist, histError;
-    el2.generateHistogram(X, hist, histError);
-    TS_ASSERT_DELTA( hist[0], 1.0, 1e-6);
-    TS_ASSERT_DELTA( hist[1], 1.0, 1e-6);
-
-    MantidVec XforDivide;
-    XforDivide.push_back(double(float(1234.567))); // Bin boundary specified in SINGLE precision
-    XforDivide.push_back(2000.0);
-    XforDivide.push_back(3000.0);
-
-    // Divide in place
-    el2.divide(XforDivide, Y, E);
-
-    // Redo the histogram
-    el2.generateHistogram(X, hist, histError);
-    TS_ASSERT_DELTA( hist[0], 0.5, 1e-6);
-    TS_ASSERT_DELTA( hist[1], 0.5, 1e-6);
-  }
-
 
   //==================================================================================
   // Mocking functions

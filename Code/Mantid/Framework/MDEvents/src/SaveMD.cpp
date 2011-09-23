@@ -216,19 +216,6 @@ namespace MDEvents
       size_t id = box->getId();
       if (id < maxBoxes)
       {
-        // Various bits of data about the box
-        depth[id] = int(box->getDepth());
-        box_signal_errorsquared[id*2] = double(box->getSignal());
-        box_signal_errorsquared[id*2+1] = double(box->getErrorSquared());
-        inverse_volume[id] = box->getInverseVolume();
-
-        for (size_t d=0; d<nd; d++)
-        {
-          size_t newIndex = id*(nd*2) + d*2;
-          extents[newIndex] = box->getExtents(d).min;
-          extents[newIndex+1] = box->getExtents(d).max;
-        }
-
         // The start/end children IDs
         size_t numChildren = box->getNumChildren();
         if (numChildren > 0)
@@ -289,6 +276,18 @@ namespace MDEvents
 
             mdbox->releaseEvents();
           }
+        }
+
+        // Various bits of data about the box
+        depth[id] = int(box->getDepth());
+        box_signal_errorsquared[id*2] = double(box->getSignal());
+        box_signal_errorsquared[id*2+1] = double(box->getErrorSquared());
+        inverse_volume[id] = box->getInverseVolume();
+        for (size_t d=0; d<nd; d++)
+        {
+          size_t newIndex = id*(nd*2) + d*2;
+          extents[newIndex] = box->getExtents(d).min;
+          extents[newIndex+1] = box->getExtents(d).max;
         }
 
         // Move on to the next box

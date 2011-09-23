@@ -31,8 +31,7 @@ public:
   }
 
 
-  /// Disabled because it has text output
-  void xtest_with_stdout()
+  void test_with_stdout()
   {
     ProgressText p(0.5, 1.0, 10);
     // 4 outputs
@@ -53,19 +52,18 @@ public:
   }
 
 
-//  /// Disabled because it has text output
-//  void test_on_one_line()
-//  {
-//    ProgressText p(0.0, 1.0, 100, false);
-//    for (int i=0; i<100; i++)
-//    {
-//      std::string msg = "";
-//      for (int i = 0; i < std::rand() %10; i++)
-//        msg += "bla";
-//      p.report(msg);
-//      usleep(10000);
-//    }
-//  }
+  void test_on_one_line()
+  {
+    ProgressText p(0.0, 1.0, 100, false);
+    for (int i=0; i<100; i++)
+    {
+      std::string msg = "";
+      for (int i = 0; i < std::rand() %10; i++)
+        msg += "bla";
+      p.report(msg);
+      usleep(10000);
+    }
+  }
 
 
 
