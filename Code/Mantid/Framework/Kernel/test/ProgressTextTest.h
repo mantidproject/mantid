@@ -61,7 +61,6 @@ public:
       for (int i = 0; i < std::rand() %10; i++)
         msg += "bla";
       p.report(msg);
-      usleep(10000);
     }
   }
 
