@@ -47,7 +47,7 @@ class MantidGeom:
         self._append_child("length", defaults_element, unit="metre")
         self._append_child("angle", defaults_element, unit="degree")
 
-        reference_element = self._append_child("reference=frame", defaults_element)
+        reference_element = self._append_child("reference-frame", defaults_element)
         self._append_child("along-beam", reference_element, axis="z")
         self._append_child("pointing-up", reference_element, axis="y")
         self._append_child("handedness", reference_element, axis="right")
@@ -59,9 +59,7 @@ class MantidGeom:
         """
         if comment is None: return
         
-        child = self._document.createElement("Comment")
-        content_node = self._document.createTextNode(str(comment))
-        child.appendChild(content_node)
+        child = self._document.createComment(str(comment))
         self._root.appendChild(child) 
 
     def _append_child(self, element_name, element_parent, **kwargs):
