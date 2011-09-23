@@ -31,7 +31,7 @@ public:
 
 
   /** Disabled because this isn't a real algorithm, just a testing one */
-  void test_exec()
+  void xtest_exec()
   {
     RayTracerTester alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
