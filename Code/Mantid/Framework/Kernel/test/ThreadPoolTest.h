@@ -228,20 +228,6 @@ public:
     TS_ASSERT_EQUALS( last_report_counter, 10);
   }
 
-  /// Disabled because it has std output
-  void xtest_with_progress_reporting2()
-  {
-    ThreadPool p(new ThreadSchedulerFIFO(), 0, new ProgressText(0.0, 1.0, 50));
-    for (int i=0; i< 50; i++)
-    {
-      double cost = i;
-      p.schedule( new FunctionTask( threadpooltest_function, cost ) );
-    }
-    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
-  }
-
-
-
   //=======================================================================================
 
   /** Start a threadpool before adding tasks
