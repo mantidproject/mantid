@@ -55,6 +55,9 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<PeaksWorkspace>()),
         "An input PeaksWorkspace with an instrument.");
 
+    declareProperty("AppendFile", false, "Append to file if true.\n"
+      "If false, new file (default).");
+
     std::vector<std::string> exts;
     exts.push_back(".peaks");
     exts.push_back(".integrate");
@@ -74,29 +77,6 @@ namespace Crystal
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
     std::vector<Peak> peaks = ws->getPeaks();
-
-    std::ofstream out( filename.c_str() );
-
-    Instrument_const_sptr inst = ws->getInstrument();
-    if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
-
-    double l1; V3D beamline; double beamline_norm; V3D samplePos;
-    inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-
-    out << "Version: 2.0  Facility: SNS " ;
-    out <<  " Instrument: " <<  inst->getName() <<  "  Date: " ;
-
-    //TODO: The experiment date might be more useful than the instrument date.
-    // For now, this allows the proper instrument to be loaded back after saving.
-    Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
-    out <<  expDate.to_ISO8601_string() << std::endl;
-
-    out << "6         L1    T0_SHIFT" <<  std::endl;
-    out << "7 "<< std::setw( 10 )  ;
-    out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
-    out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
-    // Time offset of 0.00 for now
-    out << "0.000" <<  std::endl;
 
     // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
     typedef std::map<int, std::vector<size_t> > bankMap_t;
@@ -124,6 +104,38 @@ namespace Crystal
       // Track unique bank numbers
       uniqueBanks.insert(bank);
     }
+
+    Instrument_const_sptr inst = ws->getInstrument();
+    if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
+
+    double l1; V3D beamline; double beamline_norm; V3D samplePos;
+    inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
+
+    std::ofstream out;
+    bool append = getProperty("AppendFile");
+    if (append)
+    {
+      out.open( filename.c_str(), std::ios::app);
+    }
+    else
+    {
+      out.open( filename.c_str());
+
+
+    out << "Version: 2.0  Facility: SNS " ;
+    out <<  " Instrument: " <<  inst->getName() <<  "  Date: " ;
+
+    //TODO: The experiment date might be more useful than the instrument date.
+    // For now, this allows the proper instrument to be loaded back after saving.
+    Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
+    out <<  expDate.to_ISO8601_string() << std::endl;
+
+    out << "6         L1    T0_SHIFT" <<  std::endl;
+    out << "7 "<< std::setw( 10 )  ;
+    out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
+    out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
+    // Time offset of 0.00 for now
+    out << "0.000" <<  std::endl;
 
 
     // ============================== Save .detcal info =========================================
@@ -178,6 +190,7 @@ namespace Crystal
 
         }
       }
+    }
     }
 
 
