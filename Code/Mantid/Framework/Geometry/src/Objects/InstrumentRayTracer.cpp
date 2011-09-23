@@ -56,7 +56,7 @@ namespace Mantid
       m_resultsTrack.reset(m_instrument->getSource()->getPos(), dir);
       //m_resultsTrack.reset(m_instrument->getSample()->getPos() + V3D(1.0,0.0,0.0), dir);
       // The intersection results are accumulated within the ray object
-      fireRay(m_resultsTrack, true);
+      fireRay(m_resultsTrack);
     }
 
     /**
@@ -69,7 +69,7 @@ namespace Mantid
       // Define the track with the sample position and the given direction.
       m_resultsTrack.reset(m_instrument->getSample()->getPos(), dir);
       // The intersection results are accumulated within the ray object
-      fireRay(m_resultsTrack, false);
+      fireRay(m_resultsTrack);
     }
 
     /**
@@ -118,27 +118,16 @@ namespace Mantid
      * object tree to find the objects that were intersected.
      * @param testRay :: An input/output parameter that defines the track and accumulates the
      *        intersection results
-     * @param checkInstrumentBB :: set to true (default) to check that the ray intersects the
-     *        overall instruement BoundingBox. If the ray emanantes from WITHIN the instrument,
-     *        then the tracing fails, so set this to false then.
      */
-    void InstrumentRayTracer::fireRay(Track & testRay, bool checkInstrumentBB) const
+    void InstrumentRayTracer::fireRay(Track & testRay) const
     {
       // Go through the instrument tree and see if we get any hits by
       // (a) first testing the bounding box and if we're inside that then
       // (b) test the lower components.
       std::deque<IComponent_const_sptr> nodeQueue;
 
-      if (checkInstrumentBB)
-      {
-        //Start at the root of the tree
-        nodeQueue.push_back(m_instrument);
-      }
-      else
-      {
-        // Skip the instrument (assume it DOES intersect) and do all its children
-        m_instrument->testIntersectionWithChildren(testRay, nodeQueue);
-      }
+      //Start at the root of the tree
+      nodeQueue.push_back(m_instrument);
 
       IComponent_const_sptr node;
       while( !nodeQueue.empty() )

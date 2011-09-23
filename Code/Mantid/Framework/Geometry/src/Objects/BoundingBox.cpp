@@ -123,7 +123,7 @@ namespace Mantid
               return true;
         }
       }
-      return false;
+      return this->isPointInside(startPoint);
     }
 
     /**

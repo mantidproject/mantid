@@ -89,8 +89,7 @@ public:
   void setOutline(boost::shared_ptr<const Object> obj);
 
   /** Test the intersection of the ray with the children of the component assembly  */
-  virtual void testIntersectionWithChildren(Track & /*testRay*/, std::deque<IComponent_const_sptr> & /*searchQueue*/) const
-  { throw std::runtime_error("Not implemented."); }
+  virtual void testIntersectionWithChildren(Track & /*testRay*/, std::deque<IComponent_const_sptr> & /*searchQueue*/) const;
 
 
 private:

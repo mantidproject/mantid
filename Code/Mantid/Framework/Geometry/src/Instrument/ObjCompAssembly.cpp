@@ -334,6 +334,32 @@ const Quat ObjCompAssembly::getRotation() const
 
 
 
+//------------------------------------------------------------------------------------------------
+/** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer.
+ *
+ * @param testRay :: Track under test. The results are stored here.
+ * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching
+ */
+void ObjCompAssembly::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & searchQueue) const
+{
+  int nchildren = this->nelements();
+  for( int i = 0; i < nchildren; ++i )
+  {
+    boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
+    if( ICompAssembly_sptr childAssembly = boost::dynamic_pointer_cast<ICompAssembly>(comp) )
+    {
+      searchQueue.push_back(comp);
+    }
+    // Check the physical object intersection
+    else if( IObjComponent *physicalObject = dynamic_cast<IObjComponent*>(comp.get()) )
+    {
+       physicalObject->interceptSurface(testRay);
+    }
+    else {}
+  }
+}
+
+
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to it.
  *  All child components must be detectors and positioned along a straight line and have the same shape.
  *  The shape can be either a box or a cylinder.

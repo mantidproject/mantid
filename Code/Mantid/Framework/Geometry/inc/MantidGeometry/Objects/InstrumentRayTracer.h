@@ -73,7 +73,7 @@ namespace Mantid
       /// Default constructor
       InstrumentRayTracer();
       /// Fire the given track at the instrument
-      void fireRay(Track & testRay, bool checkInstrumentBB = true) const;
+      void fireRay(Track & testRay) const;
 
       /// Pointer to the instrument
       Instrument_const_sptr m_instrument;

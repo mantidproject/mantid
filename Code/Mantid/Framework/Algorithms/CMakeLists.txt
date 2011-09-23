@@ -122,6 +122,7 @@ set ( SRC_FILES
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
 	src/Qxy.cpp
+	src/RayTracerTester.cpp
 	src/ReadGroupsFromFile.cpp
 	src/RealFFT.cpp
 	src/Rebin.cpp
@@ -289,6 +290,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qxy.h
+	inc/MantidAlgorithms/RayTracerTester.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
 	inc/MantidAlgorithms/RealFFT.h
 	inc/MantidAlgorithms/Rebin.h
@@ -381,8 +383,8 @@ set ( TEST_FILES
 	test/DetectorEfficiencyVariationTest.h
 	test/DiffractionEventCalibrateDetectorsTest.h
 	test/DiffractionEventReadDetCalTest.h
-  test/DiffractionFocussingTest.h
 	test/DiffractionFocussing2Test.h
+	test/DiffractionFocussingTest.h
 	test/DivideTest.h
 	test/DspacemaptoCalTest.h
 	test/DummyTest.h
@@ -442,6 +444,7 @@ set ( TEST_FILES
 	test/Q1DTest.h
 	test/Q1DWeightedTest.h
 	test/QxyTest.h
+	test/RayTracerTesterTest.h
 	test/ReadGroupsFromFileTest.h
 	test/RealFFTTest.h
 	test/Rebin2DTest.h

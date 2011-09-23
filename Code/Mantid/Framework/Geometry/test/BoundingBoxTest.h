@@ -81,6 +81,16 @@ public:
     doPointTest(false);
   }
 
+  void test_That_A_Line_Originating_Inside_Always_Intersects()
+  {
+    BoundingBox bbox(4.1, 4.1, 4.1, -4.1, -4.1, -4.1);
+    // Track goes outside the box
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(1,0,0), V3D(6,0,0)), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(0,1,0), V3D(0,6,0)), true);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(0,0,1), V3D(0,0,6)), true);
+
+  }
+
   void test_That_A_Line_Originating_Outside_The_Box_And_Fired_Towards_It_Intersects_The_Box()
   {
     BoundingBox bbox(4.1, 4.1, 4.1, -4.1, -4.1, -4.1);
@@ -98,7 +108,6 @@ public:
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(-5.0,-1.0,0.0),V3D(1.0,1.0,0.0)), true);
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(-5.0,-1.0,-0.5),V3D(1.0,1.0,1.0)), true);
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(V3D(10.0,10.0,0.0),V3D(-1.0,-0.4,0.0)), false);
-
   }
 
   void test_That_A_Track_Originating_Outside_The_Box_And_Fired_Towards_It_Intersects_The_Box()
