@@ -273,6 +273,44 @@ public:
   }
 
 
+  void test_GetMagFFT()
+  {
+    size_t N_FFT_STEPS = 256;
+    double projections[ N_FFT_STEPS ];
+    double magnitude_fft[ N_FFT_STEPS/2 ];
+
+    V3D current_dir( 1, 2, -3 );
+    std::vector<V3D> q_vectors;
+    current_dir.normalize();
+    for ( size_t i = 0; i < 16; i++ )
+    {
+      V3D vec( current_dir );
+      vec *= ( (double)i + 0.6 );
+      q_vectors.push_back( vec );
+    }
+    double max_q_magnitude = 16.0;
+
+    double index_factor = ((double)N_FFT_STEPS) / max_q_magnitude;
+
+    double max_mag_fft = IndexingUtils::GetMagFFT( q_vectors, current_dir,
+                    N_FFT_STEPS, projections, index_factor, magnitude_fft );
+
+    TS_ASSERT_DELTA( max_mag_fft, 16.0, 1e-5 );
+
+    for ( size_t i = 0; i < N_FFT_STEPS/2; i++ )
+    {
+      if ( i % 16 == 0 )
+      {
+        TS_ASSERT_DELTA( magnitude_fft[i], 16.0, 1e-5 );
+      }
+      else
+      {
+        TS_ASSERT_DELTA( magnitude_fft[i], 0.0, 1e-5 );
+      }
+    }
+  }
+
+
   void test_Make_c_dir()
   {
     V3D a_dir(  1, 2, 3 );

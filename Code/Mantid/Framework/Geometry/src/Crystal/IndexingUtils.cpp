@@ -9,10 +9,12 @@
 
 extern "C"
 {
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_sys.h> 
 #include <gsl/gsl_vector.h> 
 #include <gsl/gsl_matrix.h> 
 #include <gsl/gsl_linalg.h> 
+#include <gsl/gsl_fft_real.h>
 }
 
 using namespace Mantid::Geometry;
@@ -1103,6 +1105,74 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
   return max_indexed;
 }
 
+
+/**
+ *  Fill an array with the magnitude of the FFT of the 
+ *  projections of the specified q_vectors on the specified direction.
+ *  The largest value in the magnitude FFT that occurs at index 5 or more
+ *  is returned as the value of the function.
+ *
+ *  @param q_vectors     The list of Q vectors to project on the specified 
+ *                       direction.
+ *  @param current_dir   The direction the Q vectors will be projected on.
+ *  @param N             The size of the projections[] array.  This MUST BE
+ *                       a power of 2.  The magnitude_fft[] array must be 
+ *                       half the size.
+ *  @param projections   Array to hold the projections of the Q vectors.  This
+ *                       must be long enough so that all projected values map
+ *                       map to a valid index, after they are multiplied by the
+ *                       index_factor.
+ *  @param index_factor  Factor that when multiplied by a projected Q vector 
+ *                       will give a valid index into the projections array.
+ *  @param magnitude_fft Array that will be filled out with the magnitude of
+ *                       the FFT of the projections.
+ *  @return The largest value in the magnitude_fft, that is stored in position
+ *          5 or more.
+ */
+double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
+                                 const V3D              & current_dir,
+                                 const size_t             N,
+                                       double             projections[],
+                                       double             index_factor,
+                                       double             magnitude_fft[] )
+{
+  for ( size_t i = 0; i < N; i++ )
+  {
+    projections[i] = 0.0;
+  }
+                                                      // project onto direction
+  V3D     q_vec;
+  double  dot_prod;
+  size_t  index;
+  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
+  {
+    q_vec = q_vectors[ q_num ];
+    dot_prod = current_dir.scalar_prod( q_vec );
+    index = (size_t)fabs(index_factor * dot_prod);
+    if ( index < N )
+      projections[ index ] += 1;
+    else
+      projections[ N-1 ] += 1;     // This should not happen, but trap it in
+  }                                // case of rounding errors.
+
+                                                      // get the |FFT|
+  gsl_fft_real_radix2_transform ( projections, 1, N );
+  for ( size_t i = 1; i < N/2; i++ )
+  {
+    magnitude_fft[i] = sqrt( projections[i]   * projections[i] +
+                             projections[N-i] * projections[N-i] );
+  }
+
+  magnitude_fft[0] = fabs( projections[0] );
+
+  size_t dc_end      = 5;        // we may need a better estimate of this
+  double max_mag_fft = 0.0;
+  for ( size_t i = dc_end; i < N/2; i++ )
+    if ( magnitude_fft[i] > max_mag_fft )
+      max_mag_fft = magnitude_fft[i];
+
+ return max_mag_fft;
+}
 
 
 /**

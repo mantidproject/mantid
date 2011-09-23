@@ -99,6 +99,15 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                     double max_d,
                                     double required_tolerance,
                                     double degrees_per_step   );
+
+  /// Get the magnitude of the FFT of the projections of the q_vectors on 
+  /// the current direction vector.
+  static double GetMagFFT( const std::vector<Kernel::V3D>  & q_vectors,
+                           const Kernel::V3D               & current_dir,
+                           const size_t                      N,
+                                 double                      projections[],
+                                 double                      index_factor,
+                                 double                      magnitude_fft[]);
   
 
   /// Get the vector in the direction of "c" given other unit cell information
