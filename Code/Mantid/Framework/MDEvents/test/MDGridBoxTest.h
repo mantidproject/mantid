@@ -334,7 +334,7 @@ public:
     // ID of first child remains unchanged at 1
     TS_ASSERT_EQUALS( gb->getId(), 1 );
     // There were 101 assigned IDs
-    TS_ASSERT_EQUALS( b->getBoxController()->getMaxId(), 200+1);
+    TS_ASSERT_EQUALS( gb->getBoxController()->getMaxId(), 200+1);
     // The first child of the sub-divided box got 101 as its id
     TS_ASSERT_EQUALS( gb->getBoxes()[0]->getId(), 101 );
 
