@@ -58,9 +58,16 @@ public:
 	Matrix* matrix(){return d_matrix;};
 
 private:
-	using QwtPlotCurve::draw; // Unhide base class method (avoids Intel compiler warning)
 	void draw(QPainter *painter,const QwtScaleMap &xMap,
 		const QwtScaleMap &yMap, int from, int to) const;
+	// Implement overloaded virtual method to just pass up to the base class to avoid
+	// an Intel compiler warning
+	void draw(QPainter *p,
+	    const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+	    const QRect& rect) const
+	{
+	  DataCurve::draw(p,xMap,yMap,rect);
+	}
 
     void loadDataFromMatrix();
     Matrix *d_matrix;
