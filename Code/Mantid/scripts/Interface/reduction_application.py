@@ -1,5 +1,24 @@
 import sys, os
+import traceback
 from PyQt4 import QtGui, QtCore, uic
+
+REDUCTION_WARNING = False
+WARNING_MESSAGE = ""
+try:
+    import reduction
+    print reduction.__file__
+    if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
+        REDUCTION_WARNING = True
+        home_dir = os.path.expanduser('~')
+        if os.path.abspath(reduction.__file__).startswith(home_dir):
+            WARNING_MESSAGE = "The following file is in your home area, please delete it and restart Mantid:\n\n"
+        else:
+            WARNING_MESSAGE = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
+        WARNING_MESSAGE += os.path.abspath(reduction.__file__)
+except:
+    REDUCTION_WARNING = True
+    WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
+    WARNING_MESSAGE += unicode(traceback.format_exc())
 
 from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -25,6 +44,11 @@ except:
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def __init__(self, instrument=None, instrument_list=None):
         QtGui.QMainWindow.__init__(self)
+        
+        if REDUCTION_WARNING:
+            message = "The reduction application has problems starting:\n\n"
+            message += WARNING_MESSAGE
+            QtGui.QMessageBox.warning(self, "WARNING", message)
         
         # Application settings
         settings = QtCore.QSettings()
