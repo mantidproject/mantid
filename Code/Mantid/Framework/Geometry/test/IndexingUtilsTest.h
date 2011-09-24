@@ -275,9 +275,11 @@ public:
 
   void test_GetMagFFT()
   {
-    size_t N_FFT_STEPS = 256;
+#define N_FFT_STEPS    256
+#define HALF_FFT_STEPS 128
+
     double projections[ N_FFT_STEPS ];
-    double magnitude_fft[ N_FFT_STEPS/2 ];
+    double magnitude_fft[ HALF_FFT_STEPS ];
 
     V3D current_dir( 1, 2, -3 );
     std::vector<V3D> q_vectors;
