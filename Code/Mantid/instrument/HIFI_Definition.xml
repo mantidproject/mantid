@@ -24,6 +24,9 @@
       Generated from engineering drawings of scintillators JSL 23/2/2011
   -->
   
+  <parameter name="Default grouping file" type="string">
+    <value val="Grouping/HIFI_Detector_Grouping_LF_64.xml"/>
+  </parameter>     
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   

@@ -22,7 +22,10 @@
   
       Data provided by Stephen Cottrell for the EMU instrument
   -->
-  
+
+  <parameter name="Default grouping file" type="string">
+    <value val="Grouping/EMU_Detector_Grouping_LF_96.xml"/>
+  </parameter>     
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   
