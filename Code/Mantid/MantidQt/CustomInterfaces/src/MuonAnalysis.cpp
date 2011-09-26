@@ -2133,10 +2133,10 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   {
       QTableWidgetItem* it = m_uiForm.pairTable->item(0, 0);
       if (it)
-        it->setText("pair");
+        it->setText("long");
       else
       {
-        m_uiForm.pairTable->setItem(0, 0, new QTableWidgetItem("pair"));
+        m_uiForm.pairTable->setItem(0, 0, new QTableWidgetItem("long"));
       }    
       it = m_uiForm.pairTable->item(0, 3);
       if (it)
