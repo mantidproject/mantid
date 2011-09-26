@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include <fstream>
 #include "MantidDataObjects/SpecialWorkspace2D.h"
+#include <Poco/Path.h>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -162,10 +163,14 @@ namespace DataHandling
     OffsetsWorkspace_sptr offsetsWS;
     MatrixWorkspace_sptr maskWS;
 
+    // Title of all workspaces = the file without path
+    std::string title = Poco::Path(CalFilename).getFileName();
+
     // Initialize all required workspaces.
     if (MakeGroupingWorkspace)
     {
       groupWS = GroupingWorkspace_sptr(new GroupingWorkspace(inst));
+      groupWS->setTitle(title);
       declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputGroupingWorkspace", WorkspaceName + "_group", Direction::Output),
               "Set the the output GroupingWorkspace, if any.");
       setProperty("OutputGroupingWorkspace", groupWS);
@@ -174,6 +179,7 @@ namespace DataHandling
     if (MakeOffsetsWorkspace)
     {
       offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inst));
+      offsetsWS->setTitle(title);
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
               "Set the the output OffsetsWorkspace, if any.");
       setProperty("OutputOffsetsWorkspace", offsetsWS);
@@ -182,6 +188,7 @@ namespace DataHandling
     if (MakeMaskWorkspace)
     {
       maskWS = MatrixWorkspace_sptr(new SpecialWorkspace2D(inst));
+      maskWS->setTitle(title);
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
               "Set the the output MaskWorkspace, if any.");
       setProperty("OutputMaskWorkspace", maskWS);
