@@ -322,6 +322,8 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void BinToMDHistoWorkspace::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    BoxController_sptr bc = ws->getBoxController();
+
     // Start with signal at 0.0
     outWS->setTo(0.0, 0.0);
 
@@ -382,6 +384,10 @@ namespace MDEvents
       std::vector<IMDBox<MDE,nd>*> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
       ws->getBox()->getBoxes(boxes, 1000, true, function);
+
+      // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
+      if (bc->isFileBacked())
+        IMDBox<MDE, nd>::sortBoxesByFilePos(boxes);
 
       // For progress reporting, the # of boxes
       if (prog)

@@ -272,6 +272,37 @@ namespace MDEvents
 
 
 
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Helper method for sorting IMDBoxes by file position.
+   * MDGridBoxes return 0 for file position and so aren't sorted.
+   *
+   * @param a :: an IMDBox pointer
+   * @param b :: an IMDBox pointer
+   * @return
+   */
+  template<typename MDE, size_t nd>
+  bool CompareMDBoxFilePosition (const IMDBox<MDE,nd> * a, const IMDBox<MDE,nd> * b)
+  {
+    return (a->getFilePosition() < b->getFilePosition());
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Static method for sorting a list of IMDBox pointers by their file position,
+   * ascending. This should optimize the speed of loading a bit by
+   * reducing the amount of disk seeking.
+   *
+   * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
+   */
+  TMDE(
+  void IMDBox)::sortBoxesByFilePos(std::vector<IMDBox<MDE,nd> *> & boxes)
+  {
+    std::sort( boxes.begin(), boxes.end(), CompareMDBoxFilePosition<MDE,nd>);
+  }
+
+
+
 } // namespace Mantid
 } // namespace MDEvents
 

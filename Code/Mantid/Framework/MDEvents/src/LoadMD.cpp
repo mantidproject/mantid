@@ -364,7 +364,7 @@ namespace Mantid
           uint64_t smallBufferMemory = uint64_t(double(cacheMemory) * 0.45);
 
           double writeBufferMB = mb/10;
-          if (writeBufferMB < 1) writeBufferMB = 1;
+          //if (writeBufferMB < 1) writeBufferMB = 1;
           uint64_t writeBufferMemory = (uint64_t(writeBufferMB) * 1024 * 1024) / sizeof(MDE);
 
           // Set these values in the diskMRU

@@ -24,7 +24,10 @@ class IMDBoxTester : public IMDBox<MDE,nd>
 {
 public:
   IMDBoxTester()
-  : IMDBox<MDE,nd>()
+  : IMDBox<MDE,nd>(), m_filePos(0)
+  { }
+  IMDBoxTester(uint64_t filePos)
+  : IMDBox<MDE,nd>(), m_filePos(filePos)
   { }
 
   IMDBoxTester(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
@@ -77,6 +80,9 @@ public:
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
 
+  uint64_t getFilePosition() const
+  { return m_filePos; }
+  uint64_t m_filePos;
 };
 
 
@@ -324,6 +330,17 @@ public:
     delete [] v;
   }
 
+  void test_sortBoxesByFilePos()
+  {
+    std::vector<IMDBox<MDLeanEvent<1>,1>*> boxes;
+    // 10 to 1 in reverse order
+    for (uint64_t i=0; i<10; i++)
+      boxes.push_back(new IMDBoxTester<MDLeanEvent<1>,1>(10-i));
+    IMDBox<MDLeanEvent<1>,1>::sortBoxesByFilePos(boxes);
+    // After sorting, they are in the right order 1,2,3, etc.
+    for (uint64_t i=0; i<10; i++)
+      { TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); }
+  }
 };
 
 
@@ -408,6 +425,7 @@ public:
       delete [] v;
     }
   }
+
 
 };
 

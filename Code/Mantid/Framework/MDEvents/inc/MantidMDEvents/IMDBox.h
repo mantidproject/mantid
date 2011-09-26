@@ -96,13 +96,15 @@ namespace MDEvents
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
     virtual uint64_t getFilePosition() const
     { return 0; }
+    // -----------------------------------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------------------------
 
+    // ----------------------------- Helper Methods --------------------------------------------------------
+    static void sortBoxesByFilePos(std::vector<IMDBox<MDE,nd> *> & boxes);
+    // -----------------------------------------------------------------------------------------------------
 
 
     // -------------------------------- Parents/Children-Related -------------------------------------------
-
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;
 
