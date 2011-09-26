@@ -39,23 +39,23 @@ namespace Mantid
     template<typename ClassType>
     typename ComponentPool<ClassType>::PtrType
     ComponentPool<ClassType>::create(const ClassType *base, 
-				     const ParameterMap *map)
+             const ParameterMap *map)
     {
       try
       {
-    	const size_t index = getIndexInCache();
-    	PtrType & cached = m_store[index];
-    	if( !cached ) 
-    	{
-    	  // Creating cached object
-    	  cached = PtrType(createUsingNew(base, map));
-    	}
-    	cached->swap(base, map);
-    	return cached;
+        const size_t index = getIndexInCache();
+        PtrType & cached = m_store[index];
+        if( !cached ) 
+        {
+          // Creating cached object
+          cached = PtrType(createUsingNew(base, map));
+        }
+        cached->swap(base, map);
+        return cached;
       }
       catch(std::runtime_error&)
       {
-    	return PtrType(createUsingNew(base, map));
+        return PtrType(createUsingNew(base, map));
       }
       // This will never get hit but MSVC complains if it's not here.
       return PtrType();
@@ -72,13 +72,13 @@ namespace Mantid
       const PtrType & cached_first = m_store[index];
       if( cached_first && !cached_first.unique() )
       {
-    	// Try the extra storage
-    	index += PARALLEL_GET_MAX_THREADS;
-    	const PtrType & cached_second = m_store[index];
-    	if( cached_second && !cached_second.unique() )
-    	{
-    	  throw std::runtime_error("ComponentPool::getIndexInCache - Cannot use cache index.");
-    	}
+        // Try the extra storage
+        index += PARALLEL_GET_MAX_THREADS;
+        const PtrType & cached_second = m_store[index];
+        if( cached_second && !cached_second.unique() )
+        {
+          throw std::runtime_error("ComponentPool::getIndexInCache - Cannot use cache index.");
+        }
       }
       return index;
     }    
@@ -92,7 +92,7 @@ namespace Mantid
     template<typename ClassType>
     ClassType* 
     ComponentPool<ClassType>::createUsingNew(const ClassType *base, 
-					     const ParameterMap *map)
+               const ParameterMap *map)
     {
       return new ClassType(base,map);
     }
@@ -129,7 +129,7 @@ namespace Mantid
      */
     boost::shared_ptr<Instrument>
     ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
-					  boost::shared_ptr<ParameterMap> map)
+            boost::shared_ptr<ParameterMap> map)
     {
       return boost::shared_ptr<Instrument>(new Instrument(base, map));
     }
@@ -142,16 +142,16 @@ namespace Mantid
      * @returns A pointer to a parameterized component
      */
     IComponent_sptr ParComponentFactory::create(IComponent_const_sptr base,
-						const ParameterMap * map)
+            const ParameterMap * map)
     {
       boost::shared_ptr<const IDetector> det_sptr = boost::dynamic_pointer_cast<const IDetector>(base);
       if( det_sptr )
       {
-    	return createDetector(det_sptr.get(), map);
+        return createDetector(det_sptr.get(), map);
       }
 
       boost::shared_ptr<const Instrument> inst_sptr = 
-    	boost::dynamic_pointer_cast<const Instrument>(base);
+           boost::dynamic_pointer_cast<const Instrument>(base);
       // @todo One of the review tasks is to take a look at the parametertized mess and
       // short out this problem with different classes carrying different types of pointers around
       if( inst_sptr )
