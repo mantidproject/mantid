@@ -143,6 +143,9 @@ private slots:
   /// Remove any rebinned data so that the plot shows the raw data again
   void makeRaw(const std::string&);
 
+  ///
+  void changeTab(int);
+
   /// Assigns a peak picker tool to the workspace (@param::workspace name)
   void assignPeakPickerTool(const QString &);
 
@@ -229,11 +232,17 @@ private:
   /// name of workspace
   std::string m_workspace_name;
 
+  // name of the loaded data
+  QString m_currentDataName;
+
   /// which group table row has the user last clicked on
   int m_groupTableRowInFocus;
 
   /// which pair table row has the user last clicked on
   int m_pairTableRowInFocus;
+
+  /// Index of the current tab.
+  int m_tabNumber;
 
   /// used to test that a new filename has been entered 
   QString m_previousFilename;
@@ -243,9 +252,6 @@ private:
 
   /// used to test whether the data has already been bunched before
   std::string m_previousBunchWsName;
-
-  /// used to test whether the data has already got the peak picker tool assigned
-  QString m_previousFittingRequested;
 
   /// List of current group names 
   std::vector<std::string> m_groupNames;

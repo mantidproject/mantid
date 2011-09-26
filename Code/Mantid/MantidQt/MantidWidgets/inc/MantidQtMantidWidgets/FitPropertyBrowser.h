@@ -199,6 +199,9 @@ public:
   /// Add a workspace property
   void manualAddWorkspace(const QString& wsName);
 
+  /// Update the PeakPickerTool with the current workspace to be displayed and which to associate itself with
+  void updatePPTool(const QString& name);
+
 public slots:
   void fit();
   void sequentialFit();
@@ -218,6 +221,7 @@ signals:
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
+
   void wsChangePPAssign(const QString&);
   void functionChanged();
 
@@ -330,7 +334,7 @@ private:
   void setCurrentFunction(const Mantid::API::IFitFunction* f)const;
 
   /// Sets the new workspace to the current one
-  void workspaceChange(const QString&);
+  void workspaceChange(const QString& wsName);
 
   /// Does a parameter have a tie
   void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;

@@ -2631,9 +2631,22 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
   // If fit property browser is a custom fitting then emit signal that workspace has changed and to assign a new peak picker tool to it
   if (m_customFittings)
   {
-    emit workspaceNameChanged(wsName);
-    emit wsChangePPAssign(wsName);
+    // Sets up the peak picker tool for that workspace. Might not work if not on correct tab. i.e loading data on the first tab wouldn't work.
+     updatePPTool(wsName);
   }
+}
+
+/**
+* Shows the correct workspace in the fit property browser and
+* then updates the PeakPickerTool to another workspace.
+*
+* @params wsName :: The name of the workspace the PeakPickerTool is 
+*                   to be assigned to.
+*/
+void FitPropertyBrowser::updatePPTool(const QString & wsName)
+{
+  emit workspaceNameChanged(wsName);
+  emit wsChangePPAssign(wsName);
 }
 
 /**

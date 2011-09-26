@@ -75,7 +75,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/")
+  m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_currentDataName(""), m_tabNumber(0)
 {
 }
 
@@ -169,6 +169,9 @@ void MuonAnalysis::initLayout()
 
   // Detected a workspace change and therefore the peak picker tool needs to be reassigned.
   connect(m_uiForm.fitBrowser,SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
+
+  // Detect when the tab is changed
+  connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 }
 
 
@@ -1584,8 +1587,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
     
-    //Manually add the workspace to the fit property browser
-    m_uiForm.fitBrowser->manualAddWorkspace(titleLabel);
+    m_currentDataName = titleLabel;
+    m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }  
 }
 
@@ -1704,8 +1707,8 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     
     QString pyOutput = runPythonCode( pyString ).trimmed();
     
-    //Manually add the workspace to the fit property browser
-    m_uiForm.fitBrowser->manualAddWorkspace(titleLabel);
+    m_currentDataName = titleLabel;
+    m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }  
 }
 
@@ -2726,6 +2729,30 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 
 
 /**
+* Everytime the tab is changed this is called to decide whether the peakpicker 
+* tool needs to be associated with a plot or deleted from a plot
+*
+* @params tabNumber :: The index value of the current tab (3 = data analysis)
+*/
+void MuonAnalysis::changeTab(int tabNumber)
+{
+  m_tabNumber = tabNumber;
+
+  // If data analysis tab is chosen by user, assign peak picker tool to the current data if not done so already.
+  if (tabNumber == 3)
+  {
+    // Update the peak picker tool with the current workspace.
+    m_uiForm.fitBrowser->updatePPTool(m_currentDataName);
+  } 
+  else
+  {
+    // delete the peak picker tool because it is no longer needed.
+    emit fittingRequested(m_uiForm.fitBrowser, "");
+  }
+}
+
+
+/**
 *   Emits a signal containing the fitBrowser and the name of the 
 *   workspace we want to attach a peak picker tool to 
 *
@@ -2734,13 +2761,11 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 */
 void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 { 
-  if (m_previousFittingRequested != workspaceName)
+  if (m_tabNumber == 3)
   {
-    m_previousFittingRequested = workspaceName;
-  emit fittingRequested(m_uiForm.fitBrowser, workspaceName);
+    emit fittingRequested(m_uiForm.fitBrowser, workspaceName);
   }
 }
-
 
 }//namespace MantidQT
 }//namespace CustomInterfaces
