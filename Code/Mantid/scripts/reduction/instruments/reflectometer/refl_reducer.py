@@ -1,5 +1,5 @@
 """
-    Simple Reducer example
+    Reducer for reflectometry
 """
 from MantidFramework import *
 from reduction import Reducer
@@ -16,6 +16,7 @@ class ReflReducer(Reducer):
         
     def __init__(self):
         super(ReflReducer, self).__init__()
+        self.set_loader(RefLoad, Filename=None, OutputWorkspace=None)
         
     @validate_loader
     def set_loader(self, step):
@@ -24,23 +25,26 @@ class ReflReducer(Reducer):
         """
         self._loader = step
             
+    def set_pixel_size(self, size_x=None, size_y=None):
+        """
+            @param size_x: size of the pixels in x [m]
+            @param size_y: size of the pixels in y [m]
+        """
+        self.set_loader(RefLoad, Filename=None, OutputWorkspace=None, PixelSizeX=size_x, PixelSizeY=size_y)
+        
     def pre_process(self): 
         """
             Create the list of algorithms that will be run.
             - This is the place to set algorithm properties if you need to
         """
-        self._reduction_steps = []
-        if self._loader is not None:
-            self.append_step(self._loader) 
-            
-
+        self._reduction_steps = [self._loader]            
 
 if __name__ == '__main__':  
     # Instantiate the Reducer object
     r = ReflReducer()
     
     r.append_data_file("REF_L_51440_event.nxs")
-    r.set_loader(RefLoad, Filename=None, OutputWorkspace=None, PixelSizeX=0.0007, PixelSizeY=0.00075)
+    r.set_pixel_size(0.0007, 0.00075)
     
     r.reduce()
     
