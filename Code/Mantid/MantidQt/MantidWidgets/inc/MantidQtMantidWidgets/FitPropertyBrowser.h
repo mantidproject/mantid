@@ -135,7 +135,8 @@ public:
   double endX()const;
   /// Set the end X
   void setEndX(double);
-
+  /// Return whether or not the Fit Property Browser is in a custom interface (i.e muon analysis)
+  bool isCustomFittings()const;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString& lv = "");
   /// Get LogValue

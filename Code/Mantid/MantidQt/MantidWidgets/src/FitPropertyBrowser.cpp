@@ -1635,6 +1635,12 @@ void FitPropertyBrowser::setEndX(double value)
   m_doubleManager->setValue(m_endX,value);
 }
 
+/// Get whether the FitPropertyBrowser is in the Muon interface
+bool FitPropertyBrowser::isCustomFittings()const
+{
+  return m_customFittings;
+}
+
 ///
 QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* prop)const
 {

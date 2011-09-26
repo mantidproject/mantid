@@ -81,11 +81,21 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   if (m_fitPropertyBrowser->count() == 0 || (m_fitPropertyBrowser->count() == 1 && m_fitPropertyBrowser->isAutoBack()))
   {
     m_init = true;
-    QwtScaleMap xMap = d_graph->plotWidget()->canvasMap(QwtPlot::xBottom);
-    double s1 = xMap.s1(), s2 = xMap.s2();
-    double ds = fabs(s2-s1)*0.05;
-    xMin(s1 + ds);
-    xMax(s2 - ds);
+    // If part of custom interface (i.e muon analysis)
+    if (m_fitPropertyBrowser->isCustomFittings())
+    {
+      // Set the vertical lines to correspond to the StartX and EndX stated on the custom interface.
+      xMin(m_fitPropertyBrowser->startX());
+      xMax(m_fitPropertyBrowser->endX());
+    }
+    else // Do what was done before
+    {
+      QwtScaleMap xMap = d_graph->plotWidget()->canvasMap(QwtPlot::xBottom);
+      double s1 = xMap.s1(), s2 = xMap.s2();
+      double ds = fabs(s2-s1)*0.05; 
+      xMin(s1 + ds);
+      xMax(s2 - ds);
+    }   
     m_changingXMin = false;
     m_changingXMax = false;
     m_fitPropertyBrowser->setStartX(xMin());

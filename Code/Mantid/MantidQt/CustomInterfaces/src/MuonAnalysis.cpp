@@ -2133,7 +2133,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   {
       QTableWidgetItem* it = m_uiForm.pairTable->item(0, 0);
       if (it)
-        it->setText("long");
+        it->setText("pair");
       else
       {
         m_uiForm.pairTable->setItem(0, 0, new QTableWidgetItem("long"));
@@ -2737,6 +2737,8 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 void MuonAnalysis::changeTab(int tabNumber)
 {
   m_tabNumber = tabNumber;
+  m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
+  m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
   // If data analysis tab is chosen by user, assign peak picker tool to the current data if not done so already.
   if (tabNumber == 3)
