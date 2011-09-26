@@ -6,7 +6,6 @@ REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
 try:
     import reduction
-    print reduction.__file__
     if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
         REDUCTION_WARNING = True
         home_dir = os.path.expanduser('~')
