@@ -355,12 +355,15 @@ namespace MDEvents
 
     // Total number of steps
     size_t progNumSteps = 0;
+    if (prog) prog->setNotifyStep(0.1);
+    if (prog) prog->resetNumSteps(100, 0.00, 1.0);
 
     // Run the chunks in parallel. There is no overlap in the output workspace so it is
     // thread safe to write to it..
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
     {
+      PARALLEL_START_INTERUPT_REGION
       // Region of interest for this chunk.
       size_t * chunkMin = new size_t[outD];
       size_t * chunkMax = new size_t[outD];
@@ -412,7 +415,9 @@ namespace MDEvents
         if (prog) prog->report();
 
       }// for each box in the vector
+      PARALLEL_END_INTERUPT_REGION
     } // for each chunk in parallel
+    PARALLEL_CHECK_INTERUPT_REGION
 
 
 
