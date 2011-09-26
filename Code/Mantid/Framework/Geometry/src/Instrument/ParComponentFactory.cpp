@@ -12,10 +12,6 @@ namespace Mantid
   namespace Geometry
   {
 
-    /// Detector pool static storage
-    ComponentPool<Detector> ParComponentFactory::g_detPool = 
-      ComponentPool<Detector>(2*PARALLEL_GET_MAX_THREADS);
-
     //--------------------------------------------------------------------------
     // ComponentPool
     //--------------------------------------------------------------------------
@@ -64,21 +60,29 @@ namespace Mantid
     /**
      * Retrieve a index for a pre-allocated object, throwing if one cannot be found
      * @returns An index pointing to a valid area within the cache
+     * @throws std::runtime_error if unable to provide a suitable index
      */
     template<typename ClassType>
     size_t ComponentPool<ClassType>::getIndexInCache() const
     {
       size_t index = PARALLEL_THREAD_NUMBER;
-      const PtrType & cached_first = m_store[index];
-      if( cached_first && !cached_first.unique() )
-      {
-        // Try the extra storage
-        index += PARALLEL_GET_MAX_THREADS;
-        const PtrType & cached_second = m_store[index];
-        if( cached_second && !cached_second.unique() )
+      // Use the range-checking vector accessor to guard against the (slim) possibility
+      // that someone has increased the number of threads since the pool was created
+      try {
+        const PtrType & cached_first = m_store.at(index);
+        if( cached_first && !cached_first.unique() )
         {
-          throw std::runtime_error("ComponentPool::getIndexInCache - Cannot use cache index.");
+          // Try the extra storage
+          index += PARALLEL_GET_MAX_THREADS;
+          const PtrType & cached_second = m_store.at(index);
+          if( cached_second && !cached_second.unique() )
+          {
+            throw std::runtime_error("ComponentPool::getIndexInCache - Cannot use cache index.");
+          }
         }
+      } catch (std::out_of_range& ex) {
+        // Get here if trying to go past end of storage vector
+        throw std::runtime_error(ex.what());
       }
       return index;
     }    
@@ -112,6 +116,10 @@ namespace Mantid
     ParComponentFactory::createDetector(const IDetector *base, const ParameterMap *map)
     {
       // Use a pool for the detectors as the are created very frequently
+      // Create it statically here as it's not used elsewhere, which means there's an opportunity
+      // for the number of threads to be updated programatically (unlike the previous way of having
+      // this as a static member of the class).
+      static ComponentPool<Detector> g_detPool(2*PARALLEL_GET_MAX_THREADS);
       const Detector *baseDet = dynamic_cast<const Detector*>(base);
       if( baseDet )
       {
@@ -152,7 +160,7 @@ namespace Mantid
 
       boost::shared_ptr<const Instrument> inst_sptr = 
            boost::dynamic_pointer_cast<const Instrument>(base);
-      // @todo One of the review tasks is to take a look at the parametertized mess and
+      // @todo One of the review tasks is to take a look at the parameterized mess and
       // short out this problem with different classes carrying different types of pointers around
       if( inst_sptr )
       {

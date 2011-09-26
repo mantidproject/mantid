@@ -28,7 +28,6 @@ namespace Mantid
     //------------------------------------------------------------------
     class XMLlogfile;
     class ParameterMap;
-    template<typename T> class ComponentPool;
 
     /**
     Base Instrument Class.

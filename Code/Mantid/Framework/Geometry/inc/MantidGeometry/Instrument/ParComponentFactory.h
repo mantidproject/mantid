@@ -43,8 +43,6 @@ namespace Mantid
       PtrType create(const ClassType *base, const ParameterMap * map);
       
     private:
-      /// Default constructor
-      ComponentPool();
       /// Retrieve a index for a pre-allocated object, throwing if one cannot be found
       size_t getIndexInCache() const;
       /// Create an object with the new operator
@@ -85,21 +83,15 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL ParComponentFactory 
     {
     public:
-
       /// Create a parameterized detector from the given base component and ParameterMap and
       /// return a shared_ptr<Detector>
       static boost::shared_ptr<Detector> createDetector(const IDetector *base, const ParameterMap *map);
-      /// Create a parameterized component from the given base component and ParameterMap
+      /// Create a parameterized instrument from the given base and ParameterMap
       static boost::shared_ptr<Instrument> createInstrument(boost::shared_ptr<const Instrument> base,
                                                             boost::shared_ptr<ParameterMap> map);
       /// Create a parameterized component from the given base component and ParameterMap
-      /// This has to check to is slower than the above functions
       static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base,
                                                   const ParameterMap * map);
-
-    private:
-      // A pool of existing detectors
-      static ComponentPool<Detector> g_detPool;
     };
     
 } //Namespace Geometry
