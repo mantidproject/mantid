@@ -6,12 +6,18 @@ NUM_TUBES = 304
 PIXEL_WIDTH = 0.0007
 PIXEL_HEIGHT = 0.0007
 
-if __name__ == "__main__":
 
+def create_geometry(file_name=None, pixel_width=None, pixel_height=None):
     inst_name = "REF_L"
     short_name = "REF_L"
 
-    xml_outfile = inst_name+"_Definition.xml"
+    if pixel_width is None: pixel_width = PIXEL_WIDTH
+    if pixel_height is None: pixel_height = PIXEL_HEIGHT
+
+    if file_name is None:
+        xml_outfile = inst_name+"_Definition.xml"
+    else:
+        xml_outfile = file_name
 
     det = MantidGeom(inst_name)
     det.addSnsDefaults()
@@ -25,14 +31,14 @@ if __name__ == "__main__":
     det.addComponent("detector1", id_str)
     doc_handle = det.makeTypeElement(id_str)
 
-    det.addPixelatedTube("tube", NUM_PIXELS_PER_TUBE, PIXEL_HEIGHT*NUM_PIXELS_PER_TUBE, type_name="pixel")
+    det.addPixelatedTube("tube", NUM_PIXELS_PER_TUBE, pixel_height*NUM_PIXELS_PER_TUBE, type_name="pixel")
     
     det.addCylinderPixel("pixel", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0),
-                         PIXEL_WIDTH/2.0, PIXEL_HEIGHT)
+                         pixel_width/2.0, pixel_height)
     
     for i in range(0, NUM_TUBES):
         det.addComponent("tube%d" % i, root=doc_handle)
-        det.addDetector(str((i-NUM_TUBES/2+0.5)*PIXEL_WIDTH), "0", "0", "0", "0", "0", "tube%d"%i, "tube")
+        det.addDetector(str((i-NUM_TUBES/2+0.5)*pixel_width), "0", "0", "0", "0", "0", "tube%d"%i, "tube")
 
     det.addComment("FIXME: Do something real here.")
     det.addDummyMonitor(0.01, 0.03)
@@ -44,3 +50,5 @@ if __name__ == "__main__":
 
     det.writeGeom(xml_outfile)
 
+if __name__ == "__main__":
+    create_geometry()

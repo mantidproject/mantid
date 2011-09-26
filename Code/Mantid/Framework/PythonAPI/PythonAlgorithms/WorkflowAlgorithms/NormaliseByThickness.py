@@ -19,7 +19,7 @@ class NormaliseByThickness(PythonAlgorithm):
     def PyInit(self):
         # Input workspace
         self.declareWorkspaceProperty("InputWorkspace", "", Direction=Direction.Input, Description="Workspace to be normalised")
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Description="Name of the workspace that will contain the transmission histogram")
+        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Description="Name of the workspace that will contain the normalised data")
         self.declareProperty("SampleThickness", 0.0, Direction=Direction.Input, Description="Optional sample thickness value. If not provided the sample-thickness run property will be used.")
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
