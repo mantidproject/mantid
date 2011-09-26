@@ -102,9 +102,10 @@ void ChangeLogTime::exec()
   {
     IAlgorithm_sptr duplicate = createSubAlgorithm("CloneWorkspace");
     duplicate->initialize();
-    duplicate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    duplicate->setProperty<Workspace_sptr>("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWS));
     duplicate->execute();
-    outputWS = duplicate->getProperty("OutputWorkspace");
+    Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
+    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     setProperty("OutputWorkspace", outputWS);
   }
