@@ -34,7 +34,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
         self.declareProperty("LinearScatteringCoef", 0.0, Description="Linear Scattering Coefficient for Anvred correction.")
         self.declareProperty("LinearAbsorptionCoef", 0.0, Description="Linear Absorption Coefficient for Anvred correction.")
-        self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction.")
+        self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction. Set to 0 for no Anvred corrections")
         self.declareProperty("PowerLambda", 4.0, Description="Power of wavelength for Anvred correction.")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
         self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
@@ -160,7 +160,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             LoadIsawPeaks(Filename=self._peaksfile,OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
-            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,Filename='intSapphire.integrate',InputWorkspace=peaksWS)
+            hklfile = self._peaksfile.split('.')[0] + '.integrate'
+            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
         if "nxs" in self._outTypes:
             filename = os.path.join(self._outDir, str(wksp))
             nxsfile = str(wksp) + ".nxs"
@@ -204,7 +205,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._powlam = self.getProperty("PowerLambda")
         self._ubfile = self.getProperty("IsawUBFile")
         self._peaksfile = self.getProperty("IsawPeaksFile")
-
     
         # process the vanadium run
         vanRun = self.getProperty("VanadiumNumber")
@@ -247,6 +247,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             vanRun = None
     
+        self._append = False
         Banks = ["bank17","bank18","bank26","bank27","bank36","bank37","bank38","bank39","bank46","bank47","bank48","bank49","bank57","bank58"]
 
         for samRun in samRuns:
@@ -284,10 +285,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
                     AdjX=0, AdjY=0, ZeroEdgePixels=20)
                 #Anvred corrections need units of wavelength
-                ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='Wavelength')
-                AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
-                    LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,PowerLambda=self._powlam)
-                ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='TOF')
+                if self._radius > 0:
+                    ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='Wavelength')
+                    AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
+                        LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,PowerLambda=self._powlam)
+                    ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='TOF')
 
                 if bank is "bank17":
                     samRunstr = str(samRun)
@@ -305,7 +307,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
             mtd.releaseFreeMemory()
             self._save(samRun, normalized)
-            #mtd.deleteWorkspace(str(samRun))
+            #Append next run to hkl file
+            self._append = True
+            if self.outTypes is not None:
+                mtd.deleteWorkspace(str(samRun))
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
