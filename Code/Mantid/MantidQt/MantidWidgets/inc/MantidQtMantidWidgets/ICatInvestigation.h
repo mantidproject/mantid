@@ -111,7 +111,7 @@ namespace MantidQt
       Ui::ICatInvestigation m_uiForm;
 
       ///investigation id
-      long long m_invstId;
+      int64_t m_invstId;
       /// RbNumber
       QString m_RbNumber;
       /// Title
