@@ -35,7 +35,7 @@ namespace MDEvents
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU()
+    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU(), m_useMRU(true)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -372,6 +372,9 @@ namespace MDEvents
     Mantid::Kernel::DiskMRU & getDiskMRU()
     { return m_diskMRU; }
 
+    /** Return true if the MRU should be used */
+    bool useMRU() const
+    { return m_useMRU; }
 
     //-----------------------------------------------------------------------------------
     /** Set the memory-caching parameters for a file-backed
@@ -390,6 +393,8 @@ namespace MDEvents
       m_diskMRU.setMruSize(mruSize);
       m_diskMRU.setWriteBufferSize(writeBufferSize);
       m_diskMRU.setSmallBufferSize(smallBufferSize);
+      // If all caches are 0, don't use the MRU at all
+      m_useMRU = !(mruSize==0 && writeBufferSize==0 && smallBufferSize==0);
       m_bytesPerEvent = bytesPerEvent;
     }
 
@@ -468,6 +473,9 @@ namespace MDEvents
 
     /// Instance of the disk-caching MRU list.
     mutable Mantid::Kernel::DiskMRU m_diskMRU;
+
+    /// Do we use the DiskMRU at all?
+    bool m_useMRU;
 
   public:
     /// Mutex for locking access to the file, for file-back-end MDBoxes.

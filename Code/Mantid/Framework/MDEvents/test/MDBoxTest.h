@@ -668,6 +668,61 @@ public:
   }
 
 
+
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and test accessing data.
+   * This time, use no MRU so that reading/loading is done within the object itself */
+  void test_fileBackEnd_noMRU()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    // Handle the disk MRU values
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0, 0, 0);
+    // MRU won't be used
+    TS_ASSERT( !bc->useMRU());
+    DiskMRU & mru = bc->getDiskMRU();
+    // It is empty now
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+
+    // Create and open the test NXS file
+    MDBox<MDLeanEvent<3>,3> c(bc, 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+    ::NeXus::File * file = do_saveAndOpenNexus(c);
+
+    // Set the stuff that is handled outside the box itself
+    c.setSignal(1234.5); // fake value loaded from disk
+    c.setErrorSquared(456.78);
+
+    // Now it gives the cached value
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
+    TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
+    TSM_ASSERT("Data is not flagged as modified", !c.dataModified());
+
+    // This should actually load the events from the file
+    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
+    TSM_ASSERT("Data is STILL not flagged as modified", !c.dataModified());
+    // Try a couple of events to see if they are correct
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
+    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
+    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
+    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
+
+    TSM_ASSERT_EQUALS( "MRU has nothing still - it wasn't used",  mru.getMruUsed(), 0);
+    TSM_ASSERT("Data is busy", c.dataBusy() );
+    TSM_ASSERT("Data is in memory", c.getInMemory() );
+    // Done with the data.
+    c.releaseEvents();
+    TSM_ASSERT("Data is no longer busy", !c.dataBusy() );
+    TSM_ASSERT("Data is not in memory", !c.getInMemory() );
+
+    file->close();
+    do_deleteNexusFile();
+  }
+
+
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
    * in a non-const way, and writing it back out*/

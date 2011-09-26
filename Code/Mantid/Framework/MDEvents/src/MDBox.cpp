@@ -79,7 +79,8 @@ namespace MDEvents
   void MDBox)::clear()
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
-    this->m_BoxController->getDiskMRU().objectDeleted(this, m_fileNumEvents);
+    if (this->m_BoxController->useMRU())
+      this->m_BoxController->getDiskMRU().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
@@ -199,7 +200,8 @@ namespace MDEvents
       this->loadEvents();
       // After loading, or each time you request it:
       // Touch the MRU to say you just used it.
-      this->m_BoxController->getDiskMRU().loading(this);
+      if (this->m_BoxController->useMRU())
+        this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was NOT const, so it might have changed. We assume it has by setting m_dataModified to true.
@@ -222,7 +224,8 @@ namespace MDEvents
       this->loadEvents();
       // After loading, or each time you request it:
       // Touch the MRU to say you just used it.
-      this->m_BoxController->getDiskMRU().loading(this);
+      if (this->m_BoxController->useMRU())
+        this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was const. Don't change the m_dataModified flag.
@@ -243,6 +246,10 @@ namespace MDEvents
     {
       // Data vector is no longer busy.
       this->m_dataBusy = false;
+      // If not using the MRU, then immediately save it back (if it changed)
+      //    or clear memory if unchanged.
+      if (!this->m_BoxController->useMRU())
+        this->save();
     }
   }
 
