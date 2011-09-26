@@ -7,7 +7,6 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -87,7 +86,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
     PeaksWorkspace_sptr pw;
     AnalysisDataService::Instance().addOrReplace("TOPAZ_3007", ws);
 
-    AlgorithmHelper::runAlgorithm("LoadInstrument", 4,
+    FrameworkManager::Instance().exec("LoadInstrument", 4,
         "Workspace", "TOPAZ_3007",
         "Filename", "TOPAZ_Definition_2011-01-01.xml");
 
@@ -96,17 +95,17 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
     //WorkspaceCreationHelper::SetGoniometer(ws, 0, 0, 0);
 
     // Load the .mat file into it
-    AlgorithmHelper::runAlgorithm("LoadIsawUB", 4,
+    FrameworkManager::Instance().exec("LoadIsawUB", 4,
         "Filename", "TOPAZ_3007.mat",
         "InputWorkspace", "TOPAZ_3007");
 
     // Get a reference list of HKLs
-    AlgorithmHelper::runAlgorithm("LoadIsawPeaks", 4,
+    FrameworkManager::Instance().exec("LoadIsawPeaks", 4,
         "Filename", "TOPAZ_3007.peaks",
         "OutputWorkspace", "TOPAZ_3007_peaks");
 
     // Load the .mat file into it
-    AlgorithmHelper::runAlgorithm("PredictPeaks", 6,
+    FrameworkManager::Instance().exec("PredictPeaks", 6,
         "HKLPeaksWorkspace", "TOPAZ_3007_peaks",
         "InputWorkspace", "TOPAZ_3007",
         "OutputWorkspace", "peaks_predicted" );

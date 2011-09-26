@@ -5,7 +5,6 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -152,7 +151,7 @@ public:
   {
     outWSName = "CreateGroupingWorkspaceTestPerformance_OutputWS";
     // Load a small test file
-    AlgorithmHelper::runAlgorithm("LoadEmptyInstrument", 4,
+    FrameworkManager::Instance().exec("LoadEmptyInstrument", 4,
         "Filename", "TOPAZ_Definition_2010.xml",
         "OutputWorkspace", "TOPAZ_2010");
 

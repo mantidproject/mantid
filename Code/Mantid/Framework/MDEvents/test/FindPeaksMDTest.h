@@ -5,7 +5,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/FindPeaksMD.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -28,7 +27,7 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 16,
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
         "Dimensions", "3",
         "Extents", "-10,10,-10,10,-10,10",
         "Names", "Q_lab_x,Q_lab_y,Q_lab_z",
@@ -55,13 +54,13 @@ public:
   {
     std::ostringstream mess;
     mess << num/2 << ", " << x << ", " << y << ", " << z << ", " << radius;
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+    FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "MDEWS", "PeakParams", mess.str().c_str());
 
     // Add a center with more events (half radius, half the total), to create a "peak"
     std::ostringstream mess2;
     mess2 << num/2 << ", " << x << ", " << y << ", " << z << ", " << radius/2;
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+    FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "MDEWS", "PeakParams", mess2.str().c_str());
   }
 

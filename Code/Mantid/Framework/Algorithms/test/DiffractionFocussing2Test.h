@@ -10,7 +10,6 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/cow_ptr.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -126,7 +125,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
 
 //    //----- Load some event data --------
-//    AlgorithmHelper::runAlgorithm("LoadEventNexus", 4,
+//    FrameworkManager::Instance().exec("LoadEventNexus", 4,
 //        "Filename", "CNCS_7860_event.nxs",
 //        "OutputWorkspace", nxsWSname.c_str());
 
@@ -155,7 +154,7 @@ public:
     std::string GroupNames = "bank2,bank3";
     if (numgroups == 1) GroupNames = "bank3";
     std::string groupWSName("DiffractionFocussing2Test_group");
-    AlgorithmHelper::runAlgorithm("CreateGroupingWorkspace", 6,
+    FrameworkManager::Instance().exec("CreateGroupingWorkspace", 6,
         "InputWorkspace",  nxsWSname.c_str(),
         "GroupNames", GroupNames.c_str(),
         "OutputWorkspace", groupWSName.c_str());

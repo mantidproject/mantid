@@ -10,7 +10,6 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid

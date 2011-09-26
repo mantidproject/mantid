@@ -176,9 +176,9 @@ public:
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace("LoadMDTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+    FrameworkManager::Instance().exec("FakeMDEventData", 6,
         "InputWorkspace", "LoadMDTest_ws", "UniformParams", "10000", "RandomizeSignal", "1");
-//    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+//    FrameworkManager::Instance().exec("FakeMDEventData", 6,
 //        "InputWorkspace", "LoadMDTest_ws", "PeakParams", "30000, 5.0, 0.01", "RandomizeSignal", "1");
 
     // ------ Make a ExperimentInfo entry ------------

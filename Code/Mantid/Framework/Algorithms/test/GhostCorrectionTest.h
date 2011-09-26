@@ -13,7 +13,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Poco/File.h>
-#include "MantidTestHelpers/AlgorithmHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -145,7 +144,7 @@ public:
     inputW->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     std::cout << "LoadCalFile\n";
-    AlgorithmHelper::runAlgorithm("LoadCalFile", 4,
+    FrameworkManager::Instance().exec("LoadCalFile", 4,
         "Filename", "FakeGroupingFile.cal",
         "WorkspaceName", "GhostCorrectionTest");
 

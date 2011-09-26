@@ -17,7 +17,6 @@
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
@@ -320,7 +319,7 @@ public:
 
     // Save to NXS file for testing
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
-    AlgorithmHelper::runAlgorithm("SaveMD", 4,
+    FrameworkManager::Instance().exec("SaveMD", 4,
         "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
         "Filename", "BinToMDHistoWorkspaceTest_ws_rotated.nxs");
 
@@ -424,7 +423,7 @@ public:
     in_ws->getBoxController()->setSplitThreshold(2000);
     in_ws->splitAllIfNeeded(NULL);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+    FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
         "UniformParams", "1000000");
     // 1 million random points

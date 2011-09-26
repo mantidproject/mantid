@@ -5,9 +5,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include "MantidAPI/IAlgorithm.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -97,23 +97,23 @@ public:
   /** Compare to LoadEventNexus */
   void xtest_compare_to_event() ///< DISABLED because it takes ~ 4 seconds.
   {
-    AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 4,
+    FrameworkManager::Instance().exec("LoadTOFRawNexus", 4,
         "Filename", "CNCS_7860.nxs",
         "OutputWorkspace", "outWS");
 
-    AlgorithmHelper::runAlgorithm("LoadEventNexus", 4,
+    FrameworkManager::Instance().exec("LoadEventNexus", 4,
         "Filename", "CNCS_7860_event.nxs",
         "OutputWorkspace", "outWS_event");
 
     // Convert to 2D
-    AlgorithmHelper::runAlgorithm("Rebin", 8,
+    FrameworkManager::Instance().exec("Rebin", 8,
         "InputWorkspace", "outWS_event",
         "Params", "43000, 100, 63000, 1, 63001",
         "OutputWorkspace", "outWS_event_2D",
         "PreserveEvents", "0");
 
     // Compare workspaces
-    Mantid::API::Algorithm_sptr alg = AlgorithmHelper::runAlgorithm(
+    Mantid::API::IAlgorithm_sptr alg = FrameworkManager::Instance().exec(
         "CheckWorkspacesMatch", 8,
         "Workspace1", "outWS",
         "Workspace2", "outWS_event_2D",
@@ -143,14 +143,14 @@ public:
 
   void test_bad_signal_fails()
   {
-    Mantid::API::Algorithm_sptr alg;
+    Mantid::API::IAlgorithm_sptr alg;
     // Number points to a 2D data set
-    alg = AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 6,
+    alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6,
         "Filename", "CNCS_7860.nxs", "Signal", "2", "OutputWorkspace", "outWS");
     TS_ASSERT( !alg->isExecuted() );
 
     // Number is too big
-    alg = AlgorithmHelper::runAlgorithm("LoadTOFRawNexus", 6,
+    alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6,
         "Filename", "CNCS_7860.nxs", "Signal", "6", "OutputWorkspace", "outWS");
     TS_ASSERT( !alg->isExecuted() );
   }

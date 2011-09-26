@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/CPUTimer.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include <Poco/File.h>
 
 using namespace Mantid::MDEvents;
@@ -114,7 +113,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("SaveMDTestPerformance_ws", ws);
 
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+    FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "SaveMDTestPerformance_ws", "UniformParams", "10000000");
 
     std::cout << tim << " to fake the data." << std::endl;

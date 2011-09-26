@@ -10,7 +10,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/CentroidPeaksMD.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -51,7 +50,7 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    AlgorithmHelper::runAlgorithm("CreateMDWorkspace", 14,
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 14,
         "Dimensions", "3",
         "Extents", "-10,10,-10,10,-10,10",
         "Names", "h,k,l",
@@ -68,7 +67,7 @@ public:
   {
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+    FrameworkManager::Instance().exec("FakeMDEventData", 6,
         "InputWorkspace", "CentroidPeaksMDTest_MDEWS",
         "PeakParams", mess.str().c_str(),
         "RandomSeed", "1234");

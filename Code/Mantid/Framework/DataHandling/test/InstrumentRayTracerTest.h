@@ -5,14 +5,15 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Geometry;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::API::AnalysisDataService;
 using Mantid::Kernel::V3D;
+using Mantid::API::FrameworkManager;
 
 //-------------------------------------------------------------
 // Fake test suite to keep cxxtest happy
@@ -47,7 +48,7 @@ public:
     topazWS = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
     AnalysisDataService::Instance().add("TOPAZ_2010", topazWS);
     // Load a small test file
-    AlgorithmHelper::runAlgorithm("LoadInstrument", 4,
+    FrameworkManager::Instance().exec("LoadInstrument", 4,
         "Filename", "TOPAZ_Definition_2010.xml",
         "Workspace", "TOPAZ_2010");
   }

@@ -12,6 +12,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -77,6 +78,9 @@ namespace Mantid
 
       /// Creates an instance of an algorithm, sets the properties provided & then executes it.
       IAlgorithm* exec(const std::string& algName, const std::string& propertiesArray,const int& version=-1);
+
+      /// Creates an algorithm and runs it, with variadic arguments
+      boost::shared_ptr<IAlgorithm> exec(const std::string& algorithmName, int count, ...);
 
       /// Returns a shared pointer to the workspace requested
       Workspace* getWorkspace(const std::string& wsName);

@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>

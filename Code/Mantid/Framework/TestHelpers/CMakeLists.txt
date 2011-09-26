@@ -1,18 +1,16 @@
-set ( SRC_FILES 
-	src/AlgorithmHelper.cpp
-	src/WorkspaceCreationHelper.cpp 
-	src/ComponentCreationHelper.cpp 
-	src/MDEventsTestHelper.cpp 
+set ( SRC_FILES
+	src/ComponentCreationHelper.cpp
+	src/MDEventsTestHelper.cpp
 	src/SANSInstrumentCreationHelper.cpp
+	src/WorkspaceCreationHelper.cpp
 )
 
 set ( INC_FILES
+	inc/MantidTestHelpers/ComponentCreationHelper.h
 	inc/MantidTestHelpers/DLLExport.h
-	inc/MantidTestHelpers/AlgorithmHelper.h
+	inc/MantidTestHelpers/MDEventsTestHelper.h
+	inc/MantidTestHelpers/SANSInstrumentCreationHelper.h
 	inc/MantidTestHelpers/WorkspaceCreationHelper.h
-	inc/MantidTestHelpers/ComponentCreationHelper.h 
-	inc/MantidTestHelpers/MDEventsTestHelper.h 
-  inc/MantidTestHelpers/SANSInstrumentCreationHelper.h 
 )
 
 # Requires DataHandling for a load call
@@ -44,3 +42,6 @@ set ( TMP_MANTIDLIBS )
 #======== TARGET FOR A WIKI PAGE MAKER =================
 add_executable(WikiMaker EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
 target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling MDEvents)
+
+set ( TEST_FILES
+)

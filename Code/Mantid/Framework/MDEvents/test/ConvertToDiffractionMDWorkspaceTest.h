@@ -5,13 +5,13 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidAPI/IAlgorithm.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -37,9 +37,9 @@ public:
   {
     EventWorkspace_sptr in_ws = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
-    Algorithm_sptr alg;
+    IAlgorithm_sptr alg;
 
-    alg = AlgorithmHelper::runAlgorithm("ConvertToDiffractionMDWorkspace", 6,
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "OutputDimensions", "Q (lab frame)");
@@ -52,7 +52,7 @@ public:
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
 
     // But you can't add to an existing one of the wrong dimensions type
-    alg = AlgorithmHelper::runAlgorithm("ConvertToDiffractionMDWorkspace", 6,
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "OutputDimensions", "HKL");
@@ -60,7 +60,7 @@ public:
 
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = AlgorithmHelper::runAlgorithm("ConvertToDiffractionMDWorkspace", 6,
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "OutputDimensions", "HKL");

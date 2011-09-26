@@ -11,12 +11,14 @@
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::Kernel::DateAndTime;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataObjects::EventWorkspace;
+using Mantid::API::FrameworkManager;
 
 namespace Mantid
 {
@@ -120,16 +122,16 @@ namespace MDEventsTestHelper
     ws1->getBoxController()->setSplitThreshold(100);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName,
         boost::dynamic_pointer_cast< Mantid::API::IMDEventWorkspace>(ws1));
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+    FrameworkManager::Instance().exec("FakeMDEventData", 6,
         "InputWorkspace", wsName.c_str(),
         "UniformParams", "10000", "RandomizeSignal", "1");
     if (fileBacked)
     {
       std::string filename = wsName + ".nxs";
-      Mantid::API::IAlgorithm_sptr saver = AlgorithmHelper::runAlgorithm("SaveMD", 4,
+      Mantid::API::IAlgorithm_sptr saver = FrameworkManager::Instance().exec("SaveMD", 4,
           "InputWorkspace", wsName.c_str(),
           "Filename", filename.c_str());
-      AlgorithmHelper::runAlgorithm("LoadMD", 8,
+      FrameworkManager::Instance().exec("LoadMD", 8,
           "OutputWorkspace", wsName.c_str(),
           "Filename", saver->getPropertyValue("Filename").c_str(),
           "FileBackEnd", "1", "Memory", "0");

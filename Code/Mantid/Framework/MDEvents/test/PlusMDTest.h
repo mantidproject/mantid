@@ -66,7 +66,7 @@ public:
     if (ws->isFileBacked())
     {
       // Run SaveMD so as to update the file in the back
-      AlgorithmHelper::runAlgorithm("SaveMD", 4,
+      FrameworkManager::Instance().exec("SaveMD", 4,
           "InputWorkspace", outWSName.c_str(),
           "UpdateFileBackEnd", "1");
 
