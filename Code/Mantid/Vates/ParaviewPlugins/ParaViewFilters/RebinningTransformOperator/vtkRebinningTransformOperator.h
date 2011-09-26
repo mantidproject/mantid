@@ -75,7 +75,7 @@ public:
   void SetLengthB3(double length);
   void SetOrigin(double originX, double originY, double originZ);
   void SetForceOrthogonal(bool value);
-
+  void SetInOriginalCoords(bool inOriginalCoords);
 
   const char* GetInputGeometryXML();
   void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
@@ -168,6 +168,8 @@ private:
   double m_lengthB3;
   /// Do we force the basis vectors to be orthogonal?
   bool m_ForceOrthogonal;
+  /// Flag indicating that visual results should be transformed into the original coordinate frame.
+  bool m_bTransformVis;
 
 };
 #endif

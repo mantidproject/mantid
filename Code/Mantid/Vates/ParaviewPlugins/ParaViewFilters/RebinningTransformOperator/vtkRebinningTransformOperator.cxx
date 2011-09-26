@@ -266,7 +266,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
     vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
     vtkGridFactory->SetSuccessor(p_2dSuccessorFactory);
-    vtkGridFactory->setUseTransform(true); // Use workspace defined transformations. This could be made configurable via the GUI!
+    vtkGridFactory->setUseTransform(m_bTransformVis); // Use workspace defined transformations. This could be made configurable via the GUI!
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
@@ -381,6 +381,15 @@ void vtkRebinningTransformOperator::SetThresholdRangeStrategyIndex(std::string s
   if(index != m_thresholdMethodIndex)
   {
     m_thresholdMethodIndex = index;
+    this->Modified();
+  }
+}
+
+void vtkRebinningTransformOperator::SetInOriginalCoords(bool inOriginalCoords)
+{
+  if(inOriginalCoords != m_bTransformVis)
+  {
+    m_bTransformVis = inOriginalCoords;
     this->Modified();
   }
 }
