@@ -103,30 +103,35 @@ macro_top = """
  * @param workspace :: IMDEventWorkspace_sptr input workspace.
  */
  
-#define CALL_MDEVENT_FUNCTION%s(funcname, workspace) \\
+#define %sCALL_MDEVENT_FUNCTION%s(funcname, workspace) \\
 { \\
 """
 
 
-macro = """MDEventWorkspace<%s, %d>::sptr %s = boost::dynamic_pointer_cast<MDEventWorkspace<%s, %d> >(workspace); \\
+macro = """%sMDEventWorkspace<%s, %d>::sptr %s = boost::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
 if (%s) funcname<%s, %d>(%s); \\
 """
 
-def get_macro(min_dimension=1):
+def get_macro(min_dimension=1, const=""):
     """ Return the macro code CALL_MDEVENT_FUNCTION
     Parameter:
         min_dimension :: to avoid compiler warnings, limit to dimensions higher than this
+        const :: set to "const " to make a const equivalent
     """
     suffix = ""
+    prefix = ""
     if (min_dimension > 1): suffix = "%d" % min_dimension
-    s = macro_top % suffix;
+    if const != "": prefix = "CONST_"
+    s = macro_top % (prefix, suffix);
     
     for mdevent_type in mdevent_types:
         for nd in dimensions:
             if (nd >= min_dimension):
                 eventType = "%s<%d>" % (mdevent_type, nd)
                 varname = "MDEW_%s_%d" % (mdevent_type.upper(),nd)
-                s += macro % (eventType,nd, varname, eventType,nd, varname, eventType,nd, varname) 
+                if const != "":
+                    varname = "CONST_" + varname
+                s += macro % (const, eventType,nd, varname, const, eventType,nd, varname, eventType,nd, varname) 
     s +=  "} \n"
     return s
 
@@ -245,6 +250,9 @@ def generate():
     lines = insert_lines(lines, len(lines), macro, padding)
     # Again for 3+ dimensions 
     macro = get_macro(3)
+    lines = insert_lines(lines, len(lines), macro, padding)
+    # Again for const workspace
+    macro = get_macro(1, "const ")
     lines = insert_lines(lines, len(lines), macro, padding)
 
     # Typedefs for MDEventWorkspace

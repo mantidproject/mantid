@@ -65,6 +65,7 @@ def initialize_Mantid():
     global mantid_initialized
     if mantid_initialized:   return
     sys.path.append(os.getcwd())
+    sys.path.append( os.path.join( os.getcwd(), 'bin') )
     import MantidFramework
     from MantidFramework import mtd
     mtd.initialise()
@@ -339,7 +340,7 @@ def do_algorithm(args, algo):
     global site
     contents = make_wiki(algo)
     
-    print "Saving page to www.mantidproject.org/%s" % algo
+    print "Saving page to http://www.mantidproject.org/%s" % algo
     #Open the page with the name of the algo
     page = site.Pages[algo]
     text = page.edit()

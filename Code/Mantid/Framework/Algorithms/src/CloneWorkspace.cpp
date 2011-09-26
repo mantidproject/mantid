@@ -2,7 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CloneWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -26,19 +29,23 @@ using namespace DataObjects;
 
 void CloneWorkspace::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input),
+      "Name of the input workspace. Must be a MatrixWorkspace (2D or EventWorkspace), a PeaksWorkspace or a MDEventWorkspace.");
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
+      "Name of the newly created cloned workspace.");
 }
 
 void CloneWorkspace::exec()
 {
-  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
   EventWorkspace_const_sptr inputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
+  IMDEventWorkspace_sptr inputMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(inputWorkspace);
+  PeaksWorkspace_const_sptr inputPeaks = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   
   if (inputEvent)
   {
     // Handle an EventWorkspace as the input.
-
     //Make a brand new EventWorkspace
     EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", inputEvent->getNumberHistograms(), 2, 1));
@@ -50,34 +57,51 @@ void CloneWorkspace::exec()
     outputWS->copyDataFrom( (*inputEvent) );
 
     //Cast to the matrixOutputWS and save it
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
   }
-  else
+  else if (inputMatrix)
   {
     // Create the output workspace. This will copy many aspects fron the input one.
-    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputMatrix);
 
     // ...but not the data, so do that here.
 
-    const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
+    const int64_t numHists = static_cast<int64_t>(inputMatrix->getNumberHistograms());
     Progress prog(this,0.0,1.0,numHists);
 
-    PARALLEL_FOR2(inputWorkspace,outputWorkspace)
+    PARALLEL_FOR2(inputMatrix,outputWorkspace)
     for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
   
-      outputWorkspace->setX(i,inputWorkspace->refX(i));
-      outputWorkspace->dataY(i) = inputWorkspace->readY(i);
-      outputWorkspace->dataE(i) = inputWorkspace->readE(i);
+      outputWorkspace->setX(i,inputMatrix->refX(i));
+      outputWorkspace->dataY(i) = inputMatrix->readY(i);
+      outputWorkspace->dataE(i) = inputMatrix->readE(i);
 
       prog.report();
   
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    setProperty("OutputWorkspace", outputWorkspace);
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWorkspace));
   }
+  else if (inputMD)
+  {
+    // Call the CloneMDWorkspace algo to handle MDEventWorkspace
+    IAlgorithm_sptr alg = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 1.0, true);
+    alg->setProperty("InputWorkspace", inputMD);
+    alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
+    alg->executeAsSubAlg();
+    IMDEventWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
+  }
+  else if (inputPeaks)
+  {
+    PeaksWorkspace_sptr outputWS(inputPeaks->clone());
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
+  }
+  else
+    throw std::runtime_error("Expected a MatrixWorkspace, PeaksWorkspace, or a MDEventWorkspace. Cannot clone this type of workspace.");
   
 }
 

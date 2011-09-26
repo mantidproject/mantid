@@ -64,7 +64,7 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
-    void doClone(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doClone(const typename MDEventWorkspace<MDE, nd>::sptr ws);
 
   };
 

@@ -9,10 +9,17 @@
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "../../TestHelpers/src/ComponentCreationHelper.cpp"
+#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::MDEvents;
+using Mantid::MDEvents::MDEventsTestHelper::makeMDEW;
 
 class CloneWorkspaceTest : public CxxTest::TestSuite
 {
@@ -86,7 +93,49 @@ public:
     
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString());
   }
-  
+
+  /** Test is not full, see CloneMDWorkspaceTest */
+  void test_exec_MDEventWorkspace()
+  {
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
+    AnalysisDataService::Instance().addOrReplace("inWS", ws);
+    Mantid::Algorithms::CloneWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace","inWS");
+    alg.setPropertyValue("OutputWorkspace","outWS");
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+  }
+
+
+  /** Build a test PeaksWorkspace
+   * @return PeaksWorkspace   */
+  PeaksWorkspace_sptr buildPW()
+  {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    inst->setName("SillyInstrument");
+    PeaksWorkspace * pw = new PeaksWorkspace();
+    pw->setInstrument(inst);
+    std::string val = "value";
+    pw->mutableRun().addProperty("TestProp", val);
+    Peak p(inst, 1, 3.0);
+    pw->addPeak(p);
+    return PeaksWorkspace_sptr(pw);
+  }
+
+  /** Test is not full, see PeaksWorkspaceTest */
+  void test_exec_PeaksWorkspace()
+  {
+    PeaksWorkspace_sptr ws = buildPW();
+    AnalysisDataService::Instance().addOrReplace("inWS", ws);
+    Mantid::Algorithms::CloneWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace","inWS");
+    alg.setPropertyValue("OutputWorkspace","outWS");
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+  }
+
 private:
   Mantid::Algorithms::CloneWorkspace cloner;
 };
