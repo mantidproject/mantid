@@ -1006,6 +1006,9 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       << ". Shortest TOF: " << shortest_tof << " microsec; longest TOF: "
       << longest_tof << " microsec." << std::endl;
 
+  if (shortest_tof < 0)
+    g_log.warning() << "The shortest TOF was negative! At least 1 event has an invalid time-of-flight." << std::endl;
+
 
   //Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
@@ -1213,10 +1216,19 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
     Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
     std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
     pulseTimes.reserve(temp.size());
+    // Warn if the pulse time found is below a minimum
+    size_t numBadTimes = 0;
+    Kernel::DateAndTime minDate("1991-01-01");
     for (size_t i =0; i < temp.size(); i++)
     {
       pulseTimes.push_back( temp[i] );
+      if (temp[i] < minDate)
+        numBadTimes++;
     }
+
+    if (numBadTimes > 0)
+      alg->getLogger().warning() << "Found " << numBadTimes << " entries in the proton_charge sample log with invalid pulse time!\n";
+
 
     // Use the first pulse as the run_start time.
     if (temp.size() > 0)
