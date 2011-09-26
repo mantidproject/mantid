@@ -236,7 +236,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
   if (!base.exists())
   {
     instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
-    base = ("/SNS/" + instrument + "/");
+    base = Poco::File("/SNS/" + instrument + "/");
     if (!base.exists())
       return "";
   }
