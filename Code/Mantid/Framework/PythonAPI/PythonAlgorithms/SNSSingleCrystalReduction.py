@@ -309,7 +309,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             self._save(samRun, normalized)
             #Append next run to hkl file
             self._append = True
-            if self.outTypes is not None:
+            if self._outTypes is not None:
                 mtd.deleteWorkspace(str(samRun))
             mtd.releaseFreeMemory()
 
