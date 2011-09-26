@@ -72,6 +72,7 @@ private:
   void populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
   void addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const;
+  void addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const;
   void addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;

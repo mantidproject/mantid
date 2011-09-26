@@ -778,12 +778,17 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
 void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
 {
   (void) WS;
-
   menu->addAction(m_showBoxData); // Show MD Box data
 #ifdef MAKE_VATES
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
 #endif
   menu->addAction(m_showHist);  // Algorithm history
+}
+
+void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const
+{
+  (void) WS;
+  menu->addAction(m_showHist); // Algorithm history
 }
 
 
@@ -794,14 +799,10 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
 {
   (void) WS;
-
   //menu->addAction(m_showData); // Show data
   //menu->addAction(m_showInst); // Show instrument
-  //menu->addAction(m_plotSpec); // Plot spectra
-  //menu->addAction(m_colorFill);
   menu->addAction(m_showLogs); // Sample logs
   menu->addAction(m_showHist);
-  //menu->addAction(m_saveNexus);
 }
 
 
@@ -1052,6 +1053,10 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     else if( IMDEventWorkspace_const_sptr mdeventWS = boost::dynamic_pointer_cast<const IMDEventWorkspace>(ws) )
     {
       addMDEventWorkspaceMenuItems(menu, mdeventWS);
+    }
+    else if( IMDWorkspace_const_sptr mdWS = boost::dynamic_pointer_cast<const IMDWorkspace>(ws) )
+    {
+      addMDHistoWorkspaceMenuItems(menu, mdWS);
     }
     else if( IPeaksWorkspace_const_sptr peaksWS = boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws) )
     {
