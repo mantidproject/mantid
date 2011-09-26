@@ -81,6 +81,7 @@ namespace Mantid
         alg.setPropertyValue("Filename", this->m_filename);
         alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
         alg.setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
+        alg.setPropertyValue("Memory", "0");
         alg.execute();
       }
 
