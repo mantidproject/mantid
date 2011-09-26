@@ -148,13 +148,6 @@ class ParametersReflWidget(BaseWidget):
                     bin_size = 'N/A'
                 self._summary.parameters_q_range_nbr_bins_bin_size_value.setText(str(bin_size))
             
-            
-            
-                
-
-
-
-
     def _check_for_missing_fields(self):
         """
             This just checks if any of the mandatory field is missing and if it's empty

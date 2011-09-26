@@ -3,6 +3,7 @@ import reduction_gui.widgets.util as util
 import math
 import os
 #from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
+from reduction_gui.reduction.reflectometer.refl_norm_script import NormSets
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_norm_refl
@@ -196,3 +197,40 @@ class NormReflWidget(BaseWidget):
                 QtGui.QMessageBox.warning(self, "Wrong normalization background ROI file format!",
                                             "                                   Please check the ROI file!")                  
         
+    def set_state(self, state):
+        """
+            Populate the UI element with the data from the given state
+            @param state: norm object
+        """
+        
+        #Peak from/to pixels
+        self._summary.norm_peak_from_pixel.setText(str(state.NormPeakPixels[0]))
+        self._summary.norm_peak_to_pixel.setText(str(state.NormPeakPixels[1]))
+        
+        #background flag
+        self._summary.norm_background_switch.setChecked(state.NormBackgroundFlag)
+        
+        #Background from/to pixels
+        self._summary.norm_background_from_pixel.setText(str(state.NormBackgroundRoi[0]))
+        self._summary.norm_background_to_pixel.setText(str(state.NormBackgroundRoi[1]))        
+
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        
+        m = NormSets()
+
+        #Peak selection
+        m.NormPeakPixels[0] = str(self._summary.norm_peak_from_pixel.text())
+        m.NormPeakPixels[1] = str(self._summary.norm_peak_to_pixel.text())
+        
+        #background flag
+        m.NormBackgroundFlag = self._summary.norm_background_switch.isChecked()
+        
+        #background from/to pixels
+        roi_from = str(self._summary.norm_background_from_pixel.text())
+        roi_to = str(self._summary.norm_background_to_pixel.text())
+        m.NormBackgroundRoi = [roi_from, roi_to]
+
+        return m

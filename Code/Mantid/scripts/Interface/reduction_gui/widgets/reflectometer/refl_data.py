@@ -3,6 +3,7 @@ import reduction_gui.widgets.util as util
 import math
 import os
 #from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
+from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_data_refl
@@ -43,6 +44,11 @@ class DataReflWidget(BaseWidget):
         self._summary = SummaryFrame(self)
         self.initialize_content()
         self._layout.addWidget(self._summary)
+
+        if state is not None:
+            self.set_state(state)
+        else:
+            self.set_state(DataSets())
 
     def initialize_content(self):
         
@@ -317,3 +323,75 @@ class DataReflWidget(BaseWidget):
              pixel_range = self.get_data_back_selection()
              SaveSNSRoi(filename=fname, pixel_range=pixel_range, mode='discrete')
 
+    def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state. 
+            @param state: data object
+        """
+
+        #Peak Selection
+        if state.DataPeakSelectionType == 'narrow':
+            self._summary.data_peak_narrow_switch.setChecked(True)
+        else:
+            if state.DataPeakSelectionType == 'broad':
+                self._summary.data_peak_broad_switch.setChecked(True)
+            else:
+                self._summary.data_peak_discrete_switch.setChecked(True)
+
+        #Peak from/to pixels
+        self._summary.data_peak_from_pixel.setText(str(state.DataPeakPixels[0]))
+        self._summary.data_peak_to_pixel.setText(str(state.DataPeakPixels[1]))
+        
+        #Discrete selection string
+        self._summary.data_peak_nbr_selection_value.setText(state.DataPeakDiscreteSelection)
+        
+        #Background flag
+        self._summary.data_background_switch.setChecked(state.DataBackgroundFlag)
+
+        #Background from/to pixels
+        self._summary.data_background_from_pixel1.setText(str(state.DataBackgroundRoi[0]))
+        self._summary.data_background_to_pixel1.setText(str(state.DataBackgroundRoi[1]))
+        self._summary.data_background_from_pixel2.setText(str(state.DataBackgroundRoi[2]))
+        self._summary.data_background_to_pixel2.setText(str(state.DataBackgroundRoi[3]))
+        
+        #from TOF and to TOF
+        self._summary.data_from_tof.setText(str(state.DataTofRange[0]))
+        self._summary.data_to_tof.setText(str(state.DataTofRange[1]))
+
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        m = DataSets()
+        
+        #Peak Selection
+        if self._summary.data_peak_discrete_switch.isChecked():
+            m.DataPeakSelectionType = 'discrete'
+        if self._summary.data_peak_broad_switch.isChecked():
+            m.DataPeakSelectionType = 'broad'
+        if self._summary.data_peak_narrow_switch.isChecked():
+            m.DataPeakSelectionType = 'narrow'
+
+        #Peak from/to pixels
+        m.DataPeakPixels[0] = str(self._summary.data_peak_from_pixel.text())
+        m.DataPeakPixels[1] = str(self._summary.data_peak_to_pixel.text())    
+        
+        #Discrete selection string
+        m.DataPeakDiscreteSelection = self._summary.data_peak_nbr_selection_value.text()    
+
+        #Background flag
+        m.DataBackgroundFlag = self._summary.data_background_switch.isChecked()
+
+        #Background from/to pixels
+        roi1_from = str(self._summary.data_background_from_pixel1.text())
+        roi1_to = str(self._summary.data_background_to_pixel1.text())
+        roi2_from = str(self._summary.data_background_from_pixel2.text())
+        roi2_to = str(self._summary.data_background_to_pixel2.text())
+        m.DataBackgroundRoi = [roi1_from, roi1_to, roi2_from, roi2_to]
+
+        #from TOF and to TOF
+        from_tof = str(self._summary.data_from_tof.text())
+        to_tof = str(self._summary.data_to_tof.text())
+        m.DataTofRange = [from_tof, to_tof]
+
+        return m
