@@ -47,7 +47,7 @@ namespace MantidQt
       //load button clicked
       connect(m_uiForm.LoadButton,SIGNAL(clicked()),this,SLOT(onLoad()));
       /// send error mesages to logwindow
-      connect(this,SIGNAL(error(const QString&,int) ),parent()->parent(),SLOT(writeErrorLogWindow(const QString&)));
+      connect(this,SIGNAL(error(const QString&,int) ),parent()->parent(),SLOT(writeErrorToLogWindow(const QString&)));
       //execute loadraw asynchronously
       connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
       //execute loadnexus asynchronously
@@ -55,8 +55,8 @@ namespace MantidQt
       //select all file button clicked
       connect(m_uiForm.selectallButton,SIGNAL(clicked()),this,SLOT(onSelectAllFiles()));
       //download button clicked
-      connect(this,SIGNAL(download(const std::vector<std::string>&,const std::vector<long long>&)),
-          parent()->parent(),SLOT(executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<long long>&)));
+      connect(this,SIGNAL(download(const std::vector<std::string>&,const std::vector<int64_t>&)),
+          parent()->parent(),SLOT(executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&)));
       ///
       connect(this,SIGNAL(executeLoadAlgorithm(const QString&, const QString&, const QString&)),parent()->parent(),
           SLOT(executeloadAlgorithm(const QString&, const QString&, const QString&)));
@@ -417,7 +417,7 @@ namespace MantidQt
 @param fileNames :: list of filenames
 @param fileIds :: reference to a vector of fileIds
      */
-    void ICatInvestigation::getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds)
+    void ICatInvestigation::getFileIds(const std::vector<std::string> &fileNames, std::vector<int64_t>&fileIds)
     {
       ITableWorkspace_sptr ws_sptr;
 
@@ -426,7 +426,7 @@ namespace MantidQt
         ws_sptr = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
         (AnalysisDataService::Instance().retrieve("datafiles"));
       }
-      long long fileId=0;
+      int64_t fileId=0;
       const int col=0;
       int row=0;
       std::vector<std::string>::const_iterator citr;
@@ -472,7 +472,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<long long >fileIds;
+      std::vector<int64_t> fileIds;
       //get the file ids for the given file names.
       getFileIds(fileNames,fileIds);
 
@@ -546,7 +546,7 @@ namespace MantidQt
         }
         else
         {
-          emit error("The file "+ QString::fromStdString(*citr)+ " is not downloaded. Use the downlaod button provided to down load the file and then load." );
+          emit error("The file "+ QString::fromStdString(*citr)+ " is not downloaded. Use the download button provided to download the file and then load." );
         }
 
       }
@@ -560,8 +560,8 @@ namespace MantidQt
       for(cditr=m_downloadedFileList.begin();cditr!=m_downloadedFileList.end();++cditr)
       {
         // the selected file name from UI contains only file names,but the downloaded filelist returned
-        // by downlaod algorithm contains filename with full path
-        // below code extarcts the file name part and checks file exists in the downloaded list
+        // by download algorithm contains filename with full path
+        // below code extracts the file name part and checks file exists in the downloaded list
         const std::string::size_type index = (*cditr).find_last_of("/");
         if ( index != std::string::npos )
         {

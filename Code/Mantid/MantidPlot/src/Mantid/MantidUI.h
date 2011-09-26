@@ -184,7 +184,7 @@ public:
   void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
   
   /// This method is to execute download data files algorithm from ICat
-  void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds);
+  void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds);
 
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
   /// updates the algorithms tree

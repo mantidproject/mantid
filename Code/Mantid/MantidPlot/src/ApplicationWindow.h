@@ -1014,7 +1014,7 @@ public slots:
   void executeloadAlgorithm(const QString&, const QString&, const QString&);
 
   /// slot to execute download datafiles algorithm - called  from ICat interface
-  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<long long>&);
+  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
 signals:
   void modified();

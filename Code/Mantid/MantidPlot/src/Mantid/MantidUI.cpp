@@ -1410,7 +1410,7 @@ bool MantidUI::executeICatLogout(int version)
 
 }
 /// This method is to execute download data files algorithm from ICat
-void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds)
+void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds)
 {
   std::vector<std::string> fileLocs;
   Mantid::API::IAlgorithm_sptr alg;
@@ -1426,7 +1426,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   try
   {
     alg->setProperty("FileNames",filenNames);
-	alg->setProperty("FileIds",fileIds);
+    alg->setProperty("FileIds",fileIds);
     
   }
   catch(std::invalid_argument& e)

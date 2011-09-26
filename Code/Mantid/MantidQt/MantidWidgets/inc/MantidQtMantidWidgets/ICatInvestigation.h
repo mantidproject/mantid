@@ -21,9 +21,9 @@ namespace MantidQt
       /// Constructor
       ICatInvestigation(long long investId,const QString &qRbNumber,const QString &qTitle,
           const QString & qInstrument,Mantid::API::ITableWorkspace_sptr& m_ws2_sptr,QWidget *parent = 0);
-      signals:
-      ///this signal prints error messge to log window
 
+    signals:
+      ///this signal prints error messge to log window
       void error(const QString&,int param=0);
       /// loadraw asynchronous execution.
       void loadRawAsynch(const QString&,const QString&);
@@ -32,7 +32,7 @@ namespace MantidQt
       void loadNexusAsynch(const QString&,const QString&);
 
       /// signal for downloading data files
-      void download(const std::vector<std::string>&,const std::vector<long long>&);
+      void download(const std::vector<std::string>&,const std::vector<int64_t>&);
 
       //signal for uncontrolled loading of
       void executeLoadAlgorithm(const QString&, const QString&, const QString&);
@@ -75,7 +75,7 @@ namespace MantidQt
       void loadData( const QString& filePath);
 
       /// get fileds
-      void getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds);
+      void getFileIds(const std::vector<std::string> &fileNames, std::vector<int64_t>&fileIds);
 
       ///update the investigation widget label
       void updateLabel(const QString& labelText);

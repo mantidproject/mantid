@@ -16808,7 +16808,7 @@ void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QSt
 /* This method executes Download data files algorithm
  * @param  filenames - list of the file names to download
  */
-void ApplicationWindow::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds)
+void ApplicationWindow::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds)
 {
   //getting the sender of the signal(it's ICatInvestigation object)
   QObject* qsender= sender();
