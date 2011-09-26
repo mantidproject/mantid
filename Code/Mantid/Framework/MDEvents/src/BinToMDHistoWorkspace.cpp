@@ -127,7 +127,7 @@ namespace MDEvents
     setPropertyGroup("IterateEvents", grp);
 
     declareProperty(new PropertyWithValue<bool>("Parallel",false,Direction::Input),
-        "Temporary parameter: true to run in parallel.");
+        "Temporary parameter: true to run in parallel. This is ignored for file-backed workspaces, where running in parallel makes things slower due to disk thrashing.");
     setPropertyGroup("Parallel", grp);
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output MDHistoWorkspace.");
@@ -350,6 +350,8 @@ namespace MDEvents
 
     // Do we actually do it in parallel?
     bool doParallel = getProperty("Parallel");
+    // Not if file-backed!
+    if (bc->isFileBacked()) doParallel = false;
     if (!doParallel)
       chunkNumBins = int(binDimensions[chunkDimension]->getNBins());
 

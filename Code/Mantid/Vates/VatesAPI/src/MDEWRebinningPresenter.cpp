@@ -325,6 +325,7 @@ namespace Mantid
             hist_alg.setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
           }
         }
+        hist_alg.setPropertyValue("Parallel", "1");
         hist_alg.setPropertyValue("OutputWorkspace", "Histo_ws");
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         //Add observer.
