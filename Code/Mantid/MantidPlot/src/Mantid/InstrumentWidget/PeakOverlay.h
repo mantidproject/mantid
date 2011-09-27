@@ -17,7 +17,7 @@ class PeakHKL
 public:
   PeakHKL(PeakMarker2D* m,const QRectF& trect);
   bool add(PeakMarker2D* marker,const QRectF& trect);
-  void draw(QPainter& painter,const QTransform& transform);
+  void draw(QPainter& painter);
   void print()const;
 
 private:

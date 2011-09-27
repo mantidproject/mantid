@@ -25,7 +25,7 @@ public:
   /// Get marker size
   int getMarkerSize()const{return m_markerSize;}
   /// Get default marker size
-  static const int getDefaultMarkerSize(){return g_defaultMarkerSize;}
+  static int getDefaultMarkerSize(){return g_defaultMarkerSize;}
   Symbol getSymbol()const{return m_symbol;}
   void setSymbol(Symbol s){m_symbol=s;}
   void setPeak(const Mantid::API::IPeak& peak);

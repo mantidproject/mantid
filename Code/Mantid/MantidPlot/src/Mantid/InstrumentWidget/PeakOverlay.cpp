@@ -50,7 +50,7 @@ bool PeakHKL::add(PeakMarker2D* marker,const QRectF& trect)
 * @param painter :: QPainter to draw with
 * @param transform :: Current transform
 */
-void PeakHKL::draw(QPainter& painter,const QTransform& transform)
+void PeakHKL::draw(QPainter& painter)
 {
   QString label;
   if (nh) label = QString::number(h) + " ";
@@ -125,7 +125,7 @@ void PeakOverlay::draw(QPainter& painter) const
   for(int i = 0; i < m_labels.size(); ++i)
   {
     PeakHKL& hkl = m_labels[i];
-    hkl.draw(painter,m_transform);
+    hkl.draw(painter);
     //hkl.print();
   }
 }
