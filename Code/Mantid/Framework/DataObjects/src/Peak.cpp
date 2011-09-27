@@ -394,6 +394,7 @@ namespace DataObjects
   /** Set the peak using the peak's position in reciprocal space, in the lab frame.
    * The detector position will be determined.
    * DetectorID, row and column will be set to -1 since they are not (necessarily) found.
+   * You can call findDetector to look for the detector ID
    *
    * @param QLabFrame :: Q of the center of the peak, in reciprocal space.
    *        This is in inelastic convention: momentum transfer of the LATTICE!

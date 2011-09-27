@@ -11,6 +11,10 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+
+using Mantid::Kernel::EnabledWhenProperty;
 
 namespace Mantid
 {
@@ -55,8 +59,8 @@ namespace Crystal
    */
   void PredictPeaks::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
-        "An input workspace containing:\n"
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+        "An input workspace (MatrixWorkspace or MDEventWorkspace) containing:\n"
         "  - The relevant Instrument (calibrated as needed).\n"
         "  - A sample with a UB matrix.\n"
         "  - The goniometer rotation matrix.");
@@ -71,9 +75,6 @@ namespace Crystal
     declareProperty(new PropertyWithValue<double>("MaxDSpacing",100.0,Direction::Input),
         "Maximum d-spacing of peaks to consider.");
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, true),
-        "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict.");
-
     // Build up a list of reflection conditions to use
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_refConds.size(); ++i)
@@ -82,23 +83,36 @@ namespace Crystal
       "Which reflection condition applies to this crystal, reducing the number of expected HKL peaks?");
 
 
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, true),
+        "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict. HKL values will be rounded to the nearest integer.\n"
+        "The WavelengthMin/Max and Min/MaxDSpacing parameters are unused if this is specified.");
+
+    // Disable some props when using HKLPeaksWorkspace
+    IPropertySettings * set = new EnabledWhenProperty(this, "HKLPeaksWorkspace", IS_DEFAULT);
+    setPropertySettings("WavelengthMin", set);
+    setPropertySettings("WavelengthMax", set->clone());
+    setPropertySettings("MinDSpacing", set->clone());
+    setPropertySettings("MaxDSpacing", set->clone());
+    setPropertySettings("ReflectionCondition", set->clone());
+
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output PeaksWorkspace.");
   }
 
 
-  /** Calculate the prediction for this HKL
+  /** Calculate the prediction for this HKL. Thread-safe.
    *
    * @param h
    * @param k
    * @param l
    */
-  void PredictPeaks::doHKL(const int h, const int k, const int l)
+  void PredictPeaks::doHKL(const int h, const int k, const int l, bool doFilter)
   {
     V3D hkl(h,k,l);
 
     // Skip those with unacceptable d-spacings
     double d = crystal.d(hkl);
-    if (d > minD && d < maxD)
+    if (!doFilter || (d > minD && d < maxD))
     {
       // The q-vector direction of the peak is = goniometer * ub * hkl_vector
       // This is in inelastic convention: momentum transfer of the LATTICE!
@@ -115,34 +129,20 @@ namespace Crystal
       double one_over_wl = (norm_q*norm_q) / (2.0 * q.Z());
       double wl = 1.0/one_over_wl;
 
-      g_log.information() << "Peak at " << hkl << " has d-spacing " << d << " and wavelength " << wl << std::endl;
+      g_log.debug() << "Peak at " << hkl << " has d-spacing " << d << " and wavelength " << wl << std::endl;
 
       // Only keep going for accepted wavelengths.
-      if (wl >= wlMin && wl <= wlMax)
+      if (wl > 0 && (!doFilter || (wl >= wlMin && wl <= wlMax)))
       {
-        // This is the scattered direction, kf = (-qx, -qy, 1/wl-qz)
-        V3D beam = q * -1.0;
-        beam.setZ(one_over_wl - q.Z());
-        beam.normalize();
-
-        g_log.information() << "Peak at " << hkl << " scatters towards " << beam << "." << std::endl;
-
-        //          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
         PARALLEL_CRITICAL(PredictPeaks_numInRange)
-        { numInRange++;
-        }
+        { numInRange++; }
 
-        // Create a ray tracer
-        InstrumentRayTracer tracker(inst);
-        // Find intersecting instrument components in this direction.
-        V3D beamNormalized = beam;
-        beamNormalized.normalize();
-        tracker.traceFromSample(beamNormalized);
-        IDetector_const_sptr det = tracker.getDetectorResult();
-        if (det)
+        // Create the peak using the Q in the lab framewith all its info:
+        Peak p(inst, q);
+        if (p.findDetector())
         {
-          // Create the peak
-          Peak p(inst, det->getID(), wl);
+          // Only add peaks that hit the detector
+          p.setGoniometerMatrix(gonio);
           p.setHKL(hkl);
 
           // Add it to the workspace
@@ -150,7 +150,7 @@ namespace Crystal
           {
             pw->addPeak(p);
           }
-        } // detector was found.
+        } // Detector was found
       } // (wavelength is okay)
     } // (d is acceptable)
   }
@@ -162,7 +162,22 @@ namespace Crystal
   void PredictPeaks::exec()
   {
     // Get the input properties
-    MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+    Workspace_sptr inBareWS = getProperty("InputWorkspace");
+    ExperimentInfo_sptr inWS;
+    MatrixWorkspace_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(inBareWS);
+    PeaksWorkspace_sptr peaksWS = boost::dynamic_pointer_cast<PeaksWorkspace>(inBareWS);
+    IMDEventWorkspace_sptr mdWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inBareWS);
+    if (matrixWS)
+      inWS = matrixWS;
+    else if (peaksWS)
+      inWS = peaksWS;
+    else if (mdWS)
+    {
+      if (mdWS->getNumExperimentInfo() <= 0)
+        throw std::invalid_argument("Specified a MDEventWorkspace as InputWorkspace but it does not have any ExperimentInfo associated. Please choose a workspace with a full instrument and sample.");
+      inWS = mdWS->getExperimentInfo(0);
+    }
+
 
     wlMin = getProperty("WavelengthMin");
     wlMax = getProperty("WavelengthMax");
@@ -172,7 +187,7 @@ namespace Crystal
     PeaksWorkspace_sptr HKLPeaksWorkspace = getProperty("HKLPeaksWorkspace");
 
     // Check the values.
-    if (!inWS) throw std::invalid_argument("Did not specify a valid InputWorkspace.");
+    if (!inWS) throw std::invalid_argument("Did not specify a valid InputWorkspace with a full instrument and sample.");
     if (wlMin >= wlMax) throw std::invalid_argument("WavelengthMin must be < WavelengthMax.");
     if (wlMin < 1e-5) throw std::invalid_argument("WavelengthMin must be stricly positive.");
     if (minD < 1e-4) throw std::invalid_argument("MinDSpacing must be stricly positive.");
@@ -205,18 +220,17 @@ namespace Crystal
     ub = crystal.getUB();
 
     // Retrieve the goniometer rotation matrix
-    Matrix<double> gonio(3,3, true);
+    gonio = Matrix<double>(3,3, true);
     try
     {
       gonio = inWS->mutableRun().getGoniometerMatrix();
     }
     catch (std::runtime_error & e)
     {
-      g_log.error() << "Error getting the goniometer rotation matrix from the workspace " << inWS->getName() << std::endl
+      g_log.error() << "Error getting the goniometer rotation matrix from the InputWorkspace." << std::endl
           << e.what() << std::endl;
-      g_log.information() << "Using identity goniometer rotation matrix." << std::endl;
+      g_log.warning() << "Using identity goniometer rotation matrix instead." << std::endl;
     }
-    //gonio.Invert();
 
     // Final transformation matrix (HKL to Q in lab frame)
     mat = gonio * ub;
@@ -249,7 +263,10 @@ namespace Crystal
         PARALLEL_START_INTERUPT_REGION
 
         IPeak & p = HKLPeaksWorkspace->getPeak(i);
-        doHKL(int(p.getH()), int(p.getK()), int(p.getL()));
+        // Use the rounded HKL value
+        V3D hkl = p.getHKL();
+        hkl.round();
+        doHKL(int(hkl[0]), int(hkl[1]), int(hkl[2]), false);
 
         PARALLEL_END_INTERUPT_REGION
       } // for each hkl in the workspace
@@ -303,7 +320,7 @@ namespace Crystal
           {
             if (refCond->isAllowed(h,k,l) && (h != 0) && (k != 0) && (l != 0))
             {
-              doHKL(h,k,l);
+              doHKL(h,k,l, true);
             } // refl is allowed and not 0,0,0
             prog.report();
           } // for each l
@@ -314,7 +331,7 @@ namespace Crystal
 
     } // Find the HKL automatically
 
-    g_log.information() << "Out of " << numInRange << " allowed peaks within parameters, " << pw->getNumberPeaks() << " were found to hit a detector.\n";
+    g_log.notice() << "Out of " << numInRange << " allowed peaks within parameters, " << pw->getNumberPeaks() << " were found to hit a detector.\n";
   }
 
 

@@ -49,7 +49,7 @@ namespace Crystal
     /// Run the algorithm
     void exec();
 
-    void doHKL(const int h, const int k, const int l);
+    void doHKL(const int h, const int k, const int l, bool doFilter);
 
   private:
     /// Reflection conditions possible
@@ -71,8 +71,10 @@ namespace Crystal
     double minD;
     /// Max D spacing to apply.
     double maxD;
-    /// Rotation matrix
+    /// HKL->Q matrix (Goniometer * UB)
     Mantid::Kernel::DblMatrix mat;
+    /// Goniometer rotation matrix
+    Mantid::Kernel::DblMatrix gonio;
 
   };
 
