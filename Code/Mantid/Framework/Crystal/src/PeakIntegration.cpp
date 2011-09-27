@@ -93,6 +93,7 @@ namespace Mantid
       //To get the workspace index from the detector ID
       pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
+      //Sort events if EventWorkspace so it will run in parallel
       EventWorkspace_const_sptr inWS = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
       if (inWS)
       {
@@ -104,11 +105,19 @@ namespace Mantid
       outputW =API::WorkspaceFactory::Instance().create(inputW,peaksW->getNumberPeaks(),YLength+1,YLength);
       //Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
-
+      int MinPeaks = -1;
+      int MaxPeaks = -1;
       int NumberPeaks = peaksW->getNumberPeaks();
-      Progress prog(this, 0.0, 1.0, NumberPeaks);
-      PARALLEL_FOR3(inputW, peaksW, outputW)
       for (int i = 0; i<NumberPeaks; i++)
+      {
+        Peak & peak = peaksW->getPeaks()[i];
+        if(MinPeaks == -1 && peak.getRunNumber() == inputW->getRunNumber()) MinPeaks = i;
+        if(peak.getRunNumber() == inputW->getRunNumber()) MaxPeaks = i;
+      }
+
+      Progress prog(this, MinPeaks, 1.0, MaxPeaks);
+      PARALLEL_FOR3(inputW, peaksW, outputW)
+      for (int i = MinPeaks; i<= MaxPeaks; i++)
       {
         PARALLEL_START_INTERUPT_REGION
   

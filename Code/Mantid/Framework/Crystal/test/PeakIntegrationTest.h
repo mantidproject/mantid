@@ -164,8 +164,11 @@ public:
 
     // Create a single peak on that particular detector
     Peak PeakObj(in_ws->getInstrument(),5050,2.,V3D(1,1,1));
+    PeakObj.setRunNumber(3007);
     pkws->addPeak( PeakObj);
     AnalysisDataService::Instance().add("TOPAZ", pkws);
+
+    inputW->mutableRun().addProperty("run_number", 3007);
 
     boost::shared_ptr<Mantid::API::Algorithm> algu =Mantid::API::AlgorithmFactory::Instance(). create(std::string("LoadIsawUB"), 1);
     algu->initialize();
