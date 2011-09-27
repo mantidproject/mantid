@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
+#include "MantidKernel/CPUTimer.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h" 
 
@@ -344,11 +345,14 @@ namespace Mantid
 
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         //Add observer.
+        Mantid::Kernel::CPUTimer tim;
         xmlRebinAlg.addObserver(observer);
         //Run the rebinning algorithm.
         xmlRebinAlg.execute();
         //Remove observer
         xmlRebinAlg.removeObserver(observer);
+
+        std::cout << "Rebinned in --- " << tim << std::endl;
       }
 
       //Use the generated workspace to access the underlying image, which may be rendered.

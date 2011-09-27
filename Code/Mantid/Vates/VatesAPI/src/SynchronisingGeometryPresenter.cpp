@@ -196,7 +196,7 @@ namespace Mantid
       std::replace_if(m_dimensions.begin(), m_dimensions.end(), FindModelId(pDimensionPresenter->getAppliedModel()->getDimensionId()), pDimensionPresenter->getAppliedModel());
       //Delete the axis mapping for the presenter of this dimension.
       VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getAppliedModel()->getDimensionId()));
-      eraseMappedPresenter((*location));
+      //DONOT ERRASE THE MAPPING. 
       shuffleMappedPresenters();
 
     }
@@ -276,13 +276,17 @@ namespace Mantid
     {
       //Get the selected alignment for the xdimension.
       using namespace Mantid::Geometry;
-      MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
+      MDGeometryBuilderXML<NoDimensionPolicy> xmlBuilder;
 
       VecIMDDimension_sptr vecIntegrated = getIntegratedDimensions();
+      VecDimPresenter_sptr::const_iterator its = m_dimPresenters.begin();
       Mantid::Geometry::VecIMDDimension_sptr::const_iterator it = vecIntegrated.begin();
-      for(;it != vecIntegrated.end(); ++it)
+      for(;its != m_dimPresenters.end(); ++its)
       {
-        xmlBuilder.addOrdinaryDimension(*it);
+        if((*its)->getAppliedModel()->getIsIntegrated())
+        {
+          xmlBuilder.addOrdinaryDimension((*its)->getAppliedModel());
+        }
       }
 
       if(hasXDim())

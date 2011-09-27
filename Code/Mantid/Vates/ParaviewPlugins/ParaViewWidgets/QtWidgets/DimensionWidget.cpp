@@ -95,7 +95,6 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
 {
   m_dimensionLabel->setText(m_pDimensionPresenter->getLabel().c_str());
   m_nBinsBox->setHidden(false);
-  m_dimensionCombo->setHidden(false);
   m_nBinsLabel->setHidden(false);
   m_ckIntegrated->setChecked(false);
   if(atoi(m_nBinsBox->text()) <= 1)
@@ -117,7 +116,6 @@ void DimensionWidget::showAsIntegrated()
 {
   m_dimensionLabel->setText(m_pDimensionPresenter->getModel()->getDimensionId().c_str());
   m_nBinsBox->setHidden(true);
-  m_dimensionCombo->setHidden(true);
   m_nBinsLabel->setHidden(true);
   m_ckIntegrated->setChecked(true);
 }

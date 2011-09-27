@@ -61,7 +61,9 @@ namespace Mantid
         alg.initialize();
         alg.setPropertyValue("Filename", this->m_filename);
         alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+        alg.addObserver(observer);
         alg.execute();
+        alg.removeObserver(observer);
       }
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");

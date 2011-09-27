@@ -354,9 +354,9 @@ namespace Mantid
 
     bool MDEWRebinningPresenter::hasTDimensionAvailable() const
     {
-      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_serializer.getWorkspaceGeometry());
+      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
       sourceGeometry.execute();
-      return sourceGeometry.hasTDimension();
+      return sourceGeometry.hasTDimension() && (sourceGeometry.getTDimension()->getNBins() > 1);
     }
 
     std::vector<double> MDEWRebinningPresenter::getTimeStepValues() const
@@ -365,7 +365,7 @@ namespace Mantid
       sourceGeometry.execute();
 
       double min = sourceGeometry.getTDimension()->getMinimum();
-      double max = sourceGeometry.getTDimension()->getMaximum();
+      double max = sourceGeometry.getTDimension()->getMaximum(); 
       unsigned int nBins = static_cast<int>(sourceGeometry.getTDimension()->getNBins() );
       double increment = (max - min) / nBins;
       std::vector<double> timeStepValues(nBins);
