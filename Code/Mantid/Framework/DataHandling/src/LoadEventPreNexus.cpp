@@ -245,9 +245,11 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
 
   // check all of the proposals for the mapping file in the canonical place
   const string CAL("_CAL");
+  const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
   for (size_t i = 0; i < dirs.size(); ++i) {
-    if (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) == 0) {
+    if ( (dirs[i].length() > CAL_LEN)
+         && (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) == 0) ) {
       if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping).exists())
         files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" + mapping);
     }
