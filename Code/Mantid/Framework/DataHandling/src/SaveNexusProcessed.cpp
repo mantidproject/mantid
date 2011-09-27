@@ -296,7 +296,6 @@ namespace DataHandling
     for (it = events.begin(); it != it_end; it++)
     {
       if (tofs) tofs[i] = it->tof();
-      // FIXME: ticket #3051
       if (weights) weights[i] = static_cast<float>(it->weight());
       if (errorSquareds) errorSquareds[i] = static_cast<float>(it->errorSquared());
       if (pulsetimes) pulsetimes[i] = it->pulseTime().total_nanoseconds();
