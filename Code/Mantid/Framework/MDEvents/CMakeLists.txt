@@ -31,6 +31,8 @@ set ( SRC_FILES
 	src/OneStepMDEW.cpp
 	src/PlusMD.cpp
 	src/SaveMD.cpp
+	src/SliceMD.cpp
+	src/SlicingAlgorithm.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -77,6 +79,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/PlusMD.h
 	inc/MantidMDEvents/SaveMD.h
+	inc/MantidMDEvents/SliceMD.h
+	inc/MantidMDEvents/SlicingAlgorithm.h
 )
 
 # Test files. Other source files required.
@@ -113,6 +117,8 @@ set ( TEST_FILES
 	test/OneStepMDEWTest.h
 	test/PlusMDTest.h
 	test/SaveMDTest.h
+	test/SliceMDTest.h
+	test/SlicingAlgorithmTest.h
 )
 
 set ( GMOCK_TEST_FILES

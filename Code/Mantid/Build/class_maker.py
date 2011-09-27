@@ -48,6 +48,9 @@ def write_header(subproject, classname, filename, args):
     # The full text
     s = """#ifndef %s
 #define %s
+/*WIKI*
+TODO: Enter wiki description here.
+*WIKI*/
     
 #include "MantidKernel/System.h"
 %s
