@@ -285,8 +285,26 @@ namespace Mantid
         // Report progress once per block.
         m_prog->report();
       }
+    }
 
+    /**
+    Extract the b-matrix from a SQW file.
+    @return OrientedLattice sptr 
+    */
+    boost::shared_ptr<OrientedLattice> LoadSQW::extractLattice()
+    {
+      std::vector<char> buf(4*(3+3)); //Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
+      this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
+      this->m_fileStream.read(&buf[0],buf.size());
 
+      double a = (double)(*((float *)(&buf[0])));
+      double b = (double)(*((float *)(&buf[4])));
+      double c = (double)(*((float *)(&buf[8])));
+      double aa = (double)(*((float *)(&buf[12])));
+      double bb = (double)(*((float *)(&buf[16])));
+      double cc = (double)(*((float *)(&buf[20])));
+
+      return boost::shared_ptr<OrientedLattice>(new OrientedLattice(a,b,c,aa,bb,cc));
     }
 
 

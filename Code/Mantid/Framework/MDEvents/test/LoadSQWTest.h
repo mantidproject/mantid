@@ -36,6 +36,7 @@ private:
     }
     virtual void addEvents(MDEventWorkspace4Lean* ws) { return LoadSQW::addEvents(ws); };
     virtual void addDimensions(MDEventWorkspace4Lean* ws) { return LoadSQW::addDimensions(ws); };
+    virtual boost::shared_ptr<Mantid::Geometry::OrientedLattice> extractLattice() { return LoadSQW::extractLattice(); };
   };
 
 public:
@@ -151,6 +152,25 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of points", 580, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws->getNumDims());
   };
+
+  /*Even though we have no need for the oriented lattice as part of the MDEW yet, test that the functionality
+    is there to extract it*/
+  void testReadLattice()
+  {
+    ExposedLoadSQW alg; //Derived type exposes protected method as public ::extractLattice.
+    alg.initialize();
+    alg.setPropertyValue("Filename","test_horace_reader.sqw");
+    alg.setPropertyValue("OutputWorkspace", "testAddDimension");
+    alg.setup();
+
+    boost::shared_ptr<Mantid::Geometry::OrientedLattice> lattice = alg.extractLattice();
+    TS_ASSERT_DELTA(2.8699, lattice->a1(), 0.0001);
+    TS_ASSERT_DELTA(2.8699, lattice->a2(), 0.0001);
+    TS_ASSERT_DELTA(2.8699, lattice->a3(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice->b1(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice->b2(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice->b3(), 0.0001);
+  }
 };
 
 //=====================================================================================
