@@ -284,6 +284,8 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
 int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
+  try
+  {
   using namespace Mantid::VATES;
 
   enum Status{Bad=0, Good=1}; 
@@ -294,16 +296,18 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
     using namespace Mantid::VATES;
-    ADSWorkspaceProvider<Mantid::API::IMDWorkspace> wsProvider;
+    
     try
     {
-      vtkWarningMacro(<<"WARNING: Using Depreciated Rebinning Method. Rebinning from *.sqw_old.");
+      ADSWorkspaceProvider<Mantid::API::IMDWorkspace> wsProvider;
       MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDHistogramRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), new ClipperAdapter(vtkPVClipDataSet::New()), wsProvider));
       m_presenter = temp;
+      vtkWarningMacro(<<"WARNING: Using Depreciated Rebinning Method. Rebinning from *.sqw_old.");
     }
     catch(std::invalid_argument&)
     {
       //Try to use another type of presenter with this view. One for MDEWs.
+      ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> wsProvider;
       MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDEWRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), wsProvider));
       m_presenter = temp;
     }
@@ -319,6 +323,11 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
   }
   setTimeRange(outputVector);
   return status;
+  }
+  catch(std::exception& ex)
+  {
+    std::string w = ex.what();
+  }
 }
 
 int vtkMDEWRebinningCutter::RequestUpdateExtent(vtkInformation* vtkNotUsed(info), vtkInformationVector** vtkNotUsed(inputVector),
