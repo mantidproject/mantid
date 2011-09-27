@@ -284,8 +284,6 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
 int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
-  try
-  {
   using namespace Mantid::VATES;
 
   enum Status{Bad=0, Good=1}; 
@@ -323,11 +321,6 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
   }
   setTimeRange(outputVector);
   return status;
-  }
-  catch(std::exception& ex)
-  {
-    std::string w = ex.what();
-  }
 }
 
 int vtkMDEWRebinningCutter::RequestUpdateExtent(vtkInformation* vtkNotUsed(info), vtkInformationVector** vtkNotUsed(inputVector),
