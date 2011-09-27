@@ -3,6 +3,7 @@ import reduction_gui.widgets.util as util
 import math
 import os
 #from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
+from reduction_gui.reduction.reflectometer.refl_parameters_script import ParametersSets
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_parameters_refl
@@ -300,4 +301,68 @@ class ParametersReflWidget(BaseWidget):
         self._summary.parameters_q_range_log_switch.setChecked(True)
         self._recalculate_nbr_q_or_bin_size_labels()
         
+    def set_state(self, state):
+        """
+            Populate the UI elements with the data from the given state. 
+            @param state: data object
+        """   
+        
+        #Automatic or Manual mode selected
+        self._summary.parameters_q_range_automatic_switch.setChecked(state.AutomaticQRangeFlag)
+        self._summary.parameters_q_range_manual_switch.setChecked(not state.AutomaticQRangeFlag)
+        
+        #from/to Q values
+        self._summary.parameters_q_range_from_value.setText(state.Qrange[0])
+        self._summary.parameters_q_range_to_value.setText(state.Qrange[1])
+        
+        #Number of Q bins and Q bin size flags
+        self._summary.parameters_number_of_q_bins_switch.setChecked(state.NbrOfQBinsFlag)
+        self._summary.parameters_q_bin_size_switch.setChecked(not state.NbrOfQBinsFlag)
+        
+        #nbr of Q bins and bin size
+        self._summary.parameters_q_range_nbr_bins_value.setText(state.NbrOfBins_BinSize[0])
+        self._summary.parameters_q_range_nbr_bins_bin_size_value.setText(state.NbrOfBins_BinSize[1])
+        
+        self._summary.parameters_q_range_bin_size_value.setText(state.BinSize_NbrOfBins[0])
+        self._summary.parameters_q_range_bin_size_number_of_q_label.setText(state.BinSize_NbrOfBins[1])
+        
+        #linear/log binning
+        self._summary.parameters_q_range_linear_switch.setChecked(state.LinearBinningFlag)
+        self._summary.parameters_q_range_log_switch.setChecked(not state.LinearBinningFlag)
+        
+        #Output directory
+        self._summary.parameters_output_directory_value.setText(state.OutputFolder)
+        
+    def get_state(self):
+        """
+            Returns an object with the state of the interface
+        """
+        m = ParametersSets()
+        
+        #Automatic or Manual mode selected
+        m.AutomaticQRangeFlag = self._summary.parameters_q_range_automatic_switch.isChecked()
+  
+        #from/to Q values
+        from_q = str(self._summary.parameters_q_range_from_value.text())
+        to_q = str(self._summary.parameters_q_range_to_value.text())
+        m.Qrange = [from_q, to_q]
+        
+        #Number of Q bins flag and fields
+        m.NbrOfQBinsFlag = self._summary.parameters_number_of_q_bins_switch.isChecked()
+        nbr_bins = str(self._summary.parameters_q_range_nbr_bins_value.text())
+        bin_size = str(self._summary.parameters_q_range_nbr_bins_bin_size_value.text())
+        m.NbrOfBins_BinSize = [nbr_bins, bin_size]
+  
+        #Q bin size
+        bin_size = str(self._summary.parameters_q_range_bin_size_value.text())
+        nbr_bins = str(self._summary.parameters_q_range_bin_size_number_of_q_label.text())
+        m.BinSize_NbrOfBins = [bin_size, nbr_bins]
+
+        #Linear/log binning
+        m.LinearBinningFlag = self._summary.parameters_q_range_linear_switch.isChecked()
+        
+        #output directory
+        m.OutputFolder = str(self._summary.parameters_output_directory_value.text())
+        
+        return m
   

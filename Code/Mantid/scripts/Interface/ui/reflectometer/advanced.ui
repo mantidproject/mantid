@@ -31,14 +31,14 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="advanced_filtering_data">
             <property name="text">
              <string>Filtering data</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="checkBox_2">
+           <widget class="QCheckBox" name="advanced_dt_d">
             <property name="text">
              <string>dt/d</string>
             </property>
@@ -320,21 +320,21 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QCheckBox" name="checkBox_5">
+             <widget class="QCheckBox" name="data_combined_back_tof">
               <property name="text">
                <string>Data combined background TOF</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_4">
+             <widget class="QCheckBox" name="data_combined_specular_tof">
               <property name="text">
                <string>Data combined specular TOF</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_3">
+             <widget class="QCheckBox" name="data_combined_subtracted_tof">
               <property name="text">
                <string>Data combined subtracted TOF</string>
               </property>
@@ -345,21 +345,21 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
-             <widget class="QCheckBox" name="checkBox_8">
+             <widget class="QCheckBox" name="normalization_combined_back_tof">
               <property name="text">
                <string>Normalization combined background TOF</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_7">
+             <widget class="QCheckBox" name="normalization_combined_specular_tof">
               <property name="text">
                <string>Normalization combined specular TOF</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_6">
+             <widget class="QCheckBox" name="normalization_combined_subtracted_tof">
               <property name="text">
                <string>Normalization combined subtracted TOF</string>
               </property>
@@ -374,14 +374,14 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
-             <widget class="QCheckBox" name="checkBox_10">
+             <widget class="QCheckBox" name="r_vs_tof">
               <property name="text">
                <string>R vs TOF</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_9">
+             <widget class="QCheckBox" name="r_vs_tof_combined">
               <property name="text">
                <string>R vs TOF combined</string>
               </property>
@@ -392,14 +392,14 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
-             <widget class="QCheckBox" name="checkBox_12">
+             <widget class="QCheckBox" name="r_vs_q">
               <property name="text">
                <string>R vs Q</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox_11">
+             <widget class="QCheckBox" name="r_vs_q_after_rebinning">
               <property name="text">
                <string>R vs Q after rebinning</string>
               </property>
