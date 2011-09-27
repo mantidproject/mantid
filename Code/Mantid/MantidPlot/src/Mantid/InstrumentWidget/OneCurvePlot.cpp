@@ -1,4 +1,5 @@
 #include "OneCurvePlot.h"
+#include "PeakMarker2D.h"
 
 #include <qwt_plot_curve.h>
 #include <qwt_scale_div.h>
@@ -11,6 +12,7 @@
 #include <QFontMetrics>
 #include <QMouseEvent>
 #include <QContextMenuEvent>
+#include <QPainter>
 
 #include <iostream>
 
@@ -182,3 +184,39 @@ void OneCurvePlot::setYLinearScale()
   update();
 }
 
+/**
+ * Add new peak label
+ * @param label :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
+ */
+void OneCurvePlot::addLabel(PeakLabel* label)
+{
+  label->attach(this);
+  m_peakLabels.append(label);
+}
+
+/**
+ * Removes all peak labels.
+ */
+void OneCurvePlot::clearLabels()
+{
+  foreach(PeakLabel* label, m_peakLabels)
+  {
+    label->detach();
+    delete label;
+  }
+  m_peakLabels.clear();
+}
+
+
+/**
+ * Draw PeakLabel on a plot
+ */
+void PeakLabel::draw(QPainter *painter, 
+        const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+        const QRect &canvasRect) const
+{
+  int x = xMap.transform(m_marker->getTOF());
+  int y = canvasRect.top() + m_marker->getLabelRect().height();
+  painter->drawText(x,y,m_marker->getLabel());
+  //std::cerr << x << ' ' << y << ' ' << m_marker->getLabel().toStdString() << std::endl;
+}

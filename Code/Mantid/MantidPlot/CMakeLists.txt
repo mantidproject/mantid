@@ -204,6 +204,8 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
+                   src/Mantid/InstrumentWidget/PeakMarker2D.cpp
+                   src/Mantid/InstrumentWidget/PeakOverlay.cpp
                    src/Mantid/InstrumentWidget/OneCurvePlot.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
                    src/Mantid/InstrumentWidget/DetSelector.cpp
@@ -411,6 +413,8 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                   src/Mantid/InstrumentWidget/PeakMarker2D.h
+                   src/Mantid/InstrumentWidget/PeakOverlay.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
                    src/Mantid/InstrumentWidget/Projection3D.h
                    src/Mantid/InstrumentWidget/OneCurvePlot.h
@@ -653,6 +657,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
                        src/Mantid/InstrumentWidget/InstrumentActor.h
+                       src/Mantid/InstrumentWidget/PeakOverlay.h
                        src/Mantid/InstrumentWidget/ProjectionSurface.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
 )

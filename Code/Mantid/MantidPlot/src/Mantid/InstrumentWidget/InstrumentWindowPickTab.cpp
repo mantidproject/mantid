@@ -4,6 +4,7 @@
 #include "CollapsiblePanel.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
+#include "PeakMarker2D.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -344,8 +345,13 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
   }
 }
 
+/**
+ * Plot data for a detector.
+ * @param detid :: ID of the detector to be plotted.
+ */
 void InstrumentWindowPickTab::plotSingle(int detid)
 {
+  m_plot->clearLabels();
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
   size_t wi;
@@ -354,8 +360,11 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   } catch (Mantid::Kernel::Exception::NotFoundError) {
     return; // Detector doesn't have a workspace index relating to it
   }
+  // get the data
   const Mantid::MantidVec& x = ws->readX(wi);
   const Mantid::MantidVec& y = ws->readY(wi);
+
+  // find min and max for x
   size_t imin,imax;
   getBinMinMaxIndex(wi,imin,imax);
 
@@ -364,16 +373,26 @@ void InstrumentWindowPickTab::plotSingle(int detid)
 
   m_plot->setXScale(x[imin],x[imax]);
 
+  // fins min and max for y
   Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
   Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
+  // set the data 
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
   m_plot->setYScale(*min_it,*max_it);
+
+  // find any markers
+  ProjectionSurface* surface = mInstrumentDisplay->getSurface();
+  if (surface)
+  {
+    QList<PeakMarker2D*> markers = surface->getPeakOverlay().getMarkersWithID(detid);
+    foreach(PeakMarker2D* marker,markers)
+    {
+      m_plot->addLabel(new PeakLabel(marker));
+      //std::cerr << marker->getLabel().toStdString() << std::endl;
+    }
+  }
 }
 
-//void InstrumentWindowPickTab::plotBox(const Instrument3DWidget::DetInfo & /*cursorPos*/)
-//{
-//}
-//
 void InstrumentWindowPickTab::plotTube(int detid)
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();

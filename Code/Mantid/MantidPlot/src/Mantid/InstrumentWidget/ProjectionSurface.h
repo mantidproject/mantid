@@ -7,6 +7,7 @@
 
 #include "InstrumentActor.h"
 #include "Shape2DCollection.h"
+#include "PeakOverlay.h"
 
 #include <QImage>
 #include <QList>
@@ -109,6 +110,8 @@ public:
   bool isMasked(double x,double y)const{return m_maskShapes.isMasked(x,y);}
   void clearMask(){m_maskShapes.clear();}
 
+  PeakOverlay& getPeakOverlay(){return m_peakShapes;}
+
 signals:
 
   void singleDetectorTouched(int);
@@ -173,7 +176,7 @@ protected:
   bool m_leftButtonDown;
 
   Shape2DCollection m_maskShapes;  ///< to draw mask shapes
-  mutable Shape2DCollection m_peakShapes; ///< to draw peak labels
+  mutable PeakOverlay m_peakShapes; ///< to draw peak labels
 
 };
 

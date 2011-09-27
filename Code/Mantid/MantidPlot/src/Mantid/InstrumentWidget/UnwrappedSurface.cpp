@@ -2,6 +2,7 @@
 #include "GLColor.h"
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
+#include "PeakMarker2D.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -12,6 +13,7 @@
 #include <QSet>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QApplication>
 
 #include <cfloat>
 #include <limits>
@@ -170,7 +172,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
   if (m_startPeakShapes)
   {
-    ceatePeakShapes(widget->rect());
+    createPeakShapes(widget->rect());
   }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -632,9 +634,10 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
  * Create the peak labels from the peaks set by setPeaksWorkspace. The method is called from the draw(...) method
  * @param window :: The screen window rectangle in pixels.
  */
-void UnwrappedSurface::ceatePeakShapes(const QRect& viewport)const
+void UnwrappedSurface::createPeakShapes(const QRect& window)const
 {
-  m_peakShapes.setWindow(getSurfaceBounds(),viewport);
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  m_peakShapes.setWindow(getSurfaceBounds(),window);
   int nPeaks = m_peaksWorkspace->getNumberPeaks();
   for(int i = 0; i < nPeaks; ++i)
   {
@@ -645,12 +648,12 @@ void UnwrappedSurface::ceatePeakShapes(const QRect& viewport)const
       Mantid::Geometry::IDetector_const_sptr det = udet.detector;
       if (! det ) continue;
       if (det->getID() != detID) continue;
-      Shape2DRectangle* r = new Shape2DRectangle();
-      r->setFillColor(QColor(255,255,255,100));
-      m_peakShapes.addShape(r,true);
-      m_peakShapes.setCurrentBoundingRectReal(QRectF(udet.u-udet.width/2,udet.v-udet.height/2,udet.width,udet.height));
+      PeakMarker2D* r = new PeakMarker2D(m_peakShapes.realToUntransformed(QPointF(udet.u,udet.v)));
+      r->setPeak(peak);
+      m_peakShapes.addMarker(r);
     }
   }
   m_peakShapes.deselectAll();
   m_startPeakShapes = false;
+  QApplication::restoreOverrideCursor();
 }

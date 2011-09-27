@@ -24,10 +24,13 @@ public:
   virtual Shape2D* clone()const = 0;
   // modify path so painter.drawPath(path) could be used to draw the shape. needed for filling in complex shapes
   virtual void addToPath(QPainterPath& path) const = 0;
-  // make sure the shape is withing the bounding box
+  // make sure the shape is within the bounding box
   virtual void refit() = 0;
 
+  // --- Public virtual methods --- //
+
   virtual void draw(QPainter& painter) const;
+  virtual QPointF origin() const {return m_boundingRect.center();}
   virtual void moveBy(const QPointF& pos);
   virtual size_t getNControlPoints() const;
   virtual QPointF getControlPoint(size_t i) const;
@@ -37,17 +40,22 @@ public:
   // by dx1, dy1, dx2, and dy2 correspondingly
   virtual void adjustBoundingRect(qreal dx1,qreal dy1,qreal dx2,qreal dy2);
   virtual void setBoundingRect(const QRectF& rect);
-
-  void setColor(const QColor& color){m_color = color;}
-  void setFillColor(const QColor& color){m_fill_color = color;}
-  void edit(bool on){m_editing = on;}
-  bool isEditing()const{return m_editing;}
   // will the shape be selected if clicked at a point
   virtual bool selectAt(const QPointF& )const{return false;}
   // is a point inside the shape (closed line)
   virtual bool contains(const QPointF& )const{return false;}
   // is a point "masked" by the shape. Only filled regians of a shape mask a point
   virtual bool isMasked(const QPointF& )const;
+
+  // --- Public methods --- //
+
+  void setColor(const QColor& color){m_color = color;}
+  QColor getColor()const{return m_color;}
+  void setFillColor(const QColor& color){m_fill_color = color;}
+  void setScalable(bool on){m_scalable = on;}
+  bool isScalable() const {return m_scalable;}
+  void edit(bool on){m_editing = on;}
+  bool isEditing()const{return m_editing;}
 
   // --- Properties. for gui interaction --- //
 
@@ -66,6 +74,8 @@ protected:
 
   virtual void drawShape(QPainter& painter) const = 0;
 
+  // --- Protected virtual methods --- //
+
   // return number of control points specific to this shape
   virtual size_t getShapeNControlPoints() const{return 0;}
   // returns position of a shape specific control point, 0 < i < getShapeNControlPoints()
@@ -75,14 +85,19 @@ protected:
   // make sure the bounding box is correct
   virtual void resetBoundingRect() {}
 
+  // --- Protected methods --- //
+
   // make sure that width and heigth are positive
   void correctBoundingRect();
+
+  // --- Protected data --- //
 
   static const size_t NCommonCP;
   static const qreal sizeCP;
   QRectF m_boundingRect;
   QColor m_color;
   QColor m_fill_color;
+  bool m_scalable; ///< shape cann be scaled when zoomed
   bool m_editing;
 };
 

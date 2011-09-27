@@ -13,6 +13,21 @@ class QKeyEvent;
 
 /**
  * Class Shape2DCollection is a collection of 2D shapes. 
+ * It supports operations on teh shapes such as adding, removing, and aditting either
+ * with the mouse via control points (CPs) or via properties.
+ *
+ * The shapes operate in three coordinate systems:
+ * 1. Some 'real' or logical coordinates
+ * 2. Current or transformed screen coordinates
+ * 3. Untransformed screen coordinates
+ *
+ * Shape2DCollection must know the boundaries of the drawing area in logical and transformed screen coords.
+ * They are set by calling setWindow(...) method. The first argument is the logical drawing rectangle and 
+ * the second one is the corresponding screen viewport in pixels. The first screen viewport set with setWindow
+ * defines the Untransformed screen coordinates. The individual shapes draw themselves in the untransformed
+ * screen coords and unaware of the logical ones at all. If the size of the screen/widget changes setWindow
+ * must be called again. Changing the logical drawing bounds translates and zooms the picture.
+ * The transformation is done by Qt's QTransform object.
  */
 class Shape2DCollection: public QObject, public Shape2D
 {
@@ -21,9 +36,10 @@ public:
   Shape2DCollection();
   ~Shape2DCollection();
   Shape2D* clone()const{return NULL;}
-  void setWindow(const QRectF& rect,const QRect& viewport) const;
+  void setWindow(const QRectF& window,const QRect& viewport) const;
   virtual void draw(QPainter& painter) const;
   virtual void addShape(Shape2D*,bool slct = false);
+  virtual void removeShape(Shape2D*);
   
   void mousePressEvent(QMouseEvent*);
   void mouseMoveEvent(QMouseEvent*);
@@ -58,7 +74,12 @@ public:
   // collect all screen pixels that are masked by the shapes
   void getMaskedPixels(QList<QPoint>& pixels)const;
 
+  // --- coordinate transformations --- //
+
+  // set the bounding rect of the current shape such that its real rect is given by the argument
   void setCurrentBoundingRectReal(const QRectF& rect);
+  // convert a real point to the untransformed screen coordinates
+  QPointF realToUntransformed(const QPointF& point)const;
 
 signals:
 
@@ -79,15 +100,15 @@ protected:
   void select(Shape2D* shape);
 
   QList<Shape2D*> m_shapes;
-  mutable QRectF m_windowRect; // original surface window in "real" cooerdinates
+  mutable QRectF m_windowRect; // original surface window in "real" coordinates
   mutable double m_wx,m_wy;
   mutable int m_h; // original screen viewport height
   mutable QRect m_viewport;  // current screen viewport
   mutable QTransform m_transform; // current transform
 
-  bool m_creating;
-  bool m_editing;
-  bool m_moving;
+  bool m_creating; ///< a shape is being created with a mouse
+  bool m_editing;  ///< current shape is being edited with a mouse. CPs are visible
+  bool m_moving;   ///< current shape is being moved with a mouse. 
   int m_x,m_y;
   QString m_shapeType;
   QColor m_borderColor, m_fillColor;

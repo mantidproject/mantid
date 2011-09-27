@@ -16,6 +16,7 @@ const qreal Shape2D::sizeCP = 2;
 
 Shape2D::Shape2D():
 m_color(Qt::red),
+m_scalable(true),
 m_editing(false)
 {
 
