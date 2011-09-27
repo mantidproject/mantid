@@ -33,6 +33,7 @@ private:
  */
 class PeakOverlay: public Shape2DCollection
 {
+  Q_OBJECT
 public:
   PeakOverlay():Shape2DCollection(){}
   ~PeakOverlay(){}
