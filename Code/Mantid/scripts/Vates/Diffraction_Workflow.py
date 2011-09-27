@@ -44,9 +44,19 @@ IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', P
 # Save the MD workspace in Q sample frame to a NXS file. 
 SaveMD(InputWorkspace=ws+'_MD', Filename='TOPAZ_3131_MD_q_sample.nxs')
 
+# ----- Now Convert to HKL space to view in that space ----------- 
 
+# Convert to reciprocal space, in the sample frame
+ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_HKL',
+		OutputDimensions='HKL',LorentzCorrection='1')
+
+# Save that for later viewing in paraview
+SaveMD(InputWorkspace=ws+'_HKL', Filename='TOPAZ_3131_MD_HKL.nxs')
+
+
+		
 # ------ Now predict peaks and integrate those -----------
-if False:
+if True:
 	PredictPeaks(InputWorkspace=ws, MinDSpacing=0.75, OutputWorkspace=ws+'_peaks_predicted')
 	# Does not work quite well, see ticket #3772
 	IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', PeakRadius=0.1, BackgroundRadius=0.0, \
