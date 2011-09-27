@@ -91,14 +91,18 @@ void GenericDialog::layoutOptionsProperty(Property* prop, int row)
   //Check if this is the row that matches the one that we want to link to the
   //output box and used the saved combo box
   QComboBox *optionsBox = new QComboBox;
+  bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
   std::set<std::string> items = prop->allowedValues();
   std::set<std::string>::const_iterator vend = items.end();
   for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr)
-    optionsBox->addItem(QString::fromStdString(*vitr));
+  {
+    QString propValue = QString::fromStdString(*vitr);
+    if ( isWorkspaceProp && ( ! m_showHidden ) && propValue.startsWith("__") ) continue;
+    optionsBox->addItem(propValue);
+  }
 
   m_currentGrid->addWidget(optionsBox, row, 1, 0);
   tie(optionsBox, propName, m_currentGrid, true, nameLbl);
-  bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
   if( isWorkspaceProp )
     flagInputWS(optionsBox);
 

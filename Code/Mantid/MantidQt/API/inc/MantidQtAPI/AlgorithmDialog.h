@@ -107,6 +107,7 @@ public:
 
   /// Is this dialog initialized
   bool isInitialized() const;
+  void showHiddenWorkspaces(const bool & show);
 
 protected:
 
@@ -277,6 +278,9 @@ protected:
 
   /// Whether the layout has been initialized
   bool m_isInitialized;
+
+  /// Whether we show hidden workspaces
+  bool m_showHidden;
 
   /// A list of labels to use as validation markers
   mutable QHash<QString, QLabel*> m_validators;

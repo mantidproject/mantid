@@ -32,7 +32,7 @@ using namespace MantidQt::API;
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
   QDialog(parent), m_algorithm(NULL), m_algName(""), m_algProperties(), 
   m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(), 
-  m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), 
+  m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), m_showHidden(true),
   m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
   m_signal_mapper(new QSignalMapper())
 {
@@ -44,6 +44,11 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
  */
 AlgorithmDialog::~AlgorithmDialog()
 {
+}
+
+void AlgorithmDialog::showHiddenWorkspaces(const bool & show)
+{
+  m_showHidden = show;
 }
 
 /**
