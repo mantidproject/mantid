@@ -16,6 +16,7 @@ namespace API
   /** Constructor
    */
   MDGeometry::MDGeometry()
+  :m_transformFromOriginal(NULL), m_transformToOriginal(NULL)
   {
   }
     
@@ -24,6 +25,10 @@ namespace API
    */
   MDGeometry::~MDGeometry()
   {
+    if (m_transformFromOriginal)
+      delete m_transformFromOriginal;
+    if (m_transformToOriginal)
+      delete m_transformToOriginal;
   }
 
   
@@ -184,28 +189,32 @@ namespace API
   /// @return Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
   Mantid::API::CoordTransform * MDGeometry::getTransformFromOriginal() const
   {
-    return m_transformFromOriginal.get();
+    return m_transformFromOriginal;
   }
 
   /** Set Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
    * @param transform :: CoordTransform pointer (this assumes pointer ownership) */
   void MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform * transform)
   {
-    m_transformFromOriginal = boost::shared_ptr<Mantid::API::CoordTransform>(transform);
+    if (m_transformFromOriginal)
+      delete m_transformFromOriginal;
+    m_transformFromOriginal = transform;
   }
 
   //---------------------------------------------------------------------------------------------------
   /// @return Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
   Mantid::API::CoordTransform * MDGeometry::getTransformToOriginal() const
   {
-    return m_transformToOriginal.get();
+    return m_transformToOriginal;
   }
 
   /** Set Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
    * @param transform :: CoordTransform pointer (this assumes pointer ownership) */
   void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform * transform)
   {
-    m_transformToOriginal = boost::shared_ptr<Mantid::API::CoordTransform>(transform);
+    if (m_transformToOriginal)
+      delete m_transformToOriginal;
+    m_transformToOriginal = transform;
   }
 
   //---------------------------------------------------------------------------------------------------

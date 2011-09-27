@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS( out->getBasisVector(0), expectBasisX);
     if (out->getNumDims() > 1) { TS_ASSERT_EQUALS( out->getBasisVector(1), expectBasisY); }
     if (out->getNumDims() > 2) { TS_ASSERT_EQUALS( out->getBasisVector(2), expectBasisZ); }
-    CoordTransform * ctFrom = out->getTransformFromOriginal();
+    const CoordTransform * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
 
     AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
@@ -364,9 +364,9 @@ public:
     { TS_ASSERT_EQUALS( out->getBasisVector(1), baseY);
       TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ); }
 
-    CoordTransform * ctFrom = out->getTransformFromOriginal();
+    const CoordTransform * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
-    CoordTransform * ctTo = out->getTransformToOriginal();
+    const CoordTransform * ctTo = out->getTransformToOriginal();
     TS_ASSERT(ctTo);
     if (!ctTo) return;
 

@@ -108,10 +108,10 @@ namespace API
     Mantid::Kernel::VMD m_origin;
 
     /// Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-    boost::shared_ptr<Mantid::API::CoordTransform> m_transformFromOriginal;
 
+    Mantid::API::CoordTransform * m_transformFromOriginal;
     /// Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
-    boost::shared_ptr<Mantid::API::CoordTransform> m_transformToOriginal;
+    Mantid::API::CoordTransform * m_transformToOriginal;
 
 
   };
