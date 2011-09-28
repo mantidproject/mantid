@@ -29,6 +29,9 @@ class FindSNSNeXus(PythonAlgorithm):
                                  Validator=ListValidator(instruments))
         except ImportError, e:
             self.declareProperty("Instrument", "")
+        except IOError, e:
+	    self.log().error(str(e))
+            raise e
         self.declareProperty("RunNumber", 0)
         extensions = [".nxs", "_histo.nxs", "_event.nxs", "_neutron_event.dat",
                       "_neutron0_event.dat", "_neutron1_event.dat",
