@@ -25,6 +25,7 @@ vtkSplatterPlot::vtkSplatterPlot()
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
+  Mantid::API::FrameworkManager::Instance();
 }
 
 vtkSplatterPlot::~vtkSplatterPlot()
