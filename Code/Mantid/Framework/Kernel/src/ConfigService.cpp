@@ -672,9 +672,11 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
   loadConfig(filename, append);
 
   //Ensure that the default save directory makes sense
-  std::string save_dir = getString("defaultsave.directory");
-  if (Poco::trimInPlace(save_dir).size() == 0) {
-    setString("defaultsave.directory", Poco::Path::home());
+  if (!append)
+  {
+    std::string save_dir = getString("defaultsave.directory");
+    if (Poco::trimInPlace(save_dir).size() == 0) 
+      setString("defaultsave.directory", Poco::Path::home());
   }
 
   if (update_caches)
