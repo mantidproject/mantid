@@ -7,15 +7,17 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::VMD;
 
 class MDPlaneTest : public CxxTest::TestSuite
 {
 public:
 
-  void test_constructor()
+  void test_constructor_vectors()
   {
     std::vector<coord_t> normal;
     std::vector<coord_t> point;
@@ -32,7 +34,7 @@ public:
     TS_ASSERT_DELTA( p.getInequality(), 0, 1e-5);
   }
 
-  void test_constructor2()
+  void test_constructor_bareArrays()
   {
     coord_t normal[2] = {1.234, 4.56};
     coord_t point[2] = {1.0, 0.0};
@@ -42,6 +44,66 @@ public:
     TS_ASSERT_DELTA( p.getNormal()[0], 1.234, 1e-5);
     TS_ASSERT_DELTA( p.getNormal()[1], 4.56,  1e-5);
     TS_ASSERT_DELTA( p.getInequality(), 1.234, 1e-5);
+  }
+
+  void test_constructor_VMD()
+  {
+    VMD normal(1.234, 4.56);
+    VMD point(1.0, 0.0);
+    MDPlane p(normal, point);
+    TS_ASSERT_EQUALS( p.getNumDims(), 2);
+    TS_ASSERT_DELTA( p.getNormal()[0], 1.234, 1e-5);
+    TS_ASSERT_DELTA( p.getNormal()[1], 4.56,  1e-5);
+    TS_ASSERT_DELTA( p.getInequality(), 1.234, 1e-5);
+  }
+
+  void test_constructorPoints_badInputs()
+  {
+    std::vector<VMD> points;
+    VMD insidePoint(1);
+    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, insidePoint));
+    points.push_back(VMD(1,2,3));
+    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(2,3,4)));
+  }
+
+  void test_constructorPoints_1D()
+  {
+    std::vector<VMD> points;
+    VMD a(1), inside(1);
+    a[0] = 2.0;
+    inside[0] = 3.0;
+    points.push_back(a);
+    MDPlane p(points, inside);
+    TS_ASSERT( p.isPointBounded( inside ) );
+  }
+
+  void test_constructorPoints_2D()
+  {
+    std::vector<VMD> points;
+    points.push_back(VMD(1.0,1.0));
+    points.push_back(VMD(2.0,2.0));
+    MDPlane p(points, VMD(1.5, 0.5) );
+    TS_ASSERT( p.isPointBounded( VMD(0.2, 0.1) ) );
+  }
+
+  void test_constructorPoints_3D()
+  {
+    // Define a plane along x=y axis vertical in Z
+    std::vector<VMD> points;
+    points.push_back(VMD(1.0,1.0,0.0));
+    points.push_back(VMD(2.0,2.0,0.0));
+    points.push_back(VMD(2.0,2.0,1.0));
+    MDPlane p(points, VMD(0.5, 1.5, 1.0) );
+    TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0) ) );
+  }
+
+  /** Disabled because GSL simply aborts the program instead of throwing a friendly exception */
+  void xtest_constructorPoints_2D_singularMatrix()
+  {
+    std::vector<VMD> points;
+    points.push_back(VMD(1.0,1.0));
+    points.push_back(VMD(1.0,1.0));
+    TS_ASSERT_THROWS_ANYTHING( MDPlane p(points, VMD(1.5, 0.5) ) );
   }
 
   void test_copy_ctor()

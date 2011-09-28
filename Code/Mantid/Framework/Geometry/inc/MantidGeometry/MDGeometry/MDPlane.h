@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <vector>
+#include "MantidKernel/VMD.h"
 
 
 namespace Mantid
@@ -58,8 +59,10 @@ namespace Geometry
   class DLLExport MDPlane 
   {
   public:
+    MDPlane(const Mantid::Kernel::VMD & normal, const Mantid::Kernel::VMD & point);
     MDPlane(const std::vector<coord_t> & normal, const std::vector<coord_t> & point);
     MDPlane(const size_t nd, const coord_t * normal, const coord_t * point);
+    MDPlane(const std::vector<Mantid::Kernel::VMD> & points, const Mantid::Kernel::VMD & insidePoint);
     MDPlane(const MDPlane & other);
     MDPlane & operator=(const MDPlane & other);
     ~MDPlane();
@@ -83,6 +86,23 @@ namespace Geometry
      * @return true if it is bounded by the plane
      */
     inline bool isPointBounded(const coord_t * coords) const
+    {
+      coord_t total = 0;
+      for (size_t d=0; d<m_nd; d++)
+      {
+        total += m_normal[d] * coords[d];
+      }
+      return (total >= m_inequality);
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Is a point in MDimensions bounded by this hyperplane, that is,
+     * is (a1*x1 + a2*x2 + ... >= b)?
+     *
+     * @param coords :: VMD vector giving the point of the right size
+     * @return true if it is bounded by the plane
+     */
+    inline bool isPointBounded(const Mantid::Kernel::VMD & coords) const
     {
       coord_t total = 0;
       for (size_t d=0; d<m_nd; d++)
