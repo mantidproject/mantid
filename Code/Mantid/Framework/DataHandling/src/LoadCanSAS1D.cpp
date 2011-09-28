@@ -216,6 +216,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   runLoadInstrument(instname, dataWS);
 
   idataElemList->release();
+  dataWS->getAxis(0)->setUnit("Wavelength");
   return dataWS;
 }
 /* This method throws not found error if a element is not found in the xml file
