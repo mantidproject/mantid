@@ -74,7 +74,7 @@ namespace Mantid
       parseMetadata();
 
       // Create a new output workspace.
-      MDEventWorkspace<MDLeanEvent<4>,4>* pWs = new MDEventWorkspace<MDLeanEvent<4>,4>;
+      MDEventWorkspace<MDEvent<4>,4>* pWs = new MDEventWorkspace<MDEvent<4>,4>;
       Mantid::API::IMDEventWorkspace_sptr ws(pWs);
 
       // Add dimensions onto workspace.
@@ -100,7 +100,7 @@ namespace Mantid
       if (!m_outputFile.empty())
       {
         MemoryStats stat;
-        if ((m_nDataPoints * sizeof(MDLeanEvent<4>) * 2 / 1024) < stat.availMem())
+        if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
           g_log.notice() << "You have enough memory available to load the " << m_nDataPoints << " points into memory; this would be faster than using a file back-end." << std::endl;
 
         IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05, true);
@@ -113,12 +113,12 @@ namespace Mantid
       else
       {
         MemoryStats stat;
-        if ( (size_t(double(m_nDataPoints) * 1.5) * sizeof(MDLeanEvent<4>) / 1024) > stat.availMem()  )
+        if ( (size_t(double(m_nDataPoints) * 1.5) * sizeof(MDEvent<4>) / 1024) > stat.availMem()  )
           g_log.warning() << "You may not have enough physical memory available to load the " << m_nDataPoints << " points into memory. You can cancel and specify OutputFilename to load to a file back-end." << std::endl;
       }
 
       bc = pWs->getBoxController();
-      bc->setCacheParameters( sizeof(MDLeanEvent<4>), 0, 1000000, 10000000);
+      bc->setCacheParameters( sizeof(MDEvent<4>), 0, 1000000, 10000000);
       std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getDiskMRU().getMemoryStr() << std::endl;
 
       //Persist the workspace.
@@ -149,7 +149,7 @@ namespace Mantid
 
 
     /// Add events after reading pixels/datapoints from file.
-    void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
+    void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws)
     {
       CPUTimer tim;
 
@@ -165,6 +165,9 @@ namespace Mantid
       const size_t column_size_3 = column_size * 3; //offset, gives en
       const size_t column_size_4 = column_size * 4; //offset, gives s
       const size_t column_size_5 = column_size * 5; //offset, gives err
+      const size_t column_size_6 = column_size * 6; //offset, gives irun
+      const size_t column_size_7 = column_size * 7; //offset, gives idet
+
       const size_t pixel_width = ncolumns * column_size;
       const size_t data_buffer_size = pixel_width * m_nDataPoints;
       g_log.information() << m_nDataPoints << " data points in this SQW file." << std::endl;
@@ -217,14 +220,20 @@ namespace Mantid
               *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
           };
           float error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
-          ws->addEvent(MDLeanEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
+
+          ws->addEvent(MDEvent<4>( 
+            *reinterpret_cast<float*>(pData + current_pix + column_size_4),     // Signal
+            error*error,                                                        // Error sq 
+            *reinterpret_cast<uint16_t*>(pData + current_pix + column_size_6),  // run Index
+            *reinterpret_cast<uint32_t*>(pData + current_pix + column_size_7),  // Detector Id
+            centers));
         }
 
 
 //        MemoryStats stat;
 //        size_t bytesAvail = stat.availMem() * 1024;
 //        // Estimate how many extra bytes will (temporarily) be used when splitting events
-//        size_t bytesNeededToSplit = eventsAdded * sizeof(MDLeanEvent<4>) / 2;
+//        size_t bytesNeededToSplit = eventsAdded * sizeof(MDEvent<4>) / 2;
 
         // Split:
         // 1. When < 1 GB of memory is free
@@ -259,7 +268,7 @@ namespace Mantid
 //
 //        if (false)
 //        {
-//          std::vector<IMDBox<MDLeanEvent<4>,4>*> boxes;
+//          std::vector<IMDBox<MDEvent<4>,4>*> boxes;
 //          ws->getBox()->getBoxes(boxes, 100, true);
 //          size_t modified = 0;
 //          size_t inmem = 0;
@@ -267,7 +276,7 @@ namespace Mantid
 //          size_t events = 0;
 //          for (size_t i=0; i<boxes.size(); i++)
 //          {
-//            MDBox<MDLeanEvent<4>,4>* box = dynamic_cast<MDBox<MDLeanEvent<4>,4>*>(boxes[i]);
+//            MDBox<MDEvent<4>,4>* box = dynamic_cast<MDBox<MDEvent<4>,4>*>(boxes[i]);
 //            if (box)
 //            {
 //              //box->save();
@@ -295,7 +304,7 @@ namespace Mantid
     Extract the b-matrix from a SQW file. Create experiment info with oriented lattice and add to workspace.
     @param ws : Workspace to modify.
     */
-    void LoadSQW::addLattice(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
+    void LoadSQW::addLattice(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws)
     {
       std::vector<char> buf(4*(3+3)); //Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
       this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
@@ -315,7 +324,7 @@ namespace Mantid
 
 
     /// Add a dimension after reading info from file.
-    void LoadSQW::addDimensions(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
+    void LoadSQW::addDimensions(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws)
     {
       using Mantid::Geometry::MDHistoDimensionBuilder;
       Mantid::Geometry::Vec_MDHistoDimensionBuilder dimensionVec(4);
