@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/V3D.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -88,6 +89,8 @@ namespace Crystal
 
     std::vector<Peak> peaks = ws->getPeaks();
 
+    // Sequence and run number
+    int seqNum = 1;
     int runcount = 1;
 
     std::fstream out;
@@ -98,8 +101,12 @@ namespace Crystal
       long pos = out.tellp();
       out.seekp (pos - 135);
       out >> runcount;
+      out.seekp (pos - 110);
+      out >> seqNum;
+      std::cout << seqNum<<"\n";
       out.seekp (pos - 73);
       runcount ++;
+      seqNum ++;
     }
     else
     {
@@ -143,8 +150,6 @@ namespace Crystal
 
 
     // ============================== Save all Peaks =========================================
-    // Sequence number
-    int seqNum = 1;
 
     // Go in order of run numbers
     runMap_t::iterator runMap_it;
@@ -168,7 +173,8 @@ namespace Crystal
           {
             size_t wi = ids[i];
             Peak & p = peaks[wi];
-            if (p.getIntensity() == 0.0) continue;
+            if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) || 
+              boost::math::isnan(p.getSigmaIntensity())) continue;
 
             double tbar = 0;
             // This is the scattered beam direction
