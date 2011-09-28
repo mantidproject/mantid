@@ -605,6 +605,14 @@ void ConfigServiceImpl::createUserPropertiesFile() const
     filestr << "#overriding any value set in the Mantid.properties file" << std::endl;
     filestr << "#algorithms.retained = 90" << std::endl;
 
+    filestr << std::endl;
+    filestr << "#uncomment to enable archive search - ICat and Orbiter" << std::endl;
+    filestr << "#datasearch.searcharchive = On" << std::endl;
+
+    filestr << std::endl;
+    filestr << "#uncomment to change logging level. Valid values are: error, warning, notice, information, debug" << std::endl;
+    filestr << "#logging.loggers.root.level = information" << std::endl;
+
     filestr.close();
   } catch (std::runtime_error& ex)
   {
