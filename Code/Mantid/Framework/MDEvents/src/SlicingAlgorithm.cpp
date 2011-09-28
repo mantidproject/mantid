@@ -4,6 +4,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -96,7 +98,7 @@ namespace MDEvents
    */
   void SlicingAlgorithm::makeBasisVectorFromString(const std::string & str)
   {
-    if (str.empty())
+    if (Strings::strip(str).empty())
       return;
 
     std::string name, id, units;
@@ -128,6 +130,7 @@ namespace MDEvents
     VMD basis(this->in_ws->getNumDims());
     for (size_t d=0; d<this->in_ws->getNumDims(); d++)
       Strings::convert(strs[d+2], basis[d]);
+    basis.normalize();
 
     // Create the output dimension
     MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, min, max, numBins));
@@ -143,7 +146,7 @@ namespace MDEvents
   /** Loads the dimensions and create the coordinate transform, using the inputs.
    * This is for the general (i.e. non-aligned) case
    */
-  void SlicingAlgorithm::createTransform()
+  void SlicingAlgorithm::createGeneralTransform()
   {
     // Number of input dimensions
     size_t inD = in_ws->getNumDims();
@@ -188,6 +191,7 @@ namespace MDEvents
     { throw std::invalid_argument("Error parsing the Origin parameter: " + std::string(e.what()) ); }
     if (origin.getNumDims() != inD)
       throw std::invalid_argument("The number of dimensions in the Origin parameter is not consistent with the number of dimensions in the input workspace.");
+    m_origin = origin;
 
     // Validate
     if (outD > inD)
@@ -235,21 +239,19 @@ namespace MDEvents
 
   //----------------------------------------------------------------------------------------------
   /** Generate a MDHistoDimension_sptr from a comma-sep string (for AlignedDimX, etc.)
+   * Must be called in order X,Y,Z,T.
    *
    * @param str :: name,minimum,maximum,number_of_bins
-   * @return
    */
-  MDHistoDimension_sptr makeMDHistoDimensionFromString(const std::string & str)
+  void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string & str)
   {
     if (str.empty())
     {
-      // Make a blank dimension
-      MDHistoDimension_sptr out;
-      return out;
+      throw std::runtime_error("Empty string passed to one of the AlignedDimX parameters.");
     }
     else
     {
-      std::string name, id;
+      std::string name;
       double min, max;
       int numBins = 0;
       std::vector<std::string> strs;
@@ -258,7 +260,6 @@ namespace MDEvents
         throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
       // Extract the arguments
       name = Strings::strip(strs[0]);
-      id = name;
       Strings::convert(strs[1], min);
       Strings::convert(strs[2], max);
       Strings::convert(strs[3], numBins);
@@ -269,8 +270,24 @@ namespace MDEvents
       if (numBins < 1)
         throw std::invalid_argument("Number of bins should be >= 1.");
 
-      MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
-      return out;
+      std::string units = "";
+      std::string id = name;
+      // Find the named axis in the input workspace
+      try
+      {
+        size_t dim_index = in_ws->getDimensionIndexByName(name);
+        IMDDimension_sptr inputDim = in_ws->getDimension(dim_index);
+        units = inputDim->getUnits();
+        // Add the index from which we're binning to the vector
+        this->dimensionToBinFrom.push_back(dim_index);
+      }
+      catch (std::runtime_error &)
+      {
+        // The dimension was not found, so this is a problem
+        throw std::runtime_error("Dimension " + name + " was not found in the MDEventWorkspace! Cannot continue.");
+      }
+
+      binDimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(name, id, units, min, max, numBins)));
     }
   }
   //----------------------------------------------------------------------------------------------
@@ -279,43 +296,38 @@ namespace MDEvents
    */
   void SlicingAlgorithm::createAlignedTransform()
   {
-    // Create the dimensions based on the strings from the user
     std::string dimChars = "XYZT";
+
+    // Validate inputs
+    bool previousWasEmpty = false;
+    size_t numDims = 0;
     for (size_t i=0; i<4; i++)
     {
       std::string propName = "AlignedDimX"; propName[10] = dimChars[i];
-      MDHistoDimension_sptr binDim = makeMDHistoDimensionFromString( getPropertyValue(propName));
-      if (binDim)
-      {
-        // (valid pointer?)
-        if (binDim->getNBins() == 0)
-          throw std::runtime_error("Dimension " + binDim->getName() + " was set to have 0 bins. Cannot continue.");
-
-        // We have to find the dimension in the INPUT workspace to set to the OUTPUT workspace
-        try {
-          size_t dim_index = in_ws->getDimensionIndexByName(binDim->getName());
-          dimensionToBinFrom.push_back(dim_index);
-        }
-        catch (std::runtime_error &)
-        {
-          // The dimension was not found, so we are not binning across it.
-          if (binDim->getNBins() > 1)
-            throw std::runtime_error("Dimension " + binDim->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
-        }
-        // This is a dimension we'll use in the output
-        binDimensions.push_back(binDim);
-      }
+      std::string prop = Strings::strip(getPropertyValue(propName));
+      if (!prop.empty()) numDims++;
+      if (!prop.empty() && previousWasEmpty)
+        throw std::invalid_argument("Please enter the AlignedDim parameters in the order X,Y,Z,T, without skipping any entries.");
+      previousWasEmpty = prop.empty();
     }
-    // Number of output binning dimensions found
-    outD = binDimensions.size();
+
     // Number of input dimension
     size_t inD = in_ws->getNumDims();
-
     // Validate
-    if (outD == 0)
-      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
-    if (outD > inD)
-      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
+    if (numDims == 0)
+      throw std::runtime_error("No output dimensions specified.");
+    if (numDims > inD)
+      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace.");
+
+    // Create the dimensions based on the strings from the user
+    for (size_t i=0; i<numDims; i++)
+    {
+      std::string propName = "AlignedDimX"; propName[10] = dimChars[i];
+      makeAlignedDimensionFromString( getPropertyValue(propName));
+    }
+
+    // Number of output binning dimensions found
+    outD = binDimensions.size();
 
     // Now we build the coordinate transformation object
     m_origin = VMD(inD);
@@ -333,22 +345,251 @@ namespace MDEvents
       m_bases.push_back(basis);
     }
 
+    // Transform for binning
     m_transform = new CoordTransformAligned(in_ws->getNumDims(), outD,
         dimensionToBinFrom, origin, scaling);
 
-    // Transformation original->binned
+    // Transformation original->binned. There is not offset or scaling!
     std::vector<double> unitScaling(outD, 1.0);
-    m_transformFromOriginal = new CoordTransformAligned(in_ws->getNumDims(), outD,
-        dimensionToBinFrom, origin, unitScaling);
+    std::vector<double> zeroOrigin(outD, 0.0);
+    m_transformFromOriginal = new CoordTransformAligned(inD, outD,
+        dimensionToBinFrom, zeroOrigin, unitScaling);
 
-    // Now the reverse transformation. This is not possible in general.
-    m_transformToOriginal = NULL;
+    // Now the reverse transformation.
+    if (outD == inD)
+    {
+      // Make the reverse map = if you're in the output dimension "od", what INPUT dimension index is that?
+      std::vector<size_t> reverseDimensionMap(inD, 0);
+      for (size_t od=0; od<dimensionToBinFrom.size(); od++)
+        reverseDimensionMap[ dimensionToBinFrom[od] ] = od;
+      m_transformToOriginal = new CoordTransformAligned(inD, outD,
+          reverseDimensionMap, zeroOrigin, unitScaling);
+    }
+    else
+      // Changed # of dimensions - can't reverse the transform
+      m_transformToOriginal = NULL;
   }
 
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Read the algorithm properties and creates the appropriate transforms
+   * for slicing the MDEventWorkspace
+   */
+  void SlicingAlgorithm::createTransform()
+  {
+    // Is the transformation aligned with axes?
+    m_axisAligned = getProperty("AxisAligned");
+
+    // Create the coordinate transformation
+    m_transform = NULL;
+    if (m_axisAligned)
+      this->createAlignedTransform();
+    else
+      this->createGeneralTransform();
+
+  }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Create an implicit function for picking boxes, based on the indexes in the
+   * output MDHistoWorkspace.
+   * This needs to be in the space of the INPUT MDEventWorkspace.
+   * This function assumes ORTHOGONAL BASIS VECTORS!
+   *
+   * @param nd :: number of dimensions in the workspace being sliced.
+   * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive).
+   *        NULL to use the entire range.
+   * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
+   *        NULL to use the entire range.
+   * @return MDImplicitFunction created
+   */
+  MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(size_t nd, size_t * chunkMin, size_t * chunkMax)
+  {
+    // General implicit function
+    MDImplicitFunction * func = new MDImplicitFunction;
+
+    // First origin = 0,0,0 (offset if you specified a chunk)
+    VMD o1 = m_origin;
+    // Second origin = max of each basis vector
+    VMD o2 = m_origin;
+    // And this the list of basis vectors. Each vertex is given by o1+bases[i].
+    std::vector<VMD> bases;
+    VMD x,y,z,t;
+
+    for (size_t d=0; d<m_bases.size(); d++)
+    {
+      double xMin = 0;
+      double xMax = binDimensions[d]->getX(binDimensions[d]->getNBins());
+      if (chunkMin != NULL) xMin = binDimensions[d]->getX(chunkMin[d]);
+      if (chunkMax != NULL) xMax = binDimensions[d]->getX(chunkMax[d]);
+      o1 += (m_bases[d] * xMin);
+      o2 += (m_bases[d] * xMax);
+      VMD thisBase = m_bases[d] * (xMax-xMin);
+      bases.push_back(thisBase);
+      if (d==0) x = thisBase;
+      if (d==1) y = thisBase;
+      if (d==2) z = thisBase;
+      if (d==3) t = thisBase;
+    }
+
+    // Dimensionality of the box
+    size_t boxDim = bases.size();
+
+    // Create a Z vector by doing the cross-product of X and Y
+    if (boxDim==2 && nd == 3)
+    { z = x.cross_prod(y); z.normalize(); }
+
+//    std::cout << "x " << x << std::endl;
+//    std::cout << "y " << y << std::endl;
+//    std::cout << "z " << z << std::endl;
+//    std::cout << "t " << t << std::endl;
+
+    // Point that is sure to be inside the volume of interest
+    VMD insidePoint = (o1 + o2) / 2.0;      VMD normal = bases[0];
+
+    std::vector<VMD> points;
+
+    if (boxDim == 1)
+    {
+      // 2 planes defined by 1 basis vector
+      // Your normal = the x vector
+      func->addPlane( MDPlane(x, o1) );
+      func->addPlane( MDPlane(x * -1.0, o2) );
+    }
+    else if (boxDim == 2)
+    {
+      // 4 planes defined by 2 basis vectors
+      // The plane along the X basis vector has Y as its normal. Assumes orthogonality!
+      func->addPlane( MDPlane(y,        o1) );
+      func->addPlane( MDPlane(y * -1.0, o2) );
+      // The plane along the Y basis vector has X as its normal. Assumes orthogonality!
+      func->addPlane( MDPlane(x,        o1) );
+      func->addPlane( MDPlane(x * -1.0, o2) );
+    }
+    else if (boxDim == 3 && nd == 3)
+    {
+      // 6 planes defined by 3 basis vectors
+      VMD xyNormal = x.cross_prod(y);
+      func->addPlane( MDPlane(xyNormal,        o1) );
+      func->addPlane( MDPlane(xyNormal * -1.0, o2) );
+      VMD xzNormal = z.cross_prod(x);
+      func->addPlane( MDPlane(xzNormal,        o1) );
+      func->addPlane( MDPlane(xzNormal * -1.0, o2) );
+      VMD yzNormal = y.cross_prod(z);
+      func->addPlane( MDPlane(yzNormal,        o1) );
+      func->addPlane( MDPlane(yzNormal * -1.0, o2) );
+    }
+    // TODO: Handle 4D and mixed cases like 3D basis of 4D space.
+
+    return func;
+  }
+
+
+  /*
+   *     else if (boxDim == 2)
+    {
+      // 4 planes defined by 2 basis vectors
+      normal = y.cross_prod()
+      points.clear();
+      points.push_back(o1);
+      points.push_back(o1+x);
+      if (nd > 2) points.push_back(o1+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear();
+      points.push_back(o1);
+      points.push_back(o1+y);
+      if (nd > 2) points.push_back(o1+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear();
+      points.push_back(o1+x);
+      points.push_back(o2);
+      if (nd > 2) points.push_back(o2+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear();
+      points.push_back(o1+y);
+      points.push_back(o2);
+      if (nd > 2) points.push_back(o2+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+    }
+    else if (boxDim == 3)
+    {
+      // 6 planes defined by 3 basis vectors
+      points.clear(); // XZ-plane
+      points.push_back(o1);
+      points.push_back(o1+x);
+      points.push_back(o1+x+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear(); // YZ-plane
+      points.push_back(o1);
+      points.push_back(o1+y);
+      points.push_back(o1+y+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear(); // XY-plane
+      points.push_back(o1);
+      points.push_back(o1+x);
+      points.push_back(o1+x+y);
+      func->addPlane( MDPlane(points, insidePoint) );
+
+      points.clear(); // YZ-plane, other side
+      points.push_back(o1+x+y+z);
+      points.push_back(o1+x+y);
+      points.push_back(o1+x);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear(); // XZ-plane, other side
+      points.push_back(o1+y+x+z);
+      points.push_back(o1+y+z);
+      points.push_back(o1+y);
+      func->addPlane( MDPlane(points, insidePoint) );
+      points.clear(); // XY-plane, other side
+      points.push_back(o1+z+x+y);
+      points.push_back(o1+z+x);
+      points.push_back(o1+z);
+      func->addPlane( MDPlane(points, insidePoint) );
+    }
+   *
+   */
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an implicit function for picking boxes, based on the indexes in the
+   * output MDHistoWorkspace.
+   * This needs to be in the space of the INPUT MDEventWorkspace
+   *
+   * @param nd :: number of dimensions in the workspace being sliced.
+   * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive).
+   *        NULL to use the entire range.
+   * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
+   *        NULL to use the entire range.
+   * @return MDImplicitFunction created
+   */
+  MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(size_t nd, size_t * chunkMin, size_t * chunkMax)
+  {
+    if (m_axisAligned)
+    {
+      std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
+      for (size_t bd=0; bd<outD; bd++)
+      {
+        // Dimension in the MDEventWorkspace
+        size_t d = dimensionToBinFrom[bd];
+        if (chunkMin)
+          function_min[d] = binDimensions[bd]->getX(chunkMin[bd]);
+        else
+          function_min[d] = binDimensions[bd]->getX(0);
+        if (chunkMax)
+          function_max[d] = binDimensions[bd]->getX(chunkMax[bd]);
+        else
+          function_max[d] = binDimensions[bd]->getX(binDimensions[bd]->getNBins());
+      }
+      MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
+      return function;
+    }
+    else
+    {
+      // General implicit function
+      return getGeneralImplicitFunction(nd, chunkMin, chunkMax);
+    }
+  }
 
 
 } // namespace Mantid

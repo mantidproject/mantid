@@ -68,9 +68,6 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
-    template<typename MDE, size_t nd>
-    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(typename MDEventWorkspace<MDE, nd>::sptr ws, size_t * chunkMin, size_t * chunkMax);
-
     /// Helper method
     template<typename MDE, size_t nd>
     void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);

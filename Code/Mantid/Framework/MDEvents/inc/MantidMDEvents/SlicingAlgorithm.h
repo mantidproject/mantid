@@ -60,19 +60,27 @@ namespace MDEvents
     void initSlicingProps();
 
     void createTransform();
+
+    void createGeneralTransform();
     void createAlignedTransform();
 
+    void makeAlignedDimensionFromString(const std::string & str);
     void makeBasisVectorFromString(const std::string & str);
+
+    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(size_t nd, size_t * chunkMin, size_t * chunkMax);
+    Mantid::Geometry::MDImplicitFunction * getGeneralImplicitFunction(size_t nd, size_t * chunkMin, size_t * chunkMax);
 
     /// Input workspace
     Mantid::API::IMDEventWorkspace_sptr in_ws;
 
     /// Bin dimensions to actually use
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
-    /// Index of the dimension in the MDEW for the dimension in the output.
+
+    /// Index of the dimension in the MDEW for the dimension in the output. Only for axis-aligned slices
     std::vector<size_t> dimensionToBinFrom;
 
-    /// Coordinate transformation to apply
+    /// Coordinate transformation to apply. This transformation
+    /// contains the scaling that makes the output coordinate = bin indexes in the output MDHistoWorkspace.
     Mantid::API::CoordTransform * m_transform;
 
     /// Coordinate transformation to save in the output workspace (original->binned)
@@ -86,7 +94,7 @@ namespace MDEvents
     /// Number of dimensions in the output (binned) workspace.
     size_t outD;
 
-    /// Basis vectors of the output dimensions
+    /// Basis vectors of the output dimensions, normalized to unity length
     std::vector<Mantid::Kernel::VMD> m_bases;
 
     /// Scaling factor to apply for each basis vector (to map to the bins)

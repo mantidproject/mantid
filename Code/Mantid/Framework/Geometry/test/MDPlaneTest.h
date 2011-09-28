@@ -97,6 +97,17 @@ public:
     TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0) ) );
   }
 
+//  void test_constructorPoints_3D_2()
+//  {
+//    // Define a plane along x=y axis vertical in Z
+//    std::vector<VMD> points;
+//    points.push_back(VMD(0, 0, 0));
+//    points.push_back(VMD(1, 0, 0));
+//    points.push_back(VMD(0, 0, 1));
+//    MDPlane p(points, VMD(0.5, 1.5, 1.0) );
+//    TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0) ) );
+//  }
+
   /** Given a singular matrix it is not possible to find a matrix
    * Disabled because it does NOT throw on MacOS for some reason. */
   void xtest_constructorPoints_singularMatrix()

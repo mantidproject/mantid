@@ -132,6 +132,24 @@ namespace Geometry
      * If the point is bounded by ALL planes contained, then this
      * returns true.
      *
+     * @param coords :: nd-sized array of coordinates
+     * @return true if it is contained in the implicit function.
+     */
+    virtual bool isPointContained(const Mantid::Kernel::VMD & coords)
+    {
+      for (size_t i=0; i<m_numPlanes; i++)
+      {
+        if (!m_planes[i].isPointBounded(coords))
+          return false;
+      }
+      return true;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Is a point in MDimensions contained by this ImplicitFunction?
+     * If the point is bounded by ALL planes contained, then this
+     * returns true.
+     *
      * @param coords :: nd-sized vector of coordinates. No size-check is made!
      * @return true if it is contained in the implicit function.
      */

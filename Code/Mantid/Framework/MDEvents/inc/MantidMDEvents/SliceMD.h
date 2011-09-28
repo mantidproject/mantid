@@ -6,6 +6,8 @@ Algorithm that can take a slice out of an original MDEventWorkspace while preser
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/SlicingAlgorithm.h"
 
 namespace Mantid
 {
@@ -38,7 +40,7 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SliceMD  : public API::Algorithm
+  class DLLExport SliceMD  : public SlicingAlgorithm
   {
   public:
     SliceMD();
@@ -58,6 +60,14 @@ namespace MDEvents
     void init();
     /// Run the algorithm
     void exec();
+
+    /// Helper method
+    template<typename MDE, size_t nd>
+    void doExec(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    /// Method to actually do the slice
+    template<typename MDE, size_t nd, typename OMDE, size_t ond>
+    void slice(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
 
   };

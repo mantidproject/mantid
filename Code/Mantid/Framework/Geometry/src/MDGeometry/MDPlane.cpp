@@ -14,7 +14,7 @@ namespace Geometry
   //----------------------------------------------------------------------------------------------
   /** Constructor with normal and point
    *
-   * @param normal :: vector of length nd of coefficients for the linear equation.
+   * @param normal :: normal to the plane. Points that are in the direction of the normal of the plane are considered to be bounded by it.
    * @param point :: any point that is on the plane
    */
   MDPlane::MDPlane(const std::vector<coord_t> & normal, const std::vector<coord_t> & point)
@@ -28,7 +28,7 @@ namespace Geometry
   //----------------------------------------------------------------------------------------------
   /** Constructor with normal and point
    *
-   * @param normal :: vector of length nd of coefficients for the linear equation.
+   * @param normal :: normal to the plane. Points that are in the direction of the normal of the plane are considered to be bounded by it.
    * @param point :: any point that is on the plane
    */
   MDPlane::MDPlane(const Mantid::Kernel::VMD & normal, const Mantid::Kernel::VMD & point)
@@ -43,8 +43,8 @@ namespace Geometry
   /** Constructor with normal and point
    *
    * @param nd :: number of dimensions
- * @param normal :: vector of length nd of coefficients for the linear equation.
- * @param point :: any point that is on the plane
+   * @param normal :: normal to the plane. Points that are in the direction of the normal of the plane are considered to be bounded by it.
+   * @param point :: any point that is on the plane
    */
   MDPlane::MDPlane(const size_t nd, const coord_t * normal, const coord_t * point)
   : m_nd(nd)
@@ -141,9 +141,15 @@ namespace Geometry
       ret = gsl_linalg_LU_solve (&m.matrix, p, &b.vector, x);
 
     if (ret != 0)
+    {
+      std::string pointsStr;
+      for (size_t i=0; i < points.size(); i++)
+        pointsStr += points[i].toString(",") + ((i != points.size()-1) ? "; " : "");
       // Something failed
       throw std::runtime_error("MDPlane::ctor(): unable to solve the system of equations.\n"
-          "The points given likely do not form a plane (some may be collinear), meaning the plane cannot be constructed.");
+          "The points given likely do not form a plane (some may be collinear), meaning the plane cannot be constructed.\n"
+          "Points were: " + pointsStr);
+    }
 
     // The normal vector
     VMD normal(m_nd);

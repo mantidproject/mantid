@@ -53,12 +53,12 @@ namespace MDEventsTestHelper
    *        0 = don't split box, don't add events
    * @return
    */
-  template<size_t nd>
-  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd> >
-    makeMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0)
+  template<typename MDE, size_t nd>
+  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
+    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0)
   {
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd> >
-            out(new Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd>());
+    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
+            out(new Mantid::MDEvents::MDEventWorkspace<MDE,nd>());
     Mantid::MDEvents::BoxController_sptr bc = out->getBoxController();
     bc->setSplitThreshold(100);
     bc->setSplitInto(splitInto);
@@ -86,7 +86,7 @@ namespace MDEventsTestHelper
           Mantid::coord_t centers[nd];
           for (size_t d=0; d<nd; d++)
             centers[d] = min + (double(index[d])+0.5)*(max-min)/double(splitInto);
-          out->addEvent( Mantid::MDEvents::MDLeanEvent<nd>(1.0, 1.0, centers) );
+          out->addEvent( MDE(1.0, 1.0, centers) );
         }
 
         allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, index, index_max);
@@ -98,6 +98,13 @@ namespace MDEventsTestHelper
   }
 
 
+  /** Make a MDEventWorkspace with MDLeanEvents */
+  template<size_t nd>
+  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd> >
+    makeMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0)
+  {
+    return makeAnyMDEW<Mantid::MDEvents::MDLeanEvent<nd>,nd>(splitInto, min, max, numEventsPerBox);
+  }
 
 
   //=====================================================================================

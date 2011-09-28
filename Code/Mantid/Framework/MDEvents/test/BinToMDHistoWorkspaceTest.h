@@ -173,12 +173,12 @@ public:
   }
 
   void test_exec_3D_scrambled_order()
-  { do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "", "Axis2,2.0,8.0, 6", 1.0 /*signal*/, 6*6*6 /*# of bins*/, false /*IterateEvents*/, 1,
+  { do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/, false /*IterateEvents*/, 1,
       VMD(0,1,0), VMD(1,0,0), VMD(0,0,1));
   }
 
   void test_exec_3D_scrambled_order_IterateEvents()
-  { do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "", "Axis2,2.0,8.0, 6", 1.0 /*signal*/, 6*6*6 /*# of bins*/, true /*IterateEvents*/ , 1,
+  { do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/, true /*IterateEvents*/ , 1,
       VMD(0,1,0), VMD(1,0,0), VMD(0,0,1));
   }
 
@@ -210,12 +210,12 @@ public:
   }
 
   void test_exec_2D_scrambledAndUnevent()
-  { do_test_exec("", "Axis0,2.0,8.0, 3", "", "Axis2,2.0,8.0, 6", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/, false /*IterateEvents*/, 1,
+  { do_test_exec("", "Axis0,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/, false /*IterateEvents*/, 1,
       VMD(1,0,0), VMD(0,0,1));
   }
 
   void test_exec_2D_scrambledAndUnevent_IterateEvents()
-  { do_test_exec("", "Axis0,2.0,8.0, 3", "", "Axis2,2.0,8.0, 6", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/, true /*IterateEvents*/ , 1,
+  { do_test_exec("", "Axis0,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/, true /*IterateEvents*/ , 1,
       VMD(1,0,0), VMD(0,0,1));
   }
 
