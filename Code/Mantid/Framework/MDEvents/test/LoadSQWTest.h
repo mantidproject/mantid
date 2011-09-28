@@ -36,7 +36,7 @@ private:
     }
     virtual void addEvents(MDEventWorkspace4Lean* ws) { return LoadSQW::addEvents(ws); };
     virtual void addDimensions(MDEventWorkspace4Lean* ws) { return LoadSQW::addDimensions(ws); };
-    virtual boost::shared_ptr<Mantid::Geometry::OrientedLattice> extractLattice() { return LoadSQW::extractLattice(); };
+    virtual void addLattice(MDEventWorkspace4Lean* ws) { return LoadSQW::addLattice(ws); };
   };
 
 public:
@@ -163,13 +163,16 @@ public:
     alg.setPropertyValue("OutputWorkspace", "testAddDimension");
     alg.setup();
 
-    boost::shared_ptr<Mantid::Geometry::OrientedLattice> lattice = alg.extractLattice();
-    TS_ASSERT_DELTA(2.8699, lattice->a1(), 0.0001);
-    TS_ASSERT_DELTA(2.8699, lattice->a2(), 0.0001);
-    TS_ASSERT_DELTA(2.8699, lattice->a3(), 0.0001);
-    TS_ASSERT_DELTA(0.3484, lattice->b1(), 0.0001);
-    TS_ASSERT_DELTA(0.3484, lattice->b2(), 0.0001);
-    TS_ASSERT_DELTA(0.3484, lattice->b3(), 0.0001);
+    MDEventWorkspace4Lean ws;
+    alg.addLattice(&ws);
+
+    const Mantid::Geometry::OrientedLattice& lattice = ws.getExperimentInfo(0)->sample().getOrientedLattice();
+    TS_ASSERT_DELTA(2.8699, lattice.a1(), 0.0001);
+    TS_ASSERT_DELTA(2.8699, lattice.a2(), 0.0001);
+    TS_ASSERT_DELTA(2.8699, lattice.a3(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice.b1(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice.b2(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice.b3(), 0.0001);
   }
 };
 

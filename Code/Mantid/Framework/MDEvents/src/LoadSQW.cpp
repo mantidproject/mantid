@@ -87,6 +87,10 @@ namespace Mantid
 
       // Initialize the workspace.
       pWs->initialize();
+
+      // Add oriented lattice.
+      addLattice(pWs);
+
       // Start with a MDGridBox.
       pWs->splitBox();
 
@@ -288,10 +292,10 @@ namespace Mantid
     }
 
     /**
-    Extract the b-matrix from a SQW file.
-    @return OrientedLattice sptr 
+    Extract the b-matrix from a SQW file. Create experiment info with oriented lattice and add to workspace.
+    @param ws : Workspace to modify.
     */
-    boost::shared_ptr<OrientedLattice> LoadSQW::extractLattice()
+    void LoadSQW::addLattice(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
     {
       std::vector<char> buf(4*(3+3)); //Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
       this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
@@ -303,8 +307,10 @@ namespace Mantid
       double aa = (double)(*((float *)(&buf[12])));
       double bb = (double)(*((float *)(&buf[16])));
       double cc = (double)(*((float *)(&buf[20])));
-
-      return boost::shared_ptr<OrientedLattice>(new OrientedLattice(a,b,c,aa,bb,cc));
+      
+      ExperimentInfo_sptr info(new ExperimentInfo());
+      info->mutableSample().setOrientedLattice(new OrientedLattice(a,b,c,aa,bb,cc));
+      ws->addExperimentInfo(info);
     }
 
 

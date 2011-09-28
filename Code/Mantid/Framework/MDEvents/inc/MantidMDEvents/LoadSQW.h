@@ -45,7 +45,7 @@ namespace MDEvents
     virtual void addDimensions(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws);
 
     /// Extract lattice information
-    virtual boost::shared_ptr<OrientedLattice> extractLattice();
+    virtual void addLattice(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws);
 
     /// Parse metadata from file.
     void parseMetadata(); // New controlling function over legacy ones.
