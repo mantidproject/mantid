@@ -160,7 +160,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             LoadIsawPeaks(Filename=self._peaksfile,OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
-            hklfile = self._peaksfile.split('.')[0] + '.integrate'
+            hklfile = self._peaksfile.split('.')[0] + '.hkl'
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
         if "nxs" in self._outTypes:
             filename = os.path.join(self._outDir, str(wksp))
@@ -303,6 +303,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             # write out the files
             RenameWorkspace(InputWorkspace=samRunT,OutputWorkspace=samRunstr)
             samRun = mtd[samRunstr]
+            # scale data so fitting routines do not run out of memory
+            samRun /= 500
             samRun = self._bin(samRun)
             ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
             mtd.releaseFreeMemory()
