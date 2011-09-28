@@ -36,11 +36,13 @@ namespace Mantid
       virtual Mantid::API::CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const;
       virtual void setSuccessor(CoordTransformAffineParser* other);
       virtual ~CoordTransformAffineParser();
-      typedef boost::shared_ptr<CoordTransformAffineParser> SuccessorType_sptr;
+      typedef boost::shared_ptr<CoordTransformAffineParser> SuccessorType_sptr; ///< successor parser shared ptr typedef
     protected:
-      SuccessorType_sptr m_successor;
+      SuccessorType_sptr m_successor; ///< successor parser
     private:
+      /// Copy constructor
       CoordTransformAffineParser(const CoordTransformAffineParser&);
+      /// Assignment operator
       CoordTransformAffineParser& operator=(const CoordTransformAffineParser&);
     };
   }

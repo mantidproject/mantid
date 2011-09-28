@@ -36,9 +36,9 @@ namespace Mantid
       coord_t ** getRawMatrix();
       AffineMatrixType  getAffineMatrix() const; 
       
-      /*
-        Gets the type parameter name.
-        @return parameter name.
+      /**
+       * Gets the type parameter name.
+       * @return parameter name.
       */
       static std::string parameterName()
       {

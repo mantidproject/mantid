@@ -18,14 +18,22 @@ namespace Mantid
     {
     public:
 
+      /// Constructor
       AffineMatrixParameterParser();
+      /** Creates the parameter by reading the xml given.
+      * @param parameterElement : xml element to parser from.
+      * @return Fully constructed AffineMatrixParameter.
+      */
       virtual AffineMatrixParameter* createParameter(Poco::XML::Element* parameterElement);
+      /// Set a successor parser for chain-of-responsibility type reading.
       virtual void setSuccessorParser(ImplicitFunctionParameterParser*);
+      /// Destructor
       virtual ~AffineMatrixParameterParser();
 
     private:
-
+      /// Assignment operator
       AffineMatrixParameterParser& operator=(const AffineMatrixParameterParser&);
+      /// Copy constructor
       AffineMatrixParameterParser(const AffineMatrixParameterParser&);
     };
   }

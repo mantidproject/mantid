@@ -6,16 +6,13 @@ namespace Mantid
   namespace MDEvents
   {
     
-    /// Constructor
+
     AffineMatrixParameterParser::AffineMatrixParameterParser()
     {
     }
 
     //----------------------------------------------------------------------------------------------
-    /** Creates the parameter by reading the xml given.
-    * @param parameterElement : xml element to parser from.
-    * @return Fully constructed AffineMatrixParameter.
-    */
+
     AffineMatrixParameter* AffineMatrixParameterParser::createParameter(Poco::XML::Element* parameterElement)
     {
       std::string typeName = parameterElement->getChildElement("Type")->innerText();
@@ -82,15 +79,12 @@ namespace Mantid
     }  
 
     //----------------------------------------------------------------------------------------------
-    /** Set a successor parser for chain-of-responsibility type reading.
-    * @param 
-    */
+
     void AffineMatrixParameterParser::setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser*)
     {
       throw std::runtime_error("Cannot set a successor parser on a AffineMatrixParameterParser");
     }
 
-    /// Destructor
     AffineMatrixParameterParser::~AffineMatrixParameterParser()
     {
     }

@@ -22,7 +22,7 @@ namespace Mantid
     }
 
     //-----------------------------------------------------------------------------------------------
-    /*
+    /**
     Create the transform object.
     @param coordTransElement : xml coordinate transform element
     @return a fully constructed coordinate transform object.
@@ -72,7 +72,7 @@ namespace Mantid
     }
 
     //-----------------------------------------------------------------------------------------------
-    /*
+    /**
     Set the successor parser.
     @param other : another parser to use if this one fails.
     */

@@ -8,8 +8,8 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     *
-    * @param outD, the number of output dimensions
-    * @param inD, the nubmer of input dimensions
+    * @param outD the number of output dimensions
+    * @param inD the nubmer of input dimensions
     */
     AffineMatrixParameter::AffineMatrixParameter(size_t outD, size_t inD) : affineMatrix(outD+1, inD+1)
     {
