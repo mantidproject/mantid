@@ -25,7 +25,11 @@ else:
     else: # Give it a go how it is
         _var = ''
         _sep = ''
-_oldpath = os.environ[_var]
+try:
+    _oldpath = os.environ[_var]
+except:
+    _oldpath = ''
+    _sep = ''
 os.environ[_var] = os.environ['MANTIDPATH'] + _sep + _oldpath       
 
 #######################################################################
