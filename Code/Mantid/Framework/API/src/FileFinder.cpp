@@ -325,14 +325,21 @@ namespace Mantid
       {
         if (arch)
         {
-          std::string path = arch->getPath(hint);
-          if (!path.empty())
+          try
           {
-            Poco::File file(path);
-            if (file.exists())
+            std::string path = arch->getPath(hint);
+            if (!path.empty())
             {
-              return file.path();
+              Poco::File file(path);
+              if (file.exists())
+              {
+                return file.path();
+              }
             }
+          }
+          catch(...)
+          {
+            g_log.error() << "Archive search could not find '" << hint << "'\n";
           }
         }
       }
@@ -348,7 +355,14 @@ namespace Mantid
           extension = filename.substr(i);
           filename.erase(i);
         }
-        filename = makeFileName(filename, facility);
+        try
+        {
+          filename = makeFileName(filename, facility);
+        }
+        catch(std::invalid_argument)
+        {
+          g_log.error() << "Could not find file '" << filename << "'\n";
+        }
       }
 
       // work through the extensions
