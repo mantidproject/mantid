@@ -103,7 +103,6 @@ namespace Crystal
       out >> runcount;
       out.seekp (pos - 110);
       out >> seqNum;
-      std::cout << seqNum<<"\n";
       out.seekp (pos - 73);
       runcount ++;
       seqNum ++;
