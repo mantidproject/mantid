@@ -92,14 +92,16 @@ public:
   void drawObject() const;
   void initDraw() const;
 
-  ///Return the shape of the component
-  const boost::shared_ptr<const Object> shape()const;
+  /// Return the shape of the component
+  const Object_const_sptr shape() const;
+  /// Set a new shape on the component
+  void setShape(Object_const_sptr newShape);
   /// Return the material this component is made from
   const Material_const_sptr material() const;
 
 protected:
-  /// The phyical geometry representation
-  // Made a const pointer to a const object. Since this is a shared object we shouldn't be
+  /// The physical geometry representation
+  // Made a pointer to a const object. Since this is a shared object we shouldn't be
   // exposing non-const methods of Object through this class.
   Object_const_sptr m_shape;
   /// The material this object is made of

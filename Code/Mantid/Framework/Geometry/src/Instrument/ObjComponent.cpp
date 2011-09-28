@@ -63,6 +63,15 @@ namespace Mantid
         return m_shape;
     }
 
+    /// Set a new shape on the component
+    void ObjComponent::setShape(Object_const_sptr newShape)
+    {
+      if (m_isParametrized)
+        throw "Noooooooo!";
+      else
+        m_shape = newShape;
+    }
+
     /** 
      * Return the material of the component. Currently 
      * unaffacted by parametrization

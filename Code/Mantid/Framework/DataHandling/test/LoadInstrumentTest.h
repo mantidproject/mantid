@@ -479,6 +479,13 @@ public:
     TS_ASSERT_THROWS( neutronicInst->getDetector(1004), Exception::NotFoundError );
     TS_ASSERT_EQUALS( neutronicInst->getDetector(1005)->getPos(), V3D(4,3,0) );
 
+    // Check that the first 2 detectors share the same shape in the physical instrument...
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1000)->shape(), physicalInst->getDetector(1001)->shape() )
+    // ...but not in the neutronic instrument
+    TS_ASSERT_DIFFERS( neutronicInst->getDetector(1000)->shape(), neutronicInst->getDetector(1001)->shape() )
+    // Also, the same shape is shared between the corresponding '1000' detectors
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1000)->shape(), neutronicInst->getDetector(1000)->shape() )
+
     // Check the monitor is in the same place in each instrument
     TS_ASSERT_EQUALS( physicalInst->getMonitor(1)->getPos(), neutronicInst->getMonitor(1)->getPos() );
     // ...but is not the same object

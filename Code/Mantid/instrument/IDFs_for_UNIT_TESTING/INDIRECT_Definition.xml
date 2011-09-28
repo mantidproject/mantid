@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<instrument name="unit testing 3" valid-from   ="1900-01-31 23:59:59"
-                                  valid-to     ="2100-01-31 23:59:59"
-                                  last-modified="2011-08-25T12:00:00">
+<instrument name="indirect neutronic" valid-from   ="1900-01-31 23:59:59"
+                                      valid-to     ="2100-01-31 23:59:59"
+                                      last-modified="2011-08-25T12:00:00">
 
 <!-- XY detector -->
 <defaults>
@@ -29,7 +29,7 @@
       <neutronic x="2" y="2"/>
     </location>
     <location x="0" y="1">
-      <neutronic x="2" y="3"/>
+      <neutronic x="2" y="3" type="banana" />
     </location>
     <location x="1" y="0">
       <neutronic x="3" y="2"/>
@@ -55,6 +55,16 @@
   <algebra val="pixel-shape"/>
 </type>
 
+<!-- Sample 'neutronic' pixel -->
+<type is="detector" name="banana">
+  <cuboid id="pixel-shape">
+    <left-front-bottom-point y="-0.2" x="-0.2" z="0.0"/>
+    <left-front-top-point y="0.2" x="-0.2" z="0.0"/>
+    <left-back-bottom-point y="-0.2" x="-0.2" z="-0.1"/>
+    <right-front-bottom-point y="-0.2" x="0.2" z="0.0"/>
+  </cuboid>
+  <algebra val="pixel-shape"/>
+</type>
 
 <!-- monitor -->
 <component type="monitor" idlist="monitor">

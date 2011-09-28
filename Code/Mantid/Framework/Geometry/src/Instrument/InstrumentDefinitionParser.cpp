@@ -361,7 +361,7 @@ namespace Geometry
       throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
     }
 
-    comp->setPos(InstrumentDefinitionParser::getRelativeTranslation(comp, pElem, angleConvertConst, deltaOffsets));
+    comp->setPos(getRelativeTranslation(comp, pElem, angleConvertConst, deltaOffsets));
 
     // Rotate coordinate system of this component
     if ( pElem->hasAttribute("rot") )
@@ -409,7 +409,7 @@ namespace Geometry
 
         if (tElem)
         {
-            posTrans = InstrumentDefinitionParser::getRelativeTranslation(comp, tElem, angleConvertConst, deltaOffsets);
+            posTrans = getRelativeTranslation(comp, tElem, angleConvertConst, deltaOffsets);
 
         // to get the change in translation relative to current rotation of comp
         Geometry::CompAssembly compToGetRot;
@@ -770,7 +770,7 @@ namespace Geometry
     // set location for this newly added comp and set facing if specified in instrument def. file. Also
     // check if any logfiles are referred to through the <parameter> element.
 
-    InstrumentDefinitionParser::setLocation(ass, pLocElem, m_angleConvertConst, m_deltaOffsets);
+    setLocation(ass, pLocElem, m_angleConvertConst, m_deltaOffsets);
     setFacing(ass, pLocElem);
     setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
     setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
@@ -904,7 +904,7 @@ namespace Geometry
 
       // set location for this newly added comp and set facing if specified in instrument def. file. Also
       // check if any logfiles are referred to through the <parameter> element.
-      InstrumentDefinitionParser::setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
+      setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
       setFacing(bank, pLocElem);
       setLogfile(bank, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
       setLogfile(bank, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
@@ -997,12 +997,13 @@ namespace Geometry
 
       // set location for this newly added comp and set facing if specified in instrument def. file. Also
       // check if any logfiles are referred to through the <parameter> element.
-      InstrumentDefinitionParser::setLocation(detector, pLocElem, m_angleConvertConst, m_deltaOffsets);
+      setLocation(detector, pLocElem, m_angleConvertConst, m_deltaOffsets);
       setFacing(detector, pLocElem);
       setLogfile(detector, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
       setLogfile(detector, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
-      // If enabled, check for a 'neutronic position' tag and add to cache (null pointer added if not found)
+      // If enabled, check for a 'neutronic position' tag and add to cache
+      // (null pointer added INTENTIONALLY if not found)
       if ( m_indirectPositions )
       {
         m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
@@ -1049,7 +1050,7 @@ namespace Geometry
       // set location for this newly added comp and set facing if specified in instrument def. file. Also
       // check if any logfiles are referred to through the <parameter> element.
 
-      InstrumentDefinitionParser::setLocation(comp, pLocElem, m_angleConvertConst, m_deltaOffsets);
+      setLocation(comp, pLocElem, m_angleConvertConst, m_deltaOffsets);
       setFacing(comp, pLocElem);
       setLogfile(comp, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
       setLogfile(comp, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
@@ -1745,20 +1746,36 @@ namespace Geometry
     m_instrument->setPhysicalInstrument(physical);
 
     // Now we manipulate the original instrument (m_instrument) to hold neutronic positions
-    std::map<Geometry::IComponent*,Poco::XML::Element*>::const_iterator it;
+    std::map<IComponent*,Poco::XML::Element*>::const_iterator it;
     for ( it = m_neutronicPos.begin(); it != m_neutronicPos.end(); ++it )
     {
       if ( it->second )
       {
-        InstrumentDefinitionParser::setLocation(it->first,it->second, m_angleConvertConst, m_deltaOffsets);
+        setLocation(it->first,it->second, m_angleConvertConst, m_deltaOffsets);
+        // TODO: Do we need to deal with 'facing'???
+
+        // Check for a 'type' attribute, indicating that we want to set the neutronic shape
+        if ( it->second->hasAttribute("type") && dynamic_cast<ObjComponent*>(it->first) )
+        {
+          const Poco::XML::XMLString shapeName = it->second->getAttribute("type");
+          std::map<std::string,Object_sptr>::const_iterator shapeIt = mapTypeNameToShape.find(shapeName);
+          if ( shapeIt != mapTypeNameToShape.end() )
+          {
+            // Change the shape on the current component to the one requested
+            dynamic_cast<ObjComponent*>(it->first)->setShape(shapeIt->second);
+          }
+          else
+          {
+            throw Exception::InstrumentDefinitionError("Requested type "+shapeName+" not defined in IDF");
+          }
+        }
       }
-      else
+      else // We have a null Element*, which signals a detector with no neutronic position
       {
         // This should only happen for detectors
         Detector * det = dynamic_cast<Detector*>(it->first);
         if (det) m_instrument->removeDetector(det);
       }
-
     }
   }
 
