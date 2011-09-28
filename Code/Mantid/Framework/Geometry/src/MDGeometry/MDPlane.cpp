@@ -125,26 +125,25 @@ namespace Geometry
       // The row in B = - the 0th coordinate of the offset point.
       b_data[row] = -point[0];
     }
+    // To avoid aborting
+    gsl_set_error_handler_off();
 
     gsl_matrix_view m = gsl_matrix_view_array (a_data, m_nd-1, m_nd-1);
     gsl_vector_view b = gsl_vector_view_array (b_data, m_nd-1);
     gsl_vector *x = gsl_vector_alloc (m_nd-1);
-    int s;
+    int s, ret = 0;
 
     // Use GSL to solve the linear algebra problem
     gsl_permutation * p;
-    try
-    {
-      p = gsl_permutation_alloc (m_nd-1);
-      gsl_linalg_LU_decomp (&m.matrix, p, &s);
-      gsl_linalg_LU_solve (&m.matrix, p, &b.vector, x);
-    }
-    catch (...)
-    {
-      // Rethrow with useful message
-      throw std::runtime_error("MDPlane::ctor(): the points given did not form a plane (may be collinear), meaning the plane cannot be constructed.\n"
-          "GSL error: " /*+ std::string(e) */);
-    }
+    p = gsl_permutation_alloc (m_nd-1);
+    ret = gsl_linalg_LU_decomp (&m.matrix, p, &s);
+    if (ret == 0)
+      ret = gsl_linalg_LU_solve (&m.matrix, p, &b.vector, x);
+
+    if (ret != 0)
+      // Something failed
+      throw std::runtime_error("MDPlane::ctor(): unable to solve the system of equations.\n"
+          "The points given likely do not form a plane (some may be collinear), meaning the plane cannot be constructed.");
 
     // The normal vector
     VMD normal(m_nd);

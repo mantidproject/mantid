@@ -97,13 +97,18 @@ public:
     TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0) ) );
   }
 
-  /** Disabled because GSL simply aborts the program instead of throwing a friendly exception */
-  void xtest_constructorPoints_2D_singularMatrix()
+  /** Given a singular matrix it is not possible to find a matrix */
+  void test_constructorPoints_singularMatrix()
   {
     std::vector<VMD> points;
     points.push_back(VMD(1.0,1.0));
     points.push_back(VMD(1.0,1.0));
     TS_ASSERT_THROWS_ANYTHING( MDPlane p(points, VMD(1.5, 0.5) ) );
+    points.clear();
+    points.push_back(VMD(1.0,1.0,0.0));
+    points.push_back(VMD(2.0,2.0,0.0));
+    points.push_back(VMD(3.0,3.0,0.0));
+    TS_ASSERT_THROWS_ANYTHING( MDPlane p(points, VMD(1,2,3) ) );
   }
 
   void test_copy_ctor()
