@@ -175,7 +175,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
   m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
-  m_ConfigPaths.insert(std::make_pair("defaultsave.directory", false));
   m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
   m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
@@ -662,8 +661,14 @@ std::string ConfigServiceImpl::defaultConfig() const
 void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append,
     const bool update_caches)
 {
-  //std::cout << "Properties file loaded: " <<  filename << std::endl;
   loadConfig(filename, append);
+
+  //Ensure that the default save directory makes sense
+  std::string save_dir = getString("defaultsave.directory");
+  if (Poco::trimInPlace(save_dir).size() == 0) {
+    setString("defaultsave.directory", Poco::Path::home());
+  }
+
   if (update_caches)
   {
     // Only configure logging once

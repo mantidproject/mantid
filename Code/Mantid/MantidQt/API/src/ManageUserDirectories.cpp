@@ -215,7 +215,9 @@ void ManageUserDirectories::moveDown()
 void ManageUserDirectories::selectSaveDir()
 {
   QSettings settings;
-  QString lastDirectory = settings.value("ManageUserSettings/last_directory", "").toString();
+  QString lastDirectory = m_uiForm.leDefaultSave->text();
+  if ( lastDirectory.trimmed() == "" )
+    lastDirectory = settings.value("ManageUserSettings/last_directory", "").toString();
 
   QString newDir = QFileDialog::getExistingDirectory(this,
     tr("Select New Default Save Directory"),
