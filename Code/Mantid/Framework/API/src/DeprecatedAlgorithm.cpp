@@ -25,6 +25,7 @@ namespace API
       this->m_replacementAlgorithm = "";
   }
 
+  /// The date the algorithm was deprecated on
   void DeprecatedAlgorithm::deprecatedDate(const std::string & date)
   {
     this->m_deprecatdDate = "";

@@ -39,7 +39,7 @@ void AlignDetectors::initDocs()
  * Make a map of the conversion factors between tof and D-spacing
  * for all pixel IDs in a workspace.
  * @param inputWS the workspace containing the instrument geometry of interest.
- * @param offsets map between pixelID and offset (from the calibration file)
+ * @param offsetsWS map between pixelID and offset (from the calibration file)
  * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
  * @return map of conversion factors between TOF and dSpacing
  */

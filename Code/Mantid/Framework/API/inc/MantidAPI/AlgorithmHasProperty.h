@@ -65,14 +65,18 @@ namespace Mantid
       }
 
     protected:
-      ///  Checks the value based on the validator's rules
+      /**
+       * Checks the value based on the validator's rules
+       * @param value :: The input algorithm to check
+       * @returns An error message to display to users or an empty string on no error
+       */
       virtual std::string checkValidity(const boost::shared_ptr<IAlgorithm> & value) const;
 
     private:
       /// Default constructor
       AlgorithmHasProperty();
 
-      ///Store the property name
+      /// Store the property name
       std::string m_propName;
     };
 

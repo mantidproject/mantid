@@ -351,6 +351,10 @@ double AnvredCorrection::getEventWeight( double lamda, double two_theta )
   *       the absorption (absn) and tbar are returned.
   *
   *       a. j. schultz, june, 2008
+  *
+  *       @param twoth scattering angle
+  *       @param wl scattering wavelength
+  *       @returns absorption
   */
 double AnvredCorrection::absor_sphere(double& twoth, double& wl)
   {

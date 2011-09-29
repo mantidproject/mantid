@@ -46,42 +46,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-/** Calculates anvred correction factors for attenuation due to absorption and scattering in a spherical sample. 
-
-    Properties:
-    <UL>
-    <LI> InputWorkspace  - The name of the input workspace. </LI>
-    <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
-    <LI> PreserveEvents - Keep the output workspace as an EventWorkspace, if the input has events. 
-    <LI> OnlySphericalAbsorption - All corrections done if false (default). If true, only the spherical absorption correction. 
-    <LI> LinearScatteringCoef - Linear scattering coefficient in 1/cm 
-    <LI> LinearAbsorptionCoef - Linear absorption coefficient at 1.8 Angstroms in 1/cm. 
-    <LI> Radius - Radius of the sample in centimeters. 
-    </UL>
-
-    @author Vickie Lynch, Dennis Mikkelson SNS
-    @date 06/14/2011
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
   const double pc[4][19] =
   {    {0.9369, 0.9490, 0.9778, 1.0083, 1.0295, 1.0389, 1.0392, 1.0338,
         1.0261, 1.0180, 1.0107, 1.0046, 0.9997, 0.9957, 0.9929, 0.9909,
@@ -102,8 +66,42 @@ namespace Crystal
   const int NUM_WAVELENGTHS = std::ceil( MAX_WAVELENGTH * STEPS_PER_ANGSTROM);
 
   const double radtodeg_half = 180.0/M_PI/2.;
+  /** Calculates anvred correction factors for attenuation due to absorption and scattering in a spherical sample.
 
+      Properties:
+      <UL>
+      <LI> InputWorkspace  - The name of the input workspace. </LI>
+      <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
+      <LI> PreserveEvents - Keep the output workspace as an EventWorkspace, if the input has events.
+      <LI> OnlySphericalAbsorption - All corrections done if false (default). If true, only the spherical absorption correction.
+      <LI> LinearScatteringCoef - Linear scattering coefficient in 1/cm
+      <LI> LinearAbsorptionCoef - Linear absorption coefficient at 1.8 Angstroms in 1/cm.
+      <LI> Radius - Radius of the sample in centimeters.
+      </UL>
 
+      @author Vickie Lynch, Dennis Mikkelson SNS
+      @date 06/14/2011
+
+      Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+      This file is part of Mantid.
+
+      Mantid is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation; either version 3 of the License, or
+      (at your option) any later version.
+
+      Mantid is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+      Code Documentation is available at: <http://doxygen.mantidproject.org>
+  */
 class DLLExport AnvredCorrection : public API::Algorithm
 {
 public:
@@ -135,22 +133,24 @@ private:
   void init();
   /// Execution code
   void exec();
+  /// Event execution code
   void execEvent();
+  /// Algorithm cleanup
   void cleanup();
 
 
   void retrieveBaseProperties();
-  void constructSample(API::Sample& sample);
+  //void constructSample(API::Sample& sample);
   double getEventWeight( double lamda, double two_theta);
   void BuildLamdaWeights();
   double absor_sphere(double& twoth, double& wl) ;
-  void GetSpectrumWeights(std::string spectrum_file_name, std::vector<double> lamda_weight);
+  //void GetSpectrumWeights(std::string spectrum_file_name, std::vector<double> lamda_weight);
   
-  double smu; // in 1/cm
-  double amu; // in 1/cm
-  double radius; // in cm
-  double power_th;  //Power of lamda in BuildLamdaWeights
-  std::vector<double> lamda_weight;
+  double smu; ///< linear scattering coefficient in 1/cm
+  double amu; ///< linear absoprtion coefficient in 1/cm
+  double radius; ///< sample radius in cm
+  double power_th;  ///< Power of lamda in BuildLamdaWeights
+  std::vector<double> lamda_weight; ///< lmabda weights
 
 };
 

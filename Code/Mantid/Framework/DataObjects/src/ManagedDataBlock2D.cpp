@@ -28,8 +28,8 @@ Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBloc
  *  @param parentWS :: The workspace that owns this block
  *  @param sharedDx :: A cow-ptr to a correctly-sized DX vector that every spectrum will share (until written to).
  */
-ManagedDataBlock2D::ManagedDataBlock2D(const size_t &minIndex, const size_t &NVectors, 
-    const size_t &XLength, const size_t &YLength, AbsManagedWorkspace2D * parentWS, MantidVecPtr sharedDx) :
+ManagedDataBlock2D::ManagedDataBlock2D(const std::size_t &minIndex, const std::size_t &NVectors,
+    const std::size_t &XLength, const std::size_t &YLength, AbsManagedWorkspace2D * parentWS, MantidVecPtr sharedDx) :
   m_XLength(XLength), m_YLength(YLength), m_minIndex(minIndex), m_loaded(false)
 {
 //  MantidVecPtr t1;

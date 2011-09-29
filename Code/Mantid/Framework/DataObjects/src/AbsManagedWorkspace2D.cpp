@@ -47,7 +47,7 @@ Workspace2D()
 *  @param YLength :: The number of data/error points in each vector (must all be the same)
 *  @throw std::runtime_error if unable to open a temporary file
 */
-void AbsManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
+void AbsManagedWorkspace2D::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
 {
   m_noVectors = NVectors;
   m_axes.resize(2);
@@ -151,7 +151,7 @@ size_t AbsManagedWorkspace2D::getHistogramNumberHelper() const
 *  @return A pointer to the data block containing the index requested
 */
 // not really a const method, but need to pretend it is so that const data getters can call it
-ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const size_t index) const
+ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const std::size_t index) const
 {
   // Which clock does this correspond to?
   size_t blockIndex = index / m_vectorsPerBlock;
