@@ -43,8 +43,10 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
+#include <qwt_global.h>
+#if QWT_VERSION >= 0x050200
 #include <qwt_plot_rescaler.h>
-
+#endif
 #include "Plot.h"
 #include "Table.h"
 #include "AxesDialog.h"
@@ -830,7 +832,9 @@ private:
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
   QwtPlotPanner *d_panner;
+#if QWT_VERSION >= 0x050200
   QwtPlotRescaler *d_rescaler;
+#endif
   //for saving the spectrogram axes number if the axes details like scale is changed
   //this is useful for saving/loading project.
   std::vector<int> updatedaxis;

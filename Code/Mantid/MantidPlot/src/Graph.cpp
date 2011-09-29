@@ -87,7 +87,9 @@
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_layout.h>
 #include <qwt_plot_zoomer.h>
+#if QWT_VERSION >= 0x050200
 #include <qwt_plot_rescaler.h>
+#endif
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
 #include <qwt_text_label.h>
@@ -123,7 +125,9 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   d_peak_fit_tool = NULL;
   d_magnifier = NULL;
   d_panner=NULL;
+#if QWT_VERSION >= 0x050200
   d_rescaler = NULL;
+#endif
 
   widthLine=1;
   selectedMarker=-1;
@@ -4940,14 +4944,25 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,d
   return plotSpectrogram(d_spectrogram,type);
 }
 
+/*
+ * Returns true if the graph has a 2D plot
+ *
+ * NOTE: returns false if we are running an old version of QWT (pre-5.2.0)
+ *
+ */
 bool Graph::isSpectrogram()
 {
+#if QWT_VERSION >= 0x050200
   for (int i=0; i<c_type.count(); i++)
   {
     if (!(c_type[i] == GrayScale || c_type[i] == ColorMap || c_type[i] == Contour || c_type[i] == ColorMapContour))
       return false;
   }
   return true;
+#else
+  return false;
+#endif
+
 }
 
 Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
@@ -5557,7 +5572,9 @@ void Graph::enablePanningMagnifier(bool on)
  */
 bool Graph::isFixedAspectRatioEnabled()
 {
+#if QWT_VERSION >= 0x050200
   if (d_rescaler) return true;
+#endif
   return false;
 }
 /* Enable or disable fixing the aspect ratio of plots
@@ -5565,6 +5582,7 @@ bool Graph::isFixedAspectRatioEnabled()
  */
 void Graph::enableFixedAspectRatio(bool on)
 {
+#if QWT_VERSION >= 0x050200
   if (d_rescaler)
     delete d_rescaler;
 
@@ -5575,6 +5593,9 @@ void Graph::enableFixedAspectRatio(bool on)
   } else {
     d_rescaler = NULL;
   }
+#else
+  UNUSED_ARG(on)
+#endif
 }
 
 void Graph::setWaterfallXOffset(int offset)
