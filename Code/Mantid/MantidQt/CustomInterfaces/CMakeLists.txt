@@ -11,6 +11,7 @@ set ( SRC_FILES src/background.cpp
                 src/MuonAnalysis.cpp
                 src/MuonAnalysisHelper.cpp
 		        src/MuonAnalysisOptionTab.cpp
+				#src/ParameterisedLatticeView.cpp
                 src/SANSAddFiles.cpp
                 src/SANSPlotSpecial.cpp
                 src/SANSRunWindow.cpp
@@ -30,9 +31,11 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
+				#inc/MantidQtCustomInterfaces/LatticeView.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
+				#inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
@@ -54,6 +57,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
+				#inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
@@ -104,8 +108,6 @@ target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBro
 if ( CXXTEST_FOUND )
   
   include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
-  MESSAGE(STATUS "including -> ${inc}")
-  
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
