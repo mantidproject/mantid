@@ -1138,7 +1138,7 @@ class MantidPyFramework(FrameworkManager):
 
     def _importSimpleAPIToMain(self):
         import mantidsimple
-        mantidsimple.translate()
+        # mantidsimple.translate() #Unnecessary : called already when importing.
         for name in dir(mantidsimple):
             if name.startswith('_'):
                 continue
