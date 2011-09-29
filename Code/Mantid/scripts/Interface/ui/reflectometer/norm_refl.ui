@@ -29,7 +29,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QPushButton" name="pushButton_4">
+            <widget class="QPushButton" name="norm_load_nexus_button">
              <property name="text">
               <string>Load Normalization ...</string>
              </property>
@@ -1499,7 +1499,7 @@
               </palette>
              </property>
              <property name="text">
-              <string>  </string>
+              <string/>
              </property>
             </widget>
            </item>
@@ -1956,7 +1956,7 @@
               </palette>
              </property>
              <property name="text">
-              <string> </string>
+              <string/>
              </property>
             </widget>
            </item>

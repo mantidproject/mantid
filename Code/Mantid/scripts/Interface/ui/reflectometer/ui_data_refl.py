@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl.ui'
 #
-# Created: Tue Sep 27 12:08:04 2011
+# Created: Wed Sep 28 11:03:33 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,9 +25,9 @@ class Ui_Frame(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.data_nexus_browse = QtGui.QPushButton(Frame)
-        self.data_nexus_browse.setObjectName("data_nexus_browse")
-        self.horizontalLayout_5.addWidget(self.data_nexus_browse)
+        self.data_load_nexus_button = QtGui.QPushButton(Frame)
+        self.data_load_nexus_button.setObjectName("data_load_nexus_button")
+        self.horizontalLayout_5.addWidget(self.data_load_nexus_button)
         self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.tableWidget = QtGui.QTableWidget(Frame)
         self.tableWidget.setObjectName("tableWidget")
@@ -518,7 +518,7 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_nexus_browse.setText(QtGui.QApplication.translate("Frame", "Load data ...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_load_nexus_button.setText(QtGui.QApplication.translate("Frame", "Load data ...", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Peak Selection", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "Selection type:", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_narrow_switch.setText(QtGui.QApplication.translate("Frame", "Narrow ", None, QtGui.QApplication.UnicodeUTF8))

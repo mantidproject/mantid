@@ -29,7 +29,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QPushButton" name="data_nexus_browse">
+            <widget class="QPushButton" name="data_load_nexus_button">
              <property name="text">
               <string>Load data ...</string>
              </property>

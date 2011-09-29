@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/instrument_dialog.ui'
 #
-# Created: Tue Sep 27 12:08:03 2011
+# Created: Wed Sep 28 11:03:33 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!

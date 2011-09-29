@@ -63,6 +63,7 @@ class DataReflWidget(BaseWidget):
         self._summary.data_to_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_to_tof))
 
         # Event connections
+        self.connect(self._summary.data_load_nexus_button, QtCore.SIGNAL("clicked()"), self._data_load_nexus_clicked)
         self.connect(self._summary.data_peak_narrow_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_broad_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_discrete_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked_discrete)
@@ -78,6 +79,11 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.data_background_from_pixel2, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_background_save_button)
         self.connect(self._summary.data_background_to_pixel2, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_data_background_save_button)
         self.connect(self._summary.data_background_save_button, QtCore.SIGNAL("clicked()"), self._data_background_save_roi_clicked)
+
+    def _data_load_nexus_clicked(self):
+        """
+            Load data NeXus
+        """
 
     def _data_background_clicked(self, is_checked):
         """

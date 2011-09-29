@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/norm_refl.ui'
 #
-# Created: Tue Sep 27 12:08:04 2011
+# Created: Wed Sep 28 11:03:33 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,9 +25,9 @@ class Ui_Frame(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.pushButton_4 = QtGui.QPushButton(Frame)
-        self.pushButton_4.setObjectName("pushButton_4")
-        self.horizontalLayout_5.addWidget(self.pushButton_4)
+        self.norm_load_nexus_button = QtGui.QPushButton(Frame)
+        self.norm_load_nexus_button.setObjectName("norm_load_nexus_button")
+        self.horizontalLayout_5.addWidget(self.norm_load_nexus_button)
         self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.tableWidget = QtGui.QTableWidget(Frame)
         self.tableWidget.setObjectName("tableWidget")
@@ -528,6 +528,7 @@ class Ui_Frame(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         self.norm_back_from_pixel_missing.setPalette(palette)
+        self.norm_back_from_pixel_missing.setText("")
         self.norm_back_from_pixel_missing.setObjectName("norm_back_from_pixel_missing")
         self.horizontalLayout_8.addWidget(self.norm_back_from_pixel_missing)
         self.norm_background_to_pixel_label = QtGui.QLabel(Frame)
@@ -683,6 +684,7 @@ class Ui_Frame(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         self.norm_back_to_pixel_missing.setPalette(palette)
+        self.norm_back_to_pixel_missing.setText("")
         self.norm_back_to_pixel_missing.setObjectName("norm_back_to_pixel_missing")
         self.horizontalLayout_8.addWidget(self.norm_back_to_pixel_missing)
         self.norm_background_load_button = QtGui.QPushButton(Frame)
@@ -719,7 +721,7 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_4.setText(QtGui.QApplication.translate("Frame", "Load Normalization ...", None, QtGui.QApplication.UnicodeUTF8))
+        self.norm_load_nexus_button.setText(QtGui.QApplication.translate("Frame", "Load Normalization ...", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Peak Selection", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_peak_from_pixel_missing.setText(QtGui.QApplication.translate("Frame", "*", None, QtGui.QApplication.UnicodeUTF8))
@@ -729,9 +731,7 @@ class Ui_Frame(object):
         self.norm_peak_save_roi.setText(QtGui.QApplication.translate("Frame", "Save...", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_switch.setText(QtGui.QApplication.translate("Frame", "Background", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.norm_back_from_pixel_missing.setText(QtGui.QApplication.translate("Frame", "  ", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_to_pixel_label.setText(QtGui.QApplication.translate("Frame", "   To pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.norm_back_to_pixel_missing.setText(QtGui.QApplication.translate("Frame", " ", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_load_button.setText(QtGui.QApplication.translate("Frame", "Load...", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_save_button.setText(QtGui.QApplication.translate("Frame", "Save...", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_5.setText(QtGui.QApplication.translate("Frame", "2D Pixels vs TOF", None, QtGui.QApplication.UnicodeUTF8))

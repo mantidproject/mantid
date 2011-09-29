@@ -49,6 +49,7 @@ class NormReflWidget(BaseWidget):
         self._summary.norm_background_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel))
 
         # Event connections
+        self.connect(self._summary.norm_load_nexus_button, QtCore.SIGNAL("clicked()"), self._norm_load_nexus_clicked)
         self.connect(self._summary.norm_peak_load_roi, QtCore.SIGNAL("clicked()"), self._norm_peak_load_roi_clicked)
         self.connect(self._summary.norm_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_peak_save_button)
         self.connect(self._summary.norm_peak_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_peak_save_button)
@@ -60,6 +61,12 @@ class NormReflWidget(BaseWidget):
         self.connect(self._summary.norm_background_from_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_back_save_button)
         self.connect(self._summary.norm_background_to_pixel, QtCore.SIGNAL("textChanged(QString)"), self._check_status_of_norm_back_save_button)
 
+    def _norm_load_nexus_clicked(self):
+        """
+            Load norm NeXus
+        """
+        pass
+    
     def _check_status_of_norm_peak_save_button(self):
         """
             This function checks if the SAVE... button of the normalization peak can be enabled or not
