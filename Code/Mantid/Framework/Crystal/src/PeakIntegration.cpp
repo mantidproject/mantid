@@ -621,6 +621,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       slice_alg->setProperty("PeakIndex", ipeak);
       slice_alg->setProperty("PeakQspan", qspan);
       slice_alg->executeAsSubAlg();
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
    
       MantidVec& Xout=outputW->dataX(idet);
       MantidVec& Yout=outputW->dataY(idet);

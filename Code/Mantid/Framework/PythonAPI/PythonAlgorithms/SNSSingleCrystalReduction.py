@@ -36,7 +36,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("LinearAbsorptionCoef", 0.0, Description="Linear Absorption Coefficient for Anvred correction.")
         self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction. Set to 0 for no Anvred corrections")
         self.declareProperty("PowerLambda", 4.0, Description="Power of wavelength for Anvred correction.")
-        self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
+        self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
         self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
 
@@ -156,7 +156,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def _save(self, wksp, normalized):
         if "hkl" in self._outTypes:
-            LoadIsawUB(InputWorkspace=wksp,Filename=self._ubfile)
+            name = str(wksp)
+            name = name.split('_')[1] # remove the instrument name
+            self._ubfile = self._ubfile.split(name)[0]
+            ubname = self._ubfile + name + '.mat'
+            LoadIsawUB(InputWorkspace=wksp,Filename=ubname)
             LoadIsawPeaks(Filename=self._peaksfile,OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
