@@ -43,7 +43,7 @@ public:
   DeprecatedAlgorithm();
   virtual ~DeprecatedAlgorithm();
   const std::string deprecationMsg(const IAlgorithm *);
-protected:
+public:
   void useAlgorithm(const std::string &);
   void deprecatedDate(const std::string &);
 private:

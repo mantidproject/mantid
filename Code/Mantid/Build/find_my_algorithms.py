@@ -32,7 +32,9 @@ def initialize_Mantid():
 if __name__ == "__main__":
     global mtd
     
-    parser = argparse.ArgumentParser(description='Utility to list all algorithms written by yourself. Uses ack-grep.')
+    parser = argparse.ArgumentParser(description="Utility to list all algorithms written by yourself. Requires: ack-grep. " + \
+                                     "You can use this output as the arguments to auto_wiki.py to quickly generate all " + \
+                                     "your wiki pages. Fun!")  
     
     parser.add_argument('name', metavar='NAME', type=str,
                         help='Your name, to search for. Can be a regular expression')
@@ -50,6 +52,7 @@ if __name__ == "__main__":
     files = output.split('\n')
     
     print len(files), "files were found."
+    print 
     
     initialize_Mantid()
     all_algos = get_all_algorithms()
@@ -62,7 +65,10 @@ if __name__ == "__main__":
         name = name.replace(".cpp", "")
         if name in all_algos:
             my_algos.add(name)
-            
+    
+    my_algos = list(my_algos)
+    my_algos.sort()        
+    
     print
     print "You are the author of %d algorithms." % len(my_algos)
     print

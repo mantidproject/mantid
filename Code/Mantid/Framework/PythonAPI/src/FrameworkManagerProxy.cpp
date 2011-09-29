@@ -1,20 +1,23 @@
 //---------------------------------------
 // Includes
 //------------------------------------
-#include "MantidPythonAPI/FrameworkManagerProxy.h"
-#include "MantidPythonAPI/PyAlgorithmWrapper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
-#include <stdexcept>
+#include "MantidPythonAPI/FrameworkManagerProxy.h"
+#include "MantidPythonAPI/PyAlgorithmWrapper.h"
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
+
+using Mantid::API::AlgorithmManager;
 
 namespace Mantid
 {
@@ -159,6 +162,22 @@ API::IAlgorithm_sptr FrameworkManagerProxy::createUnmanagedAlgorithm(const std::
   API::IAlgorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged(algName, version);
   alg->initialize();
   return alg;
+}
+
+/** Returns the deprecation message (if any) for deprecated algorithms.
+ *
+ * @param algName :: The name of the algorithm to execute.
+ * @param version :: The version number (default=-1=highest version).
+ * @return string, empty if algo is NOT deprecated.
+ **/
+std::string FrameworkManagerProxy::algorithmDeprecationMessage(const std::string& algName)
+{
+  std::string deprecMessage = "";
+  API::Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algName);
+  API::DeprecatedAlgorithm * depr = dynamic_cast<API::DeprecatedAlgorithm *>(alg.get());
+  if (depr)
+    deprecMessage = depr->deprecationMsg(alg.get());
+  return deprecMessage;
 }
 
 /**

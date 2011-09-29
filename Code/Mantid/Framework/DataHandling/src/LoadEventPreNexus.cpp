@@ -151,37 +151,38 @@ int LoadEventPreNexus::fileCheck(const std::string& filePath)
 void LoadEventPreNexus::init()
 {
   // which files to use
-  this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
-                        "A preNeXus neutron event file");
-  this->declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, PULSE_EXT),
-                        "A preNeXus pulseid file. Used only if specified.");
-  this->declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
-                        "TS mapping file converting detector id to pixel id. Used only if specified.");
+  declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
+      "The name of the neutron event file to read, including its full or relative path. The file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
+  declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, PULSE_EXT),
+      "File containing the accelerator pulse information; the filename will be found automatically if not specified.");
+  declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      "File containing the pixel mapping (DAS pixels to pixel IDs) file (typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found automatically if not specified.");
 
   // which pixels to load
-  this->declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
-                        "A list of individual spectra (pixel IDs) to read. Only used if set.");
+  declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
+      "A list of individual spectra (pixel IDs) to read, specified as e.g. 10:20. Only used if set.");
 
   // how many events to process
-  this->declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
-          "Number of events to read from the file.");
-//
-//  // how many events to process
-//  this->declareProperty(new PropertyWithValue<bool>("UseParallelProcessing", false, Direction::Input),
-//          "Use multiple cores for loading the data?");
+  declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
+      "Number of events to read from the file.");
+  //
+  //  // how many events to process
+  //  declareProperty(new PropertyWithValue<bool>("UseParallelProcessing", false, Direction::Input),
+  //          "Use multiple cores for loading the data?");
 
   std::vector<std::string> propOptions;
   propOptions.push_back("Auto");
   propOptions.push_back("Serial");
   propOptions.push_back("Parallel");
   declareProperty("UseParallelProcessing", "Auto",new ListValidator(propOptions),
-    "Use multiple cores for loading the data?\n"
-    "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
-    "  Serial: Use a single core.\n"
-    "  Parallel: Use all available cores.");
+      "Use multiple cores for loading the data?\n"
+      "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
+      "  Serial: Use a single core.\n"
+      "  Parallel: Use all available cores.");
 
   // the output workspace name
-  this->declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output));
+  declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output),
+      "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
 }
 

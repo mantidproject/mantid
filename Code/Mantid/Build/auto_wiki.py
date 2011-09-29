@@ -176,6 +176,15 @@ def make_property_table_line(propnum, p):
 def make_wiki(algo_name):
     """ Return wiki text for a given algorithm """ 
     initialize_Mantid()
+    
+    # Deprecated algorithms: Simply returnd the deprecation message
+    deprec = mtd.algorithmDeprecationMessage(algo_name)
+    if len(deprec) != 0:
+        out = deprec
+        out = out.replace(". Use ", ". Use [[")
+        out = out.replace(" instead.", "]] instead.")
+        return out
+    
     alg = mtd.createAlgorithm(algo_name)
     
     out = ""

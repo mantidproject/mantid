@@ -59,6 +59,7 @@ using namespace boost::python;
       .def("clearData", &FrameworkManagerProxy::clearData)
       .def("clearInstruments", &FrameworkManagerProxy::clearInstruments)
       .def("isAlgorithmName", &FrameworkManagerProxy::isAlgorithmName)
+      .def("algorithmDeprecationMessage", &FrameworkManagerProxy::algorithmDeprecationMessage)
       .def("createManagedAlgorithm", &FrameworkManagerProxy::createManagedAlgorithm, 
 	   FM_createManagedAlgorithmOverloader()[return_internal_reference<>()] )
       .def("createUnmanagedAlgorithm", &FrameworkManagerProxy::createUnmanagedAlgorithm, 
