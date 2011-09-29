@@ -17,8 +17,8 @@ namespace Kernel
   /** ThreadPoolRunnable : Class used by thread pool (and POCO) to
    * run inside a thread.
    * 
-   * @author: Janik Zikovsky
-   * @date: 2011-02-23 10:40:46.297133
+   * @author Janik Zikovsky
+   * @date 2011-02-23
    */
   class MANTID_KERNEL_DLL ThreadPoolRunnable: public Poco::Runnable
   {
