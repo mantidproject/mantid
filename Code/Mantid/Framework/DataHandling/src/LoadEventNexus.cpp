@@ -20,6 +20,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 using std::endl;
 using std::map;
@@ -42,8 +43,8 @@ DECLARE_LOADALGORITHM(LoadEventNexus)
 /// Sets documentation strings for this algorithm
 void LoadEventNexus::initDocs()
 {
-  this->setWikiSummary("Loads Event NeXus (produced by the SNS) files and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
-  this->setOptionalMessage("Loads Event NeXus (produced by the SNS) files and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
+  this->setWikiSummary("Loads Event NeXus files and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
+  this->setOptionalMessage("Loads Event NeXus files and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
 }
 
 
@@ -690,10 +691,39 @@ void LoadEventNexus::init()
 
   declareProperty(new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
       "If present, load the monitors as events.\nWARNING: WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). \n");
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
+    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight.\n"\
+    "This is the minimum accepted value in microseconds." );
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
+    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight.\n"\
+    "This is the maximum accepted value in microseconds." );
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterMonByTimeStart", EMPTY_DBL(), Direction::Input),
+    "Optional: To only include events from monitors after the provided start time, in seconds (relative to the start of the run).");
+
+  declareProperty(
+      new PropertyWithValue<double>("FilterMonByTimeStop", EMPTY_DBL(), Direction::Input),
+    "Optional: To only include events from monitors before the provided stop time, in seconds (relative to the start of the run).");
+
   setPropertySettings("MonitorsAsEvents", new VisibleWhenProperty(this, "LoadMonitors", IS_EQUAL_TO, "1") );
+  IPropertySettings *asEventsIsOn = new VisibleWhenProperty(this, "MonitorsAsEvents", IS_EQUAL_TO, "1");
+  setPropertySettings("FilterMonByTofMin", asEventsIsOn);
+  setPropertySettings("FilterMonByTofMax", asEventsIsOn->clone());
+  setPropertySettings("FilterMonByTimeStart", asEventsIsOn->clone());
+  setPropertySettings("FilterMonByTimeStop", asEventsIsOn->clone());
+
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
   setPropertyGroup("MonitorsAsEvents", grp4);
+  setPropertyGroup("FilterMonByTofMin", grp4);
+  setPropertyGroup("FilterMonByTofMax", grp4);
+  setPropertyGroup("FilterMonByTimeStart", grp4);
+  setPropertyGroup("FilterMonByTimeStop", grp4);
 
 }
 
@@ -737,21 +767,21 @@ void LoadEventNexus::exec()
 
   loadlogs = true;
 
-  //Get the limits to the filter
-  filter_tof_min = getProperty("FilterByTofMin");
-  filter_tof_max = getProperty("FilterByTofMax");
-  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
-  {
-    //Nothing specified. Include everything
-    filter_tof_min = -1e20;
-    filter_tof_max = +1e20;
-  }
-  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
-  {
-    //Both specified. Keep these values
-  }
-  else
-    throw std::invalid_argument("You must specify both the min and max of time of flight to filter, or neither!");
+//  //Get the limits to the filter
+//  filter_tof_min = getProperty("FilterByTofMin");
+//  filter_tof_max = getProperty("FilterByTofMax");
+//  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
+//  {
+//    //Nothing specified. Include everything
+//    filter_tof_min = -1e20;
+//    filter_tof_max = +1e20;
+//  }
+//  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
+//  {
+//    //Both specified. Keep these values
+//  }
+//  else
+//    throw std::invalid_argument("You must specify both the min and max of time of flight to filter, or neither!");
 
   // Check to see if the monitors need to be loaded later
   bool load_monitors = this->getProperty("LoadMonitors");
@@ -776,6 +806,22 @@ void LoadEventNexus::exec()
     if( eventMonitors && this->hasEventMonitors() )
     {
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
+//      // Set filter member variable attributes for
+//      filter_tof_min = getProperty("FilterMonByTofMin");
+//      filter_tof_max = getProperty("FilterMonByTofMax");
+//      if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
+//      {
+//        //Nothing specified. Include everything
+//        filter_tof_min = -1e20;
+//        filter_tof_max = +1e20;
+//      }
+//      else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
+//      {
+//        //Both specified. Keep these values
+//      }
+//      else
+//        throw std::invalid_argument("You must specify both the min and max or neither of time of flight to filter the monitor");
+      // Perform the load
       loadEvents(&prog, true);
       std::string mon_wsname = this->getProperty("OutputWorkspace");
       mon_wsname.append("_monitors");
@@ -847,6 +893,9 @@ void LoadEventNexus::makeMapToEventLists()
  */
 void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 {
+  // Get the time filters
+  setTimeFilters(monitors);
+
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0,0);
 
@@ -968,7 +1017,12 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
     //Silly values?
     if (filter_time_stop < filter_time_start)
-      throw std::invalid_argument("Your filter for time's Stop value is smaller than the Start value.");
+    {
+      std::string msg = "Your ";
+      if(monitors) msg += "monitor ";
+      msg += "filter for time's Stop value is smaller than the Start value.";
+      throw std::invalid_argument(msg);
+    }
   }
 
   //Count the limits to time of flight
@@ -1451,6 +1505,38 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
   g_log.debug() << "Found " << spectramap->nSpectra() << " unique spectra and a total of " << spectramap->nElements() << " elements\n"; 
   return spectramap;
 }
+
+/**
+ * Set the filters on TOF.
+ * @param monitors :: If true check the monitor properties else use the standard ones
+ */
+void LoadEventNexus::setTimeFilters(const bool monitors)
+{
+  //Get the limits to the filter
+  std::string prefix("Filter");
+  if(monitors) prefix += "Mon";
+
+  filter_tof_min = getProperty(prefix + "ByTofMin");
+  filter_tof_max = getProperty(prefix + "ByTofMax");
+  if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
+  {
+    //Nothing specified. Include everything
+    filter_tof_min = -1e20;
+    filter_tof_max = +1e20;
+  }
+  else if ( (filter_tof_min != EMPTY_DBL()) ||  (filter_tof_max != EMPTY_DBL()))
+  {
+    //Both specified. Keep these values
+  }
+  else
+  {
+    std::string msg("You must specify both min & max or neither TOF filters");
+    if(monitors) msg =  " for the monitors.";
+    throw std::invalid_argument(msg);
+  }
+
+}
+
 
 
 } // namespace DataHandling

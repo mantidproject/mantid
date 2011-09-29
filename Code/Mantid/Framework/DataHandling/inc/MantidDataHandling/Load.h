@@ -7,7 +7,7 @@ The Load algorithm is a more intelligent algorithm than most other load algorith
 
 ==== Specific Load Algorithm Properties ====
 
-Each specific loader will have its own properties that are appropriate to it:  SpectrumMin and SpectrumMax for ISIS RAW/NeXuS, FilterByTof_Min and FilterByTof_Max for Event data. The Load algorithm cannot know about these properties until it has been told the filename and found the correct loader. Once this has happened the properties of the specific Load algorithm are redeclared on to that copy of Load.
+Each specific loader will have its own properties that are appropriate to it:  SpectrumMin and SpectrumMax for ISIS RAW/NeXuS, FilterByTofMin and FilterByTofMax for Event data. The Load algorithm cannot know about these properties until it has been told the filename and found the correct loader. Once this has happened the properties of the specific Load algorithm are redeclared on to that copy of Load.
 
 == Usage ==
 

@@ -168,6 +168,8 @@ namespace Mantid
                                 const bool monitorsOnly, const std::string & bankName = "");
       bool hasEventMonitors();
       void runLoadMonitors();
+      /// Set the filters on TOF.
+      void setTimeFilters(const bool monitors);
 
       static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
           const std::string &entry_name);
