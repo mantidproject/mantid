@@ -20,11 +20,12 @@ def numberRows(descr, fw):
     i += fw
   return (nrows, descr_split)
   
-def create_algorithm(algorithm, version):
+def create_algorithm(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
         @param algorithm: name of the algorithm
+        @param _algm_object :: the created algorithm object.
     """
     
     def algorithm_wrapper(*args, **kwargs):
@@ -42,6 +43,8 @@ def create_algorithm(algorithm, version):
         return algm
     
     algorithm_wrapper.__name__ = algorithm
+    
+    # This creates/initializes the algorithm once to make the documentation
     algorithm_wrapper.__doc__ = mtd.createAlgorithmDocs(algorithm, version)
     
     # Dark magic to get the correct function signature
@@ -51,7 +54,8 @@ def create_algorithm(algorithm, version):
     # the name "kwargs" by "Version=1".
     #   1- Get the algorithm properties and build a string to list them,
     #      taking care of giving no default values to mandatory parameters
-    _algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
+    
+    #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
     for p in mtd._getPropertyOrder(_algm_object):
         prop = _algm_object.getProperty(p)
@@ -84,11 +88,12 @@ def create_algorithm(algorithm, version):
         if len(alias)>0:
             globals()[alias] = algorithm_wrapper
     
-def create_algorithm_dialog(algorithm, version):
+def create_algorithm_dialog(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm dialog.
         The help that will be displayed is that of the most recent version.
         @param algorithm: name of the algorithm
+        @param _algm_object :: the created algorithm object.
     """
     def algorithm_wrapper(*args, **kwargs):
         _version = version
@@ -108,7 +113,7 @@ def create_algorithm_dialog(algorithm, version):
     algorithm_wrapper.__doc__ = "\n\n%s dialog" % algorithm
 
     # Dark magic to get the correct function signature
-    _algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
+    #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
     for p in mtd._getPropertyOrder(_algm_object):
         arg_list.append("%s=None" % p)
@@ -242,8 +247,10 @@ def translate():
     for algorithm in mtd._getRegisteredAlgorithms(include_hidden=True):
         if algorithm[0] == "Load":
             continue
-        create_algorithm(algorithm[0], max(algorithm[1]))
-        create_algorithm_dialog(algorithm[0], max(algorithm[1]))
+        # Create the algorithm object
+        _algm_object = mtd.createUnmanagedAlgorithm(algorithm[0], max(algorithm[1]))
+        create_algorithm(algorithm[0], max(algorithm[1]), _algm_object)
+        create_algorithm_dialog(algorithm[0], max(algorithm[1]), _algm_object)
             
 translate()
 

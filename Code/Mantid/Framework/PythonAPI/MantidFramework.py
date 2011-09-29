@@ -1000,7 +1000,8 @@ class MantidPyFramework(FrameworkManager):
         # Run through init steps 
         self._importSimpleAPIToMain()
         self._pyalg_loader.load_modules(refresh=False)
-        self._importSimpleAPIToMain()
+        # Janik Zikovsky, sep 29, 2011: Commented out this line to speed up starting. Seems to have had no ill effect
+        #self._importSimpleAPIToMain()
 
         self.__is_initialized = True
 
