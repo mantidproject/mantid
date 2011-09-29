@@ -7,10 +7,19 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 class CropWorkspaceTest : public CxxTest::TestSuite
 {
@@ -95,6 +104,49 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop.setPropertyValue("EndWorkspaceIndex","2") );
     TS_ASSERT_THROWS_NOTHING( crop.execute() );
     TS_ASSERT( !crop.isExecuted() );
+  }
+
+  void makeFakeEventWorkspace(std::string wsName)
+  {
+    //Make an event workspace with 2 events in each bin.
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(36, 50, 50, 0.0, 2., 2);
+    //Fake a d-spacing unit in the data.
+    test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
+    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(4.0, false) );
+    //Add it to the workspace
+    AnalysisDataService::Instance().add(wsName, test_in);
+  }
+
+  void test_CropWorkspaceEventsInplace()
+  {
+    // setup
+    std::string eventname("TestEvents");
+    this->makeFakeEventWorkspace(eventname);
+    EventWorkspace_sptr ws
+         = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(eventname));
+
+    // run the algorithm
+    CropWorkspace algo;
+    if (!algo.isInitialized()) algo.initialize();
+    algo.setPropertyValue("InputWorkspace", eventname);
+    algo.setPropertyValue("OutputWorkspace", eventname);
+    TS_ASSERT_THROWS_NOTHING( algo.setPropertyValue("XMin","40.") );
+    TS_ASSERT_THROWS_NOTHING( algo.setPropertyValue("XMax","50.") );
+    TS_ASSERT_THROWS_NOTHING( algo.setPropertyValue("StartWorkspaceIndex","2") );
+    TS_ASSERT_THROWS_NOTHING( algo.setPropertyValue("EndWorkspaceIndex","4") );
+    TS_ASSERT(algo.execute());
+    TS_ASSERT(algo.isExecuted());
+
+    // verify the output workspace
+    ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(eventname));
+    TS_ASSERT_EQUALS(3, ws->getNumberHistograms()); // reduced histograms
+    TS_ASSERT_EQUALS(30, ws->getNumberEvents()); 
+
+    TS_ASSERT(40. <= ws->getEventList(0).getTofMin());
+    TS_ASSERT(50. >= ws->getEventList(0).getTofMax());
+
+    TS_ASSERT(40. <= ws->getEventList(2).getTofMin());
+    TS_ASSERT(50. >= ws->getEventList(2).getTofMax());
   }
 
   void testExec()
