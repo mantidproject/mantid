@@ -1,4 +1,5 @@
 #include <QAbstractTableModel>
+#include <boost/shared_ptr.hpp>
 #include "MantidQtCustomInterfaces/ExternalDrivenModel.h"
 
 // Forward declarations

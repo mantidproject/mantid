@@ -34,7 +34,7 @@ namespace CustomInterfaces
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
 */
-CreateMDWorkspace::CreateMDWorkspace(QWidget *parent) : m_data(new WorkspaceMementoCollection)
+CreateMDWorkspace::CreateMDWorkspace(QWidget *) : m_data(new WorkspaceMementoCollection)
 {
   //Generate memento view model.
   m_model = new QtWorkspaceMementoModel(m_data->getWorkingData());
@@ -100,7 +100,7 @@ void CreateMDWorkspace::applyToAllClicked()
 
 void CreateMDWorkspace::addWorkspaceClicked()
 {
-  std::string wsName = m_uiForm.workspaceSelector->currentText();
+  std::string wsName = m_uiForm.workspaceSelector->currentText().toStdString();
   if(!wsName.empty())
   {
     using namespace Mantid::API;
