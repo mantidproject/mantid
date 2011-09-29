@@ -18,6 +18,8 @@ a copy of the input one.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
+
 #include <climits>
 
 namespace Mantid
@@ -92,6 +94,7 @@ private:
   void init();
   ///Execution code
   void exec();
+  void execEvent();
 
   void checkProperties();
   std::size_t getXMin(const int wsIndex = 0);
@@ -99,7 +102,8 @@ private:
   void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex);
 
   /// The input workspace
-  API::MatrixWorkspace_const_sptr m_inputWorkspace;
+  API::MatrixWorkspace_sptr m_inputWorkspace;
+  DataObjects::EventWorkspace_sptr eventW;
   /// The bin index to start the cropped workspace from
   std::size_t m_minX;
   /// The bin index to end the cropped workspace at

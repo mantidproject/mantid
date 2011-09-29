@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/VectorHelper.h"
 #include <iostream>
 
 namespace 
@@ -32,6 +33,7 @@ void CropWorkspace::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Default constructor
 CropWorkspace::CropWorkspace() : 
@@ -73,6 +75,15 @@ void CropWorkspace::exec()
 {
   // Get the input workspace
   m_inputWorkspace = getProperty("InputWorkspace");
+
+  eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputWorkspace);
+  if (eventW != NULL)
+  {
+    //Input workspace is an event workspace. Use the other exec method
+    this->execEvent();
+    return;
+  }
+
   m_histogram = m_inputWorkspace->isHistogramData();
   // Check for common boundaries in input workspace
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
@@ -157,6 +168,94 @@ void CropWorkspace::exec()
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
+/** Executes the algorithm
+ *  @throw std::out_of_range If a property is set to an invalid value for the input workspace
+ */
+void CropWorkspace::execEvent()
+{
+  m_histogram = m_inputWorkspace->isHistogramData();
+  double minX_val = getProperty("XMin");
+  double maxX_val = getProperty("XMax");
+
+  // Check for common boundaries in input workspace
+  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+
+  // Retrieve and validate the input properties
+  this->checkProperties();
+  cow_ptr<MantidVec> XValues_new;
+  if ( m_commonBoundaries )
+  {
+    const MantidVec& oldX = m_inputWorkspace->readX(m_minSpec);
+    XValues_new.access().assign(oldX.begin()+m_minX,oldX.begin()+m_maxX);
+  }
+  size_t ntcnew = m_maxX-m_minX;
+
+  if (ntcnew < 2)
+  {
+    // create new output X axis
+    std::vector<double> rb_params;
+    rb_params.push_back(minX_val);
+    rb_params.push_back(maxX_val-minX_val);
+    rb_params.push_back(maxX_val);
+    ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
+  }
+
+  // Create the output workspace
+  EventWorkspace_sptr outputWorkspace =
+    boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", m_maxSpec-m_minSpec+1, ntcnew, ntcnew-m_histogram));
+  outputWorkspace->sortAll(TOF_SORT, NULL);
+  //Copy required stuff from it
+  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWorkspace, outputWorkspace, true);
+  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
+  if (inPlace)
+    g_log.debug("Cropping EventWorkspace in-place.");
+
+
+  outputWorkspace->setAllX(XValues_new);
+
+  Progress prog(this,0.0,1.0,(m_maxSpec-m_minSpec));
+  // Loop over the required spectra, copying in the desired bins
+  for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
+  {
+    EventList el = eventW->getEventList(i);
+    EventList outEL;
+    std::vector<TofEvent>::iterator itev;
+    for (itev = el.getEvents().begin(); itev != el.getEvents().end(); itev++)
+    {
+      const double tof = itev->tof();
+      if(tof <=  maxX_val && tof >= minX_val)
+        outEL += TofEvent(*itev);
+    }
+    outputWorkspace->getOrAddEventList(j) += outEL;
+    std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
+    std::set<detid_t>::iterator k;
+    for (k = dets.begin(); k != dets.end(); ++k)
+      outputWorkspace->getOrAddEventList(j).addDetectorID(*k);
+
+    // Propagate bin masking if there is any
+    if ( m_inputWorkspace->hasMaskedBins(i) )
+    {
+      const MatrixWorkspace::MaskList& inputMasks = m_inputWorkspace->maskedBins(i);
+      MatrixWorkspace::MaskList::const_iterator it;
+      for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
+      {
+        const size_t maskIndex = (*it).first;
+        if ( maskIndex >= m_minX && maskIndex < m_maxX-m_histogram )
+          outputWorkspace->flagMasked(j,maskIndex-m_minX,(*it).second);
+      }
+    }
+    // When cropping in place, you can clear out old memory from the input one!
+    if (inPlace)
+    {
+      eventW->getEventList(i).clear();
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+    }
+    prog.report();
+  }
+
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
+}
+
 /** Retrieves the optional input properties and checks that they have valid values.
  *  Assigns to the defaults if any property has not been set.
  *  @throw std::invalid_argument If the input workspace does not have common binning
@@ -174,7 +273,7 @@ void CropWorkspace::checkProperties()
       g_log.error("XMin must be less than XMax");
       throw std::out_of_range("XMin must be less than XMax");
     }
-    if ( m_minX == m_maxX && m_commonBoundaries )
+    if ( m_minX == m_maxX && m_commonBoundaries && eventW == NULL)
     {
       g_log.error("The X range given lies entirely within a single bin");
       throw std::out_of_range("The X range given lies entirely within a single bin");
