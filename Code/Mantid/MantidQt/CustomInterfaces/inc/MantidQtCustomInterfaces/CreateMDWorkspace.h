@@ -5,6 +5,7 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/QtWorkspaceMementoModel.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
 #include "ui_CreateMDWorkspace.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
