@@ -187,6 +187,7 @@ private:
 
   QSpinBox* boxX, *boxY, *boxLayerWidth, *boxLayerHeight;
   QCheckBox *keepRatioBox;
+  QCheckBox *keepRatioOnResizeBox;
 
   QPushButton *btnTitle, *btnAxesLabels, *btnAxesNumbers, *btnLegend;
   ColorMapEditor *colorMapEditor;

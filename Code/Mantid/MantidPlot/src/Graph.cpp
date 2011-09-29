@@ -87,6 +87,7 @@
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_layout.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_plot_rescaler.h>
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
 #include <qwt_text_label.h>
@@ -122,6 +123,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   d_peak_fit_tool = NULL;
   d_magnifier = NULL;
   d_panner=NULL;
+  d_rescaler = NULL;
 
   widthLine=1;
   selectedMarker=-1;
@@ -4938,6 +4940,16 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,d
   return plotSpectrogram(d_spectrogram,type);
 }
 
+bool Graph::isSpectrogram()
+{
+  for (int i=0; i<c_type.count(); i++)
+  {
+    if (!(c_type[i] == GrayScale || c_type[i] == ColorMap || c_type[i] == Contour || c_type[i] == ColorMapContour))
+      return false;
+  }
+  return true;
+}
+
 Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
   if (type != GrayScale && type != ColorMap && type != Contour && type != ColorMapContour)
@@ -4995,6 +5007,8 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 
   for (int i=0; i < QwtPlot::axisCnt; i++)
   {updatedaxis.push_back(0);  }
+
+  enableFixedAspectRatio(true);
 
   return d_spectrogram;
 }
@@ -5536,6 +5550,30 @@ void Graph::enablePanningMagnifier(bool on)
     cnvs->setCursor(Qt::arrowCursor);
     d_magnifier = NULL;
     d_panner = NULL;
+  }
+}
+
+/* Get the fixed aspect ratio option
+ */
+bool Graph::isFixedAspectRatioEnabled()
+{
+  if (d_rescaler) return true;
+  return false;
+}
+/* Enable or disable fixing the aspect ratio of plots
+ * @param on :: If true, aspect ratio will be fixed
+ */
+void Graph::enableFixedAspectRatio(bool on)
+{
+  if (d_rescaler)
+    delete d_rescaler;
+
+  QwtPlotCanvas *cnvs =d_plot->canvas();
+  if (on){
+    d_rescaler = new QwtPlotRescaler(cnvs, QwtPlot::xBottom, QwtPlotRescaler::Fixed);
+    d_rescaler->setExpandingDirection(QwtPlotRescaler::ExpandBoth);
+  } else {
+    d_rescaler = NULL;
   }
 }
 

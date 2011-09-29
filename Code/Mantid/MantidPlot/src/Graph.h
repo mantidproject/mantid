@@ -43,6 +43,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
+#include <qwt_plot_rescaler.h>
 
 #include "Plot.h"
 #include "Table.h"
@@ -59,6 +60,7 @@
 #include <float.h>
 
 class QwtPlotCurve;
+class QwtPlotRescaler;
 class QwtPlotPanner;
 class QwtPlotMagnifier;
 class QwtPlotZoomer;
@@ -189,7 +191,8 @@ public:
 
   // This method zooms the selected grpah
   void enablePanningMagnifier(bool on = true);
-
+  bool isFixedAspectRatioEnabled();
+  void enableFixedAspectRatio(bool on);
   // Are MantidCurves plotted as distributions in this Graph
   bool isDistribution()const{return m_isDistribution;}
 	
@@ -702,6 +705,7 @@ public slots:
   void showScaleDialog();
 
   //! Add a spectrogram to the graph
+  bool isSpectrogram();
   Spectrogram* plotSpectrogram(Matrix *m, CurveType type);
   Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type);//Mantid
   Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
@@ -826,6 +830,7 @@ private:
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
   QwtPlotPanner *d_panner;
+  QwtPlotRescaler *d_rescaler;
   //for saving the spectrogram axes number if the axes details like scale is changed
   //this is useful for saving/loading project.
   std::vector<int> updatedaxis;

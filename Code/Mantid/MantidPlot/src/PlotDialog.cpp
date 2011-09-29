@@ -575,11 +575,16 @@ void PlotDialog::initLayerGeometryPage()
     gl2->setRowStretch(4, 1);
 
     QBoxLayout *bl1 = new QBoxLayout (QBoxLayout::LeftToRight);
-	bl1->addWidget(gb1);
-	bl1->addWidget(gb2);
+    bl1->addWidget(gb1);
+	  bl1->addWidget(gb2);
 
-    QHBoxLayout * hl = new QHBoxLayout( layerGeometryPage );
-    hl->addLayout(bl1);
+    keepRatioOnResizeBox = new QCheckBox(tr("Keep aspect ratio on window resize"));
+    QBoxLayout *bl2 = new QBoxLayout (QBoxLayout::LeftToRight);
+    bl2->addWidget(keepRatioOnResizeBox);
+
+    QVBoxLayout * vl = new QVBoxLayout( layerGeometryPage );
+    vl->addLayout(bl1);
+    vl->addLayout(bl2);
 
     privateTabWidget->addTab(layerGeometryPage, tr("Geometry"));
 
@@ -1416,8 +1421,8 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
         return;
 
     d_ml = ml;
-	boxScaleLayers->setChecked(d_ml->scaleLayersOnPrint());
-	boxPrintCrops->setChecked(d_ml->printCropmarksEnabled());
+    boxScaleLayers->setChecked(d_ml->scaleLayersOnPrint());
+    boxPrintCrops->setChecked(d_ml->printCropmarksEnabled());
 
     QTreeWidgetItem *item = new QTreeWidgetItem(listBox, QStringList(ml->name()));
     item->setIcon(0, QIcon(getQPixmap("folder_open")));
@@ -1431,10 +1436,14 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
         item->addChild(layer);
 
         if (g == ml->activeGraph()){
-            layer->setExpanded(true);
+          layer->setExpanded(true);
         	layer->setActive(true);
         	listBox->setCurrentItem(layer);
-		}
+
+        	keepRatioOnResizeBox->setChecked(g->isFixedAspectRatioEnabled());
+        	if (g->isSpectrogram()) keepRatioOnResizeBox->show();
+        	else keepRatioOnResizeBox->hide();
+        }
     }
 }
 
@@ -2321,13 +2330,15 @@ bool PlotDialog::acceptParams()
 		if (!g)
 			return false;
 
+    g->enableFixedAspectRatio(keepRatioOnResizeBox->isChecked());
+
 		QPoint pos = QPoint(boxX->value(), boxY->value());
 		QSize size = QSize(boxLayerWidth->value(), boxLayerHeight->value());
 		if (g->pos() == pos && g->size() == size)
 			return true;
 
 		g->setGeometry(QRect(pos, size));
-    	g->plotWidget()->resize(size);
+    g->plotWidget()->resize(size);
 		d_ml->repaint();
 		return true;
 	}
