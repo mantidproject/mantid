@@ -112,8 +112,8 @@ if ( CXXTEST_FOUND )
          ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
          TestHelpers DataObjects)
   else ()
-    cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
+    cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} )
+    target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
          TestHelpers )
   endif ()
   
