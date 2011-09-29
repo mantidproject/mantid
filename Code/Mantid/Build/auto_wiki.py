@@ -160,8 +160,19 @@ def make_property_table_line(propnum, p):
     # Type (as string)
     out += "|" + str(p.type) + "\n"
     # Default?
+    default = p.getDefault
+    defaultstr = str(default)
+    # Replace the ugly default values with "optional"
+    if (defaultstr == "8.9884656743115785e+307") or \
+       (defaultstr == "2147483647"):
+        defaultstr = "Optional"
+        
+    if str(p.type) == "boolean":
+        if defaultstr == "1": defaultstr = "True" 
+        else: defaultstr = "False"
+    
     if (p.isValid == ""): #Nothing was set, but it's still valid = NOT mandatory
-      out += "| " + str(p.getDefault) + "\n"
+      out += "| " + defaultstr + "\n"
     else:
       out += "|Mandatory\n"
     # Documentation
@@ -354,7 +365,7 @@ def do_algorithm(args, algo):
     page = site.Pages[algo]
     text = page.edit()
     #print 'Text in page:', text.encode('utf-8')
-    page.save(contents, summary = 'Bot: replace contents by auto_wiki.py script, using output from WikiMaker.' )
+    page.save(contents, summary = 'Bot: replaced contents using the auto_wiki.py script.' )
 
 #======================================================================
 if __name__ == "__main__":

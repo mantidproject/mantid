@@ -40,12 +40,6 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadEventNexus)
 DECLARE_LOADALGORITHM(LoadEventNexus)
 
-/// Sets documentation strings for this algorithm
-void LoadEventNexus::initDocs()
-{
-  this->setWikiSummary("Loads Event NeXus files and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
-  this->setOptionalMessage("Loads Event NeXus files and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
-}
 
 
 using namespace Kernel;
@@ -620,6 +614,13 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
   return confidence;
 }
 
+/// Sets documentation strings for this algorithm
+void LoadEventNexus::initDocs()
+{
+  this->setWikiSummary("Loads Event NeXus files (produced by the SNS) and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
+  this->setOptionalMessage("Loads Event NeXus files (produced by the SNS) and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
+}
+
 /// Initialisation method.
 void LoadEventNexus::init()
 {
@@ -627,8 +628,8 @@ void LoadEventNexus::init()
   exts.push_back("_event.nxs");
   exts.push_back(".nxs");
   this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-      "The name (including its full or relative path) of the Nexus file to\n"
-      "attempt to load. The file extension must either be .nxs or .NXS" );
+      "The name of the Event NeXus file to read, including its full or relative path. \n"
+      "The file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
 
   this->declareProperty(
     new WorkspaceProperty<IEventWorkspace>("OutputWorkspace", "", Direction::Output),
@@ -637,12 +638,12 @@ void LoadEventNexus::init()
   declareProperty(
       new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
     "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
-    "This is the minimum accepted value in microseconds." );
+    "This is the minimum accepted value in microseconds. Keep blank to load all events." );
 
   declareProperty(
       new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
     "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
-    "This is the maximum accepted value in microseconds." );
+    "This is the maximum accepted value in microseconds. Keep blank to load all events." );
 
   declareProperty(
       new PropertyWithValue<double>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
