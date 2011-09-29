@@ -67,7 +67,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         return wksp
 
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=0, FilterByTof_min=self._binning[0], FilterByTof_max=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=0, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
         #Normalise by sum of counts in upstream monitor
         Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
@@ -111,9 +111,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         filter = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filter["FilterByTof_Start"] = filterWall[0]
+                filter["FilterByTofStart"] = filterWall[0]
             if filterWall[1] > 0.:
-                filter["FilterByTof_Stop"] = filterWall[1]
+                filter["FilterByTofStop"] = filterWall[1]
 
         if  runnumber is None or runnumber <= 0:
             return None

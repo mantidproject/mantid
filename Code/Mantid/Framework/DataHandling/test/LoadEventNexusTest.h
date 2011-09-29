@@ -172,10 +172,10 @@ public:
     ld->initialize();
     ld->setPropertyValue("OutputWorkspace",ws1Name);
     ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld->setPropertyValue("FilterByTime_Start", "60.0");
-    ld->setPropertyValue("FilterByTime_Stop", "120.0");
-    ld->setPropertyValue("FilterByTof_Min", "-1e10");
-    ld->setPropertyValue("FilterByTof_Max", "1e10");
+    ld->setPropertyValue("FilterByTimeStart", "60.0");
+    ld->setPropertyValue("FilterByTimeStop", "120.0");
+    ld->setPropertyValue("FilterByTofMin", "-1e10");
+    ld->setPropertyValue("FilterByTofMax", "1e10");
     ld->execute();
     TS_ASSERT( ld->isExecuted() );
 
@@ -209,10 +209,10 @@ public:
     ld->initialize();
     ld->setPropertyValue("OutputWorkspace",ws2Name);
     ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld->setPropertyValue("FilterByTime_Start", "-1e10");
-    ld->setPropertyValue("FilterByTime_Stop", "1e10");
-    ld->setPropertyValue("FilterByTof_Min", "-1e10");
-    ld->setPropertyValue("FilterByTof_Max", "1e10");
+    ld->setPropertyValue("FilterByTimeStart", "-1e10");
+    ld->setPropertyValue("FilterByTimeStop", "1e10");
+    ld->setPropertyValue("FilterByTofMin", "-1e10");
+    ld->setPropertyValue("FilterByTofMax", "1e10");
     ld->execute();
     TS_ASSERT( ld->isExecuted() );
 

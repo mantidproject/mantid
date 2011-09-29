@@ -634,28 +634,28 @@ void LoadEventNexus::init()
     "The name of the output EventWorkspace in which to load the EventNexus file." );
 
   declareProperty(
-      new PropertyWithValue<double>("FilterByTof_Min", EMPTY_DBL(), Direction::Input),
+      new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
     "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
     "This is the minimum accepted value in microseconds." );
 
   declareProperty(
-      new PropertyWithValue<double>("FilterByTof_Max", EMPTY_DBL(), Direction::Input),
+      new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
     "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
     "This is the maximum accepted value in microseconds." );
 
   declareProperty(
-      new PropertyWithValue<double>("FilterByTime_Start", EMPTY_DBL(), Direction::Input),
+      new PropertyWithValue<double>("FilterByTimeStart", EMPTY_DBL(), Direction::Input),
     "Optional: To only include events after the provided start time, in seconds (relative to the start of the run).");
 
   declareProperty(
-      new PropertyWithValue<double>("FilterByTime_Stop", EMPTY_DBL(), Direction::Input),
+      new PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(), Direction::Input),
     "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run).");
 
   std::string grp1 = "Filter Events";
-  setPropertyGroup("FilterByTof_Min", grp1);
-  setPropertyGroup("FilterByTof_Max", grp1);
-  setPropertyGroup("FilterByTime_Start", grp1);
-  setPropertyGroup("FilterByTime_Stop", grp1);
+  setPropertyGroup("FilterByTofMin", grp1);
+  setPropertyGroup("FilterByTofMax", grp1);
+  setPropertyGroup("FilterByTimeStart", grp1);
+  setPropertyGroup("FilterByTimeStop", grp1);
 
   declareProperty(
       new PropertyWithValue<string>("BankName", "", Direction::Input),
@@ -738,8 +738,8 @@ void LoadEventNexus::exec()
   loadlogs = true;
 
   //Get the limits to the filter
-  filter_tof_min = getProperty("FilterByTof_Min");
-  filter_tof_max = getProperty("FilterByTof_Max");
+  filter_tof_min = getProperty("FilterByTofMin");
+  filter_tof_max = getProperty("FilterByTofMax");
   if ( (filter_tof_min == EMPTY_DBL()) ||  (filter_tof_max == EMPTY_DBL()))
   {
     //Nothing specified. Include everything
@@ -943,8 +943,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
-  filter_time_start_sec = getProperty("FilterByTime_Start");
-  filter_time_stop_sec = getProperty("FilterByTime_Stop");
+  filter_time_start_sec = getProperty("FilterByTimeStart");
+  filter_time_stop_sec = getProperty("FilterByTimeStop");
 
   //Default to ALL pulse times
   bool is_time_filtered = false;
