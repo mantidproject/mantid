@@ -35,7 +35,7 @@ private:
   }
 
   // Helper method. Create the expected backend filename + path using the same rules used internally in SQWLoadingPresenter.
-  static std::string getFileBackend(std::string& fileName)
+  static std::string getFileBackend(std::string fileName)
   {
     size_t pos = fileName.find(".");
     return fileName.substr(0, pos) + ".nxs";
