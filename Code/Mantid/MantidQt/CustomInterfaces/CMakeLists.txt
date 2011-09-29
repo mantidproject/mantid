@@ -10,14 +10,14 @@ set ( SRC_FILES src/background.cpp
                 src/QtWorkspaceMementoModel.cpp
                 src/MuonAnalysis.cpp
                 src/MuonAnalysisHelper.cpp
-		        src/MuonAnalysisOptionTab.cpp
+                src/MuonAnalysisOptionTab.cpp
 				#src/ParameterisedLatticeView.cpp
                 src/SANSAddFiles.cpp
                 src/SANSPlotSpecial.cpp
                 src/SANSRunWindow.cpp
                 src/SANSDiagnostics.cpp
-				src/WorkspaceMementoCollection.cpp
-				src/WorkspaceMemento.cpp
+                src/WorkspaceMementoCollection.cpp
+                src/WorkspaceMemento.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -25,7 +25,7 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/deltaECalc.h
-				inc/MantidQtCustomInterfaces/ExternalDrivenModel.h
+                inc/MantidQtCustomInterfaces/ExternalDrivenModel.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
@@ -114,9 +114,9 @@ if ( CXXTEST_FOUND )
          ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
          TestHelpers DataObjects)
   else ()
-    cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} )
-    target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
-         TestHelpers )
+    #cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} )
+    #target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
+    #     TestHelpers )
   endif ()
   
   add_dependencies( FrameworkTests CustomInterfacesTest )
