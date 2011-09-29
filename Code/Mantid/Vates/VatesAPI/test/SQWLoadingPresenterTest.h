@@ -7,6 +7,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MockObjects.h"
+#include <fstream>
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
@@ -109,7 +110,7 @@ void testExecutionInMemory()
   vtkDataSet* product = presenter.execute(&factory, progressAction);
   
   std::string fileNameIfGenerated = getFileBackend(getSuitableFileNamePath());
-  ifstream fileExists(fileNameIfGenerated);
+  std::ifstream fileExists(fileNameIfGenerated, ifstream::in);
   TSM_ASSERT("File Backend SHOULD NOT be generated.",  !fileExists.good());
 
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
