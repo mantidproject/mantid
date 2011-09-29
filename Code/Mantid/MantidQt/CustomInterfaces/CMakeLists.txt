@@ -113,15 +113,11 @@ if ( CXXTEST_FOUND )
     target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
          ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
          TestHelpers DataObjects)
-  else ()
-    #cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} )
-    #target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
-    #     TestHelpers )
   endif ()
   
   add_dependencies( FrameworkTests CustomInterfacesTest )
   # Add to the 'UnitTests' group in VS
-  set_property ( TARGET CustomInterfacesTest PROPERTY FOLDER "UnitTests" )
+  set_property( TARGET CustomInterfacesTest PROPERTY FOLDER "UnitTests" )
   
 endif ()
 
