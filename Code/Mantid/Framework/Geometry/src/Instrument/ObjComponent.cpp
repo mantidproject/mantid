@@ -41,7 +41,7 @@ namespace Mantid
     *  @param parent :: The Parent geometry object of this component
     *  @param material :: An optional pointer to the material object of this component
     */
-    ObjComponent::ObjComponent(const std::string& name, Object_sptr shape, 
+    ObjComponent::ObjComponent(const std::string& name, Object_const_sptr shape,
                    IComponent* parent, Material_sptr material)
       : IObjComponent(), Component(name,parent), m_shape(shape), m_material(material)
     {

@@ -39,6 +39,20 @@ public:
     TS_ASSERT_EQUALS(objComp.type(),"PhysicalComponent");
   }
 
+  void testShape()
+  {
+    // Create an empty shape and put it in an ObjComponent
+    Object_const_sptr shape(new Object);
+    ObjComponent objComp("obj",shape);
+    // Get it back - it's the same one
+    TS_ASSERT_EQUALS( objComp.shape(), shape );
+    // Put a different shape object in there and check we get back that one
+    Object_const_sptr shape2(new Object);
+    objComp.setShape(shape2);
+    TS_ASSERT_DIFFERS( objComp.shape(), shape );
+    TS_ASSERT_EQUALS( objComp.shape(), shape2 );
+  }
+
   void testIsValid()
   {
     ObjComponent ocyl("ocyl", createCappedCylinder());

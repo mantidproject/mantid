@@ -62,7 +62,7 @@ public:
   ObjComponent(const IComponent* base, const ParameterMap * map);
   // Looking to get rid of the first of these constructors in due course (and probably add others)
   explicit ObjComponent(const std::string& name, IComponent* parent=0);
-  explicit ObjComponent(const std::string& name, Object_sptr shape, IComponent* parent=0,
+  explicit ObjComponent(const std::string& name, Object_const_sptr shape, IComponent* parent=0,
                         Material_sptr material = Material_sptr());
   virtual ~ObjComponent();
 
