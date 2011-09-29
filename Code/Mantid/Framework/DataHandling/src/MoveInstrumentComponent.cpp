@@ -63,7 +63,7 @@ void MoveInstrumentComponent::exec()
   // Find the component to move
   if (DetID != -1)
   {
-      comp = findByID(inst,DetID);
+      comp = inst->getDetector(DetID);
       if (comp == 0)
       {
           std::ostringstream mess;
@@ -122,33 +122,6 @@ void MoveInstrumentComponent::exec()
   pmap.addV3D(comp.get(), "pos", Pos);
 
   return;
-}
-
-boost::shared_ptr<const Geometry::IComponent> MoveInstrumentComponent::findByID(boost::shared_ptr<const Geometry::IComponent> comp,int id)
-{
-    boost::shared_ptr<const IDetector> det = boost::dynamic_pointer_cast<const IDetector>(comp);
-    if (det && det->getID() == id) return comp;
-    boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-    if (asmb)
-        for(int i=0;i<asmb->nelements();i++)
-        {
-            boost::shared_ptr<const IComponent> res = findByID((*asmb)[i],id);
-            if (res) return res;
-        }
-    return boost::shared_ptr<IComponent>();
-}
-
-boost::shared_ptr<Geometry::IComponent> MoveInstrumentComponent::findByName(boost::shared_ptr<Geometry::IComponent> comp,const std::string& CName)
-{
-    if (comp->getName() == CName) return comp;
-    boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(comp);
-    if (asmb)
-        for(int i=0;i<asmb->nelements();i++)
-        {
-            boost::shared_ptr<IComponent> res = findByName((*asmb)[i],CName);
-            if (res) return res;
-        }
-    return boost::shared_ptr<IComponent>();
 }
 
 } // namespace DataHandling
