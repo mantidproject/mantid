@@ -252,6 +252,6 @@ def translate():
         create_algorithm(algorithm[0], max(algorithm[1]), _algm_object)
         create_algorithm_dialog(algorithm[0], max(algorithm[1]), _algm_object)
             
-translate()
+# translate()
 
 
