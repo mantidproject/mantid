@@ -110,7 +110,7 @@ void testExecutionInMemory()
   vtkDataSet* product = presenter.execute(&factory, progressAction);
   
   std::string fileNameIfGenerated = getFileBackend(getSuitableFileNamePath());
-  std::ifstream fileExists(fileNameIfGenerated, ifstream::in);
+  std::ifstream fileExists(fileNameIfGenerated.c_str(), ifstream::in);
   TSM_ASSERT("File Backend SHOULD NOT be generated.",  !fileExists.good());
 
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
