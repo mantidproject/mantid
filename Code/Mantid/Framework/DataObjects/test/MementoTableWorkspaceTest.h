@@ -26,7 +26,7 @@ public:
   {
     MementoTableWorkspace ws;
     TableWorkspace* pWs = &ws; //This will break if ws is not a tableworkspace.
-    TSM_ASSERT_EQUALS("Wrong number of columns constructed", 1, pWs->columnCount());
+    TSM_ASSERT_EQUALS("Wrong number of columns constructed", 11, pWs->columnCount());
   }
 
   void testCompareWithWrongNColumns()

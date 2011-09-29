@@ -8,26 +8,26 @@ namespace MantidQt
     /**
     Constructor
     @param ws : ref to underlying table workspace where persisted data is stored.
-    @param runNumber : the run number corresponding to this memento.
+    @param wsName : The name of the workspace
     */
-    WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber) :
+    WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string wsName) :
       m_data(ws), 
       m_validMemento(false), 
-      m_runNumber(runNumber), 
-      m_lock(new SingleOwnerLock(runNumber))
+      m_wsName(wsName), 
+      m_lock(new SingleOwnerLock(wsName))
     {
     }
 
     /**
     Constructor with option to specify locking object.
     @param ws : ref to underlying table workspace where persisted data is stored.
-    @param runNumber : the run number corresponding to this memento.
+    @param wsName : The name of the workspace.
     @param lock : locking object to use internally.
     */
-     WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber, WorkspaceMementoLock* lock) : 
+     WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string wsName, WorkspaceMementoLock* lock) : 
       m_data(ws), 
       m_validMemento(false), 
-      m_runNumber(runNumber), 
+      m_wsName(wsName), 
       m_lock(lock)
     {
     }
@@ -177,7 +177,7 @@ namespace MantidQt
 
     SingleOwnerLock::LockMap SingleOwnerLock::locks;
 
-    SingleOwnerLock::SingleOwnerLock(size_t runNumber) : m_runNumber(runNumber) {}
+    SingleOwnerLock::SingleOwnerLock(std::string wsName) : m_wsName(wsName) {}
 
       /// Apply the lock.
       void SingleOwnerLock::lock()
@@ -187,7 +187,7 @@ namespace MantidQt
         {
           throw std::runtime_error("This memento is already in use!");
         }
-        SingleOwnerLock::locks[m_runNumber] = true;
+        SingleOwnerLock::locks[m_wsName] = true;
       }
 
       /**
@@ -196,8 +196,8 @@ namespace MantidQt
       */
       bool SingleOwnerLock::unlock()
       {
-        bool existingState = SingleOwnerLock::locks[m_runNumber];
-        SingleOwnerLock::locks[m_runNumber] = false;
+        bool existingState = SingleOwnerLock::locks[m_wsName];
+        SingleOwnerLock::locks[m_wsName] = false;
         return existingState;
       }
 
@@ -207,7 +207,7 @@ namespace MantidQt
       */
       bool SingleOwnerLock::locked() const
       {
-        LockMap::iterator it = SingleOwnerLock::locks.find(m_runNumber);
+        LockMap::iterator it = SingleOwnerLock::locks.find(m_wsName);
         if(SingleOwnerLock::locks.end() != it)
         {
           return it->second;

@@ -31,11 +31,11 @@ namespace MantidQt
     class DLLExport SingleOwnerLock : public WorkspaceMementoLock
     {
     private:
-      typedef std::map<size_t, bool> LockMap;
+      typedef std::map<std::string, bool> LockMap;
       static LockMap locks;
-      size_t m_runNumber;
+      std::string m_wsName;
     public:
-      SingleOwnerLock(size_t runNumber);
+      SingleOwnerLock(std::string wsName);
       virtual void lock();
       virtual bool unlock();
       virtual bool locked() const;
@@ -75,8 +75,8 @@ namespace MantidQt
     public:
 
       typedef std::vector<AbstractMementoItem_sptr> VecMementoItems;
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber);
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber, WorkspaceMementoLock* lock);
+      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName);
+      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, WorkspaceMementoLock* lock);
       ~WorkspaceMemento(); 
       void addItem(AbstractMementoItem* item);
       AbstractMementoItem_sptr getItem(const size_t col) const;
@@ -97,8 +97,8 @@ namespace MantidQt
       VecMementoItems m_items;
       /// Flag indicating memento is valid.
       bool m_validMemento;
-      /// Run number associated with this memento.
-      size_t m_runNumber;
+      /// Name of the workspace wrapped.
+      std::string m_wsName;
       /// Disabled copy constructor.
       WorkspaceMemento(const WorkspaceMemento&);
       /// Disabled assignement operator.

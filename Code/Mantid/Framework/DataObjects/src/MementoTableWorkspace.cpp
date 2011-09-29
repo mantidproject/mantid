@@ -66,6 +66,16 @@ namespace Mantid
     {
       //Configure the columns as part of the construction.
       this->addColumn("str","WSName");
+      this->addColumn("str","ISName");
+      this->addColumn("int","RunNumber");
+      this->addColumn("str","ShapeXML");
+      this->addColumn("double", "a");
+      this->addColumn("double", "b");
+      this->addColumn("double", "c");
+      this->addColumn("double", "alpha");
+      this->addColumn("double", "beta");
+      this->addColumn("double", "gamma");
+      this->addColumn("str", "Status");
     }
 
     /// Destructor

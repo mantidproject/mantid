@@ -2,7 +2,9 @@
 #define MANTID_DATAOBJECTS_MEMENTO_COLLECTION_H_
 
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include <boost/scoped_ptr.hpp>
+#include <map>
 
 namespace MantidQt
 {
@@ -12,21 +14,49 @@ namespace MantidQt
   }
   namespace CustomInterfaces
   {
-    /// Locking proxy smart pointer. Ensures that Workspace Mementos are always locked and unlocked.
-    class DLLExport LockingMemento {
+    /// Smart pointer wraps mementos so that they can be borrowed, but not deleted 
+    class DLLExport LoanedMemento {
     public:
-      LockingMemento (WorkspaceMemento *memento) : m_memento (memento) 
+      LoanedMemento (WorkspaceMemento *memento) : m_memento (memento) 
       {
-        m_memento->lock();
+        if(m_memento)
+        {
+          m_memento->lock();
+        }
+      }
+      LoanedMemento(const LoanedMemento& other)
+      {
+        m_memento = other.m_memento;
+        if(m_memento)
+        {
+          other.m_memento->unlock();
+          m_memento->lock();
+        }
+      }
+      LoanedMemento& operator=(LoanedMemento& other)
+      {
+        if(this != &other)
+        {
+          m_memento = other.m_memento;
+          if(m_memento)
+          {
+            other.m_memento->unlock();
+            m_memento->lock();
+          }
+        }
+        return *this;
       }
       WorkspaceMemento * operator -> () 
       {
         return m_memento;
       }
-      ~LockingMemento () 
+      ~LoanedMemento () 
       {
-        m_memento->unlock();
-        delete m_memento;
+        if(m_memento)
+        {
+          this->m_memento->unlock();
+        }
+        //Explicitly do not delete memento.
       }
     private:
       WorkspaceMemento* m_memento;
@@ -46,7 +76,6 @@ namespace MantidQt
 
     Mementos are returned in a Locked format, meaning that no other memento may change that table row (corresponding to an individual run/workspace).
     Once the fields are changed on the memento, changes may be committed or rolled-back. These operations occur directly on the diff table contained within the MementoCollection.
-    The Memento collection does NOT own memento objects, it is a factory for them.
 
     @author Owen Arnold
     @date 26/08/2011
@@ -71,17 +100,30 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+    class ExternalDrivenModel;
     class DLLExport WorkspaceMementoCollection
     {
     public:
       WorkspaceMementoCollection();
       ~WorkspaceMementoCollection();
-      void registerWorkspace(const Mantid::API::Workspace& ws);
-      LockingMemento at(int runNumber);
+      void registerWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws, ExternalDrivenModel* model);
+      void unregisterWorkspace(const std::string& ws, ExternalDrivenModel* model);
+      LoanedMemento at(int rowIndex);
+      size_t size();
       Mantid::API::ITableWorkspace* serialize() const;
+      void revertAll(ExternalDrivenModel* model);
+      void applyAll(ExternalDrivenModel* model);
+      boost::shared_ptr<Mantid::API::ITableWorkspace> getWorkingData() const;
     private:
+      /// Type definition for a map of all mementos keyed via a name
+      typedef std::map<std::string, WorkspaceMemento*> MementoMap;
+      /// Map of all mementos keyed via a name
+      MementoMap m_mementoMap;
+      /// Table workspace data
       boost::shared_ptr<Mantid::API::ITableWorkspace> m_data;
     };
+    /// Status descriptions.
+    enum StatusOptions{NotReady, ReadyForPlotting, ReadyForAnything};
   }
 }
 

@@ -1,12 +1,13 @@
 set ( SRC_FILES src/background.cpp
                 src/ConvertToEnergy.cpp
-                #src/CreateMDWorkspace.cpp
+                src/CreateMDWorkspace.cpp
                 src/deltaECalc.cpp
                 src/Homer.cpp
                 src/Indirect.cpp
                 src/IndirectDataAnalysis.cpp
                 src/IndirectDiffractionReduction.cpp
                 src/IO_MuonGrouping.cpp
+                src/QtWorkspaceMementoModel.cpp
                 src/MuonAnalysis.cpp
                 src/MuonAnalysisHelper.cpp
 		        src/MuonAnalysisOptionTab.cpp
@@ -21,8 +22,9 @@ set ( SRC_FILES src/background.cpp
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
-                #inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+                inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/deltaECalc.h
+				inc/MantidQtCustomInterfaces/ExternalDrivenModel.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
@@ -31,20 +33,21 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
+                inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-				        inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
-				        inc/MantidQtCustomInterfaces/WorkspaceMemento.h
-				        inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
+                inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
+                inc/MantidQtCustomInterfaces/WorkspaceMemento.h
+                inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
-                #inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+                inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
@@ -58,12 +61,17 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
-               #inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
+               inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
+)
+
+set( TEST_FILES
+               test/WorkspaceMementoCollectionTest.h
+               test/WorkspaceMementoItemTest.h
 )
 
 include_directories ( inc )
@@ -92,6 +100,28 @@ add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
 
 target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser )
+
+if ( CXXTEST_FOUND )
+  
+  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
+  MESSAGE(STATUS "including -> ${inc}")
+  
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+    target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
+         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
+         TestHelpers DataObjects)
+  else ()
+    cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
+         TestHelpers )
+  endif ()
+  
+  add_dependencies( FrameworkTests CustomInterfacesTest )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET CustomInterfacesTest PROPERTY FOLDER "UnitTests" )
+  
+endif ()
 
 ###########################################################################
 # Installation settings
