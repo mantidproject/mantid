@@ -113,7 +113,7 @@ namespace MDEvents
     outWS->splitBox();
 
     // Function defining which events (in the input dimensions) to place in the output
-    MDImplicitFunction * function = this->getImplicitFunctionForChunk(nd, NULL, NULL);
+    MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
 
     std::vector<IMDBox<MDE,nd>*> boxes;
     // Leaf-only; no depth limit; with the implicit function passed to it.

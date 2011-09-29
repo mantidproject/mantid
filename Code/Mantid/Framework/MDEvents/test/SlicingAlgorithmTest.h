@@ -45,9 +45,20 @@ public:
   static void destroySuite( SlicingAlgorithmTest *suite ) { delete suite; }
 
   IMDEventWorkspace_sptr ws;
+  IMDEventWorkspace_sptr ws1;
+  IMDEventWorkspace_sptr ws2;
+  IMDEventWorkspace_sptr ws3;
+  IMDEventWorkspace_sptr ws4;
+  IMDEventWorkspace_sptr ws5;
+
   SlicingAlgorithmTest()
   {
     ws = MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
+    ws1 = MDEventsTestHelper::makeMDEW<1>(5, 0.0, 10.0, 1);
+    ws2 = MDEventsTestHelper::makeMDEW<2>(5, 0.0, 10.0, 1);
+    ws3 = MDEventsTestHelper::makeMDEW<3>(5, 0.0, 10.0, 1);
+    ws4 = MDEventsTestHelper::makeMDEW<4>(5, 0.0, 10.0, 1);
+    ws5 = MDEventsTestHelper::makeMDEW<5>(5, 0.0, 10.0, 1);
   }
 
   void test_initSlicingProps()
@@ -218,7 +229,7 @@ public:
   {
     SlicingAlgorithmImpl * alg =
         do_createAlignedTransform("Axis0, 2.0,8.0, 6", "Axis1, 2.0,8.0, 3", "Axis2, 2.0,8.0, 3", "");
-    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(3, NULL, NULL);
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
     TS_ASSERT( func->isPointContained(VMD(3, 4, 5)) );
@@ -233,7 +244,7 @@ public:
     /* This defines a chunk implicit function between 3-4 in each axis */
     size_t chunkMin[3] = {1, 1, 1};
     size_t chunkMax[3] = {2, 2, 2};
-    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(3, chunkMin, chunkMax);
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(chunkMin, chunkMax);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
     TS_ASSERT( func->isPointContained(VMD(3.5, 3.5, 3.5)) );
@@ -281,11 +292,12 @@ public:
     TS_ASSERT_EQUALS( dim->getX(5), 10.0);
   }
 
-  SlicingAlgorithmImpl * do_createGeneralTransform(std::string name1, std::string name2, std::string name3, std::string name4,
+
+  SlicingAlgorithmImpl * do_createGeneralTransform(IMDEventWorkspace_sptr inWS, std::string name1, std::string name2, std::string name3, std::string name4,
       VMD origin, bool ForceOrthogonal=false)
   {
     SlicingAlgorithmImpl * alg = new SlicingAlgorithmImpl();
-    alg->in_ws = ws;
+    alg->in_ws = inWS;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "0"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVectorX", name1));
@@ -300,12 +312,12 @@ public:
 
   void test_createGeneralTransform_failures()
   {
-    TSM_ASSERT_THROWS_ANYTHING("No dimensions given",  do_createGeneralTransform("", "", "", "", VMD(1,2,3)) );
-    TSM_ASSERT_THROWS_ANYTHING("Bad # of dimensions in origin param",  do_createGeneralTransform("x,m,1,0,0, 10.0, 10", "", "", "", VMD(1,2,3,4)) );
-    TSM_ASSERT_THROWS_ANYTHING("Too many output dims",  do_createGeneralTransform("x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", VMD(1,2,3,4)) );
+    TSM_ASSERT_THROWS_ANYTHING("No dimensions given",  do_createGeneralTransform(ws, "", "", "", "", VMD(1,2,3)) );
+    TSM_ASSERT_THROWS_ANYTHING("Bad # of dimensions in origin param",  do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "", "", "", VMD(1,2,3,4)) );
+    TSM_ASSERT_THROWS_ANYTHING("Too many output dims",  do_createGeneralTransform(ws, "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", "x,m,1,0,0, 10.0, 10", VMD(1,2,3,4)) );
   }
 
-  void test_createGeneralTransform_3D()
+  void test_createGeneralTransform_3D_to_3D()
   {
     // Build the basis vectors, a 0.1 rad rotation along +Z
     double angle = 0.1;
@@ -314,7 +326,7 @@ public:
     VMD baseZ(0.0, 0.0, 1.0);
 
     SlicingAlgorithmImpl * alg =
-        do_createGeneralTransform(
+        do_createGeneralTransform(ws3,
             "OutX,m," + baseX.toString(",") + ",10.0, 5",
             "OutY,m," + baseY.toString(",") + ",10.0, 5",
             "OutZ,m," + baseZ.toString(",") + ",10.0, 5",
@@ -349,7 +361,7 @@ public:
     TS_ASSERT_EQUALS( VMD(3,in), VMD(3.0, 1.0, 2.6) );
 
     // The implicit function
-    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(3, NULL, NULL);
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
     TS_ASSERT( func->isPointContained(VMD(1.5, 1.5, 2)) );
@@ -363,32 +375,77 @@ public:
 
   }
 
-
-
-  void test_createGeneralTransform_1D()
+  void test_createGeneralTransform_4D_to_3D()
   {
     SlicingAlgorithmImpl * alg =
-        do_createGeneralTransform("OutX,m, 1,0,0, 10.0, 5",  "",  "",  "", VMD(1,1,0));
-    TS_ASSERT_EQUALS( alg->m_bases.size(), 1);
+        do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0, 10.0, 5",  "OutY,m, 0,1,0,0, 10.0, 5",
+            "OutZ,m, 0,0,1,0, 10.0, 5",  "", VMD(1,1,1,0));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(3, NULL, NULL);
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
-    TS_ASSERT_EQUALS( func->getNumPlanes(), 2);
-    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5, 2) ) );
-    TS_ASSERT( func->isPointContained(  VMD(1.5, -12345.5, +23456) ) );
-    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0, 2) ) );
-    TS_ASSERT( !func->isPointContained( VMD(11.1, -1.0, 2) ) );
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5,  2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5,  12, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5,  0.5, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0,  2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1., 2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 0.5,  2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5, 2, 234) ) );
   }
 
-  void test_createGeneralTransform_2D()
+  void test_createGeneralTransform_5D_to_3D()
   {
     SlicingAlgorithmImpl * alg =
-        do_createGeneralTransform("OutX,m, 1,0.01,0, 10.0, 5",  "OutY,m, 0.01,1,0, 10.0, 5",  "",  "", VMD(1,1,0));
+        do_createGeneralTransform(ws5, "OutX,m, 1,0,0,0,0, 10.0, 5",  "OutY,m, 0,1,0,0,0, 10.0, 5",
+            "OutZ,m, 0,0,1,0,0, 10.0, 5",  "", VMD(1,1,1,0,0));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
+
+    // The implicit function
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5,  2, 234, 456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5,  12, 234, 456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5,  0.5, 234, 456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0,  2, 234, 456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1., 2, 234, 456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 0.5,  2, 234, 456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5, 2, 234, 456) ) );
+  }
+
+
+
+  void test_createGeneralTransform_4D_to_2D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0, 10.0, 5",  "OutY,m, 0,1,0,0, 10.0, 5",  "",  "", VMD(1,1,0,0));
     TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(3, NULL, NULL);
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5,  2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0,  2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1., 2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 0.5,  2, 234) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5, 2, 234) ) );
+  }
+
+  void test_createGeneralTransform_3D_to_2D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws3, "OutX,m, 1,0,0, 10.0, 5",  "OutY,m, 0,1,0, 10.0, 5",  "",  "", VMD(1,1,0));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
+
+    // The implicit function
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
     TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5, 2) ) );
@@ -398,6 +455,133 @@ public:
     TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5, 2) ) );
   }
 
+  void test_createGeneralTransform_2D_to_2D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws2, "OutX,m, 1,0, 10.0, 5",  "OutY,m, 0,1, 10.0, 5",  "",  "", VMD(1,1));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
+
+    // The implicit function
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1.0) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 0.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5) ) );
+  }
+
+  /** These non-orthogonal bases define a parallelogram sort of like this but at 45 degrees:
+   *
+   *    /``````/
+   *   /      /
+   *  /______/
+   *
+   */
+  void test_createGeneralTransform_2D_to_2D_nonOrthogonal()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws2, "OutX,m, 1,0, 10.0, 5",  "OutY,m, 1,1, 10.0, 5",  "",  "", VMD(0.,0.));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
+
+    // The implicit function
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
+    TS_ASSERT(  func->isPointContained( VMD(2., 1.) ) );
+    TS_ASSERT( !func->isPointContained( VMD(8., 7.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0., 1.) ) );
+    TS_ASSERT( !func->isPointContained( VMD(5., 6.) ) );    // This point would be contained if using orthogonal bases
+    TS_ASSERT(  func->isPointContained( VMD(12., 3.) ) );   // This point would NOT be contained if using orthogonal bases
+  }
+
+  void test_createGeneralTransform_3D_to_2D_nonOrthogonal()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws3, "OutX,m, 1,0,0, 10.0, 5",  "OutY,m, 1,1,0, 10.0, 5",  "",  "", VMD(0.,0.,0.));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
+
+    // The implicit function
+    MDImplicitFunction * func;
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
+    TS_ASSERT(  func->isPointContained( VMD(2., 1.,  0.) ) );
+    TS_ASSERT( !func->isPointContained( VMD(8., 7.5, 0.) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0., 1.,  0.) ) );
+    TS_ASSERT( !func->isPointContained( VMD(5., 6.,  0.) ) );   // This point would be contained if using orthogonal bases
+    TS_ASSERT(  func->isPointContained( VMD(12., 3., 0.) ) );   // This point would NOT be contained if using orthogonal bases
+  }
+
+  void test_createGeneralTransform_4D_to_1D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0, 10.0, 5",  "",  "",  "", VMD(1,1,0,0));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 1);
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 2);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5, 2, 345) ) );
+    TS_ASSERT( func->isPointContained(  VMD(1.5, -12345.5, +23456, 345) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0, 2, 345) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1.0, 2, 345) ) );
+  }
+
+  void test_createGeneralTransform_3D_to_1D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws3, "OutX,m, 1,0,0, 10.0, 5",  "",  "",  "", VMD(1,1,0));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 1);
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 2);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5, 2) ) );
+    TS_ASSERT( func->isPointContained(  VMD(1.5, -12345.5, +23456) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0, 2) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1.0, 2) ) );
+  }
+
+  void test_createGeneralTransform_2D_to_1D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws2, "OutX,m, 1,0, 10.0, 5",  "",  "",  "", VMD(1,1));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 1);
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 2);
+    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5) ) );
+    TS_ASSERT( func->isPointContained(  VMD(1.5, -12345.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0) ) );
+    TS_ASSERT( !func->isPointContained( VMD(11.1, -1.0) ) );
+  }
+
+  void test_createGeneralTransform_1D_to_1D()
+  {
+    VMD origin(1); origin[0] = 1.0;
+    SlicingAlgorithmImpl * alg = do_createGeneralTransform(ws1, "OutX,m, 1, 10.0, 5",  "",  "",  "", origin);
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 1);
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 2);
+    VMD point(1);
+    point[0] = 1.5;
+    TS_ASSERT( func->isPointContained(point) );
+    point[0] = 11.5;
+    TS_ASSERT(!func->isPointContained(point) );
+    point[0] = 0.5;
+    TS_ASSERT(!func->isPointContained(point) );
+  }
 };
 
 

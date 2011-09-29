@@ -105,6 +105,35 @@ namespace Kernel
     }
 
     //-------------------------------------------------------------------------------------------
+    /** 5D Constructor
+     * @param valX :: value at this dimension*/
+    VMD(double val0, double val1, double val2, double val3, double val4)
+    : nd(5)
+    {
+      data = new double[nd];
+      data[0] = val0;
+      data[1] = val1;
+      data[2] = val2;
+      data[3] = val3;
+      data[4] = val4;
+    }
+
+    //-------------------------------------------------------------------------------------------
+    /** 6D Constructor
+     * @param valX :: value at this dimension*/
+    VMD(double val0, double val1, double val2, double val3, double val4, double val5)
+    : nd(6)
+    {
+      data = new double[nd];
+      data[0] = val0;
+      data[1] = val1;
+      data[2] = val2;
+      data[3] = val3;
+      data[4] = val4;
+      data[5] = val5;
+    }
+
+    //-------------------------------------------------------------------------------------------
     /** Copy constructor
      * @param other :: other to copy */
     VMD(const VMD & other)

@@ -301,7 +301,7 @@ namespace MDEvents
         chunkMax[chunkDimension] = size_t(chunk+chunkNumBins);
 
       // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
-      MDImplicitFunction * function = this->getImplicitFunctionForChunk(nd, chunkMin, chunkMax);
+      MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin, chunkMax);
 
       // Use getBoxes() to get an array with a pointer to each box
       std::vector<IMDBox<MDE,nd>*> boxes;

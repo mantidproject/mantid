@@ -67,8 +67,8 @@ namespace MDEvents
     void makeAlignedDimensionFromString(const std::string & str);
     void makeBasisVectorFromString(const std::string & str);
 
-    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(size_t nd, size_t * chunkMin, size_t * chunkMax);
-    Mantid::Geometry::MDImplicitFunction * getGeneralImplicitFunction(size_t nd, size_t * chunkMin, size_t * chunkMax);
+    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(size_t * chunkMin, size_t * chunkMax);
+    Mantid::Geometry::MDImplicitFunction * getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax);
 
     /// Input workspace
     Mantid::API::IMDEventWorkspace_sptr in_ws;

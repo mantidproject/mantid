@@ -395,17 +395,24 @@ namespace MDEvents
   /** Create an implicit function for picking boxes, based on the indexes in the
    * output MDHistoWorkspace.
    * This needs to be in the space of the INPUT MDEventWorkspace.
-   * This function assumes ORTHOGONAL BASIS VECTORS!
    *
-   * @param nd :: number of dimensions in the workspace being sliced.
+   * In the most general case, this function assumes ORTHOGONAL BASIS VECTORS!
+   * However, the following cases handle non-orthogonal vectors:
+   *  2 bases in 2D space
+   *  2 bases in 3D space
+   *  3 bases in 3D space
+   *  3 bases in 4D space
+   *
    * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive).
    *        NULL to use the entire range.
    * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
    *        NULL to use the entire range.
    * @return MDImplicitFunction created
    */
-  MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(size_t nd, size_t * chunkMin, size_t * chunkMax)
+  MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax)
   {
+    size_t nd = in_ws->getNumDims();
+
     // General implicit function
     MDImplicitFunction * func = new MDImplicitFunction;
 
@@ -457,19 +464,46 @@ namespace MDEvents
       func->addPlane( MDPlane(x, o1) );
       func->addPlane( MDPlane(x * -1.0, o2) );
     }
-    else if (boxDim == 2)
+    else if (boxDim == 2 && nd == 2)
     {
-      // 4 planes defined by 2 basis vectors
-      // The plane along the X basis vector has Y as its normal. Assumes orthogonality!
-      func->addPlane( MDPlane(y,        o1) );
-      func->addPlane( MDPlane(y * -1.0, o2) );
-      // The plane along the Y basis vector has X as its normal. Assumes orthogonality!
-      func->addPlane( MDPlane(x,        o1) );
-      func->addPlane( MDPlane(x * -1.0, o2) );
+      // 4 planes defined by 2 basis vectors (general to non-orthogonal basis vectors)
+      std::vector<VMD> vectors;
+      // X plane
+      vectors.clear();
+      vectors.push_back(x);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
+
+      // Y plane
+      vectors.clear();
+      vectors.push_back(y);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
+    }
+    else if (boxDim == 2 && nd == 3)
+    {
+      // 4 planes defined by 2 basis vectors (general to non-orthogonal basis vectors)
+      // The vertical = cross-product of X and Y basis vectors
+      z = x.cross_prod(y);
+      std::vector<VMD> vectors;
+
+      // X plane
+      vectors.clear();
+      vectors.push_back(x);
+      vectors.push_back(z);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
+
+      // Y plane
+      vectors.clear();
+      vectors.push_back(y);
+      vectors.push_back(z);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
     }
     else if (boxDim == 3 && nd == 3)
     {
-      // 6 planes defined by 3 basis vectors
+      // 6 planes defined by 3 basis vectors (general to non-orthogonal basis vectors)
       VMD xyNormal = x.cross_prod(y);
       func->addPlane( MDPlane(xyNormal,        o1) );
       func->addPlane( MDPlane(xyNormal * -1.0, o2) );
@@ -480,75 +514,55 @@ namespace MDEvents
       func->addPlane( MDPlane(yzNormal,        o1) );
       func->addPlane( MDPlane(yzNormal * -1.0, o2) );
     }
-    // TODO: Handle 4D and mixed cases like 3D basis of 4D space.
+    else if (boxDim == 3 && nd == 4)
+    {
+      // 6 planes defined by 3 basis vectors, in 4D world. (General to non-orthogonal basis vectors)
+
+      // Get a vector (in 4D) that is normal to all 3 other bases.
+      t = VMD::getNormalVector(bases);
+      // All the planes will have "t" in their plane.
+
+      std::vector<VMD> vectors;
+
+      // XY plane
+      vectors.clear();
+      vectors.push_back(x);
+      vectors.push_back(y);
+      vectors.push_back(t);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
+
+      // XZ plane
+      vectors.clear();
+      vectors.push_back(x);
+      vectors.push_back(z);
+      vectors.push_back(t);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
+
+      // YZ plane
+      vectors.clear();
+      vectors.push_back(y);
+      vectors.push_back(z);
+      vectors.push_back(t);
+      func->addPlane( MDPlane(vectors, o1, insidePoint) );
+      func->addPlane( MDPlane(vectors, o2, insidePoint) );
+    }
+    else
+    {
+      // Last-resort, totally general case
+      // 2*N planes defined by N basis vectors, in any dimensionality workspace. Assumes orthogonality!
+      for (size_t i=0; i<bases.size(); i++)
+      {
+        // For each basis vector, make two planes, perpendicular to it and facing inwards
+        func->addPlane( MDPlane(bases[i],        o1) );
+        func->addPlane( MDPlane(bases[i] * -1.0, o2) );
+      }
+    }
 
     return func;
   }
 
-
-  /*
-   *     else if (boxDim == 2)
-    {
-      // 4 planes defined by 2 basis vectors
-      normal = y.cross_prod()
-      points.clear();
-      points.push_back(o1);
-      points.push_back(o1+x);
-      if (nd > 2) points.push_back(o1+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear();
-      points.push_back(o1);
-      points.push_back(o1+y);
-      if (nd > 2) points.push_back(o1+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear();
-      points.push_back(o1+x);
-      points.push_back(o2);
-      if (nd > 2) points.push_back(o2+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear();
-      points.push_back(o1+y);
-      points.push_back(o2);
-      if (nd > 2) points.push_back(o2+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-    }
-    else if (boxDim == 3)
-    {
-      // 6 planes defined by 3 basis vectors
-      points.clear(); // XZ-plane
-      points.push_back(o1);
-      points.push_back(o1+x);
-      points.push_back(o1+x+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear(); // YZ-plane
-      points.push_back(o1);
-      points.push_back(o1+y);
-      points.push_back(o1+y+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear(); // XY-plane
-      points.push_back(o1);
-      points.push_back(o1+x);
-      points.push_back(o1+x+y);
-      func->addPlane( MDPlane(points, insidePoint) );
-
-      points.clear(); // YZ-plane, other side
-      points.push_back(o1+x+y+z);
-      points.push_back(o1+x+y);
-      points.push_back(o1+x);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear(); // XZ-plane, other side
-      points.push_back(o1+y+x+z);
-      points.push_back(o1+y+z);
-      points.push_back(o1+y);
-      func->addPlane( MDPlane(points, insidePoint) );
-      points.clear(); // XY-plane, other side
-      points.push_back(o1+z+x+y);
-      points.push_back(o1+z+x);
-      points.push_back(o1+z);
-      func->addPlane( MDPlane(points, insidePoint) );
-    }
-   *
-   */
 
   //----------------------------------------------------------------------------------------------
   /** Create an implicit function for picking boxes, based on the indexes in the
@@ -562,8 +576,9 @@ namespace MDEvents
    *        NULL to use the entire range.
    * @return MDImplicitFunction created
    */
-  MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(size_t nd, size_t * chunkMin, size_t * chunkMax)
+  MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(size_t * chunkMin, size_t * chunkMax)
   {
+    size_t nd = in_ws->getNumDims();
     if (m_axisAligned)
     {
       std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
@@ -587,7 +602,7 @@ namespace MDEvents
     else
     {
       // General implicit function
-      return getGeneralImplicitFunction(nd, chunkMin, chunkMax);
+      return getGeneralImplicitFunction(chunkMin, chunkMax);
     }
   }
 
