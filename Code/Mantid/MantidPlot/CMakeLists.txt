@@ -174,6 +174,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
+                   src/Mantid/SliceViewer/SliceViewer.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -385,6 +386,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
+                   src/Mantid/SliceViewer/SliceViewer.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
@@ -644,6 +646,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h
+                       src/Mantid/SliceViewer/SliceViewer.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
@@ -668,6 +671,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/ManageCustomMenus.ui
+               src/Mantid/SliceViewer/SliceViewer.ui
 )
 
 # Create Vates configuration file
