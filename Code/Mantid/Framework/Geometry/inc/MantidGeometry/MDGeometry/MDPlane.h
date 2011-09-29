@@ -62,7 +62,7 @@ namespace Geometry
     MDPlane(const Mantid::Kernel::VMD & normal, const Mantid::Kernel::VMD & point);
     MDPlane(const std::vector<coord_t> & normal, const std::vector<coord_t> & point);
     MDPlane(const size_t nd, const coord_t * normal, const coord_t * point);
-    MDPlane(const std::vector<Mantid::Kernel::VMD> & points, const Mantid::Kernel::VMD & insidePoint);
+    MDPlane(const std::vector<Mantid::Kernel::VMD> & vectors, const Mantid::Kernel::VMD & origin, const Mantid::Kernel::VMD & insidePoint);
     MDPlane(const MDPlane & other);
     MDPlane & operator=(const MDPlane & other);
     ~MDPlane();

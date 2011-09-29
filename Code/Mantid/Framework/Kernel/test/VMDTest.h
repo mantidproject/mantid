@@ -185,6 +185,50 @@ public:
     TS_ASSERT_THROWS_ANYTHING( VMD("   ,  ,   ") );
   }
 
+  void test_getNormalVector()
+  {
+  }
+
+
+  void test_getNormalVector_2D()
+  {
+    std::vector<VMD> vectors;
+    vectors.push_back(VMD(1.0,1.0));
+    VMD normal = VMD::getNormalVector(vectors);
+    TS_ASSERT_EQUALS( normal, VMD(1., -1.)*sqrt(0.5) );
+  }
+
+  /// Define a plane along x=y axis vertical in Z
+  void test_getNormalVector_3D()
+  {
+    std::vector<VMD> vectors;
+    vectors.push_back(VMD(1., 1., 0.));
+    vectors.push_back(VMD(0., 0., 1.));
+    VMD normal = VMD::getNormalVector(vectors);
+    TS_ASSERT_EQUALS( normal, VMD(1., -1., 0.)*sqrt(0.5) );
+  }
+
+  /// Bad vectors = they are collinear
+  void test_getNormalVector_3D_collinear()
+  {
+    std::vector<VMD> vectors;
+    vectors.push_back(VMD(1., 1., 0.));
+    vectors.push_back(VMD(2., 2., 0.));
+    TS_ASSERT_THROWS_ANYTHING( VMD normal = VMD::getNormalVector(vectors) );
+  }
+
+  /// Define a plane along x=y axis vertical in Z and t
+  void test_getNormalVector_4D()
+  {
+    std::vector<VMD> vectors;
+    vectors.push_back(VMD(1., 1., 0., 0.));
+    vectors.push_back(VMD(0., 0., 1., 0.));
+    vectors.push_back(VMD(0., 0., 0., 1.));
+    VMD normal = VMD::getNormalVector(vectors);
+    TS_ASSERT_EQUALS( normal, VMD(1., -1., 0., 0.)*sqrt(0.5) );
+  }
+
+
 };
 
 

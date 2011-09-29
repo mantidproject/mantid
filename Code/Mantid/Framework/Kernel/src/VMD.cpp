@@ -20,6 +20,7 @@ std::ostream& operator<<(std::ostream& os, const VMD& v)
   return os;
 }
 
+//-------------------------------------------------------------------------------------------------
 /** Make an orthogonal system with 2 input 3D vectors.
  * Currently only works in 3D!
  *
@@ -42,6 +43,88 @@ std::vector<VMD> VMD::makeVectorsOrthogonal(std::vector<VMD> & vectors)
     retVal.push_back( VMD(out[i]) );
   return retVal;
 }
+
+
+//-------------------------------------------------------------------------------------------------
+/** Given N-1 vectors defining a N-1 dimensional hyperplane in N dimensions,
+ * returns a vector that is normal (perpendicular) to all the input vectors
+ *
+ * Given planar vectors a, b, c, ...
+ * Build a NxN matrix of this style:
+ *  x1  x2  x3  x4
+ *  a1  a2  a4  a4
+ *  b1  b2  b4  b4
+ *  c1  c2  c4  c4
+ *
+ * Where xn = the basis unit vector of the space, e.g. x1 = x, x2 = y, etc.
+ *
+ * The determinant of the matrix gives the normal vector. This is analogous
+ * to the determinant method of finding the cross product of 2 3D vectors.
+ *
+ * It can be shown that the resulting vector n is such that:
+ *  n . a = 0; n . b = 0 etc.
+ * ... meaning that all the in-plane vectors are perpendicular to the normal, which is what we wanted!
+ *
+ * (I've worked it out in 4D and its a long proof (not shown here)
+ * I'm assuming it holds for higher dimensions,
+ * I'll let a mathematician prove this :) )
+ *
+ * @param vectors :: vector of N-1 vectors with N dimensions.
+ * @throw if the vectors are collinear
+ * @return the normal vector
+ */
+VMD VMD::getNormalVector(const std::vector<VMD> & vectors)
+{
+  if (vectors.size() <= 0)
+    throw std::invalid_argument("VMD::getNormalVector: Must give at least 1 vector");
+  size_t nd = vectors[0].getNumDims();
+  if (nd < 2)
+    throw std::invalid_argument("VMD::getNormalVector: Must have at least 2 dimensions!");
+  if (vectors.size() != nd-1)
+    throw std::invalid_argument("VMD::getNormalVector: Must have as many N-1 vectors if there are N dimensions.");
+  for (size_t i=0; i < vectors.size(); i++)
+    if (vectors[i].getNumDims() != nd)
+      throw std::invalid_argument("VMD::getNormalVector: Inconsistent number of dimensions in the vectors given!");
+
+  // Start the normal vector
+  VMD normal = VMD(nd);
+  double sign = +1.0;
+  for (size_t d=0; d<nd; d++)
+  {
+    // Make the sub-determinant with the columns of every other dimension.
+    Matrix<double> mat(nd-1, nd-1);
+    for (size_t row=0; row<vectors.size(); row++)
+    {
+      VMD vec = vectors[row];
+      size_t col = 0;
+      for (size_t i=0; i < nd; i++)
+      {
+        if (i != d) // Skip the column of this dimension
+        {
+          mat[row][col] = vec[i];
+          col++;
+        }
+      }
+    } // Building the matrix rows
+
+    double det = mat.determinant();
+
+    // The determinant of the sub-matrix = the normal at that dimension
+    normal[d] = sign * det;
+
+    // Sign flips each time
+    sign *= -1.0;
+  } // each dimension of the normal vector
+
+  // Unity normal is better.
+  double length = normal.normalize();
+  if (length == 0)
+    throw std::runtime_error("VMD::getNormalVector: 0-length normal found. Are your vectors collinear?");
+
+  return normal;
+}
+
+
 
 } // namespace Mantid
 } // namespace Kernel

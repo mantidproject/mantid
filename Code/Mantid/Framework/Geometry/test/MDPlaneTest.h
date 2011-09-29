@@ -57,71 +57,57 @@ public:
     TS_ASSERT_DELTA( p.getInequality(), 1.234, 1e-5);
   }
 
-  void test_constructorPoints_badInputs()
+  void test_constructorVectors_badInputs()
   {
     std::vector<VMD> points;
     VMD insidePoint(1);
-    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, insidePoint));
+    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(1,2,3), insidePoint));
     points.push_back(VMD(1,2,3));
-    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(2,3,4)));
+    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(1,2,3), VMD(2,3,4)));
   }
 
-  void test_constructorPoints_1D()
-  {
-    std::vector<VMD> points;
-    VMD a(1), inside(1);
-    a[0] = 2.0;
-    inside[0] = 3.0;
-    points.push_back(a);
-    MDPlane p(points, inside);
-    TS_ASSERT( p.isPointBounded( inside ) );
-  }
-
-  void test_constructorPoints_2D()
+  void test_constructorVectors_2D()
   {
     std::vector<VMD> points;
     points.push_back(VMD(1.0,1.0));
-    points.push_back(VMD(2.0,2.0));
-    MDPlane p(points, VMD(1.5, 0.5) );
+    MDPlane p(points, VMD(0., 0.), VMD(1.5, 0.5) );
     TS_ASSERT( p.isPointBounded( VMD(0.2, 0.1) ) );
   }
 
-  void test_constructorPoints_3D()
+  /// Define a plane along x=y axis vertical in Z
+  void test_constructorVectors_3D()
   {
-    // Define a plane along x=y axis vertical in Z
     std::vector<VMD> points;
-    points.push_back(VMD(1.0,1.0,0.0));
-    points.push_back(VMD(2.0,2.0,0.0));
-    points.push_back(VMD(2.0,2.0,1.0));
-    MDPlane p(points, VMD(0.5, 1.5, 1.0) );
+    points.push_back(VMD(1., 1., 0.));
+    points.push_back(VMD(0., 0., 1.));
+    MDPlane p(points, VMD(0., 0., 0.), VMD(0.5, 1.5, 1.0) );
     TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0) ) );
   }
 
-//  void test_constructorPoints_3D_2()
-//  {
-//    // Define a plane along x=y axis vertical in Z
-//    std::vector<VMD> points;
-//    points.push_back(VMD(0, 0, 0));
-//    points.push_back(VMD(1, 0, 0));
-//    points.push_back(VMD(0, 0, 1));
-//    MDPlane p(points, VMD(0.5, 1.5, 1.0) );
-//    TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0) ) );
-//  }
-
-  /** Given a singular matrix it is not possible to find a matrix
-   * Disabled because it does NOT throw on MacOS for some reason. */
-  void xtest_constructorPoints_singularMatrix()
+  /// Bad vectors = they are collinear
+  void test_constructorVectors_3D_collinear()
   {
     std::vector<VMD> points;
-    points.push_back(VMD(1.0,1.0));
-    points.push_back(VMD(1.0,1.0));
-    TS_ASSERT_THROWS_ANYTHING( MDPlane p(points, VMD(1.5, 0.5) ) );
-    points.clear();
-    points.push_back(VMD(1.0,1.0,0.0));
-    points.push_back(VMD(2.0,2.0,0.0));
-    points.push_back(VMD(3.0,3.0,0.0));
-    TS_ASSERT_THROWS_ANYTHING( MDPlane p(points, VMD(1,2,3) ) );
+    points.push_back(VMD(1., 1., 0.));
+    points.push_back(VMD(2., 2., 0.));
+    TS_ASSERT_THROWS_ANYTHING(MDPlane p(points, VMD(0., 0., 0.), VMD(0.5, 1.5, 1.0) ));
   }
+
+
+  /// Define a plane along x=y axis vertical in Z and t
+  void test_constructorVectors_4D()
+  {
+    std::vector<VMD> points;
+    points.push_back(VMD(1., 1., 0., 0.));
+    points.push_back(VMD(0., 0., 1., 0.));
+    points.push_back(VMD(0., 0., 0., 1.));
+    MDPlane p(points, VMD(0., 0., 0., 0.), VMD(0.5, 1.5, 1.0, 1.0) );
+    TS_ASSERT( p.isPointBounded( VMD(0.5, 1.5, 1.0, -23.0) ) );
+    TS_ASSERT( !p.isPointBounded( VMD(1.5, 0.5, 1.0, -23.0) ) );
+  }
+
+
+
 
   void test_copy_ctor()
   {

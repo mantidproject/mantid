@@ -449,6 +449,7 @@ namespace Kernel
     }
 
     static std::vector<VMD> makeVectorsOrthogonal(std::vector<VMD> & vectors);
+    static VMD getNormalVector(const std::vector<VMD> & vectors);
 
   protected:
     /// Number of dimensions

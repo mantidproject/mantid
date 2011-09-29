@@ -70,7 +70,7 @@ namespace Mantid
 
       /// const Array accessor
       const T* operator[](const size_t A) const { return V[A]; }
-      /// Array accessor
+      /// Array accessor. Use, e.g. Matrix[row][col]
       T* operator[](const size_t A) { return V[A]; }
 
       Matrix<T>& operator+=(const Matrix<T>&);       ///< Basic addition operator
