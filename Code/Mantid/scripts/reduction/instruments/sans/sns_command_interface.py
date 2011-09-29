@@ -46,12 +46,10 @@ def MonitorNormalization():
     TotalChargeNormalization()
       
 def BeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
-    ReductionSingleton().set_transmission(sns_reduction_steps.BeamStopTransmission(normalize_to_unity=normalize_to_unity,
-                                                                           theta_dependent=theta_dependent))
+    raise RuntimeError, "Transmission measurement using the beam stop hole is no longer supported" 
     
 def BckBeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
-    ReductionSingleton().set_bck_transmission(sns_reduction_steps.BeamStopTransmission(normalize_to_unity=normalize_to_unity,
-                                                                               theta_dependent=theta_dependent))
+    raise RuntimeError, "Transmission measurement using the beam stop hole is no longer supported" 
 
 def PerformFlightPathCorrection(do_correction=True):
     ReductionSingleton().get_data_loader().set_flight_path_correction(do_correction)

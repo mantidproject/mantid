@@ -6,12 +6,11 @@ import sys
 import pickle
 import math
 from reduction import ReductionStep
-from sans_reduction_steps import BaseTransmission, BaseBeamFinder, WeightedAzimuthalAverage
+from sans_reduction_steps import WeightedAzimuthalAverage
 from sans_reduction_steps import DirectBeamTransmission as SingleFrameDirectBeamTransmission
 from sans_reduction_steps import SaveIqAscii as BaseSaveIqAscii
 from sans_reduction_steps import SensitivityCorrection as BaseSensitivityCorrection
 from reduction import extract_workspace_name, find_file, find_data
-from eqsans_config import EQSANSConfig
 from eqsans_load import LoadRun
 
 # Mantid imports
@@ -70,115 +69,7 @@ class Normalize(ReductionStep):
             Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
         
         return "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, flux_data_path) 
-    
-    
-class BeamStopTransmission(BaseTransmission):
-    """
-        Perform the transmission correction for EQ-SANS using the beam stop hole
-    """
-    def __init__(self, normalize_to_unity=False, theta_dependent=False):
-        super(BeamStopTransmission, self).__init__()
-        self._normalize = normalize_to_unity
-        self._theta_dependent = theta_dependent
-        self._transmission_ws = None
-    
-    def execute(self, reducer, workspace):
-        # Keep track of workspaces to delete when we clean up
-        ws_for_deletion = []
-        if self._transmission_ws is not None and mtd.workspaceExists(self._transmission_ws):
-            # We have everything we need to apply the transmission correction
-            pass
-        elif mtd[workspace].getRun().hasProperty("transmission_ws"):
-            trans_prop = mtd[workspace].getRun().getProperty("transmission_ws")
-            if mtd.workspaceExists(trans_prop.value):
-                self._transmission_ws = trans_prop.value
-            else:
-                raise RuntimeError, "The transmission workspace %s is no longer available" % trans_prop.value
-        else:
-            raw_ws = workspace
-            if mtd[workspace].getRun().hasProperty("event_ws"):
-                raw_ws_prop = mtd[workspace].getRun().getProperty("event_ws")
-                if mtd.workspaceExists(raw_ws_prop.value):
-                    if mtd[workspace].getRun().hasProperty("wavelength_min"):
-                        wl_min = mtd[workspace].getRun().getProperty("wavelength_min").value
-                    else:
-                        raise RuntimeError, "Beam-hole transmission correction could not get minimum wavelength"
-                    if mtd[workspace].getRun().hasProperty("wavelength_max_frame2"):
-                        wl_max = mtd[workspace].getRun().getProperty("wavelength_max_frame2").value
-                    elif mtd[workspace].getRun().hasProperty("wavelength_max"):
-                        wl_max = mtd[workspace].getRun().getProperty("wavelength_max").value
-                    else:
-                        raise RuntimeError, "Beam-hole transmission correction could not get maximum wavelength"
-                    raw_ws = '__'+raw_ws_prop.value+'_histo'
-                    # Need to convert to workspace until somebody fixes Integration. Ticket #3277
-                    Rebin(raw_ws_prop.value, raw_ws, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), False)
-                    ws_for_deletion.append(raw_ws)
-                else:
-                    raise RuntimeError, "The event workspace %s is no longer available" % raw_ws_prop.value
-
-            # The transmission calculation only works on the original un-normalized counts
-            if not reducer.is_clean(raw_ws):
-                raise RuntimeError, "The transmission can only be calculated using un-modified data"
-
-            if mtd[workspace].getRun().hasProperty("beam_center_x"):
-                beam_center_x = mtd[workspace].getRun().getProperty("beam_center_x").value
-            else:
-                raise RuntimeError, "Transmission correction algorithm could not get beam center x position"
-            if mtd[workspace].getRun().hasProperty("beam_center_y"):
-                beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
-            else:
-                raise RuntimeError, "Transmission correction algorithm could not get beam center y position"
-    
-            if self._transmission_ws is None:
-                self._transmission_ws = "beam_hole_transmission_"+workspace
-    
-            # Calculate the transmission as a function of wavelength
-            EQSANSTransmission(InputWorkspace=raw_ws,
-                               OutputWorkspace=self._transmission_ws,
-                               XCenter=beam_center_x,
-                               YCenter=beam_center_y,
-                               NormalizeToUnity = self._normalize)
-            
-            mantid[workspace].getRun().addProperty_str("transmission_ws", self._transmission_ws, True)
-
-        # Apply the transmission. For EQSANS, we just divide by the 
-        # transmission instead of using the angular dependence of the
-        # correction.
-        reducer.dirty(workspace)
-
-        output_str = "Beam hole transmission correction applied"
-        # Get the beam spectrum, if available
-        transmission_ws = self._transmission_ws
-        if mtd[workspace].getRun().hasProperty("beam_flux_ws"):
-            beam_flux_ws_name = mtd[workspace].getRun().getProperty("beam_flux_ws").value
-            if mtd.workspaceExists(beam_flux_ws_name):
-                beam_flux_ws = mtd[beam_flux_ws_name]
-                transmission_ws = "__transmission_tmp"
-                ws_for_deletion.append(transmission_ws)
-                Divide(self._transmission_ws, beam_flux_ws, transmission_ws)
-                output_str += "\n  Transmission corrected for beam spectrum"
-            else:
-                output_str += "\n  Transmission was NOT corrected for beam spectrum: inconsistent meta-data!"
-        else:
-            output_str += "\n  Transmission was NOT corrected for beam spectrum: check your normalization option!"
         
-        if self._theta_dependent:
-            # To apply the transmission correction using the theta-dependent algorithm
-            # we should get the beam spectrum out of the measured transmission
-            # We should then re-apply it when performing normalization
-            ApplyTransmissionCorrection(workspace, workspace, transmission_ws)
-        else:
-            Divide(workspace, transmission_ws, workspace)
-        #ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
-        
-        # Clean up 
-        for ws in ws_for_deletion:
-            if mtd.workspaceExists(ws):
-                mtd.deleteWorkspace(ws)
-                
-        return output_str
-    
-    
 class SubtractDarkCurrent(ReductionStep):
     """
         Subtract the dark current from the input workspace.
