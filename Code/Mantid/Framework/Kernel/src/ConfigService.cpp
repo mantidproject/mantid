@@ -689,6 +689,7 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
     convertRelativeToAbsolute();
     //Configure search paths into a specially saved store as they will be used frequently
     cacheDataSearchPaths();
+    appendDataSearchDir(getString("defaultsave.directory"));
     cacheUserSearchPaths();
   }
 }
@@ -1012,7 +1013,7 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
     m_AbsolutePaths[key] = makeAbsolute(value, key);
   }
 
-  if (key == "datasearch.directories")
+  if (key == "datasearch.directories" )
   {
     cacheDataSearchPaths();
   }
@@ -1022,8 +1023,7 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   }
   else if (key == "defaultsave.directory")
   {
-    //Some recursion here! As this call calls the current function
-    appendDataSearchDir(m_AbsolutePaths[key]);
+    appendDataSearchDir(value);
   }
 
   m_pConf->setString(key, value);

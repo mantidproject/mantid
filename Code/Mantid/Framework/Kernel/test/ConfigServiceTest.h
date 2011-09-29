@@ -431,7 +431,8 @@ public:
 
     //Returns all *root* keys, i.e. unique keys left of the first period
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys(""); 
-    TS_ASSERT_EQUALS(keyVector.size(), 4);
+    // The 4 unique in the file and the ConfigService always sets a datasearch.directories key on creation
+    TS_ASSERT_EQUALS(keyVector.size(), 5);
   }
 
   void testRemovingProperty()
