@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -16,7 +17,8 @@ using namespace API;
 ///Initialisation method
 void GroupWorkspaces::init()
 {
-  declareProperty(new ArrayProperty<std::string> ("InputWorkspaces"),
+
+  declareProperty(new ArrayProperty<std::string> ("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >()),
       "Name of the Input Workspaces to Group");
   declareProperty(new WorkspaceProperty<WorkspaceGroup> ("OutputWorkspace", "", Direction::Output),
       "Name of the workspace to be created as the output of grouping ");

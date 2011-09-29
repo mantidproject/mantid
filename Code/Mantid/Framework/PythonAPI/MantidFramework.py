@@ -809,8 +809,7 @@ class IAlgorithmProxy(ProxyObject):
         for p in props:
             if p.direction != 1:
                 continue
-            if isinstance(p, MatrixWorkspaceProperty) or isinstance(p, TableWorkspaceProperty) or \
-              isinstance(p, EventWorkspaceProperty) or isinstance(p, WorkspaceProperty):
+            if issubclass(type(p), IWorkspaceProperty):
                self.__wkspnames.append(p.value)
         self.__havelist = True
 

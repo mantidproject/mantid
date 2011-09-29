@@ -521,17 +521,16 @@ using namespace boost::python;
   {
     class_< IWorkspaceProperty, boost::noncopyable>("IWorkspaceProperty", no_init)
       ;
-    
-    // Tell python about this so I can check if a property is a workspace
+
+    // WorkspaceGroups of various types
     class_< WorkspaceProperty<Workspace>, bases<Kernel::Property, API::IWorkspaceProperty>, boost::noncopyable>("WorkspaceProperty", no_init)
       ;
-    // Tell python about a MatrixWorkspace property
+    class_< WorkspaceProperty<WorkspaceGroup>, bases<Kernel::Property, API::IWorkspaceProperty>, boost::noncopyable>("WorkspaceGroupProperty", no_init)
+      ;
     class_< WorkspaceProperty<MatrixWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("MatrixWorkspaceProperty", no_init)
       ;
-    // Tell python about a TableWorkspace property
     class_< WorkspaceProperty<ITableWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("TableWorkspaceProperty", no_init)
       ;
-    // Tell python about an EventWorkspace
     class_< WorkspaceProperty<IEventWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("EventWorkspaceProperty", no_init)
       ;
 
