@@ -65,6 +65,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   virtual bool threadSafe() const;
 
+  virtual void makeThreadSafe(Mantid::API::Progress * prog = NULL);
+
   //------------------------------------------------------------
 
   // Returns the number of single indexable items in the workspace
