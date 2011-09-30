@@ -12,6 +12,8 @@
 
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::WorkspaceGroup_sptr;
+
 using Mantid::DataObjects::EventWorkspace_sptr;
 
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
@@ -410,6 +412,100 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log value mismatch" );
+  }
+
+  void test_Input_With_Two_Groups_That_Are_The_Same_Matches()
+  {
+    // Create a group
+    const std::string groupName("TestGroup");
+    WorkspaceGroup_sptr group = WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupName);
+
+    doGroupTest(groupName, groupName, Mantid::Algorithms::CheckWorkspacesMatch::successString());
+
+    cleanupGroup(group);
+  }
+
+  void test_Input_With_Two_Groups_That_Are_Different_Sizes_Gives_Size_Mismatch()
+  {
+    // Create a group
+    const std::string groupOneName("TestGroupOne");
+    WorkspaceGroup_sptr groupOne = WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupOneName);
+    const std::string groupTwoName("TestGroupTwo");
+    WorkspaceGroup_sptr groupTwo = WorkspaceCreationHelper::CreateWorkspaceGroup(3, 2, 2, groupTwoName);
+
+    doGroupTest(groupOneName, groupTwoName, "GroupWorkspaces size mismatch.");
+
+    cleanupGroup(groupOne);
+    cleanupGroup(groupTwo);
+  }
+
+  void test_Input_With_A_Group_And_A_Single_Workspace_Gives_Type_Mismatch()
+  {
+    const std::string groupName("CheckWorkspacesMatch_TestGroup");
+    WorkspaceGroup_sptr group = WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupName);
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
+    const std::string wsName("CheckWorkspacesMatch_TestWS");
+    Mantid::API::AnalysisDataService::Instance().add(wsName,ws2);
+
+    doGroupTest(groupName, wsName, "Type mismatch. One workspace is a group, the other is not.");
+
+    // Cleanup
+    cleanupGroup(group);
+    Mantid::API::AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_Input_With_Two_Groups_When_Single_Item_Checking_Is_Disabled()
+  {
+    // Create a group
+    const std::string groupOneName("TestGroupOne");
+    WorkspaceGroup_sptr groupOne = WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupOneName);
+    const std::string groupTwoName("TestGroupTwo");
+    WorkspaceGroup_sptr groupTwo = WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupTwoName);
+    Mantid::API::AnalysisDataServiceImpl& dataStore =  Mantid::API::AnalysisDataService::Instance();
+    // Extract the zeroth element of groupTwo and add a spurious log
+    MatrixWorkspace_sptr zero = boost::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(groupTwo->getNames()[0]));
+    TS_ASSERT(zero);
+    using Mantid::Kernel::PropertyWithValue;
+    zero->mutableRun().addProperty(new PropertyWithValue<double>("ExtraLog", 10));
+
+    std::map<std::string,std::string> otherProps;
+    otherProps.insert(std::make_pair("CheckSample", "1"));
+
+    doGroupTest(groupOneName, groupTwoName, "Different numbers of logs. Inputs=[TestGroupOne_0,TestGroupTwo_0]", otherProps);
+
+    // Cleanup
+    cleanupGroup(groupOne);
+    cleanupGroup(groupTwo);
+  }
+
+
+private:
+
+  void doGroupTest(const std::string & inputWSOne, const std::string & inputWSTwo,
+                   const std::string & expectedResult,
+                   const std::map<std::string,std::string> & otherProps = std::map<std::string,std::string>())
+  {
+    Mantid::Algorithms::CheckWorkspacesMatch matcher;
+    matcher.initialize();
+    matcher.setPropertyValue("Workspace1", inputWSOne);
+    matcher.setPropertyValue("Workspace2", inputWSTwo);
+    std::map<std::string,std::string>::const_iterator iend = otherProps.end();
+    std::map<std::string,std::string>::const_iterator itr = otherProps.begin();
+    for(; itr != iend; ++itr)
+    {
+      matcher.setPropertyValue(itr->first, itr->second);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(matcher.execute());
+    TS_ASSERT_EQUALS(matcher.isExecuted(), true);
+    TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), expectedResult);
+  }
+
+  void cleanupGroup(const WorkspaceGroup_sptr group)
+  {
+    group->deepRemoveAll();
+    const std::string name = group->getName();
+    Mantid::API::AnalysisDataService::Instance().remove(name);
   }
 
 private:

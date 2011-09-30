@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <sstream>
 
@@ -25,6 +26,101 @@ void CheckWorkspacesMatch::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+
+/**
+ * Process two groups and ensure the Result string is set properly on the final algorithm
+ * @param group1 :: The first workspace group. Ignored as we know what the property is called so it can be retrieved directly
+ * @param props :: The list of properties for this algorithms. Ignored as we know what they are.
+ * returns True if everything executed correctly
+ */
+bool CheckWorkspacesMatch::processGroups(WorkspaceGroup_sptr group1, const std::vector<Property*>& props)
+{
+  // We don't need these here has we know what the properties are called
+  UNUSED_ARG(group1); UNUSED_ARG(props);
+  AnalysisDataServiceImpl& dataStore = AnalysisDataService::Instance();
+  WorkspaceGroup_sptr ws1 = boost::dynamic_pointer_cast<WorkspaceGroup>(dataStore.retrieve(getPropertyValue("Workspace1")));
+  WorkspaceGroup_sptr ws2 = boost::dynamic_pointer_cast<WorkspaceGroup>(dataStore.retrieve(getPropertyValue("Workspace2")));
+  this->result.clear();
+
+  if( ws1 && ws2 ) // Both groups
+  {
+    processGroups(ws1, ws2);
+  }
+  else if(!ws1 && !ws2) // Neither groups (shouldn't happen)
+  {
+    throw std::runtime_error("CheckWorkspacesMatch::processGroups - Neither input is a WorkspaceGroup. This is a logical error in the code.");
+  }
+  else if( !ws1 || !ws2 )
+  {
+    this->result = "Type mismatch. One workspace is a group, the other is not.";
+  }
+
+  if( this->result.empty() )
+  {
+    this->result = this->successString();
+  }
+  else
+  {
+    g_log.notice() << this->result << "\n";
+  }
+  setProperty("Result", this->result);
+  setExecuted(true);
+  m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
+  return true;
+}
+
+/**
+ * Process the two groups together and set the result accordingly
+ * @param groupOne :: Input group 1
+ * @param groupTwo :: Input group 2
+ */
+void CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> groupOne, boost::shared_ptr<API::WorkspaceGroup> groupTwo)
+{
+  // Check their sizes
+  const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
+  if( groupOne->getNumberOfEntries() != groupTwo->getNumberOfEntries() )
+  {
+    this->result = "GroupWorkspaces size mismatch.";
+    return;
+  }
+
+  // See if there are any other properties that require setting
+  const std::vector<Property*> & allProps = this->getProperties();
+  std::vector<Property*> nonDefaultProps;
+  nonDefaultProps.reserve(allProps.size());
+  for(size_t i = 0; i < allProps.size(); ++i)
+  {
+    Property *p = allProps[i];
+    const std::string & propName = p->name();
+    // Skip those not set and the input workspaces
+    if(p->isDefault() || propName == "Workspace1" || propName == "Workspace2" ) continue;
+    nonDefaultProps.push_back(p);
+  }
+  const size_t numNonDefault = nonDefaultProps.size();
+
+  const double progressFraction = 1.0/static_cast<double>(totalNum);
+  std::vector<std::string> namesOne = groupOne->getNames();
+  std::vector<std::string> namesTwo = groupTwo->getNames();
+  for( size_t i = 0; i < totalNum; ++i )
+  {
+    // We should use an algorithm for each so that the output properties are reset properly
+    Algorithm_sptr checker =  this->createSubAlgorithm(this->name(), progressFraction*(double)i, progressFraction*(double)(i+1), false, this->version());
+    checker->setPropertyValue("Workspace1", namesOne[i]);
+    checker->setPropertyValue("Workspace2", namesTwo[i]);
+    for( size_t j = 0; j < numNonDefault; ++j )
+    {
+      Property *p = nonDefaultProps[j];
+      checker->setPropertyValue(p->name(), p->value());
+    }
+    checker->execute();
+    std::string success = checker->getProperty("Result");
+    if(success != this->successString())
+    {
+      if(!this->result.empty()) this->result += "\n";
+      this->result += success + ". Inputs=[" + namesOne[i] + "," + namesTwo[i] + "]";
+    }
+  }
+}
 
 void CheckWorkspacesMatch::init()
 {
@@ -501,7 +597,6 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   }
   return true;
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid

@@ -168,6 +168,24 @@ namespace WorkspaceCreationHelper
     return workspace;
   }
 
+  /**
+   * Create a group with nEntries. It is added to the ADS with the given stem
+   */
+  WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins, const std::string & stem)
+  {
+    WorkspaceGroup_sptr group(new WorkspaceGroup);
+    for(int i = 0; i < nEntries; ++i)
+    {
+      Workspace2D_sptr ws = Create2DWorkspace(nHist,nBins);
+      std::ostringstream os;
+      os << stem << "_"  << i;
+      AnalysisDataService::Instance().add(os.str(), ws);
+      group->add(os.str());
+    }
+    AnalysisDataService::Instance().add(stem, group);
+    return group;
+  }
+
   /** Create a 2D workspace with this many histograms and bins.
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */

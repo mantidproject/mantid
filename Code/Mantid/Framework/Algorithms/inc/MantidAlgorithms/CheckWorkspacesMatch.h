@@ -88,12 +88,16 @@ public:
 
   /** Return the string output when comparison is successful.
    */
-  std::string successString()
+  static std::string successString()
   {
     return "Success!";
   }
 
 private:
+  // Process two groups and ensure the Result string is set properly on the final algorithm
+  virtual bool processGroups(boost::shared_ptr<API::WorkspaceGroup> ws1, const std::vector<Mantid::Kernel::Property*>& props);
+  // Process the two groups
+  void processGroups(boost::shared_ptr<API::WorkspaceGroup> groupOne, boost::shared_ptr<API::WorkspaceGroup> groupTwo);
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialisation code
@@ -110,6 +114,7 @@ private:
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);
   bool checkRunProperties(const API::Run& run1, const API::Run& run2);
   
+
   std::string result; ///< the result string
 
   API::Progress * prog;

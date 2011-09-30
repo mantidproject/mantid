@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -37,6 +38,10 @@ namespace WorkspaceCreationHelper
                            const std::set<int64_t> & maskedWorkspaceIndices = std::set<int64_t>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr maskSpectra(Mantid::DataObjects::Workspace2D_sptr workspace, 
                                     const std::set<int64_t> & maskedWorkspaceIndices);
+  /**
+   * Create a WorkspaceGroup with N workspaces and the specified parameters
+   */
+  DLL_TESTHELPERS Mantid::API::WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins, const std::string& stem);
   /** Create a 2D workspace with this many histograms and bins.
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
