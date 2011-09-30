@@ -110,6 +110,8 @@ private:
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
+  /// Check the environmental variables to make sure PV_PLUGIN_PATH is available
+  void checkEnvSetup();
   /// Check if an incoming dataset has timesteps for animation control.
   void checkForTimesteps();
   /// Function to create the pqPVApplicationCore object in plugin mode

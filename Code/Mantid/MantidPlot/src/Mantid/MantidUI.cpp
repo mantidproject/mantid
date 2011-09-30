@@ -515,6 +515,10 @@ void MantidUI::showVatesSimpleInterface()
       }
     }
   }
+  catch (std::runtime_error &e)
+  {
+    throw std::runtime_error(e);
+  }
   catch (...)
   {
   }

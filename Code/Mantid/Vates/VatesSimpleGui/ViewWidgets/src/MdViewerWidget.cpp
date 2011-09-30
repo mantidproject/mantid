@@ -26,6 +26,7 @@
 #include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
+#include <vtksys/SystemTools.hxx>
 
 #include <pqPipelineRepresentation.h>
 
@@ -76,6 +77,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 {
+  this->checkEnvSetup();
   // We're in the standalone application mode
   this->isPluginInitialized = false;
   this->setupUiAndConnections();
@@ -92,6 +94,17 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 
 MdViewerWidget::~MdViewerWidget()
 {
+}
+
+void MdViewerWidget::checkEnvSetup()
+{
+  QString pv_plugin_path = vtksys::SystemTools::GetEnv("PV_PLUGIN_PATH");
+  if (pv_plugin_path.isEmpty())
+  {
+    throw std::runtime_error("PV_PLUGIN_PATH not setup.\nVates plugins will not be available.\n"
+                             "Further use will cause the program to crash.\nPlease exit and "
+                             "set this variable.");
+  }
 }
 
 void MdViewerWidget::setupUiAndConnections()
@@ -130,6 +143,7 @@ void MdViewerWidget::setupMainView()
 void MdViewerWidget::setupPluginMode()
 {
   this->createAppCoreForPlugin();
+  this->checkEnvSetup();
   this->setupUiAndConnections();
   if (!this->isPluginInitialized)
   {
