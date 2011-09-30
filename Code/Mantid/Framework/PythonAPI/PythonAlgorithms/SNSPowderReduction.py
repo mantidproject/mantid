@@ -297,23 +297,13 @@ class SNSPowderReduction(PythonAlgorithm):
                                        % (filterLogs[0], str(wksp)))            
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
             SortEvents(wksp)
-        if "histo" in self.getProperty("Extension"):
-            cropkwargs = {}
-            if info.tmin > 0.:
-                cropkwargs["XMin"] = info.tmin
-            if info.tmax > 0.:
-                cropkwargs["XMax"] = info.tmax
+        cropkwargs = {}
+        if info.tmin > 0.:
+            cropkwargs["XMin"] = info.tmin
+        if info.tmax > 0.:
+            cropkwargs["XMax"] = info.tmax
+        if len(cropkwargs) > 0:
             CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
-        else:
-            tmin = wksp.getTofMin()
-            tmax = wksp.getTofMax()
-            if info.tmin > 0. and info.tmin > tmin:
-                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, Xmin=tmin, XMax=info.tmin)
-            if info.tmax > 0.:
-                if info.tmin >= info.tmax:
-                    raise RuntimeError("Encountered tmin (%f) >= tmax (%f)" % (info.tmin, info.tmax))
-                if info.tmax < tmax:
-                    MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=tmax)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
         if self._instrument == "VULCAN":
             AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets",
