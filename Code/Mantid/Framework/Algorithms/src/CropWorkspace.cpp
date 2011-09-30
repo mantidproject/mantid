@@ -213,13 +213,15 @@ void CropWorkspace::execEvent()
 
   outputWorkspace->setAllX(XValues_new);
 
+  EventType type = eventW->getEventType();
+
   Progress prog(this,0.0,1.0,(m_maxSpec-m_minSpec));
   // Loop over the required spectra, copying in the desired bins
   for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
   {
     EventList el = eventW->getEventList(i);
     EventList outEL;
-    switch (el.getEventType())
+    switch (type)
     {
       case TOF:
       {
