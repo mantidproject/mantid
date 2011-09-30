@@ -132,8 +132,7 @@ public:
     }
   }
 
-
-
+  /*
   void doTestVulcan(std::string dspaceFile, std::string fileType)
   {
     LoadEmptyInstrument loaderDSP;
@@ -234,7 +233,7 @@ public:
     doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
   }
 
-
+  */
 
 
 };
