@@ -20,6 +20,7 @@
 #include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
+#include <pqStatusBar.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
@@ -111,6 +112,7 @@ void MdViewerWidget::setupUiAndConnections()
 {
   this->ui.setupUi(this);
   this->ui.splitter_2->setStretchFactor(1, 1);
+  this->ui.statusBar->setSizeGripEnabled(false);
 
   // Unset the connections since the views aren't up yet.
   this->removeProxyTabWidgetConnections();

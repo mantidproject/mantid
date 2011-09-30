@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>974</width>
-    <height>646</height>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -101,6 +101,16 @@
      </widget>
     </widget>
    </item>
+   <item>
+    <widget class="pqStatusBar" name="statusBar" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -132,6 +142,12 @@
    <class>Mantid::Vates::SimpleGui::TimeControlWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqStatusBar</class>
+   <extends>QWidget</extends>
+   <header>pqStatusBar.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
