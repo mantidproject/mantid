@@ -194,7 +194,7 @@ void MaskBins::execEvent()
   //Go through all histograms
   const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
-
+  outputWS->makeThreadSafe();
   if (this->spectra_list.size() > 0)
   {
     //Specific spectra were specified
