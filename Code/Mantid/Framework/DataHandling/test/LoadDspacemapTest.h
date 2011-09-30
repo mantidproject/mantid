@@ -31,8 +31,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
     testerDSP.setPropertyValue("InstrumentFilename", ConfigService::Instance().getString(
         "instrumentDefinition.directory")+"/INES_Definition.xml");
-    std::string dspaceFile = "./INES_DspacemaptoCalTest.dat";
-    std::ofstream fout("./INES_DspacemaptoCalTest.dat", std::ios_base::out|std::ios_base::binary);
+    std::string dspaceFile = "./INES_LoadDspacemaptoCalTest.dat";
+    std::ofstream fout("./INES_LoadDspacemaptoCalTest.dat", std::ios_base::out|std::ios_base::binary);
     double read = 3.1992498205034756E-6;
     for (int i=0; i<147; i++)
         fout.write( reinterpret_cast<char*>( &read ), sizeof read );
