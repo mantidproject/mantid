@@ -83,7 +83,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         if self._filterBadPulses:
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
         return wksp
 
     def _findNeXusData(self, runnumber, bank, extension, **kwargs):
@@ -133,9 +132,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              GroupingWorkspace=str(wksp)+"group")
         mtd.deleteWorkspace(str(wksp)+"group")
         mtd.releaseFreeMemory()
-        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if len(self._binning) == 3:
            binning = self._binning
         else:
@@ -290,10 +288,12 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                     AdjX=0, AdjY=0, ZeroEdgePixels=20)
                 #Anvred corrections need units of wavelength
                 if self._radius > 0:
+                    SortEvents(InputWorkspace=samRun, SortBy="X Value")
                     ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='Wavelength')
                     AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
                         LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,PowerLambda=self._powlam)
                     ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='TOF')
+                    SortEvents(InputWorkspace=samRun, SortBy="X Value")
 
                 if bank is "bank17":
                     samRunstr = str(samRun)
