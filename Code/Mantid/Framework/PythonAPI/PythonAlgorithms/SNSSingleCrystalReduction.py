@@ -30,15 +30,16 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
-        outfiletypes = ['', 'hkl', 'nxs']
-        self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
         self.declareProperty("LinearScatteringCoef", 0.0, Description="Linear Scattering Coefficient for Anvred correction.")
         self.declareProperty("LinearAbsorptionCoef", 0.0, Description="Linear Absorption Coefficient for Anvred correction.")
         self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction. Set to 0 for no Anvred corrections")
         self.declareProperty("PowerLambda", 4.0, Description="Power of wavelength for Anvred correction.")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
         self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
-        self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
+        outfiletypes = ['', 'hkl', 'nxs']
+        self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
+        self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
+        self.declareProperty("AppendHKLFile", False, Description="Append existing hkl file")
 
     def _findData(self, runnumber, extension):
         result = FindSNSNeXus(Instrument=self._instrument,
@@ -162,10 +163,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             LoadIsawPeaks(Filename=self._peaksfile,OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
-            hklfile = self._peaksfile.split('.')[0] + '.hkl'
+            hklfile = self._outFile
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
         if "nxs" in self._outTypes:
-            filename = os.path.join(self._outDir, str(wksp))
             nxsfile = str(wksp) + ".nxs"
     
             if not os.path.isfile(nxsfile):
@@ -175,7 +175,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                     name = name.split('_')[1] # remove the instrument name
                     nxsfile = self._findData(int(name), "_histo.nxs")
             self.log().information(nxsfile)
-            SaveToSNSHistogramNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
+            SaveToSNSHistogramNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=self._outFile, Compress=True)
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
@@ -197,7 +197,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         self._vanPeakWidthPercent = 5. #self.getProperty("VanadiumPeakWidthPercentage")
         self._vanSmoothing = "20,2"   #self.getProperty("VanadiumSmoothParams")
-        self._outDir = self.getProperty("OutputDirectory")
+        self._outFile = self.getProperty("OutputFile")
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("SampleNumbers")
         filterWall = None #(self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
@@ -207,6 +207,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._powlam = self.getProperty("PowerLambda")
         self._ubfile = self.getProperty("IsawUBFile")
         self._peaksfile = self.getProperty("IsawPeaksFile")
+        self._append = self.getProperty("AppendHKLFile")
     
         # process the vanadium run
         vanRun = self.getProperty("VanadiumNumber")
@@ -249,7 +250,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             vanRun = None
     
-        self._append = False
         Banks = ["bank17","bank18","bank26","bank27","bank36","bank37","bank38","bank39","bank46","bank47","bank48","bank49","bank57","bank58"]
 
         for samRun in samRuns:
