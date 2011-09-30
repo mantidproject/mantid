@@ -219,13 +219,47 @@ void CropWorkspace::execEvent()
   {
     EventList el = eventW->getEventList(i);
     EventList outEL;
-    std::vector<TofEvent>::iterator itev;
-    for (itev = el.getEvents().begin(); itev != el.getEvents().end(); itev++)
+    switch (el.getEventType())
     {
-      const double tof = itev->tof();
-      if(tof <=  maxX_val && tof >= minX_val)
-        outEL += TofEvent(*itev);
+      case TOF:
+      {
+        std::vector<TofEvent>::iterator itev;
+        for (itev = el.getEvents().begin(); itev != el.getEvents().end(); itev++)
+        {
+          const double tof = itev->tof();
+          if(tof <=  maxX_val && tof >= minX_val)
+            outEL += TofEvent(*itev);
+        }
+        break;
+      }
+      case WEIGHTED:
+      {
+        std::vector<WeightedEvent>::iterator itev;
+        for (itev = el.getWeightedEvents().begin(); itev != el.getWeightedEvents().end(); itev++)
+        {
+          const double tof = itev->tof();
+          if(tof <=  maxX_val && tof >= minX_val)
+            outEL += WeightedEvent(*itev);
+        }
+        break;
+      }
+      case WEIGHTED_NOTIME:
+      {
+        std::vector<WeightedEventNoTime>::iterator itev;
+        for (itev = el.getWeightedEventsNoTime().begin(); itev != el.getWeightedEventsNoTime().end(); itev++)
+        {
+          const double tof = itev->tof();
+          // There is no += operator for a single weighted event with no time
+          std::vector< WeightedEventNoTime > moreevents;
+          moreevents.push_back(WeightedEventNoTime(*itev));
+          if(tof <=  maxX_val && tof >= minX_val)
+            outEL += moreevents;
+          moreevents.clear();
+        }
+        break;
+      }
     }
+
     outputWorkspace->getOrAddEventList(j) += outEL;
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
     std::set<detid_t>::iterator k;
