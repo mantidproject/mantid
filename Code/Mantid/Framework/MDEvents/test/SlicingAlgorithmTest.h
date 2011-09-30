@@ -383,7 +383,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
@@ -404,7 +404,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
@@ -426,7 +426,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
@@ -444,7 +444,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
@@ -462,7 +462,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
@@ -487,7 +487,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
@@ -505,7 +505,7 @@ public:
     TS_ASSERT_EQUALS( alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction * func;
+    MDImplicitFunction * func(NULL);
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 4);
