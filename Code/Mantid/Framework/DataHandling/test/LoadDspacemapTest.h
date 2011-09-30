@@ -55,7 +55,6 @@ public:
 
 
 
-  /*
   void doTestVulcan(std::string dspaceFile, std::string fileType)
   {
     std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
@@ -78,7 +77,7 @@ public:
     if (!offsetsWS) return;
 
     // Check one point.
-    TS_ASSERT_DELTA( offsetsWS->dataY(0)[0],  0.0938, 0.0001 );
+    // TS_ASSERT_DELTA( offsetsWS->dataY(0)[0],  0.0938, 0.0001 );
 
   }
 
@@ -91,8 +90,6 @@ public:
   {
     doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
   }
-
-  */
 
 };
 
