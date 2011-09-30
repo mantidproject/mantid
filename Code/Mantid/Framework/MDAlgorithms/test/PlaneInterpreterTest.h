@@ -27,6 +27,8 @@ private:
   public:
     MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t* pPoint));
     MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t>&));
+    // Unhide base class methods (avoids Intel compiler warning)
+    using MDImplicitFunction::isPointContained;
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     ~MockImplicitFunction()

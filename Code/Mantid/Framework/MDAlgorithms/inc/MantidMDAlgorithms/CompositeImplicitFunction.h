@@ -49,6 +49,8 @@ public:
   //---------------------------------- Override base-class methods---
   virtual bool isPointContained(const coord_t * coords);
   virtual bool isPointContained(const std::vector<coord_t> & coords);
+  // Unhide base class methods (avoids Intel compiler warning)
+  using MDImplicitFunction::isPointContained;
   //-----------------------------------------------------------------
 
   CompositeImplicitFunction();

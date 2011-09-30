@@ -24,6 +24,8 @@ private:
     {
       return true;
     }
+    // Unhide base class methods (avoids Intel compiler warning)
+    using MDImplicitFunction::isPointContained;
     ~MockImplicitFunction(){}
   };
 
