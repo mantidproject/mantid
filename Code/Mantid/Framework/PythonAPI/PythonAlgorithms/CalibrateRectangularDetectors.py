@@ -124,6 +124,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         # find the file to load
         filename = self._findData(runnumber, extension)
+        if len(filename) <= 0:
+            raise RuntimeError("Failed to find event nexus file for run %s" % str(runnumber))
 
         # generate the workspace name
         (path, name) = os.path.split(filename)
