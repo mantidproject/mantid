@@ -203,6 +203,7 @@ void CropWorkspace::execEvent()
   // Create the output workspace
   EventWorkspace_sptr outputWorkspace =
     boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", m_maxSpec-m_minSpec+1, ntcnew, ntcnew-m_histogram));
+  eventW->sortAll(TOF_SORT, NULL);
   outputWorkspace->sortAll(TOF_SORT, NULL);
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWorkspace, outputWorkspace, true);
@@ -217,8 +218,11 @@ void CropWorkspace::execEvent()
 
   Progress prog(this,0.0,1.0,(m_maxSpec-m_minSpec));
   // Loop over the required spectra, copying in the desired bins
-  for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
+  //PARALLEL_FOR2(m_inputWorkspace,outputWorkspace)
+  for (int i = m_minSpec; i <= m_maxSpec; ++i)
   {
+    //PARALLEL_START_INTERUPT_REGION
+    int j = i - m_minSpec;
     EventList el = eventW->getEventList(i);
     EventList outEL;
     switch (type)
@@ -260,7 +264,9 @@ void CropWorkspace::execEvent()
         }
         break;
       }
+      //PARALLEL_END_INTERUPT_REGION
     }
+    //PARALLEL_CHECK_INTERUPT_REGION
 
     outputWorkspace->getOrAddEventList(j) += outEL;
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
