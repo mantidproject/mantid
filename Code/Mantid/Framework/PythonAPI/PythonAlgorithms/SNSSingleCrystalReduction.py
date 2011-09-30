@@ -133,8 +133,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              GroupingWorkspace=str(wksp)+"group")
         mtd.deleteWorkspace(str(wksp)+"group")
         mtd.releaseFreeMemory()
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        SortEvents(InputWorkspace=wksp, SortBy="X Value")
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if len(self._binning) == 3:
            binning = self._binning
         else:
