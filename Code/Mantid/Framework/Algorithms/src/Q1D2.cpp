@@ -80,6 +80,7 @@ void Q1D2::exec()
 
   //throws if we don't have common binning or another incompatibility
   examineInput(waveAdj, pixelAdj);
+  g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
   double const * const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : NULL;
   // error on the wavelength normalization
@@ -342,7 +343,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd, A
   {
     addWaveAdj(binNorms+wavStart, binNormEs+wavStart, norm, normETo2);
   }
-  normToBinWidth(wavStart, specInd, norm, normETo2);
+  normToMask(wavStart, specInd, norm, normETo2);
 }
 
 /** Calculates the normalisation for the spectrum specified by the index number that was passed
@@ -398,13 +399,13 @@ void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator b
   }
 }
 
-/** Add the bin widths, scaled to bin masking, to the normalization
+/** Scaled to bin masking, to the normalization
 *  @param[in] offSet the inex number of the first bin in the input wavelengths that is actually being used
 *  @param[in] specIndex the spectrum to calculate
 *  @param[in,out] theNorms normalization for each bin, this is multiplied by the proportion that is not masked and the normalization workspace
 *  @param[in,out] errorSquared the running total of the square of the uncertainty in the normalization
 */
-void Q1D2::normToBinWidth(const size_t offSet, const size_t specIndex, const MantidVec::iterator theNorms, const MantidVec::iterator errorSquared) const
+void Q1D2::normToMask(const size_t offSet, const size_t specIndex, const MantidVec::iterator theNorms, const MantidVec::iterator errorSquared) const
 {  
   // if any bins are masked it is normally a small proportion
   if ( m_dataWS->hasMaskedBins(specIndex) )

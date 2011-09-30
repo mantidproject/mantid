@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_Q1D2_H_
-#define MANTID_ALGORITHMS_Q1D2_H_
+#ifndef MANTID_ALGORITHMS_QHELPER_H_
+#define MANTID_ALGORITHMS_QHELPER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,11 +11,10 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Takes account of the effects of gravity for instruments where the y-axis points upwards, for
-    example SANS instruments
+/** Helper class for the Q1D and Qxy algorithms
 
-    @author Steve Williams ISIS Rutherford Appleton Laboratory 
-    @date 10/12/2010
+    @author Anders Markvardsen ISIS Rutherford Appleton Laboratory 
+    @date 30/09/2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,37 +36,24 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Q1D2 : public API::Algorithm
+class Qhelper 
 {
 public:
-  /// (Empty) Constructor
-  Q1D2() : API::Algorithm(), m_RCut(0.0), m_WCutOver(0.0) {}
-  /// Virtual destructor
-  virtual ~Q1D2() {}
-  /// Algorithm's name
-  virtual const std::string name() const { return "Q1D"; }
-  /// Algorithm's version
-  virtual int version() const { return (2); }
-  /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  void examineInput(API::MatrixWorkspace_const_sptr dataWS, 
+       API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
 
 private:
   /// the experimental workspace with counts across the detector
-  API::MatrixWorkspace_const_sptr m_dataWS;
+/*  API::MatrixWorkspace_const_sptr m_dataWS;
   ///The radius cut off, should be value of the property RadiusCut. A value of zero here will disable the cut off and all wavelengths are used
   double m_RCut;
   ///The wavelength cut off divided by the radius cut is used in the calculation of the first wavelength to include, it's value is only used if RadiusCut > 0
   double m_WCutOver;
 
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-  /// Initialisation code
-  void init();
-  /// Execution code
-  void exec();
+
 
   void initizeCutOffs(const double RCut, const double WCut);
-  void examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
+
   API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams) const;
   //these are the steps that are run on each individual spectrum
   size_t waveLengthCutOff(const size_t specInd) const;
@@ -77,7 +63,7 @@ private:
   void normToMask(const size_t offSet, const size_t specIndex, const MantidVec::iterator theNorms, const MantidVec::iterator errorSquared) const;
   void convertWavetoQ(const size_t specInd, const bool doGravity, const size_t offset, MantidVec::iterator Qs) const;
   void getQBinPlus1(const MantidVec & OutQs, const double QToFind, MantidVec::const_iterator & loc) const;
-  void normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & YOut, MantidVec & errors) const;
+  void normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & YOut, MantidVec & errors) const;*/
 };
 
 } // namespace Algorithms

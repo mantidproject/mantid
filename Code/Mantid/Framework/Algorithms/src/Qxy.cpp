@@ -43,6 +43,9 @@ void Qxy::init()
   
   declareProperty("MaxQxy",-1.0,mustBePositive);
   declareProperty("DeltaQ",-1.0,mustBePositive->clone());
+  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true),
+    "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
+    "the same number of spectra as the DetBankWorkspace");
   declareProperty("AccountForGravity",false,Direction::Input);
   declareProperty("SolidAngleWeighting",true,
       "If true, pixels will be weighted by their solid angle.", Direction::Input);
@@ -51,7 +54,7 @@ void Qxy::init()
 void Qxy::exec()
 {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-
+  MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   const bool doGravity = getProperty("AccountForGravity");
   const bool doSolidAngle = getProperty("SolidAngleWeighting");
 
@@ -110,20 +113,20 @@ void Qxy::exec()
     double angle = det->solidAngle(samplePos);
 
     // some bins are masked completely or partially, the following vector will contain the fractions
-    MantidVec fractions;
+    MantidVec maskFractions;
     if ( inputWorkspace->hasMaskedBins(i) )
     {
       // go through the set and convert it to a vector
       const MatrixWorkspace::MaskList& mask = inputWorkspace->maskedBins(i);
-      fractions.resize(numBins, 1.0);
+      maskFractions.resize(numBins, 1.0);
       MatrixWorkspace::MaskList::const_iterator it, itEnd(mask.end());
       for (it = mask.begin(); it != itEnd; ++it)
       {
         // The weight for this masked bin is 1 minus the degree to which this bin is masked
-        fractions[it->first] -= it->second;
+        maskFractions[it->first] -= it->second;
       }
     }
-    double fraction(1);
+    double maskFraction(1);
     
     // this object is not used if gravity correction is off, but it is only constructed once per spectrum
     GravitySANSHelper grav;
@@ -173,15 +176,15 @@ void Qxy::exec()
         outputBinE = std::sqrt( (outputBinE*outputBinE) + (E[j]*E[j]) );
         
         // account for masked bins
-        if ( ! fractions.empty() )
+        if ( ! maskFractions.empty() )
         {
-          fraction = fractions[j];
+          maskFraction = maskFractions[j];
         }
         // add the total weight for this bin in the weights workspace, in an equivalent bin to where the data was stored
         if (doSolidAngle)
-          weights->dataY(yIndex)[xIndex] += fraction*angle;
+          weights->dataY(yIndex)[xIndex] += maskFraction*angle;
         else
-          weights->dataY(yIndex)[xIndex] += fraction;
+          weights->dataY(yIndex)[xIndex] += maskFraction;
 
       }
     } // loop over single spectrum

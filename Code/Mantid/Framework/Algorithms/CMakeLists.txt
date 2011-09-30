@@ -120,6 +120,7 @@ set ( SRC_FILES
 	src/PowerLawCorrection.cpp
 	src/Q1D.cpp
 	src/Q1D2.cpp
+	src/Qhelper.cpp
 	src/Q1DWeighted.cpp
 	src/Qxy.cpp
 	src/RayTracerTester.cpp
@@ -288,6 +289,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PowerLawCorrection.h
 	inc/MantidAlgorithms/Q1D.h
 	inc/MantidAlgorithms/Q1D2.h
+	inc/MantidAlgorithms/Qhelper.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/RayTracerTester.h
