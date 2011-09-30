@@ -73,7 +73,6 @@ public:
    *  Will lead to the property having a default-constructed (i.e. empty) vector
    *  as its initial (default) value and no validator
    *  @param name ::      The name to assign to the property
-   *  @param validator :: The validator to use for this property, if required
    *  @param direction :: The direction (Input/Output/InOut) of this property
    */
   ArrayProperty(const std::string &name,

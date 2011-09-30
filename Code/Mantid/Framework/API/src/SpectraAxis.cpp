@@ -22,7 +22,7 @@ using std::size_t;
  * @param initWithDefaults :: If true the axis values will be initialized 
  * with values from 1->length
  */
-SpectraAxis::SpectraAxis(const size_t& length, const bool initWithDefaults ): Axis()
+SpectraAxis::SpectraAxis(const std::size_t& length, const bool initWithDefaults ): Axis()
 {
   m_values.resize(length);
   if( initWithDefaults )
@@ -42,7 +42,7 @@ SpectraAxis::SpectraAxis(const size_t& length, const bool initWithDefaults ): Ax
  * @param length :: The length of the axis
  * @param spectramap :: A reference to an ISpectraDetectorMap implementation.
  */
-SpectraAxis::SpectraAxis(const size_t length, const Geometry::ISpectraDetectorMap & spectramap) :
+SpectraAxis::SpectraAxis(const std::size_t length, const Geometry::ISpectraDetectorMap & spectramap) :
   Axis()
 {
   m_values.resize(length);
@@ -100,7 +100,7 @@ Axis* SpectraAxis::clone(const std::size_t length, const MatrixWorkspace* const 
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double SpectraAxis::operator()(const size_t& index, const size_t& verticalIndex) const
+double SpectraAxis::operator()(const std::size_t& index, const std::size_t& verticalIndex) const
 {
   UNUSED_ARG(verticalIndex)
   if (index >= length())
@@ -116,7 +116,7 @@ double SpectraAxis::operator()(const size_t& index, const size_t& verticalIndex)
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void SpectraAxis::setValue(const size_t& index, const double& value)
+void SpectraAxis::setValue(const std::size_t& index, const double& value)
 {
   if (index >= length())
   {
@@ -132,7 +132,7 @@ void SpectraAxis::setValue(const size_t& index, const double& value)
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-const specid_t& SpectraAxis::spectraNo(const size_t& index) const
+const specid_t& SpectraAxis::spectraNo(const std::size_t& index) const
 {
   if (index >= length())
   {
@@ -148,7 +148,7 @@ const specid_t& SpectraAxis::spectraNo(const size_t& index) const
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-specid_t& SpectraAxis::spectraNo(const size_t& index)
+specid_t& SpectraAxis::spectraNo(const std::size_t& index)
 {
   if (index >= length())
   {
@@ -234,7 +234,7 @@ bool SpectraAxis::operator==(const Axis& axis2) const
  *  @param index :: The index of an axis value
  *  @return label of requested axis index
  */
-std::string SpectraAxis::label(const size_t& index)const
+std::string SpectraAxis::label(const std::size_t& index)const
 {
   return "sp-" + boost::lexical_cast<std::string>(spectraNo(index));
 }

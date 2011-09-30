@@ -56,10 +56,14 @@ public:
   virtual std::size_t length() const{return m_values.size();}
   /// If this is a TextAxis, always return true for this class
   virtual bool isText() const{return true;}
+  /// Get a value at the specified index
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
+  /// Set the value at the specified index
   virtual void setValue(const std::size_t& index, const double& value);
   virtual bool operator==(const Axis&) const;
+  /// Get the label at the specified index
   std::string label(const std::size_t& index)const;
+  /// Set the label at the given index
   void setLabel(const std::size_t& index, const std::string& lbl);
 private:
   /// Private, undefined copy assignment operator

@@ -10,8 +10,10 @@ namespace Mantid
 namespace API
 {
 
-/// Constructor
-TextAxis::TextAxis(const size_t& length): Axis()
+/** Constructor
+ * @param length the size of the text axis
+ */
+TextAxis::TextAxis(const std::size_t& length): Axis()
 {
   m_values.resize(length);
 }
@@ -41,7 +43,7 @@ Axis* TextAxis::clone(const std::size_t length, const MatrixWorkspace* const par
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double TextAxis::operator()(const size_t& index, const size_t& verticalIndex) const
+double TextAxis::operator()(const std::size_t& index, const std::size_t& verticalIndex) const
 {
   UNUSED_ARG(verticalIndex)
   if (index >= length())
@@ -57,7 +59,7 @@ double TextAxis::operator()(const size_t& index, const size_t& verticalIndex) co
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void TextAxis::setValue(const size_t& index, const double& value)
+void TextAxis::setValue(const std::size_t& index, const double& value)
 {
   UNUSED_ARG(index)
   UNUSED_ARG(value)
@@ -87,7 +89,7 @@ bool TextAxis::operator==(const Axis& axis2) const
  *  @param index :: The index of an axis value
  *  @return The label
  */
-std::string TextAxis::label(const size_t& index)const
+std::string TextAxis::label(const std::size_t& index)const
 {
   return m_values.at(index);
 }
@@ -97,7 +99,7 @@ std::string TextAxis::label(const size_t& index)const
   * @param index :: Index
   * @param lbl :: The text label
   */
-void TextAxis::setLabel(const size_t& index, const std::string& lbl)
+void TextAxis::setLabel(const std::size_t& index, const std::string& lbl)
 {
   if (index >= length())
   {

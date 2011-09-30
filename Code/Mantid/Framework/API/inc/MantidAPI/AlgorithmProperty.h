@@ -21,7 +21,7 @@ namespace Mantid
     API::IAlgorithm interface.
 
     @author Martyn Gigg, Tessella Plc
-    @data 24/03/2011
+    @date 24/03/2011
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

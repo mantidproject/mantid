@@ -16,8 +16,10 @@ namespace PhysicalConstants
    * is generated using the DANSE project's periodictable python module.
    */
   struct MANTID_KERNEL_DLL Atom {
+    /// Standard constructor
     Atom(const std::string & symbol, const uint16_t z, const uint16_t a, const double abundance,
          const double mass, const double density);
+    /// Copy constructor
     Atom(const Atom& other);
 
     /// The atomic symbol. In other words the one or two character abbreviation.
@@ -44,11 +46,15 @@ namespace PhysicalConstants
     /** The number density in units of cm<SUP>-3</SUP> as calculated from the mass density. */
     const double number_density;
 
+    /// Handle to class containing neutronic atomic properties.
     const NeutronAtom neutron;
   };
 
+  /// Equality operator overload
   MANTID_KERNEL_DLL bool operator==(const Atom& left, const Atom & right);
+  /// Inequality operator overload
   MANTID_KERNEL_DLL bool operator!=(const Atom& left, const Atom & right);
+  /// Stream operator overload
   MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const Atom &atom);
   MANTID_KERNEL_DLL Atom getAtom(const uint16_t z_number, const uint16_t a_number = 0);
   MANTID_KERNEL_DLL Atom getAtom(const std::string& symbol, const uint16_t a_number = 0);

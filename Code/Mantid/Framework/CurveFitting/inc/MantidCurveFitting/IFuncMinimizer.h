@@ -52,6 +52,7 @@ public:
   virtual void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
     gsl_vector* startGuess, API::IFitFunction* function, const std::string& costFunction) = 0;
 
+  /// Initialize minimizer, i.e. pass function and costFunction
   virtual void initialize(API::IFitFunction* function, const std::string& costFunction) = 0;
 
   /// Get name of minimizer

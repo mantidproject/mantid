@@ -16,6 +16,7 @@ using std::string;
 /// constant to use for garbage numbers
 static const double NAN = std::numeric_limits<double>::quiet_NaN();
 
+/// Get the corresponding neutronic atom
 const NeutronAtom getNeutronNoExceptions(const uint16_t z, const uint16_t a)
 {
   try {
@@ -27,7 +28,7 @@ const NeutronAtom getNeutronNoExceptions(const uint16_t z, const uint16_t a)
   }
 }
 
-Atom::Atom(const string& symbol, const uint16_t z, const uint16_t a,
+Atom::Atom(const std::string& symbol, const uint16_t z, const uint16_t a,
            const double abundance, const double mass, const double density) :
            symbol(symbol), z_number(z), a_number(a), abundance(abundance),
            mass(mass), mass_density(density),
@@ -36,7 +37,6 @@ Atom::Atom(const string& symbol, const uint16_t z, const uint16_t a,
 {
 }
 
-/// Copy constructor.
 Atom::Atom(const Atom& other):
     symbol(other.symbol), z_number(other.z_number), a_number(other.a_number),
     abundance(other.abundance), mass(other.mass), mass_density(other.mass_density),
@@ -3186,11 +3186,13 @@ static const size_t NUM_ATOMS = 2845;
 
 // ---------- END DO NOT EDIT AREA----------
 
+/// Check to see if we have non-valid atom
 inline bool AtomIsNaN(const double number)
 {
   return (number != number);
 }
 
+/// Check if two atoms are not valid.
 bool AtomEqualsWithNaN(const double left, const double right)
 {
   if (left == right)
@@ -3234,6 +3236,7 @@ std::ostream& operator<<(std::ostream& out, const Atom &atom)
   return out;
 }
 
+/// Compare two atoms
 bool compareAtoms(const Atom &left, const Atom &right)
 {
   if (left.z_number == right.z_number) {
@@ -3265,7 +3268,12 @@ Atom getAtom(const uint16_t z_number, const uint16_t a_number)
   return *result;
 }
 
-Atom getAtom(const string& symbol, const uint16_t a_number)
+/**
+ * @param symbol :: Chemical symbol of the atom to get
+ * @param a_number :: Mass number of the atom to get
+ * @return The atom corresponding to the given symbol and A
+ */
+Atom getAtom(const std::string& symbol, const uint16_t a_number)
 {
   // special cases for aliases
   if (symbol.compare("D") == 0)

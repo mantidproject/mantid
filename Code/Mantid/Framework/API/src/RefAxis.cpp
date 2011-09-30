@@ -13,7 +13,7 @@ namespace API
  *  @param length :: The length of this axis
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
-RefAxis::RefAxis(const size_t& length, const MatrixWorkspace* const parentWorkspace) : 
+RefAxis::RefAxis(const std::size_t& length, const MatrixWorkspace* const parentWorkspace) :
   NumericAxis(length),  m_parentWS(parentWorkspace), m_size(length)
 {
 }
@@ -55,7 +55,7 @@ Axis* RefAxis::clone(const std::size_t length, const MatrixWorkspace* const pare
  *  @throw  IndexError If 'index' is not in the range of this axis
  *  @throw  std::range_error If 'verticalIndex' is not in the range of the parent workspace
  */
-double RefAxis::operator()(const size_t& index, const size_t& verticalIndex) const
+double RefAxis::operator()(const std::size_t& index, const std::size_t& verticalIndex) const
 {
   if (index >= m_size)
   {
@@ -65,8 +65,11 @@ double RefAxis::operator()(const size_t& index, const size_t& verticalIndex) con
   return m_parentWS->dataX(verticalIndex)[index];
 }
 
-/// Method not available for RefAxis. Will always throw.
-void RefAxis::setValue(const size_t& index, const double& value)
+/** Method not available for RefAxis. Will always throw.
+  * @param index location for setting
+  * @param value the value to set
+  */
+void RefAxis::setValue(const std::size_t& index, const double& value)
 {
   UNUSED_ARG(index)
   UNUSED_ARG(value)

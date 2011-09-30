@@ -12,8 +12,10 @@ namespace Mantid
 namespace API
 {
 
-/// Constructor
-NumericAxis::NumericAxis(const size_t& length): Axis()
+/** Constructor
+ * @param length size of the numeric axis
+ */
+NumericAxis::NumericAxis(const std::size_t& length): Axis()
 {
   m_values.resize(length);
 }
@@ -43,7 +45,7 @@ Axis* NumericAxis::clone(const std::size_t length, const MatrixWorkspace* const 
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double NumericAxis::operator()(const size_t& index, const size_t& verticalIndex) const
+double NumericAxis::operator()(const std::size_t& index, const std::size_t& verticalIndex) const
 {
   UNUSED_ARG(verticalIndex)
   if (index >= length())
@@ -59,7 +61,7 @@ double NumericAxis::operator()(const size_t& index, const size_t& verticalIndex)
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void NumericAxis::setValue(const size_t& index, const double& value)
+void NumericAxis::setValue(const std::size_t& index, const double& value)
 {
   if (index >= length())
   {
@@ -92,18 +94,18 @@ bool NumericAxis::operator==(const Axis& axis2) const
  *  @param index :: The index of an axis value
  *  @return the label of the requested axis
  */
-std::string NumericAxis::label(const size_t& index)const
+std::string NumericAxis::label(const std::size_t& index)const
 {
   return boost::lexical_cast<std::string>((*this)(index));
 }
 
 /**
  * Create a set of bin boundaries from the centre point values
- * @param returns A vector of bin boundaries
+ * @returns A vector of bin boundaries
  */
 std::vector<double> NumericAxis::createBinBoundaries() const
 {
-  const size_t npoints = length();
+  const std::size_t npoints = length();
   if( npoints < 2 ) throw std::runtime_error("Fewer than two points on axis, cannot create bins.");
   std::vector<double> boundaries(npoints + 1);
   const NumericAxis & thisObject(*this);

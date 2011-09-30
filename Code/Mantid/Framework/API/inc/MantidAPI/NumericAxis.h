@@ -56,7 +56,9 @@ public:
   ///Is the axis numeric - always true for this class
   virtual bool isNumeric() const{return true;}
   virtual std::size_t length() const{return m_values.size();}
+  /// Get a value at the specified index
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
+  /// Set the value at a specific index
   virtual void setValue(const std::size_t& index, const double& value);
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;

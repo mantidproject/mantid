@@ -78,7 +78,9 @@ public:
   /// @param index :: The index
   /// @param value :: The new value
   virtual void setValue(const std::size_t& index, const double& value) = 0;
+  /// Get a non-mutable spectrum index
   virtual const specid_t& spectraNo(const std::size_t& index) const;
+  /// Get a spectrum index
   virtual specid_t& spectraNo(const std::size_t& index);
 
   /// Get the length of the axis

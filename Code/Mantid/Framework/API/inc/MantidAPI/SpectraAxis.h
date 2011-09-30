@@ -59,7 +59,7 @@ class MANTID_API_DLL SpectraAxis: public Axis
 {
 public:
   explicit SpectraAxis(const std::size_t& length, const bool initWithDefaults = true);
-  explicit SpectraAxis(const size_t length, const Geometry::ISpectraDetectorMap & spectramap);
+  explicit SpectraAxis(const std::size_t length, const Geometry::ISpectraDetectorMap & spectramap);
   virtual ~SpectraAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
   virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL);
