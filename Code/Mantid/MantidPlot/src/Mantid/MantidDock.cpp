@@ -35,6 +35,7 @@
 #include <iomanip>
 #include <cstdio>
 #include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -61,11 +62,13 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   m_loadButton = new QPushButton("Load");
   m_deleteButton = new QPushButton("Delete");
   m_groupButton= new QPushButton("Group");
+  m_sortButton= new QPushButton("Sort");
   if(m_groupButton)
     m_groupButton->setEnabled(false);
   buttonLayout->addWidget(m_loadButton);
   buttonLayout->addWidget(m_deleteButton);
   buttonLayout->addWidget(m_groupButton);
+  buttonLayout->addWidget(m_sortButton);
   buttonLayout->addStretch();
   //
   QVBoxLayout * layout = new QVBoxLayout();
@@ -88,6 +91,44 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   m_loadMenu->addAction(loadDAEAction);
   m_loadButton->setMenu(m_loadMenu);
 
+  // SET UP SORT
+  chooseByName();
+  m_sortMenu = new QMenu(this);
+  m_choiceMenu = new QMenu(m_sortMenu);
+
+  m_choiceMenu->setTitle(tr("Sort by"));
+
+  QAction* m_ascendingSortAction = new QAction("Ascending", this);
+  QAction* m_descendingSortAction = new QAction("Descending", this);
+  QAction* m_byNameChoice = new QAction("Name", this);
+  QAction* m_byLastModifiedChoice = new QAction("Last Modified", this);
+  
+  m_byNameChoice->setCheckable(true);
+  m_byNameChoice->setEnabled(true);
+  m_byNameChoice->setToggleAction(true);
+  
+  m_byLastModifiedChoice->setCheckable(true);
+  m_byLastModifiedChoice->setEnabled(true);
+  m_byLastModifiedChoice->setToggleAction(true);
+
+  m_sortChoiceGroup = new QActionGroup(m_sortMenu);
+  m_sortChoiceGroup->addAction(m_byNameChoice);
+  m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
+  m_sortChoiceGroup->setExclusive(true);
+  m_byNameChoice->setChecked(true);
+  
+  connect(m_ascendingSortAction, SIGNAL(activated()), this, SLOT(sortAscending()));
+  connect(m_descendingSortAction, SIGNAL(activated()), this, SLOT(sortDescending()));
+  connect(m_byNameChoice, SIGNAL(activated()), this, SLOT(chooseByName()));
+  connect(m_byLastModifiedChoice, SIGNAL(activated()), this, SLOT(chooseByLastModified()));
+  m_sortMenu->addAction(m_ascendingSortAction);
+  m_sortMenu->addAction(m_descendingSortAction);
+  m_sortMenu->addSeparator();
+  m_sortMenu->addMenu(m_choiceMenu);
+  m_choiceMenu->addActions(m_sortChoiceGroup->actions());
+  m_sortButton->setMenu(m_sortMenu);
+  // Set m_sortScheme to be ByName by default:
+  m_sortScheme = ByName;
   createWorkspaceMenuActions();
 
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
@@ -163,7 +204,7 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
     }
     return;
   }
-  QTreeWidgetItem *ws_item = createEntry(ws_name, workspace);
+  MantidTreeWidgetItem *ws_item = createEntry(ws_name, workspace);
   setItemIcon(ws_item, workspace);
   m_tree->addTopLevelItem(ws_item);
 }
@@ -323,8 +364,9 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   {
     return;
   }
-  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(QString::fromStdString(workspace->id())));
+  MantidTreeWidgetItem *wsid_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(workspace->id())), m_tree);
   wsid_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(wsid_item);
   item->addChild(wsid_item);
 
   bool showMemory = true;
@@ -362,23 +404,24 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   if (showMemory)
   {
     // For all workspaces, show the memory
-    QTreeWidgetItem* data_item;
+    MantidTreeWidgetItem* data_item;
     double kb = double(workspace->getMemorySize()/1024);
     if (kb > 1000000)
     {
       // Show in MB if over 1 GB
-      data_item = new QTreeWidgetItem(QStringList("Memory used: "
+      data_item = new MantidTreeWidgetItem(QStringList("Memory used: "
                       + QLocale(QLocale::English).toString(kb/1024, 'd', 0)
-                      + " MB"));
+                      + " MB"), m_tree);
     }
     else
     {
       // Show in MB
-      data_item = new QTreeWidgetItem(QStringList("Memory used: "
+      data_item = new MantidTreeWidgetItem(QStringList("Memory used: "
                       + QLocale(QLocale::English).toString(kb, 'd', 0)
-                      + " KB"));
+                      + " KB"), m_tree);
     }
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     item->addChild(data_item);
   }
 }
@@ -412,13 +455,13 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 * @param ws_name :: The workspace name
 * @param workspace :: A pointer to the workspace
 */
-QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
+MantidTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
-  QTreeWidgetItem *ws_item = new QTreeWidgetItem(QStringList(ws_name));
+  MantidTreeWidgetItem *ws_item = new MantidTreeWidgetItem(QStringList(ws_name), m_tree);
 
   // Need to add a child so that it becomes expandable. Using the correct ID is needed when plotting from non-expanded groups.
   std::string workspace_type = workspace->id();
-  QTreeWidgetItem *wsid_item = new QTreeWidgetItem(QStringList(workspace_type.c_str()));
+  MantidTreeWidgetItem *wsid_item = new MantidTreeWidgetItem(QStringList(workspace_type.c_str()), m_tree);
   wsid_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(wsid_item);
   return ws_item;
@@ -454,7 +497,7 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
       QList<QTreeWidgetItem*> exists = m_tree->findItems(wsname, Qt::MatchFixedString);
       if ( exists.empty() )
       {
-        QTreeWidgetItem *item = createEntry(wsname, member_ws);
+        MantidTreeWidgetItem *item = createEntry(wsname, member_ws);
         setItemIcon(item, member_ws);
         m_tree->addTopLevelItem(item);
       }
@@ -469,8 +512,9 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
  */
 void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
+  MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
 
   // Now add each dimension
@@ -480,8 +524,10 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
     IMDDimension_const_sptr dim = workspace->getDimensionNum(i);
     mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
     std::string s = mess.str();
-    QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     sub_data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
+
     ws_item->addChild(sub_data_item);
   }
 
@@ -496,8 +542,9 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
  */
 void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
+  MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
 
   //data_item = new QTreeWidgetItem(QStringList("Dimensions: "));
@@ -511,8 +558,9 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
     IMDDimension_sptr dim = workspace->getDimension(i);
     mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " " << dim->getUnits();
     std::string s = mess.str();
-    QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     sub_data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(sub_data_item);
     ws_item->addChild(sub_data_item);
   }
 
@@ -520,14 +568,16 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
   std::vector<std::string> stats = workspace->getBoxControllerStats();
   for (size_t i=0; i < stats.size(); i++)
   {
-    QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString( stats[i] )));
+    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString( stats[i] )), m_tree);
     sub_data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(sub_data_item);
     ws_item->addChild(sub_data_item);
   }
 
 
-  data_item = new QTreeWidgetItem(QStringList("Events: "+ QLocale(QLocale::English).toString(double(workspace->getNPoints()), 'd', 0)));
+  data_item = new MantidTreeWidgetItem(QStringList("Events: "+ QLocale(QLocale::English).toString(double(workspace->getNPoints()), 'd', 0)), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
 
 
@@ -542,7 +592,7 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
 */
 void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  QTreeWidgetItem* data_item;
+  MantidTreeWidgetItem* data_item;
   std::string s;
   std::ostringstream out;
 
@@ -552,8 +602,9 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
       << " to " << inst->getValidToDate().to_string("%Y-%b-%d") << ")";
   s = out.str();
 
-  data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+  data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
 
   if (workspace->sample().hasOrientedLattice())
@@ -563,8 +614,9 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
     out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
     out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
     s = out.str();
-    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
   }
 }
@@ -581,22 +633,26 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   bool specialWorkspace = false;
   specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
 
-  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
+  MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Histograms: "+ QLocale(QLocale::English).toString(double(workspace->getNumberHistograms()), 'd', 0)));
+  data_item = new MantidTreeWidgetItem(QStringList("Histograms: "+ QLocale(QLocale::English).toString(double(workspace->getNumberHistograms()), 'd', 0)), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
+  excludeItemFromSort(data_item);
   ws_item->addChild(data_item);
 
   if (!specialWorkspace)
   {
-    data_item = new QTreeWidgetItem(QStringList("Bins: "+QString::number(workspace->blocksize())));
+    data_item = new MantidTreeWidgetItem(QStringList("Bins: "+QString::number(workspace->blocksize())), m_tree);
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
 
-    data_item = new QTreeWidgetItem(QStringList(workspace->isHistogramData() ? "Histogram" : "Data points"));
+    data_item = new MantidTreeWidgetItem(QStringList(workspace->isHistogramData() ? "Histogram" : "Data points"), m_tree);
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
 
     std::string s = "X axis: ";
@@ -610,13 +666,15 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
     {
       s += "N/A";
     }
-    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
 
     s = "Y axis: " + workspace->YUnitLabel();
-    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
   }
 
@@ -638,10 +696,11 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
       extra = "";
       break;
     }
-    data_item = new QTreeWidgetItem(QStringList("Number of events: "
+    data_item = new MantidTreeWidgetItem(QStringList("Number of events: "
         + QLocale(QLocale::English).toString(double(eventWS->getNumberEvents()), 'd', 0)
-        + extra.c_str() ));
+        + extra.c_str() ), m_tree);
     data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(data_item);
     ws_item->addChild(data_item);
   }
 }
@@ -669,7 +728,7 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
     {
       continue;
     }
-    QTreeWidgetItem *item = createEntry(QString::fromStdString(name), member_ws);
+    MantidTreeWidgetItem *item = createEntry(QString::fromStdString(name), member_ws);
     setItemIcon(item, member_ws);
     ws_item->addChild(item);
   }
@@ -682,11 +741,13 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
 */
 void MantidDockWidget::populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
-  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Columns: "+QString::number(workspace->columnCount())));
+  MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Columns: "+QString::number(workspace->columnCount())), m_tree);
+  excludeItemFromSort(data_item);
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Rows: "+QString::number(workspace->rowCount())));
+  data_item = new MantidTreeWidgetItem(QStringList("Rows: "+QString::number(workspace->rowCount())), m_tree);
+  excludeItemFromSort(data_item);
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 }
@@ -870,6 +931,37 @@ void MantidDockWidget::deleteWorkspaces()
   {
     m_mantidUI->deleteWorkspace((*itr)->text(0));
   }//end of for loop for selected items
+}
+
+void MantidDockWidget::sortAscending()
+{
+  m_tree->setSortOrder(Qt::Ascending);
+  m_tree->sortItems(m_tree->sortColumn(), Qt::Ascending);
+}
+
+void MantidDockWidget::sortDescending()
+{
+   m_tree->setSortOrder(Qt::Descending);
+   m_tree->sortItems(m_tree->sortColumn(), Qt::Descending);
+}
+
+void MantidDockWidget::chooseByName()
+{
+  m_tree->setSortScheme(ByName);
+}
+
+void MantidDockWidget::chooseByLastModified()
+{
+  m_tree->setSortScheme(ByLastModified);
+}
+
+void MantidDockWidget::excludeItemFromSort(MantidTreeWidgetItem *item)
+{
+  static size_t counter = 0;
+
+  item->setData(0,Qt::UserRole, counter);
+
+  counter++;
 }
 
 /**
@@ -1358,6 +1450,159 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
   }
 
   return toPlot;
+}
+
+void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)
+{
+  m_sortScheme = sortScheme;
+}
+
+void MantidTreeWidget::setSortOrder(Qt::SortOrder sortOrder)
+{
+  m_sortOrder = sortOrder;
+}
+
+Qt::SortOrder MantidTreeWidget::getSortOrder() const
+{
+  return m_sortOrder;
+}
+
+MantidItemSortScheme MantidTreeWidget::getSortScheme() const
+{
+  return m_sortScheme;
+}
+
+
+//-------------------- MantidTreeWidgetItem ----------------------//
+/**Constructor.
+ * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+ */
+MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget* parent):QTreeWidgetItem(parent)
+{
+  m_parent = parent;
+}
+
+/**Constructor.
+ * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+ */
+MantidTreeWidgetItem::MantidTreeWidgetItem(QStringList list, MantidTreeWidget* parent):QTreeWidgetItem(list)
+{
+  m_parent = parent;
+}
+
+/**Overidden operator.
+ * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
+ */
+bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const 
+{
+  // If this and/or other has been set to have a Qt::UserRole, then
+  // it has an accompanying sort order that we must maintain, no matter
+  // what the user has seletected in terms of order or scheme.
+  
+  bool thisShouldBeSorted = data(0,Qt::UserRole).isNull();
+  bool otherShouldBeSorted = other.data(0,Qt::UserRole).isNull();
+
+  if(!thisShouldBeSorted && !otherShouldBeSorted)
+  {
+    if(m_parent->getSortOrder() == Qt::Ascending)
+      return data(0,Qt::UserRole).toInt() < other.data(0,Qt::UserRole).toInt();
+    else
+      return data(0,Qt::UserRole).toInt() >= other.data(0,Qt::UserRole).toInt();
+  }
+  else if(thisShouldBeSorted && !otherShouldBeSorted)
+  {
+    if(m_parent->getSortOrder() == Qt::Ascending)
+      return false;
+    else
+      return true;
+  }
+  else if(!thisShouldBeSorted && otherShouldBeSorted)
+  {
+    if(m_parent->getSortOrder() == Qt::Ascending)
+      return true;
+    else
+      return false;
+  }
+
+  // If both should be sorted, and the scheme is set to ByName ...
+  if(m_parent->getSortScheme() == ByName)
+  {
+    if(QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0)
+      return true;
+    return false;
+  }
+  // ... else both should be sorted and the scheme is set to ByLastModified.
+  else
+  {
+    try
+    {
+      if(childCount() > 0 && other.childCount() > 0)
+      {
+        const QTreeWidgetItem * other_ptr = &other;
+        return getLastModified(this) < getLastModified(other_ptr);
+      }
+      else if (childCount() == 0 && other.childCount() > 0)
+      {
+        return false;
+      }
+      else
+      {
+        return false;
+      }
+    } catch (Mantid::Kernel::Exception::NotFoundError nfe)
+    {
+      return false;
+    }
+  }
+}
+
+/**Finds the date and time of the last modification made to the workspace who's details
+ * are found in the given QTreeWidgetItem.
+ */
+DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* workspaceWidget)
+{
+  bool isWorkspaceGroup = false;
+  if(workspaceWidget->childCount() > 0) 
+  {
+    for(int i = 0; i < workspaceWidget->childCount(); i++)
+    {
+      if(workspaceWidget->child(i)->childCount() > 0)
+        isWorkspaceGroup = true;
+    }
+  }
+
+  if(isWorkspaceGroup)
+  {
+    const QString wsgName = workspaceWidget->text(0);
+  
+    Mantid::API::WorkspaceGroup_sptr wsgPstr;
+      wsgPstr = boost::dynamic_pointer_cast<WorkspaceGroup>
+        (Mantid::API::AnalysisDataService::Instance().retrieve(wsgName.toStdString()));
+
+    const Mantid::API::WorkspaceHistory wsgHist = wsgPstr->getHistory();
+    const std::vector<AlgorithmHistory>& algHists = wsgHist.getAlgorithmHistories();
+  
+    AlgorithmHistory lastAlgHist = algHists.at(algHists.size() - 1);
+    DateAndTime output = lastAlgHist.executionDate();
+
+    return output;
+  }
+  else
+  {
+    const QString wsName = workspaceWidget->text(0);
+  
+    Mantid::API::Workspace_sptr wsPstr;
+      wsPstr = boost::dynamic_pointer_cast<Workspace>
+        (Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+
+    const Mantid::API::WorkspaceHistory wsHist = wsPstr->getHistory();
+    const std::vector<AlgorithmHistory>& algHists = wsHist.getAlgorithmHistories();
+  
+    AlgorithmHistory lastAlgHist = algHists.at(algHists.size() - 1);
+    DateAndTime output = lastAlgHist.executionDate();
+
+    return output;
+  }
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//

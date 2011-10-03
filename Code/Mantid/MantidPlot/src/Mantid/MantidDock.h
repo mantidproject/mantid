@@ -12,19 +12,27 @@
 #include <QDockWidget>
 #include <QPoint>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <QVector>
+#include <QActionGroup>
+#include <QSortFilterProxyModel>
+#include <QStringList>
 
 class MantidUI;
 class ApplicationWindow;
+class MantidTreeWidgetItem;
 class MantidTreeWidget;
 class QLabel;
 class QMenu;
 class QPushButton;
 class QTreeWidget;
+class QTreeWidgetItem;
 class QProgressBar;
 class QVBoxLayout;
 class QHBoxLayout;
 class QSignalMapper;
+class QSortFilterProxyModel;
+enum MantidItemSortScheme;
 
 class MantidDockWidget: public QDockWidget
 {
@@ -40,7 +48,10 @@ public slots:
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem* item);
   void saveToProgram(const QString & name);
-
+  void sortAscending();
+  void sortDescending();
+  void chooseByName();
+  void chooseByLastModified();
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();
@@ -61,7 +72,7 @@ private:
   void createWorkspaceMenuActions();
   QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace);
-  QTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
+  MantidTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void updateWorkspaceGroupEntry(const QString & ws_name, Mantid::API::WorkspaceGroup_sptr workspace);
   void populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
@@ -77,6 +88,8 @@ private:
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
   bool isInvisibleWorkspaceOptionSet();
+
+  void excludeItemFromSort(MantidTreeWidgetItem *item);
   
 protected:
   MantidTreeWidget * m_tree;
@@ -89,18 +102,25 @@ private:
   QSet<QString> m_known_groups;
 
   QPushButton *m_loadButton;
-  QMenu *m_loadMenu, *m_saveToProgram;
+  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_choiceMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
+  QPushButton *m_sortButton;
   QSignalMapper *m_loadMapper, *m_programMapper;
+  QActionGroup *m_sortChoiceGroup;
 
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecDistr, *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_colorFill, *m_showLogs, *m_showHist,
-    *m_saveNexus, *m_rename, *m_delete, *m_program; 
+    *m_saveNexus, *m_rename, *m_delete, *m_program, * m_ascendingSortAction, * m_descendingSortAction, * m_byNameChoice, * m_byLastModifiedChoice;
 
+  MantidItemSortScheme m_sortScheme;
   static Mantid::Kernel::Logger& logObject;
 };
 
+enum MantidItemSortScheme
+{
+  ByName, ByLastModified
+};
 
 class MantidTreeWidget:public QTreeWidget
 {
@@ -114,11 +134,35 @@ public:
 
   QStringList getSelectedWorkspaceNames() const;
   QMultiMap<QString,int> chooseSpectrumFromSelected() const;
-  
+  void setSortScheme(MantidItemSortScheme);
+  void setSortOrder(Qt::SortOrder);
+  MantidItemSortScheme getSortScheme() const;
+  Qt::SortOrder getSortOrder() const;
+
+  void disableNodes(bool);
+
 private:
   QPoint m_dragStartPosition;
   MantidUI *m_mantidUI;
   static Mantid::Kernel::Logger& logObject;
+  MantidItemSortScheme m_sortScheme;
+  Qt::SortOrder m_sortOrder;
+};
+
+/**A class derived from QTreeWidgetItem, to accomodate
+ * sorting on the items in a MantidTreeWidget.
+ */
+class MantidTreeWidgetItem : public QTreeWidgetItem
+{
+public:
+  MantidTreeWidgetItem(MantidTreeWidget*);
+  MantidTreeWidgetItem(QStringList, MantidTreeWidget*);
+  void disableIfNode(bool);
+
+private:
+  bool operator<(const QTreeWidgetItem &other) const;
+  MantidTreeWidget* m_parent;
+  static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem*);
 };
 
 class FindAlgComboBox:public QComboBox
