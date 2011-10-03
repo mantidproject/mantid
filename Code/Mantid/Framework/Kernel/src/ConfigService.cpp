@@ -1316,7 +1316,17 @@ void ConfigServiceImpl::setDataSearchDirs(const std::string &searchDirs)
  */
 void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
 {
-  if (!isInDataSearchList(path))
+  Poco::Path dirPath;
+  try
+  {
+    dirPath = Poco::Path(path);
+    dirPath.makeDirectory();
+  }
+  catch(Poco::PathSyntaxException &)
+  {
+    return;
+  }
+  if (!isInDataSearchList(dirPath.toString()))
   {
     std::string newSearchString;
     std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
