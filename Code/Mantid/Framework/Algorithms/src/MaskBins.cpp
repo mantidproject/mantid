@@ -191,10 +191,14 @@ void MaskBins::execEvent()
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
   }
 
-  //Go through all histograms
+  // set up the progress bar
   const size_t numHists = inputWS->getNumberHistograms();
-  Progress progress(this,0.0,1.0,numHists);
-  outputWS->makeThreadSafe();
+  Progress progress(this,0.0,1.0,numHists * 2);
+
+  // sort the events
+//  outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
+
+  //Go through all histograms
   if (this->spectra_list.size() > 0)
   {
     //Specific spectra were specified
