@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Qxy.h"
+#include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
@@ -46,17 +47,37 @@ void Qxy::init()
   declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true),
     "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
     "the same number of spectra as the DetBankWorkspace");
+  CompositeWorkspaceValidator<> *wavVal = new CompositeWorkspaceValidator<>;
+  wavVal->add(new WorkspaceUnitValidator<>("Wavelength"));
+  wavVal->add(new HistogramValidator<>);
+  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, true, wavVal),
+    "The scaling to apply to each bin to account for monitor counts, transmission\n"
+    "fraction, etc");
   declareProperty("AccountForGravity",false,Direction::Input);
   declareProperty("SolidAngleWeighting",true,
       "If true, pixels will be weighted by their solid angle.", Direction::Input);
+  BoundedValidator<double> *mustBePositive2 = new BoundedValidator<double>();
+  mustBePositive2->setLower(0.0);
+  declareProperty("RadiusCut", 0.0, mustBePositive2,
+    "To increase resolution some wavelengths are excluded within this distance from\n"
+    "the beam center (m)");
+  declareProperty("WaveCut", 0.0, mustBePositive2->clone(),
+    "To increase resolution by starting to remove some wavelengths below this"
+    "freshold (angstrom)");
 }
 
 void Qxy::exec()
 {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   const bool doGravity = getProperty("AccountForGravity");
   const bool doSolidAngle = getProperty("SolidAngleWeighting");
+
+  //throws if we don't have common binning or another incompatibility
+  Qhelper helper;
+  helper.examineInput(inputWorkspace, waveAdj, pixelAdj);
+  g_log.debug() << "All input workspaces were found to be valid\n";
 
   // Create the output Qx-Qy grid
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace(inputWorkspace);
@@ -94,6 +115,15 @@ void Qxy::exec()
     // If no detector found or if it's masked or a monitor, skip onto the next spectrum
     if ( !det || det->isMonitor() || det->isMasked() ) continue;
     
+    //get the bins that are included inside the RadiusCut/WaveCutcut off, those to calculate for
+    const size_t wavStart = helper.waveLengthCutOff(inputWorkspace, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+    if (wavStart >=  inputWorkspace->readY(i).size())
+    {
+      // all the spectra in this detector are out of range
+      continue;
+    }
+
+
     V3D detPos = det->getPos()-samplePos;
       
     // these will be re-calculated if gravity is on but without gravity there is no need
@@ -135,7 +165,8 @@ void Qxy::exec()
       grav = GravitySANSHelper(inputWorkspace, det);
     }
 
-    for (int j = static_cast<int>(numBins)-1; j >= 0; --j)
+    
+    for (int j = static_cast<int>(numBins)-1; j >= wavStart; --j)
     {
       const double binWidth = X[j+1]-X[j];
       // Calculate the wavelength at the mid-point of this bin
@@ -180,11 +211,52 @@ void Qxy::exec()
         {
           maskFraction = maskFractions[j];
         }
-        // add the total weight for this bin in the weights workspace, in an equivalent bin to where the data was stored
-        if (doSolidAngle)
-          weights->dataY(yIndex)[xIndex] += maskFraction*angle;
+        // add the total weight for this bin in the weights workspace, 
+        // in an equivalent bin to where the data was stored
+
+        // first take into account the product of contributions to the weight which have
+        // no errors
+        double weight = 0.0;
+        if(doSolidAngle)
+          weight = maskFraction*angle; 
         else
-          weights->dataY(yIndex)[xIndex] += maskFraction;
+          weight = maskFraction;
+        
+        // then the product of contributions which have errors, i.e. optional 
+        // pixelAdj and waveAdj contributions
+
+        if (pixelAdj && waveAdj)
+        {
+          weights->dataY(yIndex)[xIndex] += weight*pixelAdj->readY(i)[0]*waveAdj->readDx(j)[0];
+          const double pixelYSq = pixelAdj->readY(i)[0]*pixelAdj->readY(i)[0];
+          const double pixelESq = pixelAdj->readE(i)[0]*pixelAdj->readE(i)[0]; 
+          const double waveYSq = waveAdj->readY(j)[0]*waveAdj->readY(j)[0];
+          const double waveESq = waveAdj->readE(j)[0]*waveAdj->readE(j)[0];
+          // add product of errors from pixelAdj and waveAdj       
+          weights->dataE(yIndex)[xIndex] += sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex] 
+                   + weight*weight*(waveESq*pixelYSq + pixelESq*waveYSq) );
+        }
+        else if (pixelAdj)
+        {
+          weights->dataY(yIndex)[xIndex] += weight*pixelAdj->readY(i)[0];
+          const double pixelE = weight*pixelAdj->readE(i)[0]; 
+          // add error from pixelAdj
+          weights->dataE(yIndex)[xIndex] += 
+                  sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex]
+                        + pixelE*pixelE);
+        }
+        else if(waveAdj)
+        {
+          weights->dataY(yIndex)[xIndex] += weight*waveAdj->readDx(j)[0];
+          const double waveE = weight*waveAdj->readDx(j)[0]; 
+          // add error from waveAdj
+          weights->dataE(yIndex)[xIndex] += 
+                  sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex]
+                        + waveE*waveE);
+        }
+        else
+          weights->dataY(yIndex)[xIndex] += weight;
+        
 
       }
     } // loop over single spectrum

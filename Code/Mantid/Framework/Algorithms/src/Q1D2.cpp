@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidAlgorithms/Qhelper.h"
 
 namespace Mantid
 {
@@ -73,13 +74,12 @@ void Q1D2::exec()
 {
   m_dataWS = getProperty("DetBankWorkspace");
   MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
-  // this pointer could be NULL as PixelAdj is an optional property
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   const bool doGravity = getProperty("AccountForGravity");
-  initizeCutOffs(getProperty("RadiusCut"), getProperty("WaveCut"));
 
   //throws if we don't have common binning or another incompatibility
-  examineInput(waveAdj, pixelAdj);
+  Qhelper helper;
+  helper.examineInput(m_dataWS, waveAdj, pixelAdj);
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
   double const * const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : NULL;
@@ -123,7 +123,8 @@ void Q1D2::exec()
     }
 
     //get the bins that are included inside the RadiusCut/WaveCutcut off, those to calculate for
-    const size_t wavStart = waveLengthCutOff(i);
+    //const size_t wavStart = waveLengthCutOff(i);
+    const size_t wavStart = helper.waveLengthCutOff(m_dataWS, getProperty("RadiusCut"), getProperty("WaveCut"), i);
     if (wavStart >=  m_dataWS->readY(i).size())
     {
       // all the spectra in this detector are out of range
@@ -198,77 +199,6 @@ void Q1D2::exec()
   setProperty("OutputWorkspace",outputWS);
 }
 
-/** If the distribution/raw counts status and binning on all the input workspaces
-*  is the same and this reads some workspace description but throws if not
-  @param binWS workpace that will be checked to see if it has one spectrum and the same number of bins as dataWS
-  @param detectWS passing NULL for this wont raise an error, if set it will be checked this workspace has as many histograms as dataWS each with one bin
-  @throw invalid_argument if the workspaces are not mututially compatible
-*/
-void Q1D2::examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj)
-{
-  if ( m_dataWS->getNumberHistograms() < 1 )
-  {
-    throw std::invalid_argument("Empty data workspace passed, can not continue");
-  }
-
-  //it is not an error for these workspaces not to exist
-  if (binAdj)
-  {
-    if ( binAdj->getNumberHistograms() != 1 )
-    {
-      throw std::invalid_argument("The WavelengthAdj workspace must have one spectrum");
-    }
-    if ( binAdj->readY(0).size() != m_dataWS->readY(0).size() )
-    {
-      throw std::invalid_argument("The WavelengthAdj workspace's bins must match those of the detector bank workspace");
-    }
-    MantidVec::const_iterator reqX = m_dataWS->readX(0).begin();
-    MantidVec::const_iterator testX = binAdj->readX(0).begin();
-    for ( ; reqX != m_dataWS->readX(0).end(); ++reqX, ++testX)
-    {
-      if ( *reqX != *testX )
-      {
-        throw std::invalid_argument("The WavelengthAdj workspace must have matching bins with the detector bank workspace");
-      }
-    }
-    if ( binAdj->isDistribution() != m_dataWS->isDistribution() )
-    {
-      throw std::invalid_argument("The distrbution/raw counts status of the wavelengthAdj and DetBankWorkspace must be the same, use ConvertToDistribution");
-    }
-  }
-  else if( ! m_dataWS->isDistribution() )
-  {
-    throw std::invalid_argument("The data workspace must be a distrbution if there is no Wavelength dependent adjustment");
-  }
-  
-  if (detectAdj)
-  {
-    if ( detectAdj->blocksize() != 1 )
-    {
-      throw std::invalid_argument("The PixelAdj workspace must point to a workspace with single bin spectra, as only the first bin is used");
-    }
-    if ( detectAdj->getNumberHistograms() != m_dataWS->getNumberHistograms() )
-    {
-      throw std::invalid_argument("The PixelAdj workspace must have one spectrum for each spectrum in the detector bank workspace");
-    }
-    g_log.debug() << "Optional PixelAdj workspace " << detectAdj->getName() << " validated successfully\n";
-  }
-
-  g_log.debug() << "All input workspaces were found to be valid\n";
-}
-
-/** Detector independent parts of the wavelength cut off calculation
-*  @param RCut the radius cut off, should be value of the property RadiusCut
-*  @param WCut this wavelength cut off, should be equal to the value WaveCut
-*/
-void Q1D2::initizeCutOffs(const double RCut, const double WCut)
-{
-  if ( RCut > 0 && WCut > 0 )
-  {
-    m_WCutOver = WCut/RCut;
-    m_RCut = RCut;
-  }
-}
 
 /** Creates the output workspace, its size, units, etc.
 *  @param binParams the bin boundary specification using the same same syntax as param the Rebin algorithm
@@ -297,26 +227,6 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
   return outputWS;
 }
 
-/** Finds the first index number of the first wavelength bin that should included based on the
-*  the calculation: W = Wcut (Rcut-R)/Rcut
-*  @param specInd spectrum that is being analysed
-*  @return index number of the first bin to include in the calculation
-*/
-size_t Q1D2::waveLengthCutOff(const size_t specInd) const
-{
-  if ( !(m_RCut > 0) )
-  {
-    return 0;
-  }
-  //get the distance of between this detector and the origin, which should be the along the beam center
-  const V3D posOnBank = m_dataWS->getDetector(specInd)->getPos();
-  double R = (posOnBank.X()*posOnBank.X())+(posOnBank.Y()*posOnBank.Y());
-  R = std::sqrt(R);
-
-  const double WMin = m_WCutOver*(m_RCut-R);
-  const MantidVec & Xs = m_dataWS->readX(specInd);
-  return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
-}
 
 /** Calculate the normalization term for each output bin
 *  @param[in] offSet the inex number of the first bin in the input wavelengths that is actually being used

@@ -64,7 +64,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
   }
   else if( ! dataWS->isDistribution() )
   {
-    throw std::invalid_argument("The data workspace must be a distrbution if there is no Wavelength dependent adjustment");
+    //throw std::invalid_argument("The data workspace must be a distrbution if there is no Wavelength dependent adjustment");
   }
   
   if (detectAdj)
@@ -80,7 +80,38 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
   }
 }
 
+/** Finds the first index number of the first wavelength bin that should included based on the
+*  the calculation: W = Wcut (Rcut-R)/Rcut
+*  @param dataWS data workspace
+*  @param RCut the radius cut off, should be value of the property RadiusCut
+*  @param WCut this wavelength cut off, should be equal to the value WaveCut
+*  @param specInd spectrum that is being analysed
+*  @return index number of the first bin to include in the calculation
+*/
+size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS, const double RCut, const double WCut, 
+                                 const size_t specInd) const
+{
+  double l_WCutOver = 0.0;
+  double l_RCut = 0.0;
+  if ( RCut > 0 && WCut > 0 )
+  {
+    l_WCutOver = WCut/RCut;
+    l_RCut = RCut;
+  }
 
+  if ( !(l_RCut > 0) )
+  {
+    return 0;
+  }
+  //get the distance of between this detector and the origin, which should be the along the beam center
+  const V3D posOnBank = dataWS->getDetector(specInd)->getPos();
+  double R = (posOnBank.X()*posOnBank.X())+(posOnBank.Y()*posOnBank.Y());
+  R = std::sqrt(R);
+
+  const double WMin = l_WCutOver*(l_RCut-R);
+  const MantidVec & Xs = dataWS->readX(specInd);
+  return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
+}
 
 } // namespace Algorithms
 } // namespace Mantid

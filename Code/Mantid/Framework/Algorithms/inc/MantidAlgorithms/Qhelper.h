@@ -42,6 +42,8 @@ public:
   void examineInput(API::MatrixWorkspace_const_sptr dataWS, 
        API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
 
+  size_t waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS, const double RCut, const double WCut, 
+                                 const size_t specInd) const;
 private:
   /// the experimental workspace with counts across the detector
 /*  API::MatrixWorkspace_const_sptr m_dataWS;
