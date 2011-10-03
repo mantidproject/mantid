@@ -216,12 +216,13 @@ void CropWorkspace::execEvent()
 
   EventType type = eventW->getEventType();
 
-  Progress prog(this,0.0,1.0,(m_maxSpec-m_minSpec));
+  Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
+  eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
   // Loop over the required spectra, copying in the desired bins
-  //PARALLEL_FOR2(m_inputWorkspace,outputWorkspace)
+  PARALLEL_FOR2(m_inputWorkspace,outputWorkspace)
   for (int i = m_minSpec; i <= m_maxSpec; ++i)
   {
-    //PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
     int j = i - m_minSpec;
     EventList el = eventW->getEventList(i);
     EventList outEL;
@@ -264,9 +265,7 @@ void CropWorkspace::execEvent()
         }
         break;
       }
-      //PARALLEL_END_INTERUPT_REGION
     }
-    //PARALLEL_CHECK_INTERUPT_REGION
 
     outputWorkspace->getOrAddEventList(j) += outEL;
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
@@ -293,7 +292,9 @@ void CropWorkspace::execEvent()
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
     prog.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
 }
