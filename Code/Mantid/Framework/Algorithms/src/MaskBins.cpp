@@ -196,7 +196,7 @@ void MaskBins::execEvent()
   Progress progress(this,0.0,1.0,numHists * 2);
 
   // sort the events
-//  outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
+  outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
 
   //Go through all histograms
   if (this->spectra_list.size() > 0)
