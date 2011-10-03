@@ -284,13 +284,19 @@ using namespace boost::python;
 
     //Operator overloads dispatch through the above structure. The typedefs save some typing
     typedef MatrixWorkspace_sptr(*binary_fn1)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr,const std::string &,const std::string &,bool, bool);
-    typedef MatrixWorkspace_sptr(*binary_fn2)(const API::MatrixWorkspace_sptr, double,const std::string&,const std::string &,bool,bool);
-    typedef bool(*binary_fn3)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr,double);
+    typedef WorkspaceGroup_sptr(*binary_fn2)(const API::WorkspaceGroup_sptr, const API::WorkspaceGroup_sptr,const std::string &,const std::string &,bool, bool);
+    typedef MatrixWorkspace_sptr(*binary_fn3)(const API::MatrixWorkspace_sptr, double,const std::string&,const std::string &,bool,bool);
+    typedef WorkspaceGroup_sptr(*binary_fn4)(const API::WorkspaceGroup_sptr, double,const std::string&,const std::string &,bool,bool);
+
+    typedef bool(*binary_fn5)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr,double);
 
       // Binary operations helpers
     def("_binary_op", (binary_fn1)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn2)&PythonAPI::performBinaryOp);
-    def("_equals_op", (binary_fn3)&API::equals);
+    def("_binary_op", (binary_fn3)&PythonAPI::performBinaryOpWithDouble);
+    def("_binary_op", (binary_fn4)&PythonAPI::performBinaryOpWithDouble);
+
+    def("_equals_op", (binary_fn5)&API::equals);
 
   }
 

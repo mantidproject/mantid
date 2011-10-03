@@ -12,9 +12,10 @@ namespace API
 namespace OperatorOverloads
 {
   // Helper function for operator overloads
-  MANTID_API_DLL MatrixWorkspace_sptr 
-    executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, 
-                           const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false, 
+  template<typename LHSType, typename RHSType, typename ResultType>
+  DLLExport ResultType
+    executeBinaryOperation(const std::string & algorithmName, const LHSType lhs,
+                           const RHSType rhs, bool lhsAsOutput = false,
                            bool child = true, const std::string & name = "", bool rethrow = false);
 
 }

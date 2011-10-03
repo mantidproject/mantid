@@ -41,7 +41,7 @@ namespace Mantid
       bool bgroupExecStatus=true;
       //flag used for checking failure of  all memebrs of the group
       bool bgroupFailed=false;
-      WorkspaceGroup_sptr outWSGrp= WorkspaceGroup_sptr(new WorkspaceGroup);
+      WorkspaceGroup_sptr outWSGrp= WorkspaceGroup_sptr(new WorkspaceGroup(false)); // Do not observe ADS notifications while constructing the group
       //get the lhs and rhs group vectors from properties
       getGroupNames(props,lhsWSGrp,rhsWSGrp);
       //check lhs and o/p workspaces are same
@@ -79,7 +79,6 @@ namespace Mantid
           {
             ++nPeriod;
             // Create a new instance of the algorithm for each group member (needed if execute creates new properties)
-           // alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
             setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
             bStatus=alg->execute();
             if(!bStatus)
@@ -141,6 +140,7 @@ namespace Mantid
 	    {
         setExecuted(true);
 	    }
+      outWSGrp->observeADSNotifications(true);
       m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
       return bStatus;
     }

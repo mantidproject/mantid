@@ -53,11 +53,17 @@ namespace API
 class MANTID_API_DLL WorkspaceGroup : public Workspace
 {
 public:
-  WorkspaceGroup();
+  /// Default constructor.
+  WorkspaceGroup(const bool observeADS = true);
+  /// Destructor
   ~WorkspaceGroup();
-  
+  /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
+  /// The collection itself is considered to take up no space
   virtual size_t getMemorySize() const { return 0; }
+  /// Turn ADS observations on/off
+  void observeADSNotifications(const bool observeADS);
+  /// Adds a name to the group
   void add(const std::string& wsName);
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
@@ -65,20 +71,23 @@ public:
   std::vector<std::string> getNames() const { return m_wsNames; }
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(m_wsNames.size()); }
+  /// Prints the group to the screen using the logger at debug
   void print() const;
+  /// Remove a name from the group
   void remove(const std::string& name);
+  /// Remove all names from the group but do not touch the ADS
   void removeAll();
+  /// Remove all names from the group and also from the ADS
   void deepRemoveAll();
-
   /// This method returns true if the group is empty (no member workspace)
-  bool isEmpty();
+  bool isEmpty() const;
  
+
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
-  std::vector<std::string> m_wsNames; ///< The list of workspace names in the group
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
@@ -87,8 +96,12 @@ private:
   void workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
   /// Observer for renaming of workspaces
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
-
-  static Kernel::Logger& g_log;       ///< Static reference to the logger
+  /// The list of workspace names in the group
+  std::vector<std::string> m_wsNames;
+  /// Flag as to whether the observers have been added to the ADS
+  bool m_observingADS;
+  /// Static reference to the logger
+  static Kernel::Logger& g_log;
 };
 
 /// Shared pointer to a workspace group class

@@ -1,18 +1,20 @@
 //---------------------------------------
 // Includes
 //---------------------------------------
-#include <MantidPythonAPI/WorkspaceProxies.h>
-#include <MantidPythonAPI/MantidVecHelper.h>
+#include "MantidPythonAPI/WorkspaceProxies.h"
+#include "MantidPythonAPI/MantidVecHelper.h"
 
-#include <MantidAPI/WorkspaceOpOverloads.h>
-#include <MantidAPI/AlgorithmManager.h>
-#include <MantidAPI/AnalysisDataService.h>
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid
 {
   namespace PythonAPI
   {
     using API::MatrixWorkspace_sptr;
+    using API::WorkspaceGroup_sptr;
 
     //****************************************
     //
@@ -78,22 +80,22 @@ namespace Mantid
      * @param reverse :: Unused parameter. Here for consistent interface
      * @returns The resulting workspace
      */
-    MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr lhs, 
-        const MatrixWorkspace_sptr rhs,
-        const std::string& op, const std::string & name,
-        bool inplace,bool reverse)
+    template<typename LHSType, typename RHSType, typename ResultType>
+    ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
+                        const std::string& op, const std::string & name,
+                        bool inplace,bool reverse)
     {
-      MatrixWorkspace_sptr result;
+      ResultType result;
       std::string error("");
       try
       {
         if( reverse )
         {
-          result = API::OperatorOverloads::executeBinaryOperation(op, rhs, lhs, inplace, false, name, true);
+          result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType, ResultType>(op, rhs, lhs, inplace, false, name, true);
         }
         else
         {
-          result = API::OperatorOverloads::executeBinaryOperation(op, lhs, rhs, inplace, false, name, true);
+          result = API::OperatorOverloads::executeBinaryOperation<LHSType, RHSType, ResultType>(op, lhs, rhs, inplace, false, name, true);
         }
       }
       catch(std::runtime_error & exc)
@@ -121,7 +123,8 @@ namespace Mantid
     * @param reverse :: If true then the double is the lhs argument
     * @return A shared pointer to the result workspace
     */
-    MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr inputWS, const double value, 
+    template<typename LHSType, typename ResultType>
+    ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
         const std::string& op, const std::string & name,
         bool inplace, bool reverse)
     {
@@ -131,7 +134,7 @@ namespace Mantid
       alg->setChild(false);
       alg->initialize();
       alg->setProperty<double>("DataValue",value);
-      const std::string & tmp_name("__tmp_double");
+      const std::string & tmp_name("__tmp_binary_operation_double");
       alg->setPropertyValue("OutputWorkspace", tmp_name);
       alg->execute();
       MatrixWorkspace_sptr singleValue;
@@ -144,11 +147,22 @@ namespace Mantid
       {
         throw std::runtime_error("performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
       }      
-      MatrixWorkspace_sptr result = performBinaryOp(inputWS, singleValue, op, name, inplace, reverse);
+      ResultType result = performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(inputWS, singleValue, op, name, inplace, reverse);
       // Delete the temporary
       data_store.remove(tmp_name);
       return result;
     }
+
+    // Concrete instantations
+    template MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr, const MatrixWorkspace_sptr, const std::string& , const std::string & name,
+                                    bool, bool);
+    template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string& , const std::string & name,
+                                    bool, bool);
+    // Double variants
+    template MatrixWorkspace_sptr performBinaryOpWithDouble(const MatrixWorkspace_sptr, const double, const std::string& op,
+                                                  const std::string &, bool, bool);
+    template WorkspaceGroup_sptr performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double, const std::string& op,
+                                                    const std::string &, bool, bool);
 
   }
 

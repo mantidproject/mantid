@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid
 {
@@ -12,21 +13,44 @@ namespace API
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
-WorkspaceGroup::WorkspaceGroup() : 
+WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
-  m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle)
-				     
+  m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle),
+  m_wsNames(), m_observingADS(false)
 {
-  // Listen for delete and rename notifications to update the group
-  // accordingly
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+  observeADSNotifications(observeADS);
 }
 
 WorkspaceGroup::~WorkspaceGroup()
 {
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+  observeADSNotifications(false);
+}
+
+/**
+ * Turn on/off observing delete and rename notifications to update the group accordingly
+ * It can be useful to turn them off when constructing the group.
+ * @param observeADS :: If true observe the ADS notifications, otherwise disable them
+ */
+void WorkspaceGroup::observeADSNotifications(const bool observeADS)
+{
+  if( observeADS )
+  {
+    if(!m_observingADS)
+    {
+      Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+      Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+      m_observingADS = true;
+    }
+  }
+  else
+  {
+    if(m_observingADS)
+    {
+      Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+      Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+      m_observingADS = false;
+    }
+  }
 }
 
 /** Add the named workspace to the group
@@ -70,15 +94,13 @@ void WorkspaceGroup::remove(const std::string& name)
 /// Removes all members of the group from the group AND from the AnalysisDataService
 void WorkspaceGroup::deepRemoveAll()
 {
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-   while (!m_wsNames.empty())
-   {
-	   AnalysisDataService::Instance().remove(m_wsNames.back());
-	   m_wsNames.pop_back();
-
-   }
-   
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+  while (!m_wsNames.empty())
+  {
+    AnalysisDataService::Instance().remove(m_wsNames.back());
+	  m_wsNames.pop_back();
+  }
+  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
 
 /// Print the names of all the workspaces in this group to the logger (at debug level)
@@ -91,18 +113,21 @@ void WorkspaceGroup::print() const
   }
 }
 
-/**M
+/**
  * Callback for a workspace delete notification
  * @param notice :: A pointer to a workspace delete notificiation object
  */
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr notice)
-{  
-  if( notice->object_name() != this->getName() )
+{
+  const std::string deletedName = notice->object_name();
+  if( !this->contains(deletedName)) return;
+
+  if( deletedName != this->getName() )
   {
-    remove(notice->object_name());
+    this->remove(deletedName);
     if(isEmpty())
     {
-      Mantid::API::AnalysisDataService::Instance().remove(this->getName());
+     Mantid::API::AnalysisDataService::Instance().remove(this->getName());
     }
   }
 }
@@ -125,10 +150,53 @@ void WorkspaceGroup::workspaceRenameHandle(Mantid::API::WorkspaceRenameNotificat
  * This method returns true if the workspace group is empty
  * @return true if workspace is empty
  */
-bool WorkspaceGroup::isEmpty()
+bool WorkspaceGroup::isEmpty() const
 {
 	return m_wsNames.empty();
 }
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+
+    template<> MANTID_API_DLL
+      Mantid::API::WorkspaceGroup_sptr IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::API::WorkspaceGroup_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected WorkspaceGroup.";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> MANTID_API_DLL
+      Mantid::API::WorkspaceGroup_const_sptr IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::API::WorkspaceGroup_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const WorkspaceGroup.";
+        throw std::runtime_error(message);
+      }
+    }
+
+  } // namespace Kernel
+} // namespace Mantid
+
+///\endcond TEMPLATE
+

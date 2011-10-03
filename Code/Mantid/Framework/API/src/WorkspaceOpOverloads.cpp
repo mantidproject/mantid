@@ -28,7 +28,9 @@ namespace OperatorOverloads
    *  @param A :: flag indicating whether to rethrow exceptions
    *  @return The result in a workspace shared pointer
    */
-  MatrixWorkspace_sptr executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput, bool child, const std::string &name, bool rethrow)
+  template<typename LHSType, typename RHSType, typename ResultType>
+  ResultType executeBinaryOperation(const std::string & algorithmName, const LHSType lhs, const RHSType rhs, bool lhsAsOutput,
+      bool child, const std::string &name, bool rethrow)
   {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
     alg->setChild(child);
@@ -37,15 +39,15 @@ namespace OperatorOverloads
 
     if( child )
     {
-      alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
-      alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
+      alg->setProperty<LHSType>("LHSWorkspace",lhs);
+      alg->setProperty<RHSType>("RHSWorkspace",rhs);
       alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
       // Have to set a text name for the output workspace if the algorithm is a child even
       // though it will not be used.
       alg->setPropertyValue("OutputWorkspace","��NotApplicable");
       if( lhsAsOutput )
       {
-        alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",lhs);
+        alg->setProperty<LHSType>("OutputWorkspace",lhs);
       }
     }
     // If this is not a child algorithm then we need names for the properties
@@ -69,15 +71,15 @@ namespace OperatorOverloads
     if (alg->isExecuted())
     {
       // Get the output workspace property
-      if( child )
+      if (child)
       {
         return alg->getProperty("OutputWorkspace");
       }
       else
       {
-        API::Workspace_sptr result =
-            API::AnalysisDataService::Instance().retrieve(alg->getPropertyValue("OutputWorkspace"));
-        return boost::dynamic_pointer_cast<API::MatrixWorkspace>(result);
+        API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
+            alg->getPropertyValue("OutputWorkspace"));
+        return boost::dynamic_pointer_cast<typename ResultType::element_type>(result);
       }
     }
     else
@@ -90,12 +92,17 @@ namespace OperatorOverloads
 
     //Horendous code inclusion to satisfy compilers that all code paths return a value
     // in reality the above code should either throw or return successfully.
-    return MatrixWorkspace_sptr();
+    return ResultType();
   }
 
-
-
-
+  template DLLExport MatrixWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr, const MatrixWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr, const MatrixWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr, const WorkspaceGroup_sptr, bool,
+      bool, const std::string &, bool);
 
 } // namespace OperatorOverloads
 
@@ -156,7 +163,7 @@ using OperatorOverloads::executeBinaryOperation;
  */
 MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Plus",lhs,rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus",lhs,rhs);
 }
 
 /** Adds a workspace to a single value
@@ -166,7 +173,7 @@ MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const MatrixWorks
  */
 MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue));
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus",lhs,createWorkspaceSingleValue(rhsValue));
 }
 
 /** Subtracts two workspaces
@@ -176,7 +183,7 @@ MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const double& rhs
  */
 MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Minus",lhs,rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus",lhs,rhs);
 }
 
 /** Subtracts  a single value from a workspace
@@ -186,7 +193,7 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const MatrixWorks
  */
 MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue));
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus",lhs,createWorkspaceSingleValue(rhsValue));
 }
 
 /** Subtracts a workspace from a single value
@@ -196,7 +203,7 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const double& rhs
  */
 MatrixWorkspace_sptr operator-(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Minus",createWorkspaceSingleValue(lhsValue),rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus",createWorkspaceSingleValue(lhsValue),rhs);
 }
 /** Multiply two workspaces
  *  @param lhs :: left hand side workspace shared pointer
@@ -205,7 +212,7 @@ MatrixWorkspace_sptr operator-(const double& lhsValue, const MatrixWorkspace_spt
  */
 MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Multiply",lhs,rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply",lhs,rhs);
 }
 
 /** Multiply a workspace and a single value
@@ -215,7 +222,7 @@ MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const MatrixWorks
  */
 MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue));
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply",lhs,createWorkspaceSingleValue(rhsValue));
 }
 
 /** Multiply a workspace and a single value. Allows you to write, e.g., 2*workspace.
@@ -225,7 +232,7 @@ MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const double& rhs
  */
 MatrixWorkspace_sptr operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Multiply",createWorkspaceSingleValue(lhsValue),rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply",createWorkspaceSingleValue(lhsValue),rhs);
 }
 
 /** Divide two workspaces
@@ -235,7 +242,7 @@ MatrixWorkspace_sptr operator*(const double& lhsValue, const MatrixWorkspace_spt
  */
 MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Divide",lhs,rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide",lhs,rhs);
 }
 
 /** Divide a workspace by a single value
@@ -245,7 +252,7 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const MatrixWorks
  */
 MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue));
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide",lhs,createWorkspaceSingleValue(rhsValue));
 }
 
 /** Divide a single value and a workspace. Allows you to write, e.g., 2/workspace.
@@ -255,7 +262,7 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const double& rhs
  */
 MatrixWorkspace_sptr operator/(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Divide",createWorkspaceSingleValue(lhsValue),rhs);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide",createWorkspaceSingleValue(lhsValue),rhs);
 }
 
 /** Adds two workspaces
@@ -265,7 +272,7 @@ MatrixWorkspace_sptr operator/(const double& lhsValue, const MatrixWorkspace_spt
  */
 MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Plus",lhs,rhs,true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus",lhs,rhs,true);
 }
 
 /** Adds a single value to a workspace
@@ -275,7 +282,7 @@ MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const MatrixWork
  */
 MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue),true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Plus",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
 
 /** Subtracts two workspaces
@@ -285,7 +292,7 @@ MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const double& rh
  */
 MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Minus",lhs,rhs,true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus",lhs,rhs,true);
 }
 
 /** Subtracts a single value from a workspace
@@ -295,7 +302,7 @@ MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const MatrixWork
  */
 MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue),true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Minus",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
 
 /** Multiply two workspaces
@@ -305,7 +312,7 @@ MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const double& rh
  */
 MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Multiply",lhs,rhs,true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply",lhs,rhs,true);
 }
 
 /** Multiplies a workspace by a single value
@@ -315,7 +322,7 @@ MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const MatrixWork
  */
 MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue),true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Multiply",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
 
 /** Divide two workspaces
@@ -325,7 +332,7 @@ MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const double& rh
  */
 MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
-  return executeBinaryOperation("Divide",lhs,rhs,true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide",lhs,rhs,true);
 }
 
 /** Divides a workspace by a single value
@@ -335,7 +342,7 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const MatrixWork
  */
 MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
-  return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue),true);
+  return executeBinaryOperation<MatrixWorkspace_sptr,MatrixWorkspace_sptr,MatrixWorkspace_sptr>("Divide",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
 
 

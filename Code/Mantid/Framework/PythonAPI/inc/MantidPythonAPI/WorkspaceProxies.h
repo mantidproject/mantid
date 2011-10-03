@@ -76,14 +76,15 @@ namespace Mantid
     /** @name Binary operation helpers */
     //@{
     /// Binary op for two workspaces
-    API::MatrixWorkspace_sptr performBinaryOp(const API::MatrixWorkspace_sptr lhs, 
-					      const API::MatrixWorkspace_sptr rhs, 
-					      const std::string & op, const std::string & name, 
-					      bool inplace, bool reverse);
+    template<typename LHSType, typename RHSType, typename ResultType>
+    ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
+                         const std::string & op, const std::string & name,
+                         bool inplace, bool reverse);
     /// Binary op for a workspace and a double
-    API::MatrixWorkspace_sptr performBinaryOp(const API::MatrixWorkspace_sptr inputWS, const double value, 
-					      const std::string & op, const std::string & name, 
-					      bool inplace, bool reverse);
+    template<typename LHSType, typename ResultType>
+    ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
+					               const std::string & op, const std::string & name,
+					               bool inplace, bool reverse);
     //@}
 
     /**
