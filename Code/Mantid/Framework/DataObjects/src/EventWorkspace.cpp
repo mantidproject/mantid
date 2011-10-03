@@ -35,7 +35,7 @@ namespace DataObjects
 
   //---- Constructors -------------------------------------------------------------------
   EventWorkspace::EventWorkspace() :
-      mru(new EventWorkspaceMRU)
+      mru(new EventWorkspaceMRU), m_threadSafeOnce(false)
   {
   }
 
@@ -57,6 +57,13 @@ namespace DataObjects
    */
   bool EventWorkspace::threadSafe() const
   {
+    // see if somebody is trying the cheat and report it back
+    if (this->m_threadSafeOnce)
+    {
+      this->m_threadSafeOnce = false;
+      return true;
+    }
+
     //Return false if ANY event list is not sorted. You can't have 2 threads trying to sort the
     //  same event list simultaneously.
     for (size_t i=0; i<data.size(); i++)
@@ -67,12 +74,13 @@ namespace DataObjects
     return true;
   }
 
-  void EventWorkspace::makeThreadSafe(Mantid::API::Progress * prog)
+  /**
+   * Sets an internal parameter that the next time EventWorkspace::threadSafe() is
+   * called it returns true.
+   */
+  void EventWorkspace::makeThreadSafe()
   {
-    if (!this->threadSafe())
-    {
-      this->sortAll(TOF_SORT, prog);
-    }
+    this->m_threadSafeOnce = true;
   }
 
   //-----------------------------------------------------------------------------

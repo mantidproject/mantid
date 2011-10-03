@@ -65,7 +65,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   virtual bool threadSafe() const;
 
-  virtual void makeThreadSafe(Mantid::API::Progress * prog = NULL);
+  virtual void makeThreadSafe();
 
   //------------------------------------------------------------
 
@@ -191,6 +191,8 @@ private:
 
   /// Container for the MRU lists of the event lists contained.
   mutable EventWorkspaceMRU * mru;
+
+  mutable bool m_threadSafeOnce;
 };
 
 ///shared pointer to the EventWorkspace class
