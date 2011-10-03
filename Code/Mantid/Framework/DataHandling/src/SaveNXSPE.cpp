@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
 
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <limits>
@@ -236,52 +237,63 @@ namespace Mantid
       // Create a progress reporting object
       Progress progress(this,0,1,100);
       const int progStep = (int)(ceil(nHist/100.0));
-      
+      Geometry::IDetector_const_sptr det;      
       // Loop over spectra
       for (int i = 0; i < nHist; i++)
         {
-          // Check that we aren't writing a monitor...
-          if (!inputWS->getDetector(i)->isMonitor())
-            {
-              Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
+            try{  // detector exist
+                det =inputWS->getDetector(i); 
+                // Check that we aren't writing a monitor...
+                if (!det->isMonitor())
+                {
+                Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
   
-              if (!inputWS->getDetector(i)->isMasked())
-                {
-                  // no masking...
-                  // Open the data
-                  nxFile.openData("data");
-                  slab_start[0] = i;
-                  nxFile.putSlab(const_cast<MantidVec&> (inputWS->readY(i)),
-                                  slab_start, slab_size);
-                  // Close the data
-                  nxFile.closeData();
+                    if (!det->isMasked())
+                    {
+                      // no masking...
+                      // Open the data
+                        nxFile.openData("data");
+                        slab_start[0] = i;
+                        nxFile.putSlab(const_cast<MantidVec&> (inputWS->readY(i)),
+                                      slab_start, slab_size);
+                      // Close the data
+                          nxFile.closeData();
 
-                  // Open the error
-                  nxFile.openData("error");
-                  //MantidVec& tmparr = const_cast<MantidVec&>(inputWS->dataE(i));
-                  //nxFile.putSlab((void*)(&(tmparr[0])), slab_start, slab_size);
-                  nxFile.putSlab(const_cast<MantidVec&> (inputWS->readE(i)),
-                                 slab_start, slab_size);
-                  // Close the error
-                  nxFile.closeData();
-                }
-              else
-                {
-                  // Write a masked value...
-                  // Open the data
-                  nxFile.openData("data");
-                  slab_start[0] = i;
-                  nxFile.putSlab(masked_data, slab_start, slab_size);
-                  // Close the data
-                  nxFile.closeData();
+                      // Open the error
+                        nxFile.openData("error");
+                        //MantidVec& tmparr = const_cast<MantidVec&>(inputWS->dataE(i));
+                        //nxFile.putSlab((void*)(&(tmparr[0])), slab_start, slab_size);
+                        nxFile.putSlab(const_cast<MantidVec&> (inputWS->readE(i)),
+                                         slab_start, slab_size);
+                        // Close the error
+                         nxFile.closeData();
+                      }
+                      else
+                      {
+                      // Write a masked value...
+                      // Open the data
+                      nxFile.openData("data");
+                      slab_start[0] = i;
+                      nxFile.putSlab(masked_data, slab_start, slab_size);
+                     // Close the data
+                      nxFile.closeData();
 
-                  // Open the error
-                  nxFile.openData("error");
-                  nxFile.putSlab(masked_error, slab_start, slab_size);
-                  // Close the error
-                  nxFile.closeData();
+                     // Open the error
+                     nxFile.openData("error");
+                     nxFile.putSlab(masked_error, slab_start, slab_size);
+                     // Close the error
+                     nxFile.closeData();
+                     }
                 }
+            }catch(Exception::NotFoundError&)
+            {
+            // Catch if no detector. Next line tests whether this happened - test placed
+            // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+            // in an openmp block.
             }
+           // If no detector found, skip onto the next spectrum
+            if ( !det ) continue;
+
           // make regular progress reports and check for canceling the algorithm
           if ( i % progStep == 0 )
           {

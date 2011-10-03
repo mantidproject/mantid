@@ -76,7 +76,7 @@ public:
 
     /// Type of the column data.
     const std::string& type()const{return m_type;}
-    /// return value casted to double
+    /// return value casted to double (should be pure virtual)
     virtual double operator[](size_t i)const{UNUSED_ARG(i); return std::numeric_limits<double>::quiet_NaN();}
     /// Renames the column.
     void setName(const std::string& str){m_name = str;}
