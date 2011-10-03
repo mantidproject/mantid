@@ -59,7 +59,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/LineDialog.cpp
                    src/LineProfileTool.cpp
                    src/LogisticFit.cpp
-                   src/main.cpp
                    src/MatrixCommand.cpp
                    src/Matrix.cpp
                    src/MatrixDialog.cpp
@@ -750,8 +749,21 @@ if ( APPLE )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 
-add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ${INC_FILES} 
-                            ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE}
+add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
+							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE}
+)
+
+
+# Extra, optional target for demoing a GUI element
+add_executable ( SliceViewerDemo ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/Mantid/SliceViewer/main.cpp  
+                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+target_link_libraries ( SliceViewerDemo 
+                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets
+                        QtPropertyBrowser ${QT_LIBRARIES} 
+                        ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
+                        ${QSCINTILLA_LIBRARIES}
+                        ${PYTHON_LIBRARIES}
+                        ${ZLIB_LIBRARIES} 
 )
 
 # Library dependencies
