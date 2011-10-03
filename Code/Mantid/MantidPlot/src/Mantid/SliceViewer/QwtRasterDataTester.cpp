@@ -31,5 +31,5 @@ QwtRasterData* QwtRasterDataTester::copy() const
 
 QwtDoubleInterval QwtRasterDataTester::range() const
 {
-  return QwtDoubleInterval(0.0, 10.0, 0);
+  return QwtDoubleInterval(0.0, 10.0);
 }
