@@ -460,9 +460,6 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 
       // Convert the input unit to time-of-flight
       fromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-
-
-
       // Convert from time-of-flight to the desired unit
       outputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
@@ -474,19 +471,6 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
         fromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
         outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
         eventWS->getEventList(i).setTofs(tofs);
-
-        if (i == 10 || i == 3000 || i == 6000){
-          double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) )
-                                    / PhysicalConstants::h;
-
-          // Now adjustments for the scale of units used
-          const double TOFisinMicroseconds = 1e6;
-          const double toAngstroms = 1e10;
-          factor *= TOFisinMicroseconds / toAngstroms;
-          g_log.notice() << "Number(Events) = " << eventWS->getEventList(i).getNumberEvents() << "  L2 = " << l2 << "  Twotheta = " << twoTheta << std::endl;
-          g_log.notice() << "conversion factor (DIFC) = " << factor << std::endl;
-        }
-
       }
 
     } catch (Exception::NotFoundError&) {
