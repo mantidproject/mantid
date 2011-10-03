@@ -65,7 +65,6 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
-	src/ScriptWriter.cpp
 	src/SpectraAxis.cpp
 	src/SpectraDetectorMap.cpp
 	src/TableRow.cpp
@@ -173,8 +172,6 @@ set ( INC_FILES
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
-	inc/MantidAPI/ScriptWriter.h
-	inc/MantidAPI/ScriptWriterFactory.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
@@ -232,7 +229,6 @@ set ( TEST_FILES
 	test/RunTest.h
 	test/SampleEnvironmentTest.h
 	test/SampleTest.h
-	test/ScriptWriterTest.h
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h

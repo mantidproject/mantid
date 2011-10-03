@@ -7,7 +7,6 @@ set ( SRC_FILES
 	src/MantidVecHelper.cpp
 	src/PyAlgorithmWrapper.cpp
 	src/PythonInterfaceFunctions.cpp
-	src/PythonScriptWriter.cpp
 	src/PythonWrapper.cpp
 	src/WorkspaceProxies.cpp
 	src/api_exports.cpp
@@ -23,7 +22,6 @@ set ( INC_FILES
 	inc/MantidPythonAPI/MantidVecHelper.h
 	inc/MantidPythonAPI/PyAlgorithmWrapper.h
 	inc/MantidPythonAPI/PythonInterfaceFunctions.h
-	inc/MantidPythonAPI/PythonScriptWriter.h
 	inc/MantidPythonAPI/WorkspaceProxies.h
 	inc/MantidPythonAPI/api_exports.h
 	inc/MantidPythonAPI/geometryhelper.h
@@ -38,7 +36,6 @@ set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple.py)
 # cxxtest unit tests
 set ( TEST_FILES
 	test/PythonFrameworkTests.h
-	test/PythonScriptWriterTest.h
 )
 
 # Python unit tests
