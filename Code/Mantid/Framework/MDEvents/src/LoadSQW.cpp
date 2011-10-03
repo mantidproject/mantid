@@ -163,10 +163,11 @@ namespace Mantid
       const size_t column_size = 4; //types stored as either float32 or unsigned integer (both 4byte).
       const size_t column_size_2 = column_size * 2; //offset, gives qz
       const size_t column_size_3 = column_size * 3; //offset, gives en
-      const size_t column_size_4 = column_size * 4; //offset, gives s
-      const size_t column_size_5 = column_size * 5; //offset, gives err
+      const size_t column_size_4 = column_size * 4; //offset, gives idet
+      const size_t column_size_5 = column_size * 5; //offset, gives ien
       const size_t column_size_6 = column_size * 6; //offset, gives irun
-      const size_t column_size_7 = column_size * 7; //offset, gives idet
+      const size_t column_size_7 = column_size * 7; //offset, gives signal
+      const size_t column_size_8 = column_size * 8; //offset, gives error
 
       const size_t pixel_width = ncolumns * column_size;
       const size_t data_buffer_size = pixel_width * m_nDataPoints;
@@ -219,13 +220,12 @@ namespace Mantid
               *(reinterpret_cast<float*>(pData + current_pix + column_size_2)),
               *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
           };
-          float error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
-
+          float error = *reinterpret_cast<float*>(pData + current_pix + column_size_8);
           ws->addEvent(MDEvent<4>( 
-            *reinterpret_cast<float*>(pData + current_pix + column_size_4),     // Signal
+            *reinterpret_cast<float*>(pData + current_pix + column_size_7),     // Signal
             error*error,                                                        // Error sq 
             *reinterpret_cast<uint16_t*>(pData + current_pix + column_size_6),  // run Index
-            *reinterpret_cast<uint32_t*>(pData + current_pix + column_size_7),  // Detector Id
+            *reinterpret_cast<uint32_t*>(pData + current_pix + column_size_4),  // Detector Id
             centers));
         }
 
