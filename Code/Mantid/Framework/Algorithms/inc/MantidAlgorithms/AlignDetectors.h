@@ -73,7 +73,7 @@ public:
 
   // ----- Useful static functions ------
   static std::map<detid_t, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-      Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, bool vulcancorrection);
+      Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -83,6 +83,8 @@ private:
   void exec();
 
   void execEvent();
+
+  void execTOFEvent(std::string calfilename, Mantid::API::MatrixWorkspace_const_sptr inputWS);
 
   /// Pointer for an event workspace
   Mantid::DataObjects::EventWorkspace_const_sptr eventW;

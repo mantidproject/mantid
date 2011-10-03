@@ -232,7 +232,7 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
 
   std::map<detid_t,double> offsets; // just an empty offsets map
   double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
-                                     m_instrument, detNumbers, offsets, false);
+                                     m_instrument, detNumbers, offsets);
 
   // this is related to the reference tof
   double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);

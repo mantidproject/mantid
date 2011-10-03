@@ -113,7 +113,7 @@ namespace DataHandling
       if (it != allDetectors.end())
       {
         det = it->second;
-        factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0), false);
+        factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0));
         //Factor of 10 between ISAW and Mantid
         factor *= 0.1 ;
         if(factor<0)factor = 0.0;

@@ -181,8 +181,7 @@ namespace Mantid
 
       // ----- Useful static functions ------
       static double calcConversion(const double l1, const Kernel::V3D &beamline, const double beamline_norm,
-          const Kernel::V3D &samplePos, const IDetector_const_sptr &det, const double offset,
-          bool vulcancorrection);
+          const Kernel::V3D &samplePos, const IDetector_const_sptr &det, const double offset);
 
       static double calcConversion(const double l1,
                             const Kernel::V3D &beamline,
@@ -190,8 +189,7 @@ namespace Mantid
                             const Kernel::V3D &samplePos,
                             const boost::shared_ptr<const Instrument> &instrument,
                             const std::vector<detid_t> &detectors,
-                            const std::map<detid_t,double> &offsets,
-                            bool vulcancorrection);
+                            const std::map<detid_t,double> &offsets);
 
       void getInstrumentParameters(double & l1, Kernel::V3D & beamline,
           double & beamline_norm, Kernel::V3D & samplePos) const;

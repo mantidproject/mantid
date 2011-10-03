@@ -762,7 +762,7 @@ namespace Mantid
     const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
     //-----------------------------------------------------------------------
-    /** Calculate the conversion factor (tof -> d-spacing) for a single pixel.
+    /** Calculate the conversion factor (tof -> d-spacing) for a single pixel, i.e., 1/DIFC for that pixel.
      *
      * @param l1 :: Primary flight path.
      * @param beamline: vector = samplePos-sourcePos = a vector pointing from the source to the sample,
@@ -779,8 +779,7 @@ namespace Mantid
                           const double beamline_norm,
                           const Kernel::V3D &samplePos,
                           const IDetector_const_sptr &det,
-                          const double offset,
-                          bool vulcancorrection)
+                          const double offset)
     {
       if (offset <= -1.) // not physically possible, means result is negative d-spacing
       {
@@ -793,14 +792,7 @@ namespace Mantid
 
       // The scattering angle for this detector (in radians).
       Kernel::V3D detPos;
-      if (vulcancorrection)
-      {
-        detPos = det->getParent()->getPos();
-      }
-      else
-      {
-        detPos = det->getPos();
-      }
+      detPos = det->getPos();
 
       // Now detPos will be set with respect to samplePos
       detPos -= samplePos;
@@ -825,8 +817,7 @@ namespace Mantid
                           const Kernel::V3D &samplePos,
                           const Instrument_const_sptr &instrument,
                           const std::vector<detid_t> &detectors,
-                          const std::map<detid_t,double> &offsets,
-                          bool vulcancorrection)
+                          const std::map<detid_t,double> &offsets)
     {
       double factor = 0.;
       double offset;
@@ -842,7 +833,7 @@ namespace Mantid
           offset = 0.;
         }
         factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                                 instrument->getDetector(*iter), offset, vulcancorrection);
+                                 instrument->getDetector(*iter), offset);
       }
       return factor / static_cast<double>(detectors.size());
     }

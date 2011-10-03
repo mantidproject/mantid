@@ -273,7 +273,7 @@ namespace Mantid
       Progress prog(this, 0.0, 1.0, numsteps);
 
       //Set up the tof-to-d_spacing map for all pixel ids.
-      this->tof_to_d = Mantid::Algorithms::AlignDetectors::calcTofToD_ConversionMap(inputW, offsetsWS, false);
+      this->tof_to_d = Mantid::Algorithms::AlignDetectors::calcTofToD_ConversionMap(inputW, offsetsWS);
 
       // Set the final unit that our output workspace will have
       outputW->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
