@@ -754,18 +754,6 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 )
 
 
-# Extra, optional target for demoing a GUI element
-add_executable ( SliceViewerDemo ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/Mantid/SliceViewer/main.cpp  
-                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( SliceViewerDemo 
-                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets
-                        QtPropertyBrowser ${QT_LIBRARIES} 
-                        ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
-                        ${QSCINTILLA_LIBRARIES}
-                        ${PYTHON_LIBRARIES}
-                        ${ZLIB_LIBRARIES} 
-)
-
 # Library dependencies
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets
@@ -775,6 +763,24 @@ target_link_libraries ( MantidPlot
                         ${PYTHON_LIBRARIES}
                         ${ZLIB_LIBRARIES} 
 )
+
+
+
+
+if ( WIN32 )
+else ()
+	# Extra, optional target for demoing a GUI element
+	add_executable ( SliceViewerDemo ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/Mantid/SliceViewer/main.cpp  
+	                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+	target_link_libraries ( SliceViewerDemo 
+	                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets
+	                        QtPropertyBrowser ${QT_LIBRARIES} 
+	                        ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
+	                        ${QSCINTILLA_LIBRARIES}
+	                        ${PYTHON_LIBRARIES}
+	                        ${ZLIB_LIBRARIES} 
+	)
+endif ()
 
 ###########################################################################
 # Entry point flag for Windows to ensure we always link to standard main 
