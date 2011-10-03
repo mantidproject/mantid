@@ -175,6 +175,8 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/SliceViewer/SliceViewer.cpp
+                   src/Mantid/SliceViewer/SliceViewer.cpp
+                   src/Mantid/SliceViewer/DimensionSliceWidget.cpp
                    src/Mantid/SliceViewer/QwtRasterDataTester.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
@@ -389,6 +391,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/SliceViewer/SliceViewer.h
                    src/Mantid/SliceViewer/QwtRasterDataTester.h
+                   src/Mantid/SliceViewer/DimensionSliceWidget.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
@@ -649,6 +652,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/SliceViewer/SliceViewer.h
+               			src/Mantid/SliceViewer/DimensionSliceWidget.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
@@ -674,6 +678,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/SliceViewer/SliceViewer.ui
+               src/Mantid/SliceViewer/DimensionSliceWidget.ui
 )
 
 # Create Vates configuration file

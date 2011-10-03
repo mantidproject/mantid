@@ -20,7 +20,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 	m_spect = new QwtPlotSpectrogram();
 	m_spect->attach(m_plot);
 
-	m_data = new QwtRasterDataTester(1,1);
+	m_data = new QwtRasterDataTester();
 	m_spect->setData(*m_data);
 	m_spect->setColorMap(QwtLinearColorMap(Qt::black, Qt::white));
 	m_spect->itemChanged();
