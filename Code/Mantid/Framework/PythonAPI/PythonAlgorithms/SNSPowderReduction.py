@@ -142,6 +142,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("FilterMaximumValue", 0.0, Description="Maximum log value for which to keep events.")
         self.declareProperty("SaveAs", "gsas", ListValidator(outfiletypes))
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
+        self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
 
     def _findData(self, runnumber, extension):
         #self.log().information(str(dir()))
@@ -305,11 +306,7 @@ class SNSPowderReduction(PythonAlgorithm):
         if len(cropkwargs) > 0:
             CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
-        if self._instrument == "VULCAN":
-            AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets",
-                    VULCANDspacemapFile=True)
-        else: 
-            AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
+        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
         if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
@@ -427,6 +424,7 @@ class SNSPowderReduction(PythonAlgorithm):
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
         preserveEvents = self.getProperty("PreserveEvents")
+        normbycurrent = self.getProperty("NormalizeByCurrent")
 
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
 
@@ -436,7 +434,7 @@ class SNSPowderReduction(PythonAlgorithm):
             for temp in samRuns:
                 temp = self._loadData(temp, SUFFIX, filterWall)
                 tempinfo = self._getinfo(temp)
-                temp = self._focus(temp, calib, tempinfo, filterLogs, preserveEvents=preserveEvents)
+                temp = self._focus(temp, calib, tempinfo, filterLogs, preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 if samRun is None:
                     samRun = temp
                     info = tempinfo
@@ -459,7 +457,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if not self.getProperty("Sum"):
                 samRun = self._loadData(samRun, SUFFIX, filterWall)
                 info = self._getinfo(samRun)
-                samRun = self._focus(samRun, calib, info, filterLogs, preserveEvents=preserveEvents)
+                samRun = self._focus(samRun, calib, info, filterLogs, preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 workspacelist.append(str(samRun))
 
             # process the container
