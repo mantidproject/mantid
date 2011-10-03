@@ -1340,8 +1340,8 @@ class ConvertToQ(ReductionStep):
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
 
-        #the last term maintains compatibility with the original Qxy, remove when it is fixed
-        if self.prenorm or (self._Q_alg == 'Qxy'):
+        # If some prenormalization flag is set - normalize data with wave_adj and pixel_adj
+        if self.prenorm:
             data = mtd[workspace]
             if wave_adj:
                 data /= mtd[wave_adj]
@@ -1355,7 +1355,7 @@ class ConvertToQ(ReductionStep):
                 Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut/1000., WaveCut=self.w_cut)
     
             elif self._Q_alg == 'Qxy':
-                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
+                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut/1000., WaveCut=self.w_cut)
                 ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
