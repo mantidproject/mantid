@@ -32,7 +32,11 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QSignalMapper;
 class QSortFilterProxyModel;
-enum MantidItemSortScheme;
+
+enum MantidItemSortScheme
+{
+  ByName, ByLastModified
+};
 
 class MantidDockWidget: public QDockWidget
 {
@@ -113,13 +117,7 @@ private:
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecDistr, *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_colorFill, *m_showLogs, *m_showHist,
     *m_saveNexus, *m_rename, *m_delete, *m_program, * m_ascendingSortAction, * m_descendingSortAction, * m_byNameChoice, * m_byLastModifiedChoice;
 
-  MantidItemSortScheme m_sortScheme;
   static Mantid::Kernel::Logger& logObject;
-};
-
-enum MantidItemSortScheme
-{
-  ByName, ByLastModified
 };
 
 class MantidTreeWidget:public QTreeWidget

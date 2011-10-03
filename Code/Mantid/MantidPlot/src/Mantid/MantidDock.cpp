@@ -127,8 +127,6 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   m_sortMenu->addMenu(m_choiceMenu);
   m_choiceMenu->addActions(m_sortChoiceGroup->actions());
   m_sortButton->setMenu(m_sortMenu);
-  // Set m_sortScheme to be ByName by default:
-  m_sortScheme = ByName;
   createWorkspaceMenuActions();
 
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
@@ -957,7 +955,7 @@ void MantidDockWidget::chooseByLastModified()
 
 void MantidDockWidget::excludeItemFromSort(MantidTreeWidgetItem *item)
 {
-  static size_t counter = 0;
+  static int counter = 0;
 
   item->setData(0,Qt::UserRole, counter);
 
