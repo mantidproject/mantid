@@ -98,10 +98,10 @@ void Qxy::exec()
   // Set the progress bar (1 update for every one percent increase in progress)
   Progress prog(this, 0.05, 1.0, numSpec);
 
-  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
+//  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int64_t i = 0; i < int64_t(numSpec); ++i)
   {
-    PARALLEL_START_INTERUPT_REGION
+//    PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
     IDetector_const_sptr det;
     try {
@@ -166,7 +166,7 @@ void Qxy::exec()
     }
 
     
-    for (int j = static_cast<int>(numBins)-1; j >= wavStart; --j)
+    for (int j = static_cast<int>(numBins)-1; j >= static_cast<int>(wavStart); --j)
     {
       const double binWidth = X[j+1]-X[j];
       // Calculate the wavelength at the mid-point of this bin
@@ -191,7 +191,7 @@ void Qxy::exec()
       const MantidVec::difference_type xIndex = std::upper_bound(axis.begin(),axis.end(),Qx) - axis.begin() - 1;
       const int yIndex = static_cast<int>(
         std::upper_bound(axis.begin(),axis.end(),Qy) - axis.begin() - 1);
-      PARALLEL_CRITICAL(qxy)    /* Write to shared memory - must protect */
+//      PARALLEL_CRITICAL(qxy)    /* Write to shared memory - must protect */
       {
         // the data will be copied to this bin in the output array
         double & outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
@@ -227,11 +227,11 @@ void Qxy::exec()
 
         if (pixelAdj && waveAdj)
         {
-          weights->dataY(yIndex)[xIndex] += weight*pixelAdj->readY(i)[0]*waveAdj->readDx(j)[0];
+          weights->dataY(yIndex)[xIndex] += weight*pixelAdj->readY(i)[0]*waveAdj->readY(0)[j];
           const double pixelYSq = pixelAdj->readY(i)[0]*pixelAdj->readY(i)[0];
           const double pixelESq = pixelAdj->readE(i)[0]*pixelAdj->readE(i)[0]; 
-          const double waveYSq = waveAdj->readY(j)[0]*waveAdj->readY(j)[0];
-          const double waveESq = waveAdj->readE(j)[0]*waveAdj->readE(j)[0];
+          const double waveYSq = waveAdj->readY(0)[j]*waveAdj->readY(0)[j];
+          const double waveESq = waveAdj->readE(0)[j]*waveAdj->readE(0)[j];
           // add product of errors from pixelAdj and waveAdj       
           weights->dataE(yIndex)[xIndex] += sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex] 
                    + weight*weight*(waveESq*pixelYSq + pixelESq*waveYSq) );
@@ -247,8 +247,8 @@ void Qxy::exec()
         }
         else if(waveAdj)
         {
-          weights->dataY(yIndex)[xIndex] += weight*waveAdj->readDx(j)[0];
-          const double waveE = weight*waveAdj->readDx(j)[0]; 
+          weights->dataY(yIndex)[xIndex] += weight*waveAdj->readY(0)[j];
+          const double waveE = weight*waveAdj->readE(0)[j]; 
           // add error from waveAdj
           weights->dataE(yIndex)[xIndex] += 
                   sqrt( weights->dataE(yIndex)[xIndex]*weights->dataE(yIndex)[xIndex]
@@ -263,9 +263,9 @@ void Qxy::exec()
     
     prog.report("Calculating Q");
 
-    PARALLEL_END_INTERUPT_REGION
+//    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+//  PARALLEL_CHECK_INTERUPT_REGION
 
   // Divide the output data by the solid angles
   outputWorkspace /= weights;

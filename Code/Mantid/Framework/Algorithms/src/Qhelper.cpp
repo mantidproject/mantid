@@ -32,7 +32,6 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
      API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj)
 {
   if ( dataWS->getNumberHistograms() < 1 )
-  if ( dataWS->getNumberHistograms() < 1 )
   {
     throw std::invalid_argument("Empty data workspace passed, can not continue");
   }
