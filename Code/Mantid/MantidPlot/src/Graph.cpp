@@ -1035,7 +1035,9 @@ void Graph::setAutoScale()
     }
   }
   d_plot->replot();
+  
   updateScale();
+  
   for (int i = 0; i < QwtPlot::axisCnt; i++)
   {
     if ( !m_fixed_axes.contains(i) && isLog(QwtPlot::Axis(i)) )
@@ -3447,7 +3449,6 @@ void Graph::updateScale()
   d_plot->replot();//TODO: avoid 2nd replot!
   d_zoomer[0]->setZoomBase();
   //	d_zoomer[1]->setZoomBase();
-
 }
 
 void Graph::setBarsGap(int curve, int gapPercent, int offset)
@@ -5707,4 +5708,33 @@ void Graph::updateDataCurves()
   }
   replot();
   QApplication::restoreOverrideCursor();
+}
+
+void Graph::checkValuesInAxisRange(MantidCurve* mc)
+{
+  MantidQwtData* data = mc->mantidData();
+  double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
+  double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
+  bool changed(false);
+  for (size_t i = 1; i<data->size(); ++i)
+  {
+    // Sort X
+    if(data->x(i) < xMin)
+    {
+      xMin = data->x(i);
+      changed = true;
+    }
+    else if (data->x(i) > xMax)
+    {
+      xMax = data->x(i);
+      changed = true;
+    }
+  }
+
+  // If there were values outside the range of the axis then update the axis with the new positions.
+  if(changed)
+  {
+    d_plot->setAxisScale(QwtPlot::Axis(QwtPlot::xTop), xMin, xMax);
+    d_plot->setAxisScale(QwtPlot::Axis(QwtPlot::xBottom), xMin, xMax);
+  }
 }

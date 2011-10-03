@@ -111,7 +111,6 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   const bool log = g->isLog(QwtPlot::yLeft);
   MantidQwtData data(workspace,index, log,distr);
   setData(data);
-
   Mantid::API::Axis* ax = workspace->getAxis(0);
   if (ax->unit())
   {
@@ -131,7 +130,6 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   {
     m_yUnits.reset(new Mantid::Kernel::Units::Empty());
   }
-
   int lineWidth = 1;
   MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
   if (ml && ml->applicationWindow()->applyCurveStyleToMantid)
@@ -175,7 +173,6 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   {
     g->insertCurve(this,lineWidth);
   }
-
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
 }
 

@@ -2605,14 +2605,15 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   Graph *g = ml->activeGraph();
   if (!g)
     return 0;
-
-  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
+  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
   appWindow()->setPreferences(g);
   g->newLegend("");
+  MantidCurve* mc(NULL);
+
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      MantidCurve* mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
+      mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
       UNUSED_ARG(mc)
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
@@ -2625,13 +2626,13 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
       logMessage(Poco::Message("MantidPlot",ex.what(),Poco::Message::PRIO_WARNING));
     }
   }
+
   // If no spectra have been plotted, close the window (unfortunately it will flash up briefly)
   if ( g->curves() == 0 )
   {
     ml->close();
     return NULL;
   }
-
   Mantid::API::MatrixWorkspace_sptr workspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(
           AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString())
@@ -2669,6 +2670,9 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   g->setYAxisTitle(tr(yTitle.c_str()));
   g->setAntialiasing(false);
   g->setAutoScale();
+
+  g->checkValuesInAxisRange(mc);
+
   //setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 }
@@ -3125,3 +3129,5 @@ void MantidUI::test()
   }
   std::cerr<<"Failed...\n";
 }
+
+

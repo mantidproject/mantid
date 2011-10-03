@@ -563,6 +563,9 @@ public slots:
 
   QString axisFormula(int axis);
   void setAxisFormula(int axis, const QString &);
+  
+  void checkValuesInAxisRange(MantidCurve* mc);
+  
   //@}
 
   //! \name Canvas Frame
@@ -785,7 +788,6 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
-  
 	
   Plot *d_plot;
   QwtPlotZoomer *d_zoomer[2];
