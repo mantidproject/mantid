@@ -6,6 +6,7 @@
 #include <QtGui/qdialog.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot.h>
+#include <qwt_raster_data.h>
 
 class SliceViewer : public QWidget
 {
@@ -30,6 +31,10 @@ private:
 
   /// Layout containing the spectrogram
   QVBoxLayout * m_spectLayout;
+
+  /// Data to be shown
+  QwtRasterData * m_data;
+
 
 };
 

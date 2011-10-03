@@ -175,6 +175,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/SliceViewer/SliceViewer.cpp
+                   src/Mantid/SliceViewer/QwtRasterDataTester.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -387,6 +388,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/SliceViewer/SliceViewer.h
+                   src/Mantid/SliceViewer/QwtRasterDataTester.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
