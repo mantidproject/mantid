@@ -7,6 +7,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/V3D.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  * 
@@ -69,11 +72,11 @@ void AnvredCorrection::init()
 {
   // The input workspace must have an instrument and units of wavelength
   CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
+  //wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
   wsValidator->add(new InstrumentValidator<>());
 
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,wsValidator),
-    "The X values for the input workspace must be in units of wavelength");
+    "The X values for the input workspace must be in units of wavelength or TOF");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");
    declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
@@ -101,6 +104,7 @@ void AnvredCorrection::exec()
 {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
+  std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
 
   // Get the input parameters
   retrieveBaseProperties();
@@ -127,6 +131,8 @@ void AnvredCorrection::exec()
 
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos()-samplePos;
+  double L1 = pos.norm();
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
@@ -162,13 +168,21 @@ void AnvredCorrection::exec()
     // This is the scattered beam direction
     Instrument_const_sptr inst = m_inputWS->getInstrument();
     V3D dir = det->getPos() - samplePos;
+    double L2 = dir.norm();
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
+
+    Mantid::Kernel::Units::Wavelength wl;
+    std::vector<double> timeflight;
 
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++)
     {
-      const double lambda = (isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]);
+      timeflight.push_back((isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]));
+      if (unitStr.compare("TOF") == 0)
+        wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
+      const double lambda = timeflight[0];
+      timeflight.clear();
 
       if (transOnly)
       {
@@ -204,6 +218,7 @@ void AnvredCorrection::execEvent()
 {
 
   const int64_t numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   //Create a new outputworkspace with not much in it
   DataObjects::EventWorkspace_sptr correctionFactors;
   correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -217,6 +232,8 @@ void AnvredCorrection::execEvent()
 
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos()-samplePos;
+  double L1 = pos.norm();
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
@@ -246,6 +263,7 @@ void AnvredCorrection::execEvent()
     // This is the scattered beam direction
     Instrument_const_sptr inst = eventW->getInstrument();
     V3D dir = det->getPos() - samplePos;
+    double L2 = dir.norm();
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
 
@@ -256,11 +274,17 @@ void AnvredCorrection::execEvent()
     std::vector<WeightedEventNoTime>::iterator itev;
     std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
 
+    Mantid::Kernel::Units::Wavelength wl;
+    std::vector<double> timeflight;
+
     // multiplying an event list by a scalar value
     for (itev = events.begin(); itev != itev_end; itev++)
     {
-      const double lambda = itev->tof();
-      double value = this->getEventWeight(lambda, scattering);
+      timeflight.push_back(itev->tof());
+      if (unitStr.compare("TOF") == 0)
+        wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
+      double value = this->getEventWeight(timeflight[0], scattering);
+      timeflight.clear();
       itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
       itev->m_weight *= static_cast<float>(value);
     }
