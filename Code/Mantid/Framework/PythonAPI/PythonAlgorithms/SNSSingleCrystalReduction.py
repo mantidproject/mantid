@@ -70,6 +70,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=0, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
+        #DiffractionEventReadDetCal(InputWorkspace=wksp,Filename="TOPAZ_8Sept11.DetCal")
         #Normalise by sum of counts in upstream monitor
         Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
         mtd.deleteWorkspace(str(name)+'_monitors')
@@ -287,14 +288,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 #Remove data at edges of rectangular detectors
                 SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
                     AdjX=0, AdjY=0, ZeroEdgePixels=20)
-                #Anvred corrections need units of wavelength
+                #Anvred corrections converts from TOF to Wavelength now.
                 if self._radius > 0:
-                    SortEvents(InputWorkspace=samRun, SortBy="X Value")
-                    ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='Wavelength')
                     AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
                         LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,PowerLambda=self._powlam)
-                    ConvertUnits(InputWorkspace=samRun,OutputWorkspace=samRun,Target='TOF')
-                    SortEvents(InputWorkspace=samRun, SortBy="X Value")
 
                 if bank is "bank17":
                     samRunstr = str(samRun)
