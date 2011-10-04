@@ -1063,7 +1063,7 @@ namespace Mantid
     bool LoadRawHelper::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       std::string extn=extension(filePath);
-      bool braw = (!extn.compare("raw")||!extn.compare("add")||extn[0]=='s') ? true : false;
+      bool braw = (!extn.compare("raw")||!extn.compare("add")||(extn.length() > 0 && extn[0]=='s')) ? true : false;
       if( isRawFileHeader(static_cast<int>(nread), header.full_hdr) || braw )
       {
               return true;

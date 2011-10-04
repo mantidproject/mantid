@@ -197,6 +197,12 @@ namespace MantidQt
         m_form.propertyLayout->setEnabled(true);
         m_form.propertyLayout->activate();
         this->resize(this->width(), m_initialHeight + 15);
+        
+        // Reset the algorithm pointer so that the base class re-reads the properties and drops links from
+        // old widgets meaning they are safe to remove
+        setAlgorithm(loadAlg);
+        tieStaticWidgets(false); //The ties are cleared when resetting the algorithm
+
         return;
       }
       // Reset the algorithm pointer so that the base class re-reads the properties and drops links from
