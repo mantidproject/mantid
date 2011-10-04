@@ -1,4 +1,7 @@
-  <instrument name="Polaris_upgrade"
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="Polaris_upgrade"
               valid-from="2011-01-01 01:01:01"
               valid-to="2099-12-31 23:59:59"
               last-modified="2011-10-04T13:38:18">
