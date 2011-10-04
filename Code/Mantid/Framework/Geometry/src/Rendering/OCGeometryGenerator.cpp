@@ -129,14 +129,19 @@ namespace Mantid
     {
       TopoDS_Shape left=AnalyzeRule(rule->leaf(0));
       TopoDS_Shape right=AnalyzeRule(rule->leaf(1));
-      TopoDS_Shape Result=BRepAlgoAPI_Common(left,right);
+      //TopoDS_Shape Result=BRepAlgoAPI_Common(left,right);
+      BRepAlgoAPI_Common comm(left,right);
+      TopoDS_Shape Result=comm.Shape();
+      //std::cerr << "Intersection status " << comm.ErrorStatus() << std::endl;
       return Result;
     }
     TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Union* rule)
     {
       TopoDS_Shape left=AnalyzeRule(rule->leaf(0));
       TopoDS_Shape right=AnalyzeRule(rule->leaf(1));
-      TopoDS_Shape Result=BRepAlgoAPI_Fuse(left,right);
+      //TopoDS_Shape Result=BRepAlgoAPI_Fuse(left,right);
+      BRepAlgoAPI_Fuse fuse(left,right);
+      TopoDS_Shape Result=fuse.Shape();
       return Result;
     }
     TopoDS_Shape OCGeometryGenerator::AnalyzeRule(SurfPoint* rule)
@@ -249,9 +254,14 @@ namespace Mantid
     {
       //Get Plane normal and distance.
       V3D normal= plane->getNormal();
+      double norm2 = normal.norm2();
+      if (norm2 == 0.0)
+      {
+        throw std::runtime_error("Cannot create a plane with zero normal");
+      }
       double distance=plane->getDistance();
       //Find point closest to origin
-      double t=distance/normal.norm2();
+      double t=distance/norm2;
       //Create Half Space
       TopoDS_Shape Result;
       if(orientation>0){

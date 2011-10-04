@@ -34,7 +34,7 @@ namespace Mantid
     *  Default constuctor
     */
     Object::Object() :
-      ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+    ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
       vtkGeometryCacheWriter>())
@@ -47,7 +47,7 @@ namespace Mantid
     *  @param shapeXML : string with original shape xml.
     */
     Object::Object(const std::string& shapeXML) :
-      ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+    ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
       vtkGeometryCacheWriter>()), m_shapeXML(shapeXML)
@@ -56,11 +56,11 @@ namespace Mantid
     }
 
     /**
-     * Copy constructor
-     * @param A :: The object to initialise this copy from
-     */
+    * Copy constructor
+    * @param A :: The object to initialise this copy from
+    */
     Object::Object(const Object& A) :
-      ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), m_boundingBox(A.m_boundingBox),
+    ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : NULL), m_boundingBox(A.m_boundingBox),
       AABBxMax(A.AABBxMax), AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin), 
       AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded), 
       bGeometryCaching(A.bGeometryCaching), vtkCacheReader(A.vtkCacheReader),
@@ -114,31 +114,31 @@ namespace Mantid
     }
 
     /**
-     * Destructor
-     * Deletes the rule
-     */
-     Object::~Object()
+    * Destructor
+    * Deletes the rule
+    */
+    Object::~Object()
     {
       delete TopRule;
     }
 
     /**
-     * Returns whether this object has a valid shape
-     * @returns True if the surface list is populated and there is a 
-     * defined TopRule, false otherwise.
-     */
+    * Returns whether this object has a valid shape
+    * @returns True if the surface list is populated and there is a 
+    * defined TopRule, false otherwise.
+    */
     bool Object::hasValidShape() const
     {
       // Assume invalid shape if object has no 'TopRule' or surfaces
       return (TopRule != NULL && !SurList.empty());
     }
 
-     /**
-     * Object line ==  cell
-     * @param ON :: Object name
-     * @param Ln :: Input string must be :  {rules}
-     * @returns 1 on success and zero on failure
-     */
+    /**
+    * Object line ==  cell
+    * @param ON :: Object name
+    * @param Ln :: Input string must be :  {rules}
+    * @returns 1 on success and zero on failure
+    */
     int Object::setObject(const int ON, const std::string& Ln)
     {
       // Split line
@@ -209,14 +209,14 @@ namespace Mantid
     }
 
     /*
-     * Calcluate if there are any complementary components in
-     * the object. That is lines with #(....)
-     * @throw ColErr::ExBase :: Error with processing
-     * @param Ln :: Input string must:  ID Mat {Density}  {rules}
-     * @param Cnum :: Number for cell since we don't have one
-     * @retval 0 on no work to do
-     * @retval 1 :: A (maybe there are many) #(...) object found
-     */
+    * Calcluate if there are any complementary components in
+    * the object. That is lines with #(....)
+    * @throw ColErr::ExBase :: Error with processing
+    * @param Ln :: Input string must:  ID Mat {Density}  {rules}
+    * @param Cnum :: Number for cell since we don't have one
+    * @retval 0 on no work to do
+    * @retval 1 :: A (maybe there are many) #(...) object found
+    */
     int Object::complementaryObject(const int Cnum, std::string& Ln)
     {
       std::string::size_type posA = Ln.find("#(");
@@ -258,10 +258,10 @@ namespace Mantid
     }
 
     /**
-     * Determine if the object has a complementary object
-     * @retval 1 :: true
-     * @retval 0 :: false
-     */
+    * Determine if the object has a complementary object
+    * @retval 1 :: true
+    * @retval 0 :: false
+    */
     int Object::hasComplement() const
     {
 
@@ -487,12 +487,12 @@ namespace Mantid
         return false;
       return TopRule->isValid(Pt);
     }
-    
+
     /**
-     * Determines is group of surface maps are valid
-     * @param SMap :: map of SurfaceNumber : status
-     * @returns 1 if true and 0 if false
-     */
+    * Determines is group of surface maps are valid
+    * @param SMap :: map of SurfaceNumber : status
+    * @returns 1 if true and 0 if false
+    */
     bool Object::isValid(const std::map<int, int>& SMap) const
     {
       if (!TopRule)
@@ -638,7 +638,7 @@ namespace Mantid
     }
 
     /**
-     * Takes the complement of a group
+    * Takes the complement of a group
     */
     void Object::makeComplement() 
     {
@@ -648,8 +648,8 @@ namespace Mantid
     }
 
     /**
-     * Displays the rule tree
-     */
+    * Displays the rule tree
+    */
     void Object::printTree() const
     {
       std::cout << "Name == " << ObjName << std::endl;
@@ -671,10 +671,10 @@ namespace Mantid
     }
 
     /**
-     * Write the object to a string.
-     * This includes the Name but not post-fix operators
-     * @return Object Line
-     */
+    * Write the object to a string.
+    * This includes the Name but not post-fix operators
+    * @return Object Line
+    */
     std::string Object::str() const
     {
       std::ostringstream cx;
@@ -685,7 +685,7 @@ namespace Mantid
       }
       return cx.str();
     }
-    
+
     /**
     * Write the object to a standard stream
     * in standard MCNPX output format.
@@ -701,11 +701,11 @@ namespace Mantid
     }
 
     /**
-     * Processes the cell string. This is an internal function
-     * to process a string with - String type has #( and ( )
-     * @param Line :: String value
-     * @returns 1 on success
-     */
+    * Processes the cell string. This is an internal function
+    * to process a string with - String type has #( and ( )
+    * @param Line :: String value
+    * @returns 1 on success
+    */
     int Object::procString(const std::string& Line)
     {
       delete TopRule;
@@ -796,9 +796,9 @@ namespace Mantid
     }
 
     /**
-     * Given a track, fill the track with valid section
-     * @param UT :: Initial track
-     * @return Number of segments added
+    * Given a track, fill the track with valid section
+    * @param UT :: Initial track
+    * @return Number of segments added
     */
     int Object::interceptSurface(Geometry::Track& UT) const
     {
@@ -862,13 +862,13 @@ namespace Mantid
     }
 
     /**
-     * Find solid angle of object wrt the observer with a scaleFactor for the object.
-     * @param observer :: point to measure solid angle from
-     * @param scaleFactor :: V3D giving scaling of the object
-     * @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
-     */
+    * Find solid angle of object wrt the observer with a scaleFactor for the object.
+    * @param observer :: point to measure solid angle from
+    * @param scaleFactor :: V3D giving scaling of the object
+    * @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
+    */
     double Object::solidAngle(const Kernel::V3D& observer, const Kernel::V3D& scaleFactor) const
-      
+
     {
       return triangleSolidAngle(observer, scaleFactor);
     }
@@ -1062,40 +1062,40 @@ namespace Mantid
       int nTri = this->NumberOfTriangles();
       // Cylinders are by far the most frequently used
       if (type == 3)
-	return CylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+        return CylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
       else if (type == 1)
-	return CuboidSolidAngle(observer, geometry_vectors);
+        return CuboidSolidAngle(observer, geometry_vectors);
       else if (type == 2)
-	return SphereSolidAngle(observer, geometry_vectors, radius);
+        return SphereSolidAngle(observer, geometry_vectors, radius);
       else if (type == 4)
-	return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+        return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
       else if( nTri == 0 ) // Fall back to raytracing if there are no triangles
       {
-	return rayTraceSolidAngle(observer);
+        return rayTraceSolidAngle(observer);
       }
       // Compute a generic shape that has been triangulated
       else
       {
-	double* vertices = this->getTriangleVertices();
-	int *faces = this->getTriangleFaces();
-	double sangle(0.0), sneg(0.0);
-	for (int i = 0; i < nTri; i++)
-	{
-	  int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
-	  V3D vp1 = V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
-	  V3D vp2 = V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
-	  V3D vp3 = V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
-	  double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
-	  if (sa > 0.0)
-	  {
-	    sangle += sa;
-	  }
-	  else
-	  {
-	    sneg += sa;
-	  }
-	}
-	return 0.5 * (sangle - sneg);
+        double* vertices = this->getTriangleVertices();
+        int *faces = this->getTriangleFaces();
+        double sangle(0.0), sneg(0.0);
+        for (int i = 0; i < nTri; i++)
+        {
+          int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
+          V3D vp1 = V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
+          V3D vp2 = V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
+          V3D vp3 = V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
+          double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
+          if (sa > 0.0)
+          {
+            sangle += sa;
+          }
+          else
+          {
+            sneg += sa;
+          }
+        }
+        return 0.5 * (sangle - sneg);
       }
     }
     /**
@@ -1311,13 +1311,13 @@ namespace Mantid
 
         for (int sl = 0; sl < nslices; ++sl)
         {
-	  double x = radius * std::cos(angle_step * sl);
-	  double y = radius * std::sin(angle_step * sl);
-	  Kernel::V3D pt1 = Kernel::V3D(x,y,z0);
+          double x = radius * std::cos(angle_step * sl);
+          double y = radius * std::sin(angle_step * sl);
+          Kernel::V3D pt1 = Kernel::V3D(x,y,z0);
           Kernel::V3D pt2 = Kernel::V3D(x,y,z1);
-	  int vertex = (sl+1) % nslices;
-	  x = radius * std::cos(angle_step * vertex);
-	  y = radius * std::sin(angle_step * vertex);
+          int vertex = (sl+1) % nslices;
+          x = radius * std::cos(angle_step * vertex);
+          y = radius * std::sin(angle_step * vertex);
           Kernel::V3D pt3 = Kernel::V3D(x,y,z0);
           Kernel::V3D pt4 = Kernel::V3D(x,y,z1);
           // Rotations
@@ -1518,7 +1518,7 @@ namespace Mantid
       if( !TopRule )
       {
         // If we don't know the extent of the object, the bounding box doesn't mean anything
-	const_cast<Object*>(this)->setNullBoundingBox();
+        const_cast<Object*>(this)->setNullBoundingBox();
       }
       else if( m_boundingBox.isNull() )
       {
@@ -1528,17 +1528,27 @@ namespace Mantid
         TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
         //If the object is not axis aligned then the bounding box will be poor, in particular the minima are left at the trial start so return 
         // a null object here
+        if (minX < -100 || maxX > 100 || minY < -100 || maxY > 100 || minZ < -100 || maxZ > 100)
+        {
+          //std::cerr << this->getName() << '(' << minX << ',' << maxX << ") (" << minY << ',' << maxY << ") (" << minZ << ',' << maxZ << ")\n";
+          minX = -100;
+          maxX = 100;
+          minY = -100;
+          maxY = 100;
+          minZ = -100;
+          maxZ = 100;
+        }
         if( minX == -big || minY == -big || minZ == -big )
         {
-	  const_cast<Object*>(this)->setNullBoundingBox();
+          const_cast<Object*>(this)->setNullBoundingBox();
         }
-	else
-	{
-	  const_cast<Object*>(this)->defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-	}
+        else
+        {
+          const_cast<Object*>(this)->defineBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+        }
       }
       else {}
-      
+
       return m_boundingBox;
     }
 
@@ -1610,10 +1620,10 @@ namespace Mantid
 
       m_boundingBox = BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin);
     }
-    
+
     /**
-     * Set the bounding box to a null box
-     */
+    * Set the bounding box to a null box
+    */
     void Object::setNullBoundingBox()
     {
       m_boundingBox = BoundingBox();

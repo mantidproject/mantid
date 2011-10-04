@@ -144,6 +144,10 @@ Plane::setPlane(const Kernel::V3D& P,const Kernel::V3D& N)
 {
   NormV=N;
   NormV.normalize();
+  if (NormV.norm2() == 0.0)
+  {
+    throw std::invalid_argument("Attempt to create Plane with zero normal");
+  }
   Dist=P.scalar_prod(NormV);
   setBaseEqn();
   return 0;
@@ -326,6 +330,8 @@ int Plane::LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output){
 	double s1=(NormV[0]*startpt[0]+NormV[1]*startpt[1]+NormV[2]*startpt[2]-Dist)/sprod;
 	if(s1<0||s1>1)return 0;
 	output[0]=startpt[0]+s1*(endpt[0]-startpt[0]);
+  double dp = endpt[1]-startpt[1];
+  double sdp = s1 * dp;
 	output[1]=startpt[1]+s1*(endpt[1]-startpt[1]);
 	output[2]=startpt[2]+s1*(endpt[2]-startpt[2]);
 	return 1;
