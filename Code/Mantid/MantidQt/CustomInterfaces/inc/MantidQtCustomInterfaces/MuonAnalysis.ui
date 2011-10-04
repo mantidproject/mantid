@@ -901,18 +901,24 @@
       <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
         <widget class="QGroupBox" name="groupBox_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
-          <string>Default Plot Style</string>
+          <string>Default Data Plot Style</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_10">
             <property name="text">
              <string>Time axis:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" colspan="2">
+          <item row="1" column="1" colspan="2">
            <widget class="QComboBox" name="timeComboBox">
             <item>
              <property name="text">
@@ -926,7 +932,7 @@
             </item>
            </widget>
           </item>
-          <item row="0" column="3">
+          <item row="1" column="3">
            <widget class="QLabel" name="timeAxisStartAtLabel">
             <property name="enabled">
              <bool>true</bool>
@@ -936,7 +942,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
+          <item row="1" column="4">
            <widget class="QLineEdit" name="timeAxisStartAtInput">
             <property name="enabled">
              <bool>true</bool>
@@ -952,14 +958,14 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
+          <item row="1" column="5">
            <widget class="QLabel" name="timeAxisFinishAtLabel">
             <property name="text">
              <string>Finish</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="6">
+          <item row="1" column="6">
            <widget class="QLineEdit" name="timeAxisFinishAtInput">
             <property name="maximumSize">
              <size>
@@ -972,24 +978,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_11">
             <property name="text">
              <string>Y-axis:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QCheckBox" name="yAxisAutoscale">
-            <property name="text">
-             <string>Autoscale</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
+          <item row="3" column="3">
            <widget class="QLabel" name="yAxisMinimumLabel">
             <property name="enabled">
              <bool>true</bool>
@@ -999,7 +995,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
+          <item row="3" column="4">
            <widget class="QLineEdit" name="yAxisMinimumInput">
             <property name="enabled">
              <bool>false</bool>
@@ -1012,7 +1008,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="5">
+          <item row="3" column="5">
            <widget class="QLabel" name="yAxisMaximumLabel">
             <property name="enabled">
              <bool>true</bool>
@@ -1022,7 +1018,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="6">
+          <item row="3" column="6">
            <widget class="QLineEdit" name="yAxisMaximumInput">
             <property name="enabled">
              <bool>false</bool>
@@ -1035,26 +1031,49 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
+          <item row="0" column="1" colspan="2">
+           <widget class="QComboBox" name="connectPlotType">
+            <item>
+             <property name="text">
+              <string>Line</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Line + Symbol</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Scatter</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Connect Points:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="2">
+           <widget class="QCheckBox" name="yAxisAutoscale">
+            <property name="text">
+             <string>Autoscale</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
            <widget class="QCheckBox" name="showErrorBars">
             <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="text">
              <string>Show error bars</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QCheckBox" name="connectPoints">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Connect points</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -1281,8 +1300,6 @@
   <tabstop>yAxisAutoscale</tabstop>
   <tabstop>yAxisMinimumInput</tabstop>
   <tabstop>yAxisMaximumInput</tabstop>
-  <tabstop>showErrorBars</tabstop>
-  <tabstop>connectPoints</tabstop>
   <tabstop>rebinComboBox</tabstop>
   <tabstop>optionStepSizeText</tabstop>
  </tabstops>
