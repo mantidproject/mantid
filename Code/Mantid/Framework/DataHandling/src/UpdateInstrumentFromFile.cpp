@@ -198,7 +198,11 @@ namespace Mantid
               pos.spherical(l2[i], theta[i], p);
             }
             // Set new relative position
-            det->setPos(pos-parentPos);
+            Kernel::V3D r = pos-parentPos;
+            Kernel::Quat q = det->getParent()->getRotation();
+            q.inverse();
+            q.rotate(r);
+            det->setPos(r);
           }
           catch (Kernel::Exception::NotFoundError&)
           {
