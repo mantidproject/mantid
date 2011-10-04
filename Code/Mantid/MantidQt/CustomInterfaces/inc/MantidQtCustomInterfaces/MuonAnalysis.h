@@ -124,6 +124,12 @@ private slots:
 
   ///
   void muonAnalysisHelpGroupingClicked();
+
+  ///
+  void muonAnalysisHelpPlottingClicked();
+
+  ///
+  void muonAnalysisHelpDataAnalysisClicked();
   
   ///
   void runFirstGoodBinFront();

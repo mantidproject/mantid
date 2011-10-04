@@ -142,6 +142,8 @@ void MuonAnalysis::initLayout()
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
   connect(m_uiForm.muonAnalysisHelpGrouping, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpGroupingClicked()));
+  connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpPlottingClicked()));
+  connect(m_uiForm.muonAnalysisHelpDataAnalysis, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpDataAnalysisClicked()));
 
   // add combo boxes to pairTable
   for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++)
@@ -193,6 +195,23 @@ void MuonAnalysis::muonAnalysisHelpGroupingClicked()
             "MuonAnalysisGrouping"));
 }
 
+/**
+* Muon Analysis Plotting help (slot)
+*/
+void MuonAnalysis::muonAnalysisHelpPlottingClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+            "MuonAnalysisPlotting"));
+}
+
+/**
+* Muon Analysis Data Analysis help (slot)
+*/
+void MuonAnalysis::muonAnalysisHelpDataAnalysisClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+            "MuonAnalysisDataAnalysis"));
+}
 
 /**
 * Front group/ group pair combobox (slot)

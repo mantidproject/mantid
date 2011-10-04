@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>532</height>
+    <width>582</width>
+    <height>544</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,9 +19,15 @@
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
-       <width>460</width>
+       <width>580</width>
        <height>0</height>
       </size>
      </property>
@@ -38,116 +44,185 @@
          <property name="title">
           <string>Instrument</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="instrSelector">
-            <property name="techniques">
-             <stringlist>
-              <string>Muon spectroscopy</string>
-             </stringlist>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <property name="topMargin">
+             <number>0</number>
             </property>
-           </widget>
+            <item>
+             <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="instrSelector">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="techniques">
+               <stringlist>
+                <string>Muon spectroscopy</string>
+               </stringlist>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>60</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_17">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_15">
+                <item>
+                 <widget class="QLabel" name="First_Good_Data_label">
+                  <property name="text">
+                   <string>First Good Data</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="Time_Zero_label">
+                  <property name="text">
+                   <string>Time Zero</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
+                <item>
+                 <widget class="QLineEdit" name="timeZeroFront">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>40</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>0.2</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_16">
+                <item>
+                 <widget class="QLineEdit" name="firstGoodBinFront">
+                  <property name="minimumSize">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>40</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>0.3</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_12">
+                  <property name="text">
+                   <string>(measured from Time Zero)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_10">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="Time_Zero_label">
-            <property name="text">
-             <string>Time Zero</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLineEdit" name="timeZeroFront">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>2000000</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>0.2</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="firstGoodBinFront">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>0.3</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_12">
-            <property name="text">
-             <string>(measured from Time Zero)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="5">
-           <widget class="QLabel" name="instrumentDescription">
-            <property name="text">
-             <string>Description:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="5">
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="First_Good_Data_label">
-            <property name="text">
-             <string>First Good Data</string>
-            </property>
-           </widget>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QLabel" name="instrumentDescription">
+              <property name="text">
+               <string>Description:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -165,9 +240,21 @@
               <property name="enabled">
                <bool>true</bool>
               </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
-                <width>120</width>
+                <width>16777215</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -178,6 +265,12 @@
             </item>
             <item>
              <widget class="QLabel" name="frontWarningMessage">
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -189,6 +282,19 @@
                <string/>
               </property>
              </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -211,9 +317,6 @@
               </property>
               <property name="multipleFiles" stdset="0">
                <bool>false</bool>
-              </property>
-              <property name="buttonOpt" stdset="0">
-               <enum>MantidQt::MantidWidgets::MWRunFiles::Icon</enum>
               </property>
              </widget>
             </item>
@@ -312,7 +415,7 @@
              <widget class="QComboBox" name="homePeriodBox1">
               <property name="maximumSize">
                <size>
-                <width>50</width>
+                <width>60</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -325,7 +428,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>45</width>
+                <width>60</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -348,7 +451,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>50</width>
+                <width>60</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -364,51 +467,77 @@
          <property name="title">
           <string>Plot Data</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="maximumSize">
-             <size>
-              <width>100000</width>
-              <height>16777215</height>
-             </size>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
             </property>
-            <property name="text">
-             <string>Plot type:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="frontPlotFuncs">
-            <property name="maximumSize">
-             <size>
-              <width>140</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="frontPlotButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Plot</string>
-            </property>
-           </widget>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="maximumSize">
+               <size>
+                <width>100000</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Plot type:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="frontPlotFuncs">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>140</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="frontPlotButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Plot</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -420,7 +549,14 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QTextBrowser" name="infoBrowser"/>
+           <widget class="QTextBrowser" name="infoBrowser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -620,13 +756,13 @@
          <property name="title">
           <string>Pair Table</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
            <widget class="QTableWidget" name="pairTable">
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>115</height>
+              <height>16777215</height>
              </size>
             </property>
             <property name="rowCount">
@@ -670,7 +806,7 @@
             </column>
            </widget>
           </item>
-          <item>
+          <item row="1" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
              <widget class="QPushButton" name="guessAlphaButton">
@@ -776,7 +912,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1" colspan="3">
+          <item row="0" column="1" colspan="2">
            <widget class="QComboBox" name="timeComboBox">
             <item>
              <property name="text">
@@ -790,7 +926,7 @@
             </item>
            </widget>
           </item>
-          <item row="0" column="4">
+          <item row="0" column="3">
            <widget class="QLabel" name="timeAxisStartAtLabel">
             <property name="enabled">
              <bool>true</bool>
@@ -800,14 +936,14 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
+          <item row="0" column="4">
            <widget class="QLineEdit" name="timeAxisStartAtInput">
             <property name="enabled">
              <bool>true</bool>
             </property>
             <property name="maximumSize">
              <size>
-              <width>33</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
@@ -816,18 +952,18 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="6">
+          <item row="0" column="5">
            <widget class="QLabel" name="timeAxisFinishAtLabel">
             <property name="text">
              <string>Finish</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="7">
+          <item row="0" column="6">
            <widget class="QLineEdit" name="timeAxisFinishAtInput">
             <property name="maximumSize">
              <size>
-              <width>33</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
@@ -843,7 +979,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
+          <item row="1" column="2">
            <widget class="QCheckBox" name="yAxisAutoscale">
             <property name="text">
              <string>Autoscale</string>
@@ -853,7 +989,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
+          <item row="1" column="3">
            <widget class="QLabel" name="yAxisMinimumLabel">
             <property name="enabled">
              <bool>true</bool>
@@ -863,20 +999,20 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="5">
+          <item row="1" column="4">
            <widget class="QLineEdit" name="yAxisMinimumInput">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="maximumSize">
              <size>
-              <width>33</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
            </widget>
           </item>
-          <item row="1" column="6">
+          <item row="1" column="5">
            <widget class="QLabel" name="yAxisMaximumLabel">
             <property name="enabled">
              <bool>true</bool>
@@ -886,14 +1022,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="7">
+          <item row="1" column="6">
            <widget class="QLineEdit" name="yAxisMaximumInput">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="maximumSize">
              <size>
-              <width>33</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
@@ -909,7 +1045,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2" colspan="3">
+          <item row="2" column="2">
            <widget class="QCheckBox" name="connectPoints">
             <property name="enabled">
              <bool>false</bool>
@@ -972,7 +1108,7 @@
              <widget class="QLineEdit" name="optionStepSizeText">
               <property name="maximumSize">
                <size>
-                <width>35</width>
+                <width>50</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -993,21 +1129,54 @@
             </item>
            </layout>
           </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>347</height>
-          </size>
-         </property>
-        </spacer>
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="muonAnalysisHelpPlotting">
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>?</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <spacer name="horizontalSpacer_15">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -1017,7 +1186,47 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="MantidQt::MantidWidgets::FitPropertyBrowser" name="fitBrowser"/>
+        <widget class="MantidQt::MantidWidgets::FitPropertyBrowser" name="fitBrowser">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <layout class="QGridLayout" name="gridLayout_7">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="muonAnalysisHelpDataAnalysis">
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>?</string>
+           </property>
+           <property name="autoRepeatDelay">
+            <number>300</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <spacer name="horizontalSpacer_16">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -1040,13 +1249,10 @@
    <class>MantidQt::MantidWidgets::FitPropertyBrowser</class>
    <extends>QDockWidget</extends>
    <header>MantidQtMantidWidgets/FitPropertyBrowser.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>instrSelector</tabstop>
-  <tabstop>timeZeroFront</tabstop>
-  <tabstop>firstGoodBinFront</tabstop>
   <tabstop>loadCurrent</tabstop>
   <tabstop>frontGroupGroupPairComboBox</tabstop>
   <tabstop>frontAlphaNumber</tabstop>
