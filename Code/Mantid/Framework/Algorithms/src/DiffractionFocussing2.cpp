@@ -354,6 +354,8 @@ void DiffractionFocussing2::execEvent()
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
+    groupEL.switchTo(eventW->getEventType());
+    groupEL.reserve(eventW->getNumberEvents());
 
     // Only one group, spec # is = 1
     groupEL.setSpectrumNo(1);
@@ -367,12 +369,29 @@ void DiffractionFocussing2::execEvent()
     {
       PARALLEL_START_INTERUPT_REGION
 
-      // Make a blank EventList that will accumulate the chunk.
-      EventList chunkEL;
-
       // Perform in chunks for more efficiency
       int max = (wiChunk+1)*chunkSize;
       if (max > nHist) max = nHist;
+
+      // calculate the number of events that will go into the chunk
+      size_t eventsInChunk = 0;
+      for (int wi=wiChunk*chunkSize; wi < max; wi++)
+      {
+        // ignore the masking bit
+        const int group = groupAtWorkspaceIndex[wi];
+        if (group == 1)
+        {
+          // Accumulate the chunk
+          eventsInChunk += eventW->getEventList(wi).getNumberEvents();
+        }
+      }
+
+      // Make a blank EventList that will accumulate the chunk.
+      EventList chunkEL;
+      chunkEL.switchTo(eventW->getEventType());
+      chunkEL.reserve(eventsInChunk);
+
+      // process the chunk
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
       {
         // Check for masking. TODO: Most of the pointer checks are redundant
