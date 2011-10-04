@@ -1464,6 +1464,99 @@ namespace DataObjects
     }
   }
 
+
+
+  // --------------------------------------------------------------------------
+  /** Compress the event list by grouping events with the same TOF.
+   * Performs the compression in parallel.
+   *
+   * @param events :: input event list.
+   * @param out :: output WeightedEventNoTime vector.
+   * @param tolerance :: how close do two event's TOF have to be to be considered the same.
+   */
+
+  template<class T>
+  void EventList::compressEventsParallelHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance)
+  {
+    // Create a local output vector for each thread
+    int numThreads = PARALLEL_GET_MAX_THREADS;
+    std::vector<std::vector<WeightedEventNoTime> > outputs(numThreads);
+    // This is how many events to process in each thread.
+    size_t numPerBlock = events.size() / numThreads;
+
+    // Do each block in parallel
+    PRAGMA(omp parallel for)
+    for (int thread=0; thread < numThreads; thread++)
+    {
+      // The local output vector
+      std::vector<WeightedEventNoTime> & localOut = outputs[thread];
+      // Reserve a bit of space to avoid excess copying
+      localOut.clear();
+      localOut.reserve(numPerBlock / 20);
+
+      // The last TOF to which we are comparing.
+      double lastTof = -std::numeric_limits<double>::max();
+      // For getting an accurate average TOF
+      double totalTof = 0;
+      int num = 0;
+      // Carrying weight and error
+      double weight = 0;
+      double errorSquared = 0;
+
+      // Separate the
+      typename std::vector<T>::const_iterator it = events.begin() + thread*numPerBlock;
+      typename std::vector<T>::const_iterator it_end = events.begin() + (thread+1)*numPerBlock; //cache for speed
+      if (thread == numThreads-1) it_end = events.end();
+      for (; it != it_end; it++)
+      {
+        if ((it->m_tof - lastTof) <= tolerance)
+        {
+          // Carry the error and weight
+          weight += it->weight();
+          errorSquared += it->errorSquared();
+          // Track the average tof
+          num++;
+          totalTof += it->m_tof;
+        }
+        else
+        {
+          // We exceeded the tolerance
+          if (num > 0)
+          {
+            // Create a new event with the average TOF and summed weights and squared errors.
+            localOut.push_back( WeightedEventNoTime( totalTof/num, weight, errorSquared ) );
+          }
+          // Start a new combined object
+          num = 1;
+          totalTof = it->m_tof;
+          weight = it->weight();
+          errorSquared = it->errorSquared();
+          lastTof = it->m_tof;
+        }
+      }
+
+      // Put the last event in there too.
+      if (num > 0)
+      {
+        // Create a new event with the average TOF and summed weights and squared errors.
+        localOut.push_back( WeightedEventNoTime( totalTof/num, weight, errorSquared ) );
+      }
+    }
+
+    //Clear the output. Reserve the required size
+    out.clear();
+    size_t numEvents = 0;
+    for (int thread=0; thread < numThreads;  thread++)
+      numEvents += outputs[thread].size();
+    out.reserve(numEvents);
+
+    // Re-join all the outputs
+    for (int thread=0; thread < numThreads;  thread++)
+      out.insert(out.end(), outputs[thread].begin(), outputs[thread].end());
+  }
+
+
+
   // --------------------------------------------------------------------------
   /** Compress the event list by grouping events with the same
    * TOF (within a given tolerance). PulseTime is ignored.
@@ -1471,19 +1564,32 @@ namespace DataObjects
    *
    * @param tolerance :: how close do two event's TOF have to be to be considered the same.
    * @param destination :: EventList that will receive the compressed events. Can be == this.
+   * @param parallel :: if true, the compression will be done with all available cores in parallel.
+   *        Note: The parallel results may be slightly different than the serial calculation.
+   *        There will typically be more events because of the list was split up.
    */
-  void EventList::compressEvents(double tolerance, EventList * destination)
+  void EventList::compressEvents(double tolerance, EventList * destination, bool parallel)
   {
     // Must have a sorted list
-    this->sortTof();
+    if (parallel)
+      this->sortTof4();
+    else
+      this->sortTof();
     switch (eventType)
     {
     case TOF:
-      compressEventsHelper(this->events, destination->weightedEventsNoTime, tolerance);
+      if (parallel)
+        compressEventsParallelHelper(this->events, destination->weightedEventsNoTime, tolerance);
+      else
+        compressEventsHelper(this->events, destination->weightedEventsNoTime, tolerance);
       break;
 
     case WEIGHTED:
-      compressEventsHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
+      if (parallel)
+        compressEventsParallelHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
+      else
+        compressEventsHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
+
       break;
 
     case WEIGHTED_NOTIME:
@@ -1491,13 +1597,19 @@ namespace DataObjects
       {
         // Put results in a temp output
         std::vector<WeightedEventNoTime> out;
-        compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
+        if (parallel)
+          compressEventsParallelHelper(this->weightedEventsNoTime, out, tolerance);
+        else
+          compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
         // Put it back
         this->weightedEventsNoTime.swap(out);
       }
       else
       {
-        compressEventsHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
+        if (parallel)
+          compressEventsParallelHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
+        else
+          compressEventsHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
       }
       break;
     }

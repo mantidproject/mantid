@@ -78,8 +78,12 @@ void CompressEvents::exec()
     API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
     // We DONT copy the data though
 
+    // Do we want to parallelize over event lists, or in each event list
+    bool parallel_in_each = noSpectra < PARALLEL_GET_MAX_THREADS;
+
     // Loop over the histograms (detector spectra)
-    PARALLEL_FOR_NO_WSP_CHECK()
+    // Don't parallelize the loop if we are going to parallelize each event list.
+    PRAGMA( omp parallel for schedule(dynamic) if (!parallel_in_each) )
     for (int i = 0; i < noSpectra; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
@@ -93,7 +97,7 @@ void CompressEvents::exec()
       output_el.setX( input_el.ptrX() );
 
       // The EventList method does the work.
-      input_el.compressEvents(tolerance, &output_el);
+      input_el.compressEvents(tolerance, &output_el, parallel_in_each);
 
       prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION

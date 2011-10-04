@@ -33,20 +33,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerance", "0.0"));
   }
 
-  void doTest(std::string inputName, std::string outputName, double tolerance)
+  void doTest(std::string inputName, std::string outputName, double tolerance, int numPixels=50)
   {
     EventWorkspace_sptr input, output;
 
     /** Create event workspace with:
-     * 50 pixels
+     * 50 pixels (or another number)
      * 100 histogrammed bins from 0.0 in steps of 1.0
      * 200 events; two in each bin, at time 0.5, 1.5, etc.
      * PulseTime = 1 second, 2 seconds, etc.
      */
-    input = WorkspaceCreationHelper::CreateEventWorkspace2();
+    input = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, 100, 100, 0.0, 1.0, 2);
     AnalysisDataService::Instance().addOrReplace(inputName, input);
     // Quick initial check
-    TS_ASSERT_EQUALS( input->getNumberEvents(), 200*50 );
+    TS_ASSERT_EQUALS( input->getNumberEvents(), 200*numPixels );
 
     CompressEvents alg;
     alg.initialize();
@@ -71,7 +71,10 @@ public:
       { TS_ASSERT_DIFFERS( input, output); }
 
     // Half the previous # of events
-    TS_ASSERT_EQUALS( output->getNumberEvents(), 100*50 );
+    if (numPixels <= 1)
+      { TS_ASSERT_DELTA( output->getNumberEvents(), 100*numPixels, PARALLEL_GET_MAX_THREADS * 2 ); }
+    else
+      { TS_ASSERT_EQUALS( output->getNumberEvents(), 100*numPixels ); }
 
     // Event list is now of type WeightedEventNoTime
     TS_ASSERT_EQUALS( output->getEventType(), WEIGHTED_NOTIME );
@@ -112,6 +115,15 @@ public:
   void test_InPlace_ZeroTolerance()
   {
     doTest( "CompressEvents_input", "CompressEvents_input", 0.0);
+  }
+
+  void test_DifferentOutput_Parallel()
+  {
+    doTest( "CompressEvents_input", "CompressEvents_output", 0.5, 1);
+  }
+  void test_InPlace_Parallel()
+  {
+    doTest( "CompressEvents_input", "CompressEvents_input", 0.5, 1);
   }
 
 };

@@ -278,7 +278,9 @@ public:
 
   template<class T>
   static void compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
-  void compressEvents(double tolerance, EventList * destination);
+  template<class T>
+  void compressEventsParallelHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
+  void compressEvents(double tolerance, EventList * destination, bool parallel = false);
   // get EventType declaration
   template<class T>
   static void histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E);
