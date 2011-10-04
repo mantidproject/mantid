@@ -224,7 +224,24 @@ public:
     TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "dSpacing");
   }
 
+  class LoadTOFRawNexusExposed : public LoadTOFRawNexus
+  {
+  public:
+    void doExec()
+    {
+      this->exec();
+    }
+  };
 
+  void xtest_SNAP_3893() ///< DISABLED because it takes > 60 seconds.
+  {
+    LoadTOFRawNexusExposed alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename","SNAP_3893.nxs");
+    alg.setPropertyValue("OutputWorkspace","outWS");
+    alg.doExec();
+    TS_ASSERT( alg.isExecuted() );
+  };
 };
 
 #endif /*LOADTOFRAWNEXUSTEST_H_*/

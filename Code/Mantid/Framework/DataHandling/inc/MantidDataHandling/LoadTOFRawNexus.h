@@ -91,7 +91,7 @@ public:
   /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
   int fileCheck(const std::string& filePath);
 
-private:
+protected:
   /// Overwrites Algorithm method.
   void init();
 

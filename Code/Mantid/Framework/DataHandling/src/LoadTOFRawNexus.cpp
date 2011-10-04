@@ -148,6 +148,8 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
   // Open the default data group 'entry'
   file->openGroup(entry_name, "NXentry");
+  // Also pop into the instrument
+  file->openGroup("instrument", "NXinstrument");
 
   // Look for all the banks
   std::map<std::string, std::string> entries = file->getEntries();
@@ -159,8 +161,6 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
     {
       if (name.substr(0, 4) == "bank")
       {
-        bankNames.push_back(name);
-
         // OK, this is some bank data
         file->openGroup(name, it->second);
 
@@ -171,72 +171,97 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
           std::map<std::string, std::string>::iterator it;
           for (it = entries.begin(); it != entries.end(); ++it)
           {
-            file->openData(it->first);
-            if (file->hasAttr("signal"))
+            if (it->second == "SDS")
             {
-              int signal = 0;
-              file->getAttr("signal", signal);
-              if (signal == m_signal)
+              file->openData(it->first);
+              if (file->hasAttr("signal"))
               {
-                // That's the right signal!
-                m_dataField = it->first;
-                // Find the corresponding X axis
-                if (!file->hasAttr("axes"))
-                  throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
-                      m_dataField + "' has no 'axes' attribute specifying.");
+                int signal = 0;
+                file->getAttr("signal", signal);
+                if (signal == m_signal)
+                {
+                  // That's the right signal!
+                  m_dataField = it->first;
+                  // Find the corresponding X axis
+                  if (!file->hasAttr("axes"))
+                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                        m_dataField + "' has no 'axes' attribute specifying.");
 
-                std::string axes;
-                file->getAttr("axes", axes);
-                std::vector<std::string> allAxes;
-                boost::split( allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
-                if (allAxes.size() != 3)
-                  throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
-                      m_dataField + "' which has only " + Strings::toString(allAxes.size()) + " dimension. Expected 3 dimensions.");
+                  std::string axes;
+                  file->getAttr("axes", axes);
+                  std::vector<std::string> allAxes;
+                  boost::split( allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
+                  if (allAxes.size() != 3)
+                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                        m_dataField + "' which has only " + Strings::toString(allAxes.size()) + " dimension. Expected 3 dimensions.");
 
-                m_axisField = allAxes.back();
-                g_log.information() << "Loading signal " << m_signal << ", " << m_dataField << " with axis " << m_axisField << std::endl;
-                file->closeData();
-                break;
-              }
-            }
-            file->closeData();
+                  m_axisField = allAxes.back();
+                  g_log.information() << "Loading signal " << m_signal << ", " << m_dataField << " with axis " << m_axisField << std::endl;
+                  file->closeData();
+                  break;
+                } // Data has a 'signal' attribute
+              }// Yes, it is a data field
+              file->closeData();
+            } // each entry in the group
           }
-
-          if (m_dataField.empty())
-            throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", was not found in any of the data fields.");
         }
+        file->closeGroup();
+      } // bankX name
+    }
+  } // each entry
+
+  if (m_dataField.empty())
+    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", was not found in any of the data fields of any 'bankX' group. Cannot load file.");
 
 
+  for (it = entries.begin(); it != entries.end(); it++)
+  {
+    std::string name = it->first;
+    if (name.size() > 4)
+    {
+      if (name.substr(0, 4) == "bank")
+      {
+        // OK, this is some bank data
+        file->openGroup(name, it->second);
+        std::map<std::string, std::string> entries = file->getEntries();
 
-        // Count how many pixels in the bank
-        file->openData("pixel_id");
-        std::vector<int> dims = file->getInfo().dims;
-        file->closeData();
-
-        size_t newPixels = 1;
-        if (dims.size() > 0)
+        if (entries.find("pixel_id") != entries.end())
         {
-          for (size_t i=0; i < dims.size(); i++)
-            newPixels *= dims[i];
-          numPixels += newPixels;
+          bankNames.push_back(name);
+
+          // Count how many pixels in the bank
+          file->openData("pixel_id");
+          std::vector<int> dims = file->getInfo().dims;
+          file->closeData();
+
+          size_t newPixels = 1;
+          if (dims.size() > 0)
+          {
+            for (size_t i=0; i < dims.size(); i++)
+              newPixels *= dims[i];
+            numPixels += newPixels;
+          }
         }
 
-        // Get the size of the X vector
-        file->openData(m_axisField);
-        dims = file->getInfo().dims;
-        // Find the units, if available
-        if (file->hasAttr("units"))
-          file->getAttr("units", m_xUnits);
-        else
-          m_xUnits = "microsecond"; //use default
-        file->closeData();
-        if (dims.size() > 0)
-          numBins = dims[0] - 1;
+        if (entries.find(m_axisField) != entries.end())
+        {
+          // Get the size of the X vector
+          file->openData(m_axisField);
+          std::vector<int> dims = file->getInfo().dims;
+          // Find the units, if available
+          if (file->hasAttr("units"))
+            file->getAttr("units", m_xUnits);
+          else
+            m_xUnits = "microsecond"; //use default
+          file->closeData();
+          if (dims.size() > 0)
+            numBins = dims[0] - 1;
+        }
 
         file->closeGroup();
-      }
+      } // bankX name
     }
-  }
+  } // each entry
   file->close();
 
   delete file;
@@ -254,6 +279,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string & entry_name,
     const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS)
 {
+  g_log.debug() << "Loading bank " << bankName << std::endl;
   // To avoid segfaults on RHEL5/6 and Fedora
   m_fileMutex.lock();
 
@@ -437,13 +463,13 @@ void LoadTOFRawNexus::exec()
   //PARALLEL_FOR1(WS)
   for (int i=0; i<int(bankNames.size()); i++)
   {
-    PARALLEL_START_INTERUPT_REGION
+//    PARALLEL_START_INTERUPT_REGION
     std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
     loadBank(filename, entry_name, bankName, WS);
-    PARALLEL_END_INTERUPT_REGION
+//    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+//  PARALLEL_CHECK_INTERUPT_REGION
 
   // Set some units
   if (m_xUnits == "Ang")
