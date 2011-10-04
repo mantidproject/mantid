@@ -81,12 +81,13 @@ set ( SRC_FILES
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
+	src/SaveIsawDetCal.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
+	src/SavePAR.cpp
 	src/SavePHX.cpp
-	src/SavePAR.cpp	
 	src/SaveRKH.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
@@ -172,12 +173,13 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
+	inc/MantidDataHandling/SaveIsawDetCal.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
+	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
-	inc/MantidDataHandling/SavePAR.h	
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
@@ -256,12 +258,13 @@ set ( TEST_FILES
 	test/SaveDaveGrpTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
+	test/SaveIsawDetCalTest.h
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
 	test/SaveNexusProcessedTest.h
 	test/SaveNexusTest.h
+	test/SavePARTest.h
 	test/SavePHXTest.h
-	test/SavePARTest.h	
 	test/SaveRKHTest.h
 	test/SaveSPETest.h
 	test/SaveToSNSHistogramNexusTest.h
