@@ -175,6 +175,7 @@ def addAllFiles(location,name,parent):
         fn = fil.replace('-','_')
         fn = fn.replace('+','_')
         fn = fn.replace(' ','_')
+        fn = fn.replace('#','_')
         if (fil.find('.svn') < 0 and os.path.isfile(location+'/'+fil)):
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
             i += 1
@@ -186,6 +187,7 @@ def addAllFilesExt(location,name,ext,parent):
     for fil in sfiles:
         fn = fil.replace('-','_')
         fn = fn.replace('+','_')
+        fn = fn.replace('#','_')
         if (fil.find('.svn') < 0 and fil.endswith('.'+ext) > 0):
             #print fil
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
@@ -196,6 +198,7 @@ def addSingleFile(location,fil,name,parent):
     location = os.path.abspath(location);
     fn = name.replace('-','_')
     fn = fn.replace('+','_')
+    fn = fn.replace('#','_')
     addFileV(fn+'_file',name,fil,location+'/'+fil,parent)
 
 def addFeature(Id,title,description,level,parent,absent='allow',allowAdvertise='yes'):
@@ -297,6 +300,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
                 fn = fil.replace('-','_')
                 fn = fn.replace('+','_')
                 fn = fn.replace('.','_')
+                fn = fn.replace('#','_')
                 fileId = 'd'+fn+'_file'+str(ifil)
                 fileName = 'f'+str(ifil)
                 fileLongName = fil
