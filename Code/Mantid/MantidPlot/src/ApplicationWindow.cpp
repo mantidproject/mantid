@@ -10784,7 +10784,6 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
 {
   Graph* ag = 0;
   int curveID = 0;
-  QString wsName;
   for (int j=0;j<(int)list.count()-1;j++){
     QString s=list[j];
     if (s.contains ("ggeometry")){
@@ -11215,7 +11214,6 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
     }
     else if (s.contains ("PlotTitle")){
       QStringList fList=s.split("\t");
-      wsName=fList[1].split(" ")[1];
       ag->setTitle(fList[1]);
       ag->setTitleColor(QColor(fList[2]));
       ag->setTitleAlignment(fList[3].toInt());
