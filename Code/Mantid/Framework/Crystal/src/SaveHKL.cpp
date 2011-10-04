@@ -194,7 +194,7 @@ namespace Crystal
 
             out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << p.getIntensity();
 
-            out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << p.getSigmaIntensity();
+            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << p.getSigmaIntensity();
 
             out << std::setw( 4 ) << runcount;
 
