@@ -83,7 +83,7 @@ void CompressEvents::exec()
 
     // Loop over the histograms (detector spectra)
     // Don't parallelize the loop if we are going to parallelize each event list.
-    PRAGMA( omp parallel for schedule(dynamic) if (!parallel_in_each) )
+    PRAGMA_OMP( parallel for schedule(dynamic) if (!parallel_in_each) )
     for (int i = 0; i < noSpectra; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
