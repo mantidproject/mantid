@@ -150,7 +150,7 @@ namespace Mantid
       return thetaMax;
     }
     //
-    void BoundingBox::getFullBox(std::vector<V3D> &box,const V3D &observer)const
+    void BoundingBox::getFullBox(std::vector<Kernel::V3D> &box,const Kernel::V3D &observer)const
     {
       box.resize(8);
       box[0] = Kernel::V3D(xMin(), yMin(), zMin())-observer;
@@ -163,7 +163,7 @@ namespace Mantid
       box[7] = Kernel::V3D(xMax(), yMax(), zMax())-observer;
 
     }
-    void BoundingBox::setBoxAlignment(const V3D &R0,const std::vector<V3D> &orts)
+    void BoundingBox::setBoxAlignment(const Kernel::V3D &R0,const std::vector<Kernel::V3D> &orts)
     {
         this->coord_system.resize(4);
         coord_system[0] = R0;
@@ -181,7 +181,7 @@ namespace Mantid
         }
     }
      //
-    void BoundingBox::realign(std::vector<V3D> const*const pCS)
+    void BoundingBox::realign(std::vector<Kernel::V3D> const*const pCS)
     {
        if(pCS){
          this->coord_system.resize(pCS->size());

@@ -84,7 +84,9 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------
     /** Set the new maximum ID number anywhere in the workspace.
-     * Should only be called when loading a file. */
+     * Should only be called when loading a file.
+     * @param newMaxId value to set the newMaxId to
+     */
     void setMaxId(size_t newMaxId)
     {
       m_maxId = newMaxId;

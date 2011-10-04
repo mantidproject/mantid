@@ -46,17 +46,22 @@ namespace Mantid
         class DLLExport BoxFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
         {
         private:
-            mutable OriginParameter m_origin;
-            mutable WidthParameter m_width;
-            mutable HeightParameter m_height;
-            mutable DepthParameter m_depth;
+            mutable OriginParameter m_origin; ///< Origin of the box
+            mutable WidthParameter m_width; ///< Size for the box width
+            mutable HeightParameter m_height; ///< Size for the box height
+            mutable DepthParameter m_depth; ///< Size for the box depth
         public:
             BoxFunctionBuilder();
 
+            /// Set the box origin
             void addOriginParameter(const OriginParameter& parameter);
+            /// Set the box depth
             void addDepthParameter(const DepthParameter& depthParam);
+            /// Set the box width
             void addWidthParameter(const WidthParameter& widthParam);
+            /// Set the box height
             void addHeightParameter(const HeightParameter& heightParam);
+            /// Create an implicit function instance
             Mantid::Geometry::MDImplicitFunction* create() const;
             ~BoxFunctionBuilder();
         };

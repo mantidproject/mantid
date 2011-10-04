@@ -230,6 +230,7 @@ namespace Mantid
 
       /// The property value
       bool m_AllowDifferentNumberSpectra;
+      /// Flag to clear RHS workspace in binary operation
       bool m_ClearRHSWorkspace;
 
       //------ Requirements -----------

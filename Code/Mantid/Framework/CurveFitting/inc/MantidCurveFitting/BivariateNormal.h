@@ -136,7 +136,7 @@ namespace Mantid
  	  
       Mantid::API::IFitFunction::Attribute getAttribute(const std::string &attName)const;
       
- 	  void 	setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
+      void 	setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
  	  
       bool   hasAttribute (const std::string &attName) const;
  
@@ -145,17 +145,19 @@ namespace Mantid
    
       void init();
       
-      void initCommon();//Check for changes in parameters, etc. Calculates common values
+      /// Check for changes in parameters, etc. Calculates common values
+      void initCommon();
       
+      /// Check for changes in given parameters, etc. Calculates common values
       void initCommon(  double* LastParams,double* expVals,double &uu,
-                     double &coefNorm,double &expCoeffx2,double  &expCoeffy2,double  &expCoeffxy,
-		      bool &isNaNs) const;
+                        double &coefNorm,double &expCoeffx2,double  &expCoeffy2,double  &expCoeffxy,
+                        bool &isNaNs) const;
 
-      double* Attrib;//Saves Attribute values
+      double* Attrib; ///< Saves Attribute values
       
-      double* LastParams;//Saves previous/this set of parameters
+      double* LastParams; ///< Saves previous/this set of parameters
       
-      std::vector<std::string> AttNames;
+      std::vector<std::string> AttNames; ///< List of attribute names
       
       double SIxx,
              SIyy,
@@ -169,7 +171,7 @@ namespace Mantid
              mIy,
              my; //Means corresp to background = 0
              
-      double* expVals;// Save common exponential values for each cell
+      double* expVals; ///< Save common exponential values for each cell
       
       double uu,
              coefNorm , 
@@ -178,13 +180,13 @@ namespace Mantid
              expCoeffxy; //Other common values used in calculating values and
                          //derivatives
       
-      BoundaryConstraint *BackConstraint;
-      
-      BoundaryConstraint *MeanxConstraint;
-      
-      BoundaryConstraint *MeanyConstraint;
+      BoundaryConstraint *BackConstraint; ///< Constraint for background
 
-      BoundaryConstraint *IntensityConstraint;
+      BoundaryConstraint *MeanxConstraint; ///< Constraint using mean x
+      
+      BoundaryConstraint *MeanyConstraint; ///< Constraint using mean y
+
+      BoundaryConstraint *IntensityConstraint; ///< Constraint using intensity
 
      static Kernel::Logger & g_log;
 

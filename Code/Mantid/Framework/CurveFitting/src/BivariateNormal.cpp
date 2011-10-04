@@ -1,10 +1,3 @@
-/*
- * BivariateNormal.cpp
- *
- *  Created on: Apr 12, 2011
- *      Author: ruth
- */
-
 #include "MantidCurveFitting/BivariateNormal.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidKernel/PhysicalConstants.h"

@@ -9,6 +9,7 @@ namespace Geometry
 {
   using Kernel::V3D;
 
+  /// Parameter constructor
   BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
   : GeometryHandler(dynamic_cast<IObjComponent*>(comp))
   {

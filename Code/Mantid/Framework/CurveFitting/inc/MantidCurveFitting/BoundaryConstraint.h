@@ -118,6 +118,7 @@ namespace Mantid
 
     private:
 
+      /// Penalty factor for the given boundary constraint
       double m_penaltyFactor;
 
       /// name of parameter you want to constraint
