@@ -26,7 +26,7 @@ namespace DataObjects
    */
 
 
-  enum BinaryOperator{AND, OR, XOR};
+  enum BinaryOperator{AND, OR, XOR, NOT};
 
   class DLLExport SpecialWorkspace2D  : public Workspace2D
   {
@@ -48,6 +48,7 @@ namespace DataObjects
     detid_t getDetectorID(const std::size_t workspaceIndex) const;
 
     void BinaryOperation(const boost::shared_ptr<SpecialWorkspace2D> ws, BinaryOperator binoperator);
+    void BinaryOperation(BinaryOperator binoperator);
 
   private:
     /// Private copy constructor. NO COPY ALLOWED
@@ -70,6 +71,7 @@ namespace DataObjects
     void binaryAND(const boost::shared_ptr<SpecialWorkspace2D> ws);
     void binaryOR(const boost::shared_ptr<SpecialWorkspace2D> ws);
     void binaryXOR(const boost::shared_ptr<SpecialWorkspace2D> ws);
+    void binaryNOT();
 
     /// Map with key = detector ID, and value = workspace index.
     std::map<detid_t,std::size_t> detID_to_WI;

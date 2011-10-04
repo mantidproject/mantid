@@ -183,6 +183,26 @@ namespace DataObjects
     return;
   }
 
+  //--------------------------------------------------------------------------------------------
+  /** Return the result of operator &
+   * @ parameter
+   * @ return
+   */
+  void SpecialWorkspace2D::BinaryOperation(BinaryOperator operatortype){
+
+    switch (operatortype){
+    case NOT:
+      this->binaryNOT();
+      break;
+    default:
+      g_log.error() << "Operator " << operatortype << " Is Not Valid In BinaryOperation(operatortype)" << std::endl;
+      throw std::invalid_argument("Invalid Operator");
+      break;
+    }
+
+    return;
+  }
+
   /** And operator
    *
    */
@@ -245,6 +265,24 @@ namespace DataObjects
         this->dataY(i)[0] = 1.0;
       }
 
+    }
+
+    return;
+  }
+
+
+  /** Excluded Or operator
+   *
+   */
+  void SpecialWorkspace2D::binaryNOT(){
+
+    for (size_t i = 0; i < this->getNumberHistograms(); i ++){
+      double y1 = this->dataY(i)[0];
+      if (y1 < 1.0E-10){
+        this->dataY(i)[0] = 1.0;
+      }else {
+        this->dataY(i)[0] = 0.0;
+      }
     }
 
     return;

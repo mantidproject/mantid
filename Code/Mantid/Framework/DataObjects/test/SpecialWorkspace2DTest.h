@@ -152,6 +152,31 @@ public:
 
   }
 
+  void test_binaryNOT(){
+    Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    SpecialWorkspace2D_sptr ws1(new SpecialWorkspace2D(inst1));
+
+    Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    SpecialWorkspace2D_sptr ws2(new SpecialWorkspace2D(inst2));
+
+    Instrument_sptr inst3 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    SpecialWorkspace2D_sptr ws3(new SpecialWorkspace2D(inst3));
+
+    ws2->BinaryOperation(NOT);
+
+    ws1->BinaryOperation(ws2, AND);
+    ws3->BinaryOperation(ws2, OR);
+
+    for (size_t i = 0; i < ws1->getNumberHistograms(); i ++){
+      detid_t did = ws1->getDetectorID(i);
+      TS_ASSERT_EQUALS(ws1->getValue(did), 0);
+      TS_ASSERT_EQUALS(ws3->getValue(did), 1);
+    }
+
+
+  }
+
+
 };
 
 
