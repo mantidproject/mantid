@@ -19,60 +19,50 @@ class ExtractFFTSpectrumTest : public CxxTest::TestSuite
 public:
   void testMetaInfo()
   {
-    alg = new ExtractFFTSpectrum();
-    TS_ASSERT_EQUALS(alg->name(), "ExtractFFTSpectrum");
-    TS_ASSERT_EQUALS(alg->version(), 1);
-    TS_ASSERT_EQUALS(alg->category(), "General");
-    delete alg;
+    ExtractFFTSpectrum alg;
+    TS_ASSERT_EQUALS(alg.name(), "ExtractFFTSpectrum");
+    TS_ASSERT_EQUALS(alg.version(), 1);
+    TS_ASSERT_EQUALS(alg.category(), "General");
   }
 
   void testInit()
   {
-    alg = new ExtractFFTSpectrum();
-    TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT(alg->isInitialized());
-    delete alg;
+    ExtractFFTSpectrum alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
   void testExec()
   {
-    IAlgorithm* loader;
-    loader = new Mantid::DataHandling::LoadNexus;
-    loader->initialize();
-    loader->setPropertyValue("Filename", "IRS26176_ipg.nxs");
-    loader->setPropertyValue("OutputWorkspace", "alg_irs_r");
-    loader->setPropertyValue("SpectrumMin", "2");
-    loader->setPropertyValue("SpectrumMax", "3");
-    TS_ASSERT_THROWS_NOTHING(loader->execute());
-    TS_ASSERT(loader->isExecuted());
-    delete loader;
+    Mantid::DataHandling::LoadNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "IRS26176_ipg.nxs");
+    loader.setPropertyValue("OutputWorkspace", "alg_irs_r");
+    loader.setPropertyValue("SpectrumMin", "2");
+    loader.setPropertyValue("SpectrumMax", "3");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
     
-    IAlgorithm* rebin;
-    rebin = new Rebin;
-    rebin->initialize();
-    rebin->setPropertyValue("InputWorkspace", "alg_irs_r");
-    rebin->setPropertyValue("OutputWorkspace", "alg_irs_r");
-    rebin->setPropertyValue("Params", "-0.5,0.005,0.5");
-    TS_ASSERT_THROWS_NOTHING(rebin->execute());
-    TS_ASSERT(rebin->isExecuted());
-    delete rebin;
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "alg_irs_r");
+    rebin.setPropertyValue("OutputWorkspace", "alg_irs_r");
+    rebin.setPropertyValue("Params", "-0.5,0.005,0.5");
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
 
     MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("alg_irs_r"));
 
-    alg = new ExtractFFTSpectrum();
+    ExtractFFTSpectrum alg;
+    alg.initialize();
 
-    if ( !alg->isInitialized() )
-    {
-      alg->initialize();
-    }
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-    TS_ASSERT(!alg->isExecuted());
-
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", "alg_irs_r"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "alg_irs_t"));
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "alg_irs_r"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "alg_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
@@ -86,11 +76,7 @@ public:
     TS_ASSERT_EQUALS(inputWS->getAxis(1)->unit(),outputWS->getAxis(1)->unit());
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Time");
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "ns");
-
-    delete alg;
   }
-private:
-  ExtractFFTSpectrum* alg;
 
 };
 #endif // EXTRACTFFTSPECTRUM_H
