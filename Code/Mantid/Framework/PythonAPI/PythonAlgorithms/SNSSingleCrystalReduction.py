@@ -70,7 +70,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=0, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
-        #DiffractionEventReadDetCal(InputWorkspace=wksp,Filename="TOPAZ_8Sept11.DetCal")
+        #LoadIsawDetCal(InputWorkspace=wksp,Filename="TOPAZ_8Sept11.DetCal")
         #Normalise by sum of counts in upstream monitor
         Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
         mtd.deleteWorkspace(str(name)+'_monitors')

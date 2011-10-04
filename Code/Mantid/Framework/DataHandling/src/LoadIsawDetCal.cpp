@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/DiffractionEventReadDetCal.h"
+#include "MantidDataHandling/LoadIsawDetCal.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -22,14 +22,14 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace DataHandling
 {
 
   // Register the class into the algorithm factory
-  DECLARE_ALGORITHM(DiffractionEventReadDetCal)
+  DECLARE_ALGORITHM(LoadIsawDetCal)
   
   /// Sets documentation strings for this algorithm
-  void DiffractionEventReadDetCal::initDocs()
+  void LoadIsawDetCal::initDocs()
   {
     this->setWikiSummary("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ. ");
     this->setOptionalMessage("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ.");
@@ -42,12 +42,12 @@ namespace Algorithms
   using namespace DataObjects;
 
     /// Constructor
-    DiffractionEventReadDetCal::DiffractionEventReadDetCal() :
+    LoadIsawDetCal::LoadIsawDetCal() :
       API::Algorithm()
     {}
 
     /// Destructor
-    DiffractionEventReadDetCal::~DiffractionEventReadDetCal()
+    LoadIsawDetCal::~LoadIsawDetCal()
     {}
 
 
@@ -61,7 +61,7 @@ namespace Algorithms
  * @param inname :: The workspace name
  */
 
-  void DiffractionEventReadDetCal::center(double x, double y, double z, std::string detname, std::string inname)
+  void LoadIsawDetCal::center(double x, double y, double z, std::string detname, std::string inname)
   {
 
     MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
@@ -79,7 +79,7 @@ namespace Algorithms
 
   /** Initialisation method
   */
-  void DiffractionEventReadDetCal::init()
+  void LoadIsawDetCal::init()
   {
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
@@ -100,7 +100,7 @@ namespace Algorithms
   *
   *  @throw runtime_error Thrown if algorithm cannot execute
   */
-  void DiffractionEventReadDetCal::exec()
+  void LoadIsawDetCal::exec()
   {
 
     // Get the input workspace
@@ -174,7 +174,7 @@ namespace Algorithms
 
 
     if (detList.size() == 0)
-      throw std::runtime_error("This instrument does not have any RectangularDetector's. DiffractionEventReadDetCal cannot operate on this instrument at this time.");
+      throw std::runtime_error("This instrument does not have any RectangularDetector's. LoadIsawDetCal cannot operate on this instrument at this time.");
 
     while(std::getline(input, line)) 
     {

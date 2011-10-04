@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/DiffractionEventReadDetCal.h"
+#include "MantidDataHandling/LoadIsawDetCal.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -24,13 +24,12 @@
 #include <vector>
 
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class DiffractionEventReadDetCalTest : public CxxTest::TestSuite
+class LoadIsawDetCalTest : public CxxTest::TestSuite
 {
 public:
 
@@ -48,7 +47,7 @@ public:
     loaderCAL.execute();
     loaderCAL.isExecuted();
 
-    DiffractionEventReadDetCal testerCAL;
+    LoadIsawDetCal testerCAL;
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());

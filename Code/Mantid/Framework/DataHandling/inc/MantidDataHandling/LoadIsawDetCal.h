@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_DIFFRACTIONEVENTREADDETCAL_H_
-#define MANTID_ALGORITHMS_DIFFRACTIONEVENTREADDETCAL_H_
+#ifndef MANTID_DATAHANDLING_LOADISAWDETCAL_H_
+#define MANTID_DATAHANDLING_LOADISAWDETCAL_H_
 /*WIKI* 
 
 
@@ -9,10 +9,10 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 
 ==Usage==
 '''Python'''
-    DiffractionEventReadDetCal("SNAP_4111","SNAP.DetCal")
+    LoadIsawDetCal("SNAP_4111","SNAP.DetCal")
 
 '''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("DiffractionEventReadDetCal");
+    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("LoadIsawDetCal");
     alg->setPropertyValue("InputWorkspace", "SNAP_4111");
     alg->setPropertyValue("Filename", "SNAP.DetCal");
     alg->execute();
@@ -31,7 +31,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 
 namespace Mantid
 {
-namespace Algorithms
+namespace DataHandling
 {
 /**
  Find the offsets for each detector
@@ -59,15 +59,15 @@ namespace Algorithms
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DiffractionEventReadDetCal: public API::Algorithm, public Kernel::Quat
+class DLLExport LoadIsawDetCal: public API::Algorithm, public Kernel::Quat
 {
 public:
   /// Default constructor
-  DiffractionEventReadDetCal();
+  LoadIsawDetCal();
   /// Destructor
-  virtual ~DiffractionEventReadDetCal();
+  virtual ~LoadIsawDetCal();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "DiffractionEventReadDetCal"; }
+  virtual const std::string name() const { return "LoadIsawDetCal"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -85,7 +85,7 @@ private:
 
 };
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DIFFRACTIONEVENTREADDETCAL_H_*/

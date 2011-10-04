@@ -50,7 +50,6 @@ set ( SRC_FILES
 	src/DetectorEfficiencyCor.cpp
 	src/DetectorEfficiencyVariation.cpp
 	src/DiffractionEventCalibrateDetectors.cpp
-	src/DiffractionEventReadDetCal.cpp
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
@@ -120,8 +119,8 @@ set ( SRC_FILES
 	src/PowerLawCorrection.cpp
 	src/Q1D.cpp
 	src/Q1D2.cpp
-	src/Qhelper.cpp
 	src/Q1DWeighted.cpp
+	src/Qhelper.cpp
 	src/Qxy.cpp
 	src/RayTracerTester.cpp
 	src/ReadGroupsFromFile.cpp
@@ -218,7 +217,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
 	inc/MantidAlgorithms/DetectorEfficiencyVariation.h
 	inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
-	inc/MantidAlgorithms/DiffractionEventReadDetCal.h
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
@@ -289,8 +287,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PowerLawCorrection.h
 	inc/MantidAlgorithms/Q1D.h
 	inc/MantidAlgorithms/Q1D2.h
-	inc/MantidAlgorithms/Qhelper.h
 	inc/MantidAlgorithms/Q1DWeighted.h
+	inc/MantidAlgorithms/Qhelper.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/RayTracerTester.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
@@ -384,7 +382,6 @@ set ( TEST_FILES
 	test/DetectorEfficiencyCorTest.h
 	test/DetectorEfficiencyVariationTest.h
 	test/DiffractionEventCalibrateDetectorsTest.h
-	test/DiffractionEventReadDetCalTest.h
 	test/DiffractionFocussing2Test.h
 	test/DiffractionFocussingTest.h
 	test/DivideTest.h

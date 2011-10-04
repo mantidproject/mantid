@@ -30,6 +30,7 @@ set ( SRC_FILES
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
+	src/LoadIsawDetCal.cpp
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
+	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
@@ -219,6 +221,7 @@ set ( TEST_FILES
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h
+	test/LoadIsawDetCalTest.h
 	test/LoadLogTest.h
 	test/LoadLogsFromSNSNexusTest.h
 	test/LoadMappingTableTest.h
