@@ -214,7 +214,8 @@ public:
 
      WorkspaceMemento c(ws, "C");
      doAddItems(ws, c);
-     c.getItem(0)->setValue(std::string("New Name"));
+     std::string newValue = "New Name";
+     c.getItem(0)->setValue(newValue);
 
      TS_ASSERT(!(a != b));
      TS_ASSERT(a != c);
