@@ -377,7 +377,7 @@ void DiffractionFocussing2::execEvent()
       if (max > nHist) max = nHist;
 
       // precalculate output size
-      size_t numEventsInChunk(0);
+      /* size_t numEventsInChunk(0);
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
       {
         // Check for masking. TODO: Most of the pointer checks are redundant
@@ -392,12 +392,12 @@ void DiffractionFocussing2::execEvent()
           // Accumulate the chunk
           numEventsInChunk += eventW->getEventList(wi).getNumberEvents();
         }
-      }
+      } */
 
       // Make a blank EventList that will accumulate the chunk.
       EventList chunkEL;
       chunkEL.switchTo(eventWtype);
-      chunkEL.reserve(numEventsInChunk);
+      //chunkEL.reserve(numEventsInChunk);
 
       // process the chunk
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
