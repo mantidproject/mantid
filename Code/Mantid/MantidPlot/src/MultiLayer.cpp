@@ -1269,12 +1269,33 @@ void MultiLayer::dropEvent( QDropEvent * event )
   QMultiMap<QString,int> toPlot = tree->chooseSpectrumFromSelected();
   Graph *g = this->activeGraph();
   if (!g) return; // (shouldn't happen either)
+  
+  bool errorBars;
+
+  if(g->curves() > 0)
+  {
+    MantidCurve * c = dynamic_cast<MantidCurve*>(g->curve(0));
+    // If this is Mantid curve, then see if it has error bars ...
+    if(NULL != c)
+    {
+      errorBars = c->hasErrorBars();
+    }
+    else
+    {
+      // Else we'll just have no error bars.
+      errorBars = false;
+    }
+  }
+  else
+  {
+    errorBars = false;
+  }
 
   // Iterate through the selected workspaces adding a curve from each
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      new MantidCurve(it.key(),g,it.value(),false); // Always without errors for now
+      new MantidCurve(it.key(),g,it.value(),errorBars); // Always without errors for now
     } catch (Mantid::Kernel::Exception::NotFoundError) {
       // Get here if workspace name is invalid - shouldn't be possible, but just in case
     } catch (std::invalid_argument&) {

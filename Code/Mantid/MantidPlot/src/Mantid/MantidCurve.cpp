@@ -417,6 +417,12 @@ bool MantidCurve::isDistribution() const
   return mantidData()->m_isDistribution;
 }
 
+/// Returns whether the curve has error bars
+bool MantidCurve::hasErrorBars() const
+{
+  return m_drawErrorBars;
+}
+
 //==========================================
 //
 //  MantdQwtData methods

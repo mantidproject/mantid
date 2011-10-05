@@ -253,19 +253,22 @@ bool MantidDockWidget::isInvisibleWorkspaceOptionSet()
 */
 void MantidDockWidget::createWorkspaceMenuActions()
 {
-  m_showData = new QAction(tr("Show data"),this);
+  m_showData = new QAction(tr("Show Data"),this);
   connect(m_showData,SIGNAL(triggered()),m_mantidUI,SLOT(importWorkspace()));
 
-  m_showInst = new QAction(tr("Show instrument"),this);
+  m_showInst = new QAction(tr("Show Instrument"),this);
   connect(m_showInst,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
 
-  m_plotSpec = new QAction(tr("Plot spectrum..."),this);
+  m_plotSpec = new QAction(tr("Plot Spectrum..."),this);
   connect(m_plotSpec,SIGNAL(triggered()),this,SLOT(plotSpectra()));
+
+  m_plotSpecErr = new QAction(tr("Plot Spectrum with Errors..."),this);
+  connect(m_plotSpecErr,SIGNAL(triggered()),this,SLOT(plotSpectraErr()));
 
   m_plotSpecDistr = new QAction(tr("Plot spectrum as distribution..."),this);
   connect(m_plotSpecDistr,SIGNAL(triggered()),this,SLOT(plotSpectraDistribution()));
 
-  m_colorFill = new QAction(tr("Color fill plot"), this);
+  m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
 
   m_showDetectors = new QAction(tr("Show Detectors"),this);
@@ -816,13 +819,17 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
   menu->addAction(m_showInst);
   // Disable the 'show instrument' option if a workspace doesn't have an instrument attached
   m_showInst->setEnabled( matrixWS->getInstrument() && !matrixWS->getInstrument()->getName().empty() );
+  menu->addSeparator();
   menu->addAction(m_plotSpec);
+  menu->addAction(m_plotSpecErr);
   //menu->addAction(m_plotSpecDistr);
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
+  m_plotSpecErr->setEnabled ( matrixWS->blocksize() > 1 );
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
   m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );
+  menu->addSeparator();
   menu->addAction(m_showDetectors);
   menu->addAction(m_showLogs);
   menu->addAction(m_showHist);
@@ -874,8 +881,11 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
+  m_plotSpecErr->setEnabled(true);
+  menu->addAction(m_plotSpecErr);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
+  menu->addSeparator();
   menu->addAction(m_saveNexus);
 }
 
@@ -1249,6 +1259,24 @@ void MantidDockWidget::plotSpectraDistribution()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   m_mantidUI->plotSpectraList( toPlot, false, true );
+}
+
+/// Plots a single spectrum from each selected workspace with errors
+void MantidDockWidget::plotSpectraErr()
+{
+  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  // An empty map will be returned if the user clicks cancel in the spectrum selection
+  if (toPlot.empty()) return;
+  m_mantidUI->plotSpectraList( toPlot, true );
+}
+
+/// Plots a single spectrum from each selected workspace with erros
+void MantidDockWidget::plotSpectraDistributionErr()
+{
+  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  // An empty map will be returned if the user clicks cancel in the spectrum selection
+  if (toPlot.empty()) return;
+  m_mantidUI->plotSpectraList( toPlot, true, true );
 }
 
 /**

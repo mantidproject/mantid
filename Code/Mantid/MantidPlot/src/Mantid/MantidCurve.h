@@ -90,6 +90,9 @@ public:
   /// Returns whether the curve is plotted as a distribution
   bool isDistribution() const;
 
+  /// Returns whether the curve has error bars
+  bool hasErrorBars() const;
+
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;
