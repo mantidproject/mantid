@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ABSTRACT_MEMENTO_ITEM_H_
 
 #include <boost/shared_ptr.hpp>
+#include <stdexcept>
 #include "MantidKernel/System.h"
 
 namespace MantidQt
@@ -27,7 +28,8 @@ namespace MantidQt
           std::string paramTypename(typeid(T).name());
           if(typeid(T) != get_type_info())
           {
-            throw std::runtime_error("Type missmatch while using AbstractMementoItem. Cannot compare: '" + thisTypename + "' to : '" + paramTypename +"'" );
+            std::string message = "Type missmatch while using AbstractMementoItem. Cannot compare: '" + thisTypename + "' to : '" + paramTypename +"'";
+            throw std::runtime_error(message);
           }
       }
       template<class T>

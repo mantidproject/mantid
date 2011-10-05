@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/SingleOwnerLock.h"
+#include <stdexcept>
 
 namespace MantidQt
 {
