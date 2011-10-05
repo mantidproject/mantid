@@ -59,13 +59,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullCoordTransform);
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     vtkThresholdingLineFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
@@ -81,13 +75,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullCoordTransform);
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
     vtkThresholdingLineFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
@@ -103,13 +91,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullCoordTransform);
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
     vtkThresholdingLineFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(1.5, 2)), "signal");
@@ -122,30 +104,25 @@ public:
 
   void testInitializationDelegates()
   {
-    //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
+    //If the workspace provided is not a 1D imdworkspace, it should call the successor's initalization
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullCoordTransform);
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillOnce(Return(VecIMDDimension_const_sptr(3))); //3 dimensions on the workspace.
+    // 3 dimensions on the workspace
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
-    
     factory.initialize(ws_sptr);
 
-    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
@@ -156,10 +133,8 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillOnce(Return(VecIMDDimension_const_sptr(3))); //3 dimensions on the workspace.
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    // 3 dimensions on the workspace
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
@@ -167,23 +142,20 @@ public:
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
-  void testCreateDeleagates()
+  void testCreateDelegates()
   {
     //If the workspace provided is not a 2D imdworkspace, it should call the successor's initalization
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullCoordTransform);
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(3))); //3 dimensions on the workspace.
+    // 3 dimensions on the workspace
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
@@ -194,7 +166,6 @@ public:
     factory.initialize(ws_sptr);
     factory.create(); // should be called on successor.
 
-    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
@@ -223,12 +194,7 @@ public:
     using namespace testing;
 
     //1D Workspace with 2000 points
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->addDimension(new FakeIMDDimension("x", 2000));
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(1)));
-
-    m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
+    m_ws_sptr = getFakeMDHistoWorkspace(1.0, 1, 2000);
   }
 
 	void testGenerateVTKDataSet()

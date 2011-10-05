@@ -119,7 +119,6 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh(RebinningKnowledgeSerializer& s
 
   //Serialize metadata
   serializer.setWorkspaceName(m_workspace->getName());
-  serializer.setWorkspaceLocation(m_workspace->getWSLocation());
   serializer.setGeometryXML(m_workspace->getGeometryXML());
   std::string xmlString = serializer.createXMLString();
 

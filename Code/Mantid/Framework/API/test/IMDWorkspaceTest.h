@@ -114,14 +114,6 @@ public:
     TSM_ASSERT_EQUALS("The expected number of points have not been returned.", 25, matrixWS.getNPoints());
   }
 
-  void testGetCellElipsisParameterVersion()
-  {
-    WorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1), std::logic_error);
-    TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1), std::logic_error);
-    TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1, 1, 1, 1, 1, 1), std::logic_error);
-  }
-
   void testGetHistogramIndex()
   {
     MatrixWSIndexCalculator indexCalculator(5);
@@ -178,10 +170,6 @@ public:
     TSM_ASSERT_EQUALS("The v3 y-value is incorrect.", 2, vertexes.at(3).getY());
   }
 
-  void testGetWSLocationThrows()
-  {
-    TSM_ASSERT_THROWS("Getting the workspace location should not be possible.", workspace.getWSLocation(), std::logic_error);
-  }
 
 };
 

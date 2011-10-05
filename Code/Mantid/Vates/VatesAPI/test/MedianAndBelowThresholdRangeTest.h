@@ -88,13 +88,7 @@ namespace MedianAndBelowThresholdRangeTestHelpers
     MOCK_CONST_METHOD0(getMemorySize, size_t());
     MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
     MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
-    MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment));
-    MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment));
-    MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment));
-
-    MOCK_CONST_METHOD0(getWSLocation,std::string());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
-
     MOCK_CONST_METHOD0(getXDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
     MOCK_CONST_METHOD0(getYDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
     MOCK_CONST_METHOD0(getZDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
@@ -109,11 +103,6 @@ namespace MedianAndBelowThresholdRangeTestHelpers
     virtual Mantid::API::IMDIterator* createIterator() const
     {
       return new FakeIterator(this, m_nCells);
-    }
-
-    const Mantid::Geometry::SignalAggregate& getCell(...) const
-    {
-      throw std::runtime_error("Not Implemented");
     }
 
     virtual ~MockIMDWorkspace() {}

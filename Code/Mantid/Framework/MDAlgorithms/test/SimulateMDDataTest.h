@@ -67,26 +67,6 @@ public:
         return(m_mdcells.at(dim1Increment));
     };
 
-    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t , size_t ) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t , size_t , size_t ) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t , size_t , size_t , size_t ) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(...) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
     Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
     {
       throw std::runtime_error("Not implemented");
@@ -96,10 +76,7 @@ public:
     virtual const std::string id() const {return "TestIMDDWorkspace";}
     /// Get the footprint in memory in bytes - return 0 for now
     virtual size_t getMemorySize() const {return 0;};
-    virtual std::string getWSLocation() const
-    {
-        throw std::runtime_error("Not implemented");
-    }
+
     virtual std::string getGeometryXML() const
     {
         throw std::runtime_error("Not implemented");

@@ -100,21 +100,6 @@ namespace Mantid
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const;
 
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const;
-
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const;
-
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const;
-
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
-
-      /// Get the location of the workspace on disk, supports Horace implementation of rebinning.
-      virtual std::string getWSLocation() const{return "";}
-
       /// Get the geometry xml.
       virtual std::string getGeometryXML() const{return "";}
 

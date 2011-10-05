@@ -26,6 +26,7 @@
 #include <iostream>
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VMD.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -131,8 +132,8 @@ public:
 
     TS_ASSERT( alg.isExecuted() );
 
-    IMDWorkspace_sptr out ;
-    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<IMDWorkspace>(
+    MDHistoWorkspace_sptr out ;
+    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
         AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
     TS_ASSERT(out);
     if(!out) return;
@@ -342,8 +343,8 @@ public:
 
     TS_ASSERT( alg.isExecuted() );
 
-    IMDWorkspace_sptr out ;
-    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<IMDWorkspace>(
+    MDHistoWorkspace_sptr out ;
+    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
         AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
     TS_ASSERT(out);
     if(!out) return;

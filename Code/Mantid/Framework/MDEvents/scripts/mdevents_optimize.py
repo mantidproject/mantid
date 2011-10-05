@@ -167,22 +167,3 @@ plot_results(results, "SplitInto", "FineBinTime", "SplitThreshold")
 
 
 show()
-
-#
-#bb = mtd["mdhisto"]
-#b = bb._getHeldObject()
-#
-#data = b.getSignalDataVector()
-#data = np.array(data)
-#data = data.reshape( (xbins, ybins, zbins) )
-#f = open("tempdata.dat")
-#data.tofile(f)
-#f.close()
-#
-#
-#for i in xrange(4):
-#    mlab.figure(i)
-#    contour_val = 10**i
-#    mlab.gcf().name = "Threshold = %f" % contour_val
-#    mlab.contour3d(data, contours=[ contour_val  ])
-

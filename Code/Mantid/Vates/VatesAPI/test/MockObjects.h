@@ -136,13 +136,7 @@ public:
   MOCK_CONST_METHOD0(getMemorySize, size_t());
   MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
   MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
-  MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment));
-  MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment));
-  MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment));
-
-  MOCK_CONST_METHOD0(getWSLocation,std::string());
   MOCK_CONST_METHOD0(getGeometryXML,std::string());
-
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
   MOCK_CONST_METHOD1(getSignalNormalizedAt, Mantid::signal_t(size_t index1));
   MOCK_CONST_METHOD2(getSignalNormalizedAt, double(size_t index1, size_t index2));
@@ -155,14 +149,8 @@ public:
     return new FakeIterator(this);
   }
 
-  const Mantid::Geometry::SignalAggregate& getCell(...) const
-  {
-    throw std::runtime_error("Not Implemented");
-  }
-
   virtual ~MockIMDWorkspace() {}
 };
-
 
 
 //=================================================================================================
@@ -268,7 +256,18 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
 Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10)
 {
   Mantid::MDEvents::MDHistoWorkspace * ws;
-  if (numDims == 3)
+  if (numDims ==1)
+  {
+    ws = new Mantid::MDEvents::MDHistoWorkspace(
+        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)) );
+  }
+  else if (numDims == 2)
+  {
+    ws = new Mantid::MDEvents::MDHistoWorkspace(
+        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins))  );
+  }
+  else if (numDims == 3)
   {
     ws = new Mantid::MDEvents::MDHistoWorkspace(
         MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),

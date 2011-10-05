@@ -310,8 +310,6 @@ using namespace boost::python;
         .def("getNPoints", &IMDWorkspace::getNPoints)
         .def("getNumDims", &IMDWorkspace::getNumDims)
         .def("getDimensionNum", &IMDWorkspace::getDimensionNum )
-        .def("getSignalDataVector", &IMDWorkspace::getSignalDataVector)
-        .def("getErrorDataVector", &IMDWorkspace::getErrorDataVector)
         ;
   }
 

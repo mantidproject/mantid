@@ -27,12 +27,13 @@
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include <vtkStructuredGrid.h>
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkPoints.h>
-#include <vtkCellData.h>
-#include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include <vtkStructuredGrid.h>
 
 namespace Mantid
 {
@@ -86,7 +87,7 @@ private:
   /// Private constructor for use by constructional static member
   vtkStructuredGridFactory();
 
-  Mantid::API::IMDWorkspace_sptr m_workspace;
+  Mantid::MDEvents::MDHistoWorkspace_sptr m_workspace;
   std::string m_scalarName;
   double m_timeValue;
   bool m_meshOnly;

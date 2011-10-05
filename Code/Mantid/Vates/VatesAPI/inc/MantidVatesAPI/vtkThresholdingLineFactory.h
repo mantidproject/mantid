@@ -6,6 +6,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
 #include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 namespace Mantid
 {
@@ -75,7 +76,7 @@ namespace Mantid
 
     private:
 
-      Mantid::API::IMDWorkspace_sptr m_workspace;
+      Mantid::MDEvents::MDHistoWorkspace_sptr m_workspace;
 
       std::string m_scalarName;
 

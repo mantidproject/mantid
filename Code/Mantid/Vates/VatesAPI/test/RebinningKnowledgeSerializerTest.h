@@ -41,16 +41,9 @@ private:
     MOCK_CONST_METHOD0(getMemorySize, size_t());
     MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
     MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
-    MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment));
-    MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment));
-    MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment));
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
-    MOCK_CONST_METHOD0(getWSLocation,std::string());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
-    const Mantid::Geometry::SignalAggregate& getCell(...) const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
+
     virtual uint64_t getNPoints() const
     {
       throw std::runtime_error("Not Implemented");
@@ -85,7 +78,6 @@ void testNoImplicitFunctionThrows()
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1);
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1);
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   generator.setWorkspace(workspace);
   TSM_ASSERT_THROWS("Cannot generate the xml without the implicitFunction", generator.createXMLString(), std::runtime_error);
@@ -97,7 +89,6 @@ void testNoGeometryXMLThrows()
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return(""));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("../somelocation/somefile.sqw"));
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   RebinningKnowledgeSerializer generator;
   generator.setImplicitFunction(impFunction);
@@ -106,28 +97,11 @@ void testNoGeometryXMLThrows()
   TSM_ASSERT_THROWS("Cannot create the xml without geometry xml", generator.createXMLString(), std::runtime_error);
 }
 
-void testNoLocationThrows()
-{
-  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
-  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-  pWorkspace->setName("someName");
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return(""));
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  RebinningKnowledgeSerializer generator;
-  generator.setImplicitFunction(impFunction);
-  generator.setWorkspace(workspace);
-
-  TSM_ASSERT_THROWS("Cannot create the xml without the workspace location", generator.createXMLString(),
-      std::runtime_error);
-}
-
 void testNoLocationDoesNotThrow()
 {
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return(""));
   Mantid::API::IMDWorkspace_sptr workspace(pWorkspace);
 
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
@@ -147,7 +121,6 @@ void testNoNameThrows()
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("..../somelocation/somefile.sqw"));
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   RebinningKnowledgeSerializer generator;
   generator.setImplicitFunction(impFunction);
@@ -164,7 +137,6 @@ void testCreateXMLWithWorkspace() //Uses the workspace setter.
 
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("name");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
-  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("location"));
 
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
@@ -176,7 +148,7 @@ void testCreateXMLWithWorkspace() //Uses the workspace setter.
 
   std::string xml = generator.createXMLString();
 
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
+  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation></MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
 }
 
 void testCreateXMLWithComponents() //Uses individual setters for geometry, location and name.
@@ -189,12 +161,11 @@ void testCreateXMLWithComponents() //Uses individual setters for geometry, locat
   //Apply setters.
   generator.setImplicitFunction(impFunction);
   generator.setWorkspaceName("name");
-  generator.setWorkspaceLocation("location");
   generator.setGeometryXML("<DimensionSet/>");
 
   std::string xml = generator.createXMLString();
 
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
+  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
 }
 
 void testCreateXMLWithoutFunction()
@@ -202,18 +173,16 @@ void testCreateXMLWithoutFunction()
   RebinningKnowledgeSerializer generator;
   //Apply setters.
   generator.setWorkspaceName("name");
-  generator.setWorkspaceLocation("location");
   generator.setGeometryXML("<DimensionSet/>");
 
   std::string xml = generator.createXMLString();
-  TSM_ASSERT_EQUALS("The xml has been created without a function incorrectly", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation>location</MDWorkspaceLocation><DimensionSet/></MDInstruction>", xml);
+  TSM_ASSERT_EQUALS("The xml has been created without a function incorrectly", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><DimensionSet/></MDInstruction>", xml);
 }
 
 void testGetGeometryXML()
 {
   RebinningKnowledgeSerializer generator;
   generator.setWorkspaceName("name");
-  generator.setWorkspaceLocation("location");
   std::string dimensionXMLString = "<DimensionSet/>";
   generator.setGeometryXML(dimensionXMLString);
 
@@ -236,7 +205,6 @@ void testHasGeometryInfoWithoutGeometry()
 {
   //Note that functions do not apply to this test set.
   RebinningKnowledgeSerializer withoutGeometry;
-  withoutGeometry.setWorkspaceLocation("-");
   withoutGeometry.setWorkspaceName("-");
   TSM_ASSERT_EQUALS("No Geometry provided. ::hasGeometryInfo() should return false.", false, withoutGeometry.hasGeometryInfo());
 }
@@ -245,16 +213,7 @@ void testHasGeometryInfoWithoutWSName()
 {
   RebinningKnowledgeSerializer withoutWSName;
   withoutWSName.setGeometryXML("-");
-  withoutWSName.setWorkspaceLocation("-");
   TSM_ASSERT_EQUALS("No WS name provided. ::hasGeometryInfo() should return false.", false, withoutWSName.hasGeometryInfo());
-}
-
-void testHasGeometryInfoWithoutWSLocation()
-{
-  RebinningKnowledgeSerializer withoutWSLocation;
-  withoutWSLocation.setGeometryXML("-");
-  withoutWSLocation.setWorkspaceName("-");
-  TSM_ASSERT_EQUALS("No WS location provided. ::hasGeometryInfo() should return false.", false, withoutWSLocation.hasGeometryInfo());
 }
 
 void testHasGeometryAndWSInfo()
@@ -262,7 +221,6 @@ void testHasGeometryAndWSInfo()
   RebinningKnowledgeSerializer withFullGeometryAndWSInfo;
   withFullGeometryAndWSInfo.setGeometryXML("-");
   withFullGeometryAndWSInfo.setWorkspaceName("-");
-  withFullGeometryAndWSInfo.setWorkspaceLocation("-");
   TSM_ASSERT_EQUALS("All geometry and ws information has been provided. ::hasGeometryInfo() should return true.", true, withFullGeometryAndWSInfo.hasGeometryInfo());
 }
 

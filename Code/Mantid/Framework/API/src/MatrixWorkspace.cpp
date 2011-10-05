@@ -1261,7 +1261,7 @@ namespace Mantid
       virtual size_t getNBins() const {return m_axis.length();}
 
       /// Change the extents and number of bins
-      virtual void setRange(size_t nBins, double min, double max){throw std::runtime_error("Not implemented");}
+      virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){throw std::runtime_error("Not implemented");}
 
       ///  Get coordinate for index;
       virtual double getX(size_t ind)const {return m_axis(ind);}
@@ -1326,46 +1326,6 @@ namespace Mantid
 
       return this->getPoint(dim1Increment);
     }
-
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t dim1Increment, size_t dim2Increment) const
-    { 
-      if (dim1Increment >= this->dataX(0).size())
-      {
-        throw std::range_error("MatrixWorkspace::getCell, increment out of range");
-      }
-      if (dim2Increment >= this->dataX(0).size())
-      {
-        throw std::range_error("MatrixWorkspace::getCell, increment out of range");
-      }
-
-      return getPointImp(dim1Increment, dim2Increment);
-    }
-
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t, size_t, size_t) const
-    { 
-      throw std::logic_error("Cannot access higher dimensions");
-    }
-
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t, size_t, size_t, size_t) const
-    { 
-      throw std::logic_error("Cannot access higher dimensions");
-    }
-
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(...) const
-    { 
-      throw std::logic_error("Cannot access higher dimensions");
-    }
-
-    std::string MatrixWorkspace::getWSLocation() const
-    {
-      throw std::logic_error("Cannot access the workspace location on a MatrixWS");
-    }
-
-
-
-
-
-
 
 
     //--------------------------------------------------------------------------------------------

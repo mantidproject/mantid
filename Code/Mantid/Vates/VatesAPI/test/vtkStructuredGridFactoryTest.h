@@ -6,66 +6,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
+#include "MockObjects.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid;
-
-//=====================================================================================
-// Test Helpers Types
-//=====================================================================================
-namespace vtkStructuredGridFactoryTestHelpers
-{
-  ///Helper class. Concrete instance of IMDDimension.
-  class FakeIMDDimension: public Mantid::Geometry::IMDDimension
-  {
-  private:
-    std::string m_id;
-    const unsigned int m_nbins;
-  public:
-    FakeIMDDimension(std::string id, unsigned int nbins=10) : m_id(id), m_nbins(nbins) {}
-    std::string getName() const {throw std::runtime_error("Not implemented");}
-    std::string getUnits() const {throw std::runtime_error("Not implemented");}
-    std::string getDimensionId() const {return m_id;}
-    double getMaximum() const {return 10;}
-    double getMinimum() const {return 0;}
-    size_t getNBins() const {return m_nbins;}
-    std::string toXMLString() const {throw std::runtime_error("Not implemented");}
-    double getX(size_t) const {throw std::runtime_error("Not implemented");}
-    void setRange(size_t, double, double) {}
-    virtual ~FakeIMDDimension()
-    {
-    }
-  };
-
-  /// Mock IMDDimension.
-  class MockIMDWorkspace: public Mantid::API::IMDWorkspace
-  {
-  public:
-
-    MOCK_CONST_METHOD0(id, const std::string());
-    MOCK_CONST_METHOD0(getMemorySize, size_t());
-    MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
-    MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
-    MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment));
-    MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment));
-    MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment));
-
-    MOCK_CONST_METHOD0(getWSLocation,std::string());
-    MOCK_CONST_METHOD0(getGeometryXML,std::string());
-
-    MOCK_CONST_METHOD0(getNPoints, uint64_t());
-    MOCK_CONST_METHOD4(getSignalAt, signal_t(size_t index1, size_t index2, size_t index3, size_t index4));
-    MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
-
-    const Mantid::Geometry::SignalAggregate& getCell(...) const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-
-    virtual ~MockIMDWorkspace() {}
-  };
-}
-
-using namespace vtkStructuredGridFactoryTestHelpers;
+using namespace Mantid::MDEvents;
 
 //=====================================================================================
 // Functional Tests
@@ -81,14 +26,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    pMockWs->addDimension(new FakeIMDDimension("y"));
-    pMockWs->addDimension(new FakeIMDDimension("z"));
-    pMockWs->addDimension(new FakeIMDDimension("t"));
-    EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factoryA =
@@ -112,14 +50,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    pMockWs->addDimension(new FakeIMDDimension("y"));
-    pMockWs->addDimension(new FakeIMDDimension("z"));
-    pMockWs->addDimension(new FakeIMDDimension("t"));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factoryA =
@@ -147,14 +78,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(0); //Shouldn't access getSignal At
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    pMockWs->addDimension(new FakeIMDDimension("y"));
-    pMockWs->addDimension(new FakeIMDDimension("z"));
-    pMockWs->addDimension(new FakeIMDDimension("t"));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
@@ -166,7 +90,6 @@ public:
 
     int predictedNPoints = (10 + 1) * (10 + 1) * (10 + 1);
     TSM_ASSERT_EQUALS("Wrong number of points generated", predictedNPoints, product->GetNumberOfPoints());
-    TSM_ASSERT("This is not a mesh-only product.", testing::Mock::VerifyAndClearExpectations(pMockWs));
     product->Delete();
   }
 
@@ -176,12 +99,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->addDimension(new FakeIMDDimension("z"));
-    pMockWs->addDimension(new FakeIMDDimension("y"));
-    pMockWs->addDimension(new FakeIMDDimension("z"));
-    pMockWs->addDimension(new FakeIMDDimension("t"));
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
@@ -198,14 +116,7 @@ public:
     using namespace testing;
     TimeStepToTimeStep timeMapper;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
-    pMockWs->addDimension(new FakeIMDDimension("x"));
-    pMockWs->addDimension(new FakeIMDDimension("y"));
-    pMockWs->addDimension(new FakeIMDDimension("z"));
-    pMockWs->addDimension(new FakeIMDDimension("t"));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
@@ -266,7 +177,7 @@ public:
 class vtkStructuredGridFactoryTestPerformance : public CxxTest::TestSuite
 {
 public:
- MockIMDWorkspace* pMockWs;
+ Mantid::API::IMDWorkspace_sptr ws_sptr;
 
   void setUp()
   {
@@ -274,12 +185,8 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    //20 by 20 by 20 by 20 workspace.
-    pMockWs = new MockIMDWorkspace;
-    pMockWs->addDimension(new FakeIMDDimension("x", 100));
-    pMockWs->addDimension(new FakeIMDDimension("y", 100));
-    pMockWs->addDimension(new FakeIMDDimension("z", 100));
-    pMockWs->addDimension(new FakeIMDDimension("t", 100));
+    // 4D, 100 bins per side
+    ws_sptr = getFakeMDHistoWorkspace(1.0, 4, 100);
   }
 
   void testGenerateVTKDataSet()
@@ -288,7 +195,6 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =

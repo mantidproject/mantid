@@ -230,40 +230,6 @@ namespace MDEvents
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
-    /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const
-    {
-      (void) dim1Increment; (void) dim2Increment; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
-    }
-
-    /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
-    {
-      (void) dim1Increment; (void) dim2Increment; (void) dim3Increment; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
-    }
-
-    /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
-    {
-      (void) dim1Increment; (void)    // --------------------------------------------------------------------------------------------
- dim2Increment; (void) dim3Increment; (void) dim4Increment; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
-    }
-
-    /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(...) const
-    {
-      throw Mantid::Kernel::Exception::NotImplementedError("MDHistoWorkspace does not support more than 4 dimensions!");
-    }
-
-    /// Horace sytle implementations need to have access to the underlying file.
-    std::string getWSLocation() const
-    {
-      return "";
-    }
-
     //======================================================================================
     //================= END METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
     //======================================================================================

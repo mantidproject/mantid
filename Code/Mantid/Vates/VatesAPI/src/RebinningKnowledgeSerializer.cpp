@@ -17,7 +17,6 @@ RebinningKnowledgeSerializer::RebinningKnowledgeSerializer(LocationPolicy locati
   m_spFunction(), 
   m_wsLocationXML(""), 
   m_wsNameXML(""), 
-  m_wsLocation(""), 
   m_wsName(""), 
   m_geomXML(""),
   m_locationPolicy(locationPolicy)
@@ -34,8 +33,7 @@ void RebinningKnowledgeSerializer::setWorkspace(boost::shared_ptr<const Mantid::
 {
   
   this->m_wsNameXML =  MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + workspace->getName() + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd();
-  this->m_wsLocation = workspace->getWSLocation();
-  this->m_wsLocationXML =   MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + this->m_wsLocation + MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd();
+  this->m_wsLocationXML =   MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + "" + MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd();
   this->m_geomXML = workspace->getGeometryXML();
 }
 
@@ -43,13 +41,6 @@ void RebinningKnowledgeSerializer::setWorkspaceName(std::string wsName)
 {
   this->m_wsName = wsName;
   this->m_wsNameXML =   std::string(MDGeometryXMLDefinitions::workspaceNameXMLTagStart()  + wsName + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd());
-}
-
-void RebinningKnowledgeSerializer::setWorkspaceLocation(std::string wsLocation)
-{
-
-  this->m_wsLocation = wsLocation;
-  this->m_wsLocationXML =   std::string(MDGeometryXMLDefinitions::workspaceLocationXMLTagStart()  + wsLocation + MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd() );
 }
 
 void RebinningKnowledgeSerializer::setGeometryXML(std::string geomXML)
@@ -65,13 +56,13 @@ std::string RebinningKnowledgeSerializer::createXMLString() const
   {
     throw std::runtime_error("No geometry provided on workspace.");
   }
-  if(LocationMandatory == this->m_locationPolicy) //Only if it is stated that a location must be provided, do we apply the checking.
-  {
-    if(this->m_wsLocationXML == (MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd()))
-    {
-      throw std::runtime_error("No workspace location provided on workspace.");
-    }
-  }
+//  if(LocationMandatory == this->m_locationPolicy) //Only if it is stated that a location must be provided, do we apply the checking.
+//  {
+//    if(this->m_wsLocationXML == (MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd()))
+//    {
+//      throw std::runtime_error("No workspace location provided on workspace.");
+//    }
+//  }
   if(this->m_wsNameXML == (MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd()))
   {
     throw std::runtime_error("No workspace name provided on workspace.");
@@ -87,11 +78,6 @@ std::string RebinningKnowledgeSerializer::createXMLString() const
     //Functions are optional, so don't provide them as part of the completed xml if not present.
     return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
   }
-}
-
-const std::string& RebinningKnowledgeSerializer::getWorkspaceLocation() const
-{
-  return this->m_wsLocation;
 }
 
 const std::string& RebinningKnowledgeSerializer::getWorkspaceName() const
@@ -111,7 +97,7 @@ const std::string& RebinningKnowledgeSerializer::getWorkspaceGeometry() const
 
  bool RebinningKnowledgeSerializer::hasGeometryInfo() const
  {
-   return  !m_geomXML.empty() && !m_wsLocation.empty() && !m_wsName.empty();
+   return  !m_geomXML.empty() && !m_wsName.empty();
  }
 
 

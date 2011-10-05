@@ -10,8 +10,10 @@
 #include <boost/math/special_functions/fpclassify.hpp> 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/NullCoordTransform.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using Mantid::API::IMDWorkspace;
+using Mantid::MDEvents::MDHistoWorkspace;
 
 namespace Mantid
 {
@@ -155,7 +157,7 @@ namespace Mantid
 
     void vtkThresholdingLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
-      m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(wspace_sptr);
+      m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(wspace_sptr);
       validate();
       // When the workspace can not be handled by this type, take action in the form of delegation.
       size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();

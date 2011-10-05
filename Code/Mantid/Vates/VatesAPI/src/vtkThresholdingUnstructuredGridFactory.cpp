@@ -57,7 +57,7 @@ namespace VATES
   template<typename TimeMapper>
   void vtkThresholdingUnstructuredGridFactory<TimeMapper>::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(workspace);
+    m_workspace = boost::dynamic_pointer_cast<MDHistoWorkspace>(workspace);
     // Check that a workspace has been provided.
     validateWsNotNull();
     // When the workspace can not be handled by this type, take action in the form of delegation.

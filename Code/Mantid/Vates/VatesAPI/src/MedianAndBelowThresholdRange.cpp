@@ -42,7 +42,7 @@ namespace Mantid
       size_t pos = 0;
       signal_t accumulated_signal = 0;
 
-      try
+//      try
       {
       Mantid::API::IMDIterator* it = m_workspace->createIterator();
       while(it->next())
@@ -54,17 +54,17 @@ namespace Mantid
       }
       m_max = accumulated_signal / static_cast<signal_t>(it->getDataSize());
       }
-      catch(Kernel::Exception::NotImplementedError&) // Really don't want to do this, but some IMDWorkspace don't implement createIterator!
-      {
-        uint64_t size = m_workspace->getNPoints();
-        for(uint64_t i = 0; i < size; i++)
-        {
-          signal = m_workspace->getSignalAt(i);
-          accumulated_signal += signal;
-          m_min = signal < m_min ? signal : m_min;
-        }
-        m_max = accumulated_signal / static_cast<signal_t>(size);
-      }
+//      catch(Kernel::Exception::NotImplementedError&) // Really don't want to do this, but some IMDWorkspace don't implement createIterator!
+//      {
+//        uint64_t size = m_workspace->getNPoints();
+//        for(uint64_t i = 0; i < size; i++)
+//        {
+//          signal = m_workspace->getSignalAt(i);
+//          accumulated_signal += signal;
+//          m_min = signal < m_min ? signal : m_min;
+//        }
+//        m_max = accumulated_signal / static_cast<signal_t>(size);
+//      }
       m_isCalculated = true;
     }
 

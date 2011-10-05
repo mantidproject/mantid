@@ -271,21 +271,11 @@ namespace Mantid
       virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const;
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const;
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const;
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const;
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
       /// Dimension id for x-dimension.
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
       /// Getter for collapsed dimensions.
-      /// Provide the location of the underlying file.
-      virtual std::string getWSLocation() const;
       Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
       {
         throw std::runtime_error("Not yet implemented");

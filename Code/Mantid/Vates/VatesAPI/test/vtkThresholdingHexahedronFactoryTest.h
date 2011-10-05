@@ -111,14 +111,11 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -128,7 +125,6 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     
     factory.initialize(ws_sptr);
 
-    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
@@ -139,10 +135,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -150,23 +143,21 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
-  void testCreateDeleagates()
+  void testCreateDelegates()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    pMockWs->setTransformFromOriginal(new NullCoordTransform);
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
+    //2 dimensions on the workspace.
+    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -177,7 +168,6 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     factory.initialize(ws_sptr);
     factory.create(); // should be called on successor.
 
-    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 

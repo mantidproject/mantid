@@ -61,7 +61,6 @@ private:
   boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction>  m_spFunction;
   std::string m_wsLocationXML;
   std::string m_wsNameXML;
-  std::string m_wsLocation;
   std::string m_wsName;
   std::string m_geomXML;
   LocationPolicy m_locationPolicy;
@@ -78,17 +77,11 @@ public:
   /// Set the workspace name to apply.
   void setWorkspaceName(std::string wsName);
 
-  /// Set the location to apply.
-  void setWorkspaceLocation(std::string wsLocation);
-
   /// Set the geometry xml to apply.
   void setGeometryXML(std::string geomXML);
 
   /// Create the xml string correponding to the set values.
   std::string createXMLString() const;
-
-  /// Get the underlying workspace location.
-  const std::string& getWorkspaceLocation() const;
 
   /// Get the underlying workspace name.
   const std::string& getWorkspaceName() const;

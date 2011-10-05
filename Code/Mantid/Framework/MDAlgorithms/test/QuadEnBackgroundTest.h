@@ -153,26 +153,6 @@ public:
         return(m_mdcells.at(dim1Increment));
     };
 
-    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(...) const
-    {
-        throw std::runtime_error("Not implemented");
-    }
-
     virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
     {
         // only one dimension in this mock up
@@ -184,10 +164,7 @@ public:
     /// return number of dimensions in MD workspace
     virtual size_t getNumDims()const{return 4;}
     virtual size_t getMemorySize() const {return 0;};
-    virtual std::string getWSLocation() const
-    {
-        throw std::runtime_error("Not implemented");
-    }
+
     virtual std::string getGeometryXML() const
     {
         throw std::runtime_error("Not implemented");

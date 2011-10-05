@@ -37,7 +37,6 @@ public:
 
     // Methods that are not implemented
     TS_ASSERT_THROWS_ANYTHING( ws.getCell(1) );
-    TS_ASSERT_THROWS_ANYTHING( ws.getCell(1,2,3,4) );
     TS_ASSERT_THROWS_ANYTHING( ws.getPoint(1) );
 
     // The values are cleared at the start
