@@ -109,6 +109,19 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                  double                      index_factor,
                                  double                      magnitude_fft[]);
   
+  /// Get the location of the first maximum (beyond the DC term) in the |FFT| 
+  /// that exceeds the specified threshold.
+  static double GetFirstMaxIndex( const double magnitude_fft[],
+                                        size_t N,
+                                        double threshold );
+
+  /// Try to form a UB matrix from three vectors chosen from list of possible
+  /// a,b,c directions, starting with the a vector at the given index.
+  static bool FormUB_From_abc_Vectors( Kernel::DblMatrix         & UB,
+                                 const std::vector<Kernel::V3D>  & directions,
+                                       size_t                      a_index,
+                                       double                      min_d,
+                                       double                      max_d );
 
   /// Get the vector in the direction of "c" given other unit cell information
   static Kernel::V3D Make_c_dir( const Kernel::V3D  & a_dir,

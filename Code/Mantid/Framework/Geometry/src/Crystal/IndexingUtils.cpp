@@ -406,76 +406,11 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   }
 
   std::sort( directions.begin(), directions.end(), CompareMagnitude );
-  V3D a_dir = directions[0];     // take the shortest direction to be "a"
-                                 // then take "b" to be the next shortest 
-                                 // direction that forms a large enough angle
-                                 // with "a".
-  double min_deg = (180/PI) * atan(2*min_d/max_d);
 
-  double epsilon = 5;                    //  tolerance on right angle (degrees)
-  V3D    b_dir;
-  bool   b_found = false;
-  size_t index = 1;
-  while ( !b_found && index < directions.size() )
+  if ( ! FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d )  )
   {
-    V3D vec = directions[index];
-    double gamma = a_dir.angle( vec ) * 180 / PI;
-    if ( gamma >= min_deg && (180 - gamma) >= min_deg )
-    {
-      b_dir = vec;
-      if ( gamma > 90 + epsilon )       // try for Nigli cell with angles <= 90
-        b_dir *= -1;
-      b_found = true;
-    }
-    index++;
+    throw std::runtime_error("Could not find independent a, b, c directions" ); 
   }
-  if ( ! b_found )
-  {
-    throw std::runtime_error("Could not find independent b direction");   
-  }
-
-  V3D c_dir;
-  bool c_found = false;
-
-  V3D perp = a_dir.cross_prod( b_dir );
-  perp.normalize();
-  double perp_ang;
-  double alpha;
-  double beta;
-  while ( !c_found && index < directions.size() )
-  {
-    V3D vec = directions[index];
-    int factor = 1;
-    while ( !c_found && factor >= -1 )         // try c in + or - direction
-    {
-      c_dir = vec; 
-      c_dir *= factor;
-      perp_ang = perp.angle( c_dir )  * 180 / PI;
-      alpha    = b_dir.angle( c_dir ) * 180 / PI;
-      beta     = a_dir.angle( c_dir ) * 180 / PI;
-                                       // keep a,b,c right handed by choosing
-                                       // c in general directiion of a X b 
-      if ( perp_ang < 90 - epsilon                      &&
-           alpha >= min_deg && (180 - alpha) >= min_deg &&
-           beta  >= min_deg && (180 - beta ) >= min_deg  )
-      { 
-        c_found = true;
-      }
-      factor -= 2;
-    }
-    if ( ! c_found )
-      index++;
-  }
-
-  if ( ! c_found )
-  {
-    throw std::runtime_error("Could not find independent c direction"); 
-  }
-                                     // now build the UB matrix from a,b,c 
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  UB.Invert();
                                      // now gradually bring in the remaining
                                      // peaks and re-optimize the UB to index
                                      // them as well
@@ -1176,6 +1111,177 @@ double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
 
 
 /**
+ * Scan the FFT array for the first maximum that exceeds
+ * the specified threshold and is beyond the initial DC term/interval.
+ * @param magnitude_fft   The array containing the magnitude of the 
+ *                        FFT values.
+ * @param N               The size of the FFT array.
+ * @param threshold       The required threshold for the first peak.  This
+ *                        must be positive.
+ * @return The centroid (index) where the first maximum occurs, or -1
+ *         if no point in the FFT (beyond the DC term) equals or exceeds 
+ *         the required threshold.
+ */
+double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[], 
+                                              size_t N,
+                                              double threshold )
+{
+                                     // find first local min below threshold
+  size_t i = 2;
+  bool   found_min = false;
+  double val;
+  while ( i < N-1 && !found_min )
+  {
+    val = magnitude_fft[i];
+    if ( val <  threshold          &&
+         val <= magnitude_fft[i-1] &&
+         val <= magnitude_fft[i+1]  )
+      found_min = true;
+    i++;
+  }
+
+  if ( !found_min )
+    return -1;
+                                     // find next local max above threshold
+  bool found_max = false;
+  while ( i < N-1 && !found_max )
+  {
+    val = magnitude_fft[i];
+    if ( val >= threshold          &&
+         val >= magnitude_fft[i-1] &&
+         val >= magnitude_fft[i+1]  )
+      found_max = true;
+    else
+      i++;
+  }
+
+  double sum   = 0;
+  double w_sum = 0;
+  if ( found_max )
+  {
+    sum   = 0;
+    w_sum = 0;
+    for ( size_t j = i-2; j <= i+2; j++ )
+    {
+      sum   += (double)j * magnitude_fft[j];
+      w_sum += magnitude_fft[j];
+    }
+    return sum / w_sum;
+  }
+  else
+    return -1;
+}
+
+
+/**
+ *  Form a UB matrix from the given list of possible directions, using the
+ *  direction at the specified index for the "a" direction.  The "b" and "c"
+ *  directions are chosen so that 
+ *   1) |a| < |b| < |c|, 
+ *   2) the angle between the a, b, c, vectors is at least a minimum 
+ *      angle based on min_d/max_d
+ *   3) c is not in the same plane as a and b.
+ *
+ *  @param UB           The calculated UB matrix will be returned in this 
+ *                      parameter
+ *  @param directions   List of possible vectors for a, b, c.  This list MUST
+ *                      be sorted in order of increasing magnitude.
+ *  @param a_index      The index to use for the a vector.  The b and c 
+ *                      vectors will be choosen from LATER positions in the
+ *                      directions list.
+ *  @param min_d        Minimum possible real space unit cell edge length.
+ *  @param max_d        Maximum possible real space unit cell edge length.
+ *
+ *  @return true if a UB matrix was set, and false if it not possible to
+ *          choose a,b,c (i.e. UB) from the list of directions, starting
+ *          with the specified a_index.
+ */
+bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
+                                       const std::vector<V3D>  & directions,
+                                             size_t              a_index,
+                                             double              min_d,
+                                             double              max_d )
+
+{
+  size_t index = a_index;
+  V3D a_dir = directions[ index ];
+  index++;
+                                         // the possible range of d-values
+                                         // implies a bound on the minimum
+                                         // angle between a,b, c vectors.
+  double min_deg = (180.0/PI) * atan(2.0 * min_d/max_d);
+
+  double epsilon = 5;                    //  tolerance on right angle (degrees)
+  V3D b_dir;
+  bool b_found = false;
+  while ( !b_found && index < directions.size() )
+  {
+    V3D    vec   = directions[ index ];
+    double gamma = a_dir.angle( vec ) * 180 / PI;
+
+    if ( gamma >= min_deg && (180 - gamma) >= min_deg )
+    {
+      b_dir = vec;
+      if ( gamma > 90 + epsilon )       // try for Nigli cell with angles <= 90
+        b_dir *= -1.0;
+      b_found = true;
+      index++;
+    }
+    else
+      index++;
+  }
+
+  if ( ! b_found )
+    return false;
+
+  V3D c_dir;
+  bool c_found = false;
+
+  V3D perp = a_dir.cross_prod( b_dir );
+  perp.normalize();
+  double perp_ang;
+  double alpha;
+  double beta;
+  while ( !c_found && index < directions.size() )
+  {
+    V3D vec = directions[index];
+    int factor = 1;
+    while ( !c_found && factor >= -1 )         // try c in + or - direction
+    {
+      c_dir = vec;
+      c_dir *= factor;
+      perp_ang = perp.angle( c_dir )  * 180 / PI;
+      alpha    = b_dir.angle( c_dir ) * 180 / PI;
+      beta     = a_dir.angle( c_dir ) * 180 / PI;
+                                       // keep a,b,c right handed by choosing
+                                       // c in general directiion of a X b
+      if ( perp_ang < 90 - epsilon                      &&
+           alpha >= min_deg && (180 - alpha) >= min_deg &&
+           beta  >= min_deg && (180 - beta ) >= min_deg  )
+      {
+        c_found = true;
+      }
+      factor -= 2;
+    }
+    if ( ! c_found )
+      index++;
+  }
+
+  if ( ! c_found )
+  {
+    return false;
+  }
+                                     // now build the UB matrix from a,b,c
+  UB.setRow( 0, a_dir );
+  UB.setRow( 1, b_dir );
+  UB.setRow( 2, c_dir );
+  UB.Invert();
+
+  return true;
+}
+
+
+/**
     For a rotated unit cell, calculate the vector in the direction of edge
     "c" given two vectors a_dir and b_dir in the directions of edges "a" 
     and "b", with lengths a and b, and the cell angles.  The calculation is
@@ -1316,7 +1422,8 @@ bool IndexingUtils::CheckUB( const DblMatrix & UB )
   as indexed.  Also, if (h,k,l) = (0,0,0) the peak will NOT be counted
   as indexed, since (0,0,0) is not a valid index of any peak.
   
-  @param UB           A 3x3 matrix of doubles holding the UB matrix
+  @param UB           A 3x3 matrix of doubles holding the UB matrix.
+                      The UB matrix must not be singular.
   @param q_vectors    std::vector of V3D objects that contains the list of 
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
@@ -1479,6 +1586,10 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   indexed_qs.reserve( q_vectors.size() );
 
   fit_error = 0;
+
+  if ( direction.norm() == 0 )    // special case, zero vector will NOT index
+   return 0;                      // any peaks, even though dot product
+                                  // with Q vectors is always an integer!
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
