@@ -317,7 +317,7 @@ void AlignDetectors::execTOFEvent(std::string calfilename, Mantid::API::MatrixWo
   }
 
   // 3. Convert!
-  for (int ispec = 0; ispec < outputWS->getNumberHistograms(); ispec ++){
+  for (int ispec = 0; ispec < static_cast<int>(outputWS->getNumberHistograms()); ispec ++){
     // For each spectrum
 
     EventList events = outputWS->getEventList(ispec);
@@ -330,7 +330,7 @@ void AlignDetectors::execTOFEvent(std::string calfilename, Mantid::API::MatrixWo
 
     std::set<detid_t>::iterator setiter;
     double shiftfactor = 1.0;
-    detid_t detid;
+    detid_t detid = 0;
     for (setiter=detectorids.begin(); setiter != detectorids.end(); ++setiter){
 
       detid = *setiter;

@@ -164,7 +164,7 @@ namespace Mantid
       const size_t column_size_2 = column_size * 2; //offset, gives qz
       const size_t column_size_3 = column_size * 3; //offset, gives en
       const size_t column_size_4 = column_size * 4; //offset, gives idet
-      const size_t column_size_5 = column_size * 5; //offset, gives ien
+      //const size_t column_size_5 = column_size * 5; //offset, gives ien
       const size_t column_size_6 = column_size * 6; //offset, gives irun
       const size_t column_size_7 = column_size * 7; //offset, gives signal
       const size_t column_size_8 = column_size * 8; //offset, gives error
