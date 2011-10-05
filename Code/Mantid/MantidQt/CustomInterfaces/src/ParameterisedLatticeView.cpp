@@ -31,7 +31,7 @@ namespace MantidQt
 
       m_a1 = createEditBox(a1);
       m_a2 = createEditBox(a2);
-      m_a3 = createEditBox(a2);
+      m_a3 = createEditBox(a3);
       m_b1 = createEditBox(b1);
       m_b2 = createEditBox(b2);
       m_b3 = createEditBox(b3);

@@ -30,7 +30,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
@@ -116,8 +116,8 @@ void CreateMDWorkspace::addWorkspaceClicked()
     using namespace Mantid::API;
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
     m_data->registerWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(ws), m_model); //TODO better handle any incompatibility here.
-
-    m_approach = boost::shared_ptr<Approach>(new InelasticISIS(m_data->at(0))); //HACK : find some better way of providing the exact ws memento.
+    LoanedMemento memento = m_data->at(0);
+    m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento)); //HACK : find some better way of providing the exact ws memento.
     m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
     m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
 
