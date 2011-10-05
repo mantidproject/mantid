@@ -349,6 +349,8 @@ void DiffractionFocussing2::execEvent()
   Progress * prog;
   prog = new Progress(this,0.2,0.35,nHist);
 
+  bool checkForMask = (instrument != NULL) && (source != NULL) && (sample != NULL);
+
   if (nGroups == 1)
   {
     g_log.information() << "Performing focussing on a single group\n";
@@ -373,35 +375,18 @@ void DiffractionFocussing2::execEvent()
       int max = (wiChunk+1)*chunkSize;
       if (max > nHist) max = nHist;
 
-      // calculate the number of events that will go into the chunk
-      size_t eventsInChunk = 0;
-      for (int wi=wiChunk*chunkSize; wi < max; wi++)
-      {
-        // ignore the masking bit
-        const int group = groupAtWorkspaceIndex[wi];
-        if (group == 1)
-        {
-          // Accumulate the chunk
-          eventsInChunk += eventW->getEventList(wi).getNumberEvents();
-        }
-      }
-
       // Make a blank EventList that will accumulate the chunk.
       EventList chunkEL;
       chunkEL.switchTo(eventW->getEventType());
-      chunkEL.reserve(eventsInChunk);
 
       // process the chunk
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
       {
         // Check for masking. TODO: Most of the pointer checks are redundant
-        if (instrument != NULL)
+        if (checkForMask)
         {
-          if ( source != NULL && sample != NULL )
-          {
-            Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
-            if ( det->isMasked() ) continue;
-          }
+          Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
+          if ( det->isMasked() ) continue;
         }
         const int group = groupAtWorkspaceIndex[wi];
         if (group == 1)
@@ -432,13 +417,10 @@ void DiffractionFocussing2::execEvent()
 
     for (int wi=0;wi<nHist;wi++)
     {
-      if (instrument != NULL)
+      if (checkForMask)
       {
-        if ( source != NULL && sample != NULL )
-        {
-          Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
-          if ( det->isMasked() ) continue;
-        }
+        Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
+        if ( det->isMasked() ) continue;
       }
       //i is the workspace index (of the input)
       const int group = groupAtWorkspaceIndex[wi];
