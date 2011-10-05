@@ -14,10 +14,8 @@ src/FieldDataToMetadata.cpp
 src/GaussianThresholdRange.cpp
 src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
-src/IMDWorkspaceProxy.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
 src/MDEWRebinningPresenter.cpp
-#src/MDHistogramRebinningPresenter.cpp
 src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
@@ -69,7 +67,6 @@ inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDEWLoadingPresenter.h
 inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDEWRebinningPresenter.h
-#inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
@@ -80,7 +77,6 @@ inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/NullCoordTransform.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
-inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
 inc/MantidVatesAPI/NoThresholdRange.h
@@ -135,15 +131,12 @@ test/vtkThresholdingLineFactoryTest.h
 test/vtkThresholdingQuadFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
-test/IMDWorkspaceProxyTest.h
-# test/MultiDimensionalDbPresenterTest.h
 test/MDLoadingViewAdapterTest.h
 test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
 test/MDEWInMemoryLoadingPresenterTest.h
 test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h
-#test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h
