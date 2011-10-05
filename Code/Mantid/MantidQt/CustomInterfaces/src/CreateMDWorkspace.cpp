@@ -1,6 +1,7 @@
 //----------------------
 // Includes
 //----------------------
+#include "MantidQtCustomInterfaces/InelasticISIS.h"
 #include "MantidQtCustomInterfaces/CreateMDWorkspace.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -29,7 +30,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
@@ -53,6 +54,15 @@ void CreateMDWorkspace::initLayout()
   connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeWorkspaceClicked()));
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
+
+  //TODO : generate a proper dialog giving a set of options for 'configurations'. i.e. ISIS inelastic.
+  QMessageBox msgBox;
+  msgBox.setText("Choose a configuration.");
+  msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+  msgBox.setDefaultButton(QMessageBox::Cancel);
+  msgBox.exec();
+
+  
 
 }
 
@@ -106,6 +116,11 @@ void CreateMDWorkspace::addWorkspaceClicked()
     using namespace Mantid::API;
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
     m_data->registerWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(ws), m_model); //TODO better handle any incompatibility here.
+
+    m_approach = boost::shared_ptr<Approach>(new InelasticISIS(m_data->at(0))); //HACK : find some better way of providing the exact ws memento.
+    m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
+    m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+
   }
 }
 

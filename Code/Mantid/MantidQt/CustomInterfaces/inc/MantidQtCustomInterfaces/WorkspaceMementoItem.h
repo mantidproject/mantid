@@ -1,32 +1,13 @@
 #ifndef MANTID_DATAOBJECTS_MEMENTO_ITEM_H_
 #define MANTID_DATAOBJECTS_MEMENTO_ITEM_H_
-#include "MantidKernel/System.h"
+
 #include "MantidAPI/ITableWorkspace.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-
-
-    /**  @class Boolean
-    As TableColumn stores its data in a std::vector bool type cannot be used 
-    in the same way as the other types. Class Boolean is used instead.
-*/
-    class DLLExport AbstractMementoItem
-    {
-    public:
-      virtual bool hasChanged() const = 0;
-      virtual void commit() = 0;
-      virtual void rollback() = 0;
-      virtual bool equals(AbstractMementoItem& other) const = 0;
-      virtual ~AbstractMementoItem() {}
-    };
-
-
-    typedef boost::shared_ptr<AbstractMementoItem> AbstractMementoItem_sptr;
-    
     /** @class WorkspaceMementoItem. Unique type for column data, through which changes to cell data can be applied, stored and reverted.
     Type system ensures that no two columns are comparible, even if they store the same data.
 
@@ -64,6 +45,23 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr m_data;
       /// Row onto which this column object projects.
       int m_rowIndex;
+
+    protected:
+
+      virtual const std::type_info& get_type_info() const
+      {
+         return typeid(ColType);
+      }
+
+      void* getValueVoidPtr()
+      {
+        return &m_value;
+      }
+
+      void setValueVoidPtr(void* value)
+      {
+        m_value = *static_cast<ColType*>(value);
+      }
 
     public:
       /// Unique column index.

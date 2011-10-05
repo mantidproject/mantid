@@ -1,6 +1,6 @@
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
-#include "MantidQtCustomInterfaces/ExternalDrivenModel.h"
+#include "MantidQtCustomInterfaces/Updateable.h"
 
 // Forward declarations
 namespace Mantid
@@ -43,7 +43,7 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class QtWorkspaceMementoModel : public QAbstractTableModel, public ExternalDrivenModel
+    class QtWorkspaceMementoModel : public QAbstractTableModel, public Updateable
     {
     public:
       QtWorkspaceMementoModel(boost::shared_ptr<Mantid::API::ITableWorkspace> displayData);

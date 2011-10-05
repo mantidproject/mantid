@@ -4,8 +4,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
-#include "MantidQtCustomInterfaces/ExternalDrivenModel.h"
+#include "MantidQtCustomInterfaces/Updateable.h"
 
 #include <utility>
 #include <string>
@@ -46,7 +47,7 @@ namespace MantidQt
     @param ws : ref to workspace to generate mementos for.
     @param model : ptr to the model which can be updated.
     */
-    void WorkspaceMementoCollection::registerWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws, ExternalDrivenModel* model)
+    void WorkspaceMementoCollection::registerWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws, Updateable* model)
     {
       enum statusoptions{notready, readyforvisualisation, notreadyforanything};
       using namespace Mantid::API;
@@ -116,7 +117,7 @@ namespace MantidQt
       return m_data;
     }
 
-    void WorkspaceMementoCollection::unregisterWorkspace(const std::string& wsName, ExternalDrivenModel* model)
+    void WorkspaceMementoCollection::unregisterWorkspace(const std::string& wsName, Updateable* model)
     {
       //Clear the table row.
       int row;
@@ -133,7 +134,7 @@ namespace MantidQt
       model->update();
     }
 
-    void WorkspaceMementoCollection::revertAll(ExternalDrivenModel* model)
+    void WorkspaceMementoCollection::revertAll(Updateable* model)
     {
       MementoMap::iterator it = m_mementoMap.begin();
       while(it != m_mementoMap.end())
@@ -143,7 +144,7 @@ namespace MantidQt
       model->update();
     }
 
-    void WorkspaceMementoCollection::applyAll(ExternalDrivenModel* model)
+    void WorkspaceMementoCollection::applyAll(Updateable* model)
     {
       MementoMap::iterator it = m_mementoMap.begin();
       while(it != m_mementoMap.end())
@@ -186,6 +187,7 @@ namespace MantidQt
         memento->addItem(new WorkspaceMementoItem<7, double>(m_data, rowIndex));
         memento->addItem(new WorkspaceMementoItem<8, double>(m_data, rowIndex));
         memento->addItem(new WorkspaceMementoItem<9, double>(m_data, rowIndex));
+        memento->addItem(new WorkspaceMementoItem<10, std::string>(m_data, rowIndex));
         //TODO lots more column items to add.
       }
       

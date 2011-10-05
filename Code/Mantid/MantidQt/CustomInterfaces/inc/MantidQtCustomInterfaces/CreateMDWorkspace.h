@@ -11,8 +11,8 @@
 
 #include <Poco/NObserver.h>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include "MantidKernel/ConfigService.h"
-
 
 namespace MantidQt
 {
@@ -20,6 +20,7 @@ namespace MantidQt
   {
     //Forward declaration
     class WorkspaceMementoCollection;
+    class Approach;
     class CreateMDWorkspace : public MantidQt::API::UserSubWindow
     {
       Q_OBJECT
@@ -47,6 +48,7 @@ namespace MantidQt
     private:
       Ui::CreateMDWorkspace  m_uiForm;
       boost::scoped_ptr<WorkspaceMementoCollection> m_data;
+      boost::shared_ptr<Approach> m_approach;
       QtWorkspaceMementoModel* m_model;
       
       

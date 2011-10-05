@@ -7,41 +7,53 @@ set ( SRC_FILES src/background.cpp
                 src/IndirectDataAnalysis.cpp
                 src/IndirectDiffractionReduction.cpp
                 src/IO_MuonGrouping.cpp
+                src/InelasticISIS.cpp
                 src/QtWorkspaceMementoModel.cpp
+                src/LatticePresenter.cpp
+                src/LoanedMemento.cpp
                 src/MuonAnalysis.cpp
                 src/MuonAnalysisHelper.cpp
                 src/MuonAnalysisOptionTab.cpp
-				#src/ParameterisedLatticeView.cpp
+                src/ParameterisedLatticeView.cpp
                 src/SANSAddFiles.cpp
                 src/SANSPlotSpecial.cpp
                 src/SANSRunWindow.cpp
                 src/SANSDiagnostics.cpp
+		src/SingleOwnerLock.cpp
                 src/WorkspaceMementoCollection.cpp
                 src/WorkspaceMemento.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
+set ( INC_FILES 
+                inc/MantidQtCustomInterfaces/AbstractMementoItem.h
+                inc/MantidQtCustomInterfaces/Approach.h
+                inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/deltaECalc.h
-                inc/MantidQtCustomInterfaces/ExternalDrivenModel.h
+                inc/MantidQtCustomInterfaces/Updateable.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
-				#inc/MantidQtCustomInterfaces/LatticeView.h
+                inc/MantidQtCustomInterfaces/InelasticISIS.h
+                inc/MantidQtCustomInterfaces/LatticePresenter.h
+                inc/MantidQtCustomInterfaces/LatticeView.h
+                inc/MantidQtCustomInterfaces/LoanedMemento.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-				#inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
+                inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+                inc/MantidQtCustomInterfaces/SingleOwnerLock.h
                 inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
+                inc/MantidQtCustomInterfaces/WorkspaceMementoLock.h
                 inc/MantidQtCustomInterfaces/WorkspaceMemento.h
                 inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
 )
@@ -57,7 +69,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-				#inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
+                inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
@@ -74,8 +86,14 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 )
 
 set( TEST_FILES
+               test/AbstractMementoItemTest.h
+               test/LatticePresenterTest.h
+               test/LoanedMementoTest.h
+               test/InelasticISISTest.h
+               test/SingleOwnerLockTest.h
                test/WorkspaceMementoCollectionTest.h
                test/WorkspaceMementoItemTest.h
+               test/WorkspaceMementoTest.h
 )
 
 include_directories ( inc )

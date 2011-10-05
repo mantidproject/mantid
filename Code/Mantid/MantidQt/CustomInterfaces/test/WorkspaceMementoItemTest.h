@@ -28,6 +28,10 @@ WorkspaceMementoItemTest() : ws(new TableWorkspace(2))
   ws->cell<int>(0, 1) = 1;
 }
 
+//=====================================================================================
+// Functional tests
+//=====================================================================================
+
 void testConstructor()
 {
   //Integer Item

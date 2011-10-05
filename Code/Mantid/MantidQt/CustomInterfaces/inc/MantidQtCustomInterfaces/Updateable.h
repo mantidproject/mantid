@@ -2,7 +2,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    class ExternalDrivenModel
+    class Updateable
     {
     public:
       virtual void update() = 0;

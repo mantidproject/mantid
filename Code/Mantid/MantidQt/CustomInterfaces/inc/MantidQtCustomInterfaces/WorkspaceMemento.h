@@ -1,47 +1,19 @@
-#ifndef MANTID_DATAOBJECTS_MEMENTO_H_
-#define MANTID_DATAOBJECTS_MEMENTO_H_
+#ifndef MANTID_CUSTOMINTERFACES_MEMENTO_H_
+#define MANTID_CUSTOMINTERFACES_MEMENTO_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
-#include <string>
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include <vector>
-#include <map>
+#include <string>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /**
-    Abstract Functor for locking usage. 
-    */
-    class DLLExport WorkspaceMementoLock
-    {
-    public:
-      virtual void lock() = 0;
-      virtual bool unlock() = 0;
-      virtual bool locked() const = 0;
-      virtual ~WorkspaceMementoLock(){}
-    };
-
-    /**
-    Concrete locking functor implementing single-owner-usage for locking.
-    */
-    class DLLExport SingleOwnerLock : public WorkspaceMementoLock
-    {
-    private:
-      typedef std::map<std::string, bool> LockMap;
-      static LockMap locks;
-      std::string m_wsName;
-    public:
-      SingleOwnerLock(std::string wsName);
-      virtual void lock();
-      virtual bool unlock();
-      virtual bool locked() const;
-      virtual ~SingleOwnerLock();
-    };
-
     /** @class WorkspaceMemento
 
     Stores local changes to Workspace metadata. Can commit or rollback these changes to an underlying table workspace,
@@ -70,6 +42,7 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+    class WorkspaceMementoLock;
     class DLLExport WorkspaceMemento
     {
     public:
@@ -90,6 +63,8 @@ namespace MantidQt
       bool locked() const;
       bool unlock();
       void lock();
+
+
     private:
       /// Reference to underlying data.
       Mantid::API::ITableWorkspace_sptr m_data;
