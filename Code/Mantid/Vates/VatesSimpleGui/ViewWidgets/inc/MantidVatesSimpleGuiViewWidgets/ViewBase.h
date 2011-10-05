@@ -129,7 +129,7 @@ signals:
 
 private:
   Q_DISABLE_COPY(ViewBase);
-  ColorUpdater colorUpdater; /// Handle to the color updating delegator
+  ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };
 
 }
