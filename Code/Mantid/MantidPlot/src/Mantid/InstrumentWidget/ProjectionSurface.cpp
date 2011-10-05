@@ -519,7 +519,7 @@ QList<PeakMarker2D*> ProjectionSurface::getMarkersWithID(int detID)const
   QList<PeakMarker2D*> out;
   for(int i=0;i < m_peakShapes.size(); ++i)
   {
-    out.append(m_peakShapes[i]->getMarkersWithID(detID));
+    out += m_peakShapes[i]->getMarkersWithID(detID);
   }
   return out;
 }
