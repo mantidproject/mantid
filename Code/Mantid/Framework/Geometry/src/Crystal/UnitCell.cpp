@@ -465,6 +465,10 @@ namespace Geometry
   void UnitCell::calculateGstar()
   {
       // Reciprocal metrix tensor is simply the inverse of the direct one
+    if(G.determinant() == 0)
+    {
+      throw std::range_error("UnitCell not properly initialized");
+    }
     Gstar=G;
     if (Gstar.Invert()==0)
             {throw std::range_error("UnitCell not properly initialized");}

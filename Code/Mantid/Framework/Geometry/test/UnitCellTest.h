@@ -20,6 +20,11 @@ class UnitCellTest : public CxxTest::TestSuite
 {
 public:
 
+  void testInvalidParametersThrow()
+  {
+    TSM_ASSERT_THROWS("Should throw if matrix is not invertible!", UnitCell(0, 0, 0, 0, 0, 0), std::range_error);
+  }
+
   void test_Simple()
   {
     // test constructors, access to some of the variables

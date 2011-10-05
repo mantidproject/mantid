@@ -143,7 +143,10 @@ namespace Mantid
             throw std::invalid_argument("Cannot determine t-dimension mapping.");
           }
           m_tDimension = *tDimensionIt;
-          vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(tDimId)));
+          if(!vecNonMappedDims.empty())
+          {
+            vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(tDimId)));
+          }
         }
         m_vecNonMappedDims = vecNonMappedDims; //Copy with strong guarantee.
         m_vecAllDims = vecAllDims;
