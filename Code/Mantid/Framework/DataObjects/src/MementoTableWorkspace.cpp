@@ -62,7 +62,7 @@ namespace Mantid
     Kernel::Logger& MementoTableWorkspace::g_log = Kernel::Logger::get("MementoTableWorkspace");
 
     /// Constructor
-    MementoTableWorkspace::MementoTableWorkspace() 
+    MementoTableWorkspace::MementoTableWorkspace(int nRows) : TableWorkspace(nRows) 
     {
       //Configure the columns as part of the construction.
       this->addColumn("str","WSName");

@@ -145,7 +145,8 @@ public:
      WorkspaceMemento memento(ws, "TestWSRow");
 
      doAddItems(ws, memento);
-     memento.getItem(0)->setValue(std::string("New Name")); //Give the memento a new name.
+     std::string newValue = "New Name";
+     memento.getItem(0)->setValue(newValue); //Give the memento a new name.
      
      TSM_ASSERT("Should indicate changes state via ::hasChanges", memento.hasChanged());
 
@@ -157,7 +158,8 @@ public:
      WorkspaceMemento memento(ws, "TestWSRow");
 
      doAddItems(ws, memento);
-     memento.getItem(1)->setValue(std::string("New Instrument")); //Give the memento a new instrument.
+     std::string newValue = "New Instrument";
+     memento.getItem(1)->setValue(newValue); //Give the memento a new instrument.
      TSM_ASSERT("Should indicate changes state via ::hasChanges", memento.hasChanged());
      memento.rollback(); //Roll back the changes.
      TSM_ASSERT("Should indicate no changes after rollBack", !memento.hasChanged());
@@ -169,7 +171,8 @@ public:
      WorkspaceMemento memento(ws, "TestWSRow");
 
      doAddItems(ws, memento);
-     memento.getItem(1)->setValue(std::string("New Instrument")); //Give the memento a new instrument.
+     std::string newValue = "New Instrument";
+     memento.getItem(1)->setValue(newValue);//Give the memento a new instrument.
      TSM_ASSERT("Should indicate changes state via ::hasChanges", memento.hasChanged());
      memento.commit(); //Commit the changes. Make them stick.
      TSM_ASSERT("Should indicate no changes after commit", !memento.hasChanged());
@@ -191,7 +194,8 @@ public:
 
      WorkspaceMemento c(ws, "C");
      doAddItems(ws, c);
-     c.getItem(0)->setValue(std::string("New Name"));
+     std::string newValue = "New Name";
+     c.getItem(0)->setValue(newValue);
 
      TS_ASSERT(a.equals(b));
      TS_ASSERT(a == b);

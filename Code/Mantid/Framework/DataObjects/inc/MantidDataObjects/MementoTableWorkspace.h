@@ -48,7 +48,7 @@ namespace DataObjects
     public:
       
       static bool isMementoWorkspace(const Mantid::API::ITableWorkspace& candidate);
-      MementoTableWorkspace();
+      MementoTableWorkspace(int nRows=0);
       ~MementoTableWorkspace();
     private:
       static Kernel::Logger& g_log;
