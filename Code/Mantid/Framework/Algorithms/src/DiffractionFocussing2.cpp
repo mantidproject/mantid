@@ -357,7 +357,7 @@ void DiffractionFocussing2::execEvent()
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
     groupEL.switchTo(eventW->getEventType());
-    groupEL.reserve(eventW->getNumberEvents());
+    //groupEL.reserve(eventW->getNumberEvents());  does this slow it all down?
 
     // Only one group, spec # is = 1
     groupEL.setSpectrumNo(1);
