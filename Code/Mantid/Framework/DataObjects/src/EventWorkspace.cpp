@@ -754,12 +754,34 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
+
+  EventSortType EventWorkspace::getSortType() const
+  {
+    size_t size = this->data.size();
+    EventSortType order = data[0]->getSortType();
+    for (size_t i = 1; i < size; i++)
+    {
+      if (order != data[i]->getSortType())
+        return UNSORTED;
+    }
+    return order;
+  }
+
   /*** Sort all event lists. Uses a parallelized algorithm
    * @param sortType :: How to sort the event lists.
    * @param prog :: a progress report object. If the pointer is not NULL, each event list will call prog.report() once.
    */
   void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
+    if (this->getSortType() == sortType)
+    {
+      if (prog != NULL)
+      {
+        prog->reportIncrement(this->data.size());
+      }
+      return;
+    }
+
     size_t num_threads;
     num_threads = ThreadPool::getNumPhysicalCores();
     g_log.debug() << num_threads << " cores found. ";
