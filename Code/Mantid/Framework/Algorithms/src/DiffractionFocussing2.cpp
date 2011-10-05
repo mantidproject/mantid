@@ -350,14 +350,15 @@ void DiffractionFocussing2::execEvent()
   prog = new Progress(this,0.2,0.35,nHist);
 
   bool checkForMask = (instrument != NULL) && (source != NULL) && (sample != NULL);
+  EventType eventWtype = eventW->getEventType();
 
   if (nGroups == 1)
   {
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
-    //groupEL.switchTo(eventW->getEventType());
-    //groupEL.reserve(eventW->getNumberEvents());  does this slow it all down?
+    groupEL.switchTo(eventWtype);
+    groupEL.reserve(eventW->getNumberEvents()); // does this slow it all down?
 
     // Only one group, spec # is = 1
     groupEL.setSpectrumNo(1);
@@ -375,9 +376,28 @@ void DiffractionFocussing2::execEvent()
       int max = (wiChunk+1)*chunkSize;
       if (max > nHist) max = nHist;
 
+      // precalculate output size
+      size_t numEventsInChunk(0);
+      for (int wi=wiChunk*chunkSize; wi < max; wi++)
+      {
+        // Check for masking. TODO: Most of the pointer checks are redundant
+        if (checkForMask)
+        {
+          Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
+          if ( det->isMasked() ) continue; // should be cached
+        }
+        const int group = groupAtWorkspaceIndex[wi];
+        if (group == 1)
+        {
+          // Accumulate the chunk
+          numEventsInChunk += eventW->getEventList(wi).getNumberEvents();
+        }
+      }
+
       // Make a blank EventList that will accumulate the chunk.
       EventList chunkEL;
-      //chunkEL.switchTo(eventW->getEventType());
+      chunkEL.switchTo(eventWtype);
+      chunkEL.reserve(numEventsInChunk);
 
       // process the chunk
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
