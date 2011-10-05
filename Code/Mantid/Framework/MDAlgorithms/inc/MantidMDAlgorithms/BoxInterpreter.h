@@ -1,6 +1,30 @@
 #ifndef MD_MANTID_ALGORITHMS_BOX_INTERPRETER
 #define MD_MANTID_ALGORITHMS_BOX_INTERPRETER
 
+#include "MantidKernel/System.h"
+#include <boost/smart_ptr.hpp>
+#include <vector>
+#include <functional>
+
+namespace Mantid
+{
+//Forward declaration.
+namespace Geometry
+{
+class MDImplicitFunction;
+}
+
+namespace MDAlgorithms
+{
+//Forward declaration.
+class CompositeImplicitFunction;
+class BoxImplicitFunction;
+
+
+typedef std::vector<boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> > boxVector;
+
+typedef std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction> > functionVector;
+
 /** A helper class to determine inner surface box boundaries from a composite set of implicit functions
 
  @author Owen Arnold, Tessella plc
@@ -26,31 +50,6 @@
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
-#include "MantidKernel/System.h"
-#include <boost/smart_ptr.hpp>
-#include <vector>
-#include <functional>
-
-namespace Mantid
-{
-//Forward declaration.
-namespace Geometry
-{
-class MDImplicitFunction;
-}
-
-namespace MDAlgorithms
-{
-//Forward declaration.
-class CompositeImplicitFunction;
-class BoxImplicitFunction;
-
-
-typedef std::vector<boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> > boxVector;
-
-typedef std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction> > functionVector;
-
 class DLLExport BoxInterpreter: public std::unary_function<Mantid::Geometry::MDImplicitFunction*, std::vector<double> >
 {
 private:
