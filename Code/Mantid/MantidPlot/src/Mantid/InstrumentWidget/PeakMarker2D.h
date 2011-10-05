@@ -13,7 +13,14 @@ class PeakMarker2D: public Shape2D
 {
 public:
   enum Symbol {Circle = 0,Diamond,Square};
-  PeakMarker2D(const QPointF& centre,Symbol symbol = Circle,int markerSize = 0);
+  struct Style
+  {
+    Style(Symbol sb = Circle, QColor c = Qt::red, int sz = g_defaultMarkerSize):symbol(sb),color(c),size(sz){}
+    Symbol symbol;
+    QColor color;
+    int size;
+  };
+  PeakMarker2D(const QPointF& centre,Style style = Style());
   /* --- Implemented Shape2D virtual methods --- */
   virtual Shape2D* clone()const{return new PeakMarker2D(*this);}
   virtual bool selectAt(const QPointF& p)const;

@@ -1,8 +1,10 @@
 #include "PeakOverlay.h"
-#include "PeakMarker2D.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 #include <QPainter>
 #include <QList>
+
+QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 
 /**
 * Constructor.
@@ -72,6 +74,36 @@ void PeakHKL::print()const
 }
 
 /**
+ * Constructor
+ */
+PeakOverlay::PeakOverlay(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws):
+Shape2DCollection(),
+m_peaksWorkspace(pws),
+m_currentDefaultStyle(0)
+{
+  if (g_defaultStyles.isEmpty())
+  {
+    g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Circle,Qt::red);
+    g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Diamond,Qt::green);
+    g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Square,Qt::magenta);
+  }
+}
+
+/**
+ * Not implemented yet.
+ */
+void PeakOverlay::removeShape(Shape2D*)
+{
+}
+
+/**
+ * Not implemented yet.
+ */
+void PeakOverlay::clear()
+{
+}
+
+/**
  * Add new marker to the overlay.
  * @param m :: Pointer to the new marker
  */
@@ -81,6 +113,10 @@ void PeakOverlay::addMarker(PeakMarker2D* m)
   m_det2marker.insert(m->getDetectorID(),m);
 }
 
+/**
+ * Draw peaks on screen.
+ * @param painter :: The QPainter to draw with.
+ */
 void PeakOverlay::draw(QPainter& painter) const
 {
   // Draw symbols
@@ -138,4 +174,34 @@ void PeakOverlay::draw(QPainter& painter) const
 QList<PeakMarker2D*> PeakOverlay::getMarkersWithID(int detID)const
 {
   return m_det2marker.values(detID);
+}
+
+/**
+ * Return the total number of peaks.
+ */
+int PeakOverlay::getNumberPeaks()const
+{
+  return m_peaksWorkspace->getNumberPeaks();
+}
+
+/**
+ * Return the i-th peak.
+ * @param i :: Peak index.
+ * @return A reference to the peak.
+ */
+Mantid::API::IPeak& PeakOverlay::getPeak(int i)
+{
+  return m_peaksWorkspace->getPeak(i);
+}
+
+/**
+ * Return a default style for creating markers and increment the style index. 
+ * Styles are taken form g_defaultStyles
+ */
+PeakMarker2D::Style PeakOverlay::getNextDefaultStyle()const
+{
+  int i = m_currentDefaultStyle;
+  ++m_currentDefaultStyle;
+  m_currentDefaultStyle %= g_defaultStyles.size();
+  return g_defaultStyles[i];
 }

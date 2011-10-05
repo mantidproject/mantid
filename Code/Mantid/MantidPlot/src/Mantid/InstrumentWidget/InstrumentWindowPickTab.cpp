@@ -384,7 +384,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   ProjectionSurface* surface = mInstrumentDisplay->getSurface();
   if (surface)
   {
-    QList<PeakMarker2D*> markers = surface->getPeakOverlay().getMarkersWithID(detid);
+    QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
     foreach(PeakMarker2D* marker,markers)
     {
       m_plot->addLabel(new PeakLabel(marker));

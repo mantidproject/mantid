@@ -108,7 +108,6 @@ protected:
   double m_width_max;   ///< Maximum detector width
   QList<UnwrappedDetector> m_unwrappedDetectors;  ///< info needed to draw detectors onto unwrapped image
   QMap<Mantid::Geometry::ComponentID,QRectF> m_assemblies;
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
   mutable bool m_startPeakShapes; ///< set to true to start creating m_peakShapes from m_peaksWorkspace, return to false after creation
 
 };

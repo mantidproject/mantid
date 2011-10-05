@@ -7,7 +7,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 
 #include <QRgb>
 #include <QSet>
@@ -488,6 +487,10 @@ void UnwrappedSurface::findAndCorrectUGap()
   const int nbins = 1000;
   std::vector<bool> ubins(nbins);
   double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
+  if (bin_width == 0.0)
+  {
+    throw std::runtime_error("Failed to build unwrapped surface");
+  }
 
   QList<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
   for(;ud != m_unwrappedDetectors.end(); ++ud)
@@ -621,12 +624,11 @@ QRectF UnwrappedSurface::getSurfaceBounds()const
  */
 void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws)
 {
-  m_peakShapes.clear();
-  m_peaksWorkspace = pws;
   if (!pws)
   {
     return;
   }
+  m_peakShapes.append(new PeakOverlay(pws));
   m_startPeakShapes = true;
 }
 
@@ -637,23 +639,25 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
 void UnwrappedSurface::createPeakShapes(const QRect& window)const
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_peakShapes.setWindow(getSurfaceBounds(),window);
-  int nPeaks = m_peaksWorkspace->getNumberPeaks();
+  PeakOverlay& peakShapes = *m_peakShapes.last();
+  PeakMarker2D::Style style = m_peakShapes.first()->getNextDefaultStyle();
+  peakShapes.setWindow(getSurfaceBounds(),window);
+  int nPeaks = peakShapes.getNumberPeaks();
   for(int i = 0; i < nPeaks; ++i)
   {
-    Mantid::API::IPeak& peak = m_peaksWorkspace->getPeak(i);
+    Mantid::API::IPeak& peak = peakShapes.getPeak(i);
     int detID = peak.getDetectorID();
     foreach(UnwrappedDetector udet,m_unwrappedDetectors)
     {
       Mantid::Geometry::IDetector_const_sptr det = udet.detector;
       if (! det ) continue;
       if (det->getID() != detID) continue;
-      PeakMarker2D* r = new PeakMarker2D(m_peakShapes.realToUntransformed(QPointF(udet.u,udet.v)));
+      PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(udet.u,udet.v)),style);
       r->setPeak(peak);
-      m_peakShapes.addMarker(r);
+      peakShapes.addMarker(r);
     }
   }
-  m_peakShapes.deselectAll();
+  peakShapes.deselectAll();
   m_startPeakShapes = false;
   QApplication::restoreOverrideCursor();
 }

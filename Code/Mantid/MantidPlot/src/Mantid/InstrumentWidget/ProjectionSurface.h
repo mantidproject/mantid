@@ -110,7 +110,8 @@ public:
   bool isMasked(double x,double y)const{return m_maskShapes.isMasked(x,y);}
   void clearMask(){m_maskShapes.clear();}
 
-  PeakOverlay& getPeakOverlay(){return m_peakShapes;}
+  QList<PeakMarker2D*> getMarkersWithID(int detID)const;
+  //PeakOverlay& getPeakOverlay(){return m_peakShapes;}
 
 signals:
 
@@ -176,7 +177,7 @@ protected:
   bool m_leftButtonDown;
 
   Shape2DCollection m_maskShapes;  ///< to draw mask shapes
-  mutable PeakOverlay m_peakShapes; ///< to draw peak labels
+  mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
 
 };
 

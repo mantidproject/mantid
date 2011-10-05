@@ -40,6 +40,7 @@ public:
   virtual void draw(QPainter& painter) const;
   virtual void addShape(Shape2D*,bool slct = false);
   virtual void removeShape(Shape2D*);
+  virtual void clear();
   
   void mousePressEvent(QMouseEvent*);
   void mouseMoveEvent(QMouseEvent*);
@@ -52,7 +53,6 @@ public:
   void deselectAll();
   bool selectAtXY(int x,int y);
   void removeCurrentShape();
-  void clear();
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);

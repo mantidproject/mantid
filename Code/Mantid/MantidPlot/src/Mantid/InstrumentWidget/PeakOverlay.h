@@ -2,7 +2,16 @@
 #define MANTIDPLOT_PEAKOVERLAY_H_
 
 #include "Shape2DCollection.h"
+#include "PeakMarker2D.h"
+
 #include <QHash>
+
+namespace Mantid{
+  namespace API{
+    class IPeak;
+    class IPeaksWorkspace;
+  }
+}
 
 class PeakMarker2D;
 
@@ -35,17 +44,25 @@ class PeakOverlay: public Shape2DCollection
 {
   Q_OBJECT
 public:
-  PeakOverlay():Shape2DCollection(){}
+  PeakOverlay(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   ~PeakOverlay(){}
   /// Override the drawing method
   void draw(QPainter& painter) const;
+  virtual void removeShape(Shape2D*);
+  virtual void clear();
 
   void addMarker(PeakMarker2D* m);
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
+  int getNumberPeaks()const;
+  Mantid::API::IPeak& getPeak(int);
+  PeakMarker2D::Style getNextDefaultStyle()const;
 
 private:
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
+  static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
+  mutable int m_currentDefaultStyle; ///< default style index
 };
 
 #endif /*MANTIDPLOT_PEAKOVERLAY_H_*/

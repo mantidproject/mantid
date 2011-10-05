@@ -20,12 +20,13 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
  * @param symbol :: Symbol to draw. One of: Circle, Diamond, or Square
  * @param markerSize :: Optional size of marker's symbol.
  */
-PeakMarker2D::PeakMarker2D(const QPointF& centre,Symbol symbol,int markerSize):
-m_symbol(symbol)
+PeakMarker2D::PeakMarker2D(const QPointF& centre,Style style):
+m_symbol(style.symbol)
 {
-  if (markerSize > 0)
+  setColor(style.color);
+  if (style.size > 0)
   {
-    m_markerSize = markerSize;
+    m_markerSize = style.size;
   }
   else
   {

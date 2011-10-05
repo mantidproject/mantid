@@ -52,6 +52,11 @@ ProjectionSurface::~ProjectionSurface()
   {
     delete m_pickImage;
   }
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+    if (m_peakShapes[i]) delete m_peakShapes[i];
+  }
+  m_peakShapes.clear();
 }
 
 void ProjectionSurface::clear()
@@ -119,8 +124,11 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
       QRectF windowRect = getSurfaceBounds();
       m_maskShapes.setWindow(windowRect,painter.viewport());
       m_maskShapes.draw(painter);
-      m_peakShapes.setWindow(windowRect,painter.viewport());
-      m_peakShapes.draw(painter);
+      for(int i=0;i < m_peakShapes.size(); ++i)
+      {
+        m_peakShapes[i]->setWindow(windowRect,painter.viewport());
+        m_peakShapes[i]->draw(painter);
+      }
       painter.end();
     }
     m_viewChanged = false;
@@ -135,8 +143,11 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
     m_maskShapes.setWindow(windowRect,painter.viewport());
     m_maskShapes.draw(painter);
 
-    m_peakShapes.setWindow(windowRect,painter.viewport());
-    m_peakShapes.draw(painter);
+    for(int i=0;i < m_peakShapes.size(); ++i)
+    {
+      m_peakShapes[i]->setWindow(windowRect,painter.viewport());
+      m_peakShapes[i]->draw(painter);
+    }
 
     // draw the selection rectangle
     if (!m_selectRect.isNull())
@@ -499,3 +510,16 @@ void ProjectionSurface::catchShapeChanged()
   emit shapeChanged();
 }
 
+/**
+ * Return a combined list of peak parkers from all overlays
+ * @param detID :: The detector ID of interest
+ */
+QList<PeakMarker2D*> ProjectionSurface::getMarkersWithID(int detID)const
+{
+  QList<PeakMarker2D*> out;
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+    out.append(m_peakShapes[i]->getMarkersWithID(detID));
+  }
+  return out;
+}
