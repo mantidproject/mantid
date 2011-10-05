@@ -321,7 +321,7 @@ void MdViewerWidget::renderWorkspace(QString wsname)
   if (this->currentView->origSource)
   {
     this->ui.modeControlWidget->setToStandardView();
-    builder->destroy(this->currentView->origSource);
+    builder->destroySources();
   }
   this->currentView->origSource = builder->createSource("sources",
                                                         "MDEW Source",
