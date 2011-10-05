@@ -35,6 +35,7 @@ private:
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     Mantid::MDEvents::LoadMD alg;
     alg.initialize();
+    alg.setRethrows(true);
     alg.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
     alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
     alg.setProperty("FileBackEnd", false); 

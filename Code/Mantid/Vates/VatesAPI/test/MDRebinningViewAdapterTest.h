@@ -33,6 +33,7 @@ public:
     EXPECT_CALL(view, getLengthB1()).Times(1);
     EXPECT_CALL(view, getLengthB2()).Times(1);
     EXPECT_CALL(view, getLengthB3()).Times(1);
+    EXPECT_CALL(view, getForceOrthogonal()).Times(1);
 
     //Create adapter using adaptee
     MDRebinningViewAdapter<MockMDRebinningView> view_adapter(&view);
@@ -53,6 +54,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alias.getB1());
     TS_ASSERT_THROWS_NOTHING(alias.getB2());
     TS_ASSERT_THROWS_NOTHING(alias.getOrigin());
+    TS_ASSERT_THROWS_NOTHING(alias.getForceOrthogonal());
 
     //Check the expectations.
     TSM_ASSERT("Not wired-up correctly", Mock::VerifyAndClearExpectations(&view));

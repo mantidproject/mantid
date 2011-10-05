@@ -254,6 +254,7 @@ public:
     EXPECT_CALL(*view, getLengthB1()).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*view, getLengthB2()).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*view, getLengthB3()).Times(AtLeast(1)).WillRepeatedly(Return(1));
+    EXPECT_CALL(*view, getForceOrthogonal()).WillRepeatedly(Return(false));
 
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(*view, getAppliedGeometryXML()).Times(AtLeast(1)).WillRepeatedly(Return(viewXML.c_str()));
@@ -290,6 +291,7 @@ public:
       .Times(AtLeast(1))
       .WillOnce(Return(1))
       .WillOnce(Return(1)); 
+    EXPECT_CALL(*view, getForceOrthogonal()).WillRepeatedly(Return(false));
     
     //Should now need to fetch the implicit function
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
@@ -329,6 +331,7 @@ public:
       .Times(AtLeast(1))
       .WillOnce(Return(1))
       .WillOnce(Return(2)); 
+    EXPECT_CALL(*view, getForceOrthogonal()).WillRepeatedly(Return(false));
     
     //Should now need to fetch the implicit function
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");

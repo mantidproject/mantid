@@ -10,7 +10,6 @@
 #include <vector>
 #include <iostream>
 #include "DimensionWidget.h"
-#include "DimensionWidget.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
