@@ -356,7 +356,7 @@ void DiffractionFocussing2::execEvent()
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
-    groupEL.switchTo(eventW->getEventType());
+    //groupEL.switchTo(eventW->getEventType());
     //groupEL.reserve(eventW->getNumberEvents());  does this slow it all down?
 
     // Only one group, spec # is = 1
@@ -377,7 +377,7 @@ void DiffractionFocussing2::execEvent()
 
       // Make a blank EventList that will accumulate the chunk.
       EventList chunkEL;
-      chunkEL.switchTo(eventW->getEventType());
+      //chunkEL.switchTo(eventW->getEventType());
 
       // process the chunk
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
