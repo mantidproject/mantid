@@ -4,8 +4,6 @@
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MDDataObjects/IMD_FileFormat.h"
-#include "MDDataObjects/MD_FileFormatFactory.h"
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -113,8 +111,6 @@ std::string MultiDimensionalDbPresenter::getZAxisName() const
 
 vtkDataSet* MultiDimensionalDbPresenter::getMesh(RebinningKnowledgeSerializer& serializer, vtkDataSetFactory& factory) const
 {
-  using namespace Mantid::MDDataObjects;
-
   //Sanity check. Must run execution successfully first.
   verifyExecution();
 
@@ -181,7 +177,6 @@ std::vector<double> MultiDimensionalDbPresenter::getTimesteps() const
 
 vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTimeBin(vtkDataSetFactory& vtkFactory) const
 {
-  using namespace Mantid::MDDataObjects;
   verifyExecution();
 
   vtkFactory.initialize(m_workspace);
@@ -190,7 +185,6 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTimeBin(vtkDataSetFa
 
 vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTime(vtkDataSetFactory& vtkFactory) const
 {
-  using namespace Mantid::MDDataObjects;
   verifyExecution();
   
   vtkFactory.initialize(m_workspace);

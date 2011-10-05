@@ -1,5 +1,4 @@
 #include "MantidVatesAPI/MDEWRebinningPresenter.h"
-#include "MantidVatesAPI/MDHistogramRebinningPresenter.h"
 #include "MantidVatesAPI/NullRebinningPresenter.h"
 
 #include "vtkMDEWRebinningCutter.h"
@@ -295,25 +294,10 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
 
     using namespace Mantid::VATES;
     
-    try
-    {
-      ADSWorkspaceProvider<Mantid::API::IMDWorkspace> wsProvider;
-      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDHistogramRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), new ClipperAdapter(vtkPVClipDataSet::New()), wsProvider));
-      m_presenter = temp;
-      vtkWarningMacro(<<"WARNING: Using Depreciated Rebinning Method. Rebinning from *.sqw_old.");
-    }
-    catch(std::invalid_argument&)
-    {
-      //Try to use another type of presenter with this view. One for MDEWs.
-      ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> wsProvider;
-      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDEWRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), wsProvider));
-      m_presenter = temp;
-    }
-    catch(std::logic_error&)
-    {
-      vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
-      status = Bad;
-    }
+    //Try to use another type of presenter with this view. One for MDEWs.
+    ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> wsProvider;
+    MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDEWRebinningPresenter(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), new MDRebinningViewAdapter<vtkMDEWRebinningCutter>(this), wsProvider));
+    m_presenter = temp;
     
     m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
     m_setup = SetupDone;

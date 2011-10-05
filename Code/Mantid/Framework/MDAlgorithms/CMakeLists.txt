@@ -1,27 +1,23 @@
 # GLOBs should be replaced with explicit listings
 set ( SRC_FILES
-	src/BoxImplicitFunction.cpp
 	src/BoxFunctionBuilder.cpp
+	src/BoxImplicitFunction.cpp
 	src/BoxImplicitFunctionParser.cpp
 	src/BoxInterpreter.cpp
-	src/CenterpieceRebinning.cpp
-	src/CobaltSpinWaveDSHO.cpp	
+	src/CobaltSpinWaveDSHO.cpp
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
-	src/CpRebinningNx3.cpp
+	src/ConvertToQ3DdE.cpp
 	src/CreateMDFitWorkspace.cpp
-	src/DynamicCPRRebinning.cpp
-	src/DynamicRebinFromXML.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
-	src/Load_MDWorkspace.cpp
 	src/MDParameterParserDeclarations.cpp
 	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
-	src/PlaneImplicitFunction.cpp
 	src/PlaneFunctionBuilder.cpp
+	src/PlaneImplicitFunction.cpp
 	src/PlaneImplicitFunctionParser.cpp
 	src/PlaneInterpreter.cpp
 	src/QuadEnBackground.cpp
@@ -31,40 +27,34 @@ set ( SRC_FILES
 	src/TobyFitSimulate.cpp
 	src/Vector3DParameterParser.cpp
 	src/VectorMathematics.cpp
-	src/ConvertToQ3DdE.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
 #)
 
 set ( INC_FILES
-	inc/MantidMDAlgorithms/BoxImplicitFunction.h
 	inc/MantidMDAlgorithms/BoxFunctionBuilder.h
+	inc/MantidMDAlgorithms/BoxImplicitFunction.h
 	inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/BoxInterpreter.h
-	inc/MantidMDAlgorithms/CenterpieceRebinning.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
-	inc/MantidMDAlgorithms/CpRebinningNx3.h
+	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
-	inc/MantidMDAlgorithms/ConvertToQ3DdE.h 
 	inc/MantidMDAlgorithms/DepthParameter.h
-	inc/MantidMDAlgorithms/DynamicCPRRebinning.h
-	inc/MantidMDAlgorithms/DynamicRebinFromXML.h
 	inc/MantidMDAlgorithms/HeightParameter.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
-	inc/MantidMDAlgorithms/Load_MDWorkspace.h
 	inc/MantidMDAlgorithms/MDParameterParserDeclarations.h
 	inc/MantidMDAlgorithms/NormalParameter.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/OriginParameter.h
 	inc/MantidMDAlgorithms/PerpendicularParameter.h
-	inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 	inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
+	inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 	inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/PlaneInterpreter.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
@@ -86,46 +76,41 @@ set ( TEST_FILES
 	#test/CreateMDFitWorkspaceTest.h
 	#test/QuadEnBackgroundTest.h
 	test/BoxImplicitFunctionTest.h
-	test/CP3DxN_RebinningTest.h
-	test/CPR_preselectCellsTest.h
-	test/CPRebinKeepPixTest.h
+	test/ConvertToQ3DdETest.h
 	test/DepthParameterTest.h
-	test/DynamicRebinFromXMLAlgorithmTest.h
 	test/HeightParameterTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
-	test/Load_MDWorkspaceTest.h
 	test/NormalParameterTest.h
 	test/OriginParameterTest.h
-	test/PlaneImplicitFunctionTest.h
 	test/PlaneFunctionBuilderTest.h
+	test/PlaneImplicitFunctionTest.h
 	test/RunParamTest.h
 	test/SimulateMDDataTest.h
 	test/TobyFitSimulateTest.h
 	test/VectorMathematicsTest.h
 	test/WidthParameterTest.h
-	test/ConvertToQ3DdETest.h
 )
 
 set ( GMOCK_TEST_FILES
-test/BoxBuilderTest.h
-test/BoxImplicitFunctionParserTest.h
-test/BoxInterpreterTest.h
-test/CompositeBuilderTest.h
-test/CompositeImplicitFunctionParserTest.h
-test/CompositeImplicitFunctionTest.h
-test/DepthParameterParserTest.h
-test/HeightParameterParserTest.h
-test/NormalParameterParserTest.h
-test/NullImplicitFunctionTest.h
-test/OriginParameterParserTest.h
-test/PerpendicularParameterParserTest.h
-test/PerpendicularParameterTest.h
-test/PlaneImplicitFunctionParserTest.h
-test/PlaneInterpreterTest.h
-test/WidthParameterParserTest.h
-test/UpParameterParserTest.h
-test/UpParameterTest.h
+	test/BoxBuilderTest.h
+	test/BoxImplicitFunctionParserTest.h
+	test/BoxInterpreterTest.h
+	test/CompositeBuilderTest.h
+	test/CompositeImplicitFunctionParserTest.h
+	test/CompositeImplicitFunctionTest.h
+	test/DepthParameterParserTest.h
+	test/HeightParameterParserTest.h
+	test/NormalParameterParserTest.h
+	test/NullImplicitFunctionTest.h
+	test/OriginParameterParserTest.h
+	test/PerpendicularParameterParserTest.h
+	test/PerpendicularParameterTest.h
+	test/PlaneImplicitFunctionParserTest.h
+	test/PlaneInterpreterTest.h
+	test/WidthParameterParserTest.h
+	test/UpParameterParserTest.h
+	test/UpParameterTest.h
 )
 
 if(UNITY_BUILD)

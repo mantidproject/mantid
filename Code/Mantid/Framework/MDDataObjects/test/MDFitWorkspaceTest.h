@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/System.h"
-#include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDFitWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmFactory.h"

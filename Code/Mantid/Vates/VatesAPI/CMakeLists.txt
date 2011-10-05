@@ -17,7 +17,7 @@ src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
 src/MDEWRebinningPresenter.cpp
-src/MDHistogramRebinningPresenter.cpp
+#src/MDHistogramRebinningPresenter.cpp
 src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
@@ -69,7 +69,7 @@ inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDEWLoadingPresenter.h
 inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDEWRebinningPresenter.h
-inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
+#inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
@@ -136,14 +136,14 @@ test/vtkThresholdingQuadFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
-test/MultiDimensionalDbPresenterTest.h
+# test/MultiDimensionalDbPresenterTest.h
 test/MDLoadingViewAdapterTest.h
 test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
 test/MDEWInMemoryLoadingPresenterTest.h
 test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h
-test/MDHistogramRebinningPresenterTest.h
+#test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h

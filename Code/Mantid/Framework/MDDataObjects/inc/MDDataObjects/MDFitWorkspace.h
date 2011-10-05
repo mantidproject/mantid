@@ -1,7 +1,6 @@
 #ifndef H_MD_FITWORKSPACE
 #define H_MD_FITWORKSPACE
 #include "MDDataObjects/DllExport.h"
-#include "MDDataObjects/MDDataPoints.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"

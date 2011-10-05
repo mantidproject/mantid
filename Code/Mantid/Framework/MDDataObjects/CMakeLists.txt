@@ -1,67 +1,31 @@
 # Source files
 set ( SRC_FILES
-	#src/Events/MDBox.cpp
-	#src/Events/MDEventWorkspace.cpp # breaks the windows build
-	src/IMD_FileFormat.cpp
-	src/MDDPoints_MemManager.cpp
-	src/MDDataPoint.cpp
-	src/MDDataPointDescription.cpp
-	src/MDDataPoints.cpp
+	# test helpers
 	src/MDFitWorkspace.cpp
-	src/MDImage.cpp
 	src/MDIndexCalculator.cpp
-	src/MDWorkspace.cpp
-    src/MDWorkspaceIterator.cpp
-	src/MD_FileFormatFactory.cpp
-	src/MD_FileHoraceReader.cpp
-# test helpers
-	testHelpers/MD_FileTestDataGenerator.cpp
-    testHelpers/MDDensityTestHelper.cpp 
+	src/MDWorkspaceIterator.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
 # Header files
 set ( INC_FILES
+	# test helpers
 	inc/MDDataObjects/DllExport.h
-	inc/MDDataObjects/IMD_FileFormat.h
-	inc/MDDataObjects/MDDPoints_MemManager.h
-	inc/MDDataObjects/MDDataPoint.h
-	inc/MDDataObjects/MDDataPointDescription.h
-	inc/MDDataObjects/MDDataPoints.h
 	inc/MDDataObjects/MDFitWorkspace.h
-	inc/MDDataObjects/MDImage.h
-	inc/MDDataObjects/MDImageDatatypes.h
 	inc/MDDataObjects/MDIndexCalculator.h
-	inc/MDDataObjects/MDWorkspace.h
-    inc/MDDataObjects/MDWorkspaceIterator.h
-	inc/MDDataObjects/MD_FileFormatFactory.h
-	inc/MDDataObjects/MD_FileHoraceReader.h
-# test helpers
-	inc/MDDataObjectsTestHelpers/MDTestWorkspace.h 	
-	inc/MDDataObjectsTestHelpers/MD_FileTestDataGenerator.h 	
-	inc/MDDataObjectsTestHelpers/MDDensityTestHelper.h 
+	inc/MDDataObjects/MDWorkspaceIterator.h
 )
 
 # Test files. Other source files required.
 set ( TEST_FILES
-	test/HoraceReaderTest.h
-	#test/MDDPoints_MemManagerTest.h #TODO fix. This currently brings the test suite down.
-	test/MDDataPointDescriptionTest.h
+	# test some complex test helpers
 	test/MDFitWorkspaceTest.h
-	test/MD_FileFactoryTest.h
-# test some complex test helpers
-	test/MDDensityTestHelperTest.h 
-    test/MDFileTestDataGeneratorTest.h 
 )
 
 set ( GMOCK_TEST_FILES
-test/MDIndexCalculatorTest.h
-test/MDDataPointTest.h
-test/MDImageTest.h
-test/MDPixelsTest.h
-test/MDWorkspaceTest.h
-test/MDWorkspaceIteratorTest.h
+	test/MDIndexCalculatorTest.h
+	test/MDWorkspaceIteratorTest.h
 )
 
 if(UNITY_BUILD)

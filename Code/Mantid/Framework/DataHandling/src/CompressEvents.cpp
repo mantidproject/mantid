@@ -80,6 +80,7 @@ void CompressEvents::exec()
 
     // Do we want to parallelize over event lists, or in each event list
     bool parallel_in_each = noSpectra < PARALLEL_GET_MAX_THREADS;
+    //parallel_in_each = false;
 
     // Loop over the histograms (detector spectra)
     // Don't parallelize the loop if we are going to parallelize each event list.
