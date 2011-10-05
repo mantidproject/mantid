@@ -32,6 +32,7 @@
 #include "MantidAPI/Algorithm.h"
 #include <algorithm>
 #include <math.h>
+#include <cstdio>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

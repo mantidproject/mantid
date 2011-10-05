@@ -49,7 +49,6 @@ set ( SRC_FILES
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
 	src/MDGeometry.cpp
-	src/MDPropertyGeometry.cpp
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MemoryManager.cpp
@@ -156,7 +155,6 @@ set ( INC_FILES
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
 	inc/MantidAPI/MDGeometry.h
-	inc/MantidAPI/MDPropertyGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MemoryManager.h
@@ -218,7 +216,6 @@ set ( TEST_FILES
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/MDGeometryTest.h
-	test/MDPropertyGeometryTest.h
 	test/MatrixWorkspaceTest.h
 	test/MemoryManagerTest.h
 	test/MultipleFilePropertyTest.h

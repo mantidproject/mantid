@@ -5,8 +5,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/Instrument.h"
 
 //STL

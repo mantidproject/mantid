@@ -2,6 +2,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 /*****************************************************
  * SANS instrument helper class

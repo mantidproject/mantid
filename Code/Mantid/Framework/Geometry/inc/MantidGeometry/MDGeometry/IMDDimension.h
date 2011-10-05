@@ -56,17 +56,20 @@ namespace Mantid
     /// @return Dimension ID string.
     virtual std::string getDimensionId() const = 0;
 
-    /// @return the maximum extent of this dimension
-    virtual double getMaximum() const = 0;
-
     /// @return the minimum extent of this dimension
     virtual double getMinimum() const = 0;
+
+    /// @return the maximum extent of this dimension
+    virtual double getMaximum() const = 0;
 
     /// @return number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
     virtual size_t getNBins() const = 0;
 
     /// @return an XML string representation of the dimension.
     virtual std::string toXMLString() const = 0;
+
+    /// Change the extents and number of bins
+    virtual void setRange(size_t nBins, double min, double max) = 0;
 
     /** @return Coordinate of the axis at the given index
      * @param ind :: index into the axis  */
@@ -84,37 +87,6 @@ namespace Mantid
     bool operator!=(const IMDDimension &)const{
       throw std::runtime_error("Not Implemented.");
     }
-
-    /// it is sometimes convinient to shift image data by some number along specific dimension
-    /// @return ???
-    virtual double getDataShift()const
-    {throw std::runtime_error("Not Implemented.");}
-
-    /// @return the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one.
-    virtual size_t getStride()const
-    {throw std::runtime_error("Not Implemented.");}
-
-    /// @return defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
-    virtual bool isReciprocal() const
-    {throw std::runtime_error("Not Implemented.");}
-
-    /** @return a direction of the dimension in the system of coordinates described by the MDBasis;
-     *  Orthogonal dimensions always have direction 1, but we set direction of this to 0  (e.g. direction={0,0,0})? questionable, 1 may be better;
-     *  while reciprocal dimension can be directed anywhere withing the reciprocal space;
-       Norm of the vector, returned by this function has to be 1    */
-    virtual Kernel::V3D getDirection(void)const
-    { throw std::runtime_error("Not Implemented.");  }
-
-    /** @return  direction in the crystallogrpahical sence, e.g. output Kernel::V3D is normalized in such a way that the size of
-     smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would
-     have integer values; */
-    virtual Kernel::V3D getDirectionCryst(void)const
-    { throw std::runtime_error("Not Implemented.");  }
-
-    /** @return the function returns the center points of the axis bins; There are nBins of such points
-     (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax) */
-    virtual void getAxisPoints(std::vector<double>  &)const
-    { throw std::runtime_error("Not Implemented."); }
 
   };
 

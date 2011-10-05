@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
-#include "MantidGeometry/MDGeometry/MDDimensionRes.h"
-#include "MantidGeometry/MDGeometry/MDDimension.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 
@@ -106,40 +104,6 @@ public:
     TS_ASSERT_EQUALS(3, dimension->getMaximum());
     TS_ASSERT_EQUALS(8, dimension->getNBins());
     delete dimension;
-  }
-
-  void testCreationOfReciprocalMDDimensionThrows()
-  {
-    using namespace Mantid::Geometry;
-    IMDDimensionFactory factory(constructUnknownReciprocalDimensionXML());
-    TSM_ASSERT_THROWS("Uses tag/id 'unknown' which should not be possible to match to q1,q2,q3.", factory.createAsMDDimension(),  std::runtime_error);
-  }
-
-  void testCreationOfReciprocalMDDimension()
-  {
-    using namespace Mantid::Geometry;
-    IMDDimensionFactory factory(constructReciprocalDimensionXML());
-    IMDDimension* dimension = factory.createAsMDDimension();
-
-    MDDimensionRes* resDimension = dynamic_cast<MDDimensionRes*> (dimension);
-    TSM_ASSERT("This should have been of type MDReciprocal dimension", NULL != resDimension);
-    TS_ASSERT_EQUALS(6.6, resDimension->getMaximum());
-    TS_ASSERT_EQUALS(-6.6, resDimension->getMinimum());
-    TS_ASSERT_EQUALS(6, resDimension->getNBins());
-  }
-
-  void testCreationOfMDDimension()
-  {
-    using namespace Mantid::Geometry;
-    IMDDimensionFactory factory(constructNonReciprocalDimensionXML());
-    IMDDimension* dimension = factory.createAsMDDimension();
-
-    MDDimension* resDimension = dynamic_cast<MDDimension*> (dimension);
-    TSM_ASSERT("This should have been of type MD dimension", NULL != resDimension);
-
-    TS_ASSERT_EQUALS(150, resDimension->getMaximum());
-    TS_ASSERT_EQUALS(0, resDimension->getMinimum());
-    TS_ASSERT_EQUALS(4, resDimension->getNBins());
   }
 
   void testStaticCreation()

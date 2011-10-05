@@ -4,6 +4,7 @@
 #include <sstream>
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #define HUGEVALUE 1.0E10
 

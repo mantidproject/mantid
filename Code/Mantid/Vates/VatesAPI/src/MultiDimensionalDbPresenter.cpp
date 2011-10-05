@@ -3,7 +3,6 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidAPI/AnalysisDataService.h"

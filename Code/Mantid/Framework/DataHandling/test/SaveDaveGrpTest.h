@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

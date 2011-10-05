@@ -36,6 +36,8 @@ private:
       std::string());
     MOCK_CONST_METHOD1(getX,
       double(size_t ind));
+    MOCK_METHOD3(setRange,
+      void(size_t nBins, double min, double max));
   };
 
 public:

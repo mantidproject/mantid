@@ -83,16 +83,9 @@ namespace Mantid
             virtual double getMaximum() const {return(1.0);}
             virtual double getMinimum() const {return(0.0);}
             virtual size_t getNBins() const {return(m_cells);}
-            virtual bool isReciprocal() const {return false;}
             virtual std::string toXMLString() const { return "";}
-            virtual size_t getStride()const {throw std::runtime_error("Not Implemented");}
-            virtual double getScale()const {throw std::runtime_error("Not Implemented");} 
             virtual double getX(size_t ind)const {throw std::runtime_error("Not Implemented");}
             virtual std::vector<double>const & getCoord(void)const {throw std::runtime_error("Not Implemented");}
-            virtual void getAxisPoints(std::vector<double>  &)const {throw std::runtime_error("Not Implemented");}
-            virtual double getDataShift()const{return 0;}
-            virtual V3D getDirection()const{throw std::runtime_error("Not Implemented");}
-            virtual V3D getDirectionCryst()const{throw std::runtime_error("Not Implemented");}
             
             TestQIMDDimension() {
             m_cells=0;

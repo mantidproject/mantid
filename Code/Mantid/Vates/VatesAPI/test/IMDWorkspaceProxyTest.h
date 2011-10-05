@@ -13,9 +13,6 @@ class IMDWorkspaceProxyTest: public CxxTest::TestSuite
 {
 private:
 
-  //  typedef boost::shared_ptr<Mantid::Geometry::MDDimension> MDDimension_sptr;
-  //  typedef std::vector<MDDimension_sptr> MDDimension_vec;
-  //
   //Helper methods purely to keep dimension ids consistent.
   static std::string getXDimId()
   {
@@ -58,6 +55,7 @@ private:
     size_t getNBins() const {throw std::runtime_error("Not implemented");};
     std::string toXMLString() const {throw std::runtime_error("Not implemented");};
     double getX(size_t) const {throw std::runtime_error("Not implemented");};
+    virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){ };
     virtual ~MockIMDDimension()
     {
     }

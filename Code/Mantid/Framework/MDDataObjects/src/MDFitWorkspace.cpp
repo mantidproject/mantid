@@ -235,8 +235,8 @@ namespace Mantid{
       /**
         * Creates a dimension object.
         */
-      MDFitWorkspaceDimension(const std::string& id,const std::string& name,const std::vector<double>& x,bool rec=false):
-          m_name(name),m_id(id),m_isReciprocal(rec)
+      MDFitWorkspaceDimension(const std::string& id,const std::string& name,const std::vector<double>& x):
+          m_name(name),m_id(id)
       {
         if (x.size() < 2)
         {
@@ -248,12 +248,10 @@ namespace Mantid{
       virtual std::string getUnits() const {return "None";}
       virtual std::string getDimensionId() const {return m_id;}
       virtual bool getIsIntegrated() const {return m_binBoundaries.size() == 2;}
-      virtual double getDataShift()const {return 0.0;}
       virtual double getMaximum() const {return m_binBoundaries.front();}
       virtual double getMinimum() const {return m_binBoundaries.back();}
       virtual size_t getNBins() const {return int(m_binBoundaries.size()) - 1;}
-      virtual size_t getStride()const {throw std::runtime_error("Stride not implemented");}
-      virtual bool isReciprocal() const {return m_isReciprocal;}
+      virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){throw std::runtime_error("MDFitWorkspaceDimension::setRange(): Not implemented");}
       ///  Get coordinate for index; Good question: is it a bin boundary or the centre?
       virtual double getX(size_t ind)const
       {
@@ -263,22 +261,11 @@ namespace Mantid{
         }
         return (m_binBoundaries[ind+1]+m_binBoundaries[ind])/2;
       }
-      virtual V3D getDirection(void)const {return V3D();}
-      virtual V3D getDirectionCryst(void)const {return V3D();}
-      virtual void getAxisPoints(std::vector<double>  &x)const
-      {
-        x.resize(getNBins());
-        for(size_t i=1;i<m_binBoundaries.size();++i)
-        {
-          x[i-1] = (m_binBoundaries[i] + m_binBoundaries[i-1]) / 2;
-        }
-      }
       virtual std::string toXMLString() const {return "";}
     private:
       std::string m_name;
       std::string m_id;
       std::vector<double> m_binBoundaries;
-      bool m_isReciprocal;
     };
 
     class MDFitWorkspaceIterator: public IMDIterator
@@ -331,7 +318,7 @@ namespace Mantid{
       * Creates a IMDDimension object for dimension idim of the workspace.
       * @param idim :: Index of the dimension.
       * @param paramString :: A string describing the dimension. Format:
-      *    "id=<string>[,name=<string>],xmin=<double>,xmax=<double>,n=<int>, dx=<double>[, rec=true|false]"
+      *    "id=<string>[,name=<string>],xmin=<double>,xmax=<double>,n=<int>, dx=<double>"
       * If name is not give name is the same as id. xmin is the lower bound of the first bin.
       * xmax is the upper bound of the last bin.
       * n is the number of bins, dx is the bin width. One of xmin, xmax, n, or dx should be omitted.
@@ -355,7 +342,6 @@ namespace Mantid{
       int n = -1;
       std::string id,name;
       std::vector<double> x;
-      bool rec = false;
       // parse the input expression
       for(size_t i = 0; i < expr.size(); ++i)
       {
@@ -385,10 +371,6 @@ namespace Mantid{
         else if (key == "n")
         {
           n = boost::lexical_cast<int>(value);
-        }
-        else if (key == "rec")
-        {
-          rec = boost::lexical_cast<bool>(value);
         }
       }
 
@@ -437,7 +419,7 @@ namespace Mantid{
       {
         name = id;
       }
-      MDFitWorkspaceDimension* dim = new MDFitWorkspaceDimension(id,name,x,rec);
+      MDFitWorkspaceDimension* dim = new MDFitWorkspaceDimension(id,name,x);
       m_dimensions[idim].reset(dim);
 	  // idim can not be larger then 2^32, so cast to unsigned int
       m_indexCalculator->setDimensionSize((unsigned int)idim,n);

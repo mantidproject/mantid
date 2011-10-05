@@ -44,7 +44,6 @@ namespace Mantid
 {
 namespace Geometry
 {
-class MDDimension;
 class MDHistoDimension;
 class MANTID_GEOMETRY_DLL IMDDimensionFactory
 {
@@ -69,9 +68,6 @@ public:
   /// Factory method.
   Mantid::Geometry::IMDDimension* create() const;
 
-  /// Factory method. More explicit naming as create() should be preferred.
-  Mantid::Geometry::MDDimension* createAsMDDimension() const;
-  
 private:
 
   IMDDimensionFactory();
@@ -82,9 +78,6 @@ private:
 
   /// Dimension xml to process.
   Poco::XML::Element* m_dimensionXML;
-
-  /// Create an instance of a dimension of the correct type (reciprocal or otherwise)
-  Mantid::Geometry::MDDimension* createRawDimension(Poco::XML::Element* reciprocalMapping, const std::string& id) const;
 };
 
   

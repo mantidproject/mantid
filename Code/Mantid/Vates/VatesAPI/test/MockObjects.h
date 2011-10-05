@@ -120,6 +120,7 @@ public:
   size_t getNBins() const {return m_nbins;};
   std::string toXMLString() const {throw std::runtime_error("Not implemented");};
   double getX(size_t) const {throw std::runtime_error("Not implemented");};
+  virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){ };
   virtual ~FakeIMDDimension()
   {
   }

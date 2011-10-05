@@ -96,6 +96,17 @@ namespace Geometry
       return m_binWidth;
     }
 
+    /** Change the extents and number of bins
+     * @param nBins :: number of bins
+     * @param min :: extents minimum
+     * @param max :: extents maximum
+     */
+    void setRange(size_t nBins, double min, double max)
+    {
+      m_min = min;
+      m_max = max;
+      m_numBins = nBins;
+    }
 
   private:
     /// Name

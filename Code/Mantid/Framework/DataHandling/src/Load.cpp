@@ -13,6 +13,7 @@
 #include <cctype>
 #include <algorithm>
 #include "MantidAPI/IMDEventWorkspace.h"
+#include <cstdio>
 
 namespace Mantid
 {

@@ -4,7 +4,6 @@
 #include "MDDataObjects/MDIndexCalculator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
-#include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <boost/scoped_ptr.hpp>

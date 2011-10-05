@@ -1,9 +1,10 @@
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/System.h"
+#include <cstdio>
 
 namespace Mantid
 {

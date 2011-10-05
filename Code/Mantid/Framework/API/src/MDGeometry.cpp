@@ -35,7 +35,7 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Initialize the geometry
    *
-   * @param dimensions :: vector of MDDimension objects, in the order of X, Y, Z, t, etc.
+   * @param dimensions :: vector of IMDDimension objects, in the order of X, Y, Z, t, etc.
    */
   void MDGeometry::initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions)
   {

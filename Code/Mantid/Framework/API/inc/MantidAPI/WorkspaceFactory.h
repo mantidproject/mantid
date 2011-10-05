@@ -23,7 +23,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 namespace Mantid
 {
 namespace API
@@ -66,14 +65,6 @@ public:
   MatrixWorkspace_sptr create(const std::string& className, const size_t& NVectors,
                                    const size_t& XLength, const size_t& YLength) const;
   
-  IMDWorkspace_sptr create(const std::string & className, const Geometry::MDGeometryDescription &) const;
- /// this create method is currently used to build MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;
-  // IMDWorkspace_sptr create(const IMDWorkspace_sptr origin) const;
-
- 
-  ///MDWorkspaceHolder_sptr create(const IMDWorkspace_sptr origin,const MDPropertyGeometry<> &MDgeometry) const;
-  //MDWorkspace_sptr create(const std::string &className="MDWorkspace",const const MDPropertyGeometry<>const *MDgeometry=NULL) const;
-
   void initializeFromParent(const MatrixWorkspace_const_sptr parent,
                             const MatrixWorkspace_sptr child, const bool differentSize) const;
 

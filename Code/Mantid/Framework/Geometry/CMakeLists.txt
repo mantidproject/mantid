@@ -25,14 +25,8 @@ set ( SRC_FILES
 	src/MDGeometry/Coordinate.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
-	src/MDGeometry/MDBasisDimension.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
 	src/MDGeometry/MDCell.cpp
-	src/MDGeometry/MDDimension.cpp
-	src/MDGeometry/MDDimensionRes.cpp
-	src/MDGeometry/MDGeometry.cpp
-	src/MDGeometry/MDGeometryBasis.cpp
-	src/MDGeometry/MDGeometryDescription.cpp
 	src/MDGeometry/MDGeometryXMLBuilder.cpp
 	src/MDGeometry/MDGeometryXMLParser.cpp
 	src/MDGeometry/MDHistoDimension.cpp
@@ -125,14 +119,8 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/Coordinate.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
-	inc/MantidGeometry/MDGeometry/MDBasisDimension.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDCell.h
-	inc/MantidGeometry/MDGeometry/MDDimension.h
-	inc/MantidGeometry/MDGeometry/MDDimensionRes.h
-	inc/MantidGeometry/MDGeometry/MDGeometry.h
-	inc/MantidGeometry/MDGeometry/MDGeometryBasis.h
-	inc/MantidGeometry/MDGeometry/MDGeometryDescription.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
@@ -209,10 +197,6 @@ set ( TEST_FILES
 	test/LineTest.h
 	test/MDBoxImplicitFunctionTest.h
 	test/MDCellTest.h
-	test/MDDimensionTest.h
-	test/MDGeometryBasisTest.h
-	test/MDGeometryDescriptionTest.h
-	test/MDGeometryTest.h
 	test/MDGeometryXMLParserTest.h
 	test/MDHistoDimensionBuilderTest.h
 	test/MDHistoDimensionTest.h

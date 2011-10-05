@@ -4,6 +4,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include <cstdio>
 
 namespace Mantid
 {

@@ -16,8 +16,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
-#include "MantidGeometry/MDGeometry/MDDimension.h"
-#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -1242,36 +1240,31 @@ namespace Mantid
       }
       /// the name of the dimennlsion as can be displayed along the axis
       virtual std::string getName() const {return m_axis.title();}
+
+      /// @return the units of the dimension as a string
       virtual std::string getUnits() const {return m_axis.unit()->label();}
-      /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
+
+      /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names. 
       virtual std::string getDimensionId() const {return m_dimensionId;}
 
       /// if the dimension is integrated (e.g. have single bin)
       virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
-      // it is sometimes convinient to shift image data by some number along specific dimension
-      virtual double getDataShift()const {return 0;}
 
+      /// @return the minimum extent of this dimension
+      virtual double getMinimum() const {return m_axis(0);}
+
+      /// @return the maximum extent of this dimension
       virtual double getMaximum() const {return m_axis(m_axis.length()-1);}
 
-      virtual double getMinimum() const {return m_axis(0);}
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual size_t getNBins() const {return m_axis.length();}
-      /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one. 
-      virtual size_t      getStride()const {return 0;}
-      /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
-      virtual bool isReciprocal() const {return false;}
-      /// defines the dimension scale in physical units. 
-      virtual double getScale()const {return 0;}
+
+      /// Change the extents and number of bins
+      virtual void setRange(size_t nBins, double min, double max){throw std::runtime_error("Not implemented");}
+
       ///  Get coordinate for index;
       virtual double getX(size_t ind)const {return m_axis(ind);}
-      // Mess; TODO: clear
-      virtual Kernel::V3D getDirection(void)const {throw std::runtime_error("Not implemented");}
-      virtual Kernel::V3D getDirectionCryst(void)const {throw std::runtime_error("Not implemented");}
-
-      /// the function returns the center points of the axis bins; There are nBins of such points 
-      /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
-      virtual void getAxisPoints(std::vector<double>  &)const{throw std::runtime_error("Not implemented");}
 
 
       //Dimensions must be xml serializable.
