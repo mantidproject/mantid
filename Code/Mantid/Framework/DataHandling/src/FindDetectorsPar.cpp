@@ -25,7 +25,8 @@ Kernel::Logger& FindDetectorsPar::g_log=Kernel::Logger::get("DataHandling");
 /// Sets documentation strings for this algorithm
 void FindDetectorsPar::initDocs()
 {
-  this->setWikiSummary("The algorithm [[FindDetectorsPar]] returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
+  this->setWikiSummary("Calculates angular positions and sizes of detectors and groups of detectors after the workspace was grouped using ASCII or XML map file. "
+                       "The results can be used to identify the positions of detectors in reciprocal space. Primary usage -- sub-algorithm of [[SaveNXSPE]], [[SavePAR]] or [[SavePHX]] algorithm.");
   this->setOptionalMessage("The algorithm returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
 }
 
@@ -59,8 +60,8 @@ void FindDetectorsPar::init()
     "If specified, will use data from file instead of the data, calculated from the instument description");
 
    //
-  declareProperty("OutputParTable","","If not empty, a table workspace of that "
-      "name will contain the calculated par-values for the detectors");
+  declareProperty("OutputParTable","","If not empty, a name of a table workspace which "
+      " will contain the calculated par or phx values for the detectors");
 
 
 }
