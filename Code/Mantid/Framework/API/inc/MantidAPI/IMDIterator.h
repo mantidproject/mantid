@@ -50,11 +50,7 @@ class IMDWorkspace;
   {
   public:
 
-  //=============================== REMOVE THESE SOON ==================================================
-    /// Get the size of the data (number of entries that will be iterated through)
-    virtual size_t getDataSize() const
-    { throw std::runtime_error("IMDIterator: Not Implemented."); }
-
+    //=============================== REMOVE THESE SOON ==================================================
     /// Get the i-th coordinate of the current cell
     virtual double getCoordinate(std::size_t i) const
     { UNUSED_ARG(i); throw std::runtime_error("IMDIterator: Not Implemented."); }
@@ -64,6 +60,9 @@ class IMDWorkspace;
     { throw std::runtime_error("IMDIterator: Not Implemented."); }
     //=============================== END REMOVE THESE SOON ==================================================
 
+    /// Get the size of the data (number of entries that will be iterated through)
+    virtual size_t getDataSize() const
+    { throw std::runtime_error("IMDIterator: Not Implemented."); }
 
     /// Advance to the next cell. If the current cell is the last one in the workspace
     /// do nothing and return false.
