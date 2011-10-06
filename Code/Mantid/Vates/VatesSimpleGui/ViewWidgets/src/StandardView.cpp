@@ -64,7 +64,12 @@ void StandardView::render()
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSource->getOutputPort(0), this->view);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
+  int reptype = VTK_SURFACE;
+  if (QString("PeaksReader") == QString(this->origSource->getProxy()->GetXMLName()))
+  {
+    reptype = VTK_WIREFRAME;
+  }
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype);
   drep->getProxy()->UpdateVTKObjects();
   this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
   this->originSourceRepr->colorByArray("signal",

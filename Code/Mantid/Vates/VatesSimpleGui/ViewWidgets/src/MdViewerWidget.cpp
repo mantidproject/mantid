@@ -305,7 +305,7 @@ void MdViewerWidget::checkForTimesteps()
 {
   vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
   vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
-  if (0 != tsv->GetNumberOfElements())
+  if (NULL != tsv && 0 != tsv->GetNumberOfElements())
   {
     this->ui.timeControlWidget->setEnabled(true);
   }
@@ -340,14 +340,17 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->onAutoScale();
   this->ui.proxyTabWidget->getObjectInspector()->accept();
 
-  const unsigned int val = vtkSMPropertyHelper(\
-        this->currentView->origSource->getProxy(),
-        "InputGeometryXML", true).GetNumberOfElements();
-  if (val > 0)
+  if (QString("PeaksReader") != QString(this->currentView->origSource->getProxy()->GetXMLName()))
   {
-    emit this->enableMultiSliceViewButton();
+    const unsigned int val = vtkSMPropertyHelper(\
+                               this->currentView->origSource->getProxy(),
+                               "InputGeometryXML", true).GetNumberOfElements();
+    if (val > 0)
+    {
+      emit this->enableMultiSliceViewButton();
+    }
+    emit this->enableThreeSliceViewButton();
   }
-  emit this->enableThreeSliceViewButton();
 }
 
 void MdViewerWidget::checkForUpdates()
