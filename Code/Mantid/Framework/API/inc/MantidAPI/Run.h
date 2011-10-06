@@ -110,8 +110,6 @@ namespace Mantid
       double getProtonCharge() const;
       /// Integrate the proton charge over the whole run time
       double integrateProtonCharge();
-      /// Integrate the proton charge over set range
-      double integrateProtonCharge(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end);
 
       /** @return a reference to the Goniometer object for this run */
       Mantid::Geometry::Goniometer & getGoniometer()

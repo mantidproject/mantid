@@ -201,7 +201,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     m_manager.filterByTime(start, stop);
 
     //Re-integrate proton charge
-    this->integrateProtonCharge(start, stop);
+    this->integrateProtonCharge();
   }
 
 
@@ -292,12 +292,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   //-----------------------------------------------------------------------------------------------
-  /// Integrate the proton charge over a whole run range
-  double Run::integrateProtonCharge()
-  {
-    return integrateProtonCharge(startTime(), endTime());
-  }
-
   /**
    * Calculate the total proton charge by integrating up all the entries in the
    * "proton_charge" time series log. This is then saved in the log entry
@@ -306,11 +300,10 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param start The start of the integration time
    * @param end The end of the integration time
    * @return :: the total charge in microAmp*hours.
-   */
-  double Run::integrateProtonCharge(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end)
+   */  
+  double Run::integrateProtonCharge()
   {
     Kernel::TimeSeriesProperty<double> * log;
-
     try
     {
       log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( this->getProperty("proton_charge") );
