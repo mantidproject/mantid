@@ -10,11 +10,14 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/VMD.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using namespace Mantid;
 using Mantid::Kernel::VMD;
+using Mantid::API::IMDIterator;
 
 class MDHistoWorkspaceTest : public CxxTest::TestSuite
 {
@@ -249,7 +252,22 @@ public:
 
   }
 
-    //Test for the IMDWorkspace aspects of MDWorkspace.
+  //---------------------------------------------------------------------------------------------------
+  void test_createIterator()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 10));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 10));
+    MDHistoWorkspace ws(dimX, dimY, dimZ);
+    IMDIterator * it = ws.createIterator();
+    TS_ASSERT( it );
+    MDHistoWorkspaceIterator * hwit = dynamic_cast<MDHistoWorkspaceIterator *>(it);
+    TS_ASSERT( hwit );
+    TS_ASSERT( it->next() );
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  //Test for the IMDWorkspace aspects of MDWorkspace.
   void testGetNonIntegratedDimensions()
   {
     MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 1)); //Integrated.

@@ -2,9 +2,9 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/VMD.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
-#include "MantidKernel/VMD.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -260,8 +260,7 @@ namespace MDEvents
   /// Creates a new iterator pointing to the first cell in the workspace
   Mantid::API::IMDIterator* MDHistoWorkspace::createIterator() const
   {
-//    return new MDHistoWorkspaceIterator(this);
-    return NULL;
+    return new MDHistoWorkspaceIterator(this);
   }
 
 
