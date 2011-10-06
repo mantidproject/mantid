@@ -40,6 +40,7 @@ private:
     return ws;
   }
 
+  // Add items to the workspace. This is a job performed by WorkspaceMementoCollection when fully assembled.
   static void doAddItems(TableWorkspace_sptr ws, WorkspaceMemento& memento)
   {
     int rowIndex = 0;
