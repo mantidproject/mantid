@@ -10,7 +10,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     //class ParameterisedLatticeView;
-    class InelasticISIS : public Approach
+    class DLLExport InelasticISIS : public Approach
     {
     public:
       InelasticISIS(LoanedMemento& memento);

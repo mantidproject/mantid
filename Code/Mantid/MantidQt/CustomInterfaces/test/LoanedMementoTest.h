@@ -66,7 +66,6 @@ public:
 
   void testThrowsIfWsMementoNULL()
   {
-    MockWorkspaceMementoLock* lock = new MockWorkspaceMementoLock;
     WorkspaceMemento* memento = NULL;
     TSM_ASSERT_THROWS("Cannot wrap NULL, should throw!", LoanedMemento loan(memento), std::runtime_error); //Should automatically lock
   }

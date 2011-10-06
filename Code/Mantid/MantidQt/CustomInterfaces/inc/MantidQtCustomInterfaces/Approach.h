@@ -2,13 +2,14 @@
 #define MANTIDQTCUSTOMINTERFACES_APPROACH_H_
 
 #include <qwidget.h>
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/LatticeView.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    class Approach
+    class DLLExport Approach
     {
     public:
       virtual QWidget* createLatticeView() = 0;
