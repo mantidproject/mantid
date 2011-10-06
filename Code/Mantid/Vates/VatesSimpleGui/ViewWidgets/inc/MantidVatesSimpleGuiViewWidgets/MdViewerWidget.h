@@ -75,7 +75,7 @@ public:
    */
   void connectLoadDataReaction(QAction *action);
   /// See MantidQt::API::VatesViewerInterface
-  void renderWorkspace(QString wsname);
+  void renderWorkspace(QString wsname, int wstype);
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode();
 
@@ -109,6 +109,7 @@ private:
   bool isPluginInitialized; ///< Flag for plugin initialization
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
+  MantidQt::API::VatesViewerInterface::WorkspaceType wsType; ///< Identifies the current dataset type
 
   /// Check the environmental variables to make sure PV_PLUGIN_PATH is available
   void checkEnvSetup();

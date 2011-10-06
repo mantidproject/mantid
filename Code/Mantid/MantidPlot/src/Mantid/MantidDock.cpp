@@ -868,6 +868,9 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPea
   //menu->addAction(m_showData); // Show data
   //menu->addAction(m_showInst); // Show instrument
   menu->addAction(m_showLogs); // Sample logs
+#ifdef MAKE_VATES
+  menu->addAction(m_showVatesGui); // Show the Vates simple interface
+#endif
   menu->addAction(m_showHist);
 }
 

@@ -74,10 +74,12 @@ REGISTER_VATESGUI(MdViewerWidget)
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
   this->isPluginInitialized = false;
+  this->wsType = VatesViewerInterface::MDEW;
 }
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 {
+  this->wsType = VatesViewerInterface::MDEW;
   this->checkEnvSetup();
   // We're in the standalone application mode
   this->isPluginInitialized = false;
@@ -295,7 +297,14 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
   {
     pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSource);
   }
-  //this->originSource = source;
+  if (QString("PeaksReader") == source->getProxy()->GetXMLName())
+  {
+    this->wsType = VatesViewerInterface::PEAKS;
+  }
+  else
+  {
+    this->wsType = VatesViewerInterface::MDEW;
+  }
 
   this->renderAndFinalSetup();
   this->checkForTimesteps();
@@ -315,7 +324,7 @@ void MdViewerWidget::checkForTimesteps()
   }
 }
 
-void MdViewerWidget::renderWorkspace(QString wsname)
+void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   if (this->currentView->origSource)
@@ -323,8 +332,19 @@ void MdViewerWidget::renderWorkspace(QString wsname)
     this->ui.modeControlWidget->setToStandardView();
     builder->destroySources();
   }
-  this->currentView->origSource = builder->createSource("sources",
-                                                        "MDEW Source",
+  QString sourcePlugin = "";
+  if (VatesViewerInterface::PEAKS == wstype)
+  {
+    this->wsType = VatesViewerInterface::PEAKS;
+    sourcePlugin = "Peaks Source";
+  }
+  else
+  {
+    this->wsType = VatesViewerInterface::MDEW;
+    sourcePlugin = "MDEW Source";
+  }
+
+  this->currentView->origSource = builder->createSource("sources", sourcePlugin,
                                                         pqActiveObjects::instance().activeServer());
   vtkSMPropertyHelper(this->currentView->origSource->getProxy(),
                       "Mantid Workspace Name").Set(wsname.toStdString().c_str());
@@ -340,7 +360,7 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->onAutoScale();
   this->ui.proxyTabWidget->getObjectInspector()->accept();
 
-  if (QString("PeaksReader") != QString(this->currentView->origSource->getProxy()->GetXMLName()))
+  if (VatesViewerInterface::MDEW == this->wsType)
   {
     const unsigned int val = vtkSMPropertyHelper(\
                                this->currentView->origSource->getProxy(),
@@ -385,6 +405,10 @@ void MdViewerWidget::updateAnimationControls(vtkSMDoubleVectorProperty *dvp)
 
 void MdViewerWidget::setTimesteps()
 {
+  if (VatesViewerInterface::PEAKS == this->wsType)
+  {
+    return;
+  }
   vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
   srcProxy1->Modified();
   srcProxy1->UpdatePipelineInformation();

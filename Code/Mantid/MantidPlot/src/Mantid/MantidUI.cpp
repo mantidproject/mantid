@@ -480,15 +480,29 @@ void MantidUI::showVatesSimpleInterface()
   QString wsName = getSelectedWorkspaceName();
   try
   {
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
-    if (!ws) return;
+
+    IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+                                 AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+
+    if (!mdews && !pws)
+    {
+      return;
+    }
+    // Set the type of workspace, the GUI needs it
+    int wsType = MantidQt::API::VatesViewerInterface::MDEW;
+    if (pws)
+    {
+      wsType = MantidQt::API::VatesViewerInterface::PEAKS;
+    }
+
 
     if (m_vatesSubWindow)
     {
       QWidget *vwidget = m_vatesSubWindow->widget();
       vwidget->show();
-      qobject_cast<MantidQt::API::VatesViewerInterface *>(vwidget)->renderWorkspace(wsName);
+      qobject_cast<MantidQt::API::VatesViewerInterface *>(vwidget)->renderWorkspace(wsName, wsType);
       return;
     }
     else
@@ -505,7 +519,7 @@ void MantidUI::showVatesSimpleInterface()
         //m_appWindow->setGeometry(usr_win, vsui);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
-        vsui->renderWorkspace(wsName);
+        vsui->renderWorkspace(wsName, wsType);
       }
       else
       {
