@@ -61,47 +61,6 @@ public:
   virtual ~FakeCell(){};
 };
 
-//=================================================================================================
-/// Fake iterator helper. Ideally would not need to provide this sort of implementation in a test.
-class FakeIterator : public Mantid::API::IMDIterator
-{
-private:
-  Mantid::API::IMDWorkspace const * const m_mockWorkspace;
-  size_t m_currentPointer;
-public:
-  FakeIterator(Mantid::API::IMDWorkspace const * const mockWorkspace) : m_mockWorkspace(mockWorkspace), m_currentPointer(0)
-  {
-  }
-  /// Get the size of the data
-  size_t getDataSize()const
-  {
-    return dimension_size * dimension_size;
-  }
-  double getCoordinate(size_t i)const
-  {
-    std::string id = m_mockWorkspace->getDimensionNum(i)->getDimensionId();
-    std::vector<size_t> indexes;
-    Mantid::MDDataObjects::MDWorkspaceIndexCalculator indexCalculator(2); //2d
-    indexes.resize(indexCalculator.getNDimensions());
-    indexCalculator.calculateDimensionIndexes(m_currentPointer,indexes);
-    return m_mockWorkspace->getDimension(id)->getX(indexes[i]);
-  }
-  bool next()
-  {
-    m_currentPointer++;
-    if(m_currentPointer < (dimension_size * dimension_size) )
-    {
-      return true;
-    }
-    return false;
-
-  }
-  size_t getPointer()const
-  {
-    return m_currentPointer;
-  }
-};
-
 
 //=================================================================================================
 ///Helper class. Concrete instance of IMDDimension.
@@ -145,8 +104,7 @@ public:
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
   virtual Mantid::API::IMDIterator* createIterator() const
-  {
-    return new FakeIterator(this);
+  { throw std::runtime_error("Mock createIterator() Not implemented.");
   }
 
   virtual ~MockIMDWorkspace() {}

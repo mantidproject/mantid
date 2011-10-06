@@ -175,17 +175,6 @@ public:
     //Create the workspace. 20 bins in each dimension.
     m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 100);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
-
-//    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-//    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-//        new FakeIMDDimension("x", 20))));
-//    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-//        new FakeIMDDimension("y", 20))));
-//    EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-//        new FakeIMDDimension("z", 20))));
-//    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(3)));
-//    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_,_)).WillRepeatedly(Return(1));
-//    m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
   }
 
 	void testGenerateHexahedronVtkDataSet()
