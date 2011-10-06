@@ -18,6 +18,16 @@ namespace MantidQt
       m_presenter->acceptView(this);
     }
 
+    /**
+    initalize the view with model data.
+    @param a1: Lattice parameter indicating component in x
+    @param a2: Lattice parameter indicating component in y
+    @param a3: Lattice parameter indicating component in z
+    @param b1: Lattice parameter giving alpha angle
+    @param b2: Lattice parameter giving beta angle
+    @param b3: Lattice parameter giving gamma angle
+    @return false if invalid unit cell.
+    */
     void ParameterisedLatticeView::initalize(double a1, double a2, double a3, double b1, double b2, double b3)
     {
       QGridLayout* layout = new QGridLayout();
@@ -47,6 +57,9 @@ namespace MantidQt
       this->setLayout(layout);
     }
 
+    /**
+    Create a standard edit box for each component.
+    */
     QLineEdit* ParameterisedLatticeView::createEditBox(double value)
     {
       QLineEdit* box = new QLineEdit();
@@ -64,41 +77,67 @@ namespace MantidQt
       this->layout();
     }
 
+    /**
+    Getter for a1
+    @return a1
+    */
     double ParameterisedLatticeView::getA1() const
     {
       return m_a1->text().toDouble();
     }
 
+    /**
+    Getter for a2
+    @return a2
+    */
     double ParameterisedLatticeView::getA2() const
     {
       return m_a2->text().toDouble();
     }
 
+    /**
+    Getter for a3
+    @return a3
+    */
     double ParameterisedLatticeView::getA3() const
     {
       return m_a3->text().toDouble();
     }
 
+    /**
+    Getter for b1
+    @return b1
+    */
     double ParameterisedLatticeView::getB1() const
     {
       return m_b1->text().toDouble();
     }
 
+    /**
+    Getter for b2
+    @return b2
+    */
     double ParameterisedLatticeView::getB2() const
     {
       return m_b2->text().toDouble();
     }
 
+    /**
+    Getter for b3
+    @return a3
+    */
     double ParameterisedLatticeView::getB3() const
     {
       return m_b3->text().toDouble();
     }
 
+    /// Slot for edit box edited.
     void ParameterisedLatticeView::edited()
     {
-      m_presenter->update();
+      m_presenter->update(); // Feedback to the presenter
     }
 
+    /// Indicate that a modification has been made
     void ParameterisedLatticeView::indicateModified()
     {
       QPalette pal = this->palette();
@@ -107,12 +146,14 @@ namespace MantidQt
       this->setPalette(pal);
     }
 
+    /// Indicate that there are no pending modifications
     void ParameterisedLatticeView::indicateDefault()
     {
       this->setAutoFillBackground(true);
       this->setPalette(m_pal);
     }
 
+    /// Indicate that the modifications/input are invalid.
     void ParameterisedLatticeView::indicateInvalid()
     {
       QPalette pal = this->palette();
