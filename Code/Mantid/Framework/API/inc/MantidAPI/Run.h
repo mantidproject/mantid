@@ -57,6 +57,13 @@ namespace Mantid
       /// Addition
       Run& operator+=(const Run& rhs);
 
+      /// Set the run start and end
+      void setStartAndEndTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end);
+      /// Return the run start time
+      const Kernel::DateAndTime startTime() const;
+      /// Return the run end time
+      const Kernel::DateAndTime endTime() const;
+
       void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
       void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
 
@@ -101,8 +108,10 @@ namespace Mantid
       void setProtonCharge( const double charge);
       /// Get the proton charge
       double getProtonCharge() const;
-
+      /// Integrate the proton charge over the whole run time
       double integrateProtonCharge();
+      /// Integrate the proton charge over set range
+      double integrateProtonCharge(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end);
 
       /** @return a reference to the Goniometer object for this run */
       Mantid::Geometry::Goniometer & getGoniometer()

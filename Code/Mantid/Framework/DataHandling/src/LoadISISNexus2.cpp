@@ -731,7 +731,6 @@ namespace Mantid
         LogParser parser(log);
         ws->mutableRun().addProperty(parser.createPeriodLog(period));
         ws->mutableRun().addProperty(parser.createAllPeriodsLog());
-        ws->mutableRun().addProperty(parser.createRunningLog());
       }
 
     }

@@ -27,7 +27,8 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /**
    * Default constructor
    */
-  Run::Run() : m_manager(), m_protonChargeName("gd_prtn_chrg")
+  Run::Run() : m_manager(), m_protonChargeName("gd_prtn_chrg"), 
+    m_goniometer()
   {
   }
 
@@ -42,7 +43,8 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * Copy constructor
    * @param copy :: The object to initialize the copy from
    */
-  Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName), m_goniometer(copy.m_goniometer)
+  Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName), 
+    m_goniometer(copy.m_goniometer)
   {
   }
 
@@ -108,6 +110,47 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     return *this;
   }
 
+  /**
+  * Set the run start and end
+  * @param start :: The run start
+  * @param end :: The run end
+  */
+  void Run::setStartAndEndTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end)
+  {
+    this->addProperty<std::string>("start_time", start.to_ISO8601_string(), true);
+    this->addProperty<std::string>("end_time", end.to_ISO8601_string(), true);
+  }
+
+  /// Return the run start time
+  const Kernel::DateAndTime Run::startTime() const
+  {
+    const std::string start_prop("start_time");
+    if( this->hasProperty(start_prop) ) 
+    {
+      std::string start = this->getProperty(start_prop)->value();
+      return DateAndTime(start);
+    }
+    else
+    {
+      throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
+    }
+  }
+
+  /// Return the run end time
+  const Kernel::DateAndTime Run::endTime() const
+  {
+    const std::string end_prop("end_time");
+    if( this->hasProperty(end_prop) )
+    {
+      std::string end = this->getProperty(end_prop)->value();
+      return DateAndTime(end);
+    }
+    else
+    {
+      throw std::runtime_error("Run::endTime() - No end time has been set for this run.");
+    }
+  }
+
   /** Adds all the time series in the second property manager to those in the first
   * @param sum the properties to add to
   * @param toAdd the properties to add
@@ -158,7 +201,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     m_manager.filterByTime(start, stop);
 
     //Re-integrate proton charge
-    this->integrateProtonCharge();
+    this->integrateProtonCharge(start, stop);
   }
 
 
@@ -249,18 +292,23 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   //-----------------------------------------------------------------------------------------------
-    /**
-   * Calculate the total proton charge by summing up all the entries in the
+  /// Integrate the proton charge over a whole run range
+  double Run::integrateProtonCharge()
+  {
+    return integrateProtonCharge(startTime(), endTime());
+  }
+
+  /**
+   * Calculate the total proton charge by integrating up all the entries in the
    * "proton_charge" time series log. This is then saved in the log entry
    * using setProtonCharge().
    * If "proton_charge" is not found, the value is set to 0.0.
-   *
+   * @param start The start of the integration time
+   * @param end The end of the integration time
    * @return :: the total charge in microAmp*hours.
    */
-  double Run::integrateProtonCharge()
+  double Run::integrateProtonCharge(const Kernel::DateAndTime & start, const Kernel::DateAndTime & end)
   {
-    /// Conversion factor between picoColumbs and microAmp*hours
-    const double CURRENT_CONVERSION = 1.e-6 / 3600.;
     Kernel::TimeSeriesProperty<double> * log;
 
     try
@@ -276,7 +324,19 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 
     if (log)
     {
-      double total = log->getTotalValue() * CURRENT_CONVERSION;
+      double total = log->getTotalValue();
+      std::string unit = log->units();
+      // Do we need to take account of a unit
+      if(unit.find("picoCoulomb") != std::string::npos )
+      {
+        /// Conversion factor between picoColumbs and microAmp*hours
+        const double currentConversion = 1.e-6 / 3600.;
+        total *= currentConversion;
+      }
+      else if(!unit.empty() && unit != "uAh")
+      {
+        g_log.warning("Proton charge log has units other than uAh or picoCoulombs. The value of the total proton charge has been left at the sum of the log values.");
+      }
       this->setProtonCharge(total);
       return total;
     }

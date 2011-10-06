@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/LogParser.h"
 #include "MantidAPI/FileProperty.h"
 #include <cctype>
 
@@ -94,19 +95,63 @@ namespace Mantid
           loadLogs(file, group_name, group_class, workspace);
         }
       }
-      file.close();
+      try
+      {
+        // Read the start and end time strings
+        file.openData("start_time");
+        Kernel::DateAndTime start(file.getStrData());
+        file.closeData();
+        file.openData("end_time");
+        Kernel::DateAndTime end(file.getStrData());
+        file.closeData();
+        workspace->mutableRun().setStartAndEndTime(start, end);
+      }
+      catch(::NeXus::Exception&)
+      {}
+
       if( !workspace->run().hasProperty("gd_prtn_chrg") )
       {
-        
+        // Try pulling it from the main proton_charge entry first
         try
         {
-          //Use the DAS logs to integrate the proton charge (if any).
-          workspace->mutableRun().integrateProtonCharge();
+          file.openData("proton_charge");
+          std::vector<double> values;
+          file.getDataCoerce(values);
+          std::string units;
+          file.getAttr("units", units);
+          double charge = values.front();
+          if( units.find("picoCoulomb") != std::string::npos )
+          {
+            charge *= 1.e-06/3600.;
+          }
+          workspace->mutableRun().setProtonCharge(charge);
         }
-        catch (Exception::NotFoundError &)
+        catch(::NeXus::Exception&)
         {
-          //Ignore not found property error.
+          // Try and integrate the proton logs
+          try
+          {
+            //Use the DAS logs to integrate the proton charge (if any).
+            workspace->mutableRun().integrateProtonCharge();
+          }
+          catch (Exception::NotFoundError &)
+          {
+            //Ignore not found property error.
+          }
         }
+      }
+
+      // Close the file
+      file.close();
+
+      // Filter logs
+      // If we loaded an icp_event log then create the running log to
+      // allow filtering 
+      if( workspace->run().hasProperty("icp_event") )
+      {
+        Kernel::Property *log = workspace->run().getProperty("icp_event");
+        LogParser parser(log);
+        workspace->mutableRun().addProperty(parser.createRunningLog());
       }
     }
 
