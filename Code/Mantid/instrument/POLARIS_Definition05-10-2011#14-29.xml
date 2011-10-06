@@ -4,17 +4,8 @@
 <instrument name="Polaris_upgrade"
               valid-from="2011-01-01 01:01:01"
               valid-to="2099-12-31 23:59:59"
-              last-modified="2011-10-04T13:38:18">
+              last-modified="2011-10-05T14:29:11">
 
-<!-- Note still waiting update of ticket #3873. Meanwhile following was
-     done: 
-     
-     To avoid the pixel triangulation problem I trimmed 1mm off the top and 
-     bottom of the ZnS pixels (total height reduction = 2mm) and reduced their 
-     width from 4.8mm to 4.6mm in the model (in reality they are 5mm wide). 
-     
-     -->
-              
   <defaults>
     <length unit="meter" />
     <angle unit="degree" />
@@ -31,6 +22,11 @@
       This file generated automatically by "Anders" program
       Detector position data (projected on to xz plane) provided by David McPhail
       Translations and rotations to build detector modules calculated using Excel by Ron Smith
+
+      Note: In order to avoid problems with Mantid crashing due to a bug in a library
+            routine which deals with triangulation of shapes defined in the instrument
+            description, all the ZnS scintillator detectors have had their widths reduced
+            by 0.2mm and their heights reduced by 2mm.
 
   -->
 
@@ -100,10 +96,10 @@
     <!-- The shape is 32mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.016" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.016" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.016" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.016" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.016" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.016" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.016" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.016" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -112,10 +108,10 @@
     <!-- The shape is 36mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.018" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.018" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.018" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.018" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.018" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.018" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.018" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.018" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -124,10 +120,10 @@
     <!-- The shape is 40mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.020" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.020" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.020" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.020" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.020" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.020" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.020" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.020" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -136,10 +132,10 @@
     <!-- The shape is 44mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.022" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.022" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.022" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.022" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.022" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.022" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.022" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.022" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -148,10 +144,10 @@
     <!-- The shape is 48mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.024" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.024" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.024" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.024" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.024" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.024" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.024" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.024" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -160,10 +156,10 @@
     <!-- The shape is 52mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.026" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.026" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.026" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.026" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.026" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.026" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.026" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.026" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -172,10 +168,10 @@
     <!-- The shape is 56mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.028" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.028" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.028" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.028" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.028" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.028" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.028" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.028" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
@@ -184,10 +180,10 @@
     <!-- The shape is 60mm tall along y; 4.8mm wide along x and a small depth in z to 
          avoid issues with solid angle calculations -->
     <cuboid id="shape">
-      <left-front-bottom-point   x="-0.0023" y="-0.030" z="0.0"  />
-      <left-front-top-point      x="-0.0023" y="0.030" z="0.0"  />
-      <left-back-bottom-point    x="-0.0023" y="-0.030" z="-0.001"  />
-      <right-front-bottom-point  x="0.0023"  y="-0.030" z="0.0"  />
+      <left-front-bottom-point   x="-0.0024" y="-0.030" z="0.0"  />
+      <left-front-top-point      x="-0.0024" y="0.030" z="0.0"  />
+      <left-back-bottom-point    x="-0.0024" y="-0.030" z="-0.001"  />
+      <right-front-bottom-point  x="0.0024"  y="-0.030" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
