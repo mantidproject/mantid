@@ -1,0 +1,14 @@
+<ServerManagerConfiguration>
+  <!-- Begin PeaksSource -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="Peaks Source" class="vtkPeaksSource">
+	   <StringVectorProperty
+         name="Mantid Workspace Name"
+         command="SetWsName"
+         number_of_elements="1"
+         information_only="0">
+       </StringVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End PeaksSource -->
+</ServerManagerConfiguration>
