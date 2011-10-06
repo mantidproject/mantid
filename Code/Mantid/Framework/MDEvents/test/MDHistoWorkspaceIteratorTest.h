@@ -37,6 +37,11 @@ public:
       ws->setSignalAt(i, double(i));
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
     size_t i=0;
+
+    // Position of the first box
+    for (size_t d=0; d<nd; d++)
+    { TS_ASSERT_DELTA( it->getInnerPosition(0,0), 0.5, 1e-6 ); }
+
     do
     {
       TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
@@ -45,12 +50,11 @@ public:
       size_t numVertices;
       vertexes = it->getVertexesArray(numVertices);
       TS_ASSERT( vertexes );
-      TS_ASSERT_EQUALS( it->getNumEvents(), 0 );
-      TS_ASSERT_THROWS_ANYTHING( it->getInnerDetectorID(1) );
-      TS_ASSERT_THROWS_ANYTHING( it->getInnerRunIndex(1) );
-      TS_ASSERT_THROWS_ANYTHING( it->getInnerSignal(1) );
-      TS_ASSERT_THROWS_ANYTHING( it->getInnerError(1) );
-      TS_ASSERT_THROWS_ANYTHING( it->getInnerPosition(1,0) );
+      TS_ASSERT_EQUALS( it->getNumEvents(), 1 );
+      TS_ASSERT_EQUALS( it->getInnerDetectorID(0), 0 );
+      TS_ASSERT_EQUALS( it->getInnerRunIndex(0), 0 );
+      TS_ASSERT_EQUALS( it->getInnerSignal(0), double(i) );
+      TS_ASSERT_EQUALS( it->getInnerError(0),  1.0 );
       i++;
     } while(it->next());
     TS_ASSERT_EQUALS( i, numPoints );

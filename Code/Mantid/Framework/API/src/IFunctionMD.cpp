@@ -77,16 +77,16 @@ namespace API
 
         IMDIterator* r = m_workspace->createIterator();
 
+        size_t i = 0;
         do
         {
-          size_t i = r->getPointer();
-          const Mantid::Geometry::SignalAggregate& point = m_workspace->getCell(i);
-          double signal = point.getSignal();
-          double error  = point.getError();
+          double signal = r->getNormalizedSignal(); //point.getSignal();
+          double error  = r->getNormalizedError();  //point.getError();
           if (error == 0) error = 1.;
           m_data[i] = signal;
           m_weights[i] = 1./error;
-        }while(r->next());
+          i++;
+        } while(r->next());
         delete r;
       }
     }
@@ -127,11 +127,12 @@ namespace API
   {
     if (m_dataSize == 0) return;
     IMDIterator* r = m_workspace->createIterator();
+    size_t i=0;
     do
     {
-      size_t i = r->getPointer();
       out[i] = functionMD(*r);
-    }while(r->next());
+      i++;
+    } while(r->next());
     delete r;
   }
 

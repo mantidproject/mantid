@@ -39,7 +39,6 @@ namespace Mantid
       }
       
       signal_t signal = 0;
-      size_t pos = 0;
       signal_t accumulated_signal = 0;
 
       Mantid::API::IMDIterator* it = m_workspace->createIterator();

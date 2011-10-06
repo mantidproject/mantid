@@ -183,16 +183,21 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
 
   // set dimensions and calculate ws's contribution to m_dataSize
   IFunctionMD::setWorkspace(ws,slicing,false);
+
+  // Cache the iterators
+  std::vector<IMDIterator*> iterators;
+  for(size_t i = 0; i < m_workspaces.size(); ++i)
+    iterators.push_back(m_workspaces[i]->createIterator());
+
   // add other workspaces
   m_offset.resize(m_workspaces.size(),0);
   for(size_t i = 1; i < m_workspaces.size(); ++i)
   {
     mws = m_workspaces[i];
-    IMDIterator* r = mws->createIterator();
+    IMDIterator* r = iterators[i];
     size_t n = r->getDataSize();
     m_offset[i] = m_dataSize;
     m_dataSize += static_cast<int>(n);
-    delete r;
   }
 
   m_data.reset(new double[m_dataSize]);
@@ -203,17 +208,16 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   for(size_t i = 0; i < m_workspaces.size(); ++i)
   {
     mws = m_workspaces[i];
-    IMDIterator* r = mws->createIterator();
+    IMDIterator* it = iterators[i];
     size_t j0 = m_offset[i];
     do
     {
-      size_t j = r->getPointer();
-      const Mantid::Geometry::SignalAggregate& cell = mws->getCell(j);
-      m_data[j0 + j] = cell.getSignal();
-      double err = cell.getError();
-      m_weights[j0 + j] = err != 0.0 ? 1./err : 1.0;
-    }while(r->next());
-    delete r;
+      m_data[j0] = it->getNormalizedSignal();
+      double err = it->getNormalizedError();
+      m_weights[j0] = err != 0.0 ? 1./err : 1.0;
+      j0++;
+    }while(it->next());
+    delete it;
   }
 
   //std::cerr << "Workspace:\n";

@@ -33,6 +33,15 @@ namespace Mantid
             double quadratic = getParameter("Quadratic");
             double bgSignal = 0.;
             double eps=0.;
+
+//            // Go once over each event
+//            for (size_t i=0; i < it.getNumEvents(); i++)
+//            {
+//              // 4th coordinate = energy
+//              eps = it.getInnerPosition(i, 3);
+//              bgSignal += constant+eps*(linear+eps*quadratic);
+//            }
+
             const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
             std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
             // assume that the first point in the vertexes array is the centre point anf that the gett getter

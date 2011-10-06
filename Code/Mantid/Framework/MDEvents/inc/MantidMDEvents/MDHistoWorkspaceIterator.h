@@ -66,7 +66,7 @@ namespace MDEvents
 
     virtual int32_t getInnerDetectorID(size_t index) const;
 
-    virtual size_t getInnerPosition(size_t index, size_t dimension) const;
+    virtual coord_t getInnerPosition(size_t index, size_t dimension) const;
 
     virtual signal_t getInnerSignal(size_t index) const;
 

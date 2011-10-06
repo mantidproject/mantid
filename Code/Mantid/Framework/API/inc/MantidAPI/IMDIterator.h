@@ -107,7 +107,7 @@ class IMDWorkspace;
     { UNUSED_ARG(index); throw std::runtime_error("IMDIterator: Not Implemented."); }
 
     /// Returns the position of a given event for a given dimension
-    virtual size_t getInnerPosition(size_t index, size_t dimension) const
+    virtual coord_t getInnerPosition(size_t index, size_t dimension) const
     { UNUSED_ARG(index); UNUSED_ARG(dimension); throw std::runtime_error("IMDIterator: Not Implemented."); }
 
     /// Returns the signal of a given event

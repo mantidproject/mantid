@@ -115,46 +115,43 @@ namespace MDEvents
 
   //----------------------------------------------------------------------------------------------
   /// Returns the number of events/points contained in this box
+  /// @return 1 always: e.g. there is one (fake) event in the middle of the box.
   size_t MDHistoWorkspaceIterator::getNumEvents() const
   {
-    // There are no events contained - this is a binned workspace
-    return 0;
+    return 1;
   }
 
   //----------------------------------------------------------------------------------------------
   /// For a given event/point in this box, return the run index
-  uint16_t MDHistoWorkspaceIterator::getInnerRunIndex(size_t index) const
+  uint16_t MDHistoWorkspaceIterator::getInnerRunIndex(size_t /*index*/) const
   {
-    UNUSED_ARG(index);
-    throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner run index.");
+    return 0;
+    //throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner run index.");
   }
 
   /// For a given event/point in this box, return the detector ID
-  int32_t MDHistoWorkspaceIterator::getInnerDetectorID(size_t index) const
+  int32_t MDHistoWorkspaceIterator::getInnerDetectorID(size_t /*index*/) const
   {
-    UNUSED_ARG(index);
-    throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner detector ID.");
+    return 0;
+    //throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner detector ID.");
   }
 
   /// Returns the position of a given event for a given dimension
-  size_t MDHistoWorkspaceIterator::getInnerPosition(size_t index, size_t dimension) const
+  coord_t MDHistoWorkspaceIterator::getInnerPosition(size_t /*index*/, size_t dimension) const
   {
-    UNUSED_ARG(index); UNUSED_ARG(dimension);
-    throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner position.");
+    return m_ws->getCenter(m_pos)[dimension];
   }
 
   /// Returns the signal of a given event
-  signal_t MDHistoWorkspaceIterator::getInnerSignal(size_t index) const
+  signal_t MDHistoWorkspaceIterator::getInnerSignal(size_t /*index*/) const
   {
-    UNUSED_ARG(index);
-    throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner signal.");
+    return m_ws->getSignalAt(m_pos);
   }
 
   /// Returns the error of a given event
-  signal_t MDHistoWorkspaceIterator::getInnerError(size_t index) const
+  signal_t MDHistoWorkspaceIterator::getInnerError(size_t /*index*/) const
   {
-    UNUSED_ARG(index);
-    throw std::runtime_error("MDHistoWorkspaceIterator: No events are contained, so it is not possible to return inner error.");
+    return m_ws->getErrorAt(m_pos);
   }
 
 } // namespace Mantid
