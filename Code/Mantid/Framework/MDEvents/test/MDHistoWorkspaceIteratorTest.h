@@ -1,13 +1,14 @@
 #ifndef MANTID_MDEVENTS_MDHISTOWORKSPACEITERATORTEST_H_
 #define MANTID_MDEVENTS_MDHISTOWORKSPACEITERATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidKernel/Timer.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -22,10 +23,99 @@ public:
   static void destroySuite( MDHistoWorkspaceIteratorTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void do_test_iterator(size_t nd, size_t numPoints)
   {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    for (size_t i=0; i<numPoints; i++)
+      ws->setSignalAt(i, double(i));
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    size_t i=0;
+    do
+    {
+      TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
+      TS_ASSERT_DELTA( it->getNormalizedError(), 1.0, 1e-5);
+      coord_t * vertexes;
+      size_t numVertices;
+      vertexes = it->getVertexesArray(numVertices);
+      TS_ASSERT( vertexes );
+      TS_ASSERT_EQUALS( it->getNumEvents(), 0 );
+      TS_ASSERT_THROWS_ANYTHING( it->getInnerDetectorID(1) );
+      TS_ASSERT_THROWS_ANYTHING( it->getInnerRunIndex(1) );
+      TS_ASSERT_THROWS_ANYTHING( it->getInnerSignal(1) );
+      TS_ASSERT_THROWS_ANYTHING( it->getInnerError(1) );
+      TS_ASSERT_THROWS_ANYTHING( it->getInnerPosition(1,0) );
+      i++;
+    } while(it->next());
+    TS_ASSERT_EQUALS( i, numPoints );
   }
 
+  void test_iterator_1D()
+  {
+    do_test_iterator(1, 10);
+  }
+
+  void test_iterator_2D()
+  {
+    do_test_iterator(2, 100);
+  }
+
+  void test_iterator_3D()
+  {
+    do_test_iterator(3, 1000);
+  }
+
+  void test_iterator_4D()
+  {
+    do_test_iterator(4, 10000);
+  }
+
+
+};
+
+
+
+class MDHistoWorkspaceIteratorTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDHistoWorkspaceIteratorTestPerformance *createSuite() { return new MDHistoWorkspaceIteratorTestPerformance(); }
+  static void destroySuite( MDHistoWorkspaceIteratorTestPerformance *suite ) { delete suite; }
+
+  MDHistoWorkspace_sptr ws;
+
+  MDHistoWorkspaceIteratorTestPerformance()
+  {
+    // 125^3 workspace = about 2 million
+    ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 125);
+  }
+
+  /** One million iterations */
+  void test_iterator_3D_signalAndErrorOnly()
+  {
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    size_t i=0;
+    do
+    {
+      signal_t sig = it->getNormalizedSignal();
+      signal_t err = it->getNormalizedError();
+    } while(it->next());
+  }
+
+  /** One million iterations */
+  void test_iterator_3D_withGetVertexes()
+  {
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    size_t i=0;
+    size_t numVertices;
+    do
+    {
+      signal_t sig = it->getNormalizedSignal();
+      signal_t err = it->getNormalizedError();
+      coord_t * vertexes = it->getVertexesArray(numVertices);
+      delete [] vertexes;
+    } while(it->next());
+  }
 
 };
 
