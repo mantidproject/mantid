@@ -51,9 +51,20 @@ namespace MDEvents
   /** @return the number of points to be iterated on */
   size_t MDHistoWorkspaceIterator::getDataSize() const
   {
-    return size_t(m_ws->getNPoints());
+    return size_t(m_max);
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Jump to the index^th cell.
+   *  No range checking is performed, for performance reasons!
+   *
+   * @param index :: point to jump to. Must be 0 <= index < getDataSize().
+   */
+  void MDHistoWorkspaceIterator::jumpTo(size_t index)
+  {
+    m_pos = uint64_t(index);
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Advance to the next cell. If the current cell is the last one in the workspace

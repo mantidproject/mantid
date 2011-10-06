@@ -64,6 +64,10 @@ class IMDWorkspace;
     virtual size_t getDataSize() const
     { throw std::runtime_error("IMDIterator: Not Implemented."); }
 
+    /// Jump to the index^th cell.
+    virtual void jumpTo(size_t index)
+    { UNUSED_ARG(index); throw std::runtime_error("IMDIterator: Not Implemented."); }
+
     /// Advance to the next cell. If the current cell is the last one in the workspace
     /// do nothing and return false.
     virtual bool next()

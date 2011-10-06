@@ -54,6 +54,13 @@ public:
       i++;
     } while(it->next());
     TS_ASSERT_EQUALS( i, numPoints );
+
+    // Now use a for loop
+    for (size_t i=0; i < numPoints; i++)
+    {
+      it->jumpTo(i);
+      TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
+    }
   }
 
   void test_iterator_1D()
@@ -135,6 +142,21 @@ public:
       VMD center = it->getCenter();
       UNUSED_ARG(sig); UNUSED_ARG(err);
     } while(it->next());
+  }
+
+  /** Use jumpTo() */
+  void test_iterator_3D_withGetCenter_usingJumpTo()
+  {
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    int max = it->getDataSize();
+    for (int i=0; i<max; i++)
+    {
+      it->jumpTo(size_t(i));
+      signal_t sig = it->getNormalizedSignal();
+      signal_t err = it->getNormalizedError();
+      VMD center = it->getCenter();
+      UNUSED_ARG(sig); UNUSED_ARG(err);
+    }
   }
 
 };

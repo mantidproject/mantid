@@ -50,6 +50,8 @@ namespace MDEvents
 
     virtual bool next(size_t skip);
 
+    virtual void jumpTo(size_t index);
+
     virtual signal_t getNormalizedSignal() const;
 
     virtual signal_t getNormalizedError() const;
