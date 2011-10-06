@@ -137,7 +137,7 @@ public:
     TS_ASSERT_THROWS(g->setMatrixWorkspace(ws,7,12,3),std::range_error);
 
     g->setMatrixWorkspace(ws,0);
-    g->testInit(ws,0,0,ws->blocksize()-1);
+    g->testInit(ws,0,0,static_cast<int>(ws->blocksize()-1));
 
     g->setMatrixWorkspace(ws,0,1.0,3.3);
     g->testInit(ws,0,10,32);
