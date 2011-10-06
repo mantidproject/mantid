@@ -47,6 +47,13 @@ namespace MDEvents
   }
   
 
+  //----------------------------------------------------------------------------------------------
+  /** @return the number of points to be iterated on */
+  size_t MDHistoWorkspaceIterator::getDataSize() const
+  {
+    return size_t(m_ws->getNPoints());
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /// Advance to the next cell. If the current cell is the last one in the workspace
@@ -55,6 +62,15 @@ namespace MDEvents
   bool MDHistoWorkspaceIterator::next()
   {
     return (++m_pos < m_max);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// Advance, skipping a certain number of cells.
+  /// @param skip :: how many to increase. If 1, then every point will be sampled.
+  bool MDHistoWorkspaceIterator::next(size_t skip)
+  {
+    m_pos += skip;
+    return (m_pos < m_max);
   }
 
   //----------------------------------------------------------------------------------------------

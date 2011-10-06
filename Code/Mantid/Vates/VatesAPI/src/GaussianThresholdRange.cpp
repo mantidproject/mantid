@@ -73,42 +73,28 @@ namespace Mantid
       std::vector<signal_t> raw_values;
       signal_t signal = 0;
       signal_t accumulated_signal = 0;
-      signal_t max_signal = m_workspace->getCell(0).getSignal();
-      signal_t min_signal = m_workspace->getCell(0).getSignal();
+      signal_t max_signal = it->getNormalizedSignal();
+      signal_t min_signal = max_signal;
       size_t size = 0;
-      size_t nSkips = 0;
+      size_t nSkips = 1;
       if(m_sampleSize > 0)
       {
         size_t interval = it->getDataSize()/m_sampleSize; //Integer division
-        nSkips = interval > 0 ? interval - 1 : 0; //nSkips = interval - 1, unless integer division gives zero.
+        nSkips = interval > 0 ? interval : 1; //nSkips = 1 minimum
       }
-      for(int i =0; ;i++)
+      do
       {
-        if(it->next())
+        signal = it->getNormalizedSignal();
+        if(signal != 0) //Cells with zero signal values are not considered in the analysis.
         {
-          size_t pos = it->getPointer();
-          signal = m_workspace->getCell(pos).getSignal();
-          if(signal != 0) //Cells with zero signal values are not considered in the analysis.
-          {
-            accumulated_signal += signal;
-            raw_values.push_back(signal);
-            max_signal = signal > max_signal  ? signal : max_signal;
-            min_signal = signal < min_signal ? signal : min_signal;
-            size++;
-          }
+          accumulated_signal += signal;
+          raw_values.push_back(signal);
+          max_signal = signal > max_signal  ? signal : max_signal;
+          min_signal = signal < min_signal ? signal : min_signal;
+          size++;
         }
-        else
-        {
-          break;
-        }
-        for(unsigned int j = 0; j < nSkips; j++)
-        {
-          if(j < nSkips)
-          {
-            it->next();
-          }
-        }
-      }
+      } while (it->next(nSkips));
+
       calculateAsNormalDistrib(raw_values, size, max_signal, min_signal, accumulated_signal);
       m_isCalculated = true;
       delete it;

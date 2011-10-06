@@ -227,14 +227,14 @@ namespace MDEvents
     const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
     {
       (void) index; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
+      throw Mantid::Kernel::Exception::NotImplementedError("MDHistoWorkspace::getPoint() WONT GET IMPLEMENTED !");
     }
 
     /// Get the cell at the specified index/increment.
     const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
     {
       (void) dim1Increment; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
+      throw Mantid::Kernel::Exception::NotImplementedError("MDHistoWorkspace::getCell() WONT GET IMPLEMENTED !");
     }
 
     //======================================================================================

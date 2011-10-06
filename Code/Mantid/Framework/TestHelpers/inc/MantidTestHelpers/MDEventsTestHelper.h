@@ -43,7 +43,7 @@ namespace MDEventsTestHelper
   DLL_TESTHELPERS Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
 
   /// Make a fake n-dimensional MDHistoWorkspace
-  DLL_TESTHELPERS Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10);
+  DLL_TESTHELPERS Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0);
 
 
   //-------------------------------------------------------------------------------------

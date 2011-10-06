@@ -70,6 +70,10 @@ class IMDWorkspace;
     virtual bool next()
     { throw std::runtime_error("IMDIterator: Not Implemented."); }
 
+    /// Advance, skipping a certain number of cells.
+    virtual bool next(size_t skip)
+    { UNUSED_ARG(skip); throw std::runtime_error("IMDIterator: Not Implemented."); }
+
     /// Returns the normalized signal for this box
     virtual signal_t getNormalizedSignal() const
     { throw std::runtime_error("IMDIterator: Not Implemented."); }

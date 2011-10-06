@@ -44,7 +44,11 @@ namespace MDEvents
     MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace);
     ~MDHistoWorkspaceIterator();
 
+    virtual size_t getDataSize() const;
+
     virtual bool next();
+
+    virtual bool next(size_t skip);
 
     virtual signal_t getNormalizedSignal() const;
 

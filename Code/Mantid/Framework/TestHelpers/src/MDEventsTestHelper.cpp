@@ -198,38 +198,40 @@ namespace MDEventsTestHelper
   /** Creates a fake MDHistoWorkspace
    *
    * @param signal :: signal and error squared in every point
-   * @param numDims :: number of dimensions to create. They will range from 0 to 10
+   * @param numDims :: number of dimensions to create. They will range from 0 to max
    * @param numBins :: bins in each dimensions
+   * @param max :: max position in each dimension
    * @return the MDHisto
    */
-  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins)
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
+      double max)
   {
     Mantid::MDEvents::MDHistoWorkspace * ws;
     if (numDims ==1)
     {
       ws = new Mantid::MDEvents::MDHistoWorkspace(
-          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)) );
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)) );
     }
     else if (numDims == 2)
     {
       ws = new Mantid::MDEvents::MDHistoWorkspace(
-          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins))  );
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins))  );
     }
     else if (numDims == 3)
     {
       ws = new Mantid::MDEvents::MDHistoWorkspace(
-          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins))   );
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, max, numBins))   );
     }
     else if (numDims == 4)
     {
       ws = new Mantid::MDEvents::MDHistoWorkspace(
-          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, 10.0, numBins))
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, max, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, max, numBins))
           );
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
