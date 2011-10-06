@@ -107,6 +107,7 @@ static std::string constructXML(std::string nbinsA, std::string nbinsB, std::str
     MOCK_CONST_METHOD0(getNBins, unsigned int());
     MOCK_CONST_METHOD0(getSelectedIndex, unsigned int());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
+    MOCK_CONST_METHOD1(displayError, void(std::string));
     ~MockDimensionView(){};
   };
 

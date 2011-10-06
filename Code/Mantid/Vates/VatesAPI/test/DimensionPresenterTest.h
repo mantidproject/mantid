@@ -30,6 +30,7 @@ private:
     MOCK_CONST_METHOD0(getSelectedIndex, unsigned int());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
     MOCK_CONST_METHOD0(getVisDimensionName, std::string());
+    MOCK_CONST_METHOD1(displayError, void(std::string));
     ~MockDimensionView(){};
   };
 
@@ -217,6 +218,33 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of bins for an integrated dimension", 1, product->getNBins());
     TSM_ASSERT_EQUALS("Range max not set properly", 2, product->getMaximum());
     TSM_ASSERT_EQUALS("Range min not set properly", 0, product->getMinimum());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockDimension));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&gPresenter));
+  }
+
+  void testHandleArgumentErrors()
+  {
+    MockDimensionView view;
+    EXPECT_CALL(view, configureStrongly()).Times(AnyNumber());
+    EXPECT_CALL(view, showAsIntegrated()).Times(AnyNumber());
+    EXPECT_CALL(view, getIsIntegrated()).Times(AtLeast(1)).WillRepeatedly(Return(false)); // view says it's integrated
+    EXPECT_CALL(view, getMinimum()).Times(AnyNumber()).WillRepeatedly(Return(10)); //Ooops, min > max, this should be handled! 
+    EXPECT_CALL(view, getMaximum()).Times(AnyNumber()).WillRepeatedly(Return(2));
+    EXPECT_CALL(view, getNBins()).Times(AnyNumber()); 
+    EXPECT_CALL(view, displayError(_)).Times(1);
+
+    MockIMDDimension* pMockDimension = new MockIMDDimension();
+    EXPECT_CALL(*pMockDimension, getIsIntegrated()).Times(AnyNumber()).WillRepeatedly(Return(true)); //Model says it's integrated
+    EXPECT_CALL(*pMockDimension, toXMLString()).WillOnce(Return("<Dimension ID=\"en\"><Name>Energy</Name><UpperBounds>150</UpperBounds><LowerBounds>0</LowerBounds><NumberOfBins>1</NumberOfBins></Dimension>"));
+    Mantid::Geometry::IMDDimension_sptr model(pMockDimension);
+
+    MockGeometryPresenter gPresenter;
+
+    DimensionPresenter presenter(&view, &gPresenter); 
+    presenter.acceptModelStrongly(model);
+    presenter.getAppliedModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockDimension));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));

@@ -89,6 +89,8 @@ public:
   virtual void showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr nonIntegratedDims);
   
   virtual void showAsIntegrated();
+
+  virtual void displayError(std::string message) const;
       
   virtual void accept(Mantid::VATES::DimensionPresenter* pDimensionPresenter);
 

@@ -84,6 +84,13 @@ unsigned int DimensionWidget::getNBins() const
   return atoi(m_nBinsBox->text().toStdString().c_str());
 }
 
+void DimensionWidget::displayError(std::string message) const
+{
+    QMessageBox msgBox;
+    msgBox.setText(message.c_str());
+    msgBox.exec();
+}
+
 unsigned int DimensionWidget::getSelectedIndex() const
 {
   return m_dimensionCombo->currentIndex();

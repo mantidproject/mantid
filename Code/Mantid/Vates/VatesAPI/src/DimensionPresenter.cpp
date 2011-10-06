@@ -129,9 +129,16 @@ namespace Mantid
 
       double min = m_view->getMinimum();
       double max = m_view->getMaximum();
-
-      return Mantid::Geometry::createDimension(m_model->toXMLString(), nbins, min, max);
-
+      try
+      {
+       return Mantid::Geometry::createDimension(m_model->toXMLString(), nbins, min, max);
+      }
+      catch(std::invalid_argument& err)
+      {
+        m_view->configureStrongly();
+        m_view->displayError("Check the ranges just entered. Must have min < max.");
+        return m_model;
+      }
     }
 
     /**
