@@ -140,7 +140,7 @@ public:
     g->testInit(ws,0,0,ws->blocksize()-1);
 
     g->setMatrixWorkspace(ws,0,1.0,3.3);
-    g->testInit(ws,0,9,32);
+    g->testInit(ws,0,10,32);
 
     Fit alg;
     alg.initialize();

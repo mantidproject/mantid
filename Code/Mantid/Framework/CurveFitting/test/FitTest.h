@@ -161,7 +161,6 @@ public:
 
   void testFit()
   {
-
     WS_type ws = mkWS(FitExpression(),1,0,10,0.1);
     storeWS("Exp",ws);
 

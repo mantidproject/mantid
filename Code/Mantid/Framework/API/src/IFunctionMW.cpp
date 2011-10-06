@@ -192,7 +192,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   size_t xMin = 0;
   size_t xMax = 0;
 
-  if (wi >= n)
+  if (wi >= m_workspace->getNumberHistograms())
   {
     throw std::range_error("Workspace index out of range");
   }
@@ -200,6 +200,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   const MantidVec& x = m_workspace->readX(wi);
   const MantidVec& y = m_workspace->readY(wi);
   const MantidVec& e = m_workspace->readE(wi);
+  bool isHist = x.size() > y.size();
 
   if (startX >= endX)
   {
@@ -208,14 +209,15 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   }
   else
   {
-    for(; xMax < n - 1; ++xMax)
+    size_t m = isHist? n - 1 : n;
+    for(; xMax < m; ++xMax)
     {
       if (x[xMax] > endX)
       {
         if (xMax > 0) xMax--;
         break;
       }
-      if (x[xMax] < startX)
+      if (x[xMax] <= startX)
       {
         xMin = xMax;
       }
@@ -227,6 +229,8 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
     std::swap(xMin,xMax);
   }
 
+  if (xMax >= n) xMax = n - 1;
+
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
 
@@ -234,7 +238,6 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   m_data = &y[xMin];
   m_xValues.reset(new double[m_dataSize]);
   m_weights.reset(new double[m_dataSize]);
-  bool isHist = x.size() > y.size();
 
   for (size_t i = 0; i < m_dataSize; ++i)
   {

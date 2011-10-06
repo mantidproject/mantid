@@ -141,7 +141,6 @@ public:
 
   void do_test_MINITOPAZ(bool slices)
   {
-
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
     EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
