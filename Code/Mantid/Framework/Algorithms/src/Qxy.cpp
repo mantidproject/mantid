@@ -168,6 +168,7 @@ void Qxy::exec()
     
     for (int j = static_cast<int>(numBins)-1; j >= static_cast<int>(wavStart); --j)
     {
+      if( j < 0 ) break; // Be careful with counting down. Need a better fix but this will work for now
       const double binWidth = X[j+1]-X[j];
       // Calculate the wavelength at the mid-point of this bin
       const double wavLength = X[j]+(binWidth)/2.0;
