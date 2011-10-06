@@ -237,7 +237,7 @@ public:
 
     MockIMDDimension* pMockDimension = new MockIMDDimension();
     EXPECT_CALL(*pMockDimension, getIsIntegrated()).Times(AnyNumber()).WillRepeatedly(Return(true)); //Model says it's integrated
-    EXPECT_CALL(*pMockDimension, toXMLString()).WillOnce(Return("<Dimension ID=\"en\"><Name>Energy</Name><UpperBounds>150</UpperBounds><LowerBounds>0</LowerBounds><NumberOfBins>1</NumberOfBins></Dimension>"));
+    EXPECT_CALL(*pMockDimension, toXMLString()).Times(AnyNumber()).WillRepeatedly(Return("<Dimension ID=\"en\"><Name>Energy</Name><UpperBounds>150</UpperBounds><LowerBounds>0</LowerBounds><NumberOfBins>1</NumberOfBins></Dimension>"));
     Mantid::Geometry::IMDDimension_sptr model(pMockDimension);
 
     MockGeometryPresenter gPresenter;
