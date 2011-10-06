@@ -42,11 +42,12 @@ IMDDimensionFactory& IMDDimensionFactory::operator=(const IMDDimensionFactory& o
   return *this;
 }
 
-
+/// Constructor
 IMDDimensionFactory::IMDDimensionFactory() : m_dimensionXML(NULL)
 {
 }
 
+/// Destructor
 IMDDimensionFactory::~IMDDimensionFactory()
 {
 }
@@ -62,14 +63,32 @@ void IMDDimensionFactory::setXMLString(const std::string& dimensionXMLString)
   m_dimensionXML = pDimensionElement;
 }
 
+
+/**Creation method of factory using xml as-is.
+ @return IMDDimension generated.
+*/
 Mantid::Geometry::IMDDimension* IMDDimensionFactory::create() const
 {
-  return createAsMDHistogramDimension();
+  return doCreate();
+}
+
+
+/**Creation method of factory using xml with overrides.
+ @param nBins : overrriden number of bins
+ @param min : overriden minimum
+ @parm max : overriden maximum
+ @return IMDDimension generated.
+*/
+Mantid::Geometry::IMDDimension* IMDDimensionFactory::create(int nBins, double min, double max) const
+{
+  MDHistoDimension* product =  doCreate();
+  product->setRange(nBins, min, max); //Override the number of bins, min and max.
+  return product;
 }
 
 /** Create the dimension as a MDHistogram dimension.
 */
-Mantid::Geometry::MDHistoDimension* IMDDimensionFactory::createAsMDHistogramDimension() const
+Mantid::Geometry::MDHistoDimension* IMDDimensionFactory::doCreate() const
 {
   using namespace Mantid::Geometry;
 
@@ -118,7 +137,7 @@ Mantid::Geometry::MDHistoDimension* IMDDimensionFactory::createAsMDHistogramDime
 Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString)
  {
    IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimensionXMLString);
-   return Mantid::Geometry::IMDDimension_sptr(factory.create());
+   return IMDDimension_sptr(factory.create());
  }
 
 
@@ -133,10 +152,7 @@ Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimension
  Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max)
  {
    IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimensionXMLString);
-   Mantid::Geometry::IMDDimension_sptr dimension = createDimension(dimensionXMLString);
-   //Set the number of bins to use for a given dimension.
-   dimension->setRange(size_t(nBins), min, max);
-   return dimension;
+   return IMDDimension_sptr(factory.create(nBins, min, max));
  }
 
 

@@ -14,6 +14,13 @@ using namespace Mantid::Geometry;
 class MDHistoDimensionTest : public CxxTest::TestSuite
 {
 public:
+ 
+  void test_constructor_throws()
+  {
+    double min = 10;
+    double max = 1; //min > max !
+    TSM_ASSERT_THROWS("Should throw if min > max!", MDHistoDimension("name", "id", "Furlongs", min, max, 15), std::invalid_argument);
+  }
 
   void test_constructor()
   {

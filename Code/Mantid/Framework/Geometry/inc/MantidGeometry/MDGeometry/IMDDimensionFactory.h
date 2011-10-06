@@ -66,7 +66,10 @@ public:
   ~IMDDimensionFactory();
 
   /// Factory method.
-  Mantid::Geometry::IMDDimension* create() const;
+  IMDDimension* create() const;
+
+  /// Factory method.
+  IMDDimension* create(int nBins, double min, double max) const;
 
 private:
 
@@ -74,7 +77,8 @@ private:
 
   void setXMLString(const std::string& xmlString);
 
-  Mantid::Geometry::MDHistoDimension* createAsMDHistogramDimension() const;
+  /// Internal creation method.
+  MDHistoDimension* doCreate() const;
 
   /// Dimension xml to process.
   Poco::XML::Element* m_dimensionXML;

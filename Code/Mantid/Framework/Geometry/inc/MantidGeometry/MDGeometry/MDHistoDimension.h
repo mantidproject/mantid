@@ -36,6 +36,10 @@ namespace Geometry
       m_min(min), m_max(max), m_numBins(numBins),
       m_binWidth((max-min)/static_cast<double>(numBins))
     {
+      if(max < min)
+      {
+        throw std::invalid_argument("Error making MDHistoDimension. Cannot have dimension with min > max");
+      }
     }
     
     /// Destructor
@@ -103,6 +107,10 @@ namespace Geometry
      */
     void setRange(size_t nBins, double min, double max)
     {
+      if(max < min)
+      {
+        throw std::invalid_argument("Error making MDHistoDimension. Cannot have dimension with min > max");
+      }
       m_min = min;
       m_max = max;
       m_numBins = nBins;
