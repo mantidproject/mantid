@@ -141,6 +141,7 @@ public:
     if (add_proton_charge)
     {
       TimeSeriesProperty<double> * pc = new TimeSeriesProperty<double>("proton_charge");
+      pc->setUnits("picoCoulomb");
       for (double i=0; i<100; i++)
         pc->addValue( run_start+i, 1.0);
       ew->mutableRun().addProperty( pc );
