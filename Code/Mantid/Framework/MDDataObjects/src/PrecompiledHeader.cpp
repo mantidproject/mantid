@@ -1,1 +1,1 @@
-#include "MDDataObjects/PrecompiledHeader.h"
+#include "MantidMDDataObjects/PrecompiledHeader.h"

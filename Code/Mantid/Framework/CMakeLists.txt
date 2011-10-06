@@ -146,7 +146,7 @@ if ( CXXTEST_FOUND )
 endif ()
 
 add_subdirectory (MDDataObjects)
-include_directories (MDDataObjects/inc)
+include_directories (MantidMDDataObjects/inc)
 set ( MANTIDLIBS ${MANTIDLIBS} MDDataObjects )
 add_subdirectory (MDAlgorithms)
 add_subdirectory (MDEvents)

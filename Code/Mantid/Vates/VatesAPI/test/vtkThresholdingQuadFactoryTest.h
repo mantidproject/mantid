@@ -6,7 +6,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
-#include "MDDataObjects/MDIndexCalculator.h"
+#include "MantidMDDataObjects/MDIndexCalculator.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

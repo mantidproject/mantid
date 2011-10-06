@@ -5,7 +5,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkLine.h"
 #include "MantidGeometry/MDGeometry/Coordinate.h"
-#include "MDDataObjects/MDIndexCalculator.h"
+#include "MantidMDDataObjects/MDIndexCalculator.h"
 #include <vector>
 #include <boost/math/special_functions/fpclassify.hpp> 
 #include "MantidAPI/IMDWorkspace.h"

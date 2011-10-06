@@ -1,4 +1,4 @@
-#include "MDDataObjects/MDFitWorkspace.h"
+#include "MantidMDDataObjects/MDFitWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IMDIterator.h"

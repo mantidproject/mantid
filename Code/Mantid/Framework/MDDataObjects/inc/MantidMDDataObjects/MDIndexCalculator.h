@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MDDataObjects/DllExport.h"
+#include "MantidMDDataObjects/DllExport.h"
 #include <vector>
 namespace Mantid
 {

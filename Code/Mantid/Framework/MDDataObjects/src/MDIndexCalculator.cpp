@@ -1,4 +1,4 @@
-#include "MDDataObjects/MDIndexCalculator.h"
+#include "MantidMDDataObjects/MDIndexCalculator.h"
 #include <stdexcept>
 
 namespace Mantid

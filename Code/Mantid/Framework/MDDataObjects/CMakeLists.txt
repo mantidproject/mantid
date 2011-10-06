@@ -10,9 +10,9 @@ set ( SRC_UNITY_IGNORE_FILES )
 # Header files
 set ( INC_FILES
 	# test helpers
-	inc/MDDataObjects/DllExport.h
-	inc/MDDataObjects/MDFitWorkspace.h
-	inc/MDDataObjects/MDIndexCalculator.h
+	inc/MantidMDDataObjects/DllExport.h
+	inc/MantidMDDataObjects/MDFitWorkspace.h
+	inc/MantidMDDataObjects/MDIndexCalculator.h
 )
 
 # Test files. Other source files required.
@@ -31,7 +31,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MDDataObjects/PrecompiledHeader.h MDDataObjects src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+ADD_PRECOMPILED_HEADER( inc/MantidMDDataObjects/PrecompiledHeader.h MDDataObjects src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
 # Add the target for this directory
 add_library ( MDDataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

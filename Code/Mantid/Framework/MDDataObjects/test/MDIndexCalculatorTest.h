@@ -2,7 +2,7 @@
 #define MD_INDEX_CALCULATOR_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MDDataObjects/MDIndexCalculator.h"
+#include "MantidMDDataObjects/MDIndexCalculator.h"
 
 class MDIndexCalculatorTest : public CxxTest::TestSuite
 {

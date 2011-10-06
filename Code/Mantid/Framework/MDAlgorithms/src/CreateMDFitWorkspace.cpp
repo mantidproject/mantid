@@ -1,6 +1,6 @@
 #include <exception>
 #include "MantidMDAlgorithms/CreateMDFitWorkspace.h"
-#include "MDDataObjects/MDFitWorkspace.h"
+#include "MantidMDDataObjects/MDFitWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/Property.h"
