@@ -137,7 +137,7 @@ void GroupDetectors2::exec()
   {
     // copy them into the output workspace
     moveOthers(unGroupedSet, inputWS, outputWS, outIndex);
-  }
+  } 
   
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -552,6 +552,9 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 
   g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
 
+  //Input instrument
+  Geometry::Instrument_const_sptr instr = inputWS->getInstrument();
+
   // where we are copying spectra to, we start copying to the start of the output workspace
   size_t outIndex = 0;
 
@@ -569,13 +572,6 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
     outSpec->setSpectrumNo(firstSpecNum);
     // Start fresh with no detector IDs
     outSpec->clearDetectorIDs();
-
-    if ( bhv == 1 )
-    {
-      beh->dataX(outIndex)[0] = 0.0;
-      beh->dataE(outIndex)[0] = 0.0;
-      beh->dataY(outIndex)[0] = static_cast<double>(it->second.size());
-    }
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra are assumed to be the same here
     outSpec->dataX() = inputWS->readX(0);
@@ -607,6 +603,26 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
       outSpec->addDetectorIDs(fromSpectrum->getDetectorIDs() );
     }
 
+    // Get the number of existing non-masked detectors that contribute for averaging
+    if ( bhv == 1 )
+    {
+      beh->dataX(outIndex)[0] = 0.0;
+      beh->dataE(outIndex)[0] = 0.0;
+      const std::set<detid_t> & ids = outSpec->getDetectorIDs();
+      size_t nonMasked(0);
+      for( std::set<detid_t>::const_iterator it = ids.begin(); it != ids.end(); ++it )
+      {
+        try
+        {
+          Geometry::IDetector_const_sptr det = instr->getDetector(*it);
+          if( !det->isMasked() ) ++nonMasked;
+        }
+        catch(Exception::NotFoundError&){}
+      }
+      if( nonMasked == 0 ) ++nonMasked; // Avoid divide by zero error as all data will have been zeroed anyway
+      beh->dataY(outIndex)[0] = static_cast<double>(nonMasked);
+    }
+
 
     // make regular progress reports and check for cancelling the algorithm
     if ( outIndex % INTERVAL == 0 )
@@ -619,6 +635,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
     }
     outIndex ++;
   }
+  
   // Refresh the spectraDetectorMap
   outputWS->generateSpectraMap();
 
