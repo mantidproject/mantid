@@ -3,6 +3,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -233,8 +235,36 @@ namespace MDEvents
     return out;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Return the position of the center of a bin at a given position
+   *
+   * @param linearIndex :: linear index into the workspace
+   * @return VMD vector of the center position
+   */
+  Mantid::Kernel::VMD MDHistoWorkspace::getCenter(size_t linearIndex) const
+  {
+    // Index into each dimension. Built from the linearIndex.
+    size_t dimIndexes[10];
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
-  
+    // The output vertexes coordinates
+    VMD out(numDimensions);
+    // Offset the 0th box by the position of this linear index, in each dimension, plus a half
+    for (size_t d=0; d<numDimensions; d++)
+      out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + 0.5);
+    return out;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /// Creates a new iterator pointing to the first cell in the workspace
+  Mantid::API::IMDIterator* MDHistoWorkspace::createIterator() const
+  {
+//    return new MDHistoWorkspaceIterator(this);
+    return NULL;
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Return the memory used, in bytes */
   size_t MDHistoWorkspace::getMemorySize() const

@@ -1,5 +1,6 @@
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -16,10 +17,24 @@ namespace MDEvents
    * @param workspace :: MDHistoWorkspace_sptr being iterated
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_sptr workspace)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace)
+  : m_ws(workspace.get()), m_pos(0)
+  {
+    if (m_ws == NULL)
+      throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
+    m_max = m_ws->getNPoints();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @return
+   */
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace)
   : m_ws(workspace), m_pos(0)
   {
-    if (!m_ws)
+    if (m_ws == NULL)
       throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
     m_max = m_ws->getNPoints();
   }
@@ -61,6 +76,13 @@ namespace MDEvents
   {
     // The MDHistoWorkspace takes care of this
     return m_ws->getVertexesArray(m_pos, numVertices);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// Returns the position of the center of the box pointed to.
+  Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const
+  {
+    return VMD();
   }
 
 

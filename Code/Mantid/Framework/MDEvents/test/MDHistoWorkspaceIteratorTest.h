@@ -9,10 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using Mantid::Kernel::VMD;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite
 {
@@ -22,6 +24,11 @@ public:
   static MDHistoWorkspaceIteratorTest *createSuite() { return new MDHistoWorkspaceIteratorTest(); }
   static void destroySuite( MDHistoWorkspaceIteratorTest *suite ) { delete suite; }
 
+  void test_bad_constructor()
+  {
+    MDHistoWorkspace_sptr ws;
+    TS_ASSERT_THROWS_ANYTHING( MDHistoWorkspaceIterator it(ws));
+  }
 
   void do_test_iterator(size_t nd, size_t numPoints)
   {
@@ -90,23 +97,22 @@ public:
     ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 125);
   }
 
-  /** One million iterations */
+  /** ~Two million iterations */
   void test_iterator_3D_signalAndErrorOnly()
   {
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
-    size_t i=0;
     do
     {
       signal_t sig = it->getNormalizedSignal();
       signal_t err = it->getNormalizedError();
+      UNUSED_ARG(sig); UNUSED_ARG(err);
     } while(it->next());
   }
 
-  /** One million iterations */
+  /** ~Two million iterations */
   void test_iterator_3D_withGetVertexes()
   {
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
-    size_t i=0;
     size_t numVertices;
     do
     {
@@ -114,6 +120,20 @@ public:
       signal_t err = it->getNormalizedError();
       coord_t * vertexes = it->getVertexesArray(numVertices);
       delete [] vertexes;
+      UNUSED_ARG(sig); UNUSED_ARG(err);
+    } while(it->next());
+  }
+
+  /** ~Two million iterations */
+  void test_iterator_3D_withGetCenter()
+  {
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    do
+    {
+      signal_t sig = it->getNormalizedSignal();
+      signal_t err = it->getNormalizedError();
+      VMD center = it->getCenter();
+      UNUSED_ARG(sig); UNUSED_ARG(err);
     } while(it->next());
   }
 

@@ -9,10 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using namespace Mantid;
+using Mantid::Kernel::VMD;
 
 class MDHistoWorkspaceTest : public CxxTest::TestSuite
 {
@@ -206,6 +208,19 @@ public:
     TS_ASSERT_DELTA( v[i+0], -10.0, 1e-5);
     TS_ASSERT_DELTA( v[i+1], -9.0, 1e-5);
     TS_ASSERT_DELTA( v[i+2], -8.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  void test_getCenter_3D()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 20));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 19));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 18));
+    MDHistoWorkspace ws(dimX, dimY, dimZ);
+    VMD v = ws.getCenter(0);
+    TS_ASSERT_DELTA( v[0], -9.5, 1e-5);
+    TS_ASSERT_DELTA( v[1], -8.5, 1e-5);
+    TS_ASSERT_DELTA( v[2], -7.5, 1e-5);
   }
 
 

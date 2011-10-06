@@ -82,6 +82,10 @@ class IMDWorkspace;
     virtual coord_t * getVertexesArray(size_t & numVertices) const
     { UNUSED_ARG(numVertices); throw std::runtime_error("IMDIterator: Not Implemented."); }
 
+    /// Returns the position of the center of the box pointed to.
+    virtual Mantid::Kernel::VMD getCenter() const
+    { throw std::runtime_error("IMDIterator: Not Implemented."); }
+
 
     /// Returns the number of events/points contained in this box
     virtual size_t getNumEvents() const

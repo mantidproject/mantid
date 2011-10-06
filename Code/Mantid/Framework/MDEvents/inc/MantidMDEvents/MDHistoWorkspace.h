@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_MDHISTOWORKSPACE_H_
 #define MANTID_MDEVENTS_MDHISTOWORKSPACE_H_
 
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -54,6 +55,9 @@ namespace MDEvents
       return m_length;
     }
 
+    /// Creates a new iterator pointing to the first cell in the workspace
+    virtual Mantid::API::IMDIterator* createIterator() const;
+
     // --------------------------------------------------------------------------------------------
     /** @return a const reference to the indexMultiplier array.
      * To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
@@ -86,6 +90,8 @@ namespace MDEvents
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error);
 
     coord_t * getVertexesArray(size_t linearIndex, size_t & numVertices) const;
+
+    Mantid::Kernel::VMD getCenter(size_t linearIndex) const;
 
 
     /// Sets the signal at the specified index.
@@ -276,6 +282,8 @@ namespace MDEvents
   /// A shared pointer to a MDHistoWorkspace
   typedef boost::shared_ptr<MDHistoWorkspace> MDHistoWorkspace_sptr;
 
+  /// A shared pointer to a const MDHistoWorkspace
+  typedef boost::shared_ptr<const MDHistoWorkspace> MDHistoWorkspace_const_sptr;
 
 } // namespace Mantid
 } // namespace MDEvents

@@ -40,7 +40,8 @@ namespace MDEvents
   class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator
   {
   public:
-    MDHistoWorkspaceIterator(MDHistoWorkspace_sptr workspace);
+    MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace);
+    MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace);
     ~MDHistoWorkspaceIterator();
 
     virtual bool next();
@@ -50,6 +51,8 @@ namespace MDEvents
     virtual signal_t getNormalizedError() const;
 
     virtual coord_t * getVertexesArray(size_t & numVertices) const;
+
+    virtual Mantid::Kernel::VMD getCenter() const;
 
     virtual size_t getNumEvents() const;
 
@@ -65,7 +68,7 @@ namespace MDEvents
 
   protected:
     /// The MDHistoWorkspace being iterated.
-    MDHistoWorkspace_sptr m_ws;
+    const MDHistoWorkspace * m_ws;
 
     /// The linear position/index into the MDHistoWorkspace.
     uint64_t m_pos;
