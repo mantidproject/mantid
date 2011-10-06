@@ -2618,9 +2618,14 @@ namespace DataObjects
    * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
    *
    * The formula used for calculating the error on the neutron weight is:
-   * \f[ \sigma_{AB}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
-   * ... where A is the weight, and B is the scalar multiplier for the histogram bin that A is in,
-   *  \f$\sigma_X \f$ is the variance of the given variable:
+   * \f[ \sigma_{f}^2 = B^2 \sigma_A^2 + A^2 \sigma_B ^ 2  \f]
+   *
+   * where:
+   *  * A is the weight of the event
+   *  * B is the weight of the BIN that the event falls in
+   *  * \sigma_A is the error (not squared) of the weight of the event
+   *  * \sigma_B is the error (not squared) of the bin B
+   *  * f is the resulting weight of the multiplied event
    *
    * @param X: bins of the multiplying histogram.
    * @param Y: value to multiply the weights.
@@ -2753,7 +2758,17 @@ namespace DataObjects
   /** Divide the weights in this event list by a histogram.
    * The event list switches to WeightedEvent's if needed.
    * NOTE: no unit checks are made (or possible to make) to compare the units of X and tof() in the EventList.
-   * This calls multiply(X,Y,E, divide=true) to do division there.
+   *
+   * The formula used for calculating the error on the neutron weight is:
+   * \f[ \sigma_{f}^2 = (A / B)^2 * (\sigma_A^2 / A^2 + \sigma_B^2 / B^2) \f]
+   *
+   * where:
+   *  * A is the weight of the event
+   *  * B is the weight of the BIN that the event falls in
+   *  * \sigma_A is the error (not squared) of the weight of the event
+   *  * \sigma_B is the error (not squared) of the bin B
+   *  * f is the resulting weight of the divided event
+   *
    *
    * @param X: bins of the multiplying histogram.
    * @param Y: value to multiply the weights.

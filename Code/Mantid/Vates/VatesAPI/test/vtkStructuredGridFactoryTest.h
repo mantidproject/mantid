@@ -8,9 +8,16 @@
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MockObjects.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
+using namespace Mantid::VATES;
+using namespace testing;
+using Mantid::MDEvents::MDEventsTestHelper::makeFakeMDHistoWorkspace;
+
 
 //=====================================================================================
 // Functional Tests
@@ -22,11 +29,7 @@ public:
 
   void testCopy()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factoryA =
@@ -46,11 +49,7 @@ public:
 
   void testAssignment()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factoryA =
@@ -74,11 +73,7 @@ public:
 
   void testMeshOnly()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
@@ -95,11 +90,7 @@ public:
 
   void testMeshOnlyCausesThrow()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
@@ -111,12 +102,9 @@ public:
 
   void testSignalAspects()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
     TimeStepToTimeStep timeMapper;
 
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
@@ -134,9 +122,6 @@ public:
 
   void testIsValidThrowsWhenNoWorkspace()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::API;
-
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
@@ -147,11 +132,6 @@ public:
 
   void testIsValidThrowsWhenNoTDimension()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::API;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     IMDDimension* nullDimension = NULL;
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
     pMockWs->addDimension(nullDimension);
@@ -164,7 +144,6 @@ public:
 
   void testTypeName()
   {
-    using namespace Mantid::VATES;
     vtkStructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
     TS_ASSERT_EQUALS("vtkStructuredGridFactory", factory.getFactoryTypeName());
   }
@@ -181,21 +160,12 @@ public:
 
   void setUp()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     // 4D, 100 bins per side
-    ws_sptr = getFakeMDHistoWorkspace(1.0, 4, 100);
+    ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, 100);
   }
 
   void testGenerateVTKDataSet()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkStructuredGridFactory<TimeStepToTimeStep> factory =
       vtkStructuredGridFactory<TimeStepToTimeStep>::constructAsMeshOnly();

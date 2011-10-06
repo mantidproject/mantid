@@ -146,6 +146,68 @@ public:
   }
 
 
+  //---------------------------------------------------------------------------------------------------
+  void test_getVertexesArray_1D()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoWorkspace ws(dimX);
+    coord_t * v;
+    size_t numVertices;
+    v = ws.getVertexesArray(0,numVertices);
+    TS_ASSERT_EQUALS( numVertices, 2 );
+    TS_ASSERT_DELTA( v[0], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v[1], -6.0, 1e-5);
+
+    v = ws.getVertexesArray(4,numVertices);
+    TS_ASSERT_DELTA( v[0], 6.0, 1e-5);
+    TS_ASSERT_DELTA( v[1], 10.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  void test_getVertexesArray_2D()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
+    MDHistoWorkspace ws(dimX, dimY);
+    coord_t * v;
+    size_t numVertices, i;
+
+    v = ws.getVertexesArray(0,numVertices);
+    TS_ASSERT_EQUALS( numVertices, 4 );
+    i = 0*2;
+    TS_ASSERT_DELTA( v[i+0], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v[i+1], -10.0, 1e-5);
+    i = 3*2;
+    TS_ASSERT_DELTA( v[i+0], -6.0, 1e-5);
+    TS_ASSERT_DELTA( v[i+1], -6.0, 1e-5);
+    // The opposite corner
+    v = ws.getVertexesArray(24,numVertices);
+    i = 0*2;
+    TS_ASSERT_DELTA( v[i+0], 6.0, 1e-5);
+    TS_ASSERT_DELTA( v[i+1], 6.0, 1e-5);
+    i = 3*2;
+    TS_ASSERT_DELTA( v[i+0], 10.0, 1e-5);
+    TS_ASSERT_DELTA( v[i+1], 10.0, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  void test_getVertexesArray_3D()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 5));
+    MDHistoWorkspace ws(dimX, dimY, dimZ);
+    coord_t * v;
+    size_t numVertices, i;
+
+    v = ws.getVertexesArray(0,numVertices);
+    TS_ASSERT_EQUALS( numVertices, 8 );
+    i = 0;
+    TS_ASSERT_DELTA( v[i+0], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v[i+1], -9.0, 1e-5);
+    TS_ASSERT_DELTA( v[i+2], -8.0, 1e-5);
+  }
+
 
   //---------------------------------------------------------------------------------------------------
   /** Test for a possible seg-fault if nx != ny etc. */

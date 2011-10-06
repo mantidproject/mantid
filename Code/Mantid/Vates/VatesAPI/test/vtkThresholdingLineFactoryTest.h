@@ -1,18 +1,23 @@
 #ifndef VTK_THRESHOLDING_LINE_FACTORY_TEST_H
 #define VTK_THRESHOLDING_LINE_FACTORY_TEST_H
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/IMDIterator.h"
-#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using namespace Mantid;
+using namespace Mantid::MDEvents;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::VATES;
+using namespace testing;
 
 
 //=====================================================================================
@@ -37,9 +42,6 @@ public:
 
   void testIsValidThrowsWhenNoWorkspace()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::API;
-
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
@@ -56,10 +58,7 @@ public:
 
   void testInsideThresholds()
   {
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 1);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     vtkThresholdingLineFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
@@ -75,7 +74,7 @@ public:
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 1);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
     vtkThresholdingLineFactory above(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), "signal");
@@ -88,10 +87,7 @@ public:
 
   void testBelowThreshold()
   {
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 1);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
     vtkThresholdingLineFactory below(ThresholdRange_scptr(new UserDefinedThresholdRange(1.5, 2)), "signal");
@@ -105,12 +101,8 @@ public:
   void testInitializationDelegates()
   {
     //If the workspace provided is not a 1D imdworkspace, it should call the successor's initalization
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     // 3 dimensions on the workspace
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -129,12 +121,8 @@ public:
   void testInitializationDelegatesThrows()
   {
     //If the workspace provided is not a 2D imdworkspace, it should call the successor's initalization. If there is no successor an exception should be thrown.
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     // 3 dimensions on the workspace
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingLineFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
@@ -145,12 +133,8 @@ public:
   void testCreateDelegates()
   {
     //If the workspace provided is not a 2D imdworkspace, it should call the successor's initalization
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     // 3 dimensions on the workspace
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -171,7 +155,6 @@ public:
 
   void testTypeName()
   {
-    using namespace Mantid::VATES;
     vtkThresholdingLineFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),"signal");
     TS_ASSERT_EQUALS("vtkThresholdingLineFactory", factory.getFactoryTypeName());
   }
@@ -190,11 +173,8 @@ public:
 
   void setUp()
   {
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     //1D Workspace with 2000 points
-    m_ws_sptr = getFakeMDHistoWorkspace(1.0, 1, 2000);
+    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 2000);
   }
 
 	void testGenerateVTKDataSet()

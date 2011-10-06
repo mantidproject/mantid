@@ -2,6 +2,7 @@
 #define VTK_THRESHOLDING_HEXAHEDRON_FACTORY_TEST_H_
 
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include "MockObjects.h"
@@ -10,7 +11,11 @@
 #include <gtest/gtest.h>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDEvents;
+using namespace Mantid::VATES;
+using namespace Mantid::Geometry;
+using namespace testing;
 
 //=====================================================================================
 // Functional Tests
@@ -22,12 +27,8 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
   void testThresholds()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     vtkThresholdingHexahedronFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
@@ -49,12 +50,8 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
   void testSignalAspects()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
@@ -72,9 +69,6 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
   void testIsValidThrowsWhenNoWorkspace()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::API;
-
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
     
@@ -85,21 +79,18 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
 
   void testCreateMeshOnlyThrows()
   {
-    using namespace Mantid::VATES;
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
   }
 
   void testCreateScalarArrayThrows()
   {
-    using namespace Mantid::VATES;
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
   }
 
   void testCreateWithoutInitializeThrows()
   {
-    using namespace Mantid::VATES;
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
@@ -107,11 +98,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
   void testInitializationDelegates()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -131,11 +118,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
   void testInitializationDelegatesThrows()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization. If there is no successor an exception should be thrown.
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -146,12 +129,8 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
   void testCreateDelegates()
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
     //2 dimensions on the workspace.
-    Mantid::API::IMDWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
+    Mantid::API::IMDWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -193,12 +172,8 @@ public:
 
   void setUp()
   {
-    using namespace Mantid::VATES;
-    using namespace Mantid::Geometry;
-    using namespace testing; 
-
     //Create the workspace. 20 bins in each dimension.
-    m_ws_sptr = getFakeMDHistoWorkspace(1.0, 3, 100);
+    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 100);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
 //    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
@@ -215,8 +190,6 @@ public:
 
 	void testGenerateHexahedronVtkDataSet()
 	{
-    using namespace Mantid::VATES;
-
     //Create the factory.
     vtkThresholdingHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
     factory.initialize(m_ws_sptr);

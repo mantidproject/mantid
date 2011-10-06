@@ -85,6 +85,7 @@ namespace MDEvents
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error);
 
+    coord_t * getVertexesArray(size_t linearIndex, size_t & numVertices) const;
 
 
     /// Sets the signal at the specified index.
@@ -238,6 +239,9 @@ namespace MDEvents
 
 
   private:
+
+    void initVertexesArray();
+
     /// Number of dimensions in this workspace
     size_t numDimensions;
 
@@ -255,6 +259,17 @@ namespace MDEvents
 
     /// Inverse of the volume of EACH cell
     coord_t m_inverseVolume;
+
+    /// Pre-calculated vertexes array for the 0th box
+    coord_t * m_vertexesArray;
+
+    /// Vector of the length of the box in each dimension
+    coord_t * m_boxLength;
+
+    /// For converting to/from linear index to tdimensions
+    size_t * m_indexMaker;
+    /// Max index into each dimension
+    size_t * m_indexMax;
 
   };
 

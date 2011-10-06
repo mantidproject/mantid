@@ -253,41 +253,6 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
   }
 };
 
-Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10)
-{
-  Mantid::MDEvents::MDHistoWorkspace * ws;
-  if (numDims ==1)
-  {
-    ws = new Mantid::MDEvents::MDHistoWorkspace(
-        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)) );
-  }
-  else if (numDims == 2)
-  {
-    ws = new Mantid::MDEvents::MDHistoWorkspace(
-        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins))  );
-  }
-  else if (numDims == 3)
-  {
-    ws = new Mantid::MDEvents::MDHistoWorkspace(
-        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins))   );
-  }
-  else if (numDims == 4)
-  {
-    ws = new Mantid::MDEvents::MDHistoWorkspace(
-        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, 10.0, numBins))
-        );
-  }
-  Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
-  ws_sptr->setTo(signal, signal);
-  return ws_sptr;
-}
-
   vtkFieldData* createFieldDataWithCharArray(std::string testData)
   {
     vtkFieldData* fieldData = vtkFieldData::New();

@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;
@@ -19,6 +20,8 @@ using Mantid::Kernel::DateAndTime;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::API::FrameworkManager;
+using Mantid::Geometry::MDHistoDimension_sptr;
+using Mantid::Geometry::MDHistoDimension;
 
 namespace Mantid
 {
@@ -190,6 +193,49 @@ namespace MDEventsTestHelper
     return out;
   }
 
+
+
+  /** Creates a fake MDHistoWorkspace
+   *
+   * @param signal :: signal and error squared in every point
+   * @param numDims :: number of dimensions to create. They will range from 0 to 10
+   * @param numBins :: bins in each dimensions
+   * @return the MDHisto
+   */
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins)
+  {
+    Mantid::MDEvents::MDHistoWorkspace * ws;
+    if (numDims ==1)
+    {
+      ws = new Mantid::MDEvents::MDHistoWorkspace(
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)) );
+    }
+    else if (numDims == 2)
+    {
+      ws = new Mantid::MDEvents::MDHistoWorkspace(
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins))  );
+    }
+    else if (numDims == 3)
+    {
+      ws = new Mantid::MDEvents::MDHistoWorkspace(
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins))   );
+    }
+    else if (numDims == 4)
+    {
+      ws = new Mantid::MDEvents::MDHistoWorkspace(
+          MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins)),
+          MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, 10.0, numBins))
+          );
+    }
+    Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+    ws_sptr->setTo(signal, signal);
+    return ws_sptr;
+  }
 
 
 } // namespace

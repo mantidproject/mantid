@@ -1,15 +1,16 @@
 #ifndef VTK_THRESHOLDING_UNSTRUCTURED_GRID_FACTORY_TEST_H_
 #define VTK_THRESHOLDING_UNSTRUCTURED_GRID_FACTORY_TEST_H_
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MockObjects.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -29,7 +30,7 @@ public:
   void testThresholds()
   {
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
 
     //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
@@ -54,7 +55,7 @@ public:
   void testSignalAspects()
   {
     // Workspace with value 1.0 everywhere
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 4);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
     ws_sptr->setTransformFromOriginal(new NullCoordTransform);
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
@@ -108,7 +109,7 @@ public:
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     // 2D workspace
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -132,7 +133,7 @@ public:
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization. If there is no successor an exception should be thrown.
     // 2D workspace
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
@@ -147,7 +148,7 @@ public:
   {
     //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
     // 2D workspace
-    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 2);
+    MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -196,7 +197,7 @@ public:
   void setUp()
   {
     //Create a 4D workspace 50 ^ 4
-    m_ws_sptr = getFakeMDHistoWorkspace(1.0, 4, 50);
+    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, 50);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
   }
 

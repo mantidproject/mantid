@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
+	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
 	src/MergeMD.cpp
 	src/OneStepMDEW.cpp
@@ -74,6 +75,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
+	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MergeMD.h
 	inc/MantidMDEvents/OneStepMDEW.h
@@ -111,6 +113,7 @@ set ( TEST_FILES
 	test/MDEventTest.h
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
+	test/MDHistoWorkspaceIteratorTest.h
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
 	test/MergeMDTest.h

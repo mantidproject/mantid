@@ -3,7 +3,6 @@ set ( SRC_FILES
 	# test helpers
 	src/MDFitWorkspace.cpp
 	src/MDIndexCalculator.cpp
-	src/MDWorkspaceIterator.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -14,7 +13,6 @@ set ( INC_FILES
 	inc/MDDataObjects/DllExport.h
 	inc/MDDataObjects/MDFitWorkspace.h
 	inc/MDDataObjects/MDIndexCalculator.h
-	inc/MDDataObjects/MDWorkspaceIterator.h
 )
 
 # Test files. Other source files required.
@@ -25,7 +23,6 @@ set ( TEST_FILES
 
 set ( GMOCK_TEST_FILES
 	test/MDIndexCalculatorTest.h
-	test/MDWorkspaceIteratorTest.h
 )
 
 if(UNITY_BUILD)

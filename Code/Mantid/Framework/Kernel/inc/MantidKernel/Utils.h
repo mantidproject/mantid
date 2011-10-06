@@ -39,8 +39,6 @@ namespace Utils
 
   namespace NestedForLoop
   {
-  //TODO: Separate these into a namespace like NestedForLoop::
-
   //------------------------------------------------------------------------------------------------
   /** Set up a nested for loop by setting an array of counters.
    *

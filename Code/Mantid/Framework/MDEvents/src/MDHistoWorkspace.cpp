@@ -1,10 +1,9 @@
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidKernel/Utils.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
-using Mantid::Kernel::Utils::NestedForLoop::SetUp;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::Geometry::IMDDimension;
@@ -40,6 +39,20 @@ namespace MDEvents
   : numDimensions(0)
   {
     this->init(dimensions);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  MDHistoWorkspace::~MDHistoWorkspace()
+  {
+    delete [] m_signals;
+    delete [] m_errors;
+    delete [] indexMultiplier;
+    delete [] m_vertexesArray;
+    delete [] m_boxLength;
+    delete [] m_indexMaker;
+    delete [] m_indexMax;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -87,6 +100,9 @@ namespace MDEvents
     for (size_t i=0; i < numDimensions; ++i)
       volume *= dimensions[i]->getBinWidth();
     m_inverseVolume = 1.0 / volume;
+
+    // Continue with the vertexes array
+    this->initVertexesArray();
   }
 
 
@@ -136,14 +152,88 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  MDHistoWorkspace::~MDHistoWorkspace()
+  /** After initialization, call this to initialize the vertexes array
+   * to the vertexes of the 0th box.
+   * Will be used by getVertexesArray()
+   * */
+  void MDHistoWorkspace::initVertexesArray()
   {
-    delete [] m_signals;
-    delete [] m_errors;
-    delete [] indexMultiplier;
+    size_t nd = numDimensions;
+    // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
+    size_t numVertices = 1 << numDimensions;
+
+    // Allocate the array of the right size
+    m_vertexesArray = new coord_t[nd*numVertices];
+
+    // For each vertex, increase an integeer
+    for (size_t i=0; i<numVertices; ++i)
+    {
+      // Start point index in the output array;
+      size_t outIndex = i * nd;
+
+      // Coordinates of the vertex
+      for (size_t d=0; d<nd; d++)
+      {
+        // Use a bit mask to look at each bit of the integer we are iterating through.
+        size_t mask = 1 << d;
+        if ((i & mask) > 0)
+        {
+          // Bit is 1, use the max of the dimension
+          m_vertexesArray[outIndex + d] = m_dimensions[d]->getX(1);
+        }
+        else
+        {
+          // Bit is 0, use the min of the dimension
+          m_vertexesArray[outIndex + d] = m_dimensions[d]->getX(0);
+        }
+      } // (for each dimension)
+    }
+
+    // Now set the m_boxLength
+    m_boxLength = new coord_t[nd];
+    for (size_t d=0; d<nd; d++)
+      m_boxLength[d] = m_dimensions[d]->getX(1) - m_dimensions[d]->getX(0);
+
+    // The index calculator
+    m_indexMax = new size_t[numDimensions];
+    for (size_t d=0; d<nd; d++)
+      m_indexMax[d] = m_dimensions[d]->getNBins();
+    m_indexMaker = new size_t[numDimensions];
+    Utils::NestedForLoop::SetUpIndexMaker(numDimensions, m_indexMaker, m_indexMax);
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** For the volume at the given linear index,
+   * Return the vertices of every corner of the box, as
+   * a bare array of length numVertices * nd
+   *
+   * @param linearIndex :: index into the workspace. Same as for getSignalAt(index)
+   * @param[out] numVertices :: returns the number of vertices in the array.
+   * @return the bare array. This should be deleted by the caller!
+   * */
+  coord_t * MDHistoWorkspace::getVertexesArray(size_t linearIndex, size_t & numVertices) const
+  {
+    // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
+    numVertices = 1 << numDimensions;
+
+    // Index into each dimension. Built from the linearIndex.
+    size_t dimIndexes[10];
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
+
+    // The output vertexes coordinates
+    coord_t * out = new coord_t[numDimensions * numVertices];
+    for (size_t i=0; i<numVertices; ++i)
+    {
+      size_t outIndex = i * numDimensions;
+      // Offset the 0th box by the position of this linear index, in each dimension
+      for (size_t d=0; d<numDimensions; d++)
+        out[outIndex+d] = m_vertexesArray[outIndex+d] + m_boxLength[d] * coord_t(dimIndexes[d]);
+    }
+
+    return out;
+  }
+
+
   
   //----------------------------------------------------------------------------------------------
   /** Return the memory used, in bytes */
