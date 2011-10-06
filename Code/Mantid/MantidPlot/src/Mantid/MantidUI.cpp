@@ -2092,7 +2092,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   Mantid::Kernel::DateAndTime startTime;
   if (time_value_map.size() > 0)
   {
-    startTime = time_value_map.begin()->first;
+    startTime = ws->run().startTime();
   }
 
   //Make a unique title, and put in the start time of the log
