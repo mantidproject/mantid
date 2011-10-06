@@ -190,7 +190,7 @@ void FunctionCurve::loadData(int points)
       boost::shared_ptr<Mantid::API::IFitFunction> f(Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString()));
       boost::shared_ptr<Mantid::API::IFunctionMW> fMW = boost::dynamic_pointer_cast<Mantid::API::IFunctionMW>(f);
       if (!fMW) return;
-      fMW->setMatrixWorkspace(ws,wsIndex,-1,-1);
+      fMW->setMatrixWorkspace(ws,wsIndex);
       fMW->applyTies();
       fMW->functionMW(Y.data(),X.constData(),nPoints);
 

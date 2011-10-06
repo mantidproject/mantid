@@ -61,11 +61,8 @@ namespace API
       }
 
       size_t index = mws->getNumberHistograms();
-      size_t xMin = mws->blocksize();
-      size_t xMax = mws->blocksize();
       double startX = 0;
       double endX = 0;
-      size_t n = mws->blocksize(); // length of each Y vector
 
       Expression expr;
       expr.parse(slicing);
@@ -83,12 +80,12 @@ namespace API
             else if (e[0].name() == "StartX")
             {
               startX = boost::lexical_cast<double>(e[1].str());
-              xMin = 0;
+//              xMin = 0;
             }
             else if (e[0].name() == "EndX")
             {
               endX = boost::lexical_cast<double>(e[1].str());
-              xMax = 0;
+//              xMax = 0;
             }
           }
         }
@@ -107,83 +104,8 @@ namespace API
       {
         throw std::range_error("WorkspaceIndex outside range");
       }
-      const MantidVec& x = mws->readX(index);
-      const MantidVec& y = mws->readY(index);
-      const MantidVec& e = mws->readE(index);
 
-      if (xMin >= mws->blocksize())
-      {
-        xMin = 0;
-      }
-      else
-      {
-        for(; xMin < n - 1; ++xMin)
-        {
-          if (x[xMin] > startX)
-          {
-            xMin--;
-            break;
-          }
-        }
-        if (xMin >= mws->blocksize()) xMin = 0;
-      }
-
-      if (xMax >= mws->blocksize())
-      {
-        xMax = n - 1;
-      }
-      else
-      {
-        for(; xMax < n - 1; ++xMax)
-        {
-          if (x[xMax] > endX)
-          {
-            xMax--;
-            break;
-          }
-        }
-        if (xMax >= mws->blocksize()) xMax = 0;
-      }
-
-      if (xMin > xMax)
-      {
-        size_t tmp = xMin;
-        xMin = xMax;
-        xMax = tmp;
-      }
-      m_dataSize = xMax - xMin + 1;
-      m_data = &y[xMin];
-      m_xValues.reset(new double[m_dataSize]);
-      m_weights.reset(new double[m_dataSize]);
-      bool isHist = x.size() > y.size();
-
-      for (size_t i = 0; i < m_dataSize; ++i)
-      {
-        if (isHist)
-        {
-          m_xValues[i] = 0.5*(x[xMin + i] + x[xMin + i + 1]);
-        }
-        else
-        {
-          m_xValues[i] = x[xMin + i];
-        }
-        if (e[xMin + i] <= 0.0)
-          m_weights[i] = 1.0;
-        else
-          m_weights[i] = 1./e[xMin + i];
-      }
-
-      if (mws->hasMaskedBins(index))
-      {
-        const MatrixWorkspace::MaskList& mlist = mws->maskedBins(index);
-        MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-        for(;it!=mlist.end();++it)
-        {
-          m_weights[it->first - xMin] = 0.;
-        }
-      }
-
-      setMatrixWorkspace(mws,index,xMin,xMax);
+      setMatrixWorkspace(mws,index,startX,endX);
       
     }
     catch(std::exception& e)
@@ -259,16 +181,86 @@ void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const si
  * @param xMin :: The lower bin index
  * @param xMax :: The upper bin index
  */
-void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,size_t xMin,size_t xMax)
+void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
 {
-
   m_workspaceIndex = wi;
+
+  m_workspace = workspace;
+  if (!workspace) return; // unset the workspace
+
+  size_t n = m_workspace->blocksize(); // length of each Y vector
+  size_t xMin = 0;
+  size_t xMax = 0;
+
+  if (wi >= n)
+  {
+    throw std::range_error("Workspace index out of range");
+  }
+
+  const MantidVec& x = m_workspace->readX(wi);
+  const MantidVec& y = m_workspace->readY(wi);
+  const MantidVec& e = m_workspace->readE(wi);
+
+  if (startX >= endX)
+  {
+    xMin = 0;
+    xMax = n - 1;
+  }
+  else
+  {
+    for(; xMax < n - 1; ++xMax)
+    {
+      if (x[xMax] > endX)
+      {
+        if (xMax > 0) xMax--;
+        break;
+      }
+      if (x[xMax] < startX)
+      {
+        xMin = xMax;
+      }
+    }
+  }
+
+  if (xMin > xMax)
+  {
+    std::swap(xMin,xMax);
+  }
+
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
 
-  if (m_workspace.get() == workspace.get()) return;
-  m_workspace = workspace;
-  if (!workspace) return; // unset the workspace
+  m_dataSize = xMax - xMin + 1;
+  m_data = &y[xMin];
+  m_xValues.reset(new double[m_dataSize]);
+  m_weights.reset(new double[m_dataSize]);
+  bool isHist = x.size() > y.size();
+
+  for (size_t i = 0; i < m_dataSize; ++i)
+  {
+    if (isHist)
+    {
+      m_xValues[i] = 0.5*(x[xMin + i] + x[xMin + i + 1]);
+    }
+    else
+    {
+      m_xValues[i] = x[xMin + i];
+    }
+    if (e[xMin + i] <= 0.0)
+      m_weights[i] = 1.0;
+    else
+      m_weights[i] = 1./e[xMin + i];
+  }
+
+  if (m_workspace->hasMaskedBins(wi))
+  {
+    const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(wi);
+    MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
+    for(;it!=mlist.end();++it)
+    {
+      m_weights[it->first - xMin] = 0.;
+    }
+  }
 
   try
   {
@@ -551,54 +543,6 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
 void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData)
 {
   this->functionDerivMW(out,xValues,nData);
-}
-
-/// Called after setMatrixWorkspace if setWorkspace hadn't been called before
-void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
-{
-  m_dataSize = m_xMaxIndex - m_xMinIndex;
-  m_data = &m_workspace->readY(m_workspaceIndex)[m_xMinIndex];
-  //m_xValues = &m_workspace->readX(m_workspaceIndex)[m_xMinIndex];
-  if (weights && xs)
-  {
-    m_xValues = xs;
-    m_weights = weights;
-  }
-  else
-  {
-    m_xValues.reset(new double[m_dataSize]);
-    m_weights.reset(new double[m_dataSize]);
-    const MantidVec& x = m_workspace->readX(m_workspaceIndex);
-    const MantidVec& e = m_workspace->readE(m_workspaceIndex);
-    bool isHist = m_workspace->isHistogramData();
-
-    for (size_t i = 0; i < m_dataSize; ++i)
-    {
-      if (isHist)
-      {
-        m_xValues[i] = 0.5*(x[m_xMinIndex + i] + x[m_xMinIndex + i + 1]);
-      }
-      else
-      {
-        m_xValues[i] = x[m_xMinIndex + i];
-      }
-      if (e[m_xMinIndex + i] <= 0.0)
-        m_weights[i] = 1.0;
-      else
-        m_weights[i] = 1./e[m_xMinIndex + i];
-    }
-
-    if (m_workspace->hasMaskedBins(m_workspaceIndex))
-    {
-      const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(m_workspaceIndex);
-      MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
-      for(;it!=mlist.end();++it)
-      {
-        m_weights[it->first - m_xMinIndex] = 0.;
-      }
-    }
-  }
-
 }
 
 namespace

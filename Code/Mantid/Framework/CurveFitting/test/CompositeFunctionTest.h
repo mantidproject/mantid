@@ -216,8 +216,13 @@ public:
     addNoise(ws,0.1);
     storeWS("mfun",ws);
 
-    mfun->setMatrixWorkspace(ws,7,12,3);
-    mfun->testInit(ws,7,12,3);
+    TS_ASSERT_THROWS(mfun->setMatrixWorkspace(ws,7,12,3),std::range_error);
+
+    mfun->setMatrixWorkspace(ws,0);
+    mfun->testInit(ws,0,0,ws->blocksize()-1);
+
+    mfun->setMatrixWorkspace(ws,0,1.0,3.3);
+    mfun->testInit(ws,0,9,32);
 
     Fit alg;
     alg.initialize();

@@ -78,8 +78,31 @@ void UnwrappedSurface::init()
     {
       Mantid::Kernel::V3D pos = det->getPos() - m_pos;
       double z = pos.scalar_prod(m_zaxis);
-      m_xaxis = pos - m_zaxis * z;
-      m_xaxis.normalize();
+      if (z == 0.0)
+      {
+        // find the sortest projection of m_zaxis and direct m_xaxis along it
+        bool isY = false;
+        bool isZ = false;
+        if (fabs(m_zaxis.Y()) < fabs(m_zaxis.X())) isY = true;
+        if (fabs(m_zaxis.Z()) < fabs(m_zaxis.Y())) isZ = true;
+        if (isZ)
+        {
+          m_xaxis = Mantid::Kernel::V3D(0,0,1);
+        }
+        else if (isY)
+        {
+          m_xaxis = Mantid::Kernel::V3D(0,1,0);
+        }
+        else
+        {
+          m_xaxis = Mantid::Kernel::V3D(1,0,0);
+        }
+      }
+      else
+      {
+        m_xaxis = pos - m_zaxis * z;
+        m_xaxis.normalize();
+      }
       m_yaxis = m_zaxis.cross_prod(m_xaxis);
     }
     UnwrappedDetector udet(&color[0],det);

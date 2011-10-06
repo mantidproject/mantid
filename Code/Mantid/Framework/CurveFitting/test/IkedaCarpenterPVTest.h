@@ -180,7 +180,7 @@ public:
    
     // could set workspace here but makes no difference since
     // regardless m_wavelength set to zero in IC code 
-    //pk->setMatrixWorkspace(ws2D, 0,-1,-1);
+    //pk->setMatrixWorkspace(ws2D, 0);
 
     const double* x = &ws2D->readX(0)[0];
     double *yy = new double[timechannels]; 

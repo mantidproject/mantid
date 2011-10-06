@@ -134,8 +134,13 @@ public:
     WS_type ws = mkWS(Exp(),1,0,10,0.1);
     storeWS("Exp",ws);
 
-    g->setMatrixWorkspace(ws,12,7,9);
-    g->testInit(ws,12,7,9);
+    TS_ASSERT_THROWS(g->setMatrixWorkspace(ws,7,12,3),std::range_error);
+
+    g->setMatrixWorkspace(ws,0);
+    g->testInit(ws,0,0,ws->blocksize()-1);
+
+    g->setMatrixWorkspace(ws,0,1.0,3.3);
+    g->testInit(ws,0,9,32);
 
     Fit alg;
     alg.initialize();

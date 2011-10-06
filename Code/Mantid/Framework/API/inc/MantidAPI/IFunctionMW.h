@@ -141,7 +141,7 @@ public:
   /* MatrixWorkspace specific methods */
 
   /// Set the workspace
-  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, size_t xMin, size_t xMax);
+  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX = 0.0, double endX = 0.0);
   /// Get the workspace
   virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace()const{return m_workspace;}
   /// Get workspace index
@@ -156,8 +156,8 @@ public:
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData);
 
   /// To be used temporarily with the old Fit algorithm. 
-  virtual void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),
-                             boost::shared_array<double> weights = boost::shared_array<double>());
+  //virtual void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),
+  //                           boost::shared_array<double> weights = boost::shared_array<double>());
 
   boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(
     boost::shared_ptr<const API::MatrixWorkspace> inWS, 

@@ -2518,7 +2518,7 @@ void FitPropertyBrowser::findPeaks()
         Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType())
         );
       if (!f) break;
-      f->setMatrixWorkspace(inputWS,workspaceIndex(),-1,-1);
+      f->setMatrixWorkspace(inputWS,workspaceIndex());
       f->setCentre(centre[i]);
       f->setWidth(width[i]);
       f->setHeight(height[i]);

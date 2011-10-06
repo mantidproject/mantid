@@ -139,14 +139,14 @@ void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* 
  * @param xMin :: The minimum bin index of spectrum spec that will be used in fitting
  * @param xMax :: The maximum bin index of spectrum spec that will be used in fitting
  */
-void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t spec, size_t xMin, size_t xMax)
+void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t spec, double startX, double endX)
 {
-  IFunctionMW::setMatrixWorkspace(workspace,spec,xMin,xMax);
+  IFunctionMW::setMatrixWorkspace(workspace,spec,startX,endX);
   for(size_t i=0;i<nFunctions();i++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
     if (fun)
-      fun->setMatrixWorkspace(workspace,spec,xMin,xMax);
+      fun->setMatrixWorkspace(workspace,spec,startX,endX);
   }
 }
 
@@ -160,18 +160,7 @@ void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     if (fun)
     {
       fun->setWorkspace(ws, slicing, copyData); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
-      fun->setUpNewStuff(m_xValues,m_weights);
     }
-  }
-}
-
-void CompositeFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
-{
-  IFunctionMW::setUpNewStuff(xs,weights);
-  for(size_t iFun=0;iFun<nFunctions();iFun++)
-  {
-    IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(iFun));
-    fun->setUpNewStuff(xs,weights);
   }
 }
 

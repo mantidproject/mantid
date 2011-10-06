@@ -56,7 +56,7 @@ public:
 
   void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData = true);
   /// Set the workspace
-  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t spec, size_t xMin, size_t xMax);
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t spec, double startX = 0.0, double endX = 0.0);
   /// Returns the function's name
   std::string name()const{return "CompositeFunctionMW";}
   /// Writes itself into a string
@@ -68,8 +68,6 @@ public:
   void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData);
   /// Derivatives to be used in covariance matrix calculation. 
   void calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData);
-
-  void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),boost::shared_array<double> weights = boost::shared_array<double>());
 
 };
 
