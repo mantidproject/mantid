@@ -40,6 +40,11 @@ namespace Mantid
       return new GluGeometryHandler(obj);
     }
 
+    GeometryHandler* GluGeometryHandler::createInstance(Object* obj)
+    {
+      return new GluGeometryHandler(obj);
+    }
+
     void GluGeometryHandler::Triangulate()
     {
       //Check whether Object is triangulated otherwise triangulate

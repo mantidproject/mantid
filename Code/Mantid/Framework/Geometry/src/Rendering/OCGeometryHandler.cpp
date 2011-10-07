@@ -43,6 +43,11 @@ namespace Mantid
       return new OCGeometryHandler(obj);
     }
 
+    GeometryHandler* OCGeometryHandler::createInstance(Object* obj)
+    {
+      return new OCGeometryHandler(obj);
+    }
+
     void OCGeometryHandler::Triangulate()
     {
       //Check whether Object is triangulated otherwise triangulate

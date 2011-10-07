@@ -77,6 +77,7 @@ namespace Mantid
       ~GluGeometryHandler(); ///< Destructor
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
+      GeometryHandler* createInstance(Object*);
       ///sets the geometry handler for a cuboid
       void setCuboid(Kernel::V3D,Kernel::V3D,Kernel::V3D,Kernel::V3D);
       ///sets the geometry handler for a cone

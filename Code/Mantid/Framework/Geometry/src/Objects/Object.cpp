@@ -96,7 +96,7 @@ namespace Mantid
         AABByMin = A.AABByMin;
         AABBzMin = A.AABBzMin;
         boolBounded = A.boolBounded;
-        handle = A.handle;
+        handle.reset(A.handle->createInstance(this));
         bGeometryCaching = A.bGeometryCaching;
         vtkCacheReader = A.vtkCacheReader;
         vtkCacheWriter = A.vtkCacheWriter;

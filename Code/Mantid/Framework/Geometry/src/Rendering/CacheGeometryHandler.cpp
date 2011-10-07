@@ -44,6 +44,11 @@ namespace Mantid
       return new CacheGeometryHandler(obj);
     }
 
+    GeometryHandler* CacheGeometryHandler::createInstance(Object* obj)
+    {
+      return new CacheGeometryHandler(obj);
+    }
+
     void CacheGeometryHandler::Triangulate()
     {
       //Check whether Object is triangulated otherwise triangulate

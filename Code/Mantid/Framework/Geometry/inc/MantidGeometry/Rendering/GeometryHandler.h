@@ -61,6 +61,7 @@ namespace Mantid
       virtual ~GeometryHandler();
       virtual GeometryHandler* createInstance(IObjComponent *)=0; ///< Create an instance of concrete geometry handler for ObjComponent
       virtual GeometryHandler* createInstance(boost::shared_ptr<Object> )=0; ///< Create an instance of concrete geometry handler for Object
+      virtual GeometryHandler* createInstance(Object*)=0; ///< Create an instance of concrete geometry handler for Object
       virtual void Triangulate()=0; ///< Triangulate the Object
       virtual void Render()=0;      ///< Render Object or ObjComponent
       virtual void Initialize()=0;  ///< Prepare/Initialize Object/ObjComponent to be rendered

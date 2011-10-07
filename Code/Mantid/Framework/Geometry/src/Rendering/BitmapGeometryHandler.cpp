@@ -44,6 +44,13 @@ namespace Geometry
     return new BitmapGeometryHandler();
   }
 
+  ///< Create an instance of concrete geometry handler for Object
+  GeometryHandler* BitmapGeometryHandler::createInstance(Object* obj )
+  {
+    (void)obj;
+    return new BitmapGeometryHandler();
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Triangulate the Object - this function will not be used.
    *

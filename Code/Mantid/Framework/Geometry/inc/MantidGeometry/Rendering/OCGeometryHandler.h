@@ -58,6 +58,7 @@ namespace Mantid
       ~OCGeometryHandler(); ///< Destructor
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
+      GeometryHandler* createInstance(Object*);
       void Triangulate();
       void Render();
       void Initialize();
