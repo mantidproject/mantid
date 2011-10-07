@@ -98,7 +98,8 @@ public:
     template <typename T>
     IPropertyManager* setProperty(const std::string &name, const T & value)
     {
-      return setTypedProperty(name, value, boost::is_convertible<T, boost::shared_ptr<DataItem> >());
+      //return setTypedProperty(name, value, boost::is_convertible<T, boost::shared_ptr<DataItem> >());
+      return setTypedProperty(name, value, boost::false_type()); // Temporary until a few minor issues around output properties are sorted.
     }
 
     template<typename T>
