@@ -224,7 +224,7 @@ void ConvertToQ3DdE::exec(){
     // check if workspace knows better 
     if(inWS2D->run().hasProperty("Ei")){
         double Ei_t = boost::lexical_cast<double>(inWS2D->run().getProperty("Ei")->value());
-        if(abs(Ei-Ei_t)>FLT_EPSILON){
+        if(abs(Ei-Ei_t)>double(FLT_EPSILON)){
             g_log.information()<<" energy: "<<Ei<<" obtained from the algorithm parameters has been replaced by the energy:"<<Ei_t<<", obtained from the workspace\n";
             Ei=Ei_t;
             setProperty("EnergyInput", Ei);
