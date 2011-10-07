@@ -76,7 +76,7 @@ namespace MDAlgorithms
     virtual const std::string category() const { return "Inelastic;MDAlgorithms";}
 
   /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
-      and places the resutls into static cash to be used in subsequent calls of this algorithm */
+      and places the resutls into static cash to be used in subsequent calls to this algorithm */
     static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
   private:
     /// Sets documentation strings for this algorithm

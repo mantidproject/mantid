@@ -156,7 +156,7 @@ ConvertToQ3DdE::init()
 
      BoundedValidator<double> *minEn = new BoundedValidator<double>();
      minEn->setLower(0);
-     declareProperty("EnergyInput",100.,minEn,"The value for the incident energy of the neutrons leaving the source (meV)",Direction::Input);
+     declareProperty("EnergyInput",0.000000001,minEn,"The value for the incident energy of the neutrons leaving the source (meV)",Direction::InOut);
 
      // this property is mainly for subalgorithms to set-up as they have to identify 
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
@@ -218,9 +218,19 @@ void ConvertToQ3DdE::exec(){
         convert_log.error()<<" expecting to process energy form "<<E_min<<" to "<<E_max<<" but Emin>=Emax\n";
         throw(std::invalid_argument(" Emin>=Emax"));
     }
-
-    // get and check input energy (TODO: should energy be moved into Run?)
+    //*** Input energy
+    // get and check input energy 
     double Ei = getProperty("EnergyInput");
+    // check if workspace knows better 
+    if(inWS2D->run().hasProperty("Ei")){
+        double Ei_t = boost::lexical_cast<double>(inWS2D->run().getProperty("Ei")->value());
+        if(abs(Ei-Ei_t)>FLT_EPSILON){
+            g_log.information()<<" energy: "<<Ei<<" obtained from the algorithm parameters has been replaced by the energy:"<<Ei_t<<", obtained from the workspace\n";
+            Ei=Ei_t;
+            setProperty("EnergyInput", Ei);
+        }
+
+    }
     if (E_max >Ei){
         convert_log.error()<<"Maximal elergy transferred to sample eq "<<E_max<<" and exceeds the input energy "<<Ei<<std::endl;
         throw(std::invalid_argument("Maximal transferred energy exceeds input energy"));
@@ -282,7 +292,7 @@ void ConvertToQ3DdE::exec(){
     Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
-    Kernel::Matrix<double> gon =inWS2D->mutableRun().getGoniometerMatrix();
+    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
     // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
     mat = gon * ub;
     std::vector<double> rotMat = mat.get_vector();

@@ -134,14 +134,11 @@ void testExecAndAdd(){
     // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
 
-  // rotate the crystal by two degrees back;
-     ExperimentInfo *pExperInfo=ws2D->cloneExperimentInfo();
-     pExperInfo->mutableRun().getGoniometer().setRotationAngle(0,20);
-//     Run mr = pExperInfo->mutableRun(); //.getGoniometer().setRotationAngle(0,20);
-     //mr.getGoniometer().setRotationAngle(0,20);
-
-     ws2D->copyExperimentInfoFrom(pExperInfo);
-    
+  // rotate the crystal by twenty degrees back;
+     ws2D->mutableRun().getGoniometer().setRotationAngle(0,20);
+     // add workspace energy
+     ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
+ //  
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
@@ -149,13 +146,14 @@ void testExecAndAdd(){
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxQdE_values", " 50., 50., 50, 20"));
 
 
     pAlg->execute();
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+    // check if the algorith used correct energy
+    TS_ASSERT("The energy, used by the algorithm has been reset from the workspace", "13",pAlg->getProperty("EnergyInput"));
 
 }
 
