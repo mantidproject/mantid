@@ -151,7 +151,7 @@ namespace MDEvents
     virtual void clear() = 0;
 
     /// Get total number of points
-    virtual size_t getNPoints() const = 0;
+    virtual uint64_t getNPoints() const = 0;
 
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;

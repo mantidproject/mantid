@@ -49,7 +49,7 @@ namespace MDEvents
     virtual size_t getNumDims() const;
 
     /** @returns the total number of points (events) in this workspace */
-    virtual size_t getNPoints() const;
+    virtual uint64_t getNPoints() const;
 
     /** @returns the number of bytes of memory used by the workspace. */
     virtual size_t getMemorySize() const;

@@ -12,48 +12,6 @@ namespace MDEvents
 {
 
   //----------------------------------------------------------------------------------------------
-  /** Helper function. Return true if the box is touching the implicit function
-   *
-   * @param function :: MDImplicitFunction
-   * @param box :: IMDBox
-   * @return true if the box is touching the implicit function
-   */
-  TMDE(
-  bool MDBoxIterator)::boxIsTouching(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box)
-  {
-    // NULL box does not touch anything.
-    if (!box) return false;
-    // Get the vertexes of the box as a bare array
-    size_t numVertices = 0;
-    coord_t * vertexes = box->getVertexesArray(numVertices);
-    bool retVal = function->isBoxTouching(vertexes, numVertices);
-    delete [] vertexes;
-    return retVal;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Helper function. Return true if the box is touching the implicit function
-   *
-   * @param function :: MDImplicitFunction
-   * @param box :: IMDBox
-   * @return true if the box is touching the implicit function
-   */
-  TMDE(
-  MDImplicitFunction::eContact MDBoxIterator)::boxContact(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box)
-  {
-    // NULL box does not touch anything.
-    if (!box) return MDImplicitFunction::NOT_TOUCHING;
-    // Get the vertexes of the box as a bare array
-    size_t numVertices = 0;
-    coord_t * vertexes = box->getVertexesArray(numVertices);
-    MDImplicitFunction::eContact retVal = function->boxContact(vertexes, numVertices);
-    delete [] vertexes;
-    return retVal;
-  }
-
-
-
-  //----------------------------------------------------------------------------------------------
   /** Constructor
    *
    * @param topBox :: top-level parent box.
@@ -67,48 +25,28 @@ namespace MDEvents
       Mantid::Geometry::MDImplicitFunction * function)
       : m_topBox(topBox),
         m_maxDepth(maxDepth), m_leafOnly(leafOnly),
-        m_done(false),
-        m_function(function)
+        m_function(function),
+        m_pos(0), m_current(NULL), m_currentMDBox(NULL), m_events(NULL)
   {
     if (!m_topBox)
       throw std::invalid_argument("MDBoxIterator::ctor(): NULL top-level box given.");
 
-    // Allocate an array of indices
-    m_indices = new size_t[m_maxDepth+1];
-    // Allocate an array of parents pointers
-    m_parents = new IMDBox<MDE,nd> *[m_maxDepth+1];
-
-    // Indices start at -1 (meaning do the parent)
-    for (size_t i=0; i<m_maxDepth+1; i++)
-    {
-      m_indices[i] = 0;
-      m_parents[i] = NULL;
-    }
-
-    // We have no parent
-    m_parent = NULL;
-    m_parentNumChildren = 0;
-
-    m_current = m_topBox;
-    m_currentDepth = m_current->getDepth();
-
-    if (m_currentDepth > m_maxDepth)
+    if (m_topBox->getDepth() > m_maxDepth)
       throw std::invalid_argument("MDBoxIterator::ctor(): The maxDepth parameter must be >= the depth of the topBox.");
 
-    // Check if top-level box is excluded by the implicit function
-    if (m_function)
+    // Use the "getBoxes" to get all the boxes in a vector.
+    m_boxes.clear();
+    if (function)
+      m_topBox->getBoxes(m_boxes, maxDepth, leafOnly, function);
+    else
+      m_topBox->getBoxes(m_boxes, maxDepth, leafOnly);
+
+    m_max = m_boxes.size();
+    // Get the first box
+    if (m_max > 0)
     {
-      if (!boxIsTouching(m_function, m_current))
-      {
-        m_done = true;
-        return;
-      }
+      m_current = m_boxes[0];
     }
-
-    // Starting with leafs only? You need to skip ahead (if the top level box has children)
-    if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
-      next();
-
   }
     
   //----------------------------------------------------------------------------------------------
@@ -116,121 +54,181 @@ namespace MDEvents
    */
   TMDE(MDBoxIterator)::~MDBoxIterator()
   {
-    delete [] m_indices;
-    delete [] m_parents;
   }
-  
-//  /** Get the i-th coordinate of the current cell
-//   *
-//   * @param i :: dimension # to retriev
-//   * @return position of the center of the cell in that dimension
-//   */
-//  TMDE(
-//  double MDBoxIterator)::getCoordinate(std::size_t /*i*/) const
-//  {
-//    return 0.0;
-//  }
 
 
   //----------------------------------------------------------------------------------------------
-  /**  Advance to the next box in the workspace. If the current box is the last one in the workspace
-   * do nothing and return false.
-   * @return true if there are more cells to iterate through.
+  /** Jump to the index^th cell.
+   *
+   * @param index :: point to jump to. Must be 0 <= index < getDataSize().
    */
+  TMDE(
+  void MDBoxIterator)::jumpTo(size_t index)
+  {
+    releaseEvents();
+    m_pos = index;
+    if (m_pos < m_max)
+    {
+      m_current = m_boxes[m_pos];
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// Advance to the next cell. If the current cell is the last one in the workspace
+  /// do nothing and return false.
+  /// @return true if you can continue iterating
   TMDE(
   bool MDBoxIterator)::next()
   {
-    while (!m_done)
+    return this->next(1);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// Advance, skipping a certain number of cells.
+  /// @param skip :: how many to increase. If 1, then every point will be sampled.
+  TMDE(
+  inline bool MDBoxIterator)::next(size_t skip)
+  {
+    releaseEvents();
+    m_pos += skip;
+    if (m_pos < m_max)
     {
-      size_t children = m_current->getNumChildren();
+      // Move up.
+      m_current = m_boxes[m_pos];
+      return true;
+    }
+    else
+      // Done - can't iterate
+      return false;
+  }
 
-      if ((children > 0) && (m_currentDepth < m_maxDepth))
+  //----------------------------------------------------------------------------------------------
+  /** If needed, retrieve the events vector from the box.
+   * Does nothing if the events are already obtained.
+   * @throw if the box cannot have events.
+   */
+  TMDE(
+  void MDBoxIterator)::getEvents() const
+  {
+    if (!m_events)
+    {
+      if (!m_currentMDBox)
+        m_currentMDBox = dynamic_cast<MDBox<MDE,nd> *>(m_current);
+      if (m_currentMDBox)
       {
-        // Current becomes the parent
-        m_parent = m_current;
-        m_parentNumChildren = m_parent->getNumChildren();
-
-        // Go deeper
-        m_indices[++m_currentDepth] = 0;
-
-        // Save the parent for this depth
-        m_parents[m_currentDepth] = m_parent;
-        // Take the first child of it
-        m_current = m_parent->getChild(0);
-
-        // Check if the child is excluded by the implicit function
-        bool skipBecauseItIsExcluded = false;
-        if (m_function)
-          skipBecauseItIsExcluded = !boxIsTouching(m_function, m_current);
-
-        // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
-        // For boxes excluded by an implicit function, you need to keep looking too.
-        if ((skipBecauseItIsExcluded) ||
-            (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
-          return next();
-        else
-          // If not leaves-only, then you return each successive child you encounter.
-          return true;
-      }
-
-      // If you reach here, then it is a leaf node that we've already returned.
-
-      // Go to the next child
-      size_t newIndex = ++m_indices[m_currentDepth];
-
-      while (newIndex >= m_parentNumChildren)
-      {
-        // Reached the end of the number of children of the current parent.
-
-        // Are we as high as we can go?
-        if (m_currentDepth == 0)
-        {
-          m_done = true;
-          return false;
-        }
-
-        // Time to go up a level
-        m_currentDepth--;
-        m_parent = m_parents[m_currentDepth];
-
-        // Reached a null parent = higher than we started. We're done
-        if (!m_parent)
-        {
-          m_done = true;
-          return false;
-        }
-
-        // If we get here, then we have a valid parent
-        m_parentNumChildren = m_parent->getNumChildren();
-
-        // Move on to the next child of this level because we already returned this guy.
-        newIndex = ++m_indices[m_currentDepth];
-      }
-
-      // This is now the current box
-      m_current = m_parent->getChild(m_indices[m_currentDepth]);
-
-      // Check if the child is excluded by the implicit function
-      bool skipBecauseItIsExcluded = false;
-      if (m_function)
-        skipBecauseItIsExcluded = !boxIsTouching(m_function, m_current);
-
-      // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
-      // For boxes excluded by an implicit function, you need to keep looking too.
-      if ((skipBecauseItIsExcluded) ||
-          (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
-      {
-        // Keep going
-        // return next();
+        // Retrieve the event vector.
+        m_events = &m_currentMDBox->getConstEvents();
       }
       else
-        // If not leaves-only, then you return each successive child you encounter.
-        return true;
+        throw std::runtime_error("MDBoxIterator: requested the event list from a box that is not a MDBox!");
+    }
+  }
 
-    } // (while not done)
 
-    // Done!
-    return false;
+
+  //----------------------------------------------------------------------------------------------
+  /** After you're done with a given box, release the events list
+   * (if it was retrieved)
+   */
+  TMDE(
+  void MDBoxIterator)::releaseEvents() const
+  {
+    if (m_events)
+    {
+      m_currentMDBox->releaseEvents();
+      m_events = NULL;
+      m_currentMDBox = NULL;
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /// Returns the number of entries to be iterated against.
+  TMDE(size_t MDBoxIterator)::getDataSize() const
+  {
+    return m_max;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /// Returns the normalized signal for this box
+  TMDE(signal_t MDBoxIterator)::getNormalizedSignal() const
+  {
+    return m_current->getSignalNormalized();
+  }
+
+  /// Returns the normalized error for this box
+  TMDE(signal_t MDBoxIterator)::getNormalizedError() const
+  {
+    return m_current->getError() * m_current->getInverseVolume();
+  }
+
+  /// Return a list of vertexes defining the volume pointed to
+  TMDE(coord_t * MDBoxIterator)::getVertexesArray(size_t & numVertices) const
+  {
+    return m_current->getVertexesArray(numVertices);
+  }
+
+  /// Returns the position of the center of the box pointed to.
+  TMDE(Mantid::Kernel::VMD MDBoxIterator)::getCenter() const
+  {
+    coord_t center[nd];
+    m_current->getCenter(center);
+    return Mantid::Kernel::VMD(nd, center);
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /// Returns the number of events/points contained in this box
+  TMDE(size_t MDBoxIterator)::getNumEvents() const
+  {
+    // Do we have a MDBox?
+    m_currentMDBox = dynamic_cast<MDBox<MDE,nd> *>(m_current);
+    if (m_currentMDBox)
+      return m_current->getNPoints();
+    else
+      return 0;
+  }
+
+
+  /// For a given event/point in this box, return the run index
+  TMDE(uint16_t MDBoxIterator)::getInnerRunIndex(size_t /*index*/) const
+  {
+    getEvents();
+    return 0; //TODO: Handle both types of events
+    //return (*m_events)[index].getRunIndex();
+  }
+
+
+  /// For a given event/point in this box, return the detector ID
+  TMDE(int32_t MDBoxIterator)::getInnerDetectorID(size_t /*index*/) const
+  {
+    getEvents();
+    return 0;
+    //return (*m_events)[index].getDetectorID();
+  }
+
+
+  /// Returns the position of a given event for a given dimension
+  TMDE(coord_t MDBoxIterator)::getInnerPosition(size_t index, size_t dimension) const
+  {
+    getEvents();
+    return (*m_events)[index].getCenter(dimension);
+  }
+
+
+  /// Returns the signal of a given event
+  TMDE(signal_t MDBoxIterator)::getInnerSignal(size_t index) const
+  {
+    getEvents();
+    return (*m_events)[index].getSignal();
+  }
+
+  /// Returns the error of a given event
+  TMDE(signal_t MDBoxIterator)::getInnerError(size_t index) const
+  {
+    getEvents();
+    return (*m_events)[index].getError();
   }
 
 

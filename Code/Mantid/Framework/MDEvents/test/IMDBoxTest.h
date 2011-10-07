@@ -39,7 +39,7 @@ public:
   {}
 
   /// Get total number of points
-  virtual size_t getNPoints() const
+  virtual uint64_t getNPoints() const
   {return 0;}
 
   /// Get number of dimensions

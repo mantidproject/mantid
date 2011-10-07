@@ -1,6 +1,5 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>

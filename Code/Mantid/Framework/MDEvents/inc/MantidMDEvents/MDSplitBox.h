@@ -31,7 +31,7 @@ namespace MDEvents
     
     void clear();
 
-    size_t getNPoints() const;
+    uint64_t getNPoints() const;
 
     size_t getNumDims() const;
 

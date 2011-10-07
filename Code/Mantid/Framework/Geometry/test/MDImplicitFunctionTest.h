@@ -68,38 +68,6 @@ public:
     TS_ASSERT( !try2Dpoint(f, -1, -2) );
   }
 
-//
-//  /// Helper function for the 2D case
-//  MDImplicitFunction::eContact try2Dpoint2(MDImplicitFunction & f, coord_t x, coord_t y)
-//  {
-//    coord_t centers[2] = {x,y};
-//    return f.pointContact(centers);
-//  }
-//
-//  void test_pointContact()
-//  {
-//    MDImplicitFunction f;
-//    coord_t origin[2] = {0,0};
-//
-//    // Everything below a 45 degree line
-//    coord_t normal1[2] = {1,-1};
-//    f.addPlane( MDPlane(2, normal1, origin) );
-//    // Everything above y=0
-//    coord_t normal2[2] = {0,1};
-//    f.addPlane( MDPlane(2, normal2, origin) );
-//
-//    // Are both planes doing the checking?
-//    TS_ASSERT(  try2Dpoint2(f, 0.2, 0.1) == MDImplicitFunction::CONTAINED );
-//    // Only one plane, so it is touching
-//    TS_ASSERT(  try2Dpoint2(f, -5, 0.1) == MDImplicitFunction::TOUCHING );
-//    // In that corner with nothing
-//    TS_ASSERT(  try2Dpoint2(f, -5, 0.1) == MDImplicitFunction::TOUCHING );
-////    TS_ASSERT( !try2Dpoint(f, 0.2, -0.1) );
-////    TS_ASSERT( !try2Dpoint(f, 0.2, 0.3) );
-////    TS_ASSERT(  try2Dpoint(f, 2000, 1999) );
-////    TS_ASSERT( !try2Dpoint(f, -1, -2) );
-//  }
-
 
   void test_everythingIsContained_ifNoPlanes()
   {

@@ -257,7 +257,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
-  TMDE(size_t MDGridBox)::getNPoints() const
+  TMDE(uint64_t MDGridBox)::getNPoints() const
   {
     //Use the cached value
     return nPoints;

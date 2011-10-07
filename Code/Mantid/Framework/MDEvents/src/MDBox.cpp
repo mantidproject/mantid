@@ -135,7 +135,8 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
-  TMDE(size_t MDBox)::getNPoints() const
+  TMDE(
+  uint64_t MDBox)::getNPoints() const
   {
     if (m_onDisk)
     {

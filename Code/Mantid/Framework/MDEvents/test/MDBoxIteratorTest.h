@@ -147,14 +147,6 @@ public:
     TS_ASSERT( !it->next() );
   }
 
-  void test_starting_deeper_fails_for_wrong_maxDepth()
-  {
-    // Typedef for the iterator (for macros)
-    typedef MDBoxIterator<MDLeanEvent<1>,1> boxit_t;
-    // Start at a depth of 1 (on B0): you need to give a valid maxDepth
-    TS_ASSERT_THROWS_ANYTHING( it = new boxit_t(B0, 0, false); );
-  }
-
   void test_starting_deeper()
   {
     // Start at a depth of 1 (on B0)
@@ -276,6 +268,33 @@ public:
     TS_ASSERT( !it->next() );
   }
 
+  //--------------------------------------------------------------------------------------
+  /** Get the inner data from an MDBox
+   */
+  void test_iterator_getInnerData()
+  {
+    // Make a MDBox with 10 events
+    ibox_t * A = MDEventsTestHelper::makeMDBox1();
+    MDEventsTestHelper::feedMDBox<1>(A,1,10, 0.5, 1.0);
+    MDBoxIterator<MDLeanEvent<1>,1> * it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false);
+    TS_ASSERT_EQUALS( it->getBox(), A);
+    // It has some events!
+    TS_ASSERT_EQUALS( it->getNumEvents(), 10);
+    // Check inner data
+    for (size_t i=0; i<10; i++)
+    {
+      TS_ASSERT_DELTA( it->getInnerSignal(i), 1.0, 1e-6);
+      TS_ASSERT_DELTA( it->getInnerError(i), 1.0, 1e-6);
+      TS_ASSERT_DELTA( it->getInnerRunIndex(i), 0, 0);
+      TS_ASSERT_DELTA( it->getInnerDetectorID(i), 0, 0);
+      TS_ASSERT_DELTA( it->getInnerPosition(i,0), 0.5 + double(i), 1e-6);
+    }
+    // Other functions that go back to the box
+    TS_ASSERT_DELTA( it->getCenter()[0], 5.0, 1e-5);
+
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above11()
   {
@@ -437,9 +456,8 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
-
-    // Returns the first box but that's it
-    TS_ASSERT_EQUALS( it->getBox(), A);
+    // Nothing in the iterator!
+    TS_ASSERT_EQUALS( it->getDataSize(), 0);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
   }
@@ -636,142 +654,6 @@ public:
   }
 
 
-
-//
-//  // ============================ MDBoxImplicitFunction-related tests ============================
-//  MDBoxImplicitFunction get3DFunction()
-//  {
-//    std::vector<coord_t> min;
-//    min.push_back(1.0);
-//    min.push_back(2.0);
-//    min.push_back(3.0);
-//    std::vector<coord_t> max;
-//    max.push_back(2.0);
-//    max.push_back(3.0);
-//    max.push_back(4.0);
-//    return MDBoxImplicitFunction(min,max);
-//  }
-//
-//  MDBoxImplicitFunction get4DFunction()
-//  {
-//    std::vector<coord_t> min;
-//    min.push_back(1.0);
-//    min.push_back(2.0);
-//    min.push_back(3.0);
-//    min.push_back(4.0);
-//    std::vector<coord_t> max;
-//    max.push_back(2.0);
-//    max.push_back(3.0);
-//    max.push_back(4.0);
-//    max.push_back(5.0);
-//    return MDBoxImplicitFunction(min,max);
-//  }
-//
-//  // Box that is fully contained in the implicit function
-//  void test_boxIsTouching_3D_allInside()
-//  {
-//    MDBox<MDLeanEvent<3>,3> box;
-//    box.setExtents(0, 1.2, 1.8);
-//    box.setExtents(1, 2.2, 3.8);
-//    box.setExtents(2, 3.2, 3.8);
-//    MDBoxImplicitFunction f = get3DFunction();
-//    bool res;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxIsTouching(&f,&box);
-//      (void) res;
-//    }
-//    TS_ASSERT(res);
-//  }
-//
-//  // Box that is completely outside of the implicit function
-//  void test_boxIsTouching_3D_allOutside()
-//  {
-//    MDBox<MDLeanEvent<3>,3> box;
-//    box.setExtents(0, 3.2, 5.8);
-//    box.setExtents(1, -5.2, -3.8);
-//    box.setExtents(2, 12.2, 73.8);
-//    MDBoxImplicitFunction f = get3DFunction();
-//    bool res;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxIsTouching(&f,&box);
-//      (void) res;
-//    }
-//    TS_ASSERT(!res);
-//  }
-//
-//
-//  // Box that is fully contained in the implicit function
-//  void test_boxContact_3D_allInside()
-//  {
-//    MDBox<MDLeanEvent<3>,3> box;
-//    box.setExtents(0, 1.2, 1.8);
-//    box.setExtents(1, 2.2, 3.8);
-//    box.setExtents(2, 3.2, 3.8);
-//    MDBoxImplicitFunction f = get3DFunction();
-//    MDBoxImplicitFunction::eContact res;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxContact(&f,&box);
-//      (void) res;
-//    }
-//    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
-//  }
-//
-//  // Box that is fully contained in the implicit function
-//  void test_boxContact_3D_allOutside()
-//  {
-//    MDBox<MDLeanEvent<3>,3> box;
-//    box.setExtents(0, 3.2, 5.8);
-//    box.setExtents(1, -5.2, -3.8);
-//    box.setExtents(2, 12.2, 73.8);
-//    MDBoxImplicitFunction f = get3DFunction();
-//    MDBoxImplicitFunction::eContact res;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxContact(&f,&box);
-//      (void) res;
-//    }
-//    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
-//  }
-
-//
-//  // Box that is fully contained in the implicit function
-//  void test_boxIsTouching_4D_allInside()
-//  {
-//    MDBox<MDLeanEvent<4>,4> box;
-//    box.setExtents(0, 1.2, 1.8);
-//    box.setExtents(1, 2.2, 3.8);
-//    box.setExtents(2, 3.2, 3.8);
-//    box.setExtents(3, 4.2, 4.8);
-//    MDBoxImplicitFunction f = get4DFunction();
-//    TS_ASSERT( f.isBoxTouching(&box) );
-//    bool res;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      res = f.isBoxTouching(&box);
-//      (void) res;
-//    }
-//  }
-//
-//  // Box that is completely outside of the implicit function
-//  void test_boxIsTouching_4D_allOutside()
-//  {
-//    MDBox<MDLeanEvent<4>,4> box;
-//    box.setExtents(0, 3.2, 5.8);
-//    box.setExtents(1, -5.2, -3.8);
-//    box.setExtents(2, 12.2, 73.8);
-//    box.setExtents(3, 18.2, 23.8);
-//    MDBoxImplicitFunction f = get4DFunction();
-//    TS_ASSERT( !f.isBoxTouching(&box) );
-//    bool res;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      res = f.isBoxTouching(&box);
-//      (void) res;
-//    }
-//  }
 
 
 };

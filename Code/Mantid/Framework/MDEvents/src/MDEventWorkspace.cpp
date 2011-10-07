@@ -105,7 +105,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this workspace */
   TMDE(
-  size_t MDEventWorkspace)::getNPoints() const
+  uint64_t MDEventWorkspace)::getNPoints() const
   {
     return data->getNPoints();
   }
