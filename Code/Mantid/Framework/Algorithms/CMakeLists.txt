@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/AnyShapeAbsorption.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
+	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/BlendSq.cpp
 	src/CalculateEfficiency.cpp
@@ -175,6 +176,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
+	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BlendSq.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
@@ -341,6 +343,7 @@ set ( TEST_FILES
 	test/AnyShapeAbsorptionTest.h
 	test/ApplyDetailedBalanceTest.h
 	test/ApplyTransmissionCorrectionTest.h
+	test/BinaryOperateMasksTest.h
 	test/BinaryOperationTest.h
 	test/BlendSqTest.h
 	test/CalculateEfficiencyTest.h
