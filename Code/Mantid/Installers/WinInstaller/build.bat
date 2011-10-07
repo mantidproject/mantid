@@ -54,7 +54,7 @@ if errorlevel 1 goto candle_error
 
 REM Generate final MSI
 echo Running light to generate %FINALMSI%
-light -out "%FINALMSI%" "%WXSOBJ%" %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib  -loc WixUI_en-us.wxl
+light -out "%FINALMSI%" "%WXSOBJ%" %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib -loc WixUI_en-us.wxl
 if errorlevel 1 goto light_error
 
 goto :end

@@ -18,8 +18,7 @@ if len(sys.argv) == 3:
 
 # Hack while we still have scons around in some places
 if not os.path.exists(MANTIDRELEASE + '/MantidPlot.exe'):
-    MANTIDRELEASE = FRAMEWORKDIR + '/release'
-    WXSFILE = 'msi_input.wxs'
+    sys.exit('Path "%s" does not exist. Incorrect output path specified.' % (MANTIDRELEASE+'/MantidPlot.exe'))
 
 # MantidPlot -v prints the version number
 subp = subprocess.Popen([MANTIDRELEASE + '/MantidPlot',  '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -39,11 +38,9 @@ print('Mantid version '+ MantidVersion)
 # Architecture
 if platform.architecture()[0] == '64bit':
     ARCH = '64'
-    toget = 'toget64'
     upgrade_uuid = '{ae4bb5c4-6b5f-4703-be9a-b5ce662b81ce}'
 else:
     ARCH = '32'
-    toget = 'toget'
     upgrade_uuid = '{E9B6F1A9-8CB7-4441-B783-4E7A921B37F0}'
 
 # Define our source directories
@@ -384,6 +381,7 @@ Package.setAttribute('Manufacturer','STFC Rutherford Appleton Laboratories')
 Package.setAttribute('Languages','1033')
 Package.setAttribute('Compressed','yes')
 Package.setAttribute('SummaryCodepage','1252')
+#Package.setAttribute('InstallPrivileges','limited')
 Product.appendChild(Package)
 
 # Architecture specific stuff
@@ -401,11 +399,10 @@ addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'no','Property':'PREVIOUSFOUND','Mi
 addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'yes','Property':'NEWERFOUND','Minimum':MantidVersion,'IncludeMinimum':'no'})
 
 addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [ProductName] is already installed.'})
-
 exeSec = addTo(Product,'InstallExecuteSequence',{})
 NoDowngrade = addTo(exeSec,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
 addText('NEWERFOUND',NoDowngrade)
-addTo(exeSec,'RemoveExistingProducts',{'After':'InstallInitialize'})
+addTo(exeSec,'RemoveExistingProducts',{'After':'InstallValidate'})
 
 Media = doc.createElement('Media')
 Media.setAttribute('Id','1')
@@ -419,14 +416,59 @@ Prop.setAttribute('Id','DiskPrompt')
 Prop.setAttribute('Value','Mantid Installation')
 Product.appendChild(Prop)
 
+
+# <Property Id="ASSISTANCE_USERS" Value="cur"/>
+# <UI Id="UserUI">
+# <Dialog Id="MyDialog" Height="100" Width="100" Hidden="yes">
+# <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="Next">
+          
+          # <Publish Property="ALLUSERS" Value="{}">ASSISTANCE_USERS = "cur"</Publish>  <!-- set null value -->
+          # <Publish Property="ALLUSERS" Value="1">ASSISTANCE_USERS = "all"</Publish>
+          # </Control>
+
+# </Dialog>
+# </UI>
+
+# To produce this we need to write the following!
+#
+# Wix does not allow elements to have null values despite the MS installer tables
+# having conditions that include them.
+# To get around Wix we have to use a Publish element that can only be attached to a 
+# dialog, which we hide here so that no one actually sees anything different
+Prop = doc.createElement('Property')
+Prop.setAttribute('Id','ALLUSER_PROXY')
+Prop.setAttribute('Value','current')
+Product.appendChild(Prop)
+
+ui = doc.createElement('UI')
+Product.appendChild(ui)
+ui.setAttribute('Id', 'HiddenUI')
+dialog = doc.createElement('Dialog')
+ui.appendChild(dialog)
+dialog.setAttribute('Id', 'HiddenDialog')
+dialog.setAttribute('Height','100')
+dialog.setAttribute('Width','100')
+dialog.setAttribute('Hidden', 'yes') # VERY important
+control = doc.createElement('Control')
+dialog.appendChild(control)
+control.setAttribute('Id','Next')
+control.setAttribute('Height','17')
+control.setAttribute('Width','56')
+control.setAttribute('Type', 'PushButton')
+control.setAttribute('X','236')
+control.setAttribute('Y', '243')
+control.setAttribute('Default', 'yes')
+publish = doc.createElement('Publish')
+control.appendChild(publish)
+publish.setAttribute('Property','ALLUSERS')
+publish.setAttribute('Value','{}')
+addText(r'ASSISTANCE_USERS = "current"',publish)
+
 TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
 InstallDir = addDirectory('INSTALLDIR','MInstall',MantidInstallDir,TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
 
 MantidDlls = addComponent('MantidDLLs',comp_guid['MantidDLLs'],binDir)
-addTo(MantidDlls,'Registry',{'Id':'RegInstallDir','Root':'HKLM','Key':'Software\Mantid','Name':'InstallDir','Action':'write','Type':'string','Value':'[INSTALLDIR]'})
-addTo(MantidDlls,'Registry',{'Id':'RegMantidVersion','Root':'HKLM','Key':'Software\Mantid','Name':'Version','Action':'write','Type':'string','Value':MantidVersion})
-addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\Mantid','Name':'GUID','Action':'write','Type':'string','Value':product_uuid})
 
 # Need to create Mantid.properties file. A template exists but some entries point to the incorrect locations so those need modifying
 createPropertiesFile(FRAMEWORKDIR + '/Properties/Mantid.properties.template')
@@ -451,6 +493,8 @@ addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 
 # The other required third_party libraries, excluding the designer stuff
 addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,
         exclude_files=['QtDesigner4.dll','QtDesignerComponents4.dll','QtScript4.dll']) # The designer is notnecessary and is just bloat for the installer
+# The C runtime
+addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH + '/CRT','CRT',MantidDlls)
 
 #------------- Bundled Python installation ---------------
 pythonDLLs = addCompList('PythonDLLs',LIBDIR + '/Python27/DLLs','DLLs',binDir)[0]
@@ -672,26 +716,6 @@ addCRefs(sconsList,MantidExec)
 addCRefs(pyalgsList,MantidExec)
 addCRef('QtImagePlugins', MantidExec)
 addCRef('MantidQtPlugins', MantidExec)
-
-# C/C++ runtime. The msm files are essentially themseleves installers  and merging them in this manner causes their contents to be installed during the Mantid install
-# procedure. Some dependencies still require the VC80 runtime so include these as well
-Redist = addHiddenFeature('Redist',Complete)
-if ARCH == '32':
-    msm_files = ['Microsoft_VC80_CRT_x86.msm', 'Microsoft_VC80_OpenMP_x86.msm',\
-                 'policy_8_0_Microsoft_VC80_CRT_x86.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86.msm',\
-                 'Microsoft_VC100_CRT_x86.msm','Microsoft_VC100_OpenMP_x86.msm'\
-                ]
-    msm_dir = r'C:\Program Files\Common Files\Merge Modules'
-else:
-    msm_files = ['Microsoft_VC80_CRT_x86_x64.msm', 'Microsoft_VC80_OpenMP_x86_x64.msm',\
-                 'policy_8_0_Microsoft_VC80_CRT_x86_x64.msm', 'policy_8_0_Microsoft_VC80_OpenMP_x86_x64.msm',\
-                 'Microsoft_VC100_CRT_x64.msm','Microsoft_VC100_OpenMP_x64.msm'\
-                ]
-    msm_dir = r'C:\Program Files (x86)\Common Files\Merge Modules'
-for index, mod in enumerate(msm_files):
-    id = 'VCRed_' + str(index)
-    addTo(TargetDir,'Merge',{'Id':id, 'SourceFile': os.path.join(msm_dir,mod), 'DiskId':'1','Language':'1033'})
-    addTo(Redist,'MergeRef',{'Id':id})
 
 # Header files
 Includes = addFeature('Includes','Includes','Mantid and third party header files.','2',Complete)
