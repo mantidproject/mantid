@@ -65,7 +65,8 @@ void StandardView::render()
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSource->getOutputPort(0), this->view);
   int reptype = VTK_SURFACE;
-  if (QString("PeaksReader") == QString(this->origSource->getProxy()->GetXMLName()))
+  char *xmlName = this->origSource->getProxy()->GetXMLName();
+  if (QString("PeaksReader") == QString(xmlName) || QString("Peaks Source") == QString(xmlName))
   {
     reptype = VTK_WIREFRAME;
   }
