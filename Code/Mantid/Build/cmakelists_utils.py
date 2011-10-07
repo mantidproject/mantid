@@ -90,7 +90,7 @@ def fix_cmake_format(subproject):
 def fix_all_cmakes():
     """ Fix all cmake files """
     projects = ["Algorithms", "DataObjects", "MDAlgorithms", "PythonAPI", "API", 
-                       "Geometry", "MDDataObjects", "CurveFitting", "ICat", "MDEvents", 
+                       "Geometry", "CurveFitting", "ICat", "MDEvents", 
                        "DataHandling", "Kernel", "Nexus", "Crystal"]
     for proj in projects:
         fix_cmake_format(proj)

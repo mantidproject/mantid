@@ -569,7 +569,6 @@ addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE +
 addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + '/MantidICat.dll',Plugins)
 addFileV('MantidCrystal','MCR.dll','MantidCrystal.dll',MANTIDRELEASE + '/MantidCrystal.dll',Plugins)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + '/MantidNexus.dll',Plugins)
-addFileV('MantidMDDataObjects', 'MMDO.dll', 'MantidMDDataObjects.dll',MANTIDRELEASE + '/MantidMDDataObjects.dll',Plugins) 
 addFileV('MantidMDAlgorithms', 'MMDA.dll', 'MantidMDAlgorithms.dll',MANTIDRELEASE + '/MantidMDAlgorithms.dll',Plugins) 
 addFileV('MantidMDEvents', 'MMDE.dll', 'MantidMDEvents.dll',MANTIDRELEASE + '/MantidMDEvents.dll',Plugins) 
 

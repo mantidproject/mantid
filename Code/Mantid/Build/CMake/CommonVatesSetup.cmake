@@ -13,7 +13,6 @@ Framework/DataObjects
 Framework/DataHandling
 Framework/MDEvents
 Framework/MDAlgorithms
-Framework/MDDataObjects
 Framework/Nexus
 Framework/NexusCPP
 )

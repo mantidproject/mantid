@@ -53,7 +53,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 
       #On install commands.
 	  #1) Check that MantidPath exists.
-	  #2) Append MantidPath/../plugins directory onto path, as it contains libs MDAlgorithms, MDDataObjects etc.
+	  #2) Append MantidPath/../plugins directory onto path, as it contains libs MDAlgorithms, etc.
 	  #3) Append the installdir/bin directory onto path as it contains libs MantidVatesAPI etc (required for advanced Paraview plugin loading).
 	  #4) Point to the location of the plubin libs. Paraview will then autoload these.
 	  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "

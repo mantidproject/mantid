@@ -145,9 +145,6 @@ if ( CXXTEST_FOUND )
   add_subdirectory (UserAlgorithms)
 endif ()
 
-add_subdirectory (MDDataObjects)
-include_directories (MantidMDDataObjects/inc)
-set ( MANTIDLIBS ${MANTIDLIBS} MDDataObjects )
 add_subdirectory (MDAlgorithms)
 add_subdirectory (MDEvents)
 
@@ -157,7 +154,7 @@ add_subdirectory (MDEvents)
 
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule PythonAPIModule DataObjects
                      DataHandling Nexus NexusCPP Algorithms CurveFitting ICat
-                     Crystal MDDataObjects MDAlgorithms MDEvents WorkflowAlgorithms
+                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

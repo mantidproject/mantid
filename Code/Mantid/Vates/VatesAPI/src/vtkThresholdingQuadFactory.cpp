@@ -1,6 +1,5 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDDataObjects/MDIndexCalculator.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/NullCoordTransform.h"
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"

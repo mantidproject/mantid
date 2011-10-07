@@ -125,8 +125,6 @@ EXCLUDE                = \
 						../ICat/src/GSoapGenerated \
 						../MDAlgorithms/inc/MantidMDAlgorithms \ 
 						../MDAlgorithms/src \
-						../MDDataObjects/src \
-						../MDDataObjects/inc/MantidMDDataObjects \
 						../Geometry/inc/MantidGeometry/MDGeometry 
 
 EXCLUDE_SYMLINKS       = NO

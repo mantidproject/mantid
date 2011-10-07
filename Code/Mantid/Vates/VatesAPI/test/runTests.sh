@@ -35,8 +35,8 @@ vtk_libpath=/usr/local/2.1.1/linux-x86_64/lib
 #TODO set path properly
 gmock_libpath=../../../TestingTools/lib/ubuntu-10.10
 
-g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Framework/Kernel/inc -I../../../Framework/MDDataObjects/inc -I../../../Framework/MDAlgorithms/inc -I../../../Framework/API/inc -I../inc/VisitPlugins -I/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0 -I../../../Framework/Geometry/inc -I ../inc \
-    -I ../../../../Third_Party/src/cxxtest -I ../../../../Third_Party/include -I ../../../TestingTools/include -L$vtk_libpath -L$mantid_libpath -L$gmock_libpath -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMantidMDAlgorithms -lMantidDataObjects -lMantidMDDataObjects -lMantidVisitPresenters -lhdf5 -Wno-deprecated 
+g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../../Framework/Kernel/inc  -I../../../Framework/MDAlgorithms/inc -I../../../Framework/API/inc -I../inc/VisitPlugins -I/usr/local/2.1.1/linux-x86_64/include/vtk/include/vtk-5.0 -I../../../Framework/Geometry/inc -I ../inc \
+    -I ../../../../Third_Party/src/cxxtest -I ../../../../Third_Party/include -I ../../../TestingTools/include -L$vtk_libpath -L$mantid_libpath -L$gmock_libpath -lvtkCommon -lvtkFiltering -lMantidKernel -lMantidGeometry -lMantidAPI -lboost_date_time-mt -lgmock -lMantidMDAlgorithms -lMantidDataObjects  -lMantidVisitPresenters -lhdf5 -Wno-deprecated 
 
 echo
 

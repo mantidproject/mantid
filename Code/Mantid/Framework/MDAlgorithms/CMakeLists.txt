@@ -128,7 +128,7 @@ set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDDataObjects/inc ../MDEvents/inc)
+include_directories ( inc ../MDEvents/inc)
 
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
@@ -138,12 +138,12 @@ if ( CXXTEST_FOUND )
           ../DataHandling/inc ../DataObjects/inc )	
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API DataHandling Nexus 
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms CurveFitting MDEvents API DataHandling Nexus 
 	   TestHelpers
       ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API  
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms CurveFitting MDEvents API  
 	TestHelpers DataHandling Nexus )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )

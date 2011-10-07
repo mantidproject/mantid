@@ -99,8 +99,6 @@ INPUT                  = \
 						../MatlabAPI/src \
 						../MDAlgorithms/inc/MantidMDAlgorithms \
 						../MDAlgorithms/src \
-						../MDDataObjects/inc/MDDataObjects \
-						../MDDataObjects/src \
 						../MDEvents/inc/MantidMDEvents \
 						../MDEvents/src \
 						../Nexus/inc/MantidNexus \

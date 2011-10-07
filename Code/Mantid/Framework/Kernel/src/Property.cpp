@@ -219,10 +219,6 @@ namespace DataObjects
   class SpecialWorkspace2D;
   class Workspace2D;
 }
-namespace MDDataObjects
-{
-  class MDWorkspace;
-}
 
 namespace Kernel
 {
@@ -238,7 +234,6 @@ std::string getUnmangledTypeName(const std::type_info& type)
   using std::make_pair;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
-  using namespace Mantid::MDDataObjects;
   // Compile a lookup table. This is a static local variable that
   // will get initialized when the function is first used
   static std::map<string, string> typestrings;
@@ -279,8 +274,6 @@ std::string getUnmangledTypeName(const std::type_info& type)
                                       string("OffsetsWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(), 
                                       string("SpecialWorkspace2D")));
-    typestrings.insert(make_pair(typeid(boost::shared_ptr<MDWorkspace>).name(), 
-                                      string("MDWorkspace")));
 
 
   }

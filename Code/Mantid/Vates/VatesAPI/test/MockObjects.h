@@ -18,7 +18,6 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/NullCoordTransform.h"
-#include "MantidMDDataObjects/MDIndexCalculator.h"
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
