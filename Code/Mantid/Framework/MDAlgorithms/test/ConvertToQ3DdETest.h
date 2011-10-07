@@ -153,7 +153,7 @@ void testExecAndAdd(){
     pAlg->execute();
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
     // check if the algorith used correct energy
-    TS_ASSERT("The energy, used by the algorithm has been reset from the workspace", "13",pAlg->getProperty("EnergyInput"));
+    TSM_ASSERT("The energy, used by the algorithm has not been reset from the workspace", "13",pAlg->getProperty("EnergyInput"));
 
 }
 
