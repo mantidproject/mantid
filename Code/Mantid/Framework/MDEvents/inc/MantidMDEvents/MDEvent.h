@@ -148,7 +148,7 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------------
     /** @return the detectorId of this event. */
-    int32_t getDetectorId() const
+    int32_t getDetectorID() const
     { return detectorId;  }
 
     /** Sets the detectorId of this event

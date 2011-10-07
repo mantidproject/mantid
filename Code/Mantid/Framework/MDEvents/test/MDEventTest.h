@@ -25,14 +25,14 @@ public:
     TS_ASSERT_EQUALS( a.getSignal(), 1.0);
     TS_ASSERT_EQUALS( a.getErrorSquared(), 1.0);
     TS_ASSERT_EQUALS( a.getRunIndex(), 0);
-    TS_ASSERT_EQUALS( a.getDetectorId(), 0);
+    TS_ASSERT_EQUALS( a.getDetectorID(), 0);
 
     MDEvent<4> b(2.5, 1.5);
     TS_ASSERT_EQUALS( b.getNumDims(), 4);
     TS_ASSERT_EQUALS( b.getSignal(), 2.5);
     TS_ASSERT_EQUALS( b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS( b.getRunIndex(), 0);
-    TS_ASSERT_EQUALS( b.getDetectorId(), 0);
+    TS_ASSERT_EQUALS( b.getDetectorID(), 0);
 
     // NOTE: The pragma (pack,2) call has no effect on some platforms: RHEL5, Ubuntu 10.04 and MacOS as of now.
     // Therefore these tests fail and the events are somewhat too big on these platforms:
@@ -47,7 +47,7 @@ public:
     TS_ASSERT_EQUALS( b.getSignal(), 2.5);
     TS_ASSERT_EQUALS( b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS( b.getRunIndex(), 123);
-    TS_ASSERT_EQUALS( b.getDetectorId(), 456789);
+    TS_ASSERT_EQUALS( b.getDetectorID(), 456789);
   }
 
   void test_constructor_withCoords()
@@ -61,7 +61,7 @@ public:
     TS_ASSERT_EQUALS( b.getCenter(1), 1.234);
     TS_ASSERT_EQUALS( b.getCenter(2), 2.345);
     TS_ASSERT_EQUALS( b.getRunIndex(), 123);
-    TS_ASSERT_EQUALS( b.getDetectorId(), 456789);
+    TS_ASSERT_EQUALS( b.getDetectorID(), 456789);
   }
 
   /** Note: the copy constructor is not explicitely written but rather is filled in by the compiler */
@@ -77,7 +77,7 @@ public:
     TS_ASSERT_EQUALS( a.getCenter(1), 1.234);
     TS_ASSERT_EQUALS( a.getCenter(2), 2.345);
     TS_ASSERT_EQUALS( a.getRunIndex(), 123);
-    TS_ASSERT_EQUALS( a.getDetectorId(), 456789);
+    TS_ASSERT_EQUALS( a.getDetectorID(), 456789);
   }
 
 

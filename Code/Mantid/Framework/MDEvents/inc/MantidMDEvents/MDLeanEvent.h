@@ -211,6 +211,22 @@ namespace MDEvents
 
 
 
+    //---------------------------------------------------------------------------------------------
+    /** @return the run index of this event in the containing MDEventWorkspace.
+     *          Always 0: this information is not present in a MDLeanEvent. */
+    uint16_t getRunIndex() const
+    {
+      return 0;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** @return the detectorId of this event.
+    *           Always 0: this information is not present in a MDLeanEvent. */
+    int32_t getDetectorID() const
+    {
+      return 0;
+    }
+
 
     //---------------------------------------------------------------------------------------------
     /** When first creating a NXS file containing the data, the proper

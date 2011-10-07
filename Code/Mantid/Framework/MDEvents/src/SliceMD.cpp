@@ -80,7 +80,7 @@ namespace MDEvents
   template<size_t nd, size_t ond>
   inline void copyEvent(const MDEvent<nd> & srcEvent, MDEvent<ond> & newEvent)
   {
-    newEvent.setDetectorId(srcEvent.getDetectorId());
+    newEvent.setDetectorId(srcEvent.getDetectorID());
     newEvent.setRunIndex(srcEvent.getRunIndex());
   }
 

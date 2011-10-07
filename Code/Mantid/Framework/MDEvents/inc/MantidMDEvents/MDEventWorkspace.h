@@ -13,6 +13,7 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 namespace Mantid
 {
@@ -50,6 +51,10 @@ namespace MDEvents
 
     /** @returns the total number of points (events) in this workspace */
     virtual uint64_t getNPoints() const;
+
+    /// Creates a new iterator pointing to the first cell (box) in the workspace
+    virtual Mantid::API::IMDIterator* createIterator() const;
+
 
     /** @returns the number of bytes of memory used by the workspace. */
     virtual size_t getMemorySize() const;

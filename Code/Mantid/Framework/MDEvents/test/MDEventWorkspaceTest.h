@@ -23,6 +23,7 @@
 #include <memory>
 #include <vector>
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -133,6 +134,21 @@ public:
     TS_ASSERT_THROWS_NOTHING( ew->splitBox(); )
     TS_ASSERT( ew->isGridBox() );
     delete ew;
+  }
+
+  /** Create an IMDIterator */
+  void test_createIterator()
+  {
+    MDEventWorkspace3 * ew = new MDEventWorkspace3();
+    BoxController_sptr bc = ew->getBoxController();
+    bc->setSplitInto(4);
+    ew->splitBox();
+    IMDIterator * it = ew->createIterator();
+    TS_ASSERT(it);
+    TS_ASSERT_EQUALS(it->getDataSize(), 4*4*4);
+    TS_ASSERT(it->next());
+    delete ew;
+    delete it;
   }
 
   /** Method that makes a table workspace for use in MantidPlot */

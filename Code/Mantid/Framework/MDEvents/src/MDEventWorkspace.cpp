@@ -17,6 +17,7 @@
 #include "MantidMDEvents/MDSplitBox.h"
 #include <iomanip>
 #include <functional>
+#include "MantidMDEvents/MDBoxIterator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -108,6 +109,16 @@ namespace MDEvents
   uint64_t MDEventWorkspace)::getNPoints() const
   {
     return data->getNPoints();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Creates a new iterator pointing to the first cell (box) in the workspace */
+  TMDE(
+  Mantid::API::IMDIterator*  MDEventWorkspace)::createIterator() const
+  {
+    // TODO: Should this be leaf only? Depends on most common use case
+    return new MDBoxIterator<MDE,nd>(data, 10000, true, NULL);
   }
 
 
