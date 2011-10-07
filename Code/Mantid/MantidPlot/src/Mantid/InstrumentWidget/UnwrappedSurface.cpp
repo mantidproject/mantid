@@ -13,6 +13,7 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QApplication>
+#include <QMessageBox>
 
 #include <cfloat>
 #include <limits>
@@ -512,7 +513,10 @@ void UnwrappedSurface::findAndCorrectUGap()
   double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
   if (bin_width == 0.0)
   {
-    throw std::runtime_error("Failed to build unwrapped surface");
+    QMessageBox::warning(NULL, tr("MantidPLot - Instrument view error"), tr("Failed to build unwrapped surface"));
+    m_u_min = 0.0;
+    m_u_max = 1.0;
+    return;
   }
 
   QList<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
