@@ -1,21 +1,21 @@
 #ifndef CROPWORKSPACETEST_H_
 #define CROPWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
 #include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Timer.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <limits>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
@@ -275,7 +275,38 @@ public:
         }
       }
     }
+  }
 
+  void testRagged_events()
+  {
+    // Event workspace with 10 bins from 0 to 10
+    EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(5, 10, 10, 0.0, 1.0);
+    // Change the first X vector to 3, 4, 5 ..
+    for (int k = 0; k <= 10; ++k) {
+      input->dataX(0)[k] = k+3;
+    }
+    CropWorkspace crop4;
+    TS_ASSERT_THROWS_NOTHING( crop4.initialize() );
+    TS_ASSERT_THROWS_NOTHING( crop4.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(input) ) );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("OutputWorkspace","raggedOut") );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMin","2.9") );
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","5.1") );
+    TS_ASSERT_THROWS_NOTHING( crop4.execute() );
+    TS_ASSERT( crop4.isExecuted() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("raggedOut")) );
+    // The number of bins is UNCHANGED because of ragged bins
+    TS_ASSERT_EQUALS( output->size(), input->size() );
+    TS_ASSERT_EQUALS( output->blocksize(), input->blocksize() );
+
+    for (size_t i = 0; i < 5; ++i)
+    {
+      const MantidVec & iX = input->readX(i);
+      const MantidVec & oX = output->readX(i);
+      for (size_t j = 0 ; j < iX.size(); j++)
+      { TS_ASSERT_EQUALS( iX[j], oX[j] ); }
+    }
   }
 
   void testNegativeBinBoundaries()

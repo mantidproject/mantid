@@ -212,8 +212,6 @@ void CropWorkspace::execEvent()
     g_log.debug("Cropping EventWorkspace in-place.");
 
 
-  outputWorkspace->setAllX(XValues_new);
-
   EventType type = eventW->getEventType();
 
   Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
@@ -225,7 +223,8 @@ void CropWorkspace::execEvent()
     PARALLEL_START_INTERUPT_REGION
     int j = i - m_minSpec;
     EventList el = eventW->getEventList(i);
-    EventList outEL;
+    // The output event list
+    EventList & outEL = outputWorkspace->getOrAddEventList(j);
     switch (type)
     {
       case TOF:
@@ -267,11 +266,17 @@ void CropWorkspace::execEvent()
       }
     }
 
-    outputWorkspace->getOrAddEventList(j) += outEL;
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
     std::set<detid_t>::iterator k;
     for (k = dets.begin(); k != dets.end(); ++k)
-      outputWorkspace->getOrAddEventList(j).addDetectorID(*k);
+      outEL.addDetectorID(*k);
+
+    if (!m_commonBoundaries)
+      // If the X axis is NOT common, then keep the initial X axis, just clear the events
+      outEL.setX(el.dataX());
+    else
+      // Common bin boundaries get all set to the same value
+      outEL.setX(XValues_new);
 
     // Propagate bin masking if there is any
     if ( m_inputWorkspace->hasMaskedBins(i) )
@@ -295,6 +300,7 @@ void CropWorkspace::execEvent()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
 }
