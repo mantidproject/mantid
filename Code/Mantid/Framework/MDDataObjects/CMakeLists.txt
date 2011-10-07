@@ -50,11 +50,11 @@ if ( CXXTEST_FOUND )
     #else ()
     #cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} )
     #target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} )
+
+    add_dependencies ( FrameworkTests MDDataObjectsTest )
+    # Add to the 'FrameworkTests' group in VS
+    set_property ( TARGET MDDataObjectsTest PROPERTY FOLDER "UnitTests" )
   endif ()
-  
-  add_dependencies ( FrameworkTests MDDataObjectsTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MDDataObjectsTest PROPERTY FOLDER "UnitTests" )
 endif ()
 
 ###########################################################################
