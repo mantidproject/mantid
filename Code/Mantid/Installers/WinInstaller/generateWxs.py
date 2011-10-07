@@ -402,7 +402,7 @@ addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [Pr
 exeSec = addTo(Product,'InstallExecuteSequence',{})
 NoDowngrade = addTo(exeSec,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
 addText('NEWERFOUND',NoDowngrade)
-addTo(exeSec,'RemoveExistingProducts',{'After':'InstallValidate'})
+addTo(exeSec,'RemoveExistingProducts',{'After':'InstallInitialize'})
 
 Media = doc.createElement('Media')
 Media.setAttribute('Id','1')
