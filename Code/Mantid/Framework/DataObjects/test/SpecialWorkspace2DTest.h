@@ -69,70 +69,71 @@ public:
     SpecialWorkspace2D_sptr ws1(new SpecialWorkspace2D(inst1));
 
     Instrument_sptr inst2 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    SpecialWorkspace2D_sptr ws2(new SpecialWorkspace2D(inst2));
+    SpecialWorkspace2D_sptr ws2raw(new SpecialWorkspace2D(inst2));
+    SpecialWorkspace2D_const_sptr ws2 = boost::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2raw);
 
     // 1. AND operation
     ws1->setValue(2, 1);
-    ws2->setValue(2, 1);
-    ws1->BinaryOperation(ws2, AND);
+    ws2raw->setValue(2, 1);
+    ws1->binaryOperation(ws2, BinaryOperator::AND);
     TS_ASSERT_EQUALS( ws1->getValue(2), 2);
 
     ws1->setValue(2, 0);
-    ws2->setValue(2, 1);
-    ws1->BinaryOperation(ws2, AND);
+    ws2raw->setValue(2, 1);
+    ws1->binaryOperation(ws2, BinaryOperator::AND);
     TS_ASSERT_EQUALS( ws1->getValue(2), 0);
 
     ws1->setValue(2, 1);
-    ws2->setValue(2, 0);
-    ws1->BinaryOperation(ws2, AND);
+    ws2raw->setValue(2, 0);
+    ws1->binaryOperation(ws2, BinaryOperator::AND);
     TS_ASSERT_EQUALS( ws1->getValue(2), 0);
 
     ws1->setValue(2, 0);
-    ws2->setValue(2, 0);
-    ws1->BinaryOperation(ws2, AND);
+    ws2raw->setValue(2, 0);
+    ws1->binaryOperation(ws2, BinaryOperator::AND);
     TS_ASSERT_EQUALS( ws1->getValue(2), 0);
 
     // 2. OR operation
     ws1->setValue(2, 1);
-    ws2->setValue(2, 1);
-    ws1->BinaryOperation(ws2, OR);
+    ws2raw->setValue(2, 1);
+    ws1->binaryOperation(ws2, BinaryOperator::OR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 1);
 
     ws1->setValue(2, 0);
-    ws2->setValue(2, 1);
-    ws1->BinaryOperation(ws2, OR);
+    ws2raw->setValue(2, 1);
+    ws1->binaryOperation(ws2, BinaryOperator::OR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 1);
 
     ws1->setValue(2, 1);
-    ws2->setValue(2, 0);
-    ws1->BinaryOperation(ws2, OR);
+    ws2raw->setValue(2, 0);
+    ws1->binaryOperation(ws2, BinaryOperator::OR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 1);
 
     ws1->setValue(2, 0);
-    ws2->setValue(2, 0);
-    ws1->BinaryOperation(ws2, OR);
+    ws2raw->setValue(2, 0);
+    ws1->binaryOperation(ws2, BinaryOperator::OR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 0);
 
     // 3. XOR operation
     // 2. OR operation
     ws1->setValue(2, 1);
-    ws2->setValue(2, 1);
-    ws1->BinaryOperation(ws2, XOR);
+    ws2raw->setValue(2, 1);
+    ws1->binaryOperation(ws2, BinaryOperator::XOR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 0);
 
     ws1->setValue(2, 0);
-    ws2->setValue(2, 1);
-    ws1->BinaryOperation(ws2, XOR);
+    ws2raw->setValue(2, 1);
+    ws1->binaryOperation(ws2, BinaryOperator::XOR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 1);
 
     ws1->setValue(2, 1);
-    ws2->setValue(2, 0);
-    ws1->BinaryOperation(ws2, XOR);
+    ws2raw->setValue(2, 0);
+    ws1->binaryOperation(ws2, BinaryOperator::XOR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 1);
 
     ws1->setValue(2, 0);
-    ws2->setValue(2, 0);
-    ws1->BinaryOperation(ws2, XOR);
+    ws2raw->setValue(2, 0);
+    ws1->binaryOperation(ws2, BinaryOperator::XOR);
     TS_ASSERT_EQUALS( ws1->getValue(2), 0);
 
   }
@@ -148,7 +149,8 @@ public:
      ws1->setValue(2, 1);
      ws2->setValue(2, 1);
 
-     TS_ASSERT_THROWS_ANYTHING( ws1->BinaryOperation(ws2, AND) );
+     SpecialWorkspace2D_const_sptr cws2 = boost::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
+     TS_ASSERT_THROWS_ANYTHING( ws1->binaryOperation(cws2, BinaryOperator::AND) );
 
   }
 
@@ -162,10 +164,11 @@ public:
     Instrument_sptr inst3 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws3(new SpecialWorkspace2D(inst3));
 
-    ws2->BinaryOperation(NOT);
+    ws2->binaryOperation(BinaryOperator::NOT);
+    SpecialWorkspace2D_const_sptr cws2 = boost::dynamic_pointer_cast<const SpecialWorkspace2D>(ws2);
 
-    ws1->BinaryOperation(ws2, AND);
-    ws3->BinaryOperation(ws2, OR);
+    ws1->binaryOperation(cws2, BinaryOperator::AND);
+    ws3->binaryOperation(cws2, BinaryOperator::OR);
 
     for (size_t i = 0; i < ws1->getNumberHistograms(); i ++){
       detid_t did = ws1->getDetectorID(i);

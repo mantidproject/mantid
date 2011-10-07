@@ -26,7 +26,10 @@ namespace DataObjects
    */
 
 
-  enum BinaryOperator{AND, OR, XOR, NOT};
+  class BinaryOperator{
+  public:
+    enum e {AND, OR, XOR, NOT};
+  };
 
   class DLLExport SpecialWorkspace2D  : public Workspace2D
   {
@@ -47,8 +50,10 @@ namespace DataObjects
 
     detid_t getDetectorID(const std::size_t workspaceIndex) const;
 
-    void BinaryOperation(const boost::shared_ptr<SpecialWorkspace2D> ws, BinaryOperator binoperator);
-    void BinaryOperation(BinaryOperator binoperator);
+    void binaryOperation(boost::shared_ptr<const SpecialWorkspace2D>& ws, const unsigned int operatortype);
+    void binaryOperation(const unsigned int operatortype);
+
+    void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
   private:
     /// Private copy constructor. NO COPY ALLOWED
@@ -58,7 +63,7 @@ namespace DataObjects
 
     virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
     
-    bool isCompatible(const boost::shared_ptr<SpecialWorkspace2D> ws);
+    bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
     /// Non-const access to the spectra map is disallowed except by this classes constructor.
     Workspace2D::replaceSpectraMap;
@@ -68,9 +73,9 @@ namespace DataObjects
      * Therefore, detectorIDs[workspaceIndex] = that detector ID.  */
     std::vector<detid_t> detectorIDs;
 
-    void binaryAND(const boost::shared_ptr<SpecialWorkspace2D> ws);
-    void binaryOR(const boost::shared_ptr<SpecialWorkspace2D> ws);
-    void binaryXOR(const boost::shared_ptr<SpecialWorkspace2D> ws);
+    void binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws);
+    void binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws);
+    void binaryXOR(boost::shared_ptr<const SpecialWorkspace2D> ws);
     void binaryNOT();
 
     /// Map with key = detector ID, and value = workspace index.

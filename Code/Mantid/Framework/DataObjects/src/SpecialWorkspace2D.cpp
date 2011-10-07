@@ -90,11 +90,18 @@ namespace DataObjects
    */
   double SpecialWorkspace2D::getValue(const detid_t detectorID) const
   {
+    // std::cout << "\ngetValue():  " << this->getNumberHistograms() << "  Map Size = " << this->detID_to_WI.size() << std::endl;
+
     std::map<detid_t,size_t>::const_iterator it = detID_to_WI.find(detectorID);
+
     if (it == detID_to_WI.end())
+    {
+      g_log.error() << "Error!  SpecialWorkspace2D: " << this->getName() << "  Detector ID = " << detectorID << "  Size(Map) = " << this->detID_to_WI.size() << std::endl;
       throw std::invalid_argument("SpecialWorkspace2D::getValue(): Invalid detectorID provided.");
+    }
     else
     {
+      // std::cout << "Spectrum ID = " << it->second << "   Total Number (Histogram) = " << this->getNumberHistograms() << std::endl;
       return this->dataY(it->second)[0];
     }
   }
@@ -158,7 +165,7 @@ namespace DataObjects
    * @ parameter
    * @ return
    */
-  void SpecialWorkspace2D::BinaryOperation(const boost::shared_ptr<SpecialWorkspace2D> ws, BinaryOperator operatortype){
+  void SpecialWorkspace2D::binaryOperation(boost::shared_ptr<const SpecialWorkspace2D>& ws, const unsigned int operatortype){
 
     // 1. Check compatibility between this and input workspace
     if (!this->isCompatible(ws)){
@@ -166,13 +173,13 @@ namespace DataObjects
     }
 
     switch (operatortype){
-    case AND:
+    case  BinaryOperator::AND:
       this->binaryAND(ws);
       break;
-    case OR:
+    case BinaryOperator::OR:
       this->binaryOR(ws);
       break;
-    case XOR:
+    case BinaryOperator::XOR:
       this->binaryXOR(ws);
       break;
     default:
@@ -188,10 +195,10 @@ namespace DataObjects
    * @ parameter
    * @ return
    */
-  void SpecialWorkspace2D::BinaryOperation(BinaryOperator operatortype){
+  void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype){
 
     switch (operatortype){
-    case NOT:
+    case BinaryOperator::NOT:
       this->binaryNOT();
       break;
     default:
@@ -206,7 +213,7 @@ namespace DataObjects
   /** And operator
    *
    */
-  void SpecialWorkspace2D::binaryAND(const boost::shared_ptr<SpecialWorkspace2D> ws){
+  void SpecialWorkspace2D::binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws){
 
     for (size_t i = 0; i < this->getNumberHistograms(); i ++){
       double y1 = this->dataY(i)[0];
@@ -225,7 +232,7 @@ namespace DataObjects
   /** Or operator
    *
    */
-  void SpecialWorkspace2D::binaryOR(const boost::shared_ptr<SpecialWorkspace2D> ws){
+  void SpecialWorkspace2D::binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws){
 
     for (size_t i = 0; i < this->getNumberHistograms(); i ++){
       double y1 = this->dataY(i)[0];
@@ -252,7 +259,7 @@ namespace DataObjects
   /** Excluded Or operator
    *
    */
-  void SpecialWorkspace2D::binaryXOR(const boost::shared_ptr<SpecialWorkspace2D> ws){
+  void SpecialWorkspace2D::binaryXOR(boost::shared_ptr<const SpecialWorkspace2D> ws){
 
     for (size_t i = 0; i < this->getNumberHistograms(); i ++){
       double y1 = this->dataY(i)[0];
@@ -293,7 +300,7 @@ namespace DataObjects
    * @ parameter
    * @ return
    */
-  bool SpecialWorkspace2D::isCompatible(const boost::shared_ptr<SpecialWorkspace2D> ws){
+  bool SpecialWorkspace2D::isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws){
 
     // 1. Check number of histogram
     size_t numhist1 = this->getNumberHistograms();
@@ -321,6 +328,57 @@ namespace DataObjects
     } // false
 
     return true;
+  }
+
+  void SpecialWorkspace2D::copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews){
+
+    // std::cout << "\nSize of My Map = " << this->detID_to_WI.size() << std::endl;
+
+    // 0. Check
+    if (this->getNumberHistograms() != sourcews->getNumberHistograms()){
+      throw std::invalid_argument("Incompatible number of histograms");
+    }
+
+    // 1. Copy data
+    for (size_t ispec = 0; ispec < this->getNumberHistograms(); ispec++){
+
+      // 1.1 Check size
+      const MantidVec& inx = sourcews->dataX(ispec);
+      const MantidVec& iny = sourcews->dataY(ispec);
+      const MantidVec& ine = sourcews->dataE(ispec);
+
+      MantidVec& outx = this->dataX(ispec);
+      MantidVec& outy = this->dataY(ispec);
+      MantidVec& oute = this->dataE(ispec);
+
+      if (inx.size() != outx.size() || iny.size() != outy.size() || ine.size() != oute.size()){
+        throw std::invalid_argument("X, Y, E size different within spectrum");
+      }
+
+      // 1.2 Copy data
+      for (size_t i = 0; i < inx.size(); i ++){
+        outx[i] = inx[i];
+      }
+      for (size_t i = 0; i < iny.size(); i ++){
+        outy[i] = iny[i];
+        oute[i] = ine[i];
+      }
+    }
+
+    // 2. Copy detector map
+    this->detID_to_WI = sourcews->detID_to_WI;
+    this->detectorIDs = sourcews->detectorIDs;
+
+    /*
+    std::map<detid_t, std::size_t>::iterator copyiter;
+    for (copyiter=sourcews->detID_to_WI.begin(); copyiter!=sourcews->detID_to_WI.end(); ++copyiter){
+      detid_t tempdetid = copyiter->first;
+      std::size_t specid = copyiter->second;
+      this->detID_to_WI.insert(std::make_pair(tempdetid, specid));
+    }
+    */
+
+    return;
   }
 
 
