@@ -18,11 +18,12 @@ namespace Mantid
 
     namespace MDAlgorithms
     {
-        /**
+        /** NOTE: CURRENTLY DISABLED in CMakeLists.txt
+         * TODO: Refactor to use MDHistoWorkspace
+         *
+         * Algorithm to generate fake MDWorkspace from a function.
 
-        This builder is for constructing composite functions.
-
-        @author Owen Arnold, Tessella plc
+        @author Roman Tolchenov
         @date 01/10/2010
 
         Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

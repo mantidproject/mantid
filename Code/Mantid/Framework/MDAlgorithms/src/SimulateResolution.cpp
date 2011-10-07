@@ -34,16 +34,22 @@ namespace Mantid
         double SimulateResolution::functionMD(Mantid::API::IMDIterator& it) const
         {
             getParams();
-            double fgSignal = 0.;
-            double fgError = 0.;
-            const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
-            std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
-            // calculate contribution of each point
-            for(size_t i=0; i<points.size();i++){
-                sqwConvolution(points[i],fgSignal,fgError);
-            }
-            // Return mean
-            return fgSignal/double(points.size());
+
+            //TODO: Update for new iterator
+
+//            double fgSignal = 0.;
+//            double fgError = 0.;
+//            const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
+//            std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
+//            // calculate contribution of each point
+//            for(size_t i=0; i<points.size();i++){
+//                sqwConvolution(points[i],fgSignal,fgError);
+//            }
+//
+//            // Return mean
+//            return fgSignal/double(points.size());
+
+            return 0;
         }
         /*
         // simple test interface for fg model - will need vector of parameters

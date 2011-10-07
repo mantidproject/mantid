@@ -2,7 +2,6 @@
 #define VTK_THRESHOLDING_LINE_FACTORY_TEST_H
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"

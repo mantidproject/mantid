@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include "MantidVatesAPI/GaussianThresholdRange.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 

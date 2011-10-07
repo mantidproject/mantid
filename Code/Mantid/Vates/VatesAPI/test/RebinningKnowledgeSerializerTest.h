@@ -4,7 +4,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
-#include <MantidGeometry/MDGeometry/MDPoint.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidAPI/IMDWorkspace.h"

@@ -1,7 +1,6 @@
 # Source files
 set ( SRC_FILES
 	# test helpers
-	src/MDFitWorkspace.cpp
 	src/MDIndexCalculator.cpp
 )
 
@@ -11,14 +10,12 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	# test helpers
 	inc/MantidMDDataObjects/DllExport.h
-	inc/MantidMDDataObjects/MDFitWorkspace.h
 	inc/MantidMDDataObjects/MDIndexCalculator.h
 )
 
 # Test files. Other source files required.
 set ( TEST_FILES
 	# test some complex test helpers
-	test/MDFitWorkspaceTest.h
 )
 
 set ( GMOCK_TEST_FILES

@@ -230,6 +230,9 @@ namespace API
 
 
 #include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/VMD.h"
+
+using Mantid::Kernel::VMD;
 
 namespace Mantid
 {
@@ -269,11 +272,12 @@ namespace Mantid
       {
         double arg = 0.0;
         size_t n = m_dimensions.size();
+        VMD center = r.getCenter();
         for(size_t i = 0; i < n; ++i)
         {
           double c = getParameter(2*i);
           double a = getParameter(2*i + 1);
-          double t = r.getCoordinate(i) - c;
+          double t = center[i] - c;
           arg += a*t*t;
         }
         return getParameter("Height") * exp(-arg);
@@ -354,9 +358,10 @@ namespace Mantid
       double functionMD(IMDIterator& r) const
       {
         size_t n = m_dimensions.size();
+        VMD center = r.getCenter();
         for(size_t i = 0; i < n; ++i)
         {
-          m_vars[i] = r.getCoordinate(i);
+          m_vars[i] = center[i];
         }
         return m_parser.Eval();
       }

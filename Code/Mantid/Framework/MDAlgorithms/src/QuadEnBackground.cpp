@@ -34,24 +34,24 @@ namespace Mantid
             double bgSignal = 0.;
             double eps=0.;
 
-//            // Go once over each event
-//            for (size_t i=0; i < it.getNumEvents(); i++)
-//            {
-//              // 4th coordinate = energy
-//              eps = it.getInnerPosition(i, 3);
-//              bgSignal += constant+eps*(linear+eps*quadratic);
-//            }
-
-            const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
-            std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
-            // assume that the first point in the vertexes array is the centre point anf that the gett getter
-            // returns a energy value in the appropriate units.
-            for(size_t i=0; i<points.size();i++){
-                std::vector<Mantid::Geometry::Coordinate> vertexes = points[i]->getVertexes();
-                eps=vertexes[0].gett();
-                //int run=points[i]->getRunId(); // testing
-                bgSignal+=constant+eps*(linear+eps*quadratic);
+            // Go once over each event
+            for (size_t i=0; i < it.getNumEvents(); i++)
+            {
+              // 4th coordinate = energy
+              eps = it.getInnerPosition(i, 3);
+              bgSignal += constant+eps*(linear+eps*quadratic);
             }
+
+//            const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
+//            std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
+//            // assume that the first point in the vertexes array is the centre point anf that the gett getter
+//            // returns a energy value in the appropriate units.
+//            for(size_t i=0; i<points.size();i++){
+//                std::vector<Mantid::Geometry::Coordinate> vertexes = points[i]->getVertexes();
+//                eps=vertexes[0].gett();
+//                //int run=points[i]->getRunId(); // testing
+//                bgSignal+=constant+eps*(linear+eps*quadratic);
+//            }
             return bgSignal;
         }
     }
