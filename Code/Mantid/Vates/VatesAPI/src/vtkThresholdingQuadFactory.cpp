@@ -1,17 +1,16 @@
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidMDDataObjects/MDIndexCalculator.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidVatesAPI/NullCoordTransform.h"
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
-#include "vtkSmartPointer.h" 
 #include "vtkQuad.h"
-#include "MantidGeometry/MDGeometry/Coordinate.h"
-#include "MantidMDDataObjects/MDIndexCalculator.h"
-#include <vector>
+#include "vtkSmartPointer.h" 
 #include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidVatesAPI/NullCoordTransform.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include <vector>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;

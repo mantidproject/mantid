@@ -1,6 +1,7 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidKernel/System.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidKernel/VMD.h"
 
 using NeXus::File;
 
@@ -126,14 +127,14 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Return the vertices of corners of the box
    *
-   * @return a vector of Coordinate objects
+   * @return a vector of VMD objects
    */
   TMDE(
-  std::vector<Mantid::Geometry::Coordinate> IMDBox)::getVertexes() const
+  std::vector<Mantid::Kernel::VMD> IMDBox)::getVertexes() const
   {
     if (nd > 4)
       throw std::runtime_error("IMDBox::getVertexes(): At this time, cannot return vertexes for > 4 dimensions.");
-    std::vector<Mantid::Geometry::Coordinate> out;
+    std::vector<Mantid::Kernel::VMD> out;
 
     // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
     size_t maxVertices = 1 << nd;
@@ -160,7 +161,7 @@ namespace MDEvents
       } // (for each dimension)
 
       // Create the coordinate object and add it to the vector
-      out.push_back( Mantid::Geometry::Coordinate(coords, nd) );
+      out.push_back( Mantid::Kernel::VMD(nd, coords) );
     }
 
     return out;

@@ -82,8 +82,6 @@ namespace Mantid
     this->dataSet = visualDataSet;
     visualDataSet->Allocate(numBoxes);
 
-    std::vector<Mantid::Geometry::Coordinate> coords;
-
     vtkIdList * hexPointList = vtkIdList::New();
     hexPointList->SetNumberOfIds(8);
 

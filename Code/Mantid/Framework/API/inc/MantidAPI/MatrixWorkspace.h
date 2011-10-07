@@ -32,19 +32,12 @@ namespace Mantid
   //----------------------------------------------------------------------------
   namespace Geometry
   {
-    class MDCell;
-    class MDPoint;
     class ParameterMap;
     class ISpectraDetectorMap;
   }
   namespace API
   {
     class SpectraDetectorMap;
-    //----------------------------------------------------------------------------
-    // Typedefs
-    //----------------------------------------------------------------------------
-    // Map for associating indexes to generated MDPoints.
-    typedef std::map<int64_t, Mantid::Geometry::MDPoint> MatrixMDPointMap;
 
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
@@ -267,10 +260,6 @@ namespace Mantid
       // ---------------- IMDWorkspace Methods --------------------------------
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
-      /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const;
       /// Dimension id for x-dimension.
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
@@ -298,12 +287,6 @@ namespace Mantid
       std::vector<Axis*> m_axes;
 
     private:
-      /// Implementation of getMDPointImp taking two arguments for histogram and bin.
-      const Mantid::Geometry::SignalAggregate& getPointImp(size_t histogram, size_t bin) const;
-
-      /// Creates a point for a given histogram/bin.
-      Mantid::Geometry::MDPoint createPoint(HistogramIndex histogram, BinIndex bin) const;
-     
       /// Private copy constructor. NO COPY ALLOWED
       MatrixWorkspace(const MatrixWorkspace&);
       /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
@@ -325,8 +308,6 @@ namespace Mantid
       bool m_isDistribution;
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
-      /// Associates indexes to MDPoints. Dynamic cache.
-      mutable MatrixMDPointMap m_mdPointMap;
 
     protected:
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.

@@ -152,7 +152,7 @@ public:
   void test_iterator_3D_withGetCenter_usingJumpTo()
   {
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
-    int max = it->getDataSize();
+    int max = int(it->getDataSize());
     for (int i=0; i<max; i++)
     {
       it->jumpTo(size_t(i));

@@ -21,11 +21,11 @@ namespace MDEvents
 
   /** Templated class for the multi-dimensional event workspace.
    *
-   * Template parameters are the same as the MDPoint<> template params, and
-   * determine the basic MDPoint type used.
-   *
-   * @tparam nd :: the number of dimensions that each MDPoint will be tracking.
+   * @tparam MDE :: the type of MDEvent in the workspace. This can be, e.g.
+   *                MDLeanEvent<nd> or MDEvent<nd>
+   * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
    *               an usigned int > 0.
+   *               nd must match the number of dimensions in the MDE type!
    *
    *
    * @author Janik Zikovsky, SNS

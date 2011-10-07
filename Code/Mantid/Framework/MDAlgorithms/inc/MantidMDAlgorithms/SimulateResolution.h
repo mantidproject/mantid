@@ -63,12 +63,7 @@ namespace Mantid
                     const double temp, const Kernel::DblMatrix & ubinv) const=0;
             /// This will be over ridden by the user's getParam function
             virtual void getParams() const = 0;
-            /// Perform convolution on one MDPoint
-            void sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-                    double & fgSignal, double & fgError) const;
-            /// Perform convolution on one MDPoint
-            void sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-                    double & fgSignal, double & fgError) const;
+
             /// Pointer to the cut data
             boost::shared_ptr<Mantid::API::IMDWorkspace> imdwCut;
             /// For MC integration return next point in space

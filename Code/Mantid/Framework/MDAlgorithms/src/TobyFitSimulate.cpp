@@ -14,6 +14,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -29,55 +30,46 @@ namespace Mantid
 
         TobyFitSimulate::~TobyFitSimulate()
         {
-            delete m_randGen;
+          delete m_randGen;
         }
+
 
         // simple test interface for fg model - will need vector of parameters
         void TobyFitSimulate::SimForeground(boost::shared_ptr<Mantid::API::IMDWorkspace> imdw,
-              std::string fgmodel,const double fgparaP1, const double fgparaP2, const double fgparaP3)
+            std::string fgmodel,const double fgparaP1, const double fgparaP2, const double fgparaP3)
         {
-            UNUSED_ARG(fgmodel);
-            UNUSED_ARG(fgparaP1);
-            UNUSED_ARG(fgparaP2);
-            UNUSED_ARG(fgparaP3);
+          UNUSED_ARG(fgmodel);
+          UNUSED_ARG(fgparaP1);
+          UNUSED_ARG(fgparaP2);
+          UNUSED_ARG(fgparaP3);
 
-            imdwCut=imdw;
-            initRandomNumbers();
-            // currently maximum of 13 dimensions required
-            std::vector<double> point;
-            for(size_t i=0;i<13;i++)
-                point.push_back(0.0);
-            const int ncell= static_cast<int>( imdwCut->getXDimension()->getNBins() );
-            // loop over MDCells in this cut
-            for(int i=0; i<ncell ; i++ ){
-                const Mantid::Geometry::SignalAggregate& newCell = imdwCut->getCell(i); // get cell data
-                std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > cellPoints = newCell.getContributingPoints();
-                double answer=0.,error=0.;
-                // loop over each MDPoint in current MDCell
-                for(size_t j=0; j<cellPoints.size(); j++){
-                    std::vector<Mantid::Geometry::Coordinate> vertexes = cellPoints[j]->getVertexes();
-                    //double eps=vertexes[0].gett();
-                    sqwConvolution(cellPoints[j],answer,error);
-                }
-                //pnt->setSignal(bgsum);
+          imdwCut=imdw;
+          initRandomNumbers();
+//          // currently maximum of 13 dimensions required
+//          std::vector<double> point;
+//          for(size_t i=0;i<13;i++)
+//            point.push_back(0.0);
+
+          // loop over cells in this cut
+          IMDIterator * it = imdwCut->createIterator();
+          size_t i=0;
+          do
+          {
+            double answer=0.,error=0.;
+            // loop over each MDPoint in current MDCell
+            for(size_t j=0; j < it->getNumEvents(); j++)
+            {
+              // TODO: Add code to perform sqwConvolution on this point.
+              // Note Janik Zikovsky, Oct 7, 2011. Function was empty, so I removed it.
+              //sqwConvolution(* this event *,answer,error);
+              UNUSED_ARG(answer);
+              UNUSED_ARG(error);
             }
+            i++;
+          } while( it->next() );
+          delete it;
         }
 
-
-        // SQW convolution choice - currently just MonteCarlo
-        void TobyFitSimulate::sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error) {
-            sqwConvolutionMC(point,answer,error);
-        }
-
-        // SQW convolution MonteCarlo
-        void TobyFitSimulate::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error)
-        {
-          UNUSED_ARG(point);
-          UNUSED_ARG(answer);
-          UNUSED_ARG(error);
-        }
 
         // Return next pseudo or quasi random point in the N dimensional space
         void TobyFitSimulate::getNextPoint(std::vector<double>& point, int count)

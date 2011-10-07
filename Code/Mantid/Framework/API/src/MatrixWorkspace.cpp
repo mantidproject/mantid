@@ -14,8 +14,6 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/MDGeometry/MDCell.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -1154,63 +1152,6 @@ namespace Mantid
 
 
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(size_t index) const
-    {
-      HistogramIndex histInd = m_indexCalculator.getHistogramIndex(index);
-      BinIndex binInd = m_indexCalculator.getBinIndex(index, histInd);
-      MatrixMDPointMap::const_iterator iter = m_mdPointMap.find(index);
-      //Create the MDPoint if it is not already present.
-      if(m_mdPointMap.end() ==  iter)
-      {
-        m_mdPointMap[static_cast<int64_t>(index)] = createPoint(histInd, binInd);
-      }
-      return m_mdPointMap[static_cast<int64_t>(index)];
-    }
-
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(size_t histogram, size_t bin) const
-    {
-      Index oneDimIndex = m_indexCalculator.getOneDimIndex(histogram, bin);
-      MatrixMDPointMap::const_iterator iter = m_mdPointMap.find(oneDimIndex);
-      if(m_mdPointMap.end() ==  iter)
-      {
-        m_mdPointMap[oneDimIndex] = createPoint(histogram, bin);
-      }
-      return m_mdPointMap[oneDimIndex];
-    }
-
-    Mantid::Geometry::MDPoint  MatrixWorkspace::createPoint(HistogramIndex histogram, BinIndex bin) const
-    {
-      VecCoordinate verts(4);
-
-      signal_t signal = this->dataY(histogram)[bin];
-      signal_t error = this->dataE(histogram)[bin];
-      coord_t x = this->dataX(histogram)[bin];
-      coord_t histogram_d = static_cast<double>(histogram);
-
-      if(isHistogramData()) //TODO. complete vertex generating cases.
-      {
-        verts[0] = Coordinate::createCoordinate2D(x, histogram_d);
-        verts[1] = Coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d);
-        verts[2] = Coordinate::createCoordinate2D(x, histogram_d+1.);
-        verts[3] = Coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d+1.);
-      }
-
-      IDetector_const_sptr detector;
-      const ISpectrum * spec = this->getSpectrum(histogram);
-      if(spec->getDetectorIDs().size() > 0)
-      {
-        try
-        {
-          detector = this->getDetector(histogram);
-        }
-        catch(std::exception&)
-        {
-          //Swallow exception and continue processing.
-        }
-      }
-      return Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
-    }
-
 
     std::string MatrixWorkspace::getDimensionIdFromAxis(const int& axisIndex) const
     {
@@ -1315,16 +1256,6 @@ namespace Mantid
         throw std::overflow_error(message);
       }
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dim);
-    }
-
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t dim1Increment) const
-    { 
-      if (dim1Increment >= this->dataX(0).size())
-      {
-        throw std::range_error("MatrixWorkspace::getCell, increment out of range");
-      }
-
-      return this->getPoint(dim1Increment);
     }
 
 

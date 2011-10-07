@@ -40,10 +40,6 @@ public:
     TS_ASSERT_EQUALS( ws.getZDimension(), dimZ);
     TS_ASSERT_EQUALS( ws.getTDimension(), dimT);
 
-    // Methods that are not implemented
-    TS_ASSERT_THROWS_ANYTHING( ws.getCell(1) );
-    TS_ASSERT_THROWS_ANYTHING( ws.getPoint(1) );
-
     // The values are cleared at the start
     for (size_t i=0; i <  ws.getNPoints(); i++)
     {

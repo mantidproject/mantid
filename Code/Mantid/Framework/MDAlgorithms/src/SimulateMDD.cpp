@@ -13,6 +13,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -90,73 +91,86 @@ namespace Mantid
             double residual=0;
             // TO DO add in foreground component
             double weightSq;
-            for(size_t i=0;i<cellBg.size();i++) {
-                weightSq=1./pow(imdwCut->getCell(i).getError(),2);
-                residual+=pow(cellBg[i]-imdwCut->getCell(i).getSignal(),2)*weightSq;
-            };
+            IMDIterator * it = imdwCut->createIterator();
+            size_t i=0;
+            do
+            {
+//                weightSq=1./pow(imdwCut->getCell(i).getError(),2);
+//                residual+=pow(cellBg[i]-imdwCut->getCell(i).getSignal(),2)*weightSq;
+                weightSq = 1./pow(it->getNormalizedError(),2);
+                residual += pow(cellBg[i] - it->getNormalizedSignal(), 2) * weightSq;
+                i++;
+            } while( it->next() );
+            delete it;
             setProperty("Residual", residual);
         }
+
+
         void SimulateMDD::SimBackground(std::vector<double>& cellBg, const std::string & bgmodel,const double bgparaP1, const double bgparaP2, const double bgparaP3,
                                         const double bgparaP4, const double bgparaP5, const double bgparaP6,
                                         const double bgparaP7, const double bgparaP8)
         {
-            size_t ncell= imdwCut->getXDimension()->getNBins();
-            // loop over cells of cut
-            for(size_t i=0; i<ncell ; i++ ){
-                double bgsum=0.;
-                double eps,phi;
-                const Mantid::Geometry::SignalAggregate& newCell = imdwCut->getCell(i);
-                std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > myPoints = newCell.getContributingPoints();
-                // Assume that the energy (centre point) is in coordinate.t of first point vertex
-                if( ! bgmodel.compare("QuadEnTrans")) {
-                    for(size_t j=0; j<myPoints.size(); j++){
-                        // TO DO: this is expensive way to get eps, should use pointer
-                        std::vector<Mantid::Geometry::Coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].gett();
-                        bgsum+=bgparaP1+eps*(bgparaP2+eps*bgparaP3);
-                    }
-                }
-                else if( ! bgmodel.compare("ExpEnTrans")) {
-                    for(size_t j=0; j<myPoints.size(); j++){
-                        std::vector<Mantid::Geometry::Coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].gett();
-                        bgsum+=bgparaP1+bgparaP2*exp(-eps/bgparaP3);
-                    }
-                }
-                else if( ! bgmodel.compare("QuadEnTransAndPhi")) {
-                    double dphi,deps;
-                    for(size_t j=0; j<myPoints.size(); j++){
-                        std::vector<Mantid::Geometry::Coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].gett();
-                        deps=eps-bgparaP1;
-                        phi=0.; // TO DO: get phi of detector
-                        dphi=phi-bgparaP2;
-                        bgsum+=bgparaP3+bgparaP4*deps+bgparaP5*dphi+bgparaP6*deps*deps+2.*bgparaP7*deps*dphi+bgparaP8*dphi*dphi;
-                    }
-                }
-                else if( ! bgmodel.compare("ExpEnTransAndPhi")) {
-                    for(size_t j=0; j<myPoints.size(); j++){
-                        std::vector<Mantid::Geometry::Coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].gett();
-                        phi=0.; // TO DO: get phi of detector
-                        bgsum+=bgparaP3*exp(-(eps-bgparaP1)/bgparaP4 - (phi-bgparaP2)/bgparaP5 );
-                    }
-                }
-                else {
-                    std::string message="undefined background model: "+bgmodel;
-                    g_log.error(message);
-                    throw std::invalid_argument(message);
-                }
-                // Would pre size cellBg vector, but no getNCell method for IMDWorkspace
-                if(cellBg.size()<i+1)
-                    cellBg.push_back(bgsum);
-                else
-                    cellBg[i]+=bgsum;
+          IMDIterator * it = imdwCut->createIterator();
+          size_t i = 0;
+          // loop over cells of cut
+          do
+          {
+            double bgsum=0.;
+            double eps,phi;
+            size_t numEvents = it->getNumEvents();
+            // Assume that the energy (centre point) is in coordinate.t of first point vertex
+            if( ! bgmodel.compare("QuadEnTrans"))
+            {
+              for(size_t j=0; j<numEvents; j++)
+              {
+                eps = it->getInnerPosition(j, 3);
+                bgsum+=bgparaP1+eps*(bgparaP2+eps*bgparaP3);
+              }
             }
+            else if( ! bgmodel.compare("ExpEnTrans"))
+            {
+              for(size_t j=0; j<numEvents; j++)
+              {
+                eps = it->getInnerPosition(j, 3);
+                bgsum+=bgparaP1+bgparaP2*exp(-eps/bgparaP3);
+              }
+            }
+            else if( ! bgmodel.compare("QuadEnTransAndPhi"))
+            {
+              double dphi,deps;
+              for(size_t j=0; j<numEvents; j++)
+              {
+                eps = it->getInnerPosition(j, 3);
+                deps=eps-bgparaP1;
+                phi=0.; // TO DO: get phi of detector
+                dphi=phi-bgparaP2;
+                bgsum+=bgparaP3+bgparaP4*deps+bgparaP5*dphi+bgparaP6*deps*deps+2.*bgparaP7*deps*dphi+bgparaP8*dphi*dphi;
+              }
+            }
+            else if( ! bgmodel.compare("ExpEnTransAndPhi"))
+            {
+              for(size_t j=0; j<numEvents; j++)
+              {
+                eps = it->getInnerPosition(j, 3);
+                phi=0.; // TO DO: get phi of detector
+                bgsum+=bgparaP3*exp(-(eps-bgparaP1)/bgparaP4 - (phi-bgparaP2)/bgparaP5 );
+              }
+            }
+            else
+            {
+              std::string message="undefined background model: "+bgmodel;
+              g_log.error(message);
+              throw std::invalid_argument(message);
+            }
+            // Would pre size cellBg vector, but no getNCell method for IMDWorkspace
+            if(cellBg.size()<i+1)
+              cellBg.push_back(bgsum);
+            else
+              cellBg[i]+=bgsum;
+            i++;
+          } while (it->next());
+
         }
-        //
-
-
 
     } // namespace Algorithms
 } // namespace Mantid

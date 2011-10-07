@@ -4,7 +4,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
@@ -13,8 +12,8 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <iosfwd>
+#include "MantidKernel/VMD.h"
 
-using NeXus::File;
 
 /// Define to keep the centroid around as a field on each IMDBox.
 #undef MDBOX_TRACK_CENTROID
@@ -42,7 +41,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport IMDBox : public Mantid::Geometry::SignalAggregate, public Mantid::Kernel::ISaveable
+  class DLLExport IMDBox : public Mantid::Kernel::ISaveable
   {
   public:
 
@@ -157,16 +156,10 @@ namespace MDEvents
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
-    /** @return the MDPoints contained. throws. */
-    virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
-    {
-      throw std::runtime_error("Not implemented and never will be. This does not apply to MDBoxes.");
-    }
-
 
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------
 
-    std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
+    std::vector<Mantid::Kernel::VMD> getVertexes() const;
 
     coord_t * getVertexesArray(size_t & numVertices) const;
 

@@ -86,7 +86,7 @@ set ( TEST_FILES
 	test/PlaneFunctionBuilderTest.h
 	test/PlaneImplicitFunctionTest.h
 	test/RunParamTest.h
-	test/SimulateMDDataTest.h
+	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
 	test/VectorMathematicsTest.h
 	test/WidthParameterTest.h

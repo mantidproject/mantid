@@ -7,7 +7,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 
@@ -217,29 +216,6 @@ namespace MDEvents
 
     /// Getter for collapsed dimensions.
     Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
-
-
-    //======================================================================================
-    //================= METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
-    //======================================================================================
-
-    /// Get the point at the specified index.
-    const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
-    {
-      (void) index; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("MDHistoWorkspace::getPoint() WONT GET IMPLEMENTED !");
-    }
-
-    /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
-    {
-      (void) dim1Increment; // Avoid compiler warning
-      throw Mantid::Kernel::Exception::NotImplementedError("MDHistoWorkspace::getCell() WONT GET IMPLEMENTED !");
-    }
-
-    //======================================================================================
-    //================= END METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
-    //======================================================================================
 
 
 

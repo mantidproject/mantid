@@ -36,30 +36,6 @@ namespace
 
 const int dimension_size = 9;
 
-//=================================================================================================
-///Helper class. Usage as fake MDCell.
-class FakeCell : public Mantid::Geometry::SignalAggregate
-{
-public:
-  FakeCell(){}
-  virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const
-  {
-    return std::vector<Mantid::Geometry::Coordinate>(4);
-  }
-  virtual Mantid::signal_t getSignal() const
-  {
-    return 1; //Hard-coded signal value. Required for threshold checking in tests that follow.
-  }
-  virtual Mantid::signal_t getError() const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-  virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
-  {
-    throw std::runtime_error("Not implemented");
-  }
-  virtual ~FakeCell(){};
-};
 
 
 //=================================================================================================
@@ -93,8 +69,6 @@ public:
 
   MOCK_CONST_METHOD0(id, const std::string());
   MOCK_CONST_METHOD0(getMemorySize, size_t());
-  MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
-  MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
   MOCK_CONST_METHOD0(getGeometryXML,std::string());
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
   MOCK_CONST_METHOD1(getSignalNormalizedAt, Mantid::signal_t(size_t index1));

@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/MDCell.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <stdarg.h>
@@ -63,12 +61,6 @@ namespace Mantid
 
       /// Get those dimensions which have not been collapsed.
       virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const = 0;
-
-      /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const = 0;
-
-      /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
       virtual IMDIterator* createIterator() const;

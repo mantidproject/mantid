@@ -51,7 +51,7 @@ if __name__ == "__main__":
                         help='The subproject under Framework/; e.g. Kernel')
     parser.add_argument('classname', metavar='CLASSNAME', type=str,
                         help='Name of the class to create')
-    parser.add_argument('--source-subfolder', dest='source_subfolder', 
+    parser.add_argument('--subfolder', dest='source_subfolder', 
                         default="",
                         help='The source is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
     

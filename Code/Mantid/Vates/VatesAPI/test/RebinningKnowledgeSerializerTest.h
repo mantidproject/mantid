@@ -38,8 +38,6 @@ private:
 
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
-    MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
-    MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());
 

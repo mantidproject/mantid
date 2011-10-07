@@ -1923,7 +1923,7 @@ namespace Geometry
 
 
   /// Returns a translated and rotated <cuboid> element
-  /// @param comp Coordinate system to translate and rotate cuboid to
+  /// @param comp coordinate system to translate and rotate cuboid to
   /// @param cuboidEle containing one <cuboid> element
   /// @return XML string of translated and rotated cuboid
   std::string InstrumentDefinitionParser::translateRotateXMLcuboid(ICompAssembly* comp, Poco::XML::Element* cuboidEle,

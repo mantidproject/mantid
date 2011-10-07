@@ -223,15 +223,15 @@ public:
     IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
-    std::vector<Mantid::Geometry::Coordinate> v = b.getVertexes();
-    TS_ASSERT_EQUALS( v[0].getX(), -10.0);
-    TS_ASSERT_EQUALS( v[0].getY(), -4.0);
-    TS_ASSERT_EQUALS( v[1].getX(), 10.0);
-    TS_ASSERT_EQUALS( v[1].getY(), -4.0);
-    TS_ASSERT_EQUALS( v[2].getX(), -10.0);
-    TS_ASSERT_EQUALS( v[2].getY(), 6.0);
-    TS_ASSERT_EQUALS( v[3].getX(), 10.0);
-    TS_ASSERT_EQUALS( v[3].getY(), 6.0);
+    std::vector<Mantid::Kernel::VMD> v = b.getVertexes();
+    TS_ASSERT_EQUALS( v[0][0], -10.0);
+    TS_ASSERT_EQUALS( v[0][1], -4.0);
+    TS_ASSERT_EQUALS( v[1][0], 10.0);
+    TS_ASSERT_EQUALS( v[1][1], -4.0);
+    TS_ASSERT_EQUALS( v[2][0], -10.0);
+    TS_ASSERT_EQUALS( v[2][1], 6.0);
+    TS_ASSERT_EQUALS( v[3][0], 10.0);
+    TS_ASSERT_EQUALS( v[3][1], 6.0);
   }
 
   /** Get vertexes as a bare array */
@@ -352,7 +352,7 @@ class IMDBoxTestPerformance : public CxxTest::TestSuite
 {
 public:
 
-  /** Vector of Coordinate version of getVertexes (slower than the bare array version)
+  /** Vector of VMD version of getVertexes (slower than the bare array version)
    * (this is only 100 thousand, not a million times like the others).
    */
   void test_getVertexes_3D()
@@ -363,7 +363,7 @@ public:
     b.setExtents(2, -7.0, 7.0);
     for (size_t i=0; i<100000; i++)
     {
-      std::vector<Mantid::Geometry::Coordinate> v = b.getVertexes();
+      std::vector<Mantid::Kernel::VMD> v = b.getVertexes();
     }
   }
 

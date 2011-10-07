@@ -14,6 +14,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/IMDIterator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -33,66 +34,53 @@ namespace Mantid
         }
         double SimulateResolution::functionMD(Mantid::API::IMDIterator& it) const
         {
-            getParams();
+          getParams();
 
-            //TODO: Update for new iterator
+          // loop over workspace
+          double fgSignal = 0.;
+          double fgError = 0.;
+          // loop over each MDPoint in current MDCell
+          for(size_t j=0; j < it.getNumEvents(); j++)
+          {
+            // TODO: Add code to perform sqwConvolution on this point.
+            // Note Janik Zikovsky, Oct 7, 2011. Function was empty, so I removed it.
+            //sqwConvolution(* this event *,fgSignal,fgError);
+            UNUSED_ARG(fgSignal);
+            UNUSED_ARG(fgError);
+          }
 
-//            double fgSignal = 0.;
-//            double fgError = 0.;
-//            const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
-//            std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
-//            // calculate contribution of each point
-//            for(size_t i=0; i<points.size();i++){
-//                sqwConvolution(points[i],fgSignal,fgError);
+          // Return mean
+          return fgSignal/double(it.getNumEvents());
+        }
+
+
+//        // simple test interface for fg model - will need vector of parameters
+//        void SimulateResolution::SimForeground(boost::shared_ptr<Mantid::API::IMDWorkspace> imdw,
+//              std::string fgmodel,const double fgparaP1, const double fgparaP2, const double fgparaP3)
+//        {
+//            imdwCut=imdw;
+//            initRandomNumbers();
+//            // currently maximum of 13 dimensions required
+//            std::vector<double> point;
+//            for(size_t i=0;i<13;i++)
+//                point.push_back(0.0);
+//            int ncell= imdwCut->getXDimension()->getNBins();
+//            // loop over MDCells in this cut
+//            for(int i=0; i<ncell ; i++ ){
+//                const Mantid::Geometry::SignalAggregate& newCell = imdwCut->getCell(i); // get cell data
+//                std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > cellPoints = newCell.getContributingPoints();
+//                double answer=0.,error=0.;
+//                // loop over each MDPoint in current MDCell
+//                for(size_t j=0; j<cellPoints.size(); j++){
+//                    std::vector<Mantid::Geometry::Coordinate> vertexes = cellPoints[j]->getVertexes();
+//                    double eps=vertexes[0].gett();
+//                    sqwConvolution(cellPoints[j],answer,error);
+//                }
+//                //pnt->setSignal(bgsum);
 //            }
-//
-//            // Return mean
-//            return fgSignal/double(points.size());
+//        }
 
-            return 0;
-        }
-        /*
-        // simple test interface for fg model - will need vector of parameters
-        void SimulateResolution::SimForeground(boost::shared_ptr<Mantid::API::IMDWorkspace> imdw,
-              std::string fgmodel,const double fgparaP1, const double fgparaP2, const double fgparaP3)
-        {
-            imdwCut=imdw;
-            initRandomNumbers();
-            // currently maximum of 13 dimensions required
-            std::vector<double> point;
-            for(size_t i=0;i<13;i++)
-                point.push_back(0.0);
-            int ncell= imdwCut->getXDimension()->getNBins();
-            // loop over MDCells in this cut
-            for(int i=0; i<ncell ; i++ ){
-                const Mantid::Geometry::SignalAggregate& newCell = imdwCut->getCell(i); // get cell data
-                std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > cellPoints = newCell.getContributingPoints();
-                double answer=0.,error=0.;
-                // loop over each MDPoint in current MDCell
-                for(size_t j=0; j<cellPoints.size(); j++){
-                    std::vector<Mantid::Geometry::Coordinate> vertexes = cellPoints[j]->getVertexes();
-                    double eps=vertexes[0].gett();
-                    sqwConvolution(cellPoints[j],answer,error);
-                }
-                //pnt->setSignal(bgsum);
-            }
-        }
-        */
 
-        // SQW convolution choice - currently just MonteCarlo
-        void SimulateResolution::sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double & fgSignal, double & fgError) const {
-            sqwConvolutionMC(point,fgSignal,fgError);
-        }
-
-        // SQW convolution MonteCarlo
-        void SimulateResolution::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double & fgSignal, double & fgError) const
-        {
-          UNUSED_ARG(point);
-          UNUSED_ARG(fgSignal);
-          UNUSED_ARG(fgError);
-        }
 
         // Return next pseudo or quasi random point in the N dimensional space
         void SimulateResolution::getNextPoint(std::vector<double>& point, int count)
@@ -101,7 +89,7 @@ namespace Mantid
                 for(int i=0;i<count;i++)
                     point[i]=m_randGen->next();
             }
-        }
+       }
 
         /**
         * Initialise the random number generator

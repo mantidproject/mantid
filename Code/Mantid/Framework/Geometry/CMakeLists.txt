@@ -22,18 +22,15 @@ set ( SRC_FILES
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/XMLlogfile.cpp
-	src/MDGeometry/Coordinate.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
-	src/MDGeometry/MDCell.cpp
 	src/MDGeometry/MDGeometryXMLBuilder.cpp
 	src/MDGeometry/MDGeometryXMLParser.cpp
 	src/MDGeometry/MDHistoDimension.cpp
 	src/MDGeometry/MDHistoDimensionBuilder.cpp
 	src/MDGeometry/MDImplicitFunction.cpp
 	src/MDGeometry/MDPlane.cpp
-	src/MDGeometry/MDPoint.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -116,11 +113,9 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ParameterMap.h
 	inc/MantidGeometry/Instrument/RectangularDetector.h
 	inc/MantidGeometry/Instrument/XMLlogfile.h
-	inc/MantidGeometry/MDGeometry/Coordinate.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
-	inc/MantidGeometry/MDGeometry/MDCell.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
@@ -128,7 +123,6 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h
 	inc/MantidGeometry/MDGeometry/MDImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDPlane.h
-	inc/MantidGeometry/MDGeometry/MDPoint.h
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
 	inc/MantidGeometry/Math/Acomp.h
@@ -179,7 +173,6 @@ set ( TEST_FILES
 	test/ComponentTest.h
 	test/ConeTest.h
 	test/ConvexPolygonTest.h
-	test/CoordinateTest.h
 	test/CylinderTest.h
 	test/DetectorGroupTest.h
 	test/DetectorTest.h
@@ -196,13 +189,11 @@ set ( TEST_FILES
 	test/LineIntersectVisitTest.h
 	test/LineTest.h
 	test/MDBoxImplicitFunctionTest.h
-	test/MDCellTest.h
 	test/MDGeometryXMLParserTest.h
 	test/MDHistoDimensionBuilderTest.h
 	test/MDHistoDimensionTest.h
 	test/MDImplicitFunctionTest.h
 	test/MDPlaneTest.h
-	test/MDPointTest.h
 	test/MapSupportTest.h
 	test/MaterialTest.h
 	test/MathSupportTest.h

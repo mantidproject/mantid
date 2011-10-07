@@ -5,8 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
-#include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidKernel/RandomNumberGenerator.h"
 #include "MantidMDAlgorithms/RunParam.h"
 
@@ -60,12 +58,7 @@ namespace Mantid
              const double, const double);
 
     protected:
-      /// Perform convolution on one MDPoint
-      void sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error);
-      /// Perform convolution on one MDPoint
-      void sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error);
+
       /// Pointer to the cut data
       boost::shared_ptr<Mantid::API::IMDWorkspace> imdwCut;
       /// For MC integration return next point in space

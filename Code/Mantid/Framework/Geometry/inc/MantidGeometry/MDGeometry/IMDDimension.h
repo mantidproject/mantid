@@ -71,7 +71,7 @@ namespace Mantid
     /// Change the extents and number of bins
     virtual void setRange(size_t nBins, double min, double max) = 0;
 
-    /** @return Coordinate of the axis at the given index
+    /** @return coordinate of the axis at the given index
      * @param ind :: index into the axis  */
     virtual double getX(size_t ind)const = 0;
 

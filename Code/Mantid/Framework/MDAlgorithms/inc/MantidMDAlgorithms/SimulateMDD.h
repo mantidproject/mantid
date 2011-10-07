@@ -10,8 +10,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDPoint.h"
-#include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidKernel/RandomNumberGenerator.h"
 
 #include "MantidKernel/Tolerance.h"
