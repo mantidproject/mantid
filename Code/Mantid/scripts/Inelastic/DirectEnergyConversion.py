@@ -444,7 +444,7 @@ class DirectEnergyConversion(object):
         if not spec_masks is None:
             MaskDetectors(result_ws, MaskedWorkspace=spec_masks)
         if not map_file is None:
-            GroupDetectors(result_ws, result_ws, map_file, KeepUngroupedSpectra=0)
+            GroupDetectors(result_ws, result_ws, map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
         return mtd[str(result_ws)]
 
