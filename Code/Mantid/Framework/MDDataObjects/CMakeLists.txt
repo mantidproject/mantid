@@ -47,9 +47,9 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} 
         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
-  else ()
-    cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} )
-    target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} )
+    #else ()
+    #cxxtest_add_test ( MDDataObjectsTest ${TEST_FILES} )
+    #target_link_libraries( MDDataObjectsTest MDDataObjects ${MANTIDLIBS} )
   endif ()
   
   add_dependencies ( FrameworkTests MDDataObjectsTest )
