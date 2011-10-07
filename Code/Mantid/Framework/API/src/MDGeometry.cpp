@@ -61,7 +61,7 @@ namespace API
    * @param index :: which dimension
    * @return the dimension at that index
    */
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimensionNum(size_t index) const
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimension(size_t index) const
   {
     if (index >= m_dimensions.size()) throw std::runtime_error("Workspace does not have a dimension at that index.");
     return m_dimensions[index];
@@ -72,7 +72,7 @@ namespace API
    * @param id :: string ID of the dimension
    * @return the dimension with the specified id string.
    */
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimension(std::string id) const
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimensionNamed(std::string id) const
   {
     for (size_t i=0; i < m_dimensions.size(); ++i)
       if (m_dimensions[i]->getDimensionId() == id)
@@ -80,7 +80,41 @@ namespace API
     throw std::invalid_argument("Dimension tagged " + id + " was not found in the Workspace");
   }
 
+  // --------------------------------------------------------------------------------------------
+  /** Get non-collapsed dimensions
+  @return vector of collapsed dimensions in the workspace geometry.
+  */
+  Mantid::Geometry::VecIMDDimension_const_sptr MDGeometry::getNonIntegratedDimensions() const
+  {
+    using namespace Mantid::Geometry;
+    VecIMDDimension_const_sptr vecCollapsedDimensions;
+    std::vector<Mantid::Geometry::IMDDimension_sptr>::const_iterator it = this->m_dimensions.begin();
+    for(; it != this->m_dimensions.end(); ++it)
+    {
+      IMDDimension_sptr current = (*it);
+      if(!current->getIsIntegrated())
+      {
+        vecCollapsedDimensions.push_back(current);
+      }
+    }
+    return vecCollapsedDimensions;
+  }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Get the index of the dimension that matches the name given
+   *
+   * @param name :: name of the m_dimensions
+   * @return the index (size_t)
+   * @throw runtime_error if it cannot be found.
+   */
+  size_t MDGeometry::getDimensionIndexByName(const std::string & name) const
+  {
+    for (size_t d=0; d<m_dimensions.size(); d++)
+      if (m_dimensions[d]->getName() == name)
+        return d;
+    throw std::runtime_error("Dimension named '" + name + "' was not found in the IMDWorkspace.");
+  }
 
   // --------------------------------------------------------------------------------------------
   /** Add a dimension
@@ -104,28 +138,28 @@ namespace API
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getXDimension() const
   {
     if (this->getNumDims() < 1) throw std::runtime_error("Workspace does not have any dimensions!");
-    return this->getDimensionNum(0);
+    return this->getDimension(0);
   }
 
   /// Get the y-dimension mapping.
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getYDimension() const
   {
     if (this->getNumDims() < 2) throw std::runtime_error("Workspace does not have a Y dimension.");
-    return this->getDimensionNum(1);
+    return this->getDimension(1);
   }
 
   /// Get the z-dimension mapping.
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getZDimension() const
   {
     if (this->getNumDims() < 3) throw std::runtime_error("Workspace does not have a X dimension.");
-    return this->getDimensionNum(2);
+    return this->getDimension(2);
   }
 
   /// Get the t-dimension mapping.
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getTDimension() const
   {
     if (this->getNumDims() < 4) throw std::runtime_error("Workspace does not have a T dimension.");
-    return this->getDimensionNum(3);
+    return this->getDimension(3);
   }
 
 
@@ -170,7 +204,7 @@ namespace API
   /// @return true if the geometry is defined relative to another workspace.
   bool MDGeometry::hasOriginalWorkspace() const
   {
-    return (m_originalWorkspace);
+    return bool(m_originalWorkspace);
   }
 
   /// @return the original workspace to which the basis vectors relate
@@ -228,7 +262,7 @@ namespace API
     const size_t nDimensions = this->getNumDims();
     for(size_t i = 0; i < nDimensions; i++)
     {
-      xmlBuilder.addOrdinaryDimension(this->getDimensionNum(i));
+      xmlBuilder.addOrdinaryDimension(this->getDimension(i));
     }
     // Add mapping dimensions
     if(nDimensions > 0)

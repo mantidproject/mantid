@@ -276,7 +276,7 @@ namespace MDEvents
       try
       {
         size_t dim_index = in_ws->getDimensionIndexByName(name);
-        IMDDimension_sptr inputDim = in_ws->getDimension(dim_index);
+        IMDDimension_const_sptr inputDim = in_ws->getDimension(dim_index);
         units = inputDim->getUnits();
         // Add the index from which we're binning to the vector
         this->dimensionToBinFrom.push_back(dim_index);

@@ -309,7 +309,7 @@ using namespace boost::python;
     class_< IMDWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDWorkspace", no_init)
         .def("getNPoints", &IMDWorkspace::getNPoints)
         .def("getNumDims", &IMDWorkspace::getNumDims)
-        .def("getDimensionNum", &IMDWorkspace::getDimensionNum )
+        .def("getDimension", &IMDWorkspace::getDimension )
         ;
   }
 

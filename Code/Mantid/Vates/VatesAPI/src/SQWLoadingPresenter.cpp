@@ -106,7 +106,7 @@ namespace Mantid
       size_t nDimensions = eventWs->getNumDims();
       for (size_t d=0; d<nDimensions; d++)
       {
-        IMDDimension_sptr inDim = eventWs->getDimension(d);
+        IMDDimension_const_sptr inDim = eventWs->getDimension(d);
         //Copy the dimension, but set the ID and name to be the same. This is an assumption in bintohistoworkspace.
         MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), inDim->getMinimum(), inDim->getMaximum(), size_t(10)));
         dimensions.push_back(dim);

@@ -26,7 +26,7 @@ namespace API
    * @date Dec 3, 2010
    *
    * */
-  class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace
+  class MANTID_API_DLL IMDEventWorkspace  : public API::IMDWorkspace
   {
   public:
     IMDEventWorkspace();
@@ -34,18 +34,6 @@ namespace API
 
     /// Perform initialization after dimensions (and others) have been set.
     virtual void initialize() = 0;
-
-    /** Returns the number of dimensions in this workspace */
-    virtual size_t getNumDims() const = 0;
-
-    /** Returns the total number of points (events) in this workspace */
-    virtual size_t getNPoints() const = 0;
-
-    /// Add a new dimension
-    virtual void addDimension(Mantid::Geometry::IMDDimension_sptr dimInfo);
-
-    /// Get that dimension
-    virtual Mantid::Geometry::IMDDimension_sptr getDimension(size_t dim) const;
 
     /// Get the minimum extents that hold the data
     virtual std::vector<Mantid::Geometry::MDDimensionExtents> getMinimumExtents(size_t depth=2) = 0;
@@ -59,9 +47,6 @@ namespace API
     /// @return true if the workspace is file-backed
     virtual bool isFileBacked() const = 0;
 
-    /// Get the dimension index, searching by name
-    virtual size_t getDimensionIndexByName(const std::string & name) const;
-
 
     ExperimentInfo_sptr getExperimentInfo(const uint16_t runIndex);
 
@@ -74,9 +59,6 @@ namespace API
     uint16_t getNumExperimentInfo() const;
 
   protected:
-    /// Vector with each dimension (length must match nd)
-    std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
-
     /// Vector for each ExperimentInfo class
     std::vector<ExperimentInfo_sptr> m_expInfos;
 

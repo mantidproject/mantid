@@ -408,14 +408,6 @@ public:
     TS_ASSERT_THROWS(wkspace->binIndexOf(0.), std::out_of_range);
   }
 
-
-  void testGetNonIntegratedDimensionsThrows()
-  {
-    //No implementation yet. 
-    MatrixWorkspace *ws = new WorkspaceTester;
-    TSM_ASSERT_THROWS("Characterisation tests fail", ws->getNonIntegratedDimensions(), std::runtime_error);
-  }
-
   void test_nexus_spectraMap()
   {
     NexusTestHelper th(false);

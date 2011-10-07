@@ -21,12 +21,15 @@ namespace Mantid
 
     class IMDIterator;
     
-    /** Base MD Workspace Abstract Class.
+    /** Basic MD Workspace Abstract Class.
+     *
+     *  This defines the interface that allows one to iterate through several types of workspaces:
+     *
+     *   - The regularly gridded MDHistoWorkspace
+     *   - The recursively binned MDEventWorkspace
+     *   - The regular (2D) MatrixWorkspace.
      *  
-     *   It defines common interface to Matrix Workspace and MD workspace. It is expected that all algorithms, which are applicable 
-     *   to both 2D matrix workspace and MD workspace will use methods, with interfaces, defined here. 
-
-     @author Alex Buts, ISIS, RAL
+     @author Janik Zikovsky
      @date 04/10/2010
 
      Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -55,12 +58,11 @@ namespace Mantid
     {
     public:
       
-      /// Get the number of points associated with the workspace; For MD workspace it is number of points contributing into the workspace
-        // TODO: -- what is its meaning for the matrix workspace, may be different or the same? different logic of the operations
+      /// Get the number of points associated with the workspace.
+      /// For MDEvenWorkspace it is the number of events contributing into the workspace
+      /// For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace), it is
+      /// the number of bins.
       virtual uint64_t getNPoints() const = 0;
-
-      /// Get those dimensions which have not been collapsed.
-      virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
       virtual IMDIterator* createIterator() const;

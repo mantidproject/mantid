@@ -135,22 +135,6 @@ public:
     delete ew;
   }
 
-  /** Adding dimension info and searching for it back */
-  void test_addDimension_getDimension()
-  {
-    MDEventWorkspace2Lean * ew = new MDEventWorkspace2Lean();
-    MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
-    TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim); )
-    MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
-    TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim2); )
-    TS_ASSERT_EQUALS( ew->getNumDims(), 2);
-    TS_ASSERT_EQUALS( ew->getDimension(0)->getName(), "Qx");
-    TS_ASSERT_EQUALS( ew->getDimension(1)->getName(), "Qy");
-    TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qx"), 0);
-    TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qy"), 1);
-    TS_ASSERT_THROWS_ANYTHING( ew->getDimensionIndexByName("IDontExist"));
-  }
-
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable()
   {

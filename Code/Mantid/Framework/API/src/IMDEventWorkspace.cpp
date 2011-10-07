@@ -13,63 +13,22 @@ namespace API
   //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
   IMDEventWorkspace::IMDEventWorkspace()
-  : Workspace(),
-    dimensions()
+  : IMDWorkspace()
   {
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor */
   IMDEventWorkspace::IMDEventWorkspace(const IMDEventWorkspace & other)
-  : Workspace(other),
-    dimensions(other.dimensions)
+  : IMDWorkspace(other)
   {
-    // Do a deep copy
+    // Do a deep copy of ExperimentInfo's
     for (size_t i=0; i<other.m_expInfos.size(); i++)
     {
       ExperimentInfo_sptr copy(new ExperimentInfo(*other.m_expInfos[i]));
       m_expInfos.push_back(copy);
     }
   }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a new dimension
-   *
-   * @param dimInfo :: IMDDimension object which will be copied into the workspace
-   */
-  void IMDEventWorkspace::addDimension(IMDDimension_sptr dimInfo)
-  {
-    dimensions.push_back(dimInfo);
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Get the given dimension
-   *
-   * @param dim :: index of dimension to set
-   * @return IMDDimension object
-   */
-  IMDDimension_sptr IMDEventWorkspace::getDimension(size_t dim) const
-  {
-    return dimensions[dim];
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Get the index of the dimension that matches the name given
-   *
-   * @param name :: name of the dimensions
-   * @return the index (size_t)
-   * @throw runtime_error if it cannot be found.
-   */
-  size_t IMDEventWorkspace::getDimensionIndexByName(const std::string & name) const
-  {
-    for (size_t d=0; d<dimensions.size(); d++)
-      if (dimensions[d]->getName() == name)
-        return d;
-    throw std::runtime_error("Dimension named '" + name + "' was not found in the IMDEventWorkspace.");
-  }
-
 
 
   //-----------------------------------------------------------------------------------------------

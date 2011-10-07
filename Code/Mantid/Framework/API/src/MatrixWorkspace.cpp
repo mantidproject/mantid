@@ -1218,7 +1218,7 @@ namespace Mantid
     };
 
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimensionNum(size_t index)const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimension(size_t index)const
     { 
       if (index == 0)
       {
@@ -1236,7 +1236,7 @@ namespace Mantid
         throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
     }
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimension(std::string id) const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getDimensionNamed(std::string id) const
     { 
       int nAxes = this->axes();
       IMDDimension* dim = NULL;

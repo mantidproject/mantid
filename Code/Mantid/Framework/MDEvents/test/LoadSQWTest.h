@@ -63,10 +63,10 @@ public:
 
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws.getNumDims());
 
-    Mantid::Geometry::IMDDimension_sptr a = ws.getDimension(0);
-    Mantid::Geometry::IMDDimension_sptr b = ws.getDimension(1);
-    Mantid::Geometry::IMDDimension_sptr c = ws.getDimension(2);
-    Mantid::Geometry::IMDDimension_sptr d = ws.getDimension(3);
+    Mantid::Geometry::IMDDimension_const_sptr a = ws.getDimension(0);
+    Mantid::Geometry::IMDDimension_const_sptr b = ws.getDimension(1);
+    Mantid::Geometry::IMDDimension_const_sptr c = ws.getDimension(2);
+    Mantid::Geometry::IMDDimension_const_sptr d = ws.getDimension(3);
 
     //Check dimension ids
     TS_ASSERT_EQUALS("qx", a->getDimensionId());

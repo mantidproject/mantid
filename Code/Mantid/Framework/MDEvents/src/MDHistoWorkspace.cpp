@@ -296,28 +296,6 @@ namespace MDEvents
     return out;
   }
 
-
-  /*
-  Get non-collapsed dimensions
-  @return vector of collapsed dimensions in the workspace geometry.
-  */
-  Mantid::Geometry::VecIMDDimension_const_sptr MDHistoWorkspace::getNonIntegratedDimensions() const
-  {
-    using namespace Mantid::Geometry;
-    VecIMDDimension_const_sptr vecCollapsedDimensions;
-    std::vector<Mantid::Geometry::IMDDimension_sptr>::const_iterator it = this->m_dimensions.begin();
-    for(; it != this->m_dimensions.end(); ++it)
-    {
-      IMDDimension_sptr current = (*it);
-      if(!current->getIsIntegrated())
-      {
-        vecCollapsedDimensions.push_back(current);
-      }
-    }
-    return vecCollapsedDimensions;
-  }
-
-
 } // namespace Mantid
 } // namespace MDEvents
 

@@ -253,8 +253,8 @@ namespace Mantid
 
       // ---------------------------------- MDGeometry methods -------------------------------
       virtual size_t getNumDims() const;
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
-      boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const;
 
 
       // ---------------- IMDWorkspace Methods --------------------------------
@@ -264,11 +264,6 @@ namespace Mantid
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
-      /// Getter for collapsed dimensions.
-      Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
-      {
-        throw std::runtime_error("Not yet implemented");
-      }
 
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;

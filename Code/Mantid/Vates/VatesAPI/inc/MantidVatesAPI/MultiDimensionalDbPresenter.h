@@ -116,7 +116,7 @@ public:
  /// Get the dimension from the image with the id.
  Mantid::VATES::Dimension_const_sptr getDimensionFromWorkspace(const std::string& id)
  {
-   return m_workspace->getDimension(id);
+   return m_workspace->getDimensionNamed(id);
  }
 };
 }

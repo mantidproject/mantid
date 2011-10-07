@@ -69,18 +69,18 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Perform initialization after dimensions (and others) have been set.
+  /** Perform initialization after m_dimensions (and others) have been set.
    * This sets the size of the box.
    */
   TMDE(
   void MDEventWorkspace)::initialize()
   {
-    if (dimensions.size() != nd)
-      throw std::runtime_error("MDEventWorkspace::initialize() called with an incorrect number of dimensions set. Use addDimension() first to add the right number of dimension info objects.");
+    if (m_dimensions.size() != nd)
+      throw std::runtime_error("MDEventWorkspace::initialize() called with an incorrect number of m_dimensions set. Use addDimension() first to add the right number of dimension info objects.");
     if (isGridBox())
         throw std::runtime_error("MDEventWorkspace::initialize() called on a MDEventWorkspace containing a MDGridBox. You should call initialize() before adding any events!");
     for (size_t d=0; d<nd; d++)
-      data->setExtents(d, dimensions[d]->getMinimum(), dimensions[d]->getMaximum());
+      data->setExtents(d, m_dimensions[d]->getMinimum(), m_dimensions[d]->getMaximum());
   }
 
   //-----------------------------------------------------------------------------------------------

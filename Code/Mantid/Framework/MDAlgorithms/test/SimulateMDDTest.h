@@ -60,20 +60,6 @@ using Mantid::MDEvents::MDHistoWorkspace_sptr;
 //        return m_points;
 //    }
 //
-//    virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t) const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//
-//    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
-//    {
-//        return(m_mdcells.at(dim1Increment));
-//    };
-//
-//    Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
-//    {
-//      throw std::runtime_error("Not implemented");
-//    }
 //
 //    /// return ID specifying the workspace kind
 //    virtual const std::string id() const {return "TestIMDDWorkspace";}

@@ -69,31 +69,6 @@ void testNoWorkspaceThrows()
   TSM_ASSERT_THROWS("Cannot generate the xml without the workspace", generator.createXMLString(), std::runtime_error);
 }
 
-void testNoImplicitFunctionThrows()
-{
-  RebinningKnowledgeSerializer generator;
-  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-  pWorkspace->setName("someName");
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1);
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  generator.setWorkspace(workspace);
-  TSM_ASSERT_THROWS("Cannot generate the xml without the implicitFunction", generator.createXMLString(), std::runtime_error);
-}
-
-void testNoGeometryXMLThrows()
-{
-  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
-  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-  pWorkspace->setName("someName");
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return(""));
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  RebinningKnowledgeSerializer generator;
-  generator.setImplicitFunction(impFunction);
-  generator.setWorkspace(workspace);
-
-  TSM_ASSERT_THROWS("Cannot create the xml without geometry xml", generator.createXMLString(), std::runtime_error);
-}
-
 void testNoLocationDoesNotThrow()
 {
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
@@ -133,7 +108,6 @@ void testCreateXMLWithWorkspace() //Uses the workspace setter.
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
 
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("name");
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
 
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
@@ -145,7 +119,8 @@ void testCreateXMLWithWorkspace() //Uses the workspace setter.
 
   std::string xml = generator.createXMLString();
 
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation></MDWorkspaceLocation><DimensionSet/><ImplicitFunction/></MDInstruction>" ,xml)
+  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation></MDWorkspaceLocation>"
+      + workspace->getGeometryXML() + "<ImplicitFunction/></MDInstruction>" ,xml)
 }
 
 void testCreateXMLWithComponents() //Uses individual setters for geometry, location and name.

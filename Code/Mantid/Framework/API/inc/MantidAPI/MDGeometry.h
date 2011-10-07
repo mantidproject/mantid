@@ -16,6 +16,10 @@ namespace API
   class IMDWorkspace;
 
   /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
+   * This defines the dimensions contained in the workspace.
+   * On option, it can also relate the coordinates of this workspace
+   * to another workspace, e.g. if a workspace is a slice or a view
+   * onto an original workspace.
     
     @author Janik Zikovsky
     @date 2011-09-06
@@ -50,9 +54,10 @@ namespace API
     // --------------------------------------------------------------------------------------------
     // These are the main methods for dimensions, that CAN be overridden (e.g. by MatrixWorkspace)
     virtual size_t getNumDims() const;
-    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNum(size_t index) const;
-    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
-
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const;
+    size_t getDimensionIndexByName(const std::string & name) const;
+    Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
 
     // --------------------------------------------------------------------------------------------
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
@@ -60,7 +65,7 @@ namespace API
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
 
-    virtual std::string getGeometryXML() const;
+    std::string getGeometryXML() const;
 
     void addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim);
     void addDimension(Mantid::Geometry::IMDDimension * dim);
@@ -108,8 +113,8 @@ namespace API
     Mantid::Kernel::VMD m_origin;
 
     /// Coordinate Transformation that goes from the original workspace to this workspace's coordinates.
-
     Mantid::API::CoordTransform * m_transformFromOriginal;
+
     /// Coordinate Transformation that goes from this workspace's coordinates to the original workspace coordinates.
     Mantid::API::CoordTransform * m_transformToOriginal;
 

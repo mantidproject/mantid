@@ -214,9 +214,6 @@ namespace MDEvents
     virtual std::vector<signal_t> getSignalDataVector() const;
     virtual std::vector<signal_t> getErrorDataVector() const;
 
-    /// Getter for collapsed dimensions.
-    Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
-
 
 
 

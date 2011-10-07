@@ -54,7 +54,7 @@ namespace API
       std::map<std::string,size_t>::const_iterator end = m_dimensionIndexMap.end();
       for(; it != end; ++it)
       {
-        boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = m_workspace->getDimension(it->first);
+        boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = m_workspace->getDimensionNamed(it->first);
         if (!dim)
         {
           throw std::invalid_argument("Dimension "+it->first+" dos not exist in workspace "+ws->getName());
@@ -219,7 +219,7 @@ namespace API
     }
     for(size_t i = 0; i < m_workspace->getNumDims(); ++ i)
     {
-      useDimension(m_workspace->getDimensionNum(i)->getDimensionId());
+      useDimension(m_workspace->getDimension(i)->getDimensionId());
     }
     this->initDimensions();
   }

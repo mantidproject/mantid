@@ -94,7 +94,7 @@ public:
     TS_ASSERT_EQUALS( ws->getNumDims(), 3);
     TS_ASSERT_EQUALS( ws->getNPoints(), 0);
 
-    IMDDimension_sptr dim;
+    IMDDimension_const_sptr dim;
     dim = ws->getDimension(0);
     TS_ASSERT_DELTA( dim->getMaximum(), 1.0, 1e-6);
     TS_ASSERT_EQUALS( dim->getName(), "x");
