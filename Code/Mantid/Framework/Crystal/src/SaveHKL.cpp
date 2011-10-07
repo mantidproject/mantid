@@ -64,6 +64,8 @@ namespace Crystal
       "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
     declareProperty("Radius", -1.0, mustBePositive->clone(),
       "Radius of the sample in centimeters");
+    declareProperty("ScalePeaks", 1.0, mustBePositive->clone(),
+      "Multiply FSQ and sig(FSQ) by scaleFactor");
 
     declareProperty("AppendFile", false, "Append to file if true.\n"
       "If false, new file (default).");
@@ -86,6 +88,7 @@ namespace Crystal
     smu = getProperty("LinearScatteringCoef"); // in 1/cm
     amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
     radius = getProperty("Radius"); // in cm
+    double scaleFactor = getProperty("ScalePeaks"); 
 
     std::vector<Peak> peaks = ws->getPeaks();
 
@@ -192,9 +195,9 @@ namespace Crystal
                 <<  std::setw( 4 ) << Utils::round(-p.getK())
                 <<  std::setw( 4 ) << Utils::round(-p.getL());
 
-            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << p.getIntensity();
+            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getIntensity();
 
-            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << p.getSigmaIntensity();
+            out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
 
             out << std::setw( 4 ) << runcount;
 
