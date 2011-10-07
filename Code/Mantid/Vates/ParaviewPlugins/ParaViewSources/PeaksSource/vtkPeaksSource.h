@@ -40,9 +40,10 @@ public:
   vtkTypeRevisionMacro(vtkPeaksSource,vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   
+  void SetWidth(double width);
   void SetWsName(std::string wsName);
   /// Update the algorithm progress.
-  void updateAlgorithmProgress(double);
+  void updateAlgorithmProgress(double progress);
 
 protected:
   vtkPeaksSource();
@@ -53,6 +54,9 @@ protected:
 private:
   /// Name of the workspace.
   std::string m_wsName;
+
+  /// Width of the glyphs
+  double m_width;
 
   vtkPeaksSource(const vtkPeaksSource&);
   void operator = (const vtkPeaksSource&);

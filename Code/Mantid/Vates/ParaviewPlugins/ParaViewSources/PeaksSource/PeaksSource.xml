@@ -2,12 +2,19 @@
   <!-- Begin PeaksSource -->
   <ProxyGroup name="sources">
     <SourceProxy name="Peaks Source" class="vtkPeaksSource">
-	   <StringVectorProperty
-         name="Mantid Workspace Name"
-         command="SetWsName"
-         number_of_elements="1"
-         information_only="0">
-       </StringVectorProperty>
+      <StringVectorProperty
+        name="Mantid Workspace Name"
+        command="SetWsName"
+        number_of_elements="1"
+        information_only="0">
+      </StringVectorProperty>
+      <DoubleVectorProperty
+        name="Peak Width"
+        command="SetWidth"
+        number_of_elements="1"
+        default_values="0.05"
+        information_only="0">
+      </DoubleVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End PeaksSource -->
