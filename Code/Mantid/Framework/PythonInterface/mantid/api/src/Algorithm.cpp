@@ -3,8 +3,6 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/return_internal_reference.hpp>
-#include <boost/python/pure_virtual.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 
@@ -13,7 +11,6 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::Algorithm;
 using Mantid::API::AlgorithmProxy;
 using Mantid::PythonInterface::AlgorithmWrapper;
-using Mantid::PythonInterface::PropertyMarshal;
 
 using namespace boost::python;
 

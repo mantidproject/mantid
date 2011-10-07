@@ -57,9 +57,9 @@ endforeach ( PYFILE )
 # Create the target for this directory
 #############################################################################################
 
-add_library ( _api ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
-set_python_properties( _api )
-move_target ( _api ${OUTPUT_DIR} .pyd )
+add_library ( PythonAPIModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+set_python_properties( PythonAPIModule _api )
+set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( _api _kernel ${PYTHON_DEPS} )
+target_link_libraries ( PythonAPIModule PythonKernelModule ${PYTHON_DEPS} )

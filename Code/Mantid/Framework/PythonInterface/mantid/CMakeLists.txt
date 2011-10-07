@@ -36,22 +36,51 @@ ENDMACRO( )
 ####################################################################################
 # Define a function for setting the correct properties on the individual targets
 ####################################################################################
-FUNCTION( SET_PYTHON_PROPERTIES TARGET_NAME )
+FUNCTION( SET_PYTHON_PROPERTIES TARGET TARGET_NAME )
   # Library name needs to end in .pyd for Windows
   if ( MSVC )
-    set_target_properties ( ${TARGET_NAME} PROPERTIES SUFFIX .pyd 
+    set_target_properties ( ${TARGET} PROPERTIES SUFFIX .pyd 
                             COMPILE_FLAGS "/bigobj /w44005 /w44244") # bigobj required for intensive templating
   elseif ( APPLE )
     # and in .so on the Mac
-    set_target_properties ( ${TARGET_NAME} PROPERTIES SUFFIX .so )
+    set_target_properties ( ${TARGET} PROPERTIES SUFFIX .so )
   endif ()
+  # Set the name
+  set_target_properties ( ${TARGET} PROPERTIES OUTPUT_NAME ${TARGET_NAME} )
   # Debug python library expects imported module names to end in _d
   if ( PYTHON_DEBUG_LIBRARY )
-    set_target_properties ( ${TARGET_NAME} PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d )
+    set_target_properties ( ${TARGET} PROPERTIES DEBUG_OUTPUT_NAME ${TARGET_NAME}_d )
   endif ()
   # Group within VS
-  set_property ( TARGET ${TARGET_NAME} PROPERTY FOLDER "MantidFramework/Python" )
+  set_property ( TARGET ${TARGET} PROPERTY FOLDER "MantidFramework/Python" )
 ENDFUNCTION() 
+
+####################################################################################
+# Root module 
+####################################################################################
+set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
+
+set ( PY_FILES
+  __init__.py
+)
+
+# CMake would not let this hang off the PythonInterface target because
+# when adding PythonInterface to Framework in the parent directory
+# it can't figure out what file to be dependent on as
+# add_custom_target doesn't produce any output.
+# For that reason these are added as dependencies to the _kernel module
+set ( PYTHON_PKGROOT_INSTALL_FILES "" )
+foreach ( PY_FILE ${PY_FILES} )
+  add_custom_command ( OUTPUT ${OUTPUT_DIR}/${PY_FILE}
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PY_FILE}
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                       ${CMAKE_CURRENT_SOURCE_DIR}/${PY_FILE}
+                       ${OUTPUT_DIR}/${PY_FILE} 
+  )
+  set ( PYTHON_PKGROOT_INSTALL_FILES ${PYTHON_PKGROOT_INSTALL_FILES} ${OUTPUT_DIR}/${PY_FILE} )
+endforeach ( PY_FILE )
+
+add_custom_target ( PythonModuleFiles DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} )
 
 ####################################################################################
 # Sub modules 
@@ -60,29 +89,10 @@ ENDFUNCTION()
 set ( CMAKE_SHARED_LIBRARY_PREFIX )
 
 add_subdirectory ( kernel )
+add_dependencies ( PythonKernelModule PythonModuleFiles ) # Ensure the module files are in place
 #add_subdirectory ( geometry )
 add_subdirectory ( api )
 
-####################################################################################
-# Python code   
-####################################################################################
-set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
-
-set ( PY_FILES 
-  __init__.py
-)
-
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${OUTPUT_DIR}/${PYFILE}
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                       ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       ${OUTPUT_DIR}/${PYFILE} 
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
-endforeach ( PYFILE )
-
 # Create an overall target
-add_custom_target ( PythonInterface DEPENDS _kernel _api ${PYTHON_INSTALL_FILES} )
+add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonAPIModule  )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )

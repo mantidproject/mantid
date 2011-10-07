@@ -7,7 +7,7 @@ def write_export_file(exportpath, headerpath, classname):
     """Write the export cpp file
     """
     headerfile = os.path.basename(headerpath)
-    relativeheader = headerpath[headerpath.index('MantidAPI'):]
+    relativeheader = headerpath[headerpath.index('MantidKernel'):]
     namespace = os.path.dirname(relativeheader).lstrip('Mantid')
     
     cppcode = """#include "%(header)s"

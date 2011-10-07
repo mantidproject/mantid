@@ -4,11 +4,13 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/DataItem.h"
 
 #include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
 
 #include <string>
+#include <iostream>
 
 namespace Mantid
 {

@@ -12,6 +12,8 @@
 
 using namespace Mantid::API;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::Kernel::DataItem;
+using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 namespace
@@ -25,7 +27,7 @@ void export_Workspace()
 {
   register_ptr_to_python<Workspace_sptr>();
 
-  object cls = class_<Workspace, boost::noncopyable>("Workspace", no_init)
+  object cls = class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
     .def("id", &Workspace::id, "Returns the string ID of the workspace type")
     .def("get_title", &Workspace::getTitle, "Returns the title of the workspace")
     .def("get_comment", &Workspace::getComment, return_value_policy<copy_const_reference>(), "Returns the comment field on the workspace")
@@ -38,7 +40,7 @@ void export_Workspace()
     ;
 
   // @todo: Simplify this stuff with a Macro
-  Mantid::PythonInterface::PropertyMarshal::insert((PyTypeObject*)cls.ptr(), new Mantid::PythonInterface::TypedHandler<Workspace_sptr>());
+  Mantid::PythonInterface::PropertyMarshal::insert((PyTypeObject*)cls.ptr(), new Mantid::PythonInterface::TypedHandler<DataItem_sptr>());
 
 }
 

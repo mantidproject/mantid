@@ -10,6 +10,7 @@ using namespace boost::python;
 void export_IPropertyManager()
 {
   register_ptr_to_python<IPropertyManager*>();
+
   class_<IPropertyManager, boost::noncopyable>("IPropertyManager", no_init)
     .def("get_property", &IPropertyManager::getPointerToProperty, return_value_policy<return_by_value>(),
         "Returns the property of the given name. Use .value to give the value")

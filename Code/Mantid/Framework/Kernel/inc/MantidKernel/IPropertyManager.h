@@ -10,15 +10,18 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Matrix.h"
 
+
 namespace Mantid
 {
 
 namespace Kernel
 {
+
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
 class Logger;
+class DataItem;
 
 /** @class IPropertyManager IPropertyManager.h Kernel/IPropertyManager.h
 
@@ -95,16 +98,35 @@ public:
     template <typename T>
     IPropertyManager* setProperty(const std::string &name, const T & value)
     {
-        PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
-        if (prop)
-        {
-          *prop = value;
-        }
-        else
-        {
-          throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
-        }
-        return this;
+      return setTypedProperty(name, value, boost::is_convertible<T, boost::shared_ptr<DataItem> >());
+    }
+
+    template<typename T>
+    IPropertyManager* setTypedProperty(const std::string &name, const T & value, const boost::false_type &)
+    {
+      PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        *prop = value;
+      }
+      else
+      {
+        throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
+      }
+      return this;
+    }
+
+    template<typename T>
+    IPropertyManager* setTypedProperty(const std::string &name, const T & value, const boost::true_type &)
+    {
+      // T is convertible to DataItem_sptr
+      boost::shared_ptr<DataItem> data = boost::static_pointer_cast<DataItem>(value);
+      std::string error = getPointerToProperty(name)->setValue(data);
+      if( !error.empty() )
+      {
+        throw std::invalid_argument(error);
+      }
+      return this;
     }
 
     /// Specialised version of setProperty template method

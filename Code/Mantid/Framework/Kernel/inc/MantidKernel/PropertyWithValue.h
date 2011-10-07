@@ -301,6 +301,18 @@ public:
     return "";
   }
 
+  /**
+   * Set a property value via a DataItem
+   * @param data :: A shared pointer to a data item
+   * @return "" if the assignment was successful or a user level description of the problem
+   */
+  virtual std::string setValue(const boost::shared_ptr<DataItem> data)
+  {
+    // Pass of the helper function that is able to distinguish whether
+    // the TYPE of the PropertyWithValue can be converted to a shared_ptr<DataItem>
+    return setTypedValue(data, boost::is_convertible<TYPE, boost::shared_ptr<DataItem> >());
+  }
+
   ///Copy assignment operator assigns only the value and the validator not the name, default (initial) value, etc.
   PropertyWithValue& operator=( const PropertyWithValue& right )
   {
@@ -313,7 +325,6 @@ public:
     m_validator = right.m_validator->clone();
     return *this;
   }
-
 
   //--------------------------------------------------------------------------------------
   /** Add the value of another property
@@ -414,6 +425,46 @@ protected:
   const TYPE m_initialValue;
 
 private:
+  /**
+   * Helper function for setValue(DataItem_sptr). Uses boost type traits to ensure
+   * it is only used if U is a type that is convertible to boost::shared_ptr<DataItem>
+   * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
+   */
+  template<typename U>
+  std::string setTypedValue(const U & value, const boost::true_type &)
+  {
+    TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
+    std::string msg;
+    if ( data )
+    {
+      try
+      {
+        (*this) = data;
+      }
+      catch(std::invalid_argument& exc)
+      {
+        msg = exc.what();
+      }
+    }
+    else
+    {
+      msg = "Invalid DataItem. The object type (" + std::string(typeid(value).name()) + ") does not match the declared type of the property (" + std::string(this->type()) + ").";
+    }
+    return msg;
+  }
+
+  /**
+   * Helper function for setValue(DataItem_sptr). Uses boost type traits to ensure
+   * it is only used if U is NOT a type that is convertible to boost::shared_ptr<DataItem>
+   * @param value :: A object of type convertible to boost::shared_ptr<DataItem>
+   */
+  template<typename U>
+  std::string setTypedValue(const U & value, const boost::false_type &)
+  {
+    UNUSED_ARG(value);
+    return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
+  }
+
 
   /// Visitor validator class
   IValidator<TYPE> *m_validator;

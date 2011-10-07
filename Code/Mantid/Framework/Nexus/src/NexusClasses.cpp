@@ -640,7 +640,7 @@ Kernel::Property* NXLog::createSingleValueProperty()
   {
     NXDataSetTyped<unsigned char> value(*this, valAttr);
     value.load();
-    bool state = static_cast<bool>(value[0]);
+    bool state  = (value[0] == 0 ) ? false : true;
     prop = new Kernel::PropertyWithValue<bool>(name(), state);
   }
   else

@@ -54,6 +54,11 @@ struct Direction
   
 };
 
+//-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+class DataItem;
+
 /** Base class for properties. Allows access without reference to templated concrete type.
 
     @author Russell Taylor, Tessella Support Services plc
@@ -99,13 +104,15 @@ public:
 
   ///Overridden function that returns true if the property should be enabled in GUI
   virtual bool isEnabled() const
-  { if (m_settings) return m_settings->isEnabled();
+  { 
+    if (m_settings) return m_settings->isEnabled();
     else return true;
   }
 
   ///Overridden function that returns true if the property should be visible in GUI
   virtual bool isVisible() const
-  { if (m_settings) return m_settings->isVisible();
+  { 
+    if (m_settings) return m_settings->isVisible();
     else return true;
   }
 
@@ -136,6 +143,8 @@ public:
   virtual std::string value() const = 0;
   /// Set the value of the property via a string.  If the value is unacceptable the value is not changed but a string is returned
   virtual std::string setValue(const std::string&) = 0;
+  /// Set the value of the property via a DataItem pointer.  If the value is unacceptable the value is not changed but a string is returned
+  virtual std::string setValue(const boost::shared_ptr<DataItem>) = 0;
   /// Get the default value for the property which is the value the property was initialised with
   virtual std::string getDefault() const = 0;
 

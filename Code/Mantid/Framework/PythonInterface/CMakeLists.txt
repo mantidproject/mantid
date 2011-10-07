@@ -45,7 +45,7 @@ set ( TEST_FILES
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc )
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
-  target_link_libraries( PythonInterfaceTest _kernel _api TestHelpers )
+  target_link_libraries( PythonInterfaceTest TestHelpers PythonKernelModule )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonInterfaceTest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonInterfaceTest )
@@ -67,14 +67,28 @@ set ( TEST_PY_FILES
   test/python/WorkspaceTest.py
 )
 
-set ( PYTEST_HELPERS
-  test/python/testhelpers.py
+set ( PYTEST_HELPERS test/python/testhelpers.py 
 )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} ${PYTEST_HELPERS} )
-  add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms )
+  pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} )
+  # Helpers
+  set ( VANILLA_TEST_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/VanillaPythonInterfaceTest )
+  set ( PYTEST_HELPER_INSTALLS "" )
+  foreach( PYTEST_HELPER ${PYTEST_HELPERS} )
+    get_filename_component(helper_file ${PYTEST_HELPER} NAME)
+    add_custom_command ( OUTPUT ${VANILLA_TEST_DIR}/${helper_file}
+                         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYTEST_HELPER} 
+                         COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYTEST_HELPER}
+                         ${VANILLA_TEST_DIR}/${helper_file} )
+    set ( PYTEST_HELPER_INSTALLS ${PYTEST_HELPER_INSTALLS} ${VANILLA_TEST_DIR}/${helper_file} )
+  endforeach( PYTEST_HELPER ${PYTEST_HELPERS} )
+  add_custom_target ( PythonTestHelpers DEPENDS ${PYTEST_HELPER_INSTALLS} )
+                      
+  # Test Dependencies  
+  add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms PythonTestHelpers )
   add_dependencies ( FrameworkTests VanillaPythonInterfaceTest.py )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests" )

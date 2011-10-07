@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/CPUTimer.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
+	src/DataItem.cpp
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
 	src/DirectoryValidator.cpp
@@ -40,8 +41,8 @@ set ( SRC_FILES
 	src/MatrixProperty.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
-	src/NexusTestHelper.cpp
 	src/NeutronAtom.cpp
+	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
 	src/Property.cpp
@@ -52,7 +53,6 @@ set ( SRC_FILES
 	src/Quat.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
-#	src/DataItem.cpp
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/Statistics.cpp
@@ -100,6 +100,7 @@ set ( INC_FILES
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
+	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateValidator.h
@@ -158,7 +159,6 @@ set ( INC_FILES
 	inc/MantidKernel/RandomNumberGenerator.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
-#	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/Statistics.h

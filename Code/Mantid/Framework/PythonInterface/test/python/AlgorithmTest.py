@@ -38,8 +38,8 @@ class AlgorithmTest(unittest.TestCase):
         alg.execute()
 
         self.assertEquals(alg.get_property('SpectrumMax').value, nspec)
-        self.assertEquals(type(alg.get_property('SpectrumMax')), int)
-        #self.assertEquals(type(alg.get_property('OutputWorkspace')), int)
+        self.assertEquals(type(alg.get_property('SpectrumMax').value), int)
+        self.assertEquals(alg.get_property('SpectrumMax').name, 'SpectrumMax')
                 
         ws = alg.get_property('OutputWorkspace').value
         self.assertTrue(ws.get_memory_size() > 0.0 )

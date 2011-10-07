@@ -647,6 +647,14 @@ public:
     throw Exception::NotImplementedError("Not implemented in this class");
   }
 
+  /** Not implemented in this class
+   *  @throw Exception::NotImplementedError Not yet implemented
+   * @return Nothing in this case
+   */
+  std::string setValue(const boost::shared_ptr<DataItem>)
+  {
+    throw Exception::NotImplementedError("Not implemented in this class");
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Clears and creates a TimeSeriesProperty from these parameters:

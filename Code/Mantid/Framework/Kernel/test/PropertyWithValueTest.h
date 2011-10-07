@@ -7,6 +7,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/DataItem.h"
 
 using namespace Mantid::Kernel;
 
@@ -102,6 +103,48 @@ public:
       "Could not set property test. Can not convert \"9.99\" to " + l.type() );
     TS_ASSERT_EQUALS( l.setValue("garbage"),
       "Could not set property test. Can not convert \"garbage\" to " + l.type() );
+  }
+
+  private:
+    class DataObjectOne : public DataItem
+    {
+      virtual const std::string name() const { return "MyName1"; };
+      virtual const std::string id() const { return "DataObjectOne"; }
+      virtual bool threadSafe() const { return true; }
+      virtual std::string toString() const { return name(); }
+    };
+
+    class DataObjectTwo : public DataItem
+    {
+      virtual const std::string name() const { return "MyName2"; };
+      virtual const std::string id() const { return "DataObjectTwo"; }
+      virtual bool threadSafe() const { return true; }
+      virtual std::string toString() const { return name(); }
+    };
+
+
+ public:
+  void test_Setting_With_DataItemPtr_Succeeds_When_Object_Is_Convertible_To_Property_Type()
+  {
+    PropertyWithValue<DataItem_sptr> *dataProp = new PropertyWithValue<DataItem_sptr>("DataProp", DataItem_sptr());
+    DataItem_sptr item(new DataObjectOne);
+    TS_ASSERT_EQUALS(dataProp->setValue(item), std::string());
+    delete dataProp;
+
+    typedef boost::shared_ptr<DataObjectOne> DataObjectOne_sptr;
+    PropertyWithValue<DataItem_sptr> *otherDataProp = new PropertyWithValue<DataItem_sptr>("DataProp", DataItem_sptr());
+    TS_ASSERT_EQUALS(otherDataProp->setValue(item), std::string());
+  }
+
+  void test_Setting_With_DataItemPtr_Fails_When_Object_Is_Not_Convertible_To_Property_Type()
+  {
+    typedef boost::shared_ptr<DataObjectOne> DataObjectOne_sptr;
+    // Declare property as pointing to DataObjectOne_sptr
+    PropertyWithValue<DataObjectOne_sptr> *dataProp = new PropertyWithValue<DataObjectOne_sptr>("DataProp", DataObjectOne_sptr());
+    typedef boost::shared_ptr<DataObjectTwo> DataObjectTwo_sptr;
+    // Value is of type DataObjectOne_sptr
+    DataObjectTwo_sptr item(new DataObjectTwo);
+    TS_ASSERT_DIFFERS(dataProp->setValue(item), std::string());
   }
 
   void testGetDefault()
