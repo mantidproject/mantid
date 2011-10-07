@@ -128,19 +128,13 @@ namespace Mantid
       return result/static_cast<double>(m_detectors.size());
     }
 
-    /// Gives the average phi of the constituent detectors
+    /// Computes the averate position and returns the phi value
     double DetectorGroup::getPhi() const
     {
-      double result = 0.0;
-      DetCollection::const_iterator it;
-      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
-      {
-        V3D detPos = (*it).second->getPos();
-        double phi = 0.0, dummy;
-        detPos.getSpherical(dummy,dummy,phi);
-        result += phi*M_PI/180.0;;
-      }
-      return result/static_cast<double>(m_detectors.size()); 
+      V3D avgPos = this->getPos();
+      double phi(0.0), dummy(0.0);
+      avgPos.getSpherical(dummy, dummy, phi);
+      return phi*M_PI/180.0;
     }
 
     /** Return IDs for the detectors grouped
