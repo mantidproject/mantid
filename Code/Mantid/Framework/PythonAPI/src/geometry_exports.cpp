@@ -18,6 +18,7 @@
 #include <MantidGeometry/Crystal/UnitCell.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Instrument/ObjComponent.h>
+#include <MantidGeometry/Instrument/ObjCompAssembly.h>
 #include <MantidGeometry/Instrument/Component.h>
 #include <MantidGeometry/Instrument/CompAssembly.h>
 #include <MantidGeometry/Instrument/Detector.h>
@@ -74,6 +75,14 @@ namespace Mantid
         .def("__getitem__", &Geometry::ICompAssembly::operator[])
         ;
 
+      //ObjCompAssembly class
+      register_ptr_to_python<boost::shared_ptr<Geometry::ObjCompAssembly> >();
+
+      class_<Geometry::ObjCompAssembly, boost::python::bases<Geometry::IComponent>,
+        boost::noncopyable>("IObjCompAssembly", no_init)
+        .def("nElements", &Geometry::ObjCompAssembly::nelements)
+        .def("__getitem__", &Geometry::ObjCompAssembly::operator[])
+        ;
       //IObjComponent class
       register_ptr_to_python<boost::shared_ptr<Geometry::IObjComponent> >();
 
