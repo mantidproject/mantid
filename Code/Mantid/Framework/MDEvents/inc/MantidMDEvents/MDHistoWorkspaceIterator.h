@@ -12,7 +12,9 @@ namespace MDEvents
 {
 
   /** An implementation of IMDIterator that iterates through
-    a MDHistoWorkspace.
+    a MDHistoWorkspace. It treats the bin in the workspace as
+    a box containing a single "event", at the center of each bin
+    and with the proper signal/error.
     
     @author Janik Zikovsky
     @date 2011-10-06

@@ -92,6 +92,8 @@ namespace MDEvents
 
     Mantid::Kernel::VMD getCenter(size_t linearIndex) const;
 
+    /// Returns the (normalized) signal at a given coordinates
+    signal_t getSignalAtCoord(const coord_t * coords) const;
 
     /// Sets the signal at the specified index.
     void setSignalAt(size_t index, signal_t value)
@@ -244,6 +246,9 @@ namespace MDEvents
 
     /// Vector of the length of the box in each dimension
     coord_t * m_boxLength;
+
+    /// Vector of the origin in each dimension
+    coord_t * m_origin;
 
     /// For converting to/from linear index to tdimensions
     size_t * m_indexMaker;

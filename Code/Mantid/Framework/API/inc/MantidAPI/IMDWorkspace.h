@@ -67,6 +67,21 @@ namespace Mantid
       /// Creates a new iterator pointing to the first cell in the workspace
       virtual IMDIterator* createIterator() const;
 
+      /// Returns the (normalized) signal at a given coordinates
+      virtual signal_t getSignalAtCoord(const coord_t * coords) const
+      {
+        UNUSED_ARG(coords);
+        throw std::runtime_error("getSignalAtCoord() not implemented.");
+      }
+
+      //-------------------------------------------------------------------------------------------
+      /// Returns the (normalized) signal at a given coordinates
+      /// @param coords :: coordinate as a VMD vector
+      signal_t getSignalAtCoord(const Mantid::Kernel::VMD & coords) const
+      {
+        return this->getSignalAtCoord(coords.getBareArray());
+      }
+
       virtual ~IMDWorkspace();
 
     };

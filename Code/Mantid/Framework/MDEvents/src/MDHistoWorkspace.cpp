@@ -7,8 +7,7 @@
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 
 using namespace Mantid::Kernel;
-using Mantid::Geometry::IMDDimension_sptr;
-using Mantid::Geometry::IMDDimension;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -55,6 +54,7 @@ namespace MDEvents
     delete [] m_boxLength;
     delete [] m_indexMaker;
     delete [] m_indexMax;
+    delete [] m_origin;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -191,10 +191,14 @@ namespace MDEvents
       } // (for each dimension)
     }
 
-    // Now set the m_boxLength
+    // Now set the m_boxLength and origin
     m_boxLength = new coord_t[nd];
+    m_origin = new coord_t[nd];
     for (size_t d=0; d<nd; d++)
+    {
       m_boxLength[d] = m_dimensions[d]->getX(1) - m_dimensions[d]->getX(0);
+      m_origin[d] = m_dimensions[d]->getX(0);
+    }
 
     // The index calculator
     m_indexMax = new size_t[numDimensions];
@@ -235,6 +239,7 @@ namespace MDEvents
     return out;
   }
 
+
   //----------------------------------------------------------------------------------------------
   /** Return the position of the center of a bin at a given position
    *
@@ -253,6 +258,29 @@ namespace MDEvents
     for (size_t d=0; d<numDimensions; d++)
       out[d] = m_vertexesArray[d] + m_boxLength[d] * (coord_t(dimIndexes[d]) + 0.5);
     return out;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Get the signal at a particular coordinate in the workspace.
+   *
+   * @param coords :: numDimensions-sized array of the coordinates to look at
+   * @return the (normalized) signal at a given coordinates.
+   *         NaN if outside the range of this workspace
+   */
+  signal_t MDHistoWorkspace::getSignalAtCoord(const coord_t * coords) const
+  {
+    // Build up the linear index, dimension by dimension
+    size_t linearIndex = 0;
+    for (size_t d=0; d<numDimensions; d++)
+    {
+      coord_t x = coords[d] - m_origin[d];
+      size_t ix = size_t(x / m_boxLength[d]);
+      if (ix >= m_indexMax[d] || (x<0))
+        return std::numeric_limits<signal_t>::quiet_NaN();
+      linearIndex += ix * m_indexMaker[d];
+    }
+    return m_signals[linearIndex];
   }
 
 

@@ -257,6 +257,13 @@ namespace Kernel
     { return data[index]; }
 
     //-------------------------------------------------------------------------------------------
+    /** @return the bare data array directly. */
+    const double * getBareArray() const
+    {
+      return data;
+    }
+
+    //-------------------------------------------------------------------------------------------
     /** Return a simple string representation of the vector
      * @param separator :: string to place between values, one space is the default
      */

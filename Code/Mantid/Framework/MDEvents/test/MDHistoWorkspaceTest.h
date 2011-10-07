@@ -1,23 +1,25 @@
 #ifndef MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 
+#include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidKernel/VMD.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid;
-using Mantid::Kernel::VMD;
-using Mantid::API::IMDIterator;
 
 class MDHistoWorkspaceTest : public CxxTest::TestSuite
 {
@@ -338,6 +340,25 @@ public:
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
+
+  //---------------------------------------------------------------------------------------------------
+  void test_getSignalAtCoord()
+  {
+    // 2D workspace with signal[i] = i (linear index)
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i=0; i<100; i++)
+      ws->setSignalAt(i, double(i));
+    IMDWorkspace_sptr iws(ws);
+    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(0.5, 0.5)), 0.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(1.5, 0.5)), 1.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(1.5, 1.5)), 11.0, 1e-6);
+    TS_ASSERT_DELTA( iws->getSignalAtCoord(VMD(9.5, 9.5)), 99.0, 1e-6);
+    // Out of range = NaN
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(-0.01, 2.5)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(3.5, -0.02)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(10.01, 2.5)) ) );
+    TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(3.5, 10.02)) ) );
+  }
 
 };
 
