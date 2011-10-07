@@ -556,7 +556,7 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
   for (size_t i=0; i < workspace->getNumDims(); i++)
   {
     std::ostringstream mess;
-    IMDDimension_sptr dim = workspace->getDimension(i);
+    IMDDimension_const_sptr dim = workspace->getDimension(i);
     mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " " << dim->getUnits();
     std::string s = mess.str();
     MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString(s)), m_tree);
