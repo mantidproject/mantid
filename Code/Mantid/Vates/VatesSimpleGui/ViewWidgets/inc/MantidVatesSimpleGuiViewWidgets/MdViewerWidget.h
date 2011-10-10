@@ -96,10 +96,12 @@ protected slots:
 signals:
   /// Signal to disable all view modes but standard.
   void disableViewModes();
-  /// Signal to enable the threeslice view mode button.
-  void enableThreeSliceViewButton();
   /// Signal to enable the multislice view mode button.
   void enableMultiSliceViewButton();
+  /// Signal to enable the splatter plot view mode button.
+  void enableSplatterPlotViewButton();
+  /// Signal to enable the threeslice view mode button.
+  void enableThreeSliceViewButton();
 
 private:
   Q_DISABLE_COPY(MdViewerWidget);

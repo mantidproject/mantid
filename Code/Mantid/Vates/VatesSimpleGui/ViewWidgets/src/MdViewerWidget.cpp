@@ -2,6 +2,7 @@
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
@@ -239,6 +240,11 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
     view = new MultiSliceView(container);
   }
   break;
+  case ModeControlWidget::SPLATTERPLOT:
+  {
+    view = new SplatterPlotView(container);
+  }
+  break;
   default:
     view = NULL;
     break;
@@ -370,6 +376,7 @@ void MdViewerWidget::renderAndFinalSetup()
       emit this->enableMultiSliceViewButton();
     }
     emit this->enableThreeSliceViewButton();
+    emit this->enableSplatterPlotViewButton();
   }
 }
 

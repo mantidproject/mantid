@@ -16,6 +16,8 @@ ModeControlWidget::ModeControlWidget(QWidget *parent)
                    SLOT(enableMultiSliceViewButton()));
   QObject::connect(parent, SIGNAL(enableThreeSliceViewButton()), this,
                    SLOT(enableThreeSliceViewButton()));
+  QObject::connect(parent, SIGNAL(enableSplatterPlotViewButton()), this,
+                   SLOT(enableSplatterPlotViewButton()));
   QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()),
                    this, SLOT(onMultiSliceViewButtonClicked()));
   QObject::connect(this->ui.standardButton, SIGNAL(clicked()),
