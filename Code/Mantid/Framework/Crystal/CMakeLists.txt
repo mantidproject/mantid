@@ -52,6 +52,7 @@ set ( TEST_FILES
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h
 	test/MaskPeaksWorkspaceTest.h
+	test/NormaliseVanadiumTest.h
 	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
