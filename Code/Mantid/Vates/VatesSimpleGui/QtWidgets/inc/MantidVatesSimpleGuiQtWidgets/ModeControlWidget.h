@@ -56,7 +56,7 @@ public:
   void setToStandardView();
 
   /// Enumeration for the view types
-  enum Views {STANDARD, THREESLICE, MULTISLICE};
+  enum Views {STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT};
 
 signals:
   /**
@@ -67,11 +67,15 @@ signals:
 
 protected slots:
   /**
-   * Enable on the multislice view button.
+   * Enable the multislice view button.
    */
   void enableMultiSliceViewButton();
   /**
-   * Enable on the threeslice view button.
+   * Enable the splatter plot view button.
+   */
+  void enableSplatterPlotViewButton();
+  /**
+   * Enable the threeslice view button.
    */
   void enableThreeSliceViewButton();
   /**
@@ -79,6 +83,11 @@ protected slots:
    * enable other view buttons.
    */
   void onMultiSliceViewButtonClicked();
+  /**
+   * Execute switch to splatter plot view, disable splatter plot
+   * button and enable other views.
+   */
+  void onSplatterPlotViewButtonClicked();
   /**
    * Execute switch to standard view, disable standard button and
    * enable other view buttons.
