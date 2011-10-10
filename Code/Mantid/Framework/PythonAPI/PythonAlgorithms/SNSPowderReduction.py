@@ -133,7 +133,7 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
-        self.declareProperty("VanadiumPeakWidthPercentage", 5.)
+        self.declareProperty("VanadiumFWHM", 7)
         self.declareProperty("VanadiumSmoothParams", "20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
@@ -416,7 +416,7 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             filterLogs = [filterLogs, 
                           self.getProperty("FilterMinimumValue"), self.getProperty("FilterMaximumValue")]
-        self._vanPeakWidthPercent = self.getProperty("VanadiumPeakWidthPercentage")
+        self._vanPeakFWHM = self.getProperty("VanadiumFWHM")
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams")
         calib = self.getProperty("CalibrationFile")
         self._outDir = self.getProperty("OutputDirectory")
@@ -522,10 +522,14 @@ class SNSPowderReduction(PythonAlgorithm):
                         vanRun -= vbackRun
 
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
+                    CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun) + "a")
+                    ConvertUnits(InputWorkspace=str(vanRun) + "a", OutputWorkspace=str(vanRun) + "a", Target="TOF")
+                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun) + "b")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                    CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun) + "c")
                     MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
