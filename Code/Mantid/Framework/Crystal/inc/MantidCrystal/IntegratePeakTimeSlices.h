@@ -98,11 +98,11 @@ private:
   Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
 
-  std::string AttributeNames[15];
+  std::string AttributeNames[16];
   /// Map wi to detid
   std::string ParameterNames[7];
 
-  double AttributeValues[15] ;
+  double AttributeValues[16] ;
   double ParameterValues[7] ;
 
   Mantid::detid2index_map * wi_to_detid_map;
@@ -180,11 +180,13 @@ private:
                               double                        &TotVariance,
                               double                        &TotIntensity,
                               double const                   TotSliceIntensity,
+                              double const                   TotSliceVariance,
                               double const                   chisqdivDOF,
                               const int                      ncelss) ;
 
 
   void updateStats( const double          intensity,
+                    const double          variance,
                     const int             row,
                     const int             col,
                     std::vector<double> & StatBase );

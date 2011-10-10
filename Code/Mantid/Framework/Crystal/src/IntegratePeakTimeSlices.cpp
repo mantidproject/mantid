@@ -64,7 +64,8 @@ namespace Mantid
 #define ISSx  12
 #define ISSy  13
 #define IIntensities 14
-#define NAttributes  15
+#define IVariance    15
+#define NAttributes  16
 
     //Parameter indicies
 #define IBACK   0
@@ -99,6 +100,7 @@ namespace Mantid
       AttributeNames[12] = "SSx";
       AttributeNames[13] = "SSy";
       AttributeNames[14] = "Intensities";
+      AttributeNames[15] = "Variance";
 
       ParameterNames[0] = "Background";
       ParameterNames[1] = "Intensity";
@@ -360,8 +362,9 @@ namespace Mantid
                 {
                   UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq, time);
                   double TotSliceIntensity = AttributeValues[IIntensities];
+                  double TotSliceVariance = AttributeValues[IVariance];
                   updatePeakInformation(params, errs, names, TotVariance, TotIntensity,
-                      TotSliceIntensity, chisq, ncells);
+                      TotSliceIntensity, TotSliceVariance, chisq, ncells);
 
                 }
                 else
@@ -415,7 +418,7 @@ namespace Mantid
 
       } catch (std::exception &EE1)
       {
-        std::cout << "Error in main reaspm=" << EE1.what() << std::endl;
+        std::cout << "Error in main reason=" << EE1.what() << std::endl;
         throw;
       }
 
@@ -687,6 +690,7 @@ namespace Mantid
 
 
     void IntegratePeakTimeSlices::updateStats( const double          intensity,
+                                               const double          variance,
                                                const int             row,
                                                const int             col,
                                                std::vector<double> & StatBase)
@@ -702,6 +706,7 @@ namespace Mantid
       StatBase[ISSx] += col;
       StatBase[ISSy] += row;
       StatBase[IIntensities] += intensity;
+      StatBase[IVariance] += variance;
     }
 
 
@@ -843,13 +848,15 @@ namespace Mantid
           size_t workspaceIndex = (it->second);
 
           Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
+          Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
 
           double intensity = histogram[chan];
+          double variance = histoerrs[chan] * histoerrs[chan];
 
           yvalB.push_back(intensity);
           errB.push_back(1);
 
-          updateStats(intensity, row, col, StatBase);
+          updateStats(intensity, variance, row, col, StatBase);
           if (row == Attr[0] || col == Attr[1])
           {
             TotBoundaryIntensities += intensity;
@@ -888,10 +895,10 @@ namespace Mantid
       for (int i = 0; i < NParameters; i++)
         fun_str << ParameterNames[i] << "=" << ParameterValues[i] << ", ";
 
-      for (size_t j = 0; j < NAttributes; j++)
+      for (size_t j = 0; j < NAttributes-1; j++)
       {
         fun_str << AttributeNames[j] << "=" << AttributeValues[j];
-        if (j + 1 < NAttributes)
+        if (j + 1 < NAttributes-1)
           fun_str << ", ";
       }
 
@@ -1017,12 +1024,12 @@ namespace Mantid
     double IntegratePeakTimeSlices::CalculateIsawIntegrateError(const double background,
                                                                 const double backError,
                                                                 const double ChiSqOverDOF,
-                                                                const double TotIntensity,
+                                                                const double TotVariance,
                                                                 const int ncells)
     {
       UNUSED_ARG(ChiSqOverDOF)
 
-      double Variance = TotIntensity + (backError * backError * TotIntensity / ncells) * ncells * ncells
+      double Variance = TotVariance + (backError * backError * TotVariance / ncells) * ncells * ncells
           + background * ncells;
 
       return sqrt(Variance);
@@ -1077,7 +1084,7 @@ namespace Mantid
           - params[Ibk] * ncells;
       //cout<<"ISAWIntensity parts="<<","<<AttributeValues[IIntensities]<<","<<params[Ibk]<<","<<ncells <<endl;
       TabWS->getRef<double> (std::string("ISAWIntensityError"), TableRow) = CalculateIsawIntegrateError(
-          params[Ibk], errs[Ibk], chisq, AttributeValues[IIntensities], ncells);
+          params[Ibk], errs[Ibk], chisq, AttributeValues[IVariance], ncells);
       TabWS->getRef<double> (std::string("Time"), TableRow) = time;
 
       TabWS->getRef<double> (std::string("Start Row"), TableRow) = AttributeValues[IStartRow];
@@ -1098,12 +1105,13 @@ namespace Mantid
                                                          double                        &TotVariance,
                                                          double                        &TotIntensity,
                                                          double const                   TotSliceIntensity,
+                                                         double const                   TotSliceVariance,
                                                          double const                   chisqdivDOF,
                                                          const int ncells)
     {
       int Ibk = find("Background", names);
 
-      double err = CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceIntensity, ncells);
+      double err = CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
 
       TotIntensity += TotSliceIntensity - params[IBACK] * ncells;
 
