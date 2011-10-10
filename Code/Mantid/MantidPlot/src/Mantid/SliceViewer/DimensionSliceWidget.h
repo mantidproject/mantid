@@ -17,29 +17,57 @@
 
 class DimensionSliceWidget : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
+
+//  /** Enum for each shown dimension */
+//  enum eShownDim
+//  {
+//    None=-1,
+//    X=0,
+//    Y=1
+//  };
+
 
 public:
-    DimensionSliceWidget(QWidget *parent = 0);
-    ~DimensionSliceWidget();
+  DimensionSliceWidget(QWidget *parent = 0);
+  ~DimensionSliceWidget();
 
-    void setDimension(Mantid::Geometry::IMDDimension_sptr dim);
+  void setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim);
 
-    double getSlicePoint() const
-    { return m_slicePoint; }
+  double getSlicePoint() const
+  { return m_slicePoint; }
+
+  void setShownDim(int dim);
+
+  /// @return the shown dimension, 0=X, 1=Y, -1=None
+  int getShownDim() const
+  { return m_shownDim; }
+
+public slots:
+  void sliderMoved();
+  void btnXYChanged();
+
+signals:
+  void changedShownDim(int index, int dim);
+  void changedSlicePoint(int index, double value);
 
 private:
-    /// Auto-gen UI class
-    Ui::DimensionSliceWidgetClass ui;
+  /// Auto-gen UI class
+  Ui::DimensionSliceWidgetClass ui;
 
-    /// Sptr to the dimensions being displayed
-    Mantid::Geometry::IMDDimension_sptr m_dim;
+  /// Sptr to the dimensions being displayed
+  Mantid::Geometry::IMDDimension_const_sptr m_dim;
 
-    /// Which dimension is being shown. -1 = None, 0 = X, 1 = Y. 2+ reserved for higher dimensions
-    int m_shownDim;
+  /// The index of the dimension into the workspace
+  int m_dimIndex;
 
-    /// If the dimensions is not shown, where is the slice point?
-    double m_slicePoint;
+  /// Which dimension is being shown. -1 = None, 0 = X, 1 = Y. 2+ reserved for higher dimensions
+  int m_shownDim;
+
+  /// If the dimensions is not shown, where is the slice point?
+  double m_slicePoint;
+
+  bool m_insideSetShownDim;
 };
 
 #endif // DIMENSIONSLICEWIDGET_H

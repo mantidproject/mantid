@@ -75,6 +75,12 @@ namespace Mantid
      * @param ind :: index into the axis  */
     virtual double getX(size_t ind)const = 0;
 
+    /** @return the width of each bin */
+    virtual double getBinWidth() const
+    {
+      return (getMaximum() - getMinimum())/getNBins();
+    }
+
     /// @return true if the dimension is integrated (e.g. has only one single bin)
     virtual bool getIsIntegrated() const
     {

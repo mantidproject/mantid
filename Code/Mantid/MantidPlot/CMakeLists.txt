@@ -176,7 +176,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/SliceViewer/SliceViewer.cpp
                    src/Mantid/SliceViewer/SliceViewer.cpp
                    src/Mantid/SliceViewer/DimensionSliceWidget.cpp
-                   src/Mantid/SliceViewer/QwtRasterDataTester.cpp
+                   src/Mantid/SliceViewer/QwtRasterDataMD.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -389,7 +389,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/SliceViewer/SliceViewer.h
-                   src/Mantid/SliceViewer/QwtRasterDataTester.h
+                   src/Mantid/SliceViewer/QwtRasterDataMD.h
                    src/Mantid/SliceViewer/DimensionSliceWidget.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
@@ -769,11 +769,20 @@ target_link_libraries ( MantidPlot
 
 if ( WIN32 )
 else ()
+	include_directories ( ../Framework/MDEvents/inc )
+	include_directories ( ../Framework/DataObjects/inc )
+	include_directories ( ../Framework/Algorithms/inc )
+	include_directories ( ../Framework/API/inc )
+	include_directories ( ../Framework/DataHandling/inc )
+	include_directories ( ../Framework/TestHelpers/inc )
+	include_directories ( ../Framework/Geometry/inc )
+	
 	# Extra, optional target for demoing a GUI element
 	add_executable ( SliceViewerDemo ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/Mantid/SliceViewer/main.cpp  
 	                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
 	target_link_libraries ( SliceViewerDemo 
-	                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets
+	                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets 
+	                        MDEvents Geometry
 	                        QtPropertyBrowser ${QT_LIBRARIES} 
 	                        ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
 	                        ${QSCINTILLA_LIBRARIES}
