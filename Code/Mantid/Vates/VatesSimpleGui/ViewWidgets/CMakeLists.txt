@@ -7,6 +7,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
+  inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
@@ -19,6 +20,7 @@ set( SOURCE_FILES
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
   src/StandardView.cpp
+  src/SplatterPlotView.cpp
   src/ThreesliceView.cpp
   src/TimeControlWidget.cpp
   src/ViewBase.cpp
@@ -31,6 +33,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
+  inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
@@ -43,6 +46,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
+  inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.ui
 )
