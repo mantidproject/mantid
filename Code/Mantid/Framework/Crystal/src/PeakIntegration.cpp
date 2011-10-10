@@ -268,15 +268,15 @@ namespace Mantid
         else
           for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++)I+=Y[iTOF];
     
-        //Calculate errors correctly for nonPoisson distributions
-        for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++) sigI+= E[iTOF]*E[iTOF];
 
         if (slices)
         {
-          sigI = sqrt(sigI);
+          sigI = peak.getSigmaIntensity();
         }
         else
         {
+          //Calculate errors correctly for nonPoisson distributions
+          for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++) sigI+= E[iTOF]*E[iTOF];
           I-= ratio*(Y[TOFmin] + Y[TOFmax]);
           sigI = sqrt(sigI+ratio*ratio*(E[TOFmin]*E[TOFmin] + E[TOFmax]*E[TOFmax]));
         }
