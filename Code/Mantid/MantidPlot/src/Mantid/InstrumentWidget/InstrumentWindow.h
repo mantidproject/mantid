@@ -128,6 +128,7 @@ public slots:
   void changeColorMapMaxValue(double maxValue);
   void changeColorMapRange(double minValue, double maxValue);
   void setIntegrationRange(double,double);
+  void setBinRange(double,double);
 
   void setViewDirection(const QString&);
   void pickBackgroundColor();

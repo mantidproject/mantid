@@ -774,12 +774,23 @@ void InstrumentWindow::setWireframe(bool on)
   m_InstrumentDisplay->repaint();
 }
 
+/**
+ * Set new integration range but don't update XIntegrationControl (because the control calls this slot)
+ */
 void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 {
   m_instrumentActor->setIntegrationRange(xmin,xmax);
   setupColorMap();
   m_InstrumentDisplay->refreshView();
   m_InstrumentDisplay->repaint();
+}
+
+/**
+ * Set new integration range and update XIntegrationControl. To be called from python.
+ */
+void InstrumentWindow::setBinRange(double xmin,double xmax)
+{
+  m_xIntegration->setRange(xmin,xmax);
 }
 
 void InstrumentWindow::singleDetectorTouched(int detid)

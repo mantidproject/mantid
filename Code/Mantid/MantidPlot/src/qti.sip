@@ -1710,7 +1710,7 @@ public:
   void setColorMapMinValue(double);
   void setColorMapMaxValue(double);
   void setColorMapRange(double, double);
-  void setIntegrationRange(double, double) /PyName = setBinRange/;
+  void setBinRange(double, double);// /PyName = setBinRange/;
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
