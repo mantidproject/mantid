@@ -262,6 +262,9 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
                    SIGNAL(postaccept()),
                    this, SLOT(checkForUpdates()));
+  QObject::connect(this->currentView, SIGNAL(triggerAccept()),
+                   this->ui.proxyTabWidget->getObjectInspector(),
+                   SLOT(accept()));
   if (this->currentView->inherits("MultiSliceView"))
   {
     QObject::connect(this->ui.pipelineBrowser,
@@ -452,13 +455,6 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
-  if (this->currentView->inherits("ThreeSliceView") ||
-      this->currentView->inherits("StandardView") ||
-      this->currentView->inherits("SplatterPlotView"))
-  {
-    std::cout << "Help!" << std::endl;
-    this->ui.proxyTabWidget->getObjectInspector()->accept();
-  }
   if (this->currentView->inherits("ThreeSliceView"))
   {
     static_cast<ThreeSliceView *>(this->currentView)->correctVisibility(this->ui.pipelineBrowser);

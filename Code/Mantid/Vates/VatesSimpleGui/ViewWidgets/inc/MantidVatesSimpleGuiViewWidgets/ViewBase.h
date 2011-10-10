@@ -126,6 +126,7 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
+  void triggerAccept();
 
 private:
   Q_DISABLE_COPY(ViewBase);

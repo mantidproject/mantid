@@ -81,6 +81,7 @@ void StandardView::render()
 
   QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
+  emit this->triggerAccept();
 }
 
 void StandardView::onCutButtonClicked()

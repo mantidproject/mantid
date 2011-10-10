@@ -89,6 +89,7 @@ void ThreeSliceView::render()
   this->mainView->resetViewDirection(-1, -1, -1, 0, 1, 0);
   this->resetDisplay();
   this->renderAll();
+  emit this->triggerAccept();
 }
 
 void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
