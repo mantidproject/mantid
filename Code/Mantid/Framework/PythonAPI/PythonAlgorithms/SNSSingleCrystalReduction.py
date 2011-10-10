@@ -35,6 +35,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction of sample. Set to 0 for no Anvred corrections")
         self.declareProperty("PowerLambda", 4.0, Description="Power of wavelength for Anvred correction of sample.")
         self.declareProperty("VanadiumRadius", 0.0, Description="Radius of sphere for Anvred correction of vanadium. Set to 0 for no Anvred corrections")
+        self.declareProperty("MinimumdSpacing", 0.5, Description="Minimum d-spacing.  Default is 0.5")
+        self.declareProperty("MinimumWavelength", 0.6, Description="Minimum Wavelength.  Default is 0.6")
+        self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
         self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
         outfiletypes = ['', 'hkl', 'nxs']
@@ -201,6 +204,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._amu = self.getProperty("LinearScatteringCoef")
         self._smu = self.getProperty("LinearAbsorptionCoef")
         self._radius = self.getProperty("Radius")
+        self._minD = self.getProperty("MinimumdSpacing")
+        self._minWL = self.getProperty("MinimumWavelength")
+        self._maxWL = self.getProperty("MaximumWavelength")
         self._vanradius = self.getProperty("VanadiumRadius")
         self._powlam = self.getProperty("PowerLambda")
         self._ubfile = self.getProperty("IsawUBFile")
@@ -270,7 +276,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 # first round of processing the sample
                 samRun = self._loadData(samRunnum, bank, SUFFIX, filterWall)
                 ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="Wavelength")
-                CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=0.6, XMax=3.5)
+                CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=self._minWL, XMax=self._maxWL)
+                ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="dSpacing")
+                CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=self._minD)
                 ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
 
 #                # process the background
@@ -341,6 +349,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             self._append = True
             if self._outTypes is not '':
                 mtd.deleteWorkspace(str(samRun))
+            mtd.deleteWorkspace('Mon')
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
