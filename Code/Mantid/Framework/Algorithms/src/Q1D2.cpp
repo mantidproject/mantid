@@ -58,6 +58,8 @@ void Q1D2::init()
     "fraction, etc");
   declareProperty("AccountForGravity",false,
     "Whether to correct for the effects of gravity");
+  declareProperty("SolidAngleWeighting",true,
+      "If true, pixels will be weighted by their solid angle.", Direction::Input);
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
   declareProperty("RadiusCut", 0.0, mustBePositive,
@@ -76,6 +78,7 @@ void Q1D2::exec()
   MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   const bool doGravity = getProperty("AccountForGravity");
+  m_doSolidAngle = getProperty("SolidAngleWeighting");
 
   //throws if we don't have common binning or another incompatibility
   Qhelper helper;
@@ -268,7 +271,11 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t s
 {
   const V3D samplePos = m_dataWS->getInstrument()->getSample()->getPos();
 
-  weight = m_dataWS->getDetector(specIndex)->solidAngle(samplePos);
+  if (m_doSolidAngle)
+    weight = m_dataWS->getDetector(specIndex)->solidAngle(samplePos);
+  else
+    weight = 1.0;
+
   if ( weight < 1e-200 )
   {
     throw std::logic_error("Invalid (zero or negative) solid angle for one detector");

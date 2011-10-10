@@ -54,6 +54,7 @@ public:
 private:
   /// the experimental workspace with counts across the detector
   API::MatrixWorkspace_const_sptr m_dataWS;
+  bool m_doSolidAngle;
 
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
