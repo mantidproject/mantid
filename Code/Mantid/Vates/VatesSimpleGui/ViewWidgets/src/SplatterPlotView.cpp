@@ -68,6 +68,7 @@ void SplatterPlotView::render()
 
   QPair<double, double> range = this->splatRepr->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
+  emit this->triggerAccept();
 }
 
 void SplatterPlotView::renderAll()
