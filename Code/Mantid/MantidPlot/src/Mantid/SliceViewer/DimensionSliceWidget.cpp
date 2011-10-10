@@ -79,7 +79,7 @@ void DimensionSliceWidget::setShownDim(int dim)
     ui.horizontalSpacer->changeSize(1,1, QSizePolicy::Fixed, QSizePolicy::Fixed);
   else
     ui.horizontalSpacer->changeSize(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-  ui.horizontalLayout->setStretch(3, slicing ? 0 : 1);
+  //ui.horizontalLayout->setStretch(3, slicing ? 0 : 1);
   this->update();
   m_insideSetShownDim = false;
 }
