@@ -2,9 +2,14 @@
 
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"
+#include "pqDataRepresentation.h"
 #include "pqObjectBuilder.h"
+#include "pqPipelineRepresentation.h"
 #include "pqPipelineSource.h"
 #include "pqRenderView.h"
+#include "vtkDataObject.h"
+#include "vtkProperty.h"
+#include "vtkSMPropertyHelper.h"
 
 namespace Mantid
 {
@@ -16,6 +21,10 @@ namespace SimpleGui
 SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
+
+  // Set the threshold button to create a threshold filter on data
+  QObject::connect(this->ui.thresholdButton, SIGNAL(clicked()),
+                   this, SLOT(onThresholdButtonClicked()));
 
   this->view = this->createRenderView(this->ui.renderFrame);
 }
@@ -39,29 +48,22 @@ pqRenderView* SplatterPlotView::getView()
 void SplatterPlotView::render()
 {
   this->origSource = pqActiveObjects::instance().activeSource();
-  //pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->splatSource = builder->createFilter("filters", "MantidParaViewSplatterPlot", this->origSource);
 
-  /*
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSource->getOutputPort(0), this->view);
-  int reptype = VTK_SURFACE;
-  char *xmlName = this->origSource->getProxy()->GetXMLName();
-  if (QString("PeaksReader") == QString(xmlName) || QString("Peaks Source") == QString(xmlName))
-  {
-    reptype = VTK_WIREFRAME;
-  }
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype);
+        this->splatSource->getOutputPort(0), this->view);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
   drep->getProxy()->UpdateVTKObjects();
-  this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->originSourceRepr->colorByArray("signal",
-                                       vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  this->splatRepr = qobject_cast<pqPipelineRepresentation*>(drep);
+  this->splatRepr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
-  */
   this->resetDisplay();
   this->renderAll();
-  //QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
-  //emit this->dataRange(range.first, range.second);
+
+  QPair<double, double> range = this->splatRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
 }
 
 void SplatterPlotView::renderAll()
@@ -72,6 +74,13 @@ void SplatterPlotView::renderAll()
 void SplatterPlotView::resetDisplay()
 {
   this->view->resetDisplay();
+}
+
+void SplatterPlotView::onThresholdButtonClicked()
+{
+  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->threshSource = builder->createFilter("filters", "Threshold",
+                                             this->splatSource);
 }
 
 }

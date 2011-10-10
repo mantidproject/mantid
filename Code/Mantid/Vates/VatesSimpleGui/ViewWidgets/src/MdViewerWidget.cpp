@@ -453,8 +453,10 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   delete this->hiddenView;
   this->currentView->render();
   if (this->currentView->inherits("ThreeSliceView") ||
-      this->currentView->inherits("StandardView"))
+      this->currentView->inherits("StandardView") ||
+      this->currentView->inherits("SplatterPlotView"))
   {
+    std::cout << "Help!" << std::endl;
     this->ui.proxyTabWidget->getObjectInspector()->accept();
   }
   if (this->currentView->inherits("ThreeSliceView"))

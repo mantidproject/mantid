@@ -9,6 +9,8 @@
 
 class QWidget;
 
+class pqPipelineRepresentation;
+class pqPipelineSource;
 class pqRenderView;
 
 namespace Mantid
@@ -79,9 +81,18 @@ public:
    */
   void resetDisplay();
 
+protected slots:
+  /**
+   * Create and apply a threshold filter to the data.
+   */
+  void onThresholdButtonClicked();
+
 private:
   Q_DISABLE_COPY(SplatterPlotView);
 
+  QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
+  QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
+  QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
   Ui::SplatterPlotView ui; ///< The splatter plot view'a UI form
   QPointer<pqRenderView> view; ///< The main view area
 };
