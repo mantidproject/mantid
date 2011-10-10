@@ -282,8 +282,8 @@ namespace Mantid
         }
     
         //std::cout << n<<"  "<<peak.getBankName()<< "  "<<peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI <<"\n";
-        peak.setIntensity(I);
-        peak.setSigmaIntensity(sigI);
+        //peak.setIntensity(I);
+        //peak.setSigmaIntensity(sigI);
   
         prog.report();
         PARALLEL_END_INTERUPT_REGION

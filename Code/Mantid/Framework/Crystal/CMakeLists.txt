@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/LoadIsawPeaks.cpp
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
+	src/NormaliseVanadium.cpp
 	src/PeakIntegration.cpp
 	src/PredictPeaks.cpp
 	src/SaveHKL.cpp
@@ -30,6 +31,7 @@ set ( INC_FILES
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
+	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SaveHKL.h
