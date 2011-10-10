@@ -212,8 +212,6 @@ void CropWorkspace::execEvent()
     g_log.debug("Cropping EventWorkspace in-place.");
 
 
-  EventType type = eventW->getEventType();
-
   Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
   // Loop over the required spectra, copying in the desired bins
@@ -225,7 +223,7 @@ void CropWorkspace::execEvent()
     EventList el = eventW->getEventList(i);
     // The output event list
     EventList & outEL = outputWorkspace->getOrAddEventList(j);
-    switch (type)
+    switch (el.getEventType())
     {
       case TOF:
       {
