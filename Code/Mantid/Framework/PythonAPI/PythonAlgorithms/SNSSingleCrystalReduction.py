@@ -30,10 +30,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
-        self.declareProperty("LinearScatteringCoef", 0.0, Description="Linear Scattering Coefficient for Anvred correction.")
-        self.declareProperty("LinearAbsorptionCoef", 0.0, Description="Linear Absorption Coefficient for Anvred correction.")
-        self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction. Set to 0 for no Anvred corrections")
-        self.declareProperty("PowerLambda", 4.0, Description="Power of wavelength for Anvred correction.")
+        self.declareProperty("LinearScatteringCoef", 0.0, Description="Linear Scattering Coefficient for Anvred correction of sample.")
+        self.declareProperty("LinearAbsorptionCoef", 0.0, Description="Linear Absorption Coefficient for Anvred correction of sample.")
+        self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction of sample. Set to 0 for no Anvred corrections")
+        self.declareProperty("PowerLambda", 4.0, Description="Power of wavelength for Anvred correction of sample.")
+        self.declareProperty("VanadiumRadius", 0.0, Description="Radius of sphere for Anvred correction of vanadium. Set to 0 for no Anvred corrections")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
         self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
         outfiletypes = ['', 'hkl', 'nxs']
@@ -74,12 +75,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         #Normalise by sum of counts in upstream monitor
         Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
         mtd.deleteWorkspace(str(name)+'_monitors')
-        mtd.releaseFreeMemory()
-        temp = mtd['Mon']
-        # Numerical precision of same limits for division sometimes results in Counts and somtimes Counts/Counts; no units avoids this
-        temp.setYUnit("")
-        Divide(LHSWorkspace=wksp, RHSWorkspace=temp, OutputWorkspace=wksp, AllowDifferentNumberSpectra=1)
-        mtd.deleteWorkspace('Mon')
         mtd.releaseFreeMemory()
         # take care of filtering events
         if self._filterBadPulses:
@@ -166,7 +161,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile
-            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
+            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=0.01,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
         if "nxs" in self._outTypes:
             nxsfile = str(wksp) + ".nxs"
     
@@ -198,7 +193,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         mtd.settings['default.instrument'] = self._instrument
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         self._vanPeakWidthPercent = 5. #self.getProperty("VanadiumPeakWidthPercentage")
-        self._vanSmoothing = "20,2"   #self.getProperty("VanadiumSmoothParams")
+        self._vanSmoothing = 11
         self._outFile = self.getProperty("OutputFile")
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("SampleNumbers")
@@ -206,6 +201,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._amu = self.getProperty("LinearScatteringCoef")
         self._smu = self.getProperty("LinearAbsorptionCoef")
         self._radius = self.getProperty("Radius")
+        self._vanradius = self.getProperty("VanadiumRadius")
         self._powlam = self.getProperty("PowerLambda")
         self._ubfile = self.getProperty("IsawUBFile")
         self._peaksfile = self.getProperty("IsawPeaksFile")
@@ -217,36 +213,50 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             temp = mtd["%s_%d" % (self._instrument, vanRun)]
             if temp is None:
                 vanRun = self._loadData(vanRun, "", SUFFIX, (0., 0.))
-                Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins=1)
-                vanI = mtd["VanSumTOF"]
-                FindDetectorsOutsideLimits(vanI, "VanMask", LowThreshold=1.0e-300, HighThreshold=1.0e+300)
-                maskWS = mtd["VanMask"]
-                MaskDetectors(vanI, MaskedWorkspace=maskWS)
-                mtd.deleteWorkspace('VanMask')
-                mtd.releaseFreeMemory()
+                #Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins=1)
+                #vanI = mtd["VanSumTOF"]
+                #FindDetectorsOutsideLimits(vanI, "VanMask", LowThreshold=1.0e-300, HighThreshold=1.0e+300)
+                #maskWS = mtd["VanMask"]
+                #MaskDetectors(vanI, MaskedWorkspace=maskWS)
+                #mtd.deleteWorkspace('VanMask')
+                #mtd.releaseFreeMemory()
                 # process the background
                 bkgRun = self.getProperty("BackgroundNumber")
                 if bkgRun > 0:
                     temp = mtd["%s_%d" % (self._instrument, bkgRun)]
                     if temp is None:
+                                vanMon = mtd['Mon']
+                                RenameWorkspace(InputWorkspace=vanMon,OutputWorkspace="vanMon")
+                                vanMon = mtd['vanMon']
                                 bkgRun = self._loadData(bkgRun, "", SUFFIX, (0., 0.))
+                                temp = mtd['Mon']
+                                vanMon /= temp
+                                # Keep units of Counts
+                                vanMon.setYUnit("")
+                                Multiply(LHSWorkspace=bkgRun, RHSWorkspace=vanMon, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
+                                mtd.deleteWorkspace('Mon')
+                                mtd.deleteWorkspace('vanMon')
+                                mtd.releaseFreeMemory()
                     else:
                                 bkgRun = temp
                 else:
                     bkgRun = None
                 if bkgRun is not None:
-                    vanRun -= bkgRun
+                    Minus(LHSWorkspace=vanRun, RHSWorkspace=bkgRun, OutputWorkspace=vanRun, ClearRHSWorkspace=True)
                     mtd.deleteWorkspace(str(bkgRun))
                     mtd.releaseFreeMemory()
                     CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun, Tolerance=COMPRESS_TOL_TOF) # 10ns
+                
+                #Anvred corrections converts from TOF to Wavelength now.
+                if self._vanradius > 0:
+                    AnvredCorrection(InputWorkspace=vanRun,OutputWorkspace=vanRun,PreserveEvents=1,
+                        LinearScatteringCoef=0.367,LinearAbsorptionCoef=0.366,Radius=self._vanradius,OnlySphericalAbsorption=True)
+
                 vanRun = self._focus(vanRun, "bank17,bank18,bank26,bank27,bank36,bank37,bank38,bank39,bank46,bank47,bank48,bank49,bank57,bank58")
                 ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
-                ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
-                  Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                ConvertToDistribution(Workspace=vanRun)
+                SmoothData(InputWorkspace=vanRun, OutputWorkspace=vanRun, NPoints=self._vanSmoothing)
+                NormaliseVanadium(InputWorkspace=vanRun, OutputWorkspace=vanRun, Wavelength=1.0)
             else:
                 vanRun = temp
         else:
@@ -259,27 +269,41 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             for bank in Banks:
                 # first round of processing the sample
                 samRun = self._loadData(samRunnum, bank, SUFFIX, filterWall)
+                ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="Wavelength")
+                CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=0.6, XMax=3.5)
+                ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
 
-                # process the background
-                bkgRun = self.getProperty("BackgroundNumber")
-                if bkgRun > 0:
-                    temp = mtd["%s_%d" % (self._instrument, bkgRun)]
-                    if temp is None:
-                                bkgRun = self._loadData(bkgRun, bank, SUFFIX, (0., 0.))
-                    else:
-                                bkgRun = temp
-                else:
-                    bkgRun = None
-    
-                if bkgRun is not None:
-                    samRun -= bkgRun
-                    mtd.deleteWorkspace(str(bkgRun))
-                    mtd.releaseFreeMemory()
-                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=COMPRESS_TOL_TOF) # 10ns
+#                # process the background
+#                bkgRun = self.getProperty("BackgroundNumber")
+#                if bkgRun > 0:
+#                    temp = mtd["%s_%d" % (self._instrument, bkgRun)]
+#                    if temp is None:
+#                                samMon = mtd['Mon']
+#                                RenameWorkspace(InputWorkspace=samMon,OutputWorkspace="samMon")
+#                                bkgRun = self._loadData(bkgRun, bank, SUFFIX, (0., 0.))
+#                                temp = mtd['Mon']
+#                                # Keep units of Counts
+#                                temp.setYUnit("")
+#                                Divide(LHSWorkspace=bkgRun, RHSWorkspace=temp, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
+#                                samMon.setYUnit("")
+#                                Multiply(LHSWorkspace=bkgRun, RHSWorkspace=samMon, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
+#                                mtd.deleteWorkspace('Mon')
+#                                mtd.deleteWorkspace('samMon')
+#                                mtd.releaseFreeMemory()
+#                    else:
+#                                bkgRun = temp
+#                else:
+#                    bkgRun = None
+#    
+#                if bkgRun is not None:
+#                    samRun -= bkgRun
+#                    mtd.deleteWorkspace(str(bkgRun))
+#                    mtd.releaseFreeMemory()
+#                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=COMPRESS_TOL_TOF) # 10ns
     
                 # the final bit of math
                 if vanRun is not None:
-                    samRun /= vanI
+                    #samRun /= vanI
                     Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=1)
                     normalized = True
                 else:
@@ -287,7 +311,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
                 #Remove data at edges of rectangular detectors
                 SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
-                    AdjX=0, AdjY=0, ZeroEdgePixels=20)
+                    AdjX=0, AdjY=0, ZeroEdgePixels=24)
                 #Anvred corrections converts from TOF to Wavelength now.
                 if self._radius > 0:
                     AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
@@ -306,7 +330,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=samRunT,OutputWorkspace=samRunstr)
             samRun = mtd[samRunstr]
             # scale data so fitting routines do not run out of memory
-            samRun /= 500
+            samMon = mtd['Mon']
+            samMon /= 1e8
+            samRun /= samMon
             samRun = self._bin(samRun)
             ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
             mtd.releaseFreeMemory()
