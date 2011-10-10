@@ -29,7 +29,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              Description="If specified overrides value in CharacterizationRunsFile")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
-        self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
+        self.declareProperty("SubtractBackgroundFromSample", False, Description="Subtract background from sample.  Background always subtracted from vanadium if specified.")
+        self.declareProperty("DivideSamplebyIntegratedVanadium", False, Description="Divide sample by integrated vanadium.")
         self.declareProperty("LinearScatteringCoef", 0.0, Description="Linear Scattering Coefficient for Anvred correction of sample.")
         self.declareProperty("LinearAbsorptionCoef", 0.0, Description="Linear Absorption Coefficient for Anvred correction of sample.")
         self.declareProperty("Radius", 0.0, Description="Radius of sphere for Anvred correction of sample. Set to 0 for no Anvred corrections")
@@ -194,7 +195,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._instrument = self.getProperty("Instrument")
         mtd.settings['default.facility'] = 'SNS'
         mtd.settings['default.instrument'] = self._instrument
-        self._filterBadPulses = self.getProperty("FilterBadPulses")
+        self._filterBadPulses = False
+        self._SubtractBkg = self.getProperty("SubtractBackgroundFromSample")
+        self._DivideVan = self.getProperty("DivideSamplebyIntegratedVanadium")
         self._vanPeakWidthPercent = 5. #self.getProperty("VanadiumPeakWidthPercentage")
         self._vanSmoothing = 11
         self._outFile = self.getProperty("OutputFile")
@@ -219,13 +222,14 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             temp = mtd["%s_%d" % (self._instrument, vanRun)]
             if temp is None:
                 vanRun = self._loadData(vanRun, "", SUFFIX, (0., 0.))
-                #Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins=1)
-                #vanI = mtd["VanSumTOF"]
-                #FindDetectorsOutsideLimits(vanI, "VanMask", LowThreshold=1.0e-300, HighThreshold=1.0e+300)
-                #maskWS = mtd["VanMask"]
-                #MaskDetectors(vanI, MaskedWorkspace=maskWS)
-                #mtd.deleteWorkspace('VanMask')
-                #mtd.releaseFreeMemory()
+                if self._DivideVan:
+                    Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins=1)
+                    vanI = mtd["VanSumTOF"]
+                    FindDetectorsOutsideLimits(vanI, "VanMask", LowThreshold=1.0e-300, HighThreshold=1.0e+300)
+                    maskWS = mtd["VanMask"]
+                    MaskDetectors(vanI, MaskedWorkspace=maskWS)
+                    mtd.deleteWorkspace('VanMask')
+                    mtd.releaseFreeMemory()
                 # process the background
                 bkgRun = self.getProperty("BackgroundNumber")
                 if bkgRun > 0:
@@ -281,37 +285,38 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=self._minD)
                 ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
 
-#                # process the background
-#                bkgRun = self.getProperty("BackgroundNumber")
-#                if bkgRun > 0:
-#                    temp = mtd["%s_%d" % (self._instrument, bkgRun)]
-#                    if temp is None:
-#                                samMon = mtd['Mon']
-#                                RenameWorkspace(InputWorkspace=samMon,OutputWorkspace="samMon")
-#                                bkgRun = self._loadData(bkgRun, bank, SUFFIX, (0., 0.))
-#                                temp = mtd['Mon']
-#                                # Keep units of Counts
-#                                temp.setYUnit("")
-#                                Divide(LHSWorkspace=bkgRun, RHSWorkspace=temp, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
-#                                samMon.setYUnit("")
-#                                Multiply(LHSWorkspace=bkgRun, RHSWorkspace=samMon, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
-#                                mtd.deleteWorkspace('Mon')
-#                                mtd.deleteWorkspace('samMon')
-#                                mtd.releaseFreeMemory()
-#                    else:
-#                                bkgRun = temp
-#                else:
-#                    bkgRun = None
-#    
-#                if bkgRun is not None:
-#                    samRun -= bkgRun
-#                    mtd.deleteWorkspace(str(bkgRun))
-#                    mtd.releaseFreeMemory()
-#                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=COMPRESS_TOL_TOF) # 10ns
+                # process the background
+                bkgRun = self.getProperty("BackgroundNumber")
+                if bkgRun > 0 and self._SubtractBkg:
+                    temp = mtd["%s_%d" % (self._instrument, bkgRun)]
+                    if temp is None:
+                                samMon = mtd['Mon']
+                                RenameWorkspace(InputWorkspace=samMon,OutputWorkspace="samMon")
+                                samMon = mtd['samMon']
+                                bkgRun = self._loadData(bkgRun, "", SUFFIX, (0., 0.))
+                                temp = mtd['Mon']
+                                samMon /= temp
+                                # Keep units of Counts
+                                samMon.setYUnit("")
+                                Multiply(LHSWorkspace=bkgRun, RHSWorkspace=samMon, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
+                                mtd.deleteWorkspace('Mon')
+                                mtd.deleteWorkspace('samMon')
+                                mtd.releaseFreeMemory()
+                    else:
+                                bkgRun = temp
+                else:
+                    bkgRun = None
+    
+                if bkgRun is not None:
+                    Minus(LHSWorkspace=samRun, RHSWorkspace=bkgRun, OutputWorkspace=samRun, ClearRHSWorkspace=True)
+                    mtd.deleteWorkspace(str(bkgRun))
+                    mtd.releaseFreeMemory()
+                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=COMPRESS_TOL_TOF) # 10ns
     
                 # the final bit of math
                 if vanRun is not None:
-                    #samRun /= vanI
+                    if self._DivideVan:
+                        samRun /= vanI
                     Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=1)
                     normalized = True
                 else:
