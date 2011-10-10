@@ -152,6 +152,7 @@ set ( SRC_FILES
 	src/SphericalAbsorption.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
+	src/StripVanadiumPeaks2.cpp
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
@@ -321,6 +322,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
+	inc/MantidAlgorithms/StripVanadiumPeaks2.h
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
@@ -471,6 +473,7 @@ set ( TEST_FILES
 	test/SpatialGroupingTest.h
 	test/SphericalAbsorptionTest.h
 	test/StripPeaksTest.h
+	test/StripVanadiumPeaks2Test.h
 	test/StripVanadiumPeaksTest.h
 	test/SumNeighboursTest.h
 	test/SumRowColumnTest.h
