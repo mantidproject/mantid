@@ -36,7 +36,11 @@ SplatterPlotView::~SplatterPlotView()
 void SplatterPlotView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  //this->destroyFilter(builder, QString("Slice"));
+  if (this->threshSource)
+  {
+    builder->destroy(this->threshSource);
+  }
+  builder->destroy(this->splatSource);
   builder->destroy(this->view);
 }
 
