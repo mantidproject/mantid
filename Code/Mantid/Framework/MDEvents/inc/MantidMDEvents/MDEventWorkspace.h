@@ -46,6 +46,8 @@ namespace MDEvents
 
     virtual const std::string id() const;
 
+    //------------------------ IMDWorkspace Methods -----------------------------------------
+
     /** @returns the number of dimensions in this workspace */
     virtual size_t getNumDims() const;
 
@@ -55,6 +57,10 @@ namespace MDEvents
     /// Creates a new iterator pointing to the first cell (box) in the workspace
     virtual Mantid::API::IMDIterator* createIterator() const;
 
+    /// Returns the (normalized) signal at a given coordinates
+    virtual signal_t getSignalAtCoord(const coord_t * coords) const;
+
+    //------------------------ (END) IMDWorkspace Methods -----------------------------------------
 
     /** @returns the number of bytes of memory used by the workspace. */
     virtual size_t getMemorySize() const;

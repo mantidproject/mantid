@@ -123,6 +123,33 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
+  /** Returns the (normalized) signal at a given coordinates
+   *
+   * @param coords :: nd-sized array of coordinates
+   * @return the normalized signal of the box at the given coordinates. NaN if out of bounds
+   */
+  TMDE(
+  signal_t MDEventWorkspace)::getSignalAtCoord(const coord_t * coords) const
+  {
+    // Do an initial bounds check
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = coords[d];
+      MDDimensionExtents & extents = data->getExtents(d);
+      if (x < extents.min || x >= extents.max)
+        return std::numeric_limits<signal_t>::quiet_NaN();
+    }
+    // If you got here, then the point is in the workspace.
+    const IMDBox<MDE,nd> * box = data->getBoxAtCoord(coords);
+    if (box)
+      return box->getSignalNormalized();
+    else
+      return std::numeric_limits<signal_t>::quiet_NaN();
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Get a vector of the minimum extents that still contain all the events in the workspace.
    *
    * @param depth :: recursion depth to which to search. This will determine the resolution

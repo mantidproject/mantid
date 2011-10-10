@@ -71,6 +71,9 @@ namespace MDEvents
 
     void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
+    const IMDBox<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
+
+
     void addEvent(const MDE & point);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;

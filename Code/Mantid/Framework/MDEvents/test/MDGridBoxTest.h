@@ -805,6 +805,17 @@ public:
 
 
   //-------------------------------------------------------------------------------------
+  /** Get a sub-box at a given coord */
+  void test_getBoxAtCoord()
+  {
+    MDGridBox<MDLeanEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
+    coord_t coords[2] = {1.5,1.5};
+    const IMDBox<MDLeanEvent<2>,2> * c = b->getBoxAtCoord(coords);
+    TS_ASSERT_EQUALS(c, b->getChild(11));
+  }
+
+
+  //-------------------------------------------------------------------------------------
   /** Test the routine that auto-splits MDBoxes into MDGridBoxes recursively.
    * It tests the max_depth of splitting too, because there are numerous
    * repeated events at exactly the same position = impossible to separate further.

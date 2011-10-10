@@ -691,6 +691,30 @@ namespace MDEvents
 
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the lowest-level box at the given coordinates
+   * @param coords :: nd-sized array of the coordinate of the point to look at
+   * @return IMDBox pointer.
+   */
+  template <typename MDE, size_t nd>
+  const IMDBox<MDE,nd> * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) const
+  {
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = coords[d];
+      int i = int((x - this->extents[d].min) / boxSize[d]);
+      // NOTE: No bounds checking is done (for performance).
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      return boxes[index]->getBoxAtCoord(coords);
+    else
+      return NULL;
+  }
 
 
 

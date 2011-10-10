@@ -143,6 +143,10 @@ namespace MDEvents
     virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)
     {  /* Do nothing by default. */ }
 
+    /// Returns the lowest-level box at the given coordinates
+    virtual const IMDBox<MDE,nd> * getBoxAtCoord(const coord_t * /*coords*/) const
+    { return this; }
+
 
 
     // -------------------------------- Events-Related -------------------------------------------

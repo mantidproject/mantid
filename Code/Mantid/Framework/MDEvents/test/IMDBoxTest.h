@@ -136,6 +136,13 @@ public:
     TS_ASSERT_EQUALS( b.getDepth(), 123);
   }
 
+  void test_getBoxAtCoord()
+  {
+    coord_t dummy[3] = {1,2,3};
+    IMDBoxTester<MDLeanEvent<3>,3> b;
+    TSM_ASSERT_EQUALS("IMDBox->getBoxAtCoord() always returns this.", b.getBoxAtCoord(dummy), &b);
+  }
+
   void test_getParent_and_setParent()
   {
     IMDBoxTester<MDLeanEvent<3>,3> b;
@@ -341,6 +348,8 @@ public:
     for (uint64_t i=0; i<10; i++)
       { TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); }
   }
+
+
 };
 
 

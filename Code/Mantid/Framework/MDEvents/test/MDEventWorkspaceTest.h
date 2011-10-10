@@ -1,6 +1,8 @@
 #ifndef MDEVENTWORKSPACETEST_H
 #define MDEVENTWORKSPACETEST_H
 
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressText.h"
@@ -8,10 +10,10 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -22,8 +24,7 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -125,6 +126,8 @@ public:
   }
 
 
+  //-------------------------------------------------------------------------------------
+  /** Split the main box into a grid box */
   void test_splitBox()
   {
     MDEventWorkspace3 * ew = new MDEventWorkspace3();
@@ -136,6 +139,7 @@ public:
     delete ew;
   }
 
+  //-------------------------------------------------------------------------------------
   /** Create an IMDIterator */
   void test_createIterator()
   {
@@ -151,6 +155,7 @@ public:
     delete it;
   }
 
+  //-------------------------------------------------------------------------------------
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable()
   {
@@ -160,6 +165,23 @@ public:
     TS_ASSERT_EQUALS( itab->cell<int>(3,0), 3);
   }
 
+
+  //-------------------------------------------------------------------------------------
+  /** Get the signal at a given coord */
+  void test_getSignalAtCoord()
+  {
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    coord_t coords1[3] = {1.5,1.5,1.5};
+    coord_t coords2[3] = {2.5,2.5,2.5};
+    coord_t coords3[3] = {-0.1, 2, 2};
+    coord_t coords4[3] = {2, 2, 4.1};
+    ew->addEvent(MDLeanEvent<3>(2.0, 2.0, coords2));
+    ew->refreshCache();
+    TSM_ASSERT_DELTA("A regular box with a single event", ew->getSignalAtCoord(coords1), 1.0, 1e-5);
+    TSM_ASSERT_DELTA("The box with 2 events", ew->getSignalAtCoord(coords2), 3.0, 1e-5);
+    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords3) ) );
+    TSM_ASSERT("Out of bounds returns NAN", boost::math::isnan( ew->getSignalAtCoord(coords4) ) );
+  }
 
   //-------------------------------------------------------------------------------------
   /** Fill a 10x10 gridbox with events
