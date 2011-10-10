@@ -336,8 +336,6 @@ class SNSPowderReduction(PythonAlgorithm):
                 binning = [info.dmin, self._binning[0], info.dmax]
             self.log().information("d-Spacing Binning: " + str(binning))
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        else:
-            preserveEvents = True
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
                              PreserveEvents=preserveEvents)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
@@ -522,14 +520,10 @@ class SNSPowderReduction(PythonAlgorithm):
                         vanRun -= vbackRun
 
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
-                    CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun) + "a")
-                    ConvertUnits(InputWorkspace=str(vanRun) + "a", OutputWorkspace=str(vanRun) + "a", Target="TOF")
                     StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun) + "b")
                     FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun) + "c")
                     MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
