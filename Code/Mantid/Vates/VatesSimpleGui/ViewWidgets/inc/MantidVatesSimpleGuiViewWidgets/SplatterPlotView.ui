@@ -32,7 +32,7 @@
      <item>
       <widget class="QPushButton" name="thresholdButton">
        <property name="text">
-        <string>Theshhold</string>
+        <string>Threshold</string>
        </property>
       </widget>
      </item>
