@@ -2,6 +2,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <iomanip>
+#include <qlayout.h>
 
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
     : QWidget(parent)
@@ -75,16 +76,19 @@ void DimensionSliceWidget::setShownDim(int dim)
   ui.horizontalSlider->setVisible( slicing );
   ui.doubleSpinBox->setVisible( slicing );
   ui.lblUnits->setVisible( slicing );
+
   // Make the spacer expand to keep the buttons in the same spot
   if (slicing)
   {
-    ui.horizontalSpacer->changeSize(1,1, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // Remove the 3rd item = the spacer
+    QLayoutIterator it = ui.horizontalLayout->iterator();
+    ++it; ++it; ++it;
+    ui.horizontalLayout->removeItem(it.current());
   }
   else
-  {
-    ui.horizontalSpacer->changeSize(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-  }
-  //ui.horizontalLayout->setStretchFactor(ui.horizontalSpacer, slicing ? 0 : 1);
+    // Put the spacer back
+    ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer );
+
   this->update();
   m_insideSetShownDim = false;
 }
