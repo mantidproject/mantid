@@ -114,6 +114,8 @@ void SliceViewer::changedShownDim(int index, int dim)
 /** Slot to redraw when the slice poitn changes */
 void SliceViewer::updateDisplaySlot(int index, double value)
 {
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
   this->updateDisplay();
 }
 
