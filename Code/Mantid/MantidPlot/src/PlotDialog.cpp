@@ -434,6 +434,37 @@ void PlotDialog::changePlotType(int plotType)
 	acceptParams();
 }
 
+
+
+/** 
+* Changes the graph's plot stlye from somewhere other than the plot dialog.
+*
+* @params plotType :: This is the plot style number. i.e line is 0 and scatter is 1.
+* @params color :: The color the user specified for the plot.
+*/
+void PlotDialog::setPlotType(int plotType, const QString & color)
+{
+    CurveTreeItem *item = (CurveTreeItem *)listBox->currentItem();
+    if (!item)
+        return;
+    if (item->type() != CurveTreeItem::PlotCurveTreeItem)
+        return;
+    Graph *graph = item->graph();
+    if (!graph)
+        return;
+
+		QwtSymbol s = QwtSymbol(QwtSymbol::Cross, QBrush(), QPen(QColor(color)), QSize(5,5));
+		if (plotType == Graph::Line)
+			s.setStyle(QwtSymbol::NoSymbol);
+		else if (plotType == Graph::Scatter)
+			graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
+		else if (plotType == Graph::LineSymbols)
+			graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
+
+    graph->setCurveSymbol(item->plotItemIndex(), s);
+}
+
+
 void PlotDialog::initFontsPage()
 {
     QGroupBox *boxFonts = new QGroupBox();

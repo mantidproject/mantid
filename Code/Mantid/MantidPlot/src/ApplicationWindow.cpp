@@ -16286,6 +16286,8 @@ else
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
         SLOT(runPythonScript(const QString&)));
+    // Re-emits the signal caught from the muon analysis
+    connect(user_interface, SIGNAL(setAsPlotType(const QString &)), this, SLOT(setPlotType(const QString &)));
     //If the fitting is requested then run the peak picker tool in runConnectFitting
     connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
         SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
@@ -16365,9 +16367,7 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
     connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
     connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 
         SLOT(scriptPrint(const QString &)));
-
   }
-
   m_iface_script->setCode(code);
   if( !quiet )
   {
@@ -16379,8 +16379,70 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
   {
     scriptPrint("Script execution completed successfully.", false, true);
   }
-    
 }
+
+
+/**
+* Makes sure that it is dealing with a graph and then tells the plotDialog class 
+* to change the plot style
+*
+* @params plotDetails :: This includes all details of the plot including type, 
+* curve number, workspace and color
+*/
+void ApplicationWindow::setPlotType(const QString & plotDetails)
+{
+  QStringList plotDetailsList("");
+  int plotType(0);
+  int curveNum(0);
+
+  if (plotDetails.contains(".") == false)
+  {
+    QMessageBox::information(this, "Mantid - Error", "Plot type or curve index is missing. Please contact a Mantid team member.");
+  }
+  else
+  {
+    plotDetailsList = plotDetails.split('.');
+    if (plotDetailsList.size() >= 3) 
+    {
+      plotType = plotDetailsList[0].toInt();
+      curveNum = plotDetailsList[1].toInt();
+
+
+      QList<MdiSubWindow *> windows = windowsList();
+      foreach (MdiSubWindow *w, windows) 
+      {
+        if (w->isA("MultiLayer"))
+        {
+          MultiLayer *plot = (MultiLayer *)w;
+          {
+            // Check to see if graph is the new one by comparing the names
+            if (w->objectName() == plotDetailsList[2])
+            {
+              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
+              pd->setMultiLayer(plot);
+              Graph *g = plot->activeGraph();
+              if (g)
+              {
+                pd->selectCurve(g->curveIndex(curveNum));
+
+                // line(0) scatter(1) line+symbol(2)
+                if (plotType >= 0 && plotType <= 2)
+                {
+                if (plotDetailsList.size() > 3)
+                  pd->setPlotType(plotType, plotDetailsList[3]);
+                else
+                  pd->setPlotType(plotType);            
+                }
+                g->activateGraph();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 
 void ApplicationWindow::loadCustomActions()
 {

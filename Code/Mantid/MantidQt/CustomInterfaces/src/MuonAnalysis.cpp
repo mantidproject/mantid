@@ -174,6 +174,9 @@ void MuonAnalysis::initLayout()
 
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
+
+  // Detect when fitting has started, change the plot style to the one specified in plot details tab.
+  connect(m_uiForm.fitBrowser,SIGNAL(changeFitPlotStyle(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
 }
 
 
@@ -1725,6 +1728,13 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     std::string bsdfasdf = pyString.toStdString();
     
     QString pyOutput = runPythonCode( pyString ).trimmed();
+
+    // Change the plot style of the graph so that it matches what is selected on 
+    // the plot options tab. Default is set to line (0).
+    QString plotType("");
+    plotType.setNum(m_uiForm.connectPlotType->currentIndex());
+
+    changePlotType(plotType + ".1." + titleLabel);
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
@@ -2788,6 +2798,20 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
   }
 }
 
+
+/**
+* Set up the string that will contain all the data needed for making a plot.
+* [fitType, curveNum, wsName, color]
+*
+* @params wsName :: The workspace name of the plot to be created. 
+*/
+void MuonAnalysis::changeFitPlotType(const QString & wsName)
+{
+  // First part indicates 
+  QString fitType("");
+  fitType.setNum(m_uiForm.connectFitType->currentIndex());
+  changePlotType(fitType + ".3." + wsName + "." + "Lime");
+}
+
 }//namespace MantidQT
 }//namespace CustomInterfaces
-

@@ -1463,6 +1463,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
   {
     emit multifitFinished();
   }
+  changeFitPlotStyle(QString::fromStdString(alg->getProperty("InputWorkspace")));
 }
 
 

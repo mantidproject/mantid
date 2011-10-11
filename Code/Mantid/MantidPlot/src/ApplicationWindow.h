@@ -1086,6 +1086,8 @@ private:
   void performCustomAction(QAction *);
   void runPythonScript(const QString & code, bool quiet=false);
 
+  void setPlotType(const QString & plotType);
+
   void hideSelectedColumns();
   void showAllColumns();
   void closedLastCopiedLayer(){lastCopiedLayer = NULL;};

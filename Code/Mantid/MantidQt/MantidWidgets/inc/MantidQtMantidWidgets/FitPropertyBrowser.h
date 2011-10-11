@@ -226,6 +226,8 @@ signals:
   void wsChangePPAssign(const QString&);
   void functionChanged();
 
+  void changeFitPlotStyle(const QString &);
+
   // @Rob_Whitley Need to implement. 
   void bunchData(const std::string&);
   void rawData(const std::string&);

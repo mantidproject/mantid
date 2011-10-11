@@ -75,6 +75,8 @@ public:
   void insertColumnsList(const QStringList& names){columnNames = names;};
   void setMultiLayer(MultiLayer *ml);
 
+  void setPlotType(int plotType, const QString & color = "Black");
+
 public slots:
   void showAll(bool all);
   void selectCurve(int index);
@@ -92,6 +94,8 @@ private slots:
 
   int setPlotType(CurveTreeItem *item);
   void changePlotType(int plotType);
+
+
   void setActiveCurve(CurveTreeItem *item);
 
   void insertTabs(int plot_type);

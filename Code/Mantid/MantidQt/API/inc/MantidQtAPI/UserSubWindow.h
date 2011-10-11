@@ -110,6 +110,10 @@ public:
 signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code);
+
+  /// Change the plot style/color
+  void setAsPlotType(const QString & plotDetails);
+
   ///Mantid log message recieved
   void logMessageReceived(const QString & msg);
 
@@ -132,6 +136,9 @@ protected:
   QString runPythonCode(const QString & code, bool no_output = false);
   QString openFileDialog(const bool save, const QStringList &exts);
   QLabel* newValidator(QWidget *parent);
+
+  /// Change the plot style/color
+  void changePlotType(const QString & plotDetails);
 
 private:
   // This is so that it can set the name

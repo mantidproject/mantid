@@ -212,6 +212,18 @@ QLabel* UserSubWindow::newValidator(QWidget *parent)
   return validLbl;
 }
 
+/**
+* Re-emits the signal to change the plot style
+*
+* @params plotDetails :: This includes all details of the plot including type, 
+* curve number, workspace and color
+*/
+void UserSubWindow::changePlotType(const QString& plotDetails)
+{
+  emit setAsPlotType(plotDetails);
+}
+
+
 //--------------------------------------
 // Private member functions
 //-------------------------------------
