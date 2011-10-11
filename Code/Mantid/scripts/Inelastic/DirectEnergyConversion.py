@@ -186,6 +186,7 @@ class DirectEnergyConversion(object):
         Convert units of a given workspace to deltaE, including possible 
         normalisation to a white-beam vanadium run.
         """
+
         # Special load monitor stuff.    
         if (self.instr_name == "CNCS"):
             self.fix_ei = True
@@ -196,6 +197,11 @@ class DirectEnergyConversion(object):
                 tzero = Tzero
             # apply T0 shift
             ChangeBinOffset(data_ws, result_name, -tzero)
+            mon1_peak = 0.0
+	elif (self.instr_name == "HYSPEC"):
+	    self.fix_ei = True
+            ei_value = ei_guess
+            tzero = 0.0
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename']
@@ -670,7 +676,7 @@ class DirectEnergyConversion(object):
         self.normalise_method = 'monitor-1'
         self.map_file = None
         
-        if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
+        if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA" or self.instr_name == "HYSPEC"):
             self.facility = "SNS"
             self.normalise_method  = 'current'
         else:
