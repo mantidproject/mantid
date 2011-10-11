@@ -9,6 +9,7 @@
 
 class pqColorMapModel;
 class pqObjectBuilder;
+class pqPipelineBrowserWidget;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
@@ -59,6 +60,12 @@ public:
   ViewBase(QWidget *parent = 0);
   /// Default destructor.
   virtual ~ViewBase() {}
+
+  /**
+   * Function used to correct post-accept visibility issues. Most
+   * views won't need to do anything.
+   */
+  virtual void correctVisibility(pqPipelineBrowserWidget *pbw);
   /**
    * Function that creates a single view instance.
    * @param container the UI widget to associate the view with

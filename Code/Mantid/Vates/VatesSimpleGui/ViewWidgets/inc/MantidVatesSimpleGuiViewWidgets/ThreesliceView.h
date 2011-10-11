@@ -61,14 +61,15 @@ public:
   ThreeSliceView(QWidget *parent = 0);
   /// Default destructor.
   virtual ~ThreeSliceView();
+
+  /// Correct the color scale range if not in automatic mode.
+  void correctColorScaleRange();
   /**
-   * Correct an oddity in the creation of the view so that the cuts
+   * Correct an oddity in the creation of the 3D view so that the cuts
    * are visibile.
    * @param pbw the main program's handle to the pqPipelineBrowserWidget
    */
   void correctVisibility(pqPipelineBrowserWidget *pbw);
-  /// Correct the color scale range if not in automatic mode.
-  void correctColorScaleRange();
   /**
    * ViewBase::destroyView
    */

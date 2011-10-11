@@ -82,6 +82,11 @@ void ViewBase::onLogScale(int state)
   this->renderAll();
 }
 
+void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
+{
+  UNUSED_ARG(pbw);
+}
+
 }
 }
 }

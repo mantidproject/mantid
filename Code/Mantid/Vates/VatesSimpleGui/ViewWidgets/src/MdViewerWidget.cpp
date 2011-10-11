@@ -455,10 +455,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
-  if (this->currentView->inherits("ThreeSliceView"))
-  {
-    static_cast<ThreeSliceView *>(this->currentView)->correctVisibility(this->ui.pipelineBrowser);
-  }
+  this->currentView->correctVisibility(this->ui.pipelineBrowser);
 }
 
 void MdViewerWidget::swapViews()
