@@ -310,7 +310,7 @@ class DirectEnergyConversion(object):
         ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
         
         if not self.energy_bins is None:
-            Rebin(result_ws, result_ws, self.energy_bins)
+            Rebin(result_ws, result_ws, self.energy_bins,PreserveEvents=False)
         
         if self.apply_detector_eff:
             if (self.facility == "SNS"):
