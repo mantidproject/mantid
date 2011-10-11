@@ -143,9 +143,6 @@ void Q1DWeighted::exec()
       const MantidVec& YIn = inputWS->readY(i);
       const MantidVec& EIn = inputWS->readE(i);
 
-      double wl_bin_width = 1.0;
-      if (xLength>2) wl_bin_width = XIn[j+1]-XIn[j];
-
       // Each pixel is sub-divided in the number of pixels given as input parameter (NPixelDivision)
       for ( int isub=0; isub<nSubPixels*nSubPixels; isub++ )
       {
@@ -191,7 +188,7 @@ void Q1DWeighted::exec()
           {
             lambda_iq[iq] += YIn[j]*w;
             lambda_iq_err[iq] += w*w*EIn[j]*EIn[j];
-            XNorm[iq] += w*wl_bin_width;
+            XNorm[iq] += w;
           }
         }
       }
