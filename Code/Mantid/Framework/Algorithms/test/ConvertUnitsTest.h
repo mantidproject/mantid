@@ -15,6 +15,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -313,6 +314,65 @@ public:
     conv2.setPropertyValue("Efixed","15.0");
     TS_ASSERT_THROWS_NOTHING( conv2.execute() );
     TS_ASSERT( conv2.isExecuted() );
+  }
+
+
+  /** Ticket #3934: If the workspace is sorted by TOF, it should remain so even if
+   * sorting flips the direction
+   */
+  void do_testExecEvent_RemainsSorted(EventSortType sortType)
+  {
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false);
+    ws->getAxis(0)->setUnit("TOF");
+    ws->sortAll(sortType, NULL);
+
+    if (sortType == TOF_SORT)
+    {
+      // Only threadsafe if all the event lists are sorted
+      TS_ASSERT( ws->threadSafe() );
+    }
+    TS_ASSERT_EQUALS( ws->getNumberEvents(), 100*200);
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+    conv.setPropertyValue("OutputWorkspace", "out");
+    conv.setPropertyValue("Target","dSpacing");
+    conv.execute();
+    TS_ASSERT( conv.isExecuted() );
+
+    EventWorkspace_sptr out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("out"));
+    TS_ASSERT(out);
+    if (!out) return;
+    TS_ASSERT_EQUALS( out->getNumberEvents(), 100*200);
+
+    EventList & el = out->getEventList(0);
+    TS_ASSERT( el.getSortType() == sortType );
+
+    if (sortType == TOF_SORT)
+    {
+      // Only threadsafe if all the event lists are sorted by TOF
+      TS_ASSERT( out->threadSafe() );
+
+      // Check directly that it is indeed increasing
+      double last_x = -1e10;
+      for (size_t i=0; i<el.getNumberEvents(); i++)
+      {
+        double x = el.getEvent(i).tof();
+        TS_ASSERT( x >= last_x );
+        last_x = x;
+      }
+    }
+  }
+
+  void testExecEvent_RemainsSorted_TOF()
+  {
+    do_testExecEvent_RemainsSorted(TOF_SORT);
+  }
+
+  void testExecEvent_RemainsSorted_Pulsetime()
+  {
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT);
   }
 
 private:

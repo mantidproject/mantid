@@ -7,6 +7,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Kernel::Units;
 
 class UnitTest : public CxxTest::TestSuite
 {
@@ -24,8 +25,10 @@ public:
     const std::string unitID() const {return "aUnit";}
     const std::string caption() const {return "";}
     const std::string label() const{return "";}
-    void toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&, const double&,const int&, const double&, const double&) const {}
-    void fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double&, const double&, const int&, const double&, const double&) const {}
+    void init() {}
+    virtual double singleToTOF(const double ) const { return 0; }
+    virtual double singleFromTOF(const double ) const { return 0; }
+    virtual Unit * clone() const { return new UnitTester();}
   };
 
 public:
@@ -50,6 +53,20 @@ public:
     // Test the quickConversion method that takes a Unit
     Units::TOF tof;
     TS_ASSERT( ! t.quickConversion(tof,factor,power) );
+  }
+
+  void test_clone()
+  {
+    TS_ASSERT( dynamic_cast<Empty*>((new Empty())->clone()) );
+    TS_ASSERT( dynamic_cast<Label*>((new Label())->clone()) );
+    TS_ASSERT( dynamic_cast<Wavelength*>((new Wavelength())->clone()) );
+    TS_ASSERT( dynamic_cast<Energy*>((new Energy())->clone()) );
+    TS_ASSERT( dynamic_cast<Energy_inWavenumber*>((new Energy_inWavenumber())->clone()) );
+    TS_ASSERT( dynamic_cast<dSpacing*>((new dSpacing())->clone()) );
+    TS_ASSERT( dynamic_cast<MomentumTransfer*>((new MomentumTransfer())->clone()) );
+    TS_ASSERT( dynamic_cast<QSquared*>((new QSquared())->clone()) );
+    TS_ASSERT( dynamic_cast<DeltaE*>((new DeltaE())->clone()) );
+    TS_ASSERT( dynamic_cast<DeltaE_inWavenumber*>((new DeltaE_inWavenumber())->clone()) );
   }
     
   //----------------------------------------------------------------------

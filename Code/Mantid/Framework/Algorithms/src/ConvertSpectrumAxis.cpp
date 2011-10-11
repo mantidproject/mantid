@@ -9,30 +9,6 @@
 
 #include <cfloat>
 
-/// @cond
-// Don't document this very long winded way of getting "radians" to print on the axis.
-namespace
-{
-  class Degrees : public Mantid::Kernel::Unit
-  {
-    const std::string unitID() const { return ""; }
-    const std::string caption() const { return "Scattering angle"; }
-    const std::string label() const { return "degrees"; }
-    void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
-    {
-      (void) xdata; (void) ydata; (void) l1; (void)l2; (void)twoTheta; (void)emode; (void)efixed; (void)delta;
-    }
-
-    void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
-    {
-      (void) xdata; (void) ydata; (void) l1; (void)l2; (void)twoTheta; (void)emode; (void)efixed; (void)delta;
-    }
-  };
-} // end anonynmous namespace
-/// @endcond
-
 namespace Mantid
 {
 namespace Algorithms
@@ -94,8 +70,8 @@ namespace Algorithms
     bool warningGiven = false;
     if ( unitTarget != "theta" )
     {
-      Kernel::Unit_const_sptr fromUnit = inputWS->getAxis(0)->unit();
-      Kernel::Unit_const_sptr toUnit = UnitFactory::Instance().create(unitTarget);
+      Kernel::Unit_sptr fromUnit = inputWS->getAxis(0)->unit();
+      Kernel::Unit_sptr toUnit = UnitFactory::Instance().create(unitTarget);
       IObjComponent_const_sptr source = inputWS->getInstrument()->getSource();
       IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
       std::vector<double> emptyVector;
@@ -157,7 +133,7 @@ namespace Algorithms
     // The unit of this axis is radians. Use the 'radians' unit defined above.
     if ( unitTarget == "theta" )
     {
-      newAxis->unit() = boost::shared_ptr<Unit>(new Degrees);
+      newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
     }
     else
     {

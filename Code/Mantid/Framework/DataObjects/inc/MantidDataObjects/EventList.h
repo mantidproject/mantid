@@ -350,6 +350,15 @@ public:
 
   void divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
 
+  template<class T>
+  void convertUnitsViaTofHelper(typename std::vector<T> & events, Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
+  template<class T>
+  void convertUnitsQuicklyHelper(typename std::vector<T> & events, const double& factor, const double& power);
+
+  void convertUnitsViaTof(Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
+  void convertUnitsQuickly(const double& factor, const double& power);
+
+
 private:
   ///List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;

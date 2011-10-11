@@ -7,6 +7,7 @@
 #include <limits>
 #include <math.h>
 #include <stdexcept>
+#include <cfloat>
 
 using std::ostream;
 using std::runtime_error;
@@ -3169,6 +3170,96 @@ namespace DataObjects
     events = &el.getWeightedEventsNoTime();
   }
 
+
+
+
+  //--------------------------------------------------------------------------
+  template<class T>
+  void EventList::convertUnitsViaTofHelper(typename std::vector<T> & events, Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit)
+  {
+    typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end();
+    for (; itev != itev_end; itev++)
+    {
+      // Conver to TOF
+      double tof = fromUnit->singleToTOF(itev->m_tof);
+      // And back from TOF to whatever
+      itev->m_tof = toUnit->singleFromTOF(tof);
+    }
+  }
+
+  //--------------------------------------------------------------------------
+  /** Converts the X units in each event by going through TOF.
+   * Note: if the unit conversion reverses the order, use "reverse()" to flip it back.
+   *
+   * @param fromUnit :: the Unit describing the input unit. Must be initialized.
+   * @param toUnit :: the Unit describing the output unit. Must be initialized.
+   */
+  void EventList::convertUnitsViaTof(Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit)
+  {
+    // Check for initialized
+    if (!fromUnit || !toUnit)
+      throw std::runtime_error("EventList::convertUnitsViaTof(): one of the units is NULL!");
+    if (!fromUnit->isInitialized())
+      throw std::runtime_error("EventList::convertUnitsViaTof(): fromUnit is not initialized!");
+    if (!toUnit->isInitialized())
+      throw std::runtime_error("EventList::convertUnitsViaTof(): toUnit is not initialized!");
+
+    switch (eventType)
+    {
+    case TOF:
+      convertUnitsViaTofHelper(this->events, fromUnit, toUnit);
+      break;
+    case WEIGHTED:
+      convertUnitsViaTofHelper(this->weightedEvents, fromUnit, toUnit);
+      break;
+    case WEIGHTED_NOTIME:
+      convertUnitsViaTofHelper(this->weightedEventsNoTime, fromUnit, toUnit);
+      break;
+    }
+  }
+
+
+
+
+  //--------------------------------------------------------------------------
+  /** Convert the event's TOF (x) value according to a simple output = a * (input^b) relationship
+   *  @param events :: templated class for the list of events
+   *  @param factor :: the conversion factor a to apply
+   *  @param power :: the Power b to apply to the conversion
+   */
+  template<class T>
+  void EventList::convertUnitsQuicklyHelper(typename std::vector<T> & events, const double& factor, const double& power)
+  {
+    typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end();
+    for (; itev != itev_end; itev++)
+    {
+      // Output unit = factor * (input) ^ power
+      itev->m_tof = factor * std::pow(itev->m_tof, power);
+    }
+  }
+
+  //--------------------------------------------------------------------------
+  /** Convert the event's TOF (x) value according to a simple output = a * (input^b) relationship
+   *  @param factor :: the conversion factor a to apply
+   *  @param power :: the Power b to apply to the conversion
+   */
+  void EventList::convertUnitsQuickly(const double& factor, const double& power)
+  {
+    switch (eventType)
+    {
+    case TOF:
+      convertUnitsQuicklyHelper(this->events, factor, power);
+      break;
+    case WEIGHTED:
+      convertUnitsQuicklyHelper(this->weightedEvents, factor, power);
+      break;
+    case WEIGHTED_NOTIME:
+      convertUnitsQuicklyHelper(this->weightedEventsNoTime, factor, power);
+      break;
+    }
+  }
 
 
 } /// namespace DataObjects

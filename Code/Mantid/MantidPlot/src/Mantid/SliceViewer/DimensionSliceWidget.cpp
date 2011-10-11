@@ -76,10 +76,14 @@ void DimensionSliceWidget::setShownDim(int dim)
   ui.lblUnits->setVisible( slicing );
   // Make the spacer expand to keep the buttons in the same spot
   if (slicing)
+  {
     ui.horizontalSpacer->changeSize(1,1, QSizePolicy::Fixed, QSizePolicy::Fixed);
+  }
   else
+  {
     ui.horizontalSpacer->changeSize(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-  //ui.horizontalLayout->setStretch(3, slicing ? 0 : 1);
+  }
+  //ui.horizontalLayout->setStretchFactor(ui.horizontalSpacer, slicing ? 0 : 1);
   this->update();
   m_insideSetShownDim = false;
 }

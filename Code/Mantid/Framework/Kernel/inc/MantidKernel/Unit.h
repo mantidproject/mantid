@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -61,6 +62,7 @@ public:
   bool quickConversion(const Unit& destination, double& factor, double& power) const;
   bool quickConversion(std::string destUnitName, double& factor, double& power) const;
 
+
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
    *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
@@ -71,8 +73,8 @@ public:
    *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
    *  @param delta ::    Not currently used
    */
-  virtual void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const = 0;
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -84,17 +86,66 @@ public:
    *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
    *  @param delta ::    Not currently used
    */
-  virtual void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const = 0;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta);
+
+  /** Initialize the unit to perform conversion using singleToTof() and singleFromTof()
+   *
+   *  @param _l1 ::       The source-sample distance (in metres)
+   *  @param _l2 ::       The sample-detector distance (in metres)
+   *  @param _twoTheta :: The scattering angle (in radians)
+   *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *  @param _delta ::    Not currently used
+   */
+  void initialize(const double& _l1, const double& _l2,
+               const double&_twoTheta, const int& _emode, const double& _efixed, const double& _delta);
+
+  /** Finalize the initialization. This will be overridden by subclasses as needed. */
+  virtual void init() = 0;
+
+  /** Convert a single X value to TOF.
+   * @return the TOF as converted.
+   */
+  virtual double singleToTOF(const double x) const = 0;
+
+  /** Convert a single tof value to this unit
+   * @return the value in this unit as converted.
+   */
+  virtual double singleFromTOF(const double tof) const = 0;
 
   /// (Empty) Constructor
-  Unit() {}
+  Unit() : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0), delta(0) {}
+  /// Copy Constructor
+  Unit(const Unit & other);
   /// Virtual destructor
   virtual ~Unit() {}
+
+  /// @return a cloned instance of the other
+  virtual Unit * clone() const = 0;
+
+  /// @return true if the unit was initialized and so can use singleToTOF()
+  bool isInitialized() const
+  { return initialized; }
 
 protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
+
+  /// The unit values have been initialized
+  bool initialized;
+  /// l1 ::       The source-sample distance (in metres)
+  double l1;
+  /// l2 ::       The sample-detector distance (in metres)
+  double l2;
+  /// twoTheta :: The scattering angle (in radians)
+  double twoTheta;
+  /// emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+  int emode;
+  /// efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+  double efixed;
+  /// delta ::    Not currently used
+  double delta;
 
 private:
   /// A 'quick conversion' requires the constant by which to multiply the input and the power to which to raise it
@@ -121,6 +172,7 @@ typedef boost::shared_ptr<const Unit> Unit_const_sptr;
 namespace Units
 {
 
+//=================================================================================================
 /// Empty unit
 class MANTID_KERNEL_DLL Empty : public Unit
 {
@@ -129,10 +181,10 @@ public:
   const std::string caption() const { return ""; }
   const std::string label() const {return ""; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   Empty() : Unit() {}
@@ -140,6 +192,7 @@ public:
   ~Empty() {}
 };
 
+//=================================================================================================
 /// Label unit
 class MANTID_KERNEL_DLL Label : public Empty
 {
@@ -150,6 +203,7 @@ public:
 
   Label();
   void setLabel(const std::string& cpt, const std::string& lbl = "");
+  virtual Unit * clone() const;
 
   /// Destructor
   ~Label() {}
@@ -160,6 +214,7 @@ private:
   std::string m_label;
 };
 
+//=================================================================================================
 /// Time of flight in microseconds
 class MANTID_KERNEL_DLL TOF : public Unit
 {
@@ -168,10 +223,10 @@ public:
   const std::string caption() const { return "Time-of-flight"; }
   const std::string label() const {return "microsecond"; }
   
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   TOF() : Unit() {}
@@ -179,6 +234,7 @@ public:
   ~TOF() {}
 };
 
+//=================================================================================================
 /// Wavelength in Angstrom
 class MANTID_KERNEL_DLL Wavelength : public Unit
 {
@@ -187,17 +243,25 @@ public:
   const std::string caption() const { return "Wavelength"; }
   const std::string label() const {return "Angstrom"; }
   
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   Wavelength();
   /// Destructor
   ~Wavelength() {}
+
+protected:
+  double sfpTo;
+  double factorTo;
+  double sfpFrom;
+  double factorFrom;
+  bool do_sfpFrom;
 };
 
+//=================================================================================================
 /// Energy in milli-electronvolts
 class MANTID_KERNEL_DLL Energy : public Unit
 {
@@ -206,17 +270,22 @@ public:
   const std::string caption() const { return "Energy"; }
   const std::string label() const {return "meV"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   Energy();
   /// Destructor
   ~Energy() {}
+
+protected:
+  double factorTo;
+  double factorFrom;
 };
 
+//=================================================================================================
 /// Absolute energy in units of wavenumber (cm^-1)
 class MANTID_KERNEL_DLL Energy_inWavenumber : public Unit
 {
@@ -225,17 +294,22 @@ public:
   const std::string caption() const { return "Energy"; }
   const std::string label() const {return "1/cm"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   Energy_inWavenumber();
   /// Destructor
   ~Energy_inWavenumber() {}
+
+protected:
+  double factorTo;
+  double factorFrom;
 };
 
+//=================================================================================================
 /// d-Spacing in Angstrom
 class MANTID_KERNEL_DLL dSpacing : public Unit
 {
@@ -244,17 +318,22 @@ public:
   const std::string caption() const { return "d-Spacing"; }
   const std::string label() const {return "Angstrom"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   dSpacing();
   /// Destructor
   ~dSpacing() {}
+
+protected:
+  double factorTo;
+  double factorFrom;
 };
 
+//=================================================================================================
 /// Momentum Transfer in Angstrom^-1
 class MANTID_KERNEL_DLL MomentumTransfer : public Unit
 {
@@ -263,17 +342,22 @@ public:
   const std::string caption() const { return "q"; }
   const std::string label() const {return "1/Angstrom"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   MomentumTransfer();
   /// Destructor
   ~MomentumTransfer() {}
+
+protected:
+  double factorTo;
+  double factorFrom;
 };
 
+//=================================================================================================
 /// Momentum transfer squared in Angstrom^-2
 class MANTID_KERNEL_DLL QSquared : public Unit
 {
@@ -282,54 +366,89 @@ public:
   const std::string caption() const { return "Q2"; }
   const std::string label() const {return "Angstrom^-2"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   QSquared();
   /// Destructor
   ~QSquared() {}
+
+protected:
+  double factorTo;
+  double factorFrom;
 };
 
+//=================================================================================================
 /// Energy transfer in milli-electronvolts
 class MANTID_KERNEL_DLL DeltaE : public Unit
 {
 public:
-  const std::string unitID() const; ///< "DeltaE"
-  const std::string caption() const { return "Energy transfer"; }
-  const std::string label() const {return "meV"; }
+  virtual const std::string unitID() const; ///< "DeltaE"
+  virtual const std::string caption() const { return "Energy transfer"; }
+  virtual const std::string label() const {return "meV"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
   DeltaE() : Unit() {}
   /// Destructor
   ~DeltaE() {}
+
+protected:
+  double factorTo;
+  double factorFrom;
+  double t_other;
+  double t_otherFrom;
+  double unitScaling;
 };
 
+//=================================================================================================
 /// Energy transfer in units of wavenumber (cm^-1)
-class MANTID_KERNEL_DLL DeltaE_inWavenumber : public Unit
+class MANTID_KERNEL_DLL DeltaE_inWavenumber : public DeltaE
 {
 public:
   const std::string unitID() const; ///< "DeltaE_inWavenumber"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "1/cm"; }
 
-  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
-      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  virtual void init();
+  virtual Unit * clone() const;
 
   /// Constructor
-  DeltaE_inWavenumber() : Unit() {}
+  DeltaE_inWavenumber() : DeltaE() {}
   /// Destructor
   ~DeltaE_inWavenumber() {}
+
 };
+
+//=================================================================================================
+/// @cond
+// Don't document this very long winded way of getting "radians" to print on the axis.
+class Degrees : public Mantid::Kernel::Unit
+{
+  const std::string unitID() const { return ""; }
+  virtual const std::string caption() const { return "Scattering angle"; }
+  const std::string label() const { return "degrees"; }
+  virtual double singleToTOF(const double x) const { return x;}
+  virtual double singleFromTOF(const double tof) const { return tof; }
+  virtual void init() {}
+  virtual Unit * clone() const { return new Degrees(*this); }
+};
+
+/// Class that is Phi in degrees
+class Phi : public Degrees
+{
+  virtual const std::string caption() const { return "Phi"; }
+  virtual Unit * clone() const { return new Phi(*this); }
+};
+
+/// @endcond
 
 } // namespace Units
 

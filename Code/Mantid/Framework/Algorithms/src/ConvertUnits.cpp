@@ -297,14 +297,16 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
     // Convert the events themselves if necessary. Inefficiently.
     if ( m_inputEvents )
     {
-      std::vector<double> tofs;
-      eventWS->getEventList(k).getTofs(tofs);
-      std::vector<double>::iterator tofIt;
-      for (tofIt = tofs.begin(); tofIt != tofs.end(); ++tofIt)
-      {
-        *tofIt = factor * std::pow(*tofIt,power);
-      }
-      eventWS->getEventList(k).setTofs(tofs);
+      eventWS->getEventList(k).convertUnitsQuickly(factor, power);
+
+//      std::vector<double> tofs;
+//      eventWS->getEventList(k).getTofs(tofs);
+//      std::vector<double>::iterator tofIt;
+//      for (tofIt = tofs.begin(); tofIt != tofs.end(); ++tofIt)
+//      {
+//        *tofIt = factor * std::pow(*tofIt,power);
+//      }
+//      eventWS->getEventList(k).setTofs(tofs);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
@@ -344,7 +346,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   IObjComponent_const_sptr sample = instrument->getSample();
   if ( source == NULL || sample == NULL )
   {
-    throw Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+    throw Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
   }
   double l1;
   try
@@ -458,19 +460,25 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
         }
       }
 
-      // Convert the input unit to time-of-flight
-      fromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-      // Convert from time-of-flight to the desired unit
-      outputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      // Make local copies of the units. This allows running the loop in parallel
+      Unit * localFromUnit = fromUnit->clone();
+      Unit * localOutputUnit = outputUnit->clone();
 
-      // EventWorkspace part, modifying the EventLists. Very inefficient!
+      // Convert the input unit to time-of-flight
+      localFromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      // Convert from time-of-flight to the desired unit
+      localOutputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+
+      // EventWorkspace part, modifying the EventLists.
       if ( m_inputEvents )
       {
-        std::vector<double> tofs;
-        eventWS->getEventList(i).getTofs(tofs);
-        fromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-        outputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-        eventWS->getEventList(i).setTofs(tofs);
+        eventWS->getEventList(i).convertUnitsViaTof(localFromUnit, localOutputUnit);
+
+//        std::vector<double> tofs;
+//        eventWS->getEventList(i).getTofs(tofs);
+//        localFromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+//        localOutputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+//        eventWS->getEventList(i).setTofs(tofs);
       }
 
     } catch (Exception::NotFoundError&) {

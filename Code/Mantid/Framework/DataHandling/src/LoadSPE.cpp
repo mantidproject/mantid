@@ -11,22 +11,6 @@
 #include <cstdio>
 #include <limits>
 #include <fstream>
-/// @cond
-// Don't document this very long winded way of getting "degrees" to print on the axis.
-namespace
-{
-  class Degrees : public Mantid::Kernel::Unit
-  {
-    const std::string unitID() const { return ""; }
-    const std::string caption() const { return "Phi"; }
-    const std::string label() const { return "degrees"; }
-    void toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
-      const double&, const int&, const double&, const double&) const {}
-    void fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double&,
-      const double&, const int&, const double&, const double&) const {}
-  };
-} // end anonynmous namespace
-/// @endcond
 
 namespace Mantid
 {
@@ -100,7 +84,7 @@ void LoadSPE::exec()
   }
   else 
   {
-    phiAxis->unit() = boost::shared_ptr<Unit>(new Degrees);
+    phiAxis->unit() = boost::shared_ptr<Unit>(new Units::Phi);
   }
 
   // Read in phi grid

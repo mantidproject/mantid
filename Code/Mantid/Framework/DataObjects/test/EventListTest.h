@@ -1224,6 +1224,71 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  void test_convertUnitsQuickly_allTypes()
+  {
+    // Go through each possible EventType as the input
+    for (int this_type=0; this_type<3; this_type++)
+    {
+      this->fake_uniform_data();
+      el.switchTo(static_cast<EventType>(this_type));
+      size_t old_num = this->el.getNumberEvents();
+      this->el.convertUnitsQuickly(3.0, 2.0);
+      //Unchanged size
+      TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
+      //Original tofs were 100, 5100, 10100, etc.). This becomes 3^x^2
+      TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).tof(), 3*100*100.);
+      TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).tof(), 3*5100*5100.);
+    }
+  }
+
+  /// Dummy unit for testing conversion
+  class DummyUnit1 : public Mantid::Kernel::Units::Degrees
+  {
+    virtual double singleToTOF(const double x) const { return x*10.;}
+    virtual double singleFromTOF(const double tof) const { return tof/10.; }
+  };
+
+  /// Dummy unit for testing conversion
+  class DummyUnit2 : public Mantid::Kernel::Units::Degrees
+  {
+    virtual double singleToTOF(const double x) const { return x/20.;}
+    virtual double singleFromTOF(const double tof) const { return tof*20.; }
+  };
+
+  //-----------------------------------------------------------------------------------------------
+  void test_convertUnitsViaTof_failures()
+  {
+    Unit * fromUnit = new DummyUnit1();
+    Unit * toUnit = new DummyUnit2();
+    TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(NULL,NULL));
+    // Not initalized
+    TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(fromUnit,toUnit));
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void test_convertUnitsViaTof_allTypes()
+  {
+    Unit * fromUnit = new DummyUnit1();
+    Unit * toUnit = new DummyUnit2();
+    fromUnit->initialize(1,2,3,4,5,6);
+    toUnit->initialize(1,2,3,4,5,6);
+    // Go through each possible EventType as the input
+    for (int this_type=0; this_type<3; this_type++)
+    {
+      this->fake_uniform_data();
+      el.switchTo(static_cast<EventType>(this_type));
+      size_t old_num = this->el.getNumberEvents();
+      this->el.convertUnitsViaTof(fromUnit, toUnit);
+      //Unchanged size
+      TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
+      //Original tofs were 100, 5100, 10100, etc.). This becomes x * 200.
+      TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).tof(), 100*200.);
+      TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).tof(), 5100*200.);
+    }
+  }
+
+
 
   //-----------------------------------------------------------------------------------------------
   void test_addPulseTime_allTypes()
