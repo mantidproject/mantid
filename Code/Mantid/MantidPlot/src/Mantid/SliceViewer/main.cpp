@@ -95,7 +95,7 @@ int main( int argc, char ** argv )
   size_t numBins;
 
   numBins=100;
-  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 3, numBins, double(numBins)/10.0);
+  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 3, numBins, double(numBins)/2.0);
   for (size_t x=0;x<numBins; x++)
     for (size_t y=0;y<numBins; y++)
       for (size_t z=0;z<numBins; z++)

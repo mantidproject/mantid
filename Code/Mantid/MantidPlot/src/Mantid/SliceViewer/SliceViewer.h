@@ -24,13 +24,14 @@ public:
 
 
 public slots:
-  void changedShownDim(int index, int dim);
+  void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
   void updateDisplay();
 
 private:
   void initLayout();
   void updateDimensionSliceWidgets();
+  void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
 
 private:
   /// Auto-generated UI controls.

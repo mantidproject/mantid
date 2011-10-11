@@ -48,7 +48,7 @@ public slots:
   void btnXYChanged();
 
 signals:
-  void changedShownDim(int index, int dim);
+  void changedShownDim(int index, int dim, int oldDim);
   void changedSlicePoint(int index, double value);
 
 private:

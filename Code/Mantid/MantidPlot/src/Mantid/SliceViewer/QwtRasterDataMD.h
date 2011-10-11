@@ -30,7 +30,9 @@ public:
 
   QwtDoubleInterval range() const;
 
-  QRectF pixelHint(const QRectF & area) const;
+  QSize rasterHint(const QwtDoubleRect &) const;
+
+  mutable size_t timesRequested;
 
 protected:
   /// Workspace being shown

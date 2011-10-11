@@ -10,6 +10,7 @@
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot.h>
 #include <vector>
+#include <qwt_scale_engine.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -44,10 +45,32 @@ SliceViewer::~SliceViewer()
 }
 
 
+///** Get a slice from the workspace with the current settings */
+//SliceViewer::getSlice(double * data, size_t & length)
+//{
+//}
+
+//------------------------------------------------------------------------------------
+/** Reset the axis and scale it
+ *
+ * @param axis :: int for X or Y
+ * @param dim :: dimension to show
+ */
+void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim)
+{
+  m_plot->setAxisScale( axis, dim->getMinimum(), dim->getMaximum(), (dim->getMaximum()-dim->getMinimum())/5);
+//  m_plot->setAxisAutoScale(axis);
+  m_plot->setAxisTitle( axis, QString::fromStdString(dim->getName() + " (" + dim->getUnits() + ")") );
+//  QwtLinearScaleEngine * engine = new QwtLinearScaleEngine();
+//  m_plot->setAxisScaleEngine( axis, engine);
+}
+
 //------------------------------------------------------------------------------------
 /** Update the 2D plot using all the current controls settings */
 void SliceViewer::updateDisplay()
 {
+  m_data->timesRequested = 0;
+
   std::cout << "SliceViewer::updateDisplay()\n";
   size_t dimX = 0;
   size_t dimY = 1;
@@ -66,21 +89,14 @@ void SliceViewer::updateDisplay()
   m_X = m_ws->getDimension(dimX);
   m_Y = m_ws->getDimension(dimY);
 
-//  m_data->setBoundingRect( QwtDoubleRect(m_X->getMinimum(), m_X->getMaximum(), m_Y->getMinimum(), m_Y->getMaximum()) );
+  // Reset the 2 axes to full scale
+  this->resetAxis(m_spect->xAxis(), m_X );
+  this->resetAxis(m_spect->yAxis(), m_Y );
 
   // Notify the graph that the underlying data changed
-  //m_spect->setAxisScale(); // boundingRect() = QwtDoubleRect(m_X->getMinimum(), m_X->getMaximum(), m_Y->getMinimum(), m_Y->getMaximum());
-  m_plot->setAxisScale( m_spect->xAxis(), m_X->getMinimum(), m_X->getMaximum(), 1.0);
-  m_plot->setAxisTitle( m_spect->xAxis(), QString::fromStdString(m_X->getName() + " (" + m_X->getUnits() + ")") );
-  m_plot->setAxisScale( m_spect->yAxis(), m_Y->getMinimum(), m_Y->getMaximum(), 1.0);
-  m_plot->setAxisTitle( m_spect->yAxis(), QString::fromStdString(m_Y->getName() + " (" + m_Y->getUnits() + ")") );
-//  m_plot->axisScaleDraw( m_spect->xAxis() )->setMinimumExtent(10);
-//  m_plot->axisScaleDraw( m_spect->yAxis() )->setMinimumExtent(10);
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
-//  m_plot->setSizePolicy( Qt::MinimumExpanding );
-//  m_plot->resize(100,100);
   std::cout << m_plot->sizeHint().width() << " width\n";
 
 }
@@ -92,19 +108,35 @@ void SliceViewer::updateDisplay()
  *
  * @param index :: index of the dimension
  * @param dim :: shown dimension, 0=X, 1=Y, -1 sliced
+ * @param dim :: previous shown dimension, 0=X, 1=Y, -1 sliced
  */
-void SliceViewer::changedShownDim(int index, int dim)
+void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 {
   if (dim >= 0)
   {
+    // Swap from X to Y
+    if (oldDim >= 0 && oldDim != dim)
+    {
+      for (size_t d=0; d<m_ws->getNumDims(); d++)
+      {
+        // A different dimension had the same shown dimension
+        if ((size_t(index) != d) &&
+            (m_dimWidgets[d]->getShownDim() == dim))
+        {
+          // So flip it. If the new one is X, the old one becomes Y
+          m_dimWidgets[d]->setShownDim( (dim==0) ? 1 : 0 );
+          break;
+        }
+      }
+    }
+    // Make sure no other dimension is showing the same one
     for (size_t d=0; d<m_ws->getNumDims(); d++)
     {
       // A different dimension had the same shown dimension
       if ((size_t(index) != d) &&
           (m_dimWidgets[d]->getShownDim() == dim))
       {
-        // So flip it. If the new one is X, the old one becomes Y
-        m_dimWidgets[d]->setShownDim( (dim==0) ? 1 : 0 );
+        m_dimWidgets[d]->setShownDim(-1);
       }
     }
   }
@@ -133,8 +165,8 @@ void SliceViewer::updateDimensionSliceWidgets()
       ui.verticalLayoutDimensions->addWidget(widget);
       m_dimWidgets.push_back(widget);
       // Slot when t
-      QObject::connect(widget, SIGNAL(changedShownDim(int,int)),
-                       this, SLOT(changedShownDim(int,int)));
+      QObject::connect(widget, SIGNAL(changedShownDim(int,int,int)),
+                       this, SLOT(changedShownDim(int,int,int)));
       QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
                        this, SLOT(updateDisplaySlot(int,double)));
 

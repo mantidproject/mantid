@@ -10,6 +10,7 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 QwtRasterDataMD::QwtRasterDataMD()
 : m_slicePoint(NULL)
 {
+  timesRequested = 0;
 }
 
 
@@ -22,6 +23,9 @@ QwtRasterDataMD::~QwtRasterDataMD()
 double QwtRasterDataMD::value(double x, double y) const
 {
   if (!m_ws) return 0;
+//  timesRequested++;
+//  if (timesRequested % 1000 == 0)
+//    std::cout << timesRequested/1000 << ", ";
 
   // Generate the vector of coordinates, filling in X and Y
   coord_t * lookPoint = new coord_t[m_nd];
@@ -65,13 +69,17 @@ QwtDoubleInterval QwtRasterDataMD::range() const
 
 
 //------------------------------------------------------------------------------------------------------
-QRectF QwtRasterDataMD::pixelHint(const QRectF & /*area*/) const
+/** Return how many pixels this area should be rendered as
+ *
+ * @param area :: area under view
+ * @return # of pixels in each direction
+ */
+QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
 {
-  if (!m_ws) return QRectF(0,0,1,1);
+  if (!m_ws) return QSize();
   IMDDimension_const_sptr m_X = m_ws->getDimension(m_dimX);
   IMDDimension_const_sptr m_Y = m_ws->getDimension(m_dimY);
-  return QRectF( m_X->getMinimum(), m_Y->getMinimum(),
-      m_X->getBinWidth(), m_Y->getBinWidth());
+  return QSize( 2 * int(area.width() / m_X->getBinWidth()), 2 * int(area.height() /m_Y->getBinWidth()));
 }
 
 //------------------------------------------------------------------------------------------------------

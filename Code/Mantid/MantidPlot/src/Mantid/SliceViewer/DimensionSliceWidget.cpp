@@ -39,6 +39,7 @@ void DimensionSliceWidget::btnXYChanged()
 {
   if (m_insideSetShownDim)
     return;
+  int oldDim = m_shownDim;
   if (ui.btnX->isChecked() && ui.btnY->isChecked() )
   {
     // Toggle when both are checked
@@ -54,7 +55,7 @@ void DimensionSliceWidget::btnXYChanged()
   else
     this->setShownDim(-1);
   // Emit that the user changed the shown dimension
-  emit changedShownDim(m_dimIndex, m_shownDim);
+  emit changedShownDim(m_dimIndex, m_shownDim, oldDim);
 }
 
 
