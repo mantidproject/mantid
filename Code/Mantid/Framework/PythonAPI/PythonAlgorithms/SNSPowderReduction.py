@@ -446,7 +446,11 @@ class SNSPowderReduction(PythonAlgorithm):
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                            % (tempinfo.wl, info.wl))
                     Plus(samRun, temp, samRun)
+                    if not "histo" in self.getProperty("Extension"):
+                        CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                       Tolerance=COMPRESS_TOL_TOF) # 10ns
                     mtd.deleteWorkspace(str(temp))
+            samRun /= float(len(samRuns))
             samRuns = [samRun]
             workspacelist.append(str(samRun))
 
