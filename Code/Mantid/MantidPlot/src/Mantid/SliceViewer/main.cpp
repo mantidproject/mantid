@@ -40,7 +40,7 @@ using Mantid::Geometry::MDHistoDimension;
 Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
     double max)
 {
-  Mantid::MDEvents::MDHistoWorkspace * ws;
+  Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
   if (numDims ==1)
   {
     ws = new Mantid::MDEvents::MDHistoWorkspace(
