@@ -2042,7 +2042,7 @@ namespace DataObjects
       *iter = (*iter) * factor + offset;
     //this->refX.access() = x;
 
-    if (factor < 0.)
+    if ((factor < 0.) && (this->getSortType() == TOF_SORT))
       this->reverse();
 
     if (this->getNumberEvents() <= 0)  return;
