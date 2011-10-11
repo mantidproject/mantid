@@ -6,7 +6,7 @@ import sys
 import pickle
 import math
 from reduction import ReductionStep
-from reduction import extract_workspace_name, find_file, find_data
+from reduction import extract_workspace_name, find_data
 from eqsans_config import EQSANSConfig
 from sans_reduction_steps import BaseBeamFinder
 

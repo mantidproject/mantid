@@ -95,7 +95,9 @@ class AbsoluteScale(BaseAbsoluteScale):
             # Note: this option shouldn't really be allowed
             monitor_id = reducer.NORMALIZATION_MONITOR
         else:
-            monitor_id = reducer._normalizer.get_normalization_spectrum()
+            monitor_id = -1
+            if hasattr(reducer._normalizer, "get_normalization_spectrum"):
+                monitor_id = reducer._normalizer.get_normalization_spectrum()
         monitor = mtd[data_file_ws].dataY(monitor_id)[0]
         # HFIR-specific: If we count for monitor we need to multiply by 1e8
         # Need to be consistent with the Normalization step

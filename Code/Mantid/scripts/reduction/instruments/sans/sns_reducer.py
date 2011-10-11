@@ -5,6 +5,7 @@ from sans_reducer import SANSReducer
 from reduction import ReductionStep
 import sns_reduction_steps
 import sans_reduction_steps
+import mantidsimple
 
 class EqSansReducer(SANSReducer):
 
@@ -15,7 +16,7 @@ class EqSansReducer(SANSReducer):
         ## Default data loader
         self._data_loader = sns_reduction_steps.LoadRun()
         ## Normalization
-        self._normalizer = sns_reduction_steps.Normalize()
+        self.set_normalizer(mantidsimple.EQSANSNormalise, None)
         ## Transmission calculator
         self._transmission_calculator = sans_reduction_steps.BaseTransmission(1.0, 0.0, False)
         

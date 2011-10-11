@@ -9,6 +9,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
         @param startswith: string that files should start with.
         @param data_dir: additional directory to search
     """
+    raise RuntimeError, "find_file is no longer in use"
     # Files found
     files_found = []
     filename = str(filename).strip()

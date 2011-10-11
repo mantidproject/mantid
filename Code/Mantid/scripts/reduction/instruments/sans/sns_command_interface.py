@@ -40,8 +40,8 @@ def DarkCurrent(datafile):
                                                      ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
 
 def TotalChargeNormalization(normalize_to_beam=True):
-    ReductionSingleton().set_normalizer(sns_reduction_steps.Normalize(normalize_to_beam=normalize_to_beam))
-  
+    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToBeam=normalize_to_beam)
+
 def MonitorNormalization():
     TotalChargeNormalization()
       

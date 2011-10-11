@@ -266,7 +266,9 @@ class BeamSpreaderTransmission(BaseTransmission):
             # Get normalization for transmission calculation
             norm_detector = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
             if reducer._normalizer is not None:
-                norm_option = reducer._normalizer.get_normalization_spectrum()
+                norm_option = -1
+                if hasattr(reducer._normalizer, "get_normalization_spectrum"):
+                    norm_option = reducer._normalizer.get_normalization_spectrum()
                 norm_detector = reducer.instrument.get_incident_mon(workspace, norm_option)
             
             # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
@@ -385,7 +387,9 @@ class DirectBeamTransmission(BaseTransmission):
         # Get normalization for transmission calculation
         self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
         if reducer._normalizer is not None:
-            norm_option = reducer._normalizer.get_normalization_spectrum()
+            norm_option = -1
+            if hasattr(reducer._normalizer, "get_normalization_spectrum"):
+                norm_option = reducer._normalizer.get_normalization_spectrum()
             self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, norm_option)
             if self._monitor_det_ID<0:
                 reducer._normalizer.execute(reducer, empty_mon_ws)
@@ -829,7 +833,7 @@ class WeightedAzimuthalAverage(ReductionStep):
                 OutputBinning=self._binning, 
                 PixelAdj=pixel_adj, WavelengthAdj=wl_adj)
         else:
-            #Q1D(InputWorkspace=workspace, InputForErrors=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
+            #Q1D(DetBankWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning, SolidAngleWeighting=False)
             Q1DWeighted(workspace, output_ws, self._binning,
                     NPixelDivision=self._nsubpix,
                     PixelSizeX=pixel_size_x,
