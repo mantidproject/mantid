@@ -55,6 +55,8 @@ namespace Crystal
     /// Reflection conditions possible
     std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 
+    /// Run number of input workspace
+    int runNumber;
     /// Min wavelength parameter
     double wlMin;
     /// Max wavelength parameter

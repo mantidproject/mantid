@@ -143,6 +143,8 @@ namespace Crystal
         {
           // Only add peaks that hit the detector
           p.setGoniometerMatrix(gonio);
+          // Save the run number found before.
+          p.setRunNumber(runNumber);
           p.setHKL(hkl);
 
           // Add it to the workspace
@@ -177,7 +179,8 @@ namespace Crystal
         throw std::invalid_argument("Specified a MDEventWorkspace as InputWorkspace but it does not have any ExperimentInfo associated. Please choose a workspace with a full instrument and sample.");
       inWS = mdWS->getExperimentInfo(0);
     }
-
+    // Find the run number
+    runNumber = inWS->getRunNumber();
 
     wlMin = getProperty("WavelengthMin");
     wlMax = getProperty("WavelengthMax");
