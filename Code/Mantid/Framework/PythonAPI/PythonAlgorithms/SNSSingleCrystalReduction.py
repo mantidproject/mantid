@@ -41,7 +41,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
-        self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
         outfiletypes = ['', 'hkl', 'nxs']
         self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
         self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
@@ -162,11 +161,13 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             self._ubfile = self._ubfile.split(name)[0]
             ubname = self._ubfile + name + '.mat'
             LoadIsawUB(InputWorkspace=wksp,Filename=ubname)
-            LoadIsawPeaks(Filename=self._peaksfile,OutputWorkspace='Peaks')
+            PredictPeaks(InputWorkspace=wksp,WavelengthMin=self._minWL,WavelengthMax=self._maxWL,MinDSpacing=self._minD,
+                OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile
-            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
+            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
+                Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
         if "nxs" in self._outTypes:
             nxsfile = str(wksp) + ".nxs"
     
@@ -215,7 +216,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._vanradius = self.getProperty("VanadiumRadius")
         self._powlam = self.getProperty("PowerLambda")
         self._ubfile = self.getProperty("IsawUBFile")
-        self._peaksfile = self.getProperty("IsawPeaksFile")
         self._append = self.getProperty("AppendHKLFile")
     
         # process the vanadium run
@@ -288,28 +288,22 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             for bank in Banks:
                 # first round of processing the sample
                 samRun = self._loadData(samRunnum, bank, SUFFIX, filterWall)
-                ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="Wavelength")
-                CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=self._minWL, XMax=self._maxWL)
-                ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="dSpacing")
-                CropWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun, XMin=self._minD)
-                ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
+                samMon = mtd['Mon']
+                RenameWorkspace(InputWorkspace=samMon,OutputWorkspace="samMon")
+                samMon = mtd['samMon']
 
                 # process the background
                 bkgRun = self.getProperty("BackgroundNumber")
                 if bkgRun > 0 and self._SubtractBkg:
                     temp = mtd["%s_%d" % (self._instrument, bkgRun)]
                     if temp is None:
-                                samMon = mtd['Mon']
-                                RenameWorkspace(InputWorkspace=samMon,OutputWorkspace="samMon")
-                                samMon = mtd['samMon']
                                 bkgRun = self._loadData(bkgRun, "", SUFFIX, (0., 0.))
                                 temp = mtd['Mon']
-                                samMon /= temp
+                                temp /= samMon
                                 # Keep units of Counts
-                                samMon.setYUnit("")
-                                Multiply(LHSWorkspace=bkgRun, RHSWorkspace=samMon, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
+                                temp.setYUnit("")
+                                Divide(LHSWorkspace=bkgRun, RHSWorkspace=temp, OutputWorkspace=bkgRun, AllowDifferentNumberSpectra=1)
                                 mtd.deleteWorkspace('Mon')
-                                mtd.deleteWorkspace('samMon')
                                 mtd.releaseFreeMemory()
                     else:
                                 bkgRun = temp
@@ -352,7 +346,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=samRunT,OutputWorkspace=samRunstr)
             samRun = mtd[samRunstr]
             # scale data so fitting routines do not run out of memory
-            samMon = mtd['Mon']
             samMon /= 1e8
             samRun /= samMon
             samRun = self._bin(samRun)
@@ -363,7 +356,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             self._append = True
             if self._outTypes is not '':
                 mtd.deleteWorkspace(str(samRun))
-            mtd.deleteWorkspace('Mon')
+            mtd.deleteWorkspace('samMon')
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
