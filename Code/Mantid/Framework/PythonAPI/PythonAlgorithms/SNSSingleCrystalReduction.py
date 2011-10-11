@@ -39,6 +39,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MinimumdSpacing", 0.5, Description="Minimum d-spacing.  Default is 0.5")
         self.declareProperty("MinimumWavelength", 0.6, Description="Minimum Wavelength.  Default is 0.6")
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
+        self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
         self.declareFileProperty("IsawPeaksFile", "", FileAction.OptionalLoad, ['.peaks'],  Description="Isaw style file of peaks.")
         outfiletypes = ['', 'hkl', 'nxs']
@@ -165,7 +166,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile
-            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=0.01,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
+            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
         if "nxs" in self._outTypes:
             nxsfile = str(wksp) + ".nxs"
     
@@ -207,6 +208,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._amu = self.getProperty("LinearScatteringCoef")
         self._smu = self.getProperty("LinearAbsorptionCoef")
         self._radius = self.getProperty("Radius")
+        self._scale = self.getProperty("ScaleFactor")
         self._minD = self.getProperty("MinimumdSpacing")
         self._minWL = self.getProperty("MinimumWavelength")
         self._maxWL = self.getProperty("MaximumWavelength")
@@ -225,6 +227,13 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 if self._DivideVan:
                     Integration(InputWorkspace=vanRun,OutputWorkspace='VanSumTOF',IncludePartialBins=1)
                     vanI = mtd["VanSumTOF"]
+                    yavg = 0
+                    for s in range(0,vanI.getNumberHistograms()):
+                        y_s = vanI.readY(s)
+                        yavg += y_s[0]
+                    yavg /= vanI.getNumberHistograms()
+                    print "Average pixel=",yavg
+                    vanI /= yavg
                     FindDetectorsOutsideLimits(vanI, "VanMask", LowThreshold=1.0e-300, HighThreshold=1.0e+300)
                     maskWS = mtd["VanMask"]
                     MaskDetectors(vanI, MaskedWorkspace=maskWS)
