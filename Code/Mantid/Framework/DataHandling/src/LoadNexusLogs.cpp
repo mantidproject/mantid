@@ -90,7 +90,7 @@ namespace Mantid
         std::string group_name(it->first);
         std::string group_class(it->second);
         if( group_name == "DASlogs" || group_class == "IXrunlog" ||
-            group_class == "IXselog" )
+            group_class == "IXselog" || group_name == "framelog" )
         {
           loadLogs(file, group_name, group_class, workspace);
         }
