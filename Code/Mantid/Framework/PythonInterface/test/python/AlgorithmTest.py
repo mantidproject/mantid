@@ -30,7 +30,7 @@ class AlgorithmTest(unittest.TestCase):
         alg = algorithm_mgr.create_unmanaged('Load')
         alg.initialize()
         alg.set_property('Filename', 'LOQ48127.raw')
-        nspec = 10
+        nspec = 1
         alg.set_property('SpectrumMax', nspec)
         wsname = 'LOQ48127' 
         alg.set_property('OutputWorkspace', wsname)
