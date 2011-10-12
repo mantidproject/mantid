@@ -297,7 +297,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 if bkgRun > 0 and self._SubtractBkg:
                     temp = mtd["%s_%d" % (self._instrument, bkgRun)]
                     if temp is None:
-                                bkgRun = self._loadData(bkgRun, "", SUFFIX, (0., 0.))
+                                bkgRun = self._loadData(bkgRun, bank, SUFFIX, (0., 0.))
                                 temp = mtd['Mon']
                                 temp /= samMon
                                 # Keep units of Counts
