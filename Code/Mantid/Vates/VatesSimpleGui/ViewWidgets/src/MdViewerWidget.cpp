@@ -276,12 +276,7 @@ void MdViewerWidget::setParaViewComponentsForView()
                      static_cast<MultiSliceView *>(this->currentView),
                      SLOT(updateSelectedIndicator()));
   }
-  if (this->currentView->inherits("StandardView"))
-  {
-    QObject::connect(static_cast<StandardView *>(this->currentView),
-                     SIGNAL(enableMultiSliceViewButton()),
-                     this, SIGNAL(enableMultiSliceViewButton()));
-  }
+
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorMapChanged(const pqColorMapModel *)),
                    this->currentView,
