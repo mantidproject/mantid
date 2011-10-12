@@ -188,9 +188,10 @@ namespace Mantid
 
       // ISIS specific methods for dealing with wide events
       static void loadTimeOfFlight(const std::string &nexusfilename, DataObjects::EventWorkspace_sptr WS,
-          const std::string &entry_name);
+          const std::string &entry_name, const std::string &classType);
 
-      static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS);
+      static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
+        const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
     private:
       /// name of top level NXentry to use

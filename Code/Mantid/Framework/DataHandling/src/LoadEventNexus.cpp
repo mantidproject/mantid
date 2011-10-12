@@ -1078,7 +1078,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   loadEntryMetadata(m_filename, WS, m_top_entry_name);
 
   // if there is time_of_flight load it
-  loadTimeOfFlight(m_filename, WS, m_top_entry_name);
+  loadTimeOfFlight(m_filename, WS, m_top_entry_name,classType);
 }
 
 //-----------------------------------------------------------------------------
@@ -1584,59 +1584,113 @@ void LoadEventNexus::setTimeFilters(const bool monitors)
 //-----------------------------------------------------------------------------
 //               ISIS event corrections
 //-----------------------------------------------------------------------------
-/** Check if time_of_flight can be found in the file and load it */
+/**
+ * Check if time_of_flight can be found in the file and load it 
+ * @param nexusfilename :: The name of the ISIS nexus event file.
+ * @param WS :: The event workspace which events will be modified.
+ * @param classType :: The type of the events: either detector or monitor
+ */
 void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObjects::EventWorkspace_sptr WS,
-  const std::string &entry_name)
+  const std::string &entry_name, const std::string &classType)
 {
   bool done = false;
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
+  
   typedef std::map<std::string,std::string> string_map_t; 
   string_map_t entries = file.getEntries();
+
   if (entries.find("detector_1_events") == entries.end())
   {// not an ISIS file
     return;
   }
-  // first check detector_1_events
-  file.openGroup("detector_1_events", "NXevent_data");
-  entries = file.getEntries();
-  for(string_map_t::const_iterator it = entries.begin();it != entries.end(); ++it)
-  {
-    if (it->first == "time_of_flight")
-    {
-      loadTimeOfFlightData(file,WS);
-      done = true;
-    }
-  }
-  file.closeGroup(); // detector_1_events
 
-  if (!done) // if time_of_flight was not found try instrument/dae/time_channels_#
+  // try if monitors have their own bins
+  if (classType == "NXmonitor")
   {
-    file.openGroup("instrument","NXinstrument");
-    file.openGroup("dae","IXdae");
-    entries = file.getEntries();
-    size_t time_channels_number = 0;
-    for(string_map_t::const_iterator it = entries.begin();it != entries.end(); ++it)
+    std::vector<std::string> bankNames;
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); it++)
     {
-      // check if there are groups with names "time_channels_#" and select the one with the highest number
-      if (it->first.size() > 14 && it->first.substr(0,14) == "time_channels_")
+      std::string entry_name(it->first);
+      std::string entry_class(it->second);
+      if ( entry_class == classType )
       {
-        size_t n = boost::lexical_cast<size_t>(it->first.substr(14));
-        if (n > time_channels_number) 
-        {
-          time_channels_number = n;
-        }
+        bankNames.push_back( entry_name );
       }
     }
-    if (time_channels_number > 0) // the numbers start with 1
+    for(size_t i = 0; i < bankNames.size(); ++i)
     {
-      file.openGroup("time_channels_" + boost::lexical_cast<std::string>(time_channels_number),"IXtime_channels");
-      loadTimeOfFlightData(file,WS);
+      const std::string& mon = bankNames[i];
+      file.openGroup(mon,classType);
+      entries = file.getEntries();
+      string_map_t::const_iterator bins = entries.find("event_time_bins");
+      if (bins == entries.end())
+      {
+        //bins = entries.find("time_of_flight"); // I think time_of_flight doesn't work here
+        //if (bins == entries.end())
+        //{
+          done = false;
+          file.closeGroup();
+          break; // done == false => use bins from the detectors
+        //}
+      }
+      done = true;
+      loadTimeOfFlightData(file,WS,bins->first,i,i+1);
       file.closeGroup();
     }
-    file.closeGroup(); // dae
-    file.closeGroup(); // instrument
+  }
+
+  if (!done)
+  {
+    // first check detector_1_events
+    file.openGroup("detector_1_events", "NXevent_data");
+    entries = file.getEntries();
+    for(string_map_t::const_iterator it = entries.begin();it != entries.end(); ++it)
+    {
+      if (it->first == "time_of_flight" || it->first == "event_time_bins")
+      {
+        loadTimeOfFlightData(file,WS,it->first);
+        done = true;
+      }
+    }
+    file.closeGroup(); // detector_1_events
+
+    if (!done) // if time_of_flight was not found try instrument/dae/time_channels_#
+    {
+      file.openGroup("instrument","NXinstrument");
+      file.openGroup("dae","IXdae");
+      entries = file.getEntries();
+      size_t time_channels_number = 0;
+      for(string_map_t::const_iterator it = entries.begin();it != entries.end(); ++it)
+      {
+        // check if there are groups with names "time_channels_#" and select the one with the highest number
+        if (it->first.size() > 14 && it->first.substr(0,14) == "time_channels_")
+        {
+          size_t n = boost::lexical_cast<size_t>(it->first.substr(14));
+          if (n > time_channels_number) 
+          {
+            time_channels_number = n;
+          }
+        }
+      }
+      if (time_channels_number > 0) // the numbers start with 1
+      {
+        file.openGroup("time_channels_" + boost::lexical_cast<std::string>(time_channels_number),"IXtime_channels");
+        entries = file.getEntries();
+        for(string_map_t::const_iterator it = entries.begin();it != entries.end(); ++it)
+        {
+          if (it->first == "time_of_flight" || it->first == "event_time_bins")
+          {
+            loadTimeOfFlightData(file,WS,it->first);
+            done = true;
+          }
+        }
+        file.closeGroup();
+      }
+      file.closeGroup(); // dae
+      file.closeGroup(); // instrument
+    }
   }
 
   file.close();
@@ -1648,15 +1702,19 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObje
  * @param file :: The nexus file to read from.
  * @param WS :: The event workspace to write to.
  */
-void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS)
+void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS,
+  const std::string& binsName,size_t start_wi, size_t end_wi)
 {
-  file.openData("time_of_flight");
+  file.openData(binsName);
   std::vector<float> tof;
   file.getData(tof);
   // todo: try to find if tof can be reduced to just 3 numbers: start, end and dt
-  std::cerr << "Time bins " << tof.size()<< ' ' << WS->getNumberHistograms() << std::endl;
+  if (end_wi <= start_wi)
+  {
+    end_wi = WS->getNumberHistograms();
+  }
 
-  for(size_t wi = 0; wi < WS->getNumberHistograms(); ++wi)
+  for(size_t wi = start_wi; wi < end_wi; ++wi)
   {
     EventList& event_list = WS->getEventList(wi);
     event_list.sortTof();
