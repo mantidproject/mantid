@@ -97,24 +97,32 @@ void FilterByTime::exec()
   start_str = getPropertyValue("AbsoluteStartTime");
   stop_str = getPropertyValue("AbsoluteStopTime");
 
-  if ((start_str!="") && (stop_str!="") && (stop_dbl<=0.0) && (stop_dbl<=0.0))
+  if ( (start_str != "") && (stop_str != "") && (start_dbl <= 0.0) && (stop_dbl <= 0.0) )
   {
-    //Use the absolute string
+    // Use the absolute string
     start = DateAndTime( start_str );
     stop  = DateAndTime( stop_str );
   }
-  else
-  if ((start_str=="") && (stop_str=="") && (stop_dbl> 0.0) && (stop_dbl> 0.0))
+  else if ( (start_str == "") && (stop_str == "") && ((start_dbl > 0.0) || (stop_dbl > 0.0)) )
   {
-    //Use the relative times in seconds.
+    // Use the relative times in seconds.
     DateAndTime first = inputWS->getFirstPulseTime();
+	DateAndTime last = inputWS->getLastPulseTime();
     start = first + start_dbl;
-    stop = first + stop_dbl;
+	if (stop_dbl > 0.0)
+	{
+		stop = first + stop_dbl;
+	}
+	else
+	{
+		this->getLogger().debug() << "No end filter time specified - assuming last pulse" << std::endl;
+		stop = last + 10000.0;   // so we get all events - needs to be past last pulse
+	}
   }
   else
   {
     //Either both or none were specified
-    throw std::invalid_argument("You need to specify either: both the StartTime and StopTime parameters; or both the AbsoluteStartTime and AbsoluteStopTime parameters; but not all four.");
+    throw std::invalid_argument("You need to specify either the StartTime or StopTime parameters; or both the AbsoluteStartTime and AbsoluteStopTime parameters; but not other combinations.");
   }
 
   if (stop <= start)
