@@ -185,6 +185,14 @@ namespace Mantid
           const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log);
 
     private:
+
+      // ISIS specific methods for dealing with wide events
+      static void loadTimeOfFlight(const std::string &nexusfilename, DataObjects::EventWorkspace_sptr WS,
+          const std::string &entry_name);
+
+      static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS);
+
+    private:
       /// name of top level NXentry to use
       std::string m_top_entry_name;
       /// Set the top entry field name
