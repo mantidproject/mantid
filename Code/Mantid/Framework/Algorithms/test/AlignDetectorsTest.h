@@ -97,6 +97,7 @@ public:
     loader.setPropertyValue("EventFilename", eventfile);
     loader.setPropertyValue("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
+    loader.setPropertyValue("SpectrumList","1,2,3,4,5,6,7,8,9,10");
     loader.setPropertyValue("OutputWorkspace", inputWS);
     loader.execute();
     TS_ASSERT (loader.isExecuted() );
@@ -106,7 +107,7 @@ public:
   void testExecEventWorkspace_sameOutputWS()
   {
     this->setUp_Event();
-    std::size_t wkspIndex = 4348; // a good workspace index (with events)
+    std::size_t wkspIndex = 1; // a good workspace index (with events)
 
     //Retrieve Workspace
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
@@ -141,7 +142,7 @@ public:
   void testExecEventWorkspace_differentOutputWS()
   {
     this->setUp_Event();
-    std::size_t wkspIndex = 4348; // a good workspace index (with events)
+    std::size_t wkspIndex = 1; // a good workspace index (with events)
 
     //Retrieve Workspace
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
