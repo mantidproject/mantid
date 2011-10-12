@@ -195,8 +195,8 @@ public:
 
   WeightedEvent getEvent(size_t event_number);
 
-  template<class T>
-  std::vector<T>& getEventsOfType();
+  //template<class T>
+  //std::vector<T>& getEventsOfType();
 
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
@@ -243,24 +243,28 @@ public:
   const MantidVec& dataX() const;
   const MantidVec& constDataX() const;
 
-  // Disallowed data accessors - can't modify Y/E on a EventList
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVec& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
-
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVec& /*Y*/, const MantidVec& /*E*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
-
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVecPtr& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
-
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVecPtr& /*Y*/, const MantidVecPtr& /*E*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
-
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVecPtr::ptr_type& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
-
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVecPtr::ptr_type& /*Y*/, const MantidVecPtr::ptr_type& /*E*/)   { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   MantidVec& dataY() { throw std::runtime_error("EventList: non-const access to Y data is not possible."); }
+  /// Disallowed data accessors - can't modify Y/E on a EventList
   MantidVec& dataE() { throw std::runtime_error("EventList: non-const access to E data is not possible."); }
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
+  /// Return a read-only Y histogram view of an event list
   const MantidVec& dataY() const { return constDataY(); }
+  /// Return a read-only E histogram view of an event list
   const MantidVec& dataE() const { return constDataE(); }
 
   const MantidVec& constDataY() const;

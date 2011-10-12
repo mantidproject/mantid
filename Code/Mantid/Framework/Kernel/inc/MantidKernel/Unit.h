@@ -105,11 +105,13 @@ public:
   virtual void init() = 0;
 
   /** Convert a single X value to TOF.
+   * @param x value to convert
    * @return the TOF as converted.
    */
   virtual double singleToTOF(const double x) const = 0;
 
   /** Convert a single tof value to this unit
+   * @param tof value to convert
    * @return the value in this unit as converted.
    */
   virtual double singleFromTOF(const double tof) const = 0;
@@ -254,11 +256,11 @@ public:
   ~Wavelength() {}
 
 protected:
-  double sfpTo;
-  double factorTo;
-  double sfpFrom;
-  double factorFrom;
-  bool do_sfpFrom;
+  double sfpTo; ///< Extra correction factor in to conversion
+  double factorTo; ///< Constant factor for to conversion
+  double sfpFrom; ///< Extra correction factor in from conversion
+  double factorFrom; ///< Constant factor for from conversion
+  bool do_sfpFrom; ///< Apply the sfpFrom value
 };
 
 //=================================================================================================
@@ -281,8 +283,8 @@ public:
   ~Energy() {}
 
 protected:
-  double factorTo;
-  double factorFrom;
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
@@ -305,8 +307,8 @@ public:
   ~Energy_inWavenumber() {}
 
 protected:
-  double factorTo;
-  double factorFrom;
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
@@ -329,8 +331,8 @@ public:
   ~dSpacing() {}
 
 protected:
-  double factorTo;
-  double factorFrom;
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
@@ -353,8 +355,8 @@ public:
   ~MomentumTransfer() {}
 
 protected:
-  double factorTo;
-  double factorFrom;
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
@@ -377,8 +379,8 @@ public:
   ~QSquared() {}
 
 protected:
-  double factorTo;
-  double factorFrom;
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
@@ -401,11 +403,11 @@ public:
   ~DeltaE() {}
 
 protected:
-  double factorTo;
-  double factorFrom;
-  double t_other;
-  double t_otherFrom;
-  double unitScaling;
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
+  double t_other; ///< Energy mode dependent factor in to conversion
+  double t_otherFrom; ///< Energy mode dependent factor in from conversion
+  double unitScaling; ///< Apply unit scaling to energy value
 };
 
 //=================================================================================================

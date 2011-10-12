@@ -322,10 +322,6 @@ void CorrectKiKf::execEvent()
   }
 }
 
-/**
- * Execute CorrectKiKf for event lists
- *
- */
 template<class T>
     void CorrectKiKf::correctKiKfEventHelper(std::vector<T>& wevector, double efixed,const std::string emodeStr)
 {

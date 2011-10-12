@@ -46,16 +46,36 @@ namespace Mantid
         {
 
         public:
+            /// Default constructor
             BoxImplicitFunctionParser();
 
+            /**
+             * Create a function builder from a text-based representation.
+             * @param functionElement text representation of function
+             * @return the builder for the requested function
+             */
             Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement);
 
+            /**
+             * Set the successor translation class.
+             * @param parser the successor translator
+             */
             void setSuccessorParser(Mantid::API::ImplicitFunctionParser* parser);
 
+            /**
+             * Set the parameter translation class.
+             * @param parser the parameter translator
+             */
             void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser);
 
+            /**
+             * Create a box function builder from a text-based representation.
+             * @param functionElement text representation of builder
+             * @return a concrete box builder
+             */
             BoxFunctionBuilder* parseBoxFunction(Poco::XML::Element* functionElement);
 
+            /// Default destructor
             ~BoxImplicitFunctionParser();
         };
     }

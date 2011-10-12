@@ -98,6 +98,7 @@ namespace DataObjects
 
   /** Constructor with a MRU list
    * @param mru :: pointer to the MRU of the parent EventWorkspace
+   * @param specNo :: the spectrum number for the event list
    */
   EventList::EventList(EventWorkspaceMRU * mru, specid_t specNo)
    : IEventList(specNo),
@@ -1358,7 +1359,11 @@ namespace DataObjects
     return data->m_data;
   }
 
-
+  /** Look in the MRU to see if the E histogram has been generated before.
+   * If so, return that. If not, calculate, cache and return it.
+   *
+   * @return reference to the E vector.
+   */
   const MantidVec& EventList::constDataE() const
   {
     if (!mru) throw std::runtime_error("EventList::constDataE() called with no MRU set. This is not allowed.");
@@ -1994,6 +1999,8 @@ namespace DataObjects
    * @param minX :: minimum X bin to use in integrating.
    * @param maxX :: maximum X bin to use in integrating.
    * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+   * @param sum :: place holder for the resulting sum
+   * @param error :: place holder for the resulting sum of errors
    * @return the integrated number of events.
    */
   void EventList::integrate(const double minX, const double maxX, const bool entireRange, double & sum, double & error) const
@@ -2624,8 +2631,8 @@ namespace DataObjects
    * where:
    *  * A is the weight of the event
    *  * B is the weight of the BIN that the event falls in
-   *  * \sigma_A is the error (not squared) of the weight of the event
-   *  * \sigma_B is the error (not squared) of the bin B
+   *  * \f$\sigma_A\f$ is the error (not squared) of the weight of the event
+   *  * \f$\sigma_B\f$ is the error (not squared) of the bin B
    *  * f is the resulting weight of the multiplied event
    *
    * @param X: bins of the multiplying histogram.
@@ -2766,8 +2773,8 @@ namespace DataObjects
    * where:
    *  * A is the weight of the event
    *  * B is the weight of the BIN that the event falls in
-   *  * \sigma_A is the error (not squared) of the weight of the event
-   *  * \sigma_B is the error (not squared) of the bin B
+   *  * \f$\sigma_A\f$ is the error (not squared) of the weight of the event
+   *  * \f$\sigma_B\f$ is the error (not squared) of the bin B
    *  * f is the resulting weight of the divided event
    *
    *
@@ -3174,6 +3181,13 @@ namespace DataObjects
 
 
   //--------------------------------------------------------------------------
+  /** Helper function for the conversion to TOF. This handles the different
+   *  event types.
+   *
+   * @param events the list of events
+   * @param fromUnit the unit to convert from
+   * @param toUnit the unit to convert to
+   */
   template<class T>
   void EventList::convertUnitsViaTofHelper(typename std::vector<T> & events, Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit)
   {

@@ -79,8 +79,14 @@ private:
   void init();
   void exec();
   void execEvent();
+  /**
+   * Execute CorrectKiKf for event lists
+   * @param events the list of events to correct
+   * @param efixed the value of the fixed energy
+   * @param emodeStr the energy mode description
+   */
   template<class T>
-    void correctKiKfEventHelper(std::vector<T>& events, double efixed,const std::string emodeStr);
+  void correctKiKfEventHelper(std::vector<T>& events, double efixed,const std::string emodeStr);
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;
   /// The output workspace, maybe the same as the input one
