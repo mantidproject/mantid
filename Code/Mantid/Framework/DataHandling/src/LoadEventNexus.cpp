@@ -1270,58 +1270,17 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
     loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
     loadLogs->execute();
     //If successful, we can try to load the pulse times
-	Kernel::TimeSeriesProperty<double> * log = 0;
-	// Freddie Akeroyd 11/10/2011 
-	// current ISIS implementation contains an additional indirection between collected frames via an
-	// "event_frame_number" array in NXevent_data (which eliminates frames with no events). 
-	// the proton_log is for all frames and so is longer than the event_index array, so we need to
-	// filter the proton_charge log based on event_frame_number
-	// This difference will be removed in future for compatibility with SNS, but the code below will allow current SANS2D files to load
-	std::vector<int> event_frame_number;  
-	if (localWorkspace->mutableRun().hasProperty("proton_log"))
-	{
-		log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_log") );
-		alg->getLogger().information() << "Using old ISIS proton_log and event_frame_number indirection..." << endl;
-		::NeXus::File file(nexusfilename);
-		try
-		{
-			file.openPath("/raw_data_1/detector_1_events/event_frame_number");
-			file.getData(event_frame_number);
-		}
-		catch(const ::NeXus::Exception& exc)
-		{
-			alg->getLogger().error() << "Unable to load event_frame_number: " << exc.what() << endl;
-		}
-		file.close();
-	}
-	else
-	{
-		log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
-	}
+	Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
     std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
     pulseTimes.reserve(temp.size());
     // Warn if the pulse time found is below a minimum
     size_t numBadTimes = 0;
     Kernel::DateAndTime minDate("1991-01-01");
-	if (event_frame_number.size() > 0)   // ISIS indirection - see above comments
+	for (size_t i =0; i < temp.size(); i++)
 	{
-		Mantid::Kernel::DateAndTime tval;
-		for (size_t i =0; i < event_frame_number.size(); i++)
-		{
-			tval = temp[ event_frame_number[i] ];
-			pulseTimes.push_back( tval );
-			if (tval < minDate)
-				numBadTimes++;
-		}
-	}
-	else
-	{
-		for (size_t i =0; i < temp.size(); i++)
-		{
-			pulseTimes.push_back( temp[i] );
-			if (temp[i] < minDate)
-				numBadTimes++;
-		}
+		pulseTimes.push_back( temp[i] );
+		if (temp[i] < minDate)
+			numBadTimes++;
 	}
 
     if (numBadTimes > 0)

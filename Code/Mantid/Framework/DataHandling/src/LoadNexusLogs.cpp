@@ -95,6 +95,46 @@ namespace Mantid
           loadLogs(file, group_name, group_class, workspace);
         }
       }
+	  // Freddie Akeroyd 12/10/2011 
+	  // current ISIS implementation contains an additional indirection between collected frames via an
+	  // "event_frame_number" array in NXevent_data (which eliminates frames with no events). 
+	  // the proton_log is for all frames and so is longer than the event_index array, so we need to
+	  // filter the proton_charge log based on event_frame_number
+	  // This difference will be removed in future for compatibility with SNS, but the code below will allow current SANS2D files to load
+	  if ( workspace->mutableRun().hasProperty("proton_log") )
+	  {
+		  std::vector<int> event_frame_number;  
+		  Kernel::TimeSeriesProperty<double> * plog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( workspace->mutableRun().getProperty("proton_log") );
+		  this->getLogger().information() << "Using old ISIS proton_log and event_frame_number indirection..." << std::endl;
+		  try
+		  {
+			  file.openPath("/raw_data_1/detector_1_events/event_frame_number");
+			  file.getData(event_frame_number);
+		  }
+		  catch(const ::NeXus::Exception& exc)
+		  {
+			  this->getLogger().warning() << "Unable to load event_frame_number - filtering events by time will not work " << std::endl;
+		  }
+		  file.openPath("/"+entry_name);
+		  if (event_frame_number.size() > 0)   // ISIS indirection - see above comments
+		  {
+			  Kernel::TimeSeriesProperty<double>* pcharge = new Kernel::TimeSeriesProperty<double>("proton_charge");
+			  std::vector<double> pval;
+			  std::vector<Mantid::Kernel::DateAndTime> ptime;
+			  pval.reserve(event_frame_number.size());
+			  ptime.reserve(event_frame_number.size());
+			  std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
+			  std::vector<double> plogv = plog->valuesAsVector();
+			  for (size_t i =0; i < event_frame_number.size(); ++i)
+			  {
+				  ptime.push_back(plogt[ event_frame_number[i] ]);
+				  pval.push_back(plogv[ event_frame_number[i] ]);
+			  }
+			  pcharge->create(ptime, pval);
+			  pcharge->setUnits("uAh");
+			  workspace->mutableRun().addProperty(pcharge, true);
+		  }
+	  }
       try
       {
         // Read the start and end time strings
