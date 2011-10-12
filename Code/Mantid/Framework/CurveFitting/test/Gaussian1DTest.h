@@ -52,44 +52,6 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
 
-  void testAgainstMAR_Dataset()
-  {
-    if ( !alg.isInitialized() ) alg.initialize();
-
-    // load MAR dataset to test against
-    std::string inputFile = "MAR11060.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "MAR_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","2");
-    alg.setPropertyValue("BG0", "-2000.0");
-    alg.setPropertyValue("Height", "8000.0");
-    alg.setPropertyValue("PeakCentre", "10000.0");
-    alg.setPropertyValue("Sigma", "6000.0");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING( alg.execute());
-    TS_ASSERT( alg.isExecuted() );
-
-    // test the output from fit is what you expect
-    double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 100.98,0.1);
-    dummy = alg.getProperty("BG0");
-    TS_ASSERT_DELTA( dummy, -2511.4 ,0.2);
-    dummy = alg.getProperty("Height");
-    TS_ASSERT_DELTA( dummy, 8620.3 ,0.2);
-    dummy = alg.getProperty("PeakCentre");
-    TS_ASSERT_DELTA( dummy, 10090.7 ,0.2);
-    dummy = alg.getProperty("Sigma");
-    TS_ASSERT_DELTA( dummy, 6357.8 ,0.2);
-  }
-
   void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
   {
     y[0] =   3.56811123;

@@ -101,7 +101,7 @@ public:
 
     IAlgorithm_sptr scaler = createAlgorithm();
     // The most commonly used MARI file in the repository
-    scaler->setPropertyValue("ScalingFilename", "MAR11060.raw");
+    scaler->setPropertyValue("ScalingFilename", "MAR11001.raw");
     scaler->setPropertyValue("Workspace", testWS->getName());
     scaler->execute();    
 

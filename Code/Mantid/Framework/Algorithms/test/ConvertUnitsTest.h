@@ -188,7 +188,7 @@ public:
   {
     Mantid::DataHandling::LoadRaw loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "MAR11060.raw");
+    loader.setPropertyValue("Filename", "MAR11001.raw");
     loader.setPropertyValue("SpectrumList", "900");
     std::string ws = "mar";
     loader.setPropertyValue("OutputWorkspace", ws);
@@ -206,16 +206,15 @@ public:
     conv.setPropertyValue("OutputWorkspace",outputSpace);
     conv.setPropertyValue("Target","DeltaE");
     conv.setPropertyValue("Emode","Direct");
-    conv.setPropertyValue("Efixed","12");
+    conv.setPropertyValue("Efixed","12.95");
     conv.execute();
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS( output->blocksize(), 475 );  // Value from IDF
+    TS_ASSERT_EQUALS( output->blocksize(), 2068 );  // Value from IDF
 
     TS_ASSERT( output->getSpectrum(0)->hasDetectorID(3810));
-//    TS_ASSERT_EQUALS( output->blocksize(), 472 );  // Value from RAW geometry
 
     AnalysisDataService::Instance().remove(outputSpace);
 
@@ -230,7 +229,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber");
-    TS_ASSERT_EQUALS( output->blocksize(), 965 );
+    TS_ASSERT_EQUALS( output->blocksize(), 2546 );
 
     AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(outputSpace);

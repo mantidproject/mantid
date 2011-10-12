@@ -32,7 +32,7 @@ using namespace Mantid::DataObjects;
  */
 
 //MARI
-static const std::string RAWFILE =  "MAR11015.raw";
+static const std::string RAWFILE =  "MAR11001.raw";
 static const double TIMEOFF  =      3.9;
 static const int MONITOR =          2;  
 static const int NUMRANDOM =        7;
