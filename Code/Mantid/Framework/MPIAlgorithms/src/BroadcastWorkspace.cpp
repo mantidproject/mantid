@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
 #include <boost/mpi.hpp>
+#include "MantidKernel/UnitFactory.h"
 
 namespace mpi = boost::mpi;
 
