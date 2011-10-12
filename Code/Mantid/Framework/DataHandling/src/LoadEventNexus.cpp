@@ -1670,7 +1670,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
       {
         if (m > 0)
         {// m events in this bin
-          double dx = double(tof[i+1] - tof[i]) / (m + 1);
+          double dx = double(tof[i+1] - tof[i]) / (double(m) + 1);
           double x = double(tof[i]);
           for(std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev; ++ev1, x += dx)
           {
