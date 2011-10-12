@@ -176,6 +176,10 @@ void CropWorkspace::execEvent()
   m_histogram = m_inputWorkspace->isHistogramData();
   double minX_val = getProperty("XMin");
   double maxX_val = getProperty("XMax");
+  if (isEmpty(minX_val))
+    minX_val = eventW->getTofMin();
+  if (isEmpty(maxX_val))
+    maxX_val = eventW->getTofMax();
 
   // Check for common boundaries in input workspace
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
@@ -210,7 +214,6 @@ void CropWorkspace::execEvent()
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
   if (inPlace)
     g_log.debug("Cropping EventWorkspace in-place.");
-
 
   Progress prog(this,0.0,1.0,2*(m_maxSpec-m_minSpec));
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
