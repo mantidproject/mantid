@@ -7,6 +7,7 @@ from reduction import Reducer
 from reduction import ReductionStep
 from reduction import validate_step
 import sans_reduction_steps
+import hfir_load
 import absolute_scale
 from mantidsimple import *
 import warnings
@@ -81,7 +82,7 @@ class SANSReducer(Reducer):
         self._normalizer = sans_reduction_steps.Normalize(SANSReducer.NORMALIZATION_TIME)
         
         # Default data loader
-        self._data_loader = sans_reduction_steps.LoadRun()
+        self._data_loader = hfir_load.LoadRun()
         
         # Default mask object
         self._mask = sans_reduction_steps.Mask()

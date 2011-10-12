@@ -4,6 +4,7 @@
 from reduction.command_interface import *
 from sans_reducer import SANSReducer
 import sans_reduction_steps
+import hfir_load
 import absolute_scale
 import hfir_instrument
 from reduction.find_data import find_data
@@ -274,7 +275,7 @@ def SetSampleDetectorDistance(distance):
     ReductionSingleton().get_data_loader().set_sample_detector_distance(distance)
     
 def SetWavelength(wavelength, spread):
-    if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
+    if not isinstance(ReductionSingleton().get_data_loader(), hfir_load.LoadRun):
         raise RuntimeError, "SetWavelength was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
     ReductionSingleton().get_data_loader().set_wavelength(wavelength, spread)
     
@@ -282,7 +283,7 @@ def ResetWavelength():
     """
         Resets the wavelength to the data file default
     """
-    if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
+    if not isinstance(ReductionSingleton().get_data_loader(), hfir_load.LoadRun):
         raise RuntimeError, "ResetWavelength was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
     ReductionSingleton().get_data_loader().set_wavelength()
     

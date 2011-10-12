@@ -4,6 +4,7 @@
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "Poco/NumberFormatter.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 namespace Mantid
 {
