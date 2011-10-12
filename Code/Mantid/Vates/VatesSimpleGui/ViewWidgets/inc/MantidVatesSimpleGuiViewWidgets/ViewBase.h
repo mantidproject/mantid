@@ -133,6 +133,7 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
+  /// Signal to trigger pipeline update.
   void triggerAccept();
 
 private:
