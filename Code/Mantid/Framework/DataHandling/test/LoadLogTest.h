@@ -167,7 +167,7 @@ public:
     loaderRawFile.initialize();
 
     // Path to test input file assumes Test directory checked out from SVN
-    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", "HRP37129.s02") )
+    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", "CSP74683.s02") )
     inputFile = loaderRawFile.getPropertyValue("Filename");
 
     outputSpace = "LoadLogTest-rawdatafile_so_type";
@@ -200,7 +200,7 @@ public:
     Property *l_property = output->run().getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Oct-02 17:16:04   END" );
 
     AnalysisDataService::Instance().remove(outputSpace);
   }

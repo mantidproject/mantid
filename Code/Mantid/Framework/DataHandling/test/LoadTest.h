@@ -146,7 +146,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","HRP37129.s02");
+    loader.setPropertyValue("Filename","CSP74683.s02");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
