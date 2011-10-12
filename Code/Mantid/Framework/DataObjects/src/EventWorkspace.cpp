@@ -240,12 +240,9 @@ namespace DataObjects
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
       const EventList evList = this->getEventList(workspaceIndex);
-      if (evList.getNumberEvents() > 0)
-      {
-        temp = evList.getTofMin();
-        if (temp < tmin)
-          tmin = temp;
-      }
+      temp = evList.getTofMin();
+      if (temp < tmin)
+        tmin = temp;
     }
     return tmin;
   }
@@ -258,12 +255,9 @@ namespace DataObjects
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
       const EventList evList = this->getEventList(workspaceIndex);
-      if (evList.getNumberEvents() > 0)
-      {
-        temp = evList.getTofMax();
-        if (temp > tmax)
-          tmax = temp;
-      }
+      temp = evList.getTofMax();
+      if (temp > tmax)
+        tmax = temp;
     }
     return tmax;
   }
