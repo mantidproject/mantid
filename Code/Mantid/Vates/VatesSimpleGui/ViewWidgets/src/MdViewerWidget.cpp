@@ -330,6 +330,7 @@ void MdViewerWidget::checkForTimesteps()
 
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
+  this->wsType = wstype;
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   if (this->currentView->origSource)
   {
@@ -337,14 +338,12 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
     builder->destroySources();
   }
   QString sourcePlugin = "";
-  if (VatesViewerInterface::PEAKS == wstype)
+  if (VatesViewerInterface::PEAKS == this->wsType)
   {
-    this->wsType = VatesViewerInterface::PEAKS;
     sourcePlugin = "Peaks Source";
   }
   else
   {
-    this->wsType = VatesViewerInterface::MDEW;
     sourcePlugin = "MDEW Source";
   }
 
