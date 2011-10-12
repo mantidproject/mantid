@@ -98,7 +98,6 @@ void StandardView::onRebinButtonClicked()
     pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
     this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
                                            this->origSource);
-    emit this->enableMultiSliceViewButton();
   }
 }
 

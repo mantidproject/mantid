@@ -371,13 +371,7 @@ void MdViewerWidget::renderAndFinalSetup()
 
   if (VatesViewerInterface::MDEW == this->wsType)
   {
-    const unsigned int val = vtkSMPropertyHelper(\
-                               this->currentView->origSource->getProxy(),
-                               "InputGeometryXML", true).GetNumberOfElements();
-    if (val > 0)
-    {
-      emit this->enableMultiSliceViewButton();
-    }
+    emit this->enableMultiSliceViewButton();
     emit this->enableThreeSliceViewButton();
     emit this->enableSplatterPlotViewButton();
   }

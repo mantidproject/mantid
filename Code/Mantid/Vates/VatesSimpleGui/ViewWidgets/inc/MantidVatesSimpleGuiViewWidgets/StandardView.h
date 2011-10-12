@@ -81,10 +81,6 @@ public:
    */
   void resetDisplay();
 
-signals:
-  /// Signal to tell program to enable multi slice view mode button.
-  void enableMultiSliceViewButton();
-
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
