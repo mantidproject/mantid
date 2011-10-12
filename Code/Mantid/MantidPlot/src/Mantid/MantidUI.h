@@ -331,6 +331,9 @@ public slots:
     // Invoke the Vates Simple User Interface
     void showVatesSimpleInterface();
 
+    // SlcieViewer
+    void showSliceViewer();
+
     // #539: For adding Workspace History display to MantidPlot
     void showAlgorithmHistory();
 

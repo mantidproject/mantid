@@ -26,7 +26,8 @@ using Mantid::Kernel::VMD;
 
 
 SliceViewer::SliceViewer(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      m_colorRange(1.0, 3.0)
 {
 	ui.setupUi(this);
 
@@ -63,6 +64,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
+  ui.btnZoom->hide();
 
 }
 
@@ -75,14 +77,8 @@ SliceViewer::~SliceViewer()
 /** Intialize the zooming/panning tools */
 void SliceViewer::initZoomer()
 {
-  // LeftButton for the zooming
-    // MidButton for the panning
-    // RightButton: zoom out by 1
-    // Ctrl+RighButton: zoom out to full size
-
 //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
-//  zoomer->setMousePattern(QwtEventPattern::MouseSelect2,  Qt::RightButton, Qt::ControlModifier);
-//  zoomer->setMousePattern(QwtEventPattern::MouseSelect3,  Qt::RightButton);
+//  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton, Qt::ControlModifier);
 //  zoomer->setTrackerMode(QwtPicker::AlwaysOn);
 //  const QColor c(Qt::darkBlue);
 //  zoomer->setRubberBandPen(c);
@@ -92,6 +88,9 @@ void SliceViewer::initZoomer()
   QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
   magnif->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
   magnif->setWheelFactor(0.9);
+  // Have to flip the keys to match our flipped mouse wheel
+  magnif->setZoomInKey(Qt::Key_Minus, Qt::NoModifier);
+  magnif->setZoomOutKey(Qt::Key_Equal, Qt::NoModifier);
 
   // Pan using the middle button
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
@@ -102,11 +101,6 @@ void SliceViewer::initZoomer()
   QObject::connect(picker, SIGNAL(mouseMoved(double,double)), this, SLOT(showInfoAt(double, double)));
 
 }
-
-///** Get a slice from the workspace with the current settings */
-//SliceViewer::getSlice(double * data, size_t & length)
-//{
-//}
 
 
 //------------------------------------------------------------------------------------
@@ -145,6 +139,14 @@ void SliceViewer::resetZoom()
 }
 
 //------------------------------------------------------------------------------------
+/// Find the full range of values in the displayed area
+void SliceViewer::findRange()
+{
+  QwtDoubleInterval xint = m_plot->axisScaleDiv( Qt::XAxis )->interval();
+  std::cout << xint.minValue() << " to " << xint.maxValue() << std::endl;
+}
+
+//------------------------------------------------------------------------------------
 void SliceViewer::showInfoAt(double x, double y)
 {
   VMD coords(m_ws->getNumDims());
@@ -153,10 +155,6 @@ void SliceViewer::showInfoAt(double x, double y)
   coords[m_dimX] = x;
   coords[m_dimY] = y;
   signal_t signal = m_ws->getSignalAtCoord(coords);
-//  std::ostringstream mess;
-//  mess << std::setw(5) << std::setprecision(3) << x
-//       << ", "       << std::setw(5) << y
-//       << " s: "       << std::setw(7) << signal;
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
@@ -194,12 +192,16 @@ void SliceViewer::updateDisplay()
     this->resetAxis(m_spect->yAxis(), m_Y );
   }
 
+  // Set the color range
+  m_data->setRange(m_colorRange);
+
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
 //  std::cout << m_plot->sizeHint().width() << " width\n";
 
+  findRange();
 }
 
 
@@ -275,8 +277,8 @@ void SliceViewer::updateDimensionSliceWidgets()
     }
   }
 
-  int minLabelWidth = 10;
-  int minUnitsWidth = 10;
+  int maxLabelWidth = 10;
+  int maxUnitsWidth = 10;
   // Set each dimension
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
@@ -284,19 +286,20 @@ void SliceViewer::updateDimensionSliceWidgets()
     widget->setDimension( int(d), m_ws->getDimension(d) );
     // Default slicing layout
     widget->setShownDim( d < 2 ? int(d) : -1 );
+    // To harmonize the layout, find the largest label
     int w;
     w = widget->ui.lblName->sizeHint().width();
-    if (w > minLabelWidth) minLabelWidth = w;
+    if (w > maxLabelWidth) maxLabelWidth = w;
     w = widget->ui.lblUnits->sizeHint().width();
-    if (w > minUnitsWidth) minUnitsWidth = w;
+    if (w > maxUnitsWidth) maxUnitsWidth = w;
   }
 
   // Make the labels all the same width
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
-    widget->ui.lblName->setMinimumSize(QSize(minLabelWidth, 0) );
-    widget->ui.lblUnits->setMinimumSize(QSize(minUnitsWidth, 0) );
+    widget->ui.lblName->setMinimumSize(QSize(maxLabelWidth, 0) );
+    widget->ui.lblUnits->setMinimumSize(QSize(maxUnitsWidth, 0) );
   }
 }
 
@@ -312,6 +315,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   this->updateDimensionSliceWidgets();
   m_data->setWorkspace(ws);
   this->updateDisplay();
+  std::cout << " Ask again \n";
+  m_spect->data().range();
 }
 
 

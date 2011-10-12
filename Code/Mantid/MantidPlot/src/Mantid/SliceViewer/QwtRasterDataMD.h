@@ -22,6 +22,9 @@ public:
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
 
+  void setRange(QwtDoubleInterval & range)
+  { m_range = range; }
+
   void setSliceParams(size_t dimX, size_t dimY, std::vector<Mantid::coord_t> & slicePoint);
 
   double value(double x, double y) const;
@@ -50,6 +53,12 @@ protected:
   /// nd-sized array indicating where the slice is being done in the OTHER dimensions
   Mantid::coord_t * m_slicePoint;
 
+  /// Min and Max values plotted.
+  mutable double m_minVal;
+  mutable double m_maxVal;
+
+  /// Range of colors to plot
+  QwtDoubleInterval m_range;
 };
 
 #endif /* QwtRasterDataMD_H_ */

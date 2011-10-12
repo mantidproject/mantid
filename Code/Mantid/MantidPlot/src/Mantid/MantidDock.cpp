@@ -280,6 +280,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
   connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI, SLOT(showVatesSimpleInterface()));
 
+  m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
+  connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSliceViewer()));
+
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
 
@@ -855,6 +858,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 {
   (void) WS;
   menu->addAction(m_showHist); // Algorithm history
+  menu->addAction(m_showSliceViewer); // The 2D slice viewer
 }
 
 

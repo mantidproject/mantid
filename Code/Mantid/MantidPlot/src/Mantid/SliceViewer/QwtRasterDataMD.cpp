@@ -11,6 +11,9 @@ QwtRasterDataMD::QwtRasterDataMD()
 : m_slicePoint(NULL)
 {
   timesRequested = 0;
+  m_minVal = DBL_MAX;
+  m_maxVal = -DBL_MAX;
+  m_range = QwtDoubleInterval(0.0, 1.0);
 }
 
 
@@ -40,6 +43,8 @@ double QwtRasterDataMD::value(double x, double y) const
   }
   // Get the signal at that point
   signal_t value = m_ws->getSignalAtCoord(lookPoint);
+  if (value < m_minVal) m_minVal = value;
+  if (value > m_maxVal) m_maxVal = value;
 //  std::cout << x << "," << y << "=" << value << "\n";
   delete [] lookPoint;
   return value;
@@ -52,6 +57,9 @@ QwtRasterData* QwtRasterDataMD::copy() const
   out->m_dimX = this->m_dimX;
   out->m_dimY = this->m_dimY;
   out->m_nd = this->m_nd;
+  out->m_minVal = this->m_minVal;
+  out->m_maxVal = this->m_maxVal;
+  out->m_range = this->m_range;
   out->m_slicePoint = new coord_t[m_nd];
   for (size_t d=0; d<m_nd; d++)
     out->m_slicePoint[d] = this->m_slicePoint[d];
@@ -64,7 +72,8 @@ QwtRasterData* QwtRasterDataMD::copy() const
 /** Return the data range to show */
 QwtDoubleInterval QwtRasterDataMD::range() const
 {
-  return QwtDoubleInterval(0.0, 10.0);
+//  std::cout << "QwtRasterDataMD::range() requested " << m_minVal << "  to  "<< m_maxVal << "\n";
+  return m_range;
 }
 
 

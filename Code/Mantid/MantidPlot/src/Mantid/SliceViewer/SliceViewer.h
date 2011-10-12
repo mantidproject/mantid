@@ -35,6 +35,7 @@ private:
   void initZoomer();
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
+  void findRange();
 
 private:
   /// Auto-generated UI controls.
@@ -67,6 +68,9 @@ private:
   Mantid::Geometry::IMDDimension_const_sptr m_Y;
   size_t m_dimX;
   size_t m_dimY;
+
+  /// The range of values to fit in the color map.
+  QwtDoubleInterval m_colorRange;
 
 };
 

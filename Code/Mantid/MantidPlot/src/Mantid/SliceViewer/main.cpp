@@ -101,6 +101,7 @@ int main( int argc, char ** argv )
       for (size_t z=0;z<numBins; z++)
       {
         signal_t signal = ( sin(double(x)/5) + sin(double(y)/2) + sin(double(z)/20) ) * 5 + double(x)*0.05 + double(y)*0.05;
+        signal *= 0.1;
         ws->setSignalAt(x+y*numBins+z*numBins*numBins, signal);
       }
 

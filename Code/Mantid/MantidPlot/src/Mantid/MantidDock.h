@@ -116,8 +116,13 @@ private:
   QActionGroup *m_sortChoiceGroup;
 
   //Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr, *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_colorFill, *m_showLogs, *m_showHist,
-    *m_saveNexus, *m_rename, *m_delete, *m_program, * m_ascendingSortAction, * m_descendingSortAction, * m_byNameChoice, * m_byLastModifiedChoice;
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
+  *m_showDetectors, *m_showBoxData, *m_showVatesGui,
+  *m_showSliceViewer,
+  *m_colorFill, *m_showLogs, *m_showHist,
+  *m_saveNexus, *m_rename, *m_delete,
+  *m_program, * m_ascendingSortAction,
+  *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice;
 
   static Mantid::Kernel::Logger& logObject;
 };

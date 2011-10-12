@@ -69,6 +69,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QToolButton" name="btnZoom">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>Zoom</string>
             </property>

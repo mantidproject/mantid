@@ -53,6 +53,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include "MantidAPI/IMDWorkspace.h"
+#include "Mantid/SliceViewer/SliceViewer.h"
 
 
 using namespace std;
@@ -536,6 +538,31 @@ void MantidUI::showVatesSimpleInterface()
   catch (...)
   {
   }
+}
+
+
+/** Create a window with a SliceViewer widget to show
+ * the selected workspace
+ */
+void MantidUI::showSliceViewer()
+{
+  // Retrieve the MDWorkspace
+  QString wsName = getSelectedWorkspaceName();
+  IMDWorkspace_sptr mdws = boost::dynamic_pointer_cast<IMDWorkspace>(
+      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+  if (mdws)
+  {
+    // Create the window
+    QMdiSubWindow * subWindow = new QMdiSubWindow(this->appWindow());
+    connect(m_appWindow, SIGNAL(shutting_down()), subWindow, SLOT(close()));
+    // Create the slicer and add it to the MDI window
+    QLayout * layout = subWindow->layout();
+    SliceViewer * slicer = new SliceViewer(subWindow);
+    slicer->setWorkspace(mdws);
+    layout->addWidget(slicer);
+    subWindow->show();
+  }
+
 }
 
 /** #539: For adding Workspace History display to MantidPlot
