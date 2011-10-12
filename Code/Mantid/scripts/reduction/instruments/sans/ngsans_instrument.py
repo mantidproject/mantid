@@ -17,12 +17,14 @@ class NGSANS(HFIRSANS):
     def __init__(self) :
         super(NGSANS, self).__init__(instrument_id="NGSANS")
 
-    def get_detector_from_pixel(self, pixel_list):
+    def get_detector_from_pixel(self, pixel_list, workspace=None):
         """
             Returns a list of detector IDs from a list of [x,y] pixels,
             where the pixel coordinates are in pixel units.
+            @param workspace: the pixel number and size info will be taken from the workspace
         """
-        return [ self.nx_pixels*p[1] + p[0] + self.nMonitors for p in pixel_list ]
+        nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = self._get_pixel_info(workspace)
+        return [ nx_pixels*p[1] + p[0] + self.nMonitors for p in pixel_list ]
 
 class NGSANSLoadRun(ReductionStep):
     """
@@ -76,9 +78,9 @@ class NGSANSLoadRun(ReductionStep):
         # Move detector array to correct position
         [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
         if pixel_ctr_x is not None and pixel_ctr_y is not None:
-            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
+            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y, workspace)
             [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
-            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
+            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y, workspace)
             mantidsimple.MoveInstrumentComponent(workspace, "detector1", 
                                     X = default_x-beam_ctr_x,
                                     Y = default_y-beam_ctr_y,

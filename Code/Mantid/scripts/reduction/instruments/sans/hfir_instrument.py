@@ -106,7 +106,7 @@ class HFIRSANS(Instrument):
 
         return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
         
-    def get_detector_from_pixel(self, pixel_list):
+    def get_detector_from_pixel(self, pixel_list, workspace=None):
         """
             Returns a list of detector IDs from a list of [x,y] pixels,
             where the pixel coordinates are in pixel units.

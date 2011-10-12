@@ -1135,7 +1135,7 @@ class Mask(ReductionStep):
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
             # Transform the list of pixels into a list of Mantid detector IDs
-            masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels)
+            masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels, workspace)
             # Mask the pixels by passing the list of IDs
             MaskDetectors(workspace, DetectorList = masked_detectors)
             
