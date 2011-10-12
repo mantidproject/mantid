@@ -88,7 +88,7 @@ protected slots:
   void onThresholdButtonClicked();
 
 private:
-  Q_DISABLE_COPY(SplatterPlotView);
+  Q_DISABLE_COPY(SplatterPlotView)
 
   QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
   QPointer<pqPipelineSource> splatSource; ///< The splatter plot source

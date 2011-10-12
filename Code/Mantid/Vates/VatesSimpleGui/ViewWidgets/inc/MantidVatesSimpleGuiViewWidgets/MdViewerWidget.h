@@ -94,7 +94,8 @@ protected slots:
   void switchViews(ModeControlWidget::Views v);
 
 private:
-  Q_DISABLE_COPY(MdViewerWidget);
+  Q_DISABLE_COPY(MdViewerWidget)
+
   ViewBase *currentView; ///< Holder for the current view
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from

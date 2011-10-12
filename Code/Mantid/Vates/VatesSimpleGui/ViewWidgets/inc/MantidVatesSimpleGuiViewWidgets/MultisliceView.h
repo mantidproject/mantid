@@ -134,7 +134,8 @@ signals:
 	void sliceNamed(const QString &name);
 
 private:
-  Q_DISABLE_COPY(MultiSliceView);
+  Q_DISABLE_COPY(MultiSliceView)
+
   /// Clear all axis indicator highlighting.
   void clearIndicatorSelections();
   /**

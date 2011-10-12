@@ -101,7 +101,7 @@ protected:
   pqRenderView *create2dRenderView(QWidget *container);
 
 private:
-  Q_DISABLE_COPY(ThreeSliceView);
+  Q_DISABLE_COPY(ThreeSliceView)
 
   /**
    * A helper function that creates a single Cartesian slice.

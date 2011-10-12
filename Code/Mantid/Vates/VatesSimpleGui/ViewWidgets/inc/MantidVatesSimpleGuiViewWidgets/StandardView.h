@@ -88,7 +88,8 @@ protected slots:
   void onRebinButtonClicked();
 
 private:
-  Q_DISABLE_COPY(StandardView);
+  Q_DISABLE_COPY(StandardView)
+
   QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view

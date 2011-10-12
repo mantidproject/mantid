@@ -136,7 +136,8 @@ signals:
   void triggerAccept();
 
 private:
-  Q_DISABLE_COPY(ViewBase);
+  Q_DISABLE_COPY(ViewBase)
+
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };
 
