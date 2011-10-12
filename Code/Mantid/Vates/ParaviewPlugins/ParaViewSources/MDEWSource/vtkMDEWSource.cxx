@@ -202,6 +202,17 @@ Getter for the workspace type name.
 */
 char* vtkMDEWSource::GetWorkspaceTypeName()
 {
-  //Forward request on to MVP presenter
-  return const_cast<char*>(m_presenter->getWorkspaceTypeName().c_str());
+  if(m_presenter == NULL)
+  {
+    return "";
+  }
+  try
+  {
+    //Forward request on to MVP presenter
+    return const_cast<char*>(m_presenter->getWorkspaceTypeName().c_str());
+  }
+  catch(std::runtime_error&)
+  {
+    return "";
+  }
 }
