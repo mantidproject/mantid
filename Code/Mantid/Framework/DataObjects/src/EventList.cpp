@@ -2286,8 +2286,7 @@ namespace DataObjects
     double tMin = std::numeric_limits<double>::max();
 
     // no events is a soft error
-    size_t numEvents = this->getNumberEvents();
-    if (numEvents == 0)
+    if (this->empty())
       return tMin;
 
     // when events are ordered by tof just need the first value
@@ -2304,7 +2303,8 @@ namespace DataObjects
     }
 
     // now we are stuck with a linear search
-    double temp = std::numeric_limits<double>::max();
+    double temp = tMin; // start with the largest possible value
+    size_t numEvents = this->getNumberEvents();
     for (size_t i = 0; i < numEvents; i++)
     {
       switch (eventType)
@@ -2334,8 +2334,7 @@ namespace DataObjects
     double tMax = -1.*std::numeric_limits<double>::max(); // min is a small number, not negative
 
     // no events is a soft error
-    size_t numEvents = this->getNumberEvents();
-    if (numEvents == 0)
+    if (this->empty())
       return tMax;
 
     // when events are ordered by tof just need the first value
@@ -2352,7 +2351,8 @@ namespace DataObjects
     }
 
     // now we are stuck with a linear search
-    double temp = std::numeric_limits<double>::min();
+    size_t numEvents = this->getNumberEvents();
+    double temp = tMax; // start with the smallest possible value
     for (size_t i = 0; i < numEvents; i++)
     {
       switch (eventType)
