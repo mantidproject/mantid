@@ -1,4 +1,6 @@
-set ( SRC_FILES src/background.cpp
+set ( SRC_FILES 
+                src/ApproachDialog.cpp
+                src/background.cpp
                 src/ConvertToEnergy.cpp
                 src/CreateMDWorkspace.cpp
                 src/deltaECalc.cpp
@@ -21,6 +23,7 @@ set ( SRC_FILES src/background.cpp
                 src/SANSDiagnostics.cpp
 		src/SingleOwnerLock.cpp
                 src/WorkspaceMementoCollection.cpp
+                src/WorkspaceMementoService.cpp
                 src/WorkspaceMemento.cpp
 )
 
@@ -28,6 +31,7 @@ set ( SRC_FILES src/background.cpp
 set ( INC_FILES 
                 inc/MantidQtCustomInterfaces/AbstractMementoItem.h
                 inc/MantidQtCustomInterfaces/Approach.h
+                inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
@@ -55,12 +59,14 @@ set ( INC_FILES
                 inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
                 inc/MantidQtCustomInterfaces/WorkspaceMementoLock.h
                 inc/MantidQtCustomInterfaces/WorkspaceMemento.h
+                inc/MantidQtCustomInterfaces/WorkspaceMementoService.h
                 inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
-set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
+set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
+                inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/Homer.h
@@ -94,6 +100,7 @@ set( TEST_FILES
                test/WorkspaceMementoCollectionTest.h
                test/WorkspaceMementoItemTest.h
                test/WorkspaceMementoTest.h
+               test/WorkspaceMementoServiceTest.h
 )
 
 include_directories ( inc )

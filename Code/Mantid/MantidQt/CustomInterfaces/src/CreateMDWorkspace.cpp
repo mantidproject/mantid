@@ -55,14 +55,16 @@ void CreateMDWorkspace::initLayout()
   //Set MVC Model
   m_uiForm.tableView->setModel(m_model);
 
-  //TODO : generate a proper dialog giving a set of options for 'configurations'. i.e. ISIS inelastic.
-  QMessageBox msgBox;
-  msgBox.setText("Choose a configuration.");
-  msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-  msgBox.setDefaultButton(QMessageBox::Cancel);
-  msgBox.exec();
-
-  
+  ApproachDialog appDialog;
+  appDialog.exec();
+  if(appDialog.getWasAborted())
+  {
+    this->close();
+  }
+  else
+  {
+    this->m_approachType = appDialog.getApproach();
+  }
 
 }
 
@@ -116,10 +118,18 @@ void CreateMDWorkspace::addWorkspaceClicked()
     using namespace Mantid::API;
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
     m_data->registerWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(ws), m_model); //TODO better handle any incompatibility here.
-    LoanedMemento memento = m_data->at(0);
-    m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento)); //HACK : find some better way of providing the exact ws memento.
+
+    // Key off the selected index. --------------------------------------------
+    LoanedMemento memento = m_data->at(0); 
+
+    if(ISISInelastic == m_approachType)
+    {
+      m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+    }
+
     m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
     m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+    //------------------------------------------------------------------------------
 
   }
 }

@@ -4,6 +4,7 @@
 #include <qwidget.h>
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/LatticeView.h"
+#include "MantidQtCustomInterfaces/LoanedMemento.h"
 
 namespace MantidQt
 {

@@ -85,7 +85,7 @@ public:
    void testLock()
    {
      MockWorkspaceMementoLock* lock = new MockWorkspaceMementoLock;
-     EXPECT_CALL(*lock, lock()).Times(1); //Check that lock on lock object is used.
+     EXPECT_CALL(*lock, lock()).Times(AtLeast(1)); //Check that lock on lock object is used.
      EXPECT_CALL(*lock, unlock()).Times(0);
      EXPECT_CALL(*lock, locked()).Times(0);
 

@@ -6,6 +6,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/QtWorkspaceMementoModel.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
+#include "MantidQtCustomInterfaces/ApproachDialog.h"
 #include "ui_CreateMDWorkspace.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -50,7 +51,7 @@ namespace MantidQt
       boost::scoped_ptr<WorkspaceMementoCollection> m_data;
       boost::shared_ptr<Approach> m_approach;
       QtWorkspaceMementoModel* m_model;
-      
+      ApproachType m_approachType;
       
     };
   }

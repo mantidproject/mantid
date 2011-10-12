@@ -38,6 +38,7 @@ namespace MantidQt
          checkType<T>();
          val = *static_cast<T*>(getValueVoidPtr());
       }
+      virtual const std::type_info& get_type_info() const = 0;
       template<class T>
       void setValue(T& value)
       {
@@ -47,7 +48,6 @@ namespace MantidQt
     protected:
       virtual void* getValueVoidPtr() = 0;
       virtual void setValueVoidPtr(void* value) = 0;
-      virtual const std::type_info& get_type_info() const = 0;
     };
 
     typedef boost::shared_ptr<AbstractMementoItem> AbstractMementoItem_sptr;

@@ -12,6 +12,7 @@
 #include "MantidQtCustomInterfaces/LoanedMemento.h"
 #include "MantidQtCustomInterfaces/LatticePresenter.h"
 #include "MantidQtCustomInterfaces/LatticeView.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -56,18 +57,11 @@ private:
     TableRow row = ws->getRow(0);
     row << "TestWSRow" << "CNCS" << 1 << "SampleXML" << 1.0 << 1.0 << 1.0 << 90.0 << 90.0 << 90.0 << "Not Ready";
     int rowIndex = 0;
+
     WorkspaceMemento* memento = new WorkspaceMemento(ws, "TestWSRow");
-    memento->addItem(new WorkspaceMementoItem<0, std::string>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<1, std::string>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<2, int>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<3, std::string>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<4, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<5, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<6, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<7, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<8, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<9, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<10, std::string>(ws, rowIndex));
+    LoanedMemento managed(memento);
+    WorkspaceMementoService<LoanedMemento> service(managed);
+    service.addAllItems(ws, rowIndex);
     return memento;
   }
 

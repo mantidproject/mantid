@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
 #include "MantidQtCustomInterfaces/LoanedMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoLock.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
 #include "MantidDataObjects/MementoTableWorkspace.h"
 #include "MantidAPI/TableRow.h" 
 
@@ -45,17 +46,9 @@ private:
   static void doAddItems(TableWorkspace_sptr ws, WorkspaceMemento* memento)
   {
     int rowIndex = 0;
-    memento->addItem(new WorkspaceMementoItem<0, std::string>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<1, std::string>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<2, int>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<3, std::string>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<4, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<5, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<6, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<7, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<8, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<9, double>(ws, rowIndex));
-    memento->addItem(new WorkspaceMementoItem<10, std::string>(ws, rowIndex));
+    LoanedMemento managed(memento);
+    WorkspaceMementoService<LoanedMemento> service(managed);
+    service.addAllItems(ws, rowIndex);
   }
 
 public:
@@ -91,7 +84,7 @@ public:
   void  testCopyConstructor()
   {
     MockWorkspaceMementoLock* lock = new MockWorkspaceMementoLock;
-    EXPECT_CALL(*lock, lock()).Times(1); //Lock on a, then lock on b.
+    EXPECT_CALL(*lock, lock()).Times(AtLeast(1)); //Lock on a, then lock on b.
     EXPECT_CALL(*lock, unlock()).Times(AtLeast(2)); //unlock on a, then unlock on b
     EXPECT_CALL(*lock, locked()).Times(0);
 

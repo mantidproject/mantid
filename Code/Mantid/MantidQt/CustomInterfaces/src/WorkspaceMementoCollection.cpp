@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
 #include "MantidQtCustomInterfaces/Updateable.h"
 
 #include <utility>
@@ -49,37 +50,33 @@ namespace MantidQt
     */
     void WorkspaceMementoCollection::registerWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws, Updateable* model)
     {
-      enum statusoptions{notready, readyforvisualisation, notreadyforanything};
-      using namespace Mantid::API;
-
       ActionManager mode;
-      m_data->insertRow(m_data->rowCount() + 1);
-      TableRow row = m_data->getRow(m_data->rowCount()-1);
-      row << ws->getName() 
-        << ws->getInstrument()->getName() 
-        << ws->getRunNumber();
+      int rowIndex = m_data->rowCount() + 1;
+      m_data->insertRow(rowIndex);
 
+      WorkspaceMemento* temp = new WorkspaceMemento(m_data, "Temp");
+      WorkspaceMementoService<WorkspaceMemento*> service(temp);
+      service.addAllItems(m_data, rowIndex-1);
+      service.setWorkspaceName(ws->getName());
+      service.setInstrumentName(ws->getInstrument()->getName());
+      service.setRunNumber(ws->getRunNumber());
       if(ws->sample().getShape().hasValidShape())
       {
-        row << ws->sample().getShape().getShapeXML();
+        service.setShapeXML(ws->sample().getShape().getShapeXML());
       }
       else
       {
-        row << "";
+        service.setShapeXML("");
         mode.ask(ReadyForPlotting);
       }
       if(ws->sample().hasOrientedLattice())
       {
-        row << ws->sample().getOrientedLattice().a()
-          << ws->sample().getOrientedLattice().b()
-          << ws->sample().getOrientedLattice().c()
-          << ws->sample().getOrientedLattice().alpha()
-          << ws->sample().getOrientedLattice().beta()
-          << ws->sample().getOrientedLattice().gamma();
+        OrientedLattice lattice = ws->sample().getOrientedLattice();
+        service.setLatticeParameters(lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma());
       }
       else
       {
-        row << 0.0 << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
+        service.setLatticeParameters(0, 0, 0, 0, 0, 0);
         mode.ask(NotReady); 
       }
       std::string status;
@@ -95,7 +92,8 @@ namespace MantidQt
       {
         status = "Not Ready";
       }
-      row << status;
+      service.setStatus(status);
+      temp->commit(); 
 
       // Append all log data here.
       //typedef std::vector<Kernel::Property*> VecLogType;
@@ -167,6 +165,7 @@ namespace MantidQt
     */
     LoanedMemento WorkspaceMementoCollection::at(int rowIndex)
     {
+
       /// Index by workspace name.
       std::string wsName = m_data->cell<std::string>(rowIndex, 0);
       if(m_mementoMap.end() == m_mementoMap.find(wsName))
@@ -174,24 +173,11 @@ namespace MantidQt
         WorkspaceMemento* memento = new WorkspaceMemento(m_data, wsName);
         m_mementoMap.insert(std::make_pair(wsName, memento));
 
-
-        //Table schema should be identical to that described in constructor.
-
-        memento->addItem(new WorkspaceMementoItem<0, std::string>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<1, std::string>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<2, int>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<3, std::string>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<4, double>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<5, double>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<6, double>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<7, double>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<8, double>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<9, double>(m_data, rowIndex));
-        memento->addItem(new WorkspaceMementoItem<10, std::string>(m_data, rowIndex));
-        //TODO lots more column items to add.
+        ///Use the helper service to configure the memento.
+        LoanedMemento managedMemento(memento);
+        WorkspaceMementoService<LoanedMemento> service(managedMemento);
+        service.addAllItems(m_data, rowIndex);
       }
-      
-      
       //Wrap product and return.
       return LoanedMemento(m_mementoMap[wsName]);
     }

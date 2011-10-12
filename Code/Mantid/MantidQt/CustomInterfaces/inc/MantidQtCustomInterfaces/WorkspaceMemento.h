@@ -64,6 +64,11 @@ namespace MantidQt
       bool unlock();
       void lock();
 
+      size_t WorkspaceMemento::getSize()
+      {
+        return m_items.size();
+      }
+
 
     private:
       /// Reference to underlying data.
