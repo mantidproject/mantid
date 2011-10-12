@@ -65,7 +65,7 @@ namespace MantidQt
        {
          return false;
        }
-       for(unsigned int i = 0 ; i< ws->columnCount(); i++)
+       for(int i = 0 ; i< ws->columnCount(); i++)
        {
          if(ws->getColumn(i)->get_type_info() != m_memento->getItem(i)->get_type_info()) //Do the types match?
          {
