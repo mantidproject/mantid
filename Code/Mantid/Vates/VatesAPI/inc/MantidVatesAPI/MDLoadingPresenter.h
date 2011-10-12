@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <vtkDataSet.h>
+#include <string>
 #include <vector>
 
 class vtkUnstructuredGrid;
