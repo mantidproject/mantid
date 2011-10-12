@@ -70,24 +70,39 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     bool singleSpectrum = !isEmpty(singleIndex);
 
     // 2. Call StripPeaks
-    std::string peakpositions = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401";
+    std::string peakpositions;
+    std::string unit = inputWS->getAxis(0)->unit()->unitID();
+    if (unit == "dSpacing"){
+      peakpositions = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401";
 
-    IAlgorithm_sptr alg1 = createSubAlgorithm("StripPeaks");
-    alg1->setProperty("InputWorkspace", inputWS);
-    alg1->setPropertyValue("OutputWorkspace", outputWSName);
-    alg1->setProperty("FWHM", param_fwhm);
-    alg1->setProperty("Tolerance", param_tolerance);
-    alg1->setProperty("PeakPositions", peakpositions);
-    if (singleSpectrum){
-      alg1->setProperty("WorkspaceIndex", singleIndex);
+    } else if (unit == "MomentumTransfer"){
+      g_log.error() << "Unit MomentumTransfer (Q-space) is NOT supported by StripVanadiumPeaks now.\n";
+      throw std::invalid_argument("Q-space is not supported");
+      peakpositions = "2.9359, 4.1520, 5.0851, 5.8716, 6.5648, 7.1915, 7.7676, 8.3045, 8.8074, 9.2837, 9.7368, 10.1703, 10.5849, 11.3702, 11.7443, 12.1040, 12.4568";
+
+    } else {
+      g_log.error() << "Unit " << unit << " Is NOT supported by StripVanadiumPeaks, which only supports d-spacing" << std::endl;
+      throw std::invalid_argument("Not supported unit");
+
     }
 
-    alg1->executeAsSubAlg();
+    // Call StripPeak
+    IAlgorithm_sptr stripPeaks = createSubAlgorithm("StripPeaks");
+    stripPeaks->setProperty("InputWorkspace", inputWS);
+    stripPeaks->setPropertyValue("OutputWorkspace", outputWSName);
+    stripPeaks->setProperty("FWHM", param_fwhm);
+    stripPeaks->setProperty("Tolerance", param_tolerance);
+    stripPeaks->setProperty("PeakPositions", peakpositions);
+    if (singleSpectrum){
+      stripPeaks->setProperty("WorkspaceIndex", singleIndex);
+    }
+
+    stripPeaks->executeAsSubAlg();
 
     // 3. Get and set output workspace
     // API::MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace_sptr>(AnalysisDataService::Instance().retrieve(outputWSName));
     // boost::shared_ptr<API::Workspace> outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
-    API::MatrixWorkspace_sptr outputWS = alg1->getProperty("OutputWorkspace");
+    API::MatrixWorkspace_sptr outputWS = stripPeaks->getProperty("OutputWorkspace");
 
     this->setProperty("OutputWorkspace", outputWS);
 
