@@ -61,7 +61,7 @@ namespace MantidQt
     template<typename Memento>
     bool WorkspaceMementoService<Memento>::validMementoTableSchema(Mantid::API::ITableWorkspace_sptr ws)
     {
-       if(ws->columnCount() != m_memento->getSize()) //Do the sizes match?::W
+       if(size_t(ws->columnCount()) != m_memento->getSize()) //Do the sizes match?::W
        {
          return false;
        }
