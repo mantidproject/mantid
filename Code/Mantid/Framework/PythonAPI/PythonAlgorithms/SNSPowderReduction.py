@@ -381,10 +381,8 @@ class SNSPowderReduction(PythonAlgorithm):
         if "fullprof" in self._outTypes:
             SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
 
-        # always save processed files
-        ConvertToMatrixWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp)
-        SaveNexusProcessed(InputWorkspace=wksp, 
-                           Filename=filename+"_processed.nxs")
+        # always save python script
+        GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
