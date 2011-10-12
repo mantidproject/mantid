@@ -1,4 +1,4 @@
-#ifndef _vtkMDEWSource_h
+#ifndef _vtkMDEWSource_h 
 #define _vtkMDEWSource_h
 
 #include "vtkUnstructuredGridAlgorithm.h"
@@ -58,7 +58,10 @@ public:
 
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double);
+  /// Getter for the input geometry xml
   const char* GetInputGeometryXML();
+  /// Getter for the workspace type
+  char* GetWorkspaceTypeName();
 
 protected:
   vtkMDEWSource();

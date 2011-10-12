@@ -15,7 +15,8 @@ public:
   void SetWidth(double width);
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress);
-
+  /// Getter for the workspace type
+  char* GetWorkspaceTypeName();
 
 protected:
   vtkPeaksReader();

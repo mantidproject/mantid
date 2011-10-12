@@ -42,6 +42,10 @@ namespace Mantid
       virtual void executeLoadMetadata();
       virtual ~MDEWEventNexusLoadingPresenter();
       virtual bool canReadFile() const;
+      virtual std::string getWorkspaceTypeName()
+      {
+        return "NotSet";
+      }
     private:
       const std::string m_filename;
     };

@@ -201,3 +201,12 @@ void vtkEventNexusReader::setTimeRange(vtkInformationVector* outputVector)
   }
 }
 
+/*
+Getter for the workspace type name.
+*/
+char* vtkEventNexusReader::GetWorkspaceTypeName()
+{
+  //Forward request on to MVP presenter
+  return const_cast<char*>(m_presenter->getWorkspaceTypeName().c_str());
+}
+

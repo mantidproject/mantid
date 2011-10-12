@@ -5,7 +5,7 @@
 #include "MantidKernel/MultiThreaded.h"
 
 class vtkImplicitFunction;
-class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm
+class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm  
 {
 public:
 
@@ -27,6 +27,9 @@ public:
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress);
 
+  /// Getter for the workspace type
+  char* GetWorkspaceTypeName();
+  /// Getter for the input geometry
   const char* GetInputGeometryXML();
 
 protected:

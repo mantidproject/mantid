@@ -2,6 +2,13 @@
   <!-- Begin SQWEventReader -->
   <ProxyGroup name="sources">
     <SourceProxy name="SQWEventReader" class="vtkSQWEventReader">
+	    <StringVectorProperty
+         name="WorkspaceTypeName"
+         command="GetWorkspaceTypeName"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
 	    <IntVectorProperty
          name="Load All Into Memory"
          command="SetInMemory"

@@ -110,3 +110,14 @@ void vtkPeaksSource::updateAlgorithmProgress(double progress)
   this->SetProgressText("Executing Peaks Source...");
   this->UpdateProgress(progress);
 }
+
+
+/*
+Getter for the workspace type name.
+*/
+char* vtkPeaksSource::GetWorkspaceTypeName()
+{
+  //Forward request on to MVP presenter
+  //return m_presenter->getWorkspaceTypeName().c_str();
+  return "NotSet";
+}

@@ -2,6 +2,13 @@
   <!-- Begin MDEWNexusReader -->
   <ProxyGroup name="sources">
     <SourceProxy name="MDEWNexusReader" class="vtkMDEWNexusReader">
+	    <StringVectorProperty
+         name="WorkspaceTypeName"
+         command="GetWorkspaceTypeName"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
 	    <IntVectorProperty
          name="Load All Into Memory"
          command="SetInMemory"

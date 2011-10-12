@@ -2,6 +2,13 @@
   <!-- Begin PeaksReader -->
   <ProxyGroup name="sources">
     <SourceProxy name="PeaksReader" class="vtkPeaksReader">
+	    <StringVectorProperty
+         name="WorkspaceTypeName"
+         command="GetWorkspaceTypeName"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
 		<DoubleVectorProperty
          name="Peak Width"
          command="SetWidth"

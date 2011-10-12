@@ -122,6 +122,13 @@ void testExecuteLoadMetadata()
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.getGeometryXML());
 }
 
+void testGetWorkspaceTypeName()
+{
+  EventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "NotSet", presenter.getWorkspaceTypeName());
+}
+
+
 
 };
 #endif

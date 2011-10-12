@@ -1,4 +1,4 @@
-#ifndef _vtkEventNexusReader_h
+#ifndef _vtkEventNexusReader_h 
 #define _vtkEventNexusReader_h
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
@@ -25,7 +25,9 @@ public:
   void SetDepth(int depth);
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress);
-
+  /// Getter for the workspace type
+  char* GetWorkspaceTypeName();
+  /// Getter for the input geometry
   const char* GetInputGeometryXML();
 
 protected:

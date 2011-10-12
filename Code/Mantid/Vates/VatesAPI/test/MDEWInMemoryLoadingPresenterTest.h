@@ -188,6 +188,12 @@ public:
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
   }
 
+  void testGetWorkspaceTypeName()
+  {
+    MDEWInMemoryLoadingPresenter presenter(new MockMDLoadingView, new MockWorkspaceProvider, "_");
+    TSM_ASSERT_EQUALS("Characterisation Test Failed", "NotSet", presenter.getWorkspaceTypeName());
+  }
+
 };
 
 #endif

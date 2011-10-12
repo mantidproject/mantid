@@ -47,6 +47,10 @@ namespace Mantid
       virtual bool canReadFile() const = 0;
       virtual const std::string& getGeometryXML() const = 0;
       virtual ~MDLoadingPresenter(){}
+      virtual std::string getWorkspaceTypeName()
+      {
+        return "NotSet";
+      }
     };
 
   }

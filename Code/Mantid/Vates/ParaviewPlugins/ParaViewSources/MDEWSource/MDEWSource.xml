@@ -2,6 +2,13 @@
   <!-- Begin MDEWSource -->
   <ProxyGroup name="sources">
     <SourceProxy name="MDEW Source" class="vtkMDEWSource">
+	    <StringVectorProperty
+         name="WorkspaceTypeName"
+         command="GetWorkspaceTypeName"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
 	   <IntVectorProperty
          name="Recursion Depth"
          command="SetDepth"

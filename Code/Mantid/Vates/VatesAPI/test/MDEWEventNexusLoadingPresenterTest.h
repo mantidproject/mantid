@@ -114,5 +114,11 @@ void testCallGetGeometryThrows()
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
 }
 
+void testGetWorkspaceTypeName()
+{
+  MDEWEventNexusLoadingPresenter presenter(new MockMDLoadingView, getSuitableFile());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "NotSet", presenter.getWorkspaceTypeName());
+}
+
 };
 #endif

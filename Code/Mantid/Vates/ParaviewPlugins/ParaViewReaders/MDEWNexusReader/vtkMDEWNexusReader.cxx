@@ -200,3 +200,12 @@ void vtkMDEWNexusReader::setTimeRange(vtkInformationVector* outputVector)
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
   }
 }
+
+/*
+Getter for the workspace type name.
+*/
+char* vtkMDEWNexusReader::GetWorkspaceTypeName()
+{
+  //Forward request on to MVP presenter
+  return const_cast<char*>(m_presenter->getWorkspaceTypeName().c_str());
+}

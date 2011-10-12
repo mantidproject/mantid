@@ -44,6 +44,8 @@ public:
   void SetWsName(std::string wsName);
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double progress);
+  /// Getter for the workspace type
+  char* GetWorkspaceTypeName();
 
 protected:
   vtkPeaksSource();
