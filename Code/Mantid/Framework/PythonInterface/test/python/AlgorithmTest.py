@@ -13,7 +13,7 @@ class AlgorithmTest(unittest.TestCase):
     def test_alg_set_valid_prop_succeeds(self):
         alg = algorithm_mgr.create_unmanaged('Load')
         alg.initialize()
-        alg.set_property('Filename', 'ALF15739.raw')
+        alg.set_property('Filename', 'LOQ48127.raw')
         
     def test_alg_set_invalid_prop_raises_error(self):
         alg = algorithm_mgr.create_unmanaged('Load')
@@ -29,10 +29,10 @@ class AlgorithmTest(unittest.TestCase):
     def test_execute_succeeds_with_valid_props(self):
         alg = algorithm_mgr.create_unmanaged('Load')
         alg.initialize()
-        alg.set_property('Filename', 'ALF15739.raw')
+        alg.set_property('Filename', 'LOQ48127.raw')
         nspec = 10
         alg.set_property('SpectrumMax', nspec)
-        wsname = 'ALF15739' 
+        wsname = 'LOQ48127' 
         alg.set_property('OutputWorkspace', wsname)
         alg.set_child(True) # Just to keep the output from the data service
         alg.execute()

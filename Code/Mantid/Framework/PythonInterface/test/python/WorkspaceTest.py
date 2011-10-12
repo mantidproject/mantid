@@ -16,8 +16,8 @@ class WorkspaceTest(unittest.TestCase):
 
     def test_that_alg_get_property_is_converted_correctly(self):
         nspec = 2
-        wsname = 'ALF15739' 
-        alg = run_algorithm('LoadRaw', Filename='ALF15739.raw', OutputWorkspace=wsname, SpectrumMax=nspec, child=True)
+        wsname = 'LOQ48127' 
+        alg = run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=nspec, child=True)
         ws_prop = alg.get_property('OutputWorkspace')
         self.assertEquals(type(ws_prop), WorkspaceProperty_Workspace)
         # Is Workspace in the hierarchy of the value
@@ -27,6 +27,6 @@ class WorkspaceTest(unittest.TestCase):
         
     # Disabled until the get/set property stuff in IPropertyManager can be a little more forgiving.
     def xtest_ws_as_input_to_algorithm(self): 
-        alg = run_algorithm('LoadRaw', Filename='ALF15739.raw', OutputWorkspace='ALF15739', SpectrumMax=1, child=True)
+        alg = run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace='LOQ48127', SpectrumMax=1, child=True)
         ws = alg.get_property('OutputWorkspace').value
         alg = run_algorithm('ConvertUnits', Target='dSpacing', InputWorkspace=ws, OutputWorkspace=ws, child=True)

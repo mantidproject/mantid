@@ -88,8 +88,6 @@ public:
     ///Test a GEM file in the test directory
     std::string msg = fp->setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
-    msg = fp->setValue("ALF15739.raw");
-    TS_ASSERT_EQUALS(msg, "");
 
     //Check different extension
     msg = fp->setValue("48098.Q");
@@ -155,10 +153,15 @@ public:
     TS_ASSERT_DIFFERS(fp->value().find("LOQ48127"),std::string::npos);
     
     // Now test one with an upper case extension
-    ConfigService::Instance().setString("default.instrument","ALF");
-    error = fp->setValue("15739");
+
+    /* 
+    Commented out since ALF15739 was removed to make AutoTestData smaller, 
+    and since the file had a lower case extension anyway...*/
+
+    ConfigService::Instance().setString("default.instrument","LOQ");
+    error = fp->setValue("25654");
     TS_ASSERT_EQUALS(error, "");
-    TS_ASSERT(fp->value().find("ALF15739") != std::string::npos);
+    TS_ASSERT(fp->value().find("LOQ25654") != std::string::npos);
   }
 
   void testOptionalDirectory()

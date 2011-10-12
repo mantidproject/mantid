@@ -18,14 +18,14 @@ class AnalysisDataServiceTest(unittest.TestCase):
         
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
-        run_algorithm('Load', Filename='ALF15739.raw', OutputWorkspace=wsname, SpectrumMax=1)    
+        run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1)    
         self.assertEquals(len(analysis_data_svc), 1)
         # Remove to clean the test up
         analysis_data_svc.remove(wsname)
         
     def test_len_decreases_when_item_removed(self):
         wsname = 'ADSTest_test_len_decreases_when_item_removed'
-        run_algorithm('Load', Filename='ALF15739.raw', OutputWorkspace=wsname, SpectrumMax=1)    
+        run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1)    
         self.assertEquals(len(analysis_data_svc), 1)
         # Remove to clean the test up
         del analysis_data_svc[wsname]
@@ -33,7 +33,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
     
     def test_key_operator_does_same_as_retrieve(self):
         wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
-        run_algorithm('LoadRaw', Filename='ALF15739.raw', OutputWorkspace=wsname, SpectrumMax=1) 
+        run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1) 
         ws_from_op = analysis_data_svc[wsname]
         ws_from_method = analysis_data_svc.retrieve(wsname)
         

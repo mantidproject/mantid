@@ -12,9 +12,9 @@ class WorkspaceHistoryTest(unittest.TestCase):
 
     def test_lastAlgorithm_returns_the_correct_object(self):
         # Smallest dataset possible
-        alf_1 = LoadRaw('ALF15739.raw', 'alf_1', SpectrumMin=1, SpectrumMax=1).workspace()
+        loq_1 = LoadRaw('LOQ48127.raw', 'loq_1', SpectrumMin=1, SpectrumMax=1).workspace()
         # Retrive the algorithm
-        last_alg = alf_1.getHistory().lastAlgorithm()
+        last_alg = loq_1.getHistory().lastAlgorithm()
         self.assertEquals(last_alg.name(), 'LoadRaw')
         self.assertEquals(last_alg.getPropertyValue('SpectrumMin'), '1')
         self.assertEquals(last_alg.getPropertyValue('SpectrumMax'), '1')
