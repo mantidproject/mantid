@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 
 namespace Mantid
 {
@@ -42,9 +42,11 @@ namespace MDEvents
   class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator
   {
   public:
-    MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace);
-    MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace);
+    MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function = NULL);
+    MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function = NULL);
     ~MDHistoWorkspaceIterator();
+
+    void init(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function);
 
     virtual size_t getDataSize() const;
 
@@ -83,6 +85,9 @@ namespace MDEvents
 
     /// The maximum linear index in the workspace
     uint64_t m_max;
+
+    /// Implicit function to limit volume searched
+    Mantid::Geometry::MDImplicitFunction * m_function;
 
   };
 

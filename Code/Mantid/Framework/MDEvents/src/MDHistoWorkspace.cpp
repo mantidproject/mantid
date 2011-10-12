@@ -280,7 +280,7 @@ namespace MDEvents
         return std::numeric_limits<signal_t>::quiet_NaN();
       linearIndex += ix * m_indexMaker[d];
     }
-    return m_signals[linearIndex];
+    return m_signals[linearIndex] * m_inverseVolume;
   }
 
 

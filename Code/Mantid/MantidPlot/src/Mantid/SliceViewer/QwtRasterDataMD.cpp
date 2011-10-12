@@ -72,7 +72,6 @@ QwtRasterData* QwtRasterDataMD::copy() const
 /** Return the data range to show */
 QwtDoubleInterval QwtRasterDataMD::range() const
 {
-//  std::cout << "QwtRasterDataMD::range() requested " << m_minVal << "  to  "<< m_maxVal << "\n";
   return m_range;
 }
 

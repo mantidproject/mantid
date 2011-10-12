@@ -1,5 +1,6 @@
 #include "CustomTools.h"
 #include "DimensionSliceWidget.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
@@ -16,8 +17,8 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
-#include <vector>
 #include <sstream>
+#include <vector>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -27,9 +28,10 @@ using Mantid::Kernel::VMD;
 
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
-      m_colorRange(1.0, 3.0)
+      m_dimX(0), m_dimY(0)
 {
 	ui.setupUi(this);
+
 
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
@@ -41,19 +43,17 @@ SliceViewer::SliceViewer(QWidget *parent)
 	m_spect = new QwtPlotSpectrogram();
 	m_spect->attach(m_plot);
 
-	QwtLinearColorMap colorMap = QwtLinearColorMap(Qt::blue, Qt::red);
+	m_colorMap = QwtLinearColorMap(Qt::blue, Qt::red);
 	QwtDoubleInterval range(0.0, 10.0);
 
 	m_data = new QwtRasterDataMD();
-	m_spect->setData(*m_data);
-	m_spect->setColorMap(colorMap);
-	m_spect->itemChanged();
+	m_spect->setColorMap(m_colorMap);
   m_plot->autoRefresh();
 
   // --- Create a color bar on the right axis ---------------
   m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
   m_colorBar->setColorBarEnabled(true);
-  m_colorBar->setColorMap(range, colorMap);
+  m_colorBar->setColorMap(range, m_colorMap);
   m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
   m_plot->enableAxis(QwtPlot::yRight);
 
@@ -64,13 +64,18 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
+  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(findRangeFull()));
+  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(findRangeSlice()));
   ui.btnZoom->hide();
 
 }
 
 SliceViewer::~SliceViewer()
 {
-
+  delete m_data;
+//  delete m_spect;
+//  delete m_spectLayout;
+//  delete m_plot;
 }
 
 //------------------------------------------------------------------------------------
@@ -140,11 +145,36 @@ void SliceViewer::resetZoom()
 
 //------------------------------------------------------------------------------------
 /// Find the full range of values in the displayed area
-void SliceViewer::findRange()
+void SliceViewer::findRangeFull()
 {
   QwtDoubleInterval xint = m_plot->axisScaleDiv( Qt::XAxis )->interval();
-  std::cout << xint.minValue() << " to " << xint.maxValue() << std::endl;
+//  std::cout << xint.minValue() << " to " << xint.maxValue() << std::endl;
+
+  IMDIterator * it = m_ws->createIterator();
+  double minSignal = DBL_MAX;
+  double maxSignal = -DBL_MAX;
+  do
+  {
+    double signal = it->getNormalizedSignal();
+    if (signal < minSignal) minSignal = signal;
+    if (signal > maxSignal) maxSignal = signal;
+  } while (it->next());
+  if (minSignal < maxSignal)
+    m_colorRange = QwtDoubleInterval(minSignal, maxSignal);
+  else
+    m_colorRange = QwtDoubleInterval(0., 1.0);
+  std::cout << "Found color rnage: " << m_colorRange.minValue() << " to " << m_colorRange.maxValue() << std::endl;
+  delete it;
+  // This redoes the display to show the new range
+  this->updateDisplay();
 }
+
+void SliceViewer::findRangeSlice()
+{
+  m_colorRange = QwtDoubleInterval(0., 1.0);
+  this->updateDisplay();
+}
+
 
 //------------------------------------------------------------------------------------
 void SliceViewer::showInfoAt(double x, double y)
@@ -194,14 +224,14 @@ void SliceViewer::updateDisplay()
 
   // Set the color range
   m_data->setRange(m_colorRange);
+  m_colorBar->setColorMap(m_colorRange, m_colorMap);
+  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(), m_colorRange.maxValue() );
 
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
 //  std::cout << m_plot->sizeHint().width() << " width\n";
-
-  findRange();
 }
 
 
@@ -314,9 +344,9 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   this->updateDimensionSliceWidgets();
   m_data->setWorkspace(ws);
+  // Find the full range. This will also do the initial display
+  findRangeFull();
   this->updateDisplay();
-  std::cout << " Ask again \n";
-  m_spect->data().range();
 }
 
 

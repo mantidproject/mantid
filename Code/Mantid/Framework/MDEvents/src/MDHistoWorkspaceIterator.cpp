@@ -17,12 +17,9 @@ namespace MDEvents
    * @param workspace :: MDHistoWorkspace_sptr being iterated
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace)
-  : m_ws(workspace.get()), m_pos(0)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function)
   {
-    if (m_ws == NULL)
-      throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
-    m_max = m_ws->getNPoints();
+    this->init(workspace.get(), function);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -31,9 +28,23 @@ namespace MDEvents
    * @param workspace :: MDHistoWorkspace_sptr being iterated
    * @return
    */
-  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace)
-  : m_ws(workspace), m_pos(0)
+  MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function)
   {
+    this->init(workspace, function);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor helper
+   *
+   * @param workspace :: MDWorkspace
+   * @param function :: implicit function or NULL for none
+   */
+  void MDHistoWorkspaceIterator::init(const MDHistoWorkspace * workspace,
+      Mantid::Geometry::MDImplicitFunction * function)
+  {
+    m_ws = workspace;
+    m_pos = 0;
+    m_function = function;
     if (m_ws == NULL)
       throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
     m_max = m_ws->getNPoints();

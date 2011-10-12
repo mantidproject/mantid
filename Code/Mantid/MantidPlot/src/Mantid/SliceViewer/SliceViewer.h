@@ -12,6 +12,7 @@
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
+#include <qwt_color_map.h>
 
 class SliceViewer : public QWidget
 {
@@ -30,12 +31,13 @@ public slots:
   void updateDisplay();
   void resetZoom();
   void showInfoAt(double, double);
+  void findRangeFull();
+  void findRangeSlice();
 
 private:
   void initZoomer();
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
-  void findRange();
 
 private:
   /// Auto-generated UI controls.
@@ -49,6 +51,9 @@ private:
 
   /// Layout containing the spectrogram
   QHBoxLayout * m_spectLayout;
+
+  /// Color map in use
+  QwtLinearColorMap m_colorMap;
 
   /// Color bar indicating the color scale
   QwtScaleWidget * m_colorBar;

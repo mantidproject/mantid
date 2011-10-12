@@ -88,6 +88,26 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="btnRangeFull">
+            <property name="toolTip">
+             <string>Reset the color range to the full range of the workspace</string>
+            </property>
+            <property name="text">
+             <string>RngFull</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnRangeSlice">
+            <property name="toolTip">
+             <string>Reset the color scale to the range of the currently visible slice</string>
+            </property>
+            <property name="text">
+             <string>RngSlice</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

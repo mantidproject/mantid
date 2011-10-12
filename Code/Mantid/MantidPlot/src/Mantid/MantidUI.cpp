@@ -552,15 +552,24 @@ void MantidUI::showSliceViewer()
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
   if (mdws)
   {
+    QString windowName = QString("Slice Viewer (") + wsName + QString(")");
     // Create the window
-    QMdiSubWindow * subWindow = new QMdiSubWindow(this->appWindow());
-    connect(m_appWindow, SIGNAL(shutting_down()), subWindow, SLOT(close()));
+    MdiSubWindow * w = new MdiSubWindow("SliceViewer", this->appWindow(), windowName);
+    w->setCaption(windowName);
+    w->resize(500, 500);
+
+    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+    connect(w, SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+    connect(w, SIGNAL(showContextMenu()), appWindow(), SLOT(showWindowContextMenu()));
+    appWindow()->d_workspace->addSubWindow(w);
+    w->showNormal();
+
+    //connect(m_appWindow, SIGNAL(shutting_down()), subWindow, SLOT(close()));
     // Create the slicer and add it to the MDI window
-    QLayout * layout = subWindow->layout();
-    SliceViewer * slicer = new SliceViewer(subWindow);
+    QLayout * layout = w->layout();
+    SliceViewer * slicer = new SliceViewer(w);
     slicer->setWorkspace(mdws);
     layout->addWidget(slicer);
-    subWindow->show();
   }
 
 }
