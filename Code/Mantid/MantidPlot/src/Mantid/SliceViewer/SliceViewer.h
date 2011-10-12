@@ -10,6 +10,7 @@
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot.h>
 #include <qwt_raster_data.h>
+#include <qwt_scale_widget.h>
 #include <vector>
 
 class SliceViewer : public QWidget
@@ -21,15 +22,17 @@ public:
   ~SliceViewer();
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
-
+  void showControls(bool visible);
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
   void updateDisplay();
+  void resetZoom();
+  void showInfoAt(double, double);
 
 private:
-  void initLayout();
+  void initZoomer();
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
 
@@ -44,7 +47,10 @@ private:
   QwtPlotSpectrogram * m_spect;
 
   /// Layout containing the spectrogram
-  QVBoxLayout * m_spectLayout;
+  QHBoxLayout * m_spectLayout;
+
+  /// Color bar indicating the color scale
+  QwtScaleWidget * m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
   std::vector<DimensionSliceWidget *> m_dimWidgets;
@@ -59,6 +65,8 @@ private:
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;
   Mantid::Geometry::IMDDimension_const_sptr m_Y;
+  size_t m_dimX;
+  size_t m_dimY;
 
 };
 

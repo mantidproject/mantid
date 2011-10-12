@@ -46,15 +46,17 @@ public:
 public slots:
   void sliderMoved();
   void btnXYChanged();
+  void spinBoxChanged();
 
 signals:
   void changedShownDim(int index, int dim, int oldDim);
   void changedSlicePoint(int index, double value);
 
-private:
+public:
   /// Auto-gen UI class
   Ui::DimensionSliceWidgetClass ui;
 
+private:
   /// Sptr to the dimensions being displayed
   Mantid::Geometry::IMDDimension_const_sptr m_dim;
 
@@ -68,6 +70,7 @@ private:
   double m_slicePoint;
 
   bool m_insideSetShownDim;
+  bool m_insideSpinBoxChanged;
 };
 
 #endif // DIMENSIONSLICEWIDGET_H

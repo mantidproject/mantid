@@ -173,7 +173,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
-                   src/Mantid/SliceViewer/SliceViewer.cpp
+                   src/Mantid/SliceViewer/CustomTools.cpp
                    src/Mantid/SliceViewer/SliceViewer.cpp
                    src/Mantid/SliceViewer/DimensionSliceWidget.cpp
                    src/Mantid/SliceViewer/QwtRasterDataMD.cpp
@@ -389,6 +389,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/SliceViewer/SliceViewer.h
+                   src/Mantid/SliceViewer/CustomTools.h                   
                    src/Mantid/SliceViewer/QwtRasterDataMD.h
                    src/Mantid/SliceViewer/DimensionSliceWidget.h
                    src/Mantid/InstrumentWidget/BinDialog.h
@@ -650,8 +651,9 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h
+                       src/Mantid/SliceViewer/CustomTools.h
                        src/Mantid/SliceViewer/SliceViewer.h
-               			src/Mantid/SliceViewer/DimensionSliceWidget.h
+                       src/Mantid/SliceViewer/DimensionSliceWidget.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h

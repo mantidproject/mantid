@@ -56,8 +56,8 @@ Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, 
   {
     ws = new Mantid::MDEvents::MDHistoWorkspace(
         MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins)),
-        MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, max, numBins))   );
+        MDHistoDimension_sptr(new MDHistoDimension("yy","y","furlongs", 0.0, max, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("energy","z","meV", 0.0, max, numBins))   );
   }
   else if (numDims == 4)
   {

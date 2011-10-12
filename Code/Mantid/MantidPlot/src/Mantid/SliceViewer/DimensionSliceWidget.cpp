@@ -10,9 +10,12 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
   ui.setupUi(this);
 
   m_insideSetShownDim = false;
+  m_insideSpinBoxChanged = false;
 
-  QObject::connect(ui.horizontalSlider, SIGNAL(sliderMoved(int)),
+  QObject::connect(ui.horizontalSlider, SIGNAL( valueChanged(int)),
                    this, SLOT(sliderMoved()));
+  QObject::connect(ui.doubleSpinBox, SIGNAL( valueChanged(double)),
+                   this, SLOT(spinBoxChanged()));
   QObject::connect(ui.btnX, SIGNAL(toggled(bool)),
                    this, SLOT(btnXYChanged()));
   QObject::connect(ui.btnY, SIGNAL(toggled(bool)),
@@ -24,14 +27,37 @@ DimensionSliceWidget::~DimensionSliceWidget()
 
 }
 
+//-------------------------------------------------------------------------------------------------
 /** Slot called when the slider moves */
 void DimensionSliceWidget::sliderMoved()
 {
+  // Don't update when called from the spin box
+  if (m_insideSpinBoxChanged) return;
+
+  // Find the slice point
   size_t index = size_t(ui.horizontalSlider->value());
   m_slicePoint =  m_dim->getX(index);
+
+  // This will, in turn, emit the changedSlicePoint() signal
   ui.doubleSpinBox->setValue(m_slicePoint);
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Slot called when the slider moves */
+void DimensionSliceWidget::spinBoxChanged()
+{
+  m_insideSpinBoxChanged = true;
+  // This is the slice point
+  m_slicePoint = ui.doubleSpinBox->value();
+
+  // Set the slider to the matching point
+  int index = int((m_slicePoint - m_dim->getMinimum()) / m_dim->getBinWidth());
+  ui.horizontalSlider->setValue(index);
+
   // Emit that the user changed the slicing point
   emit changedSlicePoint(m_dimIndex, m_slicePoint);
+
+  m_insideSpinBoxChanged = false;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -99,9 +125,15 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
 {
   m_dim = dim;
   m_dimIndex = index;
+  double min = m_dim->getMinimum();
+  double max = m_dim->getMaximum(); //- m_dim->getBinWidth()/2.0;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()) );
   ui.lblUnits->setText(QString::fromStdString(m_dim->getUnits()) );
   ui.horizontalSlider->setMinimum(0);
   ui.horizontalSlider->setMaximum( int(m_dim->getNBins()) );
+  ui.doubleSpinBox->setMinimum(min);
+  ui.doubleSpinBox->setMaximum(max);
+  ui.doubleSpinBox->setSingleStep(m_dim->getBinWidth());
+  m_slicePoint = m_dim->getMinimum();
 }
 

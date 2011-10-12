@@ -79,7 +79,12 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
   if (!m_ws) return QSize();
   IMDDimension_const_sptr m_X = m_ws->getDimension(m_dimX);
   IMDDimension_const_sptr m_Y = m_ws->getDimension(m_dimY);
-  return QSize( 2 * int(area.width() / m_X->getBinWidth()), 2 * int(area.height() /m_Y->getBinWidth()));
+  int w = 2 * int(area.width() / m_X->getBinWidth());
+  int h = 2 * int(area.height() /m_Y->getBinWidth());
+  if (w<10) w = 10;
+  if (h<10) h = 10;
+//  std::cout << "rasterHint: " << w << std::endl;
+  return QSize(w,h);
 }
 
 //------------------------------------------------------------------------------------------------------
