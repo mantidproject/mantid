@@ -17,59 +17,6 @@ from eqsans_load import LoadRun
 from MantidFramework import *
 from mantidsimple import *
     
-class Normalize(ReductionStep):
-    """
-        Normalize the data to the accelerator current
-    """
-    def __init__(self, normalize_to_beam=True):
-        super(Normalize, self).__init__()
-        self._normalize_to_beam = normalize_to_beam
-        
-    def get_normalization_spectrum(self):
-        return -1
-    
-    def execute(self, reducer, workspace):
-        # Flag the workspace as dirty
-        reducer.dirty(workspace)
-        
-        flux_data_path = None
-        if self._normalize_to_beam:
-            # Find available beam flux file
-            # First, check whether we have access to the SNS mount, if
-            # not we will look in the data directory
-            
-            flux_files = find_file(filename="bl6_flux_at_sample", data_dir=reducer._data_path)
-            if len(flux_files)>0:
-                flux_data_path = flux_files[0]
-                mantid.sendLogMessage("Using beam flux file: %s" % flux_data_path)
-            else:
-                mantid.sendLogMessage("Could not find beam flux file!")
-                
-            if flux_data_path is not None:
-                beam_flux_ws = "__beam_flux"
-                LoadAscii(flux_data_path, beam_flux_ws, Separator="Tab", Unit="Wavelength")
-                ConvertToHistogram(beam_flux_ws, beam_flux_ws)
-                RebinToWorkspace(beam_flux_ws, workspace, beam_flux_ws)
-                NormaliseToUnity(beam_flux_ws, beam_flux_ws)
-                Divide(workspace, beam_flux_ws, workspace)
-                mtd[workspace].getRun().addProperty_str("beam_flux_ws", beam_flux_ws, True)
-            else:
-                flux_data_path = "Could not find beam flux file!"
-            
-        #NormaliseByCurrent(workspace, workspace)
-        proton_charge = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().mean
-        duration = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().duration
-        frequency = mantid.getMatrixWorkspace(workspace).getRun()["frequency"].getStatistics().mean
-        acc_current = 1.0e-12 * proton_charge * duration * frequency
-        
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            pixel_adj = mtd[workspace].getRun().getProperty("pixel_adj").value
-            Scale(InputWorkspace=pixel_adj, OutputWorkspace=pixel_adj, Factor=1.0/acc_current, Operation="Multiply")    
-        else:
-            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
-        
-        return "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, flux_data_path) 
-        
 class SubtractDarkCurrent(ReductionStep):
     """
         Subtract the dark current from the input workspace.
@@ -174,11 +121,6 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         Rebin(workspace, workspace+'_frame2', "%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), False)
         ReplaceSpecialValues(workspace+'_frame2', workspace+'_frame2', NaNValue=0.0,NaNError=0.0)
         
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
-            Rebin(wl_adj, wl_adj+'_frame2', "%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), False)
-            mtd[workspace+'_frame2'].getRun().addProperty_str("wl_adj", wl_adj+'_frame2', True)
-            
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
         if self._compute_resolution:
             EQSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
@@ -194,10 +136,6 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         Rebin(workspace, workspace+'_frame1', "%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1), False)
         ReplaceSpecialValues(workspace+'_frame1', workspace+'_frame1', NaNValue=0.0,NaNError=0.0)
         
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
-            Rebin(wl_adj, wl_adj+'_frame1', "%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1), False)
-            mtd[workspace+'_frame1'].getRun().addProperty_str("wl_adj", wl_adj+'_frame1', True)
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame1')
         
         # Workspace operations do not keep Dx, so scale frame 1 before putting
@@ -355,16 +293,12 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
-            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
-            Divide(wl_adj, self._transmission_ws, wl_adj)  
+        if self._theta_dependent:
+            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                        TransmissionWorkspace=self._transmission_ws, 
+                                        OutputWorkspace=workspace)          
         else:
-            if self._theta_dependent:
-                ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                            TransmissionWorkspace=self._transmission_ws, 
-                                            OutputWorkspace=workspace)          
-            else:
-                Divide(workspace, self._transmission_ws, workspace)  
+            Divide(workspace, self._transmission_ws, workspace)  
         
         return "Transmission correction applied for both frame independently [%s]\n%s\n" % (self._transmission_ws, output_str)
     
