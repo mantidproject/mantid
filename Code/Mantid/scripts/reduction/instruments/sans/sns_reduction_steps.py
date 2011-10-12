@@ -327,7 +327,8 @@ class SaveIqAscii(BaseSaveIqAscii):
                     if mtd.workspaceExists(output_ws):
                         filename = os.path.join(output_dir, output_ws+'.dat')
                         SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
-                        
+                        filename = os.path.join(output_dir, output_ws+'.nxs')                        
+                        SaveNexus(InputWorkspace=output_ws, Filename=filename)
                         if len(log_text)>0:
                             log_text += '\n'
                         log_text += "I(Qx,Qy) for %s saved in %s" % (output_ws, filename)
