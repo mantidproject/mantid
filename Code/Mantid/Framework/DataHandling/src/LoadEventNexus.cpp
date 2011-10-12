@@ -1593,9 +1593,14 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObje
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
   typedef std::map<std::string,std::string> string_map_t; 
+  string_map_t entries = file.getEntries();
+  if (entries.find("detector_1_events") == entries.end())
+  {// not an ISIS file
+    return;
+  }
   // first check detector_1_events
   file.openGroup("detector_1_events", "NXevent_data");
-  string_map_t entries = file.getEntries();
+  entries = file.getEntries();
   for(string_map_t::const_iterator it = entries.begin();it != entries.end(); ++it)
   {
     if (it->first == "time_of_flight")
