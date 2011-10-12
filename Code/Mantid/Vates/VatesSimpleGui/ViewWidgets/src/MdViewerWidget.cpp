@@ -371,9 +371,7 @@ void MdViewerWidget::renderAndFinalSetup()
 
   if (VatesViewerInterface::MDEW == this->wsType)
   {
-    emit this->enableMultiSliceViewButton();
-    emit this->enableThreeSliceViewButton();
-    emit this->enableSplatterPlotViewButton();
+    this->ui.modeControlWidget->enableViewButtons();
   }
 }
 

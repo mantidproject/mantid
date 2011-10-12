@@ -7,17 +7,10 @@ namespace Vates
 namespace SimpleGui
 {
 
-ModeControlWidget::ModeControlWidget(QWidget *parent)
-  : QWidget(parent)
+ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent)
 {
   this->ui.setupUi(this);
 
-  QObject::connect(parent, SIGNAL(enableMultiSliceViewButton()), this,
-                   SLOT(enableMultiSliceViewButton()));
-  QObject::connect(parent, SIGNAL(enableThreeSliceViewButton()), this,
-                   SLOT(enableThreeSliceViewButton()));
-  QObject::connect(parent, SIGNAL(enableSplatterPlotViewButton()), this,
-                   SLOT(enableSplatterPlotViewButton()));
   QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()),
                    this, SLOT(onMultiSliceViewButtonClicked()));
   QObject::connect(this->ui.standardButton, SIGNAL(clicked()),
@@ -33,19 +26,11 @@ ModeControlWidget::~ModeControlWidget()
 
 }
 
-void ModeControlWidget::enableThreeSliceViewButton()
-{
-  this->ui.threeSliceButton->setEnabled(true);
-}
-
-void ModeControlWidget::enableMultiSliceViewButton()
+void ModeControlWidget::enableViewButtons()
 {
   this->ui.multiSliceButton->setEnabled(true);
-}
-
-void ModeControlWidget::enableSplatterPlotViewButton()
-{
   this->ui.splatterPlotButton->setEnabled(true);
+  this->ui.threeSliceButton->setEnabled(true);
 }
 
 void ModeControlWidget::onMultiSliceViewButtonClicked()

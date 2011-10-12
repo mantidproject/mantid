@@ -58,6 +58,12 @@ public:
   /// Enumeration for the view types
   enum Views {STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT};
 
+public slots:
+  /**
+   * Enable all view buttons, except standard.
+   */
+  void enableViewButtons();
+
 signals:
   /**
    * Function to make the main program window switch to a given view.
@@ -66,18 +72,6 @@ signals:
   void executeSwitchViews(ModeControlWidget::Views v);
 
 protected slots:
-  /**
-   * Enable the multislice view button.
-   */
-  void enableMultiSliceViewButton();
-  /**
-   * Enable the splatter plot view button.
-   */
-  void enableSplatterPlotViewButton();
-  /**
-   * Enable the threeslice view button.
-   */
-  void enableThreeSliceViewButton();
   /**
    * Execute switch to multislice view, disable multislice button and
    * enable other view buttons.
