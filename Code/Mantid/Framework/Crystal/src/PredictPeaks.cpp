@@ -321,7 +321,7 @@ namespace Crystal
         {
           for (int l=(int)hklMin[2]; l <= (int)hklMax[2]; l++)
           {
-            if (refCond->isAllowed(h,k,l) && (fabs(h) + fabs(k) + fabs(l) != 0))
+            if (refCond->isAllowed(h,k,l) && (abs(h) + abs(k) + abs(l) != 0))
             {
               doHKL(h,k,l, true);
             } // refl is allowed and not 0,0,0
