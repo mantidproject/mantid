@@ -300,7 +300,7 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
   {
     pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSource);
   }
-  if (this->currentView->isPeaksWorkspace(source))
+  if (QString("PeaksReader") == source->getProxy()->GetXMLName())
   {
     this->wsType = VatesViewerInterface::PEAKS;
   }
