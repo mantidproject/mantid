@@ -51,6 +51,18 @@ public:
   /// Default constructor.
   virtual ~TimeControlWidget();
 
+public slots:
+  /**
+   * Function to update the animation scene with "time" information. This
+   * updates the animation controls automatically. The "time" information
+   * can be any fourth dimension to the dataset, i.e. energy transfer.
+   * @param timeStart the start "time" for the data
+   * @param timeEnd the end "time" for the data
+   * @param numTimesteps the number of "time" steps for the data
+   */
+  void updateAnimationControls(double timeStart, double timeEnd,
+                               int numTimesteps);
+
 private:
   Ui::TimeControlWidgetClass ui; ///< The time control widget's UI form
 };
