@@ -52,6 +52,8 @@ void EQSANSLoad::init()
   declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel coordinates (used only if UseConfigBeam is false)");
   declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
+  declareProperty("LowTOFCut", 0.0, Direction::Input);
+  declareProperty("HighTOFCut", 0.0, Direction::Input);
   declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
   declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
@@ -308,6 +310,17 @@ void EQSANSLoad::getSourceSlitSize()
 /// Move the detector according to the beam center
 void EQSANSLoad::moveToBeamCenter()
 {
+  // Check that we have a beam center defined, otherwise set the
+  // default beam center
+  if (isEmpty(m_center_x) || isEmpty(m_center_y))
+  {
+    EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
+    g_log.information() << "No beam finding method: setting to default ["
+      << Poco::NumberFormatter::format(m_center_x, 1) << ", "
+      << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
+    return;
+  }
+
   // Check that the center of the detector really is at (0,0)
   int nx_pixels = (int)(dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
   int ny_pixels = (int)(dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
@@ -336,6 +349,10 @@ void EQSANSLoad::moveToBeamCenter()
   //    + ", " + Poco::NumberFormatter::format(-y_offset-beam_ctr_y) + " m\n";
   g_log.information() << "Moving beam center to " << m_center_x << " " << m_center_y << std::endl;
 
+  dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
+  dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
+  m_output_message += "   Beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
+      + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
 }
 
 /// Read a config file
@@ -344,10 +361,6 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
 {
   // Initialize parameters
   m_mask_as_string = "";
-  m_low_TOF_cut = 0;
-  m_high_TOF_cut = 0;
-  m_center_x = 0;
-  m_center_y = 0;
   m_moderator_position = 0;
 
   // The following should be properties
@@ -382,11 +395,10 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
     dataWS->mutableRun().addProperty("rectangular_masks", m_mask_as_string, "pixels", true);
   }
 
-  if (use_config_cutoff)
-  {
-    dataWS->mutableRun().addProperty("low_tof_cut", m_low_TOF_cut, "microsecond", true);
-    dataWS->mutableRun().addProperty("high_tof_cut", m_high_TOF_cut, "microsecond", true);
-  }
+  dataWS->mutableRun().addProperty("low_tof_cut", m_low_TOF_cut, "microsecond", true);
+  dataWS->mutableRun().addProperty("high_tof_cut", m_high_TOF_cut, "microsecond", true);
+  m_output_message += "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut, 1)
+      + " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut, 1) + " microsec\n";
 
   if (m_moderator_position != 0)
   {
@@ -396,6 +408,14 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
 
 void EQSANSLoad::exec()
 {
+  // Read in default TOF cuts
+  m_low_TOF_cut = getProperty("LowTOFCut");
+  m_high_TOF_cut = getProperty("HighTOFCut");
+
+  // Read in default beam center
+  m_center_x = getProperty("BeamCenterX");
+  m_center_y = getProperty("BeamCenterY");
+
   TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
   ReductionTableHandler reductionHandler(reductionTable);
   if (!reductionTable)
@@ -493,37 +513,9 @@ void EQSANSLoad::exec()
   getSourceSlitSize();
 
   // Move the beam center to its proper position
-  bool use_config_center = getProperty("UseConfigBeam");
-  if (use_config_center)
-  {
-    // Using the beam center, which has beam read in from the config file.
-    // We now only need to move the detector.
-    moveToBeamCenter();
-  } else {
-    const double pixel_ctr_x = getProperty("BeamCenterX");
-    const double pixel_ctr_y = getProperty("BeamCenterY");
-    if (!isEmpty(pixel_ctr_x) && !isEmpty(pixel_ctr_y))
-    {
-      m_center_x = pixel_ctr_x;
-      m_center_y = pixel_ctr_y;
-      moveToBeamCenter();
-    } else {
-      EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
-      g_log.information() << "No beam finding method: setting to default ["
-        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
-        << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
-    }
-  }
-
-  dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
-  dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
-  m_output_message += "   Beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
-      + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
+  moveToBeamCenter();
 
   // Modify TOF
-  m_output_message += "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut, 1)
-      + " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut, 1) + " microsec\n";
-
   bool correct_for_flight_path = getProperty("CorrectForFlightPath");
   m_output_message += "   Flight path correction ";
   if (!correct_for_flight_path) m_output_message += "NOT ";

@@ -161,6 +161,8 @@ class LoadRun(ReductionStep):
                        BeamCenterX=pixel_ctr_x,
                        BeamCenterY=pixel_ctr_y,
                        UseConfigTOFCuts=self._use_config_cutoff,
+                       LowTOFCut=self._low_TOF_cut,
+                       HighTOFCut=self._high_TOF_cut,
                        UseConfigMask=self._use_config_mask,
                        UseConfig=self._use_config,
                        CorrectForFlightPath=self._correct_for_flight_path,
