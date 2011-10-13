@@ -76,7 +76,7 @@ class LoadRun(object):
         if period == self.UNSET_PERIOD:
             period = 1
 
-        if os.path.splitext(self._data_file)[1].lower().startswith('.r'):
+        if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
             try:
                 alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
             except ValueError:
