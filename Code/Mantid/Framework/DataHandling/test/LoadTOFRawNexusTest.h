@@ -30,7 +30,7 @@ public:
   {
     LoadTOFRawNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    alg.setPropertyValue("Filename", "CNCS_7860.nxs");
+    alg.setPropertyValue("Filename", "REF_L_32035.nxs");
     TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 80 );
     alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 20 );
@@ -45,7 +45,7 @@ public:
   {
     Mantid::DataHandling::LoadTOFRawNexus ld;
     ld.initialize();
-    ld.setPropertyValue("Filename", "CNCS_7860.nxs");
+    ld.setPropertyValue("Filename", "REF_L_32035.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
@@ -56,42 +56,42 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("outWS"));
     );
     TS_ASSERT(ws); if (!ws) return;
-    TS_ASSERT_EQUALS(ws->blocksize(), 201);
-    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "CNCS");
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 51200);
+    TS_ASSERT_EQUALS(ws->blocksize(), 501);
+    TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "REF");
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 77824);
 
-    ISpectrum * spec = ws->getSpectrum(2);
-    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 3);
+    ISpectrum * spec = ws->getSpectrum(27955);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 27956);
     TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 1);
-    TS_ASSERT( spec->hasDetectorID(2) );
+    TS_ASSERT( spec->hasDetectorID(27955) );
     MantidVec X, Y, E;
     X = spec->dataX();
     Y = spec->dataY();
     E = spec->dataE();
-    TS_ASSERT_EQUALS( X.size(), 202);
-    TS_ASSERT_EQUALS( Y.size(), 201);
-    TS_ASSERT_EQUALS( E.size(), 201);
+    TS_ASSERT_EQUALS( X.size(), 502);
+    TS_ASSERT_EQUALS( Y.size(), 501);
+    TS_ASSERT_EQUALS( E.size(), 501);
 
-    TS_ASSERT_DELTA( X[0], 43000, 1e-4);
-    TS_ASSERT_DELTA( X[201], 63001, 1e-4);
+    TS_ASSERT_DELTA( X[0], 0, 1e-4);
+    TS_ASSERT_DELTA( X[201], 40200, 1e-4);
 
     // Data is pretty sparse, look for a place with something
-    TS_ASSERT_DELTA( Y[47], 1.0, 1e-4);
-    TS_ASSERT_DELTA( E[47], 1.0, 1e-4);
+    TS_ASSERT_DELTA( Y[94], 1.0, 1e-4);
+    TS_ASSERT_DELTA( E[94], 1.0, 1e-4);
 
     // More data in this spectrum
-    spec = ws->getSpectrum(36540);
-    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 36541);
+    spec = ws->getSpectrum(38019);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 38020);
     TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 1);
-    TS_ASSERT( spec->hasDetectorID(36540) );
-    TS_ASSERT_DELTA( spec->dataY()[95], 133.0, 1e-4);
-    TS_ASSERT_DELTA( spec->dataE()[95], sqrt(133.0), 1e-4);
+    TS_ASSERT( spec->hasDetectorID(38019) );
+    TS_ASSERT_DELTA( spec->dataY()[105], 23.0, 1e-4);
+    TS_ASSERT_DELTA( spec->dataE()[105], sqrt(23.0), 1e-4);
 
-    TS_ASSERT_EQUALS( ws->getAxis(1)->length(), 51200);
-    TS_ASSERT_EQUALS( ws->getAxis(0)->length(), 202);
+    TS_ASSERT_EQUALS( ws->getAxis(1)->length(), 77824);
+    TS_ASSERT_EQUALS( ws->getAxis(0)->length(), 502);
     TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->caption(), "Time-of-flight");
     TS_ASSERT_EQUALS( ws->YUnit(), "Counts");
-    TS_ASSERT_EQUALS( ws->getTitle(), "test after manual intervention");
+    TS_ASSERT_EQUALS( ws->getTitle(), "JAA-I-103B2-1_No4Rep0");
   }
 
   /** Compare to LoadEventNexus */
@@ -146,12 +146,12 @@ public:
     Mantid::API::IAlgorithm_sptr alg;
     // Number points to a 2D data set
     alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6,
-        "Filename", "CNCS_7860.nxs", "Signal", "2", "OutputWorkspace", "outWS");
+        "Filename", "REF_L_32035.nxs", "Signal", "2", "OutputWorkspace", "outWS");
     TS_ASSERT( !alg->isExecuted() );
 
     // Number is too big
     alg = FrameworkManager::Instance().exec("LoadTOFRawNexus", 6,
-        "Filename", "CNCS_7860.nxs", "Signal", "6", "OutputWorkspace", "outWS");
+        "Filename", "REF_L_32035.nxs", "Signal", "6", "OutputWorkspace", "outWS");
     TS_ASSERT( !alg->isExecuted() );
   }
 

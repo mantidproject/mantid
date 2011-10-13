@@ -44,7 +44,7 @@ public:
   void test_setValue()
   {
     MultipleFileProperty p("Filename");
-    p.setValue("CNCS_7860.nxs, CSP78173.raw");
+    p.setValue("REF_L_32035.nxs, CSP78173.raw");
     std::vector<std::string> filenames = p();
     TS_ASSERT_EQUALS( filenames.size(), 2);
     TSM_ASSERT( "Files with no path are found using ConfigService paths", Poco::Path(filenames[0]).isAbsolute() );

@@ -27,9 +27,9 @@ public:
   {
     Mantid::API::FrameworkManager::Instance();
     LoadNexusLogs ld;
-    std::string outws_name = "CNCS_instrument";
+    std::string outws_name = "REF_L_instrument";
     ld.initialize();
-    ld.setPropertyValue("Filename","CNCS_7860.nxs");
+    ld.setPropertyValue("Filename","REF_L_32035.nxs");
     MatrixWorkspace_sptr ws = createTestWorkspace();
     //Put it in the object.
     ld.setProperty("Workspace", ws);
@@ -40,7 +40,7 @@ public:
     Run& run = ws->mutableRun();
     // Do we have all we expect
     const std::vector< Property* >& logs = run.getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 41);
+    TS_ASSERT_EQUALS(logs.size(), 74);
     Property * prop;
     TimeSeriesProperty<double> * dProp;
 
@@ -53,7 +53,7 @@ public:
     dProp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
     TS_ASSERT(dProp);
     val = dProp->nthValue(0);
-    TS_ASSERT_DELTA( val, 8798.7236, 1e-2);
+    TS_ASSERT_DELTA( val, 13712.77, 1e-2);
     TS_ASSERT_EQUALS(prop->units(), "microsecond");
 
     TimeSeriesProperty<double> * tsp;
@@ -62,10 +62,10 @@ public:
     tsp = dynamic_cast< TimeSeriesProperty<double> * >(prop);
     TS_ASSERT(tsp);
     TS_ASSERT_EQUALS(tsp->units(), "microsecond");
-    TS_ASSERT_DELTA( tsp->nthValue(1), 8798.99, 2);
+    TS_ASSERT_DELTA( tsp->nthValue(1), 13715.55, 2);
 
-    //The time diff between the 0th and 1st entry is 2.328 seconds
-    TS_ASSERT_DELTA( Kernel::DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 2.328, 0.01);
+    //The time diff between the 0th and 1st entry is 0.328 seconds
+    TS_ASSERT_DELTA( Kernel::DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 0.328, 0.01);
 
     //Now the stats
 
