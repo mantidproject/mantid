@@ -1,3 +1,4 @@
+#include "MantidKernel/Property.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
@@ -142,7 +143,7 @@ namespace MantidQt
       typedef std::vector<AbstractMementoItem_sptr> VecLogType;
       VecLogType vecLogData;
 
-      for(int i = m_logValueStart; i < m_memento->getSize(); i++)
+      for(int i = m_logValueStart; i < static_cast<int>(m_memento->getSize()); i++)
       {
         vecLogData.push_back(m_memento->getItem(i));
       }
