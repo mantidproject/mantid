@@ -45,7 +45,6 @@ void testExecThrow(){
     TSM_ASSERT_THROWS("the inital ws is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()),std::invalid_argument);
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
 
-
 }
 
 

@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToQ3DdE.cpp
+	src/ConvertToQNDany.cpp	
 	# src/CreateMDFitWorkspace.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
@@ -42,6 +43,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
+	inc/MantidMDAlgorithms/ConvertToQNDany.h	
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 	inc/MantidMDAlgorithms/DepthParameter.h
 	inc/MantidMDAlgorithms/HeightParameter.h
@@ -77,6 +79,7 @@ set ( TEST_FILES
 	#test/QuadEnBackgroundTest.h
 	test/BoxImplicitFunctionTest.h
 	test/ConvertToQ3DdETest.h
+	test/ConvertToQNDanyTest.h	
 	test/DepthParameterTest.h
 	test/HeightParameterTest.h
 	test/InvalidParameterParserTest.h
