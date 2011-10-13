@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/VMD.h"
 
 
 namespace Mantid
@@ -43,9 +44,11 @@ namespace Geometry
   public:
     MDBoxImplicitFunction();
 
+    MDBoxImplicitFunction(const Mantid::Kernel::VMD & min, const Mantid::Kernel::VMD & max);
+
     MDBoxImplicitFunction(const std::vector<coord_t> & min, const std::vector<coord_t> & max);
 
-    void construct(const std::vector<coord_t> & min, const std::vector<coord_t> & max);
+    void construct(const Mantid::Kernel::VMD & min, const Mantid::Kernel::VMD & max);
 
     ~MDBoxImplicitFunction();
     

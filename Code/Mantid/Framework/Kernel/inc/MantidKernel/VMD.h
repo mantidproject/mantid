@@ -276,6 +276,15 @@ namespace Kernel
       return mess.str();
     }
 
+    //-------------------------------------------------------------------------------------------
+    /** @return the vector as a std::vector */
+    std::vector<double> toVector() const
+    {
+      std::vector<double> out;
+      for (size_t d=0; d<nd; d++)
+        out.push_back(data[d]);
+      return out;
+    }
 
 
     //-------------------------------------------------------------------------------------------

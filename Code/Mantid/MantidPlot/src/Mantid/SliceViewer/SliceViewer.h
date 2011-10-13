@@ -31,10 +31,12 @@ public slots:
   void updateDisplay();
   void resetZoom();
   void showInfoAt(double, double);
-  void findRangeFull();
-  void findRangeSlice();
+  void colorRangeFullSlot();
+  void colorRangeSliceSlot();
 
 private:
+  void findRangeFull();
+  void findRangeSlice();
   void initZoomer();
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);

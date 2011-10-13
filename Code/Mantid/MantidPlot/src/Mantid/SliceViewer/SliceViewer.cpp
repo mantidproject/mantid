@@ -19,6 +19,7 @@
 #include <qwt_scale_engine.h>
 #include <sstream>
 #include <vector>
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -64,8 +65,8 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
-  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(findRangeFull()));
-  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(findRangeSlice()));
+  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(colorRangeFullSlot()));
+  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
   ui.btnZoom->hide();
 
 }
@@ -143,12 +144,20 @@ void SliceViewer::resetZoom()
   m_plot->replot();
 }
 
+
 //------------------------------------------------------------------------------------
-/// Find the full range of values in the workspace
-void SliceViewer::findRangeFull()
+/** Get the range of signal given an iterator
+ *
+ * @param it :: IMDIterator of what to find
+ * @return the min/max range, or 0-1.0 if not found
+ */
+QwtDoubleInterval getRange(IMDIterator * it)
 {
-  // Iterate through the entire workspace
-  IMDIterator * it = m_ws->createIterator();
+  if (!it)
+    return QwtDoubleInterval(0., 1.0);
+  if (!it->valid())
+    return QwtDoubleInterval(0., 1.0);
+
   double minSignal = DBL_MAX;
   double maxSignal = -DBL_MAX;
   do
@@ -157,13 +166,24 @@ void SliceViewer::findRangeFull()
     if (signal < minSignal) minSignal = signal;
     if (signal > maxSignal) maxSignal = signal;
   } while (it->next());
+
   if (minSignal < maxSignal)
-    m_colorRangeFull = QwtDoubleInterval(minSignal, maxSignal);
+    return QwtDoubleInterval(minSignal, maxSignal);
   else
-    m_colorRangeFull = QwtDoubleInterval(0., 1.0);
-  std::cout << "Found color range: " << m_colorRangeFull.minValue() << " to " << m_colorRangeFull.maxValue() << std::endl;
+    // Possibly only one value in range
+    return QwtDoubleInterval(minSignal-0.5, minSignal+0.5);
+}
+
+//------------------------------------------------------------------------------------
+/// Find the full range of values in the workspace
+void SliceViewer::findRangeFull()
+{
+  // Iterate through the entire workspace
+  IMDIterator * it = m_ws->createIterator();
+  m_colorRangeFull = getRange(it);
   delete it;
 }
+
 
 //------------------------------------------------------------------------------------
 /** Find the full range of values ONLY in the currently visible
@@ -171,12 +191,68 @@ part of the workspace */
 void SliceViewer::findRangeSlice()
 {
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
-  //TODO!
-  QwtDoubleInterval xint = m_plot->axisScaleDiv( Qt::XAxis )->interval();
-//  std::cout << xint.minValue() << " to " << xint.maxValue() << std::endl;
 
+  // This is what is currently visible on screen
+  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 
+  // Find the min-max extents in each dimension
+  VMD min(m_ws->getNumDims());
+  VMD max(m_ws->getNumDims());
+  for (size_t d=0; d<m_ws->getNumDims(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[d];
+    IMDDimension_const_sptr dim = m_ws->getDimension(d);
+    if (widget->getShownDim() == 0)
+    {
+      min[d] = xint.minValue();
+      max[d] = xint.maxValue();
+    }
+    else if (widget->getShownDim() == 1)
+    {
+      min[d] = yint.minValue();
+      max[d] = yint.maxValue();
+    }
+    else
+    {
+      // Is a slice. Take a slice of widht = binWidth
+      min[d] = widget->getSlicePoint() - dim->getBinWidth() * 0.45;
+      max[d] = min[d] + dim->getBinWidth();
+    }
+  }
+  // This builds the implicit function for just this slice
+  MDBoxImplicitFunction * function = new MDBoxImplicitFunction(min, max);
+
+  // Iterate through the slice
+  IMDIterator * it = m_ws->createIterator(function);
+  m_colorRangeSlice = getRange(it);
+  // In case of failure, use the full range instead
+  if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
+    m_colorRangeSlice = m_colorRangeFull;
+  delete it;
 }
+
+
+//------------------------------------------------------------------------------------
+/// Slot for finding the data full range and updating the display
+void SliceViewer::colorRangeFullSlot()
+{
+  this->findRangeFull();
+  m_colorRange = m_colorRangeFull;
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot for finding the current view/slice full range and updating the display
+void SliceViewer::colorRangeSliceSlot()
+{
+  this->findRangeSlice();
+  m_colorRange = m_colorRangeSlice;
+  this->updateDisplay();
+}
+
+
+
 
 
 //------------------------------------------------------------------------------------
