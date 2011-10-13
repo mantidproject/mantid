@@ -352,7 +352,11 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
                                                         pqActiveObjects::instance().activeServer());
   vtkSMPropertyHelper(this->currentView->origSource->getProxy(),
                       "Mantid Workspace Name").Set(wsname.toStdString().c_str());
-  this->currentView->origSource->getProxy()->UpdateVTKObjects();
+
+  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  srcProxy->UpdateVTKObjects();
+  srcProxy->Modified();
+  srcProxy->UpdatePipelineInformation();
 
   this->renderAndFinalSetup();
   this->setTimesteps();
