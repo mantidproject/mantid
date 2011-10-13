@@ -55,6 +55,7 @@
 #include <sstream>
 #include "MantidAPI/IMDWorkspace.h"
 #include "Mantid/SliceViewer/SliceViewer.h"
+#include "Mantid/SliceViewer/SliceViewerWindow.h"
 
 
 using namespace std;
@@ -552,24 +553,11 @@ void MantidUI::showSliceViewer()
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
   if (mdws)
   {
-    QString windowName = QString("Slice Viewer (") + wsName + QString(")");
-    // Create the window
-    MdiSubWindow * w = new MdiSubWindow("SliceViewer", this->appWindow(), windowName);
-    w->setCaption(windowName);
-    w->resize(500, 500);
-
-    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-    connect(w, SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-    connect(w, SIGNAL(showContextMenu()), appWindow(), SLOT(showWindowContextMenu()));
+    // Create the slice viewer MDI window
+    SliceViewerWindow * w = new SliceViewerWindow(wsName, appWindow());
+    // And add it
     appWindow()->d_workspace->addSubWindow(w);
     w->showNormal();
-
-    //connect(m_appWindow, SIGNAL(shutting_down()), subWindow, SLOT(close()));
-    // Create the slicer and add it to the MDI window
-    QLayout * layout = w->layout();
-    SliceViewer * slicer = new SliceViewer(w);
-    slicer->setWorkspace(mdws);
-    layout->addWidget(slicer);
   }
 
 }

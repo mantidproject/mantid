@@ -105,8 +105,7 @@ int main( int argc, char ** argv )
         ws->setSignalAt(x+y*numBins+z*numBins*numBins, signal);
       }
 
-  ws = makeFakeMDHistoWorkspace(1.0, 2, numBins, double(numBins)/2.0);
-
+//  ws = makeFakeMDHistoWorkspace(1.0, 2, numBins, double(numBins)/2.0);
 //  numBins=50;
 //  double mid = 25;
 //  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 4, numBins, double(numBins)/10.0);
