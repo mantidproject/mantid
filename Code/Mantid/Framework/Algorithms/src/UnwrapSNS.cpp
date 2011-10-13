@@ -230,8 +230,15 @@ void UnwrapSNS::execEvent()
     bool isMonitor;
     double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
     MantidVec time_bins;
-    this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
-    outW->setX(workspaceIndex, time_bins);
+    if (outW->dataX(0).size() > 2)
+    {
+      this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
+      outW->setX(workspaceIndex, time_bins);
+    }
+    else
+    {
+      outW->setX(workspaceIndex, m_inputWS->dataX(workspaceIndex));
+    }
     if (numEvents > 0)
     {
       MantidVec times(numEvents);
