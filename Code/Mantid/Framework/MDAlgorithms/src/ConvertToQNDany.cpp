@@ -118,7 +118,7 @@ ConvertToQNDany::init()
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
   
-    declareProperty("Q_dimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
+    declareProperty("QDimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
                               "You can select mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
     min_nDim->setLower(0);
     declareProperty(new PropertyWithValue<int>("NumAddDim",0,min_nDim,Direction::Input),
@@ -216,7 +216,7 @@ ConvertToQNDany::try2redefine_input_properties()
     // number of additional dimensions:
     size_t n_add_dims =boost::lexical_cast<size_t>(getPropertyValue("NumAddDim"));
     // number of total dimensions is also defined by the value of the Q -dimensions
-    std::string ind =   getPropertyValue("Q_dimensions");
+    std::string ind =   getPropertyValue("QDimensions");
     // check if the number of dimensions have not changed and new input is needed
     size_t n_dims;
     if    (ind.compare(Q_ID_possible[0])){ // |Q|    -- 1 dimension
@@ -249,7 +249,7 @@ ConvertToQNDany::build_ND_property_selector(size_t n_dims,const std::vector<std:
 
     for(size_t i=0;i<n_dims;i++){
         std::string num     = boost::lexical_cast<std::string>(i+1);
-        std::string dim_num = "dim_"+num; 
+        std::string dim_num = "dim"+num; 
         if(this->existsProperty(dim_num)) this->removeProperty(dim_num);
      
         std::string info=std::string("possible variables for the dimension ")+num;
