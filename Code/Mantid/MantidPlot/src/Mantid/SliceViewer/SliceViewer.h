@@ -13,6 +13,7 @@
 #include <qwt_scale_widget.h>
 #include <vector>
 #include <qwt_color_map.h>
+#include <QtCore/QtCore>
 
 class SliceViewer : public QWidget
 {
@@ -61,7 +62,7 @@ private:
   QwtScaleWidget * m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
-  std::vector<DimensionSliceWidget *> m_dimWidgets;
+  QVector<DimensionSliceWidget *> m_dimWidgets;
 
 
   /// Data presenter
@@ -84,6 +85,9 @@ private:
 
   /// The calculated range of values ONLY in the currently viewed part of the slice
   QwtDoubleInterval m_colorRangeSlice;
+
+  // Use the log of the value for the color scale
+  bool m_logColor;
 
 };
 

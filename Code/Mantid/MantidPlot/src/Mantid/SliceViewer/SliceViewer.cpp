@@ -29,7 +29,8 @@ using Mantid::Kernel::VMD;
 
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
-      m_dimX(0), m_dimY(0)
+      m_dimX(0), m_dimY(0),
+      m_logColor(false)
 {
 	ui.setupUi(this);
 
@@ -74,9 +75,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 SliceViewer::~SliceViewer()
 {
   delete m_data;
-//  delete m_spect;
-//  delete m_spectLayout;
-//  delete m_plot;
+  // Don't delete Qt objects, I think these are auto-deleted
 }
 
 //------------------------------------------------------------------------------------
@@ -178,6 +177,7 @@ QwtDoubleInterval getRange(IMDIterator * it)
 /// Find the full range of values in the workspace
 void SliceViewer::findRangeFull()
 {
+  if (!m_ws) return;
   // Iterate through the entire workspace
   IMDIterator * it = m_ws->createIterator();
   m_colorRangeFull = getRange(it);
@@ -190,6 +190,7 @@ void SliceViewer::findRangeFull()
 part of the workspace */
 void SliceViewer::findRangeSlice()
 {
+  if (!m_ws) return;
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
 
   // This is what is currently visible on screen
@@ -201,7 +202,7 @@ void SliceViewer::findRangeSlice()
   VMD max(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[d];
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
     IMDDimension_const_sptr dim = m_ws->getDimension(d);
     if (widget->getShownDim() == 0)
     {
@@ -258,9 +259,10 @@ void SliceViewer::colorRangeSliceSlot()
 //------------------------------------------------------------------------------------
 void SliceViewer::showInfoAt(double x, double y)
 {
+  if (!m_ws) return;
   VMD coords(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
-    coords[d] = m_dimWidgets[d]->getSlicePoint();
+    coords[d] = m_dimWidgets[int(d)]->getSlicePoint();
   coords[m_dimX] = x;
   coords[m_dimY] = y;
   signal_t signal = m_ws->getSignalAtCoord(coords);
@@ -282,13 +284,16 @@ void SliceViewer::updateDisplay()
   std::vector<coord_t> slicePoint;
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[d];
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
     if (widget->getShownDim() == 0)
       m_dimX = d;
     if (widget->getShownDim() == 1)
       m_dimY = d;
     slicePoint.push_back(widget->getSlicePoint());
   }
+  // Avoid going out of range
+  if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
+  if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
   m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
 
   m_X = m_ws->getDimension(m_dimX);
@@ -333,10 +338,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       {
         // A different dimension had the same shown dimension
         if ((size_t(index) != d) &&
-            (m_dimWidgets[d]->getShownDim() == dim))
+            (m_dimWidgets[int(d)]->getShownDim() == dim))
         {
           // So flip it. If the new one is X, the old one becomes Y
-          m_dimWidgets[d]->setShownDim( (dim==0) ? 1 : 0 );
+          m_dimWidgets[int(d)]->setShownDim( (dim==0) ? 1 : 0 );
           break;
         }
       }
@@ -346,9 +351,9 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
     {
       // A different dimension had the same shown dimension
       if ((size_t(index) != d) &&
-          (m_dimWidgets[d]->getShownDim() == dim))
+          (m_dimWidgets[int(d)]->getShownDim() == dim))
       {
-        m_dimWidgets[d]->setShownDim(-1);
+        m_dimWidgets[int(d)]->setShownDim(-1);
       }
     }
   }
@@ -371,7 +376,7 @@ void SliceViewer::updateDisplaySlot(int index, double value)
 void SliceViewer::updateDimensionSliceWidgets()
 {
   // Create all necessary widgets
-  if (m_dimWidgets.size() < m_ws->getNumDims())
+  if (m_dimWidgets.size() < int(m_ws->getNumDims()))
   {
     for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
     {
@@ -391,7 +396,7 @@ void SliceViewer::updateDimensionSliceWidgets()
   // Set each dimension
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[d];
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
     widget->setDimension( int(d), m_ws->getDimension(d) );
     // Default slicing layout
     widget->setShownDim( d < 2 ? int(d) : -1 );
@@ -406,7 +411,7 @@ void SliceViewer::updateDimensionSliceWidgets()
   // Make the labels all the same width
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[d];
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
     widget->ui.lblName->setMinimumSize(QSize(maxLabelWidth, 0) );
     widget->ui.lblUnits->setMinimumSize(QSize(maxUnitsWidth, 0) );
   }

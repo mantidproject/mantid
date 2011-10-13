@@ -24,7 +24,6 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
 
 DimensionSliceWidget::~DimensionSliceWidget()
 {
-
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -108,10 +107,15 @@ void DimensionSliceWidget::setShownDim(int dim)
     QLayoutIterator it = ui.horizontalLayout->iterator();
     ++it; ++it; ++it;
     ui.horizontalLayout->removeItem(it.current());
+    delete ui.horizontalSpacer;
+    ui.horizontalSpacer = NULL;
   }
   else
+  {
     // Put the spacer back
+    ui.horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer );
+  }
 
   this->update();
   m_insideSetShownDim = false;

@@ -105,6 +105,8 @@ int main( int argc, char ** argv )
         ws->setSignalAt(x+y*numBins+z*numBins*numBins, signal);
       }
 
+  ws = makeFakeMDHistoWorkspace(1.0, 2, numBins, double(numBins)/2.0);
+
 //  numBins=50;
 //  double mid = 25;
 //  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 4, numBins, double(numBins)/10.0);
@@ -123,6 +125,14 @@ int main( int argc, char ** argv )
 //          ws->setSignalAt(x+y*numBins+z*numBins*numBins+t*numBins*numBins*numBins, signal);
 //        }
 
+//  DimensionSliceWidget * widget;
+//  widget = new DimensionSliceWidget(mainWin) ;
+//  layout->addWidget( widget );
+//  widget->setDimension(0, ws->getDimension(0));
+//
+//  widget = new DimensionSliceWidget(mainWin) ;
+//  layout->addWidget( widget );
+//  widget->setDimension(1, ws->getDimension(1));
 
   SliceViewer * slicer = new SliceViewer(frame);
   slicer->setWorkspace(ws);
@@ -132,6 +142,9 @@ int main( int argc, char ** argv )
   mainWin->move(100,100);
   mainWin->resize(700, 700);
   mainWin->show();
-  return app.exec();
+  app.exec();
 
+  mainWin->close();
+  delete mainWin;
+  return 0;
 }
