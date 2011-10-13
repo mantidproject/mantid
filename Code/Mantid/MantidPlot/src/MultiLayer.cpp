@@ -1266,7 +1266,7 @@ void MultiLayer::dropEvent( QDropEvent * event )
   if ( tree == NULL ) return; // (shouldn't happen)
 
   // Ask the user which spectrum to plot
-  QMultiMap<QString,std::set<int> > toPlot = tree->chooseSpectrumFromSelected();
+  QMultiMap<QString,int> toPlot = tree->chooseSpectrumFromSelected();
   Graph *g = this->activeGraph();
   if (!g) return; // (shouldn't happen either)
   
@@ -1291,20 +1291,15 @@ void MultiLayer::dropEvent( QDropEvent * event )
     errorBars = false;
   }
 
-  // Iterate through the selected workspaces adding a set of curves from each
-  for(QMultiMap<QString,std::set<int> >::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
+  // Iterate through the selected workspaces adding a curve from each
+  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
-    std::set<int>::iterator setIt = it.value().begin();
-    
-    for( ; setIt != it.value().end(); setIt++)
-    {
-      try {
-        new MantidCurve(it.key(),g,(*setIt),errorBars);
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
-        // Get here if workspace name is invalid - shouldn't be possible, but just in case
-      } catch (std::invalid_argument&) {
-        // Get here if invalid spectrum number given - shouldn't be possible, but just in case
-      }
+    try {
+      new MantidCurve(it.key(),g,it.value(),errorBars);
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      // Get here if workspace name is invalid - shouldn't be possible, but just in case
+    } catch (std::invalid_argument&) {
+      // Get here if invalid spectrum number given - shouldn't be possible, but just in case
     }
   }
   // Update the axes

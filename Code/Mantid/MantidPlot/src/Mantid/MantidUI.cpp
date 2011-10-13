@@ -2606,25 +2606,6 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   g->setAntialiasing(false);
 }
 
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,std::set<int>>& toPlot, bool errs, bool distr)
-{
-  // Convert the list into a map (with the same workspace as key in each case)
-  QMultiMap<QString,int> pairs;
-  // Need to iterate through the workspaces
-  QMultiMap<QString,std::set<int>>::const_iterator it;
-  for (it = toPlot.constBegin(); it != toPlot.constEnd(); ++it)
-  {
-    std::set<int>::const_reverse_iterator itSet;
-    for (itSet = it->rbegin(); itSet != it->rend(); ++itSet)
-    {
-      pairs.insert(it.key(),*itSet);
-    }
-  }
-
-  // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,distr);
-}
-
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
     @param wsName :: Workspace name
     @param indexList :: A list of spectra indices to be shown in the graph
@@ -2665,11 +2646,6 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     {
       return NULL;
     }
-  }
-
-  if(toPlot.size() == 0)
-  {
-    return NULL;
   }
 
   const QString& firstWorkspace = toPlot.constBegin().key();
