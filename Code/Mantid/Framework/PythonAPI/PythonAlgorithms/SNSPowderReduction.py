@@ -143,6 +143,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("SaveAs", "gsas", ListValidator(outfiletypes))
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
         self.declareProperty("NormalizeByCurrent", True, Description="Normalized by Current")
+        self.declareProperty("FinalDataUnits", "dSpacing", ListValidator(["dSpacing","MomentumTransfer"]))
 
     def _findData(self, runnumber, extension):
         #self.log().information(str(dir()))
@@ -244,9 +245,9 @@ class SNSPowderReduction(PythonAlgorithm):
         filter = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filter["FilterByTime_Start"] = filterWall[0]
+                filter["FilterByTimeStart"] = filterWall[0]
             if filterWall[1] > 0.:
-                filter["FilterByTime_Stop"] = filterWall[1]
+                filter["FilterByTimeStop"] = filterWall[1]
 
         if  runnumber is None or runnumber <= 0:
             return None
@@ -563,6 +564,6 @@ class SNSPowderReduction(PythonAlgorithm):
         # convert everything into d-spacing
         workspacelist = set(workspacelist) # only do each workspace once
         for wksp in workspacelist:
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
 
 mtd.registerPyAlgorithm(SNSPowderReduction())
