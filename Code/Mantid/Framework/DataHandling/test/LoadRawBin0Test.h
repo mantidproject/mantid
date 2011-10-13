@@ -30,7 +30,7 @@ public:
   LoadRawBin0Test()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "HET15869.raw";
+    inputFile = "LOQ48127.raw";
   }
 
   void testInit()
@@ -60,15 +60,15 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    // Should be 2584 for file HET15869.RAW
-    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
+    // Should be 2584 for file LOQ48127.RAW
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 8);
     // Check two X vectors are the same
-    TS_ASSERT( (output2D->dataX(99)) == (output2D->dataX(1734)) );
+    TS_ASSERT( (output2D->dataX(2)) == (output2D->dataX(6)) );
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
+    TS_ASSERT_EQUALS( output2D->dataY(2).size(), output2D->dataY(6).size() );
 
     // Check one particular value
-    TS_ASSERT_EQUALS( output2D->dataY(3)[0], 24.0);
+    TS_ASSERT_EQUALS( output2D->dataY(3)[0], 0.);
     // Check that the error on that value is correct
 	TS_ASSERT_EQUALS( output2D->dataE(2)[0], std::sqrt(output2D->dataY(2)[0]));
     
@@ -77,7 +77,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 10.0409, 0.0001 )
 	AnalysisDataService::Instance().remove(outputSpace);
   }
 

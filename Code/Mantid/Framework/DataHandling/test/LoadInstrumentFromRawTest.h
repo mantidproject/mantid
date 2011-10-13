@@ -53,7 +53,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // set properties and check this are set ok
-    loader.setPropertyValue("Filename", "HET15869.raw");
+    loader.setPropertyValue("Filename", "LOQ48127.raw");
     inputFile = loader.getPropertyValue("Filename");
     loader.setPropertyValue("Workspace", wsName);
 
@@ -73,10 +73,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<const Instrument> i = output->getInstrument();
-    TS_ASSERT_EQUALS( i->getName(), "HET     ");
+    TS_ASSERT_EQUALS( i->getName(), "LOQ     ");
     boost::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "Source");
-    TS_ASSERT_DELTA( source->getPos().Z(), -11.8,0.01);
+    TS_ASSERT_DELTA( source->getPos().Z(), -11,0.01);
 
     boost::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
@@ -84,29 +84,27 @@ public:
     boost::shared_ptr<const Detector> ptrDetSp = boost::dynamic_pointer_cast<const Detector>(i->getDetector(5));
     TS_ASSERT_EQUALS( ptrDetSp->getID(), 5);
     TS_ASSERT_EQUALS( ptrDetSp->getName(), "det");
-    TS_ASSERT_DELTA( ptrDetSp->getPos().X(), -0.5141,0.01); // using phi values from raw file changes sign of this
-    TS_ASSERT_DELTA( ptrDetSp->getPos().Z(), 2.4588,0.01);
+    TS_ASSERT_DELTA( ptrDetSp->getPos().X(), 0,0.01); // using phi values from raw file changes sign of this
+    TS_ASSERT_DELTA( ptrDetSp->getPos().Z(), -11.1499,0.01);
     double d = ptrDetSp->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d, 2.5120, 0.0001);
+    TS_ASSERT_DELTA(d, 11.1499, 0.0001);
     double cmpDistance = ptrDetSp->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance, 2.5120, 0.0001);
+    TS_ASSERT_DELTA(cmpDistance, 11.1499, 0.0001);
 
     TS_ASSERT_EQUALS( ptrDetSp->type(), "DetectorComponent");
 
     // also a few tests on the last detector and a test for the one beyond the last
-    boost::shared_ptr<const Detector> ptrDetLast = boost::dynamic_pointer_cast<const Detector>(i->getDetector(718048));
-    TS_ASSERT_EQUALS( ptrDetLast->getID(), 718048);
-    TS_ASSERT_THROWS(i->getDetector(718049), Exception::NotFoundError);
+    boost::shared_ptr<const Detector> ptrDetLast = boost::dynamic_pointer_cast<const Detector>(i->getDetector(8));
+    TS_ASSERT_EQUALS( ptrDetLast->getID(), 8);
+    TS_ASSERT_THROWS(i->getDetector(9), Exception::NotFoundError);
 
     // Check the monitors are correctly marked
-    TS_ASSERT( i->getDetector(601)->isMonitor() )
-    TS_ASSERT( i->getDetector(602)->isMonitor() )
-    TS_ASSERT( i->getDetector(603)->isMonitor() )
-    TS_ASSERT( i->getDetector(604)->isMonitor() )
+    TS_ASSERT( i->getDetector(1)->isMonitor() )
+    TS_ASSERT( i->getDetector(2)->isMonitor() )
     // ...and that a normal detector isn't
-    TS_ASSERT( ! i->getDetector(1)->isMonitor() )
-    TS_ASSERT( ! i->getDetector(101256)->isMonitor() )
-    TS_ASSERT( ! i->getDetector(718048)->isMonitor() )
+    TS_ASSERT( ! i->getDetector(3)->isMonitor() )
+    TS_ASSERT( ! i->getDetector(4)->isMonitor() )
+    TS_ASSERT( ! i->getDetector(8)->isMonitor() )
 
 	AnalysisDataService::Instance().remove(wsName);
   }

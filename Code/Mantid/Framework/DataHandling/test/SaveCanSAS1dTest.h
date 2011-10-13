@@ -34,8 +34,8 @@ public:
     std::string inputFile; // Path to test input file assumes Test directory checked out from SVN
     
     //the file's run number needs to be stored in m_runNum for later tests
-    inputFile = "HET15869.raw";
-    m_runNum = "15869";
+    inputFile = "LOQ48127.raw";
+    m_runNum = "48127";
 
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("OutputWorkspace", m_workspace1);
@@ -122,7 +122,7 @@ public:
     }
 
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "\t\t<Title>White Van                             JAWS 45X45                                </Title>");
+    TS_ASSERT_EQUALS ( fileLine, "\t\t<Title>direct beam                                                                     </Title>");
     std::getline( testFile, fileLine );
     {
       std::ostringstream correctLine;
@@ -134,7 +134,7 @@ public:
     TS_ASSERT_EQUALS ( fileLine,"\t\t<SASdata>");
 
     std::getline( testFile, fileLine );
-    std::string idataline="\t\t\t<Idata><Q unit=\"1/A\">5.125</Q><Qdev unit=\"1/A\">0</Qdev><I unit=\"Counts\">0</I><Idev unit=\"Counts\">0</Idev></Idata>";
+    std::string idataline="\t\t\t<Idata><Q unit=\"1/A\">3543.75</Q><Qdev unit=\"1/A\">0</Qdev><I unit=\"Counts\">111430</I><Idev unit=\"Counts\">333.811</Idev></Idata>";
     TS_ASSERT_EQUALS ( fileLine,idataline);
 
     testFile.close();

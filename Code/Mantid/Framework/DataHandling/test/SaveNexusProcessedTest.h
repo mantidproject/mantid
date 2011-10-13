@@ -125,7 +125,7 @@ public:
   void testExecOnLoadraw()
   {
     SaveNexusProcessed algToBeTested;
-    std::string inputFile = "HET15869.raw";
+    std::string inputFile = "LOQ48127.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
