@@ -94,6 +94,12 @@ void ConvertUnits::exec()
     return;
   }
 
+  if (inputWS->dataX(0).size() < 2)
+    throw std::runtime_error("Input workspace has invalid X axis binning parameters. Should have at least 2 values.");
+  if (   inputWS->dataX(0).front() > inputWS->dataX(0).back()
+      || inputWS->dataX(m_numberOfSpectra/2).front() > inputWS->dataX(m_numberOfSpectra/2).back())
+    throw std::runtime_error("Input workspace has invalid X axis binning parameters. X values should be increasing.");
+
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
 
   // Check whether there is a quick conversion available

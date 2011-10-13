@@ -1152,8 +1152,7 @@ namespace DataObjects
       }
       //And we are still sorted! :)
     }
-    else
-      this->order = UNSORTED;
+    // Otherwise, do nothing. If it was sorted by pulse time, then it still is
   }
 
 

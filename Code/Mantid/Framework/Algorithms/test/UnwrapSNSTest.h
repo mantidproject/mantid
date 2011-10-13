@@ -85,6 +85,11 @@ public:
     // pixel NUMPIXELS - 1 should be moved
     TS_ASSERT(min_eventN < ws->getEventList(NUMPIXELS - 1).getTofMin());
     TS_ASSERT(max_eventN < ws->getEventList(NUMPIXELS - 1).getTofMax());
+
+    TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[0], 0.0);
+    TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[1], 2.0);
+    TS_ASSERT_EQUALS(ws->getEventList(0).dataX()[2], 4.0);
+
   }
 };
 

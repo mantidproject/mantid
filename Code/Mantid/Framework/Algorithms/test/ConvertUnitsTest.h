@@ -319,7 +319,7 @@ public:
   /** Ticket #3934: If the workspace is sorted by TOF, it should remain so even if
    * sorting flips the direction
    */
-  void do_testExecEvent_RemainsSorted(EventSortType sortType)
+  void do_testExecEvent_RemainsSorted(EventSortType sortType, std::string targetUnit)
   {
     EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false);
     ws->getAxis(0)->setUnit("TOF");
@@ -336,7 +336,7 @@ public:
     conv.initialize();
     conv.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
     conv.setPropertyValue("OutputWorkspace", "out");
-    conv.setPropertyValue("Target","dSpacing");
+    conv.setPropertyValue("Target",targetUnit);
     conv.execute();
     TS_ASSERT( conv.isExecuted() );
 
@@ -362,16 +362,37 @@ public:
         last_x = x;
       }
     }
+    else if (sortType == PULSETIME_SORT)
+    {
+      // Check directly that it is indeed increasing
+      Mantid::Kernel::DateAndTime last_x;
+      for (size_t i=0; i<el.getNumberEvents(); i++)
+      {
+        Mantid::Kernel::DateAndTime x = el.getEvent(i).pulseTime();
+        TS_ASSERT( x >= last_x );
+        last_x = x;
+      }
+    }
   }
 
   void testExecEvent_RemainsSorted_TOF()
   {
-    do_testExecEvent_RemainsSorted(TOF_SORT);
+    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing");
   }
 
   void testExecEvent_RemainsSorted_Pulsetime()
   {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT);
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing");
+  }
+
+  void testExecEvent_RemainsSorted_TOF_to_Energy()
+  {
+    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy");
+  }
+
+  void testExecEvent_RemainsSorted_Pulsetime_to_Energy()
+  {
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
   }
 
 private:
