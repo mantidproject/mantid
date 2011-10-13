@@ -43,12 +43,10 @@ namespace Mantid
       virtual std::vector<double> getTimeStepValues() const;
       virtual ~EventNexusLoadingPresenter();
       virtual bool canReadFile() const;
-      virtual std::string getWorkspaceTypeName()
-      {
-        return "NotSet";
-      }
+      virtual std::string getWorkspaceTypeName();
     private:
       const std::string m_filename;
+      std::string m_wsTypeName;
     };
 
 

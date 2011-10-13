@@ -119,6 +119,7 @@ void testExecutionInMemory()
   TSM_ASSERT_EQUALS("One array expected on field data!", 1, product->GetFieldData()->GetNumberOfArrays());
   TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
+  TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
@@ -156,7 +157,7 @@ void testExecuteLoadMetadata()
 void testGetWorkspaceTypeName()
 {
   SQWLoadingPresenter presenter(new MockMDLoadingView, getSuitableFileNamePath());
-  TSM_ASSERT_EQUALS("Characterisation Test Failed", "NotSet", presenter.getWorkspaceTypeName());
+  TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
 }
 
 };

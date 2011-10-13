@@ -24,7 +24,7 @@ namespace Mantid
     @throw invalid_arument if view is null
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
-    EventNexusLoadingPresenter::EventNexusLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename)
+    EventNexusLoadingPresenter::EventNexusLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
     {
       if(this->m_filename.empty())
       {
@@ -110,6 +110,7 @@ namespace Mantid
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+      m_wsTypeName = typeid(*eventWs).name(); //Cache the workspace type.
 
       factory->setRecursionDepth(this->m_view->getRecursionDepth());
       factory->initialize(eventWs);
@@ -157,6 +158,15 @@ namespace Mantid
       at which it must be added to the outgoing vtkdataset.
       */
       this->m_isSetup = true;
+    }
+
+    /*
+    Getter for the workspace type name.
+    @return Workspace Type Name
+    */
+    std::string EventNexusLoadingPresenter::getWorkspaceTypeName()
+    {
+      return m_wsTypeName;
     }
   }
 }

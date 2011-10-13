@@ -60,6 +60,9 @@ private:
   /// Width of the glyphs
   double m_width;
 
+  /// Cache for the workspace type name
+  std::string m_wsTypeName;
+
   vtkPeaksSource(const vtkPeaksSource&);
   void operator = (const vtkPeaksSource&);
 };

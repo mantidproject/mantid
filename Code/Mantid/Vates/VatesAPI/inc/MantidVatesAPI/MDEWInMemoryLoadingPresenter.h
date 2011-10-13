@@ -46,11 +46,13 @@ namespace Mantid
       virtual void executeLoadMetadata();
       virtual ~MDEWInMemoryLoadingPresenter();
       virtual bool canReadFile() const;
+      virtual std::string getWorkspaceTypeName();
     private:
       /// Repository for accessing workspaces. At this level, does not specify how or where from.
       boost::scoped_ptr<WorkspaceProvider> m_repository;
       /// The name of the workspace.
       const std::string m_wsName;
+      std::string m_wsTypeName;
     };
   }
 }

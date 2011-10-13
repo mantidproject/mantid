@@ -19,7 +19,7 @@ namespace Mantid
     @throw invalid_arument if view is null
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
-    SQWLoadingPresenter::SQWLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename)
+    SQWLoadingPresenter::SQWLoadingPresenter(MDLoadingView* view, const std::string filename) : MDEWLoadingPresenter(view), m_filename(filename), m_wsTypeName("")
     {
       if(this->m_filename.empty())
       {
@@ -154,7 +154,7 @@ namespace Mantid
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
-
+      m_wsTypeName = typeid(*eventWs).name(); //Cache the workspace type.
       //Call base-class extraction method.
       extractMetadata(eventWs);
     }
@@ -164,5 +164,15 @@ namespace Mantid
     {
       delete m_view;
     }
+
+    /*
+    Getter for the workspace type name.
+    @return Workspace Type Name
+    */
+    std::string SQWLoadingPresenter::getWorkspaceTypeName()
+    {
+      return m_wsTypeName;
+    }
+
     }
     }

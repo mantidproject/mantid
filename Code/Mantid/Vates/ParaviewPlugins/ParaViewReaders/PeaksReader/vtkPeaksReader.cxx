@@ -30,7 +30,7 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 vtkPeaksReader::vtkPeaksReader() :
-  m_isSetup(false)
+  m_isSetup(false), m_wsTypeName("")
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -79,6 +79,7 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve("LoadedPeaksWS");
     Mantid::API::IPeaksWorkspace_sptr peakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
+    m_wsTypeName = typeid(*peakWS).name();
     m_isSetup = true;
   }
 
@@ -150,7 +151,5 @@ Getter for the workspace type name.
 */
 char* vtkPeaksReader::GetWorkspaceTypeName()
 {
-  //Forward request on to MVP presenter
-  //return m_presenter->getWorkspaceTypeName().c_str();
-  return "NotSet";
+  return const_cast<char*>(m_wsTypeName.c_str());
 }

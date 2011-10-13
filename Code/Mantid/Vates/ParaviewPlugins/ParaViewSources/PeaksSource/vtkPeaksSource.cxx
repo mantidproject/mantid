@@ -23,7 +23,7 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 /// Constructor
-vtkPeaksSource::vtkPeaksSource() :  m_wsName("")
+vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), m_wsTypeName("")
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -68,7 +68,7 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
 
     Workspace_sptr result = AnalysisDataService::Instance().retrieve(m_wsName);
     Mantid::API::IPeaksWorkspace_sptr peakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
-
+    m_wsTypeName = typeid(*peakWS).name();
     // Instantiate the factory that makes the peak markers
     vtkPeakMarkerFactory *p_peakFactory = new vtkPeakMarkerFactory("peaks");
 
@@ -117,7 +117,5 @@ Getter for the workspace type name.
 */
 char* vtkPeaksSource::GetWorkspaceTypeName()
 {
-  //Forward request on to MVP presenter
-  //return m_presenter->getWorkspaceTypeName().c_str();
-  return "NotSet";
+  return const_cast<char*>(m_wsTypeName.c_str());
 }
