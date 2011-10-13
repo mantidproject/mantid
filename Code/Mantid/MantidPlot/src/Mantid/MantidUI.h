@@ -200,6 +200,7 @@ public slots:
 
 public:
     MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false);
+    MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int>>& toPlot, bool errs=false, bool distr=false);
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
     /// Draw a color fill plot for the named workspace
