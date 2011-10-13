@@ -56,7 +56,10 @@ def NoSensitivityCorrection():
     
 def DarkCurrent(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_dark_current_subtracter(sans_reduction_steps.SubtractDarkCurrent(datafile))
+    ReductionSingleton().set_dark_current_subtracter(mantidsimple.HFIRDarkCurrentSubtraction, 
+                                                     InputWorkspace=None, Filename=datafile,
+                                                     OutputWorkspace=None,
+                                                     ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     
 def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)

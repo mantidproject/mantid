@@ -174,6 +174,7 @@ class BaseTransmission(ReductionStep):
         self._error = float(error)
         self._theta_dependent = theta_dependent
         self._dark_current_data = None
+        self._dark_current_subtracter = None
         self._beam_finder = None
         
     def set_theta_dependence(self, theta_dependence=True):
@@ -192,6 +193,10 @@ class BaseTransmission(ReductionStep):
         """
         self._dark_current_data = dark_current
                 
+    @validate_step
+    def set_dark_current_subtracter(self, subtracter):
+        self._dark_current_subtracter = subtracter
+                        
     def get_transmission(self):
         return [self._trans, self._error]
     
@@ -258,10 +263,14 @@ class BeamSpreaderTransmission(BaseTransmission):
             
             # Subtract dark current
             if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_spreader_ws)
-                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, direct_spreader_ws)
-                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_scatt_ws)
-                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, direct_scatt_ws)
+                self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
+                                                  InputWorkspace=None, Filename=self._dark_current_data,
+                                                  OutputWorkspace=None,
+                                                  ReductionTableWorkspace=reducer.get_reduction_table_name())
+                self._dark_current_subtracter.execute(reducer, sample_spreader_ws)
+                self._dark_current_subtracter.execute(reducer, direct_spreader_ws)
+                self._dark_current_subtracter.execute(reducer, sample_scatt_ws)
+                self._dark_current_subtracter.execute(reducer, direct_scatt_ws)
                         
             # Get normalization for transmission calculation
             norm_detector = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
@@ -353,8 +362,12 @@ class DirectBeamTransmission(BaseTransmission):
                 output_str += partial_out
         
         elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-            partial_out = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_ws)
-            partial_out2 = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, empty_ws)
+            self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
+                                              InputWorkspace=None, Filename=self._dark_current_data,
+                                              OutputWorkspace=None,
+                                              ReductionTableWorkspace=reducer.get_reduction_table_name())
+            partial_out = self._dark_current_subtracter.execute(reducer, sample_ws)
+            partial_out2 = self._dark_current_subtracter.execute(reducer, empty_ws)
             partial_out = "\n%s\n%s" % (partial_out, partial_out2)
             partial_out.replace('\n', '   \n')
             output_str += partial_out
@@ -469,6 +482,7 @@ class SubtractDarkCurrent(ReductionStep):
         """
             @param timer_ws: if provided, will be used to scale the dark current
         """
+        raise RuntimeError, "Old dark current no longer in use"
         super(SubtractDarkCurrent, self).__init__()
         self._timer_ws = timer_ws
         self._dark_current_file = dark_current_file
@@ -586,6 +600,7 @@ class WeightedAzimuthalAverage(ReductionStep):
         pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
 
         # Q min is one pixel from the center, unless we have the beam trap size
+        # TODO: this doesn't appear to be used!
         if mtd[workspace].getRun().hasProperty("beam-trap-radius"):
             mindist = mtd[workspace].getRun().getProperty("beam-trap-radius").value
         else:
@@ -691,6 +706,7 @@ class SensitivityCorrection(ReductionStep):
         super(SensitivityCorrection, self).__init__()
         self._flood_data = flood_data
         self._dark_current_data = dark_current
+        self._dark_current_subtracter = None
         self._efficiency_ws = None
         self._min_sensitivity = min_sensitivity
         self._max_sensitivity = max_sensitivity
@@ -716,6 +732,10 @@ class SensitivityCorrection(ReductionStep):
         else:
             return None
     
+    @validate_step
+    def set_dark_current_subtracter(self, subtracter):
+        self._dark_current_subtracter = subtracter
+        
     def _compute_efficiency(self, reducer, workspace):
         output_str = ""
         if self._efficiency_ws is None:
@@ -741,7 +761,12 @@ class SensitivityCorrection(ReductionStep):
                     
             elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0 \
                 and reducer._dark_current_subtracter_class is not None:
-                partial_output = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, flood_ws)
+                #partial_output = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, flood_ws)
+                self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
+                                                  InputWorkspace=None, Filename=self._dark_current_data,
+                                                  OutputWorkspace=None,
+                                                  ReductionTableWorkspace=reducer.get_reduction_table_name())
+                partial_output = self._dark_current_subtracter.execute(reducer, flood_ws)
                 output_str = "%s\n   %s" % (output_str, partial_output) 
             
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)

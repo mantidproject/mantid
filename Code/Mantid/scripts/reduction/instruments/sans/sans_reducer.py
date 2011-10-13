@@ -88,7 +88,7 @@ class SANSReducer(Reducer):
         self._mask = sans_reduction_steps.Mask()
         
         # Default dark current subtracter class
-        self._dark_current_subtracter_class = sans_reduction_steps.SubtractDarkCurrent
+        self._dark_current_subtracter_class = HFIRDarkCurrentSubtraction
         
         # Resolution calculator
         self._resolution_calculator = ReactorSANSResolution
