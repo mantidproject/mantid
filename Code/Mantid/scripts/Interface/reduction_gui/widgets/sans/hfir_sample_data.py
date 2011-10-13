@@ -7,7 +7,6 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
-from reduction_gui.reduction.mantid_util import DataFileProxy
 
 class DirectBeam(BaseWidget):
     """

@@ -5,7 +5,6 @@ from reduction_gui.reduction.sans.eqsans_data_script import DataSets
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_sample_data
-from reduction_gui.reduction.mantid_util import DataFileProxy
 
 from hfir_sample_data import DirectBeam
 
