@@ -194,7 +194,7 @@ public:
 
   /// Returns the QMultiMap that contains all the workspaces that are to be plotted, 
   /// mapped to the set of workspace indices.
-  QMultiMap<QString,std::set<int>> getPlots() const;
+  QMultiMap<QString,std::set<int> > getPlots() const;
 
 private slots:
   /// Called when the OK button is pressed.

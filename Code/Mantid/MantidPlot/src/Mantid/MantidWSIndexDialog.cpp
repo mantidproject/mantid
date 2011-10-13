@@ -35,10 +35,10 @@ MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<
   init();
 }
 
-QMultiMap<QString,std::set<int>> MantidWSIndexDialog::getPlots() const
+QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
 {
   // Map of workspace names to set of indices to be plotted.
-  QMultiMap<QString,std::set<int>> plots;
+  QMultiMap<QString,std::set<int> > plots;
 
   // If the user typed in the wsField ...
   if(m_wsIndexChoice.getList().size() > 0)
