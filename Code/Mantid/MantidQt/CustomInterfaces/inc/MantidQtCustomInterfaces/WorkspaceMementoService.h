@@ -3,9 +3,14 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class Property;
+  }
   namespace API
   {
     class ITableWorkspace;
@@ -52,7 +57,6 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-
     template<typename Memento>
     class DLLExport WorkspaceMementoService
     {
@@ -81,6 +85,8 @@ namespace MantidQt
 
       Memento m_memento;
 
+      const int m_logValueStart;
+
     public:
 
       WorkspaceMementoService(Memento memento);
@@ -94,6 +100,7 @@ namespace MantidQt
       void setShapeXML(std::string shapeXML);
       void setLatticeParameters(double a1, double a2, double a3, double b1, double b2, double b3);
       void setStatus(std::string status);
+      void setLogData(std::vector<Mantid::Kernel::Property*> vecLogData);
 
       std::string getInstrumentName();
       std::string getWorkspaceName();
@@ -106,6 +113,7 @@ namespace MantidQt
       double getB2();
       double getB3();
       std::string getStatus();
+      std::vector<AbstractMementoItem_sptr> getLogData();
       
     };
   }

@@ -8,6 +8,8 @@
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoLock.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
+#include "MantidQtCustomInterfaces/LoanedMemento.h"
 #include "MantidDataObjects/MementoTableWorkspace.h"
 #include "MantidAPI/TableRow.h" 
 
@@ -43,18 +45,9 @@ private:
   // Add items to the workspace. This is a job performed by WorkspaceMementoCollection when fully assembled.
   static void doAddItems(TableWorkspace_sptr ws, WorkspaceMemento& memento)
   {
-    int rowIndex = 0;
-    memento.addItem(new WorkspaceMementoItem<0, std::string>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<1, std::string>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<2, int>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<3, std::string>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<4, double>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<5, double>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<6, double>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<7, double>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<8, double>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<9, double>(ws, rowIndex));
-    memento.addItem(new WorkspaceMementoItem<10, std::string>(ws, rowIndex));
+    LoanedMemento managed(&memento);
+    WorkspaceMementoService<LoanedMemento> service(managed);
+    service.addAllItems(ws, 0);
   }
 
 public:

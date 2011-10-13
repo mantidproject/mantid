@@ -43,7 +43,6 @@ namespace MantidQt
     */
     void WorkspaceMemento::addItem(AbstractMementoItem* item)
     {
-      //TODO check types here. Type of item should be the same as the corresponding colum in the table.
       AbstractMementoItem_sptr temp(item);
       m_items.push_back(temp);
       m_items.size() == size_t(m_data->columnCount()) ? m_validMemento = true : m_validMemento = false;

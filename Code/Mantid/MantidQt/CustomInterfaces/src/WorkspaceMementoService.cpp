@@ -15,7 +15,7 @@ namespace MantidQt
     @param memento : The memento to provide the service for.
     */
     template<typename Memento>
-    WorkspaceMementoService<Memento>::WorkspaceMementoService(Memento memento) : m_memento(memento)
+    WorkspaceMementoService<Memento>::WorkspaceMementoService(Memento memento) : m_memento(memento), m_logValueStart(11)
     {
     }
 
@@ -35,9 +35,10 @@ namespace MantidQt
     template<typename Memento>
     void WorkspaceMementoService<Memento>::addAllItems(Mantid::API::ITableWorkspace_sptr ws, int rowIndex)
     {
-      if(ws->columnCount() != 11)
+      const int nLogValueColumns = ws->columnCount() - m_logValueStart;
+      if(ws->columnCount() < m_logValueStart)
       {
-        throw std::runtime_error("Too many columns in table schema.");
+        throw std::runtime_error("Too few columns in table schema.");
       }
       m_memento->addItem(new WorkspaceMementoItem<0, std::string>(ws, rowIndex));
       m_memento->addItem(new WorkspaceMementoItem<1, std::string>(ws, rowIndex));
@@ -50,6 +51,12 @@ namespace MantidQt
       m_memento->addItem(new WorkspaceMementoItem<8, double>(ws, rowIndex));
       m_memento->addItem(new WorkspaceMementoItem<9, double>(ws, rowIndex));
       m_memento->addItem(new WorkspaceMementoItem<10, std::string>(ws, rowIndex));
+
+      /// Log values come last.
+      for(int i = m_logValueStart; i < m_logValueStart + nLogValueColumns; i++)
+      {
+        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws, rowIndex));
+      }
     }
 
 
@@ -113,6 +120,33 @@ namespace MantidQt
     void WorkspaceMementoService<Memento>::setRunNumber(int runnumber)
     {
       m_memento->getItem(2)->setValue(runnumber);
+    }
+
+    template<typename Memento>
+    void WorkspaceMementoService<Memento>::setLogData(std::vector<Mantid::Kernel::Property*> vecLogData)
+    {
+      typedef std::vector<Mantid::Kernel::Property*> VecLogType;
+      VecLogType::iterator it = vecLogData.begin();
+      int count = m_logValueStart;
+      while(it != vecLogData.end())
+      {
+        m_memento->getItem(count)->setValue((*it)->value());
+        it++;
+        count++;
+      }
+    }
+
+    template<typename Memento>
+    std::vector<AbstractMementoItem_sptr> WorkspaceMementoService<Memento>::getLogData()
+    {
+      typedef std::vector<AbstractMementoItem_sptr> VecLogType;
+      VecLogType vecLogData;
+
+      for(int i = m_logValueStart; i < m_memento->getSize(); i++)
+      {
+        vecLogData.push_back(m_memento->getItem(i));
+      }
+      return vecLogData;
     }
 
     template<typename Memento>

@@ -1,3 +1,4 @@
+#include "MantidKernel/Property.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h" 
 #include "MantidAPI/WorkspaceFactory.h"
@@ -96,14 +97,9 @@ namespace MantidQt
       temp->commit(); 
 
       // Append all log data here.
-      //typedef std::vector<Kernel::Property*> VecLogType;
-      //VecLogType logData = matrixWs->getLogData();
-      //VecLogType::iterator it = logData.begin();
-      //while(it != logData.end())
-      //{
-      //  row << it->value();
-      //  it++;
-      //}
+      //typedef std::vector<Mantid::Kernel::Property*> VecLogType;
+      //VecLogType logData = ws->run().getLogData();
+      //service.setLogData(logData);
 
       //Make a mutable record by adding to a mutable member.
 

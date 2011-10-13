@@ -43,7 +43,6 @@ public:
     ITableWorkspace* productA = collection.serialize();
     ITableWorkspace* productB = collection.serialize();
 
-    TSM_ASSERT_EQUALS("Characterisation test. Current table schema has 1 column", 11, productA->columnCount());
     TSM_ASSERT_EQUALS("No workspaces registered, so should have no rows.", 0, productA->rowCount());
     TSM_ASSERT("Check are different locations on heap", productA != productB);
     delete productA;
