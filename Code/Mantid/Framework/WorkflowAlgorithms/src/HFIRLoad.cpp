@@ -4,21 +4,8 @@
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include <MantidAPI/FileFinder.h>
 #include <MantidAPI/FileProperty.h>
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/RegularExpression.h"
-#include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
-#include "Poco/String.h"
-#include <iostream>
-#include <fstream>
-#include <istream>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 

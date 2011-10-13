@@ -24,13 +24,8 @@ namespace WorkflowAlgorithms
 
     Optional Properties:
     <UL>
-    <LI> UseConfigBeam - If true, the beam center defined in the configuration file will be used</LI>
     <LI> BeamCenterX - Beam position in X pixel coordinates (used only if UseConfigBeam is false)</LI>
     <LI> BeamCenterY        - Beam position in Y pixel coordinates (used only if UseConfigBeam is false)</LI>
-    <LI> UseConfigTOFCuts         - If true, the edges of the TOF distribution will be cut according to the configuration file</LI>
-    <LI> UseConfigMask         - If true, the masking information found in the configuration file will be used</LI>
-    <LI> UseConfig         - If true, the best configuration file found will be used)</LI>
-    <LI> CorrectForFlightPath         - If true, the TOF will be modified for the true flight path from the sample to the detector pixel</LI>
     <LI> SampleDetectorDistance         - Sample to detector distance to use (overrides meta data), in mm</LI>
     <LI> SampleDetectorDistanceOffset         - Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm</LI>
     </UL>
@@ -49,8 +44,7 @@ class DLLExport HFIRLoad : public API::Algorithm
 {
 public:
   /// Constructor
-  HFIRLoad() : API::Algorithm(), m_center_x(0), m_center_y(0), m_moderator_position(0) {
-    m_mask_as_string = "";
+  HFIRLoad() : API::Algorithm(), m_center_x(0), m_center_y(0) {
     m_output_message = "";
   }
   /// Virtual destructor
@@ -74,11 +68,8 @@ private:
 
   double m_center_x;
   double m_center_y;
-  std::string m_mask_as_string;
   std::string m_output_message;
-  double m_moderator_position;
   API::MatrixWorkspace_sptr dataWS;
-  double m_slit_positions[3][8];
 };
 
 } // namespace Algorithms

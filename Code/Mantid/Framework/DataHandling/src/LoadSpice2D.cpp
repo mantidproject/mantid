@@ -337,6 +337,8 @@ namespace Mantid
       ws->mutableRun().addProperty("sample-thickness", sample_thickness, "cm", true);
       ws->mutableRun().addProperty("wavelength", wavelength, "Angstrom", true);
       ws->mutableRun().addProperty("wavelength-spread", dwavelength, "Angstrom", true);
+      ws->mutableRun().addProperty("timer", countingTime, "sec", true);
+      ws->mutableRun().addProperty("monitor", monitorCounts, "", true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
