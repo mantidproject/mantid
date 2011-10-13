@@ -1255,7 +1255,7 @@ void MantidDockWidget::groupingButtonClick()
 /// Plots a single spectrum from each selected workspace
 void MantidDockWidget::plotSpectra()
 {
-  const QMultiMap<QString,std::set<int>> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
 
@@ -1265,7 +1265,7 @@ void MantidDockWidget::plotSpectra()
 /// Plots a single spectrum from each selected workspace
 void MantidDockWidget::plotSpectraDistribution()
 {
-  const QMultiMap<QString,std::set<int>> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
@@ -1275,7 +1275,7 @@ void MantidDockWidget::plotSpectraDistribution()
 /// Plots a single spectrum from each selected workspace with errors
 void MantidDockWidget::plotSpectraErr()
 {
-  const QMultiMap<QString,std::set<int>> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
@@ -1285,7 +1285,7 @@ void MantidDockWidget::plotSpectraErr()
 /// Plots a single spectrum from each selected workspace with erros
 void MantidDockWidget::plotSpectraDistributionErr()
 {
-  const QMultiMap<QString,std::set<int>> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   
@@ -1448,7 +1448,7 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 *  Automatically chooses spectrum 0 if all are single-spectrum workspaces.
 *  @return A map of workspace name - spectrum index pairs
 */
-QMultiMap<QString,std::set<int>> MantidTreeWidget::chooseSpectrumFromSelected() const
+QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
   QList<QString> wsNames = this->getSelectedWorkspaceNames();
@@ -1468,7 +1468,7 @@ QMultiMap<QString,std::set<int>> MantidTreeWidget::chooseSpectrumFromSelected() 
     if ( currentHists > maxHists ) maxHists = currentHists;
   }
 
-  QMultiMap<QString,std::set<int>> toPlot;
+  QMultiMap<QString,std::set<int> > toPlot;
 
   // ... if so, no need to ask user which one to plot - just go!
   if(maxHists == 1)
