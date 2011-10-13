@@ -257,7 +257,13 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     Mantid::Geometry::ICompAssembly_const_sptr parent = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(det->getParent());
     if (parent)
     {
-      text += "Parent assembly: " + QString::fromStdString(parent->getName()) + '\n';
+      QString textpath;
+      while (parent)
+      {
+        textpath="/"+QString::fromStdString(parent->getName())+textpath;
+        parent=boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent->getParent());
+      }
+      text += "Component path:" +textpath+"/"+ QString::fromStdString(det->getName()) +'\n';
     }
     const double integrated = instrActor->getIntegratedCounts(detid);
     const QString counts = integrated == -1.0 ? "N/A" : QString::number(integrated);
