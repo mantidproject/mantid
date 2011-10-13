@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
+	src/LoadNXSPE.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexusMonitors.cpp
 	src/LoadRKH.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
+  inc/MantidDataHandling/LoadNXSPE.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadRKH.h
@@ -232,6 +234,7 @@ set ( TEST_FILES
 	test/LoadNexusMonitorsTest.h
 	test/LoadNexusProcessedTest.h
 	test/LoadNexusTest.h
+  test/LoadNXSPETest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNexusMonitorsTest.h
 	test/LoadRKHTest.h

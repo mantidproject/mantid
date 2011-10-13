@@ -216,6 +216,7 @@ namespace Mantid
       exts.push_back(".csv");
       exts.push_back(".spe");
       exts.push_back(".grp");
+      exts.push_back(".nxspe");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the file to read, including its full or relative\n"
