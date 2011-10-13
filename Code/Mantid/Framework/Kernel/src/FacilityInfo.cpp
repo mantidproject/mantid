@@ -25,7 +25,7 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @throw std::runtime_error if name or file extensions are not defined
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
-  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_extensions(), m_archiveSearch(), 
+  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_extensions(), m_soapEndPoint(), m_archiveSearch(),
   m_instruments()
 {
   if (m_name.empty())
@@ -54,6 +54,26 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   {
     addExtension(*it);
   }
+
+  Poco::XML::NodeList* pNL_soapEndPoint = elem->getElementsByTagName("soapEndPoint");
+  if(!pNL_soapEndPoint)
+  {
+    throw std::runtime_error("Facilities.xml file  must have soapEndPoint information");
+  }
+  if (pNL_soapEndPoint->length() > 1)
+  {
+    g_log.error("Facility must have only one soapEndPoint tag");
+    throw std::runtime_error("Facility must have only one csoapEndPoint tag");
+  }
+  else if (pNL_soapEndPoint->length() == 1)
+  {
+    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
+    if(!elem->getAttribute("url").empty())
+    {
+      m_soapEndPoint= elem->getAttribute("url");
+    }
+  }
+  pNL_soapEndPoint->release();
 
   Poco::XML::NodeList* pNL_archives = elem->getElementsByTagName("archive");
   if (pNL_archives->length() > 1)
