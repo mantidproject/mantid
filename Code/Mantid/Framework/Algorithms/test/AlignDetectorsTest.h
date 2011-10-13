@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/AlignDetectors.h"
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -18,16 +18,15 @@ using namespace Mantid::API;
 class AlignDetectorsTest : public CxxTest::TestSuite
 {
 public:
-  /** Setup for loading raw data */
-  void setUp_Raw()
+  /** Setup for loading Nexus data */
+  void setUp_HRP38692()
   {
-    LoadRaw3 loader;
+
+    LoadNexus loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","HRP38692.raw");
-    inputWS = "rawWS";
+    loader.setPropertyValue("Filename","HRP38692a.nxs");
+    inputWS = "nexusWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.setProperty("SpectrumMin",320);
-    loader.setProperty("SpectrumMax",330);
     loader.execute();
   }
 
@@ -49,7 +48,9 @@ public:
    */
   void testExecWorkspace2D()
   {
-    setUp_Raw();
+	  	  int i;
+	  std::cin >> i;
+    setUp_HRP38692();
     if ( !align.isInitialized() ) align.initialize();
 
     TS_ASSERT_THROWS( align.execute(), std::runtime_error );

@@ -61,10 +61,10 @@ private:
     TS_ASSERT_THROWS_NOTHING(loaderHRP.execute());
     TS_ASSERT( loaderHRP.isExecuted() );
 
-    // now try to reload in detector positions from raw file
+    // now try to reload in detector positions from Nexus file
     UpdateInstrumentFromFile loadRawPos;
     loadRawPos.initialize();
-    loadRawPos.setPropertyValue("Filename", "HRP38692.raw");
+    loadRawPos.setPropertyValue("Filename", "HRP38692a.nxs");
     loadRawPos.setPropertyValue("Workspace", wsName);
     loadRawPos.setProperty("MoveMonitors", moveMonitors);
     TS_ASSERT_THROWS_NOTHING(loadRawPos.execute());

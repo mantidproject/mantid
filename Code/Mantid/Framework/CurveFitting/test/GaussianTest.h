@@ -100,218 +100,89 @@ public:
   }
 
 
-  // test look up table 
-  void testAgainstHRPD_DatasetLookUpTable()
-  {
-    // load dataset to test against
-    std::string inputFile = "HRP38692.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "HRP38692_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
+	  // Data taken from the peak tested in workspace index 2 of HRP38692 
+    void getHRP38692Peak2Data(Mantid::MantidVec& x, Mantid::MantidVec& y, Mantid::MantidVec& e)
+	{
+		// x-values in time-of-flight
+		for(size_t i=0; i < 8; i++) x[i] =  79292.4375 + 7.875*i;
+		for(size_t i=8; i < 41; i++) x[i] = 79347.625 + 8*(i-8);
 
-    // reload instrument to test constraint defined in IDF is working
-    LoadInstrument reLoadInstrument;
-    reLoadInstrument.initialize();
-    std::string instrumentName = "HRPD_for_UNIT_TESTING.xml";
-    reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
-    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
-    reLoadInstrument.setProperty("RewriteSpectraMap", false);
-    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
-    TS_ASSERT( reLoadInstrument.isExecuted() );
+		// y-values
+		y[0] = 7;
+		y[1] = 8;
+		y[2] = 4;
+		y[3] = 9;
+		y[4] = 4;
+		y[5] = 10;
+		y[6] = 10;
+		y[7] = 5;
+		y[8] = 8;
+		y[9] = 7;
+		y[10] = 10;
+		y[11] = 18;
+		y[12] = 30;
+		y[13] = 71;
+		y[14] = 105;
+		y[15] = 167;
+		y[16] = 266;
+		y[17] = 271;
+		y[18] = 239;
+		y[19] = 221;
+		y[20] = 179;
+		y[21] = 133;
+		y[22] = 126;
+		y[23] = 88;
+		y[24] = 85;
+		y[25] = 52;
+		y[26] = 37;
+		y[27] = 51;
+		y[28] = 32;
+		y[29] = 31;
+		y[30] = 17;
+		y[31] = 21;
+		y[32] = 15;
+		y[33] = 13;
+		y[34] = 12;
+		y[35] = 12;
+		y[36] = 10;
+		y[37] = 7;
+		y[38] = 5;
+		y[39] = 9;
+		y[40] = 6;
 
-    Fit alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","68");
-    alg.setPropertyValue("StartX","60134");
-    alg.setPropertyValue("EndX","61805");
-
-    // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
-
-    LinearBackground *bk = new LinearBackground();
-    bk->initialize();
-
-    bk->setParameter("A0",0.0);
-    bk->setParameter("A1",0.0);
-    bk->tie("A1","0");
-
-    // set up Gaussian fitting function
-    Gaussian* fn = new Gaussian();
-    fn->initialize();
-
-    fn->setParameter("Height",300.0);    
-    fn->setParameter("PeakCentre",60990.0);
-    //fn->setParameter("Sigma", 0.1);     // set using lookuptable
-
-    // set the workspace explicitely just to make sure that Sigma has been
-    // set as expected from the look up table
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
-    fn->setMatrixWorkspace(wsToPass,68);
-    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 109.9 ,0.1);
-
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
-
-    alg.setPropertyValue("Function",*fnWithBk);
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg.execute() )
-    )
-    TS_ASSERT( alg.isExecuted() );
-
-    // test the output from fit is what you expect
-    double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 1.4,0.1);
-
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
-    TS_ASSERT_DELTA( pk->height(), 315.4 ,1);
-    TS_ASSERT_DELTA( pk->centre(), 60980 ,10);
-    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 114.6 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 7.4 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
-
-    AnalysisDataService::Instance().remove(outputSpace);
-    InstrumentDataService::Instance().remove(instrumentName);
-  }
+		// errors are the square root of the Y-value
+		for (size_t i=0; i < 41; i++) e[i] = sqrt( y[i] );
+	}
 
 
-  // test look up table 
-  void testAgainstHRPD_DatasetLookUpTableDifferentUnit()
-  {
-    // load dataset to test against
-    //std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
-    std::string inputFile = "HRP38692.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "HRP38692_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
-
-    IAlgorithm_sptr units = AlgorithmFactory::Instance().create("ConvertUnits",-1);
-    units->initialize();
-    units->setPropertyValue("InputWorkspace", outputSpace);
-    units->setPropertyValue("OutputWorkspace", outputSpace);
-    units->setPropertyValue("Target", "Wavelength");
-    units->execute();
-    TS_ASSERT( units->isExecuted() );
-
-    // reload instrument to test constraint defined in IDF is working
-    LoadInstrument reLoadInstrument;
-    reLoadInstrument.initialize();
-    std::string instrumentName = "HRPD_for_UNIT_TESTING2.xml";
-    reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
-    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
-    reLoadInstrument.setProperty("RewriteSpectraMap", false);
-    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
-    TS_ASSERT( reLoadInstrument.isExecuted() );
-
-    Fit alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","68");
-    alg.setPropertyValue("StartX","2.46");
-    alg.setPropertyValue("EndX","2.52");
-
-    // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
-
-    LinearBackground *bk = new LinearBackground();
-    bk->initialize();
-
-    bk->setParameter("A0",0.0);
-    bk->setParameter("A1",0.0);
-    bk->tie("A1","0");
-
-    // set up Gaussian fitting function
-    Gaussian* fn = new Gaussian();
-    fn->initialize();
-
-    //fn->setParameter("Height",300.0);    // set using lookuptable
-    fn->setParameter("PeakCentre",2.5);
-    fn->setParameter("Sigma",0.01);     
-
-    // set the workspace explicitely just to make sure that Sigma has been
-    // set as expected from the look up table
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
-    fn->setMatrixWorkspace(wsToPass,68);
-    TS_ASSERT_DELTA( fn->getParameter("Height"), 317.23 ,0.1);
-
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
-
-    alg.setPropertyValue("Function",*fnWithBk);
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg.execute() )
-    )
-    TS_ASSERT( alg.isExecuted() );
-
-    // test the output from fit is what you expect
-    double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 1.5,0.1);
-
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
-    TS_ASSERT_DELTA( pk->height(), 315.4 ,1);
-    TS_ASSERT_DELTA( pk->centre(), 2.5 ,0.01);
-    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 0.0046 ,0.001);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 7.2654 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
-
-    AnalysisDataService::Instance().remove(outputSpace);
-    InstrumentDataService::Instance().remove(instrumentName);
-  }
-
-
-  // Also pick values from HRPD_for_UNIT_TESTING.xml
+    // Also pick values taken from HRPD_for_UNIT_TESTING.xml
   // here we have an example where an upper constraint on Sigma <= 100 makes
   // the Gaussian fit below success. The starting value of Sigma is here 300. 
   // Note that the fit is equally successful if we had no constraint on Sigma
   // and used a starting of Sigma = 100.
-  void testAgainstHRPD_DatasetWithConstraints()
+  void testAgainstPeak2WithConstraints()
   {
-    // load dataset to test against
-    std::string inputFile = "HRP38692.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "HRP38692_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
+	// create peak2 mock data to test against
+    std::string wsName = "GaussHRP38692MockData";
+    int histogramNumber = 1;
+    int timechannels = 41;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+	Mantid::MantidVec& x = ws2D->dataX(0); // x-values (time-of-flight)
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getHRP38692Peak2Data(x, y, e);
 
-    //int iii;
-    //std::cin >> iii;
-    // reload instrument to test constraint defined in IDF is working
-    LoadInstrument reLoadInstrument;
-    reLoadInstrument.initialize();
-    std::string instrumentName = "HRPD_for_UNIT_TESTING.xml";
-    reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
-    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
-    reLoadInstrument.setProperty("RewriteSpectraMap", false);
-    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
-    TS_ASSERT( reLoadInstrument.isExecuted() );
+	//put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
+	// Initialise algorithm
     Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
 
     // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("InputWorkspace", wsName);
     alg.setPropertyValue("StartX","79300");
     alg.setPropertyValue("EndX","79600");
 
@@ -328,105 +199,14 @@ public:
     // set up Gaussian fitting function
     Gaussian* fn = new Gaussian();
     fn->initialize();
-
-    // set the workspace explicitely for unit testing purpose only
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
-    fn->setMatrixWorkspace(wsToPass,2);
-    TS_ASSERT_DELTA( fn->getParameter("Height"), 200 ,0.1);
-    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 300 ,0.1);
-    IConstraint* testConstraint = fn->getConstraint(2);
-    TS_ASSERT( testConstraint->asString().compare("20<Sigma<100") == 0);
-    TS_ASSERT_DELTA( testConstraint->getPenaltyFactor(), 1000.001 ,0.00001);
-
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
-
-    alg.setPropertyValue("Function",*fnWithBk);
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg.execute() )
-    )
-    TS_ASSERT( alg.isExecuted() );
-
-    // test the output from fit is what you expect
-    double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 5.16,0.1);
-
-    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
-    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
-    TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
-    TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
-    TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.14 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.06 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
-
-    AnalysisDataService::Instance().remove(outputSpace);
-    InstrumentDataService::Instance().remove(instrumentName);
-  }
-
-
-  // Same as testAgainstHRPD_DatasetWithConstraints but
-  // also test <formula> from HRPD_for_UNIT_TESTING2.xml
-  void testAgainstHRPD_DatasetWithConstraintsTestAlsoFormula()
-  {
-    // load dataset to test against
-    std::string inputFile = "HRP38692.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "HRP38692_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
-
-    // reload instrument to test constraint defined in IDF is working
-    LoadInstrument reLoadInstrument;
-    reLoadInstrument.initialize();
-    std::string instrumentName = "HRPD_for_UNIT_TESTING2.xml";
-    reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
-    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
-    reLoadInstrument.setProperty("RewriteSpectraMap", false);
-    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
-    TS_ASSERT( reLoadInstrument.isExecuted() );
-
-    Fit alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT( alg.isInitialized() );
-
-    // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","2");
-    alg.setPropertyValue("StartX","79300");
-    alg.setPropertyValue("EndX","79600");
-
-    // create function you want to fit against
-    CompositeFunction *fnWithBk = new CompositeFunctionMW();
-
-    LinearBackground *bk = new LinearBackground();
-    bk->initialize();
-
-    bk->setParameter("A0",0.0);
-    bk->setParameter("A1",0.0);
-    bk->tie("A1","0");
-
-    //BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
-    //bk->addConstraint(bc_b);
-
-    // set up Gaussian fitting function
-    Gaussian* fn = new Gaussian();
-    fn->initialize();
-
-
-    // set the workspace explicitely just to make sure that Sigma has been
-    // set as expected from the look up table
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
-    fn->setParameter("PeakCentre",80000.0, false);  // set here for the purpose of the test below only.
-    fn->setMatrixWorkspace(wsToPass,2);
-    TS_ASSERT_DELTA( fn->getParameter("Height"), 201.44 ,0.1);
-
-    // add constraint to function
-    // BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);  
-    // fn->addConstraint(bc3);   // this is set in HRPD_for_UNIT_TESTING.xml
+    fn->setParameter("PeakCentre",79450.0);
+    fn->setParameter("Height",200.0);
+    fn->setParameter("Sigma",300.0);
+	BoundaryConstraint* bc = new BoundaryConstraint(fn,"Sigma",20.0,100.0);
+	//bc->setLower(20.0);
+	//bc->setUpper(100.0);
+	bc->setPenaltyFactor(1000.001);
+	fn->addConstraint(bc);
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
@@ -441,7 +221,7 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 5.16,0.1);
+    TS_ASSERT_DELTA( dummy, 5.04, 0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
@@ -451,30 +231,33 @@ public:
     TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.06 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
-    AnalysisDataService::Instance().remove(outputSpace);
-    InstrumentDataService::Instance().remove(instrumentName);
+	 AnalysisDataService::Instance().remove(wsName);
+
   }
 
-
-  void t11estAgainstHRPD_FallbackToSimplex()
+    void t11estAgainstPeak2FallbackToSimplex()
   {
-    // load dataset to test against
-    std::string inputFile = "HRP38692.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "HRPD_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
+	// create peak2 mock data to test against
+    std::string wsName = "GaussHRP38692MockData";
+    int histogramNumber = 1;
+    int timechannels = 41;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+	Mantid::MantidVec& x = ws2D->dataX(0); // x-values (time-of-flight)
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getHRP38692Peak2Data(x, y, e);
 
+	//put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
+	// Initialise algorithm
     Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
 
     // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("InputWorkspace", wsName);
     alg.setPropertyValue("StartX","79300");
     alg.setPropertyValue("EndX","79600");
 
@@ -500,18 +283,13 @@ public:
     fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    //BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
-    //BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
     BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
-    //fn->addConstraint(bc1);
-    //fn->addConstraint(bc2);
     fn->addConstraint(bc3);
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
 
     alg.setPropertyValue("Function",*fnWithBk);
-    std::cerr<<"\n"<<*fnWithBk<<'\n';
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
@@ -531,7 +309,7 @@ public:
     TS_ASSERT_DELTA( out->getParameter("f0.A0"), 7.8643 ,0.001);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
-    AnalysisDataService::Instance().remove(outputSpace);
+	AnalysisDataService::Instance().remove(wsName);
   }
 
 
@@ -887,14 +665,16 @@ public:
   // the correct minimum but not as badly as levenberg-marquardt
   void t11estAgainstHRPD_DatasetWithConstraintsSimplex()
   {
-    // load dataset to test against
-    std::string inputFile = "HRP38692.raw";
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "MAR_Dataset";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
+	// create peak2 mock data to test against
+    std::string wsName = "GaussHRP38692MockData";
+    int histogramNumber = 1;
+    int timechannels = 41;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+	Mantid::MantidVec& x = ws2D->dataX(0); // x-values (time-of-flight)
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getHRP38692Peak2Data(x, y, e);
 
     //This test will not make sense if the configuration peakRadius is not set correctly.
     const std::string priorRadius = ConfigService::Instance().getString("curvefitting.peakRadius");
@@ -905,8 +685,7 @@ public:
     TS_ASSERT( alg.isInitialized() );
 
     // Set which spectrum to fit against and initial starting values
-    alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("InputWorkspace",wsName);
     alg.setPropertyValue("StartX","79300");
     alg.setPropertyValue("EndX","79600");
 
@@ -972,13 +751,7 @@ public:
     TS_ASSERT_DELTA( out->getParameter("f0.A0"), 2.18 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
-    //TS_ASSERT_DELTA( fn->height(), 232.1146 ,1);
-    //TS_ASSERT_DELTA( fn->centre(), 79430.1 ,1);
-    //TS_ASSERT_DELTA( fn->getParameter("Sigma"), 26.14 ,0.1);
-    //TS_ASSERT_DELTA( bk->getParameter("A0"), 8.0575 ,0.1);
-    //TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
-
-    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove(wsName);
     // Be nice and set back to what it was before
     ConfigService::Instance().setString("curvefitting.peakRadius",priorRadius);
   }

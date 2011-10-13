@@ -325,7 +325,6 @@ void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
 }
 
 
-
 //------------------------------------------------------------------------------------------------
 /** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer.
  *
