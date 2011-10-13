@@ -1608,6 +1608,13 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
+
+    // Change the plot style of the graph so that it matches what is selected on 
+    // the plot options tab. Default is set to line (0).
+    QString plotType("");
+    plotType.setNum(m_uiForm.connectPlotType->currentIndex());
+
+    changePlotType(plotType + ".1." + titleLabel);
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
@@ -1725,8 +1732,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     }
 
     // run python script
-    std::string bsdfasdf = pyString.toStdString();
-    
     QString pyOutput = runPythonCode( pyString ).trimmed();
 
     // Change the plot style of the graph so that it matches what is selected on 
