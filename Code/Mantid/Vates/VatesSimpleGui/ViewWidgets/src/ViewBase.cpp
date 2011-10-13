@@ -2,12 +2,14 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
+#include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineSource.h>
 #include <pqPipelineRepresentation.h>
 #include <pqRenderView.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
+#include <vtkSMPropertyHelper.h>
 
 #include <QHBoxLayout>
 #include <QPointer>
@@ -85,6 +87,19 @@ void ViewBase::onLogScale(int state)
 void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
 {
   UNUSED_ARG(pbw);
+}
+
+bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
+{
+  QString wsType(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceTypeName").GetAsString());
+  return wsType == QString("");
+}
+
+pqPipelineRepresentation *ViewBase::getPvActiveRep()
+{
+  pqDataRepresentation *drep = pqActiveObjects::instance().activeRepresentation();
+  return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
 }

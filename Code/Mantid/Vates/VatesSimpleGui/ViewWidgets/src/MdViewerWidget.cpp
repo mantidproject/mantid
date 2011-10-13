@@ -296,12 +296,11 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  UNUSED_ARG(source);
   if (this->currentView->origSource)
   {
     pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSource);
   }
-  if (QString("PeaksReader") == source->getProxy()->GetXMLName())
+  if (this->currentView->isPeaksWorkspace(source))
   {
     this->wsType = VatesViewerInterface::PEAKS;
   }

@@ -87,6 +87,7 @@ public:
    * @return the main view
    */
   virtual pqRenderView *getView() = 0;
+  virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /**
    * This function makes the view render itself.
    */
@@ -138,6 +139,9 @@ signals:
 
 private:
   Q_DISABLE_COPY(ViewBase)
+
+  /// Return the active representation determined by ParaView.
+  pqPipelineRepresentation *getPvActiveRep();
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };
