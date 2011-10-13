@@ -131,7 +131,8 @@ namespace MantidQt
       int count = m_logValueStart;
       while(it != vecLogData.end())
       {
-        m_memento->getItem(count)->setValue((*it)->value());
+        std::string value = (*it)->value();
+        m_memento->getItem(count)->setValue(value);
         it++;
         count++;
       }
