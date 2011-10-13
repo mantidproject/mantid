@@ -188,20 +188,17 @@ class DirectEnergyConversion(object):
         """
 
         # Special load monitor stuff.    
-        if (self.instr_name == "CNCS"):
+        if (self.instr_name == "CNCS" or self.instr_name == "HYSPEC"):
             self.fix_ei = True
             ei_value = ei_guess
+            if (self.instr_name == "HYSPEC"):
+              Tzero=0.0
             if (Tzero is None):
                 tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
             else:
                 tzero = Tzero
             # apply T0 shift
             ChangeBinOffset(data_ws, result_name, -tzero)
-            mon1_peak = 0.0
-	elif (self.instr_name == "HYSPEC"):
-	    self.fix_ei = True
-            ei_value = ei_guess
-            tzero = 0.0
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename']
