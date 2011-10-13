@@ -100,26 +100,20 @@
     </spacer>
    </item>
    <item>
-    <widget class="QSlider" name="horizontalSlider">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="invertedAppearance">
-      <bool>false</bool>
-     </property>
-     <property name="invertedControls">
-      <bool>false</bool>
-     </property>
-     <property name="tickPosition">
-      <enum>QSlider::TicksBelow</enum>
-     </property>
-     <property name="tickInterval">
-      <number>10</number>
-     </property>
-    </widget>
+    <widget class="QwtSlider" name="horizontalSlider" native="true"/>
    </item>
    <item>
-    <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+    <widget class="QDoubleSpinBox" name="doubleSpinBox">
+     <property name="prefix">
+      <string/>
+     </property>
+     <property name="suffix">
+      <string/>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="lblUnits">
@@ -131,6 +125,13 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QwtSlider</class>
+   <extends>QWidget</extends>
+   <header>qwt_slider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

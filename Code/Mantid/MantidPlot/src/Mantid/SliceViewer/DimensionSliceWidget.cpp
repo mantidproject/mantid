@@ -12,7 +12,7 @@ DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
   m_insideSetShownDim = false;
   m_insideSpinBoxChanged = false;
 
-  QObject::connect(ui.horizontalSlider, SIGNAL( valueChanged(int)),
+  QObject::connect(ui.horizontalSlider, SIGNAL( valueChanged(double)),
                    this, SLOT(sliderMoved()));
   QObject::connect(ui.doubleSpinBox, SIGNAL( valueChanged(double)),
                    this, SLOT(spinBoxChanged()));
@@ -35,8 +35,7 @@ void DimensionSliceWidget::sliderMoved()
   if (m_insideSpinBoxChanged) return;
 
   // Find the slice point
-  size_t index = size_t(ui.horizontalSlider->value());
-  m_slicePoint =  m_dim->getX(index);
+  m_slicePoint =  ui.horizontalSlider->value();
 
   // This will, in turn, emit the changedSlicePoint() signal
   ui.doubleSpinBox->setValue(m_slicePoint);
@@ -51,8 +50,7 @@ void DimensionSliceWidget::spinBoxChanged()
   m_slicePoint = ui.doubleSpinBox->value();
 
   // Set the slider to the matching point
-  int index = int((m_slicePoint - m_dim->getMinimum()) / m_dim->getBinWidth());
-  ui.horizontalSlider->setValue(index);
+  ui.horizontalSlider->setValue(m_slicePoint);
 
   // Emit that the user changed the slicing point
   emit changedSlicePoint(m_dimIndex, m_slicePoint);
@@ -129,8 +127,9 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
   double max = m_dim->getMaximum(); //- m_dim->getBinWidth()/2.0;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()) );
   ui.lblUnits->setText(QString::fromStdString(m_dim->getUnits()) );
-  ui.horizontalSlider->setMinimum(0);
-  ui.horizontalSlider->setMaximum( int(m_dim->getNBins()) );
+
+  ui.horizontalSlider->setRange(min, max, m_dim->getBinWidth());
+
   ui.doubleSpinBox->setMinimum(min);
   ui.doubleSpinBox->setMaximum(max);
   ui.doubleSpinBox->setSingleStep(m_dim->getBinWidth());

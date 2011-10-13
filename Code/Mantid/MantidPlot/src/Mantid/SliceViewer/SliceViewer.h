@@ -77,6 +77,12 @@ private:
   /// The range of values to fit in the color map.
   QwtDoubleInterval m_colorRange;
 
+  /// The calculated range of values in the FULL data set
+  QwtDoubleInterval m_colorRangeFull;
+
+  /// The calculated range of values ONLY in the currently viewed part of the slice
+  QwtDoubleInterval m_colorRangeSlice;
+
 };
 
 #endif // SLICEVIEWER_H

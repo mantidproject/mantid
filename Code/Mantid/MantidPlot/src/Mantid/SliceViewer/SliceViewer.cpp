@@ -144,12 +144,10 @@ void SliceViewer::resetZoom()
 }
 
 //------------------------------------------------------------------------------------
-/// Find the full range of values in the displayed area
+/// Find the full range of values in the workspace
 void SliceViewer::findRangeFull()
 {
-  QwtDoubleInterval xint = m_plot->axisScaleDiv( Qt::XAxis )->interval();
-//  std::cout << xint.minValue() << " to " << xint.maxValue() << std::endl;
-
+  // Iterate through the entire workspace
   IMDIterator * it = m_ws->createIterator();
   double minSignal = DBL_MAX;
   double maxSignal = -DBL_MAX;
@@ -160,19 +158,24 @@ void SliceViewer::findRangeFull()
     if (signal > maxSignal) maxSignal = signal;
   } while (it->next());
   if (minSignal < maxSignal)
-    m_colorRange = QwtDoubleInterval(minSignal, maxSignal);
+    m_colorRangeFull = QwtDoubleInterval(minSignal, maxSignal);
   else
-    m_colorRange = QwtDoubleInterval(0., 1.0);
-  std::cout << "Found color rnage: " << m_colorRange.minValue() << " to " << m_colorRange.maxValue() << std::endl;
+    m_colorRangeFull = QwtDoubleInterval(0., 1.0);
+  std::cout << "Found color range: " << m_colorRangeFull.minValue() << " to " << m_colorRangeFull.maxValue() << std::endl;
   delete it;
-  // This redoes the display to show the new range
-  this->updateDisplay();
 }
 
+//------------------------------------------------------------------------------------
+/** Find the full range of values ONLY in the currently visible
+part of the workspace */
 void SliceViewer::findRangeSlice()
 {
-  m_colorRange = QwtDoubleInterval(0., 1.0);
-  this->updateDisplay();
+  m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
+  //TODO!
+  QwtDoubleInterval xint = m_plot->axisScaleDiv( Qt::XAxis )->interval();
+//  std::cout << xint.minValue() << " to " << xint.maxValue() << std::endl;
+
+
 }
 
 
@@ -344,8 +347,10 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_ws = ws;
   this->updateDimensionSliceWidgets();
   m_data->setWorkspace(ws);
-  // Find the full range. This will also do the initial display
+  // Find the full range. And use it
   findRangeFull();
+  m_colorRange = m_colorRangeFull;
+  // Initial display update
   this->updateDisplay();
 }
 
