@@ -48,8 +48,6 @@ public:
    */
   void testExecWorkspace2D()
   {
-	  	  int i;
-	  std::cin >> i;
     setUp_HRP38692();
     if ( !align.isInitialized() ) align.initialize();
 
