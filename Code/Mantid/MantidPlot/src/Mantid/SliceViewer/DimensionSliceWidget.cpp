@@ -5,7 +5,9 @@
 #include <qlayout.h>
 
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+     m_dimIndex(0), m_shownDim(0),
+     m_slicePoint(0.0)
 {
   ui.setupUi(this);
 
@@ -103,18 +105,24 @@ void DimensionSliceWidget::setShownDim(int dim)
   // Make the spacer expand to keep the buttons in the same spot
   if (slicing)
   {
-    // Remove the 3rd item = the spacer
-    QLayoutIterator it = ui.horizontalLayout->iterator();
-    ++it; ++it; ++it;
-    ui.horizontalLayout->removeItem(it.current());
-    delete ui.horizontalSpacer;
-    ui.horizontalSpacer = NULL;
+    if (ui.horizontalSpacer != NULL)
+    {
+      // Remove the 3rd item (if it's not gone already) = the spacer
+      QLayoutIterator it = ui.horizontalLayout->iterator();
+      ++it; ++it; ++it;
+      ui.horizontalLayout->removeItem(it.current());
+      delete ui.horizontalSpacer;
+      ui.horizontalSpacer = NULL;
+    }
   }
   else
   {
-    // Put the spacer back
-    ui.horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer );
+    // Put the spacer back, if needed
+    if (ui.horizontalSpacer == NULL)
+    {
+      ui.horizontalSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+      ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer );
+    }
   }
 
   this->update();
@@ -137,6 +145,11 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
   ui.doubleSpinBox->setMinimum(min);
   ui.doubleSpinBox->setMaximum(max);
   ui.doubleSpinBox->setSingleStep(m_dim->getBinWidth());
-  m_slicePoint = m_dim->getMinimum();
+
+  // Make sure the slice point is in range
+  if (m_slicePoint < m_dim->getMinimum()) m_slicePoint = m_dim->getMinimum();
+  if (m_slicePoint > m_dim->getMaximum()) m_slicePoint = m_dim->getMaximum();
+  ui.doubleSpinBox->setValue(m_slicePoint);
+
 }
 

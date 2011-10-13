@@ -390,6 +390,12 @@ void SliceViewer::updateDimensionSliceWidgets()
                        this, SLOT(updateDisplaySlot(int,double)));
     }
   }
+  // Hide unnecessary ones
+  for (size_t d=m_ws->getNumDims(); int(d)<m_dimWidgets.size(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    widget->hide();
+  }
 
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
@@ -415,6 +421,8 @@ void SliceViewer::updateDimensionSliceWidgets()
     widget->ui.lblName->setMinimumSize(QSize(maxLabelWidth, 0) );
     widget->ui.lblUnits->setMinimumSize(QSize(maxUnitsWidth, 0) );
   }
+
+  // Make the controls as short as possible: TODO: How?
 }
 
 

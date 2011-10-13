@@ -61,9 +61,11 @@ private:
   /// Color bar indicating the color scale
   QwtScaleWidget * m_colorBar;
 
+public:
   /// Vector of the widgets for slicing dimensions
   QVector<DimensionSliceWidget *> m_dimWidgets;
 
+protected:
 
   /// Data presenter
   QwtRasterDataMD * m_data;

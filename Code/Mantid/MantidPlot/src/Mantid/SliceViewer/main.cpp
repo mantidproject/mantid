@@ -105,7 +105,10 @@ int main( int argc, char ** argv )
         ws->setSignalAt(x+y*numBins+z*numBins*numBins, signal);
       }
 
-//  ws = makeFakeMDHistoWorkspace(1.0, 2, numBins, double(numBins)/2.0);
+  MDHistoWorkspace_sptr ws4 = makeFakeMDHistoWorkspace(1.0, 4, 20, 20.0);
+  MDHistoWorkspace_sptr ws2 = makeFakeMDHistoWorkspace(1.0, 2, numBins*3, 10.0);
+  MDHistoWorkspace_sptr ws3 = makeFakeMDHistoWorkspace(1.0, 3, numBins*2, 10.0);
+
 //  numBins=50;
 //  double mid = 25;
 //  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 4, numBins, double(numBins)/10.0);
@@ -134,13 +137,20 @@ int main( int argc, char ** argv )
 //  widget->setDimension(1, ws->getDimension(1));
 
   SliceViewer * slicer = new SliceViewer(frame);
-  slicer->setWorkspace(ws);
   slicer->resize(600,600);
   layout->addWidget(slicer);
+
+  slicer->setWorkspace(ws3);
+//  slicer->m_dimWidgets[0]->setShownDim(-1);
 
   mainWin->move(100,100);
   mainWin->resize(700, 700);
   mainWin->show();
+
+  slicer->setWorkspace(ws);
+  mainWin->move(200,200);
+  mainWin->resize(700, 700);
+
   app.exec();
 
   mainWin->close();
