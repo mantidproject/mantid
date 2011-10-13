@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
-#include "MantidDataHandling/LoadInstrumentFromRaw.h"
+#include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -62,24 +62,24 @@ private:
     TS_ASSERT( loaderHRP.isExecuted() );
 
     // now try to reload in detector positions from Nexus file
-    // UpdateInstrumentFromFile loadRawPos;
-    // loadRawPos.initialize();
-    // loadRawPos.setPropertyValue("Filename", "HRP38692a.nxs");
-    // loadRawPos.setPropertyValue("Workspace", wsName);
-    // loadRawPos.setProperty("MoveMonitors", moveMonitors);
-    // TS_ASSERT_THROWS_NOTHING(loadRawPos.execute());
-    // TS_ASSERT( loadRawPos.isExecuted() );
+   // UpdateInstrumentFromFile loadPos;
+   // loadPos.initialize();
+   // loadPos.setPropertyValue("Filename", "HRP38692a.nxs");
+  //  loadPos.setPropertyValue("Workspace", wsName);
+   // loadPos.setProperty("MoveMonitors", moveMonitors);
+   // TS_ASSERT_THROWS_NOTHING(loadPos.execute());
+  //  TS_ASSERT( loadPos.isExecuted() );
 
     // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+     MatrixWorkspace_sptr output;
+     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     Instrument_const_sptr i = output->getInstrument();
 
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(3100);
     TS_ASSERT_EQUALS( ptrDet->getName(), "Det0");
-    TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0866,0.01);
-    TS_ASSERT_DELTA( ptrDet->getPos().Z(), -0.9962,0.01);
+    TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.1318,0.01);
+    TS_ASSERT_DELTA( ptrDet->getPos().Z(), -1.8853,0.01);
 
     boost::shared_ptr<const IDetector> mon1 = i->getDetector(1001);
     TS_ASSERT(mon1->isMonitor());
@@ -87,8 +87,8 @@ private:
     mon1->getPos().getSpherical(r, theta, phi);
     if( moveMonitors )
     {
-      TS_ASSERT_DELTA(r, 2.5, 1e-08);
-      TS_ASSERT_DELTA(theta, 0.0, 1e-08);
+      TS_ASSERT_DELTA(r, 0.6, 1e-08);
+      TS_ASSERT_DELTA(theta, 180.0, 1e-08);
       TS_ASSERT_DELTA(phi, 0.0, 1e-08);
     }
     else
