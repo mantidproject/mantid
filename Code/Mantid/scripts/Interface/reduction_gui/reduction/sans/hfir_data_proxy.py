@@ -5,7 +5,7 @@ try:
     from MantidFramework import *
     mtd.initialise(False)
     import mantidsimple
-    from  reduction.instruments.sans.sans_reduction_steps import LoadRun
+    from  reduction.instruments.sans.hfir_load import LoadRun
     from reduction.instruments.sans.sans_reducer import SANSReducer
     import reduction.instruments.sans.hfir_instrument as hfir_instrument
 
@@ -63,6 +63,8 @@ class DataProxy(object):
                         raw_data[i-nMonitors] = mtd[self.data_ws].readY(i)[0]
                         
                     self.data = numpy.reshape(raw_data, (nx_pixels, ny_pixels), order='F')
+                mtd.sendLogMessage("Loaded data file: %s" % data_file)
             except:
+                mtd.sendLogMessage("DataProxy: Error loading data file:\n%s" % sys.exc_value)
                 self.errors.append("Error loading data file:\n%s" % sys.exc_value)
             
