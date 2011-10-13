@@ -6,9 +6,6 @@
 */
 
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-
 
 ICATPortBindingProxy::ICATPortBindingProxy()
 {	ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
@@ -28,8 +25,7 @@ ICATPortBindingProxy::ICATPortBindingProxy(soap_mode imode, soap_mode omode)
 void ICATPortBindingProxy::ICATPortBindingProxy_init(soap_mode imode, soap_mode omode)
 {	soap_imode(this, imode);
 	soap_omode(this, omode);
-    Mantid::Kernel::FacilityInfo facilityInfo = Mantid::Kernel::ConfigService::Instance().getFacility();
-    soap_endpoint = facilityInfo.getSoapEndPoint().c_str();
+	soap_endpoint = NULL;
 	static const struct Namespace namespaces[] =
 {
 	{"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", "http://www.w3.org/*/soap-envelope", NULL},
@@ -88,6 +84,8 @@ int ICATPortBindingProxy::login(ns1__login *ns1__login_, ns1__loginResponse *ns1
 {	struct soap *soap = this;
 	struct __ns1__login soap_tmp___ns1__login;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__login.ns1__login_ = ns1__login_;
@@ -138,6 +136,8 @@ int ICATPortBindingProxy::loginLifetime(ns1__loginLifetime *ns1__loginLifetime_,
 {	struct soap *soap = this;
 	struct __ns1__loginLifetime soap_tmp___ns1__loginLifetime;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__loginLifetime.ns1__loginLifetime_ = ns1__loginLifetime_;
@@ -188,6 +188,8 @@ int ICATPortBindingProxy::addSample(ns1__addSample *ns1__addSample_, ns1__addSam
 {	struct soap *soap = this;
 	struct __ns1__addSample soap_tmp___ns1__addSample;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addSample.ns1__addSample_ = ns1__addSample_;
@@ -238,6 +240,8 @@ int ICATPortBindingProxy::logout(ns1__logout *ns1__logout_, ns1__logoutResponse 
 {	struct soap *soap = this;
 	struct __ns1__logout soap_tmp___ns1__logout;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__logout.ns1__logout_ = ns1__logout_;
@@ -288,6 +292,8 @@ int ICATPortBindingProxy::addSampleParameter(ns1__addSampleParameter *ns1__addSa
 {	struct soap *soap = this;
 	struct __ns1__addSampleParameter soap_tmp___ns1__addSampleParameter;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addSampleParameter.ns1__addSampleParameter_ = ns1__addSampleParameter_;
@@ -338,6 +344,8 @@ int ICATPortBindingProxy::addPublication(ns1__addPublication *ns1__addPublicatio
 {	struct soap *soap = this;
 	struct __ns1__addPublication soap_tmp___ns1__addPublication;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addPublication.ns1__addPublication_ = ns1__addPublication_;
@@ -388,6 +396,8 @@ int ICATPortBindingProxy::addKeyword(ns1__addKeyword *ns1__addKeyword_, ns1__add
 {	struct soap *soap = this;
 	struct __ns1__addKeyword soap_tmp___ns1__addKeyword;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addKeyword.ns1__addKeyword_ = ns1__addKeyword_;
@@ -438,6 +448,8 @@ int ICATPortBindingProxy::addInvestigator(ns1__addInvestigator *ns1__addInvestig
 {	struct soap *soap = this;
 	struct __ns1__addInvestigator soap_tmp___ns1__addInvestigator;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addInvestigator.ns1__addInvestigator_ = ns1__addInvestigator_;
@@ -488,6 +500,8 @@ int ICATPortBindingProxy::getInvestigation(ns1__getInvestigation *ns1__getInvest
 {	struct soap *soap = this;
 	struct __ns1__getInvestigation soap_tmp___ns1__getInvestigation;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getInvestigation.ns1__getInvestigation_ = ns1__getInvestigation_;
@@ -538,6 +552,8 @@ int ICATPortBindingProxy::getInvestigationIncludes(ns1__getInvestigationIncludes
 {	struct soap *soap = this;
 	struct __ns1__getInvestigationIncludes soap_tmp___ns1__getInvestigationIncludes;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getInvestigationIncludes.ns1__getInvestigationIncludes_ = ns1__getInvestigationIncludes_;
@@ -588,6 +604,8 @@ int ICATPortBindingProxy::getDataset(ns1__getDataset *ns1__getDataset_, ns1__get
 {	struct soap *soap = this;
 	struct __ns1__getDataset soap_tmp___ns1__getDataset;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getDataset.ns1__getDataset_ = ns1__getDataset_;
@@ -638,6 +656,8 @@ int ICATPortBindingProxy::getDatasetIncludes(ns1__getDatasetIncludes *ns1__getDa
 {	struct soap *soap = this;
 	struct __ns1__getDatasetIncludes soap_tmp___ns1__getDatasetIncludes;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getDatasetIncludes.ns1__getDatasetIncludes_ = ns1__getDatasetIncludes_;
@@ -688,6 +708,8 @@ int ICATPortBindingProxy::getDatafile(ns1__getDatafile *ns1__getDatafile_, ns1__
 {	struct soap *soap = this;
 	struct __ns1__getDatafile soap_tmp___ns1__getDatafile;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getDatafile.ns1__getDatafile_ = ns1__getDatafile_;
@@ -738,6 +760,8 @@ int ICATPortBindingProxy::addDataFileParameter(ns1__addDataFileParameter *ns1__a
 {	struct soap *soap = this;
 	struct __ns1__addDataFileParameter soap_tmp___ns1__addDataFileParameter;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addDataFileParameter.ns1__addDataFileParameter_ = ns1__addDataFileParameter_;
@@ -788,6 +812,8 @@ int ICATPortBindingProxy::getInvestigationsIncludes(ns1__getInvestigationsInclud
 {	struct soap *soap = this;
 	struct __ns1__getInvestigationsIncludes soap_tmp___ns1__getInvestigationsIncludes;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getInvestigationsIncludes.ns1__getInvestigationsIncludes_ = ns1__getInvestigationsIncludes_;
@@ -838,6 +864,8 @@ int ICATPortBindingProxy::createInvestigation(ns1__createInvestigation *ns1__cre
 {	struct soap *soap = this;
 	struct __ns1__createInvestigation soap_tmp___ns1__createInvestigation;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__createInvestigation.ns1__createInvestigation_ = ns1__createInvestigation_;
@@ -889,6 +917,8 @@ int ICATPortBindingProxy::removeInvestigation(ns1__removeInvestigation *ns1__rem
 	struct __ns1__removeInvestigation soap_tmp___ns1__removeInvestigation;
 	struct __ns1__removeInvestigationResponse *soap_tmp___ns1__removeInvestigationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeInvestigation.ns1__removeInvestigation_ = ns1__removeInvestigation_;
@@ -942,6 +972,8 @@ int ICATPortBindingProxy::deleteInvestigation(ns1__deleteInvestigation *ns1__del
 	struct __ns1__deleteInvestigation soap_tmp___ns1__deleteInvestigation;
 	struct __ns1__deleteInvestigationResponse *soap_tmp___ns1__deleteInvestigationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteInvestigation.ns1__deleteInvestigation_ = ns1__deleteInvestigation_;
@@ -995,6 +1027,8 @@ int ICATPortBindingProxy::modifyInvestigation(ns1__modifyInvestigation *ns1__mod
 	struct __ns1__modifyInvestigation soap_tmp___ns1__modifyInvestigation;
 	struct __ns1__modifyInvestigationResponse *soap_tmp___ns1__modifyInvestigationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyInvestigation.ns1__modifyInvestigation_ = ns1__modifyInvestigation_;
@@ -1048,6 +1082,8 @@ int ICATPortBindingProxy::removeKeyword(ns1__removeKeyword *ns1__removeKeyword_,
 	struct __ns1__removeKeyword soap_tmp___ns1__removeKeyword;
 	struct __ns1__removeKeywordResponse *soap_tmp___ns1__removeKeywordResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeKeyword.ns1__removeKeyword_ = ns1__removeKeyword_;
@@ -1101,6 +1137,8 @@ int ICATPortBindingProxy::deleteKeyword(ns1__deleteKeyword *ns1__deleteKeyword_,
 	struct __ns1__deleteKeyword soap_tmp___ns1__deleteKeyword;
 	struct __ns1__deleteKeywordResponse *soap_tmp___ns1__deleteKeywordResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteKeyword.ns1__deleteKeyword_ = ns1__deleteKeyword_;
@@ -1154,6 +1192,8 @@ int ICATPortBindingProxy::removePublication(ns1__removePublication *ns1__removeP
 	struct __ns1__removePublication soap_tmp___ns1__removePublication;
 	struct __ns1__removePublicationResponse *soap_tmp___ns1__removePublicationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removePublication.ns1__removePublication_ = ns1__removePublication_;
@@ -1207,6 +1247,8 @@ int ICATPortBindingProxy::deletePublication(ns1__deletePublication *ns1__deleteP
 	struct __ns1__deletePublication soap_tmp___ns1__deletePublication;
 	struct __ns1__deletePublicationResponse *soap_tmp___ns1__deletePublicationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deletePublication.ns1__deletePublication_ = ns1__deletePublication_;
@@ -1260,6 +1302,8 @@ int ICATPortBindingProxy::modifyPublication(ns1__modifyPublication *ns1__modifyP
 	struct __ns1__modifyPublication soap_tmp___ns1__modifyPublication;
 	struct __ns1__modifyPublicationResponse *soap_tmp___ns1__modifyPublicationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyPublication.ns1__modifyPublication_ = ns1__modifyPublication_;
@@ -1313,6 +1357,8 @@ int ICATPortBindingProxy::removeInvestigator(ns1__removeInvestigator *ns1__remov
 	struct __ns1__removeInvestigator soap_tmp___ns1__removeInvestigator;
 	struct __ns1__removeInvestigatorResponse *soap_tmp___ns1__removeInvestigatorResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeInvestigator.ns1__removeInvestigator_ = ns1__removeInvestigator_;
@@ -1366,6 +1412,8 @@ int ICATPortBindingProxy::modifyInvestigator(ns1__modifyInvestigator *ns1__modif
 	struct __ns1__modifyInvestigator soap_tmp___ns1__modifyInvestigator;
 	struct __ns1__modifyInvestigatorResponse *soap_tmp___ns1__modifyInvestigatorResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyInvestigator.ns1__modifyInvestigator_ = ns1__modifyInvestigator_;
@@ -1419,6 +1467,8 @@ int ICATPortBindingProxy::deleteInvestigator(ns1__deleteInvestigator *ns1__delet
 	struct __ns1__deleteInvestigator soap_tmp___ns1__deleteInvestigator;
 	struct __ns1__deleteInvestigatorResponse *soap_tmp___ns1__deleteInvestigatorResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteInvestigator.ns1__deleteInvestigator_ = ns1__deleteInvestigator_;
@@ -1472,6 +1522,8 @@ int ICATPortBindingProxy::removeSample(ns1__removeSample *ns1__removeSample_, ns
 	struct __ns1__removeSample soap_tmp___ns1__removeSample;
 	struct __ns1__removeSampleResponse *soap_tmp___ns1__removeSampleResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeSample.ns1__removeSample_ = ns1__removeSample_;
@@ -1525,6 +1577,8 @@ int ICATPortBindingProxy::deleteSample(ns1__deleteSample *ns1__deleteSample_, ns
 	struct __ns1__deleteSample soap_tmp___ns1__deleteSample;
 	struct __ns1__deleteSampleResponse *soap_tmp___ns1__deleteSampleResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteSample.ns1__deleteSample_ = ns1__deleteSample_;
@@ -1578,6 +1632,8 @@ int ICATPortBindingProxy::modifySample(ns1__modifySample *ns1__modifySample_, ns
 	struct __ns1__modifySample soap_tmp___ns1__modifySample;
 	struct __ns1__modifySampleResponse *soap_tmp___ns1__modifySampleResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifySample.ns1__modifySample_ = ns1__modifySample_;
@@ -1631,6 +1687,8 @@ int ICATPortBindingProxy::removeSampleParameter(ns1__removeSampleParameter *ns1_
 	struct __ns1__removeSampleParameter soap_tmp___ns1__removeSampleParameter;
 	struct __ns1__removeSampleParameterResponse *soap_tmp___ns1__removeSampleParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeSampleParameter.ns1__removeSampleParameter_ = ns1__removeSampleParameter_;
@@ -1684,6 +1742,8 @@ int ICATPortBindingProxy::deleteSampleParameter(ns1__deleteSampleParameter *ns1_
 	struct __ns1__deleteSampleParameter soap_tmp___ns1__deleteSampleParameter;
 	struct __ns1__deleteSampleParameterResponse *soap_tmp___ns1__deleteSampleParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteSampleParameter.ns1__deleteSampleParameter_ = ns1__deleteSampleParameter_;
@@ -1737,6 +1797,8 @@ int ICATPortBindingProxy::modifySampleParameter(ns1__modifySampleParameter *ns1_
 	struct __ns1__modifySampleParameter soap_tmp___ns1__modifySampleParameter;
 	struct __ns1__modifySampleParameterResponse *soap_tmp___ns1__modifySampleParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifySampleParameter.ns1__modifySampleParameter_ = ns1__modifySampleParameter_;
@@ -1789,6 +1851,8 @@ int ICATPortBindingProxy::getAuthorisations(ns1__getAuthorisations *ns1__getAuth
 {	struct soap *soap = this;
 	struct __ns1__getAuthorisations soap_tmp___ns1__getAuthorisations;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getAuthorisations.ns1__getAuthorisations_ = ns1__getAuthorisations_;
@@ -1839,6 +1903,8 @@ int ICATPortBindingProxy::addAuthorisation(ns1__addAuthorisation *ns1__addAuthor
 {	struct soap *soap = this;
 	struct __ns1__addAuthorisation soap_tmp___ns1__addAuthorisation;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addAuthorisation.ns1__addAuthorisation_ = ns1__addAuthorisation_;
@@ -1890,6 +1956,8 @@ int ICATPortBindingProxy::deleteAuthorisation(ns1__deleteAuthorisation *ns1__del
 	struct __ns1__deleteAuthorisation soap_tmp___ns1__deleteAuthorisation;
 	struct __ns1__deleteAuthorisationResponse *soap_tmp___ns1__deleteAuthorisationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteAuthorisation.ns1__deleteAuthorisation_ = ns1__deleteAuthorisation_;
@@ -1943,6 +2011,8 @@ int ICATPortBindingProxy::removeAuthorisation(ns1__removeAuthorisation *ns1__rem
 	struct __ns1__removeAuthorisation soap_tmp___ns1__removeAuthorisation;
 	struct __ns1__removeAuthorisationResponse *soap_tmp___ns1__removeAuthorisationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeAuthorisation.ns1__removeAuthorisation_ = ns1__removeAuthorisation_;
@@ -1996,6 +2066,8 @@ int ICATPortBindingProxy::updateAuthorisation(ns1__updateAuthorisation *ns1__upd
 	struct __ns1__updateAuthorisation soap_tmp___ns1__updateAuthorisation;
 	struct __ns1__updateAuthorisationResponse *soap_tmp___ns1__updateAuthorisationResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__updateAuthorisation.ns1__updateAuthorisation_ = ns1__updateAuthorisation_;
@@ -2048,6 +2120,8 @@ int ICATPortBindingProxy::getUserDetails(ns1__getUserDetails *ns1__getUserDetail
 {	struct soap *soap = this;
 	struct __ns1__getUserDetails soap_tmp___ns1__getUserDetails;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getUserDetails.ns1__getUserDetails_ = ns1__getUserDetails_;
@@ -2098,6 +2172,8 @@ int ICATPortBindingProxy::getDatafiles(ns1__getDatafiles *ns1__getDatafiles_, ns
 {	struct soap *soap = this;
 	struct __ns1__getDatafiles soap_tmp___ns1__getDatafiles;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getDatafiles.ns1__getDatafiles_ = ns1__getDatafiles_;
@@ -2148,6 +2224,8 @@ int ICATPortBindingProxy::createDataFile(ns1__createDataFile *ns1__createDataFil
 {	struct soap *soap = this;
 	struct __ns1__createDataFile soap_tmp___ns1__createDataFile;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__createDataFile.ns1__createDataFile_ = ns1__createDataFile_;
@@ -2198,6 +2276,8 @@ int ICATPortBindingProxy::createDataFiles(ns1__createDataFiles *ns1__createDataF
 {	struct soap *soap = this;
 	struct __ns1__createDataFiles soap_tmp___ns1__createDataFiles;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__createDataFiles.ns1__createDataFiles_ = ns1__createDataFiles_;
@@ -2249,6 +2329,8 @@ int ICATPortBindingProxy::deleteDataFile(ns1__deleteDataFile *ns1__deleteDataFil
 	struct __ns1__deleteDataFile soap_tmp___ns1__deleteDataFile;
 	struct __ns1__deleteDataFileResponse *soap_tmp___ns1__deleteDataFileResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteDataFile.ns1__deleteDataFile_ = ns1__deleteDataFile_;
@@ -2302,6 +2384,8 @@ int ICATPortBindingProxy::removeDataFile(ns1__removeDataFile *ns1__removeDataFil
 	struct __ns1__removeDataFile soap_tmp___ns1__removeDataFile;
 	struct __ns1__removeDataFileResponse *soap_tmp___ns1__removeDataFileResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeDataFile.ns1__removeDataFile_ = ns1__removeDataFile_;
@@ -2355,6 +2439,8 @@ int ICATPortBindingProxy::modifyDataFile(ns1__modifyDataFile *ns1__modifyDataFil
 	struct __ns1__modifyDataFile soap_tmp___ns1__modifyDataFile;
 	struct __ns1__modifyDataFileResponse *soap_tmp___ns1__modifyDataFileResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyDataFile.ns1__modifyDataFile_ = ns1__modifyDataFile_;
@@ -2407,6 +2493,8 @@ int ICATPortBindingProxy::addDataFileParameters(ns1__addDataFileParameters *ns1_
 {	struct soap *soap = this;
 	struct __ns1__addDataFileParameters soap_tmp___ns1__addDataFileParameters;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addDataFileParameters.ns1__addDataFileParameters_ = ns1__addDataFileParameters_;
@@ -2458,6 +2546,8 @@ int ICATPortBindingProxy::modifyDataFileParameter(ns1__modifyDataFileParameter *
 	struct __ns1__modifyDataFileParameter soap_tmp___ns1__modifyDataFileParameter;
 	struct __ns1__modifyDataFileParameterResponse *soap_tmp___ns1__modifyDataFileParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyDataFileParameter.ns1__modifyDataFileParameter_ = ns1__modifyDataFileParameter_;
@@ -2511,6 +2601,8 @@ int ICATPortBindingProxy::removeDataFileParameter(ns1__removeDataFileParameter *
 	struct __ns1__removeDataFileParameter soap_tmp___ns1__removeDataFileParameter;
 	struct __ns1__removeDataFileParameterResponse *soap_tmp___ns1__removeDataFileParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeDataFileParameter.ns1__removeDataFileParameter_ = ns1__removeDataFileParameter_;
@@ -2564,6 +2656,8 @@ int ICATPortBindingProxy::deleteDataFileParameter(ns1__deleteDataFileParameter *
 	struct __ns1__deleteDataFileParameter soap_tmp___ns1__deleteDataFileParameter;
 	struct __ns1__deleteDataFileParameterResponse *soap_tmp___ns1__deleteDataFileParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteDataFileParameter.ns1__deleteDataFileParameter_ = ns1__deleteDataFileParameter_;
@@ -2616,6 +2710,8 @@ int ICATPortBindingProxy::getKeywordsForUser(ns1__getKeywordsForUser *ns1__getKe
 {	struct soap *soap = this;
 	struct __ns1__getKeywordsForUser soap_tmp___ns1__getKeywordsForUser;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getKeywordsForUser.ns1__getKeywordsForUser_ = ns1__getKeywordsForUser_;
@@ -2666,6 +2762,8 @@ int ICATPortBindingProxy::getKeywordsForUserStartWithMax(ns1__getKeywordsForUser
 {	struct soap *soap = this;
 	struct __ns1__getKeywordsForUserStartWithMax soap_tmp___ns1__getKeywordsForUserStartWithMax;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getKeywordsForUserStartWithMax.ns1__getKeywordsForUserStartWithMax_ = ns1__getKeywordsForUserStartWithMax_;
@@ -2716,6 +2814,8 @@ int ICATPortBindingProxy::getKeywordsForUserMax(ns1__getKeywordsForUserMax *ns1_
 {	struct soap *soap = this;
 	struct __ns1__getKeywordsForUserMax soap_tmp___ns1__getKeywordsForUserMax;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getKeywordsForUserMax.ns1__getKeywordsForUserMax_ = ns1__getKeywordsForUserMax_;
@@ -2766,6 +2866,8 @@ int ICATPortBindingProxy::getKeywordsForUserType(ns1__getKeywordsForUserType *ns
 {	struct soap *soap = this;
 	struct __ns1__getKeywordsForUserType soap_tmp___ns1__getKeywordsForUserType;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getKeywordsForUserType.ns1__getKeywordsForUserType_ = ns1__getKeywordsForUserType_;
@@ -2816,6 +2918,8 @@ int ICATPortBindingProxy::getAllKeywords(ns1__getAllKeywords *ns1__getAllKeyword
 {	struct soap *soap = this;
 	struct __ns1__getAllKeywords soap_tmp___ns1__getAllKeywords;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getAllKeywords.ns1__getAllKeywords_ = ns1__getAllKeywords_;
@@ -2866,6 +2970,8 @@ int ICATPortBindingProxy::downloadDatafile(ns1__downloadDatafile *ns1__downloadD
 {	struct soap *soap = this;
 	struct __ns1__downloadDatafile soap_tmp___ns1__downloadDatafile;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__downloadDatafile.ns1__downloadDatafile_ = ns1__downloadDatafile_;
@@ -2916,6 +3022,8 @@ int ICATPortBindingProxy::downloadDatafiles(ns1__downloadDatafiles *ns1__downloa
 {	struct soap *soap = this;
 	struct __ns1__downloadDatafiles soap_tmp___ns1__downloadDatafiles;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__downloadDatafiles.ns1__downloadDatafiles_ = ns1__downloadDatafiles_;
@@ -2966,6 +3074,8 @@ int ICATPortBindingProxy::downloadDataset(ns1__downloadDataset *ns1__downloadDat
 {	struct soap *soap = this;
 	struct __ns1__downloadDataset soap_tmp___ns1__downloadDataset;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__downloadDataset.ns1__downloadDataset_ = ns1__downloadDataset_;
@@ -3016,6 +3126,8 @@ int ICATPortBindingProxy::checkDatafileDownloadAccess(ns1__checkDatafileDownload
 {	struct soap *soap = this;
 	struct __ns1__checkDatafileDownloadAccess soap_tmp___ns1__checkDatafileDownloadAccess;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__checkDatafileDownloadAccess.ns1__checkDatafileDownloadAccess_ = ns1__checkDatafileDownloadAccess_;
@@ -3066,6 +3178,8 @@ int ICATPortBindingProxy::checkDatasetDownloadAccess(ns1__checkDatasetDownloadAc
 {	struct soap *soap = this;
 	struct __ns1__checkDatasetDownloadAccess soap_tmp___ns1__checkDatasetDownloadAccess;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__checkDatasetDownloadAccess.ns1__checkDatasetDownloadAccess_ = ns1__checkDatasetDownloadAccess_;
@@ -3116,6 +3230,8 @@ int ICATPortBindingProxy::searchByAdvanced(ns1__searchByAdvanced *ns1__searchByA
 {	struct soap *soap = this;
 	struct __ns1__searchByAdvanced soap_tmp___ns1__searchByAdvanced;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByAdvanced.ns1__searchByAdvanced_ = ns1__searchByAdvanced_;
@@ -3166,6 +3282,8 @@ int ICATPortBindingProxy::searchByAdvancedPagination(ns1__searchByAdvancedPagina
 {	struct soap *soap = this;
 	struct __ns1__searchByAdvancedPagination soap_tmp___ns1__searchByAdvancedPagination;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByAdvancedPagination.ns1__searchByAdvancedPagination_ = ns1__searchByAdvancedPagination_;
@@ -3216,6 +3334,8 @@ int ICATPortBindingProxy::searchByKeywords(ns1__searchByKeywords *ns1__searchByK
 {	struct soap *soap = this;
 	struct __ns1__searchByKeywords soap_tmp___ns1__searchByKeywords;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByKeywords.ns1__searchByKeywords_ = ns1__searchByKeywords_;
@@ -3266,6 +3386,8 @@ int ICATPortBindingProxy::searchByKeywordsAll(ns1__searchByKeywordsAll *ns1__sea
 {	struct soap *soap = this;
 	struct __ns1__searchByKeywordsAll soap_tmp___ns1__searchByKeywordsAll;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByKeywordsAll.ns1__searchByKeywordsAll_ = ns1__searchByKeywordsAll_;
@@ -3316,6 +3438,8 @@ int ICATPortBindingProxy::getMyInvestigations(ns1__getMyInvestigations *ns1__get
 {	struct soap *soap = this;
 	struct __ns1__getMyInvestigations soap_tmp___ns1__getMyInvestigations;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getMyInvestigations.ns1__getMyInvestigations_ = ns1__getMyInvestigations_;
@@ -3366,6 +3490,8 @@ int ICATPortBindingProxy::getMyInvestigationsIncludes(ns1__getMyInvestigationsIn
 {	struct soap *soap = this;
 	struct __ns1__getMyInvestigationsIncludes soap_tmp___ns1__getMyInvestigationsIncludes;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getMyInvestigationsIncludes.ns1__getMyInvestigationsIncludes_ = ns1__getMyInvestigationsIncludes_;
@@ -3416,6 +3542,8 @@ int ICATPortBindingProxy::getMyInvestigationsIncludesPagination(ns1__getMyInvest
 {	struct soap *soap = this;
 	struct __ns1__getMyInvestigationsIncludesPagination soap_tmp___ns1__getMyInvestigationsIncludesPagination;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getMyInvestigationsIncludesPagination.ns1__getMyInvestigationsIncludesPagination_ = ns1__getMyInvestigationsIncludesPagination_;
@@ -3466,6 +3594,8 @@ int ICATPortBindingProxy::searchByUserID(ns1__searchByUserID *ns1__searchByUserI
 {	struct soap *soap = this;
 	struct __ns1__searchByUserID soap_tmp___ns1__searchByUserID;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByUserID.ns1__searchByUserID_ = ns1__searchByUserID_;
@@ -3516,6 +3646,8 @@ int ICATPortBindingProxy::searchByUserIDPagination(ns1__searchByUserIDPagination
 {	struct soap *soap = this;
 	struct __ns1__searchByUserIDPagination soap_tmp___ns1__searchByUserIDPagination;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByUserIDPagination.ns1__searchByUserIDPagination_ = ns1__searchByUserIDPagination_;
@@ -3566,6 +3698,8 @@ int ICATPortBindingProxy::searchByUserSurname(ns1__searchByUserSurname *ns1__sea
 {	struct soap *soap = this;
 	struct __ns1__searchByUserSurname soap_tmp___ns1__searchByUserSurname;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByUserSurname.ns1__searchByUserSurname_ = ns1__searchByUserSurname_;
@@ -3616,6 +3750,8 @@ int ICATPortBindingProxy::searchByUserSurnamePagination(ns1__searchByUserSurname
 {	struct soap *soap = this;
 	struct __ns1__searchByUserSurnamePagination soap_tmp___ns1__searchByUserSurnamePagination;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByUserSurnamePagination.ns1__searchByUserSurnamePagination_ = ns1__searchByUserSurnamePagination_;
@@ -3666,6 +3802,8 @@ int ICATPortBindingProxy::listInstruments(ns1__listInstruments *ns1__listInstrum
 {	struct soap *soap = this;
 	struct __ns1__listInstruments soap_tmp___ns1__listInstruments;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listInstruments.ns1__listInstruments_ = ns1__listInstruments_;
@@ -3716,6 +3854,8 @@ int ICATPortBindingProxy::listRoles(ns1__listRoles *ns1__listRoles_, ns1__listRo
 {	struct soap *soap = this;
 	struct __ns1__listRoles soap_tmp___ns1__listRoles;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listRoles.ns1__listRoles_ = ns1__listRoles_;
@@ -3766,6 +3906,8 @@ int ICATPortBindingProxy::listParameters(ns1__listParameters *ns1__listParameter
 {	struct soap *soap = this;
 	struct __ns1__listParameters soap_tmp___ns1__listParameters;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listParameters.ns1__listParameters_ = ns1__listParameters_;
@@ -3816,6 +3958,8 @@ int ICATPortBindingProxy::listFacilityCycles(ns1__listFacilityCycles *ns1__listF
 {	struct soap *soap = this;
 	struct __ns1__listFacilityCycles soap_tmp___ns1__listFacilityCycles;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listFacilityCycles.ns1__listFacilityCycles_ = ns1__listFacilityCycles_;
@@ -3866,6 +4010,8 @@ int ICATPortBindingProxy::listInvestigationTypes(ns1__listInvestigationTypes *ns
 {	struct soap *soap = this;
 	struct __ns1__listInvestigationTypes soap_tmp___ns1__listInvestigationTypes;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listInvestigationTypes.ns1__listInvestigationTypes_ = ns1__listInvestigationTypes_;
@@ -3916,6 +4062,8 @@ int ICATPortBindingProxy::searchSamplesBySampleName(ns1__searchSamplesBySampleNa
 {	struct soap *soap = this;
 	struct __ns1__searchSamplesBySampleName soap_tmp___ns1__searchSamplesBySampleName;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchSamplesBySampleName.ns1__searchSamplesBySampleName_ = ns1__searchSamplesBySampleName_;
@@ -3966,6 +4114,8 @@ int ICATPortBindingProxy::searchDatasetsBySample(ns1__searchDatasetsBySample *ns
 {	struct soap *soap = this;
 	struct __ns1__searchDatasetsBySample soap_tmp___ns1__searchDatasetsBySample;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchDatasetsBySample.ns1__searchDatasetsBySample_ = ns1__searchDatasetsBySample_;
@@ -4016,6 +4166,8 @@ int ICATPortBindingProxy::listDatasetTypes(ns1__listDatasetTypes *ns1__listDatas
 {	struct soap *soap = this;
 	struct __ns1__listDatasetTypes soap_tmp___ns1__listDatasetTypes;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listDatasetTypes.ns1__listDatasetTypes_ = ns1__listDatasetTypes_;
@@ -4066,6 +4218,8 @@ int ICATPortBindingProxy::listDatasetStatus(ns1__listDatasetStatus *ns1__listDat
 {	struct soap *soap = this;
 	struct __ns1__listDatasetStatus soap_tmp___ns1__listDatasetStatus;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listDatasetStatus.ns1__listDatasetStatus_ = ns1__listDatasetStatus_;
@@ -4116,6 +4270,8 @@ int ICATPortBindingProxy::searchByRunNumber(ns1__searchByRunNumber *ns1__searchB
 {	struct soap *soap = this;
 	struct __ns1__searchByRunNumber soap_tmp___ns1__searchByRunNumber;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByRunNumber.ns1__searchByRunNumber_ = ns1__searchByRunNumber_;
@@ -4166,6 +4322,8 @@ int ICATPortBindingProxy::searchByRunNumberPagination(ns1__searchByRunNumberPagi
 {	struct soap *soap = this;
 	struct __ns1__searchByRunNumberPagination soap_tmp___ns1__searchByRunNumberPagination;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByRunNumberPagination.ns1__searchByRunNumberPagination_ = ns1__searchByRunNumberPagination_;
@@ -4216,6 +4374,8 @@ int ICATPortBindingProxy::listDatafileFormats(ns1__listDatafileFormats *ns1__lis
 {	struct soap *soap = this;
 	struct __ns1__listDatafileFormats soap_tmp___ns1__listDatafileFormats;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__listDatafileFormats.ns1__listDatafileFormats_ = ns1__listDatafileFormats_;
@@ -4266,6 +4426,8 @@ int ICATPortBindingProxy::getDatasets(ns1__getDatasets *ns1__getDatasets_, ns1__
 {	struct soap *soap = this;
 	struct __ns1__getDatasets soap_tmp___ns1__getDatasets;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getDatasets.ns1__getDatasets_ = ns1__getDatasets_;
@@ -4316,6 +4478,8 @@ int ICATPortBindingProxy::createDataSet(ns1__createDataSet *ns1__createDataSet_,
 {	struct soap *soap = this;
 	struct __ns1__createDataSet soap_tmp___ns1__createDataSet;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__createDataSet.ns1__createDataSet_ = ns1__createDataSet_;
@@ -4366,6 +4530,8 @@ int ICATPortBindingProxy::createDataSets(ns1__createDataSets *ns1__createDataSet
 {	struct soap *soap = this;
 	struct __ns1__createDataSets soap_tmp___ns1__createDataSets;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__createDataSets.ns1__createDataSets_ = ns1__createDataSets_;
@@ -4417,6 +4583,8 @@ int ICATPortBindingProxy::deleteDataSet(ns1__deleteDataSet *ns1__deleteDataSet_,
 	struct __ns1__deleteDataSet soap_tmp___ns1__deleteDataSet;
 	struct __ns1__deleteDataSetResponse *soap_tmp___ns1__deleteDataSetResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteDataSet.ns1__deleteDataSet_ = ns1__deleteDataSet_;
@@ -4470,6 +4638,8 @@ int ICATPortBindingProxy::deleteDataSetParameter(ns1__deleteDataSetParameter *ns
 	struct __ns1__deleteDataSetParameter soap_tmp___ns1__deleteDataSetParameter;
 	struct __ns1__deleteDataSetParameterResponse *soap_tmp___ns1__deleteDataSetParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__deleteDataSetParameter.ns1__deleteDataSetParameter_ = ns1__deleteDataSetParameter_;
@@ -4523,6 +4693,8 @@ int ICATPortBindingProxy::modifyDataSet(ns1__modifyDataSet *ns1__modifyDataSet_,
 	struct __ns1__modifyDataSet soap_tmp___ns1__modifyDataSet;
 	struct __ns1__modifyDataSetResponse *soap_tmp___ns1__modifyDataSetResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyDataSet.ns1__modifyDataSet_ = ns1__modifyDataSet_;
@@ -4576,6 +4748,8 @@ int ICATPortBindingProxy::modifyDataSetParameter(ns1__modifyDataSetParameter *ns
 	struct __ns1__modifyDataSetParameter soap_tmp___ns1__modifyDataSetParameter;
 	struct __ns1__modifyDataSetParameterResponse *soap_tmp___ns1__modifyDataSetParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__modifyDataSetParameter.ns1__modifyDataSetParameter_ = ns1__modifyDataSetParameter_;
@@ -4629,6 +4803,8 @@ int ICATPortBindingProxy::setDataSetSample(ns1__setDataSetSample *ns1__setDataSe
 	struct __ns1__setDataSetSample soap_tmp___ns1__setDataSetSample;
 	struct __ns1__setDataSetSampleResponse *soap_tmp___ns1__setDataSetSampleResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__setDataSetSample.ns1__setDataSetSample_ = ns1__setDataSetSample_;
@@ -4681,6 +4857,8 @@ int ICATPortBindingProxy::addDataSetParameter(ns1__addDataSetParameter *ns1__add
 {	struct soap *soap = this;
 	struct __ns1__addDataSetParameter soap_tmp___ns1__addDataSetParameter;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addDataSetParameter.ns1__addDataSetParameter_ = ns1__addDataSetParameter_;
@@ -4731,6 +4909,8 @@ int ICATPortBindingProxy::addDataSetParameters(ns1__addDataSetParameters *ns1__a
 {	struct soap *soap = this;
 	struct __ns1__addDataSetParameters soap_tmp___ns1__addDataSetParameters;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__addDataSetParameters.ns1__addDataSetParameters_ = ns1__addDataSetParameters_;
@@ -4782,6 +4962,8 @@ int ICATPortBindingProxy::removeDataSet(ns1__removeDataSet *ns1__removeDataSet_,
 	struct __ns1__removeDataSet soap_tmp___ns1__removeDataSet;
 	struct __ns1__removeDataSetResponse *soap_tmp___ns1__removeDataSetResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeDataSet.ns1__removeDataSet_ = ns1__removeDataSet_;
@@ -4835,6 +5017,8 @@ int ICATPortBindingProxy::removeDataSetParameter(ns1__removeDataSetParameter *ns
 	struct __ns1__removeDataSetParameter soap_tmp___ns1__removeDataSetParameter;
 	struct __ns1__removeDataSetParameterResponse *soap_tmp___ns1__removeDataSetParameterResponse;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__removeDataSetParameter.ns1__removeDataSetParameter_ = ns1__removeDataSetParameter_;
@@ -4887,6 +5071,8 @@ int ICATPortBindingProxy::ingestMetadata(ns1__ingestMetadata *ns1__ingestMetadat
 {	struct soap *soap = this;
 	struct __ns1__ingestMetadata soap_tmp___ns1__ingestMetadata;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__ingestMetadata.ns1__ingestMetadata_ = ns1__ingestMetadata_;
@@ -4937,6 +5123,8 @@ int ICATPortBindingProxy::getICATAPIVersion(ns1__getICATAPIVersion *ns1__getICAT
 {	struct soap *soap = this;
 	struct __ns1__getICATAPIVersion soap_tmp___ns1__getICATAPIVersion;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getICATAPIVersion.ns1__getICATAPIVersion_ = ns1__getICATAPIVersion_;
@@ -4987,6 +5175,8 @@ int ICATPortBindingProxy::getFacilityUserByFacilityUserId(ns1__getFacilityUserBy
 {	struct soap *soap = this;
 	struct __ns1__getFacilityUserByFacilityUserId soap_tmp___ns1__getFacilityUserByFacilityUserId;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getFacilityUserByFacilityUserId.ns1__getFacilityUserByFacilityUserId_ = ns1__getFacilityUserByFacilityUserId_;
@@ -5037,6 +5227,8 @@ int ICATPortBindingProxy::getFacilityUserByFederalId(ns1__getFacilityUserByFeder
 {	struct soap *soap = this;
 	struct __ns1__getFacilityUserByFederalId soap_tmp___ns1__getFacilityUserByFederalId;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__getFacilityUserByFederalId.ns1__getFacilityUserByFederalId_ = ns1__getFacilityUserByFederalId_;
@@ -5087,6 +5279,8 @@ int ICATPortBindingProxy::isSessionValid(ns1__isSessionValid *ns1__isSessionVali
 {	struct soap *soap = this;
 	struct __ns1__isSessionValid soap_tmp___ns1__isSessionValid;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__isSessionValid.ns1__isSessionValid_ = ns1__isSessionValid_;
@@ -5137,6 +5331,8 @@ int ICATPortBindingProxy::searchByParameterOperator(ns1__searchByParameterOperat
 {	struct soap *soap = this;
 	struct __ns1__searchByParameterOperator soap_tmp___ns1__searchByParameterOperator;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByParameterOperator.ns1__searchByParameterOperator_ = ns1__searchByParameterOperator_;
@@ -5187,6 +5383,8 @@ int ICATPortBindingProxy::searchByParameterComparator(ns1__searchByParameterComp
 {	struct soap *soap = this;
 	struct __ns1__searchByParameterComparator soap_tmp___ns1__searchByParameterComparator;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByParameterComparator.ns1__searchByParameterComparator_ = ns1__searchByParameterComparator_;
@@ -5237,6 +5435,8 @@ int ICATPortBindingProxy::searchByParameterComparators(ns1__searchByParameterCom
 {	struct soap *soap = this;
 	struct __ns1__searchByParameterComparators soap_tmp___ns1__searchByParameterComparators;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchByParameterComparators.ns1__searchByParameterComparators_ = ns1__searchByParameterComparators_;
@@ -5287,6 +5487,8 @@ int ICATPortBindingProxy::searchDatasetsByParameterComparator(ns1__searchDataset
 {	struct soap *soap = this;
 	struct __ns1__searchDatasetsByParameterComparator soap_tmp___ns1__searchDatasetsByParameterComparator;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchDatasetsByParameterComparator.ns1__searchDatasetsByParameterComparator_ = ns1__searchDatasetsByParameterComparator_;
@@ -5337,6 +5539,8 @@ int ICATPortBindingProxy::searchDatasetsByParameterComparators(ns1__searchDatase
 {	struct soap *soap = this;
 	struct __ns1__searchDatasetsByParameterComparators soap_tmp___ns1__searchDatasetsByParameterComparators;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchDatasetsByParameterComparators.ns1__searchDatasetsByParameterComparators_ = ns1__searchDatasetsByParameterComparators_;
@@ -5387,6 +5591,8 @@ int ICATPortBindingProxy::searchDatafilesByParameterComparator(ns1__searchDatafi
 {	struct soap *soap = this;
 	struct __ns1__searchDatafilesByParameterComparator soap_tmp___ns1__searchDatafilesByParameterComparator;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchDatafilesByParameterComparator.ns1__searchDatafilesByParameterComparator_ = ns1__searchDatafilesByParameterComparator_;
@@ -5437,6 +5643,8 @@ int ICATPortBindingProxy::searchDatafilesByParameterComparators(ns1__searchDataf
 {	struct soap *soap = this;
 	struct __ns1__searchDatafilesByParameterComparators soap_tmp___ns1__searchDatafilesByParameterComparators;
 	const char *soap_action = NULL;
+	if (!soap_endpoint)
+		soap_endpoint = "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT";
 	soap_action = "";
 	soap->encodingStyle = NULL;
 	soap_tmp___ns1__searchDatafilesByParameterComparators.ns1__searchDatafilesByParameterComparators_ = ns1__searchDatafilesByParameterComparators_;
