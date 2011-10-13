@@ -138,15 +138,22 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
 
   for (int spec = start; spec < end; ++spec)
   {
+
+    const MantidVec& datax = inputWS->dataX(spec);
+
     for (it = peakCenters.begin(); it != peakCenters.end(); ++it)
     {
       //Try to fit at this center
       double x_center = *it;
-      this->fitPeak(inputWS, spec, x_center, this->fwhm);
+
+      // Check whether it is the in data range
+      if (x_center > datax[0] && x_center < datax[datax.size()-1]){
+        this->fitPeak(inputWS, spec, x_center, this->fwhm);
+      }
 
     } // loop through the peaks specified
 
-  m_progress->report();
+    m_progress->report();
 
   } // loop over spectra
 
