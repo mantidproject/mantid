@@ -74,6 +74,14 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /// @return true if the iterator is currently valid
+  TMDE(
+  bool MDBoxIterator)::valid() const
+  {
+    return (m_current != NULL);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /// Advance to the next cell. If the current cell is the last one in the workspace
   /// do nothing and return false.
   /// @return true if you can continue iterating

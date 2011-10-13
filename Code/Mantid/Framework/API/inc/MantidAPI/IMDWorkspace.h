@@ -11,6 +11,7 @@
 #include <vector>
 #include <stdarg.h>
 #include "MantidAPI/MDGeometry.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 
 namespace Mantid
 {
@@ -65,7 +66,7 @@ namespace Mantid
       virtual uint64_t getNPoints() const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
-      virtual IMDIterator* createIterator() const;
+      virtual IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
       /// Returns the (normalized) signal at a given coordinates
       virtual signal_t getSignalAtCoord(const coord_t * coords) const

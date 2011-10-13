@@ -1,9 +1,12 @@
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/Utils.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace Mantid
 {
@@ -37,7 +40,7 @@ namespace MDEvents
   /** Constructor helper
    *
    * @param workspace :: MDWorkspace
-   * @param function :: implicit function or NULL for none
+   * @param function :: implicit function or NULL for none. Gains ownership of the pointer.
    */
   void MDHistoWorkspaceIterator::init(const MDHistoWorkspace * workspace,
       Mantid::Geometry::MDImplicitFunction * function)
@@ -48,6 +51,33 @@ namespace MDEvents
     if (m_ws == NULL)
       throw std::invalid_argument("MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
     m_max = m_ws->getNPoints();
+    m_nd = m_ws->getNumDims();
+    m_center = new coord_t[m_nd];
+    m_origin = new coord_t[m_nd];
+    m_binWidth = new coord_t[m_nd];
+    m_index = new size_t[m_nd];
+    m_indexMax = new size_t[m_nd];
+    Utils::NestedForLoop::SetUp(m_nd, m_index, 0);
+    // Initalize all these values
+    for (size_t d=0; d<m_nd; d++)
+    {
+      IMDDimension_const_sptr dim = m_ws->getDimension(d);
+      m_center[d] = 0;
+      m_origin[d] = dim->getMinimum();
+      m_binWidth[d] = dim->getBinWidth();
+      m_indexMax[d] = dim->getNBins();
+    }
+
+    // Make sure that the first iteration is at a point inside the implicit function
+    if (m_function)
+    {
+      // Calculate the center of the 0-th bin
+      for (size_t d=0; d<m_nd; d++)
+        m_center[d] = m_origin[d] + (0 + 0.5) * m_binWidth[d];
+      // Skip on if the first point is NOT contained
+      if (!m_function->isPointContained(m_center))
+        next();
+    }
   }
     
   //----------------------------------------------------------------------------------------------
@@ -55,6 +85,12 @@ namespace MDEvents
    */
   MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator()
   {
+    delete [] m_center;
+    delete [] m_origin;
+    delete [] m_binWidth;
+    delete [] m_index;
+    delete [] m_indexMax;
+    if (m_function) delete m_function;
   }
   
 
@@ -78,12 +114,42 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /** @return true if the iterator is valid. Check this at the start of an iteration,
+   * in case the very first point is not valid.
+   */
+  bool MDHistoWorkspaceIterator::valid() const
+  {
+    return (m_pos < m_max);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /// Advance to the next cell. If the current cell is the last one in the workspace
   /// do nothing and return false.
   /// @return true if you can continue iterating
   bool MDHistoWorkspaceIterator::next()
   {
-    return (++m_pos < m_max);
+    if (m_function)
+    {
+      do
+      {
+        m_pos++;
+        Utils::NestedForLoop::Increment(m_nd, m_index, m_indexMax);
+        // Calculate the center
+        for (size_t d=0; d<m_nd; d++)
+        {
+          m_center[d] = m_origin[d] + (double(m_index[d]) + 0.5) * m_binWidth[d];
+//          std::cout << m_center[d] << ",";
+        }
+//        std::cout<<std::endl;
+        // Keep incrementing until you are in the implicit function
+      } while (!m_function->isPointContained(m_center)
+               && m_pos < m_max);
+      // Is the iteration finished?
+      return (m_pos < m_max);
+    }
+    else
+      // Go through every point;
+      return (++m_pos < m_max);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -120,7 +186,7 @@ namespace MDEvents
   /// Returns the position of the center of the box pointed to.
   Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const
   {
-    return VMD();
+    throw std::runtime_error("MDHistoWorkspaceIterator::getCenter() not implemented.");
   }
 
 

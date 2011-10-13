@@ -53,6 +53,9 @@ class IMDWorkspace;
     /// Get the size of the data (number of entries that will be iterated through)
     virtual size_t getDataSize() const = 0;
 
+    /// Is the current position of the iterator valid?
+    virtual bool valid() const = 0;
+
     /// Jump to the index^th cell.
     virtual void jumpTo(size_t index) = 0;
 

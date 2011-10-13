@@ -55,7 +55,7 @@ namespace MDEvents
     }
 
     /// Creates a new iterator pointing to the first cell in the workspace
-    virtual Mantid::API::IMDIterator* createIterator() const;
+    virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
     // --------------------------------------------------------------------------------------------
     /** @return a const reference to the indexMultiplier array.

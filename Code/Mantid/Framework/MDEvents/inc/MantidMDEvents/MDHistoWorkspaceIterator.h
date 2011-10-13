@@ -50,6 +50,8 @@ namespace MDEvents
 
     virtual size_t getDataSize() const;
 
+    virtual bool valid() const;
+
     virtual bool next();
 
     virtual bool next(size_t skip);
@@ -88,6 +90,24 @@ namespace MDEvents
 
     /// Implicit function to limit volume searched
     Mantid::Geometry::MDImplicitFunction * m_function;
+
+    /// Number of dimensions
+    size_t m_nd;
+
+    /// Center of the current box. Not set until getCenter() is called.
+    coord_t * m_center;
+
+    /// Origin (index 0,0,0) in the space = the minimum of each dimension
+    coord_t * m_origin;
+
+    /// Width of each bin in each dimension
+    coord_t * m_binWidth;
+
+    /// Index into each dimension
+    size_t * m_index;
+
+    /// Index into each dimension
+    size_t * m_indexMax;
 
   };
 

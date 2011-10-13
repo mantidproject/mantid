@@ -151,8 +151,12 @@ public:
     TS_ASSERT(it);
     TS_ASSERT_EQUALS(it->getDataSize(), 4*4*4);
     TS_ASSERT(it->next());
-    delete ew;
     delete it;
+    it = ew->createIterator(new MDImplicitFunction());
+    TS_ASSERT(it);
+    TS_ASSERT_EQUALS(it->getDataSize(), 4*4*4);
+    TS_ASSERT(it->next());
+    delete ew;
   }
 
   //-------------------------------------------------------------------------------------

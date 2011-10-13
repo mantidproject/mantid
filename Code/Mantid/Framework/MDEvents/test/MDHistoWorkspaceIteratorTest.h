@@ -10,11 +10,16 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/VMD.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using Mantid::Kernel::VMD;
+using Mantid::Geometry::MDImplicitFunction;
+using Mantid::Geometry::MDPlane;
+using Mantid::Geometry::MDPlane;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite
 {
@@ -36,6 +41,7 @@ public:
     for (size_t i=0; i<numPoints; i++)
       ws->setSignalAt(i, double(i));
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    TSM_ASSERT( "This iterator is valid at the start.", it->valid() );
     size_t i=0;
 
     // Position of the first box
@@ -87,6 +93,66 @@ public:
     do_test_iterator(4, 10000);
   }
 
+  void test_iterator_2D_implicitFunction()
+  {
+    // Make an implicit function that will keep the points in a corner close to 0,0
+    MDImplicitFunction * function = new MDImplicitFunction();
+    function->addPlane(MDPlane(VMD(-1., -1.), VMD(4.5, 0.)));
+
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i=0; i<100; i++)
+      ws->setSignalAt(i, double(i));
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, function);
+    TSM_ASSERT( "This iterator is valid at the start.", it->valid() );
+
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 0.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 1.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 2.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 3.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 10.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 11.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 12.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 20.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 21.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 30.);
+    TS_ASSERT( !it->next() );
+  }
+
+  void test_iterator_2D_implicitFunction_thatExcludesTheStart()
+  {
+    // Make an implicit function that will EXCLUDE the points in a corner close to 0,0
+    MDImplicitFunction * function = new MDImplicitFunction();
+    function->addPlane(MDPlane(VMD(+1., +1.), VMD(4.5, 0.)));
+
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i=0; i<100; i++)
+      ws->setSignalAt(i, double(i));
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, function);
+    TSM_ASSERT( "This iterator is valid at the start.", it->valid() );
+
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 4.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 5.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 6.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 7.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 8.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 9.); it->next();
+    TS_ASSERT_EQUALS(it->getNormalizedSignal(), 13.); it->next();
+    // And so forth....
+  }
+
+  void test_iterator_2D_implicitFunction_thatExcludesEverything()
+  {
+    // Make an implicit function that will EXCLUDE all the points!
+    MDImplicitFunction * function = new MDImplicitFunction();
+    function->addPlane(MDPlane(VMD(-1., -1.), VMD(-4.5, 0.)));
+
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    for (size_t i=0; i<100; i++)
+      ws->setSignalAt(i, double(i));
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, function);
+
+    TSM_ASSERT( "This iterator is not valid at the start.", !it->valid() );
+  }
 
 };
 

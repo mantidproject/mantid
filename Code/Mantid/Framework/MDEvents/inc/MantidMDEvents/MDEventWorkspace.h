@@ -55,7 +55,7 @@ namespace MDEvents
     virtual uint64_t getNPoints() const;
 
     /// Creates a new iterator pointing to the first cell (box) in the workspace
-    virtual Mantid::API::IMDIterator* createIterator() const;
+    virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
     /// Returns the (normalized) signal at a given coordinates
     virtual signal_t getSignalAtCoord(const coord_t * coords) const;

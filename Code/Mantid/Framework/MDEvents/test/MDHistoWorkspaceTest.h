@@ -262,6 +262,8 @@ public:
     MDHistoWorkspaceIterator * hwit = dynamic_cast<MDHistoWorkspaceIterator *>(it);
     TS_ASSERT( hwit );
     TS_ASSERT( it->next() );
+    it = ws.createIterator(new MDImplicitFunction() );
+    TS_ASSERT( it );
   }
 
   //---------------------------------------------------------------------------------------------------

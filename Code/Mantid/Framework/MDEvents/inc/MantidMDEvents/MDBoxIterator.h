@@ -36,6 +36,8 @@ namespace MDEvents
     /// ------------ IMDIterator Methods ------------------------------
     size_t getDataSize() const;
 
+    bool valid() const;
+
     void jumpTo(size_t index);
 
     bool next();

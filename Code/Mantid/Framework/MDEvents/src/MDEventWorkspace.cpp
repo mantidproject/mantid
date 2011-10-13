@@ -113,12 +113,14 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Creates a new iterator pointing to the first cell (box) in the workspace */
+  /** Creates a new iterator pointing to the first cell (box) in the workspace
+   * @param function :: Optional MDImplicitFunction limiting the iterator
+   */
   TMDE(
-  Mantid::API::IMDIterator*  MDEventWorkspace)::createIterator() const
+  Mantid::API::IMDIterator*  MDEventWorkspace)::createIterator(Mantid::Geometry::MDImplicitFunction * function) const
   {
     // TODO: Should this be leaf only? Depends on most common use case
-    return new MDBoxIterator<MDE,nd>(data, 10000, true, NULL);
+    return new MDBoxIterator<MDE,nd>(data, 10000, true, function);
   }
 
 
