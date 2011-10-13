@@ -41,6 +41,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
+        self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl', 'nxs']
         self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
         self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
@@ -75,7 +76,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=0, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
-        #LoadIsawDetCal(InputWorkspace=wksp,Filename="TOPAZ_8Sept11.DetCal")
+        LoadIsawDetCal(InputWorkspace=wksp,Filename=self._DetCalfile)
         #Normalise by sum of counts in upstream monitor
         Integration(InputWorkspace=mtd[str(name)+'_monitors'], OutputWorkspace='Mon', RangeLower=self._binning[0], RangeUpper=self._binning[2], EndWorkspaceIndex=0)
         mtd.deleteWorkspace(str(name)+'_monitors')
@@ -216,6 +217,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._vanradius = self.getProperty("VanadiumRadius")
         self._powlam = self.getProperty("PowerLambda")
         self._ubfile = self.getProperty("IsawUBFile")
+        self._DetCalfile = self.getProperty("IsawDetCalFile")
         self._append = self.getProperty("AppendHKLFile")
     
         # process the vanadium run
