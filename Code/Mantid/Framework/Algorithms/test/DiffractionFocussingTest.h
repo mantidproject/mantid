@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadNexus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -37,7 +38,7 @@ public:
 
 	void testExec()
 	{
-    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
+    IAlgorithm* loader = new Mantid::DataHandling::LoadNexus;
     loader->initialize();
     loader->setPropertyValue("Filename", "HRP38692a.nxs"); // HRP382692.raw spectrum range 320-330
 
@@ -56,8 +57,8 @@ public:
 		MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("focusedWS")) );
 
-		// only 2 groups for this limited range of spectra (May be only 1 group)
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), 2 );
+     // only 1 group for this limited range of spectra 
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 1 );
     
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("focusedWS");

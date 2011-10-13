@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
@@ -47,7 +48,7 @@ public:
 
   void testExec()
   {
-    Mantid::DataHandling::LoadRaw3 loader;
+    Mantid::DataHandling::LoadNexus loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "HRP38692a.nxs"); // HRP38692.raw spectrum range 320 to 330
 
@@ -75,8 +76,8 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("focusedWS")) );
 
-    // only 2 groups for this limited range of spectra
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), 2 );
+    // only 1 group for this limited range of spectra
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 1 );
 
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("focusedWS");
