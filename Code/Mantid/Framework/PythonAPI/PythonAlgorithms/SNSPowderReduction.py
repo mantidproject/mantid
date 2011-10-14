@@ -299,14 +299,35 @@ class SNSPowderReduction(PythonAlgorithm):
                                        % (filterLogs[0], str(wksp)))            
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
             SortEvents(wksp)
+        # determine some bits about d-space and binning
+        if len(self._binning) == 3:
+            info.has_dspace = self._bin_in_dspace
+        if info.has_dspace:
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.dmin, self._binning[0], info.dmax]
+            self.log().information("d-Spacing Binning: " + str(binning))
+        else:
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.tmin, self._binning[0], info.tmax]
+
+        # trim off the ends
         cropkwargs = {}
         if info.tmin > 0.:
             cropkwargs["XMin"] = info.tmin
         if info.tmax > 0.:
             cropkwargs["XMax"] = info.tmax
+        if not info.has_dspace:
+            cropkwargs["XMin"] = binning[0]
+            cropkwargs["XMax"] = binning[-1]
         if len(cropkwargs) > 0:
             CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
+        if not info.has_dspace:
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
@@ -328,25 +349,18 @@ class SNSPowderReduction(PythonAlgorithm):
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
                                 K=3.22, **kwargs)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
-        if len(self._binning) == 3:
-            info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
-            if len(self._binning) == 3:
-                binning = self._binning
-            else:
-                binning = [info.dmin, self._binning[0], info.dmax]
-            self.log().information("d-Spacing Binning: " + str(binning))
+            self.log().information("d-Spacing binning: " + str(binning))
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+        if not "histo" in self.getProperty("Extension"):
+            SortEvents(InputWorkspace=wksp)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
                              PreserveEvents=preserveEvents)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if not info.has_dspace:
-            if len(self._binning) == 3:
-                binning = self._binning
-            else:
-                binning = [info.tmin, self._binning[0], info.tmax]
+            self.log().information("time-of-flight binning: " + str(binning))
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         if normByCurrent:
             NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -541,7 +555,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
-                if not "histo" in self.getProperty("Extension"):
+                if not "histo" in self.getProperty("Extension") and preserveEvents:
                     CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
