@@ -154,10 +154,6 @@ public:
     
     // Now test one with an upper case extension
 
-    /* 
-    Commented out since ALF15739 was removed to make AutoTestData smaller, 
-    and since the file had a lower case extension anyway...*/
-
     ConfigService::Instance().setString("default.instrument","LOQ");
     error = fp->setValue("25654");
     TS_ASSERT_EQUALS(error, "");
