@@ -1,20 +1,22 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
+#include "../../ui_SliceViewer.h"
 #include "DimensionSliceWidget.h"
+#include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "QwtRasterDataMD.h"
-#include "ui_SliceViewer.h"
+#include <QtCore/QtCore>
 #include <QtGui/qdialog.h>
 #include <QtGui/QWidget>
+#include <qwt_color_map.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot.h>
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
-#include <qwt_color_map.h>
-#include <QtCore/QtCore>
-#include "DllOption.h"
+
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
 {
@@ -73,7 +75,10 @@ private:
   QwtScaleWidget * m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
-  QVector<DimensionSliceWidget *> m_dimWidgets;
+  std::vector<DimensionSliceWidget *> m_dimWidgets;
+
+  /// Vector of the dimensions to show.
+  std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
   QwtRasterDataMD * m_data;

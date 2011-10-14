@@ -24,6 +24,7 @@
 #include <qwt_scale_engine.h>
 #include <sstream>
 #include <vector>
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -173,7 +174,7 @@ void SliceViewer::showControls(bool visible)
 void SliceViewer::updateDimensionSliceWidgets()
 {
   // Create all necessary widgets
-  if (m_dimWidgets.size() < int(m_ws->getNumDims()))
+  if (m_dimWidgets.size() < m_ws->getNumDims())
   {
     for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
     {
@@ -188,19 +189,19 @@ void SliceViewer::updateDimensionSliceWidgets()
     }
   }
   // Hide unnecessary ones
-  for (size_t d=m_ws->getNumDims(); int(d)<m_dimWidgets.size(); d++)
+  for (size_t d=m_ws->getNumDims(); d<m_dimWidgets.size(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    DimensionSliceWidget * widget = m_dimWidgets[d];
     widget->hide();
   }
 
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
   // Set each dimension
-  for (size_t d=0; d<m_ws->getNumDims(); d++)
+  for (size_t d=0; d<m_dimensions.size(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
-    widget->setDimension( int(d), m_ws->getDimension(d) );
+    DimensionSliceWidget * widget = m_dimWidgets[d];
+    widget->setDimension( int(d), m_dimensions[d] );
     // Default slicing layout
     if (d == m_dimX)
       widget->setShownDim(0);
@@ -220,7 +221,7 @@ void SliceViewer::updateDimensionSliceWidgets()
   // Make the labels all the same width
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    DimensionSliceWidget * widget = m_dimWidgets[d];
     widget->ui.lblName->setMinimumSize(QSize(maxLabelWidth, 0) );
     widget->ui.lblUnits->setMinimumSize(QSize(maxUnitsWidth, 0) );
   }
@@ -236,19 +237,28 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
   // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
-  IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+    IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
   if (mdew)
     mdew->estimateResolution();
 
-  this->updateDimensionSliceWidgets();
+  // Copy the dimensions to this so they can be modified
+  m_dimensions.clear();
+  for (size_t d=0; d < m_ws->getNumDims(); d++)
+    m_dimensions.push_back( MDHistoDimension_sptr(new MDHistoDimension(m_ws->getDimension(d).get())) );
 
-  // Fix the min/max of the widgets to the extents of data
+  // Adjust the range to that of visible data
   if (mdew)
   {
     std::vector<Mantid::Geometry::MDDimensionExtents> ext = mdew->getMinimumExtents();
     for (size_t d=0; d < mdew->getNumDims(); d++)
-      m_dimWidgets[int(d)]->setMinMax(ext[d].min, ext[d].max);
+    {
+      size_t newNumBins = size_t((ext[d].max-ext[d].min) / m_dimensions[d]->getBinWidth() + 1);
+      m_dimensions[d]->setRange(newNumBins,  ext[d].min, ext[d].max);
+    }
   }
+
+  // Build up the widgets
+  this->updateDimensionSliceWidgets();
 
   m_data->setWorkspace(ws);
   // Find the full range. And use it
@@ -406,10 +416,10 @@ void SliceViewer::findRangeSlice()
   // Find the min-max extents in each dimension
   VMD min(m_ws->getNumDims());
   VMD max(m_ws->getNumDims());
-  for (size_t d=0; d<m_ws->getNumDims(); d++)
+  for (size_t d=0; d<m_dimensions.size(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
-    IMDDimension_const_sptr dim = m_ws->getDimension(d);
+    DimensionSliceWidget * widget = m_dimWidgets[d];
+    IMDDimension_const_sptr dim = m_dimensions[d];
     if (widget->getShownDim() == 0)
     {
       min[d] = xint.minValue();
@@ -448,7 +458,7 @@ void SliceViewer::showInfoAt(double x, double y)
   if (!m_ws) return;
   VMD coords(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
-    coords[d] = m_dimWidgets[int(d)]->getSlicePoint();
+    coords[d] = m_dimWidgets[d]->getSlicePoint();
   coords[m_dimX] = x;
   coords[m_dimY] = y;
   signal_t signal = m_ws->getSignalAtCoord(coords);
@@ -470,7 +480,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
   std::vector<coord_t> slicePoint;
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    DimensionSliceWidget * widget = m_dimWidgets[d];
     if (widget->getShownDim() == 0)
       m_dimX = d;
     if (widget->getShownDim() == 1)
@@ -482,8 +492,8 @@ void SliceViewer::updateDisplay(bool resetAxes)
   if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
   m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
 
-  m_X = m_ws->getDimension(m_dimX);
-  m_Y = m_ws->getDimension(m_dimY);
+  m_X = m_dimensions[m_dimX];
+  m_Y = m_dimensions[m_dimY];
 
   // Was there a change of which dimensions are shown?
   if (resetAxes || oldX != m_dimX || oldY != m_dimY )
@@ -524,10 +534,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       {
         // A different dimension had the same shown dimension
         if ((size_t(index) != d) &&
-            (m_dimWidgets[int(d)]->getShownDim() == dim))
+            (m_dimWidgets[d]->getShownDim() == dim))
         {
           // So flip it. If the new one is X, the old one becomes Y
-          m_dimWidgets[int(d)]->setShownDim( (dim==0) ? 1 : 0 );
+          m_dimWidgets[d]->setShownDim( (dim==0) ? 1 : 0 );
           break;
         }
       }
@@ -537,9 +547,9 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
     {
       // A different dimension had the same shown dimension
       if ((size_t(index) != d) &&
-          (m_dimWidgets[int(d)]->getShownDim() == dim))
+          (m_dimWidgets[d]->getShownDim() == dim))
       {
-        m_dimWidgets[int(d)]->setShownDim(-1);
+        m_dimWidgets[d]->setShownDim(-1);
       }
     }
   }

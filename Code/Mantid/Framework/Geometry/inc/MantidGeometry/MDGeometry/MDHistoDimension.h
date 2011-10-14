@@ -41,6 +41,18 @@ namespace Geometry
         throw std::invalid_argument("Error making MDHistoDimension. Cannot have dimension with min > max");
       }
     }
+
+    /** copy constructor
+     * @param other :: other IMDDimension
+     */
+    MDHistoDimension(const IMDDimension * other)
+    : m_name(other->getName()), m_dimensionId(other->getDimensionId()),
+      m_units(other->getUnits()),
+      m_min(other->getMinimum()), m_max(other->getMaximum()),
+      m_numBins(other->getNBins()),
+      m_binWidth(other->getBinWidth())
+    {
+    }
     
     /// Destructor
     virtual ~MDHistoDimension()
