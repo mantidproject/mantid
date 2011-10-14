@@ -14,6 +14,7 @@ QwtRasterDataMD::QwtRasterDataMD()
   m_minVal = DBL_MAX;
   m_maxVal = -DBL_MAX;
   m_range = QwtDoubleInterval(0.0, 1.0);
+  nan = std::numeric_limits<double>::quiet_NaN();
 }
 
 
@@ -47,7 +48,11 @@ double QwtRasterDataMD::value(double x, double y) const
   if (value > m_maxVal) m_maxVal = value;
 //  std::cout << x << "," << y << "=" << value << "\n";
   delete [] lookPoint;
-  return log(value);
+
+  if (value <= 0.)
+    return nan;
+  else
+    return log(value);
 }
 
 QwtRasterData* QwtRasterDataMD::copy() const

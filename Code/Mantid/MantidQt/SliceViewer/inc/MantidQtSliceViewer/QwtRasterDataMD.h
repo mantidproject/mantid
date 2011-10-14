@@ -59,6 +59,9 @@ protected:
 
   /// Range of colors to plot
   QwtDoubleInterval m_range;
+
+  /// Not a number
+  double nan;
 };
 
 #endif /* QwtRasterDataMD_H_ */
