@@ -857,7 +857,7 @@ IntervalListValidator::IntervalListValidator(QObject * parent, const IntervalLis
 
 QValidator::State IntervalListValidator::validate(QString &input, int &pos) const
 {
-  pos == pos; // Use unused parameter ...
+  UNUSED_ARG(pos)
   if(IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
   
