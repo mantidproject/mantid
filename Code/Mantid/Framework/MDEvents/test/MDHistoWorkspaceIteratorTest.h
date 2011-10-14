@@ -48,6 +48,10 @@ public:
     for (size_t d=0; d<nd; d++)
     { TS_ASSERT_DELTA( it->getInnerPosition(0,0), 0.5, 1e-6 ); }
 
+    VMD compare(nd);
+    for (size_t d=0;d<nd; d++) { compare[d] = 0.5; }
+    TS_ASSERT_EQUALS( it->getCenter(), compare );
+
     do
     {
       TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);

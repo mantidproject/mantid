@@ -109,6 +109,9 @@ namespace MDEvents
     /// Index into each dimension
     size_t * m_indexMax;
 
+    /// Array to find indices from linear indices
+    size_t * m_indexMaker;
+
   };
 
 

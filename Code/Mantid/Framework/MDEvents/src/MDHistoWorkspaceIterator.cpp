@@ -57,6 +57,7 @@ namespace MDEvents
     m_binWidth = new coord_t[m_nd];
     m_index = new size_t[m_nd];
     m_indexMax = new size_t[m_nd];
+    m_indexMaker = new size_t[m_nd];
     Utils::NestedForLoop::SetUp(m_nd, m_index, 0);
     // Initalize all these values
     for (size_t d=0; d<m_nd; d++)
@@ -67,6 +68,7 @@ namespace MDEvents
       m_binWidth[d] = dim->getBinWidth();
       m_indexMax[d] = dim->getNBins();
     }
+    Utils::NestedForLoop::SetUpIndexMaker(m_nd, m_indexMaker, m_indexMax);
 
     // Make sure that the first iteration is at a point inside the implicit function
     if (m_function)
@@ -186,7 +188,12 @@ namespace MDEvents
   /// Returns the position of the center of the box pointed to.
   Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const
   {
-    throw std::runtime_error("MDHistoWorkspaceIterator::getCenter() not implemented.");
+    // Get the indices
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax, m_index);
+    // Find the center
+    for (size_t d=0; d<m_nd; d++)
+      m_center[d] = m_origin[d] + (double(m_index[d]) + 0.5) * m_binWidth[d];
+    return VMD(m_nd, m_center);
   }
 
 
