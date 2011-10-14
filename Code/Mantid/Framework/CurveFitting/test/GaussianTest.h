@@ -104,8 +104,8 @@ public:
     void getHRP38692Peak2Data(Mantid::MantidVec& x, Mantid::MantidVec& y, Mantid::MantidVec& e)
 	{
 		// x-values in time-of-flight
-		for(size_t i=0; i < 8; i++) x[i] =  79292.4375 + 7.875*i;
-		for(size_t i=8; i < 41; i++) x[i] = 79347.625 + 8*(i-8);
+		for(size_t i=0; i < 8; i++) x[i] =  79292.4375 + 7.875*double(i);
+		for(size_t i=8; i < 41; i++) x[i] = 79347.625 + 8.0*(double(i)-8.0);
 
 		// y-values
 		y[0] = 7;
