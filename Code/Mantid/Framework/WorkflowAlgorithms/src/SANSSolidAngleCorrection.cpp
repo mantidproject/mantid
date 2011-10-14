@@ -6,6 +6,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidWorkflowAlgorithms/ReductionTableHandler.h"
 
 namespace Mantid
 {
@@ -35,10 +37,22 @@ void SANSSolidAngleCorrection::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   declareProperty("OutputMessage","",Direction::Output);
+  declareProperty(new WorkspaceProperty<TableWorkspace>("ReductionTableWorkspace","", Direction::Output, true));
 }
 
 void SANSSolidAngleCorrection::exec()
 {
+  // Get the reduction table workspace or create one
+  TableWorkspace_sptr reductionTable = getProperty("ReductionTableWorkspace");
+  ReductionTableHandler reductionHandler(reductionTable);
+  if (!reductionTable)
+  {
+    const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
+    if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
+  }
+  if (reductionHandler.findStringEntry("SolidAngleAlgorithm").size()==0)
+    reductionHandler.addEntry("SolidAngleAlgorithm", toString());
+
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (inputEventWS)
