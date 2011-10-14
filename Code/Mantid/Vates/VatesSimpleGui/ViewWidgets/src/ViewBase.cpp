@@ -63,26 +63,26 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->originSourceRepr);
+  QPair <double, double> range = this->colorUpdater.autoScale(this->origRep);
   this->renderAll();
   emit this->dataRange(range.first, range.second);
 }
 
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
-  this->colorUpdater.colorMapChange(this->originSourceRepr, model);
+  this->colorUpdater.colorMapChange(this->origRep, model);
   this->renderAll();
 }
 
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  this->colorUpdater.colorScaleChange(this->originSourceRepr, min, max);
+  this->colorUpdater.colorScaleChange(this->origRep, min, max);
   this->renderAll();
 }
 
 void ViewBase::onLogScale(int state)
 {
-  this->colorUpdater.logScale(this->originSourceRepr, state);
+  this->colorUpdater.logScale(this->origRep, state);
   this->renderAll();
 }
 
@@ -116,7 +116,7 @@ void ViewBase::setSource(pqPipelineSource *src, bool pluginMode)
     srcProxy->UpdatePipelineInformation();;
   }
 
-  if (this->isPeaksWorkspace(src) && !this->origSource)
+  if (this->isPeaksWorkspace(src) && !this->origSrc)
   {
     emit this->disableViews();
   }

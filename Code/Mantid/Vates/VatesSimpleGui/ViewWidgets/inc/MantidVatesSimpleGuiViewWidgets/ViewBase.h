@@ -105,8 +105,8 @@ public:
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
 
-  QPointer<pqPipelineSource> origSource; ///< The current source
-  QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
+  QPointer<pqPipelineSource> origSrc; ///< The original source
+  QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
 
 public slots:
   /// Set the color scale back to the original bounds.

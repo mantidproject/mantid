@@ -51,9 +51,9 @@ pqRenderView* SplatterPlotView::getView()
 
 void SplatterPlotView::render()
 {
-  this->origSource = pqActiveObjects::instance().activeSource();
+  this->origSrc = pqActiveObjects::instance().activeSource();
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->splatSource = builder->createFilter("filters", "MantidParaViewSplatterPlot", this->origSource);
+  this->splatSource = builder->createFilter("filters", "MantidParaViewSplatterPlot", this->origSrc);
 
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\

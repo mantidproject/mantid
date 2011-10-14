@@ -134,17 +134,17 @@ void MultiSliceView::setupData()
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSource->getOutputPort(0), this->mainView);
+        this->origSrc->getOutputPort(0), this->mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
   drep->getProxy()->UpdateVTKObjects();
-  this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->originSourceRepr->colorByArray("signal",
+  this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
+  this->origRep->colorByArray("signal",
                                        vtkDataObject::FIELD_ASSOCIATION_CELLS);
 }
 
 void MultiSliceView::setupAxisInfo()
 {
-  const char *geomXML = vtkSMPropertyHelper(this->origSource->getProxy(),
+  const char *geomXML = vtkSMPropertyHelper(this->origSrc->getProxy(),
                                             "InputGeometryXML").GetAsString();
   GeometryParser parser(geomXML);
   AxisInformation *xinfo = parser.getAxisInfo("XDimension");
@@ -168,13 +168,13 @@ void MultiSliceView::setupAxisInfo()
 
 void MultiSliceView::render()
 {
-  this->origSource = pqActiveObjects::instance().activeSource();
+  this->origSrc = pqActiveObjects::instance().activeSource();
   this->setupData();
   this->setupAxisInfo();
   this->resetDisplay();
   this->renderAll();
 
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  QPair<double, double> range = this->origRep->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
 }
 
@@ -230,7 +230,7 @@ void MultiSliceView::makeCut(double origin[], double orient[])
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   pqPipelineSource *cut = builder->createFilter("filters", "Cut",
-                                                this->origSource);
+                                                this->origSrc);
   emit sliceNamed(cut->getSMName());
   pqDataRepresentation *trepr = builder->createDataRepresentation(\
         cut->getOutputPort(0),this->mainView);
@@ -319,7 +319,7 @@ void MultiSliceView::deleteCut(const QString &name)
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroy(cut);
-  this->originSourceRepr->setVisible(this->noIndicatorsLeft());
+  this->origRep->setVisible(this->noIndicatorsLeft());
 }
 
 void MultiSliceView::cutVisibility(bool isVisible, const QString &name)

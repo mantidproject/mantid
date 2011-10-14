@@ -58,28 +58,28 @@ pqRenderView* StandardView::getView()
 
 void StandardView::render()
 {
-  this->origSource = pqActiveObjects::instance().activeSource();
+  this->origSrc = pqActiveObjects::instance().activeSource();
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSource->getOutputPort(0), this->view);
+        this->origSrc->getOutputPort(0), this->view);
   int reptype = VTK_SURFACE;
-  char *xmlName = this->origSource->getProxy()->GetXMLName();
+  char *xmlName = this->origSrc->getProxy()->GetXMLName();
   if (QString("PeaksReader") == QString(xmlName) || QString("Peaks Source") == QString(xmlName))
   {
     reptype = VTK_WIREFRAME;
   }
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype);
   drep->getProxy()->UpdateVTKObjects();
-  this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->originSourceRepr->colorByArray("signal",
+  this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
+  this->origRep->colorByArray("signal",
                                        vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   this->resetDisplay();
   this->renderAll();
 
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  QPair<double, double> range = this->origRep->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
   emit this->triggerAccept();
 }
@@ -93,11 +93,11 @@ void StandardView::onCutButtonClicked()
 
 void StandardView::onRebinButtonClicked()
 {
-  if (this->origSource)
+  if (this->origSrc)
   {
     pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
     this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
-                                           this->origSource);
+                                           this->origSrc);
   }
 }
 

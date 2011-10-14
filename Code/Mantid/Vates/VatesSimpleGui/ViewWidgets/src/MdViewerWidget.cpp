@@ -296,9 +296,9 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  if (this->currentView->origSource)
+  if (this->currentView->origSrc)
   {
-    pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSource);
+    pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSrc);
   }
   if (QString("PeaksReader") == source->getProxy()->GetXMLName())
   {
@@ -315,7 +315,7 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 
 void MdViewerWidget::checkForTimesteps()
 {
-  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
   vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
   if (NULL != tsv && 0 != tsv->GetNumberOfElements())
   {
@@ -330,7 +330,7 @@ void MdViewerWidget::checkForTimesteps()
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  if (this->currentView->origSource)
+  if (this->currentView->origSrc)
   {
     this->ui.modeControlWidget->setToStandardView();
     builder->destroySources();
@@ -347,12 +347,12 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
     sourcePlugin = "MDEW Source";
   }
 
-  this->currentView->origSource = builder->createSource("sources", sourcePlugin,
+  this->currentView->origSrc = builder->createSource("sources", sourcePlugin,
                                                         pqActiveObjects::instance().activeServer());
-  vtkSMPropertyHelper(this->currentView->origSource->getProxy(),
+  vtkSMPropertyHelper(this->currentView->origSrc->getProxy(),
                       "Mantid Workspace Name").Set(wsname.toStdString().c_str());
 
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
@@ -409,7 +409,7 @@ void MdViewerWidget::setTimesteps()
   {
     return;
   }
-  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
   srcProxy1->Modified();
   srcProxy1->UpdatePipelineInformation();
   //srcProxy1->UpdatePipeline();
@@ -424,7 +424,7 @@ void MdViewerWidget::updateTimesteps()
   rbcProxy->UpdatePipelineInformation();
   vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(rbcProxy->GetProperty("TimestepValues"));
   const int numTimesteps = static_cast<int>(tsv->GetNumberOfElements());
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSource->getProxy());
+  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
   vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(tsv->GetElements(),
                                                       numTimesteps);
   this->updateAnimationControls(tsv);

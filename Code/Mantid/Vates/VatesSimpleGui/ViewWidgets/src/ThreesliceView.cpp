@@ -138,33 +138,33 @@ void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
 
 void ThreeSliceView::makeThreeSlice()
 {
-  this->origSource = pqActiveObjects::instance().activeSource();
+  this->origSrc = pqActiveObjects::instance().activeSource();
 
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSource->getOutputPort(0), this->mainView);
+        this->origSrc->getOutputPort(0), this->mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
   drep->getProxy()->UpdateVTKObjects();
-  this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->originSourceRepr->colorByArray("signal",
+  this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
+  this->origRep->colorByArray("signal",
                                        vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   // Have to create the cuts and cut representations up here to keep
   // them around
 
-  this->xCut = builder->createFilter("filters", "Cut", this->origSource);
+  this->xCut = builder->createFilter("filters", "Cut", this->origSrc);
   pqDataRepresentation *trepr = builder->createDataRepresentation(\
         this->xCut->getOutputPort(0), this->xView);
   this->xCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
 
-  this->yCut = builder->createFilter("filters", "Cut", this->origSource);
+  this->yCut = builder->createFilter("filters", "Cut", this->origSrc);
   trepr = builder->createDataRepresentation(this->yCut->getOutputPort(0),
                                             this->yView);
   this->yCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
 
-  this->zCut = builder->createFilter("filters", "Cut", this->origSource);
+  this->zCut = builder->createFilter("filters", "Cut", this->origSrc);
   trepr = builder->createDataRepresentation(this->zCut->getOutputPort(0),
                                             this->zView);
   this->zCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
@@ -197,13 +197,13 @@ void ThreeSliceView::correctVisibility(pqPipelineBrowserWidget *pbw)
   smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::Clear);
   smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Clear);
   smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Clear);
-  this->originSourceRepr->setVisible(false);
+  this->origRep->setVisible(false);
   this->correctColorScaleRange();
 }
 
 void ThreeSliceView::correctColorScaleRange()
 {
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  QPair<double, double> range = this->origRep->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
 }
 
