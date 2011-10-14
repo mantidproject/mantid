@@ -26,6 +26,8 @@
 #include <QSignalMapper>
 #include <QtGui>
 
+#include "MantidWSIndexDialog.h"
+
 #include <map>
 #include <vector>
 #include <iostream>
@@ -1253,37 +1255,41 @@ void MantidDockWidget::groupingButtonClick()
 /// Plots a single spectrum from each selected workspace
 void MantidDockWidget::plotSpectra()
 {
-  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  m_mantidUI->plotSpectraList( toPlot, false );
+
+  m_mantidUI->plotSpectraList(toPlot, false);
 }
 
 /// Plots a single spectrum from each selected workspace
 void MantidDockWidget::plotSpectraDistribution()
 {
-  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  m_mantidUI->plotSpectraList( toPlot, false, true );
+  
+  m_mantidUI->plotSpectraList(toPlot, false, true );
 }
 
 /// Plots a single spectrum from each selected workspace with errors
 void MantidDockWidget::plotSpectraErr()
 {
-  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  m_mantidUI->plotSpectraList( toPlot, true );
+  
+  m_mantidUI->plotSpectraList(toPlot, true);
 }
 
 /// Plots a single spectrum from each selected workspace with erros
 void MantidDockWidget::plotSpectraDistributionErr()
 {
-  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
-  m_mantidUI->plotSpectraList( toPlot, true, true );
+  
+  m_mantidUI->plotSpectraList(toPlot, true, true );
 }
 
 /**
@@ -1442,14 +1448,15 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 *  Automatically chooses spectrum 0 if all are single-spectrum workspaces.
 *  @return A map of workspace name - spectrum index pairs
 */
-QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
+QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
   QList<QString> wsNames = this->getSelectedWorkspaceNames();
-  QList<size_t> wsSizes;
-
-  // Find out if they are all single-spectrum workspaces
   QList<QString>::const_iterator it = wsNames.constBegin();
+
+  // Check to see if all workspaces have a *single* histogram ...
+  QList<size_t> wsSizes;
+  it = wsNames.constBegin();
   size_t maxHists = 0;
   for ( ; it != wsNames.constEnd(); ++it )
   {
@@ -1459,30 +1466,26 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
     wsSizes.append(currentHists);
     if ( currentHists > maxHists ) maxHists = currentHists;
   }
-  // If not all single spectrum, ask which one to plot
-  QMultiMap<QString,int> toPlot;
-  int spec = 0;
-  if ( maxHists > 1 )
-  {
-    bool goAhead;
-    spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,static_cast<int>(maxHists-1),1,&goAhead);
-    if (!goAhead) return toPlot;
-  }
 
-  // Now need to go around inserting workspace-spectrum pairs into a map
-  // and checking whether the requested spectrum is too large for any workspaces
-  for ( int i = 0; i < static_cast<int>(wsNames.size()); ++i )
+  QMultiMap<QString,std::set<int> > toPlot;
+
+  // ... if so, no need to ask user which one to plot - just go!
+  if(maxHists == 1)
   {
-    if (spec >= static_cast<int>(wsSizes[i]))
+    it = wsNames.constBegin();
+    for ( ; it != wsNames.constEnd(); ++it )
     {
-      logObject.warning() << wsNames[i].toStdString() << " has only "
-        << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
-      continue;
+      std::set<int> zero;
+      zero.insert(0);
+      toPlot.insert((*it),zero);
     }
-    toPlot.insert(wsNames[i],spec);
+
+    return toPlot;
   }
 
-  return toPlot;
+  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, wsNames);
+  dio->exec();
+  return dio->getPlots();
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)

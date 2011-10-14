@@ -17,6 +17,7 @@
 #include <QActionGroup>
 #include <QSortFilterProxyModel>
 #include <QStringList>
+#include <set>
 
 class MantidUI;
 class ApplicationWindow;
@@ -138,7 +139,7 @@ public:
   void mouseDoubleClickEvent(QMouseEvent *e);
 
   QStringList getSelectedWorkspaceNames() const;
-  QMultiMap<QString,int> chooseSpectrumFromSelected() const;
+  QMultiMap<QString,std::set<int> > chooseSpectrumFromSelected() const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;
