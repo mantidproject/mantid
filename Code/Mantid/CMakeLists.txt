@@ -58,6 +58,7 @@ include_directories ( MantidQt/API/inc )
 include_directories ( MantidQt/MantidWidgets/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/API )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/SliceViewer )
 
 add_subdirectory ( MantidPlot )
 

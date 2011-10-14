@@ -378,7 +378,7 @@ QwtDoubleInterval getRange(IMDIterator * it)
   do
   {
     double signal = it->getNormalizedSignal();
-    if (signal < minSignal) minSignal = signal;
+    if (signal > 0 && signal < minSignal) minSignal = signal;
     if (signal > maxSignal) maxSignal = signal;
   } while (it->next());
 

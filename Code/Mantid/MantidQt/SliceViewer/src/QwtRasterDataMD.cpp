@@ -47,7 +47,7 @@ double QwtRasterDataMD::value(double x, double y) const
   if (value > m_maxVal) m_maxVal = value;
 //  std::cout << x << "," << y << "=" << value << "\n";
   delete [] lookPoint;
-  return value;
+  return log(value);
 }
 
 QwtRasterData* QwtRasterDataMD::copy() const
@@ -72,7 +72,11 @@ QwtRasterData* QwtRasterDataMD::copy() const
 /** Return the data range to show */
 QwtDoubleInterval QwtRasterDataMD::range() const
 {
-  return m_range;
+  double min = log(m_range.minValue());
+  double max = log(m_range.maxValue());
+  if (m_range.minValue() <= 0)
+    min = max-6;
+  return QwtDoubleInterval(min,max);
 }
 
 

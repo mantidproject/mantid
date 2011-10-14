@@ -1,7 +1,7 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "../../ui_SliceViewer.h"
+#include "ui_SliceViewer.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
