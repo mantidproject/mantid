@@ -214,9 +214,9 @@ public:
   {
     LoadRaw2 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "EVS13895.raw");
+    loader5.setPropertyValue("Filename", "CSP79590.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod2");
-    loader5.setPropertyValue("SpectrumList", "10,50,100,195");
+    //loader5.setPropertyValue("SpectrumList", "0,1,2,3");
     //loader5.setPropertyValue("SpectrumMin", "1");
     //loader5.setPropertyValue("SpectrumMax", "2");
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
@@ -229,47 +229,19 @@ public:
     MatrixWorkspace_sptr output2;
     TS_ASSERT_THROWS_NOTHING( output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_2")) );
     TS_ASSERT_EQUALS( output2->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output3;
-    TS_ASSERT_THROWS_NOTHING( output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_3")) );
-    TS_ASSERT_EQUALS( output3->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output4;
-    TS_ASSERT_THROWS_NOTHING( output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_4")) );
-    TS_ASSERT_EQUALS( output4->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output5;
-    TS_ASSERT_THROWS_NOTHING( output5 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_5")) );
-    TS_ASSERT_EQUALS( output5->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output6;
-    TS_ASSERT_THROWS_NOTHING( output6 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_6")) );
-    TS_ASSERT_EQUALS( output6->getNumberHistograms(), 4 )
 
     // The histogram bins should be the same
     TS_ASSERT_EQUALS( output1->dataX(0), output2->dataX(0) )
-    TS_ASSERT_EQUALS( output1->dataX(0), output3->dataX(0) )
-    TS_ASSERT_EQUALS( output1->dataX(0), output4->dataX(0) )
-    TS_ASSERT_EQUALS( output1->dataX(1), output5->dataX(1) )
-    TS_ASSERT_EQUALS( output1->dataX(1), output6->dataX(1) )
     // But the data should be different
     TS_ASSERT_DIFFERS( output1->dataY(1)[555], output2->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output3->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output4->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output5->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output6->dataY(1)[555] )
 
     // Check these are the same
     TS_ASSERT_EQUALS( output1->getInstrument()->getName(), output2->getInstrument()->getName() )
     TS_ASSERT_EQUALS( &(output1->sample()), &(output2->sample()) )
     TS_ASSERT_DIFFERS( &(output1->run()), &(output2->run()) )
-    TS_ASSERT_EQUALS( output1->getInstrument()->getName(), output6->getInstrument()->getName() )
-    TS_ASSERT_EQUALS( &(output1->sample()), &(output6->sample()) )
-    TS_ASSERT_DIFFERS( &(output1->run()), &(output6->run()) )
-
     
     AnalysisDataService::Instance().remove("multiperiod2");
     AnalysisDataService::Instance().remove("multiperiod2_2");
-    AnalysisDataService::Instance().remove("multiperiod2_3");
-    AnalysisDataService::Instance().remove("multiperiod2_4");
-    AnalysisDataService::Instance().remove("multiperiod2_5");
-    AnalysisDataService::Instance().remove("multiperiod2_6");
 
   }
 

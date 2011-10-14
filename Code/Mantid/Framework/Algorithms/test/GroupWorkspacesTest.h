@@ -161,8 +161,8 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","EVS13895.raw"));
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","EVS13895"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","CSP79590.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","CSP79590"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
@@ -176,12 +176,8 @@ public:
 		GroupWorkspaces grpwsalg;
 		grpwsalg.initialize();
 		std::vector<std::string >input;
-		input.push_back("EVS13895_1");
-		input.push_back("EVS13895_2");
-		input.push_back("EVS13895_3");
-		input.push_back("EVS13895_4");
-		input.push_back("EVS13895_5");
-		input.push_back("EVS13895_6");
+		input.push_back("CSP79590_1");
+		input.push_back("CSP79590_2");
 		input.push_back("LOQ48098");
 
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
@@ -191,23 +187,15 @@ public:
 		WorkspaceGroup_sptr result;
 		TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("NewGroup")) );
 		std::vector<std::string> grpVec=result->getNames();
-		TS_ASSERT_EQUALS(grpVec.size(),7);
+		TS_ASSERT_EQUALS(grpVec.size(),3);
 		Workspace_sptr result1;
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_1")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_2")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_3")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_4")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_5")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_6")) );
+		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("CSP79590_1")) );
+		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("CSP79590_2")) );
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48098")) );
 
 		AnalysisDataService::Instance().remove("NewGroup");
-		AnalysisDataService::Instance().remove("EVS13895_1");
-		AnalysisDataService::Instance().remove("EVS13895_2");
-		AnalysisDataService::Instance().remove("EVS13895_3");
-		AnalysisDataService::Instance().remove("EVS13895_4");
-		AnalysisDataService::Instance().remove("EVS13895_5");
-		AnalysisDataService::Instance().remove("EVS13895_6");
+		AnalysisDataService::Instance().remove("CSP79590_1");
+		AnalysisDataService::Instance().remove("CSP79590_2");
 		AnalysisDataService::Instance().remove("LOQ48098");
 	}
 	void testExecGroupTwoIncompatibleWorkspaces()

@@ -86,7 +86,7 @@ public:
   {
 	LoadRawSpectrum0 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "EVS13895.raw");
+    loader5.setPropertyValue("Filename", "CSP79590.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
      
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
@@ -122,34 +122,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
     MatrixWorkspace_sptr  outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr3;
-    TS_ASSERT_THROWS_NOTHING(outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr4;
-    TS_ASSERT_THROWS_NOTHING(outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr5;
-    TS_ASSERT_THROWS_NOTHING(outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr6;
-    TS_ASSERT_THROWS_NOTHING(outsptr6=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
 		
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr3->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr4->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr5->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr6->dataX(0) )
 
     // But the data should be different
     TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr2->dataY(0)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr3->dataY(0)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr4->dataY(0)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr5->dataY(0)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr6->dataY(0)[555] )
 
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 	
   }
   

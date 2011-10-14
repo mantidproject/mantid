@@ -49,31 +49,26 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","EVS13895.raw"));
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","EVS13895"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","CSP79590.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","CSP79590"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 		
 		UnGroupWorkspace ungrpwsalg;
 		ungrpwsalg.initialize();
 		//std::vector<std::string >input;
-		//input.push_back("EVS13895");
-		std::string input="EVS13895";
+		//input.push_back("CSP79590");
+		std::string input="CSP79590";
 		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.setProperty("InputWorkspace",input));
 		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.execute());
 		TS_ASSERT( ungrpwsalg.isExecuted() );
 		//EVS13895 gets deleted,so test it
 		WorkspaceGroup_sptr result;
-		TS_ASSERT_THROWS( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("EVS13895")),std::runtime_error );
+		TS_ASSERT_THROWS( result = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("CSP79590")),std::runtime_error );
 
 		Workspace_sptr result1;
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_1")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_2")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_3")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_4")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_5")) );
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("EVS13895_6")) );
-
+		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("CSP79590_1")) );
+		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("CSP79590_2")) );
 		
 	}
 	

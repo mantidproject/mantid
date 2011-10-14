@@ -158,7 +158,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","EVS13895.raw");
+    loader.setPropertyValue("Filename","CSP79590.raw");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
@@ -168,10 +168,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
     AnalysisDataService::Instance().remove("LoadTest_Output_1");
     AnalysisDataService::Instance().remove("LoadTest_Output_2");
-    AnalysisDataService::Instance().remove("LoadTest_Output_3");
-    AnalysisDataService::Instance().remove("LoadTest_Output_4");
-    AnalysisDataService::Instance().remove("LoadTest_Output_5");
-    AnalysisDataService::Instance().remove("LoadTest_Output_6");
+
   }
   
   void testHDF4Nexus()

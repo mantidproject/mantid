@@ -87,9 +87,9 @@ public:
 	
 	LoadRawBin0 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "EVS13895.raw");
+    loader5.setPropertyValue("Filename", "CSP79590.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
-    //loader5.setPropertyValue("SpectrumList", "10,50,100,195");
+    //loader5.setPropertyValue("SpectrumList", "0,1,2,3");
     
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
@@ -115,7 +115,7 @@ public:
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
-      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 198 )
+      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 4 )
 
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
@@ -123,29 +123,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
     MatrixWorkspace_sptr  outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr3;
-    TS_ASSERT_THROWS_NOTHING(outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr4;
-    TS_ASSERT_THROWS_NOTHING(outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr5;
-    TS_ASSERT_THROWS_NOTHING(outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-    MatrixWorkspace_sptr  outsptr6;
-    TS_ASSERT_THROWS_NOTHING(outsptr6=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
 		
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr3->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr4->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr5->dataX(1) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
 
    
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
-    TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr6->sample()) )
-    TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 
 	itr1=wsNamevec.begin();
     for (;itr1!=wsNamevec.end();++itr1)
