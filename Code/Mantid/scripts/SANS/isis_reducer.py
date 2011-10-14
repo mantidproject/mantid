@@ -130,6 +130,7 @@ class ISISReducer(SANSReducer):
 	
     def __init__(self):
         SANSReducer.__init__(self)
+        self._dark_current_subtracter_class = None
         self._sample_run = Sample()
         self.output_wksp = None
         self.full_trans_wav = False
