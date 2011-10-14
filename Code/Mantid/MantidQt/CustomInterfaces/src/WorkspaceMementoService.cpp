@@ -36,7 +36,6 @@ namespace MantidQt
     template<typename Memento>
     void WorkspaceMementoService<Memento>::addAllItems(Mantid::API::ITableWorkspace_sptr ws, int rowIndex)
     {
-      const int nLogValueColumns = ws->columnCount() - m_logValueStart;
       if(ws->columnCount() < m_logValueStart)
       {
         throw std::runtime_error("Too few columns in table schema.");
@@ -122,7 +121,6 @@ namespace MantidQt
     {
       typedef std::vector<Mantid::Kernel::Property*> VecLogType;
       VecLogType::iterator it = vecLogData.begin();
-      int count = m_logValueStart;
       while(it != vecLogData.end())
       {
         ws->addColumn("str", (*it)->name());

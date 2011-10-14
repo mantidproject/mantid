@@ -18,7 +18,7 @@ namespace MantidQt
     {
     }
 
-    void LogPresenter::acceptView(LogView* view)
+    void LogPresenter::acceptView(LogView*)
     {
     }
   }
