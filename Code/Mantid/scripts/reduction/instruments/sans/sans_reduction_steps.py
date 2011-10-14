@@ -470,78 +470,7 @@ class DirectBeamTransmission(BaseTransmission):
         if len(trans_ws.dataY(0))==1:
             output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, self._trans, self._error)
         return "Transmission correction applied [%s]\n%s\n" % (self._transmission_ws, output_str)
-            
-
-class SubtractDarkCurrent(ReductionStep):
-    """
-        ReductionStep class that subtracts the dark current from the data.
-        The loaded dark current is stored by the ReductionStep object so that the
-        subtraction can be applied to multiple data sets without reloading it.
-    """
-    def __init__(self, dark_current_file, timer_ws=None):
-        """
-            @param timer_ws: if provided, will be used to scale the dark current
-        """
-        raise RuntimeError, "Old dark current no longer in use"
-        super(SubtractDarkCurrent, self).__init__()
-        self._timer_ws = timer_ws
-        self._dark_current_file = dark_current_file
-        self._dark_current_ws = None
-        
-    def execute(self, reducer, workspace):
-        """
-            Subtract the dark current from the input workspace.
-            If no timer workspace is provided, the counting time will be extracted
-            from the input workspace.
-            
-            @param reducer: Reducer object for which this step is executed
-            @param workspace: input workspace
-        """
-        # Sanity check
-        if self._dark_current_file is None:
-            raise RuntimeError, "SubtractDarkCurrent called with no defined dark current file"
-
-        # Check whether the dark current was already loaded, otherwise load it
-        # Load dark current, which will be used repeatedly
-        if self._dark_current_ws is None:
-            filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
-            self._dark_current_ws = "_dark_"+extract_workspace_name(filepath)
-            reducer._data_loader.clone(filepath).execute(reducer, self._dark_current_ws)
-            #Load(filepath, self._dark_current_ws)
-            
-            # Normalize the dark current data to counting time
-            darktimer_ws = self._dark_current_ws+"_timer"
-            CropWorkspace(self._dark_current_ws, darktimer_ws,
-                          StartWorkspaceIndex = str(reducer.NORMALIZATION_TIME), 
-                          EndWorkspaceIndex   = str(reducer.NORMALIZATION_TIME))        
-            
-            Divide(self._dark_current_ws, darktimer_ws, self._dark_current_ws)      
-    
-        # If no timer workspace was provided, get the counting time from the data
-        timer_ws = self._timer_ws
-        if timer_ws is None:
-            timer_ws = "_tmp_timer"     
-            CropWorkspace(workspace, timer_ws,
-                          StartWorkspaceIndex = str(reducer.NORMALIZATION_TIME), 
-                          EndWorkspaceIndex   = str(reducer.NORMALIZATION_TIME))  
-            
-        # Scale the stored dark current by the counting time
-        scaled_dark_ws = "_scaled_dark_current"
-        Multiply(self._dark_current_ws, timer_ws, scaled_dark_ws)
-        
-        # Set time and monitor channels to zero, so that we subtract only detectors
-        mtd[scaled_dark_ws].dataY(reducer.NORMALIZATION_TIME)[0] = 0
-        mtd[scaled_dark_ws].dataE(reducer.NORMALIZATION_TIME)[0] = 0
-        mtd[scaled_dark_ws].dataY(reducer.NORMALIZATION_MONITOR)[0] = 0
-        mtd[scaled_dark_ws].dataE(reducer.NORMALIZATION_MONITOR)[0] = 0
-        
-        # Perform subtraction
-        Minus(workspace, scaled_dark_ws, workspace)  
-        if mtd.workspaceExists(scaled_dark_ws):
-            mtd.deleteWorkspace(scaled_dark_ws)
-        
-        return "Dark current subtracted [%s]" % extract_workspace_name(self._dark_current_file)
-          
+                      
 class Normalize(ReductionStep):
     """
         Normalize the data to timer or a spectrum, typically a monitor, 
