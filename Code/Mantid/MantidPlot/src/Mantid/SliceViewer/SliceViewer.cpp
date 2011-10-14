@@ -20,6 +20,10 @@
 #include <sstream>
 #include <vector>
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "../../ColorMapDialog.h"
+#include <qmenu.h>
+#include <QtGui/qaction.h>
+#include "qmenubar.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -27,9 +31,11 @@ using namespace Mantid::API;
 using Mantid::Kernel::VMD;
 
 
+//------------------------------------------------------------------------------------
+/** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
-      m_dimX(0), m_dimY(0),
+      m_dimX(0), m_dimY(1),
       m_logColor(false)
 {
 	ui.setupUi(this);
@@ -70,12 +76,55 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
   ui.btnZoom->hide();
 
+  initMenus();
 }
 
+//------------------------------------------------------------------------------------
+/// Destructor
 SliceViewer::~SliceViewer()
 {
   delete m_data;
   // Don't delete Qt objects, I think these are auto-deleted
+}
+
+
+//------------------------------------------------------------------------------------
+/** Create the menus */
+void SliceViewer::initMenus()
+{
+  QAction * action;
+
+  // --------------- Color options Menu ----------------------------------------
+  m_menuColorOptions = new QMenu("&ColorMap", this);
+  action = new QAction(QPixmap(), "&Full range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(colorRangeFullSlot()));
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "&Slice range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(colorRangeSliceSlot()));
+  m_menuColorOptions->addAction(action);
+
+  // --------------- View Menu ----------------------------------------
+  m_menuView = new QMenu("&View", this);
+  action = new QAction(QPixmap(), "&Reset Zoom", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Zoom In", this);
+  action->setShortcut(Qt::Key_Plus + Qt::ControlModifier);
+  connect(action, SIGNAL(triggered()), this, SLOT(zoomInSlot()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Zoom Out", this);
+  action->setShortcut(Qt::Key_Minus + Qt::ControlModifier);
+  connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
+  m_menuView->addAction(action);
+
+  // ---------------------- Build the menu bar -------------------------
+  QMenuBar * bar = new QMenuBar(this, "Main Menu Bar");
+  bar->addMenu( m_menuView );
+  bar->addMenu( m_menuColorOptions );
+  ui.verticalLayout->insertWidget(0, bar );
 }
 
 //------------------------------------------------------------------------------------
@@ -120,17 +169,119 @@ void SliceViewer::showControls(bool visible)
 
 
 //------------------------------------------------------------------------------------
-/** Reset the axis and scale it
- *
- * @param axis :: int for X or Y
- * @param dim :: dimension to show
- */
-void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim)
+/** Add (as needed) and update DimensionSliceWidget's. */
+void SliceViewer::updateDimensionSliceWidgets()
 {
-  m_plot->setAxisScale( axis, dim->getMinimum(), dim->getMaximum(), (dim->getMaximum()-dim->getMinimum())/5);
-  m_plot->setAxisTitle( axis, QString::fromStdString(dim->getName() + " (" + dim->getUnits() + ")") );
+  // Create all necessary widgets
+  if (m_dimWidgets.size() < int(m_ws->getNumDims()))
+  {
+    for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
+    {
+      DimensionSliceWidget * widget = new DimensionSliceWidget(this);
+      ui.verticalLayoutControls->insertWidget(int(d), widget);
+      m_dimWidgets.push_back(widget);
+      // Slot when t
+      QObject::connect(widget, SIGNAL(changedShownDim(int,int,int)),
+                       this, SLOT(changedShownDim(int,int,int)));
+      QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
+                       this, SLOT(updateDisplaySlot(int,double)));
+    }
+  }
+  // Hide unnecessary ones
+  for (size_t d=m_ws->getNumDims(); int(d)<m_dimWidgets.size(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    widget->hide();
+  }
+
+  int maxLabelWidth = 10;
+  int maxUnitsWidth = 10;
+  // Set each dimension
+  for (size_t d=0; d<m_ws->getNumDims(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    widget->setDimension( int(d), m_ws->getDimension(d) );
+    // Default slicing layout
+    if (d == m_dimX)
+      widget->setShownDim(0);
+    else if (d == m_dimY)
+      widget->setShownDim(1);
+    else
+      widget->setShownDim(-1);
+
+    // To harmonize the layout, find the largest label
+    int w;
+    w = widget->ui.lblName->sizeHint().width();
+    if (w > maxLabelWidth) maxLabelWidth = w;
+    w = widget->ui.lblUnits->sizeHint().width();
+    if (w > maxUnitsWidth) maxUnitsWidth = w;
+  }
+
+  // Make the labels all the same width
+  for (size_t d=0; d<m_ws->getNumDims(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
+    widget->ui.lblName->setMinimumSize(QSize(maxLabelWidth, 0) );
+    widget->ui.lblUnits->setMinimumSize(QSize(maxUnitsWidth, 0) );
+  }
 }
 
+
+//------------------------------------------------------------------------------------
+/** Set the displayed workspace. Updates UI.
+ *
+ * @param ws :: IMDWorkspace to show.
+ */
+void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
+{
+  m_ws = ws;
+  this->updateDimensionSliceWidgets();
+  m_data->setWorkspace(ws);
+  // Find the full range. And use it
+  findRangeFull();
+  m_colorRange = m_colorRangeFull;
+  // Initial display update
+  this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
+  // Don't reset axes next time
+  m_firstWorkspaceOpen = true;
+}
+
+
+
+//=================================================================================================
+//========================================== SLOTS ================================================
+//=================================================================================================
+
+//------------------------------------------------------------------------------------
+/// Slot for finding the data full range and updating the display
+void SliceViewer::colorRangeFullSlot()
+{
+  this->findRangeFull();
+  m_colorRange = m_colorRangeFull;
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot for finding the current view/slice full range and updating the display
+void SliceViewer::colorRangeSliceSlot()
+{
+  this->findRangeSlice();
+  m_colorRange = m_colorRangeSlice;
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot for zooming into
+void SliceViewer::zoomInSlot()
+{
+  this->zoomBy(1.1);
+}
+
+/// Slot for zooming out
+void SliceViewer::zoomOutSlot()
+{
+  this->zoomBy(1.0 / 1.1);
+}
 
 //------------------------------------------------------------------------------------
 /// Reset the zoom view to full axes. This can be called manually with a button
@@ -143,6 +294,45 @@ void SliceViewer::resetZoom()
   m_plot->replot();
 }
 
+//------------------------------------------------------------------------------------
+/** Slot to redraw when the slice point changes */
+void SliceViewer::updateDisplaySlot(int index, double value)
+{
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
+  this->updateDisplay();
+}
+
+//=================================================================================================
+//=================================================================================================
+//=================================================================================================
+/** Zoom in or out
+ * @param factor :: > 1 : zoom in by this factor. < 1 : zoom out.
+ */
+void SliceViewer::zoomBy(double factor)
+{
+  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
+  double x_min = xint.minValue() + (factor-1.) * xint.width() * 0.5;
+  double x_max = xint.maxValue() - (factor-1.) * xint.width() * 0.5;
+  double y_min = yint.minValue() + (factor-1.) * yint.width() * 0.5;
+  double y_max = yint.maxValue() - (factor-1.) * yint.width() * 0.5;
+  m_plot->setAxisScale( m_spect->xAxis(), x_min, x_max);
+  m_plot->setAxisScale( m_spect->yAxis(), y_min, y_max);
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/** Reset the axis and scale it
+ *
+ * @param axis :: int for X or Y
+ * @param dim :: dimension to show
+ */
+void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim)
+{
+  m_plot->setAxisScale( axis, dim->getMinimum(), dim->getMaximum());
+  m_plot->setAxisTitle( axis, QString::fromStdString(dim->getName() + " (" + dim->getUnits() + ")") );
+}
 
 //------------------------------------------------------------------------------------
 /** Get the range of signal given an iterator
@@ -234,26 +424,6 @@ void SliceViewer::findRangeSlice()
 }
 
 
-//------------------------------------------------------------------------------------
-/// Slot for finding the data full range and updating the display
-void SliceViewer::colorRangeFullSlot()
-{
-  this->findRangeFull();
-  m_colorRange = m_colorRangeFull;
-  this->updateDisplay();
-}
-
-//------------------------------------------------------------------------------------
-/// Slot for finding the current view/slice full range and updating the display
-void SliceViewer::colorRangeSliceSlot()
-{
-  this->findRangeSlice();
-  m_colorRange = m_colorRangeSlice;
-  this->updateDisplay();
-}
-
-
-
 
 
 //------------------------------------------------------------------------------------
@@ -273,7 +443,7 @@ void SliceViewer::showInfoAt(double x, double y)
 
 //------------------------------------------------------------------------------------
 /** Update the 2D plot using all the current controls settings */
-void SliceViewer::updateDisplay()
+void SliceViewer::updateDisplay(bool resetAxes)
 {
   m_data->timesRequested = 0;
   size_t oldX = m_dimX;
@@ -300,7 +470,7 @@ void SliceViewer::updateDisplay()
   m_Y = m_ws->getDimension(m_dimY);
 
   // Was there a change of which dimensions are shown?
-  if (oldX != m_dimX || oldY != m_dimY )
+  if (resetAxes || oldX != m_dimX || oldY != m_dimY )
   {
     this->resetAxis(m_spect->xAxis(), m_X );
     this->resetAxis(m_spect->yAxis(), m_Y );
@@ -357,89 +527,6 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
-  this->updateDisplay();
-}
-
-
-//------------------------------------------------------------------------------------
-/** Slot to redraw when the slice point changes */
-void SliceViewer::updateDisplaySlot(int index, double value)
-{
-  UNUSED_ARG(index)
-  UNUSED_ARG(value)
-  this->updateDisplay();
-}
-
-
-//------------------------------------------------------------------------------------
-/** Add (as needed) and update DimensionSliceWidget's. */
-void SliceViewer::updateDimensionSliceWidgets()
-{
-  // Create all necessary widgets
-  if (m_dimWidgets.size() < int(m_ws->getNumDims()))
-  {
-    for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
-    {
-      DimensionSliceWidget * widget = new DimensionSliceWidget(this);
-      ui.verticalLayoutControls->insertWidget(int(d), widget);
-      m_dimWidgets.push_back(widget);
-      // Slot when t
-      QObject::connect(widget, SIGNAL(changedShownDim(int,int,int)),
-                       this, SLOT(changedShownDim(int,int,int)));
-      QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
-                       this, SLOT(updateDisplaySlot(int,double)));
-    }
-  }
-  // Hide unnecessary ones
-  for (size_t d=m_ws->getNumDims(); int(d)<m_dimWidgets.size(); d++)
-  {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
-    widget->hide();
-  }
-
-  int maxLabelWidth = 10;
-  int maxUnitsWidth = 10;
-  // Set each dimension
-  for (size_t d=0; d<m_ws->getNumDims(); d++)
-  {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
-    widget->setDimension( int(d), m_ws->getDimension(d) );
-    // Default slicing layout
-    widget->setShownDim( d < 2 ? int(d) : -1 );
-    // To harmonize the layout, find the largest label
-    int w;
-    w = widget->ui.lblName->sizeHint().width();
-    if (w > maxLabelWidth) maxLabelWidth = w;
-    w = widget->ui.lblUnits->sizeHint().width();
-    if (w > maxUnitsWidth) maxUnitsWidth = w;
-  }
-
-  // Make the labels all the same width
-  for (size_t d=0; d<m_ws->getNumDims(); d++)
-  {
-    DimensionSliceWidget * widget = m_dimWidgets[int(d)];
-    widget->ui.lblName->setMinimumSize(QSize(maxLabelWidth, 0) );
-    widget->ui.lblUnits->setMinimumSize(QSize(maxUnitsWidth, 0) );
-  }
-
-  // Make the controls as short as possible: TODO: How?
-}
-
-
-//------------------------------------------------------------------------------------
-/** Set the displayed workspace. Updates UI.
- *
- * @param ws :: IMDWorkspace to show.
- */
-void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
-{
-  m_ws = ws;
-  this->updateDimensionSliceWidgets();
-  m_data->setWorkspace(ws);
-  // Find the full range. And use it
-  findRangeFull();
-  m_colorRange = m_colorRangeFull;
-  // Initial display update
   this->updateDisplay();
 }
 

@@ -25,26 +25,36 @@ public:
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   void showControls(bool visible);
+  void zoomBy(double factor);
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
-  void updateDisplay();
   void resetZoom();
   void showInfoAt(double, double);
   void colorRangeFullSlot();
   void colorRangeSliceSlot();
+  void zoomInSlot();
+  void zoomOutSlot();
 
 private:
-  void findRangeFull();
-  void findRangeSlice();
+  void initMenus();
   void initZoomer();
+
+  void updateDisplay(bool resetAxes = false);
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
+
+  void findRangeFull();
+  void findRangeSlice();
+
 
 private:
   /// Auto-generated UI controls.
   Ui::SliceViewerClass ui;
+
+  /// Set to true once the first workspace has been loaded in it
+  bool m_firstWorkspaceOpen;
 
   /// Main plot object
   QwtPlot * m_plot;
@@ -61,11 +71,8 @@ private:
   /// Color bar indicating the color scale
   QwtScaleWidget * m_colorBar;
 
-public:
   /// Vector of the widgets for slicing dimensions
   QVector<DimensionSliceWidget *> m_dimWidgets;
-
-protected:
 
   /// Data presenter
   QwtRasterDataMD * m_data;
@@ -88,8 +95,12 @@ protected:
   /// The calculated range of values ONLY in the currently viewed part of the slice
   QwtDoubleInterval m_colorRangeSlice;
 
-  // Use the log of the value for the color scale
+  /// Use the log of the value for the color scale
   bool m_logColor;
+
+  /// Menus
+  QMenu * m_menuColorOptions;
+  QMenu * m_menuView;
 
 };
 
