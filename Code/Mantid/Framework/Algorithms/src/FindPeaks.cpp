@@ -6,6 +6,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include <boost/algorithm/string.hpp>
 #include <numeric>
+#include "MantidKernel/CPUTimer.h"
 
 namespace Mantid
 {
@@ -110,6 +111,8 @@ void FindPeaks::exec()
     std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
 
     //Perform fit with fixed start positions.
+    g_log.information() << "Number of Centers = " << centers.size() << std::endl;
+
     this->findPeaksGivenStartingPoints(centers);
   }
   else
@@ -145,15 +148,19 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
     {
       //Try to fit at this center
       double x_center = *it;
-
       // Check whether it is the in data range
       if (x_center > datax[0] && x_center < datax[datax.size()-1]){
+        CPUTimer tim;
+        tim.reset();
+        g_log.notice() << "(O)Fit Peak: T0 " << tim << std::endl;
         this->fitPeak(inputWS, spec, x_center, this->fwhm);
+        float te = tim.elapsed(false);
+        g_log.notice() << "(O)Fit Peak: Tf " << tim << "   Elapsed = " << te << std::endl;
       }
 
     } // loop through the peaks specified
 
-    m_progress->report();
+  m_progress->report();
 
   } // loop over spectra
 
@@ -477,8 +484,10 @@ long long FindPeaks::computePhi(const int& w) const
  *  @param i2 ::       Channel number of peak candidate i2 - the lower side of the peak (left side)
  *  @param i4 ::       Channel number of peak candidate i4 - the center of the peak
  */
+/*** Removed due to substitution to Gauss1D by Fit
 void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4)
 {
+
   IAlgorithm_sptr fit;
   try
   {
@@ -495,7 +504,9 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
-  
+
+  g_log.information() << "Fit Peak @ " << X[i4] << "  of Spectrum " << spectrum << std::endl;
+
   // Get the initial estimate of the width, in # of bins
   const int fitWidth = i0-i2;
 
@@ -517,7 +528,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   for (unsigned int width = 2; width <= 10; width +=2)
   {
     const double in_sigma = (i0+width < X.size())? X[i0+width] - X[i0] : 0.;
-  
+
     fit->setProperty("bg0",in_bg0);
     fit->setProperty("bg1",in_bg1);
     fit->setProperty("peakCentre",in_centre);
@@ -526,11 +537,13 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     fit->setProperty("StartX",(X[i0]-5*(X[i0]-X[i2])));
     fit->setProperty("EndX",(X[i0]+5*(X[i0]-X[i2])));
     fit->executeAsSubAlg();
- 
+
+    g_log.information() << "Fit Gauss1D  Peak Center " << in_centre << "  Sigma " << in_sigma << "  Height " << in_height << "StartX " << X[i0]-5*(X[i0]-X[i2]) << "  EndX " << X[i0]+5*(X[i0]-X[i2]) << "  BG0 " << in_bg0 << "  BG1 " << in_bg1 << std::endl;
+
     std::string fitStatus = fit->getProperty("OutputStatus");
     const double height = fit->getProperty("height");
     if ( height <= 0 ) fitStatus.clear();              // Height must be strictly positive
-    if ( ! fitStatus.compare("success") ) 
+    if ( ! fitStatus.compare("success") )
     {
       const double centre = fit->getProperty("peakCentre");
       const double width = fit->getProperty("sigma");
@@ -552,8 +565,163 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 //      std::cout << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height
 //                    << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
       break;
+    } else {
+      g_log.information() << "Fit Status = " << fitStatus << std::endl;
     }
   }
+
+  g_log.information() << "Fit Peak Over" << std::endl;
+
+}
+***/
+
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4)
+{
+  const MantidVec &X = input->readX(spectrum);
+  const MantidVec &Y = input->readY(spectrum);
+  
+  g_log.information() << "Fit Peak @ " << X[i4] << "  of Spectrum " << spectrum << std::endl;
+
+  // Get the initial estimate of the width, in # of bins
+  const int fitWidth = i0-i2;
+
+  // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
+  unsigned int i_min = 1;
+  if (i0 > static_cast<int>(5*fitWidth)) i_min = i0 - 5*fitWidth;
+  unsigned int i_max = i0 + 5*fitWidth;
+  // Bounds checks
+  if (i_min<1) i_min=1;
+  if (i_max>=Y.size()-1) i_max=static_cast<unsigned int>(Y.size()-2); // TODO this is dangerous
+  const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
+  const double bg_upperSum = Y[i_max-1] + Y[i_max] + Y[i_max+1];
+  const double in_bg0 = (bg_lowerSum + bg_upperSum) / 6.0;
+  const double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0*(i_max-i_min+1));
+  const double in_height = Y[i4] - in_bg0;
+  const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
+
+  for (unsigned int width = 2; width <= 10; width +=2)
+  {
+
+    IAlgorithm_sptr fit;
+    try
+    {
+      // Fitting the candidate peaks to a Gaussian
+      fit = createSubAlgorithm("Fit", -1, -1, true);
+    } catch (Exception::NotFoundError &)
+    {
+      g_log.error("The StripPeaks algorithm requires the CurveFitting library");
+      throw;
+    }
+    fit->setProperty("InputWorkspace", input);
+    fit->setProperty("WorkspaceIndex", spectrum);
+    fit->setProperty("MaxIterations", 50);
+
+    const double in_sigma = (i0 + width < X.size()) ? X[i0 + width] - X[i0] : 0.;
+
+    /*
+         fit->setProperty("bg0",in_bg0);
+         fit->setProperty("bg1",in_bg1);
+         fit->setProperty("peakCentre",in_centre);
+         fit->setProperty("sigma",in_sigma);
+         fit->setProperty("height",in_height);
+    */
+
+    std::stringstream ss;
+    ss << "name=LinearBackground,A0=" <<in_bg0<<",A1="<<in_bg1<<";name=Gaussian,Height="<<in_height << ",PeakCentre="<<in_centre<<",Sigma="<<in_sigma;
+    std::string function = ss.str();
+    g_log.information() << "Function: " << function << std::endl;
+
+    fit->setProperty("StartX",(X[i0]-5*(X[i0]-X[i2])));
+    fit->setProperty("EndX",(X[i0]+5*(X[i0]-X[i2])));
+    fit->setProperty("Minimizer", "Levenberg-Marquardt");
+    // fit->setProperty("Minimizer", "BFGS");
+    // fit->setProperty("Minimizer", "Conjugate gradient (Fletcher-Reeves imp.)");
+    // fit->setProperty("Minimizer", "Conjugate gradient (Polak-Ribiere imp.)");
+    // fit->setProperty("Minimizer", "Simplex");
+    fit->setProperty("CostFunction", "Least squares");
+    fit->setProperty("Function", function);
+    //fit->setProperty("Output", "FitResult");
+
+    // g_log.information() << "Fit Input:  Peak Center " << in_centre << "  Sigma " << in_sigma << "  Height " << in_height << "StartX " << X[i0]-5*(X[i0]-X[i2]) << "  EndX " << X[i0]+5*(X[i0]-X[i2]) << "  BG0 " << in_bg0 << "  BG1 " << in_bg1 << std::endl;
+
+    CPUTimer tim_fit;
+    tim_fit.reset();
+    g_log.information() << "(O)FitAlgorithm:  T0 = " << tim_fit << std::endl;
+    fit->executeAsSubAlg();
+    double dt = tim_fit.elapsed();
+    g_log.information() << "(O)FitAlgorithm:  Tf = " << tim_fit << "   Delta(T) = " << dt << std::endl;
+
+    std::string fitStatus = fit->getProperty("OutputStatus");
+    std::vector<double> params = fit->getProperty("Parameters");
+    std::vector<std::string> paramnames = fit->getProperty("ParameterNames");
+
+    // Check order of names
+    if (paramnames[0].compare("f0.A0") != 0){
+      g_log.error() << "Parameter 0 should be f0.A0, but is " << paramnames[0] << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be f0.A0");
+    }
+    if (paramnames[1].compare("f0.A1") != 0){
+      g_log.error() << "Parameter 1 should be f0.A1, but is " << paramnames[1] << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be f0.A1");
+    }
+    if (paramnames[2].compare("f1.Height") != 0){
+      g_log.error() << "Parameter 2 should be f1.Height, but is " << paramnames[2] << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be f1.Height");
+    }
+    if (paramnames[3].compare("f1.PeakCentre") != 0){
+      g_log.error() << "Parameter 3 should be f1.PeakCentre, but is " << paramnames[3] << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be f1.PeakCentre");
+    }
+    if (paramnames[4].compare("f1.Sigma") != 0){
+      g_log.error() << "Parameter 4 should be f1.Sigma, but is " << paramnames[4] << std::endl;
+      throw std::invalid_argument("Parameters are out of order @ 0, should be f1.Sigma");
+    }
+
+    /*
+    g_log.information() << "Size (Parameter Names) = " << paramnames.size() << std::endl;
+    for (size_t iname = 0; iname < paramnames.size(); iname ++){
+      g_log.information() << "Name " << iname << ": " << paramnames[iname] << std::endl;
+    }
+    double b0 = params[0];
+    double b1 = params[1];
+    double center = params[2];
+    double heightx = params[3];
+    double sigma = params[4];
+    g_log.information() << "Status: " << fitStatus << " --> B0, B1, X_c, H, Sigma = " << b0 << ", " << b1 << ", " << center << ", " << heightx << ", " << sigma << std::endl;
+    */
+
+    double height = params[2];
+    if ( height <= 0 ) fitStatus.clear();              // Height must be strictly positive
+    if ( ! fitStatus.compare("success") ) 
+    {
+      const double centre = params[3];
+      const double width = params[4];
+      const double bgintercept = params[0];
+      const double bgslope = params[1];
+
+      if ((centre != centre) || (width != width) || (bgintercept != bgintercept) || (bgslope != bgslope))
+      {
+        g_log.information() << "NaN detected in the results of peak fitting. Peak ignored." << std::endl;
+      }
+      else
+      {
+        g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height
+                      << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
+        API::TableRow t = m_peaks->appendRow();
+        t << spectrum << centre << width << height << bgintercept << bgslope;
+      }
+
+//      std::cout << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height
+//                    << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
+      break;
+    } else {
+      g_log.information() << "Fit Status = " << fitStatus << std::endl;
+    }
+  }
+
+  g_log.information() << "Fit Peak Over" << std::endl;
+
+  return;
 
 }
 
