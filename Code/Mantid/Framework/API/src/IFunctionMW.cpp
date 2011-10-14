@@ -272,15 +272,19 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
     const Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
 
-    Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
 
-    // if det is a detector groupworkspace then take as the detector
-    // the detector returned by det->getID()
-    if ( boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det) )
+    Geometry::IDetector_const_sptr det;
+    size_t numDetectors = m_workspace->getSpectrum(wi)->getDetectorIDs().size() ;
+    if (numDetectors > 1)
     {
+      // If several detectors are on this workspace index, just use the ID of the first detector
+      // Note JZ oct 2011 - I'm not sure why the code uses the first detector and not the group. Ask Roman.
       Instrument_const_sptr inst = m_workspace->getInstrument();
-      det = inst->getDetector(det->getID());
+      det = inst->getDetector( *m_workspace->getSpectrum(wi)->getDetectorIDs().begin() );
     }
+    else
+      // Get the detector (single) at this workspace index
+      det = m_workspace->getDetector(wi);;
 
     for (size_t i = 0; i < nParams(); i++)
     {
