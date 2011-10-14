@@ -366,7 +366,7 @@ public:
     TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), true );
     
     for ( int i = 0; i < 3; i++ )     // check for det too small
-      UB[i][i] = 0.0005;
+      UB[i][i] = 0.00001;
 
     TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), false );
 
