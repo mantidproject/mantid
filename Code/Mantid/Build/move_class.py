@@ -44,15 +44,14 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
 def move_all(subproject, classname, newproject, newclassname, args):
     
     # Directory at base of subproject
-    basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
+    basedir, header_folder = find_basedir(args.project, subproject)
+    newbasedir, new_header_folder = find_basedir(args.project, newproject)
     
-    newbasedir = os.path.join(os.path.curdir, "Framework/" + newproject)
-    
-    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + args.source_subfolder + classname + ".h")
+    headerfile = os.path.join(basedir, "inc/" + header_folder + "/" + args.source_subfolder + classname + ".h")
     sourcefile = os.path.join(basedir, "src/" + args.source_subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
 
-    newheaderfile = os.path.join(newbasedir, "inc/Mantid" + newproject + "/" + args.dest_subfolder + newclassname + ".h")
+    newheaderfile = os.path.join(newbasedir, "inc/" + new_header_folder + "/" + args.dest_subfolder + newclassname + ".h")
     newsourcefile = os.path.join(newbasedir, "src/" + args.dest_subfolder + newclassname + ".cpp")
     newtestfile = os.path.join(newbasedir, "test/" + newclassname + "Test.h")
     
@@ -118,7 +117,10 @@ if __name__ == "__main__":
     parser.add_argument('--dest-subfolder', dest='dest_subfolder', 
                         default="",
                         help='The destination is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-
+    parser.add_argument('--project', dest='project', 
+                        default="Framework",
+                        help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+     
     args = parser.parse_args()
     subproject = args.subproject
     newproject = args.newproject

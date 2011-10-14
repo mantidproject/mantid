@@ -273,53 +273,15 @@ public:
     f.close()
     
     
-#======================================================================================
-def find_line_number(lines, searchfor, startat=0):
-    """Look line-by-line in lines[] for a line that starts with searchfor. Return
-    the line number in source where the line was found, and the padding (in spaces) before it"""
-    count = 0
-    done = False
-    padding = ""
-    for n in xrange(startat, len(lines)):
-        line = lines[n]
-        s = line.strip()
-        if s.startswith(searchfor):
-            # How much padding?
-            padding = get_padding(line)
-            return (n, padding)
-
-    return (None, None)
-
-
-#======================================================================================
-def insert_lines(lines, insert_lineno, extra, padding):
-    """Insert a text, split by lines, inside a list of 'lines', at index 'insert_lineno'
-    Adds 'padding' to each line."""
-    # split
-    extra_lines = extra.split("\n");
-    #Pad 
-    for n in xrange(len(extra_lines)):
-        extra_lines[n] = padding + extra_lines[n]
-    return lines[0:insert_lineno] + extra_lines + lines[insert_lineno:]
-
-
-#======================================================================================
-def save_lines_to(lines, fullpath):
-    """Save a list of strings to one file"""        
-    # Join into one big string
-    source = "\n".join(lines)
-    # Save to disk
-    f = open(fullpath, 'w')
-    f.write(source)
-    f.close()
-
+    
+    
 #======================================================================
 def generate(subproject, classname, overwrite, args):
     
     # Directory at base of subproject
-    basedir = os.path.join(os.path.curdir, "Framework",subproject)
+    basedir, header_folder = find_basedir(args.project, subproject)
     
-    headerfile = os.path.join(basedir, "inc", "Mantid" + subproject, args.subfolder + classname + ".h")
+    headerfile = os.path.join(basedir, "inc", header_folder, args.subfolder + classname + ".h")
     sourcefile = os.path.join(basedir, "src", args.subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test", classname + "Test.h")
     
@@ -379,6 +341,9 @@ if __name__ == "__main__":
     parser.add_argument('--subfolder', dest='subfolder', 
                         default="",
                         help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument('--project', dest='project', 
+                        default="Framework",
+                        help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
      
     args = parser.parse_args()
     subproject = args.subproject

@@ -5,6 +5,27 @@ import datetime
 import re
 
 #======================================================================================
+def find_basedir(project, subproject):
+    """ Returns the base directory. If the subproject is known to be in MantidQt or Vates, it uses that.
+    The default is current dir + Framework
+    
+    Parameters
+    ---------
+        project : the project, Framework, MantidQt, etc.
+        subproject : the subproject, Kernel, API, etc.
+    
+    Returns
+    -------
+         basedir = base directory
+         header_folder = the folder name under the inc/ subfolder.
+    """
+    header_folder = "Mantid" + subproject
+    if project == "MantidQt": header_folder = "MantidQt" + subproject
+    basedir = os.path.join(os.path.curdir, project, subproject)
+    return (basedir, header_folder)
+    
+
+#======================================================================================
 def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     """ Read the LINES of a file. Find "set ( cmake_tag",
     read all the lines to get all the files,
@@ -99,13 +120,20 @@ def fix_all_cmakes():
 
 #======================================================================
 def add_to_cmake(subproject, classname, args, subfolder):
-    """ Add the class to the cmake list of the given class """
-    cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
+    """ Add the class to the cmake list of the given class
+    Parameters:
+        subproject : API, Kernel
+        classname : name of the class
+        args : argparse args
+        subfolder : subfolder under inc and src 
+    """
+    basedir, header_folder = find_basedir(args.project, subproject)
+    cmake_path = os.path.join(basedir, "CMakeLists.txt")
         
     source = open(cmake_path).read()
     lines = source.split("\n");
     if args.header:
-        lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + subfolder + classname + ".h")
+        lines = redo_cmake_section(lines, "INC_FILES", "inc/" + header_folder + "/" + subfolder + classname + ".h")
     if args.cpp:
         lines = redo_cmake_section(lines, "SRC_FILES", "src/" + subfolder + classname + ".cpp")
     if args.test:
@@ -120,12 +148,13 @@ def add_to_cmake(subproject, classname, args, subfolder):
 #======================================================================
 def remove_from_cmake(subproject, classname, args, subfolder):
     """ Removes the class from the cmake list of the given project """
-    cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
+    basedir, header_folder = find_basedir(args.project, subproject)
+    cmake_path = os.path.join(basedir, "CMakeLists.txt")
         
     source = open(cmake_path).read()
     lines = source.split("\n");
     if args.header:
-        lines = redo_cmake_section(lines, "INC_FILES", "",  "inc/Mantid" + subproject + "/"+ subfolder + classname + ".h")
+        lines = redo_cmake_section(lines, "INC_FILES", "",  "inc/" + header_folder + "/"+ subfolder + classname + ".h")
     if args.cpp:
         lines = redo_cmake_section(lines, "SRC_FILES", "",  "src/" + subfolder + classname + ".cpp")
     if args.test:
