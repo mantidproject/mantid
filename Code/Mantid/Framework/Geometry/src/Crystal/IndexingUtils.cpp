@@ -1374,9 +1374,9 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
 
 /**
   Check whether or not the specified matrix is reasonable for an orientation
-  matrix.  In particular, check that it is a 3x3 matrix without any nan values
-  and with a determinant that is within a reasonable range, for an 
-  orientation matrix.
+  matrix.  In particular, check that it is a 3x3 matrix without any nan or
+  infinite values and that its determinant is within a reasonable range, for 
+  an orientation matrix.
 
   @param UB  A 3x3 matrix of doubles holding the UB matrix
 
@@ -1406,7 +1406,7 @@ bool IndexingUtils::CheckUB( const DblMatrix & UB )
                + UB[0][2] * ( UB[1][0] * UB[2][1] - UB[1][1] * UB[2][0] );
 
   double abs_det = fabs(det);
-  if ( abs_det > 10 || abs_det < 1e-9 ) // UB not found correctly
+  if ( abs_det > 10 || abs_det < 1e-12 ) // UB not found correctly
   {
     return false;
   }
