@@ -10,6 +10,7 @@
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMSourceProxy.h>
 
 #include <QHBoxLayout>
 #include <QPointer>
@@ -21,7 +22,8 @@ namespace Vates
 namespace SimpleGui
 {
 
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent),
+  pluginMode(false)
 {
 }
 
@@ -93,7 +95,8 @@ bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName").GetAsString());
-  return wsType == QString("");
+  std::cout << "WS Type: " << wsType.toStdString() << std::endl;
+  return wsType.contains("PeaksWorkspace");
 }
 
 pqPipelineRepresentation *ViewBase::getPvActiveRep()
@@ -101,6 +104,24 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   pqDataRepresentation *drep = pqActiveObjects::instance().activeRepresentation();
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
+
+void ViewBase::setSource(pqPipelineSource *src, bool pluginMode)
+{
+  this->pluginMode = pluginMode;
+  if (this->pluginMode)
+  {
+    vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+    srcProxy->UpdateVTKObjects();
+    srcProxy->Modified();
+    srcProxy->UpdatePipelineInformation();;
+  }
+
+  if (this->isPeaksWorkspace(src) && !this->origSource)
+  {
+    emit this->disableViews();
+  }
+}
+
 
 }
 }

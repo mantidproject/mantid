@@ -100,6 +100,7 @@ public:
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
+  virtual void setSource(pqPipelineSource *src, bool pluginMode);
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
@@ -134,6 +135,7 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
+  void disableViews();
   /// Signal to trigger pipeline update.
   void triggerAccept();
 
@@ -144,6 +146,7 @@ private:
   pqPipelineRepresentation *getPvActiveRep();
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+  bool pluginMode;
 };
 
 }
