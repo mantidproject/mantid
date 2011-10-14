@@ -14,8 +14,9 @@
 #include <vector>
 #include <qwt_color_map.h>
 #include <QtCore/QtCore>
+#include "DllOption.h"
 
-class SliceViewer : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
 {
   Q_OBJECT
 

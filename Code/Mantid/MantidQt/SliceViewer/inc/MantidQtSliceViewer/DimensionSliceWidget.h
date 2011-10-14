@@ -4,6 +4,7 @@
 #include <QtGui/QWidget>
 #include "ui_DimensionSliceWidget.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "DllOption.h"
 
 
 /** Widget for the 2D slice viewer. Select whether the dimension
@@ -15,7 +16,7 @@
  * @date Oct 3, 2011
  */
 
-class DimensionSliceWidget : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER DimensionSliceWidget : public QWidget
 {
   Q_OBJECT
 
