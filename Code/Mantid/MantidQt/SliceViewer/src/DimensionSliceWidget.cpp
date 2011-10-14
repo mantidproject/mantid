@@ -130,13 +130,13 @@ void DimensionSliceWidget::setShownDim(int dim)
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Set the dimension to display */
-void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim)
+/** Sets the min/max to show on the widget
+ *
+ * @param min :: min value
+ * @param max :: max value
+ */
+void DimensionSliceWidget::setMinMax(double min, double max)
 {
-  m_dim = dim;
-  m_dimIndex = index;
-  double min = m_dim->getMinimum();
-  double max = m_dim->getMaximum(); //- m_dim->getBinWidth()/2.0;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()) );
   ui.lblUnits->setText(QString::fromStdString(m_dim->getUnits()) );
 
@@ -151,5 +151,16 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
   if (m_slicePoint > m_dim->getMaximum()) m_slicePoint = m_dim->getMaximum();
   ui.doubleSpinBox->setValue(m_slicePoint);
 
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Set the dimension to display */
+void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim)
+{
+  m_dim = dim;
+  m_dimIndex = index;
+  double min = m_dim->getMinimum();
+  double max = m_dim->getMaximum(); //- m_dim->getBinWidth()/2.0;
+  this->setMinMax(min,max);
 }
 

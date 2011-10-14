@@ -133,14 +133,13 @@ int main( int argc, char ** argv )
   // ---- Start with empty MDEW ----
   FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
       "Dimensions", "3",
-      "Extents", "-3,3,-3,3,-3,3",
+      "Extents", "-10,10,-10,10,-10,10",
       "Names", "h,k,l",
       "Units", "lattice,lattice,lattice",
       "SplitInto", "5",
       "SplitThreshold", "500",
       "MaxRecursionDepth", "5",
       "OutputWorkspace", "mdew");
-  addPeak(5000,1,2,3, 0.5);
   addPeak(15000,0,0,0, 1);
   addPeak(5000,0,0,0, 0.3);
   addPeak(5000,0,0,0, 0.2);

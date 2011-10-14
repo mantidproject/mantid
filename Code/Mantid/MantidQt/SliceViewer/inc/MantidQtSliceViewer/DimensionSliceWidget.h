@@ -34,15 +34,16 @@ public:
   ~DimensionSliceWidget();
 
   void setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim);
+  void setMinMax(double min, double max);
+  void setShownDim(int dim);
 
   double getSlicePoint() const
   { return m_slicePoint; }
 
-  void setShownDim(int dim);
-
   /// @return the shown dimension, 0=X, 1=Y, -1=None
   int getShownDim() const
   { return m_shownDim; }
+
 
 public slots:
   void sliderMoved();

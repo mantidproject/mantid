@@ -241,12 +241,23 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
     mdew->estimateResolution();
 
   this->updateDimensionSliceWidgets();
+
+  // Fix the min/max of the widgets to the extents of data
+  if (mdew)
+  {
+    std::vector<Mantid::Geometry::MDDimensionExtents> ext = mdew->getMinimumExtents();
+    for (size_t d=0; d < mdew->getNumDims(); d++)
+      m_dimWidgets[int(d)]->setMinMax(ext[d].min, ext[d].max);
+  }
+
   m_data->setWorkspace(ws);
   // Find the full range. And use it
   findRangeFull();
   m_colorRange = m_colorRangeFull;
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
+
+
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
 }
