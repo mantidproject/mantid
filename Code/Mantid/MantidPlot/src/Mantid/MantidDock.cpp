@@ -853,6 +853,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 #ifdef MAKE_VATES
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
 #endif
+  menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);  // Algorithm history
 }
 

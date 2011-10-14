@@ -114,6 +114,7 @@ namespace Geometry
       m_min = min;
       m_max = max;
       m_numBins = nBins;
+      m_binWidth = (m_max-m_min) / static_cast<double>(m_numBins);
     }
 
   private:

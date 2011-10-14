@@ -113,6 +113,28 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
+  /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
+  TMDE(
+  void MDEventWorkspace)::estimateResolution()
+  {
+    size_t realDepth = 0;
+    std::vector<size_t> numMD = m_BoxController->getNumMDBoxes();
+    for (size_t i=0; i<numMD.size(); i++)
+      if (numMD[i] > 0) realDepth = i;
+
+    for (size_t d=0; d<nd; d++)
+    {
+      size_t finestSplit = 1;
+      for (size_t i=0; i<realDepth; i++)
+        finestSplit *= m_BoxController->getSplitInto(d);
+      IMDDimension_sptr dim = m_dimensions[d];
+      // Set the number of bins
+      dim->setRange( finestSplit, dim->getMinimum(), dim->getMaximum());
+    }
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Creates a new iterator pointing to the first cell (box) in the workspace
    * @param function :: Optional MDImplicitFunction limiting the iterator
    */

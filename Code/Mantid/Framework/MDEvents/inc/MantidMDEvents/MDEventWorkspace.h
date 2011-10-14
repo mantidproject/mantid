@@ -65,22 +65,28 @@ namespace MDEvents
     /** @returns the number of bytes of memory used by the workspace. */
     virtual size_t getMemorySize() const;
 
+    //------------------------ IMDEventWorkspace Methods -----------------------------------------
+
     /// Returns the BoxController used in this workspace
     BoxController_sptr getBoxController()
     { return m_BoxController; }
+
+    virtual std::vector<std::string> getBoxControllerStats() const;
 
     /// @return true if the workspace is file-backed
     virtual bool isFileBacked() const
     { return m_BoxController->isFileBacked(); }
 
+    /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
+    void estimateResolution();
 
-    virtual std::vector<std::string> getBoxControllerStats() const;
+    void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
+
+    //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
 
     Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
 
     void splitBox();
-
-    void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
 
     void refreshCache();
 

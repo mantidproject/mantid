@@ -14,10 +14,15 @@
 #include "../inc/MantidQtSliceViewer/SliceViewer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::API;;
 using namespace Mantid::MDEvents;
+using namespace Mantid::Geometry;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
 
@@ -72,6 +77,22 @@ Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, 
   ws_sptr->setTo(signal, signal);
   return ws_sptr;
 }
+
+
+
+//-------------------------------------------------------------------------------
+/** Add a fake "peak"*/
+static void addPeak(size_t num, double x, double y, double z, double radius)
+{
+  std::ostringstream mess;
+  mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
+  FrameworkManager::Instance().exec("FakeMDEventData", 6,
+      "InputWorkspace", "mdew",
+      "PeakParams", mess.str().c_str(),
+      "RandomSeed", "1234");
+}
+
+
 /** Main application
  *
  * @param argc :: ignored
@@ -95,21 +116,40 @@ int main( int argc, char ** argv )
   size_t numBins;
 
   numBins=100;
-  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 3, numBins, double(numBins)/2.0);
-  for (size_t x=0;x<numBins; x++)
-    for (size_t y=0;y<numBins; y++)
-      for (size_t z=0;z<numBins; z++)
-      {
-        signal_t signal = ( sin(double(x)/5) + sin(double(y)/2) + sin(double(z)/20) ) * 5 + double(x)*0.05 + double(y)*0.05;
-        signal *= 0.1;
-        ws->setSignalAt(x+y*numBins+z*numBins*numBins, signal);
-      }
+//  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 3, numBins, double(numBins)/2.0);
+//  for (size_t x=0;x<numBins; x++)
+//    for (size_t y=0;y<numBins; y++)
+//      for (size_t z=0;z<numBins; z++)
+//      {
+//        signal_t signal = ( sin(double(x)/5) + sin(double(y)/2) + sin(double(z)/20) ) * 5 + double(x)*0.05 + double(y)*0.05;
+//        signal *= 0.1;
+//        ws->setSignalAt(x+y*numBins+z*numBins*numBins, signal);
+//      }
+//
+//  MDHistoWorkspace_sptr ws4 = makeFakeMDHistoWorkspace(1.0, 4, 20, 20.0);
+//  MDHistoWorkspace_sptr ws2 = makeFakeMDHistoWorkspace(1.0, 2, numBins*3, 10.0);
+//  MDHistoWorkspace_sptr ws3 = makeFakeMDHistoWorkspace(1.0, 3, numBins*2, 10.0);
 
-  MDHistoWorkspace_sptr ws4 = makeFakeMDHistoWorkspace(1.0, 4, 20, 20.0);
-  MDHistoWorkspace_sptr ws2 = makeFakeMDHistoWorkspace(1.0, 2, numBins*3, 10.0);
-  MDHistoWorkspace_sptr ws3 = makeFakeMDHistoWorkspace(1.0, 3, numBins*2, 10.0);
+  // ---- Start with empty MDEW ----
+  FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
+      "Dimensions", "3",
+      "Extents", "-3,3,-3,3,-3,3",
+      "Names", "h,k,l",
+      "Units", "lattice,lattice,lattice",
+      "SplitInto", "5",
+      "SplitThreshold", "500",
+      "MaxRecursionDepth", "5",
+      "OutputWorkspace", "mdew");
+  addPeak(5000,1,2,3, 0.5);
+  addPeak(15000,0,0,0, 1);
+  addPeak(5000,0,0,0, 0.3);
+  addPeak(5000,0,0,0, 0.2);
+  addPeak(5000,0,0,0, 0.1);
+//  addPeak(12000,0,0,0, 0.03);
+  IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>( AnalysisDataService::Instance().retrieve("mdew") );
+  mdew->splitAllIfNeeded(NULL);
 
-//  numBins=50;
+  //  numBins=50;
 //  double mid = 25;
 //  MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 4, numBins, double(numBins)/10.0);
 //  for (size_t x=0;x<numBins; x++)
@@ -139,17 +179,10 @@ int main( int argc, char ** argv )
   SliceViewer * slicer = new SliceViewer(frame);
   slicer->resize(600,600);
   layout->addWidget(slicer);
-
-  slicer->setWorkspace(ws3);
-//  slicer->m_dimWidgets[0]->setShownDim(-1);
-
-  mainWin->move(100,100);
+  slicer->setWorkspace(mdew);
+  mainWin->move(100, 100);
   mainWin->resize(700, 700);
   mainWin->show();
-
-  slicer->setWorkspace(ws);
-  mainWin->move(200,200);
-  mainWin->resize(700, 700);
 
   app.exec();
 

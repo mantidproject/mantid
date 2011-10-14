@@ -11,6 +11,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressBase.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidKernel/ThreadScheduler.h"
 
 namespace Mantid
 {
@@ -46,6 +47,11 @@ namespace API
 
     /// @return true if the workspace is file-backed
     virtual bool isFileBacked() const = 0;
+
+    /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
+    virtual void estimateResolution() = 0;
+
+    virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;
 
 
     ExperimentInfo_sptr getExperimentInfo(const uint16_t runIndex);

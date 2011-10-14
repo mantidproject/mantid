@@ -1,3 +1,4 @@
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
@@ -25,9 +26,9 @@
 #include <vector>
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
-using Mantid::Kernel::VMD;
 
 
 //------------------------------------------------------------------------------------
@@ -234,6 +235,11 @@ void SliceViewer::updateDimensionSliceWidgets()
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
+  // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
+  IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+  if (mdew)
+    mdew->estimateResolution();
+
   this->updateDimensionSliceWidgets();
   m_data->setWorkspace(ws);
   // Find the full range. And use it
