@@ -89,8 +89,10 @@ void MantidWSIndexDialog::plot()
   try
   {
     int npos = 0;
-    QValidator::State wsState = m_wsField->validator()->validate(m_wsField->text(), npos);
-    QValidator::State spectraState = m_spectraField->validator()->validate(m_spectraField->text(), npos);
+    QString wsText = m_wsField->text();
+    QString spectraTest = m_spectraField->text();
+    QValidator::State wsState = m_wsField->validator()->validate(wsText, npos);
+    QValidator::State spectraState = m_spectraField->validator()->validate(spectraTest, npos);
 
     // If the user typed in the wsField ...
     if(wsState == QValidator::Acceptable)
@@ -266,8 +268,8 @@ void MantidWSIndexDialog::generateSpectraIdIntervals()
     
     const int startSpectrum = static_cast<int> (first->first);
     const int endSpectrum = static_cast<int> (last->first);
-
-    if(spec2index->size() == (1 + endSpectrum - startSpectrum))
+    const int size = static_cast<int> (spec2index->size());
+    if(size == (1 + endSpectrum - startSpectrum))
     {
       // Here we make the assumption (?) that the spectra IDs are sorted, and so
       // are a list of ints from startSpectrum to endSpectrum without any gaps.
@@ -333,7 +335,7 @@ Interval::Interval(QString intervalString)
   }
   else
   {
-    throw std::exception("Could not parse " + intervalString);
+    throw std::exception();
   }
 }
 
@@ -855,6 +857,7 @@ IntervalListValidator::IntervalListValidator(QObject * parent, const IntervalLis
 
 QValidator::State IntervalListValidator::validate(QString &input, int &pos) const
 {
+  pos == pos; // Use unused parameter ...
   if(IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
   
