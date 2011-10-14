@@ -13,6 +13,7 @@ set ( SRC_FILES
                 src/QtWorkspaceMementoModel.cpp
                 src/LatticePresenter.cpp
                 src/LoanedMemento.cpp
+                src/LogPresenter.cpp
                 src/MuonAnalysis.cpp
                 src/MuonAnalysisHelper.cpp
                 src/MuonAnalysisOptionTab.cpp
@@ -21,7 +22,7 @@ set ( SRC_FILES
                 src/SANSPlotSpecial.cpp
                 src/SANSRunWindow.cpp
                 src/SANSDiagnostics.cpp
-		src/SingleOwnerLock.cpp
+                src/SingleOwnerLock.cpp
                 src/WorkspaceMementoCollection.cpp
                 src/WorkspaceMementoService.cpp
                 src/WorkspaceMemento.cpp
@@ -46,6 +47,8 @@ set ( INC_FILES
                 inc/MantidQtCustomInterfaces/LatticePresenter.h
                 inc/MantidQtCustomInterfaces/LatticeView.h
                 inc/MantidQtCustomInterfaces/LoanedMemento.h
+                inc/MantidQtCustomInterfaces/LogPresenter.h
+                inc/MantidQtCustomInterfaces/LogView.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
@@ -95,6 +98,7 @@ set( TEST_FILES
                test/AbstractMementoItemTest.h
                test/LatticePresenterTest.h
                test/LoanedMementoTest.h
+               #test/LogPresenterTest.h
                test/InelasticISISTest.h
                test/SingleOwnerLockTest.h
                test/WorkspaceMementoCollectionTest.h

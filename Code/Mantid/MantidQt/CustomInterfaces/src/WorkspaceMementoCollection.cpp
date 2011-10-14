@@ -58,6 +58,7 @@ namespace MantidQt
       WorkspaceMemento* temp = new WorkspaceMemento(m_data, "Temp");
       WorkspaceMementoService<WorkspaceMemento*> service(temp);
       service.addAllItems(m_data, rowIndex-1);
+      service.addLogItems(m_data, ws->run().getLogData(), rowIndex - 1);// 
       service.setWorkspaceName(ws->getName());
       service.setInstrumentName(ws->getInstrument()->getName());
       service.setRunNumber(ws->getRunNumber());
@@ -94,6 +95,7 @@ namespace MantidQt
         status = "Not Ready";
       }
       service.setStatus(status);
+      service.setLogData(ws->run().getLogData());
       temp->commit(); 
 
       // Append all log data here.

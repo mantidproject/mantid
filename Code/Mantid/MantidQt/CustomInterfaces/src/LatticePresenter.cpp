@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/LoanedMemento.h"
 #include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
+#include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace MantidQt
@@ -28,12 +29,14 @@ namespace MantidQt
     {
       m_view = view;
       double a1, a2, a3, b1, b2, b3;
-      m_WsMemento->getItem(4)->getValue(a1);
-      m_WsMemento->getItem(5)->getValue(a2);
-      m_WsMemento->getItem(6)->getValue(a3);
-      m_WsMemento->getItem(7)->getValue(b1);
-      m_WsMemento->getItem(8)->getValue(b2);
-      m_WsMemento->getItem(9)->getValue(b3);
+
+      WorkspaceMementoService<LoanedMemento> service(m_WsMemento);
+      a1 = service.getA1();
+      a2 = service.getA2();
+      a3 = service.getA3();
+      b1 = service.getB1();
+      b2 = service.getB2();
+      b3 = service.getB3();
 
       checkInput(a1, a2, a3, b1, b2, b3);
       m_view->initalize(a1, a2, a3, b1, b2, b3);
@@ -76,12 +79,8 @@ namespace MantidQt
       double b2 = m_view->getB2();
       double b3 = m_view->getB3();
 
-      m_WsMemento->getItem(4)->setValue(a2);
-      m_WsMemento->getItem(5)->setValue(a2);
-      m_WsMemento->getItem(6)->setValue(a3);
-      m_WsMemento->getItem(7)->setValue(b1);
-      m_WsMemento->getItem(8)->setValue(b2);
-      m_WsMemento->getItem(9)->setValue(b3);
+      WorkspaceMementoService<LoanedMemento> service(m_WsMemento);
+      service.setLatticeParameters(a1, a2, a3, b1, b2, b3);
 
       if(checkInput(a1, a2, a3, b1, b2, b3))
       {

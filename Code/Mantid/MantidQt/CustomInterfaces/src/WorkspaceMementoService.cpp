@@ -52,12 +52,6 @@ namespace MantidQt
       m_memento->addItem(new WorkspaceMementoItem<8, double>(ws, rowIndex));
       m_memento->addItem(new WorkspaceMementoItem<9, double>(ws, rowIndex));
       m_memento->addItem(new WorkspaceMementoItem<10, std::string>(ws, rowIndex));
-
-      /// Log values come last.
-      for(int i = m_logValueStart; i < m_logValueStart + nLogValueColumns; i++)
-      {
-        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws, rowIndex));
-      }
     }
 
 
@@ -121,6 +115,20 @@ namespace MantidQt
     void WorkspaceMementoService<Memento>::setRunNumber(int runnumber)
     {
       m_memento->getItem(2)->setValue(runnumber);
+    }
+
+    template<typename Memento>
+    void WorkspaceMementoService<Memento>::addLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<Mantid::Kernel::Property*> vecLogData, int rowIndex)
+    {
+      typedef std::vector<Mantid::Kernel::Property*> VecLogType;
+      VecLogType::iterator it = vecLogData.begin();
+      int count = m_logValueStart;
+      while(it != vecLogData.end())
+      {
+        ws->addColumn("str", (*it)->name());
+        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws, rowIndex));
+        it++;
+      }
     }
 
     template<typename Memento>
