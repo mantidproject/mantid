@@ -11,7 +11,7 @@
 
 #include "Mantid/MantidApplication.h"
 #include "qmainwindow.h"
-#include "Mantid/SliceViewer/SliceViewer.h"
+#include "../inc/MantidQtSliceViewer/SliceViewer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 

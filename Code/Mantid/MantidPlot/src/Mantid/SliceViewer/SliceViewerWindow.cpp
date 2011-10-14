@@ -4,7 +4,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "SliceViewer.h"
+#include "../../../MantidQt/SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
 #include "SliceViewerWindow.h"
 #include <qlayout.h>
 

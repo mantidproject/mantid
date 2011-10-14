@@ -1,14 +1,18 @@
-#include "CustomTools.h"
-#include "DimensionSliceWidget.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
-#include "QwtRasterDataMD.h"
-#include "SliceViewer.h"
+#include "MantidQtSliceViewer/CustomTools.h"
+#include "MantidQtSliceViewer/DimensionSliceWidget.h"
+#include "MantidQtSliceViewer/QwtRasterDataMD.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
+#include "qmenubar.h"
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
+#include <qmenu.h>
+#include <QtGui/qaction.h>
 #include <qwt_color_map.h>
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
@@ -19,11 +23,6 @@
 #include <qwt_scale_engine.h>
 #include <sstream>
 #include <vector>
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
-#include "../../ColorMapDialog.h"
-#include <qmenu.h>
-#include <QtGui/qaction.h>
-#include "qmenubar.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

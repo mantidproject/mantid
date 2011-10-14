@@ -1,4 +1,4 @@
-#include "DimensionSliceWidget.h"
+#include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include <iosfwd>
 #include <iostream>
 #include <iomanip>

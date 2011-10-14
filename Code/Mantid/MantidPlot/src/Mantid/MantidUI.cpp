@@ -55,7 +55,6 @@
 #include <iostream>
 #include <sstream>
 #include "MantidAPI/IMDWorkspace.h"
-#include "Mantid/SliceViewer/SliceViewer.h"
 #include "Mantid/SliceViewer/SliceViewerWindow.h"
 
 

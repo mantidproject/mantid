@@ -5,7 +5,7 @@
 #include "../../MdiSubWindow.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "SliceViewer.h"
+#include "../../../MantidQt/SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
 
 
 /** A MDI sub window that contains only a
