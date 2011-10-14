@@ -1,6 +1,7 @@
 #ifndef _vtkPeaksSource_h
 #define _vtkPeaksSource_h
 
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "vtkPolyDataAlgorithm.h"
 #include <string>
 
@@ -62,6 +63,9 @@ private:
 
   /// Cache for the workspace type name
   std::string m_wsTypeName;
+
+  /// Cached workspace.
+  Mantid::API::IPeaksWorkspace_sptr m_PeakWS;
 
   vtkPeaksSource(const vtkPeaksSource&);
   void operator = (const vtkPeaksSource&);

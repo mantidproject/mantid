@@ -1,6 +1,7 @@
 #ifndef _vtkEventNexusReader_h
 #define _vtkEventNexusReader_h
 #include "vtkPolyDataAlgorithm.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 class vtkImplicitFunction;
 class VTK_EXPORT vtkPeaksReader : public vtkPolyDataAlgorithm
@@ -40,9 +41,14 @@ private:
 
   /// Flag indicates when set up is complete wrt  the conversion of the nexus file to a MDEventWorkspace stored in ADS.
   bool m_isSetup;
-
-  /// Cached workspace type name.
+  
+  /// Cached PeaksWs Name
   std::string m_wsTypeName;
+
+  /// Cached PeaksWS
+  Mantid::API::IPeaksWorkspace_sptr  m_PeakWS;
+
+  
 
 };
 #endif

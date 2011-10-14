@@ -9,7 +9,6 @@
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -66,13 +65,10 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
     vtkPolyData *output = vtkPolyData::SafeDownCast(
                             outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-    Workspace_sptr result = AnalysisDataService::Instance().retrieve(m_wsName);
-    Mantid::API::IPeaksWorkspace_sptr peakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
-    m_wsTypeName = typeid(*peakWS).name();
     // Instantiate the factory that makes the peak markers
     vtkPeakMarkerFactory *p_peakFactory = new vtkPeakMarkerFactory("peaks");
 
-    p_peakFactory->initialize(peakWS);
+    p_peakFactory->initialize(m_PeakWS);
     vtkDataSet *structuredMesh = p_peakFactory->create();
 
     vtkCubeSource *cube = vtkCubeSource::New();
@@ -97,6 +93,13 @@ int vtkPeaksSource::RequestInformation(vtkInformation *vtkNotUsed(request),
                                        vtkInformationVector **vtkNotUsed(inputVector),
                                        vtkInformationVector *vtkNotUsed(outputVector))
 {
+  if (!m_wsName.empty())
+  {
+    //Preload the Workspace and then cache it to avoid reloading later.
+    Workspace_sptr result = AnalysisDataService::Instance().retrieve(m_wsName);
+    m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
+    m_wsTypeName = typeid(*m_PeakWS).name();
+  }
   return 1;
 }
 

@@ -12,9 +12,7 @@
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
-
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -52,16 +50,42 @@ void vtkPeaksReader::SetWidth(double width)
 
 int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
-
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   vtkPolyData *output = vtkPolyData::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  Mantid::API::FrameworkManager::Instance();
+  // Instantiate the factory that makes the peak markers
+  vtkPeakMarkerFactory * p_peakFactory = new vtkPeakMarkerFactory("peaks");
 
-   //Ensure that the Peaks Workspace is only generated once
+  p_peakFactory->initialize(m_PeakWS);
+  vtkDataSet * structuredMesh = p_peakFactory->create();
+
+  vtkCubeSource* cube = vtkCubeSource::New();
+  cube->SetXLength(m_width);
+  cube->SetYLength(m_width);
+  cube->SetZLength(m_width);
+
+  vtkPVGlyphFilter* glyphFilter = vtkPVGlyphFilter::New();
+  glyphFilter->SetInput(structuredMesh);
+  glyphFilter->SetSource(cube->GetOutput());
+  glyphFilter->Update();
+  vtkPolyData* glyphed = glyphFilter->GetOutput();
+
+  output->ShallowCopy(glyphed);
+  glyphFilter->Delete();
+
+  return 1;
+}
+
+int vtkPeaksReader::RequestInformation(
+  vtkInformation *vtkNotUsed(request),
+  vtkInformationVector **vtkNotUsed(inputVector),
+  vtkInformationVector *)
+{
+  Mantid::API::FrameworkManager::Instance();
+  //This is just a peaks workspace so should load really quickly.
   if(!m_isSetup) 
   {
     // This actually loads the peaks file
@@ -78,44 +102,11 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
     alg->removeObserver(observer);
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve("LoadedPeaksWS");
-    Mantid::API::IPeaksWorkspace_sptr peakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
-    m_wsTypeName = typeid(*peakWS).name();
+    m_PeakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
+    m_wsTypeName = typeid(m_PeakWS).name();
     m_isSetup = true;
   }
 
-  // Instantiate the factory that makes the peak markers
-  vtkPeakMarkerFactory * p_peakFactory = new vtkPeakMarkerFactory("peaks");
-
-  Workspace_sptr result=AnalysisDataService::Instance().retrieve("LoadedPeaksWS");
-  Mantid::API::IPeaksWorkspace_sptr peakWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(result);
-
-  p_peakFactory->initialize(peakWS);
-  vtkDataSet * structuredMesh = p_peakFactory->create();
-
-  vtkCubeSource* cube = vtkCubeSource::New();
-  cube->SetXLength(m_width);
-  cube->SetYLength(m_width);
-  cube->SetZLength(m_width);
-
-  vtkPVGlyphFilter* glyphFilter = vtkPVGlyphFilter::New();
-  glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(cube->GetOutput());
-  glyphFilter->Update();
-  vtkPolyData* glyphed = glyphFilter->GetOutput();
-
-  output->ShallowCopy(glyphed);
-
-
-  glyphFilter->Delete();
-
-  return 1;
-}
-
-int vtkPeaksReader::RequestInformation(
-  vtkInformation *vtkNotUsed(request),
-  vtkInformationVector **vtkNotUsed(inputVector),
-  vtkInformationVector *)
-{
   return 1;
 }
 
@@ -145,11 +136,11 @@ void vtkPeaksReader::updateAlgorithmProgress(double progress)
   this->UpdateProgress(progress);
 }
 
-
 /*
 Getter for the workspace type name.
 */
 char* vtkPeaksReader::GetWorkspaceTypeName()
 {
+  //Preload the Workspace and then cache it to avoid reloading later.
   return const_cast<char*>(m_wsTypeName.c_str());
 }
