@@ -11,7 +11,8 @@
 #include <QHeaderView>
 #include <QDesktopServices>
 #include <QUrl>
-
+#include <QString>
+#include <QList>
 
 using namespace Mantid::API;
 
@@ -24,16 +25,18 @@ namespace MantidQt
     // Public member functions
     //----------------------
     ///Constructor
-    ICatInvestigation::ICatInvestigation(long long investId,const QString &RbNumber,
-        const QString &Title,const QString &Instrument,ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
-        QWidget(par),m_invstId(investId),m_RbNumber(RbNumber),m_Title(Title),
-        m_Instrument(Instrument),m_downloadedFileList()
+    ICatInvestigation::ICatInvestigation(long long investId,const QString &ProposalId,
+        const QString &Title,const QString &Instrument,const QString &RunRange,ITableWorkspace_sptr& ws2_sptr,QWidget *par) :
+        QWidget(par),m_invstId(investId),m_ProposalId(ProposalId),m_Title(Title),
+        m_Instrument(Instrument),m_RunRange(RunRange),m_downloadedFileList()
     {
       initLayout();
       m_uiForm.invsttableWidget->verticalHeader()->setVisible(false);
       m_investws_sptr=ws2_sptr;
       //Tree on LHS of the investigation display
       populateInvestigationTreeWidget();
+
+       m_uiForm.invstlabel->setText("Proposals: " + m_ProposalId);
       //an item selected from the LHS treewidget
       connect(m_uiForm.invsttreeWidget,SIGNAL(itemClicked (QTreeWidgetItem*, int )),this,SLOT(investigationClicked(QTreeWidgetItem*, int)));
       /// cancel clicked
@@ -52,6 +55,8 @@ namespace MantidQt
       connect(this,SIGNAL(loadRawAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadRawAsynch(const QString&,const QString& )));
       //execute loadnexus asynchronously
       connect(this,SIGNAL(loadNexusAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadNexusAsynch(const QString&,const QString& )));
+      //execute load asynchronously
+      connect(this,SIGNAL(loadAsynch(const QString&,const QString&)),parent()->parent(),SLOT(executeLoadAsynch(const QString&,const QString& )));
       //select all file button clicked
       connect(m_uiForm.selectallButton,SIGNAL(clicked()),this,SLOT(onSelectAllFiles()));
       //download button clicked
@@ -73,19 +78,22 @@ namespace MantidQt
     /// Poulate the tree widget on LHS
     void ICatInvestigation::populateInvestigationTreeWidget(){
 
-
-      m_uiForm.invsttreeWidget->setHeaderLabel("");
+      m_uiForm.invsttreeWidget->setAutoExpandDelay(0);
+      m_uiForm.invsttreeWidget->setHeaderLabel("Data: ");
       QStringList qlist;
-      qlist.push_back(m_Title);
+
+      QString proposalId("ProposalId: ");
+      proposalId+=m_ProposalId;
+      qlist.push_back(proposalId);
       QTreeWidgetItem *item1 = new QTreeWidgetItem(qlist);
-      item1->setToolTip(0,m_Title);
+      item1->setToolTip(0,proposalId);
 
       qlist.clear();
-      QString rbNumber("Rb number: ");
-      rbNumber+=m_RbNumber;
-      qlist.push_back(rbNumber);
+      QString title("Title: ");
+      title+=m_Title;
+      qlist.push_back(title);
       QTreeWidgetItem *item2 = new QTreeWidgetItem(qlist);
-      item2->setToolTip(0,rbNumber);
+      item2->setToolTip(0,title);
       item1->addChild(item2);
 
       qlist.clear();
@@ -93,21 +101,24 @@ namespace MantidQt
       instrument+=m_Instrument;
       qlist.push_back(instrument);
       QTreeWidgetItem *item3 = new QTreeWidgetItem(qlist);
+      item3->setToolTip(0,instrument);
       item1->addChild(item3);
+
+      qlist.clear();
+      QString runRange("Run Range: ");
+      runRange+=m_RunRange;
+      qlist.push_back(runRange);
+      QTreeWidgetItem *item4 = new QTreeWidgetItem(qlist);
+      item4->setToolTip(0,runRange);
+      item1->addChild(item4);
 
       m_uiForm.invsttreeWidget->insertTopLevelItem(0,item1);
 
       qlist.clear();
-      qlist.push_back("DataSets");
-      QTreeWidgetItem *item4 = new QTreeWidgetItem(qlist);
-      item1->addChild(item4);
-      item4->setToolTip(0,"View investigations datasets");
-
-      qlist.clear();
-      qlist.push_back("Default");
+      qlist.push_back("Runs");
       QTreeWidgetItem *item5 = new QTreeWidgetItem(qlist);
       item4->addChild(item5);
-      item5->setToolTip(0,"View default's files");
+      item5->setToolTip(0,"View all runs");
 
       qlist.clear();
       qlist.push_back("Status:");
@@ -118,6 +129,7 @@ namespace MantidQt
       qlist.push_back("Type:");
       QTreeWidgetItem *titem = new QTreeWidgetItem(qlist);
       item5->addChild(titem);
+
       qlist.clear();
       qlist.push_back("Description:");
       QTreeWidgetItem* ditem = new QTreeWidgetItem(qlist);
@@ -241,7 +253,7 @@ namespace MantidQt
     void ICatInvestigation::investigationClicked(QTreeWidgetItem* item, int)
     {
       if(!item)return;
-      if(!item->text(0).compare("Default"))
+      if(!item->text(0).compare("Runs"))
       {
         if(isDataFilesChecked())
         {
@@ -492,7 +504,7 @@ namespace MantidQt
      */
     void ICatInvestigation::investigationWidgetItemExpanded(QTreeWidgetItem* item )
     {
-      if(item->text(0)=="Default")
+      if(item->text(0)=="Runs")
       {
         if(!m_datasetsws_sptr){
           m_datasetsws_sptr = executeGetdataSets();
@@ -525,33 +537,15 @@ namespace MantidQt
     /// Load button clicked
     void ICatInvestigation::onLoad()
     {
-      ///get selected filename (raw,nexus,log) from table widget
-      std::vector<std::string> sfileNames;
-      getSelectedFileNames(sfileNames);
-      if(sfileNames.empty())
+      QItemSelectionModel *selmodel = m_uiForm.invsttableWidget->selectionModel();
+      QModelIndexList  indexes=selmodel->selectedRows();
+      QModelIndex index;
+      foreach(index, indexes)
       {
-        QString msg="Files must be downloaded before trying to load.";
-        emit error( msg);
+        QTableWidgetItem *item = m_uiForm.invsttableWidget->item(index.row(),1);
+        QString location = item->text();
+        loadData(location);
       }
-
-      // before loading check the file is downloaded
-      std::vector<std::string>::const_iterator citr;
-      for(citr=sfileNames.begin();citr!=sfileNames.end();++citr)
-      {
-        std::string loadPath;
-        if(isFileExistsInDownloadedList(*citr,loadPath ))
-        {
-          //if the file is downloaded ,then load to mantid and create workspace
-          loadData(QString::fromStdString(loadPath));
-        }
-        else
-        {
-          emit error("The file "+ QString::fromStdString(*citr)+ " is not downloaded. Use the download button provided to download the file and then load." );
-        }
-
-      }
-
-
     }
 
     bool ICatInvestigation::isFileExistsInDownloadedList(const std::string& selectedFile,std::string& loadPath )
@@ -594,36 +588,46 @@ namespace MantidQt
         wsName=filePath.mid(index1+1,index-index1-1);
       }
 
-      if (isRawFile(filePath))
+      if(!isLoadingControlled())
       {
-        if(!isLoadingControlled())
-        {
-          executeLoadRaw(filePath,wsName);
-
-        }
-        else
-        {
-          emit loadRawAsynch(filePath,wsName);
-        }
-      }
-      else if (isNexusFile(filePath))
-      {
-
-        if(!isLoadingControlled())
-        {
-          executeLoadNexus(filePath,wsName);
-        }
-        else
-        {
-          emit loadNexusAsynch(filePath,wsName);
-
-        }
+        executeLoad(filePath,wsName);
       }
       else
       {
-        emit error("ICat interface is not supporting the loading of log files.",1);
+        emit loadAsynch(filePath,wsName);
 
       }
+
+//      if (isRawFile(filePath))
+//      {
+//        if(!isLoadingControlled())
+//        {
+//          executeLoadRaw(filePath,wsName);
+
+//        }
+//        else
+//        {
+//          emit loadRawAsynch(filePath,wsName);
+//        }
+//      }
+//      else if (isNexusFile(filePath))
+//      {
+
+//        if(!isLoadingControlled())
+//        {
+//          executeLoadNexus(filePath,wsName);
+//        }
+//        else
+//        {
+//          emit loadNexusAsynch(filePath,wsName);
+
+//        }
+//      }
+//      else
+//      {
+//        emit error("ICat interface is not supporting the loading of log files.",1);
+
+//      }
     }
     /// If user selected controlled loading of data check box
     bool ICatInvestigation::isLoadingControlled()
@@ -684,6 +688,16 @@ namespace MantidQt
     {
       emit executeLoadAlgorithm("LoadNexus",fileName,wsName);
     }
+
+    /** This method executes loadNexus algorithm
+     * @param fileName :: name of the nexus file
+     * @param wsName :: name of the workspace to store the data
+     */
+    void ICatInvestigation::executeLoad(const QString& fileName,const QString& wsName)
+    {
+      emit executeLoadAlgorithm("Load",fileName,wsName);
+    }
+
     /**This method executes loadraw/loadnexus algorithm
      *@param algName :: algoritm name
      *@param version :: -algorithm version

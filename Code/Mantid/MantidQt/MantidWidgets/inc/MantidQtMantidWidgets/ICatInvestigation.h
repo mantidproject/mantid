@@ -19,8 +19,8 @@ namespace MantidQt
 
     public:
       /// Constructor
-      ICatInvestigation(long long investId,const QString &qRbNumber,const QString &qTitle,
-          const QString & qInstrument,Mantid::API::ITableWorkspace_sptr& m_ws2_sptr,QWidget *parent = 0);
+      ICatInvestigation(long long investId,const QString &ProposalId, const QString &Title,const QString &Instrument,
+                        const QString &RunRange,Mantid::API::ITableWorkspace_sptr& m_ws2_sptr,QWidget *parent = 0);
 
     signals:
       ///this signal prints error messge to log window
@@ -30,6 +30,9 @@ namespace MantidQt
 
       /// loadnexus asynchronous execution
       void loadNexusAsynch(const QString&,const QString&);
+
+      /// loadnexus asynchronous execution
+      void loadAsynch(const QString&,const QString&);
 
       /// signal for downloading data files
       void download(const std::vector<std::string>&,const std::vector<int64_t>&);
@@ -64,6 +67,9 @@ namespace MantidQt
 
       /// executes loadRaw algorithm
       void executeLoadNexus(const QString& fileName,const QString& wsName);
+
+      /// executes loadRaw algorithm
+      void executeLoad(const QString& fileName,const QString& wsName);
 
       //if the loading is controlled
       bool isLoadingControlled();
@@ -112,12 +118,14 @@ namespace MantidQt
 
       ///investigation id
       int64_t m_invstId;
-      /// RbNumber
-      QString m_RbNumber;
+      /// ProposalId
+      QString m_ProposalId;
       /// Title
       QString m_Title;
       /// Instrument
       QString m_Instrument;
+      /// Run Range
+      QString m_RunRange;
       /// data files workspace
       Mantid::API::ITableWorkspace_sptr m_datafilesws_sptr;
       /// filtered data files workspace pointer

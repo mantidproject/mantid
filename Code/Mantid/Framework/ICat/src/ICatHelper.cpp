@@ -196,16 +196,10 @@ namespace Mantid
       //API::ITableWorkspace_sptr outputws =createTableWorkspace();
 
       outputws->addColumn("long64","InvestigationId");
-      outputws->addColumn("str","RbNumber");
+      outputws->addColumn("str","Proposal");
       outputws->addColumn("str","Title");
-      outputws->addColumn("str","Type");
       outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Investigator");
-      outputws->addColumn("str","RunRange");
-      outputws->addColumn("str","Year");
-      outputws->addColumn("str","Abstract");
-      outputws->addColumn("str","Investigators Name ");
-      outputws->addColumn("str","Samples Name");
+      outputws->addColumn("str","Run Range");
 
       try
       {
@@ -230,42 +224,21 @@ namespace Mantid
         for (citr=investigations.begin();citr!=investigations.end();++citr)
         {
           API::TableRow t = outputws->appendRow();
+
           //investigation id
           savetoTableWorkspace((*citr)->id,t);
 
-          //rb number
+          //Proposal
           savetoTableWorkspace((*citr)->invNumber,t);
 
           //title
           savetoTableWorkspace((*citr)->title,t);
 
-          //type
-          savetoTableWorkspace((*citr)->invType,t);
-
+          //Instrument
           savetoTableWorkspace((*citr)->instrument,t);
-          //investigator
-          savetoTableWorkspace((*citr)->bcatInvStr,t);
-          // run range
+
+          //run range
           savetoTableWorkspace((*citr)->invParamValue,t);
-
-          //year
-          std::string *sInvEndtime=NULL ;
-          if((*citr)->invEndDate!=NULL)
-          {
-            sInvEndtime=new std::string;
-            time_t  invEndtime=*(*citr)->invEndDate;
-            char temp [25];
-            strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&invEndtime));
-            strftime (temp,25,"%Y",localtime(&invEndtime));
-            std::string ftime(temp);
-
-            sInvEndtime->assign(ftime);
-
-          }
-          savetoTableWorkspace(sInvEndtime,t);
-
-          saveInvestigatorsNameandSample(*citr,t);
-          //
         }
       }
       catch(std::runtime_error& )
@@ -367,11 +340,7 @@ namespace Mantid
       API::ITableWorkspace_sptr outputws =createTableWorkspace();
       //add columns
       outputws->addColumn("str","Name");
-      outputws->addColumn("int","File Size(B)");
-      outputws->addColumn("long64","FileId");
-      outputws->addColumn("str","Format");
-      outputws->addColumn("str","Format Version");
-      outputws->addColumn("str","Format Type");
+      outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
 
       std::vector<ns1__investigation*> investVec;
@@ -397,26 +366,13 @@ namespace Mantid
 
               API::TableRow t = outputws->appendRow();
               savetoTableWorkspace((*datafile_citr)->name,t);
-              savetoTableWorkspace((*datafile_citr)->fileSize,t);
+              savetoTableWorkspace((*datafile_citr)->location,t);
 
-              //long long fileId=*(*datafile_citr)->id;
-              savetoTableWorkspace((*datafile_citr)->id,t);
-              ns1__datafileFormat* fileFormat=(*datafile_citr)->datafileFormat;
-              if(fileFormat)
-              {
-                if(fileFormat->datafileFormatPK)
-                {
-                  savetoTableWorkspace((fileFormat->datafileFormatPK->name),t);
-                  savetoTableWorkspace((fileFormat->datafileFormatPK->version),t);
-                }
-                savetoTableWorkspace((fileFormat->formatType),t);
-
-              }
               if((*datafile_citr)->datafileCreateTime!=NULL)
               {
                 time_t  crtime=*(*datafile_citr)->datafileCreateTime;
                 char temp [25];
-                strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&crtime));
+                strftime (temp,25,"%Y-%b-%d %H:%M:%S",localtime(&crtime));
                 std::string ftime(temp);
                 std::string *creationtime=new std::string ;
                 creationtime->assign(ftime);
@@ -523,13 +479,9 @@ namespace Mantid
         API::ITableWorkspace_sptr& outputws)
     {
 
-      outputws->addColumn("str","Name");//File name
-      outputws->addColumn("int","File Size (B)");//File Size
-      outputws->addColumn("long64","File Id");//File id
-      outputws->addColumn("str","Format");//File Format
-      outputws->addColumn("str","Format Version");//File Version
-      outputws->addColumn("str","Format Type");// File Format Type
-      outputws->addColumn("str","Create Time");// File Creation Time
+      outputws->addColumn("str","Name");
+      outputws->addColumn("str","Location");
+      outputws->addColumn("str","Create Time");
 
       try
       {		std::vector<ns1__dataset*> datasetVec;
@@ -557,36 +509,7 @@ namespace Mantid
           // File Name
           savetoTableWorkspace((*datafile_citr)->name,t);
           // File Size
-          savetoTableWorkspace((*datafile_citr)->fileSize,t);
-          //File Id
-          savetoTableWorkspace((*datafile_citr)->id,t);
-          ns1__datafileFormat* fileFormat=(*datafile_citr)->datafileFormat;
-          if(fileFormat)
-          {
-            if(fileFormat->datafileFormatPK)
-            {
-              // File Format
-              savetoTableWorkspace((fileFormat->datafileFormatPK->name),t);
-              // File Format Version
-              savetoTableWorkspace((fileFormat->datafileFormatPK->version),t);
-            }
-            else
-            {
-              std::string *s=NULL;
-              savetoTableWorkspace(s,t);
-              savetoTableWorkspace(s,t);
-            }
-            // File format Type
-            savetoTableWorkspace((fileFormat->formatType),t);
-          }
-          else
-          {
-            //i've to see a better way to write empty columns if the data is empty
-            std::string *s=NULL;
-            savetoTableWorkspace(s,t);
-            savetoTableWorkspace(s,t);
-            savetoTableWorkspace(s,t);
-          }
+          savetoTableWorkspace((*datafile_citr)->location,t);
 
           //File creation Time.
           std::string *creationtime=NULL;
@@ -594,7 +517,7 @@ namespace Mantid
           {
             time_t  crtime=*(*datafile_citr)->datafileCreateTime;
             char temp [25];
-            strftime (temp,25,"%H:%M:%S %Y-%d-%b",localtime(&crtime));
+            strftime (temp,25,"%Y-%b-%d %H:%M:%S",localtime(&crtime));
             std::string ftime(temp);
             creationtime=new std::string ;
             creationtime->assign(ftime);
@@ -984,16 +907,10 @@ namespace Mantid
     void CICatHelper::saveMyInvestigations( const ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
     {
       outputws->addColumn("long64","InvestigationId");
-      outputws->addColumn("str","RbNumber");
+      outputws->addColumn("str","Proposal");
       outputws->addColumn("str","Title");
-      outputws->addColumn("str","Type");
       outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Investigator");
-      outputws->addColumn("str","RunRange");
-      outputws->addColumn("str","Year");
-      outputws->addColumn("str","Abstract");
-      outputws->addColumn("str","Investigators Name ");
-      outputws->addColumn("str","Samples Name");
+      outputws->addColumn("str","Run Range");
 
       saveInvestigations(response.return_,outputws);
 

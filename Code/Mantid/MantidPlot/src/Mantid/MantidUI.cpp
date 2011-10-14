@@ -1087,6 +1087,25 @@ void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString&
   executeAlgorithm(dlg,alg);
 }
 
+void MantidUI::loadfromICatInterface(const QString& fileName,const QString& wsName)
+{
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("Load", -1);
+  if( !alg ) return;
+
+  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
+  if(!dlg) return;
+  QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
+  if(!list.empty())
+  {
+    list[0]->setText(fileName);
+    if(list[1])
+    {
+      list[1]->setText(wsName);
+    }
+  }
+  executeAlgorithm(dlg,alg);
+}
+
 void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& fileName, const QString& wsName)
 {
 

@@ -1010,6 +1010,9 @@ public slots:
   /// execute loadnexus asynchronously
   void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
 
+  /// execute load asynchronously
+  void executeLoadAsynch(const QString& fileName,const QString& wsName ) ;
+
   /// execute loadraw/nexus without popingup load dialogs.
   void executeloadAlgorithm(const QString&, const QString&, const QString&);
 

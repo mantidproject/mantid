@@ -16865,6 +16865,15 @@ void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QSt
   mantidUI->loadnexusfromICatInterface(fileName,wsName);
 }
 
+/* This method executes loadnexus asynchrnously
+ * @param  fileName - name of the file to load
+ * @param wsName :: -name of the workspace to store data
+ */
+void ApplicationWindow::executeLoadAsynch(const QString& fileName,const QString& wsName)
+{
+  mantidUI->loadfromICatInterface(fileName,wsName);
+}
+
 /* This method executes Download data files algorithm
  * @param  filenames - list of the file names to download
  */

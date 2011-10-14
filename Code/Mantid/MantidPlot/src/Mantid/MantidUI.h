@@ -182,6 +182,9 @@ public:
   
   /// This method executes loadnexus algorithm from ICatInterface
   void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
+
+  /// This method executes load algorithm from ICatInterface
+  void loadfromICatInterface(const QString& fileName,const QString& wsName);
   
   /// This method is to execute download data files algorithm from ICat
   void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds);

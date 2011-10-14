@@ -77,12 +77,13 @@ namespace MantidQt
       for (int i=0;i<tablewidget->columnCount();++i)
       {
         tablewidget->horizontalHeaderItem(i)->setFont(font);
+        tablewidget->horizontalHeaderItem(i)->setTextAlignment(Qt::AlignLeft);
       }
       //sorting by title
       tablewidget->sortByColumn(2,Qt::AscendingOrder);
       //enable sorting
       tablewidget->setSortingEnabled(true);
-
+      tablewidget->resizeColumnsToContents();
     }
 
     //for clearing the table widget
@@ -140,25 +141,32 @@ namespace MantidQt
       QString qinvstId = invstItem->text();
       long long invstId = qinvstId.toLongLong();
 
-      //column one is RbNumber
-      QTableWidgetItem* rbNumberItem = tablewidget->item(row,1);
-      if(!rbNumberItem) return;
-      QString qRbNumber = rbNumberItem->text();
+      //column one is proposalId
+      QTableWidgetItem* proposalIdItem = tablewidget->item(row,1);
+      if(!proposalIdItem) return;
+      QString qProposalId = proposalIdItem->text();
+
       ///column two is Title
       QTableWidgetItem* titleItem = tablewidget->item(row,2);
-      if(!titleItem)return ;
+      if(!titleItem) return ;
       QString qTitle = titleItem->text();
+
       //column 4 is Instrument
       QTableWidgetItem* instrumentItem = tablewidget->item(row,3);
       if(!instrumentItem)return;
       QString qInstrument = instrumentItem->text();
+
+      //column 5 is Run Range
+      QTableWidgetItem* runRangeItem = tablewidget->item(row,4);
+      if(!runRangeItem)return;
+      QString qRunRange = runRangeItem->text();
 
       //parent of user_win is application window;
       QMdiSubWindow* usr_win = new QMdiSubWindow(parent);
       if(!usr_win) return;
       usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
 
-      m_invstWidget= new ICatInvestigation(invstId,qRbNumber,qTitle,qInstrument,ws_sptr,usr_win);
+      m_invstWidget= new ICatInvestigation(invstId,qProposalId,qTitle,qInstrument,qRunRange,ws_sptr,usr_win);
       if( m_invstWidget )
       {
         QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),
