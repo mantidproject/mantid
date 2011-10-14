@@ -6,7 +6,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include <boost/algorithm/string.hpp>
 #include <numeric>
-#include "MantidKernel/CPUTimer.h"
 
 namespace Mantid
 {
@@ -111,8 +110,7 @@ void FindPeaks::exec()
     std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
 
     //Perform fit with fixed start positions.
-    g_log.information() << "Number of Centers = " << centers.size() << std::endl;
-
+    //std::cout << "Number of Centers = " << centers.size() << std::endl;
     this->findPeaksGivenStartingPoints(centers);
   }
   else
@@ -150,12 +148,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
       double x_center = *it;
       // Check whether it is the in data range
       if (x_center > datax[0] && x_center < datax[datax.size()-1]){
-        CPUTimer tim;
-        tim.reset();
-        g_log.notice() << "(O)Fit Peak: T0 " << tim << std::endl;
         this->fitPeak(inputWS, spec, x_center, this->fwhm);
-        float te = tim.elapsed(false);
-        g_log.notice() << "(O)Fit Peak: Tf " << tim << "   Elapsed = " << te << std::endl;
       }
 
     } // loop through the peaks specified
@@ -644,12 +637,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
     // g_log.information() << "Fit Input:  Peak Center " << in_centre << "  Sigma " << in_sigma << "  Height " << in_height << "StartX " << X[i0]-5*(X[i0]-X[i2]) << "  EndX " << X[i0]+5*(X[i0]-X[i2]) << "  BG0 " << in_bg0 << "  BG1 " << in_bg1 << std::endl;
 
-    CPUTimer tim_fit;
-    tim_fit.reset();
-    g_log.information() << "(O)FitAlgorithm:  T0 = " << tim_fit << std::endl;
     fit->executeAsSubAlg();
-    double dt = tim_fit.elapsed();
-    g_log.information() << "(O)FitAlgorithm:  Tf = " << tim_fit << "   Delta(T) = " << dt << std::endl;
 
     std::string fitStatus = fit->getProperty("OutputStatus");
     std::vector<double> params = fit->getProperty("Parameters");
