@@ -40,7 +40,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MinimumWavelength", 0.6, Description="Minimum Wavelength.  Default is 0.6")
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
-        self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix for first sample run.  Sample run number will be changed for next runs.")
+        self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl', 'nxs']
         self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
@@ -157,11 +157,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def _save(self, wksp, normalized):
         if "hkl" in self._outTypes:
-            name = str(wksp)
-            name = name.split('_')[1] # remove the instrument name
-            self._ubfile = self._ubfile.split(name)[0]
-            ubname = self._ubfile + name + '.mat'
-            LoadIsawUB(InputWorkspace=wksp,Filename=ubname)
+            LoadIsawUB(InputWorkspace=wksp,Filename=self._ubfile)
             PredictPeaks(InputWorkspace=wksp,WavelengthMin=self._minWL,WavelengthMax=self._maxWL,MinDSpacing=self._minD,
                 OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
