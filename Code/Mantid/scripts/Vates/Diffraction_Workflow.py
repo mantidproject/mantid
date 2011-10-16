@@ -61,3 +61,5 @@ if True:
 	# Does not work quite well, see ticket #3772
 	IntegratePeaksMD(InputWorkspace=ws+'_MD', CoordinatesToUse='Q (sample frame)', PeakRadius=0.1, BackgroundRadius=0.0, \
 					PeaksWorkspace=ws+'_peaks_predicted', OutputWorkspace=ws+'_peaks_predicted_integ')
+					
+	BinToMDHistoWorkspace(InputWorkspace='TOPAZ_3131_HKL',AlignedDimX='H,-20,0,200',AlignedDimY='K,-5,15,200',AlignedDimZ='L,-5,15,200',OutputWorkspace='hkl')
