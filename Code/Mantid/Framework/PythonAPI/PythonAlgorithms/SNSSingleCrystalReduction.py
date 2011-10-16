@@ -159,7 +159,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         if "hkl" in self._outTypes:
             LoadIsawUB(InputWorkspace=wksp,Filename=self._ubfile)
             PredictPeaks(InputWorkspace=wksp,WavelengthMin=self._minWL,WavelengthMax=self._maxWL,MinDSpacing=self._minD,
-                OutputWorkspace='Peaks')
+                ReflectionCondition="Rhombohedrally centred, obverse",OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile
