@@ -887,6 +887,7 @@ namespace Mantid
       *   @return the entry
       */
       NXEntry openEntry(const std::string& name){return openNXClass<NXEntry>(name);}
+      NXEntry openFirstEntry();
     private:
       const std::string m_filename; ///< The file name
     };
