@@ -486,6 +486,7 @@ addFileV('MantidNexusCPP','MNxsCPP.dll','MantidNexusCPP.dll',MANTIDRELEASE + '/M
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQtAPI.dll',MantidDlls)
 addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + '/MantidWidgets.dll',MantidDlls)
+addFileV('MantidQtSliceViewer','MQTSV.dll','MantidQtSliceViewer.dll',MANTIDRELEASE + '/MantidQtSliceViewer.dll',MantidDlls)
 
 # Add Qt Property Browser
 addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + '/QtPropertyBrowser.dll',MantidDlls)
