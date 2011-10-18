@@ -92,7 +92,7 @@ namespace Mantid
       for (size_t j = 0; j < n2; ++j)
       {
         // Move data across
-        double y = hmm(0,i,j);
+        double y = hmm(0,int(i),int(j));
         outputWorkspace->dataX(count)[0] = wavelength;
         outputWorkspace->dataY(count)[0] = y;
         outputWorkspace->dataE(count)[0] = sqrt(y);
