@@ -634,7 +634,7 @@ pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',incl
 
 #-------------------  end of Includes ---------------------------------------
 
-sconsList = addCompList('scons',CODEDIR + '/Third_Party/src/scons-local','scons-local',InstallDir)[0]
+sconsList = addCompList('scons','scons-local','scons-local',InstallDir)[0]
 
 ins_def_dir = CODEDIR + '/Mantid/instrument'
 ins_suffix = '.xml'
