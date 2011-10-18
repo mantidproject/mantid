@@ -46,6 +46,7 @@ set ( SRC_FILES
 	src/LoadNXSPE.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexusMonitors.cpp
+	src/LoadQKK.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
@@ -145,6 +146,7 @@ set ( INC_FILES
   inc/MantidDataHandling/LoadNXSPE.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
+	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw.h
 	inc/MantidDataHandling/LoadRaw2.h

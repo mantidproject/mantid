@@ -444,6 +444,25 @@ bool NXRoot::isStandard()const
     return true;
 }
 
+/**
+ * Open the first NXentry in the file.
+ */
+NXEntry NXRoot::openFirstEntry()
+{
+  if (groups().empty())
+  {
+    throw std::runtime_error("NeXus file has no entries");
+  }
+  for(std::vector<NXClassInfo>::const_iterator grp = groups().begin(); grp != groups().end(); ++grp)
+  {
+    if (grp->nxclass == "NXentry")
+    {
+      return openEntry(grp->nxname);
+    }
+  }
+  throw std::runtime_error("NeXus file has no entries");
+}
+
 //---------------------------------------------------------
 //          NXDataSet methods
 //---------------------------------------------------------
