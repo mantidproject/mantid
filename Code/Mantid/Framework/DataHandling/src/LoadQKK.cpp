@@ -88,8 +88,8 @@ namespace Mantid
 
       //  Put data into outputWorkspace
       size_t count = 0;
-      for (int i = 0; i < n1; ++i)
-      for (int j = 0; j < n2; ++j)
+      for (size_t i = 0; i < n1; ++i)
+      for (size_t j = 0; j < n2; ++j)
       {
         // Move data across
         double y = hmm(0,i,j);
