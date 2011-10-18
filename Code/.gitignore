@@ -1,0 +1,2 @@
+# Make sure Third_Party doesn't get checked into the main repository
+Third_Party/
