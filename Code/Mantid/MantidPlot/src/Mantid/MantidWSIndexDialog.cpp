@@ -121,7 +121,7 @@ void MantidWSIndexDialog::plot()
 
 void MantidWSIndexDialog::editedWsField()
 {
-  m_spectraField->clear();
+  if(m_spectra) m_spectraField->clear();
 }
 
 void MantidWSIndexDialog::editedSpectraField()
@@ -138,7 +138,7 @@ void MantidWSIndexDialog::init()
 
   setWindowTitle(tr("MantidPlot"));
   initWorkspaceBox();
-  if(m_spectra && m_spectraIdIntervals.getList().size() > 0) initSpectraBox();
+  initSpectraBox();
   initButtons();
   setLayout(m_outer);
 
@@ -171,7 +171,7 @@ void MantidWSIndexDialog::initSpectraBox()
   //m_spectraField->setPlaceholderText(tr("E.g. \"3-5,10-17,20\" would work for IDs 1-30"));
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
-  m_outer->addItem(m_spectraBox);
+  if(m_spectra) m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField, SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
   //connect(m_spectraField, SIGNAL(returnPressed()), this, SLOT(plot()));
