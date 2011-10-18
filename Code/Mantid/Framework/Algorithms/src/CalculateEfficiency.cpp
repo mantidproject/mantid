@@ -219,14 +219,19 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one
       if ( det->isMasked() ) continue;
-      // If this detector is a monitor, skip to the next one
-      if ( det->isMonitor() ) continue;
 
       // Retrieve the spectrum into a vector
       const MantidVec& YIn = rebinnedWS->readY(i);
       const MantidVec& EIn = rebinnedWS->readE(i);
       MantidVec& YOut = outputWS->dataY(i);
       MantidVec& EOut = outputWS->dataE(i);
+      // If this detector is a monitor, skip to the next one
+      if ( det->isMonitor() )
+      {
+        YOut[0] = 1.0;
+        EOut[0] = 0.0;
+        continue;
+      }
 
       // Normalize counts to get relative efficiency
       YOut[0] = nPixels/sum * YIn[0];
