@@ -21,11 +21,16 @@
  * @param flags :: Window flags that are passed the the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
  */
-MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames) :
-  QDialog(mui->appWindow(), flags), m_mantidUI(mui)
+MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames) 
+  : QDialog(mui->appWindow(), flags), 
+  m_mantidUI(mui),
+  m_spectra(false),
+  m_wsNames(wsNames),
+  m_wsIndexIntervals(),
+  m_spectraIdIntervals(),
+  m_wsIndexChoice(), 
+  m_spectraIdChoice()
 {
-  m_wsNames = wsNames;
-
   checkForSpectraAxes();
 
   // Generate the intervals allowed to be plotted by the user.
@@ -199,8 +204,8 @@ void MantidWSIndexDialog::checkForSpectraAxes()
   // If even one does not have a spectra axis, then we wont
   // ask the user to enter spectra IDs - only workspace indices.
   QList<QString>::const_iterator it = m_wsNames.constBegin();
-  bool m_spectra = true;
-  
+  m_spectra = true;
+
   for ( ; it != m_wsNames.constEnd(); ++it )
   {
     Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
