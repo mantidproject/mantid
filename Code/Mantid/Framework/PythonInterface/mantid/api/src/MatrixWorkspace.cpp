@@ -1,12 +1,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/PropertyMarshal.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::API;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 void export_MatrixWorkspace()
@@ -19,6 +21,7 @@ void export_MatrixWorkspace()
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     ;
 
+  DECLARE_PROPERTYHANDLER(MatrixWorkspace, DataItem_sptr);
 }
 
 void export_MatrixWorkspaceProperty()
