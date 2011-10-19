@@ -547,9 +547,14 @@ QString MWRunFiles::createFileFilter()
     }
   }
 
-  QString fileFilter;
   if( !fileExts.isEmpty() )
   {
+    // The file filter consists of three parts, which we will combine to create the
+    // complete file filter:
+    QString dataFiles("Data Files (");
+    QString individualFiles("");
+    QString allFiles("All Files (*.*)");
+    
     // The list may contain upper and lower cased versions, ensure these are on the same line
     // I want this ordered
     QList<QPair<QString, QStringList> > finalIndex;
@@ -576,21 +581,29 @@ QString MWRunFiles::createFileFilter()
         finalIndex.append(qMakePair(key, QStringList(ext)));
       }
     }
-    
+
     if( extsAsSingleOption() )
     {
-      fileFilter += "";
       QListIterator<QPair<QString, QStringList> > itr(finalIndex);
       while( itr.hasNext() )
       {
         const QStringList values = itr.next().second;
-        if ( *(fileFilter.end()-1) != '(' )
+        
+        if ( *(individualFiles.end()-1) != '(' )
         {
-          fileFilter += " ";
+          individualFiles += " ";
         }
-        fileFilter += "*" + values.join(" *");
+
+        if ( *(dataFiles.end()-1) != '(' )
+        {
+          dataFiles += " ";
+        }
+        
+        individualFiles += "*" + values.join(" *") + ";;";
+        dataFiles += "*" + values.join(" *") + ";";
       }
-      fileFilter += ";;";
+      dataFiles.chop(1);
+      dataFiles += ");;";
     }
     else
     {
@@ -598,12 +611,17 @@ QString MWRunFiles::createFileFilter()
       while( itr.hasNext() )
       {
         const QStringList values = itr.next().second;
-        fileFilter += "*" + values.join(" *") + ";;";
+        dataFiles += "*" + values.join(" *") + ";;";
       }
     }
+
+    return dataFiles + individualFiles + allFiles;
   }
-  fileFilter += "All Files (*.*)";
-  return fileFilter;
+  else//if( fileExts.isEmpty() )
+  {
+    return QString("All Files (*.*)");
+  }
+  
 }
 
 /**
