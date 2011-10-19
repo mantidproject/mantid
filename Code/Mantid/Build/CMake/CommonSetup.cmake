@@ -77,7 +77,10 @@ if ( GIT_FOUND )
   string ( REGEX MATCH "[-](.*)[-]" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
   string ( REGEX MATCH "[^-](.*)[^-]" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
   # Will do the date later...
-  set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
+  execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE 
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+  string ( SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE )
 else()
   # Just use a dummy version number and print a warning
   message ( STATUS "Git not found - using dummy revision number and date" )
