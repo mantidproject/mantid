@@ -323,13 +323,13 @@ class SANSReducer(Reducer):
         if self._mask is not None:
             reduction_steps.append(self._mask)
         
-        # Sensitivity correction
-        if self._sensitivity_correcter is not None:
-            reduction_steps.append(self._sensitivity_correcter)
-            
         # Solid angle correction
         if self._solid_angle_correcter is not None:
             reduction_steps.append(self._solid_angle_correcter)
+
+        # Sensitivity correction
+        if self._sensitivity_correcter is not None:
+            reduction_steps.append(self._sensitivity_correcter)    
         
         return reduction_steps
     

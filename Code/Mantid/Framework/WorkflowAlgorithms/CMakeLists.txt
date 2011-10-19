@@ -6,6 +6,7 @@ set ( SRC_FILES
         src/HFIRInstrument.cpp
         src/EQSANSInstrument.cpp
         src/SANSSolidAngleCorrection.cpp
+        src/SANSSensitivityCorrection.cpp
         src/EQSANSSensitivityCorrection.cpp
         src/EQSANSDarkCurrentSubtraction.cpp
         src/HFIRDarkCurrentSubtraction.cpp
@@ -22,6 +23,7 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/HFIRInstrument.h
         inc/MantidWorkflowAlgorithms/ReductionTableHandler.h
         inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
+        inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
         inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
