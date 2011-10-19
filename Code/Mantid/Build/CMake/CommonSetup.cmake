@@ -66,13 +66,24 @@ find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
 ###########################################################################
-# Previously looked for subversion. Used for version headers - faked if not found.
+# Look for Git. Used for version headers - faked if not found.
 ###########################################################################
 
-# Just use a dummy version number and print a warning
-message ( STATUS "Until we do something following move to Git - using dummy revision number and date" )
-set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
-set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
+find_package ( Git )
+if ( GIT_FOUND )
+  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --tags --long OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_REV 
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+  string ( REGEX MATCH "[-](.*)[-]" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
+  string ( REGEX MATCH "[^-](.*)[^-]" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
+  # Will do the date later...
+  set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
+else()
+  # Just use a dummy version number and print a warning
+  message ( STATUS "Git not found - using dummy revision number and date" )
+  set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
+  set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
+endif()
 
 mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE )
 
