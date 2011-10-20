@@ -2686,7 +2686,7 @@ void MuonAnalysis::changeRun(int amountToChange)
   }
 
   m_previousFilename = (currentFile + previousRunNumber + fileExtension);
-  m_uiForm.mwRunFiles->setUserInput(m_previousFilename);
+  m_uiForm.mwRunFiles->setUserInput(currentFile + previousRunNumber);
 
   // in case file is selected from browser button check that it actually exist
   Poco::File l_path( m_previousFilename.toStdString() );

@@ -90,6 +90,8 @@ void EQSANSDarkCurrentSubtraction::exec()
     const std::string reductionTableName = getPropertyValue("ReductionTableWorkspace");
     if (reductionTableName.size()>0) setProperty("ReductionTableWorkspace", reductionHandler.getTable());
   }
+  if (reductionHandler.findStringEntry("DarkCurrentAlgorithm").size()==0)
+    reductionHandler.addEntry("DarkCurrentAlgorithm", toString());
 
   progress.report("Subtracting dark current");
 
