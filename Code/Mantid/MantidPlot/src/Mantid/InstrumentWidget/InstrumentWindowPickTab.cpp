@@ -530,91 +530,91 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 {
   UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
-
-  const double mN =   1.67492729e-27;
-  const double hbar = 1.054571628e-34;
-  
-  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  // This does need to get the instrument from the workspace as it's doing calculations
-  // .....and this method should be an algorithm! Or at least somewhere different to here.
-  Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
-  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
-  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
-  Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
-
-  Mantid::Kernel::Unit_sptr unit = ws->getAxis(0)->unit();
-
-  std::string peakTableName = "SingleCrystalPeakTable";
   Mantid::API::IPeaksWorkspace_sptr tw;
-  if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
-  {
-    tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
-    tw->setInstrument(instr);
-    //tw->addColumn("double","Qx");
-    //tw->addColumn("double","Qy");
-    //tw->addColumn("double","Qz");
-    Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-  }
-  else
-  {
-    tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
-    if (!tw)
-    {
-      QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
-      return;
-    }
-  }
-  const Mantid::Kernel::V3D samplePos = sample->getPos();
-  const Mantid::Kernel::V3D beamLine = samplePos - source->getPos();
-  double theta2 = det->getTwoTheta(samplePos,beamLine);
-  double phi = det->getPhi();
-
-  // In the inelastic convention, Q = ki - kf.
-  double Qx=-sin(theta2)*cos(phi);
-  double Qy=-sin(theta2)*sin(phi);
-  double Qz=1.0-cos(theta2);
-  double l1 = source->getDistance(*sample);
-  double l2 = det->getDistance(*sample);
-
-  double tof = x;
-  if (unit->unitID() != "TOF")
-  {
-    if (m_emode < 0)
-    {
-      const Mantid::API::Run & run = ws->run();
-      if (run.hasProperty("Ei"))
-      {
-        m_emode = 1; // direct
-      }
-      else if (det->hasParameter("Efixed"))
-      {
-        m_emode = 2; // indirect
-      }
-      else
-      {
-        //m_emode = 0; // Elastic
-        InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
-        dlg->exec();
-        m_emode = dlg->getEMode();
-        m_efixed = dlg->getEFixed();
-        m_delta = dlg->getDelta();
-      }
-    }
-    std::vector<double> xdata(1,x);
-    std::vector<double> ydata;
-    unit->toTOF(xdata, ydata, l1, l2, theta2, m_emode, m_efixed, m_delta);
-    tof = xdata[0];
-  }
-
-  double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
-  knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
-  Qx *= knorm;
-  Qy *= knorm;
-  Qz *= knorm;
+  std::string peakTableName = "SingleCrystalPeakTable";
 
   try
   {
+    const double mN =   1.67492729e-27;
+    const double hbar = 1.054571628e-34;
+
+    InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+    Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+    // This does need to get the instrument from the workspace as it's doing calculations
+    // .....and this method should be an algorithm! Or at least somewhere different to here.
+    Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
+    Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
+    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+    Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
+
+    Mantid::Kernel::Unit_sptr unit = ws->getAxis(0)->unit();
+
+    if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
+    {
+      tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
+      tw->setInstrument(instr);
+      //tw->addColumn("double","Qx");
+      //tw->addColumn("double","Qy");
+      //tw->addColumn("double","Qz");
+      Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+    }
+    else
+    {
+      tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
+      if (!tw)
+      {
+        QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
+        return;
+      }
+    }
+    const Mantid::Kernel::V3D samplePos = sample->getPos();
+    const Mantid::Kernel::V3D beamLine = samplePos - source->getPos();
+    double theta2 = det->getTwoTheta(samplePos,beamLine);
+    double phi = det->getPhi();
+
+    // In the inelastic convention, Q = ki - kf.
+    double Qx=-sin(theta2)*cos(phi);
+    double Qy=-sin(theta2)*sin(phi);
+    double Qz=1.0-cos(theta2);
+    double l1 = source->getDistance(*sample);
+    double l2 = det->getDistance(*sample);
+
+    double tof = x;
+    if (unit->unitID() != "TOF")
+    {
+      if (m_emode < 0)
+      {
+        const Mantid::API::Run & run = ws->run();
+        if (run.hasProperty("Ei"))
+        {
+          m_emode = 1; // direct
+        }
+        else if (det->hasParameter("Efixed"))
+        {
+          m_emode = 2; // indirect
+        }
+        else
+        {
+          //m_emode = 0; // Elastic
+          InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
+          dlg->exec();
+          m_emode = dlg->getEMode();
+          m_efixed = dlg->getEFixed();
+          m_delta = dlg->getDelta();
+        }
+      }
+      std::vector<double> xdata(1,x);
+      std::vector<double> ydata;
+      unit->toTOF(xdata, ydata, l1, l2, theta2, m_emode, m_efixed, m_delta);
+      tof = xdata[0];
+    }
+
+    double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
+    knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
+    Qx *= knorm;
+    Qy *= knorm;
+    Qz *= knorm;
+
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
     tw->addPeak(*peak);
@@ -623,6 +623,10 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   }
   catch(std::exception& e)
   {
+    if (tw)
+    {
+      Mantid::API::AnalysisDataService::Instance().remove(peakTableName);
+    }
     QMessageBox::critical(this,"MantidPlot -Error",
       "Cannot create a Peak object because of the error:\n"+QString(e.what()));
   }
