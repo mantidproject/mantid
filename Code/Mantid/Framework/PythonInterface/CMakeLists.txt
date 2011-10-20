@@ -45,7 +45,7 @@ set ( TEST_FILES
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc )
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
-  target_link_libraries( PythonInterfaceTest TestHelpers PythonKernelModule )
+  target_link_libraries( PythonInterfaceTest TestHelpers PythonKernelModule PythonAPIModule )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonInterfaceTest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonInterfaceTest )

@@ -170,6 +170,25 @@ namespace Mantid
         return isValid();
       }
 
+      /** Set a value from a data item
+      *  @param value :: A shared pointer to a DataItem. If it is of the correct
+      *  type it will set validated, if not the property's value will be cleared. 
+      *  @return 
+      */
+      virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> value)
+      {
+	boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
+	if(typed)
+	{
+	  Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = typed;
+     	}
+	else
+	{
+	  this->clear();
+	}
+	return isValid();
+      }
+
       /** Checks whether the entered workspace is valid.
       *  To be valid, in addition to satisfying the conditions of any validators,
       *  an output property must not have an empty name and an input one must point to

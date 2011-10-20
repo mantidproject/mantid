@@ -105,4 +105,16 @@ namespace Mantid
   }
 }
 
+/**
+ * A macro to declare property handlers
+ *
+ * @param export_type :: The C++ type that is to be converted
+ * @param base_type :: The C++ type that the export_type is to be treated as
+ */
+#define DECLARE_PROPERTYHANDLER(export_type, base_type) \
+  const boost::python::converter::registration *reg = boost::python::converter::registry::query(typeid(export_type));\
+  Mantid::PythonInterface::PropertyMarshal::insert(reg->get_class_object(), new Mantid::PythonInterface::TypedHandler<base_type>());\
+
+
+
 #endif /* MANTID_PYTHONINTERFACE_PROPERTYMARSHAL_H_ */
