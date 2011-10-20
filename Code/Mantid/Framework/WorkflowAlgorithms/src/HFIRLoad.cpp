@@ -166,6 +166,10 @@ void HFIRLoad::exec()
     m_center_x = pixel_ctr_x;
     m_center_y = pixel_ctr_y;
     moveToBeamCenter();
+    // Add beam center to reduction table, as the last beam center position that was used.
+    // This will give us our default position next time.
+    reductionHandler.addEntry("LatestBeamCenterX", m_center_x);
+    reductionHandler.addEntry("LatestBeamCenterY", m_center_y);
   } else {
     HFIRInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
     g_log.information() << "No beam finding method: setting to default ["

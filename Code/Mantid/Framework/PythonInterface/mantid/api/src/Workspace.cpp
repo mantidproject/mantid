@@ -27,7 +27,7 @@ void export_Workspace()
 {
   register_ptr_to_python<Workspace_sptr>();
 
-  object cls = class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
+  class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
     .def("id", &Workspace::id, "Returns the string ID of the workspace type")
     .def("get_title", &Workspace::getTitle, "Returns the title of the workspace")
     .def("get_comment", &Workspace::getComment, return_value_policy<copy_const_reference>(), "Returns the comment field on the workspace")
@@ -39,9 +39,7 @@ void export_Workspace()
          "Return read-only access to the workspace history")
     ;
 
-  // @todo: Simplify this stuff with a Macro
-  Mantid::PythonInterface::PropertyMarshal::insert((PyTypeObject*)cls.ptr(), new Mantid::PythonInterface::TypedHandler<DataItem_sptr>());
-
+  DECLARE_PROPERTYHANDLER(Workspace, DataItem_sptr);
 }
 
 void export_WorkspaceProperty()
