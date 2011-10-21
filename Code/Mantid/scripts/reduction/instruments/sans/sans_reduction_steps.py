@@ -713,7 +713,33 @@ class SensitivityCorrection(ReductionStep):
             
         return output_str
         
+    def _workflow_alg(self, reducer, workspace):
+        center_x = None
+        center_y = None
+        # Find the beam center if we need to
+        if self._beam_center is not None:
+            self._beam_center.execute(reducer)
+            [center_x, center_y] = self._beam_center.get_beam_center()
+        
+        # Load the flood data
+        filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
+        
+        l=SANSSensitivityCorrection(InputWorkspace=workspace,
+                                  Filename=filepath,
+                                  UseSampleDC=self._use_sample_dc,
+                                  DarkCurrentFile=self._dark_current_data,
+                                  MinEfficiency=self._min_sensitivity,
+                                  MaxEfficiency=self._max_sensitivity,
+                                  BeamCenterX=center_x,
+                                  BeamCenterY=center_y,
+                                  OutputWorkspace=workspace,
+                                  ReductionTableWorkspace=reducer.get_reduction_table_name(),
+                                  OutputSensitivityWorkspace=self._efficiency_ws
+                                  )
+        return l.getPropertyValue("OutputMessage")
+        
     def execute(self, reducer, workspace):
+        #return self._workflow_alg(reducer, workspace)
         # If the sensitivity correction workspace exists, just apply it.
         # Otherwise create it.      
         #TODO: check that the workspaces have the same binning!
@@ -734,6 +760,9 @@ class SensitivityCorrection(ReductionStep):
 class Mask(ReductionStep):
     """
         Marks some spectra so that they are not included in the analysis
+        
+        ORNL & ISIS
+        
     """
     def __init__(self):
         """
@@ -915,6 +944,9 @@ class Mask(ReductionStep):
 class CorrectToFileStep(ReductionStep):
     """
         Runs the algorithm CorrectToFile()
+        
+        ISIS only
+        
     """
     def __init__(self, file='', corr_type='', operation=''):
         """
@@ -946,6 +978,10 @@ class CalculateNorm(object):
         of other, sometimes optional, reduction_steps or specified workspaces.
         Workspaces for wavelength adjustment must have their
         distribution/non-distribution flag set correctly as they maybe converted
+        
+        ISIS only
+        ORNL doesnt't use that approach
+        
     """
     TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'
     WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
@@ -1033,6 +1069,10 @@ class CalculateNorm(object):
 class ConvertToQ(ReductionStep):
     """
         Runs the Q1D or Qxy algorithms to convert wavelength data into momentum transfer, Q
+        
+        ISIS only 
+        ORNL uses WeightedAzimuthalAverage
+        
     """
     # the list of possible Q conversion algorithms to use
     _OUTPUT_TYPES = {'1D' : 'Q1D',
@@ -1289,6 +1329,10 @@ class GetSampleGeom(ReductionStep):
         On initialisation this class will return default geometry values (compatible with the Colette software)
         There are functions to override these settings
         On execute if there is geometry information in the workspace this will override any unset attributes
+        
+        ISIS only
+        ORNL only divides by thickness, in the absolute scaling step
+        
     """
     # IDs for each shape as used by the Colette software
     _shape_ids = {1 : 'cylinder-axis-up',
@@ -1427,6 +1471,10 @@ class GetSampleGeom(ReductionStep):
 class SampleGeomCor(ReductionStep):
     """
         Correct the neutron count rates for the size of the sample
+        
+        ISIS only
+        ORNL only divides by thickness, in the absolute scaling step
+
     """
     def __init__(self, geometry):
         """
@@ -1468,6 +1516,7 @@ class SampleGeomCor(ReductionStep):
         ws /= volume
 
 class StripEndZeros(ReductionStep):
+    # ISIS only
     def __init__(self, flag_value = 0.0):
         super(StripEndZeros, self).__init__()
         self._flag_value = flag_value
@@ -1501,6 +1550,7 @@ class StripEndZeros(ReductionStep):
         CropWorkspace(workspace,workspace,startX,endX)
 
 class StripEndNans(ReductionStep):
+    # ISIS only
     def __init__(self):
         super(StripEndNans, self).__init__()
         
