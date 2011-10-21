@@ -157,6 +157,8 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
       painter.drawRect(m_selectRect);
     }
     painter.end();
+    // Discard any error generated here
+    glGetError();
   }
 }
 
