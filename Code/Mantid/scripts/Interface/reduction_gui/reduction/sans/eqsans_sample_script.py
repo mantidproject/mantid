@@ -11,7 +11,7 @@ class SampleData(BaseSampleData):
     # Option list
     option_list = [BaseSampleData.DirectBeam]
     # Option to fit the two frame separately when in frame-skipping mode
-    combine_transmission_frames = True
+    combine_transmission_frames = False
     calculate_transmission = True
 
     def __init__(self):
