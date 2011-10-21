@@ -1,3 +1,27 @@
+/**
+    @author Mathieu Doucet
+    @date 12/10/2011
+
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -7,6 +31,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/EmptyValues.h"
+#include <MantidAPI/FileFinder.h>
+#include "Poco/File.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -49,6 +76,22 @@ namespace WorkflowAlgorithms
     } catch(std::out_of_range&) {
       return "";
     }
+  }
+
+  /// Find a file path for the given name
+  /// @param name :: key for which to look up the file
+  /// @param hint :: hint to prepend to the key, usually the instrument name
+  std::string ReductionTableHandler::findFileEntry(const std::string& name, const std::string& hint) {
+    std::string path = FileFinder::Instance().getFullPath(name);
+    if (Poco::File(path).exists()) return path;
+
+    try
+    {
+      std::vector<std::string> paths = FileFinder::Instance().findRuns(hint+name);
+      if (Poco::File(paths[0]).exists()) return paths[0];
+    } catch (...) {};
+
+    return "";
   }
 
   int ReductionTableHandler::findIntEntry(const std::string& key)
