@@ -92,6 +92,7 @@ add_dependencies ( check FrameworkTests )
 
 include_directories (NexusCPP/inc)
 add_subdirectory (NexusCPP)
+set ( MANTIDLIBS ${MANTIDLIBS} NexusCPP )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)

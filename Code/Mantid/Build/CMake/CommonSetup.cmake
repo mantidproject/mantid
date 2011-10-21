@@ -55,6 +55,9 @@ add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 find_package ( Poco REQUIRED )
 include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
+find_package ( Nexus REQUIRED )
+include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
+
 find_package ( MuParser REQUIRED )
 
 # Need to change search path to find zlib include on Windows.
