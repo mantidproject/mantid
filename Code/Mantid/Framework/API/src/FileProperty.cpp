@@ -161,6 +161,18 @@ std::string FileProperty::setValue(const std::string & propValue)
 }
 
 /**
+ * Set a property value via a DataItem
+ * @param data :: A shared pointer to a data item
+ * @return "" if the assignment was successful or a user level description of the problem
+*/
+std::string FileProperty::setValue(const boost::shared_ptr<Kernel::DataItem> data )
+{
+  // Implemented this method for documentation reasons. Just calls base class method.
+  return PropertyWithValue<std::string>::setValue(data);
+}
+
+
+/**
  * Set up the property
  * @param defExt :: The default extension
  */

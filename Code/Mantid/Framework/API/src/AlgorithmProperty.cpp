@@ -101,6 +101,17 @@ namespace Mantid
       else return message;
     }
 
+    /**
+     * Set a property value via a DataItem
+     * @param data :: A shared pointer to a data item
+     * @return "" if the assignment was successful or a user level description of the problem
+    */
+    std::string AlgorithmProperty::setValue(const boost::shared_ptr<Kernel::DataItem> data )
+    {
+      UNUSED_ARG(data);
+      return "Cannot convert a pointer to a DataItem to a pointer to an IAlgorithm object";
+    }
+
 
   } // namespace Mantid
 } // namespace API

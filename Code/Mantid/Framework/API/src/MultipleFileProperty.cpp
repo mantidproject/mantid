@@ -74,6 +74,17 @@ namespace API
     return ArrayProperty<std::string>::setValue(outValue);
   }
 
+  /**
+   * Set a property value via a DataItem
+   * @param data :: A shared pointer to a data item
+   * @return "" if the assignment was successful or a user level description of the problem
+  */
+  std::string MultipleFileProperty::setValue(const boost::shared_ptr<Kernel::DataItem> data )
+  {
+    // Implemented this method for documentation reasons. Just calls base class method.
+    return ArrayProperty<std::string>::setValue(data);
+  }
+
 
 
 } // namespace Mantid

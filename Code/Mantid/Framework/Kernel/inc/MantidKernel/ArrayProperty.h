@@ -135,6 +135,17 @@ public:
     return PropertyWithValue< std::vector<T> >::setValue(value);
   }
 
+  /**
+   * Set a property value via a DataItem
+   * @param data :: A shared pointer to a data item
+   * @return "" if the assignment was successful or a user level description of the problem
+   */
+  std::string setValue(const boost::shared_ptr<DataItem> data )
+  {
+    // Implemented this method for documentation reasons. Just calls base class method.
+    return PropertyWithValue< std::vector<T> >::setValue(data);
+  }
+
   // May want to add specialisation the the class later, e.g. setting just one element of the vector
 };
 
