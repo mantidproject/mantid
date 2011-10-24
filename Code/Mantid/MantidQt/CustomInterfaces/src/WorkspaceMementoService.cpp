@@ -117,14 +117,35 @@ namespace MantidQt
     }
 
     template<typename Memento>
+    void WorkspaceMementoService<Memento>::addLogItem(std::string name)
+    {
+        m_memento->getData()->addColumn("str", name); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
+        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(m_memento->getData(), m_memento->getRowIndex()));
+    }
+
+    
+    template<typename Memento>
     void WorkspaceMementoService<Memento>::addLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<Mantid::Kernel::Property*> vecLogData, int rowIndex)
     {
       typedef std::vector<Mantid::Kernel::Property*> VecLogType;
       VecLogType::iterator it = vecLogData.begin();
       while(it != vecLogData.end())
       {
-        ws->addColumn("str", (*it)->name());
+        ws->addColumn("str", (*it)->name()); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
         m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws, rowIndex));
+        it++;
+      }
+    }
+
+    template<typename Memento>
+    void WorkspaceMementoService<Memento>::addLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<std::string> vecLogData, int rowIndex)
+    {
+      typedef std::vector<std::string> VecLogType;
+      VecLogType::iterator it = vecLogData.begin();
+      while(it != vecLogData.end())
+      {
+        ws->addColumn("str", (*it)); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
+        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws , rowIndex));
         it++;
       }
     }
@@ -138,6 +159,21 @@ namespace MantidQt
       while(it != vecLogData.end())
       {
         std::string value = (*it)->value();
+        m_memento->getItem(count)->setValue(value);
+        it++;
+        count++;
+      }
+    }
+
+    template<typename Memento>
+    void WorkspaceMementoService<Memento>::setLogData(std::vector<std::string> vecLogData)
+    {
+      typedef std::vector<std::string> VecLogType;
+      VecLogType::iterator it = vecLogData.begin();
+      int count = m_logValueStart;
+      while(it != vecLogData.end())
+      {
+        std::string value = (*it);
         m_memento->getItem(count)->setValue(value);
         it++;
         count++;

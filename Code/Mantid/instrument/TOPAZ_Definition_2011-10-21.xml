@@ -1,9 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="TOPAZ" valid-from   ="2011-10-03 00:00:01"
-		         last-modified="2011-10-24 09:30:00"
-		         valid-to     ="2011-10-20 11:59:00">
+<instrument name="TOPAZ" valid-from   ="2011-10-21 00:00:01"
+		         last-modified="2011-10-24 09:30:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Janik Zikovsky using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
 
@@ -43,7 +42,7 @@
 
 
 <!--- Copy/paste the output from the Translation Service TOPAZ.py script here -->
-<!-- XML Code automatically generated on 2011-09-29 13:50:16.168982 for the Mantid instrument definition file -->
+<!-- XML Code automatically generated on 2011-10-19 16:45:01.273761 for the Mantid instrument definition file -->
 <component type="panel" idstart="1114112" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.455000" t="105.192621" p="-146.694008" name="bank17" rot="44.079783" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
@@ -55,6 +54,20 @@
 <location r="0.455000" t="74.807731" p="-146.694071" name="bank18" rot="80.079867" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
     <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1441792" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="90.000202" p="-16.000018" name="bank22" rot="-105.410002" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component> 
+<component type="panel" idstart="1507328" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="124.403098" p="-19.516157" name="bank23" rot="-69.410491" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
@@ -150,7 +163,7 @@
 </location>
 </component> 
 <!-- List of all the bank names:
-bank17,bank18,bank26,bank27,bank33,bank36,bank37,bank38,bank39,bank46,bank47,bank48,bank49,bank57,bank58
+bank17,bank18,bank22,bank23,bank26,bank27,bank33,bank36,bank37,bank38,bank39,bank46,bank47,bank48,bank49,bank57,bank58
 -->
 
 

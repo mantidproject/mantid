@@ -2,7 +2,6 @@
 #define MANTIDQTCUSTOMINTERFACES_LOG_PRESENTER_H
 
 #include "MantidQtCustomInterfaces/Updateable.h"
-#include "MantidQtCustomInterfaces/LogView.h"
 
 namespace MantidQt
 {
@@ -34,6 +33,7 @@ namespace MantidQt
       Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
     class LoanedMemento;
+    class LogView;
     class DLLExport LogPresenter : public Updateable
     {
     public:
@@ -42,8 +42,8 @@ namespace MantidQt
       void update();
       void acceptView(LogView* view);
     private:
-      LogView* m_view;
       LoanedMemento& m_WsMemento;
+      LogView* m_view;
     };
   }
 }

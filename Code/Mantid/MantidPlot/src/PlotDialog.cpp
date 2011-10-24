@@ -453,7 +453,7 @@ void PlotDialog::setPlotType(int plotType, const QString & color)
     if (!graph)
         return;
 
-		QwtSymbol s = QwtSymbol(QwtSymbol::Cross, QBrush(), QPen(QColor(color)), QSize(5,5));
+		QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(QColor(color)), QSize(5,5));
 		if (plotType == Graph::Line)
 			s.setStyle(QwtSymbol::NoSymbol);
 		else if (plotType == Graph::Scatter)
