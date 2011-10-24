@@ -59,7 +59,7 @@ public:
    void testInvalidByDefault()
    {
      TableWorkspace_sptr ws = makeTableWS();
-     WorkspaceMemento memento(ws, "TestWSRow");
+     WorkspaceMemento memento(ws, "TestWSRow", 0);
      //No calls to memento.addItem
      TSM_ASSERT_THROWS("Should be invalid until fully configured via ::addItem", memento.validate(), std::runtime_error)
    }
@@ -67,7 +67,7 @@ public:
    void testMakeValid()
    {
      TableWorkspace_sptr ws = makeTableWS();
-     WorkspaceMemento memento(ws, "TestWSRow");
+     WorkspaceMemento memento(ws, "TestWSRow", 0);
      
      //Items added so should be valid now.
      doAddItems(ws, memento);
@@ -126,7 +126,7 @@ public:
    void testHasNotChanged()
    {
      TableWorkspace_sptr ws = makeTableWS();
-     WorkspaceMemento memento(ws, "TestWSRow");
+     WorkspaceMemento memento(ws, "TestWSRow", 0);
 
      doAddItems(ws, memento);
 
@@ -136,7 +136,7 @@ public:
    void testHasChanged()
    {
      TableWorkspace_sptr ws = makeTableWS();
-     WorkspaceMemento memento(ws, "TestWSRow");
+     WorkspaceMemento memento(ws, "TestWSRow", 0);
 
      doAddItems(ws, memento);
      std::string newValue = "New Name";
@@ -149,7 +149,7 @@ public:
    void testRollBack()
    {
      TableWorkspace_sptr ws = makeTableWS();
-     WorkspaceMemento memento(ws, "TestWSRow");
+     WorkspaceMemento memento(ws, "TestWSRow", 0);
 
      doAddItems(ws, memento);
      std::string newValue = "New Instrument";
@@ -162,7 +162,7 @@ public:
    void testCommit()
    {
      TableWorkspace_sptr ws = makeTableWS();
-     WorkspaceMemento memento(ws, "TestWSRow");
+     WorkspaceMemento memento(ws, "TestWSRow", 0);
 
      doAddItems(ws, memento);
      std::string newValue = "New Instrument";
@@ -180,13 +180,13 @@ public:
    {
      TableWorkspace_sptr ws = makeTableWS();
 
-     WorkspaceMemento a(ws, "A");
+     WorkspaceMemento a(ws, "A", 0);
      doAddItems(ws, a);
 
-     WorkspaceMemento b(ws, "B");
+     WorkspaceMemento b(ws, "B", 0);
      doAddItems(ws, b);
 
-     WorkspaceMemento c(ws, "C");
+     WorkspaceMemento c(ws, "C", 0);
      doAddItems(ws, c);
      std::string newValue = "New Name";
      c.getItem(0)->setValue(newValue);
@@ -200,13 +200,13 @@ public:
    {
      TableWorkspace_sptr ws = makeTableWS();
 
-     WorkspaceMemento a(ws, "A");
+     WorkspaceMemento a(ws, "A", 0);
      doAddItems(ws, a);
 
-     WorkspaceMemento b(ws, "B");
+     WorkspaceMemento b(ws, "B", 0);
      doAddItems(ws, b);
 
-     WorkspaceMemento c(ws, "C");
+     WorkspaceMemento c(ws, "C", 0);
      doAddItems(ws, c);
      std::string newValue = "New Name";
      c.getItem(0)->setValue(newValue);

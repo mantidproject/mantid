@@ -11,11 +11,12 @@ namespace MantidQt
     @param ws : ref to underlying table workspace where persisted data is stored.
     @param wsName : The name of the workspace
     */
-    WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string wsName) :
+    WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string wsName, int rowIndex) :
       m_data(ws), 
       m_validMemento(false), 
       m_wsName(wsName), 
-      m_lock(new SingleOwnerLock(wsName))
+      m_lock(new SingleOwnerLock(wsName)),
+      m_rowIndex(rowIndex)
     {
     }
 
@@ -174,6 +175,24 @@ namespace MantidQt
         (*it)->rollback();
         it++;
       }
+    }
+
+    /*
+    Getter for the internal table workspace.
+    @return pointer to internal table workspace.
+    */
+    Mantid::API::ITableWorkspace_sptr WorkspaceMemento::getData() const
+    {
+      return m_data;
+    }
+
+    /*
+    Getter for the row index.
+    @return the row index.
+    */
+    int WorkspaceMemento::getRowIndex() const
+    {
+      return m_rowIndex;
     }
   }
 }
