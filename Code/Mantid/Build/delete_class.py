@@ -12,7 +12,7 @@ from cmakelists_utils import *
     
 #======================================================================
 def delete_one(oldfilename):
-    cmd = "svn remove " + oldfilename
+    cmd = "git rm " + oldfilename
     print "Running:", cmd
     os.system(cmd)
 

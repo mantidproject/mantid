@@ -21,7 +21,9 @@ def find_basedir(project, subproject):
     """
     header_folder = "Mantid" + subproject
     if project == "MantidQt": header_folder = "MantidQt" + subproject
-    basedir = os.path.join(os.path.curdir, project, subproject)
+    scriptdir = os.path.split(__file__)[0] #Folder of Code/Build
+    codedir = os.path.split(scriptdir)[0] #Folder of Code/
+    basedir = os.path.join(codedir, project, subproject)
     return (basedir, header_folder)
     
 
