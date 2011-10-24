@@ -172,9 +172,25 @@ void SANSSensitivityCorrection::exec()
         }
       } else if (darkCurrentFile.size()>0)
       {
-        g_log.error() << "No dark current algorithm provided to load ["
-            << getPropertyValue("DarkCurrentFile") << "]: skipped!" << std::endl;
-        dark_result = "   No dark current algorithm provided: skipped\n";
+        // We need to subtract the dark current for the flood field but no dark
+        // current subtraction was set for the sample! Use the default dark
+        // current algorithm if we can find it.
+        dark_current = reductionHandler.findStringEntry("DefaultDarkCurrentAlgorithm");
+        if (dark_current.size()>0)
+        {
+          IAlgorithm_sptr darkAlg = Algorithm::fromString(dark_current);
+          darkAlg->setChild(true);
+          darkAlg->setProperty("InputWorkspace", rawFloodWS);
+          darkAlg->setProperty("OutputWorkspace", rawFloodWS);
+          darkAlg->setProperty("Filename", darkCurrentFile);
+          darkAlg->execute();
+          if (darkAlg->existsProperty("OutputMessage")) dark_result = darkAlg->getPropertyValue("OutputMessage");
+        } else {
+          // We are running out of options
+          g_log.error() << "No dark current algorithm provided to load ["
+              << getPropertyValue("DarkCurrentFile") << "]: skipped!" << std::endl;
+          dark_result = "   No dark current algorithm provided: skipped\n";
+        }
       }
       m_output_message += "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
 
