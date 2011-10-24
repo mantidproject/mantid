@@ -88,7 +88,7 @@ namespace Mantid
 
     /**
     Virtual constructor clone method.
-    @return clone as GaussianThresholdRange*.
+    @return clone as MedianAndBelowThresholdRange*.
     */
     MedianAndBelowThresholdRange* MedianAndBelowThresholdRange::clone() const
     {

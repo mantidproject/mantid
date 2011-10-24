@@ -38,11 +38,6 @@
 
 namespace Mantid
 {
-  namespace MDAlgorithms
-  {
-    //Forward declaration
-    class BoxImplicitFunction;
-  }
   namespace VATES
   {
     class MDRebinningPresenter;

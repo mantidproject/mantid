@@ -28,7 +28,6 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h" 
-#include "MantidVatesAPI/GaussianThresholdRange.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
