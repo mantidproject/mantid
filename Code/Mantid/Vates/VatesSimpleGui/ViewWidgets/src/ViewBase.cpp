@@ -63,26 +63,26 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->origRep);
+  QPair <double, double> range = this->colorUpdater.autoScale(this->getPvActiveRep());
   this->renderAll();
   emit this->dataRange(range.first, range.second);
 }
 
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
-  this->colorUpdater.colorMapChange(this->origRep, model);
+  this->colorUpdater.colorMapChange(this->getPvActiveRep(), model);
   this->renderAll();
 }
 
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  this->colorUpdater.colorScaleChange(this->origRep, min, max);
+  this->colorUpdater.colorScaleChange(this->getPvActiveRep(), min, max);
   this->renderAll();
 }
 
 void ViewBase::onLogScale(int state)
 {
-  this->colorUpdater.logScale(this->origRep, state);
+  this->colorUpdater.logScale(this->getPvActiveRep(), state);
   this->renderAll();
 }
 
