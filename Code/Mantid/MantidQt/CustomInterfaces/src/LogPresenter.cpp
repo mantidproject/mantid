@@ -31,7 +31,7 @@ namespace MantidQt
       size_t proposedSize = logValues.size();
       size_t existingSize = existingLogData.size();
       LogDataMap::iterator it = logValues.begin();
-      int count = 0;
+      size_t count = 0;
       std::vector<std::string> newLogValues(proposedSize);
       while(it != logValues.end())
       {
