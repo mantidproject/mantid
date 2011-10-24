@@ -200,8 +200,9 @@ namespace PropertyNexus
   template <typename NumT>
   void saveTimeSeriesProperty(::NeXus::File * file, TimeSeriesProperty<NumT> * prop)
   {
-    file->makeGroup(prop->name(), "NXlog", 1);
     std::vector<NumT> value = prop->valuesAsVector();
+    if( value.empty() ) return;
+    file->makeGroup(prop->name(), "NXlog", 1);
     file->writeData("value", value );
     saveTimeVector(file, prop);
     file->closeGroup();
@@ -211,8 +212,9 @@ namespace PropertyNexus
   /** Helper function to save a TimeSeriesProperty<> */
   void saveTimeSeriesPropertyString(::NeXus::File * file, TimeSeriesProperty<std::string> * prop)
   {
-    file->makeGroup(prop->name(), "NXlog", 1);
     std::vector<std::string> values = prop->valuesAsVector();
+    if( values.empty() ) return;
+    file->makeGroup(prop->name(), "NXlog", 1);
 
     // Find the max length of any string
     size_t maxlen=0;
