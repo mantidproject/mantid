@@ -103,20 +103,6 @@ namespace Mantid
       delete m_view;
     }
 
-    /**
-    Constructs a PlaneImplicitFunction from a vtkPlane
-    @param plane: vtkPlane
-    @param width: plane width
-    */
-    Mantid::Geometry::MDImplicitFunction_sptr MDEWRebinningPresenter::constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width)
-    {
-      double* pOrigin = plane->GetOrigin();
-      double* pNormal = plane->GetNormal();
-      Mantid::MDAlgorithms::OriginParameter origin(pOrigin[0], pOrigin[1], pOrigin[2]);
-      Mantid::MDAlgorithms::NormalParameter normal(pNormal[0], pNormal[1], pNormal[2]);
-      return Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::PlaneImplicitFunction(normal, origin, width));
-    }
-
     /*
     Records and accumulates function knowledge so that it can be seralized to xml later.
     */

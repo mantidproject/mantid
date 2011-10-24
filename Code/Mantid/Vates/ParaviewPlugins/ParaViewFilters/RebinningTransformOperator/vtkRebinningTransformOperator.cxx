@@ -14,8 +14,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"

@@ -1,9 +1,5 @@
 # GLOBs should be replaced with explicit listings
 set ( SRC_FILES
-	src/BoxFunctionBuilder.cpp
-	src/BoxImplicitFunction.cpp
-	src/BoxImplicitFunctionParser.cpp
-	src/BoxInterpreter.cpp
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
@@ -15,12 +11,7 @@ set ( SRC_FILES
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/MDParameterParserDeclarations.cpp
-	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
-	src/PlaneFunctionBuilder.cpp
-	src/PlaneImplicitFunction.cpp
-	src/PlaneImplicitFunctionParser.cpp
-	src/PlaneInterpreter.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
 	src/SimulateMDD.cpp
@@ -34,10 +25,6 @@ set ( SRC_FILES
 #)
 
 set ( INC_FILES
-	inc/MantidMDAlgorithms/BoxFunctionBuilder.h
-	inc/MantidMDAlgorithms/BoxImplicitFunction.h
-	inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
-	inc/MantidMDAlgorithms/BoxInterpreter.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
@@ -45,30 +32,18 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/ConvertToQNDany.h	
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
-	inc/MantidMDAlgorithms/DepthParameter.h
-	inc/MantidMDAlgorithms/HeightParameter.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/MDParameterParserDeclarations.h
-	inc/MantidMDAlgorithms/NormalParameter.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
-	inc/MantidMDAlgorithms/OriginParameter.h
-	inc/MantidMDAlgorithms/PerpendicularParameter.h
-	inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
-	inc/MantidMDAlgorithms/PlaneImplicitFunction.h
-	inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
-	inc/MantidMDAlgorithms/PlaneInterpreter.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
-	inc/MantidMDAlgorithms/UpParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
-	inc/MantidMDAlgorithms/VectorMathematics.h
-	inc/MantidMDAlgorithms/WidthParameter.h
 )
 
 # Test files. Other source files required.
@@ -77,43 +52,19 @@ set ( TEST_FILES
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	#test/QuadEnBackgroundTest.h
-	test/BoxImplicitFunctionTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToQNDanyTest.h	
-	test/DepthParameterTest.h
-	test/HeightParameterTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
-	test/NormalParameterTest.h
-	test/OriginParameterTest.h
-	test/PlaneFunctionBuilderTest.h
-	test/PlaneImplicitFunctionTest.h
 	test/RunParamTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
-	test/VectorMathematicsTest.h
-	test/WidthParameterTest.h
 )
 
 set ( GMOCK_TEST_FILES
-	test/BoxBuilderTest.h
-	test/BoxImplicitFunctionParserTest.h
-	test/BoxInterpreterTest.h
 	test/CompositeBuilderTest.h
-	test/CompositeImplicitFunctionParserTest.h
 	test/CompositeImplicitFunctionTest.h
-	test/DepthParameterParserTest.h
-	test/HeightParameterParserTest.h
-	test/NormalParameterParserTest.h
 	test/NullImplicitFunctionTest.h
-	test/OriginParameterParserTest.h
-	test/PerpendicularParameterParserTest.h
-	test/PerpendicularParameterTest.h
-	test/PlaneImplicitFunctionParserTest.h
-	test/PlaneInterpreterTest.h
-	test/WidthParameterParserTest.h
-	test/UpParameterParserTest.h
-	test/UpParameterTest.h
 )
 
 if(UNITY_BUILD)

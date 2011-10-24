@@ -7,10 +7,10 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
-#include "MantidMDAlgorithms/UpParameter.h"
-#include "MantidMDAlgorithms/PerpendicularParameter.h"
-#include "MantidMDAlgorithms/NormalParameter.h"
-#include "MantidMDAlgorithms/OriginParameter.h"
+//#include "MantidMDAlgorithms/UpParameter.h"
+//#include "MantidMDAlgorithms/PerpendicularParameter.h"
+//#include "MantidMDAlgorithms/NormalParameter.h"
+//#include "MantidMDAlgorithms/OriginParameter.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -130,16 +130,16 @@ Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser()
 //Declare types based on this template.
 
 /// Parses Origin Parameters
-typedef Vector3DParameterParser<OriginParameter> OriginParameterParser;
+//typedef Vector3DParameterParser<OriginParameter> OriginParameterParser;
 
 /// Parses Normal Parameters
-typedef Vector3DParameterParser<NormalParameter> NormalParameterParser;
+//typedef Vector3DParameterParser<NormalParameter> NormalParameterParser;
 
 /// Parses Up Parameters
-typedef Vector3DParameterParser<UpParameter> UpParameterParser;
+//typedef Vector3DParameterParser<UpParameter> UpParameterParser;
 
 /// Parses Perpendicular Parameters
-typedef Vector3DParameterParser<PerpendicularParameter> PerpendicularParameterParser;
+//typedef Vector3DParameterParser<PerpendicularParameter> PerpendicularParameterParser;
 }
 }
 
