@@ -85,7 +85,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-				        #inc/MantidQtCustomInterfaces/StandardLogView.h
+				#inc/MantidQtCustomInterfaces/StandardLogView.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui

@@ -1,2 +1,4 @@
 # Make sure Third_Party doesn't get checked into the main repository
 Third_Party/
+# For an out-of-source build: make sure it doesn't get checked in either.
+dbg/

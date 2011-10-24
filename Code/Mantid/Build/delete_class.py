@@ -12,7 +12,7 @@ from cmakelists_utils import *
     
 #======================================================================
 def delete_one(oldfilename):
-    cmd = "svn remove " + oldfilename
+    cmd = "git rm " + oldfilename
     print "Running:", cmd
     os.system(cmd)
 
@@ -65,6 +65,10 @@ if __name__ == "__main__":
                         const=False, default=True,
                         help="Don't delete the cpp file")
     
+    parser.add_argument('--project', dest='project', 
+                    default="Framework",
+                    help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+     
     args = parser.parse_args()
     subproject = args.subproject
     classname = args.classname
