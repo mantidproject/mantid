@@ -52,13 +52,13 @@ namespace MantidQt
     void WorkspaceMementoCollection::registerWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws, Updateable* model)
     {
       ActionManager mode;
-      int rowIndex = m_data->rowCount() + 1;
-      m_data->insertRow(rowIndex);
+      int rowIndex = m_data->rowCount();
+      m_data->insertRow(rowIndex + 1);
 
-      WorkspaceMemento* temp = new WorkspaceMemento(m_data, "Temp");
+      WorkspaceMemento* temp = new WorkspaceMemento(m_data, "Temp", rowIndex);
       WorkspaceMementoService<WorkspaceMemento*> service(temp);
-      service.addAllItems(m_data, rowIndex-1);
-      service.addLogItems(m_data, ws->run().getLogData(), rowIndex - 1);// 
+      service.addAllItems(m_data, rowIndex);
+      service.addLogItems(m_data, ws->run().getLogData(), rowIndex);// 
       service.setWorkspaceName(ws->getName());
       service.setInstrumentName(ws->getInstrument()->getName());
       service.setRunNumber(ws->getRunNumber());
@@ -168,7 +168,7 @@ namespace MantidQt
       std::string wsName = m_data->cell<std::string>(rowIndex, 0);
       if(m_mementoMap.end() == m_mementoMap.find(wsName))
       {
-        WorkspaceMemento* memento = new WorkspaceMemento(m_data, wsName);
+        WorkspaceMemento* memento = new WorkspaceMemento(m_data, wsName, 0);
         m_mementoMap.insert(std::make_pair(wsName, memento));
 
         ///Use the helper service to configure the memento.

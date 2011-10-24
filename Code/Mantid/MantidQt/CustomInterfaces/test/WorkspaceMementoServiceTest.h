@@ -42,7 +42,7 @@ private:
      ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable("MementoTableWorkspace");
      addSomeData(ws);
 
-     WorkspaceMemento* memento = new WorkspaceMemento(ws, "WsName");
+     WorkspaceMemento* memento = new WorkspaceMemento(ws, "WsName", 0);
      WorkspaceMementoService<WorkspaceMemento*>* service = new WorkspaceMementoService<WorkspaceMemento*>(memento);
      service->addAllItems(ws, 0);
      return WorkspaceMementoService_sptr(service);
@@ -66,7 +66,7 @@ private:
      TableRow row = ws->getRow(0);
      row << "TestWSRow" << "CNCS" << 1 << "SampleXML" << 1.0 << 1.0 << 1.0 << 90.0 << 90.0 << 90.0 << "Not Ready" << "1" << "2";
 
-     WorkspaceMemento* memento = new WorkspaceMemento(ws, "WsName");
+     WorkspaceMemento* memento = new WorkspaceMemento(ws, "WsName", 0);
      WorkspaceMementoService<WorkspaceMemento*>* service = new WorkspaceMementoService<WorkspaceMemento*>(memento);
      service->addAllItems(ws, 0);
      return WorkspaceMementoService_sptr(service);
@@ -84,7 +84,7 @@ public:
      ws->addColumn("str", "WsName");
      ws->insertRow(0);
 
-     WorkspaceMementoService<WorkspaceMemento*> service(new WorkspaceMemento(ws, "WsName"));
+     WorkspaceMementoService<WorkspaceMemento*> service(new WorkspaceMemento(ws, "WsName", 0));
      TSM_ASSERT_THROWS("Should throw as invalid schema used to populate the collection.", service.addAllItems(ws, 0), std::runtime_error);
    }
 

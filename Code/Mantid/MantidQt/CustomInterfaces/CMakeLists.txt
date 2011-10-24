@@ -23,6 +23,7 @@ set ( SRC_FILES
                 src/SANSRunWindow.cpp
                 src/SANSDiagnostics.cpp
                 src/SingleOwnerLock.cpp
+                #src/StandardLogView.cpp
                 src/WorkspaceMementoCollection.cpp
                 src/WorkspaceMementoService.cpp
                 src/WorkspaceMemento.cpp
@@ -59,6 +60,7 @@ set ( INC_FILES
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/SingleOwnerLock.h
+                #inc/MantidQtCustomInterfaces/StandardLogView.h
                 inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
                 inc/MantidQtCustomInterfaces/WorkspaceMementoLock.h
                 inc/MantidQtCustomInterfaces/WorkspaceMemento.h
@@ -83,6 +85,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+				        #inc/MantidQtCustomInterfaces/StandardLogView.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
@@ -98,7 +101,7 @@ set( TEST_FILES
                test/AbstractMementoItemTest.h
                test/LatticePresenterTest.h
                test/LoanedMementoTest.h
-               #test/LogPresenterTest.h
+               test/LogPresenterTest.h
                test/InelasticISISTest.h
                test/SingleOwnerLockTest.h
                test/WorkspaceMementoCollectionTest.h
