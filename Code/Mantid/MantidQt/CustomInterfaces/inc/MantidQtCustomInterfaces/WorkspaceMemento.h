@@ -48,7 +48,7 @@ namespace MantidQt
     public:
 
       typedef std::vector<AbstractMementoItem_sptr> VecMementoItems;
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName);
+      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, int rowIndex);
       WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, WorkspaceMementoLock* lock);
       ~WorkspaceMemento(); 
       void addItem(AbstractMementoItem* item);
@@ -63,6 +63,8 @@ namespace MantidQt
       bool locked() const;
       bool unlock();
       void lock();
+      Mantid::API::ITableWorkspace_sptr getData() const;
+      int getRowIndex() const;
 
       /// Getter for the size of this memento in terms of the number of items.
       size_t getSize()
@@ -85,6 +87,8 @@ namespace MantidQt
       WorkspaceMemento& operator=(const WorkspaceMemento&);
       /// Locking object.
       boost::scoped_ptr<WorkspaceMementoLock> m_lock;
+      /// Index of corresponding row in the workspace.
+      int m_rowIndex;
 
     };
   }

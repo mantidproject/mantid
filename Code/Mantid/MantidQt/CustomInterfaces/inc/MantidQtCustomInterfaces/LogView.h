@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_LOG_VIEW_H
 #define MANTIDQTCUSTOMINTERFACES_LOG_VIEW_H
 
+#include <map>
 #include <vector>
 #include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 
@@ -8,9 +9,8 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /// Enacapsulates possible response types
-    enum LogViewResponse{Added, Edited, Removed, Advanced};
 
+    typedef std::map<std::string, std::string> LogDataMap;
     /** Abstract log view.
   
       @author Owen Arnold, RAL ISIS
@@ -40,9 +40,7 @@ namespace MantidQt
     {
     public:
       virtual void initalize(std::vector<AbstractMementoItem_sptr>) = 0;
-      virtual std::string getLogName() const = 0;
-      virtual std::string getLogValue() const = 0;
-      virtual LogViewResponse getEvent() const = 0;
+      virtual LogDataMap getLogData() const = 0;
     };
   }
 }
