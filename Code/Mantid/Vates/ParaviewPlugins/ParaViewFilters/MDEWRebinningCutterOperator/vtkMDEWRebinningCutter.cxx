@@ -26,7 +26,6 @@
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"
-#include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/Common.h"
