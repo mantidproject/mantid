@@ -2799,6 +2799,7 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 { 
   if (m_tabNumber == 3)
   {
+    m_currentDataName = workspaceName;
     emit fittingRequested(m_uiForm.fitBrowser, workspaceName);
   }
 }
