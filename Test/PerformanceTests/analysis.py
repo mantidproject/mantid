@@ -47,7 +47,7 @@ def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
         y :: list of runtime/iteration for each x 
         """
 
-    results = get_results(name, type, get_log=False, where_clause='', orderby_clause=get_orderby_clause(last_num))
+    results = get_results(name, type, where_clause='', orderby_clause=get_orderby_clause(last_num))
     
     # Data dict. Key = X variable; Value = (iterations total, runtime total)
     data = {}
@@ -60,10 +60,10 @@ def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
             
         if data.has_key(x):
             old = data[x]
-            iters = old[0] + res["iterations"]
+            iters = old[0] + 1 # Iterations
             runtime = old[1] + res["runtime"]
         else:
-            iters = res["iterations"]
+            iters = 1 
             runtime = res["runtime"]
         # Save the # of iterations and runtime
         data[x] = (iters, runtime)
@@ -158,7 +158,7 @@ def plot_success_count(type='system', last_num=-1, x_field='revision'):
     ----------
         type :: 'system', or 'performance'
     """
-    results = get_results('', type, get_log=False, where_clause='', orderby_clause=get_orderby_clause(last_num))
+    results = get_results('', type, where_clause='', orderby_clause=get_orderby_clause(last_num))
     revisions = get_unique_fields(results, x_field)
     
     # Go through each revision
@@ -298,7 +298,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     html += """<img src="%s" alt="runtime vs revision number" />\n""" % (fig2)
     html += """<h3>Test Results</h3>"""
     
-    fields = ['date', 'revision', 'status', 'iterations', 'runtime', 'cpu_fraction', 'speed_up', 'variables']
+    fields = ['revision', 'date', 'commitid', 'compare', 'status', 'runtime', 'cpu_fraction', 'variables']
     
     table_row_header = "<tr>"
     for field in fields:
@@ -308,13 +308,19 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     table_row_header += "</tr>"
     
     html += """<table border="1">""" + table_row_header
-    results = get_results(name, type='', get_log=False, where_clause='')
+    
+    table_html = ''
+    results = get_results(name, type='', where_clause='')
     sorted = [(res["revision"], res["variables"], res["date"], res) for res in results]
-    sorted.sort(reverse=True)
+    sorted.sort(reverse=False)
     count = 0
     last_rev = 0
+    commitid = ''
+    last_commitid = ''
     row_class = ''
+    table_rows = []
     for (rev, variable, date, res) in sorted:
+        table_row_html = ''
         if (rev != last_rev):
             # Changed SVN revision. Swap row color
             if row_class == '': 
@@ -322,32 +328,49 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
             else:
                 row_class = ''
             last_rev = rev
+            
+        if commitid != last_commitid:
+            last_commitid = commitid
         
         if res["success"]:
-            html += "<tr %s>\n" % row_class
+            table_row_html += "<tr %s>\n" % row_class
         else:
-            html += "<tr class=failedrow>\n"
+            table_row_html += "<tr class=failedrow>\n"
         
         for field in fields:
-            val = res[field]
+            val = ''
             
-            # Trim the fractional seconds
-            if field=="date":
-                val = str(val)[0:19]
+            if field == 'compare':
+                # Comparison to previous commit, if anything can be done
+                if (last_commitid != ""):
+                    val = """<a href="https://github.com/mantidproject/mantid/compare/%s...%s">diff</a>""" % (last_commitid, commitid)
                 
-            # Add a trac link
-            if field=="revision":
-                try:
-                    num = int(val)
-                except:
-                    num = 0
-                val = """<a href="http://trac.mantidproject.org/mantid/changeset/%d">%d</a>""" % (num, num)
+            else:
+                # Normal fields 
+                val = res[field]
                 
-            if field=="runtime":
-                val = "%.3f" % (res["runtime"]/res["iterations"])
-                
-            html += "<td>%s</td>" % val
-        html += "\n</tr>\n"
+                # Trim the fractional seconds
+                if field=="date":
+                    val = str(val)[0:19]
+                    
+                # Add a trac link
+                if field=="commitid":
+                    commitid = val
+                    partial_commitid = val
+                    if (len(partial_commitid) > 7): partial_commitid = partial_commitid[0:7];
+                    val = """<a href="https://github.com/mantidproject/mantid/commit/%s">%s</a>""" % (commitid, partial_commitid)
+                    
+                if field=="runtime":
+                    val = "%.3f" % (res["runtime"])
+                    
+            table_row_html += "<td>%s</td>" % val
+        table_row_html += "\n</tr>\n"
+        table_rows.append(table_row_html)
+        
+    # Now print out all the rows in reverse order
+    table_rows.reverse()
+    for row in table_rows:
+        html += row
 #        # Add the row header every 30 entries
 #        count += 1
 #        if count % 30 == 0: html += table_row_header

@@ -66,6 +66,7 @@ class TestResult(object):
                  host=platform.uname()[1],
                  environment=envAsString(),
                  runner="",
+                 commitid='',
                  revision=0,
                  runtime=0.0,
                  speed_up=0.0,
@@ -84,17 +85,14 @@ class TestResult(object):
         self.data["environment"] = environment
         self.data["runner"] = runner
         self.data["revision"] = revision
+        self.data["commitid"] = commitid
         self.data["runtime"] = runtime
         self.data["cpu_fraction"] = cpu_fraction
-        self.data["speed_up"] = speed_up
-        self.data["iterations"] = iterations
         self.data["success"] = success
         self.data["status"] = status
         self.data["log_contents"] = log_contents
         self.data["variables"] = variables
         
-        # This will go in a separate table
-        self.iterationTimings = []
     
     def get_logarchive_filename(self):
         "Return a bare filename that will hold the archived log contents"
@@ -108,10 +106,6 @@ class TestResult(object):
     
     def __setitem__(self, key, value):
         self.data.__setitem__(key, value)
-        
-    def addIterationTiming(self, timing):
-        """ Append a timing to the list of iteration timings """
-        self.iterationTimings.append(timing)
             
     def getData(self):
         ''' Get the map storing the results   '''
