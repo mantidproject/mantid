@@ -8,6 +8,12 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 project ( Mantid )
 
 ###########################################################################
+# Check for Qt (DarwinSetup below needs a variable from this)
+###########################################################################
+find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
+include ( UseSystemQt4 )
+
+###########################################################################
 # Set paths to Third_Party for Windows and Mac builds
 ###########################################################################
 if ( NOT THIRD_PARTY )
@@ -25,13 +31,7 @@ endif ()
 include ( CommonSetup )
 
 ###########################################################################
-# Check for Qt
-###########################################################################
-find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
-include ( UseSystemQt4 )
-
-###########################################################################
-# Now qwt
+# Find qwt
 ###########################################################################
 find_package ( Qwt REQUIRED )
 

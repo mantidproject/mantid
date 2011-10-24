@@ -264,6 +264,7 @@ void UserFunctionDialog::updateFunction()
   }
   catch(...)
   {// the formula could be being edited manually
+    m_uiForm.leParams->setText("");
     return;
   }
   std::set<std::string> vars = e.getVariables();

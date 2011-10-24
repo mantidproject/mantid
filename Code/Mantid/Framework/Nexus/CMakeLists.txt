@@ -15,10 +15,6 @@ set ( TEST_FILES
 	test/NexusAPITest.h
 )
 
-# Add the dependency on the nexus library
-find_package ( Nexus REQUIRED )
-include_directories ( ${NEXUS_INCLUDE_DIR} src)
-
 add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 
 # Add the target for this directory

@@ -46,6 +46,8 @@ namespace API
 
     ///Overridden setValue method
     virtual std::string setValue(const std::string & propValue);
+    /// Set a property value via a DataItem
+    virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> data);
 
     /// @return the vector of suggested extensions. For use in GUIs showing files.
     const std::set<std::string> & getExts() const

@@ -275,12 +275,12 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Kernel ${MANTIDLIBS} NexusCPP )
+target_link_libraries ( Kernel ${MANTIDLIBS} )
 
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   include_directories ( inc test )
-  target_link_libraries( KernelTest Kernel NexusCPP )
+  target_link_libraries( KernelTest Kernel )
   add_dependencies ( FrameworkTests KernelTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )

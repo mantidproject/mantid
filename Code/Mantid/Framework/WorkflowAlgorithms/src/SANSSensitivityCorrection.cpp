@@ -27,8 +27,8 @@ DECLARE_ALGORITHM(SANSSensitivityCorrection)
 /// Sets documentation strings for this algorithm
 void SANSSensitivityCorrection::initDocs()
 {
-  this->setWikiSummary("Perform EQSANS dark current subtraction.");
-  this->setOptionalMessage("Perform EQSANS dark current subtraction.");
+  this->setWikiSummary("Perform SANS sensitivity correction.");
+  this->setOptionalMessage("Perform SANS sensitivity correction.");
 }
 
 using namespace Kernel;
@@ -40,10 +40,10 @@ void SANSSensitivityCorrection::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
 
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, "*.nxs"),
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".nxs"),
       "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true, "If true, the dark current subtracted from the sample data will also be subtracted from the flood field.");
-  declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, "*.nxs"),
+  declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, ".nxs"),
       "The name of the input file to load as dark current.");
 
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
@@ -133,7 +133,12 @@ void SANSSensitivityCorrection::exec()
       if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
       loadAlg->execute();
       rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(rawFloodWSName));
-      m_output_message += "   | Loaded " + fileName + "\n";
+      m_output_message += "   |Loaded " + fileName + "\n";
+      if (loadAlg->existsProperty("OutputMessage")) 
+      {
+	      std::string msg = loadAlg->getPropertyValue("OutputMessage");
+  	    m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+  	  }
     }
 
     // Check whether we just loaded a flood field data set, or the actual sensitivity
@@ -171,7 +176,7 @@ void SANSSensitivityCorrection::exec()
             << getPropertyValue("DarkCurrentFile") << "]: skipped!" << std::endl;
         dark_result = "   No dark current algorithm provided: skipped\n";
       }
-      m_output_message += Poco::replace(dark_result, "\n", "\n   |");
+      m_output_message += "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
 
       // Look for solid angle correction algorithm
       std::string solid_angle = reductionHandler.findStringEntry("SolidAngleAlgorithm");
@@ -182,6 +187,9 @@ void SANSSensitivityCorrection::exec()
         solidAlg->setProperty("InputWorkspace", rawFloodWS);
         solidAlg->setProperty("OutputWorkspace", rawFloodWS);
         solidAlg->execute();
+        std::string msg = "Solid angle correction applied\n";
+        if (solidAlg->existsProperty("OutputMessage")) msg = solidAlg->getPropertyValue("OutputMessage");
+        m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
       }
 
       // Calculate detector sensitivity

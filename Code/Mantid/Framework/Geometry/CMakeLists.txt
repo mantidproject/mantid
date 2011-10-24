@@ -257,7 +257,6 @@ find_package ( OpenCascade REQUIRED )
 include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
 include_directories ( ${OPENGL_INCLUDE_DIR} )
 include_directories ( ${GSL_INCLUDE_DIR} )
-include_directories ( ../NexusCPP/inc/ )
 
 # A few defines needed for OpenCascade on the Mac
 if ( APPLE )
@@ -274,7 +273,7 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} NexusCPP)
+target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   # This is required to pick up ComponentCreationHelper.h
@@ -285,10 +284,10 @@ if ( CXXTEST_FOUND )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( GeometryTest Geometry ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  NexusCPP Kernel)
+    target_link_libraries( GeometryTest Geometry ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} Kernel)
   else ()
     cxxtest_add_test ( GeometryTest ${TEST_FILES} )
-    target_link_libraries( GeometryTest Geometry NexusCPP Kernel)
+    target_link_libraries( GeometryTest Geometry Kernel)
   endif()
   
   add_dependencies ( FrameworkTests GeometryTest )

@@ -425,6 +425,8 @@ void EQSANSLoad::exec()
   }
   if (reductionHandler.findStringEntry("LoadAlgorithm").size()==0)
     reductionHandler.addEntry("LoadAlgorithm", toString());
+  if (reductionHandler.findStringEntry("InstrumentName").size()==0)
+    reductionHandler.addEntry("InstrumentName", "EQSANS");
 
   const std::string fileName = getPropertyValue("Filename");
 
