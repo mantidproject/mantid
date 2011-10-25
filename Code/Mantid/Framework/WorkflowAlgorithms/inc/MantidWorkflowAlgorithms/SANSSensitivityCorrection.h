@@ -18,9 +18,6 @@ namespace WorkflowAlgorithms
 
     Sensitivity correction for SANS
 
-    @author Mathieu Doucet
-    @date 12/10/2011
-
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.

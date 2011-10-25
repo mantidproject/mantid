@@ -10,6 +10,7 @@ set ( SRC_FILES
         src/EQSANSSensitivityCorrection.cpp
         src/EQSANSDarkCurrentSubtraction.cpp
         src/HFIRDarkCurrentSubtraction.cpp
+        src/SetupHFIRReduction.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -27,6 +28,7 @@ set ( INC_FILES
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
         inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
+        inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
 )
               
 set ( TEST_FILES

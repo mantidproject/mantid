@@ -2,10 +2,9 @@
 #define MDEW_REBINNING_PRESENTER_H
 
 #include "MantidVatesAPI/MDRebinningPresenter.h"
-
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include <boost/scoped_ptr.hpp>
 
 class vtkPlane;
@@ -72,7 +71,6 @@ namespace Mantid
 
     private:
 
-      Mantid::Geometry::MDImplicitFunction_sptr constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width);
       void persistReductionKnowledge(vtkDataSet* out_ds, const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
       std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
       std::string extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, double length, Mantid::Geometry::IMDDimension_sptr dimension) const;
