@@ -271,56 +271,6 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
       "<MDWorkspaceName>Input</MDWorkspaceName>" +
       "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
       constrctGeometryOnlyXML(xDimensionIdMapping, yDimensionIdMapping, zDimensionIdMapping, tDimensionIdMapping) +
-      "<Function>" +
-      "<Type>CompositeImplicitFunction</Type>" +
-      "<ParameterList/>" +
-      "<Function>" +
-      "<Type>BoxImplicitFunction</Type>" +
-      "<ParameterList>" +
-      "<Parameter>" +
-      "<Type>HeightParameter</Type>" +
-      "<Value>6</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>WidthParameter</Type>" +
-      "<Value>1.5</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>DepthParameter</Type>" +
-      "<Value>6</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>OriginParameter</Type>" +
-      "<Value>0, 0, 0</Value>" +
-      "</Parameter>" +
-      "</ParameterList>" +
-      "</Function>" +
-      "<Function>" +
-      "<Type>CompositeImplicitFunction</Type>" +
-      "<ParameterList/>" +
-      "<Function>" +
-      "<Type>BoxImplicitFunction</Type>" +
-      "<ParameterList>" +
-      "<Parameter>" +
-      "<Type>WidthParameter</Type>" +
-      "<Value>4</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>HeightParameter</Type>" +
-      "<Value>1.5</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>DepthParameter</Type>" +
-      "<Value>6</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>OriginParameter</Type>" +
-      "<Value>0, 0, 0</Value>" +
-      "</Parameter>" +
-      "</ParameterList>" +
-      "</Function>" +
-      "</Function>" +
-      "</Function>" +
       "</MDInstruction>";
   }
 

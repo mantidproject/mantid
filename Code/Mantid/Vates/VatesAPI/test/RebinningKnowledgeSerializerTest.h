@@ -73,7 +73,6 @@ void testNoLocationDoesNotThrow()
 {
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   pWorkspace->setName("someName");
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
   Mantid::API::IMDWorkspace_sptr workspace(pWorkspace);
 
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
@@ -83,7 +82,6 @@ void testNoLocationDoesNotThrow()
   RebinningKnowledgeSerializer generator(LocationNotRequired); //Location is not required.
   generator.setImplicitFunction(impFunction);
   generator.setWorkspace(workspace);
-  generator.setImplicitFunction(impFunction);
 
   TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw", generator.createXMLString());
 }
@@ -92,7 +90,6 @@ void testNoNameThrows()
 {
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
   RebinningKnowledgeSerializer generator;
   generator.setImplicitFunction(impFunction);

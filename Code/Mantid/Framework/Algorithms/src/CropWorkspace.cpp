@@ -270,7 +270,16 @@ void CropWorkspace::execEvent()
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
     std::set<detid_t>::iterator k;
     for (k = dets.begin(); k != dets.end(); ++k)
+    {
       outEL.addDetectorID(*k);
+    }
+    // Spectrum number
+    ISpectrum * inSpec = m_inputWorkspace->getSpectrum(i);
+    ISpectrum * outSpec = outputWorkspace->getSpectrum(j);
+    if( inSpec && outSpec )
+    {
+      outSpec->setSpectrumNo(inSpec->getSpectrumNo());
+    }
 
     if (!m_commonBoundaries)
       // If the X axis is NOT common, then keep the initial X axis, just clear the events
@@ -302,6 +311,9 @@ void CropWorkspace::execEvent()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  if( m_inputWorkspace->axes() > 1 && m_inputWorkspace->getAxis(1)->isSpectra() )
+  // Backwards compatability while the spectra axis is still here
+  outputWorkspace->generateSpectraMap();
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
 }

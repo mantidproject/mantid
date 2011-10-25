@@ -828,7 +828,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   }
   t->setHeaderColType();
 
-  Mantid::API::Axis *spectraAxis = ws->getAxis(1);
+  //Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
   QList<double> col_values; // List of double valued data for one row
   for( size_t row = 0; row < nrows; ++row )
@@ -838,15 +838,15 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     Mantid::specid_t currentSpec;
     try
     {
-      currentSpec = spectraAxis->spectraNo(ws_index);
+      currentSpec = ws->getSpectrum(ws_index)->getSpectrumNo();
     }
-    catch(std::domain_error)
+    catch(std::range_error&)
     {//if there is no spectra number information in the workspace display the spectra numbers as -1
       currentSpec = -1;
     }
 
     int detID = 0;
-	bool isMon = false;
+    bool isMon = false;
     double R(0.0), Theta(0.0), Phi(0.0);
     try
     {

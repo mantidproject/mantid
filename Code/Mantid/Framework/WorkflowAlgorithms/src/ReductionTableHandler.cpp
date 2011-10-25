@@ -155,7 +155,7 @@ namespace WorkflowAlgorithms
       int row = 0;
       m_reductionTable->find(key, row, 0);
       if (replace) m_reductionTable->removeRow(row);
-      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Int(row, STRINGENTRY_COL)
+      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Int(row, INTENTRY_COL)
           << std::endl << "   adding: " << value << std::endl;
     } catch(std::out_of_range&) {}
 
@@ -170,7 +170,7 @@ namespace WorkflowAlgorithms
       int row = 0;
       m_reductionTable->find(key, row, 0);
       if (replace) m_reductionTable->removeRow(row);
-      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Double(row, STRINGENTRY_COL)
+      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Double(row, DOUBLEENTRY_COL)
           << std::endl << "   adding: " << value << std::endl;
     } catch(std::out_of_range&) {}
 
