@@ -53,6 +53,33 @@ def remove_wiki_from_header():
         f.close()
 
 #======================================================================
+def add_wiki_description(algo, wikidesc):
+    """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
+    wikidesc = wikidesc.split('\n')
+    source = find_algo_file(algo)
+    if source != '':
+        if len("".join(wikidesc)) == 0:
+            print "No wiki description found to add!!!!"
+        
+        f = open(source,'r')
+        lines = f.read().split('\n')
+        f.close()
+        
+        #What lines are we adding?
+        if source.endswith(".py"):
+            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
+        else:
+            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
+    
+        lines = adding + lines
+        
+        text = "\n".join(lines)
+        f = codecs.open(source, encoding='utf-8', mode='w+')
+        f.write(text)
+        f.close()
+        
+        
+#======================================================================
 def intialize_files():
     """ Get path to every header file """
     global file_matches
@@ -213,7 +240,9 @@ def validate_wiki(args, algos):
 #            desc = find_section_text(lines, "Description", True, "Introduction")
 #            if args.show_missing: print desc
             
-        #add_wiki_description(algo, desc)
+        # One-time code to add wiki desc to CPP file
+        desc = find_section_text(lines, "Description", True, "Introduction")
+        add_wiki_description(algo, desc)
             
         props = alg._ProxyObject__obj.getProperties()
         for prop in props:
@@ -244,9 +273,7 @@ def find_orphan_wiki():
 
 #======================================================================
 if __name__ == "__main__":
-    remove_wiki_from_header()
-    sys.exit()
-    
+   
     # First, get the config for the last settings
     config = ConfigParser.ConfigParser()
     config_filename = os.path.split(__file__)[0] + "/wiki_tools.ini"

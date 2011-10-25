@@ -18,40 +18,6 @@ import wiki_tools
 from wiki_tools import *
 
 #======================================================================
-def add_wiki_description(algo, wikidesc):
-    """Adds a wiki description  in the algo's header file under comments tag."""
-    wikidesc = wikidesc.split('\n')
-    source = find_algo_file(algo)
-    if source != '':
-        if len("".join(wikidesc)) == 0:
-            print "No wiki description found to add!!!!"
-        
-        f = open(source,'r')
-        lines = f.read().split('\n')
-        f.close()
-        n = 0
-        while  n < len(lines):
-            line = lines[n].strip()
-            n += 1
-            if line.startswith('#define'): break
-            
-        if n >= len(lines): n = 0
-        
-        #What lines are we adding?
-        if source.endswith(".py"):
-            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
-        else:
-            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
-    
-        lines = lines[:n] + adding + lines[n:]
-        
-        text = "\n".join(lines)
-        f = codecs.open(source, encoding='utf-8', mode='w+')
-        f.write(text)
-        f.close()
-        
-        
-#======================================================================
 def get_wiki_description(algo):
     source = find_algo_file(algo)
     if source == '': 
