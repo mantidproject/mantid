@@ -149,11 +149,11 @@ int main( int argc, char ** argv )
                    Mantid::Kernel::MantidVersion::releaseDate() << ")" << std::endl;
       exit(0);
     }
-    else if ( str == "-r" || str == "--revision") // Print and return subversion revision number
+    else if ( str == "-r" || str == "--revision") // Print abbreviated git SHA-1
     {
       QString revision(Mantid::Kernel::MantidVersion::revision());
       std::cout << revision.toStdString() << std::endl;
-      exit(revision.toInt());
+      exit(0);
     }
     else if ( str == "-a" || str == "--about" ) 
     {

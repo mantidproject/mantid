@@ -39,7 +39,7 @@ def run(args):
     # Convert the arguments. Will throw if the user is stupid.
     avg = int(args.avg)
     tol = float(args.tol)
-    rev = int(args.revision[0])
+    rev = sqlresults.get_latest_revison()
 
     print "Comparing the average of the %d revisions before rev. %d. Tolerance of %g %%." % (avg, rev, tol)
     if args.verbose: print
@@ -140,9 +140,6 @@ if __name__ == "__main__":
                         default="./MantidSystemTests.db",
                         help='Full path to the SQLite database holding the results (default "./MantidSystemTests.db"). ')
     
-    parser.add_argument('revision', metavar='REVISION', type=int, nargs=1,
-                        help='Required: The current revision number to compare to. ')
-            
     parser.add_argument('--avg', dest='avg', type=int, default="5",
                         help='Average over this many previous revisions to find a baseline. Default 5.')
             

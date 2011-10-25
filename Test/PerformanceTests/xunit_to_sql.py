@@ -51,8 +51,6 @@ def handle_testcase(case, suite_name):
                  revision=revision,
                  runtime=time,
                  cpu_fraction=cpu_fraction,
-                 speed_up=0.0,
-                 iterations=1,
                  success=True,
                  status="",
                  log_contents="",
