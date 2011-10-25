@@ -74,7 +74,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
   m_tabNumber(0), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/")
 {
 }
@@ -2777,8 +2777,10 @@ void MuonAnalysis::changeTab(int tabNumber)
   // If data analysis tab is chosen by user, assign peak picker tool to the current data if not done so already.
   if (tabNumber == 3)
   {
+    m_assigned = false;
     // Update the peak picker tool with the current workspace.
     m_uiForm.fitBrowser->updatePPTool(m_currentDataName);
+    
   } 
   else
   {
@@ -2797,8 +2799,9 @@ void MuonAnalysis::changeTab(int tabNumber)
 */
 void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 { 
-  if (m_tabNumber == 3)
+  if ((m_tabNumber == 3 && !m_assigned) || (m_tabNumber == 3 && m_currentDataName != workspaceName))
   {
+    m_assigned = true;
     m_currentDataName = workspaceName;
     emit fittingRequested(m_uiForm.fitBrowser, workspaceName);
   }
