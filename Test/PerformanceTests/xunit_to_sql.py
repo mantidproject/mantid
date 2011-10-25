@@ -82,13 +82,9 @@ if __name__ == "__main__":
     # Parse the command line
     parser = argparse.ArgumentParser(description='Add the contents of Xunit-style XML test result files to a SQL database.')
 
-    parser.add_argument('--revision', dest='revision', 
-                        default="",
-                        help='The revision number. Default 0.')
-    
     parser.add_argument('--db', dest='db', 
-                        default="./MantidSystemTests.db",
-                        help='Full path to the SQLite database holding the results (default "./MantidSystemTests.db"). The database will be created if it does not exist.')
+                        default="./MantidPerformanceTests.db",
+                        help='Full path to the SQLite database holding the results (default "./MantidPerformanceTests.db"). The database will be created if it does not exist.')
     
     parser.add_argument('--variables', dest='variables', 
                         default="",
@@ -108,7 +104,8 @@ if __name__ == "__main__":
     sql_reporter = sqlresults.SQLResultReporter()
     
     variables = args.variables 
-    revision = args.revision
+    # Add a new revision and get the "revision" number
+    revision = sqlresults.add_revision()
     
     # Convert each file
     for file in args.xmlpath:
