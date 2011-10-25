@@ -241,8 +241,11 @@ private:
   /// name of workspace
   std::string m_workspace_name;
 
-  // name of the loaded data
+  /// name of the loaded data
   QString m_currentDataName;
+
+  /// boolean to tell whether the fit property browser has been assigned
+  bool m_assigned;
 
   /// which group table row has the user last clicked on
   int m_groupTableRowInFocus;
