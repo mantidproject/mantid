@@ -7,19 +7,6 @@
 
 #ifndef MANTID_ALGORITHMS_STRIPVANADIUMPEAKS_H_
 #define MANTID_ALGORITHMS_STRIPVANADIUMPEAKS_H_
-/*WIKI* 
-
-
-* If AlternativePeakPositions is specified, it is used for the central peak positions; otherwise, this list is used: 0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401
-
-* Using the peak center position C as the starting point, the width <math>W = C * PeakWidthPercent/100</math> is calculated.
-
-* A linear background fit is performed by averaging the histogram from <math>x=-0.75W</math> to <math>-0.25W</math> on the left and  <math>x=0.25W</math> to <math>0.75W</math> on the right. The averaging reduces the error in the fit.
-
-* The histogram y values from <math>x=-0.25W</math> to <math>+0.25W</math> are set to the interpolated values found from the linear fit found previously.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

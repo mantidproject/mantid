@@ -1,11 +1,5 @@
 #ifndef MANTID_DATAHANDLING_CREATESAMPLESHAPE_H_
 #define MANTID_DATAHANDLING_CREATESAMPLESHAPE_H_
-/*WIKI* 
-
-Creates a shape object that defines the sample and sets the sample for the given workspace. Shapes are defined using XML descriptions that can be found [[HowToDefineGeometricShape|here]].
-
-
-*WIKI*/
 
 //--------------------------------
 // Includes

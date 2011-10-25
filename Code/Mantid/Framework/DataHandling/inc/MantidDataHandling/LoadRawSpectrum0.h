@@ -1,11 +1,5 @@
 #ifndef MANTID_DATAHANDLING_LOADRAWSPECTRUM0_H
 #define MANTID_DATAHANDLING_LOADRAWSPECTRUM0_H
-/*WIKI* 
-
-
-The LoadRawSpectrum0 algorithm stores spectrum zero data from the selected [[RAW_File | RAW]] file in a [[Workspace2D]].
-
-*WIKI*/
 
 
 //----------------------------------------------------------------------

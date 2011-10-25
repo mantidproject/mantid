@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_COPYSAMPLE_H_
 #define MANTID_ALGORITHMS_COPYSAMPLE_H_
-/*WIKI* 
-
-The algorithm copies some/all the sample information from one workspace to another.For MD workspaces, if no input sample number is specified, or not found, it will copy the first sample. For MD workspaces, if no output sample number is specified, it will copy to all samples.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

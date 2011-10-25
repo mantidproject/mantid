@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_
 #define MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_
-/*WIKI* 
-
-Create an empty PeaksWorkspace. Use [[LoadIsawPeaks]] or [[FindPeaksMD]] to create a peaks workspace with peaks.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

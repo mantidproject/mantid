@@ -1,9 +1,5 @@
 #ifndef MANTID_CRYSTAL_CALCULATEUMATRIX_H_
 #define MANTID_CRYSTAL_CALCULATEUMATRIX_H_
-/*WIKI* 
-
-Given a set of peaks (Q in sample frame, HKL values), and given lattice parameters (<math>a,b,c,alpha,beta,gamma</math>), it will try to find the U matrix, using least squares approach and quaternions
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

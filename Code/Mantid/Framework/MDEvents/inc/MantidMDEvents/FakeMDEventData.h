@@ -1,12 +1,5 @@
 #ifndef MANTID_MDEVENTS_FAKEMDEVENTDATA_H_
 #define MANTID_MDEVENTS_FAKEMDEVENTDATA_H_
-/*WIKI* 
-
-
-For testing MDEventWorkspaces, this algorithm either creates a uniform, random distribution of events, or fills peaks around given points with a given number of events.
-
-
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

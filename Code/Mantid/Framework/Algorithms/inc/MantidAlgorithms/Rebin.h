@@ -1,37 +1,5 @@
 #ifndef MANTID_ALGORITHMS_REBIN_H_
 #define MANTID_ALGORITHMS_REBIN_H_
-/*WIKI* 
-
-The algorithm rebins data with new bin boundaries. The 'params' property defines new boundaries in intervals <math>x_i-x_{i+1}\,</math>. Positive <math>\Delta x_i\,</math> make constant width bins, whilst negative ones create logarithmic binning using the formula <math>x(j+1)=x(j)(1+|\Delta x_i|)\,</math>
-
-This algorithms is useful both in data reduction, but also in remapping [[Ragged Workspace|ragged workspaces]] to a regular set of bin boundaries.
-
-The bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
-
-=== Example Rebin param strings ===
-;0,100,20000
-:From 0 rebin in constant size bins of 100 up to 20,000
-;2,-0.035,10
-:From 10 rebin in Logarithmic bins of 0.035 up to 10
-;0,100,10000,200,20000
-:From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
-
-=== For EventWorkspaces ===
-
-If the input is an [[EventWorkspace]] and the "Preserve Events" property is True, the rebinning is performed in place, and only the X axes of the workspace are set. The actual Y histogram data will only be requested as needed, for example, when plotting or displaying the data. 
-
-If "Preserve Events" is false., then the output workspace will be created as a [[Workspace2D]], with fixed histogram bins, and all Y data will be computed immediately. All event-specific data is lost at that point.
-
-=== For Data-Point Workspaces ===
-
-If the input workspace contains data points, rather than histograms, then Rebin will automatically use the [[ConvertToHistogram]] and [[ConvertToPointData]] algorithms before and after the rebinning has taken place.
-
-== Usage ==
-'''Python'''
- Rebin("InWS2","OutWS","x1,dx1,x2")
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

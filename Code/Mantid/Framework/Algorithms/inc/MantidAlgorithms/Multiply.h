@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHM_MULTIPLY_H_
 #define MANTID_ALGORITHM_MULTIPLY_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

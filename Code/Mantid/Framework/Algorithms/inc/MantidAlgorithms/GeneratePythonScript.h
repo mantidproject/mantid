@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
 #define MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
-/*WIKI*
-
-An Algorithm to generate a Python script file to reproduce the history of a workspace.
-*WIKI*/
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"

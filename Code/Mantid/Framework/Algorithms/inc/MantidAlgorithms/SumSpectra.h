@@ -1,12 +1,5 @@
 #ifndef MANTID_ALGORITHMS_SUMSPECTRA_H_
 #define MANTID_ALGORITHMS_SUMSPECTRA_H_
-/*WIKI* 
-
-Takes a workspace as input and sums all of the spectra within it maintaining the existing bin structure and units. Any masked spectra are ignored.
-The result is stored as a new workspace containing a single spectra.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

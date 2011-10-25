@@ -1,9 +1,5 @@
 #ifndef USER_ALGORITHMS_MODIFYDATA_H_
 #define USER_ALGORITHMS_MODIFYDATA_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

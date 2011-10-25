@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_REBIN2D_H_
 #define MANTID_ALGORITHMS_REBIN2D_H_
-/*WIKI* 
-
-The input bin parameters are used to form an output grid. The overlap of the polygons is tested to compute the required signal weight for the new bin on the workspace
-*WIKI*/
 
 //------------------------------------------------------------------------------
 // Includes

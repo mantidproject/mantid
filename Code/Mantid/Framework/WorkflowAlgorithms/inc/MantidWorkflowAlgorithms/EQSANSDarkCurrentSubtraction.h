@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_EQSANSDARKCURRENTSUBTRACTION_H_
 #define MANTID_ALGORITHMS_EQSANSDARKCURRENTSUBTRACTION_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes
