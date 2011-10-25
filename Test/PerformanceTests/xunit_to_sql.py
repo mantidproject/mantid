@@ -23,6 +23,7 @@ sql_reporter = None
 # Variables string for all tests
 variables = ""
 revision = 0
+commitid = ''
 
 def handle_testcase(case, suite_name):
     """ Handle one test case and save it to DB"""
@@ -49,6 +50,7 @@ def handle_testcase(case, suite_name):
                  environment=envAsString(),
                  runner="ctest",
                  revision=revision,
+                 commitid=commitid,
                  runtime=time,
                  cpu_fraction=cpu_fraction,
                  success=True,
@@ -90,6 +92,10 @@ if __name__ == "__main__":
                         default="",
                         help='Optional string of comma-separated "VAR1NAME=VALUE,VAR2NAME=VALUE2" giving some parameters used, e.g. while building.')
     
+    parser.add_argument('--commit', dest='commitid', 
+                        default="",
+                        help='Commit ID of the current build (a 40-character SHA string).')
+    
     parser.add_argument('xmlpath', metavar='XMLPATH', type=str, nargs='+',
                         default="", 
                         help='Required: Path to the Xunit XML files.')
@@ -106,6 +112,8 @@ if __name__ == "__main__":
     variables = args.variables 
     # Add a new revision and get the "revision" number
     revision = sqlresults.add_revision()
+    # Save the commitid
+    commitid = args.commitid
     
     # Convert each file
     for file in args.xmlpath:
