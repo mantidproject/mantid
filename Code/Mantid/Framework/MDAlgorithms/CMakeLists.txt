@@ -10,7 +10,6 @@ set ( SRC_FILES
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
-	src/MDParameterParserDeclarations.cpp
 	src/NullImplicitFunction.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
@@ -18,7 +17,6 @@ set ( SRC_FILES
 	src/SimulateResolution.cpp
 	src/TobyFitSimulate.cpp
 	src/Vector3DParameterParser.cpp
-	src/VectorMathematics.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -35,7 +33,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
-	inc/MantidMDAlgorithms/MDParameterParserDeclarations.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
