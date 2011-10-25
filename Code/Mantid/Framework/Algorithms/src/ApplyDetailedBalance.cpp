@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"

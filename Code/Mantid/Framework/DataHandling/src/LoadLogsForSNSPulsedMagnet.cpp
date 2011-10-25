@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidDataHandling/LoadLogsForSNSPulsedMagnet.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/System.h"

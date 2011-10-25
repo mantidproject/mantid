@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"

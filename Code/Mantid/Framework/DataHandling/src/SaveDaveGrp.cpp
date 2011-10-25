@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidDataHandling/SaveDaveGrp.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"

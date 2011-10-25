@@ -1,3 +1,15 @@
+/*WIKI* 
+
+
+
+
+For testing MDEventWorkspaces, this algorithm either creates a uniform, random distribution of events, or fills peaks around given points with a given number of events.
+
+
+
+
+
+*WIKI*/
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/FakeMDEventData.h"

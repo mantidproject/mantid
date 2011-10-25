@@ -1,3 +1,12 @@
+/*WIKI* 
+
+
+Masks bins in a workspace. Masked bins should properly be regarded as having been completely removed from the workspace. Bins falling within the range given (even partially) are masked, i.e. their data and error values are set to zero and the bin is added to the list of masked bins. This range is masked for all spectra in the workspace (though the workspace does not have to have common X values in all spectra).
+
+At present, although the zeroing of data will obviously be 'seen' by all downstream algorithms, only [[DiffractionFocussing]] (version 2) and [[Q1D]] have been modified to take account of masking. Several algorithms (e.g. [[Rebin]], [[CropWorkspace]]) have been modified to properly propagate the masking.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

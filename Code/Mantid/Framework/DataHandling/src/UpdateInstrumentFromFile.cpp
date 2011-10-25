@@ -1,3 +1,11 @@
+/*WIKI* 
+
+Some instrument definition file ([[InstrumentDefinitionFile|IDF]]) positions are only approximately correct and the true positions are located within data files. This algorithm reads the detector positioning from the supplied datafile and updates the instrument accordingly. It currently supports ISIS Raw and NeXus files.
+
+It is assumed that the positions specified in the raw file are all with respect to the a coordinate system defined with its origin at the sample position.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

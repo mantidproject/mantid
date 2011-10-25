@@ -1,7 +1,9 @@
 """*WIKI* 
 
+Normalise detector counts by the sample thickness
 
 *WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 

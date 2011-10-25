@@ -2,6 +2,10 @@
 
 
 *WIKI*"""
+"""*WIKI* 
+
+*WIKI*"""
+
 from MantidFramework import *
 
 class Squares(PythonAlgorithm):

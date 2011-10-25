@@ -1,8 +1,9 @@
-################################################################################
-#
-# Partial PDF Caclulator For NOMAD -- S(Q)
-#
-################################################################################
+"""*WIKI*
+
+Partial PDF Caclulator For NOMAD -- S(Q)
+
+*WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 

@@ -1,3 +1,16 @@
+/*WIKI* 
+
+
+
+The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space, and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]].
+
+The conversion can be done either to Q-space in the lab or sample frame, or to HKL of the crystal.
+
+If the OutputWorkspace does NOT already exist, a default one is created. In order to define more precisely the parameters of the [[MDEventWorkspace]], use the [[CreateMDWorkspace]] algorithm first.
+
+
+
+*WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/ProgressText.h"

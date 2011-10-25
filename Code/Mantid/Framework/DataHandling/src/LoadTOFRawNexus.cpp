@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 // Includes
 
 #include "MantidAPI/FileProperty.h"

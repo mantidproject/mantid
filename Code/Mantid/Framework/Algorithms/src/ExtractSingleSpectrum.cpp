@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+Extracts a single spectrum from a [[Workspace2D]] and stores it in a new workspace.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

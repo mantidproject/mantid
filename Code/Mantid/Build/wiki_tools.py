@@ -234,15 +234,12 @@ def validate_wiki(args, algos):
             wikidoc = find_section_text(lines, "Summary", go_to_end=False, section2="")
             if args.show_missing: print wikidoc
             
-#        desc = alg._ProxyObject__obj.getWikiDescription()
+#        # One-time code to add wiki desc to CPP file
+#        desc = find_section_text(lines, "Description", True, "Introduction")
+#        # Fallback to the code one
 #        if len(desc) == 0: 
-#            print "- Wiki Description is missing (in the code)."
-#            desc = find_section_text(lines, "Description", True, "Introduction")
-#            if args.show_missing: print desc
-            
-        # One-time code to add wiki desc to CPP file
-        desc = find_section_text(lines, "Description", True, "Introduction")
-        add_wiki_description(algo, desc)
+#            desc = alg._ProxyObject__obj.getWikiDescription()
+#        add_wiki_description(algo, desc)
             
         props = alg._ProxyObject__obj.getProperties()
         for prop in props:

@@ -1,3 +1,17 @@
+/*WIKI* 
+
+
+The algorithm will apply the exponential function (i.e. <math>e^y</math>) to the data and associated errors from a workspaces.
+The units of the workspace are not updated, so the user must take care in the use of such output workspaces.
+
+
+== Usage ==
+'''Python'''
+ Exponential("input","output")
+
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

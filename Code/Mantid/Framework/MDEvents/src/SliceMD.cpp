@@ -1,3 +1,11 @@
+/*WIKI* 
+
+
+Algorithm that can take a slice out of an original MDEventWorkspace while preserving all the events contained therein.
+
+
+
+*WIKI*/
 /*WIKI*
 Algorithm that can take a slice out of an original MDEventWorkspace while preserving all the events contained therein.
 *WIKI*/

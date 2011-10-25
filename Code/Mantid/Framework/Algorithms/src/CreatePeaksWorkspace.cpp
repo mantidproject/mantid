@@ -1,3 +1,12 @@
+/*WIKI* 
+
+
+
+Create an empty PeaksWorkspace. Use [[LoadIsawPeaks]] or [[FindPeaksMD]] to create a peaks workspace with peaks.
+
+
+
+*WIKI*/
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

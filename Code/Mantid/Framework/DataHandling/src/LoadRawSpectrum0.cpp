@@ -1,3 +1,9 @@
+/*WIKI* 
+
+
+The LoadRawSpectrum0 algorithm stores spectrum zero data from the selected [[RAW_File | RAW]] file in a [[Workspace2D]].
+
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

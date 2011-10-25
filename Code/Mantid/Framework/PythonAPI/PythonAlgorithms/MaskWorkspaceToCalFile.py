@@ -1,11 +1,9 @@
 """*WIKI* 
 
-
 Creates a cal file from a mask workspace: the masked out detectors (Y == 0 in mask workspace) will be combined into group 1.
 
-
-
 *WIKI*"""
+
 from MantidFramework import *
 
 class MaskWorkspaceToCalFile(PythonAlgorithm):
