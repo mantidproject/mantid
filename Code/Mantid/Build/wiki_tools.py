@@ -36,12 +36,13 @@ def remove_wiki_from_header():
         n = 0
         # The output file
         outlines = []
-        while not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*') and n < len(lines):
+        while n < len(lines) and (not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*')):
             outlines.append( lines[n] )
             n += 1
         #Skip all the WIKI lines
-        while not lines[n].startswith("*WIKI*") and n < len(lines):
+        while (n < len(lines)) and not lines[n].startswith("*WIKI*"):
             n += 1
+        n += 1
         # Copy the rest
         while n < len(lines):
             outlines.append( lines[n] )
@@ -243,6 +244,9 @@ def find_orphan_wiki():
 
 #======================================================================
 if __name__ == "__main__":
+    remove_wiki_from_header()
+    sys.exit()
+    
     # First, get the config for the last settings
     config = ConfigParser.ConfigParser()
     config_filename = os.path.split(__file__)[0] + "/wiki_tools.ini"
