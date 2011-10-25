@@ -43,7 +43,7 @@ namespace WorkflowAlgorithms
   using namespace API;
   using namespace DataObjects;
 
-  ReductionTableHandler::ReductionTableHandler(TableWorkspace_sptr tableWS)
+  ReductionTableHandler::ReductionTableHandler(TableWorkspace_sptr tableWS) : g_log(Kernel::Logger::get("Algorithm"))
   {
     if(tableWS)
       m_reductionTable = tableWS;
@@ -51,7 +51,7 @@ namespace WorkflowAlgorithms
       createTable();
   }
 
-  ReductionTableHandler::ReductionTableHandler()
+  ReductionTableHandler::ReductionTableHandler() : g_log(Kernel::Logger::get("Algorithm"))
   {
     createTable();
   }
@@ -133,20 +133,47 @@ namespace WorkflowAlgorithms
     return pointer;
   }
 
-  void ReductionTableHandler::addEntry(const std::string& key, const std::string& value)
+  void ReductionTableHandler::addEntry(const std::string& key, const std::string& value, bool replace)
   {
+    try
+    {
+      int row = 0;
+      m_reductionTable->find(key, row, 0);
+      if (replace) m_reductionTable->removeRow(row);
+      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->String(row, STRINGENTRY_COL)
+          << std::endl << "   adding: " << value << std::endl;
+    } catch(std::out_of_range&) {}
+
     TableRow row = m_reductionTable->appendRow();
     row << key << value << EMPTY_INT() << EMPTY_DBL();
   }
 
-  void ReductionTableHandler::addEntry(const std::string& key, const int& value)
+  void ReductionTableHandler::addEntry(const std::string& key, const int& value, bool replace)
   {
+    try
+    {
+      int row = 0;
+      m_reductionTable->find(key, row, 0);
+      if (replace) m_reductionTable->removeRow(row);
+      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Int(row, INTENTRY_COL)
+          << std::endl << "   adding: " << value << std::endl;
+    } catch(std::out_of_range&) {}
+
     TableRow row = m_reductionTable->appendRow();
     row << key << "" << value << EMPTY_DBL();
   }
 
-  void ReductionTableHandler::addEntry(const std::string& key, const double& value)
+  void ReductionTableHandler::addEntry(const std::string& key, const double& value, bool replace)
   {
+    try
+    {
+      int row = 0;
+      m_reductionTable->find(key, row, 0);
+      if (replace) m_reductionTable->removeRow(row);
+      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Double(row, DOUBLEENTRY_COL)
+          << std::endl << "   adding: " << value << std::endl;
+    } catch(std::out_of_range&) {}
+
     TableRow row = m_reductionTable->appendRow();
     row << key << "" << EMPTY_INT() << value;
   }

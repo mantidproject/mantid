@@ -16305,6 +16305,7 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
 #endif
 }
 /**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
+*  This also disables the fitFunctionBrowser from all the other graphs.
 * 
 * @param fpb The fit property browser from the custom interface
 * @param nameOfPlot A string variable containing the name of the graph we want to fit.
@@ -16314,6 +16315,7 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
 {
   // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
   // and apply pickpickertool to relevant plot
+  // Search and delete any current peak picker tools first
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) 
   {
@@ -16335,7 +16337,17 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
             g->disableTools();
           }
         }
-        else   // if (w->objectName() == nameOfPlot)
+      }
+    }
+  }
+  // now check for graphs to add the peak picker tool to.
+  foreach (MdiSubWindow *w, windows) 
+  {
+    if (w->isA("MultiLayer"))
+    {
+      MultiLayer *plot = (MultiLayer *)w;
+      {
+        if (w->objectName() == nameOfPlot)
         {
           QList<Graph *> layers = plot->layersList();
           if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer

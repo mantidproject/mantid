@@ -219,77 +219,77 @@ private:
   std::string file;
 };
 
-//------------------------------------------------------------------------------
-// Performance test
-//------------------------------------------------------------------------------
-
-class ManagedRawFileWorkspace2DTestPerformance : public CxxTest::TestSuite
-{
-private:
-  const std::string outputSpace;
-
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static ManagedRawFileWorkspace2DTestPerformance *createSuite() { return new ManagedRawFileWorkspace2DTestPerformance(); }
-  static void destroySuite( ManagedRawFileWorkspace2DTestPerformance *suite ) { delete suite; }
-
-  ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
-  {
-    // Load the instrument alone so as to isolate the raw file loading time from the instrument loading time
-    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
-    loader->setPropertyValue("Filename","WISH_Definition.xml");
-    loader->setPropertyValue("OutputWorkspace", "InstrumentOnly");
-    TS_ASSERT( loader->execute() );
-  }
-
-  // This should take ~no time. If it does an unacceptable change has occurred!
-  void testLoadTime()
-  {
-    // Make sure we go managed
-    ConfigServiceImpl& conf = ConfigService::Instance();
-    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
-    const std::string oldValue = conf.getString(managed);
-    conf.setString(managed,"0");
-    const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
-    const std::string oldValue2 = conf.getString(managed2);
-    conf.setString(managed2,"0");
-    const std::string datapath = "datasearch.directories";
-    std::string pathValue = conf.getString(datapath);
-    pathValue.append(";../../Data/SystemTests/");
-    conf.setString(datapath,pathValue);
-
-    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
-    //IAlgorithm_sptr loader = AlgorithmFactory::Instance().create("LoadRaw");
-    loader->setPropertyValue("Filename","WISH00016748.raw");
-    loader->setPropertyValue("OutputWorkspace",outputSpace);
-    TS_ASSERT( loader->execute() );
-
-    conf.setString(managed,oldValue);
-    conf.setString(managed2,oldValue2);
-  }
-
-  // This also should be very quick (nothing should get written to disk)
-  void testReadValues()
-  {
-    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
-    TS_ASSERT( ws );
-
-    double x(0),y(0),e(0);
-    for ( std::size_t i = 0 ; i < ws->getNumberHistograms() ; ++i )
-    {
-      x = ws->readX(i)[0];
-      y = ws->readY(i)[0];
-      e = ws->readE(i)[0];
-    }
-
-    TS_ASSERT( x > 0.0 );
-    TS_ASSERT( y == 0.0 );
-    TS_ASSERT( e == 0.0 );
-
-    AnalysisDataService::Instance().remove(outputSpace);
-  }
-
-};
+////------------------------------------------------------------------------------
+//// Performance test
+////------------------------------------------------------------------------------
+//
+//class ManagedRawFileWorkspace2DTestPerformance : public CxxTest::TestSuite
+//{
+//private:
+//  const std::string outputSpace;
+//
+//public:
+//  // This pair of boilerplate methods prevent the suite being created statically
+//  // This means the constructor isn't called when running other tests
+//  static ManagedRawFileWorkspace2DTestPerformance *createSuite() { return new ManagedRawFileWorkspace2DTestPerformance(); }
+//  static void destroySuite( ManagedRawFileWorkspace2DTestPerformance *suite ) { delete suite; }
+//
+//  ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
+//  {
+//    // Load the instrument alone so as to isolate the raw file loading time from the instrument loading time
+//    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+//    loader->setPropertyValue("Filename","WISH_Definition.xml");
+//    loader->setPropertyValue("OutputWorkspace", "InstrumentOnly");
+//    TS_ASSERT( loader->execute() );
+//  }
+//
+//  // This should take ~no time. If it does an unacceptable change has occurred!
+//  void testLoadTime()
+//  {
+//    // Make sure we go managed
+//    ConfigServiceImpl& conf = ConfigService::Instance();
+//    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+//    const std::string oldValue = conf.getString(managed);
+//    conf.setString(managed,"0");
+//    const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
+//    const std::string oldValue2 = conf.getString(managed2);
+//    conf.setString(managed2,"0");
+//    const std::string datapath = "datasearch.directories";
+//    std::string pathValue = conf.getString(datapath);
+//    pathValue.append(";../../Data/SystemTests/");
+//    conf.setString(datapath,pathValue);
+//
+//    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
+//    //IAlgorithm_sptr loader = AlgorithmFactory::Instance().create("LoadRaw");
+//    loader->setPropertyValue("Filename","WISH00016748.raw");
+//    loader->setPropertyValue("OutputWorkspace",outputSpace);
+//    TS_ASSERT( loader->execute() );
+//
+//    conf.setString(managed,oldValue);
+//    conf.setString(managed2,oldValue2);
+//  }
+//
+//  // This also should be very quick (nothing should get written to disk)
+//  void testReadValues()
+//  {
+//    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+//    TS_ASSERT( ws );
+//
+//    double x(0),y(0),e(0);
+//    for ( std::size_t i = 0 ; i < ws->getNumberHistograms() ; ++i )
+//    {
+//      x = ws->readX(i)[0];
+//      y = ws->readY(i)[0];
+//      e = ws->readE(i)[0];
+//    }
+//
+//    TS_ASSERT( x > 0.0 );
+//    TS_ASSERT( y == 0.0 );
+//    TS_ASSERT( e == 0.0 );
+//
+//    AnalysisDataService::Instance().remove(outputSpace);
+//  }
+//
+//};
 
 #endif /*ManagedRawFileWorkspace2DTEST_H_*/

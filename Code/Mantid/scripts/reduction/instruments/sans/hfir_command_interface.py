@@ -189,24 +189,32 @@ def SampleWidth(width):
 def HFIRSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
+    ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
+                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
     
 def BIOSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("BIOSANS"))
+    ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
+                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
 
 def HFIRDEV():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("BIOSANS"))
+    ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
+                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
 
 def GPSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
+    ReductionSingleton().set_reduction(mantidsimple.SetupHFIRReduction, 
+                                       ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     SolidAngle()
     AzimuthalAverage()
     

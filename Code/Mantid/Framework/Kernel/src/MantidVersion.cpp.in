@@ -10,12 +10,14 @@ namespace Kernel
 
 const char* MantidVersion::version()
 {
+  // The major and minor version numbers are specified in Build/CMake/VersionNumber.cmake
+  // The patch number is the number of commits since the most recent tag of the repository
   return "@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@";
 }
 
 const char* MantidVersion::revision()
 {
-  return "@MtdVersion_WC_LAST_CHANGED_REV@";
+  return "@MtdVersion_WC_LAST_CHANGED_SHA@";
 }
 
 const char* MantidVersion::releaseDate()

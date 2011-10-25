@@ -240,17 +240,10 @@ class ReductionOptions(BaseScriptElement):
         self.output_directory = BaseScriptElement.getStringElement(instrument_dom, "OutputDirectory",
                                                                    default = ReductionOptions.output_directory)
         
-        # Dark current - take care of backward compatibility
-        if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
-            bck_entries = dom.getElementsByTagName("Background")
-            if len(bck_entries)>0:
-                self.dark_current_corr = BaseScriptElement.getBoolElement(bck_entries[0], "dark_current_corr",
-                                                                          default = ReductionOptions.dark_current_corr)
-                self.dark_current_data = BaseScriptElement.getStringElement(bck_entries[0], "dark_current_file")
-        else:
-            self.dark_current_corr = BaseScriptElement.getBoolElement(instrument_dom, "dark_current_corr",
-                                                                      default = ReductionOptions.dark_current_corr)
-            self.dark_current_data = BaseScriptElement.getStringElement(instrument_dom, "dark_current_data")
+        # Dark current
+        self.dark_current_corr = BaseScriptElement.getBoolElement(instrument_dom, "dark_current_corr",
+                                                                  default = ReductionOptions.dark_current_corr)
+        self.dark_current_data = BaseScriptElement.getStringElement(instrument_dom, "dark_current_data")
                 
         self.n_q_bins = BaseScriptElement.getIntElement(instrument_dom, "n_q_bins",
                                                        default=ReductionOptions.n_q_bins)
@@ -262,36 +255,30 @@ class ReductionOptions(BaseScriptElement):
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=ReductionOptions.normalization)
 
-        # Mask - take care of backward compatibility
-        if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
-            self.top = BaseScriptElement.getIntElement(instrument_dom, "mask_top", default=ReductionOptions.top)
-            self.bottom = BaseScriptElement.getIntElement(instrument_dom, "mask_bottom", default=ReductionOptions.bottom)
-            self.right = BaseScriptElement.getIntElement(instrument_dom, "mask_right", default=ReductionOptions.right)
-            self.left = BaseScriptElement.getIntElement(instrument_dom, "mask_left", default=ReductionOptions.left)
-        else:   
-            element_list = dom.getElementsByTagName("Mask")
-            if len(element_list)>0: 
-                mask_dom = element_list[0]
-                self.top = BaseScriptElement.getIntElement(mask_dom, "mask_top", default=ReductionOptions.top)
-                self.bottom = BaseScriptElement.getIntElement(mask_dom, "mask_bottom", default=ReductionOptions.bottom)
-                self.right = BaseScriptElement.getIntElement(mask_dom, "mask_right", default=ReductionOptions.right)
-                self.left = BaseScriptElement.getIntElement(mask_dom, "mask_left", default=ReductionOptions.left)
-                
-                self.shapes = []
-                shapes_dom_list = mask_dom.getElementsByTagName("Shapes")
-                if len(shapes_dom_list)>0:
-                    shapes_dom = shapes_dom_list[0]
-                    for item in shapes_dom.getElementsByTagName("rect"):
-                        x_min =  float(item.getAttribute("x_min"))
-                        x_max =  float(item.getAttribute("x_max"))
-                        y_min =  float(item.getAttribute("y_min"))
-                        y_max =  float(item.getAttribute("y_max"))
-                        self.shapes.append(ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max))
-                                
-                self.detector_ids = BaseScriptElement.getIntList(mask_dom, "DetectorIDs", default=[])
-                self.mask_file = BaseScriptElement.getStringElement(mask_dom, "mask_file")
-                self.use_mask_file = BaseScriptElement.getBoolElement(mask_dom, "use_mask_file",
-                                                                      default = ReductionOptions.use_mask_file)
+        # Mask
+        element_list = dom.getElementsByTagName("Mask")
+        if len(element_list)>0: 
+            mask_dom = element_list[0]
+            self.top = BaseScriptElement.getIntElement(mask_dom, "mask_top", default=ReductionOptions.top)
+            self.bottom = BaseScriptElement.getIntElement(mask_dom, "mask_bottom", default=ReductionOptions.bottom)
+            self.right = BaseScriptElement.getIntElement(mask_dom, "mask_right", default=ReductionOptions.right)
+            self.left = BaseScriptElement.getIntElement(mask_dom, "mask_left", default=ReductionOptions.left)
+            
+            self.shapes = []
+            shapes_dom_list = mask_dom.getElementsByTagName("Shapes")
+            if len(shapes_dom_list)>0:
+                shapes_dom = shapes_dom_list[0]
+                for item in shapes_dom.getElementsByTagName("rect"):
+                    x_min =  float(item.getAttribute("x_min"))
+                    x_max =  float(item.getAttribute("x_max"))
+                    y_min =  float(item.getAttribute("y_min"))
+                    y_max =  float(item.getAttribute("y_max"))
+                    self.shapes.append(ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max))
+                            
+            self.detector_ids = BaseScriptElement.getIntList(mask_dom, "DetectorIDs", default=[])
+            self.mask_file = BaseScriptElement.getStringElement(mask_dom, "mask_file")
+            self.use_mask_file = BaseScriptElement.getBoolElement(mask_dom, "use_mask_file",
+                                                                  default = ReductionOptions.use_mask_file)
 
         # Absolute scaling
         element_list = dom.getElementsByTagName("AbsScale")

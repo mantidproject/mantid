@@ -9,7 +9,7 @@ from reduction import validate_step
 import sans_reduction_steps
 import hfir_load
 import absolute_scale
-from mantidsimple import *
+import mantidsimple
 import warnings
 import inspect
 
@@ -25,6 +25,9 @@ class SANSReducer(Reducer):
     NORMALIZATION_NONE = None
     NORMALIZATION_TIME = 1
     NORMALIZATION_MONITOR = 0    
+    
+    ## Reduction setup
+    _reduction_setup = None
     
     ## Beam center finder ReductionStep object
     _beam_finder = None 
@@ -88,10 +91,10 @@ class SANSReducer(Reducer):
         self._mask = sans_reduction_steps.Mask()
         
         # Default dark current subtracter class
-        self._dark_current_subtracter_class = HFIRDarkCurrentSubtraction
+        self._dark_current_subtracter_class = mantidsimple.HFIRDarkCurrentSubtraction
         
         # Resolution calculator
-        self._resolution_calculator = ReactorSANSResolution
+        self._resolution_calculator = mantidsimple.ReactorSANSResolution
         
         # Sample geometry correction
         self.geometry_correcter = None
@@ -117,6 +120,10 @@ class SANSReducer(Reducer):
     def get_normalizer(self):
         return self._normalizer
     
+    @validate_step
+    def set_reduction(self, setup_algorithm):
+        self._reduction_setup = setup_algorithm
+        
     @validate_step
     def set_geometry_correcter(self, correcter):    
         """
@@ -292,6 +299,10 @@ class SANSReducer(Reducer):
         if self.instrument is None:
             raise RuntimeError, "SANSReducer: trying to run a reduction with no instrument specified"
 
+        if self._reduction_setup is not None:
+            result = self._reduction_setup.execute(self)
+            self.log_text += "%s\n" % str(result)
+            
         if self._beam_finder is not None:
             result = self._beam_finder.execute(self)
             self.log_text += "%s\n" % str(result)     
