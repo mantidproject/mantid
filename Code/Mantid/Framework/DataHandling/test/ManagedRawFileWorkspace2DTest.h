@@ -219,33 +219,33 @@ private:
   std::string file;
 };
 
-////------------------------------------------------------------------------------
-//// Performance test
-////------------------------------------------------------------------------------
-//
-//class ManagedRawFileWorkspace2DTestPerformance : public CxxTest::TestSuite
-//{
-//private:
-//  const std::string outputSpace;
-//
-//public:
-//  // This pair of boilerplate methods prevent the suite being created statically
-//  // This means the constructor isn't called when running other tests
-//  static ManagedRawFileWorkspace2DTestPerformance *createSuite() { return new ManagedRawFileWorkspace2DTestPerformance(); }
-//  static void destroySuite( ManagedRawFileWorkspace2DTestPerformance *suite ) { delete suite; }
-//
-//  ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
-//  {
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class ManagedRawFileWorkspace2DTestPerformance : public CxxTest::TestSuite
+{
+private:
+  const std::string outputSpace;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ManagedRawFileWorkspace2DTestPerformance *createSuite() { return new ManagedRawFileWorkspace2DTestPerformance(); }
+  static void destroySuite( ManagedRawFileWorkspace2DTestPerformance *suite ) { delete suite; }
+
+  ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
+  {
 //    // Load the instrument alone so as to isolate the raw file loading time from the instrument loading time
 //    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
 //    loader->setPropertyValue("Filename","WISH_Definition.xml");
 //    loader->setPropertyValue("OutputWorkspace", "InstrumentOnly");
 //    TS_ASSERT( loader->execute() );
-//  }
-//
-//  // This should take ~no time. If it does an unacceptable change has occurred!
-//  void testLoadTime()
-//  {
+  }
+
+  // This should take ~no time. If it does an unacceptable change has occurred!
+  void testLoadTime()
+  {
 //    // Make sure we go managed
 //    ConfigServiceImpl& conf = ConfigService::Instance();
 //    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
@@ -267,11 +267,11 @@ private:
 //
 //    conf.setString(managed,oldValue);
 //    conf.setString(managed2,oldValue2);
-//  }
-//
-//  // This also should be very quick (nothing should get written to disk)
-//  void testReadValues()
-//  {
+  }
+
+  // This also should be very quick (nothing should get written to disk)
+  void testReadValues()
+  {
 //    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
 //    TS_ASSERT( ws );
 //
@@ -288,8 +288,8 @@ private:
 //    TS_ASSERT( e == 0.0 );
 //
 //    AnalysisDataService::Instance().remove(outputSpace);
-//  }
-//
-//};
+  }
+
+};
 
 #endif /*ManagedRawFileWorkspace2DTEST_H_*/
