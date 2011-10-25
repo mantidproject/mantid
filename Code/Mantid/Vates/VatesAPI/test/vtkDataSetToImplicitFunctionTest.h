@@ -17,32 +17,6 @@ using namespace Mantid::VATES;
 class vtkDataSetToImplicitFunctionTest : public CxxTest::TestSuite
 {
 
-private:
-
-  // Helper method. Create xml. Notice this is a subset of the full xml-schema, see Architectural design document.
-  static std::string constructXML()
-  {
-    return std::string("<MDInstruction>") +
-      "<Function>" + 
-      "<Type>PlaneImplicitFunction</Type>" +
-      "<ParameterList>" +
-      "<Parameter>" +
-      "<Type>NormalParameter</Type>" +
-      "<Value>1, -1, 1</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>OriginParameter</Type>" +
-      "<Value>0, 1, 0</Value>" +
-      "</Parameter>" +
-      "<Parameter>" +
-      "<Type>WidthParameter</Type>" +
-      "<Value>1</Value>" +
-      "</Parameter>" +
-      "</ParameterList>" +
-      "</Function>" +
-      "</MDInstruction>";
-  }
-
 public:
 
   void testThrowIfvtkDataSetNull()
@@ -51,18 +25,18 @@ public:
     TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg), std::runtime_error);
   }
 
-  void testExecution()
-  {
-    vtkStructuredGrid* ds = vtkStructuredGrid::New();
-    ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
+  //void testExecution()
+  //{
+  //  vtkStructuredGrid* ds = vtkStructuredGrid::New();
+  //  ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
-    vtkDataSetToImplicitFunction extractor(ds);
-    Mantid::Geometry::MDImplicitFunction* func = NULL;
-    TS_ASSERT_THROWS_NOTHING(func = extractor.execute());
-    TS_ASSERT_EQUALS("PlaneImplicitFunction", func->getName());
-    ds->Delete();
-    delete func;
-  }
+  //  vtkDataSetToImplicitFunction extractor(ds);
+  //  Mantid::Geometry::MDImplicitFunction* func = NULL;
+  //  TS_ASSERT_THROWS_NOTHING(func = extractor.execute());
+  //  TS_ASSERT_EQUALS("PlaneImplicitFunction", func->getName());
+  //  ds->Delete();
+  //  delete func;
+  //}
 
   void testNoImplcitFunction()
   {
@@ -80,11 +54,11 @@ public:
   void testStaticUsage()
   {
     vtkStructuredGrid* ds = vtkStructuredGrid::New();
-    ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
+    ds->SetFieldData(createFieldDataWithCharArray("<MDInstruction/>"));
 
     Mantid::Geometry::MDImplicitFunction* func = NULL;
     TS_ASSERT_THROWS_NOTHING(func = vtkDataSetToImplicitFunction::exec(ds));
-    TS_ASSERT_EQUALS("PlaneImplicitFunction", func->getName());
+    TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
     ds->Delete();
     delete func;
   }
