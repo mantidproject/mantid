@@ -1,3 +1,7 @@
+/*WIKI*
+Algorithm that can take a slice out of an original MDEventWorkspace while preserving all the events contained therein.
+*WIKI*/
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"

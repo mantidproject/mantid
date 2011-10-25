@@ -14,6 +14,7 @@ import commands
 import sys
 import codecs
 import fnmatch
+import wiki_tools
 from wiki_tools import *
 
 #======================================================================
@@ -183,7 +184,7 @@ def do_algorithm(args, algo):
     page = site.Pages[algo]
     text = page.edit()
     #print 'Text in page:', text.encode('utf-8')
-    page.save(contents, summary = 'Bot: replaced contents using the auto_wiki.py script.' )
+    page.save(contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
 
 #======================================================================
 if __name__ == "__main__":

@@ -16,10 +16,40 @@ import fnmatch
 
 
 mantid_initialized = False
-header_files = []
-header_files_bare = []
+cpp_files = []
+cpp_files_bare = []
 python_files = []
 python_files_bare = []
+
+
+
+#======================================================================
+def remove_wiki_from_header():
+    """One-time method to remove *WIKI* tags from all header files """
+    parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
+    for root, dirnames, filenames in os.walk(parent_dir):
+      for filename in fnmatch.filter(filenames, '*.h'):
+        fullfile = os.path.join(root, filename)
+        f = open(fullfile,'r')
+        lines = f.read().split('\n')
+        f.close()
+        n = 0
+        # The output file
+        outlines = []
+        while not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*') and n < len(lines):
+            outlines.append( lines[n] )
+            n += 1
+        #Skip all the WIKI lines
+        while not lines[n].startswith("*WIKI*") and n < len(lines):
+            n += 1
+        # Copy the rest
+        while n < len(lines):
+            outlines.append( lines[n] )
+            n += 1
+        
+        f = open(fullfile,'w')
+        f.write('\n'.join(outlines))
+        f.close()
 
 #======================================================================
 def intialize_files():
@@ -28,10 +58,10 @@ def intialize_files():
     parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
-      for filename in fnmatch.filter(filenames, '*.h'):
+      for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
-          header_files.append(fullfile)
-          header_files_bare.append( os.path.split(fullfile)[1] )
+          cpp_files.append(fullfile)
+          cpp_files_bare.append( os.path.split(fullfile)[1] )
       for filename in fnmatch.filter(filenames, '*.py'):
           fullfile = os.path.join(root, filename)
           python_files.append(fullfile)
@@ -41,11 +71,11 @@ def intialize_files():
 def find_algo_file(algo):
     """Find the files for a given algorithm"""
     source = ''
-    header = algo + ".h"
+    cpp = algo + ".cpp"
     pyfile = algo + ".py"
-    if header in header_files_bare:
-        n = header_files_bare.index(header, )
-        source = header_files[n]
+    if cpp in cpp_files_bare:
+        n = cpp_files_bare.index(cpp, )
+        source = cpp_files[n]
     elif pyfile in python_files_bare:
         n = python_files_bare.index(pyfile, )
         source = python_files[n]
@@ -60,9 +90,9 @@ def initialize_wiki(args):
     # Login, if specified
     if hasattr(args, 'username'):
         print "Logging in as %s" % args.username
-        res = site.login(args.username, args.password) # Optional
-        if res is None:
-            warnings.warn("Login with username '%s' failed! Check your username and password." % args.username)
+        site.login(args.username, args.password) 
+#        if res is None:
+#            warnings.warn("Login with username '%s' failed! Check your username and password." % args.username)
     
     
 #======================================================================
