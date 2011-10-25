@@ -74,12 +74,18 @@ set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
 find_package ( Git )
 if ( GIT_FOUND )
+  # Get the last revision
   execute_process ( COMMAND ${GIT_EXECUTABLE} describe --tags --long OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_REV 
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
-  string ( REGEX MATCH "[-](.*)[-]" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
-  string ( REGEX MATCH "[^-](.*)[^-]" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
-  # Will do the date later...
+  # Remove the tag name part
+  string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
+  # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
+  # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
+  string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
+  # Get the number part (number of commits since tag)
+  string ( REGEX MATCH "[0-9]+" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
+  # Get the date of the last commit
   execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE 
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )

@@ -28,7 +28,7 @@ private:
     TableRow row = ws->getRow(0);
     row << "TestWSRow" << "CNCS" << 1 << "SampleXML" << 1.0 << 1.0 << 1.0 << 90.0 << 90.0 << 90.0 << "Not Ready";
     int rowIndex = 0;
-    WorkspaceMemento* memento = new WorkspaceMemento(ws, "TestWSRow");
+    WorkspaceMemento* memento = new WorkspaceMemento(ws, "TestWSRow", rowIndex);
     LoanedMemento managed(memento);
     WorkspaceMementoService<LoanedMemento> service(managed);
     service.addAllItems(ws, rowIndex);

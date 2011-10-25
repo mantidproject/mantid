@@ -11,7 +11,6 @@ src/DimensionPresenter.cpp
 src/EscalatingRebinningActionManager.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
-src/GaussianThresholdRange.cpp
 src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
@@ -20,7 +19,6 @@ src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
-src/MultiDimensionalDbPresenter.cpp
 src/NoThresholdRange.cpp
 src/NullCoordTransform.cpp
 src/NullRebinningPresenter.cpp
@@ -36,11 +34,9 @@ src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
-src/vtkClipperDataSetFactory.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDEWHexahedronFactory.cpp
 src/vtkPeakMarkerFactory.cpp
-src/vtkProxyFactory.cpp
 src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingHexahedronFactory.cpp
 src/vtkThresholdingLineFactory.cpp
@@ -60,7 +56,6 @@ inc/MantidVatesAPI/EscalatingRebinningActionManager.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
-inc/MantidVatesAPI/GaussianThresholdRange.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
@@ -78,7 +73,6 @@ inc/MantidVatesAPI/NullCoordTransform.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
-inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullRebinningPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
@@ -96,11 +90,9 @@ inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
-inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
-inc/MantidVatesAPI/vtkProxyFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
 inc/MantidVatesAPI/vtkThresholdingHexahedronFactory.h
 inc/MantidVatesAPI/vtkThresholdingLineFactory.h
@@ -118,12 +110,10 @@ test/DimensionPresenterTest.h
 test/EscalatingRebinningActionManagerTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
-test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
 test/vtkMDEWHexahedronFactoryTest.h
 test/vtkSplatterPlotFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h
-test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/vtkThresholdingHexahedronFactoryTest.h
@@ -145,7 +135,6 @@ test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
 test/UserDefinedThresholdRangeTest.h
-test/GaussianThresholdRangeTest.h
 test/MedianAndBelowThresholdRangeTest.h
 test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h

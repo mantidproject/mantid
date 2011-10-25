@@ -15,7 +15,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
     """Move one file """
     
     # Do an SVN move
-    cmd = "svn mv " + oldfilename + " " + newfilename
+    cmd = "git mv " + oldfilename + " " + newfilename
     print "Running:", cmd
     os.system(cmd)
     

@@ -713,7 +713,7 @@ class SensitivityCorrection(ReductionStep):
             
         return output_str
         
-    def _workflow_alg(self, reducer, workspace):
+    def _execute_new(self, reducer, workspace):
         center_x = None
         center_y = None
         # Find the beam center if we need to
@@ -739,7 +739,6 @@ class SensitivityCorrection(ReductionStep):
         return l.getPropertyValue("OutputMessage")
         
     def execute(self, reducer, workspace):
-        #return self._workflow_alg(reducer, workspace)
         # If the sensitivity correction workspace exists, just apply it.
         # Otherwise create it.      
         #TODO: check that the workspaces have the same binning!

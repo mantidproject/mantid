@@ -25,6 +25,8 @@ MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent)
   releasedate->setText(releaseDate);
 
   QString version(Mantid::Kernel::MantidVersion::version());
+  // Add on the SHA-1 to the version number here (but not in the more visible places)
+  version.append("-").append(Mantid::Kernel::MantidVersion::revision());
   QLabel* releaseversion = m_uiForm.release_versionvalue;
   releaseversion->setText(version);
 

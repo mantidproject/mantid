@@ -27,8 +27,8 @@ def getSourceDir():
 #=====================================================================
 # These are the table fields, in order
 TABLE_FIELDS = ['date', 'name', 'type', 'host', 'environment', 'runner',
-                 'revision', 'runtime', 'cpu_fraction', 'speed_up',
-                 'iterations', 'success',
+                 'revision', 'commitid', 'runtime', 'cpu_fraction', 
+                 'success',
                  'status', 'logarchive', 'variables']
 
 #=====================================================================
@@ -60,7 +60,7 @@ def get_TestResult_from_row(row):
     Returns
     -------
         result :: TestResult object, with an extra
-            .testID membor containing the ID into the table (testID field) 
+            .testID member containing the ID into the table (testID field) 
     """
     res = testresult.TestResult()
     res.testID = row[0]
@@ -95,7 +95,7 @@ def get_latest_result(name=''):
         return None
 
 #=====================================================================
-def get_results(name, type="", get_log=False, where_clause='', orderby_clause=''):
+def get_results(name, type="", where_clause='', orderby_clause=''):
     """Return a list of testresult.TestResult objects
     generated from looking up in the table 
     Parameters:
@@ -106,7 +106,7 @@ def get_results(name, type="", get_log=False, where_clause='', orderby_clause=''
             Do not include the WHERE keyword!
             e.g "date > 2010 AND environment='mac'". 
         orderby_clause : a clause to order and/or limit the results.
-            e.g. "ORDER BY revision DESC limit 100" to get only the lastest 100 revisions.            
+            e.g. "ORDER BY revision DESC limit 100" to get only the latest 100 revisions.            
         """
     out = []
     
@@ -138,16 +138,6 @@ def get_results(name, type="", get_log=False, where_clause='', orderby_clause=''
         # Turn the row into TestResult
         res = get_TestResult_from_row(row)
         
-        # TODO: Get the log by loading back from file
-        
-#        # ----- Do we want the log ? --------------
-#        if get_log:
-#            c.execute("SELECT log FROM LogContents WHERE testID = ?", (res.testID,))
-#            log_rows = c.fetchall()
-#            if len(log_rows) > 0:
-#                log_contents = log_rows[0][0]
-#                res["log_contents"] = log_contents
-            
         out.append(res)
     c.close()
     return out
@@ -183,13 +173,30 @@ def get_all_field_values(field_name, where_clause=""):
 #=====================================================================
 def get_latest_revison():
     """ Return the latest revision number """
-    revs = get_all_field_values("revision", where_clause=" revision > 0 ORDER BY revision DESC LIMIT 1");
-    if len(revs) == 0:
-        raise "No revisions found!"
+    # Now get the latest revision
+    db = SQLgetConnection()
+    c = db.cursor()
+    query = "SELECT (revision) FROM Revisions ORDER BY revision DESC LIMIT 1;"  
+    c.execute(query)
+    rows = c.fetchall()
+    if (len(rows)>0):
+        return int(rows[0][0])
     else:
-        return int(revs[0])
+        return 0
     
-      
+#=====================================================================
+def add_revision():
+    """ Adds an entry with the current date/time to the table. 
+    Retrieve the index of that entry = the "revision".
+    Returns the current revision"""
+    db = SQLgetConnection()
+    c = db.cursor()
+    query = "INSERT INTO Revisions VALUES(NULL, '%s');" % str(datetime.datetime.now())
+    c.execute(query)
+    db.commit()
+    return get_latest_revison()
+
+            
 #=====================================================================
 def get_all_test_names(where_clause=""):
     """Returns a set containing all the UNIQUE test names in the database.
@@ -209,50 +216,31 @@ def setup_database():
         shutil.copyfile(get_database_filename(), get_database_filename()+".bak")
         
     db = SQLgetConnection()
-#    c = db.cursor()
-##    try:
-#    if 1:
-#        c.execute("CREATE DATABASE MantidSystemTests;")
-##    except:
-##        print "Error creating database. Maybe it already exists."
-##        pass
-#    
-#    db = sqlite3.connect(host='localhost', user='root', passwd='mantid', db='MantidSystemTests')
 
     c = db.cursor()
     try:
         c.execute("DROP TABLE TestRuns;")
+        c.execute("DROP TABLE Revisions;")
     except:
-        print "Error dropping table TestRuns. Perhaps it does not exist (this is normal on first run)."
+        print "Error dropping tables. Perhaps one does not exist (this is normal on first run)."
         
     c.execute("""CREATE TABLE TestRuns (
     testID INTEGER PRIMARY KEY,
     date DATETIME, name VARCHAR(60), type VARCHAR(20), 
-    host VARCHAR(30), environment VARCHAR(50), runner VARCHAR(20), revision INT, 
+    host VARCHAR(30), environment VARCHAR(50), runner VARCHAR(20), 
+    revision INT, commitid VARCHAR(45), 
     runtime DOUBLE, cpu_fraction DOUBLE, 
-    speed_up DOUBLE, iterations INT, success BOOL,
+    success BOOL,
     status VARCHAR(50), logarchive VARCHAR(80),
     variables VARCHAR(200)
     ); """)
     
-    # Iteration timings table, linked by testID
-    try:
-        c.execute("DROP TABLE IterationTimings;")
-    except:
-        print "Error dropping table IterationTimings. Perhaps it does not exist (this is normal on first run)."
-    c.execute("""CREATE TABLE IterationTimings (
-    testID INTEGER,
-    iteration INTEGER, timing DOUBLE ); """)
-    
-#    # Log contents table, linked by testID
-#    try:
-#        c.execute("DROP TABLE LogContents;")
-#    except:
-#        print "Error dropping table LogContents. Perhaps it does not exist (this is normal on first run)."
-#    c.execute("""CREATE TABLE LogContents (
-#    testID INTEGER, date DATETIME,
-#    log LONGTEXT ); """)
-
+    # Now a table that is just one entry per run (a fake "revision")
+            
+    c.execute("""CREATE TABLE Revisions (
+    revision INTEGER PRIMARY KEY,
+    date DATETIME
+    ); """)
 
         
 ###########################################################################
@@ -279,10 +267,6 @@ class SQLResultReporter(reporters.ResultReporter):
         # Create the field for the log archive name
         result["logarchive"] = result.get_logarchive_filename()
                
-#        valuessql = "INSERT INTO TestRuns "
-#        valuessql += "(" + ",".join(TABLE_FIELDS) + ")" 
-#        valuessql += " VALUES("
-
         valuessql = "INSERT INTO TestRuns VALUES(NULL, "
 
         # Insert the test results in the order of the table
@@ -303,20 +287,6 @@ class SQLResultReporter(reporters.ResultReporter):
         # Save test id for iteration table
         test_id = cur.lastrowid
         
-        # Add the timings to the separate table
-        itrtimings = result.iterationTimings
-        if len(itrtimings) > 0:
-            valuessql = "INSERT INTO IterationTimings VALUES(" + str(test_id) + ','
-            for i in xrange(len(itrtimings)):
-                timing = itrtimings[i]
-                sql = valuessql + str(i) + ',' + str(timing) + ');'
-                cur = dbcxn.cursor()
-                cur.execute(sql)
-        
-#        # Add the log contents to a separate table
-#        cur = dbcxn.cursor()
-#        cur.execute("INSERT INTO LogContents VALUES(?,?,?);", (test_id, datetime.datetime.now(), result["log_contents"]) )
-       
         # Commit and close the connection
         dbcxn.commit()
         cur.close()
@@ -329,21 +299,19 @@ def generate_fake_data(num_extra = 0):
     print "Generating fake data..."
     setup_database()
     rep = SQLResultReporter()
-    for name in ["Project1.MyFakeTest", "Project1.AnotherFakeTest", "Project2.FakeTest", "Project2.OldTest"]:
-        for rev in [9400, 9410,9411, 9412] + range(9420,9440) + [9450, 9466] + range(9450, 9450+num_extra):
-            if (name != "Project2.OldTest") or (rev < 9420):
+    for timer in [9400, 9410,9411, 9412] + range(9420,9440) + [9450, 9466] + range(9450, 9450+num_extra):
+        rev = add_revision()
+        for name in ["Project1.MyFakeTest", "Project1.AnotherFakeTest", "Project2.FakeTest", "Project2.OldTest"]:
+            if (name != "Project2.OldTest"):
                 result = testresult.TestResult()
                 result["name"] = name
-                result["date"] = datetime.datetime.now() + datetime.timedelta(days=rev, minutes=rev)
-                for i in xrange(3):
-                    result.addIterationTiming(1.2)
-                    result.addIterationTiming(3.4)
-                    result.addIterationTiming(5.6)
+                result["date"] = datetime.datetime.now() + datetime.timedelta(days=timer, minutes=timer)
                 result["log_contents"] = "Revision %d" % rev
-                result["runtime"] = rev/10.0 + random.randrange(-2,2)
-                result["revision"] = rev
+                result["runtime"] = timer/10.0 + random.randrange(-2,2)
+                result["commitid"] = rev #'926bf82e36b4c90c95efc3f1151725696273de5a'
                 result["success"] = (random.randint(0,10) > 0)
                 result["status"] = ["failed","success"][result["success"]]
+                result["revision"] = rev
                 rep.dispatchResults(result)
     print "... Fake data made."
 
@@ -351,15 +319,9 @@ def generate_fake_data(num_extra = 0):
 #=====================================================================
 if __name__ == "__main__":
     set_database_filename("SqlResults.test.db")
-    #generate_fake_data()
+    generate_fake_data()
     
-    res = get_results("MyFakeTest", "system", True)
-    print res
     res = get_latest_result()
     print res
-    res = get_results("MyFakeTest", "system", False, orderby_clause="ORDER BY revision DESC limit 2")
-    print res
-#    for r in res:
-#        print r["log_contents"]
     
     

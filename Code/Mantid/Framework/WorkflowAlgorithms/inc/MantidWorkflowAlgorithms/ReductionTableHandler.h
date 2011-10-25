@@ -17,9 +17,6 @@ namespace Mantid
 namespace WorkflowAlgorithms
 {
 /**
-    @author Mathieu Doucet
-    @date 12/10/2011
-
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -57,11 +54,11 @@ namespace WorkflowAlgorithms
     API::MatrixWorkspace_sptr findWorkspaceEntry(const std::string& key);
 
     /// Add a string entry with a given key
-    void addEntry(const std::string& key, const std::string& value);
+    void addEntry(const std::string& key, const std::string& value, bool replace=false);
     /// Add an integer entry with a given key
-    void addEntry(const std::string& key, const int& value);
+    void addEntry(const std::string& key, const int& value, bool replace=false);
     /// Add a double entry with a given key
-    void addEntry(const std::string& key, const double& value);
+    void addEntry(const std::string& key, const double& value, bool replace=false);
 
     /// Find a file path for the given string
     static std::string findFileEntry(const std::string& name, const std::string& hint="");
@@ -77,6 +74,7 @@ namespace WorkflowAlgorithms
     static const int INTENTRY_COL = 2;
     /// Column number of double entries
     static const int DOUBLEENTRY_COL = 3;
+    Kernel::Logger& g_log;
   };
 }
 }
