@@ -10,9 +10,8 @@
 #include "MantidICat/GSoapGenerated/soapH.h"
 
 class SOAP_CMAC ICATPortBindingProxy : public soap
-{ public:
-	/// Endpoint URL of service 'ICATPortBindingProxy' (change as needed)
-	const char *soap_endpoint;
+{
+  public:
 	/// Constructor
 	ICATPortBindingProxy();
 	/// Constructor with copy of another engine state
@@ -39,6 +38,7 @@ class SOAP_CMAC ICATPortBindingProxy : public soap
 	virtual	int soap_close_socket();
 	/// Print fault
 	virtual	void soap_print_fault(FILE*);
+
 #ifndef WITH_LEAN
 	/// Print fault to stream
 	virtual	void soap_stream_fault(std::ostream&);
@@ -363,5 +363,9 @@ class SOAP_CMAC ICATPortBindingProxy : public soap
 
 	/// Web service operation 'searchDatafilesByParameterComparators' (returns error code or SOAP_OK)
 	virtual	int searchDatafilesByParameterComparators(ns1__searchDatafilesByParameterComparators *ns1__searchDatafilesByParameterComparators_, ns1__searchDatafilesByParameterComparatorsResponse *ns1__searchDatafilesByParameterComparatorsResponse_);
+
+  private:
+    /// Endpoint URL of service 'ICATPortBindingProxy' (change as needed)
+    char *soap_endpoint;
 };
 #endif
