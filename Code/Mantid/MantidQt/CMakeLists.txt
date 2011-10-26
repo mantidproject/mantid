@@ -22,9 +22,9 @@ if ( MSVC_IDE )
   set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET DesignerPlugins PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET SliceViewer PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET MantidQtSliceViewer PROPERTY FOLDER "MantidQt" )
 else ()
   add_custom_target ( MantidQt DEPENDS MantidQtAPI MantidWidgets 
-                                       CustomDialogs CustomInterfaces SliceViewer
+                                       CustomDialogs CustomInterfaces MantidQtSliceViewer
   )
 endif ()
