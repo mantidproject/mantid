@@ -369,6 +369,11 @@ class LoadTransmissions(ReductionStep):
         #transmission workspaces sometimes have monitor locations, depending on the instrument, load these locations
         reducer.instrument.load_transmission_inst(self.trans.wksp_name)
         reducer.instrument.load_transmission_inst(self.direct.wksp_name)
+        
+        if reducer.instrument.name() == 'SANS2D':        
+            beamcoords = reducer._beam_finder.get_beam_center()
+            reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1])  
+            reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
 
         return self.trans.wksp_name, self.direct.wksp_name
 
