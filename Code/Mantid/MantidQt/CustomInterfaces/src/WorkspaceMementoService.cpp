@@ -40,17 +40,17 @@ namespace MantidQt
       {
         throw std::runtime_error("Too few columns in table schema.");
       }
-      m_memento->addItem(new WorkspaceMementoItem<0, std::string>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<1, std::string>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<2, int>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<3, std::string>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<4, double>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<5, double>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<6, double>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<7, double>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<8, double>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<9, double>(ws, rowIndex));
-      m_memento->addItem(new WorkspaceMementoItem<10, std::string>(ws, rowIndex));
+      m_memento->addItem(new WorkspaceMementoItem<std::string>(ws, rowIndex, 0));
+      m_memento->addItem(new WorkspaceMementoItem<std::string>(ws, rowIndex, 1));
+      m_memento->addItem(new WorkspaceMementoItem<int>(ws, rowIndex, 2));
+      m_memento->addItem(new WorkspaceMementoItem<std::string>(ws, rowIndex, 3));
+      m_memento->addItem(new WorkspaceMementoItem<double>(ws, rowIndex, 4));
+      m_memento->addItem(new WorkspaceMementoItem<double>(ws, rowIndex, 5));
+      m_memento->addItem(new WorkspaceMementoItem<double>(ws, rowIndex, 6));
+      m_memento->addItem(new WorkspaceMementoItem<double>(ws, rowIndex, 7));
+      m_memento->addItem(new WorkspaceMementoItem<double>(ws, rowIndex, 8));
+      m_memento->addItem(new WorkspaceMementoItem<double>(ws, rowIndex, 9));
+      m_memento->addItem(new WorkspaceMementoItem<std::string>(ws, rowIndex, 10));
     }
 
 
@@ -119,8 +119,13 @@ namespace MantidQt
     template<typename Memento>
     void WorkspaceMementoService<Memento>::addLogItem(std::string name)
     {
-        m_memento->getData()->addColumn("str", name); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
-        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(m_memento->getData(), m_memento->getRowIndex()));
+        std::vector<std::string> names = m_memento->getData()->getColumnNames();
+        std::vector<std::string>::iterator pos = std::find(names.begin(), names.end(), name);
+        if(pos == names.end())
+        {
+          m_memento->getData()->addColumn("str", name); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
+        }
+        m_memento->addItem(new WorkspaceMementoItem<std::string>(m_memento->getData(), m_memento->getRowIndex(), m_memento->getData()->columnCount()-1));
     }
 
     
@@ -129,10 +134,17 @@ namespace MantidQt
     {
       typedef std::vector<Mantid::Kernel::Property*> VecLogType;
       VecLogType::iterator it = vecLogData.begin();
+      int count = m_logValueStart;
       while(it != vecLogData.end())
       {
-        ws->addColumn("str", (*it)->name()); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
-        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws, rowIndex));
+        std::vector<std::string> names = ws->getColumnNames();
+        std::vector<std::string>::iterator pos = std::find(names.begin(), names.end(), (*it)->name());
+        if(pos == names.end())
+        {
+          ws->addColumn("str", (*it)->name()); 
+          //m_memento->addItem(new WorkspaceMementoItem<std::string>(ws, rowIndex, count));
+        }
+        count++;
         it++;
       }
     }
@@ -142,11 +154,13 @@ namespace MantidQt
     {
       typedef std::vector<std::string> VecLogType;
       VecLogType::iterator it = vecLogData.begin();
+      int count = m_logValueStart;
       while(it != vecLogData.end())
       {
-        ws->addColumn("str", (*it)); //TODO. THIS IS A NON-REVERTABLE CHANGE TO THE UNDERYLING TABLE WORKSPACE
-        m_memento->addItem(new WorkspaceMementoItem<11, std::string>(ws , rowIndex));
+        ws->addColumn("str", (*it)); 
+        m_memento->addItem(new WorkspaceMementoItem<std::string>(ws, rowIndex, count));
         it++;
+        count++;
       }
     }
 

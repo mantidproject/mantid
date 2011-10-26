@@ -58,7 +58,7 @@ namespace MantidQt
       WorkspaceMemento* temp = new WorkspaceMemento(m_data, "Temp", rowIndex);
       WorkspaceMementoService<WorkspaceMemento*> service(temp);
       service.addAllItems(m_data, rowIndex);
-      service.addLogItems(m_data, ws->run().getLogData(), rowIndex);// 
+      service.addLogItems(m_data, ws->run().getLogData(), rowIndex);
       service.setWorkspaceName(ws->getName());
       service.setInstrumentName(ws->getInstrument()->getName());
       service.setRunNumber(ws->getRunNumber());
@@ -97,13 +97,6 @@ namespace MantidQt
       service.setStatus(status);
       service.setLogData(ws->run().getLogData());
       temp->commit(); 
-
-      // Append all log data here.
-      //typedef std::vector<Mantid::Kernel::Property*> VecLogType;
-      //VecLogType logData = ws->run().getLogData();
-      //service.setLogData(logData);
-
-      //Make a mutable record by adding to a mutable member.
 
       model->update();
     }
@@ -175,6 +168,7 @@ namespace MantidQt
         LoanedMemento managedMemento(memento);
         WorkspaceMementoService<LoanedMemento> service(managedMemento);
         service.addAllItems(m_data, rowIndex);
+        //service.addLogItems(m_data, rowIndex);
       }
       //Wrap product and return.
       return LoanedMemento(m_mementoMap[wsName]);

@@ -30,7 +30,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
@@ -129,6 +129,8 @@ void CreateMDWorkspace::addWorkspaceClicked()
 
     m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
     m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+    m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
+    m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView());
     //------------------------------------------------------------------------------
 
   }
@@ -137,9 +139,17 @@ void CreateMDWorkspace::addWorkspaceClicked()
 void CreateMDWorkspace::removeWorkspaceClicked()
 {
   QModelIndex index = m_uiForm.tableView->currentIndex();
-  std::string wsName = m_data->getWorkingData()->cell<std::string>(index.row(), 0);
-  //Find the selected workspace names
-  m_data->unregisterWorkspace(wsName, m_model);
+  if(!index.isValid())
+  {
+    runConfirmation("Select a row from the table before running");
+  }
+  else
+  {
+    std::string wsName = m_data->getWorkingData()->cell<std::string>(index.row(), 0);
+    //Find the selected workspace names
+    m_data->unregisterWorkspace(wsName, m_model);
+  }
+  
 }
 
 void CreateMDWorkspace::createMDWorkspaceClicked()

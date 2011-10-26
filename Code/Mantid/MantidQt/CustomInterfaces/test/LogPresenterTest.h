@@ -28,6 +28,8 @@ private:
       void(std::vector<AbstractMementoItem_sptr>));
     MOCK_CONST_METHOD0(getLogData,
       LogDataMap());
+    MOCK_METHOD0(indicateModified, void());
+    MOCK_METHOD0(indicateDefault, void());
   };
 
   // Helper method to generate a workspace memento;

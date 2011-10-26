@@ -35,7 +35,7 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    template<int ColNumber, typename ColType>
+    template<typename ColType>
     class DLLExport WorkspaceMementoItem : public AbstractMementoItem
     {
     private:
@@ -45,6 +45,8 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr m_data;
       /// Row onto which this column object projects.
       int m_rowIndex;
+      /// Column index onto which this mementoitem maps.
+      int m_colIndex;
 
     protected:
 
@@ -64,8 +66,6 @@ namespace MantidQt
       }
 
     public:
-      /// Unique column index.
-      enum { ColIndex = ColNumber };
       /// Type of item being stored.
       typedef ColType ItemType;
       
@@ -73,10 +73,11 @@ namespace MantidQt
       Constructor
       @param data : ref to table workspace storing the data.
       @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
+      @param colIndex : column index of the same table workspace.
       */
-      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, int rowIndex) : m_data(data), m_rowIndex(rowIndex)
+      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, int rowIndex, int colIndex) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex)
       {
-        m_value = m_data->cell<ItemType>(m_rowIndex, ColIndex);
+        m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
       }
 
       /**
@@ -112,7 +113,7 @@ namespace MantidQt
       */
       virtual bool hasChanged() const 
       {
-        return m_data->cell<ItemType>(m_rowIndex, ColIndex) != m_value;
+        return m_data->cell<ItemType>(m_rowIndex, m_colIndex) != m_value;
       }
 
       /*
@@ -123,7 +124,7 @@ namespace MantidQt
       */
       bool equals(AbstractMementoItem& other) const
       {
-        WorkspaceMementoItem* pOther = dynamic_cast<WorkspaceMementoItem<ColNumber, ColType>* >(&other);
+        WorkspaceMementoItem* pOther = dynamic_cast<WorkspaceMementoItem<ColType>* >(&other);
         if(pOther == NULL)
         {
           throw std::runtime_error("Cannot call AbstractMementoItem::equals() on incompatible types.");
@@ -177,13 +178,13 @@ namespace MantidQt
       /// Synchronise the changes (via setvalue) with the underlying table workspace. This is a non reversible operation. 
       void commit()
       {
-        m_data->cell<ItemType>(m_rowIndex, ColIndex) = m_value;
+        m_data->cell<ItemType>(m_rowIndex, m_colIndex) = m_value;
       }
 
       /// Undo changes via setValue. 
       void rollback()
       {
-        m_value = m_data->cell<ItemType>(m_rowIndex, ColIndex);
+        m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
       }
 
       /**

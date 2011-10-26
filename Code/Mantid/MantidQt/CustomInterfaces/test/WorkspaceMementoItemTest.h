@@ -24,8 +24,10 @@ WorkspaceMementoItemTest() : ws(new TableWorkspace(2))
   //value integer in that workspace with value 1.
   ws->addColumn("int", "test_col1");
   ws->addColumn("int", "test_col2");
+  ws->addColumn("str", "test_col3");
   ws->cell<int>(0, 0) = 1;
   ws->cell<int>(0, 1) = 1;
+  ws->cell<std::string>(0, 2) = "val";
 }
 
 //=====================================================================================
@@ -35,27 +37,25 @@ WorkspaceMementoItemTest() : ws(new TableWorkspace(2))
 void testConstructor()
 {
   //Integer Item
-  WorkspaceMementoItem<0, int> a(ws, 0);
-  size_t colindex = a.ColIndex;
-  TS_ASSERT_EQUALS(0, colindex);
+  WorkspaceMementoItem<int> a(ws, 0, 0);
   TS_ASSERT_EQUALS(1, a.getValue());
 }
 
 void testEqualsThrows()
 {
-  typedef WorkspaceMementoItem<0, int> TypeA;
-  typedef WorkspaceMementoItem<1, int> TypeB; //Different column number constitutes a different type.
-  TypeA A(ws, 0);
-  TypeB B(ws, 0);
+  typedef WorkspaceMementoItem<int> TypeA;
+  typedef WorkspaceMementoItem<std::string> TypeB; //Different column number constitutes a different type.
+  TypeA A(ws, 0, 0);
+  TypeB B(ws, 0, 2);
 
   TSM_ASSERT_THROWS("Should throw if types on which equals are called are not compatible.", A.equals(B), std::runtime_error);
 }
 
 void testEquals()
 {
-  WorkspaceMementoItem<0, int> a(ws, 0);
+  WorkspaceMementoItem<int> a(ws, 0, 0);
   a.setValue(2);
-  WorkspaceMementoItem<0, int> b(ws, 0);
+  WorkspaceMementoItem<int> b(ws, 0, 0);
   b.setValue(2);
 
   TS_ASSERT(a.equals(b));
@@ -65,9 +65,9 @@ void testEquals()
 
 void testNotEquals()
 {
-  WorkspaceMementoItem<0, int> a(ws, 0);
+  WorkspaceMementoItem<int> a(ws, 0, 0);
   a.setValue(2);
-  WorkspaceMementoItem<0, int> b(ws, 0);
+  WorkspaceMementoItem<int> b(ws, 0, 0);
   b.setValue(3);
 
   TS_ASSERT(!a.equals(b));
@@ -78,18 +78,18 @@ void testNotEquals()
 
 void testCopy()
 {
-  WorkspaceMementoItem<0, int> item(ws, 0);
+  WorkspaceMementoItem<int> item(ws, 0, 0);
   item.setValue(3);
-  WorkspaceMementoItem<0, int> copy(item);
+  WorkspaceMementoItem<int> copy(item);
 
   TS_ASSERT_EQUALS(item, copy);
 }
 
 void testAssign()
 {
-  WorkspaceMementoItem<0, int> a(ws, 0);
+  WorkspaceMementoItem<int> a(ws, 0, 0);
   a.setValue(3);
-  WorkspaceMementoItem<0, int> b(ws, 0);
+  WorkspaceMementoItem<int> b(ws, 0, 0);
   b.setValue(4);
   b = a;
   TS_ASSERT_EQUALS(a, b);
@@ -98,7 +98,7 @@ void testAssign()
 
 void testSetValue()
 {
-  WorkspaceMementoItem<0, int> item(ws, 0);
+  WorkspaceMementoItem<int> item(ws, 0, 0);
   item.setValue(2);
   TS_ASSERT_EQUALS(2, item.getValue());
 }
@@ -106,7 +106,7 @@ void testSetValue()
 void testHasChanged()
 {
   //create  a mementoitem pointing at the same cell in the table workspace.
-  WorkspaceMementoItem<0, int> item(ws, 0);
+  WorkspaceMementoItem<int> item(ws, 0, 0);
   TS_ASSERT(!item.hasChanged());
   item.setValue(2000);
   TS_ASSERT(item.hasChanged());
@@ -116,7 +116,7 @@ void testApplyChanges()
 {
 
   //create  a mementoitem pointing at the same cell in the table workspace.
-  WorkspaceMementoItem<0, int> item(ws, 0);
+  WorkspaceMementoItem<int> item(ws, 0, 0);
   item.setValue(2);
 
   //Apply changes in memento over to the table workspace.
@@ -131,7 +131,7 @@ void testRevertChanges()
 {
 
   //create  a mementoitem pointing at the same cell in the table workspace.
-  WorkspaceMementoItem<0, int> item(ws, 0);
+  WorkspaceMementoItem<int> item(ws, 0, 0);
   item.setValue(2);
 
   //Apply changes in memento over to the table workspace.
