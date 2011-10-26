@@ -33,6 +33,7 @@ In addition, this only works for instruments that use [[RectangularDetector]]s (
 #include <cmath>
 #include <numeric>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_array.hpp>
 #include <Poco/File.h>
 //#include <hdf5.h> //This is troublesome on multiple platforms.
 
@@ -584,8 +585,7 @@ namespace DataHandling
               // 1 dimension, with that number of bin boundaries
               dataDimensions[0] = static_cast<int>(X.size());
               // The output TOF axis will be whatever size in the workspace.
-              float *tof_data;                /* pointer to data buffer to write */
-              tof_data = new float[dataDimensions[0]];
+              boost::scoped_array<float> tof_data(new float[dataDimensions[0]]);
 
               // And fill it with the X data
               for (size_t i=0; i < X.size(); i++)
@@ -594,8 +594,7 @@ namespace DataHandling
               if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
               if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
               if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
-              if (NXputdata (outId, tof_data) != NX_OK) return NX_ERROR;
-              delete [] tof_data;
+              if (NXputdata (outId, tof_data.get()) != NX_OK) return NX_ERROR;
               if (NXclosedata (outId) != NX_OK) return NX_ERROR;
 
             }
