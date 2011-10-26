@@ -172,7 +172,7 @@ public:
   void setUp()
   {
     //1D Workspace with 2000 points
-    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 2000);
+    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 200000);
   }
 
 	void testGenerateVTKDataSet()
