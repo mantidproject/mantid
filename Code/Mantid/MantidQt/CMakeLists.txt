@@ -2,6 +2,7 @@
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
 
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 include_directories ( API/inc )
 add_subdirectory ( API )
 add_subdirectory ( MantidWidgets )
@@ -21,8 +22,9 @@ if ( MSVC_IDE )
   set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET DesignerPlugins PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET SliceViewer PROPERTY FOLDER "MantidQt" )
 else ()
   add_custom_target ( MantidQt DEPENDS MantidQtAPI MantidWidgets 
-                                       CustomDialogs CustomInterfaces
+                                       CustomDialogs CustomInterfaces SliceViewer
   )
 endif ()

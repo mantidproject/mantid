@@ -114,7 +114,6 @@ include_directories ( inc )
 include_directories ( ../MantidWidgets/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../API )
-include_directories ( ${QWT_INCLUDE_DIR} )
 include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
