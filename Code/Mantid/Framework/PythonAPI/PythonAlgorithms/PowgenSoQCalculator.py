@@ -1,16 +1,13 @@
+#!/usr/bin/python
 """*WIKI* 
 
+Python algorithm to calculate S(Q) for POWGEN
+The algorithm and data processing procedure are referred to PDFgetN
+
+V10:  POWGEN data only!
 
 *WIKI*"""
-#!/usr/bin/python
-################################################################################
-#
-# Python algorithm to calculate S(Q) for POWGEN
-# The algorithm and data processing procedure are referred to PDFgetN
-#
-# V10:  POWGEN data only!
-#
-################################################################################
+
 from MantidFramework import *
 from mantidsimple import *
 import math

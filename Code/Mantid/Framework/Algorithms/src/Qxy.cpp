@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+This algorithm rebins a 2D workspace in units of wavelength into 2D Q, and the reduction performed is the same as that for [[Q1D]], hence please see the description of that algorithm for more details about how this algorithm works.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

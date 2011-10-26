@@ -1,3 +1,8 @@
+"""*WIKI* 
+
+Load reflectometry data
+
+*WIKI*"""
 from MantidFramework import *
 from mantidsimple import *
 from LargeScaleStructures.REF_L_geometry import create_geometry

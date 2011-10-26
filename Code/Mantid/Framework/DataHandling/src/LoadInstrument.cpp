@@ -1,3 +1,11 @@
+/*WIKI* 
+
+Loads an instrument definition file ([[InstrumentDefinitionFile|IDF]]) into a workspace, which contains information about detector positions, their geometric shape, slit properties, links between values stored in ISIS log-files and components of the instrument and so on. For more on IDFs see: [[InstrumentDefinitionFile]].
+
+By default the algorithm will write a 1:1 map between the spectrum number and detector ID. Any custom loading algorithm that calls this as a sub algorithm will therefore get this 1:1 map be default. If the custom loader is to write its own map then it is advised to set <code>RewriteSpectraMap</code> to false to avoid extra work. 
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

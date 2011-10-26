@@ -1,3 +1,37 @@
+/*WIKI* 
+
+The detector offset file created by this algorithm are in the form created by the ARIEL software. The offsets are a correction to the dSpacing values and are applied during the conversion from time-of-flight to dSpacing as follows:
+
+:<math> d = \frac{h}{m_N} \frac{t.o.f.}{L_{tot} sin \theta} (1+ \rm{offset})</math>
+
+
+==Usage==
+'''Python'''
+    LoadEmptyInstrument("POWGEN_Definition.xml","POWGEN")
+    CreateCalFileByNames("POWGEN","PG3.cal","Group1,Group2,Group3,Group4")
+    DspacemaptoCal("POWGEN","PG3_D1370_dspacemap_2010_09_12.dat","PG3.cal")
+
+'''C++'''
+    IAlgorithm* alg1 = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    alg1->setPropertyValue("Filename", "POWGEN_Definition.xml");
+    alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", "POWGEN");
+    alg1->execute();
+    IAlgorithm* alg2 = FrameworkManager::Instance().createAlgorithm("CreateCalFileByNames");
+    alg2->setProperty<MatrixWorkspace_sptr>("InstrumentWorkspace", "POWGEN");
+    alg2->setPropertyValue("GroupingFileName", "PG3.cal");
+    alg2->setPropertyValue("GroupingNames", "Group1,Group2,Group3,Group4");
+    alg2->execute();
+    IAlgorithm* alg3 = FrameworkManager::Instance().createAlgorithm("DspacemaptoCal");
+    alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", "POWGEN");
+    alg3->setPropertyValue("DspacemapFile", "PG3_D1370_dspacemap_2010_09_12.dat");
+    alg3->setPropertyValue("CalibrationFile", "PG3.cal");
+    alg3->execute();
+
+
+
+
+
+*WIKI*/
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/DspacemaptoCal.h"
 #include "MantidAPI/FileProperty.h"

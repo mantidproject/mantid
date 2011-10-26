@@ -1,9 +1,5 @@
 #ifndef MANTID_DATAHANDLING_LOADINSTRUMENTFROMNEXUS_H_
 #define MANTID_DATAHANDLING_LOADINSTRUMENTFROMNEXUS_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

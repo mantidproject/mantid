@@ -16,41 +16,8 @@ import codecs
 import fnmatch
 import wiki_tools
 from wiki_tools import *
+import difflib
 
-#======================================================================
-def add_wiki_description(algo, wikidesc):
-    """Adds a wiki description  in the algo's header file under comments tag."""
-    wikidesc = wikidesc.split('\n')
-    source = find_algo_file(algo)
-    if source != '':
-        if len("".join(wikidesc)) == 0:
-            print "No wiki description found to add!!!!"
-        
-        f = open(source,'r')
-        lines = f.read().split('\n')
-        f.close()
-        n = 0
-        while  n < len(lines):
-            line = lines[n].strip()
-            n += 1
-            if line.startswith('#define'): break
-            
-        if n >= len(lines): n = 0
-        
-        #What lines are we adding?
-        if source.endswith(".py"):
-            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
-        else:
-            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
-    
-        lines = lines[:n] + adding + lines[n:]
-        
-        text = "\n".join(lines)
-        f = codecs.open(source, encoding='utf-8', mode='w+')
-        f.write(text)
-        f.close()
-        
-        
 #======================================================================
 def get_wiki_description(algo):
     source = find_algo_file(algo)
@@ -170,21 +137,73 @@ def make_wiki(algo_name):
 
 
 
+def confirm(prompt=None, resp=False):
+    """prompts for yes or no response from the user. Returns True for yes and
+    False for no.
 
+    'resp' should be set to the default value assumed by the caller when
+    user simply types ENTER.
+
+    >>> confirm(prompt='Create Directory?', resp=True)
+    Create Directory? [y]|n: 
+    True
+    >>> confirm(prompt='Create Directory?', resp=False)
+    Create Directory? [n]|y: 
+    False
+    >>> confirm(prompt='Create Directory?', resp=False)
+    Create Directory? [n]|y: y
+    True
+
+    """
+    
+    if prompt is None:
+        prompt = 'Confirm'
+
+    if resp:
+        prompt = '%s [%s]|%s: ' % (prompt, 'y', 'n')
+    else:
+        prompt = '%s [%s]|%s: ' % (prompt, 'n', 'y')
+        
+    while True:
+        ans = raw_input(prompt)
+        if not ans:
+            return resp
+        if ans not in ['y', 'Y', 'n', 'N']:
+            print 'please enter y or n.'
+            continue
+        if ans == 'y' or ans == 'Y':
+            return True
+        if ans == 'n' or ans == 'N':
+            return False
     
     
 #======================================================================
 def do_algorithm(args, algo):
     print "Generating wiki page for %s" % (algo)
     site = wiki_tools.site
-    contents = make_wiki(algo)
+    new_contents = make_wiki(algo) 
     
-    print "Saving page to http://www.mantidproject.org/%s" % algo
     #Open the page with the name of the algo
     page = site.Pages[algo]
-    text = page.edit()
-    #print 'Text in page:', text.encode('utf-8')
-    page.save(contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
+    
+    old_contents = page.edit() + "\n"
+    
+    if old_contents == new_contents:
+        print "Generated wiki page is identical to that on the website."
+    else:
+        print "Generated wiki page is DIFFERENT than that on the website."
+        print
+        print "Printing out diff:"
+        print
+        # Perform a diff of the new vs old contents
+        diff = difflib.context_diff(old_contents.splitlines(True), new_contents.splitlines(True), fromfile='website', tofile='new')
+        for line in diff:
+            sys.stdout.write(line) 
+        print
+        
+        if args.force or confirm("Do you want to replace the website wiki page?", True):
+            print "Saving page to http://www.mantidproject.org/%s" % algo
+            page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
 
 #======================================================================
 if __name__ == "__main__":
@@ -216,6 +235,10 @@ if __name__ == "__main__":
     
     parser.add_argument('--mantidpath', dest='mantidpath', default=defaultmantidpath,
                         help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
+
+    parser.add_argument('--force', dest='force', action='store_const',
+                        const=True, default=False,
+                        help="Force overwriting the wiki page on the website if different (don't ask the user)")
 
     args = parser.parse_args()
     

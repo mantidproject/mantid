@@ -1,11 +1,5 @@
 #ifndef MANTID_MD_CONVERT2_Q_ND_ANY
 #define MANTID_MD_CONVERT2_Q_ND_ANY
-/*WIKI* 
-
-The algorithm takes data from the transformed to energy matrix workspace, converts it into reciprocal space and energy transfer, and places the resulting 4D MDEvents into a [[MDEventWorkspace]].
-
-If the OutputWorkspace does NOT already exist, a default one is created. In order to define more precisely the parameters of the [[MDEventWorkspace]], use the [[CreateMDWorkspace]] algorithm first.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

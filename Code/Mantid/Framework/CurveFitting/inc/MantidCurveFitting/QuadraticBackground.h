@@ -1,9 +1,5 @@
 #ifndef MANTID_CURVEFITTING_QUADRATICBACKGROUND_H_
 #define MANTID_CURVEFITTING_QUADRATICBACKGROUND_H_
-/*WIKI*
-Quadratic background
-Y = A0 + A1*X + A2*X**2
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidCurveFitting/BackgroundFunction.h"

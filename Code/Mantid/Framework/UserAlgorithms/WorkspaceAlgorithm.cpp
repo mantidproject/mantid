@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "WorkspaceAlgorithm.h"
 
 namespace Mantid

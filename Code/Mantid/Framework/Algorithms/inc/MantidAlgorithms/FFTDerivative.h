@@ -1,10 +1,5 @@
 #ifndef FFTDERIVATIVE_H_
 #define FFTDERIVATIVE_H_
-/*WIKI* 
-
-
-
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

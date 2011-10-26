@@ -1,3 +1,12 @@
+/*WIKI* 
+
+
+
+Save a MDEventWorkspace to a .nxs file.
+
+
+
+*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"

@@ -83,6 +83,7 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
     API::IFunctionMW* fun = dynamic_cast<API::IFunctionMW*>(getFunction(0));
     if (!fun)
     {
+      delete [] xr;
       throw std::runtime_error("Convolution can work only with IFunctionMW");
     }
     fun->functionMW(m_resolution,xr,nData);
@@ -193,7 +194,7 @@ void Convolution::functionMW(double* out, const double* xValues, const size_t nD
     resolution->functionMW(tmp,xValues,nData);
     std::transform(tmp,tmp+nData,tmp,std::bind2nd(std::multiplies<double>(),dltF));
     std::transform(out,out+nData,tmp,out,std::plus<double>());
-    delete tmp;
+    delete [] tmp;
   }
 
 }

@@ -1,9 +1,5 @@
 #ifndef MANTID_DATAHANDLING_MOVEINSTRUMENTCOMPONENT_H_
 #define MANTID_DATAHANDLING_MOVEINSTRUMENTCOMPONENT_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

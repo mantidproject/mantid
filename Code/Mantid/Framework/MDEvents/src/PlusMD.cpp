@@ -1,3 +1,12 @@
+/*WIKI* 
+
+
+This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: it combines the events from the two workspaces together to form one large workspace.
+
+
+
+
+*WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"

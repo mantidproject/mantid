@@ -1,3 +1,12 @@
+/*WIKI* 
+
+
+
+Load a .nxs file into a MDEventWorkspace.
+
+
+
+*WIKI*/
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"

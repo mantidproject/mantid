@@ -1,8 +1,5 @@
 #ifndef MANTID_MDEVENTS_SLICEMD_H_
 #define MANTID_MDEVENTS_SLICEMD_H_
-/*WIKI*
-Algorithm that can take a slice out of an original MDEventWorkspace while preserving all the events contained wherein.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

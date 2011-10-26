@@ -1,10 +1,5 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_REDUCTIONTABLEHANDLER_H_
 #define MANTID_WORKFLOWALGORITHMS_REDUCTIONTABLEHANDLER_H_
-/*WIKI*
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

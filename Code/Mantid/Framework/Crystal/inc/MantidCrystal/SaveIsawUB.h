@@ -1,9 +1,5 @@
 #ifndef MANTID_CRYSTAL_SAVEISAWUB_H_
 #define MANTID_CRYSTAL_SAVEISAWUB_H_
-/*WIKI* 
-
-The ISAW UB Matrix file format is the transpose of the Mantid orientation matrix( |Q|=1/d) with columns beam,back, and up
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

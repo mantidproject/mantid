@@ -1,11 +1,5 @@
 #ifndef MANTID_ALGORITHMS_EQSANSTOFSTRUCTURE_H_
 #define MANTID_ALGORITHMS_EQSANSTOFSTRUCTURE_H_
-/*WIKI* 
-
-Documentation to come.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,8 +1,5 @@
 #ifndef MANTID_ALGORITHMS_RAYTRACERTESTER_H_
 #define MANTID_ALGORITHMS_RAYTRACERTESTER_H_
-/*WIKI*
-Algorithm to test ray tracer by spraying evenly spaced rays around. Only for debugging / testing.
-*WIKI*/
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

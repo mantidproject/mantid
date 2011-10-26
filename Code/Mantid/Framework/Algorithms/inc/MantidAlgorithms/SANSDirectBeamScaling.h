@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_SANSDIRECTBEAMSCALING_H_
 #define MANTID_ALGORITHMS_SANSDIRECTBEAMSCALING_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

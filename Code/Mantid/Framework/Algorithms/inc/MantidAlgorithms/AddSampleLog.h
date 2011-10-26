@@ -1,11 +1,5 @@
 #ifndef MANTID_ALGORITHMS_ADDSAMPLELOG_H_
 #define MANTID_ALGORITHMS_ADDSAMPLELOG_H_
-/*WIKI* 
-
-Workspaces contain information in logs. Often these detail what happened to the sample during the experiment. This algorithm allows one named log to be entered. 
-
-The log can be either a String, a Number, or a Number Series. If you select Number Series, the current time will be used as the time of the log entry, and the number in the text used as the (only) value.
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

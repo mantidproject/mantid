@@ -1,3 +1,13 @@
+/*WIKI* 
+
+
+The bin parameters are used to form an output grid. A positive <math>\Delta x_i\,</math> makes constant width bins, whilst negative ones create logarithmic binning using the formula <math>x(j+1)=x(j)(1+|\Delta x_i|)\,</math>.
+
+The overlap of the polygons formed from the old and new grids is tested to compute the required signal weight for the each of the new bins on the workspace. 
+
+
+
+*WIKI*/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------    

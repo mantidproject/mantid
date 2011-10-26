@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
 #define MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

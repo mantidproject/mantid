@@ -1,12 +1,11 @@
 """*WIKI* 
 
-
 This algorithm takes a bit of information about a file and runs "findnexus" to return a full path to the described file.
 
 The algorithm will generate an error if "findnexus" is not installed and configured on the system. This algorithm is a stopgap until a proper implementation of the information catalog searching can be done for SNS.
 
-
 *WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 

@@ -1,3 +1,11 @@
+/*WIKI* 
+
+
+Renames a workspace to a different name in the data service. If the same name is provided for input and output then the algorithm will fail with an error. The Renaming is implemented as a removal of the original workspace from the data service and re-addition under the new name.
+
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

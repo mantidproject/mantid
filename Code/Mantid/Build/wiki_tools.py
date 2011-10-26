@@ -36,12 +36,13 @@ def remove_wiki_from_header():
         n = 0
         # The output file
         outlines = []
-        while not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*') and n < len(lines):
+        while n < len(lines) and (not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*')):
             outlines.append( lines[n] )
             n += 1
         #Skip all the WIKI lines
-        while not lines[n].startswith("*WIKI*") and n < len(lines):
+        while (n < len(lines)) and not lines[n].startswith("*WIKI*"):
             n += 1
+        n += 1
         # Copy the rest
         while n < len(lines):
             outlines.append( lines[n] )
@@ -51,6 +52,33 @@ def remove_wiki_from_header():
         f.write('\n'.join(outlines))
         f.close()
 
+#======================================================================
+def add_wiki_description(algo, wikidesc):
+    """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
+    wikidesc = wikidesc.split('\n')
+    source = find_algo_file(algo)
+    if source != '':
+        if len("".join(wikidesc)) == 0:
+            print "No wiki description found to add!!!!"
+        
+        f = open(source,'r')
+        lines = f.read().split('\n')
+        f.close()
+        
+        #What lines are we adding?
+        if source.endswith(".py"):
+            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
+        else:
+            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
+    
+        lines = adding + lines
+        
+        text = "\n".join(lines)
+        f = codecs.open(source, encoding='utf-8', mode='w+')
+        f.write(text)
+        f.close()
+        
+        
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -206,13 +234,12 @@ def validate_wiki(args, algos):
             wikidoc = find_section_text(lines, "Summary", go_to_end=False, section2="")
             if args.show_missing: print wikidoc
             
-#        desc = alg._ProxyObject__obj.getWikiDescription()
+#        # One-time code to add wiki desc to CPP file
+#        desc = find_section_text(lines, "Description", True, "Introduction")
+#        # Fallback to the code one
 #        if len(desc) == 0: 
-#            print "- Wiki Description is missing (in the code)."
-#            desc = find_section_text(lines, "Description", True, "Introduction")
-#            if args.show_missing: print desc
-            
-        #add_wiki_description(algo, desc)
+#            desc = alg._ProxyObject__obj.getWikiDescription()
+#        add_wiki_description(algo, desc)
             
         props = alg._ProxyObject__obj.getProperties()
         for prop in props:
@@ -243,6 +270,7 @@ def find_orphan_wiki():
 
 #======================================================================
 if __name__ == "__main__":
+   
     # First, get the config for the last settings
     config = ConfigParser.ConfigParser()
     config_filename = os.path.split(__file__)[0] + "/wiki_tools.ini"

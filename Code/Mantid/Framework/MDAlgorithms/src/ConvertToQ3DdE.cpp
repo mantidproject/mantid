@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidMDAlgorithms/ConvertToQ3DdE.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"

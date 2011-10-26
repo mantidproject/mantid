@@ -1,3 +1,8 @@
+/*WIKI* 
+
+
+
+*WIKI*/
 #include "MantidAlgorithms/FFTDerivative.h"
 
 #include <algorithm>
