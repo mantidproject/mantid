@@ -186,7 +186,7 @@ void SaveRKH::write2D()
   m_outRKH << "  " << Xbins << "\n";
   for (size_t i = 0; i < Xbins; ++i) 
   {
-    m_outRKH << " " << std::scientific << std::setprecision(6) << (*X)(i);
+    m_outRKH << std::setw(14) << std::scientific << std::setprecision(6) << (*X)(i);
     if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
   const Axis* const Y = m_workspace->getAxis(1);
@@ -194,7 +194,7 @@ void SaveRKH::write2D()
   m_outRKH << "\n  " << Ybins << std::endl;
   for (size_t i = 0; i < Ybins; ++i) 
   {
-    m_outRKH << " " << std::scientific << std::setprecision(6) << (*Y)(i);
+    m_outRKH << std::setw(14) << std::scientific << std::setprecision(6) << (*Y)(i);
     if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
 
@@ -208,11 +208,21 @@ void SaveRKH::write2D()
   // Question over whether I have X & Y swapped over compared to what they're expecting
   // First all the data values
   MatrixWorkspace::const_iterator wsIt(*m_workspace);
+  bool requireNewLine = false; 
   for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
   {
     m_outRKH << std::setw(12) << std::scientific << std::setprecision(4) << wsIt->Y();
-    if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
+    requireNewLine = true;
+    if ((i+1)%LINE_LENGTH == 0) 
+    {
+      m_outRKH << "\n";
+      requireNewLine = false;
+    }
   }
+  // extra new line is required if number of data written out in last column is
+  // less than LINE_LENGTH 
+  if ( requireNewLine )
+    m_outRKH << "\n";
   // Then all the error values
   wsIt.begin();
   for (int i = 0; wsIt != wsIt.end(); ++wsIt,++i)
