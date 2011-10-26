@@ -8,6 +8,7 @@ import pickle
 from reduction import ReductionStep
 from reduction import extract_workspace_name, find_data
 from reduction import validate_step
+import warnings
 
 # Mantid imports
 from mantidsimple import *
@@ -662,58 +663,10 @@ class SensitivityCorrection(ReductionStep):
     
     @validate_step
     def set_dark_current_subtracter(self, subtracter):
+        warnings.warn("Call to deprecated method SensitivityCorrection.set_dark_current_subtracter", category=DeprecationWarning)        
         self._dark_current_subtracter = subtracter
         
-    def _compute_efficiency(self, reducer, workspace):
-        output_str = ""
-        if self._efficiency_ws is None:
-            # Load the flood data
-            filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
-            flood_ws = "flood_"+extract_workspace_name(filepath)
-            
-            beam_center = None
-            # Find the beam center if we need to
-            if self._beam_center is not None:
-                self._beam_center.execute(reducer)
-                beam_center = self._beam_center.get_beam_center()
-                
-            loader = reducer._data_loader.clone(data_file=filepath)
-            loader.set_beam_center(beam_center)
-            loader.execute(reducer, flood_ws)
-
-            # Subtract dark current
-            if self._use_sample_dc:
-                if reducer._dark_current_subtracter is not None:
-                    partial_output = reducer._dark_current_subtracter.execute(reducer, flood_ws)
-                    output_str = "%s\n   %s" % (output_str, partial_output) 
-                    
-            elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0 \
-                and reducer._dark_current_subtracter_class is not None:
-                #partial_output = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, flood_ws)
-                self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
-                                                  InputWorkspace=None, Filename=self._dark_current_data,
-                                                  OutputWorkspace=None,
-                                                  ReductionTableWorkspace=reducer.get_reduction_table_name())
-                partial_output = self._dark_current_subtracter.execute(reducer, flood_ws)
-                output_str = "%s\n   %s" % (output_str, partial_output) 
-            
-            # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
-            # Note: Moving according to the beam center is done in LoadRun above
-            if reducer._solid_angle_correcter is not None:
-                partial_output = reducer._solid_angle_correcter.execute(reducer, flood_ws)
-                output_str = "%s\n   %s" % (output_str, partial_output) 
-        
-            # Create efficiency profile: 
-            # Divide each pixel by average signal, and mask high and low pixels.
-            self._efficiency_ws = "__efficiency"
-            CalculateEfficiency(flood_ws, self._efficiency_ws, self._min_sensitivity, self._max_sensitivity)
-            
-            # Clean up
-            reducer._data_loader.__class__.delete_workspaces(flood_ws)
-            
-        return output_str
-        
-    def _execute_new(self, reducer, workspace):
+    def execute(self, reducer, workspace):
         center_x = None
         center_y = None
         # Find the beam center if we need to
@@ -738,24 +691,6 @@ class SensitivityCorrection(ReductionStep):
                                   )
         return l.getPropertyValue("OutputMessage")
         
-    def execute(self, reducer, workspace):
-        # If the sensitivity correction workspace exists, just apply it.
-        # Otherwise create it.      
-        #TODO: check that the workspaces have the same binning!
-        output_str = "   Using data set: %s" % extract_workspace_name(self._flood_data)
-        if self._efficiency_ws is None:
-            output_str += self._compute_efficiency(reducer, workspace)
-            
-        # Divide by detector efficiency
-        Divide(workspace, self._efficiency_ws, workspace)
-        #ReplaceSpecialValues(workspace, workspace, InfinityValue=0.0, InfinityError=0.0)
-        
-        # Copy over the efficiency's masked pixels to the reduced workspace
-        masked_detectors = GetMaskedDetectors(self._efficiency_ws)
-        MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
-    
-        return "Sensitivity correction applied\n%s\n" % output_str
-
 class Mask(ReductionStep):
     """
         Marks some spectra so that they are not included in the analysis
