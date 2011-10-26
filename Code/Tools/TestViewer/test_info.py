@@ -969,9 +969,10 @@ class MultipleProjects(object):
                 
     #----------------------------------------------------------------------------------
     def select_svn(self):
-        """ Do a 'svn st' call and interpret the results to find which tests need to be run. """
+        """ Do a 'git status st' call and interpret the results to find which tests need to be run. """
         # First, de-select it all
         self.select_all(False)
+        os.chdir(self.source_path)
         output = commands.getoutput("git status --porcelain %s " % self.source_path )
         lines = output.split('\n')
         for line in lines:
