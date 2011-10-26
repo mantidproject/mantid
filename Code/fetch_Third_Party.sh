@@ -10,7 +10,7 @@ if [ ${uname} != 'Darwin' ]; then
 fi
 
 gitcmd=`which git`
-arch=mac
+arch=mac64
 
 if [ -z "${gitcmd}" ]; then
     echo 'Unable to find git, check that it is installed and on the PATH'
