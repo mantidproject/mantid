@@ -125,8 +125,8 @@ public:
 
 //    ws->getBoxController()->closeFile();
 
-    // Since there are 330 events, the file needs to be that big.
-    TS_ASSERT_EQUALS( ws->getBoxController()->getFile()->getInfo().dims[0], 330);
+    // Since there are 330 events, the file needs to be that big (or bigger).
+    TS_ASSERT_LESS_THAN( 330, ws->getBoxController()->getFile()->getInfo().dims[0]);
   }
 
 
