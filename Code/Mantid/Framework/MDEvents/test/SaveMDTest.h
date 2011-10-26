@@ -48,26 +48,25 @@ public:
     do_test_exec(23, "SaveMDTest.nxs", true);
   }
 
+  void test_MakeFileBacked_then_UpdateFileBackEnd()
+  {
+    do_test_exec(23, "SaveMDTest_updating.nxs", true, true);
+  }
 
-  void do_test_exec(size_t numPerBox, std::string filename, bool MakeFileBacked = false)
+
+  void do_test_exec(size_t numPerBox, std::string filename, bool MakeFileBacked = false, bool UpdateFileBackEnd = false)
   {
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
     // Make sure it is split
-    if (numPerBox == 0) ws->splitBox();
-    // Recurse split so that it has lots more boxes, recursively
-    MDEventsTestHelper::recurseSplit<1>( dynamic_cast<MDGridBox<MDLeanEvent<1>,1>*>(ws->getBox()), 0, 4);
-
-    // Add some points
-    if (numPerBox > 0)
-      MDEventsTestHelper::feedMDBox(ws->getBox(), 1, 9e3, 1e-3);
+    ws->splitBox();
 
     AnalysisDataService::Instance().addOrReplace("SaveMDTest_ws", ws);
 
     ws->refreshCache();
 
     // There are this many boxes, so this is the max ID.
-    TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 111111);
+    TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 11);
 
     IMDEventWorkspace_sptr iws = ws;
 
@@ -91,8 +90,45 @@ public:
     {
       TSM_ASSERT( "Workspace was made file-backed", ws->isFileBacked() );
     }
+
+    // Continue the test
+    if (UpdateFileBackEnd)
+      do_test_UpdateFileBackEnd(ws, filename);
+
   }
   
+  /// Add some data and update the back-end
+  void do_test_UpdateFileBackEnd(MDEventWorkspace1Lean::sptr ws,  std::string filename)
+  {
+    size_t initial_numEvents = ws->getNPoints();
+    TSM_ASSERT_EQUALS("Starting off with 230 events.", initial_numEvents, 230);
+
+    // Add 100 events
+    for (size_t i=0; i<100; i++)
+    {
+      MDLeanEvent<1> ev(1.0, 1.0);
+      ev.setCenter(0, double(i) * 0.01 + 0.4);
+      ws->addEvent(ev);
+    }
+    ws->refreshCache();
+
+    TSM_ASSERT_EQUALS("Correctly added 100 events to original 230.",  ws->getNPoints(), 230+100);
+
+    SaveMD alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UpdateFileBackEnd", true) );
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+//    ws->getBoxController()->closeFile();
+
+    // Since there are 330 events, the file needs to be that big.
+    TS_ASSERT_EQUALS( ws->getBoxController()->getFile()->getInfo().dims[0], 330);
+  }
+
 
 };
 
