@@ -88,8 +88,8 @@ public:
 
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("OutWS"));
     TS_ASSERT(NULL != result.get());
-    TSM_ASSERT("Number of histograms does not match between sample and normalised by vanadium sample", sampleWS->getNumberHistograms(), result->getNumberHistograms());
-    TS_ASSERT(sampleWS->size(), result->size());
+    TSM_ASSERT_EQUALS("Number of histograms does not match between sample and normalised by vanadium sample", sampleWS->getNumberHistograms(), result->getNumberHistograms());
+    TS_ASSERT_EQUALS(sampleWS->size(), result->size());
     
     //Could also run compare workspace alg here!
     for(int i = 0; i < result->getNumberHistograms(); i++)
