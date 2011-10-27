@@ -64,9 +64,18 @@ namespace API
 
     uint16_t getNumExperimentInfo() const;
 
+
+    bool fileNeedsUpdating() const;
+
+    void setFileNeedsUpdating(bool value);
+
+
   protected:
     /// Vector for each ExperimentInfo class
     std::vector<ExperimentInfo_sptr> m_expInfos;
+
+    /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
+    bool m_fileNeedsUpdating;
 
   };
 
