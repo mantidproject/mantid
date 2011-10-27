@@ -15,6 +15,10 @@ using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
+
+//=====================================================================================
+// Functional tests
+//=====================================================================================
 class NormaliseByVanadiumTest : public CxxTest::TestSuite
 {
 public:
@@ -68,8 +72,8 @@ public:
   {
     using Mantid::API::AnalysisDataService;
 
-    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::Create2DWorkspace(3, 10);
-    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::Create2DWorkspace(3, 10);
+    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10);
+    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10); //Effectively normalisation by itself.
     
     NormaliseByVanadium alg;
     alg.initialize();
@@ -84,12 +88,48 @@ public:
 
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("OutWS"));
     TS_ASSERT(NULL != result.get());
+    TSM_ASSERT("Number of histograms does not match between sample and normalised by vanadium sample", sampleWS->getNumberHistograms(), result->getNumberHistograms());
+    TS_ASSERT(sampleWS->size(), result->size());
+    
+    //Could also run compare workspace alg here!
+    for(int i = 0; i < result->getNumberHistograms(); i++)
+    {
+      for(int j = 0; j < sampleWS->readY(i).size(); j++)
+      {
+        TS_ASSERT(sampleWS->readY(i)[j] == result->readY(i)[j]);
+      }
+    }
 
   }
-
-
 };
 
+//=====================================================================================
+// Peformance tests
+//=====================================================================================
+class NormaliseByVanadiumTestPeformance : public CxxTest::TestSuite
+{
+public:
+
+  void testExecution()
+  {
+    using Mantid::API::AnalysisDataService;
+
+    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(200, 10);
+    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(200, 10); //Effectively normalisation by itself.
+    
+    NormaliseByVanadium alg;
+    alg.initialize();
+    alg.setProperty("SampleInputWorkspace", sampleWS);
+    alg.setProperty("VanadiumInputWorkspace", vanadiumWS);
+    alg.setPropertyValue("OutputWorkspace", "OutWS");
+    
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("OutWS"));
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("OutWS"));
+  }
+};
 
 #endif /* MANTID_ALGORITHMS_NORMALISEBYVANADIUMTEST_H_ */
 

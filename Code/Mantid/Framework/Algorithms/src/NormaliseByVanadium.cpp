@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/NormaliseByVanadium.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,6 +52,8 @@ namespace Algorithms
   {
     MatrixWorkspace_sptr sampleWS = getProperty("SampleInputWorkspace");
     MatrixWorkspace_sptr vanadiumWS = getProperty("VanadiumInputWorkspace");
+
+    spec2index_map* specToWSIndexMap = vanadiumWS->getSpectrumToWorkspaceIndexMap();
     
     // Integrate across all bins
     IAlgorithm_sptr integrateAlg = this->createSubAlgorithm("Integration", 0, 1, true, 1);
@@ -60,24 +64,43 @@ namespace Algorithms
     MatrixWorkspace_sptr vanSumTOF_WS = integrateAlg->getProperty("OutputWorkspace");
 
     // Calculate the average TOF accross all spectra
-    size_t nSpectra = vanSumTOF_WS->getNumberHistograms();
-    Progress progress(this,0.0,1.0,nSpectra);
-    double spectraSum = 0;
-    //OPENMP
-    for(size_t i = 0; i < nSpectra; i++)
+    size_t nHistograms = vanSumTOF_WS->getNumberHistograms();
+    Progress progress(this,0.0,1.0,nHistograms);
+
+    /// Create an empty workspace with the same dimensions as the integrated vanadium.
+    MatrixWorkspace_sptr yAvgWS = Mantid::API::WorkspaceFactory::Instance().create(vanSumTOF_WS);
+
+    /*
+    Find the nearest neighbours for the spectrum and use those to calculate an average (9 points)
+    */
+    //PARALLEL_FOR2(yAvgWS, vanSumTOF_WS)
+    for(int i = 0; i < int(nHistograms); i++)
     {
-      spectraSum += vanSumTOF_WS->readY(i)[0];
+      //PARALLEL_START_INTERUPT_REGION
+      try
+      {
+        Mantid::Geometry::IDetector_const_sptr idet = vanadiumWS->getDetector(i);
+        std::map<specid_t, double> specIdMap = vanadiumWS->getNeighbours(idet.get());
+        std::map<specid_t, double>::iterator it = specIdMap.begin();
+        double spectraSum = 0;
+        while(it != specIdMap.end())
+        {
+          spectraSum += vanSumTOF_WS->readY((*specToWSIndexMap)[it->first])[0];
+          it++;
+        }
+        spectraSum += vanSumTOF_WS->readY(i)[0];
+        yAvgWS->dataY(i)[0] = spectraSum/(specIdMap.size() + 1);
+      }
+      catch(Kernel::Exception::NotFoundError&)
+      {
+      }
       progress.report();
+      //PARALLEL_END_INTERUPT_REGION
     }
-    double yavg =  spectraSum/nSpectra;
+    //PARALLEL_CHECK_INTERUPT_REGION
 
     // Normalise the integrated TOFs
-    IAlgorithm_sptr createDenominatorAlg = this->createSubAlgorithm("CreateSingleValuedWorkspace", 0, 1, true, 1);
-    createDenominatorAlg->setProperty("DataValue", yavg);
-    createDenominatorAlg->setPropertyValue("OutputWorkspace", "denominator");
-    createDenominatorAlg->executeAsSubAlg();
-    MatrixWorkspace_sptr denominatorWS = createDenominatorAlg->getProperty("OutputWorkspace");
-    vanSumTOF_WS = vanSumTOF_WS/denominatorWS;
+    vanSumTOF_WS = vanSumTOF_WS/yAvgWS;
 
     //Mask detectors outside of limits
     IAlgorithm_sptr constrainAlg = this->createSubAlgorithm("FindDetectorsOutsideLimits", 0, 1, true, 1);
