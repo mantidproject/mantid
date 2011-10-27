@@ -2,7 +2,7 @@
 #define MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
     
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 
 
 namespace Mantid
