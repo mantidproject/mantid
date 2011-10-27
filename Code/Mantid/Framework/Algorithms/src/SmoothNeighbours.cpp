@@ -382,8 +382,9 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
   // Go through all the output workspace
   PARALLEL_FOR2(ws, outWS)
-  for (size_t outWI=0; outWI<ws->getNumberHistograms(); outWI++)
+  for (int outWIi=0; outWIi<int(ws->getNumberHistograms()); outWIi++)
   {
+    size_t outWI = size_t(outWIi);
     PARALLEL_START_INTERUPT_REGION
 
     ISpectrum * outSpec = outWS->getSpectrum(outWI);
@@ -457,8 +458,9 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
 
   // Go through all the output workspace
   PARALLEL_FOR2(ws, outWS)
-  for (size_t outWI=0; outWI<ws->getNumberHistograms(); outWI++)
+  for (int outWIi=0; outWIi<int(ws->getNumberHistograms()); outWIi++)
   {
+    size_t outWI = size_t(outWIi);
     PARALLEL_START_INTERUPT_REGION
 
     // Create the output event list (empty)
