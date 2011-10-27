@@ -167,7 +167,15 @@ namespace PythonAPI
     	      ;
 
     class_<Mantid::Kernel::DateAndTime>("DateAndTime", no_init)
-        .def("__str__", &Mantid::Kernel::DateAndTime::to_ISO8601_string);
+        .def("__str__", &Mantid::Kernel::DateAndTime::to_ISO8601_string)
+        .def(self == self)
+        .def(self != self)
+        .def(self < self)
+        .def(self + int64_t())
+        .def(self += int64_t())
+        .def(self - int64_t())
+        .def(self -= int64_t())
+        .def("total_nanoseconds", &Mantid::Kernel::DateAndTime::total_nanoseconds);
   }
   
   void export_validators()
