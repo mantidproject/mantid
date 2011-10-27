@@ -92,9 +92,9 @@ public:
     TS_ASSERT_EQUALS(sampleWS->size(), result->size());
     
     //Could also run compare workspace alg here!
-    for(int i = 0; i < result->getNumberHistograms(); i++)
+    for(size_t i = 0; i < result->getNumberHistograms(); i++)
     {
-      for(int j = 0; j < sampleWS->readY(i).size(); j++)
+      for(size_t j = 0; j < sampleWS->readY(i).size(); j++)
       {
         TS_ASSERT(sampleWS->readY(i)[j] == result->readY(i)[j]);
       }
