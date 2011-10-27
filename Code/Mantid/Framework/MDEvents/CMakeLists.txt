@@ -160,12 +160,12 @@ if ( CXXTEST_FOUND )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
-         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataHandling Nexus 
+         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataHandling Nexus NeXusCPP
          TestHelpers)
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
-         DataHandling Nexus TestHelpers )
+         DataHandling Nexus TestHelpers NeXusCPP)
   endif ()
   
   add_dependencies ( FrameworkTests MDEventsTest )
