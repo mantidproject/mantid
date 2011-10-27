@@ -62,7 +62,6 @@ void FindPeaks::init()
   declareProperty("BackgroundType", "Linear", new ListValidator(bkgdtypes),
       "Type of Background. The choice can be either Linear or Quadratic");
 
-
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
@@ -77,12 +76,14 @@ void FindPeaks::init()
   
 
   // Debug Workspaces
+  /*
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("BackgroundWorkspace", "", Direction::Output),
       "Temporary Background Workspace ");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("TheorticBackgroundWorkspace", "", Direction::Output),
       "Temporary Background Workspace ");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("PeakWorkspace", "", Direction::Output),
       "Temporary Background Workspace ");
+  */
 
 
   // Set up the columns for the TableWorkspace holding the peak information
@@ -742,7 +743,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   // a) Construct a Workspace to fit for background
   std::vector<double> newX, newY, newE;
   for (size_t i = i_min; i <= i_max; i ++){
-    if (i > i0 || i < i2){
+    if (i > size_t(i0) || i < size_t(i2)){
       newX.push_back(X[i]);
       newY.push_back(Y[i]);
       newE.push_back(E[i]);
@@ -818,8 +819,8 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     throw;
   }
 
-  const double a0 = params[0];
-  const double a1 = params[1];
+  double a0 = params[0];
+  double a1 = params[1];
   double a2 = 0;
   if (backgroundtype.compare("Quadratic")==0){
     a2 = params[2];
@@ -828,7 +829,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   // f) Create theoretic background workspace and thus peak workspace
   // TODO theortic background workspace will be removed when the code is matured
-  int fitsize = i_max-i_min+1;
+  size_t fitsize = i_max-i_min+1;
   API::MatrixWorkspace_sptr tbkgdWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, fitsize, fitsize);
   API::MatrixWorkspace_sptr peakWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, fitsize, fitsize);
   MantidVec& tX = tbkgdWS->dataX(0);
@@ -858,9 +859,11 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
 
   }
 
+  /*
   this->setProperty("BackgroundWorkspace", bkgdWS);
   this->setProperty("TheorticBackgroundWorkspace", tbkgdWS);
   this->setProperty("PeakWorkspace", peakWS);
+  */
 
   // g) Looping on peak width for the best fit
   double mincost = 1.0E10;
@@ -935,7 +938,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     std::string outputstatus = gfit->getProperty("OutputStatus");
 
     if (fheight <= 0 || fsigma <= 0){
-      g_log.notice() << "Wrong Fit!!!" << std::endl;
+      g_log.information() << "Wrong Fit!!!" << std::endl;
     } else {
       if (chi2 < mincost){
         bestheight = fheight;
@@ -943,11 +946,107 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         bestsigma = fsigma;
       }
     }
-    g_log.notice() << "Status: " << outputstatus << " Cost = " << chi2 << "  Height, Center, Sigma = " << fheight << ", " << fcenter << ", " << fsigma << std::endl;
+    g_log.information() << "Status: " << outputstatus << " Cost = " << chi2 << "  Height, Center, Sigma = " << fheight << ", " << fcenter << ", " << fsigma << std::endl;
 
   } // ENDFOR
 
-  // h) Set return value
+  // h) Fit again with everything altogether
+  IAlgorithm_sptr lastfit;
+  try
+  {
+    // Fitting the candidate peaks to a Gaussian
+    lastfit = createSubAlgorithm("Fit", -1, -1, true);
+  } catch (Exception::NotFoundError &)
+  {
+    g_log.error("The StripPeaks algorithm requires the CurveFitting library");
+    throw;
+  }
+  lastfit->setProperty("InputWorkspace", input);
+  lastfit->setProperty("WorkspaceIndex", spectrum);
+  lastfit->setProperty("MaxIterations", 50);
+
+  // c) Construct Function string
+  std::stringstream ss2;
+  if (backgroundtype.compare("Linear") == 0)
+  {
+    ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+        << bestsigma << ";name=LinearBackground,A0=" << a0 << ",A1=" << a1;
+  }
+  else if (backgroundtype.compare("Quadratic") == 0)
+  {
+    ss2 << "name=Gaussian,Height=" << bestheight << ",PeakCentre=" << bestcenter << ",Sigma="
+        << bestsigma << ";name=QuadraticBackground,A0=" << a0 << ",A1=" << a1 << ",A2=" << a2;
+  }
+  else
+  {
+    g_log.error() << "Background type " << backgroundtype << " is not supported in FindPeak.cpp!"
+        << std::endl;
+    throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
+  }
+  function = ss2.str();
+  g_log.information() << "Final Fit Function: " << function << std::endl;
+
+  // d) complete fit
+  lastfit->setProperty("StartX", (X[i4] - 2 * (X[i0] - X[i2])));
+  lastfit->setProperty("EndX", (X[i4] + 2 * (X[i0] - X[i2])));
+  lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
+  lastfit->setProperty("CostFunction", "Least squares");
+  lastfit->setProperty("Function", function);
+
+  // e) Fit and get result
+  lastfit->executeAsSubAlg();
+
+  std::string fitStatus2 = lastfit->getProperty("OutputStatus");
+  params = lastfit->getProperty("Parameters");
+  paramnames = lastfit->getProperty("ParameterNames");
+
+  // Check order of names
+  if (paramnames[0].compare("f0.Height") != 0)
+  {
+    g_log.error() << "Parameter 0 should be f0.Height, but is " << paramnames[0] << std::endl;
+    throw std::invalid_argument("Parameters are out of order @ 0, should be f0.Height");
+  }
+  if (paramnames[1].compare("f0.PeakCentre") != 0)
+  {
+    g_log.error() << "Parameter 1 should be f0.PeakCentre, but is " << paramnames[1]
+        << std::endl;
+    throw std::invalid_argument("Parameters are out of order @ 0, should be f0.PeakCentre");
+  }
+  if (paramnames[2].compare("f0.Sigma") != 0)
+  {
+    g_log.error() << "Parameter 2 should be f0.Sigma, but is " << paramnames[2] << std::endl;
+    throw std::invalid_argument("Parameters are out of order @ 0, should be f0.Sigma");
+  }
+  if (paramnames[3].compare("f1.A0") != 0)
+  {
+    g_log.error() << "Parameter 3 should be f1.A0, but is " << paramnames[3] << std::endl;
+    throw std::invalid_argument("Parameters are out of order @ 0, should be f1.A0");
+  }
+  if (paramnames[4].compare("f1.A1") != 0)
+  {
+    g_log.error() << "Parameter 4 should be f1.A1, but is " << paramnames[4] << std::endl;
+    throw std::invalid_argument("Parameters are out of order @ 0, should be f1.A1");
+  }
+  if (backgroundtype.compare("Quadratic") == 0 && paramnames[5].compare("f1.A2") != 0)
+  {
+    g_log.error() << "Parameter 5 should be f1.A2, but is " << paramnames[5] << std::endl;
+    throw std::invalid_argument("Parameters are out of order @ 0, should be f1.A2");
+  }
+
+  double tempheight = params[0];
+  if (!fitStatus2.compare("success") && tempheight > 0)
+  {
+    bestheight = tempheight;
+    bestcenter = params[1];
+    bestsigma  = params[2];
+    a0 = params[3];
+    a1 = params[4];
+    if (backgroundtype.compare("Quadratic") == 0){
+      a2 = params[5];
+    }
+  }
+
+  // i) Set return value
   API::TableRow t = m_peaks->appendRow();
   t << spectrum << bestcenter << bestsigma << bestheight << a0 << a1 << a2;
 
