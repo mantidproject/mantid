@@ -27,6 +27,10 @@ Both methods of smoothing will '''significantly''' increase the memory usage of
 the workspace. For example, if AdjX=AdjY=1, the algorithm will sum 9 nearest neighbours in most cases.
 This increases the memory used by a factor of 9.
 
+=== For Workspace2D's ===
+
+You can use PreserveEvents = false to avoid the memory issues with an EventWorkspace input.
+Please note that the algorithm '''does not check''' that the bin X boundaries match.
 
 *WIKI*/
 
