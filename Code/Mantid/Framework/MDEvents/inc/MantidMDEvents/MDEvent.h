@@ -215,9 +215,8 @@ namespace MDEvents
       size_t numEvents = events.size();
       std::vector<double> data;
       data.reserve(numEvents*(nd+4));
-      std::vector<int> start(2,0);
-      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
-      start[0] = int(startIndex);
+      std::vector<int64_t> start(2,0);
+      start[0] = int64_t(startIndex);
 
       totalSignal = 0;
       totalErrorSquared = 0;
@@ -244,9 +243,9 @@ namespace MDEvents
       }
 
       // Specify the dimensions
-      std::vector<int> dims;
-      dims.push_back(int(numEvents));
-      dims.push_back(int(nd+4));
+      std::vector<int64_t> dims;
+      dims.push_back(int64_t(numEvents));
+      dims.push_back(int64_t(nd+4));
 
       file->putSlab(data, start, dims);
     }
