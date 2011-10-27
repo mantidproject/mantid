@@ -81,6 +81,8 @@ public:
 
     return retVal;
   }
+
+
   void do_test_MINITOPAZ(EventType type)
   {
 
@@ -123,6 +125,13 @@ public:
   void test_SmoothNeighbours()
   {
     do_test_MINITOPAZ(TOF);
+  }
+
+
+  void test_workspace2D()
+  {
+    // Create a workspace with 100 pixels, each spaced 0.1 meters apart vertically in Y.
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 1000, false);
   }
 
 };
