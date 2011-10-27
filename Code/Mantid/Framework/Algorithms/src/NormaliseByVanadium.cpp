@@ -89,7 +89,7 @@ namespace Algorithms
           it++;
         }
         spectraSum += vanSumTOF_WS->readY(i)[0];
-        yAvgWS->dataY(i)[0] = spectraSum/(specIdMap.size() + 1);
+        yAvgWS->dataY(i)[0] = spectraSum/(double(specIdMap.size() + 1));
       }
       catch(Kernel::Exception::NotFoundError&)
       {
