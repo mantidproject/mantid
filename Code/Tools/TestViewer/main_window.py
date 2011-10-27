@@ -84,16 +84,12 @@ class TestMonitorFilesWorker(QtCore.QThread):
         self.mainWindow = mainWindow
         self.exiting = False
         self.monitor_tests = False
-        self.monitor_libraries = False
         # Hoy many seconds to wait before checking again
         self.delay = 1.0
 
     def set_monitor_tests(self, state):
         self.monitor_tests = state
 
-    def set_monitor_libraries(self, state):
-        self.monitor_libraries = state
-        
     #-----------------------------------------------------------------------------
     def run(self):
         print "Beginning to monitor files and/or libraries..."
@@ -105,8 +101,6 @@ class TestMonitorFilesWorker(QtCore.QThread):
                     if test_info.all_tests.is_source_modified(selected_only=True):
                         self.mainWindow.emit( QtCore.SIGNAL("testMonitorChanged()") )
                 
-                if self.monitor_libraries:
-                    pass
             
             time.sleep(self.delay)
             
@@ -151,7 +145,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         # -- Checkboxes toggle  ----
         self.connect(self.checkShowFailedOnly, QtCore.SIGNAL("stateChanged(int)"), self.checked_show_fail_only)
         self.connect(self.checkShowSelected, QtCore.SIGNAL("stateChanged(int)"), self.checked_show_selected_only)
-        self.connect(self.checkMonitorLibraries, QtCore.SIGNAL("stateChanged(int)"), self.checked_monitor_libraries)
         self.connect(self.checkMonitorTests, QtCore.SIGNAL("stateChanged(int)"), self.checked_monitor_tests)
 
 
@@ -279,7 +272,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         s = self.settings
         self.checkInParallel.setChecked( s.value("checkInParallel", False).toBool() )
         self.checkMonitorTests.setChecked( s.value("checkMonitorTests", False).toBool() )
-        self.checkMonitorLibraries.setChecked( s.value("checkMonitorLibraries", False).toBool() )
         if s.contains("splitter"): self.splitter.restoreState( s.value("splitter").toByteArray() )
         self.resize( s.value("TestViewerMainWindow.width", 1500).toInt()[0], 
                      s.value("TestViewerMainWindow.height", 900).toInt()[0] )
@@ -306,7 +298,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         s = self.settings
         s.setValue("checkInParallel", self.checkInParallel.isChecked() )
         s.setValue("checkMonitorTests", self.checkMonitorTests.isChecked() )
-        s.setValue("checkMonitorLibraries", self.checkMonitorLibraries.isChecked() )
         s.setValue("splitter", self.splitter.saveState())
         for i in [1,2]:    
             s.setValue("treeTests.columnWidth(%d)"%i, self.treeTests.columnWidth(i) )
@@ -618,7 +609,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.treeTests.update()
         
     def select_svn(self):
-        """ Select all files modified by SVN st """
+        """ Select all files modified by SVN/git st """
         test_info.all_tests.select_svn()
         self.proxy.invalidateFilter()
         self.treeTests.update()
