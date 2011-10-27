@@ -5,7 +5,7 @@
 
 find_path ( NEXUS_INCLUDE_DIR napi.h )
 	  
-find_library ( NEXUS_LIBRARIES NAMES NeXus libNeXus-0 )
+find_library ( NEXUS_LIBRARIES NAMES NeXusCPP )
 
 # handle the QUIETLY and REQUIRED arguments and set NEXUS_FOUND to TRUE if 
 # all listed variables are TRUE
