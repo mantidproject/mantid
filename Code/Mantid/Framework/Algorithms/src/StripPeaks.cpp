@@ -44,6 +44,15 @@ void StripPeaks::init()
   declareProperty("PeakPositions", "",
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
 
+  std::vector<std::string> bkgdtypes;
+  bkgdtypes.push_back("Linear");
+  bkgdtypes.push_back("Quadratic");
+  declareProperty("BackgroundType", "Linear", new ListValidator(bkgdtypes),
+      "Type of Background. The choice can be either Linear or Quadratic");
+
+  declareProperty("HighBackground", true,
+      "Peaks are relatively weak comparing to the background");
+
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
@@ -92,6 +101,9 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 
   //Get the specified peak positions, which is optional
   findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
+  findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
+  findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
+
   findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");
 }
