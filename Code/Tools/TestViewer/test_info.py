@@ -969,15 +969,22 @@ class MultipleProjects(object):
                 
     #----------------------------------------------------------------------------------
     def select_svn(self):
-        """ Do a 'svn st' call and interpret the results to find which tests need to be run. """
+        """ Do a 'git status st' call and interpret the results to find which tests need to be run. """
         # First, de-select it all
         self.select_all(False)
-        output = commands.getoutput("svn st %s" % self.source_path )
+        os.chdir(self.source_path)
+        output = commands.getoutput("git status --porcelain %s " % self.source_path )
         lines = output.split('\n')
         for line in lines:
-            if line.startswith('M') or line.startswith('A') or line.startswith('D') or line.startswith('R'):
+            line = line.strip()
+            #if line.startswith('M') or line.startswith('A') or line.startswith('D') or line.startswith('R'):
+            # Consider every line in git status to be a modified file
+            if True:
                 #Change to file or stuff.
-                filename = line[8:].strip()
+                filename = line[2:].strip()
+                # Go up two levels from Code/Framework so that we can append the filename, which starts with "Code/Framework/etc."
+                filename = os.path.join( self.source_path, "..", "..", "..", filename)
+                filename = os.path.abspath(filename)
                 foundit = None
                 for pj in self.projects:
                     for suite in pj.suites:
@@ -1057,8 +1064,8 @@ class MultipleProjects(object):
                 
         # Now add the known tests, in case they were deleted
         for x in ["AlgorithmsTest", "DataObjectsTest", "MDAlgorithmsTest", "PythonAPITest", "APITest", 
-                       "GeometryTest", "MDDataObjectsTest", "CurveFittingTest", "ICatTest", "MDEventsTest", 
-                       "DataHandlingTest", "KernelTest", "NexusTest", "CrystalTest", "VatesAPITest"]:
+                       "GeometryTest", "CurveFittingTest", "ICatTest", "MDEventsTest", 
+                       "DataHandlingTest", "KernelTest", "CrystalTest", "VatesAPITest"]:
             testnames.add(x)
         
         for fname in testnames:

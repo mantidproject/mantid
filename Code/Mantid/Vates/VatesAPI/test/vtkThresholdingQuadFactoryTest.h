@@ -191,7 +191,7 @@ public:
   void setUp()
   {
     // WS with 2 dimension, 100x100
-    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 100);
+    m_ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 1000);
     m_ws_sptr->setTransformFromOriginal(new NullCoordTransform);
   }
 
