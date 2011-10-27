@@ -21,7 +21,7 @@ Load a .nxs file into a MDEventWorkspace.
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
 #include <vector>
 

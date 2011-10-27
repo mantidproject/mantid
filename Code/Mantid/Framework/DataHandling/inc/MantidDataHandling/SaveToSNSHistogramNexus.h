@@ -14,8 +14,8 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
 //Copy of the NexusCpp API was placed in MantidNexus
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusFile.hpp"
+#include "nexus/NeXusException.hpp"
 
 using namespace ::NeXus;
 

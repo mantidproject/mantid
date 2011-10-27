@@ -1,6 +1,6 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 #include "MantidKernel/VMD.h"
 
 using NeXus::File;

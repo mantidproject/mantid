@@ -5,8 +5,8 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusFile.hpp"
+#include "nexus/NeXusException.hpp"
 #include "MantidMDEvents/OneStepMDEW.h"
 
 #include <vtkUnstructuredGrid.h>

@@ -1,6 +1,6 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 #include "MantidKernel/DiskMRU.h"
 
 using Mantid::Kernel::DiskMRU;

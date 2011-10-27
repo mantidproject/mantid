@@ -12,7 +12,7 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 
 namespace Mantid
 {
