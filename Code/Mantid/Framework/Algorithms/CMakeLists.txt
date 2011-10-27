@@ -535,7 +535,7 @@ if ( CXXTEST_FOUND )
   configure_file ( test/PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/MinusTest.h)
   
   # Make the rest of the tests
-  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../testHelpers/inc ../MDEvents/inc)
+  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests AlgorithmsTest )
