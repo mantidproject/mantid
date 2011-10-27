@@ -16,7 +16,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/SaveMD.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -328,8 +328,8 @@ namespace MDEvents
     bc->getDiskMRU().getFreeSpaceVector(freeSpaceBlocks);
     if (freeSpaceBlocks.size() == 0)
       freeSpaceBlocks.resize(2, 0); // Needs a minimum size
-    std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
-    std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;
+    std::vector<int64_t> free_dims(2,2); free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
+    std::vector<int64_t> free_chunk(2,2); free_chunk[0] = 1000;
 
     // Now the free space blocks under event_data
     if (!update)
@@ -353,18 +353,18 @@ namespace MDEvents
     // Add box controller info to this group
     file->putAttr("box_controller_xml", bc->toXMLString());
 
-    std::vector<int> exents_dims(2,0);
-    exents_dims[0] = (int(maxBoxes));
+    std::vector<int64_t> exents_dims(2,0);
+    exents_dims[0] = (int64_t(maxBoxes));
     exents_dims[1] = (nd*2);
-    std::vector<int> exents_chunk(2,0);
-    exents_chunk[0] = int(100000);
+    std::vector<int64_t> exents_chunk(2,0);
+    exents_chunk[0] = int64_t(100000);
     exents_chunk[1] = (nd*2);
 
-    std::vector<int> box_2_dims(2,0);
-    box_2_dims[0] = int(maxBoxes);
+    std::vector<int64_t> box_2_dims(2,0);
+    box_2_dims[0] = int64_t(maxBoxes);
     box_2_dims[1] = (2);
-    std::vector<int> box_2_chunk(2,0);
-    box_2_chunk[0] = int(100000);
+    std::vector<int64_t> box_2_chunk(2,0);
+    box_2_chunk[0] = int64_t(100000);
     box_2_chunk[1] = (2);
 
     if (!update)

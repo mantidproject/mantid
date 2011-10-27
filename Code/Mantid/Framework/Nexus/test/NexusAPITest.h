@@ -12,8 +12,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusFile.hpp"
+#include "nexus/NeXusException.hpp"
 
 #include <Poco/File.h>
 #include <iostream>

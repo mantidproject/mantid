@@ -7,7 +7,7 @@
 #include "MantidKernel/TimeSplitter.h"
 #include <vector>
 #include "MantidKernel/Matrix.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 
 
 namespace Mantid

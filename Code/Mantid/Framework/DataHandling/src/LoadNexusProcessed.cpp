@@ -48,7 +48,7 @@ The subalgorithms used by LoadMuonNexus are:
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
