@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"

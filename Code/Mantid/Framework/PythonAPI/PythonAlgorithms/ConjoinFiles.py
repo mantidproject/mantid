@@ -2,6 +2,7 @@
 
 
 *WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 import os

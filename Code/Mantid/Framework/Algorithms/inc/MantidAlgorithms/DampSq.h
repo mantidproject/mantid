@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_DAMPSQ_H_
 #define MANTID_ALGORITHMS_DAMPSQ_H_
-/*WIKI* 
-
-
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

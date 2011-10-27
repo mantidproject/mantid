@@ -100,6 +100,11 @@ namespace Mantid
       {
         newPos += (*it).second->getPos();
       }
+      // We can have very small values (< Tolerance) of each component that should be zero
+      if (std::abs(newPos[0]) < Mantid::Kernel::Tolerance) newPos[0] = 0.0;
+      if (std::abs(newPos[1]) < Mantid::Kernel::Tolerance) newPos[1] = 0.0;
+      if (std::abs(newPos[2]) < Mantid::Kernel::Tolerance) newPos[2] = 0.0;
+
       return newPos /= static_cast<double>(m_detectors.size()); // protection against divide by zero in V3D
     }
 
@@ -132,8 +137,8 @@ namespace Mantid
     double DetectorGroup::getPhi() const
     {
       V3D avgPos = this->getPos();
-      double phi(0.0), dummy(0.0);
-      avgPos.getSpherical(dummy, dummy, phi);
+      double phi(0.0), dummy1(0.0), dummy2(0.0);
+      avgPos.getSpherical(dummy1, dummy2, phi);
       return phi*M_PI/180.0;
     }
 

@@ -1,13 +1,5 @@
 #ifndef MANTID_CRYSTAL_PREDICTPEAKS_H_
 #define MANTID_CRYSTAL_PREDICTPEAKS_H_
-/*WIKI* 
-
-This algorithm uses the InputWorkspace to determine the instrument in use, as well as the UB Matrix and Unit Cell of the sample used.
-
-The algorithm operates by calculating the scattering direction (given the UB matrix) for a particular HKL, and determining whether that hits a detector. The MinDSpacing parameter is used to determine what HKL's to try.
-
-The parameters of WavelengthMin/WavelengthMax also limit the peaks attempted to those that can be detected/produced by your instrument.
-*WIKI*/
     
 #include "MantidAPI/Algorithm.h" 
 #include "MantidDataObjects/PeaksWorkspace.h"

@@ -26,7 +26,6 @@ set ( UI_FILES
 
 
 include_directories ( inc )
-include_directories ( ${QWT_INCLUDE_DIR} )
 include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )

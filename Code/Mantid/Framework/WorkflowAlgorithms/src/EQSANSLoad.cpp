@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+Workflow algorithm that loads EQSANS event data, applies TOF corrections, and converts to wavelength.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

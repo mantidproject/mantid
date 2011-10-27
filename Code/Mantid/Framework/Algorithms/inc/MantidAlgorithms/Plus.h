@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHM_PLUS_H_
 #define MANTID_ALGORITHM_PLUS_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,9 +1,5 @@
 #ifndef MANTID_MDEVENTS_LOADMD_H_
 #define MANTID_MDEVENTS_LOADMD_H_
-/*WIKI* 
-
-Load a .nxs file into a MDEventWorkspace.
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"

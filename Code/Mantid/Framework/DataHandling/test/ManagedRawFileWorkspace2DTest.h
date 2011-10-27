@@ -223,7 +223,7 @@ private:
 //// Performance test
 ////------------------------------------------------------------------------------
 //
-//class ManagedRawFileWorkspace2DTestPerformance : public CxxTest::TestSuite
+//class NOTATEST : public CxxTest::TestSuite
 //{
 //private:
 //  const std::string outputSpace;
@@ -231,10 +231,10 @@ private:
 //public:
 //  // This pair of boilerplate methods prevent the suite being created statically
 //  // This means the constructor isn't called when running other tests
-//  static ManagedRawFileWorkspace2DTestPerformance *createSuite() { return new ManagedRawFileWorkspace2DTestPerformance(); }
-//  static void destroySuite( ManagedRawFileWorkspace2DTestPerformance *suite ) { delete suite; }
+//  static NOTATEST *createSuite() { return new NOTATEST(); }
+//  static void destroySuite( NOTATEST *suite ) { delete suite; }
 //
-//  ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
+//  NOTATEST() : outputSpace("wishWS")
 //  {
 //    // Load the instrument alone so as to isolate the raw file loading time from the instrument loading time
 //    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");

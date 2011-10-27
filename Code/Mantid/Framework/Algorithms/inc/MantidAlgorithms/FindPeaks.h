@@ -1,19 +1,5 @@
 #ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
 #define MANTID_ALGORITHMS_FINDPEAKS_H_
-/*WIKI* 
-
-This algorithm searches all the spectra in a workspace for peaks, returning a list of the found and successfully fitted peaks. The search algorithm is described in full in reference [1]. In summary: the second difference of each spectrum is computed and smoothed. This smoothed data is then searched for patterns consistent with the presence of a peak. The list of candidate peaks found is passed to a fitting routine and those that are successfully fitted are kept and returned in the output workspace (and logged at information level).
-
-The output [[TableWorkspace]] contains the following columns, which reflect the fact that the peak has been fitted to a Gaussian atop a linear background: spectrum, centre, width, height, backgroundintercept & backgroundslope.
-
-====Subalgorithms used====
-FindPeaks uses the [[SmoothData]] algorithm to, well, smooth the data - a necessary step to identify peaks in statistically fluctuating data. The [[Gaussian]] algorithm is used to fit candidate peaks.
-
-==== References ====
-# M.A.Mariscotti, ''A method for automatic identification of peaks in the presence of background and its application to spectrum analysis'', NIM '''50''' (1967) 309.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

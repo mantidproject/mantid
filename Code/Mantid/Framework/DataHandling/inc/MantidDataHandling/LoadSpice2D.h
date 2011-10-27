@@ -1,10 +1,5 @@
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
-/*WIKI* 
-
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

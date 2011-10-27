@@ -1,3 +1,25 @@
+/*WIKI* 
+
+
+Combines the data contained in an arbitrary number of input workspaces. If the input workspaces do not have common binning, the bins in the output workspace will cover the entire range of all the input workspaces, with the largest bin widths used in regions of overlap.
+
+==== Restrictions on the input workspace ====
+
+The input workspaces must contain histogram data with the same number of spectra and matching units and instrument name in order for the algorithm to succeed. 
+
+'''For [[Workspace2D]]s''': Each input workspace must have common binning for all its spectra. 
+
+'''For [[EventWorkspace]]s''': This algorithm is Event-aware; it will append event lists from common spectra. Binning parameters need not be compatible; the output workspace will use the first workspaces' X bin boundaries.
+
+Other than this it is currently left to the user to ensure that the combination of the workspaces is a valid operation.
+
+
+==== Subalgorithms used ====
+
+The [[Rebin]] algorithm is used, if neccessary, to put all the input workspaces onto a common binning.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

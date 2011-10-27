@@ -1,14 +1,5 @@
 #ifndef MANTID_ALGORITHMS_SumNeighbours_H_
 #define MANTID_ALGORITHMS_SumNeighbours_H_
-/*WIKI* 
-
-
-The algorithm looks through the [[Instrument]] to find all the [[RectangularDetector]]s defined. For each detector, the SumX*SumY neighboring event lists are summed together and saved in the output workspace as a single spectrum. Therefore, the output workspace will have 1/(SumX*SumY) * the original number of spectra.
-
-
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,14 +1,5 @@
 #ifndef MANTID_ALGORITHMS_SmoothNeighbours_H_
 #define MANTID_ALGORITHMS_SmoothNeighbours_H_
-/*WIKI* 
-
-
-The algorithm looks through the [[Instrument]] to find all the [[RectangularDetector]]s defined. For each pixel in each detector, the AdjX*AdjY neighboring event lists are summed together and saved in the output workspace.  Parabolic weights are applied to each added eventlist with the largest weights near the center. The output workspace has the same number of spectra as the input workspace.  This increases memory by a factor of 9 for AdjX=AdjY=1.
-
-
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

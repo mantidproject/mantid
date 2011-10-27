@@ -1,22 +1,6 @@
 
 #ifndef MANTID_ALGORITHM_POWER_H_
 #define MANTID_ALGORITHM_POWER_H_
-/*WIKI* 
-
-
-The algorithm will raise the InputWorkspace to the power of the Exponent.
-
-== Errors ==
-
-Defining the power algorithm as: <math>  y = \left ( a^b \right )  </math>, we can describe the error as: 
-<math>s_{y} = by\left ( s_{a}/a \right )</math>, where <math>s_{y}</math> is the error in the result ''y'' and <math>s_{a}</math> is the error in the input ''a''.
-
-== Usage ==
-'''Python'''
- Power("InputWorkspace","Exponent")
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

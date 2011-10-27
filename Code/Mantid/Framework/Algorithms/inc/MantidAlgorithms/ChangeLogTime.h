@@ -1,9 +1,5 @@
 #ifndef CHANGELOGTIME_H
 #define CHANGELOGTIME_H
-/*WIKI* 
-
-
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

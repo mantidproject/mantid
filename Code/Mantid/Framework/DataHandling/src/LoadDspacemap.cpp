@@ -1,3 +1,14 @@
+/*WIKI* 
+
+
+
+Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.
+
+The resulting workspace can then be used with, e.g. [[AlignDetectors]] to perform calibration.
+
+
+
+*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"

@@ -1,3 +1,10 @@
+/*WIKI* 
+
+
+Given a set of peaks, and given a range of possible a,b,c values, this algorithm will attempt to find a UB matrix, that fits the data.  The algorithm searches over a range of possible directions and unit cell lengths for directions and lengths that match plane normals and plane spacings in reciprocal space.  It then chooses three of these vectors with the shortest lengths that are linearly independent and that are separated by at least a minimum angle.  The minimum angle is calculated from the specified min and max d values.  A UB matrix is formed using these three vectors and the resulting UB matrix is optimized using a least squares method. If the specified peaks are accurate and belong to a single crystal, this method should produce some UB matrix that indexes the peaks. However, other software will usually be needed to adjust this UB to match a desired conventional cell.
+
+
+*WIKI*/
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

@@ -10,6 +10,7 @@ The purpose of this algorithm is to calibrate the detector pixels and write a ca
 
 
 *WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import *
 import os

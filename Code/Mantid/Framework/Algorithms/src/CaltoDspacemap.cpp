@@ -1,3 +1,31 @@
+/*WIKI* 
+
+This is the inverse of the DspacemaptoCal algorithm.  The detector offset file created by this algorithm are in the form created by the ARIEL software. The offsets are a correction to the dSpacing values and are applied during the conversion from time-of-flight to dSpacing as follows:
+
+:<math> d = \frac{h}{m_N} \frac{t.o.f.}{L_{tot} sin \theta} (1+ \rm{offset})</math>
+
+
+==Usage==
+'''Python'''
+    LoadEmptyInstrument("POWGEN_Definition.xml","POWGEN")
+    CaltoDspacemap("POWGEN","PG3.cal", "PG3.dat")
+
+'''C++'''
+    IAlgorithm* alg1 = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    alg1->setPropertyValue("Filename", "POWGEN_Definition.xml");
+    alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", "POWGEN");
+    alg1->execute();
+    IAlgorithm* alg2 = FrameworkManager::Instance().createAlgorithm("DspacemaptoCal");
+    alg2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", "POWGEN");
+    alg2->setPropertyValue("CalibrationFile", "PG3.cal");
+    alg2->setPropertyValue("DspacemapFile", "PG3.dat");
+    alg2->execute();
+
+
+
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

@@ -1,12 +1,5 @@
 #ifndef GHOSTCORRECTION_H_
 #define GHOSTCORRECTION_H_
-/*WIKI* 
-
-
-Performs first-order correction on POWGEN data. This algorithm may be obsolete as newer detectors do not show significant ghosting anymore.
-
-
-*WIKI*/
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Algorithm.h"

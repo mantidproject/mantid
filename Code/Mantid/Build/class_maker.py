@@ -48,10 +48,7 @@ def write_header(subproject, classname, filename, args):
     # The full text
     s = """#ifndef %s
 #define %s
-/*WIKI*
-TODO: Enter wiki description here.
-*WIKI*/
-    
+
 #include "MantidKernel/System.h"
 %s
 
@@ -149,9 +146,14 @@ def write_source(subproject, classname, filename, args):
     if not args.alg:
         algorithm_top = ""
         algorithm_source = ""
-        
-    
-    s = """#include "Mantid%s/%s%s.h"
+    else:
+        s = """/*WIKI*
+TODO: Enter a full wiki-markup description of your algorithm here.
+*WIKI*/
+
+"""
+    # ------- Now the normal class text ------------------------------    
+    s += """#include "Mantid%s/%s%s.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;

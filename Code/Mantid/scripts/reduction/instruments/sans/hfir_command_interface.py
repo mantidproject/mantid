@@ -65,7 +65,7 @@ def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)
     
 def SolidAngle():
-    ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, None, None,
+    ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, InputWorkspace=None, OutputWorkspace=None,
                                                    ReductionTableWorkspace=ReductionSingleton().get_reduction_table_name())
     
 def NoSolidAngle():

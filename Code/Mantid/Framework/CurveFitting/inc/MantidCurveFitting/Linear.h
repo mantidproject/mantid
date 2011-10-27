@@ -1,14 +1,5 @@
 #ifndef MANTID_CURVEFITTING_LINEAR_H_
 #define MANTID_CURVEFITTING_LINEAR_H_
-/*WIKI* 
-
-This algorithm fits a line, of the form <math> Y = c0 + c1 X </math>, to the specified part of a particular spectrum. As well as outputting the result to the log (debug level) and as output properties, a 1D workspace is created with the same X bins/points as the fitted spectrum and the value and error on the fit at each point. The covariance matrix is not currently returned as an output: if this is required please contact the development team.
-
-==== References ====
-This algorithm uses the gsl linear regression algorithms ''gsl_fit_linear'' and ''gsl_fit_wlinear'', which are documented [http://www.gnu.org/software/gsl/manual/html_node/Linear-regression.html here].
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

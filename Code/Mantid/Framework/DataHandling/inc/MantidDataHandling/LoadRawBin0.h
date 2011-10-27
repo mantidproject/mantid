@@ -1,11 +1,5 @@
 #ifndef MANTID_DATAHANDLING_LOADRAWBIN0_H
 #define MANTID_DATAHANDLING_LOADRAWBIN0_H
-/*WIKI* 
-
-
-The LoadRawBin0 algorithm stores bin 0 data from the selected [[RAW_File | RAW]] file in a [[Workspace2D]].
-
-*WIKI*/
 
 
 //----------------------------------------------------------------------

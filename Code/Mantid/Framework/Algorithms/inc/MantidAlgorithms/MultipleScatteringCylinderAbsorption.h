@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
 #define MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

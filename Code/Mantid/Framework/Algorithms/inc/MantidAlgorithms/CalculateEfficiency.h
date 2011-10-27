@@ -1,11 +1,5 @@
 #ifndef MANTID_ALGORITHMS_CALCULATEEFFICIENCY_H_
 #define MANTID_ALGORITHMS_CALCULATEEFFICIENCY_H_
-/*WIKI* 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for calculation details.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

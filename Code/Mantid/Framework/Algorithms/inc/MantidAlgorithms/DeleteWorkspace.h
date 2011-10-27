@@ -1,11 +1,5 @@
 #ifndef MANTID_ALGORITHMS_DELETEWORKSPACE_H_
 #define MANTID_ALGORITHMS_DELETEWORKSPACE_H_
-/*WIKI* 
-
-If the input workspace exists then it is removed from Mantid.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

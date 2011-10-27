@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "MantidAlgorithms/DampSq.h"
 #include "MantidKernel/System.h"
 

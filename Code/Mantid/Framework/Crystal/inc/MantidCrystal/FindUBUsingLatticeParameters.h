@@ -1,9 +1,5 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_H_
-/*WIKI* 
-
-Given a set of peaks, and given lattice parameters (<math>a,b,c,alpha,beta,gamma</math>), this algorithm will find the UB matrix, that best fits the data.  The algorithm searches over a large range of possible orientations for the orientation for which the rotated B matrix best fits the data.  It then uses a least squares approach to optimize the complete UB matrix.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

@@ -1,3 +1,12 @@
+/*WIKI* 
+
+The page http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf contains a description of the file format for grouped data that this algorithm uses.
+
+The x and y units in the DAVE file refer to different things from what is often referred to as the x and y in Mantid workspaces. This algorithm sets the x units in the DAVE file to the units of axis 0 in the Mantid workspace, which is normally just called the workspace's units. The DAVE file's y units are the units of axis 1 which are normally not set in Mantid workspaces but defaults to spectrum number. The number of counts might be thought of as the units of z in the DAVE file.
+
+
+
+*WIKI*/
 #include "MantidDataHandling/SaveDASC.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"

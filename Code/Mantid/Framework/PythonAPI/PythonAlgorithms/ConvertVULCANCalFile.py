@@ -1,14 +1,10 @@
 """*WIKI* 
+Convert Vulcan's Calibration File To Mantid Standard
 
+Author:  W. Zhou
 
 *WIKI*"""
-################################################################################
-#
-#  Convert Vulcan's Calibration File To Mantid Standard
-#
-#  Author:  W. Zhou
-#
-################################################################################
+
 from MantidFramework import *
 from mantidsimple import *
 

@@ -1,13 +1,5 @@
 #ifndef MANTID_ALGORITHMS_QXY_H_
 #define MANTID_ALGORITHMS_QXY_H_
-/*WIKI* 
-
-
-This algorithm rebins a 2D workspace in units of wavelength into 2D Q. It also normalises to the solid angle of each detector pixel.
-The result is stored in a 2D workspace which two numeric axes, both in units of Q.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

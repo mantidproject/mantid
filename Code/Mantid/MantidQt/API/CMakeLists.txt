@@ -44,7 +44,6 @@ set ( UI_FILES inc/MantidQtAPI/ManageUserDirectories.ui
 )
 
 include_directories ( inc )
-include_directories ( ${QWT_INCLUDE_DIR} )
 include_directories ( ../MantidWidgets/inc )
 include_directories ( ../MantidWidgets )
 

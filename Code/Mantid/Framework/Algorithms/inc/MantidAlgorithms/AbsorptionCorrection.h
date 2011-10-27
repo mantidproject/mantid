@@ -1,21 +1,5 @@
 #ifndef MANTID_ALGORITHMS_ABSORPTIONCORRECTION_H_
 #define MANTID_ALGORITHMS_ABSORPTIONCORRECTION_H_
-/*WIKI* 
-
-This algorithm uses a numerical integration method to calculate attenuation factors resulting from absorption and single scattering in a sample with the material properties given. Factors are calculated for each spectrum (i.e. detector position) and wavelength point, as defined by the input workspace. 
-The sample is first bounded by a cuboid, which is divided up into small cubes. The cubes whose centres lie within the sample make up the set of integration elements (so you have a kind of 'Lego' model of the sample) and path lengths through the sample are calculated for the centre-point of each element, and a numerical integration is carried out using these path lengths over the volume elements.
-
-Note that the duration of this algorithm is strongly dependent on the element size chosen, and that too small an element size can cause the algorithm to fail because of insufficient memory.
-
-==== Assumptions ====
-This algorithm assumes that the (parallel) beam illuminates the entire sample '''unless''' a 'gauge volume' has been defined using the [[DefineGaugeVolume]] algorithm (or by otherwise adding a valid XML string [[HowToDefineGeometricShape | defining a shape]] to a [[Run]] property called "GaugeVolume"). In this latter case only scattering within this volume (and the sample) is integrated, because this is all the detector can 'see'. The full sample is still used for the neutron paths. ('''N.B.''' If your gauge volume is of axis-aligned cuboid shape and fully enclosed by the sample then you will get a more accurate result from the [[CuboidGaugeVolumeAbsorption]] algorithm.)
-
-==== Restrictions on the input workspace ====
-The input workspace must have units of wavelength. The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed.
-
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes
