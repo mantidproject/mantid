@@ -77,7 +77,7 @@ public:
     WorkspaceMementoCollection collection;
     collection.registerWorkspace(ws, &model); //Could be any other kind of workspace registered.
     LoanedMemento smrtPtr = collection.at(0);
-    boost::shared_ptr<WorkspaceMementoItem<0, std::string> > pExact = boost::dynamic_pointer_cast<WorkspaceMementoItem<0, std::string> >(smrtPtr->getItem(0));
+    boost::shared_ptr<WorkspaceMementoItem<std::string> > pExact = boost::dynamic_pointer_cast<WorkspaceMementoItem<std::string> >(smrtPtr->getItem(0));
 
     TS_ASSERT(pExact != NULL);
     TS_ASSERT_EQUALS("WSName", pExact->getValue());

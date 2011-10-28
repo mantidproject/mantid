@@ -28,6 +28,8 @@ private:
       void(std::vector<AbstractMementoItem_sptr>));
     MOCK_CONST_METHOD0(getLogData,
       LogDataMap());
+    MOCK_METHOD0(indicateModified, void());
+    MOCK_METHOD0(indicateDefault, void());
   };
 
   // Helper method to generate a workspace memento;
@@ -51,7 +53,7 @@ private:
     logNames.push_back("LogValueA");
     logNames.push_back("LogValueB");
     logNames.push_back("LogValueC");
-    service.addLogItems(ws, logNames, rowIndex);
+    service.declareLogItems(ws, logNames, rowIndex);
 
     return memento;
   }
