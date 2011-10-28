@@ -52,11 +52,19 @@ namespace Algorithms
   {
     MatrixWorkspace_sptr sampleWS = getProperty("SampleInputWorkspace");
     MatrixWorkspace_sptr vanadiumWS = getProperty("VanadiumInputWorkspace");
+    if(sampleWS->getXDimension()->getNBins() != vanadiumWS->getXDimension()->getNBins())
+    {
+      throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of bins.");
+    }
+    if(sampleWS->getNumberHistograms() != vanadiumWS->getNumberHistograms())
+    {
+      throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of historams");
+    }
 
     spec2index_map* specToWSIndexMap = vanadiumWS->getSpectrumToWorkspaceIndexMap();
     
     // Integrate across all bins
-    IAlgorithm_sptr integrateAlg = this->createSubAlgorithm("Integration", 0, 1, true, 1);
+    IAlgorithm_sptr integrateAlg = this->createSubAlgorithm("Integration", 0, 0.01, true, 1);
     integrateAlg->setProperty("InputWorkspace", vanadiumWS);
     integrateAlg->setPropertyValue("OutputWorkspace", "VanSumTOF");
     integrateAlg->setProperty("IncludePartialBins", true);
@@ -65,10 +73,15 @@ namespace Algorithms
 
     // Calculate the average TOF accross all spectra
     size_t nHistograms = vanSumTOF_WS->getNumberHistograms();
-    Progress progress(this,0.0,1.0,nHistograms);
+    Progress progress(this,0.01,0.99,nHistograms/10000);
 
     /// Create an empty workspace with the same dimensions as the integrated vanadium.
     MatrixWorkspace_sptr yAvgWS = Mantid::API::WorkspaceFactory::Instance().create(vanSumTOF_WS);
+
+    Mantid::Geometry::IDetector_const_sptr idet;
+    std::map<specid_t, double> specIdMap;
+    std::map<specid_t, double>::iterator it;
+    double spectraSum = 0;
 
     /*
     Find the nearest neighbours for the spectrum and use those to calculate an average (9 points)
@@ -79,10 +92,9 @@ namespace Algorithms
       //PARALLEL_START_INTERUPT_REGION
       try
       {
-        Mantid::Geometry::IDetector_const_sptr idet = vanadiumWS->getDetector(i);
-        std::map<specid_t, double> specIdMap = vanadiumWS->getNeighbours(idet.get());
-        std::map<specid_t, double>::iterator it = specIdMap.begin();
-        double spectraSum = 0;
+        idet = vanadiumWS->getDetector(i);
+        specIdMap = vanadiumWS->getNeighbours(idet.get());
+        it = specIdMap.begin();
         while(it != specIdMap.end())
         {
           spectraSum += vanSumTOF_WS->readY((*specToWSIndexMap)[it->first])[0];
@@ -95,6 +107,7 @@ namespace Algorithms
       {
       }
       progress.report();
+
       //PARALLEL_END_INTERUPT_REGION
     }
     //PARALLEL_CHECK_INTERUPT_REGION
@@ -103,7 +116,7 @@ namespace Algorithms
     vanSumTOF_WS = vanSumTOF_WS/yAvgWS;
 
     //Mask detectors outside of limits
-    IAlgorithm_sptr constrainAlg = this->createSubAlgorithm("FindDetectorsOutsideLimits", 0, 1, true, 1);
+    IAlgorithm_sptr constrainAlg = this->createSubAlgorithm("FindDetectorsOutsideLimits", 0.99, 0.991, true, 1);
     constrainAlg->setProperty("InputWorkspace", vanSumTOF_WS);
     constrainAlg->setPropertyValue("OutputWorkspace", "ConstrainedWS");
     constrainAlg->setProperty("HighThreshold", pow((double)10, (double)300));
@@ -112,7 +125,7 @@ namespace Algorithms
     MatrixWorkspace_sptr constrainedWS = constrainAlg->getProperty("OutputWorkspace");
 
     //Mask detectors outside of limits
-    IAlgorithm_sptr maskdetectorsAlg = this->createSubAlgorithm("MaskDetectors", 0, 1, true, 1);
+    IAlgorithm_sptr maskdetectorsAlg = this->createSubAlgorithm("MaskDetectors", 0.991, 1, true, 1);
     maskdetectorsAlg->setProperty("Workspace", vanSumTOF_WS);
     maskdetectorsAlg->setProperty("MaskedWorkspace", constrainedWS);
     maskdetectorsAlg->executeAsSubAlg();
