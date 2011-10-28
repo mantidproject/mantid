@@ -56,10 +56,10 @@ namespace Algorithms
     {
       throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of bins.");
     }
-    if(sampleWS->getNumberHistograms() != vanadiumWS->getNumberHistograms())
-    {
-      throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of historams");
-    }
+    //if(sampleWS->getNumberHistograms() != vanadiumWS->getNumberHistograms())
+    //{
+    //  throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of historams");
+    //}
 
     spec2index_map* specToWSIndexMap = vanadiumWS->getSpectrumToWorkspaceIndexMap();
     
@@ -73,28 +73,28 @@ namespace Algorithms
 
     // Calculate the average TOF accross all spectra
     size_t nHistograms = vanSumTOF_WS->getNumberHistograms();
-    Progress progress(this,0.01,0.99,nHistograms/10000);
+    Progress progress(this,0.01,0.99,nHistograms);
 
     /// Create an empty workspace with the same dimensions as the integrated vanadium.
     MatrixWorkspace_sptr yAvgWS = Mantid::API::WorkspaceFactory::Instance().create(vanSumTOF_WS);
 
-    Mantid::Geometry::IDetector_const_sptr idet;
-    std::map<specid_t, double> specIdMap;
-    std::map<specid_t, double>::iterator it;
-    double spectraSum = 0;
-
     /*
     Find the nearest neighbours for the spectrum and use those to calculate an average (9 points)
     */
-    //PARALLEL_FOR2(yAvgWS, vanSumTOF_WS)
+    PARALLEL_FOR2(yAvgWS, vanSumTOF_WS)
     for(int i = 0; i < int(nHistograms); i++)
     {
-      //PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
       try
       {
-        idet = vanadiumWS->getDetector(i);
-        specIdMap = vanadiumWS->getNeighbours(idet.get());
-        it = specIdMap.begin();
+        specid_t inSpec = vanadiumWS->getSpectrum(i)->getSpectrumNo();
+        std::map<specid_t, double> specIdMap;
+        PARALLEL_CRITICAL(NearestNeighboursSearch)
+        {
+          specIdMap = vanadiumWS->getNeighbours(inSpec, 0.0); //This is not threadsafe!
+        }
+        std::map<specid_t, double>::iterator it = specIdMap.begin();
+        double spectraSum = 0;
         while(it != specIdMap.end())
         {
           spectraSum += vanSumTOF_WS->readY((*specToWSIndexMap)[it->first])[0];
@@ -108,9 +108,9 @@ namespace Algorithms
       }
       progress.report();
 
-      //PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     }
-    //PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // Normalise the integrated TOFs
     vanSumTOF_WS = vanSumTOF_WS/yAvgWS;
