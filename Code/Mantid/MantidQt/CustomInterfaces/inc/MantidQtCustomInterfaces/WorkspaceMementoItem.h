@@ -8,6 +8,27 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
+    /**
+    Typedef produces distinct, non-compatible types based on an integer template arg.
+    */
+    template<int v>
+    struct  Int2Type
+    {
+      enum { type_value = v };
+      explicit Int2Type(int arg) : m_value(arg){ }
+      operator int() const
+      {
+        return m_value;
+      }
+    private:
+      int m_value;
+    };
+
+    /// Typedef to delcare a new type to act as a row
+    typedef  Int2Type<1> Row;
+    // Typedef to declare a new type to act as a column
+    typedef  Int2Type<2> Column;
+
     /** @class WorkspaceMementoItem. Unique type for column data, through which changes to cell data can be applied, stored and reverted.
     Type system ensures that no two columns are comparible, even if they store the same data.
 
@@ -47,6 +68,8 @@ namespace MantidQt
       int m_rowIndex;
       /// Column index onto which this mementoitem maps.
       int m_colIndex;
+      /// Name for the item.
+      std::string name;
 
     protected:
 
@@ -75,7 +98,7 @@ namespace MantidQt
       @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
       @param colIndex : column index of the same table workspace.
       */
-      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, int rowIndex, int colIndex) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex)
+      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, Row rowIndex, Column colIndex) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex)
       {
         m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
       }
@@ -194,6 +217,15 @@ namespace MantidQt
       ColType getValue() const
       {
         return m_value; //TODO, should we be returning the set value or the commited value.
+      }
+
+      /**
+      Getter for the item name.
+      @return column/item name.
+      */
+      const std::string& getName() const
+      {
+        return m_data->getColumn(m_colIndex)->name();
       }
 
     };

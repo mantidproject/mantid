@@ -30,7 +30,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
@@ -117,22 +117,29 @@ void CreateMDWorkspace::addWorkspaceClicked()
   {
     using namespace Mantid::API;
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-    m_data->registerWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(ws), m_model); //TODO better handle any incompatibility here.
-
-    // Key off the selected index. --------------------------------------------
-    LoanedMemento memento = m_data->at(0); 
-
-    if(ISISInelastic == m_approachType)
+    MatrixWorkspace_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if(matrixWS)
     {
-      m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+      m_data->registerWorkspace(matrixWS, m_model); //TODO better handle any incompatibility here.
+
+      // Key off the selected index. --------------------------------------------
+      LoanedMemento memento = m_data->at(0); 
+
+      if(ISISInelastic == m_approachType)
+      {
+        m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+      }
+
+      m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
+      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+      m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView());
+      //------------------------------------------------------------------------------
     }
-
-    m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
-    m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
-    m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
-    m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView());
-    //------------------------------------------------------------------------------
-
+    else
+    {
+      runConfirmation("Only Matrix workspaces may be registered.");
+    }
   }
 }
 

@@ -6,7 +6,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include <string>
 
-using MantidQt::CustomInterfaces::WorkspaceMementoItem;
+using namespace MantidQt::CustomInterfaces;
 using Mantid::DataObjects::TableWorkspace;
 
 class WorkspaceMementoItemTest : public CxxTest::TestSuite
@@ -37,7 +37,7 @@ WorkspaceMementoItemTest() : ws(new TableWorkspace(2))
 void testConstructor()
 {
   //Integer Item
-  WorkspaceMementoItem<int> a(ws, 0, 0);
+  WorkspaceMementoItem<int> a(ws, Row(0), Column(0));
   TS_ASSERT_EQUALS(1, a.getValue());
 }
 
@@ -45,17 +45,17 @@ void testEqualsThrows()
 {
   typedef WorkspaceMementoItem<int> TypeA;
   typedef WorkspaceMementoItem<std::string> TypeB; //Different column number constitutes a different type.
-  TypeA A(ws, 0, 0);
-  TypeB B(ws, 0, 2);
+  TypeA A(ws, Row(0), Column(0));
+  TypeB B(ws, Row(0), Column(2));
 
   TSM_ASSERT_THROWS("Should throw if types on which equals are called are not compatible.", A.equals(B), std::runtime_error);
 }
 
 void testEquals()
 {
-  WorkspaceMementoItem<int> a(ws, 0, 0);
+  WorkspaceMementoItem<int> a(ws, Row(0), Column(0));
   a.setValue(2);
-  WorkspaceMementoItem<int> b(ws, 0, 0);
+  WorkspaceMementoItem<int> b(ws, Row(0), Column(0));
   b.setValue(2);
 
   TS_ASSERT(a.equals(b));
@@ -65,9 +65,9 @@ void testEquals()
 
 void testNotEquals()
 {
-  WorkspaceMementoItem<int> a(ws, 0, 0);
+  WorkspaceMementoItem<int> a(ws, Row(0), Column(0));
   a.setValue(2);
-  WorkspaceMementoItem<int> b(ws, 0, 0);
+  WorkspaceMementoItem<int> b(ws, Row(0), Column(0));
   b.setValue(3);
 
   TS_ASSERT(!a.equals(b));
@@ -78,7 +78,7 @@ void testNotEquals()
 
 void testCopy()
 {
-  WorkspaceMementoItem<int> item(ws, 0, 0);
+  WorkspaceMementoItem<int> item(ws, Row(0), Column(0));
   item.setValue(3);
   WorkspaceMementoItem<int> copy(item);
 
@@ -87,9 +87,9 @@ void testCopy()
 
 void testAssign()
 {
-  WorkspaceMementoItem<int> a(ws, 0, 0);
+  WorkspaceMementoItem<int> a(ws, Row(0), Column(0));
   a.setValue(3);
-  WorkspaceMementoItem<int> b(ws, 0, 0);
+  WorkspaceMementoItem<int> b(ws, Row(0), Column(0));
   b.setValue(4);
   b = a;
   TS_ASSERT_EQUALS(a, b);
@@ -98,7 +98,7 @@ void testAssign()
 
 void testSetValue()
 {
-  WorkspaceMementoItem<int> item(ws, 0, 0);
+  WorkspaceMementoItem<int> item(ws, Row(0), Column(0));
   item.setValue(2);
   TS_ASSERT_EQUALS(2, item.getValue());
 }
@@ -106,7 +106,7 @@ void testSetValue()
 void testHasChanged()
 {
   //create  a mementoitem pointing at the same cell in the table workspace.
-  WorkspaceMementoItem<int> item(ws, 0, 0);
+  WorkspaceMementoItem<int> item(ws, Row(0), Column(0));
   TS_ASSERT(!item.hasChanged());
   item.setValue(2000);
   TS_ASSERT(item.hasChanged());
@@ -116,14 +116,14 @@ void testApplyChanges()
 {
 
   //create  a mementoitem pointing at the same cell in the table workspace.
-  WorkspaceMementoItem<int> item(ws, 0, 0);
+  WorkspaceMementoItem<int> item(ws, Row(0), Column(0));
   item.setValue(2);
 
   //Apply changes in memento over to the table workspace.
   TS_ASSERT_THROWS_NOTHING(item.commit());
 
   //Check that the chanes arrive.
-  TS_ASSERT_EQUALS(2, ws->cell<int>(0, 0));
+  TS_ASSERT_EQUALS(2, ws->cell<int>(Row(0), Column(0)));
   TSM_ASSERT("Changes have been applied. Should not indicate outstanding!", !item.hasChanged())
 }
 
@@ -131,12 +131,25 @@ void testRevertChanges()
 {
 
   //create  a mementoitem pointing at the same cell in the table workspace.
-  WorkspaceMementoItem<int> item(ws, 0, 0);
+  WorkspaceMementoItem<int> item(ws, Row(0), Column(0));
   item.setValue(2);
 
   //Apply changes in memento over to the table workspace.
   TS_ASSERT_THROWS_NOTHING(item.rollback());
   TSM_ASSERT("Changes have been reverted. Should not indicate outstanding!", !item.hasChanged())
+}
+
+void testGetName()
+{
+  //create  a mementoitem pointing at the same cell in the table workspace.
+  WorkspaceMementoItem<int> itemA(ws, Row(0), Column(0));
+  WorkspaceMementoItem<int> itemB(ws, Row(0), Column(1));
+  WorkspaceMementoItem<std::string> itemC(ws, Row(0), Column(2));
+
+  TS_ASSERT_EQUALS(ws->getColumn(0)->name(), itemA.getName());
+  TS_ASSERT_EQUALS(ws->getColumn(1)->name(), itemB.getName());
+  TS_ASSERT_EQUALS(ws->getColumn(2)->name(), itemC.getName());
+
 }
 
 

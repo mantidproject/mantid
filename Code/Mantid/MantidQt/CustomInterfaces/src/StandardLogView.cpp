@@ -4,7 +4,7 @@
 #include "MantidQtCustomInterfaces/StandardLogView.h"
 #include "MantidQtCustomInterfaces/LogPresenter.h"
 #include <qgridlayout.h>
-#include <qlistwidget.h>
+#include <qtablewidget.h>
 
 namespace MantidQt
 {
@@ -34,18 +34,26 @@ namespace MantidQt
     /// Initalization method.
     void StandardLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
     {
-      QListWidget *listWidget = new QListWidget(this);
+     QTableWidget* tableWidget = new QTableWidget(this);
+     tableWidget->setRowCount(logs.size());
+     tableWidget->setColumnCount(2);
 
       for(int i = 0; i < logs.size(); i++)
       {
-        QListWidgetItem *newItem = new QListWidgetItem;
-        std::string temp;
-        logs[i]->getValue(temp);
-        newItem->setText(temp.c_str());
-        listWidget->insertItem(i, newItem);
+        std::string value;
+        logs[i]->getValue(value);
+
+        std::string name = logs[i]->getName();
+
+        QTableWidgetItem *nameItem = new QTableWidgetItem(name.c_str());
+        QTableWidgetItem *valueItem = new QTableWidgetItem(value.c_str());
+
+        tableWidget->setItem(i, 0, nameItem);
+        tableWidget->setItem(i, 1, valueItem);
       }
+
       QGridLayout* layout = new QGridLayout();
-      layout->addWidget(listWidget);
+      layout->addWidget(tableWidget);
       this->setLayout(layout);
     }
 

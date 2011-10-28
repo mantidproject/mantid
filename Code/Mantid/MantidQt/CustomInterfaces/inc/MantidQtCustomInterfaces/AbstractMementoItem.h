@@ -20,6 +20,7 @@ namespace MantidQt
       virtual void commit() = 0;
       virtual void rollback() = 0;
       virtual bool equals(AbstractMementoItem& other) const = 0;
+      virtual const std::string& getName() const = 0;
       virtual ~AbstractMementoItem() {}
       template<class T>
       void checkType()const

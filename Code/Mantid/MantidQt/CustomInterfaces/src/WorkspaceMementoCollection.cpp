@@ -58,7 +58,7 @@ namespace MantidQt
       WorkspaceMemento* temp = new WorkspaceMemento(m_data, "Temp", rowIndex);
       WorkspaceMementoService<WorkspaceMemento*> service(temp);
       service.addAllItems(m_data, rowIndex);
-      service.addLogItems(m_data, ws->run().getLogData(), rowIndex);
+      service.declareLogItems(m_data, ws->run().getLogData(), rowIndex);
       service.setWorkspaceName(ws->getName());
       service.setInstrumentName(ws->getInstrument()->getName());
       service.setRunNumber(ws->getRunNumber());
@@ -168,7 +168,7 @@ namespace MantidQt
         LoanedMemento managedMemento(memento);
         WorkspaceMementoService<LoanedMemento> service(managedMemento);
         service.addAllItems(m_data, rowIndex);
-        //service.addLogItems(m_data, rowIndex);
+        service.addLogItems(m_data, rowIndex);
       }
       //Wrap product and return.
       return LoanedMemento(m_mementoMap[wsName]);

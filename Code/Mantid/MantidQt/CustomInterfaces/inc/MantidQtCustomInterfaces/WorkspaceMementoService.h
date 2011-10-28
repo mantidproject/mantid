@@ -93,9 +93,10 @@ namespace MantidQt
       ~WorkspaceMementoService();
 
       void addAllItems(Mantid::API::ITableWorkspace_sptr, int rowIndex);
-      void addLogItem(std::string name);
-      void addLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<Mantid::Kernel::Property*> vecLogData, int rowIndex);
-      void addLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<std::string> vecLogData, int rowIndex);
+      void declareLogItem(std::string name);
+      void declareLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<Mantid::Kernel::Property*> vecLogData, int rowIndex); //Adds log dat to tws and creates items
+      void declareLogItems(Mantid::API::ITableWorkspace_sptr ws, std::vector<std::string> vecLogData, int rowIndex); //Adds log data to tws and creates items
+      void addLogItems(Mantid::API::ITableWorkspace_sptr ws, int rowIndex); //Assumes table workspace already exists and is populated
       bool validMementoTableSchema(Mantid::API::ITableWorkspace_sptr);
       void setWorkspaceName(std::string name);
       void setInstrumentName(std::string name);

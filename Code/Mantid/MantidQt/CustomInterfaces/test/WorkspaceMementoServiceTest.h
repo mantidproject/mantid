@@ -134,8 +134,8 @@ public:
    void testAddLogItem()
    {
      WorkspaceMementoService_sptr service = createService();
-     service->addLogItem("A");
-     service->addLogItem("B");
+     service->declareLogItem("A");
+     service->declareLogItem("B");
 
      std::vector<AbstractMementoItem_sptr> fetchedLogValues = service->getLogData();
      TSM_ASSERT_EQUALS("Wrong number of log values reported.", 2, fetchedLogValues.size()); 
@@ -144,8 +144,8 @@ public:
    void testSetLogValues()
    {
      WorkspaceMementoService_sptr service = createService();
-     service->addLogItem("Temp");
-     service->addLogItem("Pressure");
+     service->declareLogItem("Temp");
+     service->declareLogItem("Pressure");
      
      std::vector<std::string> vecLogValues;
      vecLogValues.push_back("1.01");
