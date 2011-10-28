@@ -177,16 +177,16 @@ namespace Mantid
       */
       virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem> value)
       {
-	boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
-	if(typed)
-	{
-	  Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = typed;
-     	}
-	else
-	{
-	  this->clear();
-	}
-	return isValid();
+	      boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
+	      if(typed)
+	      {
+	        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = typed;
+     	  }
+	      else
+	      {
+	        this->clear();
+	      }
+	      return isValid();
       }
 
       /** Checks whether the entered workspace is valid.
@@ -257,6 +257,32 @@ namespace Mantid
             if( boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp) )
             {
               g_log.debug() << " Input WorkspaceGroup found " <<std::endl;
+
+              boost::shared_ptr<WorkspaceGroup> wsGroup = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp);
+              std::vector<std::string> wsGroupNames = wsGroup->getNames();
+              std::vector<std::string>::iterator it = wsGroupNames.begin();
+
+              // Cycle through each workspace in the group ...
+              for( ; it != wsGroupNames.end(); ++it )
+              {
+                std::string memberWsName = *it;
+                boost::shared_ptr<Workspace> memberWs = AnalysisDataService::Instance().retrieve(memberWsName);
+
+                // ... and if it is a workspace of incorrect type, exclude the group by returning an error.
+                if( NULL == boost::dynamic_pointer_cast<TYPE>(memberWs) )
+                {
+                  error = "Workspace " + memberWsName + " is not of type " + Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() + ".";
+                  
+                  g_log.debug() << error << std::endl;
+
+                  return error;
+                }
+                // If it is of the correct type, it may still be invalid. Check.
+                else
+                {
+
+                }
+              }
             }
             else
             {
