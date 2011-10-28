@@ -88,7 +88,8 @@ public:
 
     if (MakeFileBacked)
     {
-      TSM_ASSERT( "Workspace was made file-backed", ws->isFileBacked() );
+      TSM_ASSERT("Workspace was made file-backed", ws->isFileBacked() );
+      TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
     }
 
     // Continue the test
@@ -111,6 +112,8 @@ public:
       ws->addEvent(ev);
     }
     ws->refreshCache();
+    // Manually set the flag that the algo would set
+    ws->setFileNeedsUpdating(true);
 
     TSM_ASSERT_EQUALS("Correctly added 100 events to original 230.",  ws->getNPoints(), 230+100);
 
@@ -127,6 +130,9 @@ public:
 
     // Since there are 330 events, the file needs to be that big (or bigger).
     TS_ASSERT_LESS_THAN( 330, ws->getBoxController()->getFile()->getInfo().dims[0]);
+
+    TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
+
   }
 
 

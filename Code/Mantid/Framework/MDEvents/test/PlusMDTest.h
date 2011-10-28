@@ -63,8 +63,11 @@ public:
       { TSM_ASSERT( "If either input WS is file backed, then the output should be too.", ws->getBoxController()->isFileBacked() ); }
     TS_ASSERT_EQUALS( ws->getNPoints(), 20000);
 
+    TSM_ASSERT("If the workspace is file-backed, then it needs updating.", ws->fileNeedsUpdating() );
+
     if (ws->isFileBacked())
     {
+
       // Run SaveMD so as to update the file in the back
       FrameworkManager::Instance().exec("SaveMD", 4,
           "InputWorkspace", outWSName.c_str(),
@@ -115,14 +118,14 @@ public:
   { do_test(false, true, 1); }
 
 //FIXME: Test fails on Windows7 build server
-//  void test_file_plus_file()
-//  { do_test(true, true, 0); }
-//
-//  void test_file_plus_file_inPlace()
-//  { do_test(true, true, 1); }
-//
-//  void test_file_plus_file_inPlace_ofRHS()
-//  { do_test(true, true, 2); }
+  void test_file_plus_file()
+  { do_test(true, true, 0); }
+
+  void test_file_plus_file_inPlace()
+  { do_test(true, true, 1); }
+
+  void test_file_plus_file_inPlace_ofRHS()
+  { do_test(true, true, 2); }
 
 };
 

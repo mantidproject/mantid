@@ -399,6 +399,9 @@ namespace MDEvents
       file->openGroup("event_data", "NXdata");
       uint64_t totalNumEvents = MDE::openNexusData(file);
       bc->setFile(file, filename, totalNumEvents);
+      // Mark file is up-to-date
+      ws->setFileNeedsUpdating(false);
+
     }
 
     delete prog;

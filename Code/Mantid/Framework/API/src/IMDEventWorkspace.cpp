@@ -13,7 +13,8 @@ namespace API
   //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
   IMDEventWorkspace::IMDEventWorkspace()
-  : IMDWorkspace()
+  : IMDWorkspace(),
+    m_fileNeedsUpdating(false)
   {
   }
 

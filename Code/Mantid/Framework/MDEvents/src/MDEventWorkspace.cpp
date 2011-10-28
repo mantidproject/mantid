@@ -252,6 +252,12 @@ namespace MDEvents
       used = double(m_BoxController->getDiskMRU().getSmallBufferUsed() * sizeof(MDE)) / (1024*1024);
       mess << "Small objects: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
+
+      mess << "File";
+      if (this->fileNeedsUpdating())
+        mess << " (needs updating)";
+      mess << ": " << this->m_BoxController->getFilename();
+      out.push_back(mess.str()); mess.str("");
     }
     else
     {
