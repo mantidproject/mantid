@@ -873,10 +873,12 @@ namespace MDEvents
   TMDE(
   inline void MDGridBox)::addEvent( const MDE & event)
   {
+//    std::cout << "\n nd " << nd << "; boxSize[d] " << boxSize[0] << "; min " << this->extents[0].min << "." << std::endl;
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
       coord_t x = event.getCenter(d);
+//      std::cout << x << ":" << ((x - this->extents[d].min) / boxSize[d]) << ",";
       int i = int((x - this->extents[d].min) / boxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       //if (i < 0 || i >= int(split[d])) return;
@@ -888,6 +890,9 @@ namespace MDEvents
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       boxes[index]->addEvent(event);
+    else
+      std::cout << "\nEvent at " << event.getCenter(0) << " is skipped because index is " << index << "\n";
+
   }
 
 

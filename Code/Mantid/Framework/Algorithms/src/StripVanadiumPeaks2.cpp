@@ -49,6 +49,15 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
       "A measure of the strictness desired in meeting the condition on peak candidates,\n"
       "Mariscotti recommends 2 (default 4)");
 
+    std::vector<std::string> bkgdtypes;
+    bkgdtypes.push_back("Linear");
+    bkgdtypes.push_back("Quadratic");
+    declareProperty("BackgroundType", "Linear", new ListValidator(bkgdtypes),
+        "Type of Background. The choice can be either Linear or Quadratic");
+
+    declareProperty("HighBackground", true,
+        "Peaks are relatively weak comparing to the background");
+
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
@@ -93,6 +102,8 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     stripPeaks->setProperty("FWHM", param_fwhm);
     stripPeaks->setProperty("Tolerance", param_tolerance);
     stripPeaks->setProperty("PeakPositions", peakpositions);
+    stripPeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
+    stripPeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
     if (singleSpectrum){
       stripPeaks->setProperty("WorkspaceIndex", singleIndex);
     }

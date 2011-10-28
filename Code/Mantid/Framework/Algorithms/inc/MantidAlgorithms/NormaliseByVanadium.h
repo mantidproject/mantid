@@ -1,23 +1,27 @@
-#ifndef MANTID_ALGORITHMS_SmoothNeighbours_H_
-#define MANTID_ALGORITHMS_SmoothNeighbours_H_
+#ifndef MANTID_ALGORITHMS_NORMALISEBYVANADIUM_H_
+#define MANTID_ALGORITHMS_NORMALISEBYVANADIUM_H_
+/*WIKI*
+Algorithm is used to normalise a workspace against a vanadium run. Averaging of pixels on the vanadium sample is performed using a nearest neighbours search. 
+This is suitable for runs in which low statistics have been gathered from the vanadium sample.
+*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+
 
 namespace Mantid
 {
 namespace Algorithms
 {
-  /** Smooth neighboring pixels.
 
-    @authors Janik Zikovsky, Vickie Lynch, SNS
-    @date Oct 2010
+  /** NormaliseByVanadium : Normalise a sample workspace by a vanadium workspace. Use nearest neighbours for averaging vanadium pixels.
+    
+    @author Owen Arnold
+    @date 2011-10-26
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -36,16 +40,17 @@ namespace Algorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-class DLLExport SmoothNeighbours : public API::Algorithm
-{
-public:
+  */
+  class DLLExport NormaliseByVanadium : public Mantid::API::Algorithm
+  {
+  public:
+
   /// Default constructor
-  SmoothNeighbours() : API::Algorithm() {};
+  NormaliseByVanadium();
   /// Destructor
-  virtual ~SmoothNeighbours() {};
+  virtual ~NormaliseByVanadium();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SmoothNeighbours";}
+  virtual const std::string name() const { return "NormaliseByVanadium";}
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
@@ -57,46 +62,10 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  };
 
-  void execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws);
-  void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);
 
-  void findNeighboursRectangular();
-  void findNeighboursRadius();
-
-  /// Pixels in the detector
-  int XPixels;
-  /// Pixels in the detector
-  int YPixels;
-
-  /// Number to sum
-  int AdjX;
-  /// Number to sum
-  int AdjY;
-  /// Edge pixels to ignore
-  int Edge;
-  /// Radius to search nearest neighbours
-  double Radius;
-  /// Weight the neighbours during summing
-  bool WeightedSum;
-  /// PreserveEvents
-  bool PreserveEvents;
-
-  /// Input workspace
-  Mantid::API::MatrixWorkspace_sptr inWS;
-
-  /// Each neighbours is specified as a pair with workspace index, weight.
-  typedef std::pair<size_t, double> weightedNeighbour;
-
-  /// Vector of list of neighbours (with weight) for each workspace index.
-  std::vector< std::vector< weightedNeighbour > > m_neighbours;
-
-  /// Progress reporter
-  Mantid::API::Progress * m_prog;
-
-};
-
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SmoothNeighbours_H_*/
+#endif  /* MANTID_ALGORITHMS_NORMALISEBYVANADIUM_H_ */

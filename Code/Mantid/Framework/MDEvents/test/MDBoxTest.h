@@ -921,6 +921,8 @@ public:
     TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1001);
     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1001.2, 1e-3);
 
+    TSM_ASSERT_EQUALS("The size of the file's field matches the last available point", file->getInfo().dims[0], 3001);
+
     // Now getEvents in a const way then call addEvent()
     const std::vector<MDLeanEvent<3> > & events2 = c.getConstEvents();
     TSM_ASSERT("Data is not flagged as modified because it was accessed as const", !c.dataModified());

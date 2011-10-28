@@ -9,6 +9,9 @@
   <catalog name="ICat3Catalog">
   </catalog>
 
+  <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
+  </soapEndPoint>
+
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
   </instrument>
@@ -205,9 +208,12 @@
     <archiveSearch plugin="OrbiterDataSearch" />
   </archive>
   
-   <catalog name="VFSCatalog">
+   <catalog name="ICat3Catalog">
    </catalog>
   
+   <soapEndPoint url="https://orion.sns.gov:8181/ICATService/ICAT">
+   </soapEndPoint>
+
    <instrument name="DAS"> 
       <technique>technique</technique>
    </instrument> 

@@ -16,7 +16,7 @@ import subprocess
 import tempfile
 import sqlresults
 import numpy as np
-
+import glob
 
 # Global SQL result reporter 
 sql_reporter = None
@@ -114,9 +114,18 @@ if __name__ == "__main__":
     revision = sqlresults.add_revision()
     # Save the commitid
     commitid = args.commitid
-    
+
+    # If a directory has been provided, look there for all of the XML files
+    if os.path.isdir(args.xmlpath[0]):
+        xmldir = args.xmlpath[0]
+        if not os.path.isabs(xmldir):
+            xmldir = os.path.abspath(xmldir)
+        xmlfiles = glob.glob(os.path.join(xmldir, '*.xml'))
+    else:
+        xmlfiles = args.xmlpath
+       
     # Convert each file
-    for file in args.xmlpath:
+    for file in xmlfiles:
         convert_xml(file)
         
         
