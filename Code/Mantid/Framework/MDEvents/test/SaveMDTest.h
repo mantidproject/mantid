@@ -129,6 +129,7 @@ public:
 //    ws->getBoxController()->closeFile();
 
     // Since there are 330 events, the file needs to be that big (or bigger).
+    ws->getBoxController()->getFile()->openData("event_data");
     TS_ASSERT_LESS_THAN( 330, ws->getBoxController()->getFile()->getInfo().dims[0]);
 
     TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
