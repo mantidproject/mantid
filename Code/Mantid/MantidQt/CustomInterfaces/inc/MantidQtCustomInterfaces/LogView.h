@@ -41,6 +41,8 @@ namespace MantidQt
     public:
       virtual void initalize(std::vector<AbstractMementoItem_sptr>) = 0;
       virtual LogDataMap getLogData() const = 0;
+      virtual void indicateModified() = 0;
+      virtual void indicateDefault() = 0;
     };
   }
 }

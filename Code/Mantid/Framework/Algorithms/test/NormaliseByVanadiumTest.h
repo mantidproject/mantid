@@ -68,6 +68,21 @@ public:
     TS_ASSERT(alg.validateProperties());
   }
 
+  void testThrowsWhenUnequalBinsUsed()
+  {
+    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::Create2DWorkspace(10, 11);
+
+    NormaliseByVanadium alg;
+    alg.initialize();
+    alg.setProperty("SampleInputWorkspace", sampleWS);
+    alg.setProperty("VanadiumInputWorkspace", vanadiumWS);
+    alg.setPropertyValue("OutputWorkspace", "OutWS");
+    alg.setRethrows(true);
+
+    TSM_ASSERT_THROWS("Should have thrown since unequal bin size.", alg.execute() , std::runtime_error);
+  }
+
   void testExecution()
   {
     using Mantid::API::AnalysisDataService;
@@ -80,6 +95,7 @@ public:
     alg.setProperty("SampleInputWorkspace", sampleWS);
     alg.setProperty("VanadiumInputWorkspace", vanadiumWS);
     alg.setPropertyValue("OutputWorkspace", "OutWS");
+    alg.setRethrows(true);
     
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -96,7 +112,9 @@ public:
     {
       for(size_t j = 0; j < sampleWS->readY(i).size(); j++)
       {
-        TS_ASSERT(sampleWS->readY(i)[j] == result->readY(i)[j]);
+        double expected= sampleWS->readY(i)[j];
+        double actual = result->readY(i)[j];
+        TS_ASSERT_EQUALS(expected, actual);
       }
     }
 

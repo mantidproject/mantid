@@ -2,3 +2,4 @@
 Third_Party/
 # For an out-of-source build: make sure it doesn't get checked in either.
 dbg/
+update.sh

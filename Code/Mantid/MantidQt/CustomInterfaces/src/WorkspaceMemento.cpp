@@ -46,7 +46,7 @@ namespace MantidQt
     {
       AbstractMementoItem_sptr temp(item);
       m_items.push_back(temp);
-      m_items.size() == size_t(m_data->columnCount()) ? m_validMemento = true : m_validMemento = false;
+      m_validMemento = true;
     }
 
     /* Getter for the item at a column

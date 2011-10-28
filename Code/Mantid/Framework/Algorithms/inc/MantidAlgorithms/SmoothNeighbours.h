@@ -5,19 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
-/** Sums neighboring pixels on rectangular detectors.
- * Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels.
- * Only works on EventWorkspaces and for instruments with RectangularDetector's.
- *
- * This only works for instruments that have RectangularDetector's defined;
- * at the time of writing: TOPAZ, SNAP, PG3.
- *
-    @authors Vickie Lynch, Janik Zikovsky, SNS
+  /** Smooth neighboring pixels.
+
+    @authors Janik Zikovsky, Vickie Lynch, SNS
     @date Oct 2010
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -61,6 +58,12 @@ private:
   void init();
   void exec();
 
+  void execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws);
+  void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);
+
+  void findNeighboursRectangular();
+  void findNeighboursRadius();
+
   /// Pixels in the detector
   int XPixels;
   /// Pixels in the detector
@@ -70,6 +73,27 @@ private:
   int AdjX;
   /// Number to sum
   int AdjY;
+  /// Edge pixels to ignore
+  int Edge;
+  /// Radius to search nearest neighbours
+  double Radius;
+  /// Weight the neighbours during summing
+  bool WeightedSum;
+  /// PreserveEvents
+  bool PreserveEvents;
+
+  /// Input workspace
+  Mantid::API::MatrixWorkspace_sptr inWS;
+
+  /// Each neighbours is specified as a pair with workspace index, weight.
+  typedef std::pair<size_t, double> weightedNeighbour;
+
+  /// Vector of list of neighbours (with weight) for each workspace index.
+  std::vector< std::vector< weightedNeighbour > > m_neighbours;
+
+  /// Progress reporter
+  Mantid::API::Progress * m_prog;
+
 };
 
 } // namespace Algorithm

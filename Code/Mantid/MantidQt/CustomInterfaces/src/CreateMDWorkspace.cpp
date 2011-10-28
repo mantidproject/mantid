@@ -117,29 +117,46 @@ void CreateMDWorkspace::addWorkspaceClicked()
   {
     using namespace Mantid::API;
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-    m_data->registerWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(ws), m_model); //TODO better handle any incompatibility here.
-
-    // Key off the selected index. --------------------------------------------
-    LoanedMemento memento = m_data->at(0); 
-
-    if(ISISInelastic == m_approachType)
+    MatrixWorkspace_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if(matrixWS)
     {
-      m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+      m_data->registerWorkspace(matrixWS, m_model); //TODO better handle any incompatibility here.
+
+      // Key off the selected index. --------------------------------------------
+      LoanedMemento memento = m_data->at(0); 
+
+      if(ISISInelastic == m_approachType)
+      {
+        m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+      }
+
+      m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
+      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+      m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView());
+      //------------------------------------------------------------------------------
     }
-
-    m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
-    m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
-    //------------------------------------------------------------------------------
-
+    else
+    {
+      runConfirmation("Only Matrix workspaces may be registered.");
+    }
   }
 }
 
 void CreateMDWorkspace::removeWorkspaceClicked()
 {
   QModelIndex index = m_uiForm.tableView->currentIndex();
-  std::string wsName = m_data->getWorkingData()->cell<std::string>(index.row(), 0);
-  //Find the selected workspace names
-  m_data->unregisterWorkspace(wsName, m_model);
+  if(!index.isValid())
+  {
+    runConfirmation("Select a row from the table before running");
+  }
+  else
+  {
+    std::string wsName = m_data->getWorkingData()->cell<std::string>(index.row(), 0);
+    //Find the selected workspace names
+    m_data->unregisterWorkspace(wsName, m_model);
+  }
+  
 }
 
 void CreateMDWorkspace::createMDWorkspaceClicked()

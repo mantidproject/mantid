@@ -91,6 +91,26 @@ namespace API
 
 
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** @return the marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
+   */
+  bool IMDEventWorkspace::fileNeedsUpdating() const
+  {
+    return m_fileNeedsUpdating;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Sets the marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
+   * @param value :: marker value
+   */
+  void IMDEventWorkspace::setFileNeedsUpdating(bool value)
+  {
+	  m_fileNeedsUpdating = value;
+  }
+
+
+
 }//namespace MDEvents
 
 }//namespace Mantid

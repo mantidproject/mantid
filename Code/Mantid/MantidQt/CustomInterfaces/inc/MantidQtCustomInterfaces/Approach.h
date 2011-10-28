@@ -14,6 +14,8 @@ namespace MantidQt
     {
     public:
       virtual QWidget* createLatticeView() = 0;
+      virtual QWidget* createLogView() = 0;
+      //virtual QWidget* createLogEditView() = 0;
     };
   }
 }

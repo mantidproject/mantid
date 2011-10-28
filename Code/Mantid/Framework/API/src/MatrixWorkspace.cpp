@@ -340,8 +340,9 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------
-    /**
-     * Queries the NearestNeighbours object for the selected detector.
+    /** Queries the NearestNeighbours object for the selected detector.
+     * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
+     *
      * @param comp :: pointer to the querying detector
      * @param radius :: distance from detector on which to filter results
      * @return map of DetectorID to distance for the nearest neighbours
@@ -360,6 +361,24 @@ namespace Mantid
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - Cannot find spectrum number for detector", comp->getID());
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spectra[0], radius);
+      return neighbours;
+    }
+
+
+    //---------------------------------------------------------------------------------------
+    /** Queries the NearestNeighbours object for the selected spectrum number.
+     *
+     * @param spec :: spectrum number of the detector you are looking at
+     * @param radius :: distance from detector on which to filter results
+     * @return map of DetectorID to distance for the nearest neighbours
+     */
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const double radius) const
+    {
+      if ( !m_nearestNeighbours )
+      {
+        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap));
+      }
+      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, radius);
       return neighbours;
     }
 

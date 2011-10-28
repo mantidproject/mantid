@@ -25,105 +25,165 @@ class SmoothNeighboursTest : public CxxTest::TestSuite
 {
 public:
 
-  /** Create an EventWorkspace containing fake data
-   * of single-crystal diffraction.
-   *
-   * @return EventWorkspace_sptr
-   */
-  EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
+
+  void do_test(EventType type, double * expectedY, bool PreserveEvents = true,
+      bool WeightedSum = true, double Radius = 0.0,
+      bool ConvertTo2D = false)
   {
-    int numPixels = 10000;
-    int numBins = 1600;
-    double binDelta = 10.0;
+    // Pixels will be spaced 0.008 apart
+    EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
 
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numPixels,1,1);
-
-    // --------- Load the instrument -----------
-    LoadInstrument * loadInst = new LoadInstrument();
-    loadInst->initialize();
-    loadInst->setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", retVal);
-    loadInst->execute();
-    delete loadInst;
-    // Populate the instrument parameters in this workspace - this works around a bug
-    retVal->populateInstrumentParameters();
-
-    DateAndTime run_start("2010-01-01");
-
-    for (int pix = 0; pix < numPixels; pix++)
-    {
-      for (int i=0; i<numEvents; i++)
-      {
-        retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
-      }
-      retVal->getEventList(pix).addDetectorID(pix);
-    }
-    retVal->doneAddingEventLists();
-
-    //Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec& xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i)
-    {
-      xRef[i] = i*binDelta;
-    }
-
-    //Set all the histograms at once.
-    retVal->setAllX(x1);
-
-    // Some sanity checks
-    TS_ASSERT_EQUALS( retVal->getInstrument()->getName(), "MINITOPAZ");
-    detid2det_map dets;
-    retVal->getInstrument()->getDetectors(dets);
-    TS_ASSERT_EQUALS( dets.size(), 100*100);
-
-    return retVal;
-  }
-  void do_test_MINITOPAZ(EventType type)
-  {
-
-    int numEventsPer = 100;
-    EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
+    {
       in_ws *= 2.0;
+      in_ws *= 0.5;
+    }
     if (type == WEIGHTED_NOTIME)
     {
-      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
+      for (size_t i = 0; i<in_ws->getNumberHistograms(); i++)
       {
         EventList & el = in_ws->getEventList(i);
         el.compressEvents(0.0, &el);
       }
     }
+
+    // Multiply by 2 the workspace at index 4
+    EventList & el = in_ws->getEventList(4);
+    el += el;
+
     size_t nevents0 = in_ws->getNumberEvents();
+
+    AnalysisDataService::Instance().addOrReplace("SmoothNeighboursTest_input", in_ws);
+    if (ConvertTo2D)
+    {
+      FrameworkManager::Instance().exec("ConvertToMatrixWorkspace", 4,
+          "InputWorkspace", "SmoothNeighboursTest_input",
+          "OutputWorkspace", "SmoothNeighboursTest_input");
+    }
+
+
     // Register the workspace in the data service
 
     SmoothNeighbours alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
-    alg.setProperty("InputWorkspace", in_ws);
+    alg.setPropertyValue("InputWorkspace", "SmoothNeighboursTest_input");
     alg.setProperty("OutputWorkspace", "testEW");
     alg.setProperty("AdjX", 1);
     alg.setProperty("AdjY", 1);
+    alg.setProperty("PreserveEvents", PreserveEvents);
+    alg.setProperty("WeightedSum", WeightedSum);
+    alg.setProperty("Radius", Radius);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    EventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testEW")) );
+    if (PreserveEvents)
+    {
+      EventWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testEW")) );
+      TS_ASSERT(ws);
+      if (!ws) return;
+      size_t nevents = ws->getNumberEvents();
+      TS_ASSERT_LESS_THAN( nevents0, nevents);
+    }
+
+    // Check the values
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testEW"));
     TS_ASSERT(ws);
     if (!ws) return;
-    size_t nevents = ws->getNumberEvents();
-    TS_ASSERT_LESS_THAN( nevents0, nevents);
+
+    // Compare to expected values
+    TS_ASSERT_DELTA(  ws->readY(0)[0], expectedY[0], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(1)[0], expectedY[1], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(2)[0], expectedY[2], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(3)[0], expectedY[3], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(4)[0], expectedY[4], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(5)[0], expectedY[5], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(6)[0], expectedY[6], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(7)[0], expectedY[7], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(8)[0], expectedY[8], 1e-4);
+
 
     AnalysisDataService::Instance().remove("testEW");
   }
 
-  void test_SmoothNeighbours()
+  void test_event_WEIGHTED()
   {
-    do_test_MINITOPAZ(TOF);
+    double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
+    do_test(WEIGHTED, expectedY);
   }
+
+  void test_event_WEIGHTED_NOTIME()
+  {
+    double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
+    do_test(WEIGHTED_NOTIME, expectedY);
+  }
+
+  void test_event_dont_PreserveEvents()
+  {
+    double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
+    do_test(TOF, expectedY, false);
+  }
+
+
+  void test_event()
+  {
+    double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
+    do_test(TOF, expectedY);
+  }
+
+  void test_event_no_WeightedSum()
+  {
+    double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
+    do_test(TOF, expectedY, true /*PreserveEvents*/, false /*WeightedSum*/);
+  }
+
+  void test_event_Radius_no_WeightedSum()
+  {
+    // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
+    double expectedY[9] = {2, 2, 2, 2, 3.0, 2, 2, 2, 2};
+    do_test(TOF, expectedY, true /*PreserveEvents*/, false /*WeightedSum*/, 0.009 /* Radius */);
+  }
+
+  void test_event_Radius_WeightedSum()
+  {
+    // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
+    double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
+    do_test(TOF, expectedY, true /*PreserveEvents*/, true /*WeightedSum*/, 0.009 /* Radius */);
+  }
+
+
+  void test_workspace2D()
+  {
+    double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
+    do_test(TOF, expectedY, false /*PreserveEvents*/, true /*WeightedSum*/,
+        0.0 /* Radius*/, true /*Convert2D*/);
+  }
+
+  void test_workspace2D_no_WeightedSum()
+  {
+    double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
+    do_test(TOF, expectedY, false /*PreserveEvents*/, false /*WeightedSum*/,
+        0.0 /* Radius*/, true /*Convert2D*/);
+  }
+
+  void test_workspace2D_Radius_no_WeightedSum()
+  {
+    // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
+    double expectedY[9] = {2, 2, 2, 2, 3.0, 2, 2, 2, 2};
+    do_test(TOF, expectedY, false /*PreserveEvents*/, false /*WeightedSum*/, 0.009 /* Radius */,
+        true /*Convert2D*/);
+  }
+
+  void test_workspace2D_Radius_WeightedSum()
+  {
+    // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
+    double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
+    do_test(TOF, expectedY, false /*PreserveEvents*/, true /*WeightedSum*/, 0.009 /* Radius */,
+        true /*Convert2D*/);
+  }
+
 
 };
 
