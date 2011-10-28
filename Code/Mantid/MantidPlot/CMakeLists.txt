@@ -632,6 +632,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/FirstTimeSetup.h
+                       src/Mantid/FlowLayout.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
