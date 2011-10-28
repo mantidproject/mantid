@@ -1,9 +1,5 @@
 #ifndef MDALGORITHM_SIMULATEMDD_H_
 #define MDALGORITHM_SIMULATEMDD_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

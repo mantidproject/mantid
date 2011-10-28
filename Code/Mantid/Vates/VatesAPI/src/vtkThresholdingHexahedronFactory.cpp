@@ -281,6 +281,9 @@ namespace VATES
     points->Delete();
     signal->Delete();
     visualDataSet->Squeeze();
+    delete [] pointIDs;
+    delete [] voxelShown;
+    delete [] pointNeeded;
     return visualDataSet;
 
   }

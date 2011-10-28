@@ -1,10 +1,5 @@
 #ifndef MANTID_ALGORITHMS_EXTRACT_FFT_SPECTRUM_H_
 #define MANTID_ALGORITHMS_EXTRACT_FFT_SPECTRUM_H_
-/*WIKI* 
-
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

@@ -1,3 +1,14 @@
+/*WIKI* 
+
+
+
+This algorithm performs a deep copy of all of the information in the workspace. It maintains events if the input is an [[EventWorkspace]].
+
+
+
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

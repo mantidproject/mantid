@@ -1,9 +1,5 @@
 #ifndef MANTID_ALGORITHMS_SANSSENSITIVITYCORRECTION_H_
 #define MANTID_ALGORITHMS_SANSSENSITIVITYCORRECTION_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes

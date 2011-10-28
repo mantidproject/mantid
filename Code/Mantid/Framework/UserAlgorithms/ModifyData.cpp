@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 #include "ModifyData.h"
 
 namespace Mantid

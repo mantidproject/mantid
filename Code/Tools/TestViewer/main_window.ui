@@ -28,16 +28,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkMonitorLibraries">
-        <property name="toolTip">
-         <string>Continously monitor the libraries file for any changes and rerun the selected tests when changes are found.</string>
-        </property>
-        <property name="text">
-         <string>Monitor Libraries</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="buttonRunAll">
         <property name="text">
          <string>Run All Tests</string>
@@ -333,7 +323,7 @@
             <item>
              <widget class="QPushButton" name="buttonSelectSVN">
               <property name="text">
-               <string>Using SVN</string>
+               <string>Using GIT</string>
               </property>
              </widget>
             </item>
@@ -356,6 +346,9 @@
           <property name="sortingEnabled">
            <bool>true</bool>
           </property>
+          <attribute name="headerStretchLastSection">
+           <bool>false</bool>
+          </attribute>
           <attribute name="headerStretchLastSection">
            <bool>false</bool>
           </attribute>
@@ -1356,6 +1349,7 @@ p, li { white-space: pre-wrap; }
 &lt;table border=&quot;0&quot; style=&quot;-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;&quot;&gt;
 &lt;tr&gt;
 &lt;td style=&quot;border: none;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;

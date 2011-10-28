@@ -1,19 +1,5 @@
 #ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
 #define MANTID_ALGORITHMS_FINDPEAKS_H_
-/*WIKI* 
-
-This algorithm searches all the spectra in a workspace for peaks, returning a list of the found and successfully fitted peaks. The search algorithm is described in full in reference [1]. In summary: the second difference of each spectrum is computed and smoothed. This smoothed data is then searched for patterns consistent with the presence of a peak. The list of candidate peaks found is passed to a fitting routine and those that are successfully fitted are kept and returned in the output workspace (and logged at information level).
-
-The output [[TableWorkspace]] contains the following columns, which reflect the fact that the peak has been fitted to a Gaussian atop a linear background: spectrum, centre, width, height, backgroundintercept & backgroundslope.
-
-====Subalgorithms used====
-FindPeaks uses the [[SmoothData]] algorithm to, well, smooth the data - a necessary step to identify peaks in statistically fluctuating data. The [[Gaussian]] algorithm is used to fit candidate peaks.
-
-==== References ====
-# M.A.Mariscotti, ''A method for automatic identification of peaks in the presence of background and its application to spectrum analysis'', NIM '''50''' (1967) 309.
-
-
-*WIKI*/
 
 //----------------------------------------------------------------------
 // Includes
@@ -89,10 +75,17 @@ private:
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
   long long computePhi(const int& w) const;
 
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
-  void findPeaksUsingMariscotti();
-  void findPeaksGivenStartingPoints(std::vector<double> peakCenters);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4, std::string backgroundtype);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess, std::string backgroundtype);
+  void findPeaksUsingMariscotti(std::string backgroundtype);
+  void findPeaksGivenStartingPoints(std::vector<double> peakCenters, std::string backgroundtype);
+
+  // void fitPeakHighBackground(MantidVec& X, MantidVec& Y, MantidVec& E, int i0, int i2, int i4, int i_min, int i_max,
+  //    double in_bg0, double in_bg1, double in_bg2, std::string backgroundtype);
+
+  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
+      const unsigned int& i_min, const unsigned int& i_max,
+      const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype);
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
@@ -107,6 +100,8 @@ private:
   int fwhm; ///<holder for the requested peak FWHM
   int index; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
+  bool mHighBackground; ///<flag for find relatively weak peak in high background
+
 };
 
 } // namespace Algorithms

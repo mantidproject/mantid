@@ -29,6 +29,8 @@ signals:
   void mouseMoved(double /*x*/, double /*y*/) const;
 
 protected:
+  // Unhide base class method (avoids Intel compiler warning)
+  using QwtPlotPicker::trackerText;
   QwtText trackerText (const QwtDoublePoint & pos) const;
 };
 
@@ -45,6 +47,8 @@ public:
   }
 
 protected:
+  // Unhide base class method (avoids Intel compiler warning)
+  using QwtPlotZoomer::trackerText;
   virtual QwtText trackerText( const QwtDoublePoint& p ) const
   {
     QwtText t( QwtPlotPicker::trackerText( p ));

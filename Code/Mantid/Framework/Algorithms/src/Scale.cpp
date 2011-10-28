@@ -1,3 +1,9 @@
+/*WIKI* 
+
+Uses the binary operation algorithms [[Multiply]] or [[Plus]] to scale the input workspace by the amount requested. This algorithm is provided as a simple, but less powerful, alternative to the python [[Workspace_Algebra|workspace algebra]] functionality.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

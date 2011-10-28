@@ -1,3 +1,9 @@
+"""*WIKI* 
+
+Normalise detector counts by accelerator current and beam spectrum.
+
+*WIKI*"""
+
 import os
 from MantidFramework import *
 from mantidsimple import *

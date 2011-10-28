@@ -1,21 +1,5 @@
 #ifndef MANTID_ALGORITHMS_CREATEWORKSPACE_H_
 #define MANTID_ALGORITHMS_CREATEWORKSPACE_H_
-/*WIKI* 
-
-
-Example of use in Python for create a simple histogram workspace, automatically populating the VerticalAxis with SpectraNumber values.
-
-<div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
-<source lang="python">
- dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
- dataY = [1,2,3,4,5,6,7,8,9,10,11,12]
- dataE = [1,2,3,4,5,6,7,8,9,10,11,12]
- 
- CreateWorkspace('CreateWorkspace', dataX, dataY, dataE, NSpec=4,UnitX="Wavelength")
-</source></div>
-
-
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

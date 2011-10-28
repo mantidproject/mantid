@@ -1,8 +1,5 @@
 #ifndef MANTID_ALGORITHMS_STRIPVANADIUMPEAKS2_H_
 #define MANTID_ALGORITHMS_STRIPVANADIUMPEAKS2_H_
-/*WIKI*
-TODO: Enter wiki description here.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"

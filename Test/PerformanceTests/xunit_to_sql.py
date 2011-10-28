@@ -16,13 +16,14 @@ import subprocess
 import tempfile
 import sqlresults
 import numpy as np
-
+import glob
 
 # Global SQL result reporter 
 sql_reporter = None
 # Variables string for all tests
 variables = ""
 revision = 0
+commitid = ''
 
 def handle_testcase(case, suite_name):
     """ Handle one test case and save it to DB"""
@@ -49,6 +50,7 @@ def handle_testcase(case, suite_name):
                  environment=envAsString(),
                  runner="ctest",
                  revision=revision,
+                 commitid=commitid,
                  runtime=time,
                  cpu_fraction=cpu_fraction,
                  success=True,
@@ -82,17 +84,17 @@ if __name__ == "__main__":
     # Parse the command line
     parser = argparse.ArgumentParser(description='Add the contents of Xunit-style XML test result files to a SQL database.')
 
-    parser.add_argument('--revision', dest='revision', 
-                        default="",
-                        help='The revision number. Default 0.')
-    
     parser.add_argument('--db', dest='db', 
-                        default="./MantidSystemTests.db",
-                        help='Full path to the SQLite database holding the results (default "./MantidSystemTests.db"). The database will be created if it does not exist.')
+                        default="./MantidPerformanceTests.db",
+                        help='Full path to the SQLite database holding the results (default "./MantidPerformanceTests.db"). The database will be created if it does not exist.')
     
     parser.add_argument('--variables', dest='variables', 
                         default="",
                         help='Optional string of comma-separated "VAR1NAME=VALUE,VAR2NAME=VALUE2" giving some parameters used, e.g. while building.')
+    
+    parser.add_argument('--commit', dest='commitid', 
+                        default="",
+                        help='Commit ID of the current build (a 40-character SHA string).')
     
     parser.add_argument('xmlpath', metavar='XMLPATH', type=str, nargs='+',
                         default="", 
@@ -108,10 +110,22 @@ if __name__ == "__main__":
     sql_reporter = sqlresults.SQLResultReporter()
     
     variables = args.variables 
-    revision = args.revision
-    
+    # Add a new revision and get the "revision" number
+    revision = sqlresults.add_revision()
+    # Save the commitid
+    commitid = args.commitid
+
+    # If a directory has been provided, look there for all of the XML files
+    if os.path.isdir(args.xmlpath[0]):
+        xmldir = args.xmlpath[0]
+        if not os.path.isabs(xmldir):
+            xmldir = os.path.abspath(xmldir)
+        xmlfiles = glob.glob(os.path.join(xmldir, '*.xml'))
+    else:
+        xmlfiles = args.xmlpath
+       
     # Convert each file
-    for file in args.xmlpath:
+    for file in xmlfiles:
         convert_xml(file)
         
         

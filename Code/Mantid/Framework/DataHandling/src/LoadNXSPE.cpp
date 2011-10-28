@@ -1,3 +1,7 @@
+/*WIKI* 
+
+Algorithm to load an NXSPE file into a workspace2D. It will create a new instrument, that can be overwritten later by the LoadInstrument algorithm.
+*WIKI*/
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/Workspace2D.h"

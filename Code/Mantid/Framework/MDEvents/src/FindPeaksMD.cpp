@@ -1,3 +1,20 @@
+/*WIKI* 
+
+
+This algorithm is used to find single-crystal peaks in a multi-dimensional workspace. It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW.
+
+The algorithm proceeds in this way:
+* Sorts all the boxes in the workspace by decreasing order of signal density (total weighted event sum divided by box volume).
+** It will skip any boxes with a density below a threshold. The threshold is <math>TotalSignal / TotalVolume * DensityThresholdFactor</math>.
+* The centroid of the strongest box is considered a peak.
+* The centroid of the next strongest box is calculated. 
+** We look through all the peaks that have already been found. If the box is too close to an existing peak, it is rejected. This distance is PeakDistanceThreshold.
+* This is repeated until we find up to MaxPeaks peaks.
+
+Each peak created is placed in the output [[PeaksWorkspace]].
+
+
+*WIKI*/
 #include "MantidMDEvents/FindPeaksMD.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

@@ -1,9 +1,5 @@
 #ifndef MANTID_CRYSTAL_SAVEHKL_H_
 #define MANTID_CRYSTAL_SAVEHKL_H_
-/*WIKI* 
-
-Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

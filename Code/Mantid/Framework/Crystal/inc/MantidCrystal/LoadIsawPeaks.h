@@ -1,11 +1,5 @@
 #ifndef MANTID_CRYSTAL_LOADISAWPEAKS_H_
 #define MANTID_CRYSTAL_LOADISAWPEAKS_H_
-/*WIKI* 
-
-Reads an ISAW-style .peaks or .integrate file into a PeaksWorkspace. Any detector calibration information is ignored.
-
-NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:' tags at the start of the file.If the date is not present, the latest [[Instrument Definition File]] is used.
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

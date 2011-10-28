@@ -43,7 +43,7 @@ namespace WorkflowAlgorithms
   using namespace API;
   using namespace DataObjects;
 
-  ReductionTableHandler::ReductionTableHandler(TableWorkspace_sptr tableWS) : g_log(Kernel::Logger::get("Algorithm"))
+  ReductionTableHandler::ReductionTableHandler(TableWorkspace_sptr tableWS) : g_log(Kernel::Logger::get("ReductionHandler"))
   {
     if(tableWS)
       m_reductionTable = tableWS;
@@ -56,6 +56,7 @@ namespace WorkflowAlgorithms
     createTable();
   }
 
+  /// Create a new reduction table workspace
   void ReductionTableHandler::createTable()
   {
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -66,6 +67,8 @@ namespace WorkflowAlgorithms
     m_reductionTable->addColumn("double","DoubleValue");
   }
 
+  /// Find a string entry for the given key
+  /// @param key :: key string
   std::string ReductionTableHandler::findStringEntry(const std::string& key)
   {
     try
@@ -73,9 +76,8 @@ namespace WorkflowAlgorithms
       int row = 0;
       m_reductionTable->find(key, row, 0);
       return m_reductionTable->String(row, STRINGENTRY_COL);
-    } catch(std::out_of_range&) {
-      return "";
-    }
+    } catch(std::out_of_range&) {}
+    return "";
   }
 
   /// Find a file path for the given name
@@ -94,6 +96,8 @@ namespace WorkflowAlgorithms
     return "";
   }
 
+  /// Find an integer entry for the given key
+  /// @param key :: key string
   int ReductionTableHandler::findIntEntry(const std::string& key)
   {
     try
@@ -101,11 +105,12 @@ namespace WorkflowAlgorithms
       int row = 0;
       m_reductionTable->find(key, row, 0);
       return m_reductionTable->Int(row, INTENTRY_COL);
-    } catch(std::out_of_range&) {
-      return EMPTY_INT();
-    }
+    } catch(std::out_of_range&) {}
+    return EMPTY_INT();
   }
 
+  /// Find a double entry for the given key
+  /// @param key :: key string
   double ReductionTableHandler::findDoubleEntry(const std::string& key)
   {
     try
@@ -113,11 +118,13 @@ namespace WorkflowAlgorithms
       int row = 0;
       m_reductionTable->find(key, row, 0);
       return m_reductionTable->Double(row, DOUBLEENTRY_COL);
-    } catch(std::out_of_range&) {
-      return EMPTY_DBL();
-    }
+    } catch(std::out_of_range&) {}
+    return EMPTY_DBL();
   }
 
+  /// Find a string entry corresponding to a workspace and return that workspace
+  /// if it exists
+  /// @param key :: key string
   MatrixWorkspace_sptr ReductionTableHandler::findWorkspaceEntry(const std::string& key)
   {
     MatrixWorkspace_sptr pointer;
@@ -133,46 +140,79 @@ namespace WorkflowAlgorithms
     return pointer;
   }
 
+  /// Add a string entry with a given key
+  /// @param key :: key string
+  /// @param value :: string value to add
+  /// @param replace :: if true, the current value will be replaced
   void ReductionTableHandler::addEntry(const std::string& key, const std::string& value, bool replace)
   {
-    try
+    const std::string oldValue = findStringEntry(key);
+
+    // If the entry is already there with the same value, just return
+    if (oldValue == value) return;
+
+    if (oldValue.size()>0)
     {
-      int row = 0;
-      m_reductionTable->find(key, row, 0);
-      if (replace) m_reductionTable->removeRow(row);
-      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->String(row, STRINGENTRY_COL)
-          << std::endl << "   adding: " << value << std::endl;
-    } catch(std::out_of_range&) {}
+      if (replace)
+      {
+        int irow = 0;
+        m_reductionTable->find(key, irow, 0);
+        m_reductionTable->removeRow(irow);
+      } else g_log.error() << "Entry " << key << " already exists: " << oldValue
+          << std::endl << "   appending: " << value << std::endl;
+    }
 
     TableRow row = m_reductionTable->appendRow();
     row << key << value << EMPTY_INT() << EMPTY_DBL();
   }
 
+  /// Add an integer entry with a given key
+  /// @param key :: key string
+  /// @param value :: integer value to add
+  /// @param replace :: if true, the current value will be replaced
   void ReductionTableHandler::addEntry(const std::string& key, const int& value, bool replace)
   {
-    try
+    const int oldValue = findIntEntry(key);
+
+    // If the entry is already there with the same value, just return
+    if (oldValue == value) return;
+
+    if (oldValue != EMPTY_INT())
     {
-      int row = 0;
-      m_reductionTable->find(key, row, 0);
-      if (replace) m_reductionTable->removeRow(row);
-      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Int(row, STRINGENTRY_COL)
-          << std::endl << "   adding: " << value << std::endl;
-    } catch(std::out_of_range&) {}
+      if (replace)
+      {
+        int irow = 0;
+        m_reductionTable->find(key, irow, 0);
+        m_reductionTable->removeRow(irow);
+      } else g_log.error() << "Entry " << key << " already exists: " << oldValue
+            << std::endl << "   adding: " << value << std::endl;
+    }
 
     TableRow row = m_reductionTable->appendRow();
     row << key << "" << value << EMPTY_DBL();
   }
 
+  /// Add a double entry with a given key
+  /// @param key :: key string
+  /// @param value :: double value to add
+  /// @param replace :: if true, the current value will be replaced
   void ReductionTableHandler::addEntry(const std::string& key, const double& value, bool replace)
   {
-    try
+    const double oldValue = findDoubleEntry(key);
+
+    // If the entry is already there with the same value, just return
+    if (std::fabs( (oldValue - value)/value ) < 1e-8) return;
+
+    if (std::fabs( (oldValue - EMPTY_DBL())/(EMPTY_DBL()) ) > 1e-8)
     {
-      int row = 0;
-      m_reductionTable->find(key, row, 0);
-      if (replace) m_reductionTable->removeRow(row);
-      else g_log.error() << "Entry " << key << "already exists: " << m_reductionTable->Double(row, STRINGENTRY_COL)
-          << std::endl << "   adding: " << value << std::endl;
-    } catch(std::out_of_range&) {}
+      if (replace)
+      {
+        int irow = 0;
+        m_reductionTable->find(key, irow, 0);
+        m_reductionTable->removeRow(irow);
+      } else g_log.error() << "Entry " << key << " already exists: " << oldValue
+            << std::endl << "   adding: " << value << std::endl;
+    }
 
     TableRow row = m_reductionTable->appendRow();
     row << key << "" << EMPTY_INT() << value;

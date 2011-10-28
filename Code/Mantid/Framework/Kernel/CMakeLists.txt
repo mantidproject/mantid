@@ -300,9 +300,15 @@ endif ()
 # This section deals with creating the MantidVersion implementation
 ###########################################################################
 
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
-                 ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
-)
+# DON'T try to update the MantidVersion source file we were not able to
+# determine it from git and the file already exists. This makes sure the 
+# version number is correct when building off the source tarball
+
+if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
+                   ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
+  )
+endif ()
 
 ###########################################################################
 # Manipulate the Mantid.properties file to work wherever you build to

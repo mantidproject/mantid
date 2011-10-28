@@ -1,3 +1,15 @@
+/*WIKI* 
+
+
+This algorithm corrects the data and error values on a workspace by the value of one minus an exponential function
+of the form <math> \rm C1(1 - e^{-{\rm C} x}) </math>.
+This formula is calculated for each data point, with the value of ''x'' 
+being the mid-point of the bin in the case of histogram data.
+The data and error values are either divided or multiplied by the value of this function, according to the
+setting of the Operation property.
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

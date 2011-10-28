@@ -1,12 +1,9 @@
 """*WIKI* 
 
+Calculate g(r) and PDF for NOMAD
 
 *WIKI*"""
-################################################################################
-#
-#  Calculate g(r) and PDF for NOMAD
-#
-################################################################################
+
 from MantidFramework import *
 from mantidsimple import *
 

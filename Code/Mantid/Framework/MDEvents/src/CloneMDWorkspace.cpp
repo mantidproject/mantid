@@ -1,3 +1,14 @@
+/*WIKI* 
+
+
+
+This algorithm will clones an existing MDEventWorkspace into a new one.
+
+If the InputWorkspace is a file-backed MDEventWorkspace, then the algorithm will copy the original file into a new one with the suffix '_clone' added to its filename, in the same directory.
+
+
+
+*WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/CloneMDWorkspace.h"

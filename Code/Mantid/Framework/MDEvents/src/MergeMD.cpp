@@ -1,3 +1,21 @@
+/*WIKI* 
+
+
+
+This algorithm is meant to merge a large number of large MDEventWorkspaces together into one file-backed MDEventWorkspace, without exceeding available memory.
+
+First, you will need to generate a MDEventWorkspaces NXS file for each run with a fixed box structure:
+
+* This would be a MaxDepth=1 structure but with finer boxes, maybe 50x50x50.
+* This can be done immediately after acquiring each run so that less processing has to be done at once.
+
+
+Then, enter the path to all of the files created previously. The algorithm avoids excessive memory use by only keeping the events from ONE box from ALL the files in memory at once to further process and refine it.
+This is why it requires a common box structure.
+
+
+
+*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/CPUTimer.h"

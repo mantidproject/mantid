@@ -1,9 +1,5 @@
 #ifndef USER_ALGORITHMS_WORKSPACEALGORITHM_H_
 #define USER_ALGORITHMS_WORKSPACEALGORITHM_H_
-/*WIKI* 
-
-
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 

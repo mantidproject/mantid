@@ -1,3 +1,7 @@
+/*WIKI* 
+
+
+*WIKI*/
 // SaveISISNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with SaveISISNexusProcessed
@@ -356,7 +360,7 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
     std::copy(str,str + n,buff);
     NXputslab(handle,buff,start,sizes);
   }
-  delete buff;
+  delete [] buff;
   return buff_size;
 }
 

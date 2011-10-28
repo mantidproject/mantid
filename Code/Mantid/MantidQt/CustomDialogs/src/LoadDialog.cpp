@@ -299,7 +299,7 @@ namespace MantidQt
           }
         }
         nameLbl->setBuddy(inputWidget);
-        QHBoxLayout *widgetLayout = new QHBoxLayout();
+        widgetLayout = new QHBoxLayout();
         widgetLayout->addWidget(nameLbl);
         widgetLayout->addWidget(inputWidget);
         propertyLayout->addLayout(widgetLayout);

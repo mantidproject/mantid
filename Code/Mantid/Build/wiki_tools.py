@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+""" A few tools for validating the wiki at mantidproject.org """
+import warnings
 import argparse
 import os
 import mwclient
@@ -12,12 +14,71 @@ import sys
 import codecs
 import fnmatch
 
+
 mantid_initialized = False
-header_files = []
-header_files_bare = []
+cpp_files = []
+cpp_files_bare = []
 python_files = []
 python_files_bare = []
 
+
+
+#======================================================================
+def remove_wiki_from_header():
+    """One-time method to remove *WIKI* tags from all header files """
+    parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
+    for root, dirnames, filenames in os.walk(parent_dir):
+      for filename in fnmatch.filter(filenames, '*.h'):
+        fullfile = os.path.join(root, filename)
+        f = open(fullfile,'r')
+        lines = f.read().split('\n')
+        f.close()
+        n = 0
+        # The output file
+        outlines = []
+        while n < len(lines) and (not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*')):
+            outlines.append( lines[n] )
+            n += 1
+        #Skip all the WIKI lines
+        while (n < len(lines)) and not lines[n].startswith("*WIKI*"):
+            n += 1
+        n += 1
+        # Copy the rest
+        while n < len(lines):
+            outlines.append( lines[n] )
+            n += 1
+        
+        f = open(fullfile,'w')
+        f.write('\n'.join(outlines))
+        f.close()
+
+#======================================================================
+def add_wiki_description(algo, wikidesc):
+    """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
+    wikidesc = wikidesc.split('\n')
+    source = find_algo_file(algo)
+    if source != '':
+        if len("".join(wikidesc)) == 0:
+            print "No wiki description found to add!!!!"
+        
+        f = open(source,'r')
+        lines = f.read().split('\n')
+        f.close()
+        
+        #What lines are we adding?
+        if source.endswith(".py"):
+            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
+        else:
+            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
+    
+        lines = adding + lines
+        
+        text = "\n".join(lines)
+        f = codecs.open(source, encoding='utf-8', mode='w+')
+        f.write(text)
+        f.close()
+        
+        
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -25,10 +86,10 @@ def intialize_files():
     parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
-      for filename in fnmatch.filter(filenames, '*.h'):
+      for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
-          header_files.append(fullfile)
-          header_files_bare.append( os.path.split(fullfile)[1] )
+          cpp_files.append(fullfile)
+          cpp_files_bare.append( os.path.split(fullfile)[1] )
       for filename in fnmatch.filter(filenames, '*.py'):
           fullfile = os.path.join(root, filename)
           python_files.append(fullfile)
@@ -38,11 +99,11 @@ def intialize_files():
 def find_algo_file(algo):
     """Find the files for a given algorithm"""
     source = ''
-    header = algo + ".h"
+    cpp = algo + ".cpp"
     pyfile = algo + ".py"
-    if header in header_files_bare:
-        n = header_files_bare.index(header, )
-        source = header_files[n]
+    if cpp in cpp_files_bare:
+        n = cpp_files_bare.index(cpp, )
+        source = cpp_files[n]
     elif pyfile in python_files_bare:
         n = python_files_bare.index(pyfile, )
         source = python_files[n]
@@ -54,20 +115,28 @@ def initialize_wiki(args):
     # Init site object
     print "Connecting to site mantidproject.org"
     site = mwclient.Site('www.mantidproject.org', path='/')
-    print "Logging in as %s" % args.username
-    site.login(args.username, args.password) # Optional
+    # Login, if specified
+    if hasattr(args, 'username'):
+        print "Logging in as %s" % args.username
+        site.login(args.username, args.password) 
+#        if res is None:
+#            warnings.warn("Login with username '%s' failed! Check your username and password." % args.username)
     
     
 #======================================================================
-def initialize_Mantid():
+def initialize_Mantid(mantidpath):
     """ Start mantid framework """
     global mtd
     global mantid_initialized
     if mantid_initialized:   return
+    sys.path.append(mantidpath)
     sys.path.append(os.getcwd())
     sys.path.append( os.path.join( os.getcwd(), 'bin') )
-    import MantidFramework
-    from MantidFramework import mtd
+    try:
+        import MantidFramework
+        from MantidFramework import mtd
+    except:
+        raise Exception("Error importing MantidFramework. Did you specify the --mantidpath option?")
     mtd.initialise()
     mantid_initialized = True
 
@@ -89,177 +158,6 @@ def find_misnamed_algos():
         if source=='':
             print "%s was NOT FOUND" % (algo, )
             
-#======================================================================
-def add_wiki_description(algo, wikidesc):
-    """Adds a wiki description  in the algo's header file under comments tag."""
-    wikidesc = wikidesc.split('\n')
-    source = find_algo_file(algo)
-    if source != '':
-        if len("".join(wikidesc)) == 0:
-            print "No wiki description found to add!!!!"
-        
-        f = open(source,'r')
-        lines = f.read().split('\n')
-        f.close()
-        n = 0
-        while  n < len(lines):
-            line = lines[n].strip()
-            n += 1
-            if line.startswith('#define'): break
-            
-        if n >= len(lines): n = 0
-        
-        #What lines are we adding?
-        if source.endswith(".py"):
-            adding = ['"""*WIKI* ', ''] + wikidesc + ['*WIKI*"""'] 
-        else:
-            adding = ['/*WIKI* ', ''] + wikidesc + ['*WIKI*/'] 
-    
-        lines = lines[:n] + adding + lines[n:]
-        
-        text = "\n".join(lines)
-        f = codecs.open(source, encoding='utf-8', mode='w+')
-        f.write(text)
-        f.close()
-        
-        
-#======================================================================
-def get_wiki_description(algo):
-    source = find_algo_file(algo)
-    if source == '': 
-        alg = mtd.createAlgorithm(algo)
-        return alg.getWikiDescription()
-    else:
-        f = open(source,'r')
-        lines = f.read().split('\n')
-        f.close()
-        n = 0
-        while not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*'):
-            n += 1
-        desc = ""
-        n += 1
-        while not lines[n].startswith("*WIKI*"):
-            desc += lines[n] + "\n"
-            n += 1
-        return desc
-    
-#======================================================================
-def make_property_table_line(propnum, p):
-    """ Make one line of property table
-    propnum :: number of the prop
-    p :: Property object
-    """
-    out = ""
-    # The property number
-    out += "|" + str(propnum) + "\n"
-    # Name of the property
-    out += "|" + p.name + "\n"
-    # Direction
-    direction_string = ["Input", "Output", "InOut", "None"]
-    out += "|" + direction_string[p.direction] + "\n"
-    # Type (as string)
-    out += "|" + str(p.type) + "\n"
-    # Default?
-    default = p.getDefault
-    defaultstr = str(default)
-    # Replace the ugly default values with "optional"
-    if (defaultstr == "8.9884656743115785e+307") or \
-       (defaultstr == "2147483647"):
-        defaultstr = "Optional"
-        
-    if str(p.type) == "boolean":
-        if defaultstr == "1": defaultstr = "True" 
-        else: defaultstr = "False"
-    
-    if (p.isValid == ""): #Nothing was set, but it's still valid = NOT mandatory
-      out += "| " + defaultstr + "\n"
-    else:
-      out += "|Mandatory\n"
-    # Documentation
-    out += "|" + p.documentation.replace("\n", " ") + "\n"
-    # End of table line
-    out += "|-\n"
-    return out
-    
-    
-        
-#======================================================================
-def make_wiki(algo_name):
-    """ Return wiki text for a given algorithm """ 
-    initialize_Mantid()
-    
-    # Deprecated algorithms: Simply returnd the deprecation message
-    deprec = mtd.algorithmDeprecationMessage(algo_name)
-    if len(deprec) != 0:
-        out = deprec
-        out = out.replace(". Use ", ". Use [[")
-        out = out.replace(" instead.", "]] instead.")
-        return out
-    
-    alg = mtd.createAlgorithm(algo_name)
-    
-    out = ""
-    out += "== Summary ==\n\n"
-    out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
-    out += "== Properties ==\n\n"
-    
-    out += """{| border="1" cellpadding="5" cellspacing="0" 
-!Order\n!Name\n!Direction\n!Type\n!Default\n!Description
-|-\n"""
-
-    # Do all the properties
-    props = alg._ProxyObject__obj.getProperties()
-    propnum = 1
-    for prop in props:
-        out += make_property_table_line(propnum, prop)
-        propnum += 1
-        
-        
-    # Close the table
-    out += "|}\n\n"
-
-
-    out += "== Description ==\n"
-    out += "\n"
-    desc = get_wiki_description(algo_name)
-    if (desc == ""):
-      out += "INSERT FULL DESCRIPTION HERE\n"
-      print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
-    else:
-      out += desc + "\n"
-    out += "\n"
-    out += "[[Category:Algorithms]]\n"
-    
-    # All other categories
-    categories = alg.categories()
-    for categ in categories:
-      out += "[[Category:" + categ + "]]\n"
-
-    out +=  "{{AlgorithmLinks|" + algo_name + "}}\n"
-
-    return out
-
-
-
-
-
-
-#======================================================================
-def find_property_doc(lines, propname):
-    """ Search WIKI text to find a properties' documentation there """
-    if len(lines) == 0:
-        return ""
-    n = 0
-    for line in lines:
-        if line.strip() == "|" + propname:
-            doc = lines[n+4].strip()
-            if len(doc)>1:
-                doc = doc[1:]
-            return doc
-        n += 1
-            
-    return ""
-    
 #======================================================================
 def find_section_text(lines, section, go_to_end=False, section2=""):
     """ Search WIKI text to find a section text there """
@@ -288,6 +186,23 @@ def find_section_text(lines, section, go_to_end=False, section2=""):
             
     return ""
     
+    
+
+#======================================================================
+def find_property_doc(lines, propname):
+    """ Search WIKI text to find a properties' documentation there """
+    if len(lines) == 0:
+        return ""
+    n = 0
+    for line in lines:
+        if line.strip() == "|" + propname:
+            doc = lines[n+4].strip()
+            if len(doc)>1:
+                doc = doc[1:]
+            return doc
+        n += 1
+            
+    return ""
     
 #======================================================================
 def validate_wiki(args, algos):
@@ -319,13 +234,12 @@ def validate_wiki(args, algos):
             wikidoc = find_section_text(lines, "Summary", go_to_end=False, section2="")
             if args.show_missing: print wikidoc
             
-#        desc = alg._ProxyObject__obj.getWikiDescription()
+#        # One-time code to add wiki desc to CPP file
+#        desc = find_section_text(lines, "Description", True, "Introduction")
+#        # Fallback to the code one
 #        if len(desc) == 0: 
-#            print "- Wiki Description is missing (in the code)."
-#            desc = find_section_text(lines, "Description", True, "Introduction")
-#            if args.show_missing: print desc
-            
-        #add_wiki_description(algo, desc)
+#            desc = alg._ProxyObject__obj.getWikiDescription()
+#        add_wiki_description(algo, desc)
             
         props = alg._ProxyObject__obj.getProperties()
         for prop in props:
@@ -355,29 +269,15 @@ def find_orphan_wiki():
                 print "Algorithm %s was not found." % algo_name
 
 #======================================================================
-def do_algorithm(args, algo):
-    print "Generating wiki page for %s" % (algo)
-    global site
-    contents = make_wiki(algo)
-    
-    print "Saving page to http://www.mantidproject.org/%s" % algo
-    #Open the page with the name of the algo
-    page = site.Pages[algo]
-    text = page.edit()
-    #print 'Text in page:', text.encode('utf-8')
-    page.save(contents, summary = 'Bot: replaced contents using the auto_wiki.py script.' )
-
-#======================================================================
 if __name__ == "__main__":
+   
     # First, get the config for the last settings
     config = ConfigParser.ConfigParser()
-    config_filename = os.path.split(__file__)[0] + "/auto_wiki.ini"
+    config_filename = os.path.split(__file__)[0] + "/wiki_tools.ini"
     config.read(config_filename)
-    defaultuser = ""
-    defaultpassword = ""
+    defaultmantidpath = ""
     try:
-        defaultuser = config.get("login", "username")
-        defaultpassword = config.get("login", "password")
+        defaultmantidpath = config.get("mantid", "path")
     except:
         pass
     
@@ -387,12 +287,9 @@ if __name__ == "__main__":
     parser.add_argument('algos', metavar='ALGORITHM', type=str, nargs='*',
                         help='Name of the algorithm(s) to generate wiki docs.')
     
-    parser.add_argument('--user', dest='username', default=defaultuser,
-                        help="User name, to log into the www.mantidproject.org wiki. Default: '%s'. This value is saved to a .ini file so that you don't need to specify it after." % defaultuser)
+    parser.add_argument('--mantidpath', dest='mantidpath', default=defaultmantidpath,
+                        help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
 
-    parser.add_argument('--password', dest='password', default=defaultpassword,
-                        help="Password, to log into the www.mantidproject.org wiki. Default: '%s'. Note this is saved plain text to a .ini file!" % defaultpassword)
-    
     parser.add_argument('--validate', dest='validate_wiki', action='store_const',
                         const=True, default=False,
                         help="Validate algorithms' documentation. Validates them all if no algo is specified. Look for missing wiki pages, missing properties documentation, etc. using the list of registered algorithms.")
@@ -410,31 +307,26 @@ if __name__ == "__main__":
                         help="Look for algorithms where the name of the algorithm does not match any filename.")
 
     args = parser.parse_args()
-    
+        
     # Write out config for next time
     config = ConfigParser.ConfigParser()
-    config.add_section("login")
-    config.set("login", "username", args.username)
-    config.set("login", "password", args.password)
+    config.add_section("mantid")
+    config.set("mantid", "path", args.mantidpath)
     f = open(config_filename, 'w')
     config.write(f)
     f.close()
-
+    
     if not args.validate_wiki and not args.find_misnamed and not args.find_orphans and len(args.algos)==0:
         parser.error("You must specify at least one algorithm if not using --validate")
 
-    initialize_Mantid()
+    initialize_Mantid(args.mantidpath)
     intialize_files()
-    
-#    pull_wiki_description('LoadMD')
-#    sys.exit(1)
+    initialize_wiki(args)
 
     if args.find_misnamed:
         find_misnamed_algos()
         sys.exit(1)
-    
-    initialize_wiki(args)
-    
+  
     if args.find_orphans:
         find_orphan_wiki()
         sys.exit(1)
@@ -444,8 +336,5 @@ if __name__ == "__main__":
         algos = args.algos
         if len(algos) == 0:
             algos = get_all_algorithms()
-        validate_wiki(args, algos)
-    else:
-        for algo in args.algos:
-            do_algorithm(args, algo)
+        validate_wiki(args, algos)        
         

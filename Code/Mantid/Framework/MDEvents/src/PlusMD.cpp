@@ -1,3 +1,12 @@
+/*WIKI* 
+
+
+This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: it combines the events from the two workspaces together to form one large workspace.
+
+
+
+
+*WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"
@@ -74,9 +83,12 @@ namespace MDEvents
 
     Progress prog(this, 0.0, 0.4, box2->getBoxController()->getTotalNumMDBoxes());
 
+    // How many events you started with
+    size_t initial_numEvents = ws1->getNPoints();
+
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
     MDBoxIterator<MDE,nd> it2(box2, 1000, true);
-    while (true)
+    do
     {
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it2.getBox());
       if (box)
@@ -88,8 +100,7 @@ namespace MDEvents
         box->releaseEvents();
       }
       prog.report("Adding Events");
-      if (!it2.next()) break;
-    }
+    } while (it2.next());
 
     this->progress(0.41, "Splitting Boxes");
     Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
@@ -98,6 +109,10 @@ namespace MDEvents
     ws1->splitAllIfNeeded(ts);
     prog2->resetNumSteps( ts->size(), 0.4, 0.6);
     tp.joinAll();
+
+    // Set a marker that the file-back-end needs updating if the # of events changed.
+    if (ws1->getNPoints() != initial_numEvents)
+      ws1->setFileNeedsUpdating(true);
 
 //    // Now we need to save all the data that was not saved before.
 //    if (ws1->isFileBacked())

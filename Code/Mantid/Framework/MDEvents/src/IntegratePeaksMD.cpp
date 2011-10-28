@@ -1,3 +1,14 @@
+/*WIKI* 
+
+
+
+This algorithm takes two input workspaces: a MDEventWorkspace containing the events in multi-dimensional space, as well as a PeaksWorkspace containing single-crystal peak locations.
+
+The PeaksWorkspace will be modified with the integrated intensity and error found beingfilled in.
+
+
+
+*WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"

@@ -1,15 +1,5 @@
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
-/*WIKI* 
-
-This algorithm performs dense binning of the events in multiple dimensions of an input [[MDEventWorkspace]] and places them into a dense MDHistoWorkspace with 1-4 dimensions.
-
-The input MDEventWorkspace may have more dimensions than the number of output dimensions. The names of the dimensions in the DimX, etc. parameters are used to find the corresponding dimensions that will be created in the output.
-
-An ImplicitFunction can be defined using the ImplicitFunctionXML parameter; any points NOT belonging inside of the ImplicitFunction will be set as NaN (not-a-number). 
-
-As of now, binning is only performed along axes perpendicular to the dimensions defined in the MDEventWorkspace.
-*WIKI*/
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"

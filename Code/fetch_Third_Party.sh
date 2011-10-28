@@ -2,8 +2,15 @@
 # This script deals with getting hold of the required third party includes and libraries
 # It will either clone or pull 3rdpartyincludes & 3rdpartylibs-mac and put them in the right place for CMake
 
+uname=`uname`
+if [ ${uname} != 'Darwin' ]; then
+  echo 'This script is only intended for use on Macs'
+  echo 'Exiting without doing anything'
+  exit 0
+fi
+
 gitcmd=`which git`
-arch=mac
+arch=mac64
 
 if [ -z "${gitcmd}" ]; then
     echo 'Unable to find git, check that it is installed and on the PATH'

@@ -1,3 +1,24 @@
+/*WIKI* 
+
+
+
+
+Filters out events using the entries in the Sample Logs. 
+
+Sample logs consist of a series of <Time, Value> pairs. The first step in filtering is to generate a list of start-stop time intervals that will be kept, using those logs.
+* Each log value is compared to the min/max value filters to determine whether it is "good" or not.
+** For a single log value that satisfies the criteria at time T, all events between T+-Tolerance (LogBoundary=Centre), or T and T+Tolerance (LogBoundary=Left) are kept.
+** If there are several consecutive log values matching the filter, events between T1-Tolerance and T2+Tolerance (LogBoundary=Centre), or T1 and T2+Tolerance (LogBoundary=Left) are kept.
+* The filter is then applied to all events in all spectra. Any events with pulse times outside of any "good" time ranges are removed.
+
+There is no interpolation of log values between the discrete sample log times at this time.
+However, the log value is assumed to be constant at times before its first point and after its last. For example, if the first temperature measurement was at time=10 seconds and a temperature within the acceptable range, then all events between 0 and 10 seconds will be included also. If a log has a single point in time, then that log value is assumed to be constant for all time and if it falls within the range, then all events will be kept.
+
+
+
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

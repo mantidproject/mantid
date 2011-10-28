@@ -1,3 +1,14 @@
+/*WIKI* 
+
+Save a [[MDEventWorkspace]] to a .nxs file. The workspace's current box structure and entire list of events is preserved.
+The resulting file can be loaded via [[LoadMD]].
+
+If you specify MakeFileBacked, then this will turn an in-memory workspace to a file-backed one. Memory will be released as it is written to disk.
+
+If you specify UpdateFileBackEnd, then any changes (e.g. events added using the PlusMD algorithm) will be saved to the file back-end.
+
+*WIKI*/
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
@@ -105,7 +116,8 @@ namespace MDEvents
       if (!file)
         throw std::invalid_argument("MDEventWorkspace is not file-backed. Do not check UpdateFileBackEnd!");
 
-      // Normally the file is left open with the event data open. Needs to be closed and reopened for things to work
+      // Normally the file is left open with the event data open, but in READ only mode.
+      // Needs to be closed and reopened for things to work
       MDE::closeNexusData(file);
       file->close();
       // Reopen the file

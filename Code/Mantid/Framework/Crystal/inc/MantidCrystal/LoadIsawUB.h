@@ -1,9 +1,5 @@
 #ifndef MANTID_CRYSTAL_LOADISAWUB_H_
 #define MANTID_CRYSTAL_LOADISAWUB_H_
-/*WIKI* 
-
-The ISAW UB Matrix file format is: TODO
-*WIKI*/
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 

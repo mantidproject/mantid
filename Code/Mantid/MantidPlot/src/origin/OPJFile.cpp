@@ -499,7 +499,7 @@ int OPJFile::ParseFormatOld() {
 					fread(stmp,valuesize,1,f);
 					fprintf(debug,"%s ",stmp);
 					SPREADSHEET[spread].column[(current_col-1)].odata.push_back(originData(stmp));
-					delete stmp;
+					delete [] stmp;
 				}
 			}
 		}	// else
@@ -1076,7 +1076,7 @@ int OPJFile::ParseFormatNew() {
 							stmp[0]='\0';
 						SPREADSHEET[spread].column[(current_col-1)].odata.push_back(originData(stmp));
 						fprintf(debug,"%s ",stmp);
-						delete stmp;
+						delete [] stmp;
 					}
 				}
 				else //Text
@@ -1087,7 +1087,7 @@ int OPJFile::ParseFormatNew() {
 						stmp[0]='\0';
 					SPREADSHEET[spread].column[(current_col-1)].odata.push_back(originData(stmp));
 					fprintf(debug,"%s ",stmp);
-					delete stmp;
+					delete [] stmp;
 				}
 			}
 
@@ -1214,7 +1214,7 @@ int OPJFile::ParseFormatNew() {
 		fread(stmp,size,1,f);
 		if(0==strcmp(stmp,"ResultsLog"))
 		{
-			delete stmp;
+			delete [] stmp;
 			fseek(f,1,SEEK_CUR);
 			fread(&size,4,1,f);
 			if(IsBigEndian()) SwapBytes(size);
@@ -1223,7 +1223,7 @@ int OPJFile::ParseFormatNew() {
 			fread(stmp,size,1,f);
 			resultsLog=stmp;
 			fprintf(debug,"Results Log: %s\n", resultsLog.c_str());
-			delete stmp;
+			delete [] stmp;
 			break;
 		}
 		else
@@ -1233,7 +1233,7 @@ int OPJFile::ParseFormatNew() {
 			NOTE.back().creation_date=creation_date;
 			NOTE.back().modification_date=modification_date;
 			objectIndex++;
-			delete stmp;
+			delete [] stmp;
 			fseek(f,1,SEEK_CUR);
 			fread(&size,4,1,f);
 			if(IsBigEndian()) SwapBytes(size);
@@ -1244,7 +1244,7 @@ int OPJFile::ParseFormatNew() {
 				stmp[labellen-1]='\0';
 				fread(stmp,labellen-1,1,f);
 				NOTE.back().label=stmp;
-				delete stmp;
+				delete [] stmp;
 				fseek(f,1,SEEK_CUR);
 			}
 			stmp = new char[size-labellen+1];
@@ -1253,7 +1253,7 @@ int OPJFile::ParseFormatNew() {
 			fprintf(debug,"NOTE %d NAME: %s\n", NOTE.size(), NOTE.back().name.c_str());
 			fprintf(debug,"NOTE %d LABEL: %s\n", NOTE.size(), NOTE.back().label.c_str());
 			fprintf(debug,"NOTE %d TEXT:\n%s\n", NOTE.size(), NOTE.back().text.c_str());
-			delete stmp;
+			delete [] stmp;
 			fseek(f,1,SEEK_CUR);
 		}
 	}
@@ -1334,7 +1334,7 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 				stmp[sec_size]='\0';
 				fread(stmp,sec_size,1,f);
 				SPREADSHEET[spread].column[col_index].command=stmp;
-				delete stmp;
+				delete [] stmp;
 			}
 
 		//section_body_2_size
@@ -1477,7 +1477,7 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 			if(col_index!=-1)
 				SPREADSHEET[spread].column[col_index].comment=comment;
 			LAYER+=comm_size+0x1;
-			delete comment;
+			delete [] comment;
 		}
 		fseek(f,LAYER,SEEK_SET);
 		int ntmp;
@@ -1559,7 +1559,7 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
 				stmp[sec_size]='\0';
 				fread(stmp,sec_size,1,f);
 				EXCEL[iexcel].sheet[isheet].column[col_index].command=stmp;
-				delete stmp;
+				delete [] stmp;
 			}
 
 		//section_body_2_size
@@ -1702,7 +1702,7 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
 				if(col_index!=-1)
 					EXCEL[iexcel].sheet[isheet].column[col_index].comment=comment;
 				LAYER+=comm_size+0x1;
-				delete comment;
+				delete [] comment;
 			}
 			fseek(f,LAYER,SEEK_SET);
 			int ntmp;
@@ -1808,7 +1808,7 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 			stmp[sec_size]='\0';
 			fread(stmp,sec_size,1,f);
 			MATRIX[idx].command=stmp;
-			delete stmp;
+			delete [] stmp;
 		}
 
 	//section_body_2_size
@@ -3030,7 +3030,7 @@ void OPJFile::readWindowProperties(originWindow& window, FILE *f, FILE *debug, i
 			fseek(f,POS + 0xC3,SEEK_SET);
 			fread(label,labellen,1,f);
 			window.label=label;
-			delete label;
+			delete [] label;
 		}
 		else
 			window.label="";

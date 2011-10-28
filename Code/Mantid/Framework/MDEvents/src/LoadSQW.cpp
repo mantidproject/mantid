@@ -1,3 +1,11 @@
+/*WIKI* 
+
+
+The algorithm takes every pixel defined in the SQW horace file and converts it into an event. SQW DND/Image data is used to format dimension, with which to work.After the algorithm completes a fully formed [[MDEventWorkspace]] is provided.
+If the OutputWorkspace does NOT already exist, a default one is created. This is not the only route to generating MDEventWorkspaces.
+
+
+*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"

@@ -86,7 +86,7 @@ public:
       IMDBox<MDE,nd>* box1 = boxes[j];
       IMDBox<MDE,nd>* box2 = boxes1[j];
 
-      //std::cout << "ID: " << box1->getId() << std::endl;
+//      std::cout << "ID: " << box1->getId() << std::endl;
       TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
       TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
       TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
@@ -193,11 +193,14 @@ public:
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
     TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  "LoadMDTest" + Strings::toString(nd) + ".nxs") );
+
+    // Retrieve the full path; delete any pre-existing file
+    std::string filename = saver.getPropertyValue("Filename");
+    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
-    // Retrieve the full path
-    std::string filename = saver.getPropertyValue("Filename");
 
     //------ Now the loading -------------------------------------
     // Name of the output workspace.
@@ -318,6 +321,9 @@ public:
 
     ws2->refreshCache();
 
+    // There are now 2 more events
+    TS_ASSERT_EQUALS( ws2->getNPoints(), 10002 );
+
     // There are some new boxes that are not cached to disk at this point.
     // Save it again.
     SaveMD saver;
@@ -329,9 +335,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
+    // Now we look at the file that's currently open
+    ::NeXus::File * file = ws2->getBoxController()->getFile();
+    TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10002 long.", 10002, file->getInfo().dims[0] );
+
+
     // The file should have been modified but that's tricky to check directly.
     std::string filename = ws2->getBoxController()->getFilename();
-
     // Now we re-re-load it!
     LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -354,6 +364,58 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
 
   }
+
+
+  /// Load directly to memory
+  void test_exec_1D()
+  {
+    do_test_exec<1>(false);
+  }
+
+  /// Run the loading but keep the events on file and load on demand
+  void test_exec_1D_with_file_backEnd()
+  {
+    do_test_exec<1>(true);
+  }
+
+  /// Load directly to memory
+  void test_exec_3D()
+  {
+    do_test_exec<3>(false);
+  }
+
+  /// Run the loading but keep the events on file and load on demand
+  void test_exec_3D_with_FileBackEnd()
+  {
+    do_test_exec<3>(true);
+  }
+
+  /// Run the loading but keep the events on file and load on demand
+  void test_exec_3D_with_FileBackEnd_andSmallBuffer()
+  {
+    do_test_exec<3>(true, true, 1.0);
+  }
+  
+
+  /** Use the file back end,
+   * then change it and save to update the file at the back end.
+   */
+  void test_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
+  {
+    std::cout << "Starting the first step\n";
+    do_test_exec<3>(true, false);
+    std::cout << "\nStarting the update step\n";
+    do_test_UpdateFileBackEnd<3>();
+  }
+
+
+  /// Only load the box structure, no events
+  void test_exec_3D_BoxStructureOnly()
+  {
+    do_test_exec<3>(false, true, 0.0, true);
+  }
+
+
 
   void testMetaDataOnly()
   {
@@ -395,54 +457,6 @@ public:
 
     ws->getBoxController()->closeFile();
     AnalysisDataService::Instance().remove(outWSName);
-  }
-
-
-  /// Load directly to memory
-  void test_exec_1D()
-  {
-    do_test_exec<1>(false);
-  }
-
-  /// Run the loading but keep the events on file and load on demand
-  void test_exec_1D_with_file_backEnd()
-  {
-    do_test_exec<1>(true);
-  }
-
-  /// Load directly to memory
-  void test_exec_3D()
-  {
-    do_test_exec<3>(false);
-  }
-
-  /// Run the loading but keep the events on file and load on demand
-  void test_exec_3D_with_FileBackEnd()
-  {
-    do_test_exec<3>(true);
-  }
-
-  /// Run the loading but keep the events on file and load on demand
-  void test_exec_3D_with_FileBackEnd_andSmallBuffer()
-  {
-    do_test_exec<3>(true, true, 1.0);
-  }
-  
-
-  /** Use the file back end,
-   * then change it and save to update the file at the back end.
-   */
-  void test_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
-  {
-    do_test_exec<3>(true, false);
-    do_test_UpdateFileBackEnd<3>();
-  }
-
-
-  /// Only load the box structure, no events
-  void test_exec_3D_BoxStructureOnly()
-  {
-    do_test_exec<3>(false, true, 0.0, true);
   }
 
 };
