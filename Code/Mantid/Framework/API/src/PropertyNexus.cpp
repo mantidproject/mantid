@@ -164,7 +164,11 @@ namespace PropertyNexus
   template <typename NumT>
   void savePropertyWithValue(::NeXus::File * file, PropertyWithValue<NumT> * prop)
   {
-    file->makeGroup(prop->name(), "NXlog", 1);
+    // Spaces are unacceptable in names - remove them
+    std::string name(prop->name());
+    for (size_t i=0; i<name.size(); i++)
+      if (name[i] == ' ') name[i] = '_';
+    file->makeGroup(name, "NXlog", 1);
     file->writeData("value", (*prop)() );
     file->closeGroup();
   }
@@ -173,7 +177,11 @@ namespace PropertyNexus
   /** Helper function to save a PropertyWithValue<> */
   void savePropertyWithValueString(::NeXus::File * file, PropertyWithValue<std::string> * prop)
   {
-    file->makeGroup(prop->name(), "NXlog", 1);
+    // Spaces are unacceptable in names - remove them
+    std::string name(prop->name());
+    for (size_t i=0; i<name.size(); i++)
+      if (name[i] == ' ') name[i] = '_';
+    file->makeGroup(name, "NXlog", 1);
     file->writeData("value", prop->value() );
     file->closeGroup();
   }
@@ -202,7 +210,11 @@ namespace PropertyNexus
   {
     std::vector<NumT> value = prop->valuesAsVector();
     if( value.empty() ) return;
-    file->makeGroup(prop->name(), "NXlog", 1);
+    // Spaces are unacceptable in names - remove them
+    std::string name(prop->name());
+    for (size_t i=0; i<name.size(); i++)
+      if (name[i] == ' ') name[i] = '_';
+    file->makeGroup(name, "NXlog", 1);
     file->writeData("value", value );
     saveTimeVector(file, prop);
     file->closeGroup();
@@ -214,7 +226,12 @@ namespace PropertyNexus
   {
     std::vector<std::string> values = prop->valuesAsVector();
     if( values.empty() ) return;
-    file->makeGroup(prop->name(), "NXlog", 1);
+
+    // Spaces are unacceptable in names - remove them
+    std::string name(prop->name());
+    for (size_t i=0; i<name.size(); i++)
+      if (name[i] == ' ') name[i] = '_';
+    file->makeGroup(name, "NXlog", 1);
 
     // Find the max length of any string
     size_t maxlen=0;
