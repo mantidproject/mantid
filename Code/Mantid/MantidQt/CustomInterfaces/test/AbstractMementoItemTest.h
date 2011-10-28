@@ -19,6 +19,7 @@ private:
       virtual bool hasChanged() const {return false;}
       virtual void commit(){};
       virtual void rollback(){};
+      virtual const std::string& getName() const{return "";};
       virtual bool equals(AbstractMementoItem&) const {return true;};
       virtual ~DoubleMementoItem() {}
     protected:
