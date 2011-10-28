@@ -178,14 +178,14 @@ namespace MDEvents
      */
     static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
     {
-      std::vector<int> dims(2,0);
+      std::vector<int64_t> dims(2,0);
       dims[0] = NX_UNLIMITED;
       // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
       dims[1] = (nd)+4;
 
       // Now the chunk size.
-      std::vector<int> chunk(dims);
-      chunk[0] = int(chunkSize);
+      std::vector<int64_t> chunk(dims);
+      chunk[0] = int64_t(chunkSize);
 
       // Make and open the data
       file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
@@ -270,11 +270,11 @@ namespace MDEvents
       double * data = new double[numEvents*(nd+4)];
 
       // Start/size descriptors
-      std::vector<int> start(2,0);
-      start[0] = int(indexStart); //TODO: What if # events > size of int32???
+      std::vector<int64_t> start(2,0);
+      start[0] = int64_t(indexStart);
 
-      std::vector<int> size(2,0);
-      size[0] = int(numEvents);
+      std::vector<int64_t> size(2,0);
+      size[0] = int64_t(numEvents);
       size[1] = nd+4;
 
       // Get the slab into the allocated data

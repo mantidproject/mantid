@@ -259,6 +259,7 @@ namespace MDEvents
             // Save the index
             box_event_index[id*2] = mdbox->getFileIndexStart();
             box_event_index[id*2+1] = mdbox->getFileNumEvents();
+            std::cout << file->getInfo().dims[0] << " size of event_data (updating) \n";
           }
           else
           {
@@ -283,6 +284,7 @@ namespace MDEvents
               start += numEvents;
             }
 
+            std::cout << file->getInfo().dims[0] << " size of event_data (writing) \n";
             mdbox->releaseEvents();
           }
         }
