@@ -776,7 +776,7 @@ else ()
 	include_directories ( ../Framework/Geometry/inc )
 	
 	# Extra, optional target for demoing a GUI element
-	add_executable ( SliceViewerDemo ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ../MantidQt/SliceViewer/src/main.cpp  
+	add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ../MantidQt/SliceViewer/src/main.cpp  
 	                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
 	target_link_libraries ( SliceViewerDemo 
 	                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer
