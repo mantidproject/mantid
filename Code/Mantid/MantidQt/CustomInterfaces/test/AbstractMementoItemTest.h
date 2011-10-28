@@ -19,7 +19,7 @@ private:
       virtual bool hasChanged() const {return false;}
       virtual void commit(){};
       virtual void rollback(){};
-      virtual const std::string& getName() const{return "";};
+      virtual const std::string& getName() const{throw std::runtime_error("Not Implemented");}
       virtual bool equals(AbstractMementoItem&) const {return true;};
       virtual ~DoubleMementoItem() {}
     protected:

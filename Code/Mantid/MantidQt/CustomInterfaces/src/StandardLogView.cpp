@@ -34,11 +34,12 @@ namespace MantidQt
     /// Initalization method.
     void StandardLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
     {
-     QTableWidget* tableWidget = new QTableWidget(this);
-     tableWidget->setRowCount(logs.size());
-     tableWidget->setColumnCount(2);
-
-      for(int i = 0; i < logs.size(); i++)
+      int logsSize = int(logs.size());
+      QTableWidget* tableWidget = new QTableWidget(this);
+      tableWidget->setRowCount(logsSize);
+      tableWidget->setColumnCount(2);
+      
+      for(int i = 0; i < logsSize; i++)
       {
         std::string value;
         logs[i]->getValue(value);
