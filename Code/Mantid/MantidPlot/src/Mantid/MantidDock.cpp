@@ -27,6 +27,7 @@
 #include <QtGui>
 
 #include "MantidWSIndexDialog.h"
+#include "FlowLayout.h"
 
 #include <map>
 #include <vector>
@@ -60,7 +61,7 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   m_tree = new MantidTreeWidget(f,m_mantidUI);
   m_tree->setHeaderLabel("Workspaces");
 
-  QHBoxLayout * buttonLayout = new QHBoxLayout();
+  FlowLayout * buttonLayout = new FlowLayout();
   m_loadButton = new QPushButton("Load");
   m_deleteButton = new QPushButton("Delete");
   m_groupButton= new QPushButton("Group");
@@ -71,7 +72,6 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   buttonLayout->addWidget(m_deleteButton);
   buttonLayout->addWidget(m_groupButton);
   buttonLayout->addWidget(m_sortButton);
-  buttonLayout->addStretch();
   //
   QVBoxLayout * layout = new QVBoxLayout();
   f->setLayout(layout);
