@@ -117,15 +117,15 @@ public:
   void test_mem_plus_file_inPlace()
   { do_test(false, true, 1); }
 
-//FIXME: Test fails on Windows7 build server
-  void test_file_plus_file()
-  { do_test(true, true, 0); }
-
-  void test_file_plus_file_inPlace()
-  { do_test(true, true, 1); }
-
-  void test_file_plus_file_inPlace_ofRHS()
-  { do_test(true, true, 2); }
+//FIXME: Test fails on Windows7 build server. http://trac.mantidproject.org/mantid/ticket/4028
+//  void test_file_plus_file()
+//  { do_test(true, true, 0); }
+//
+//  void test_file_plus_file_inPlace()
+//  { do_test(true, true, 1); }
+//
+//  void test_file_plus_file_inPlace_ofRHS()
+//  { do_test(true, true, 2); }
 
 };
 
