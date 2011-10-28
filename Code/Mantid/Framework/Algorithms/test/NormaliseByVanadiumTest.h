@@ -114,14 +114,6 @@ public:
       {
         double expected= sampleWS->readY(i)[j];
         double actual = result->readY(i)[j];
-        if(expected != actual)
-        {
-          double x = 1;
-        }
-        else
-        {
-          double y = 1;
-        }
         TS_ASSERT_EQUALS(expected, actual);
       }
     }
