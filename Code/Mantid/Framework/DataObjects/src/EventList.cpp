@@ -353,6 +353,14 @@ namespace DataObjects
    * */
   EventList& EventList::operator-=(const EventList& more_events)
   {
+	if (this == &more_events)
+	{
+		//Special case, ticket #3844 part 2.
+		// When doing this = this - this,
+		// simply clear the input event list. Saves memory!
+		this->clearData();
+		return *this;
+	}
 
     // We'll let the -= operator for the given vector of event lists handle it
     switch (this->getEventType())
