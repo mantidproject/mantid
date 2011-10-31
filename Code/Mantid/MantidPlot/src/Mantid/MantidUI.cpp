@@ -437,12 +437,14 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
  */
 void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
   appWindow()->addListViewItem(mm);
   if (!mm)
   {Table * t=importTableWorkspace(wsName,showDlg,makeVisible);
   appWindow()->addListViewItem(t);
   }
+  QApplication::restoreOverrideCursor();
 }
 
 /**  Import the selected workspace, if any. Displays the import dialog.
@@ -1695,13 +1697,16 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   InstrumentWindow *insWin = getInstrumentView(wsName);
   if (!insWin)
   {
+    QApplication::restoreOverrideCursor();
     QMessageBox::critical(appWindow(),"MantidPlot - Error","Instrument view cannot be opened");
     return;
   }
   insWin->show();
+  QApplication::restoreOverrideCursor();
 }
 
 void MantidUI::showMantidInstrument()
@@ -1878,6 +1883,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
 
 MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
   {
@@ -1888,7 +1894,11 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
   {
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   }
-  if( !ws.get() ) return NULL;
+  if( !ws.get() )
+  {
+    QApplication::restoreOverrideCursor();
+    return NULL;
+  }
 
   QList<int> binAsList;
   binAsList.append(bin);
@@ -1896,13 +1906,18 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
   t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
-  if( !t ) return ml;
+  if( !t )
+  {
+    QApplication::restoreOverrideCursor();
+    return ml;
+  }
 
   ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
   Graph *g = ml->activeGraph();
   appWindow()->polishGraph(g,Graph::Line);
   setUpBinGraph(ml,wsName, ws);
   ml->askOnCloseEvent(false);
+  QApplication::restoreOverrideCursor();
   return ml;
 }
 
@@ -2658,6 +2673,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
  */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr)
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   UNUSED_ARG(errs);
   if (toPlot.size() > 10)
   {
@@ -2670,12 +2686,14 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     ask.exec();
     if (ask.clickedButton() != confirmButton)
     {
+      QApplication::restoreOverrideCursor();
       return NULL;
     }
   }
 
   if(toPlot.size() == 0)
   {
+    QApplication::restoreOverrideCursor();
     return NULL;
   }
 
@@ -2685,7 +2703,10 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
   if (!g)
-    return 0;
+  {
+    QApplication::restoreOverrideCursor();
+    return NULL;
+  }
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
   appWindow()->setPreferences(g);
   g->newLegend("");
@@ -2712,6 +2733,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   if ( g->curves() == 0 )
   {
     ml->close();
+    QApplication::restoreOverrideCursor();
     return NULL;
   }
   Mantid::API::MatrixWorkspace_sptr workspace =
@@ -2754,6 +2776,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   g->checkValuesInAxisRange(mc);
 
+  QApplication::restoreOverrideCursor();
   //setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 }
@@ -2929,6 +2952,7 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 
 MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs, bool tableVisible)
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   Table *t = createTableFromSelectedColumns(m,errs);
   //t->askOnCloseEvent(false);
   if (!t) return NULL;
@@ -2940,6 +2964,7 @@ MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs,
   m->setBinGraph(ml,t);
   // ml->askOnCloseEvent(false);
 
+  QApplication::restoreOverrideCursor();
   return ml;
 }
 /** Saves data to  nexus file
