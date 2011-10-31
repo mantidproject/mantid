@@ -154,6 +154,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
+                   src/Mantid/FlowLayout.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
@@ -367,6 +368,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
+                   src/Mantid/FlowLayout.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
                    src/Mantid/InputHistory.h
@@ -630,6 +632,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/FirstTimeSetup.h
+                       src/Mantid/FlowLayout.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
@@ -773,7 +776,7 @@ else ()
 	include_directories ( ../Framework/Geometry/inc )
 	
 	# Extra, optional target for demoing a GUI element
-	add_executable ( SliceViewerDemo ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ../MantidQt/SliceViewer/src/main.cpp  
+	add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ../MantidQt/SliceViewer/src/main.cpp  
 	                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
 	target_link_libraries ( SliceViewerDemo 
 	                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer

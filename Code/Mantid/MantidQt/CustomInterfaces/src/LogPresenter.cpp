@@ -37,7 +37,7 @@ namespace MantidQt
       {
         if(count >= existingSize)
         {
-          service.addLogItem(it->first); //Expand as necessary
+          service.declareLogItem(it->first); //Expand as necessary
         }
         newLogValues[count] = it->second; //Overrite values.
         count++;

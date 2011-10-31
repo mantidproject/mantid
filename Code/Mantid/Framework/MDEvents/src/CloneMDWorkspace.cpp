@@ -1,12 +1,15 @@
 /*WIKI* 
 
-
-
 This algorithm will clones an existing MDEventWorkspace into a new one.
 
-If the InputWorkspace is a file-backed MDEventWorkspace, then the algorithm will copy the original file into a new one with the suffix '_clone' added to its filename, in the same directory.
+If the InputWorkspace is a file-backed MDEventWorkspace, then the algorithm
+will copy the original file into a new one with the suffix '_clone' added to its filename, in the same directory.
+Before the clone operation, the file back-end will be updated using [[SaveMD]] with UpdateFileBackEnd=True.
+This may delay the operation.
 
-
+If you wish to clone a file-backed MDEventWorkspace to an in-memory MDEventWorkspace, we
+recommend that you first call [[SaveMD]] with UpdateFileBackEnd=True (if necessary),
+followed by a simple LoadMD call to the file in question.
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -87,6 +90,16 @@ namespace MDEvents
     if (!bc) throw std::runtime_error("Error with InputWorkspace: no BoxController!");
     if (bc->isFileBacked())
     {
+      if (ws->fileNeedsUpdating())
+      {
+        // Data was modified! You need to save first.
+        g_log.notice() << "InputWorkspace's file-backend being updated. " << std::endl;
+        IAlgorithm_sptr alg = createSubAlgorithm("SaveMD", 0.0, 0.4, false);
+        alg->setProperty("InputWorkspace", ws);
+        alg->setPropertyValue("UpdateFileBackEnd", "1");
+        alg->executeAsSubAlg();
+      }
+
       // Generate a new filename to copy to
       prog.report("Copying File");
       std::string originalFile = bc->getFilename();

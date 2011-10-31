@@ -124,12 +124,20 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /// Return the run start time
   const Kernel::DateAndTime Run::startTime() const
   {
-    const std::string start_prop("start_time");
-    if( this->hasProperty(start_prop) ) 
-    {
-      std::string start = this->getProperty(start_prop)->value();
+//    const std::string start_prop("start_time");
+	const std::string run_start_prop("run_start");
+//    if( this->hasProperty(start_prop)  ) 
+//    {
+//      std::string start = this->getProperty(start_prop)->value();
+//      return DateAndTime(start);
+//    }  
+//	else 
+	if (  this->hasProperty(run_start_prop) ) 
+	{
+	 std::string start = this->getProperty(run_start_prop)->value();
       return DateAndTime(start);
-    }
+
+	}
     else
     {
       throw std::runtime_error("Run::startTime() - No start time has been set for this run.");

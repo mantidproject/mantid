@@ -470,14 +470,21 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
 
   }
 
-
   //The boost conversion will convert the string, then we subtract the time zone offset
+  try
+  {
   if (positive_offset)
     //The timezone is + so we need to subtract the hours
     this->set_from_ptime( boost::posix_time::time_from_string(time) - tz_offset );
   else
     //The timezone is - so we need to ADD the hours
     this->set_from_ptime( boost::posix_time::time_from_string(time) + tz_offset );
+  }
+  catch (boost::bad_lexical_cast & e)
+  {
+    // Re-throw a more helpful error message
+    throw std::invalid_argument("Error interpreting string '" + time + "' as a date/time.");
+  }
 }
 
 
