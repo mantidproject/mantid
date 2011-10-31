@@ -44,6 +44,8 @@ If the input workspace contains data points, rather than histograms, then Rebin 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 
 namespace Mantid
 {
@@ -109,7 +111,52 @@ namespace Mantid
       bool inPlace = (inputWS == outputWS);
 
       // retrieve the properties
-      const std::vector<double> rb_params=getProperty("Params");
+      const std::vector<double> in_params=getProperty("Params");
+      std::vector<double> rb_params;
+
+      // The validator only passes parameters with size 1, or 3xn.  No need to check again here
+      if (in_params.size() >= 3){
+        // Input are min, delta, max
+        rb_params = in_params;
+
+      } else if (in_params.size() == 1){
+        // Input is only delta: construct
+        double xmin, xmax;
+
+        // a) Check if it is EventWorkspace
+        DataObjects::EventWorkspace_const_sptr inEventWS = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+        if (!inEventWS){
+          // Not event workspace, using the current min/max
+          const MantidVec& datax = inputWS->dataX(0);
+          xmin = datax[0];
+          xmax = datax[datax.size()-1];
+          g_log.notice() << "Non-EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+
+        } else {
+          // Event Workspace, then need to figure out the value carefully
+          xmin = xmax = -1;
+          for (size_t ispec = 0; ispec < inEventWS->getNumberHistograms(); ispec ++){
+            DataObjects::EventList el = inEventWS->getEventList(ispec);
+            double tempmin = el.getTofMin();
+            double tempmax = el.getTofMax();
+            if (tempmin < xmin || xmin < 0){
+              xmin = tempmin;
+            }
+            if (tempmax > xmax){
+              xmax = tempmax;
+            }
+            g_log.information() << "For Spectrum " << ispec << ": Min = " << tempmin << " , Max = " << tempmax << std::endl;
+          }
+
+          g_log.notice() << "EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+
+        } // ENDIF
+
+        rb_params.push_back(xmin);
+        rb_params.push_back(in_params[0]);
+        rb_params.push_back(xmax);
+
+      }
 
       const bool dist = inputWS->isDistribution();
 

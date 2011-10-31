@@ -13,8 +13,9 @@ std::string RebinParamsValidator::checkValidity( const std::vector<double>& valu
 {
   // array must not be empty
   if ( value.empty() ) return "Enter values for this property";
+
   // it must have an odd number of values (and be at least 3 elements long)
-  if ( ( value.size()%2 == 0 ) || ( value.size() == 1 ) )
+  if ( value.size()%2 == 0 )
   {
     return "The number of bin boundaries must be even";
   }
