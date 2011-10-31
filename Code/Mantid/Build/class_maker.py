@@ -18,24 +18,18 @@ def write_header(subproject, classname, filename, args):
     
     guard = "MANTID_%s_%s_H_" % (subproject.upper(), classname.upper())
     
-    # Create an Algorithm header; will not use it if 
+    # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
-    /// Algorithm's name for identification 
-    virtual const std::string name() const { return "%s";};
-    /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "General";}
+    virtual const std::string name() const;
+    virtual int version() const;
+    virtual const std::string category() const;
     
   private:
-    /// Sets documentation strings for this algorithm
     virtual void initDocs();
-    /// Initialise the properties
     void init();
-    /// Run the algorithm
     void exec();
 
-""" % classname
+"""
         
     alg_class_declare = " : public API::Algorithm"
     alg_include = """#include "MantidAPI/Algorithm.h" """
@@ -117,6 +111,16 @@ def write_source(subproject, classname, filename, args):
 
     algorithm_source = """
   //----------------------------------------------------------------------------------------------
+  /// Algorithm's name for identification. @see Algorithm::name
+  const std::string %s::name() const { return "%s";};
+  
+  /// Algorithm's version for identification. @see Algorithm::version
+  int %s::version() const { return 1;};
+  
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string %s::category() const { return "General";}
+
+  //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void %s::initDocs()
   {
@@ -141,17 +145,18 @@ def write_source(subproject, classname, filename, args):
     // TODO Auto-generated execute stub
   }
 
-""" % (classname, classname, classname)   
+""" % (classname, classname, classname, classname, classname, classname, classname)   
 
     if not args.alg:
         algorithm_top = ""
         algorithm_source = ""
     else:
         s = """/*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here.
+TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
 *WIKI*/
 
 """
+
     # ------- Now the normal class text ------------------------------    
     s += """#include "Mantid%s/%s%s.h"
 #include "MantidKernel/System.h"
