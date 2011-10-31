@@ -116,7 +116,7 @@ namespace Kernel
           {
             toWrite->save();
             m_mruUsed -= toWrite->getMRUMemorySize();
-            it = m_mru.erase(it);
+            m_mru.erase(it);
           }
         }
       }
