@@ -57,7 +57,7 @@ target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   # Make the rest of the tests
-  include_directories ( ../DataHandling/inc ../TestHelpers/inc )
+  include_directories ( ../DataHandling/inc ../TestHelpers/inc ../Nexus/inc)
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
