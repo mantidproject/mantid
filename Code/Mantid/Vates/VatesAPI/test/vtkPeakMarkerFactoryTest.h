@@ -2,19 +2,28 @@
 #define VTKPEAKMARKERFACTORY_TEST_H_
 
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace ::testing;
-using Mantid::DataObjects::PeaksWorkspace;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
+
+class MockPeak : public Peak
+{
+public:
+  MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D (void));
+  MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D (void));
+  MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D (void));
+};
 
 class MockPeaksWorkspace : public PeaksWorkspace
 {
@@ -37,25 +46,56 @@ class vtkPeakMarkerFactoryTest: public CxxTest::TestSuite
 
 public:
 
-  void test_full()
+  void do_test(MockPeak & peak1, vtkPeakMarkerFactory::ePeakDimensions dims)
   {
-    //TODO: Finish this test!
+    boost::shared_ptr<MockPeaksWorkspace> pw_ptr(new MockPeaksWorkspace());
+    MockPeaksWorkspace & pw = *pw_ptr;
 
-    boost::shared_ptr<MockPeaksWorkspace> pw(new MockPeaksWorkspace());
+    //Peaks workspace will return 5 identical peaks
+    EXPECT_CALL( pw, getNumberPeaks()).WillOnce(Return(5));
+    EXPECT_CALL( pw, getPeak(_)).WillRepeatedly( ReturnRef( peak1 ));
 
-//    pw->setI
-//
-//    ON_CALL( *pw, getPeak(_))
-//      .WillByDefault(Return(Mantid::DataObjects::Peak()));
-//
-//    EXPECT_CALL( *pw, getPeak(_))
-//      .Times(5);
-//
-//    pw->getPeak(1);
-//
-//    vtkPeakMarkerFactory factory("signal");
-//    factory.initialize(pw);
-//    vtkDataSet * set = factory.create();
+    vtkPeakMarkerFactory factory("signal", dims);
+    factory.initialize(pw_ptr);
+    vtkDataSet * set = factory.create();
+    TS_ASSERT(set);
+    TS_ASSERT_EQUALS( set->GetNumberOfPoints(), 5);
+    TS_ASSERT_EQUALS(set->GetPoint(0)[0], 1.0);
+    TS_ASSERT_EQUALS(set->GetPoint(0)[1], 2.0);
+    TS_ASSERT_EQUALS(set->GetPoint(0)[2], 3.0);
+
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&pw));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&peak1));
+  }
+
+  void test_q_lab()
+  {
+    MockPeak peak1;
+    EXPECT_CALL( peak1, getQLabFrame()).Times(5).WillRepeatedly( Return( V3D(1,2,3) ));
+    EXPECT_CALL( peak1, getHKL()).Times(0);
+    EXPECT_CALL( peak1, getQSampleFrame()).Times(0);
+
+    do_test(peak1, vtkPeakMarkerFactory::Peak_in_Q_lab);
+  }
+
+  void test_q_sample()
+  {
+    MockPeak peak1;
+    EXPECT_CALL( peak1, getQSampleFrame()).Times(5).WillRepeatedly( Return( V3D(1,2,3) ));
+    EXPECT_CALL( peak1, getHKL()).Times(0);
+    EXPECT_CALL( peak1, getQLabFrame()).Times(0);
+
+    do_test(peak1, vtkPeakMarkerFactory::Peak_in_Q_sample);
+  }
+
+  void test_hkl()
+  {
+    MockPeak peak1;
+    EXPECT_CALL( peak1, getHKL()).Times(5).WillRepeatedly( Return( V3D(1,2,3) ));
+    EXPECT_CALL( peak1, getQLabFrame()).Times(0);
+    EXPECT_CALL( peak1, getQSampleFrame()).Times(0);
+
+    do_test(peak1, vtkPeakMarkerFactory::Peak_in_HKL);
   }
 
   void testIsValidThrowsWhenNoWorkspace()

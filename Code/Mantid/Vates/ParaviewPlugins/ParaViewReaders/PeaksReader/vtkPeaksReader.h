@@ -14,6 +14,7 @@ public:
   vtkGetStringMacro(FileName);
   int CanReadFile(const char* fname);
   void SetWidth(double width);
+  void SetDimensions(int dimensions);
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress);
   /// Getter for the workspace type
@@ -47,6 +48,9 @@ private:
 
   /// Cached PeaksWS
   Mantid::API::IPeaksWorkspace_sptr  m_PeakWS;
+
+  /// Int representing an enum for q_lab, etc.
+  int m_dimensions;
 
   
 
