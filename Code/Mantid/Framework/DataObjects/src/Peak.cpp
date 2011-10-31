@@ -526,7 +526,7 @@ namespace DataObjects
   {    return m_L;  }
 
   /** Return the HKL vector */
-  Mantid::Kernel::V3D Peak::getHKL()
+  Mantid::Kernel::V3D Peak::getHKL() const
   {
     return V3D(m_H, m_K, m_L);
   }

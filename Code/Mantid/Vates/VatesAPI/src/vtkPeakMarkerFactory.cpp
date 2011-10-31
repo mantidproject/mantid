@@ -15,8 +15,8 @@ namespace Mantid
 namespace VATES 
 {
 
-  vtkPeakMarkerFactory::vtkPeakMarkerFactory(const std::string& scalarName, double minThreshold, double maxThreshold) :
-  m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+  vtkPeakMarkerFactory::vtkPeakMarkerFactory(const std::string& scalarName, ePeakDimensions dimensions) :
+  m_scalarName(scalarName), m_dimensionToShow(dimensions)
   {
   }
 
@@ -30,8 +30,7 @@ namespace VATES
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_minThreshold = other.m_minThreshold;
-      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_dimensionToShow = other.m_dimensionToShow;
       this->m_workspace = other.m_workspace;
     }
     return *this;
@@ -44,8 +43,7 @@ namespace VATES
   vtkPeakMarkerFactory::vtkPeakMarkerFactory(const vtkPeakMarkerFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
-   this->m_minThreshold = other.m_minThreshold;
-   this->m_maxThreshold = other.m_maxThreshold;
+   this->m_dimensionToShow = other.m_dimensionToShow;
    this->m_workspace = other.m_workspace;
   }
 
@@ -76,7 +74,6 @@ namespace VATES
     validate();
 
     int numPeaks = m_workspace->getNumberPeaks();
-    double width = 0.0;
 
     // Points generator
     vtkPoints *points = vtkPoints::New();
@@ -98,19 +95,24 @@ namespace VATES
     {
       IPeak & peak = m_workspace->getPeak(i);
 
-      // TODO: Which Q/hkl???
-      V3D pos = peak.getQLabFrame();
+      // Choose the dimensionality of the position to show
+      V3D pos;
+      switch (m_dimensionToShow)
+      {
+      case Peak_in_Q_lab:
+        pos = peak.getQLabFrame();
+        break;
+      case Peak_in_Q_sample:
+        pos = peak.getQSampleFrame();
+        break;
+      case Peak_in_HKL:
+        pos = peak.getHKL();
+        break;
+      }
+
       double x = pos.X();
       double y = pos.Y();
       double z = pos.Z();
-      double dx = x+width;
-      double dy = y+width;
-      double dz = z+width;
-      UNUSED_ARG(dx) //TODO use?
-      UNUSED_ARG(dy) //TODO use?
-      UNUSED_ARG(dz) //TODO use?
-
-      std::cout << "Making peak " << i << " at " << pos << " with signal " << peak.getIntensity() << std::endl;
 
       // One point per peak
       vtkVertex * vertex = vtkVertex::New();
@@ -122,36 +124,9 @@ namespace VATES
       // The integrated intensity = the signal on that point.
       signal->InsertNextValue(static_cast<float>( peak.getIntensity() ));
 
-//      vtkHexahedron* hexahedron = vtkHexahedron::New();
-//
-//      vtkIdType id_xyz =    points->InsertNextPoint(x,y,z);
-//      vtkIdType id_dxyz =   points->InsertNextPoint(dx,y,z);
-//      vtkIdType id_dxdyz =  points->InsertNextPoint(dx,dy,z);
-//      vtkIdType id_xdyz =   points->InsertNextPoint(x,dy,z);
-//      vtkIdType id_xydz =   points->InsertNextPoint(x,y,dz);
-//      vtkIdType id_dxydz =  points->InsertNextPoint(dx,y,dz);
-//      vtkIdType id_dxdydz = points->InsertNextPoint(dx,dy,dz);
-//      vtkIdType id_xdydz =  points->InsertNextPoint(x,dy,dz);
-//
-//      //create the hexahedron
-//      vtkHexahedron *theHex = vtkHexahedron::New();
-//      theHex->GetPointIds()->SetId(0, id_xyz);
-//      theHex->GetPointIds()->SetId(1, id_dxyz);
-//      theHex->GetPointIds()->SetId(2, id_dxdyz);
-//      theHex->GetPointIds()->SetId(3, id_xdyz);
-//      theHex->GetPointIds()->SetId(4, id_xydz);
-//      theHex->GetPointIds()->SetId(5, id_dxydz);
-//      theHex->GetPointIds()->SetId(6, id_dxdydz);
-//      theHex->GetPointIds()->SetId(7, id_xdydz);
-//
-//      visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexahedron->GetPointIds());
-//      hexahedron->Delete();
-
     } // for each peak
 
-
     points->Squeeze();
-    //TODO: delete points with points->Delete()?
     visualDataSet->Squeeze();
     return visualDataSet;
   }
