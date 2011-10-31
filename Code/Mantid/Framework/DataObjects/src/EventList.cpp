@@ -22,16 +22,6 @@ namespace DataObjects
   using Kernel::DateAndTime;
   using namespace Mantid::API;
 
-//  /** Macro to simplify operations on event list.
-//   *
-//   * It evaluates to:
-//   *  this->events if eventType == TOF
-//   *  this->weightedEvents if eventType == WEIGHTED
-//   *  this->weightedEventsNoTime if eventType == something else (presumably WEIGHTED_NOTIME)
-//   */
-//  //#define THIS_EVENT_VECTOR ((this->eventType==TOF) ? (this->events) : ((this->eventType==WEIGHTED) ? (this->weightedEvents) : (this->weightedEventsNoTime) ) )
-//  // Apologies for how much the above looks (LISP anyone :-) )
-
 
   //==========================================================================
   /// --------------------- TofEvent Comparators ----------------------------------
@@ -54,31 +44,6 @@ namespace DataObjects
   {
     return (e1.pulseTime() < e2.pulseTime());
   }
-
-
-
-//  /** Comparison operator by TOF for TofEvents) */
-//  bool operator<(const TofEvent & e1, const TofEvent& e2)
-//  {
-//    return (e1.tof() < e2.tof());
-//  }
-//
-//  /** Comparison operator by TOF for TofEvents) */
-//  bool operator>(const TofEvent & e1, const TofEvent& e2)
-//  {
-//    return (e1.tof() > e2.tof());
-//  }
-//
-//  /** Comparison operator by TOF for TofEvents) */
-//  bool operator<(const WeightedEvent & e1, const WeightedEvent& e2)
-//  {
-//    return (e1.tof() < e2.tof());
-//  }
-
-
-
-
-
 
 
 
@@ -388,6 +353,14 @@ namespace DataObjects
    * */
   EventList& EventList::operator-=(const EventList& more_events)
   {
+	if (this == &more_events)
+	{
+		//Special case, ticket #3844 part 2.
+		// When doing this = this - this,
+		// simply clear the input event list. Saves memory!
+		this->clearData();
+		return *this;
+	}
 
     // We'll let the -= operator for the given vector of event lists handle it
     switch (this->getEventType())

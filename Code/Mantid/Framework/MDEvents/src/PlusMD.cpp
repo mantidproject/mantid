@@ -110,10 +110,6 @@ namespace MDEvents
     prog2->resetNumSteps( ts->size(), 0.4, 0.6);
     tp.joinAll();
 
-    // Set a marker that the file-back-end needs updating if the # of events changed.
-    if (ws1->getNPoints() != initial_numEvents)
-      ws1->setFileNeedsUpdating(true);
-
 //    // Now we need to save all the data that was not saved before.
 //    if (ws1->isFileBacked())
 //    {
@@ -146,6 +142,11 @@ namespace MDEvents
 
     this->progress(0.95, "Refreshing cache");
     ws1->refreshCache();
+
+    // Set a marker that the file-back-end needs updating if the # of events changed.
+    if (ws1->getNPoints() != initial_numEvents)
+      ws1->setFileNeedsUpdating(true);
+
   }
 
 

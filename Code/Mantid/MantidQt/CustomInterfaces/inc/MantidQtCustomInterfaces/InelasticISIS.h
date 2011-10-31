@@ -4,18 +4,21 @@
 #include "MantidQtCustomInterfaces/Approach.h"
 #include "MantidQtCustomInterfaces/ParameterisedLatticeView.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
+#include "MantidQtCustomInterfaces/StandardLogView.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    //class ParameterisedLatticeView;
+    /// Group configuration for the ISIS Inelastic team.
     class DLLExport InelasticISIS : public Approach
     {
     public:
       InelasticISIS(LoanedMemento& memento);
       virtual ParameterisedLatticeView* createLatticeView();
+      virtual StandardLogView* createLogView();
     private:
+      /// Memento containing all the meta data of interest for the workspace.
       LoanedMemento m_WsMemento;
     };
   }

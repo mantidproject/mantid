@@ -8,6 +8,27 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
+    /**
+    Typedef produces distinct, non-compatible types based on an integer template arg.
+    */
+    template<int v>
+    struct  Int2Type
+    {
+      enum { type_value = v };
+      explicit Int2Type(int arg) : m_value(arg){ }
+      operator int() const
+      {
+        return m_value;
+      }
+    private:
+      int m_value;
+    };
+
+    /// Typedef to delcare a new type to act as a row
+    typedef  Int2Type<1> Row;
+    // Typedef to declare a new type to act as a column
+    typedef  Int2Type<2> Column;
+
     /** @class WorkspaceMementoItem. Unique type for column data, through which changes to cell data can be applied, stored and reverted.
     Type system ensures that no two columns are comparible, even if they store the same data.
 
@@ -35,7 +56,7 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    template<int ColNumber, typename ColType>
+    template<typename ColType>
     class DLLExport WorkspaceMementoItem : public AbstractMementoItem
     {
     private:
@@ -45,6 +66,10 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr m_data;
       /// Row onto which this column object projects.
       int m_rowIndex;
+      /// Column index onto which this mementoitem maps.
+      int m_colIndex;
+      /// Name for the item.
+      std::string name;
 
     protected:
 
@@ -64,8 +89,6 @@ namespace MantidQt
       }
 
     public:
-      /// Unique column index.
-      enum { ColIndex = ColNumber };
       /// Type of item being stored.
       typedef ColType ItemType;
       
@@ -73,10 +96,11 @@ namespace MantidQt
       Constructor
       @param data : ref to table workspace storing the data.
       @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
+      @param colIndex : column index of the same table workspace.
       */
-      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, int rowIndex) : m_data(data), m_rowIndex(rowIndex)
+      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, Row rowIndex, Column colIndex) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex)
       {
-        m_value = m_data->cell<ItemType>(m_rowIndex, ColIndex);
+        m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
       }
 
       /**
@@ -112,7 +136,7 @@ namespace MantidQt
       */
       virtual bool hasChanged() const 
       {
-        return m_data->cell<ItemType>(m_rowIndex, ColIndex) != m_value;
+        return m_data->cell<ItemType>(m_rowIndex, m_colIndex) != m_value;
       }
 
       /*
@@ -123,7 +147,7 @@ namespace MantidQt
       */
       bool equals(AbstractMementoItem& other) const
       {
-        WorkspaceMementoItem* pOther = dynamic_cast<WorkspaceMementoItem<ColNumber, ColType>* >(&other);
+        WorkspaceMementoItem* pOther = dynamic_cast<WorkspaceMementoItem<ColType>* >(&other);
         if(pOther == NULL)
         {
           throw std::runtime_error("Cannot call AbstractMementoItem::equals() on incompatible types.");
@@ -177,13 +201,13 @@ namespace MantidQt
       /// Synchronise the changes (via setvalue) with the underlying table workspace. This is a non reversible operation. 
       void commit()
       {
-        m_data->cell<ItemType>(m_rowIndex, ColIndex) = m_value;
+        m_data->cell<ItemType>(m_rowIndex, m_colIndex) = m_value;
       }
 
       /// Undo changes via setValue. 
       void rollback()
       {
-        m_value = m_data->cell<ItemType>(m_rowIndex, ColIndex);
+        m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
       }
 
       /**
@@ -193,6 +217,15 @@ namespace MantidQt
       ColType getValue() const
       {
         return m_value; //TODO, should we be returning the set value or the commited value.
+      }
+
+      /**
+      Getter for the item name.
+      @return column/item name.
+      */
+      const std::string& getName() const
+      {
+        return m_data->getColumn(m_colIndex)->name();
       }
 
     };

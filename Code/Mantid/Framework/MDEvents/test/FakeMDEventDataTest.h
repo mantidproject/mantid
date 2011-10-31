@@ -83,6 +83,8 @@ public:
     TS_ASSERT_DIFFERS( in_ws->getBox()->getSignal(), 200.0);
     TS_ASSERT_DIFFERS( in_ws->getBox()->getErrorSquared(), 200.0);
 
+    TSM_ASSERT("If the workspace is file-backed, then it needs updating.", in_ws->fileNeedsUpdating() );
+
     AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
   }
 

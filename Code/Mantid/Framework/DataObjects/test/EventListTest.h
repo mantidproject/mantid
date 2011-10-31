@@ -350,6 +350,7 @@ public:
   }
 
 
+  /** Perform THIS -= THIS, e.g. clear the event list */
   void test_MinusOperator_inPlace_3cases()
   {
     EventList lhs, rhs;
@@ -365,7 +366,7 @@ public:
       mess << "Minus operation of type " << i << ".";
       TSM_ASSERT_THROWS_NOTHING(mess.str(), lhs -= lhs );
 
-      TSM_ASSERT_EQUALS(mess.str(), lhs.getNumberEvents(), 2*el.getNumberEvents() );
+      TSM_ASSERT_EQUALS(mess.str(), lhs.getNumberEvents(), 0 );
 
       //Put a single big bin with all events
       lhs.setX(one_big_bin() );

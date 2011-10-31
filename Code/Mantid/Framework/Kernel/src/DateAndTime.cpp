@@ -470,8 +470,6 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
 
   }
 
-  std::cout << time << ".\n";
-
   //The boost conversion will convert the string, then we subtract the time zone offset
   try
   {

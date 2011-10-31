@@ -38,19 +38,30 @@ public:
     do_test(true);
   }
 
+  void test_exec_FileBacked_withNeedsUpdating()
+  {
+    do_test(true, "", true);
+  }
+
   void test_exec_FileBacked_withFilename()
   {
     do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name.nxs");
   }
 
+  void test_exec_FileBacked_withFilename_withNeedsUpdating()
+  {
+    do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name2.nxs", true);
+  }
 
-  void do_test(bool fileBacked, std::string Filename = "")
+
+  void do_test(bool fileBacked, std::string Filename = "", bool file_needs_updating = false)
   {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
 
     // Make a fake file-backed (or not) MDEW
     MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeFileBackedMDEW("CloneMDWorkspaceTest_ws", fileBacked);
+    ws1->setFileNeedsUpdating( file_needs_updating );
   
     CloneMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

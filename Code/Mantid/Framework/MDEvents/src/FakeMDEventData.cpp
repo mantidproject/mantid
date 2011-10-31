@@ -272,6 +272,9 @@ namespace MDEvents
 
     CALL_MDEVENT_FUNCTION(this->addFakePeak, in_ws)
     CALL_MDEVENT_FUNCTION(this->addFakeUniformData, in_ws)
+
+    // Mark that events were added, so the file back end (if any) needs updating
+    in_ws->setFileNeedsUpdating(true);
   }
 
 
