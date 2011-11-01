@@ -1,6 +1,6 @@
 #ifndef INSTRUMENTWINDOWRENDERTAB_H_
 #define INSTRUMENTWINDOWRENDERTAB_H_
-#include "../../GraphOptions.h"
+#include "MantidQtAPI/GraphOptions.h"
 
 #include <QFrame>
 

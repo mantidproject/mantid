@@ -194,7 +194,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.cpp
-                   src/Mantid/InstrumentWidget/MantidColorMap.cpp
                    src/Mantid/InstrumentWidget/MantidGLWidget.cpp
                    src/Mantid/InstrumentWidget/ColorMapWidget.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
@@ -261,7 +260,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/globals.h
                    src/Graph3D.h
                    src/Graph.h
-                   src/GraphOptions.h
                    src/Grid.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
@@ -408,7 +406,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
-                   src/Mantid/InstrumentWidget/MantidColorMap.h
                    src/Mantid/InstrumentWidget/MantidGLWidget.h
                    src/Mantid/InstrumentWidget/ColorMapWidget.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
@@ -453,7 +450,6 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/ImageMarker.h
                src/LegendWidget.h
                src/Grid.h
-               src/GraphOptions.h
                src/Graph.h
                src/LegendWidget.h
                src/MultiLayer.h

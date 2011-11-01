@@ -54,7 +54,7 @@
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
 #include "MantidKernel/Logger.h"
-#include "GraphOptions.h"
+#include "MantidQtAPI/GraphOptions.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 

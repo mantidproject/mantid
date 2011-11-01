@@ -1,6 +1,6 @@
 #include "ColorMapWidget.h"
-#include "MantidColorMap.h"
-#include "GraphOptions.h"
+#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/GraphOptions.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

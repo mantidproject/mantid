@@ -1,8 +1,7 @@
 //--------------------------------------
 // Includes
 //--------------------------------------
-#include "MantidColorMap.h"
-#include "GLColor.h"
+#include "MantidQtAPI/MantidColorMap.h"
 
 // std headers
 #include <fstream>
@@ -11,6 +10,7 @@
 #include <cmath>
 
 #include <iostream>
+#include <QRgb>
 
 //--------------------------------------
 // Public member functions
@@ -78,8 +78,7 @@ bool MantidColorMap::loadMap(const QString & filename)
   // Reading directly to the color store will mean that if the file is corrupt 
   // at some point then I can't revert to my previous map. Using a QVector means
   // that copying the data at the end is not an expensive operation
-  //QVector<boost::shared_ptr<GLColor> > new_colormap;
-  QVector<GLColor> new_colormap;
+  QVector<QRgb> new_colormap;
   new_colormap.reserve(getLargestAllowedCIndex() + 1);
 
   float red(0.0f), green(0.0f), blue(0.0f);
@@ -93,7 +92,7 @@ bool MantidColorMap::loadMap(const QString & filename)
     reader >> red >> green >> blue;
     if( reader )
     {
-      new_colormap.push_back(GLColor((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
+      new_colormap.push_back(qRgb((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
       ++count;
     }
     else 
@@ -156,7 +155,7 @@ void MantidColorMap::setupDefaultMap()
   {
     std::stringstream reader(line);
     reader >> red >> green >> blue;
-    m_colors.push_back(GLColor((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
+    m_colors.push_back(qRgb((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
   }  
 }
 
@@ -210,10 +209,19 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
  */
 QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
 {
-  GLColor col = getColor(colorIndex(interval, value));
-  float r(0.0f), g(0.0f), b(0.0f), a(0.0f);
-  col.get(r,g,b,a);
-  return qRgb(int(r*255),int(g*255),int(b*255));
+  short ci = static_cast<short>(colorIndex(interval, value));
+  if( ci >= 0 && ci < m_num_colors )
+  {
+    return m_colors[ci];
+  }
+  return
+      // Return black
+      QRgb();
+
+//  QRgb col = getColor();
+//  float r(0.0f), g(0.0f), b(0.0f), a(0.0f);
+//  col.get(r,g,b,a);
+//  return qRgb(int(r*255),int(g*255),int(b*255));
 }
 
 
@@ -268,19 +276,3 @@ QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) con
   return rgbtable;
 }
 
-/**
- * Returns a pointer to the GLColor object for the given id in the range 0 <= index < ncolors
- * @param An :: index within this color map's range.
- *
- */
-GLColor MantidColorMap::getColor(unsigned char index) const
-{
-  short ci = static_cast<short>(index);
-  if( ci >= 0 && ci < m_num_colors )
-  {
-    return m_colors[ci];
-  }
-
-  // Otherwise return black
-  return GLColor();
-}

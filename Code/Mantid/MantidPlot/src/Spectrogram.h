@@ -43,7 +43,7 @@
 #include <float.h>
 //#include<iostream>
 //#include "MantidKernel/Logger.h"
-#include "Mantid//InstrumentWidget//MantidColorMap.h"
+#include "MantidQtAPI/MantidColorMap.h"
 #include "Mantid//InstrumentWidget//GLColor.h"
 #include <boost/shared_ptr.hpp>
 #include <QPainter>

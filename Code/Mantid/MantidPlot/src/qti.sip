@@ -479,7 +479,7 @@ private:
 namespace GraphOptions 
 {
 %TypeHeaderCode 
-#include "src/GraphOptions.h"
+#include "MantidQtAPI/GraphOptions.h"
 %End
 
   enum ScaleType {Linear, Log10};
