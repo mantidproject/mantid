@@ -160,8 +160,8 @@ namespace Mantid
       width /= 1000;
 
       // We assumed that individual pixels have the same size and shape of a cuboid with dimensions:
-      double pixel_height = height / ny;
-      double pixel_width = width / nx;
+      double pixel_height = height / static_cast<double>(ny);
+      double pixel_width = width / static_cast<double>(nx);
       // Create size strings for shape creation
       std::string pixel_height_str = boost::lexical_cast<std::string>(pixel_height / 2);
       std::string pixel_width_str = boost::lexical_cast<std::string>(pixel_width / 2);
