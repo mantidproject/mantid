@@ -2,6 +2,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtSliceViewer/CustomTools.h"
@@ -22,9 +23,9 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
+#include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

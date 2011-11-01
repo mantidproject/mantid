@@ -36,7 +36,7 @@ namespace API
     virtual double getH() const = 0;
     virtual double getK() const = 0;
     virtual double getL() const = 0;
-    virtual Mantid::Kernel::V3D getHKL() = 0;
+    virtual Mantid::Kernel::V3D getHKL() const = 0;
     virtual void setH(double m_H) = 0;
     virtual void setK(double m_K) = 0;
     virtual void setL(double m_L) = 0;

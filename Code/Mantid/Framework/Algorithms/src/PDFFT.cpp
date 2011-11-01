@@ -209,6 +209,15 @@ void PDFFT::exec() {
 	return;
 }
 
+
+/**
+ *  Fourier transform to a specific r value in G(r)
+ *  @param r:: atomic distance vlaue
+ *  @param egr: error of G(r)
+ *  @param qmin: mininum value of Q
+ *  @param qmax: maximum value of Q
+ *  @param sofq: true if input is S(Q), false if input is S(Q)-1
+ */
 double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq) {
 
 	double gr = 0;
