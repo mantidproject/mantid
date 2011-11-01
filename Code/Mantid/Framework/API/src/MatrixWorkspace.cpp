@@ -320,21 +320,14 @@ namespace Mantid
 
       if ( !m_nearestNeighbours )
       {
-        // Get pointer to Instrument
-        boost::shared_ptr<const IComponent> parent(comp, NoDeleting());
-        while ( parent->getParent() )
-        {
-          parent = parent->getParent();
-        }
-        boost::shared_ptr<const Instrument> inst = boost::dynamic_pointer_cast<const Instrument>(parent);
+        boost::shared_ptr<const Instrument> inst = this->getInstrument();
         if ( inst )
         {
           m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap));
         }
         else
         {
-          throw Mantid::Kernel::Exception::NullPointerException("ParameterMap: buildNearestNeighbours",
-                parent->getName());
+          throw Mantid::Kernel::Exception::NullPointerException("ParameterMap: buildNearestNeighbours. Can't obtain instrument.", "instrument");
         }
       }
     }
@@ -382,12 +375,22 @@ namespace Mantid
       return neighbours;
     }
 
-
-
-
-
-
-
+     //---------------------------------------------------------------------------------------
+    /** Queries the NearestNeighbours object for the selected spectrum number.
+     *
+     * @param spec :: spectrum number of the detector you are looking at
+     * @param nNeighbours :: unsigned int, number of neighbours to include.
+     * @return map of DetectorID to distance for the nearest neighbours
+     */
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const unsigned int nNeighbours) const
+    {
+      if ( !m_nearestNeighbours )
+      {
+        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap));
+      }
+      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
+      return neighbours;
+    }
 
 
     //---------------------------------------------------------------------------------------
