@@ -155,8 +155,11 @@ private slots:
   /// Assigns a peak picker tool to the workspace (@param::workspace name)
   void assignPeakPickerTool(const QString &);
 
-  /// Change the plot style and color
+  /// Change the fit style and color
   void changeFitPlotType(const QString &);
+
+  /// Change the data style and color
+  void changeDataPlotType(const QString &);
 
 private:
   /// Initialize the layout

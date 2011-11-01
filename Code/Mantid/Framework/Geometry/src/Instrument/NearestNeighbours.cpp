@@ -23,9 +23,26 @@ namespace Mantid
      */
     NearestNeighbours::NearestNeighbours(Instrument_const_sptr instrument,
                                          const ISpectraDetectorMap & spectraMap) : 
-      m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale()
+      m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0)
     {
       this->build(m_noNeighbours);
+    }
+
+    /**
+     * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
+     * @param component :: IComponent pointer to Detector object
+     * @param noNeighbours :: Number of neighbours to search for
+     * @param force :: flag to indicate that the nearest neighbours map should be rebult by force. Otherwise will only call build when different.
+     * @return map of Detector ID's to distance
+     * @throw NotFoundError if component is not recognised as a detector
+     */
+    std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const unsigned int noNeighbours) const
+    {
+      if(force || m_noNeighbours != int(noNeighbours))
+      {
+        const_cast<NearestNeighbours*>(this)->build(noNeighbours);
+      }
+      return defaultNeighbours(spectrum);
     }
    
     /**
@@ -46,13 +63,17 @@ namespace Mantid
       std::map<specid_t, double> result;
       if( radius == 0.0 ) 
       {
-        // Note: Should be able to do this better but time constraints for the moment mean that
-        // it is necessary. 
-        // Cast is necessary as the user should see this as a const member
-        const_cast<NearestNeighbours*>(this)->build(8);
+        const int eightNearest = 8;
+        if(m_noNeighbours != eightNearest)
+        {
+          // Note: Should be able to do this better but time constraints for the moment mean that
+          // it is necessary. 
+          // Cast is necessary as the user should see this as a const member
+          const_cast<NearestNeighbours*>(this)->build(eightNearest);
+        }
         result = defaultNeighbours(spectrum);     
       }
-      else if( radius > m_cutoff )
+      else if( radius > m_cutoff && m_radius != radius )
       {
         // We might have to see how efficient this ends up being.
         int neighbours = m_noNeighbours + 1;
@@ -70,6 +91,7 @@ namespace Mantid
           else neighbours += 1;
         }
       }
+      m_radius = radius;
     
       std::map<detid_t, double> nearest = defaultNeighbours(spectrum);
       std::map<specid_t, double>::const_iterator cend;

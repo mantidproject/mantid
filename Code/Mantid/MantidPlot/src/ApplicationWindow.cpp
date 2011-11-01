@@ -16399,13 +16399,12 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 * to change the plot style
 *
 * @params plotDetails :: This includes all details of the plot including type, 
-* curve number, workspace and color
+* curve type, workspace and color
 */
 void ApplicationWindow::setPlotType(const QString & plotDetails)
 {
   QStringList plotDetailsList("");
   int plotType(0);
-  int curveNum(0);
 
   if (plotDetails.contains(".") == false)
   {
@@ -16417,8 +16416,6 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
     if (plotDetailsList.size() >= 3) 
     {
       plotType = plotDetailsList[0].toInt();
-      curveNum = plotDetailsList[1].toInt();
-
 
       QList<MdiSubWindow *> windows = windowsList();
       foreach (MdiSubWindow *w, windows) 
@@ -16435,17 +16432,30 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
               Graph *g = plot->activeGraph();
               if (g)
               {
-                pd->selectCurve(g->curveIndex(curveNum));
+                int curveNum(-1);
 
-                // line(0) scatter(1) line+symbol(2)
-                if (plotType >= 0 && plotType <= 2)
+                if (plotDetailsList[1] == "Data")
                 {
-                if (plotDetailsList.size() > 3)
-                  pd->setPlotType(plotType, plotDetailsList[3]);
-                else
-                  pd->setPlotType(plotType);            
+                  curveNum = g->curveIndex(plotDetailsList[2]); //workspaceName
                 }
-                g->activateGraph();
+                else if (plotDetailsList[1] == "Fit")
+                {
+                  curveNum = g->curveIndex(plotDetailsList[2] + "-sp-1-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff") doesnt work when axis label is 33;
+                    if (curveNum == -1)
+                      curveNum = g->curveIndex(plotDetailsList[2] + "-sp-33-Calc");
+                }
+                if (curveNum > -1) // If one of the curves has been changed 
+                {
+                  // line(0) scatter(1) line+symbol(2)
+                  if (plotType >= 0 && plotType <= 2)
+                  {
+                    if (plotDetailsList.size() > 3)
+                      pd->setPlotType(plotType, curveNum, plotDetailsList[3]);
+                    else
+                      pd->setPlotType(plotType, curveNum);            
+                  }
+                  g->activateGraph();
+                }
               }
             }
           }

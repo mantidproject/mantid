@@ -14,6 +14,8 @@
 #include <QSettings>
 #include <QMessageBox>
 
+#include <numeric>
+
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -24,9 +26,10 @@ double InstrumentActor::m_tolerance = 0.00001;
  * Constructor
  * @param workspace :: Workspace
  */
-InstrumentActor::InstrumentActor(const QString wsName)
-  : m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),
-    m_sampleActor(NULL)
+InstrumentActor::InstrumentActor(const QString wsName): 
+m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),
+m_maskedColor(100,100,100),
+m_sampleActor(NULL)
 {
   if (!m_workspace)
     throw std::logic_error("InstrumentActor passed a workspace that isn't a MatrixWorkspace");
@@ -232,8 +235,18 @@ void InstrumentActor::resetColors()
   m_colors.resize(m_specIntegrs.size());
   for (size_t wi=0; wi < m_specIntegrs.size(); wi++)
   {
-    unsigned char ci = m_colorMap.colorIndex(qwtInterval,m_specIntegrs[wi]);
-    m_colors[wi] = m_colorMap.getColor(ci);
+    double integratedValue = m_specIntegrs[wi];
+    Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
+    boost::shared_ptr<Mantid::Geometry::Parameter> masked = m_workspace->instrumentParameters().get(det.get(),"masked");
+    if (masked)
+    {
+      m_colors[wi] = m_maskedColor;
+    }
+    else
+    {
+      unsigned char ci = m_colorMap.colorIndex(qwtInterval,integratedValue);
+      m_colors[wi] = m_colorMap.getColor(ci);
+    }
   }
   if (m_scene.getNumberOfActors() > 0)
   {

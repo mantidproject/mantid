@@ -153,15 +153,8 @@ void MemoryManagerImpl::releaseFreeMemory()
 {
 
 #ifdef USE_TCMALLOC
-//    Kernel::MemoryStats mem;
-//    mem.update();
-//    std::cout << "Before releasing: " << mem << "\n";
-
     // Make TCMALLOC release memory to the system
     MallocExtension::instance()->ReleaseFreeMemory();
-
-//    mem.update();
-//    std::cout << "After releasing:  " << mem << "\n";
 #endif
 }
 

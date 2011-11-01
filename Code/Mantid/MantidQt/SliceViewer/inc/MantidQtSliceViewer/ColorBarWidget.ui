@@ -36,16 +36,43 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="valMax"/>
+      <widget class="QScienceSpinBox" name="valMax">
+       <property name="toolTip">
+        <string>Maximum value in the color scale</string>
+       </property>
+       <property name="wrapping">
+        <bool>false</bool>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::UpDownArrows</enum>
+       </property>
+       <property name="accelerated">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="valMin"/>
+      <widget class="QScienceSpinBox" name="valMin">
+       <property name="toolTip">
+        <string>Minimum value in the color scale</string>
+       </property>
+       <property name="accelerated">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QScienceSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header location="global">MantidQtSliceViewer/QScienceSpinBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

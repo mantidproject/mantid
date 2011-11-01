@@ -271,11 +271,14 @@ ADD_PRECOMPILED_HEADER ( inc/MantidKernel/PrecompiledHeader.h MantidKernel src/P
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
-                                          COMPILE_DEFINITIONS IN_MANTID_KERNEL )
+                                          COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Kernel ${MANTIDLIBS} )
+if ( WIN32 )
+  target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
+endif()
 
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )

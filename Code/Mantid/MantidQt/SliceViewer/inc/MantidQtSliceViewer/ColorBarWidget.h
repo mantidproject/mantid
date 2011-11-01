@@ -8,42 +8,56 @@
 
 class ColorBarWidget : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    ColorBarWidget(QWidget *parent = 0);
-    ~ColorBarWidget();
+  ColorBarWidget(QWidget *parent = 0);
+  ~ColorBarWidget();
 
-    void setColorMap(QwtColorMap * colorMap);
-    void setDataRange(double min, double max);
-    void setViewRange(double min, double max);
-    void setLog(bool log);
+  void setColorMap(QwtColorMap * colorMap);
+  void setDataRange(double min, double max);
+  void setViewRange(double min, double max);
+  void setLog(bool log);
 
-    void update();
+  double getMinimum() const;
+  double getMaximum() const;
+  bool getLog() const;
+
+public slots:
+  void changedLogState(int);
+  void changedMinimum(double);
+  void changedMaximum(double);
+
+signals:
+  void changedColorRange(double min, double max, bool log);
 
 private:
-    Ui::ColorBarWidgetClass ui;
+  void setSpinBoxesSteps();
+  void update();
 
-    // The color bar widget from QWT
-    QwtScaleWidget * m_colorBar;
+  /// Auto-gen UI classes
+  Ui::ColorBarWidgetClass ui;
 
-    /// Color map being displayed
-    QwtColorMap * m_colorMap;
+  /// The color bar widget from QWT
+  QwtScaleWidget * m_colorBar;
 
-    /// Logarithmic scale?
-    bool m_log;
+  /// Color map being displayed
+  QwtColorMap * m_colorMap;
 
-    /// Min value in the data shown
-    double m_rangeMin;
+  /// Logarithmic scale?
+  bool m_log;
 
-    /// Max value in the data shown
-    double m_rangeMax;
+  /// Min value in the data shown
+  double m_rangeMin;
 
-    /// Min value being displayed
-    double m_min;
+  /// Max value in the data shown
+  double m_rangeMax;
 
-    /// Min value being displayed
-    double m_max;
+  /// Min value being displayed
+  double m_min;
+
+  /// Min value being displayed
+  double m_max;
 };
 
 #endif // COLORBARWIDGET_H

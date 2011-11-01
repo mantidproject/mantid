@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
 	src/ColorBarWidget.cpp
+	src/QScienceSpinBox.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -13,6 +14,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
+	inc/MantidQtSliceViewer/QScienceSpinBox.h
 )
 
 set ( MOC_FILES 
@@ -20,6 +22,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
+	inc/MantidQtSliceViewer/QScienceSpinBox.h
 )
 
 set ( UI_FILES 
