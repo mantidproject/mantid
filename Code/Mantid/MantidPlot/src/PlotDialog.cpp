@@ -444,33 +444,38 @@ void PlotDialog::changePlotType(int plotType)
 */
 void PlotDialog::setPlotType(int plotType, const QString & color)
 {
-    CurveTreeItem *item = (CurveTreeItem *)listBox->currentItem();
-    if (!item)
-        return;
-    if (item->type() != CurveTreeItem::PlotCurveTreeItem)
-        return;
-    Graph *graph = item->graph();
-    if (!graph)
-        return;
+  CurveTreeItem *item = (CurveTreeItem *)listBox->currentItem();
+  if (!item)
+      return;
+  //std::cout << item->type(); //failing on 1001, should be 1002
+  if (item->type() != CurveTreeItem::PlotCurveTreeItem)
+      return;
+  Graph *graph = item->graph();
+  if (!graph)
+      return;
 
-		QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(QColor(color)), QSize(5,5));
-		if (plotType == Graph::Line)
-			s.setStyle(QwtSymbol::NoSymbol);
-		else if (plotType == Graph::Scatter)
-			graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
-		else if (plotType == Graph::LineSymbols)
-			graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
+  QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(5,5));
+  if (plotType == Graph::Line)
+		s.setStyle(QwtSymbol::NoSymbol);
+	else if (plotType == Graph::Scatter)
+		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
+	else if (plotType == Graph::LineSymbols)
+		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
+    
+  if (color == "Default")
+    s.setPen(QPen(QColor(color)));
 
-    graph->setCurveSymbol(item->plotItemIndex(), s);
+  graph->setCurveSymbol(item->plotItemIndex(), s);
+  //acceptParams();
 }
 
 
 void PlotDialog::initFontsPage()
 {
-    QGroupBox *boxFonts = new QGroupBox();
-    QGridLayout *fl = new QGridLayout(boxFonts);
+  QGroupBox *boxFonts = new QGroupBox();
+  QGridLayout *fl = new QGridLayout(boxFonts);
 
-    btnTitle = new QPushButton(tr("Titles"));
+  btnTitle = new QPushButton(tr("Titles"));
 	btnAxesLabels = new QPushButton(tr("Axes Labels"));
 	btnAxesNumbers = new QPushButton(tr("Axes Numbers"));
 	btnLegend = new QPushButton(tr("Legends"));
@@ -484,10 +489,10 @@ void PlotDialog::initFontsPage()
 
 	fontsPage = new QWidget();
 	QHBoxLayout *hl = new QHBoxLayout(fontsPage);
-    hl->addWidget(boxFonts);
+  hl->addWidget(boxFonts);
 	privateTabWidget->addTab(fontsPage, tr( "Fonts" ) );
 
-    connect( btnTitle, SIGNAL( clicked() ), this, SLOT( setTitlesFont() ) );
+  connect( btnTitle, SIGNAL( clicked() ), this, SLOT( setTitlesFont() ) );
 	connect( btnAxesLabels, SIGNAL( clicked() ), this, SLOT( setAxesLabelsFont() ) );
 	connect( btnAxesNumbers, SIGNAL( clicked() ), this, SLOT( setAxesNumbersFont() ) );
 	connect( btnLegend, SIGNAL( clicked() ), this, SLOT( setLegendsFont() ) );
