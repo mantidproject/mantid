@@ -52,7 +52,7 @@ namespace DataObjects
     double getH() const;
     double getK() const;
     double getL() const;
-    Mantid::Kernel::V3D getHKL();
+    Mantid::Kernel::V3D getHKL() const;
     void setH(double m_H);
     void setK(double m_K);
     void setL(double m_L);

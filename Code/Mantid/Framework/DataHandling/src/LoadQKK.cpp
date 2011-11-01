@@ -47,99 +47,154 @@ namespace Mantid
     }
 
     /**
-     * Initialise the algorithm
+     * Initialise the algorithm. Declare properties which can be set before execution (input) or 
+     * read from after the execution (output).
      */
     void LoadQKK::init()
     {
+      // Specify file extensions which can be associated with a QKK file.
       std::vector<std::string> exts;
       exts.push_back(".nx.hdf");
+      // Declare the Filename algorithm property. Mandatory. Sets the path to the file to load.
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
           "The input filename of the stored data");
+      // Declare the OutputWorkspace property. This sets the name of the workspace to be filled with the data
+      // from the file. 
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
     }
 
     /**
-     * Execute the algorithm
+     * Execute the algorithm.
      */
     void LoadQKK::exec()
     {
       using namespace Mantid::API;
+      // Get the name of the file.
       std::string filename = getPropertyValue("Filename");
 
+      // Open the root.
       NeXus::NXRoot root(filename);
+      // Open the first NXentry found in the file.
       NeXus::NXEntry entry = root.openFirstEntry();
+      // Open NXdata group with name "data"
       NeXus::NXData data = entry.openNXData("data");
+      // Read in wavelength value
       double wavelength = static_cast<double>(data.getFloat("wavelength"));
-      // open the data set with the counts 
-      NeXus::NXInt hmm = data.openIntData(); 
+      // open the data set with the counts. It is identified by the signal=1 attribute
+      NeXus::NXInt hmm = data.openIntData();
+      // Read the data into memory
       hmm.load();
 
+      // Get the wavelength spread
+      double wavelength_spread = static_cast<double>(entry.getFloat("instrument/velocity_selector/wavelength_spread"));
+      double wavelength0 = wavelength - wavelength_spread / 2;
+      double wavelength1 = wavelength + wavelength_spread / 2;
+
       // hmm is a 3d array with axes: sample_x, y_pixel_offset, x_pixel_offset
-      size_t n1 = hmm.dim1();
-      size_t n2 = hmm.dim2();
-      size_t nHist = n1 * n2;
+      size_t ny = hmm.dim1(); // second dimension
+      size_t nx = hmm.dim2(); // third dimension
+      size_t nHist = ny * nx; // number of spectra in the dataset
       if (nHist == 0)
       {
-        throw std::runtime_error("Error in data dimensions: " + boost::lexical_cast<std::string>(n1) + " X " + boost::lexical_cast<std::string>(n2));
+        throw std::runtime_error("Error in data dimensions: " + boost::lexical_cast<std::string>(ny) + " X " + boost::lexical_cast<std::string>(nx));
       }
-      size_t xWidth = 1, yWidth = 1;
 
-      // 2. Create workspace & GSS Files data is always in TOF
+      // Set the workspace structure. The workspace will contain nHist spectra each having a single wavelength bin.
+      const size_t xWidth = 2; // number of wavelength bin boundaries
+      const size_t yWidth = 1; // number of bins
+
+      // Create a workspace with nHist spectra and a single y bin.
       MatrixWorkspace_sptr outputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
           WorkspaceFactory::Instance().create("Workspace2D", nHist, xWidth, yWidth));
+      // Set the units of the x axis as Wavelength
       outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+      // Set the units of the data as Counts
       outputWorkspace->setYUnitLabel("Counts");
 
-      //  Put data into outputWorkspace
+      //  Put the data into outputWorkspace
       size_t count = 0;
-      for (size_t i = 0; i < n1; ++i)
-      for (size_t j = 0; j < n2; ++j)
+      for (size_t i = 0; i < ny; ++i)
+      for (size_t j = 0; j < nx; ++j)
       {
         // Move data across
-        double y = hmm(0,int(i),int(j));
-        outputWorkspace->dataX(count)[0] = wavelength;
-        outputWorkspace->dataY(count)[0] = y;
-        outputWorkspace->dataE(count)[0] = sqrt(y);
+        double c = hmm(0,int(i),int(j));
+        outputWorkspace->dataX(count)[0] = wavelength0;
+        outputWorkspace->dataX(count)[1] = wavelength1;
+        outputWorkspace->dataY(count)[0] = c;
+        outputWorkspace->dataE(count)[0] = sqrt(c);
         ++count;
       }
 
-      // 2.3 Build instrument geometry
+      // Build instrument geometry
 
+      // Create a new instrument and set its name
       std::string instrumentname = "QUOKKA";
-      // 1. Create a new instrument and set its name
       Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrumentname));
       outputWorkspace->setInstrument(instrument);
 
-      // 3. Add dummy source and samplepos to instrument
+      // Add dummy source and samplepos to instrument
+
+      // Create an instrument component wich will represent the sample position.
       Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample",instrument.get());
       instrument->add(samplepos);
       instrument->markAsSamplePos(samplepos);
+      // Put the sample in the centre of the coordinate system
       samplepos->setPos(0.0,0.0,0.0);
 
+      // Create a component to represent the source
       Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",instrument.get());
       instrument->add(source);
       instrument->markAsSource(source);
 
-      double l1 = entry.getFloat("instrument/parameters/L1");
+      // Read in the L1 value and place the source at (0,0,-L1)
+      double l1 = static_cast<double>(entry.getFloat("instrument/parameters/L1"));
       source->setPos(0.0,0.0,-1.0*l1);
 
-      Geometry::RectangularDetector* bank = new Geometry::RectangularDetector("bank",instrument.get());
-      std::string detXML =   "<cuboid id=\"s04\">"
-        "<left-front-bottom-point   x=\"0.005\" y=\"-0.005\" z=\"0\"  />"
-        "<left-front-top-point      x=\"0.005\" y=\"-0.005\" z=\"0.002\"  />"
-        "<left-back-bottom-point    x=\"-0.005\" y=\"-0.005\" z=\"0\"  />"
-        "<right-front-bottom-point  x=\"0.005\" y=\"0.005\" z=\"0\"  />"
-        "</cuboid>";
-      Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
-      bank->initialize(shape,192,0,0.005,192,0,0.005,1,true,192);
-      outputWorkspace->setTitle(entry.getString("experiment/title"));
+      // Create a component for the detector. 
 
+      // We assumed that these are the dimensions of the detector, and height is in y direction and width is in x direction
+      double height = static_cast<double>(entry.getFloat("instrument/detector/active_height"));
+      double width = static_cast<double>(entry.getFloat("instrument/detector/active_width"));
+      // Convert them to metres
+      height /= 1000;
+      width /= 1000;
+
+      // We assumed that individual pixels have the same size and shape of a cuboid with dimensions:
+      double pixel_height = height / ny;
+      double pixel_width = width / nx;
+      // Create size strings for shape creation
+      std::string pixel_height_str = boost::lexical_cast<std::string>(pixel_height / 2);
+      std::string pixel_width_str = boost::lexical_cast<std::string>(pixel_width / 2);
+      // Set the depth of a pixel to a very small number
+      std::string pixel_depth_str = "0.00001";
+
+      // Create a RectangularDetector which represents a rectangular array of pixels
+      Geometry::RectangularDetector* bank = new Geometry::RectangularDetector("bank",instrument.get());
+      // Define shape of a pixel as an XML string. See http://www.mantidproject.org/HowToDefineGeometricShape for details
+      // on shapes in Mantid.
+      std::string detXML =   "<cuboid id=\"pixel\">"
+        "<left-front-bottom-point   x= \""+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
+        "<left-front-top-point      x= \""+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
+        "<left-back-bottom-point    x=\"-"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
+        "<right-front-bottom-point  x= \""+pixel_width_str+"\" y= \""+pixel_height_str+"\" z=\"0\"  />"
+        "</cuboid>";
+      // Create a shape object which will be shared by all pixels.
+      Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
+      // Initialise the detector specifying the sizes.
+      bank->initialize(shape,int(nx),0,pixel_width,int(ny),0,pixel_height,1,true,int(nx));
+      // Position the detector so the z axis goes through its centre
+      bank->setPos(-width / 2, -height / 2, 0);
+
+      // Set the workspace title
+      outputWorkspace->setTitle(entry.getString("experiment/title"));
+      // Attach the created workspace to the OutputWorkspace property. The workspace will also be saved in AnalysisDataService
+      // and can be retrieved by its name.
       setProperty("OutputWorkspace", outputWorkspace);
-      return;
+
     }
 
     /**This method does a quick file type check by checking the first 100 bytes of the file
-     *  @param filePath- path of the file including name.
+     *  @param filePath :: path of the file including name.
      *  @param nread :: no.of bytes read
      *  @param header :: The first 100 bytes of the file as a union
      *  @return true if the given file is of type which can be loaded by this algorithm
@@ -166,7 +221,7 @@ namespace Mantid
       return false;
     }
 
-    /**checks the file by opening it and reading few lines
+    /** Checks the file by opening it and reading few lines
      *  @param filePath :: name of the file including its path
      *  @return an integer value how much this algorithm can load the file
      */
@@ -176,14 +231,14 @@ namespace Mantid
 
       try
       {
-        // Open the raw data group 'raw_data_1'
+        // Check if there exists a data set with name hmm_xy
         NeXus::NXEntry entry = root.openFirstEntry();
         if (entry.containsGroup("data"))
         {
           NeXus::NXData data = entry.openNXData("data");
           if (data.getDataSetInfo("hmm_xy").stat != NX_ERROR)
           {
-            return 80;
+            return 80; // Give it an 80% chance that the file is readable
           }
         }
       }
@@ -193,65 +248,6 @@ namespace Mantid
       }
       return 0;
     }
-
-    /* Create the instrument geometry with Instrument
-     *
-     */
-    //void LoadQKK::createInstrumentGeometry(MatrixWorkspace_sptr workspace, std::string instrumentname, double primaryflightpath,
-    //    std::vector<int> detectorids, std::vector<double> totalflightpaths, std::vector<double> twothetas){
-
-    //  // 0. Output information
-    //  g_log.information() << "L1 = " << primaryflightpath << std::endl;
-    //  if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()){
-    //    g_log.debug() << "Input error!  cannot create geometry" << std::endl;
-    //    g_log.information() << "Quit!" << std::endl;
-    //    return;
-    //  }
-    //  for (size_t i = 0; i < detectorids.size(); i ++){
-    //    g_log.information() << "Detector " << detectorids[i] << "  L1+L2 = " << totalflightpaths[i] << "  2Theta = " << twothetas[i] << std::endl;
-    //  }
-
-    //  // 1. Create a new instrument and set its name
-    //  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrumentname));
-    //  workspace->setInstrument(instrument);
-
-    //  // 3. Add dummy source and samplepos to instrument
-    //  Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample",instrument.get());
-    //  instrument->add(samplepos);
-    //  instrument->markAsSamplePos(samplepos);
-    //  samplepos->setPos(0.0,0.0,0.0);
-
-    //  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",instrument.get());
-    //  instrument->add(source);
-    //  instrument->markAsSource(source);
-
-    //  double l1 = primaryflightpath;
-    //  source->setPos(0.0,0.0,-1.0*l1);
-
-    //  // 4. add detectors
-    //  // The L2 and 2-theta values from Raw file assumed to be relative to sample position
-    //  const int numDetector = (int)detectorids.size();    // number of detectors
-    //  std::vector<int> detID = detectorids;    // detector IDs
-    //  std::vector<double> angle = twothetas;  // angle between indicent beam and direction from sample to detector (two-theta)
-
-    //  for (int i = 0; i < numDetector; ++i)
-    //  {
-    //    // Create a new detector. Instrument will take ownership of pointer so no need to delete.
-    //    Geometry::Detector *detector = new Geometry::Detector("det",detID[i],samplepos);
-    //    Kernel::V3D pos;
-
-    //    // FIXME : need to confirm the definition
-    //    double r = totalflightpaths[i] - l1;
-    //    pos.spherical(r, angle[i], 0.0 );
-
-    //    detector->setPos(pos);
-
-    //    // add copy to instrument and mark it
-    //    instrument->add(detector);
-    //    instrument->markAsDetector(detector);
-    //  }
-
-    //}
 
   }//namespace
 }//namespace

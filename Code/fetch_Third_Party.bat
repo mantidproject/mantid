@@ -21,30 +21,42 @@ If %ERRORLEVEL% == 0 (
 del CheckOS.txt
 del StringCheck.txt
 
-:: First check if everything is already there - if so we just want to update
-IF EXIST Third_Party/include GOTO Update
-
 :: Find out the url where mantid came from so we use the same location & protocol
 FOR /F %%I IN ('git.cmd config --get remote.origin.url') DO SET url=%%I
-echo %url%
+echo Mantid repository URL: %url%
+
+:: Check if includes are already there - if so, just update
+IF EXIST Third_Party/include GOTO UpdateInc
+
 set incs=%url:mantid.git=%3rdpartyincludes.git
-echo %incs%
+:: Otherwise we need to clone
+echo Cloning Third_Party includes from %incs%
+call git.cmd clone %incs% Third_Party/include
+
+:DoLibs
+:: Check is libs are already there - if so, just update
+IF EXIST Third_Party/lib/%arch% GOTO UpdateLib
+
 set libs=%url:mantid.git=%3rdpartylibs-%arch%.git
 echo %libs%
 
 :: Otherwise we need to clone
-echo Cloning Third_Party includes and libraries...
-call git.cmd clone %incs% Third_Party/include
+echo Cloning Third_Party libraries from %libs%
 call git.cmd clone %libs% Third_Party/lib/%arch%
 exit 0
 
-
 :: Just making sure what we have is up to date
-:Update
-echo Updating Third_Party includes and libraries...
+:UpdateInc
+echo Updating Third_Party includes...
 cd Third_Party/include
 call git.cmd pull
-cd ../lib/%arch%
+:: Be sure to end up back where we started
+cd ../..
+GOTO :DoLibs
+
+:UpdateLib
+echo Updating Third_Party libraries...
+cd Third_Party/lib/%arch%
 call git.cmd pull
 :: Be sure to end up back where we started
 cd ../../..

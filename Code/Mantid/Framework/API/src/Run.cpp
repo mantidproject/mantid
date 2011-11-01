@@ -124,12 +124,20 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /// Return the run start time
   const Kernel::DateAndTime Run::startTime() const
   {
+	// Use start_time if found, else use run_start
     const std::string start_prop("start_time");
-    if( this->hasProperty(start_prop) ) 
+	const std::string run_start_prop("run_start");
+    if( this->hasProperty(start_prop)  ) 
     {
       std::string start = this->getProperty(start_prop)->value();
       return DateAndTime(start);
-    }
+    }  
+	else if (  this->hasProperty(run_start_prop) ) 
+	{
+	 std::string start = this->getProperty(run_start_prop)->value();
+      return DateAndTime(start);
+
+	}
     else
     {
       throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
@@ -139,13 +147,19 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /// Return the run end time
   const Kernel::DateAndTime Run::endTime() const
   {
+	// Use end_time if found, else use run_end
     const std::string end_prop("end_time");
+	const std::string run_end_prop("run_end");
     if( this->hasProperty(end_prop) )
     {
       std::string end = this->getProperty(end_prop)->value();
       return DateAndTime(end);
     }
-    else
+    else if( this->hasProperty(run_end_prop) )
+    {
+      std::string end = this->getProperty(run_end_prop)->value();
+      return DateAndTime(end);
+    }
     {
       throw std::runtime_error("Run::endTime() - No end time has been set for this run.");
     }

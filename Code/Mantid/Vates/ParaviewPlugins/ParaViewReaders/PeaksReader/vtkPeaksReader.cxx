@@ -47,6 +47,12 @@ void vtkPeaksReader::SetWidth(double width)
   this->Modified();
 }
 
+void vtkPeaksReader::SetDimensions(int dimensions)
+{
+  m_dimensions = dimensions;
+  this->Modified();
+}
+
 
 int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
@@ -57,7 +63,15 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   // Instantiate the factory that makes the peak markers
-  vtkPeakMarkerFactory * p_peakFactory = new vtkPeakMarkerFactory("peaks");
+  vtkPeakMarkerFactory::ePeakDimensions dim;
+  switch (m_dimensions)
+  {
+  case 1: dim = vtkPeakMarkerFactory::Peak_in_Q_lab; break;
+  case 2: dim = vtkPeakMarkerFactory::Peak_in_Q_sample; break;
+  case 3: dim = vtkPeakMarkerFactory::Peak_in_HKL; break;
+  default: dim = vtkPeakMarkerFactory::Peak_in_Q_lab; break;
+  }
+  vtkPeakMarkerFactory * p_peakFactory = new vtkPeakMarkerFactory("peaks", dim);
 
   p_peakFactory->initialize(m_PeakWS);
   vtkDataSet * structuredMesh = p_peakFactory->create();

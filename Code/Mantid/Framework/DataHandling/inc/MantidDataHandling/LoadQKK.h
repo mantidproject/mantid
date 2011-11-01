@@ -12,10 +12,11 @@ namespace Mantid
 namespace DataHandling
 {
 /**
-     Loads a file as saved by SaveGSS
+     Loads a Quokka data file. Implements API::IDataFileChecker and its file check methods to
+     recognise a file as the one containing QUOKKA data.
 
-     @author Michael Whitty, ISIS Facility, Rutherford Appleton Laboratory
-     @date 01/09/2010
+     @author Roman Tolchenov, Tessella plc
+     @date 31/10/2011
 
      Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -63,10 +64,6 @@ private:
   void init();
   ///Execution code
   void exec();
-  // Create an instrument geometry.
-  //void createInstrumentGeometry(API::MatrixWorkspace_sptr workspace, std::string instrumentname, double primaryflightpath,
-  //    std::vector<int> detectorids, std::vector<double> totalflightpaths, std::vector<double> twothetas);
-
 };
 }
 }

@@ -57,6 +57,8 @@ private:
   void init();
   /// Execution code
   void exec();
+  /// Check whether we have a processed file of not
+  bool fileCheck(const std::string& filePath);
 
   std::string m_output_message;
 

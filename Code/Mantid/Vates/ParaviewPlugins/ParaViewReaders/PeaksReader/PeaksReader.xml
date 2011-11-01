@@ -21,7 +21,22 @@
         number_of_elements="1">
         <FileListDomain name="files"/>
       </StringVectorProperty>
-	  
+      
+      <IntVectorProperty
+                        name="Dimensions"
+                        command="SetDimensions"
+                        number_of_elements="1"
+                        default_values="1">
+        <EnumerationDomain name="enum">
+          <Entry value="1" text="Q (Lab frame)"/>
+          <Entry value="2" text="Q (Sample frame)"/>
+          <Entry value="3" text="HKL"/>
+        </EnumerationDomain>
+        <Documentation>
+          Choose the dimension space to plot the single-crystal peaks. This should match your loaded data file.
+        </Documentation>
+         </IntVectorProperty>
+         
     </SourceProxy>
   </ProxyGroup>
   <!-- End PeaksReader -->
