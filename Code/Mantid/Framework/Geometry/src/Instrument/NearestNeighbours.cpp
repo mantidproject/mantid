@@ -38,7 +38,7 @@ namespace Mantid
      */
     std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const unsigned int noNeighbours) const
     {
-      if(force || m_noNeighbours != noNeighbours)
+      if(force || m_noNeighbours != int(noNeighbours))
       {
         const_cast<NearestNeighbours*>(this)->build(noNeighbours);
       }

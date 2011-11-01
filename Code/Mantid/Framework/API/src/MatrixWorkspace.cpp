@@ -308,9 +308,8 @@ namespace Mantid
     /**
      * Handles the building of the NearestNeighbours object, if it has not already been
      * populated for this parameter map.
-     * @param comp :: Object used for determining the Instrument
      */
-    void MatrixWorkspace::buildNearestNeighbours(const IComponent *comp) const
+    void MatrixWorkspace::buildNearestNeighbours() const
     {
       if( !m_spectraMap )
       {
@@ -344,7 +343,7 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        buildNearestNeighbours(comp);
+        buildNearestNeighbours();
       }
       // Find the spectrum number
       std::vector<specid_t> spectra;
