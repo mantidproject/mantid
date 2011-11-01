@@ -49,6 +49,10 @@ double ColorBarWidget::getMaximum() const
 bool ColorBarWidget::getLog() const
 { return m_log; }
 
+/// @return then min/max range currently viewed
+QwtDoubleInterval ColorBarWidget::getViewRange() const
+{ return QwtDoubleInterval(m_min, m_max); }
+
 
 //-------------------------------------------------------------------------------------------------
 /** Change the color map shown
@@ -117,6 +121,8 @@ void ColorBarWidget::setDataRange(double min, double max)
   m_rangeMax = max;
   setSpinBoxesSteps();
 }
+void ColorBarWidget::setDataRange(QwtDoubleInterval range)
+{ this->setDataRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
 /** Set the range of values viewed in the color bar
@@ -130,6 +136,8 @@ void ColorBarWidget::setViewRange(double min, double max)
   m_max = max;
   update();
 }
+void ColorBarWidget::setViewRange(QwtDoubleInterval range)
+{ this->setViewRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
 /** SLOT called when clicking the log button */

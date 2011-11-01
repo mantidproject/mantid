@@ -38,8 +38,10 @@ public slots:
   void showInfoAt(double, double);
   void colorRangeFullSlot();
   void colorRangeSliceSlot();
+  void colorRangeChanged();
   void zoomInSlot();
   void zoomOutSlot();
+
 
 private:
   void initMenus();

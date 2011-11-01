@@ -7,6 +7,8 @@ using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
+//-------------------------------------------------------------------------
+/// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
 : m_slicePoint(NULL)
 {
@@ -14,22 +16,62 @@ QwtRasterDataMD::QwtRasterDataMD()
   m_minVal = DBL_MAX;
   m_maxVal = -DBL_MAX;
   m_range = QwtDoubleInterval(0.0, 1.0);
+  m_logMode = true;
   nan = std::numeric_limits<double>::quiet_NaN();
 }
 
-
+//-------------------------------------------------------------------------
+/// Destructor
 QwtRasterDataMD::~QwtRasterDataMD()
 {
   delete [] m_slicePoint;
 }
 
 
+//-------------------------------------------------------------------------
+/** Perform a copy of this data object */
+QwtRasterData* QwtRasterDataMD::copy() const
+{
+  QwtRasterDataMD* out = new QwtRasterDataMD();
+  out->m_ws = this->m_ws;
+  out->m_logMode = this->m_logMode;
+  out->m_dimX = this->m_dimX;
+  out->m_dimY = this->m_dimY;
+  out->m_nd = this->m_nd;
+  out->m_minVal = this->m_minVal;
+  out->m_maxVal = this->m_maxVal;
+  out->m_range = this->m_range;
+  out->m_slicePoint = new coord_t[m_nd];
+  for (size_t d=0; d<m_nd; d++)
+    out->m_slicePoint[d] = this->m_slicePoint[d];
+  out->m_ws = this->m_ws;
+  return out;
+}
+
+//-------------------------------------------------------------------------
+/** Set the data range (min/max) to display */
+void QwtRasterDataMD::setRange(const QwtDoubleInterval & range)
+{ m_range = range; }
+
+//-------------------------------------------------------------------------
+/** Sets whether to show the log10 of the data
+ * @param log :: true to use log color scaling.
+ */
+void QwtRasterDataMD::setLogMode(bool log)
+{ m_logMode = log;
+}
+
+
+//-------------------------------------------------------------------------
+/** Return the data value to plot at the given position
+ *
+ * @param x :: position in coordinates of the MDWorkspace
+ * @param y :: position in coordinates of the MDWorkspace
+ * @return signal to plot
+ */
 double QwtRasterDataMD::value(double x, double y) const
 {
   if (!m_ws) return 0;
-//  timesRequested++;
-//  if (timesRequested % 1000 == 0)
-//    std::cout << timesRequested/1000 << ", ";
 
   // Generate the vector of coordinates, filling in X and Y
   coord_t * lookPoint = new coord_t[m_nd];
@@ -46,30 +88,19 @@ double QwtRasterDataMD::value(double x, double y) const
   signal_t value = m_ws->getSignalAtCoord(lookPoint);
   if (value < m_minVal) m_minVal = value;
   if (value > m_maxVal) m_maxVal = value;
-//  std::cout << x << "," << y << "=" << value << "\n";
   delete [] lookPoint;
 
-  if (value <= 0.)
-    return nan;
+  if (m_logMode)
+  {
+    if (value <= 0.)
+      return nan;
+    else
+      return log10(value);
+  }
   else
-    return log(value);
-}
-
-QwtRasterData* QwtRasterDataMD::copy() const
-{
-  QwtRasterDataMD* out = new QwtRasterDataMD();
-  out->m_ws = this->m_ws;
-  out->m_dimX = this->m_dimX;
-  out->m_dimY = this->m_dimY;
-  out->m_nd = this->m_nd;
-  out->m_minVal = this->m_minVal;
-  out->m_maxVal = this->m_maxVal;
-  out->m_range = this->m_range;
-  out->m_slicePoint = new coord_t[m_nd];
-  for (size_t d=0; d<m_nd; d++)
-    out->m_slicePoint[d] = this->m_slicePoint[d];
-  out->m_ws = this->m_ws;
-  return out;
+  {
+    return value;
+  }
 }
 
 
@@ -77,11 +108,18 @@ QwtRasterData* QwtRasterDataMD::copy() const
 /** Return the data range to show */
 QwtDoubleInterval QwtRasterDataMD::range() const
 {
-  double min = log(m_range.minValue());
-  double max = log(m_range.maxValue());
-  if (m_range.minValue() <= 0)
-    min = max-6;
-  return QwtDoubleInterval(min,max);
+  if (m_logMode)
+  {
+    double min = log10(m_range.minValue());
+    double max = log10(m_range.maxValue());
+    if (m_range.minValue() <= 0)
+      min = max-6;
+    return QwtDoubleInterval(min,max);
+  }
+  else
+    // Linear color plot
+    return m_range;
+
 }
 
 

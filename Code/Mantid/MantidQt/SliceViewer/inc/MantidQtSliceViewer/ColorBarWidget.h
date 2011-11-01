@@ -16,12 +16,15 @@ public:
 
   void setColorMap(QwtColorMap * colorMap);
   void setDataRange(double min, double max);
+  void setDataRange(QwtDoubleInterval range);
   void setViewRange(double min, double max);
+  void setViewRange(QwtDoubleInterval range);
   void setLog(bool log);
 
   double getMinimum() const;
   double getMaximum() const;
   bool getLog() const;
+  QwtDoubleInterval getViewRange() const;
 
 public slots:
   void changedLogState(int);
