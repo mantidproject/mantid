@@ -15,6 +15,7 @@
   #include <malloc/malloc.h>
   #include <sys/sysctl.h>
   #include <mach/mach_host.h>
+  #include <mach/task.h>
 #endif
 #ifdef _WIN32
   #include <windows.h>
@@ -47,15 +48,18 @@ string memToString(const TYPE mem_in_kiB)
 }
 
 // -------------------- functions for getting the memory associated with the process
-
-/// Adapted from http://stackoverflow.com/questions/669438/how-to-get-memory-usage-at-run-time-in-c
+/** Attempts to read the system-dependent data for a process' virtual memory
+ * size and resident set size, and return the results in KB. On failure, returns 0.0, 0.0
+ * @param vm_usage :: The virtual memory usage is stored in this variable in KiB
+ * @param resident_set:: The memory associated with the current process in KiB
+ */
 void process_mem_usage(size_t & vm_usage, size_t & resident_set)
 {
-  //Temporarily disabled for non-linux OSs
   vm_usage = 0;
   resident_set = 0;
 
 #ifdef __linux__
+  // Adapted from http://stackoverflow.com/questions/669438/how-to-get-memory-usage-at-run-time-in-c
   using std::ios_base;
   using std::ifstream;
 
@@ -80,6 +84,22 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
   long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
   vm_usage     = static_cast<size_t>(vsize / static_cast<long double>(1024.0));
   resident_set = static_cast<size_t>(rss * page_size_kb);
+#elif __APPLE__
+  // Adapted from http://blog.kuriositaet.de/?p=257. No official apple docs could be found
+  task_t task = MACH_PORT_NULL;
+  struct task_basic_info t_info;
+  mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+
+  if (KERN_SUCCESS != task_info(mach_task_self(),
+      TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count))
+  {
+      return -1;
+  }
+  // Need to find out the system page size for next part
+  vm_size_t pageSize;
+  host_page_size(port, &pageSize);
+  resident_set = static_cast<size_t>(t_info.resident_size*pageSize);
+  vm_usage  = static_cast<size_t>(t_info.virtual_size*pageSize/1024.0);
 #elif _WIN32
   // Adapted from http://msdn.microsoft.com/en-us/library/windows/desktop/ms682050%28v=vs.85%29.aspx
   DWORD pid = GetCurrentProcessId();
@@ -97,7 +117,11 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
 // ----------------------- functions associated with getting the memory of the system
 
 #ifdef __linux__
-/// This function reads /proc/meminfo to get the system information.
+/**
+ * This function reads /proc/meminfo to get the system information.
+ * @param sys_avail :: An output variable containing the available system memory in KiB
+ * @param sys_total :: An output variable containing the total system memory in KiB
+ */
 bool read_mem_info(size_t & sys_avail, size_t & sys_total)
 {
   std::ifstream file("/proc/meminfo");
@@ -148,6 +172,10 @@ namespace {  // Anonymous namespace
 }
 #endif
 
+/** Attempts to read the system memory statistics.
+ * @param sys_avail :: An output variable containing the reported available system memory in this variable in KiB
+ * @param sys_total :: An output variable containing the reported total system memory in the system in KiB
+ */
 void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
 {
   sys_avail = 0;
@@ -291,11 +319,15 @@ void MemoryStats::update()
   MemoryStats::mutexMemory.lock();
   // get what is used by the process
   if (this->ignore != MEMORY_STATS_IGNORE_PROCESS)
+  {
     process_mem_usage(this->vm_usage, this->res_usage);
+  }
 
   // get the system information
   if (this->ignore != MEMORY_STATS_IGNORE_SYSTEM)
-  process_mem_system(this->avail_memory, this->total_memory);
+  {
+    process_mem_system(this->avail_memory, this->total_memory);
+  }
   MemoryStats::mutexMemory.unlock();
 }
 
