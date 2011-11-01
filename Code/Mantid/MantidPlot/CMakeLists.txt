@@ -728,6 +728,7 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
+include_directories ( ../MantidQt/SliceViewer/inc )
 
 
 ###########################################################################
