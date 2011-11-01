@@ -1,5 +1,6 @@
 #include "InstrumentWindowRenderTab.h"
 #include "ProjectionSurface.h"
+#include "UnwrappedSurface.h"
 
 #include <QMenu>
 #include <QVBoxLayout>
@@ -35,6 +36,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_renderMode->insertItems(0,modeList);
   connect(m_renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
   connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
+  connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showFlipControl(int)));
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -75,8 +77,14 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   connect(m_colorMapWidget,SIGNAL(minValueChanged(double)),m_instrWindow, SLOT(changeColorMapMinValue(double)));
   connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),m_instrWindow, SLOT(changeColorMapMaxValue(double)));
 
+  m_flipCheckBox = new QCheckBox("Flip view",this);
+  m_flipCheckBox->setChecked(false);
+  m_flipCheckBox->hide();
+  connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
+
   // layout
   renderControlsLayout->addWidget(m_renderMode);
+  renderControlsLayout->addWidget(m_flipCheckBox);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
@@ -205,6 +213,11 @@ void InstrumentWindowRenderTab::showResetView(int iv)
   m_resetViewFrame->setVisible(iv == 0);
 }
 
+void InstrumentWindowRenderTab::showFlipControl(int iv)
+{
+  m_flipCheckBox->setVisible(iv != 0);
+}
+
 void InstrumentWindowRenderTab::showAxes(bool on)
 {
   m_instrWindow->set3DAxesState(on);
@@ -231,4 +244,12 @@ void InstrumentWindowRenderTab::updateSurfaceTypeControl(int type)
   m_renderMode->blockSignals(true);
   m_renderMode->setCurrentIndex(type);
   m_renderMode->blockSignals(false);
+}
+
+void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
+{
+  UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_InstrumentDisplay->getSurface());
+  if (!surface) return;
+  surface->setFlippedView(on);
+  m_InstrumentDisplay->refreshView();
 }

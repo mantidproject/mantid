@@ -42,6 +42,8 @@ public slots:
 private slots:
   void changeColormap(const QString & filename = "");
   void showResetView(int);
+  void showFlipControl(int);
+  void flipUnwrappedView(bool);
 private:
   void showEvent (QShowEvent *);
 
@@ -54,13 +56,14 @@ private:
   ColorMapWidget* m_colorMapWidget;
   QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;
+  QCheckBox *m_flipCheckBox;
 
   QAction *m_colorMap;
   QAction *m_backgroundColor;
   QAction *m_displayAxes;
   QAction *m_wireframe;
   QAction *m_lighting;
-
+  
 };
 
 

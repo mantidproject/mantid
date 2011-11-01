@@ -39,6 +39,7 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     m_v_max(-DBL_MAX),
     m_height_max(0),
     m_width_max(0),
+    m_flippedView(false),
     m_startPeakShapes(false)
 {
 }
@@ -203,9 +204,18 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   glViewport(0, 0, vwidth, vheight);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(m_viewRect.left(),m_viewRect.right(),
-    m_viewRect.bottom(),m_viewRect.top(),
-    -10,10);
+  if (m_flippedView) // flipped view - towards the source
+  {
+    glOrtho(m_viewRect.right(),m_viewRect.left(),
+      m_viewRect.bottom(),m_viewRect.top(),
+      -10,10);
+  }
+  else // normal view - from the source
+  {
+    glOrtho(m_viewRect.left(),m_viewRect.right(),
+      m_viewRect.bottom(),m_viewRect.top(),
+      -10,10);
+  }
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface"))
   {
     OpenGLError::log() << "glOrtho arguments:\n";

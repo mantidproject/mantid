@@ -1453,7 +1453,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
     double quality = alg->getProperty("OutputChi2overDoF");
     std::string costFunction = alg->getProperty("CostFunction");
     Mantid::API::ICostFunction* costfun 
-     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction);
+     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction); 
     emit changeWindowTitle(QString("Fit Function (") 
       + costfun->shortName().c_str() + " = " + QString::number(quality) + ")");
   }
@@ -1463,7 +1463,6 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
   {
     emit multifitFinished();
   }
-  changeFitPlotStyle(QString::fromStdString(alg->getProperty("InputWorkspace")));
 }
 
 
@@ -2118,6 +2117,17 @@ void FitPropertyBrowser::plotOrRemoveGuessAll()
 void FitPropertyBrowser::clearAllPlots()
 {
   emit removeFitCurves();
+}
+
+/**
+* Customise the plot if it is a custom fitting. (i.e part of muon analysis)
+*
+* @param wsName :: The name of the workspace plot to be customised
+*/
+void FitPropertyBrowser::customisation(const QString& wsName)
+{
+  if (m_customFittings)
+    emit customiseGraph(wsName);
 }
 
 /** Create a double property and set some settings
