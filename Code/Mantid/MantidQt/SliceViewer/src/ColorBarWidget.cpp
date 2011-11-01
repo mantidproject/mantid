@@ -6,6 +6,8 @@
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
 
+//-------------------------------------------------------------------------------------------------
+/** Constructor */
 ColorBarWidget::ColorBarWidget(QWidget *parent)
 : QWidget(parent)
 {
@@ -27,7 +29,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum(double)));
   QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum(double)));
 
-
+  // Initial view
   this->update();
 }
 
@@ -181,13 +183,13 @@ void ColorBarWidget::update()
   ui.valMin->setValue( m_min );
   ui.valMax->setValue( m_max );
 
-  //  QList<double> ticks;
-  //  ticks.push_back(1);
-  //  ticks.push_back(2);
-  //  ticks.push_back(3);
-  //  ticks.push_back(4);
-  //  ticks.push_back(5);
-  //  scaleDiv.setTicks(QwtScaleDiv::MajorTick, ticks);
+    QList<double> ticks;
+    ticks.push_back(1);
+    ticks.push_back(2);
+    ticks.push_back(3);
+    ticks.push_back(4);
+    ticks.push_back(5);
+    scaleDiv.setTicks(QwtScaleDiv::MajorTick, ticks);
 
 }
 
