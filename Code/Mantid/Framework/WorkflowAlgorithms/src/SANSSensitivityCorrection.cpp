@@ -77,7 +77,9 @@ void SANSSensitivityCorrection::init()
    // Check the file extension
    Poco::Path path(filePath);
    const std::string extn = path.getExtension();
-   if (!extn.compare("nxs") && !extn.compare("nx5")) return false;
+   const std::string nxs("nxs");
+   const std::string nx5("nx5");
+   if (!(Poco::icompare(nxs, extn)==0 || Poco::icompare(nx5, extn)==0)) return false;
 
    // If we have a Nexus file, check that is comes from Mantid
    std::vector<std::string> entryName,definition;
