@@ -18,6 +18,7 @@
 #endif
 #ifdef _WIN32
   #include <windows.h>
+  #include <Psapi.h>
 #endif
 
 #include "MantidKernel/Memory.h"
@@ -79,6 +80,17 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
   long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
   vm_usage     = static_cast<size_t>(vsize / static_cast<long double>(1024.0));
   resident_set = static_cast<size_t>(rss * page_size_kb);
+#elif _WIN32
+  // Adapted from http://msdn.microsoft.com/en-us/library/windows/desktop/ms682050%28v=vs.85%29.aspx
+  DWORD pid = GetCurrentProcessId();
+  HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, pid);
+  if (NULL == hProcess) return;
+  PROCESS_MEMORY_COUNTERS pmc;
+  if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
+  {
+    vm_usage = pmc.PagefileUsage / 1024;
+    resident_set = pmc.WorkingSetSize / 1024;
+  }
 #endif
 }
 
@@ -348,6 +360,25 @@ size_t MemoryStats::totalMem() const
 size_t MemoryStats::availMem() const
 {
   return this->avail_memory;
+}
+
+/**
+ * Returns the memory usage of the current process in kiB
+ * @returns An unsigned containing the memory used by the current process in kiB
+ */
+std::size_t MemoryStats::residentMem() const
+{
+  return this->res_usage;
+}
+
+/**
+ * Returns the virtual memory usage of the current process in kiB
+ * @returns An unsigned containing the virtual memory used by the current process in kiB
+ */
+
+std::size_t MemoryStats::virtualMem() const
+{
+  return this->vm_usage;
 }
 
 /**
