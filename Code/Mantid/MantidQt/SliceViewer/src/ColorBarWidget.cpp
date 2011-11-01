@@ -183,13 +183,13 @@ void ColorBarWidget::update()
   ui.valMin->setValue( m_min );
   ui.valMax->setValue( m_max );
 
-    QList<double> ticks;
-    ticks.push_back(1);
-    ticks.push_back(2);
-    ticks.push_back(3);
-    ticks.push_back(4);
-    ticks.push_back(5);
-    scaleDiv.setTicks(QwtScaleDiv::MajorTick, ticks);
+//  QList<double> ticks;
+//  ticks.push_back(1);
+//  ticks.push_back(2);
+//  ticks.push_back(3);
+//  ticks.push_back(4);
+//  ticks.push_back(5);
+//  scaleDiv.setTicks(QwtScaleDiv::MajorTick, ticks);
 
 }
 
