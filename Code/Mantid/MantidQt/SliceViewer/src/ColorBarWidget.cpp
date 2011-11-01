@@ -136,6 +136,7 @@ void ColorBarWidget::setViewRange(double min, double max)
 void ColorBarWidget::changedLogState(int log)
 {
   this->setLog(log);
+  emit changedColorRange(m_min,m_max,m_log);
 }
 
 //-------------------------------------------------------------------------------------------------

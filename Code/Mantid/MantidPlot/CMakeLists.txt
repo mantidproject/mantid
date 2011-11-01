@@ -764,27 +764,6 @@ target_link_libraries ( MantidPlot
 
 
 
-
-if ( WIN32 )
-else ()
-	include_directories ( ../Framework/MDEvents/inc )
-	include_directories ( ../Framework/DataObjects/inc )
-	include_directories ( ../Framework/Algorithms/inc )
-	include_directories ( ../Framework/API/inc )
-	include_directories ( ../Framework/DataHandling/inc )
-	include_directories ( ../Framework/TestHelpers/inc )
-	include_directories ( ../Framework/Geometry/inc )
-	
-	# Extra, optional target for demoing a GUI element
-	add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ../MantidQt/SliceViewer/src/main.cpp  
-	                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-	target_link_libraries ( SliceViewerDemo 
-	                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer
-	                       MDEvents Geometry
-	                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} 
-	                       ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES} ${QSCINTILLA_LIBRARIES}   ${PYTHON_LIBRARIES}	)
-endif ()
-
 ###########################################################################
 # Entry point flag for Windows to ensure we always link to standard main 
 ###########################################################################

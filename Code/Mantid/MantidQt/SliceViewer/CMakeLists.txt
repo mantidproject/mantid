@@ -49,9 +49,32 @@ add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidQtSliceViewer MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
-# Extra, optional target for demoing a GUI element
-add_executable ( ColorBarWidgetDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/main_ColorBarWidget.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
+###########################################################################
+# DEMO/GUI TESTING APPLICATIONS
+###########################################################################
+
+add_executable ( ColorBarWidgetDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/main_ColorBarWidgetDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
 target_link_libraries ( ColorBarWidgetDemo MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+
+if ( WIN32 )
+else ()
+	include_directories ( ../../Framework/MDEvents/inc )
+	include_directories ( ../../Framework/DataObjects/inc )
+	include_directories ( ../../Framework/Algorithms/inc )
+	include_directories ( ../../Framework/API/inc )
+	include_directories ( ../../Framework/DataHandling/inc )
+	include_directories ( ../../Framework/TestHelpers/inc )
+	include_directories ( ../../Framework/Geometry/inc )
+	
+	# Extra, optional target for demoing a GUI element
+	add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerDemo.cpp  
+	                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+	target_link_libraries ( SliceViewerDemo 
+	                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer
+	                       MDEvents Geometry
+	                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} 
+	                       ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES} ${QSCINTILLA_LIBRARIES}   ${PYTHON_LIBRARIES}	)
+endif ()
 
 ###########################################################################
 # Installation settings

@@ -53,19 +53,26 @@ SliceViewer::SliceViewer(QWidget *parent)
 	m_spect = new QwtPlotSpectrogram();
 	m_spect->attach(m_plot);
 
-	m_colorMap = QwtLinearColorMap(Qt::blue, Qt::red);
+	m_colorMap = new QwtLinearColorMap(Qt::blue, Qt::red);
 	QwtDoubleInterval range(0.0, 10.0);
 
 	m_data = new QwtRasterDataMD();
-	m_spect->setColorMap(m_colorMap);
+	m_spect->setColorMap(*m_colorMap);
   m_plot->autoRefresh();
 
   // --- Create a color bar on the right axis ---------------
-  m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
-  m_colorBar->setColorBarEnabled(true);
-  m_colorBar->setColorMap(range, m_colorMap);
-  m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
-  m_plot->enableAxis(QwtPlot::yRight);
+  m_colorBar = new ColorBarWidget(this);
+  m_colorBar->setColorMap(m_colorMap);
+  m_colorBar->setDataRange( range.minValue(), range.maxValue() );
+  m_colorBar->setViewRange( range.minValue(), range.maxValue() );
+  m_colorBar->setLog(true);
+  m_spectLayout->addWidget(m_colorBar, 0, 0);
+
+//  m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
+//  m_colorBar->setColorBarEnabled(true);
+//  m_colorBar->setColorMap(range, m_colorMap);
+//  m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
+//  m_plot->enableAxis(QwtPlot::yRight);
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
@@ -505,8 +512,8 @@ void SliceViewer::updateDisplay(bool resetAxes)
 
   // Set the color range
   m_data->setRange(m_colorRange);
-  m_colorBar->setColorMap(m_colorRange, m_colorMap);
-  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(), m_colorRange.maxValue() );
+//  m_colorBar->setColorMap(m_colorRange, m_colorMap);
+//  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(), m_colorRange.maxValue() );
 
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);
