@@ -44,6 +44,9 @@ public slots:
 void stepDown();
 void stepUp();
 
+signals:
+  void valueChangedFromArrows();
+
 };
 
 #endif

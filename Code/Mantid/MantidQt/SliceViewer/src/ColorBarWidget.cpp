@@ -26,8 +26,10 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
 
   // Hook up signals
   QObject::connect(ui.checkLog, SIGNAL(stateChanged(int)), this, SLOT(changedLogState(int)));
-  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum(double)));
-  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum(double)));
+  QObject::connect(ui.valMin, SIGNAL(editingFinished()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
 
   // Initial view
   this->update();
@@ -153,17 +155,27 @@ void ColorBarWidget::setLog(bool log)
 
 //-------------------------------------------------------------------------------------------------
 /** SLOT called when minValue changes */
-void ColorBarWidget::changedMinimum(double val)
+void ColorBarWidget::changedMinimum()
 {
-  m_min = val;
+  m_min = ui.valMin->value();
+  if (m_min > m_max)
+  {
+    m_max = m_min+0.001;
+    update();
+  }
   emit changedColorRange(m_min,m_max,m_log);
 }
 
 //-------------------------------------------------------------------------------------------------
 /** SLOT called when maxValue changes */
-void ColorBarWidget::changedMaximum(double val)
+void ColorBarWidget::changedMaximum()
 {
-  m_max = val;
+  m_max = ui.valMax->value();
+  if (m_max < m_min)
+  {
+    m_min = m_max-0.001;
+    update();
+  }
   emit changedColorRange(m_min,m_max,m_log);
 }
 

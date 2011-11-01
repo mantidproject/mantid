@@ -25,8 +25,8 @@ public:
 
 public slots:
   void changedLogState(int);
-  void changedMinimum(double);
-  void changedMaximum(double);
+  void changedMinimum();
+  void changedMaximum();
 
 signals:
   void changedColorRange(double min, double max, bool log);
