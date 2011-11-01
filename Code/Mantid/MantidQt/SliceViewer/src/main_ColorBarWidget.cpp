@@ -34,6 +34,9 @@ int main( int argc, char ** argv )
   frame->setLayout(layout);
 
   ColorBarWidget * widget = new ColorBarWidget(frame);
+  widget->setDataRange(0.00, 1e5);
+  widget->setLog(false);
+
   layout->addWidget(widget);
   mainWin->move(100, 100);
   mainWin->resize(40, 500);
