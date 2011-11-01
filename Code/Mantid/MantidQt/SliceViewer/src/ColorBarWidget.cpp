@@ -1,3 +1,4 @@
+#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtSliceViewer/ColorBarWidget.h"
 #include "MantidQtSliceViewer/QScienceSpinBox.h"
 #include "qwt_scale_div.h"
@@ -14,7 +15,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   ui.setupUi(this);
 
   // Default values.
-  m_colorMap = new QwtLinearColorMap(Qt::blue, Qt::red);
+  m_colorMap = new MantidColorMap();
   m_min = 0;
   m_max = 1000;
   m_log = false;

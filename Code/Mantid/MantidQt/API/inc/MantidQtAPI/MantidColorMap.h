@@ -8,6 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "MantidQtAPI/GraphOptions.h"
+#include "DllOption.h"
 
 
 /**
@@ -33,7 +34,7 @@
    
    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class MantidColorMap : public QwtColorMap
+class EXPORT_OPT_MANTIDQT_API MantidColorMap : public QwtColorMap
 {
 
 public:

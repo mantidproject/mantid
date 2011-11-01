@@ -17,6 +17,7 @@
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
+#include "MantidQtAPI/MantidColorMap.h"
 
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
@@ -44,6 +45,8 @@ public slots:
 
 
 private:
+  void loadSettings();
+  void saveSettings();
   void initMenus();
   void initZoomer();
 
@@ -72,7 +75,10 @@ private:
   QHBoxLayout * m_spectLayout;
 
   /// Color map in use
-  QwtColorMap * m_colorMap;
+  MantidColorMap * m_colorMap;
+
+  /// File of the last loaded color map.
+  QString m_currentColorMapFile;
 
   /// Color bar indicating the color scale
   ColorBarWidget * m_colorBar;

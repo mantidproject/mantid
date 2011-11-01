@@ -53,7 +53,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 	m_spect->attach(m_plot);
 
 	// ---- Default Color Map ------
-  m_colorMap = new QwtLinearColorMap(Qt::blue, Qt::red);
+  m_colorMap = new MantidColorMap();
   QwtDoubleInterval range(0.0, 10.0);
 
 	m_data = new QwtRasterDataMD();
@@ -88,6 +88,8 @@ SliceViewer::SliceViewer(QWidget *parent)
   ui.btnZoom->hide();
 
   initMenus();
+
+  loadSettings();
 }
 
 //------------------------------------------------------------------------------------
@@ -95,7 +97,36 @@ SliceViewer::SliceViewer(QWidget *parent)
 SliceViewer::~SliceViewer()
 {
   delete m_data;
+  saveSettings();
   // Don't delete Qt objects, I think these are auto-deleted
+}
+
+
+//------------------------------------------------------------------------------------
+/** Load QSettings from .ini-type files */
+void SliceViewer::loadSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/SliceViewer");
+  bool scaleType = (bool)settings.value("LogColorScale", 0 ).toInt();
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  m_currentColorMapFile = settings.value("ColormapFile", "").toString();
+  // Set values from settings
+  if (!m_currentColorMapFile.isEmpty())
+    m_colorMap->loadMap(m_currentColorMapFile);
+  m_colorBar->setLog(scaleType);
+  settings.endGroup();
+}
+
+//------------------------------------------------------------------------------------
+/** Save settings for next time. */
+void SliceViewer::saveSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/SliceViewer");
+  settings.setValue("ColormapFile", m_currentColorMapFile);
+  settings.setValue("LogColorScale", (int)m_colorBar->getLog() );
+  settings.endGroup();
 }
 
 
@@ -490,6 +521,7 @@ void SliceViewer::showInfoAt(double x, double y)
 /** Update the 2D plot using all the current controls settings */
 void SliceViewer::updateDisplay(bool resetAxes)
 {
+  if (!m_ws) return;
   m_data->timesRequested = 0;
   size_t oldX = m_dimX;
   size_t oldY = m_dimY;
