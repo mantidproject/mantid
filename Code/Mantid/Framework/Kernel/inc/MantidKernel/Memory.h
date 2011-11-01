@@ -54,6 +54,8 @@ namespace Mantid
       std::string availMemStr() const;
       std::size_t totalMem() const;
       std::size_t availMem() const;
+      std::size_t residentMem() const;
+      std::size_t virtualMem() const;
       std::size_t reservedMem() const;
       double getFreeRatio() const;
     private:

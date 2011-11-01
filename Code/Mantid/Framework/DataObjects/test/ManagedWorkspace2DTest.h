@@ -434,8 +434,13 @@ public:
   void testLoopOverHalf()
   {
     Mantid::Kernel::MemoryStats stats;
-    stats.update();
-    size_t memBefore = stats.availMem() ;
+
+    // Temporary while I ensure that the memory-per-process code works on each platform
+#if _WIN32
+    size_t processMemBefore = stats.residentMem();
+#else
+    size_t memBefore = stats.availMem();
+#endif
 
     boost::shared_ptr<ManagedWorkspace2D> ws = boost::dynamic_pointer_cast<ManagedWorkspace2D>(managedWS);
     TSM_ASSERT("Workspace is really managed", ws);
@@ -448,9 +453,16 @@ public:
     }
     // For linux, make sure to release old memory
     Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-
     stats.update();
-    double memLoss = double(memBefore) - double(stats.availMem());
+
+#if _WIN32
+    size_t processMemNow = stats.residentMem();
+    double memLoss = static_cast<double>(processMemNow) - static_cast<double>(processMemBefore);
+#else
+    size_t memNow =  stats.availMem();
+    double memLoss = static_cast<double>(memBefore) - static_cast<double>(memNow);
+#endif
+    
     TSM_ASSERT_LESS_THAN( "MRU list should limit the amount of memory to around 100 MB used when accessing the data.", memLoss, 200*1024);
     std::cout << memLoss/(1024.0) << " MB of memory used up in looping. Memory looped over = " << 3500.0*5000*24 / (1024.0*1024.0) << " MB." << std::endl;
   }
