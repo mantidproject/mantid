@@ -442,12 +442,12 @@ void PlotDialog::changePlotType(int plotType)
 * @params plotType :: This is the plot style number. i.e line is 0 and scatter is 1.
 * @params color :: The color the user specified for the plot.
 */
-void PlotDialog::setPlotType(int plotType, const QString & color)
+void PlotDialog::setPlotType(int plotType, int curveNum, const QString & color)
 {
+  selectCurve(curveNum);
   CurveTreeItem *item = (CurveTreeItem *)listBox->currentItem();
   if (!item)
       return;
-  //std::cout << item->type(); //failing on 1001, should be 1002
   if (item->type() != CurveTreeItem::PlotCurveTreeItem)
       return;
   Graph *graph = item->graph();
@@ -462,11 +462,10 @@ void PlotDialog::setPlotType(int plotType, const QString & color)
 	else if (plotType == Graph::LineSymbols)
 		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
     
-  if (color == "Default")
+  if (color != "Default")
     s.setPen(QPen(QColor(color)));
 
   graph->setCurveSymbol(item->plotItemIndex(), s);
-  //acceptParams();
 }
 
 

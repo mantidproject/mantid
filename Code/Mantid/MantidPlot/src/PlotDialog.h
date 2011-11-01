@@ -75,7 +75,7 @@ public:
   void insertColumnsList(const QStringList& names){columnNames = names;};
   void setMultiLayer(MultiLayer *ml);
 
-  void setPlotType(int plotType, const QString & color = "Default");
+  void setPlotType(int plotType, int curveNum, const QString & color = "Default");
 
 public slots:
   void showAll(bool all);

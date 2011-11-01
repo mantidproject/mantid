@@ -93,10 +93,11 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
   if (KERN_SUCCESS != task_info(mach_task_self(),
       TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count))
   {
-      return -1;
+      return;
   }
   // Need to find out the system page size for next part
   vm_size_t pageSize;
+  mach_port_t port = mach_host_self();
   host_page_size(port, &pageSize);
   resident_set = static_cast<size_t>(t_info.resident_size*pageSize);
   vm_usage  = static_cast<size_t>(t_info.virtual_size*pageSize/1024.0);
