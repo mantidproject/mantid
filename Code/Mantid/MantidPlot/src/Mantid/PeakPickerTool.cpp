@@ -555,11 +555,11 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   {
     new MantidCurve(m_curveDifName,out,graph(),2,false);
   }
-  
-  graph()->replot();
 
   //customise the plot
-  m_fitPropertyBrowser->customisation(workspaceName());  
+  m_fitPropertyBrowser->customisation(workspaceName()+ "." + axisLabel);  
+
+  graph()->replot();
 }
 
 /**
