@@ -19,6 +19,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidNexus/NexusFileIO.h"
 
 namespace Mantid
 {
@@ -67,6 +68,37 @@ void SANSSensitivityCorrection::init()
 
 }
 
+/**checks the file by opening it and reading few lines
+ *  @param filePath :: name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file
+ */
+ bool SANSSensitivityCorrection::fileCheck(const std::string& filePath)
+ {
+   // Check the file extension
+   Poco::Path path(filePath);
+   const std::string extn = path.getExtension();
+   const std::string nxs("nxs");
+   const std::string nx5("nx5");
+   if (!(Poco::icompare(nxs, extn)==0 || Poco::icompare(nx5, extn)==0)) return false;
+
+   // If we have a Nexus file, check that is comes from Mantid
+   std::vector<std::string> entryName,definition;
+   int count= NeXus::getNexusEntryTypes(filePath,entryName,definition);
+   if(count<=-1)
+   {
+     g_log.error("Error reading file " + filePath);
+     throw Exception::FileError("Unable to read data in File:" , filePath);
+   }
+   else if(count==0)
+   {
+     g_log.error("Error no entries found in " + filePath);
+     throw Exception::FileError("Error no entries found in " , filePath);
+   }
+
+   if( entryName[0]=="mantid_workspace_1" ) return true;
+   return false;
+ }
+
 void SANSSensitivityCorrection::exec()
 {
   // Output log
@@ -105,6 +137,29 @@ void SANSSensitivityCorrection::exec()
   }
 
   // Load the flood field if we don't have it already
+  // First, try to determine whether we need to load data or a sensitivity workspace...
+  if (!floodWS && fileCheck(fileName))
+  {
+    IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
+    loadAlg->setProperty("Filename", fileName);
+    loadAlg->executeAsSubAlg();
+    Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
+    floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
+
+    // Check that it's really a sensitivity file
+    if (floodWS->run().hasProperty("is_sensitivity"))
+    {
+      setProperty("OutputSensitivityWorkspace", floodWS);
+    }
+    else
+    {
+      // Reset pointer
+      floodWS.reset();
+      g_log.error() << "A processed Mantid workspace was loaded but it wasn't a sensitivity file!" << std::endl;
+    }
+  }
+
+  // ... if we don't, just load the data and process it
   if (!floodWS)
   {
     std::string loader = reductionHandler.findStringEntry("LoadAlgorithm");

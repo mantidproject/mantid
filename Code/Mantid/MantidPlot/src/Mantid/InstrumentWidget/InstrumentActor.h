@@ -5,7 +5,7 @@
 #include "GLActor.h"
 #include "GLActorCollection.h"
 #include "SampleActor.h"
-#include "MantidColorMap.h"
+#include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 
@@ -131,6 +131,7 @@ protected:
   mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<GLColor> m_colors; ///< colors in order of workspace indexes
   QString m_currentColorMap;
+  GLColor m_maskedColor;
 
   GLActorCollection m_scene;
   SampleActor* m_sampleActor;

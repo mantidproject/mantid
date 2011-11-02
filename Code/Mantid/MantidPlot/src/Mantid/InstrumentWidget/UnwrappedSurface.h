@@ -73,6 +73,8 @@ public:
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   virtual QString getInfoText()const;
   virtual QRectF getSurfaceBounds()const;
+  void setFlippedView(bool on){m_flippedView = on;}
+  bool isFlippedView() const {return m_flippedView;}
 
 protected:
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
@@ -107,7 +109,8 @@ protected:
   double m_height_max;  ///< Maximum detector height
   double m_width_max;   ///< Maximum detector width
   QList<UnwrappedDetector> m_unwrappedDetectors;  ///< info needed to draw detectors onto unwrapped image
-  QMap<Mantid::Geometry::ComponentID,QRectF> m_assemblies;
+  QMap<Mantid::Geometry::ComponentID,QRectF> m_assemblies; ///< bounding rectangles of detector assemblies
+  bool m_flippedView; ///< if false the image is seen from the sample. if true the view is looking towards the sample.
   mutable bool m_startPeakShapes; ///< set to true to start creating m_peakShapes from m_peaksWorkspace, return to false after creation
 
 };

@@ -177,6 +177,10 @@ void MuonAnalysis::initLayout()
 
   // Detect when fitting has started, change the plot style to the one specified in plot details tab.
   connect(m_uiForm.fitBrowser,SIGNAL(changeFitPlotStyle(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
+
+  // Detect if the graph should be customised and call the two functions that change the different curves on the graph.
+  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QString &)), this, SLOT(changeDataPlotType(const QString &)));
+  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
 }
 
 
@@ -439,16 +443,25 @@ void MuonAnalysis::runLoadCurrent()
   }
 
   if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR")
-  {
-    // first check if autosave.run exist
+  {      
+    
     std::string autosavePointsTo = "";
     std::string autosaveFile = "\\\\" + instname.toStdString() + "\\data\\autosave.run";
     Poco::File pathAutosave( autosaveFile );
-    if ( pathAutosave.exists() )
+    
+    try // check if exists
+    { 
+      if ( pathAutosave.exists() )
+      {
+        std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
+        autofileIn >> autosavePointsTo;
+      }    
+    }
+    catch(Poco::Exception&)
     {
-      std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
-      autofileIn >> autosavePointsTo;
-    }    
+       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying" 
+         "\nto access is down or your computer is not currently connected to the network.");
+    }
 
     QString psudoDAE;
     if ( autosavePointsTo.empty() )
@@ -457,14 +470,26 @@ void MuonAnalysis::runLoadCurrent()
       psudoDAE = "\\\\" + instname + "\\data\\" + autosavePointsTo.c_str();
 
     Poco::File l_path( psudoDAE.toStdString() );
-    if ( !l_path.exists() )
+    try
+    { 
+      if ( !l_path.exists() )
+      {
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", 
+          QString("Can't load ") + "Current data since\n" +
+          psudoDAE + QString("\n") +
+          QString("does not seem to exist"));
+        return;
+      }
+    }
+    catch(Poco::Exception&)
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", 
-        QString("Can't load ") + "EMU Current data since\n" +
+        QString("Can't load ") + "Current data since\n" +
         psudoDAE + QString("\n") +
         QString("does not seem to exist"));
       return;
     }
+
     m_previousFilename = psudoDAE;
     inputFileChanged(psudoDAE);
     return;
@@ -1393,7 +1418,6 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   // rebin data if option set in Plot Options
   if ( m_uiForm.rebinComboBox->currentText() == "Fixed" )
   {
-    // @Rob.Whitley Need to implement.
     // Record the bunch data so that a fit can be done against it
     m_previousBunchWsName = wsname;
     m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
@@ -1422,7 +1446,6 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
 }
 
 
-// @Rob.Whitley Need to implement
 /**
 * Check the bunch details then fit using the rebinned data but plot against 
 * the data that is currently plotted, this may be the same.
@@ -1445,7 +1468,7 @@ void MuonAnalysis::reBunch(const std::string & wsName)
 
   else if (m_previousBunchWsName == wsName)
   {
-    //Put back to original, then bunch to specification (make raw currently creates a new plot @Rob.Whitley Need to implement)
+    //Put back to original, then bunch to specification
     makeRaw(wsName);
     m_previousBunchWsName = wsName;
     m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
@@ -1739,7 +1762,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QString plotType("");
     plotType.setNum(m_uiForm.connectPlotType->currentIndex());
 
-    changePlotType(plotType + ".1." + titleLabel);
+    changePlotType(plotType + ".Data." + titleLabel);
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
@@ -2809,17 +2832,32 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 
 /**
-* Set up the string that will contain all the data needed for making a plot.
-* [fitType, curveNum, wsName, color]
+* Set up the string that will contain all the data needed for changing a fit.
+* [fitType, curveNum, wsName, axisLabel, color]
 *
-* @params wsName :: The workspace name of the plot to be created. 
+* @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeFitPlotType(const QString & wsName)
+void MuonAnalysis::changeFitPlotType(const QString & plotDetails)
 {
   // First part indicates 
   QString fitType("");
   fitType.setNum(m_uiForm.connectFitType->currentIndex());
-  changePlotType(fitType + ".3." + wsName + "." + "Lime");
+  changePlotType(fitType + ".Fit." + plotDetails + "." + "Orange");
+}
+
+
+/**
+* Set up the string that will contain all the data needed for changing the data.
+* [fitType, curveNum, wsName, axisLabel, color]
+*
+* @params plotDetails :: The workspace name of the plot to be created and axis label. 
+*/
+void MuonAnalysis::changeDataPlotType(const QString & plotDetails)
+{
+  // First part indicates 
+  QString fitType("");
+  fitType.setNum(m_uiForm.connectPlotType->currentIndex());
+  changePlotType(fitType + ".Data." + plotDetails + "." + "Black");
 }
 
 }//namespace MantidQT

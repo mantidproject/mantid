@@ -7,6 +7,8 @@ using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
+//-------------------------------------------------------------------------
+/// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
 : m_slicePoint(NULL)
 {
@@ -17,44 +19,16 @@ QwtRasterDataMD::QwtRasterDataMD()
   nan = std::numeric_limits<double>::quiet_NaN();
 }
 
-
+//-------------------------------------------------------------------------
+/// Destructor
 QwtRasterDataMD::~QwtRasterDataMD()
 {
   delete [] m_slicePoint;
 }
 
 
-double QwtRasterDataMD::value(double x, double y) const
-{
-  if (!m_ws) return 0;
-//  timesRequested++;
-//  if (timesRequested % 1000 == 0)
-//    std::cout << timesRequested/1000 << ", ";
-
-  // Generate the vector of coordinates, filling in X and Y
-  coord_t * lookPoint = new coord_t[m_nd];
-  for (size_t d=0; d<m_nd; d++)
-  {
-    if (d==m_dimX)
-      lookPoint[d] = coord_t(x);
-    else if (d==m_dimY)
-      lookPoint[d] = coord_t(y);
-    else
-      lookPoint[d] = m_slicePoint[d];
-  }
-  // Get the signal at that point
-  signal_t value = m_ws->getSignalAtCoord(lookPoint);
-  if (value < m_minVal) m_minVal = value;
-  if (value > m_maxVal) m_maxVal = value;
-//  std::cout << x << "," << y << "=" << value << "\n";
-  delete [] lookPoint;
-
-  if (value <= 0.)
-    return nan;
-  else
-    return log(value);
-}
-
+//-------------------------------------------------------------------------
+/** Perform a copy of this data object */
 QwtRasterData* QwtRasterDataMD::copy() const
 {
   QwtRasterDataMD* out = new QwtRasterDataMD();
@@ -72,16 +46,54 @@ QwtRasterData* QwtRasterDataMD::copy() const
   return out;
 }
 
+//-------------------------------------------------------------------------
+/** Set the data range (min/max) to display */
+void QwtRasterDataMD::setRange(const QwtDoubleInterval & range)
+{ m_range = range; }
+
+
+
+//-------------------------------------------------------------------------
+/** Return the data value to plot at the given position
+ *
+ * @param x :: position in coordinates of the MDWorkspace
+ * @param y :: position in coordinates of the MDWorkspace
+ * @return signal to plot
+ */
+double QwtRasterDataMD::value(double x, double y) const
+{
+  if (!m_ws) return 0;
+
+  // Generate the vector of coordinates, filling in X and Y
+  coord_t * lookPoint = new coord_t[m_nd];
+  for (size_t d=0; d<m_nd; d++)
+  {
+    if (d==m_dimX)
+      lookPoint[d] = coord_t(x);
+    else if (d==m_dimY)
+      lookPoint[d] = coord_t(y);
+    else
+      lookPoint[d] = m_slicePoint[d];
+  }
+  // Get the signal at that point
+  signal_t value = m_ws->getSignalAtCoord(lookPoint);
+  if (value < m_minVal) m_minVal = value;
+  if (value > m_maxVal) m_maxVal = value;
+  delete [] lookPoint;
+
+  if (value == 0.)
+    return nan;
+  else
+    return value;
+}
+
 
 //------------------------------------------------------------------------------------------------------
 /** Return the data range to show */
 QwtDoubleInterval QwtRasterDataMD::range() const
 {
-  double min = log(m_range.minValue());
-  double max = log(m_range.maxValue());
-  if (m_range.minValue() <= 0)
-    min = max-6;
-  return QwtDoubleInterval(min,max);
+  // Linear color plot
+  return m_range;
 }
 
 

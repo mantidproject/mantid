@@ -51,13 +51,13 @@ set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflow
 # Add to the 'Framework' group in VS
 set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+include_directories ( inc ../Nexus/inc )
 
-target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   # Make the rest of the tests
-  include_directories ( ../DataHandling/inc ../TestHelpers/inc )
+  include_directories ( ../DataHandling/inc ../TestHelpers/inc ../Nexus/inc)
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )

@@ -78,6 +78,9 @@ namespace Mantid
       // Neighbouring spectra by radius
       std::map<specid_t, double> neighbours(const specid_t spectrum, const double radius=0.0) const;
 
+      // Neighbouring spectra by 
+      std::map<specid_t, double> neighbours(const specid_t spectrum, bool force, const unsigned int numberofneighbours=8) const;
+
     private:
       /// typedef for Graph object used to hold the calculated information
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
@@ -118,6 +121,8 @@ namespace Mantid
       boost::property_map<Graph, boost::edge_name_t>::type m_edgeLength;
       /// V3D for scaling
       boost::scoped_ptr<Kernel::V3D> m_scale;
+      /// Cached radius value. used to avoid uncessary recalculations.
+      mutable double m_radius;
     };
     
     /// Typedef for shared pointer to the NearestNeighbours class

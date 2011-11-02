@@ -286,7 +286,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
       el.reserve(index_end - index_start);
       el.clearDetectorIDs();
 
-      for (long i=index_start; i<index_end; i++)
+      for (int64_t i=index_start; i<index_end; i++)
       switch (type)
       {
       case TOF:
@@ -485,7 +485,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
     //// validate the optional spectrum parameters, if set
     checkOptionalProperties(nspectra);
     // Actual number of spectra in output workspace (if only a range was going to be loaded)
-    int total_specs=calculateWorkspacesize(nspectra);
+    size_t total_specs=calculateWorkspacesize(nspectra);
 
     //// Create the 2D workspace for the output
     local_workspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>

@@ -22,6 +22,9 @@
  */
 int main( int argc, char ** argv )
 {
+  double min=0;
+  double max=100;
+
   QApplication app(argc, argv);
   app.setOrganizationName("MantidProject");
   app.setApplicationName("Color Bar Widget Example");
@@ -34,6 +37,10 @@ int main( int argc, char ** argv )
   frame->setLayout(layout);
 
   ColorBarWidget * widget = new ColorBarWidget(frame);
+
+  widget->setDataRange(min, max);
+  widget->setLog(false);
+
   layout->addWidget(widget);
   mainWin->move(100, 100);
   mainWin->resize(40, 500);

@@ -35,6 +35,12 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(0, mem.reservedMem());
     TS_ASSERT_LESS_THAN_EQUALS(0, mem.totalMem());
     TS_ASSERT_DIFFERS( mem.totalMemStr(), "" );
+    
+    // Current process stats
+    TS_ASSERT_LESS_THAN_EQUALS(0, mem.residentMem());
+    TS_ASSERT_DIFFERS( mem.resUsageStr(), "");
+    TS_ASSERT_LESS_THAN_EQUALS(0, mem.virtualMem());
+    TS_ASSERT_DIFFERS( mem.vmUsageStr(), "");
   }
 
 

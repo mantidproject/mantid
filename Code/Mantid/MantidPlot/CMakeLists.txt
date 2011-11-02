@@ -194,7 +194,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.cpp
-                   src/Mantid/InstrumentWidget/MantidColorMap.cpp
                    src/Mantid/InstrumentWidget/MantidGLWidget.cpp
                    src/Mantid/InstrumentWidget/ColorMapWidget.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
@@ -261,7 +260,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/globals.h
                    src/Graph3D.h
                    src/Graph.h
-                   src/GraphOptions.h
                    src/Grid.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
@@ -408,7 +406,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
-                   src/Mantid/InstrumentWidget/MantidColorMap.h
                    src/Mantid/InstrumentWidget/MantidGLWidget.h
                    src/Mantid/InstrumentWidget/ColorMapWidget.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
@@ -453,7 +450,6 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/ImageMarker.h
                src/LegendWidget.h
                src/Grid.h
-               src/GraphOptions.h
                src/Graph.h
                src/LegendWidget.h
                src/MultiLayer.h
@@ -697,10 +693,15 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 ADD_PRECOMPILED_HEADER( src/PrecompiledHeader.h "" src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
+
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+
+###########################################################################
 # Internal icon links
+###########################################################################
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
 
 ###########################################################################
 # Add the dependencies
@@ -728,6 +729,7 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
+include_directories ( ../MantidQt/SliceViewer/inc )
 
 
 ###########################################################################
@@ -763,27 +765,6 @@ target_link_libraries ( MantidPlot
 )
 
 
-
-
-if ( WIN32 )
-else ()
-	include_directories ( ../Framework/MDEvents/inc )
-	include_directories ( ../Framework/DataObjects/inc )
-	include_directories ( ../Framework/Algorithms/inc )
-	include_directories ( ../Framework/API/inc )
-	include_directories ( ../Framework/DataHandling/inc )
-	include_directories ( ../Framework/TestHelpers/inc )
-	include_directories ( ../Framework/Geometry/inc )
-	
-	# Extra, optional target for demoing a GUI element
-	add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ../MantidQt/SliceViewer/src/main.cpp  
-	                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-	target_link_libraries ( SliceViewerDemo 
-	                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer
-	                       MDEvents Geometry
-	                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} 
-	                       ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES} ${QSCINTILLA_LIBRARIES}   ${PYTHON_LIBRARIES}	)
-endif ()
 
 ###########################################################################
 # Entry point flag for Windows to ensure we always link to standard main 

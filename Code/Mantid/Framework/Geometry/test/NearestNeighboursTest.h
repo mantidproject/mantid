@@ -24,7 +24,29 @@ using Mantid::Kernel::V3D;
 class NearestNeighboursTest : public CxxTest::TestSuite
 {
 public:
-  void testNeighbourFinding()
+
+  void doTestWithNeighbourNumbers(int actualNeighboursNumber, int expectedNeighboursNumber)
+  {
+     // Create Instrument and make it Parameterised
+    Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    TS_ASSERT_EQUALS(spectramap->nElements(), 18);
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+    // Parameterized instrument
+    Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    // Create the NearestNeighbours object directly.
+    NearestNeighbours nn(m_instrument, *spectramap);
+
+    // Check distances calculated in NearestNeighbours compare with those using getDistance on component
+    std::map<specid_t, double> distances = nn.neighbours(14, true, actualNeighboursNumber);
+
+    // We should have 8 neighbours when not specifying a range.
+    TS_ASSERT_EQUALS(expectedNeighboursNumber, distances.size());
+  }
+
+  void testNeighbourFindingWithRadius()
   {
     // Create Instrument and make it Parameterised
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
@@ -76,9 +98,17 @@ public:
     // Higher than currently computed
     distances = nn.neighbours(14, 6.0);
     TS_ASSERT_EQUALS(distances.size(), 17);
-
-    
   }
+
+
+
+  void testNeighbourFindingWithNeighbourNumberSpecified()
+  {
+    doTestWithNeighbourNumbers(1, 1);
+    doTestWithNeighbourNumbers(2, 2);
+    doTestWithNeighbourNumbers(3, 3);
+  }
+
   
   // Let's try it with a rectangular detector.
   void testNeighbours_RectangularDetector()

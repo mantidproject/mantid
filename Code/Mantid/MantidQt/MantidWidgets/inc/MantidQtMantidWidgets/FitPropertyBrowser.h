@@ -203,6 +203,9 @@ public:
   /// Update the PeakPickerTool with the current workspace to be displayed and which to associate itself with
   void updatePPTool(const QString& name);
 
+  /// Emits a signal to customise the plot it is associated with
+  void customisation(const QString& plotDetails);
+
 public slots:
   void fit();
   void sequentialFit();
@@ -243,6 +246,8 @@ signals:
   void changeWindowTitle(const QString&);
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
   void removeFitCurves();
+
+  void customiseGraph(const QString&);
 
   void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
