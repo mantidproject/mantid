@@ -1,3 +1,14 @@
+/*WIKI*
+
+* A list of vanadium peak positions in d-spacing is used for the central peak positions: 0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401
+
+* StripPeaks is called by providing the list of vanadium peak positions.
+
+* The vanadium peaks are fit to a function combined from Gaussian and linear/quadratic background.
+
+
+*WIKI*/
+
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 #include "MantidKernel/System.h"
 
@@ -16,7 +27,6 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
    */
   StripVanadiumPeaks2::StripVanadiumPeaks2()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -24,10 +34,15 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
    */
   StripVanadiumPeaks2::~StripVanadiumPeaks2()
   {
-    // TODO Auto-generated destructor stub
+  }
+
+  void StripVanadiumPeaks2::initDocs()
+  {
+    this->setWikiSummary("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly/quadratically interpolating over the expected peak positions. ");
   }
   
-  void StripVanadiumPeaks2::init(){
+  void StripVanadiumPeaks2::init()
+  {
     // Declare inputs and output.  Copied from StripPeaks
 
     declareProperty(
@@ -42,26 +57,25 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     min->setLower(1.0);
     // The estimated width of a peak in terms of number of channels
     declareProperty("FWHM", 7, min,
-      "Estimated number of points covered by the fwhm of a peak (default 7)" );
+      "The number of points covered, on average, by the fwhm of a peak. Passed through to FindPeaks. Default 7." );
 
     // The tolerance allowed in meeting the conditions
     declareProperty("Tolerance",4, min->clone(),
-      "A measure of the strictness desired in meeting the condition on peak candidates,\n"
-      "Mariscotti recommends 2 (default 4)");
+      "A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks. Default 4.");
 
     std::vector<std::string> bkgdtypes;
     bkgdtypes.push_back("Linear");
     bkgdtypes.push_back("Quadratic");
     declareProperty("BackgroundType", "Linear", new ListValidator(bkgdtypes),
-        "Type of Background. The choice can be either Linear or Quadratic");
+        "The type of background of the histogram. Present choices include Linear and Quadratic. ");
 
     declareProperty("HighBackground", true,
-        "Peaks are relatively weak comparing to the background");
+        "Flag to indicate that the peaks are relatively weak comparing to background ");
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
-      "If set, peaks will only be removed from this spectrum (otherwise from all)");
+      "If set, peaks will only be removed from this workspace index (otherwise from all) ");
 
     return;
 

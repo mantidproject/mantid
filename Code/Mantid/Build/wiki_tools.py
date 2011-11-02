@@ -144,6 +144,7 @@ def initialize_Mantid(mantidpath):
 def get_all_algorithms():
     """REturns a list of all algorithm names"""
     temp = mtd._getRegisteredAlgorithms(True)
+    print temp
     algos = [x for (x, version) in temp]
     return algos
 
