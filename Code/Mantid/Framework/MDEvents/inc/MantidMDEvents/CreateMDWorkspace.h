@@ -1,8 +1,9 @@
 #ifndef MANTID_MDEVENTS_CREATEMDWORKSPACE_H_
 #define MANTID_MDEVENTS_CREATEMDWORKSPACE_H_
     
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
@@ -19,7 +20,7 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-02-25 11:54:52.003137
    */
-  class DLLExport CreateMDWorkspace  : public API::Algorithm
+  class DLLExport CreateMDWorkspace  : public BoxControllerSettingsAlgorithm
   {
   public:
     CreateMDWorkspace();
