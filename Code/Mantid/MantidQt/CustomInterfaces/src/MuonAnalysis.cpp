@@ -449,7 +449,7 @@ void MuonAnalysis::runLoadCurrent()
     std::string autosaveFile = "\\\\" + instname.toStdString() + "\\data\\autosave.run";
     Poco::File pathAutosave( autosaveFile );
     
-    try // first check if autosave.run exist
+    try // check if exists
     { 
       if ( pathAutosave.exists() )
       {
@@ -470,7 +470,7 @@ void MuonAnalysis::runLoadCurrent()
       psudoDAE = "\\\\" + instname + "\\data\\" + autosavePointsTo.c_str();
 
     Poco::File l_path( psudoDAE.toStdString() );
-    try // first check if autosave.run exist
+    try
     { 
       if ( !l_path.exists() )
       {
@@ -2833,31 +2833,31 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 /**
 * Set up the string that will contain all the data needed for changing a fit.
-* [fitType, curveNum, wsName, color]
+* [fitType, curveNum, wsName, axisLabel, color]
 *
-* @params wsName :: The workspace name of the plot to be created. 
+* @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeFitPlotType(const QString & wsName)
+void MuonAnalysis::changeFitPlotType(const QString & plotDetails)
 {
   // First part indicates 
   QString fitType("");
   fitType.setNum(m_uiForm.connectFitType->currentIndex());
-  changePlotType(fitType + ".Fit." + wsName + "." + "Orange");
+  changePlotType(fitType + ".Fit." + plotDetails + "." + "Orange");
 }
 
 
 /**
 * Set up the string that will contain all the data needed for changing the data.
-* [fitType, curveNum, wsName, color]
+* [fitType, curveNum, wsName, axisLabel, color]
 *
-* @params wsName :: The workspace name of the plot to be created. 
+* @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeDataPlotType(const QString & wsName)
+void MuonAnalysis::changeDataPlotType(const QString & plotDetails)
 {
   // First part indicates 
   QString fitType("");
   fitType.setNum(m_uiForm.connectPlotType->currentIndex());
-  changePlotType(fitType + ".Data." + wsName + "." + "Black");
+  changePlotType(fitType + ".Data." + plotDetails + "." + "Black");
 }
 
 }//namespace MantidQT

@@ -16398,8 +16398,7 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 * Makes sure that it is dealing with a graph and then tells the plotDialog class 
 * to change the plot style
 *
-* @params plotDetails :: This includes all details of the plot including type, 
-* curve type, workspace and color
+* @params plotDetails :: This includes all details of the plot [fitType, curveNum, wsName, axisLabel, color]
 */
 void ApplicationWindow::setPlotType(const QString & plotDetails)
 {
@@ -16413,7 +16412,7 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
   else
   {
     plotDetailsList = plotDetails.split('.');
-    if (plotDetailsList.size() >= 3) 
+    if (plotDetailsList.size() >= 4) 
     {
       plotType = plotDetailsList[0].toInt();
 
@@ -16440,17 +16439,15 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
                 }
                 else if (plotDetailsList[1] == "Fit")
                 {
-                  curveNum = g->curveIndex(plotDetailsList[2] + "-sp-1-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff") (should be changed to axis label) 
-                    if (curveNum == -1)
-                      curveNum = g->curveIndex(plotDetailsList[2] + "-sp-33-Calc");
+                  curveNum = g->curveIndex(plotDetailsList[2] + "-" + plotDetailsList[3] + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff")
                 }
                 if (curveNum > -1) // If one of the curves has been changed 
                 {
                   // line(0) scatter(1) line+symbol(2)
                   if (plotType >= 0 && plotType <= 2)
                   {
-                    if (plotDetailsList.size() > 3)
-                      pd->setPlotType(plotType, curveNum, plotDetailsList[3]);
+                    if (plotDetailsList.size() > 4)
+                      pd->setPlotType(plotType, curveNum, plotDetailsList[4]);
                     else
                       pd->setPlotType(plotType, curveNum);            
                   }

@@ -557,7 +557,7 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   }
 
   //customise the plot
-  m_fitPropertyBrowser->customisation(workspaceName());  
+  m_fitPropertyBrowser->customisation(workspaceName()+ "." + axisLabel);  
 
   graph()->replot();
 }

@@ -2122,12 +2122,12 @@ void FitPropertyBrowser::clearAllPlots()
 /**
 * Customise the plot if it is a custom fitting. (i.e part of muon analysis)
 *
-* @param wsName :: The name of the workspace plot to be customised
+* @param plotDetails :: The name of the workspace plot to be customised and the axis label seperated by a '.'
 */
-void FitPropertyBrowser::customisation(const QString& wsName)
+void FitPropertyBrowser::customisation(const QString& plotDetails)
 {
   if (m_customFittings)
-    emit customiseGraph(wsName);
+    emit customiseGraph(plotDetails);
 }
 
 /** Create a double property and set some settings
