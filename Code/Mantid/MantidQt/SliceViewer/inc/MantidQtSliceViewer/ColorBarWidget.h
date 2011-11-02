@@ -5,7 +5,43 @@
 #include "ui_ColorBarWidget.h"
 #include <qwt_color_map.h>
 #include <qwt_scale_widget.h>
+#include "MantidQtAPI/MantidColorMap.h"
+#include <iostream>
+#include <QKeyEvent>
+#include <QtGui>
 
+//=============================================================================
+/** Extended version of QwtScaleWidget */
+class QwtScaleWidgetExtended : public QwtScaleWidget
+{
+  Q_OBJECT
+
+public:
+  QwtScaleWidgetExtended(QWidget *parent = NULL)
+  : QwtScaleWidget(parent)
+  {
+    this->setMouseTracking(true);
+  }
+
+  void mouseMoveEvent(QMouseEvent * event)
+  {
+    double val = 1.0 - double(event->y()) / double(this->height());
+    emit mouseMoved(event->globalPos(), val);
+  }
+
+signals:
+  void mouseMoved(QPoint, double);
+
+};
+
+
+//=============================================================================
+/** Widget for showing a color bar, modifying its
+ * limits, etc.
+ *
+ * @author Janik Zikovsky
+ * @date Oct 31, 2011.
+ */
 class ColorBarWidget : public QWidget
 {
   Q_OBJECT
@@ -14,7 +50,8 @@ public:
   ColorBarWidget(QWidget *parent = 0);
   ~ColorBarWidget();
 
-  void setColorMap(QwtColorMap * colorMap);
+  void update();
+
   void setDataRange(double min, double max);
   void setDataRange(QwtDoubleInterval range);
   void setViewRange(double min, double max);
@@ -25,18 +62,23 @@ public:
   double getMaximum() const;
   bool getLog() const;
   QwtDoubleInterval getViewRange() const;
+  MantidColorMap & getColorMap();
 
 public slots:
   void changedLogState(int);
   void changedMinimum();
   void changedMaximum();
+  void colorBarMouseMoved(QPoint, double);
 
 signals:
+  /// Signal sent when the range or log mode of the color scale changes.
   void changedColorRange(double min, double max, bool log);
+  /// When the user double-clicks the color bar (e.g. load a new color map)
+  void colorBarDoubleClicked();
 
 private:
   void setSpinBoxesSteps();
-  void update();
+  void mouseDoubleClickEvent(QMouseEvent * event);
 
   /// Auto-gen UI classes
   Ui::ColorBarWidgetClass ui;
@@ -45,7 +87,7 @@ private:
   QwtScaleWidget * m_colorBar;
 
   /// Color map being displayed
-  QwtColorMap * m_colorMap;
+  MantidColorMap m_colorMap;
 
   /// Logarithmic scale?
   bool m_log;
