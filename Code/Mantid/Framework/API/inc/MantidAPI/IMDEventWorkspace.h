@@ -1,6 +1,7 @@
 #ifndef IMDEVENTWORKSPACE_H_
 #define IMDEVENTWORKSPACE_H_
 
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -10,8 +11,8 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressBase.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidKernel/ThreadScheduler.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -41,6 +42,9 @@ namespace API
 
     /// Returns some information about the box controller, to be displayed in the GUI, for example
     virtual std::vector<std::string> getBoxControllerStats() const = 0;
+
+    virtual Mantid::API::BoxController_sptr getBoxController() = 0;
+    virtual Mantid::API::BoxController_const_sptr getBoxController() const = 0;
 
     /// Helper method that makes a table workspace with some box data
     virtual Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num) = 0;

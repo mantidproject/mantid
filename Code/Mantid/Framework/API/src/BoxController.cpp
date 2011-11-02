@@ -1,7 +1,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <Poco/DOM/Attr.h>
@@ -20,7 +20,7 @@ using Mantid::Kernel::VectorHelper::splitStringIntoVector;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace API
 {
 
   //-----------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ namespace MDEvents
 
 } // namespace Mantid
 
-} // namespace MDEvents
+} // namespace API
 
 
 

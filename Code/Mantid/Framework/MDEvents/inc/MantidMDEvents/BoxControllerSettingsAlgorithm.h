@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 
 namespace Mantid
 {
@@ -49,7 +49,7 @@ namespace MDEvents
     void initBoxControllerProps();
 
     /// Set the settings in the given box controller
-    void setBoxController(BoxController_sptr bc);
+    void setBoxController(Mantid::API::BoxController_sptr bc);
 
   };
 
