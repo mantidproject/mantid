@@ -443,16 +443,25 @@ void MuonAnalysis::runLoadCurrent()
   }
 
   if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR")
-  {
-    // first check if autosave.run exist
+  {      
+    
     std::string autosavePointsTo = "";
     std::string autosaveFile = "\\\\" + instname.toStdString() + "\\data\\autosave.run";
     Poco::File pathAutosave( autosaveFile );
-    if ( pathAutosave.exists() )
+    
+    try // first check if autosave.run exist
+    { 
+      if ( pathAutosave.exists() )
+      {
+        std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
+        autofileIn >> autosavePointsTo;
+      }    
+    }
+    catch(Poco::Exception&)
     {
-      std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
-      autofileIn >> autosavePointsTo;
-    }    
+       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying" 
+         "\nto access is down or your computer is not currently connected to the network.");
+    }
 
     QString psudoDAE;
     if ( autosavePointsTo.empty() )
@@ -461,14 +470,26 @@ void MuonAnalysis::runLoadCurrent()
       psudoDAE = "\\\\" + instname + "\\data\\" + autosavePointsTo.c_str();
 
     Poco::File l_path( psudoDAE.toStdString() );
-    if ( !l_path.exists() )
+    try // first check if autosave.run exist
+    { 
+      if ( !l_path.exists() )
+      {
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", 
+          QString("Can't load ") + "Current data since\n" +
+          psudoDAE + QString("\n") +
+          QString("does not seem to exist"));
+        return;
+      }
+    }
+    catch(Poco::Exception&)
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", 
-        QString("Can't load ") + "EMU Current data since\n" +
+        QString("Can't load ") + "Current data since\n" +
         psudoDAE + QString("\n") +
         QString("does not seem to exist"));
       return;
     }
+
     m_previousFilename = psudoDAE;
     inputFileChanged(psudoDAE);
     return;
