@@ -4,6 +4,7 @@
 #include "MantidKernel/DiskMRU.h"
 
 using Mantid::Kernel::DiskMRU;
+using namespace Mantid::API;
 
 namespace Mantid
 {

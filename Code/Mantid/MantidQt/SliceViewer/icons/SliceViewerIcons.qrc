@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/SliceViewer/icons">
         <file>view-fullscreen.png</file>
+        <file>color-pallette.png</file>
+        <file>color-pallette-part.png</file>
     </qresource>
 </RCC>

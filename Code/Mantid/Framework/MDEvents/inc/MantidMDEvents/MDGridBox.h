@@ -8,7 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -41,7 +41,7 @@ namespace MDEvents
   public:
     MDGridBox();
 
-    MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDGridBox(Mantid::API::BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box);
 

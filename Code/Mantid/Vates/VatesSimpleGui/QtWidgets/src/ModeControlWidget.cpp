@@ -26,11 +26,11 @@ ModeControlWidget::~ModeControlWidget()
 
 }
 
-void ModeControlWidget::enableViewButtons()
+void ModeControlWidget::enableViewButtons(bool state)
 {
-  this->ui.multiSliceButton->setEnabled(true);
-  this->ui.splatterPlotButton->setEnabled(true);
-  this->ui.threeSliceButton->setEnabled(true);
+  this->ui.multiSliceButton->setEnabled(state);
+  this->ui.splatterPlotButton->setEnabled(state);
+  this->ui.threeSliceButton->setEnabled(state);
 }
 
 void ModeControlWidget::onMultiSliceViewButtonClicked()

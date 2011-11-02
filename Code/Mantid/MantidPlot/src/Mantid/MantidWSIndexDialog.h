@@ -232,7 +232,7 @@ private:
   bool m_spectra;
 
   /// Pointers to the obligatory Qt objects:
-  QLabel *m_wsMessage, *m_spectraMessage;
+  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
   QLineEdit *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox; 
   QHBoxLayout *m_buttonBox;

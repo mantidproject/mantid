@@ -5,8 +5,8 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/BoxController.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -68,7 +68,11 @@ namespace MDEvents
     //------------------------ IMDEventWorkspace Methods -----------------------------------------
 
     /// Returns the BoxController used in this workspace
-    BoxController_sptr getBoxController()
+    Mantid::API::BoxController_sptr getBoxController()
+    { return m_BoxController; }
+
+    /// Returns the BoxController used in this workspace
+    Mantid::API::BoxController_const_sptr getBoxController() const
     { return m_BoxController; }
 
     virtual std::vector<std::string> getBoxControllerStats() const;
@@ -130,7 +134,7 @@ namespace MDEvents
     IMDBox<MDE, nd> * data;
 
     /// Box controller in use
-    BoxController_sptr m_BoxController;
+    Mantid::API::BoxController_sptr m_BoxController;
 
   public:
     /// Typedef for a shared pointer of this kind of event workspace

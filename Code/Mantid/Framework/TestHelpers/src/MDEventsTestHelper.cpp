@@ -6,7 +6,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -22,6 +22,7 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::API::FrameworkManager;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
+using namespace Mantid::API;
 
 namespace Mantid
 {
