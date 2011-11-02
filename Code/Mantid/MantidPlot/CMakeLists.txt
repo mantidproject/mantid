@@ -693,10 +693,15 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 ADD_PRECOMPILED_HEADER( src/PrecompiledHeader.h "" src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
+
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+
+###########################################################################
 # Internal icon links
+###########################################################################
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
 
 ###########################################################################
 # Add the dependencies
