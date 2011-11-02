@@ -82,13 +82,14 @@ namespace MDEvents
       new ArrayProperty<std::string>("Units"),
       "A comma separated list of the units of each dimension.");
 
-    this->initBoxControllerProps();
+    // Set the box controller properties
+    this->initBoxControllerProps("5", 1000, 5);
 
     declareProperty(
       new PropertyWithValue<int>("MinRecursionDepth", 0),
       "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 0 = no splitting, 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).");
-
+    setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
 

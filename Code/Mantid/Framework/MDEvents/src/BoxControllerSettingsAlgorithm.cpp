@@ -1,5 +1,6 @@
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::Kernel;
@@ -27,30 +28,45 @@ namespace MDEvents
   
 
   //----------------------------------------------------------------------------------------------
-  /// Box-controller-specific properties
-  void BoxControllerSettingsAlgorithm::initBoxControllerProps()
+  /** Add Box-controller-specific properties to this algorithm
+   *
+   * @param SplitInto :: default parameter value
+   * @param SplitThreshold :: default parameter value
+   * @param MaxRecursionDepth :: default parameter value
+   */
+  void BoxControllerSettingsAlgorithm::initBoxControllerProps(const std::string & SplitInto, int SplitThreshold, int MaxRecursionDepth)
   {
+    BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
+    mustBePositive->setLower(0.0);
+
+    // Split up comma-separated properties
+    std::vector<int> value;
+    typedef Poco::StringTokenizer tokenizer;
+    tokenizer values(SplitInto, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    value.clear();
+    value.reserve(values.count());
+    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
+      value.push_back(boost::lexical_cast<int>(*it));
 
     declareProperty(
-      new ArrayProperty<int>("SplitInto", "5"),
+      new ArrayProperty<int>("SplitInto", value),
       "A comma separated list of into how many sub-grid elements each dimension should split; \n"
-      "or just one to split into the same number for all dimensions. Default 5.");
+      "or just one to split into the same number for all dimensions. Default " + SplitInto +".");
 
     declareProperty(
-      new PropertyWithValue<int>("SplitThreshold", 1000),
-      "How many events in a box before it should be split. Default 1000.");
+      new PropertyWithValue<int>("SplitThreshold", SplitThreshold, mustBePositive->clone()),
+      "How many events in a box before it should be split. Default " + Strings::toString(SplitThreshold) + ".");
 
     declareProperty(
-      new PropertyWithValue<int>("MaxRecursionDepth", 5),
+      new PropertyWithValue<int>("MaxRecursionDepth", MaxRecursionDepth, mustBePositive),
       "How many levels of box splitting recursion are allowed. \n"
-      "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). Default 10.");
+      "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). "
+      "Default " + Strings::toString(MaxRecursionDepth) + ".");
 
-    std::string grp("Box Splitting Settings");
+    std::string grp = getBoxSettingsGroupName();
     setPropertyGroup("SplitInto", grp);
     setPropertyGroup("SplitThreshold", grp);
-    //setPropertyGroup("MinRecursionDepth", grp);
     setPropertyGroup("MaxRecursionDepth", grp);
-
   }
 
 
@@ -79,10 +95,10 @@ namespace MDEvents
     else if (splits.size() == nd)
     {
       for (size_t d=0; d<nd; ++d)
-        bc->setSplitInto(d, splits[0]);
+        bc->setSplitInto(d, splits[d]);
     }
     else
-      throw std::invalid_argument("SplitInto parameter must either have 1 argument, or the same number as the number of dimensions.");
+      throw std::invalid_argument("SplitInto parameter has " + Strings::toString(splits.size()) + " arguments. It should have either 1, or the same as the number of dimensions.");
     bc->resetNumBoxes();
 
   }

@@ -46,10 +46,13 @@ namespace MDEvents
     
   protected:
     /// Initialise the properties
-    void initBoxControllerProps();
+    void initBoxControllerProps(const std::string & SplitInto="5", int SplitThreshold=1000, int MaxRecursionDepth=5);
 
     /// Set the settings in the given box controller
     void setBoxController(Mantid::API::BoxController_sptr bc);
+
+    std::string getBoxSettingsGroupName()
+    { return "Box Splitting Settings"; }
 
   };
 

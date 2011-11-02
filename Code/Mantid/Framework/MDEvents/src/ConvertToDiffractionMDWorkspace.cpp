@@ -92,6 +92,9 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input),
         "Correct the weights of events with by multiplying by the Lorentz formula: sin(theta)^2 / lambda^4");
 
+    // Box controller properties. These are the defaults
+    this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+
   }
 
 
@@ -315,11 +318,9 @@ namespace MDEvents
       }
       ws->initialize();
 
-      // Build up the box controller
+      // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
       BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(5);
-      bc->setSplitThreshold(1500);
-      bc->setMaxDepth(20);
+      this->setBoxController(bc);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
     }

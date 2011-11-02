@@ -1,19 +1,19 @@
 #ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
 #define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
-    
-#include "MantidKernel/System.h"
+
 #include "MantidAPI/Algorithm.h" 
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/ProgressText.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/ProgressText.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid
 {
@@ -26,7 +26,7 @@ namespace MDEvents
    * @author Janik Zikovsky, SNS
    * @date 2011-03-01 13:14:48.236513
    */
-  class DLLExport ConvertToDiffractionMDWorkspace  : public API::Algorithm
+  class DLLExport ConvertToDiffractionMDWorkspace  : public BoxControllerSettingsAlgorithm
   {
   public:
     ConvertToDiffractionMDWorkspace();
