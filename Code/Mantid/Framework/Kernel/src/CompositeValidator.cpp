@@ -9,7 +9,6 @@ namespace Kernel
 {
 
 
-
 } // namespace Mantid
 } // namespace Kernel
 
