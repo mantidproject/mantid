@@ -146,8 +146,7 @@ void ThreeSliceView::makeThreeSlice()
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal",
-                                       vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   // Have to create the cuts and cut representations up here to keep
   // them around
@@ -173,18 +172,18 @@ void ThreeSliceView::makeThreeSlice()
 
 void ThreeSliceView::renderAll()
 {
-  this->mainView->render();
   this->xView->render();
   this->yView->render();
   this->zView->render();
+  this->mainView->render();
 }
 
 void ThreeSliceView::resetDisplay()
 {
-  this->mainView->resetDisplay();
   this->xView->resetDisplay();
   this->yView->resetDisplay();
   this->zView->resetDisplay();
+  this->mainView->resetDisplay();
 }
 
 void ThreeSliceView::correctVisibility(pqPipelineBrowserWidget *pbw)

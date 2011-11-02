@@ -23,7 +23,8 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   this->setDataRange(0, 1000);
 
   // Create and add the color bar
-  m_colorBar = new QwtScaleWidget();
+  m_colorBar = new QwtScaleWidgetExtended();
+  m_colorBar->setToolTip("");
   ui.verticalLayout->insertWidget(2,m_colorBar, 1,0 );
 
   // Hook up signals
@@ -32,6 +33,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
   QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
   QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
+  QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this, SLOT(colorBarMouseMoved(QPoint, double)));
 
   // Initial view
   this->update();
@@ -190,6 +192,19 @@ void ColorBarWidget::changedMaximum()
     update();
   }
   emit changedColorRange(m_min,m_max,m_log);
+}
+
+//-------------------------------------------------------------------------------------------------
+/** SLOT called when the mouse moves over the color bar*/
+void ColorBarWidget::colorBarMouseMoved(QPoint globalPos, double fraction)
+{
+  double val = 0;
+  if (m_log)
+    val = pow(10., fraction * (log10(m_max)-log10(m_min)) + log10(m_min));
+  else
+    val = fraction * (m_max-m_min) + m_min;
+  QString tooltip = QString::number(val,'g', 4);
+  QToolTip::showText(globalPos, tooltip, m_colorBar);
 }
 
 

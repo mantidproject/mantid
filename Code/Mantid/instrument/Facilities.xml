@@ -211,7 +211,7 @@
    <catalog name="ICat3Catalog">
    </catalog>
   
-   <soapEndPoint url="https://orion.sns.gov:8181/ICATService/ICAT">
+   <soapEndPoint url="https://icat.sns.gov:8181/ICATService/ICAT">
    </soapEndPoint>
 
    <instrument name="DAS"> 

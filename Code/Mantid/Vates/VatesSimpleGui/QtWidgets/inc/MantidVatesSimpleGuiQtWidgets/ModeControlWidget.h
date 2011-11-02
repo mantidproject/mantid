@@ -60,9 +60,10 @@ public:
 
 public slots:
   /**
-   * Enable all view buttons, except standard.
+   * Enable/disable all view buttons, except standard.
+   * @param state whether or not to enable the buttons
    */
-  void enableViewButtons();
+  void enableViewButtons(bool state);
 
 signals:
   /**
