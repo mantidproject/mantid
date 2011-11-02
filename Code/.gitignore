@@ -6,3 +6,4 @@ debug/
 release/
 qtcreator-build/
 update.sh
+win64/
