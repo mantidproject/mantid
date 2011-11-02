@@ -25,6 +25,7 @@ If the OutputWorkspace does NOT already exist, a default one is created. In orde
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -94,6 +95,13 @@ namespace MDEvents
 
     // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+
+    std::vector<double> extents(2,0);
+    extents[0]=-50;extents[1]=+50;
+    declareProperty(
+      new ArrayProperty<double>("Extents", extents),
+      "A comma separated list of min, max for each dimension,\n"
+      "specifying the extents of each dimension. Optional, default +-50 in each dimension.");
 
   }
 
@@ -310,10 +318,23 @@ namespace MDEvents
       i_out = MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
       ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(i_out);
 
+      // ---------------- Get the extents -------------
+      std::vector<double> extents = getProperty("Extents");
+      // Replicate a single min,max into several
+      if (extents.size() == 2)
+        for (size_t d=1; d<nd; d++)
+        {
+          extents.push_back(extents[0]);
+          extents.push_back(extents[1]);
+        }
+      if (extents.size() != nd*2)
+        throw std::invalid_argument("You must specify either 2 or 6 extents (min,max).");
+
+
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, -50.0, +50.0, 10);
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, extents[d*2], extents[d*2+1], 10);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();
