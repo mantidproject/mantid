@@ -749,6 +749,9 @@ void LoadEventNexus::init()
   setPropertyGroup("FilterMonByTimeStart", grp4);
   setPropertyGroup("FilterMonByTimeStop", grp4);
 
+  declareProperty(
+      new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
+      "If true, only the meta data and sample logs will be loaded.");
 }
 
 
@@ -917,6 +920,8 @@ void LoadEventNexus::makeMapToEventLists()
  */
 void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 {
+  bool metaDataOnly = getProperty("MetaDataOnly");
+
   // Get the time filters
   setTimeFilters(monitors);
 
@@ -967,6 +972,26 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   file.closeGroup();
   file.close();
 
+  // Delete the output workspace name if it existed
+  std::string outName = getPropertyValue("OutputWorkspace");
+  if (AnalysisDataService::Instance().doesExist(outName))
+    AnalysisDataService::Instance().remove( outName );
+
+  // set more properties on the workspace
+  loadEntryMetadata(m_filename, WS, m_top_entry_name);
+
+  if(metaDataOnly) {
+    //Now, create a default X-vector for histogramming, with just 2 bins.
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(2);
+    xRef[0] = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1; //Just to make sure the bins hold it all
+    xRef[1] = 1;
+    //Set the binning axis using this.
+    WS->setAllX(axis);
+    return;
+  }
+
   // --------- Loading only one bank ? ----------------------------------
   std::string onebank = getProperty("BankName");
   bool doOneBank = (onebank != "");
@@ -994,11 +1019,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   {
     onebank = "";
   }
-
-  // Delete the output workspace name if it existed
-  std::string outName = getPropertyValue("OutputWorkspace");
-  if (AnalysisDataService::Instance().doesExist(outName))
-    AnalysisDataService::Instance().remove( outName );
 
   prog->report("Initializing all pixels");
 
@@ -1096,9 +1116,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   xRef[1] = longest_tof + 1;
   //Set the binning axis using this.
   WS->setAllX(axis);
-
-  // set more properties on the workspace
-  loadEntryMetadata(m_filename, WS, m_top_entry_name);
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_filename, WS, m_top_entry_name,classType);
