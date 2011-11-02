@@ -91,6 +91,16 @@
             <property name="text">
              <string>Reset</string>
             </property>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/view-fullscreen.png</normaloff>:/SliceViewer/icons/view-fullscreen.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -235,7 +245,9 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../icons/SliceViewerIcons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>btnResetZoom</sender>

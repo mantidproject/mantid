@@ -37,6 +37,9 @@ include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
+# --- Add icons qrc ------
+qt4_add_resources ( RES_FILES icons/SliceViewerIcons.qrc )
+
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
