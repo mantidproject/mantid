@@ -16440,7 +16440,7 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
                 }
                 else if (plotDetailsList[1] == "Fit")
                 {
-                  curveNum = g->curveIndex(plotDetailsList[2] + "-sp-1-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff") doesnt work when axis label is 33;
+                  curveNum = g->curveIndex(plotDetailsList[2] + "-sp-1-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff") (should be changed to axis label) 
                     if (curveNum == -1)
                       curveNum = g->curveIndex(plotDetailsList[2] + "-sp-33-Calc");
                 }
