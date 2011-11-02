@@ -24,6 +24,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
 
   // Create and add the color bar
   m_colorBar = new QwtScaleWidget();
+  m_colorBar->setToolTip("Double-click to change color map.");
   ui.verticalLayout->insertWidget(2,m_colorBar, 1,0 );
 
   // Hook up signals
