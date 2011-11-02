@@ -4,7 +4,7 @@
 #include "MantidGLWidget.h"
 #include "InstrumentTreeWidget.h"
 #include "../../MdiSubWindow.h"
-#include "../../GraphOptions.h"
+#include "MantidQtAPI/GraphOptions.h"
 #include "BinDialog.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 

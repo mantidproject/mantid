@@ -4,6 +4,7 @@ set ( SRC_FILES src/AlgorithmDialog.cpp
                 src/InterfaceFactory.cpp
                 src/InterfaceManager.cpp
                 src/ManageUserDirectories.cpp
+                src/MantidColorMap.cpp
                 src/MantidDialog.cpp
                 src/MantidWidget.cpp
                 src/PythonRunner.cpp
@@ -21,6 +22,8 @@ set ( INC_FILES inc/MantidQtAPI/AlgorithmDialog.h
                 inc/MantidQtAPI/InterfaceFactory.h
                 inc/MantidQtAPI/InterfaceManager.h
                 inc/MantidQtAPI/ManageUserDirectories.h
+                inc/MantidQtAPI/MantidColorMap.h
+                inc/MantidQtAPI/GraphOptions.h
                 inc/MantidQtAPI/MantidDialog.h
                 inc/MantidQtAPI/MantidWidget.h
                 inc/MantidQtAPI/PythonRunner.h

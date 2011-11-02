@@ -125,6 +125,7 @@ void QScienceSpinBox::stepDown()
     setValue(value() / this->singleStep() );
   else
     setValue(value() - this->singleStep() );
+  emit valueChangedFromArrows();
 }
 
 void QScienceSpinBox::stepUp()
@@ -133,6 +134,7 @@ void QScienceSpinBox::stepUp()
     setValue(value() * this->singleStep() );
   else
     setValue(value() + this->singleStep() );
+  emit valueChangedFromArrows();
 }
 
 /*!

@@ -26,6 +26,7 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
+#include <qfiledialog.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -42,7 +43,6 @@ SliceViewer::SliceViewer(QWidget *parent)
 {
 	ui.setupUi(this);
 
-
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
 	m_plot = new QwtPlot();
@@ -53,32 +53,46 @@ SliceViewer::SliceViewer(QWidget *parent)
 	m_spect = new QwtPlotSpectrogram();
 	m_spect->attach(m_plot);
 
-	m_colorMap = QwtLinearColorMap(Qt::blue, Qt::red);
-	QwtDoubleInterval range(0.0, 10.0);
-
-	m_data = new QwtRasterDataMD();
-	m_spect->setColorMap(m_colorMap);
-  m_plot->autoRefresh();
+  QwtDoubleInterval range(0.0, 10.0);
 
   // --- Create a color bar on the right axis ---------------
-  m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
-  m_colorBar->setColorBarEnabled(true);
-  m_colorBar->setColorMap(range, m_colorMap);
-  m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
-  m_plot->enableAxis(QwtPlot::yRight);
+  m_colorBar = new ColorBarWidget(this);
+  m_colorBar->setDataRange( range.minValue(), range.maxValue() );
+  m_colorBar->setViewRange( range.minValue(), range.maxValue() );
+  m_colorBar->setLog(true);
+  m_spectLayout->addWidget(m_colorBar, 0, 0);
+  QObject::connect(m_colorBar, SIGNAL(changedColorRange(double,double,bool)), this, SLOT(colorRangeChanged()));
+
+  // ---- Set the color map on the data ------
+  m_data = new QwtRasterDataMD();
+  m_spect->setColorMap( m_colorBar->getColorMap() );
+  m_plot->autoRefresh();
+
+//  m_colorBar = m_plot->axisWidget(QwtPlot::yRight);
+//  m_colorBar->setColorBarEnabled(true);
+//  m_colorBar->setColorMap(range, m_colorMap);
+//  m_plot->setAxisScale(QwtPlot::yRight, range.minValue(), range.maxValue() );
+//  m_plot->enableAxis(QwtPlot::yRight);
 
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
   ui.splitter->setStretchFactor(1, 1);
   initZoomer();
+  ui.btnZoom->hide();
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(colorRangeFullSlot()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
-  ui.btnZoom->hide();
+
+  // ----------- Other signals ----------------
+  QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMap()));
 
   initMenus();
+
+  loadSettings();
+
+  updateDisplay();
 }
 
 //------------------------------------------------------------------------------------
@@ -86,7 +100,39 @@ SliceViewer::SliceViewer(QWidget *parent)
 SliceViewer::~SliceViewer()
 {
   delete m_data;
+  saveSettings();
   // Don't delete Qt objects, I think these are auto-deleted
+}
+
+
+//------------------------------------------------------------------------------------
+/** Load QSettings from .ini-type files */
+void SliceViewer::loadSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/SliceViewer");
+  bool scaleType = (bool)settings.value("LogColorScale", 0 ).toInt();
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  m_currentColorMapFile = settings.value("ColormapFile", "").toString();
+  // Set values from settings
+  if (!m_currentColorMapFile.isEmpty())
+  {
+    m_colorBar->getColorMap().loadMap(m_currentColorMapFile);
+    m_spect->setColorMap( m_colorBar->getColorMap() );
+  }
+  m_colorBar->setLog(scaleType);
+  settings.endGroup();
+}
+
+//------------------------------------------------------------------------------------
+/** Save settings for next time. */
+void SliceViewer::saveSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/SliceViewer");
+  settings.setValue("ColormapFile", m_currentColorMapFile);
+  settings.setValue("LogColorScale", (int)m_colorBar->getLog() );
+  settings.endGroup();
 }
 
 
@@ -98,6 +144,11 @@ void SliceViewer::initMenus()
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
+
+  action = new QAction(QPixmap(), "&Load Colormap", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMap()));
+  m_menuColorOptions->addAction(action);
+
   action = new QAction(QPixmap(), "&Full range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(colorRangeFullSlot()));
   m_menuColorOptions->addAction(action);
@@ -264,7 +315,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_data->setWorkspace(ws);
   // Find the full range. And use it
   findRangeFull();
-  m_colorRange = m_colorRangeFull;
+  m_colorBar->setDataRange(m_colorRangeFull);
+  m_colorBar->setViewRange(m_colorRangeFull);
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
 
@@ -284,7 +336,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 void SliceViewer::colorRangeFullSlot()
 {
   this->findRangeFull();
-  m_colorRange = m_colorRangeFull;
+  m_colorBar->setDataRange(m_colorRangeFull);
+  m_colorBar->setViewRange(m_colorRangeFull);
   this->updateDisplay();
 }
 
@@ -293,7 +346,15 @@ void SliceViewer::colorRangeFullSlot()
 void SliceViewer::colorRangeSliceSlot()
 {
   this->findRangeSlice();
-  m_colorRange = m_colorRangeSlice;
+  m_colorBar->setViewRange(m_colorRangeSlice);
+  this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot called when the ColorBarWidget changes the range of colors
+void SliceViewer::colorRangeChanged()
+{
+  m_spect->setColorMap( m_colorBar->getColorMap() );
   this->updateDisplay();
 }
 
@@ -327,6 +388,26 @@ void SliceViewer::updateDisplaySlot(int index, double value)
 {
   UNUSED_ARG(index)
   UNUSED_ARG(value)
+  this->updateDisplay();
+}
+
+
+//------------------------------------------------------------------------------------
+/** SLOT to open a dialog to choose a file, load a color map from that file */
+void SliceViewer::loadColorMap()
+{
+  QString fileselection;
+  fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"),
+           QFileInfo(m_currentColorMapFile).absoluteFilePath(),
+           tr("Colormaps (*.map *.MAP)"));
+  // User cancelled if filename is still empty
+  if( fileselection.isEmpty() ) return;
+  m_currentColorMapFile = fileselection;
+
+  // Load from file
+  m_colorBar->getColorMap().loadMap( fileselection );
+  m_colorBar->update();
+  m_spect->setColorMap( m_colorBar->getColorMap() );
   this->updateDisplay();
 }
 
@@ -472,6 +553,7 @@ void SliceViewer::showInfoAt(double x, double y)
 /** Update the 2D plot using all the current controls settings */
 void SliceViewer::updateDisplay(bool resetAxes)
 {
+  if (!m_ws) return;
   m_data->timesRequested = 0;
   size_t oldX = m_dimX;
   size_t oldY = m_dimY;
@@ -504,9 +586,10 @@ void SliceViewer::updateDisplay(bool resetAxes)
   }
 
   // Set the color range
-  m_data->setRange(m_colorRange);
-  m_colorBar->setColorMap(m_colorRange, m_colorMap);
-  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(), m_colorRange.maxValue() );
+  m_data->setRange(m_colorBar->getViewRange());
+
+//  m_colorBar->setColorMap(m_colorRange, m_colorMap);
+//  m_plot->setAxisScale(QwtPlot::yRight, m_colorRange.minValue(), m_colorRange.maxValue() );
 
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);

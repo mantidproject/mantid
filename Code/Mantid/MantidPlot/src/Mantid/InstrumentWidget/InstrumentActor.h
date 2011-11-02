@@ -5,7 +5,7 @@
 #include "GLActor.h"
 #include "GLActorCollection.h"
 #include "SampleActor.h"
-#include "MantidColorMap.h"
+#include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 

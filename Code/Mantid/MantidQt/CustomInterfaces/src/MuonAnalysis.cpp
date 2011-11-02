@@ -443,16 +443,25 @@ void MuonAnalysis::runLoadCurrent()
   }
 
   if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR")
-  {
-    // first check if autosave.run exist
+  {      
+    
     std::string autosavePointsTo = "";
     std::string autosaveFile = "\\\\" + instname.toStdString() + "\\data\\autosave.run";
     Poco::File pathAutosave( autosaveFile );
-    if ( pathAutosave.exists() )
+    
+    try // check if exists
+    { 
+      if ( pathAutosave.exists() )
+      {
+        std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
+        autofileIn >> autosavePointsTo;
+      }    
+    }
+    catch(Poco::Exception&)
     {
-      std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
-      autofileIn >> autosavePointsTo;
-    }    
+       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from the selected directory, either the computer you are trying" 
+         "\nto access is down or your computer is not currently connected to the network.");
+    }
 
     QString psudoDAE;
     if ( autosavePointsTo.empty() )
@@ -461,14 +470,26 @@ void MuonAnalysis::runLoadCurrent()
       psudoDAE = "\\\\" + instname + "\\data\\" + autosavePointsTo.c_str();
 
     Poco::File l_path( psudoDAE.toStdString() );
-    if ( !l_path.exists() )
+    try
+    { 
+      if ( !l_path.exists() )
+      {
+        QMessageBox::warning(this,"Mantid - MuonAnalysis", 
+          QString("Can't load ") + "Current data since\n" +
+          psudoDAE + QString("\n") +
+          QString("does not seem to exist"));
+        return;
+      }
+    }
+    catch(Poco::Exception&)
     {
       QMessageBox::warning(this,"Mantid - MuonAnalysis", 
-        QString("Can't load ") + "EMU Current data since\n" +
+        QString("Can't load ") + "Current data since\n" +
         psudoDAE + QString("\n") +
         QString("does not seem to exist"));
       return;
     }
+
     m_previousFilename = psudoDAE;
     inputFileChanged(psudoDAE);
     return;
@@ -2812,31 +2833,31 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 /**
 * Set up the string that will contain all the data needed for changing a fit.
-* [fitType, curveNum, wsName, color]
+* [fitType, curveNum, wsName, axisLabel, color]
 *
-* @params wsName :: The workspace name of the plot to be created. 
+* @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeFitPlotType(const QString & wsName)
+void MuonAnalysis::changeFitPlotType(const QString & plotDetails)
 {
   // First part indicates 
   QString fitType("");
   fitType.setNum(m_uiForm.connectFitType->currentIndex());
-  changePlotType(fitType + ".Fit." + wsName + "." + "Orange");
+  changePlotType(fitType + ".Fit." + plotDetails + "." + "Orange");
 }
 
 
 /**
 * Set up the string that will contain all the data needed for changing the data.
-* [fitType, curveNum, wsName, color]
+* [fitType, curveNum, wsName, axisLabel, color]
 *
-* @params wsName :: The workspace name of the plot to be created. 
+* @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeDataPlotType(const QString & wsName)
+void MuonAnalysis::changeDataPlotType(const QString & plotDetails)
 {
   // First part indicates 
   QString fitType("");
   fitType.setNum(m_uiForm.connectPlotType->currentIndex());
-  changePlotType(fitType + ".Data." + wsName + "." + "Black");
+  changePlotType(fitType + ".Data." + plotDetails + "." + "Black");
 }
 
 }//namespace MantidQT

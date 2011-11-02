@@ -1,12 +1,13 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "ui_SliceViewer.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "ColorBarWidget.h"
 #include "QwtRasterDataMD.h"
+#include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
 #include <QtGui/qdialog.h>
 #include <QtGui/QWidget>
@@ -16,6 +17,7 @@
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
+#include "MantidQtAPI/MantidColorMap.h"
 
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
@@ -32,15 +34,20 @@ public:
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
-  void updateDisplaySlot(int index, double value);
   void resetZoom();
   void showInfoAt(double, double);
   void colorRangeFullSlot();
   void colorRangeSliceSlot();
+  void colorRangeChanged();
   void zoomInSlot();
   void zoomOutSlot();
+  void updateDisplaySlot(int index, double value);
+  void loadColorMap();
+
 
 private:
+  void loadSettings();
+  void saveSettings();
   void initMenus();
   void initZoomer();
 
@@ -68,11 +75,11 @@ private:
   /// Layout containing the spectrogram
   QHBoxLayout * m_spectLayout;
 
-  /// Color map in use
-  QwtLinearColorMap m_colorMap;
+  /// File of the last loaded color map.
+  QString m_currentColorMapFile;
 
   /// Color bar indicating the color scale
-  QwtScaleWidget * m_colorBar;
+  ColorBarWidget * m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
   std::vector<DimensionSliceWidget *> m_dimWidgets;

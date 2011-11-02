@@ -204,7 +204,7 @@ public:
   void updatePPTool(const QString& name);
 
   /// Emits a signal to customise the plot it is associated with
-  void customisation(const QString& wsName);
+  void customisation(const QString& plotDetails);
 
 public slots:
   void fit();

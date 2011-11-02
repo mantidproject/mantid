@@ -19,19 +19,16 @@ class QWT_EXPORT QwtRasterDataMD : public QwtRasterData
 public:
   QwtRasterDataMD();
   virtual ~QwtRasterDataMD();
+  QwtRasterData* copy() const;
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
 
-  void setRange(QwtDoubleInterval & range)
-  { m_range = range; }
+  QwtDoubleInterval range() const;
+  void setRange(const QwtDoubleInterval & range);
 
   void setSliceParams(size_t dimX, size_t dimY, std::vector<Mantid::coord_t> & slicePoint);
 
   double value(double x, double y) const;
-
-  QwtRasterData* copy() const;
-
-  QwtDoubleInterval range() const;
 
   QSize rasterHint(const QwtDoubleRect &) const;
 

@@ -5,13 +5,11 @@
 #include <QDir>
 #include <QThread>
 
-#include "ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include "Mantid/MantidApplication.h"
 #include "qmainwindow.h"
-#include "../inc/MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/AnalysisDataService.h"

@@ -1,3 +1,4 @@
+#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtSliceViewer/ColorBarWidget.h"
 #include "MantidQtSliceViewer/QScienceSpinBox.h"
 #include "qwt_scale_div.h"
@@ -5,6 +6,7 @@
 #include <iostream>
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
+#include <QKeyEvent>
 
 //-------------------------------------------------------------------------------------------------
 /** Constructor */
@@ -14,10 +16,10 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   ui.setupUi(this);
 
   // Default values.
-  m_colorMap = new QwtLinearColorMap(Qt::blue, Qt::red);
   m_min = 0;
   m_max = 1000;
   m_log = false;
+  m_colorMap.changeScaleType( GraphOptions::Linear );
   this->setDataRange(0, 1000);
 
   // Create and add the color bar
@@ -26,8 +28,10 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
 
   // Hook up signals
   QObject::connect(ui.checkLog, SIGNAL(stateChanged(int)), this, SLOT(changedLogState(int)));
-  QObject::connect(ui.valMin, SIGNAL(valueChanged(double)), this, SLOT(changedMinimum(double)));
-  QObject::connect(ui.valMax, SIGNAL(valueChanged(double)), this, SLOT(changedMaximum(double)));
+  QObject::connect(ui.valMin, SIGNAL(editingFinished()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(editingFinished()), this, SLOT(changedMaximum()));
+  QObject::connect(ui.valMin, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMinimum()));
+  QObject::connect(ui.valMax, SIGNAL(valueChangedFromArrows()), this, SLOT(changedMaximum()));
 
   // Initial view
   this->update();
@@ -47,17 +51,22 @@ double ColorBarWidget::getMaximum() const
 bool ColorBarWidget::getLog() const
 { return m_log; }
 
+/// @return then min/max range currently viewed
+QwtDoubleInterval ColorBarWidget::getViewRange() const
+{ return QwtDoubleInterval(m_min, m_max); }
+
+/// @return the color map in use (ref)
+MantidColorMap & ColorBarWidget::getColorMap()
+{ return m_colorMap;
+}
+
 
 //-------------------------------------------------------------------------------------------------
-/** Change the color map shown
- *
- * @param colorMap
- */
-void ColorBarWidget::setColorMap(QwtColorMap * colorMap)
+/** Send a double-clicked event but only when clicking the color bar */
+void ColorBarWidget::mouseDoubleClickEvent(QMouseEvent * event)
 {
-  if (m_colorMap) delete m_colorMap;
-  m_colorMap = colorMap;
-  update();
+  if (m_colorBar->rect().contains(event->x(), event->y()))
+    emit colorBarDoubleClicked();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -115,6 +124,8 @@ void ColorBarWidget::setDataRange(double min, double max)
   m_rangeMax = max;
   setSpinBoxesSteps();
 }
+void ColorBarWidget::setDataRange(QwtDoubleInterval range)
+{ this->setDataRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
 /** Set the range of values viewed in the color bar
@@ -128,12 +139,15 @@ void ColorBarWidget::setViewRange(double min, double max)
   m_max = max;
   update();
 }
+void ColorBarWidget::setViewRange(QwtDoubleInterval range)
+{ this->setViewRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
 /** SLOT called when clicking the log button */
 void ColorBarWidget::changedLogState(int log)
 {
   this->setLog(log);
+  emit changedColorRange(m_min,m_max,m_log);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -144,6 +158,7 @@ void ColorBarWidget::changedLogState(int log)
 void ColorBarWidget::setLog(bool log)
 {
   m_log = log;
+  m_colorMap.changeScaleType( m_log ? GraphOptions::Log10 : GraphOptions::Linear );
   ui.checkLog->setChecked( m_log );
   ui.valMin->setLogSteps( m_log );
   ui.valMax->setLogSteps( m_log );
@@ -153,17 +168,27 @@ void ColorBarWidget::setLog(bool log)
 
 //-------------------------------------------------------------------------------------------------
 /** SLOT called when minValue changes */
-void ColorBarWidget::changedMinimum(double val)
+void ColorBarWidget::changedMinimum()
 {
-  m_min = val;
+  m_min = ui.valMin->value();
+  if (m_min > m_max)
+  {
+    m_max = m_min+0.001;
+    update();
+  }
   emit changedColorRange(m_min,m_max,m_log);
 }
 
 //-------------------------------------------------------------------------------------------------
 /** SLOT called when maxValue changes */
-void ColorBarWidget::changedMaximum(double val)
+void ColorBarWidget::changedMaximum()
 {
-  m_max = val;
+  m_max = ui.valMax->value();
+  if (m_max < m_min)
+  {
+    m_min = m_max-0.001;
+    update();
+  }
   emit changedColorRange(m_min,m_max,m_log);
 }
 
@@ -173,12 +198,17 @@ void ColorBarWidget::changedMaximum(double val)
 void ColorBarWidget::update()
 {
   m_colorBar->setColorBarEnabled(true);
-  m_colorBar->setColorMap( QwtDoubleInterval(m_min, m_max), *m_colorMap);
+  QwtDoubleInterval range(m_min, m_max);
+
+  m_colorBar->setColorMap( range, m_colorMap);
   m_colorBar->setColorBarWidth(15);
 
   QwtScaleDiv scaleDiv;
-  scaleDiv.setInterval(m_min, m_max);
-  m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Linear), scaleDiv);
+  scaleDiv.setInterval(range);
+  if (m_log)
+    m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Log10), scaleDiv);
+  else
+    m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Linear), scaleDiv);
 
   ui.valMin->setValue( m_min );
   ui.valMax->setValue( m_max );

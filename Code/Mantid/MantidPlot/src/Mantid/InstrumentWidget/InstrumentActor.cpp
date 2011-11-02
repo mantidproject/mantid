@@ -244,8 +244,8 @@ void InstrumentActor::resetColors()
     }
     else
     {
-      unsigned char ci = m_colorMap.colorIndex(qwtInterval,integratedValue);
-      m_colors[wi] = m_colorMap.getColor(ci);
+      QRgb color = m_colorMap.rgb(qwtInterval,integratedValue);
+      m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
     }
   }
   if (m_scene.getNumberOfActors() > 0)
