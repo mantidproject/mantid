@@ -142,8 +142,8 @@ void MantidWSIndexDialog::init()
   m_outer = new QVBoxLayout;
 
   setWindowTitle(tr("MantidPlot"));
-  initWorkspaceBox();
   initSpectraBox();
+  initWorkspaceBox();
   initButtons();
   setLayout(m_outer);
 
@@ -169,13 +169,15 @@ void MantidWSIndexDialog::initWorkspaceBox()
 void MantidWSIndexDialog::initSpectraBox()
 {
   m_spectraBox = new QVBoxLayout;
-  m_spectraMessage = new QLabel(tr("Or<br><br>Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
+  m_spectraMessage = new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
   m_spectraField = new QLineEdit();
+  m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
   //m_spectraField->setPlaceholderText(tr("E.g. \"3-5,10-17,20\" would work for IDs 1-30"));
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
+  m_spectraBox->add(m_orMessage);
   if(m_spectra) m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField, SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
