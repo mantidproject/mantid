@@ -22,8 +22,7 @@ namespace Vates
 namespace SimpleGui
 {
 
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent),
-  pluginMode(false)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 {
 }
 

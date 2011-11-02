@@ -152,7 +152,6 @@ private:
   pqPipelineRepresentation *getPvActiveRep();
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
-  bool pluginMode;
 };
 
 }
