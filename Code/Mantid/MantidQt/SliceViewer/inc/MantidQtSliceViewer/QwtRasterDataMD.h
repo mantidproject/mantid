@@ -26,7 +26,6 @@ public:
   QwtDoubleInterval range() const;
   void setRange(const QwtDoubleInterval & range);
 
-  void setLogMode(bool log);
   void setSliceParams(size_t dimX, size_t dimY, std::vector<Mantid::coord_t> & slicePoint);
 
   double value(double x, double y) const;
@@ -38,9 +37,6 @@ public:
 protected:
   /// Workspace being shown
   Mantid::API::IMDWorkspace_sptr m_ws;
-
-  /// Is the log10 of the data being displayed?
-  bool m_logMode;
 
   /// Number of dimensions
   size_t m_nd;

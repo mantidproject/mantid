@@ -6,6 +6,7 @@
 #include <iostream>
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
+#include <QKeyEvent>
 
 //-------------------------------------------------------------------------------------------------
 /** Constructor */
@@ -15,10 +16,10 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   ui.setupUi(this);
 
   // Default values.
-  m_colorMap = new MantidColorMap();
   m_min = 0;
   m_max = 1000;
   m_log = false;
+  m_colorMap.changeScaleType( GraphOptions::Linear );
   this->setDataRange(0, 1000);
 
   // Create and add the color bar
@@ -54,17 +55,18 @@ bool ColorBarWidget::getLog() const
 QwtDoubleInterval ColorBarWidget::getViewRange() const
 { return QwtDoubleInterval(m_min, m_max); }
 
+/// @return the color map in use (ref)
+MantidColorMap & ColorBarWidget::getColorMap()
+{ return m_colorMap;
+}
+
 
 //-------------------------------------------------------------------------------------------------
-/** Change the color map shown
- *
- * @param colorMap
- */
-void ColorBarWidget::setColorMap(QwtColorMap * colorMap)
+/** Send a double-clicked event but only when clicking the color bar */
+void ColorBarWidget::mouseDoubleClickEvent(QMouseEvent * event)
 {
-  if (m_colorMap) delete m_colorMap;
-  m_colorMap = colorMap;
-  update();
+  if (m_colorBar->rect().contains(event->x(), event->y()))
+    emit colorBarDoubleClicked();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -156,6 +158,7 @@ void ColorBarWidget::changedLogState(int log)
 void ColorBarWidget::setLog(bool log)
 {
   m_log = log;
+  m_colorMap.changeScaleType( m_log ? GraphOptions::Log10 : GraphOptions::Linear );
   ui.checkLog->setChecked( m_log );
   ui.valMin->setLogSteps( m_log );
   ui.valMax->setLogSteps( m_log );
@@ -195,12 +198,17 @@ void ColorBarWidget::changedMaximum()
 void ColorBarWidget::update()
 {
   m_colorBar->setColorBarEnabled(true);
-  m_colorBar->setColorMap( QwtDoubleInterval(m_min, m_max), *m_colorMap);
+  QwtDoubleInterval range(m_min, m_max);
+
+  m_colorBar->setColorMap( range, m_colorMap);
   m_colorBar->setColorBarWidth(15);
 
   QwtScaleDiv scaleDiv;
-  scaleDiv.setInterval(m_min, m_max);
-  m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Linear), scaleDiv);
+  scaleDiv.setInterval(range);
+  if (m_log)
+    m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Log10), scaleDiv);
+  else
+    m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Linear), scaleDiv);
 
   ui.valMin->setValue( m_min );
   ui.valMax->setValue( m_max );

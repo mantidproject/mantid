@@ -16,7 +16,6 @@ QwtRasterDataMD::QwtRasterDataMD()
   m_minVal = DBL_MAX;
   m_maxVal = -DBL_MAX;
   m_range = QwtDoubleInterval(0.0, 1.0);
-  m_logMode = true;
   nan = std::numeric_limits<double>::quiet_NaN();
 }
 
@@ -34,7 +33,6 @@ QwtRasterData* QwtRasterDataMD::copy() const
 {
   QwtRasterDataMD* out = new QwtRasterDataMD();
   out->m_ws = this->m_ws;
-  out->m_logMode = this->m_logMode;
   out->m_dimX = this->m_dimX;
   out->m_dimY = this->m_dimY;
   out->m_nd = this->m_nd;
@@ -53,13 +51,6 @@ QwtRasterData* QwtRasterDataMD::copy() const
 void QwtRasterDataMD::setRange(const QwtDoubleInterval & range)
 { m_range = range; }
 
-//-------------------------------------------------------------------------
-/** Sets whether to show the log10 of the data
- * @param log :: true to use log color scaling.
- */
-void QwtRasterDataMD::setLogMode(bool log)
-{ m_logMode = log;
-}
 
 
 //-------------------------------------------------------------------------
@@ -90,17 +81,10 @@ double QwtRasterDataMD::value(double x, double y) const
   if (value > m_maxVal) m_maxVal = value;
   delete [] lookPoint;
 
-  if (m_logMode)
-  {
-    if (value <= 0.)
-      return nan;
-    else
-      return log10(value);
-  }
+  if (value == 0.)
+    return nan;
   else
-  {
     return value;
-  }
 }
 
 
@@ -108,18 +92,8 @@ double QwtRasterDataMD::value(double x, double y) const
 /** Return the data range to show */
 QwtDoubleInterval QwtRasterDataMD::range() const
 {
-  if (m_logMode)
-  {
-    double min = log10(m_range.minValue());
-    double max = log10(m_range.maxValue());
-    if (m_range.minValue() <= 0)
-      min = max-6;
-    return QwtDoubleInterval(min,max);
-  }
-  else
-    // Linear color plot
-    return m_range;
-
+  // Linear color plot
+  return m_range;
 }
 
 
