@@ -58,6 +58,7 @@ pqRenderView* StandardView::getView()
 
 void StandardView::render()
 {
+
   this->origSrc = pqActiveObjects::instance().activeSource();
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
@@ -65,22 +66,17 @@ void StandardView::render()
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->view);
   int reptype = VTK_SURFACE;
-  char *xmlName = this->origSrc->getProxy()->GetXMLName();
-  if (QString("PeaksReader") == QString(xmlName) || QString("Peaks Source") == QString(xmlName))
+  if (this->isPeaksWorkspace(this->origSrc))
   {
     reptype = VTK_WIREFRAME;
   }
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype);
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal",
-                                       vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   this->resetDisplay();
-  this->renderAll();
-
-  QPair<double, double> range = this->origRep->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
+  this->onAutoScale();
   emit this->triggerAccept();
 }
 
@@ -88,7 +84,7 @@ void StandardView::onCutButtonClicked()
 {
   // Apply cut to currently viewed data
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  builder->createFilter("filters", "Cut", pqActiveObjects::instance().activeSource());
+  builder->createFilter("filters", "Cut", this->getPvActiveSrc());
 }
 
 void StandardView::onRebinButtonClicked()

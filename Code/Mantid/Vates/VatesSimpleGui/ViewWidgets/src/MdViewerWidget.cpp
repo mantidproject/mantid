@@ -277,6 +277,9 @@ void MdViewerWidget::setParaViewComponentsForView()
                      SLOT(updateSelectedIndicator()));
   }
 
+  QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
+                   this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
+
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorMapChanged(const pqColorMapModel *)),
                    this->currentView,
@@ -296,6 +299,7 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
+  this->currentView->isPeaksWorkspace(source);
   if (this->currentView->origSrc)
   {
     pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSrc);
@@ -347,16 +351,7 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
     sourcePlugin = "MDEW Source";
   }
 
-  this->currentView->origSrc = builder->createSource("sources", sourcePlugin,
-                                                        pqActiveObjects::instance().activeServer());
-  vtkSMPropertyHelper(this->currentView->origSrc->getProxy(),
-                      "Mantid Workspace Name").Set(wsname.toStdString().c_str());
-
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
-  srcProxy->UpdateVTKObjects();
-  srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();
-
+  this->currentView->setPluginSource(sourcePlugin, wsname);
   this->renderAndFinalSetup();
   this->setTimesteps();
 }
@@ -364,13 +359,7 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
-  this->currentView->onAutoScale();
-  this->ui.proxyTabWidget->getObjectInspector()->accept();
-
-  if (VatesViewerInterface::MDEW == this->wsType)
-  {
-    this->ui.modeControlWidget->enableViewButtons();
-  }
+  this->currentView->checkView();
 }
 
 void MdViewerWidget::checkForUpdates()
@@ -379,6 +368,7 @@ void MdViewerWidget::checkForUpdates()
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->resetDisplay();
+    //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
     this->updateTimesteps();
   }

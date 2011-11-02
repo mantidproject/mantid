@@ -172,10 +172,7 @@ void MultiSliceView::render()
   this->setupData();
   this->setupAxisInfo();
   this->resetDisplay();
-  this->renderAll();
-
-  QPair<double, double> range = this->origRep->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
+  this->onAutoScale();
 }
 
 void MultiSliceView::renderAll()

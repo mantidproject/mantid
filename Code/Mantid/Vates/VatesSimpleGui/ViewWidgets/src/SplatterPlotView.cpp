@@ -64,10 +64,7 @@ void SplatterPlotView::render()
   this->splatRepr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   this->resetDisplay();
-  this->renderAll();
-
-  QPair<double, double> range = this->splatRepr->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
+  this->onAutoScale();
   emit this->triggerAccept();
 }
 
