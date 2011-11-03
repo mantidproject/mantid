@@ -140,3 +140,9 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
+
+/Code/Mantid/Framework/MDEvents/logs/
+/Code/Mantid/Framework/MDEvents/test/.gitignore
+/Code/Mantid/Framework/Kernel/test/.gitignore
+/Code/Mantid/Framework/DataObjects/test/.gitignore
+/Code/Mantid/Framework/DataHandling/test/.gitignore
