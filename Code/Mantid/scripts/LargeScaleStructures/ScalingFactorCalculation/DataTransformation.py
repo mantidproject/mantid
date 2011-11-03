@@ -1,8 +1,8 @@
 from MantidFramework import *
 from mantidsimple import *
-from numpy import zeros
+#from numpy import zeros
 from pylab import *
-import matplotlib.pyplot as plt
+import time
 
 class Setup:
         
@@ -51,6 +51,10 @@ class Setup:
     y_axis_ratio = None
     y_axis_error_ratio = None
     x_axis_ratio = None
+    
+    #fitting parameters  y=a+b*x
+    a = None
+    b = None
     
     def __init__(self):
         pass
@@ -133,7 +137,34 @@ class Setup:
             
         self.rebin_parameters = para    
             
+    def __mul__(self, other):
+        """
+        operator * between two instances of the class
+        """
+        product = Setup()
+        product.x_axis_ratio = other.x_axis_ratio
+        product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
+        product.y_axis_error_ratio = sqrt((other.y_axis_ratio*self.y_axis_error_ratio)**2 +
+                                          (other.y_axis_error_ratio*self.y_axis_ratio)**2)
+        return product
     
+    def fit(self):
+        """
+        This is going to fit the counts_vs_tof with a linear expression and return the a and
+        b coefficients (y=a+bx)
+        """
+        CreateWorkspace('DataToFit', 
+                        DataX=self.x_axis_ratio, 
+                        DataY=self.y_axis_ratio,
+                        DataE=self.y_axis_error_ratio,
+                        Nspec=1)
+        Fit(InputWorkspace='DataToFit',
+            Function="name=UserFunction, Formula=a+b*x, a=1, b=2", 
+            Output='Res')
+        res = mtd['Res_Parameters']
+        self.a = res.getDouble("Value",0)
+        self.b = res.getDouble("Value",1)
+        
 class CalculateAD(Setup):      
     
     id_numerator = None  #ex: AiD0
@@ -153,6 +184,8 @@ class CalculateAD(Setup):
         
         self.id_numerator = id_numerator
         self.id_denominator = id_denominator
+        #Launch the calculation
+        self.run()
         
     def run(self):
         """
@@ -167,12 +200,12 @@ class CalculateAD(Setup):
         self._calculateFinalYAxis(bNumerator=False)
         
         #calculate y_axis of numerator/denominator
-        self._y_axis_ratio = self._y_axis_numerator/self._y_axis_denominator
-        self._y_axis_error_ratio = ((self._y_axis_error_numerator/self._y_axis_numerator)**2 +
+#        self._x_axis_ratio = self._x_axis
+        self.y_axis_ratio = self._y_axis_numerator/self._y_axis_denominator
+        self.y_axis_error_ratio = ((self._y_axis_error_numerator/self._y_axis_numerator)**2 +
                                     (self._y_axis_error_denominator/self._y_axis_denominator)**2)
-        self._y_axis_error_ratio = sqrt(self._y_axis_error_ratio)
-        self._y_axis_error_ratio *= self._y_axis_ratio
-        
+        self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
+        self.y_axis_error_ratio *= self.y_axis_ratio
         
     def _calculateFinalYAxis(self, bNumerator=True):
         """
@@ -191,7 +224,7 @@ class CalculateAD(Setup):
         rebin(InputWorkspace='EventDataWks', 
               OutputWorkspace='HistoDataWks', 
               Params=self.rebin_parameters)
-        #mtd.deleteWorkspace('EventDataWks')
+        mtd.deleteWorkspace('EventDataWks')
         mt2 = mtd['HistoDataWks']
         _x_axis = mt2.readX(0)[:]
         self._x_axis = _x_axis
@@ -200,25 +233,25 @@ class CalculateAD(Setup):
                                         proton_charge=proton_charge, 
                                         from_pixel=self.x_pixel_min, 
                                         to_pixel=self.x_pixel_max)
-        #mtd.deleteWorkspace('HistoDataWks')
+        mtd.deleteWorkspace('HistoDataWks')
         Transpose(InputWorkspace='IntegratedDataWks', 
                   OutputWorkspace='TransposeIntegratedDataWks')
-        #mtd.deleteWorkspace('IntegratedDataWks')
+        mtd.deleteWorkspace('IntegratedDataWks')
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
-        #mtd.deleteWorkspace('TransposeIntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks')
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks',
                        StartX=self.back_pixel_min,
                        EndX=self.back_pixel_max)
-        #mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
         Transpose(InputWorkspace='TransposeHistoFlatDataWks',
                   OutputWorkspace='DataWks')
-        #mtd.deleteWorkspace('TransposeHistoFlatDataWks')
+        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
         mt3 = mtd['DataWks']        
         self._calculateFinalAxis(Workspace=mt3, 
                            bNumerator=bNumerator)
-        #mtd.deleteWorkspace('DataWks')
+        mtd.deleteWorkspace('DataWks')
     
     
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
@@ -227,6 +260,7 @@ class CalculateAD(Setup):
         """
         mt = Workspace
         _x_axis = mt.readX(0)[:]
+        self._x_axis = _x_axis
         counts_vs_tof = zeros(len(_x_axis))
         counts_vs_tof_error = zeros(len(_x_axis))
         for x in range(self.alpha_pixel_nbr):
@@ -235,10 +269,10 @@ class CalculateAD(Setup):
         counts_vs_tof_error = sqrt(counts_vs_tof_error)
         index_tof_min = self._getIndex(self.tof_min, _x_axis)
         index_tof_max = self._getIndex(self.tof_max, _x_axis)
-        if (bNumerator):
+        if (bNumerator is True):
             self._y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max]
             self._y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max]
-            self._x_axis_ratio = self._x_axis[index_tof_min:index_tof_max]
+            self.x_axis_ratio = self._x_axis[index_tof_min:index_tof_max]
         else:
             self._y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
             self._y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
@@ -295,11 +329,7 @@ class CalculateAD(Setup):
         """
         returns the index where the value has been found
         """
-        sz = len(array)
-        for i in range(sz):
-            if value == array[i]:
-                return i
-        return -1        
+        return array.searchsorted(value)
             
     def _getProtonCharge(self, st=None):
         """
@@ -313,6 +343,57 @@ class CalculateAD(Setup):
         return None              
             
 if __name__ == '__main__':
-    cal_1 = CalculateAD(id_numerator='AiD1', id_denominator='AiD0')           
-    cal_1.run()        
+    
+    t_start = time.time()
+    
+    cal_D1 = CalculateAD(id_numerator='AiD1', id_denominator='AiD0')
+    cal_D1.fit()
+    
+#    cal_D2 = CalculateAD(id_numerator='AiD2', id_denominator='AiD0')
+#    cal_D2.fit()
+#               
+#    cal_D3 = CalculateAD(id_numerator='AiD3', id_denominator='AiD0')
+#    cal_D3.fit()
+#
+#    cal_D4 = CalculateAD(id_numerator='AiD4', id_denominator='AiD0')
+#    cal_D4.fit()
+#
+#    cal_D5 = CalculateAD(id_numerator='AiD5', id_denominator='AiD0')
+#    cal_D5.fit()
+#
+#    cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
+#    product_D6 = cal_D6 * cal_D5
+#    product_D6.fit()
+#
+#    cal_D7 = CalculateAD(id_numerator='AiiAiD7', id_denominator='AiiAiD5')
+#    product_D7 = cal_D7 * cal_D5
+#    product_D7.fit()
+#    
+#    cal_D8 = CalculateAD(id_numerator='AiiiAiiAiD8', id_denominator='AiiiAiiAiD7')
+#    product_D8 = cal_D8 * product_D7
+#    product_D8.fit()
+#    
+#    cal_D9 = CalculateAD(id_numerator='AivAiiiAiiAiD9', id_denominator='AivAiiiAiiAiD8')
+#    product_D9 = cal_D9 * product_D8 
+#    product_D9.fit()
+    
+#    print 'a: ' + str(product.a)
+#    print 'b: ' + str(product.b)    
+#    figure()
+#    errorbar(product.x_axis_ratio, 
+#             product.y_axis_ratio, 
+#             product.y_axis_error_ratio, 
+#             marker='s', 
+#             mfc='red',
+#             linestyle='')
+#    x=linspace(10000,22000,100)
+#    plot(x,product.a+product.b*x)
+#    xlabel("TOF (microsS)")
+#    ylabel("Ratio")
+#    show()
+
+
+    t_end = time.time()
+    print 'Time to run the process: %0.1f s' % (t_end-t_start)                   
+                     
             
