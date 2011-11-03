@@ -55,7 +55,7 @@ namespace Algorithms
   {
     MatrixWorkspace_sptr sampleWS = getProperty("SampleInputWorkspace");
     MatrixWorkspace_sptr vanadiumWS = getProperty("VanadiumInputWorkspace");
-    unsigned int uNeighbours = static_cast<unsigned int>(getProperty("NumberOfNeighbours"));
+    int neighbours = getProperty("NumberOfNeighbours");
     if(sampleWS->getXDimension()->getNBins() != vanadiumWS->getXDimension()->getNBins())
     {
       throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of bins.");
@@ -92,7 +92,7 @@ namespace Algorithms
         PARALLEL_CRITICAL(NearestNeighboursSearch)
         {
           //CPUTimer tim;
-          specIdMap = vanadiumWS->getNeighbours(inSpec, uNeighbours); //This is not threadsafe!
+          specIdMap = vanadiumWS->getNeighbours(inSpec, neighbours); //This is not threadsafe!
          // std::cout << tim << " to get nearest neighbours." << std::endl;
         }
         std::map<specid_t, double>::iterator it = specIdMap.begin();
