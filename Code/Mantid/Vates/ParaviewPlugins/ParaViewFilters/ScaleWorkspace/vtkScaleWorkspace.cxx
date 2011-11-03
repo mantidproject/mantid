@@ -19,7 +19,7 @@ vtkScaleWorkspace::~vtkScaleWorkspace()
 }
 
 
-int vtkScaleWorkspace::RequestData(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkScaleWorkspace::RequestData(vtkInformation*, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
   vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
   vtkPointSet * inputDataSet = vtkPointSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
@@ -46,7 +46,7 @@ int vtkScaleWorkspace::RequestData(vtkInformation *request, vtkInformationVector
   return 1;
 }
 
-int vtkScaleWorkspace::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkScaleWorkspace::RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*)
 {
   return 1;
 }
