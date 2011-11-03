@@ -61,8 +61,9 @@ def run(args):
     # The timing resolution is different across platforms and the faster tests
     # can cause more false positives on the lower-resolution clocks. We'll
     # up the tolerance for those taking less time than 10ms.
-    timer_resolution = 0.01
-    
+    timer_resolution_hi = 0.01
+    timer_resolution_lo = 0.0011
+
     for name in names:
         (r, t) = analysis.get_runtime_data(name, x_field='revision')
         r = np.array(r)
@@ -71,10 +72,14 @@ def run(args):
         # this is the timing of the current revision
         current_time = t[r == rev]
         tolerance = tol
-        if current_time < timer_resolution:
+        if current_time < timer_resolution_hi:
             # Increase the tolerance to avoid false positives
-            tolerance = 70
-            print "%s is fast, tolerance has been increased to 70%%" % name
+            if current_time < timer_resolution_lo:
+                # Very fast tests are twitchy
+                tolerance = 100.0
+            else:
+                tolerance = 70.0
+            print "%s is fast, tolerance has been increased to %f" % (name,tolerance)
 
         
         # Cut out any times after or = to the current rev
