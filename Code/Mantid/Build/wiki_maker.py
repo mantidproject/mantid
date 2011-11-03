@@ -20,12 +20,12 @@ import difflib
 
 #======================================================================
 def get_wiki_description(algo, version):
-    """    
+    """
     @param algo :: name of the algorithm
     @param version :: version, -1 for latest 
     """
     source = find_algo_file(algo, version)
-    if source == '': 
+    if source == '':
         alg = mtd.createAlgorithm(algo, version)
         return alg.getWikiDescription()
     else:
