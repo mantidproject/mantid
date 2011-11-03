@@ -364,6 +364,14 @@ void MdViewerWidget::checkForUpdates()
     this->currentView->onAutoScale();
     this->updateTimesteps();
   }
+  if (QString(proxy->GetXMLName()).contains("Threshold"))
+  {
+    vtkSMDoubleVectorProperty *range = \
+        vtkSMDoubleVectorProperty::SafeDownCast(\
+          proxy->GetProperty("ThresholdBetween"));
+    this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
+                                                      range->GetElement(1));
+  }
 }
 
 void MdViewerWidget::updateAnimationControls(vtkSMDoubleVectorProperty *dvp)
