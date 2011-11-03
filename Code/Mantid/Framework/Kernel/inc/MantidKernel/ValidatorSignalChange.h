@@ -8,7 +8,7 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
-#include "boost/Signal.hpp"
+#include "boost/signal.hpp"
 //#include <string>
 
 namespace Mantid
@@ -42,12 +42,13 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<void (const Property *)>
+class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<void (Property const *const)>
 {
 public:
-  /// Constructor
-  ValidatorSignalChange(const Property *pProp):
+  /// Constructor; takes property to check
+  ValidatorSignalChange(Property const *const pProp):
       IValidator<TYPE>() ,
+      boost::signal<void (Property const* const)>(),
       pPropObserved(pProp)
   {}
 
@@ -55,17 +56,18 @@ public:
   virtual ~ValidatorSignalChange() {}
 
   //------------------------------------------------------------------------------------------------------------
-  /** Calls the validator
+  /** Calls the validator, but validates nothing. Sends signal to subscribers instead
    *  Always valid
    */
-  std::string isValid(const TYPE &value) const{
+  std::string isValid(const TYPE &) const
+  {
       this->operator()(pPropObserved);
       return "";
   }
 
   //------------------------------------------------------------------------------------------------------------
   /** Does not verify allowed values
-   *  @return The set of allowed values that this validator may have or an empty set
+   *  @return The set of allowed values that this validator may have is an empty set
    */
   std::set<std::string> allowedValues() const { return std::set<std::string>(); }
    //
@@ -76,9 +78,9 @@ protected:
     /// always valid
     std::string checkValidity(const TYPE &) const{return std::string("");}
 private:
-    const Property *pPropObserved;
- // boost::signal<void (Property  *)> *pSignal;
-
+    // the pointer to property, this validator checks.
+    Property const *const pPropObserved;
+    //
 };
 } // namespace Kernel
 } // namespace Mantid

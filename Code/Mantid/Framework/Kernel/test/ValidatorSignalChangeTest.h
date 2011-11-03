@@ -9,7 +9,7 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
-void actOnPropertyChange(const Property *pProp)
+void actOnPropertyChange(Property const *const pProp)
 {
     int middle_val(1);
     int new_val = boost::lexical_cast<int>(pProp->value());
@@ -21,7 +21,7 @@ void actOnPropertyChange(const Property *pProp)
 
 };
 
-class SignalChangeTest : public CxxTest::TestSuite
+class ValidatorSignalChangeTest : public CxxTest::TestSuite
 {
 public:
 
