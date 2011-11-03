@@ -61,7 +61,7 @@ cd ../
 REM ---------------------------------------------------------------------------
 REM Generate input wxs file. This generates a file called version.txt in the temp directory from which we read the version. It's a bit clunky but
 REM but then so is the whole generation script.
-echo ""
+echo.
 echo Running generateWxs to generate %TMPWXS%
 python generateWxs.py "%OUTPUTDIR%" "%TMPDIR%"
 if errorlevel 1 goto wxs_error
@@ -70,11 +70,9 @@ REM ---------------------------------------------------------------------------
 REM Get the version to construct the file name
 set /p VERSION= < "%TMPDIR%\version.txt"
 if /i %ARCH% == x86 (
-    REM set MSI_NAME=mantid-%VERSION%-win32.msi
-    set MSI_NAME=Mantid-32bit.msi
+    set MSI_NAME=mantid-%VERSION%-win32.msi
 ) else (
-    REM set MSI_NAME=mantid-%VERSION%-win64.msi
-    set MSI_NAME=Mantid-64bit.msi
+    set MSI_NAME=mantid-%VERSION%-win64.msi
 )
 set FINALMSI=%OUTPUTDIR%\%MSI_NAME%
 REM Delete an old one of the same name just in case this falls over part way through
@@ -82,14 +80,14 @@ del /Q "%FINALMSI%"
 
 REM ---------------------------------------------------------------------------
 REM Generate wix object file
-echo ""
+echo.
 echo Running candle to generate %WXSOBJ%
 candle -out "%WXSOBJ%" "%TMPWXS%"  
 if errorlevel 1 goto candle_error
 
 REM ---------------------------------------------------------------------------
 REM Generate final MSI
-echo ""
+echo.
 echo Running light to generate %FINALMSI%
 light -out "%FINALMSI%" "%WXSOBJ%" %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib -loc %WIX_LOC%\WixUI_en-us.wxl
 if errorlevel 1 goto light_error
