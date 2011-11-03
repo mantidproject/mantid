@@ -86,7 +86,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
 
   // ----------- Other signals ----------------
-  QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMap()));
+  QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
 
   initMenus();
 
@@ -116,10 +116,7 @@ void SliceViewer::loadSettings()
   m_currentColorMapFile = settings.value("ColormapFile", "").toString();
   // Set values from settings
   if (!m_currentColorMapFile.isEmpty())
-  {
-    m_colorBar->getColorMap().loadMap(m_currentColorMapFile);
-    m_spect->setColorMap( m_colorBar->getColorMap() );
-  }
+    loadColorMap(m_currentColorMapFile);
   m_colorBar->setLog(scaleType);
   settings.endGroup();
 }
@@ -146,7 +143,7 @@ void SliceViewer::initMenus()
   m_menuColorOptions = new QMenu("&ColorMap", this);
 
   action = new QAction(QPixmap(), "&Load Colormap", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMap()));
+  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Full range", this);
@@ -326,6 +323,33 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 }
 
 
+//------------------------------------------------------------------------------------
+/** Load a color map from a file
+ *
+ * @param filename :: file to open; empty to ask.
+ */
+void SliceViewer::loadColorMap(QString filename)
+{
+  QString fileselection;
+  if (filename.isEmpty())
+  {
+    fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"),
+        QFileInfo(m_currentColorMapFile).absoluteFilePath(),
+        tr("Colormaps (*.map *.MAP)"));
+    // User cancelled if filename is still empty
+    if( fileselection.isEmpty() ) return;
+  }
+  else
+    fileselection = filename;
+
+  m_currentColorMapFile = fileselection;
+
+  // Load from file
+  m_colorBar->getColorMap().loadMap( fileselection );
+  m_spect->setColorMap( m_colorBar->getColorMap() );
+  m_colorBar->updateColorMap();
+  this->updateDisplay();
+}
 
 //=================================================================================================
 //========================================== SLOTS ================================================
@@ -394,22 +418,12 @@ void SliceViewer::updateDisplaySlot(int index, double value)
 
 //------------------------------------------------------------------------------------
 /** SLOT to open a dialog to choose a file, load a color map from that file */
-void SliceViewer::loadColorMap()
+void SliceViewer::loadColorMapSlot()
 {
-  QString fileselection;
-  fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"),
-           QFileInfo(m_currentColorMapFile).absoluteFilePath(),
-           tr("Colormaps (*.map *.MAP)"));
-  // User cancelled if filename is still empty
-  if( fileselection.isEmpty() ) return;
-  m_currentColorMapFile = fileselection;
-
-  // Load from file
-  m_colorBar->getColorMap().loadMap( fileselection );
-  m_colorBar->update();
-  m_spect->setColorMap( m_colorBar->getColorMap() );
-  this->updateDisplay();
+  this->loadColorMap(QString());
 }
+
+
 
 //=================================================================================================
 //=================================================================================================

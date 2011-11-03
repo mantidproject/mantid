@@ -31,6 +31,7 @@ public:
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   void showControls(bool visible);
   void zoomBy(double factor);
+  void loadColorMap(QString filename = QString() );
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
@@ -42,7 +43,7 @@ public slots:
   void zoomInSlot();
   void zoomOutSlot();
   void updateDisplaySlot(int index, double value);
-  void loadColorMap();
+  void loadColorMapSlot();
 
 
 private:

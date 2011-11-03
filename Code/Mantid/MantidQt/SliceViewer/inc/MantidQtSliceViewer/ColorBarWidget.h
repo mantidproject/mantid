@@ -50,7 +50,7 @@ public:
   ColorBarWidget(QWidget *parent = 0);
   ~ColorBarWidget();
 
-  void update();
+  void updateColorMap();
 
   void setDataRange(double min, double max);
   void setDataRange(QwtDoubleInterval range);
@@ -79,6 +79,7 @@ signals:
 private:
   void setSpinBoxesSteps();
   void mouseDoubleClickEvent(QMouseEvent * event);
+  void updateMinMaxGUI();
 
   /// Auto-gen UI classes
   Ui::ColorBarWidgetClass ui;
