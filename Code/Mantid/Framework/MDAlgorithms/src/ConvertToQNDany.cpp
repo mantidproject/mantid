@@ -22,6 +22,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 #include <float.h>
 
