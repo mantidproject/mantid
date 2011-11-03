@@ -9,6 +9,9 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+
+using Mantid::DataObjects::WorkspaceSingleValue;
 
 
 namespace Mantid
@@ -57,6 +60,23 @@ namespace MDEvents
     /// Creates a new iterator pointing to the first cell in the workspace
     virtual Mantid::API::IMDIterator* createIterator(Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
+    void checkWorkspaceSize(const MDHistoWorkspace & other, std::string operation);
+
+    // --------------------------------------------------------------------------------------------
+    MDHistoWorkspace & operator+=(const MDHistoWorkspace & b);
+    MDHistoWorkspace & operator+=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+
+    MDHistoWorkspace & operator-=(const MDHistoWorkspace & b);
+    MDHistoWorkspace & operator-=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+
+    MDHistoWorkspace & operator*=(const MDHistoWorkspace & b);
+    MDHistoWorkspace & operator*=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+
+    MDHistoWorkspace & operator/=(const MDHistoWorkspace & b);
+    MDHistoWorkspace & operator/=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+
+
+
     // --------------------------------------------------------------------------------------------
     /** @return a const reference to the indexMultiplier array.
      * To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
@@ -81,12 +101,12 @@ namespace MDEvents
     /** @return the direct pointer to the error squared array. For speed */
     signal_t * getErrorSquaredArray()
     {
-      return m_errors;
+      return m_errorsSquared;
     }
 
-    void setTo(signal_t signal, signal_t error);
+    void setTo(signal_t signal, signal_t errorSquared);
 
-    void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error);
+    void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);
 
     coord_t * getVertexesArray(size_t linearIndex, size_t & numVertices) const;
 
@@ -101,35 +121,35 @@ namespace MDEvents
       m_signals[index] = value;
     }
 
-    /// Sets the error at the specified index.
+    /// Sets the error (squared) at the specified index.
     void setErrorAt(size_t index, signal_t value)
     {
-      m_errors[index] = value;
+      m_errorsSquared[index] = value;
     }
 
 
     /// Get the error of the signal at the specified index.
     signal_t getErrorAt(size_t index) const
     {
-      return m_errors[index];
+      return m_errorsSquared[index];
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
     signal_t getErrorAt(size_t index1, size_t index2) const
     {
-      return m_errors[index1 + indexMultiplier[0]*index2];
+      return m_errorsSquared[index1 + indexMultiplier[0]*index2];
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
     signal_t getErrorAt(size_t index1, size_t index2, size_t index3) const
     {
-      return m_errors[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3];
+      return m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3];
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
     signal_t getErrorAt(size_t index1, size_t index2, size_t index3, size_t index4) const
     {
-      return m_errors[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
+      return m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
     }
 
 
@@ -190,7 +210,7 @@ namespace MDEvents
     /// Get the error of the signal at the specified index, normalized by cell volume
     signal_t getErrorNormalizedAt(size_t index) const
     {
-      return m_errors[index] * m_inverseVolume;
+      return m_errorsSquared[index] * m_inverseVolume;
     }
 
     /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
@@ -230,9 +250,9 @@ namespace MDEvents
     signal_t * m_signals;
 
     /// Linear array of errors for each bin
-    signal_t * m_errors;
+    signal_t * m_errorsSquared;
 
-    /// Length of the m_signals / m_errors arrays.
+    /// Length of the m_signals / m_errorsSquared arrays.
     size_t m_length;
 
     /// To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...

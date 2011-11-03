@@ -48,7 +48,7 @@ namespace MDEvents
   MDHistoWorkspace::~MDHistoWorkspace()
   {
     delete [] m_signals;
-    delete [] m_errors;
+    delete [] m_errorsSquared;
     delete [] indexMultiplier;
     delete [] m_vertexesArray;
     delete [] m_boxLength;
@@ -91,7 +91,7 @@ namespace MDEvents
 
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
-    m_errors = new signal_t[m_length];
+    m_errorsSquared = new signal_t[m_length];
 
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
@@ -112,14 +112,14 @@ namespace MDEvents
   /** Sets all signals/errors in the workspace to the given values
    *
    * @param signal :: signal value to set
-   * @param error :: error value to set
+   * @param errorSquared :: error (squared) value to set
    */
-  void MDHistoWorkspace::setTo(signal_t signal, signal_t error)
+  void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared)
   {
     for (size_t i=0; i < m_length; i++)
     {
       m_signals[i] = signal;
-      m_errors[i] = error;
+      m_errorsSquared[i] = errorSquared;
     }
   }
 
@@ -129,7 +129,7 @@ namespace MDEvents
   * @param signal :: signal value to set when function evaluates to false
   * @param error :: error value to set when function evaluates to false
   */
-  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error)
+  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared)
   {
     if (numDimensions<3) throw std::invalid_argument("Need 3 dimensions for ImplicitFunction.");
     Mantid::coord_t coord[3];
@@ -146,7 +146,7 @@ namespace MDEvents
           if (!function->isPointContained(coord))
           {
             m_signals[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = signal;
-            m_errors[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = error;
+            m_errorsSquared[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = errorSquared;
           }
         }
       }
@@ -319,10 +319,53 @@ namespace MDEvents
     std::vector<signal_t> out;
     out.resize(m_length, 0.0);
     for (size_t i=0; i<m_length; ++i)
-        out[i] = m_errors[i];
+        out[i] = m_errorsSquared[i];
     // This copies again! :(
     return out;
   }
+
+  void MDHistoWorkspace::checkWorkspaceSize(const MDHistoWorkspace & other, std::string operation)
+  {
+    if (other.getNumDims() != this->getNumDims())
+      throw std::invalid_argument("Cannot perform the " + operation + " operation on this workspace. The number of dimensions does not match.");
+    if (other.m_length != this->m_length)
+      throw std::invalid_argument("Cannot perform the " + operation + " operation on this workspace. The length of the signals vector does not match.");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the += operation, element-by-element, for two MDHistoWorkspace's
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator+=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "+=");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] += b.m_signals[i];
+      m_errorsSquared[i] += b.m_errorsSquared[i];
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the += operation with a scalar as the RHS argument
+   *
+   * @param b :: WorkspaceSingleValue (signal and error) as the RHS argument
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator+=(const Mantid::DataObjects::WorkspaceSingleValue & b)
+  {
+    signal_t signal = b.dataY(0)[0];
+    signal_t errorSquared = b.dataE(0)[0];
+    errorSquared *= errorSquared;
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] += signal;
+      m_errorsSquared[i] += errorSquared;
+    }
+    return *this;
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

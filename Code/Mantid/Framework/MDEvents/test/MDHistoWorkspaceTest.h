@@ -24,6 +24,23 @@ using namespace Mantid;
 class MDHistoWorkspaceTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDHistoWorkspaceTest *createSuite() { return new MDHistoWorkspaceTest(); }
+  static void destroySuite( MDHistoWorkspaceTest *suite ) { delete suite; }
+
+  MDHistoWorkspace_sptr two;
+  MDHistoWorkspace_sptr three;
+
+  MDHistoWorkspace_sptr ma
+
+  MDHistoWorkspaceTest()
+  {
+    MDEventsTestHelper::makeFakeMDHistoWorkspace(
+    two.
+  }
+
+
 
   void test_constructor()
   {
@@ -347,7 +364,7 @@ public:
   void test_getSignalAtCoord()
   {
     // 2D workspace with signal[i] = i (linear index)
-    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1.0, 2, 10);
     for (size_t i=0; i<100; i++)
       ws->setSignalAt(i, double(i));
     IMDWorkspace_sptr iws(ws);
