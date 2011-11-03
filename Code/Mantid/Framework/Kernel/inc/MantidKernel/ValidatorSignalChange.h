@@ -67,7 +67,7 @@ public:
 
   //------------------------------------------------------------------------------------------------------------
   /** Does not verify allowed values
-   *  @return The set of allowed values that this validator may have is an empty set
+   *  @return The set of allowed values of this validato is an empty set
    */
   std::set<std::string> allowedValues() const { return std::set<std::string>(); }
    //
