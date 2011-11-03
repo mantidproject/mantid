@@ -8,7 +8,7 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
-#include "boost/Signal.hpp"
+#include "boost/signal.hpp"
 //#include <string>
 
 namespace Mantid
@@ -48,6 +48,7 @@ public:
   /// Constructor
   ValidatorSignalChange(const Property *pProp):
       IValidator<TYPE>() ,
+      boost::signal<void (const Property *)>(),
       pPropObserved(pProp)
   {}
 

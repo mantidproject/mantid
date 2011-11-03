@@ -21,7 +21,7 @@ void actOnPropertyChange(const Property *pProp)
 
 };
 
-class SignalChangeTest : public CxxTest::TestSuite
+class ValidatorSignalChangeTest : public CxxTest::TestSuite
 {
 public:
 
