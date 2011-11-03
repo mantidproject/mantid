@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace API
 {
 
 
@@ -492,7 +492,10 @@ namespace MDEvents
   /// Shared ptr to BoxController
   typedef boost::shared_ptr<BoxController> BoxController_sptr;
 
-}//namespace MDEvents
+  /// Shared ptr to a const BoxController
+  typedef boost::shared_ptr<const BoxController> BoxController_const_sptr;
+
+}//namespace API
 
 }//namespace Mantid
 

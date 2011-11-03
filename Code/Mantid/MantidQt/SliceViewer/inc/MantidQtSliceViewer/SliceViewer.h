@@ -34,7 +34,6 @@ public:
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
-  void updateDisplaySlot(int index, double value);
   void resetZoom();
   void showInfoAt(double, double);
   void colorRangeFullSlot();
@@ -42,6 +41,8 @@ public slots:
   void colorRangeChanged();
   void zoomInSlot();
   void zoomOutSlot();
+  void updateDisplaySlot(int index, double value);
+  void loadColorMap();
 
 
 private:
@@ -73,9 +74,6 @@ private:
 
   /// Layout containing the spectrogram
   QHBoxLayout * m_spectLayout;
-
-  /// Color map in use
-  MantidColorMap * m_colorMap;
 
   /// File of the last loaded color map.
   QString m_currentColorMapFile;

@@ -20,12 +20,24 @@ class CreateMDWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 
-    
+
   void test_Init()
   {
     CreateMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
+  }
+
+
+  void test_default_properties()
+  {
+    TS_ASSERT( FrameworkManager::Instance().exec("CreateMDWorkspace", 10,
+            "OutputWorkspace","simple_md",
+            "Dimensions", "3",
+            "Extents", "-1,1,-2,2,3,3",
+            "Names", "One,Two,Three",
+            "Units", "One,Two,Three"
+            )->isExecuted() );
   }
 
   /** Validate bad inputs. */

@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -41,9 +41,9 @@ namespace MDEvents
   public:
     MDBox();
 
-    MDBox(BoxController_sptr splitter, const size_t depth = 0);
+    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth = 0);
 
-    MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
     MDBox(const MDBox & other);
 

@@ -70,6 +70,7 @@ set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
 ###########################################################################
 # Look for Git. Used for version headers - faked if not found.
+# Also makes sure our commit hooks are linked in the right place.
 ###########################################################################
 
 set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
@@ -85,6 +86,7 @@ if ( GIT_FOUND )
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
   if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
+
     # Remove the tag name part
     string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${GIT_DESCRIBE} )
     # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
@@ -97,7 +99,33 @@ if ( GIT_FOUND )
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
     string ( SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE )
+
+    ###########################################################################
+    # This part puts our hooks (in .githooks) into .git/hooks
+    ###########################################################################
+    # First need to find the top-level directory of the git repository
+    execute_process ( COMMAND ${GIT_EXECUTABLE} rev-parse --show-toplevel
+                      OUTPUT_VARIABLE GIT_TOP_LEVEL
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+    # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
+    string ( REGEX MATCH "(.*)[^\n]" GIT_TOP_LEVEL ${GIT_TOP_LEVEL} )
+    # Prefer symlinks on platforms that support it so we don't rely on cmake running to be up-to-date
+    # On Windows, we have to copy the file
+    if ( WIN32 )
+      execute_process ( COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_TOP_LEVEL}/.githooks/pre-commit
+                                                                      ${GIT_TOP_LEVEL}/.git/hooks )
+      execute_process ( COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_TOP_LEVEL}/.githooks/commit-msg
+                                                                      ${GIT_TOP_LEVEL}/.git/hooks )
+    else ()
+      execute_process ( COMMAND ${CMAKE_COMMAND} -E create_symlink ${GIT_TOP_LEVEL}/.githooks/pre-commit
+                                                                   ${GIT_TOP_LEVEL}/.git/hooks/pre-commit )
+      execute_process ( COMMAND ${CMAKE_COMMAND} -E create_symlink ${GIT_TOP_LEVEL}/.githooks/commit-msg
+                                                                   ${GIT_TOP_LEVEL}/.git/hooks/commit-msg )
+    endif ()
+
   endif()
+
 else()
   # Just use a dummy version number and print a warning
   message ( STATUS "Git not found - using dummy revision number and date" )

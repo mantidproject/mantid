@@ -9,6 +9,8 @@ Algorithm that can take a slice out of an original MDEventWorkspace while preser
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidAPI/FileProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -58,6 +60,20 @@ namespace MDEvents
     this->initSlicingProps();
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
+
+    std::vector<std::string> exts;
+    exts.push_back(".nxs");
+    declareProperty(new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
+        "Optional: Specify a NeXus file to write if you want the output workspace to be file-backed.");
+
+    declareProperty(new PropertyWithValue<int>("Memory", -1),
+        "If OutputFilename is specified to use a file back end:\n"
+        "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
+        "  If not specified, a default of 40% of free physical memory is used.");
+    //setPropertySettings("Memory", new EnabledWhenProperty(this, "OutputFilename", IS_NOT_DEFAULT));
+
+    setPropertyGroup("OutputFilename", "File Back-End");
+    setPropertyGroup("Memory", "File Back-End");
   }
 
 
@@ -115,6 +131,30 @@ namespace MDEvents
     obc->resetNumBoxes();
     // Perform the first box splitting
     outWS->splitBox();
+
+    // --- File back end ? ----------------
+    std::string filename = getProperty("OutputFilename");
+    if (!filename.empty())
+    {
+      // First save to the NXS file
+      g_log.notice() << "Running SaveMD" << std::endl;
+      IAlgorithm_sptr alg = createSubAlgorithm("SaveMD");
+      alg->setPropertyValue("Filename", filename);
+      alg->setProperty("InputWorkspace", outWS);
+      alg->executeAsSubAlg();
+      // And now re-load it with this file as the backing.
+      g_log.notice() << "Running LoadMD" << std::endl;
+      alg = createSubAlgorithm("LoadMD");
+      alg->setPropertyValue("Filename", filename);
+      alg->setProperty("FileBackEnd", true);
+      alg->setPropertyValue("Memory", getPropertyValue("Memory"));
+      alg->executeAsSubAlg();
+      // Replace the workspace with the loaded, file-backed one
+      IMDEventWorkspace_sptr temp;
+      temp = alg->getProperty("OutputWorkspace");
+      outWS = boost::dynamic_pointer_cast<MDEventWorkspace<OMDE, ond> >(temp);
+    }
+
 
     // Function defining which events (in the input dimensions) to place in the output
     MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
@@ -193,6 +233,16 @@ namespace MDEvents
 
     g_log.notice() << totalAdded << " " << OMDE::getTypeName() << "'s added to the output workspace." << std::endl;
 
+    if (outWS->isFileBacked())
+    {
+      // Update the file-back-end
+      g_log.notice() << "Running SaveMD" << std::endl;
+      IAlgorithm_sptr alg = createSubAlgorithm("SaveMD");
+      alg->setProperty("UpdateFileBackEnd", true);
+      alg->setProperty("InputWorkspace", outWS);
+      alg->executeAsSubAlg();
+    }
+
     this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS));
     delete prog;
   }
@@ -203,6 +253,9 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void SliceMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    if (outD==0)
+      throw std::runtime_error("No output dimensions specified!");
+
     // Templated method needs to call another templated method depending on the # of output dimensions.
     if (MDE::getTypeName() == "MDLeanEvent")
     {
@@ -211,7 +264,7 @@ namespace MDEvents
       else if (outD==3) this->slice<MDE,nd,MDLeanEvent<3>,3>(ws);
       else if (outD==4) this->slice<MDE,nd,MDLeanEvent<4>,4>(ws);
       else
-        throw std::runtime_error("Number of output dimensions > 4 or < 1. This is not currently handled.");
+        throw std::runtime_error("Number of output dimensions > 4. This is not currently handled.");
     }
     else if (MDE::getTypeName() == "MDEvent")
     {
@@ -220,7 +273,7 @@ namespace MDEvents
       else if (outD==3) this->slice<MDE,nd,MDEvent<3>,3>(ws);
       else if (outD==4) this->slice<MDE,nd,MDEvent<4>,4>(ws);
       else
-        throw std::runtime_error("Number of output dimensions > 4 or < 1. This is not currently handled.");
+        throw std::runtime_error("Number of output dimensions > 4. This is not currently handled.");
     }
     else
       throw std::runtime_error("Unexpected MDEvent type '" + MDE::getTypeName() + "'. This is not currently handled.");

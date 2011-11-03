@@ -61,6 +61,7 @@ public:
   /// Default destructor.
   virtual ~ViewBase() {}
 
+  void checkView();
   /**
    * Function used to correct post-accept visibility issues. Most
    * views won't need to do anything.
@@ -82,6 +83,7 @@ public:
    * Destroy sources and view relevant to mode switching.
    */
   virtual void destroyView() = 0;
+  pqPipelineSource *getPvActiveSrc();
   /**
    * The function gets the main view.
    * @return the main view
@@ -100,7 +102,7 @@ public:
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
-  virtual void setSource(pqPipelineSource *src, bool pluginMode);
+  virtual void setPluginSource(QString pluginName, QString wsName);
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
@@ -135,9 +137,13 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
-  void disableViews();
   /// Signal to trigger pipeline update.
   void triggerAccept();
+  /**
+   * Signal to set the status of the view mode buttons.
+   * @param state whether or not to enable to view mode buttons
+   */
+  void setViewsStatus(bool state);
 
 private:
   Q_DISABLE_COPY(ViewBase)
@@ -146,7 +152,6 @@ private:
   pqPipelineRepresentation *getPvActiveRep();
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
-  bool pluginMode;
 };
 
 }

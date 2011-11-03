@@ -91,6 +91,16 @@
             <property name="text">
              <string>Reset</string>
             </property>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/view-fullscreen.png</normaloff>:/SliceViewer/icons/view-fullscreen.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -100,6 +110,16 @@
             </property>
             <property name="text">
              <string>RngFull</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/color-pallette.png</normaloff>:/SliceViewer/icons/color-pallette.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -111,12 +131,15 @@
             <property name="text">
              <string>RngSlice</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnColorOptions">
-            <property name="text">
-             <string>Color</string>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/color-pallette-part.png</normaloff>:/SliceViewer/icons/color-pallette-part.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -235,7 +258,9 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../icons/SliceViewerIcons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>btnResetZoom</sender>
