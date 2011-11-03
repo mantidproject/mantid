@@ -42,11 +42,12 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class DLLExport ValidatorSignalChange : public IValidator<TYPE>, public boost::signal<void (const Property *)>
+class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<void (const Property *)>
 {
 public:
   /// Constructor
   ValidatorSignalChange(const Property *pProp):
+      IValidator<TYPE>() ,
       pPropObserved(pProp)
   {}
 
