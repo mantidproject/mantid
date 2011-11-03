@@ -98,7 +98,7 @@ namespace Mantid
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
       std::map<specid_t, double> getNeighbours(specid_t spec, const double radius) const;
       /// Query the NearestNeighbours object for a given spectrum index using the direct number of nearest neighbours
-      std::map<specid_t, double> getNeighbours(specid_t spec, const int nNeighbours) const;
+      std::map<specid_t, double> getNeighboursExact(specid_t spec, const int nNeighbours) const;
       //@}
 
       /// Const access to the spectra-detector map

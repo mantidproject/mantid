@@ -92,7 +92,7 @@ namespace Algorithms
         PARALLEL_CRITICAL(NearestNeighboursSearch)
         {
           //CPUTimer tim;
-          specIdMap = vanadiumWS->getNeighbours(inSpec, neighbours); //This is not threadsafe!
+          specIdMap = vanadiumWS->getNeighboursExact(inSpec, neighbours); //This is not threadsafe!
          // std::cout << tim << " to get nearest neighbours." << std::endl;
         }
         std::map<specid_t, double>::iterator it = specIdMap.begin();
@@ -118,7 +118,7 @@ namespace Algorithms
     vanSumTOF_WS = vanSumTOF_WS/yAvgWS;
 
     //Mask detectors outside of limits
-    IAlgorithm_sptr constrainAlg = this->createSubAlgorithm("FindDetectorsOutsideLimits", 0.80, 0.90, true, 1);
+    IAlgorithm_sptr constrainAlg = this->createSubAlgorithm("FindDetectorsOutsideLimits", 0.80, 0.85, true, 1);
     constrainAlg->setProperty("InputWorkspace", vanSumTOF_WS);
     constrainAlg->setPropertyValue("OutputWorkspace", "ConstrainedWS");
     constrainAlg->setProperty("HighThreshold", pow((double)10, (double)300));
@@ -127,13 +127,16 @@ namespace Algorithms
     MatrixWorkspace_sptr constrainedWS = constrainAlg->getProperty("OutputWorkspace");
 
     //Mask detectors outside of limits
-    IAlgorithm_sptr maskdetectorsAlg = this->createSubAlgorithm("MaskDetectors", 0.90, 1, true, 1);
+    IAlgorithm_sptr maskdetectorsAlg = this->createSubAlgorithm("MaskDetectors", 0.85, 0.90, true, 1);
     maskdetectorsAlg->setProperty("Workspace", vanSumTOF_WS);
     maskdetectorsAlg->setProperty("MaskedWorkspace", constrainedWS);
     maskdetectorsAlg->executeAsSubAlg();
 
+    //Divide the sample workspace by the smoothed vanadium workspace.
     sampleWS = sampleWS / vanSumTOF_WS;
 
+    progress.report(1, "Complete");
+    //Finally set the output workspace.
     setProperty("OutputWorkspace", sampleWS);
   }
 
