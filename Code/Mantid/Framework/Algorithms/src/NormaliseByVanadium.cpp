@@ -55,8 +55,7 @@ namespace Algorithms
   {
     MatrixWorkspace_sptr sampleWS = getProperty("SampleInputWorkspace");
     MatrixWorkspace_sptr vanadiumWS = getProperty("VanadiumInputWorkspace");
-    int neighbours = getProperty("NumberOfNeighbours");
-    unsigned int uNeighbours = unsigned int(neighbours);
+    unsigned int uNeighbours = static_cast<unsigned int>(getProperty("NumberOfNeighbours"));
     if(sampleWS->getXDimension()->getNBins() != vanadiumWS->getXDimension()->getNBins())
     {
       throw std::runtime_error("Sample and Vanadium workspaces do not have the same number of bins.");
