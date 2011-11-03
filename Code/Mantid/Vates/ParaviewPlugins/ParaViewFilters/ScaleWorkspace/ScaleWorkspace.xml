@@ -1,0 +1,22 @@
+<ServerManagerConfiguration>
+  <!-- Begin ScaleWorkspace -->
+  <ProxyGroup name="filters">
+    <SourceProxy name="MantidParaViewScaleWorkspace" class="vtkScaleWorkspace" label="MD Scale Workspace" >
+      <InputProperty
+        name="Input"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkUnstructuredGrid"/>
+        </DataTypeDomain>
+      </InputProperty>
+	  <DoubleVectorProperty name="X Scaling Factor" command="SetXScaling" number_of_elements="1" default_values="1"/>
+	  <DoubleVectorProperty name="Y Scaling Factor" command="SetYScaling" number_of_elements="1" default_values="1"/>
+	  <DoubleVectorProperty name="Z Scaling Factor" command="SetZScaling" number_of_elements="1" default_values="1"/>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End ScaleWorkspace -->
+</ServerManagerConfiguration>
