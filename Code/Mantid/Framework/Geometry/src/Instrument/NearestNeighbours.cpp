@@ -36,7 +36,7 @@ namespace Mantid
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
-    std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const unsigned int noNeighbours) const
+    std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const int noNeighbours) const
     {
       if(force || m_noNeighbours != int(noNeighbours))
       {

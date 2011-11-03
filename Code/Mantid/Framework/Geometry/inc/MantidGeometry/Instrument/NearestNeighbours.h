@@ -79,7 +79,7 @@ namespace Mantid
       std::map<specid_t, double> neighbours(const specid_t spectrum, const double radius=0.0) const;
 
       // Neighbouring spectra by 
-      std::map<specid_t, double> neighbours(const specid_t spectrum, bool force, const unsigned int numberofneighbours=8) const;
+      std::map<specid_t, double> neighbours(const specid_t spectrum, bool force, const int numberofneighbours=8) const;
 
     private:
       /// typedef for Graph object used to hold the calculated information
