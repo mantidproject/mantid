@@ -21,6 +21,9 @@ using Mantid::Kernel::V3D;
 * Everything must be in one test or the instrument/detector list goes AWOL.
 */
 
+//=====================================================================================
+// Functional tests
+//=====================================================================================
 class NearestNeighboursTest : public CxxTest::TestSuite
 {
 public:
@@ -147,5 +150,67 @@ public:
   }
 
 };
+
+//=====================================================================================
+// Performance tests
+//=====================================================================================
+class NearestNeighboursTestPerformance : public CxxTest::TestSuite
+{
+
+public:
+
+  void testUsingRadius()
+  {
+    Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+    // Parameterized instrument
+    Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    // Create the NearestNeighbours object directly.
+    NearestNeighbours nn(m_instrument, *spectramap);
+    for(size_t i = 0; i < 2000; i++)
+    {
+      nn.neighbours(1, 5.0);
+    }
+  }
+
+  void testUsingDefault()
+  {
+    Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+    // Parameterized instrument
+    Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    // Create the NearestNeighbours object directly.
+    NearestNeighbours nn(m_instrument, *spectramap);
+    for(size_t i = 0; i < 2000; i++)
+    {
+      nn.neighbours(1, 0.0);
+    }
+  }
+
+  void testUsingNumberOfNeighbours()
+  {
+    Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+    // Parameterized instrument
+    Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    // Create the NearestNeighbours object directly.
+    NearestNeighbours nn(m_instrument, *spectramap);
+    for(size_t i = 0; i < 2000; i++)
+    {
+      nn.neighbours(1, true, 8.0);
+    }
+  }
+
+};
+
 
 #endif /* MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS */
