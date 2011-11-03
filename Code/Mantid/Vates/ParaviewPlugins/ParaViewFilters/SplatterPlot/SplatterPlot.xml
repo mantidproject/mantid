@@ -1,7 +1,7 @@
 <ServerManagerConfiguration>
   <!-- Begin SplatterPlot -->
   <ProxyGroup name="filters">
-    <SourceProxy name="MantidParaViewSplatterPlot" class="vtkSplatterPlot" label="MDEW Scatter Plot">
+    <SourceProxy name="MantidParaViewSplatterPlot" class="vtkSplatterPlot" label="MD Scatter Plot">
       <InputProperty
         name="Input"
         command="SetInputConnection">
