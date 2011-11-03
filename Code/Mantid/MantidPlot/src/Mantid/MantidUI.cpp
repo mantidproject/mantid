@@ -521,7 +521,7 @@ void MantidUI::showVatesSimpleInterface()
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();
-        //m_appWindow->setGeometry(usr_win, vsui);
+        //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType);
