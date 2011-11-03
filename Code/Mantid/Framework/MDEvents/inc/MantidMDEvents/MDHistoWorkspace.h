@@ -42,6 +42,8 @@ namespace MDEvents
 
     MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
 
+    MDHistoWorkspace(const MDHistoWorkspace & other);
+
     virtual ~MDHistoWorkspace();
 
     void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);

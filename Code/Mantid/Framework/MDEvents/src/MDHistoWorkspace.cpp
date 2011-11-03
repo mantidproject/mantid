@@ -5,6 +5,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -41,6 +42,30 @@ namespace MDEvents
   {
     this->init(dimensions);
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy constructor
+   *
+   * @param other :: MDHistoWorkspace to copy from.
+   */
+  MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace & other)
+  {
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    for (size_t d=0; d< other.getNumDims(); d++)
+    {
+      // Copy the dimension
+      MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(0).get() ) );
+      dimensions.push_back(dim);
+    }
+    this->init(dimensions);
+    // Now copy all the data
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = other.m_signals[i];
+      m_errorsSquared[i] = other.m_errorsSquared[i];
+    }
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Destructor

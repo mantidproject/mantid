@@ -176,6 +176,16 @@ public:
   }
 
 
+  //--------------------------------------------------------------------------------------
+  void test_copy_constructor()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    MDHistoWorkspace_sptr b( new MDHistoWorkspace(*a));
+    TS_ASSERT_EQUALS( b->getNumDims(), a->getNumDims() );
+    TS_ASSERT_EQUALS( b->getNPoints(), a->getNPoints() );
+    checkWorkspace(b, 1.23, 3.234);
+  }
+
   //---------------------------------------------------------------------------------------------------
   void test_getVertexesArray_1D()
   {
