@@ -19,12 +19,12 @@ from wiki_tools import *
 import difflib
 
 #======================================================================
-def get_wiki_description(algo, version=-1):
+def get_wiki_description(algo, version):
     """    
     @param algo :: name of the algorithm
     @param version :: version, -1 for latest 
     """
-    source = find_algo_file(algo)
+    source = find_algo_file(algo, version)
     if source == '': 
         alg = mtd.createAlgorithm(algo, version)
         return alg.getWikiDescription()
@@ -102,15 +102,15 @@ def make_wiki(algo_name, version, latest_version):
     alg = mtd.createAlgorithm(algo_name, version)
     
     if (version < latest_version):
-        out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s]].\n\n" % (version, algo_name, latest_version, algo_name)
+        out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
     else:
-        out += "Note: This page refers to version %d of %s."% (version, algo_name)
+        out += "Note: This page refers to version %d of %s. "% (version, algo_name)
         if latest_version > 2:
             out += "The documentation for older versions is available at: "
         else:
             out += "The documentation for the older version is available at: "
         for v in xrange(1,latest_version):
-            out += "[[%s%d]] " % (algo_name, v)
+            out += "[[%s v.%d]] " % (algo_name, v)
         out += "\n\n"
         
     
@@ -150,7 +150,11 @@ def make_wiki(algo_name, version, latest_version):
     for categ in categories:
       out += "[[Category:" + categ + "]]\n"
 
-    out +=  "{{AlgorithmLinks|" + algo_name + "}}\n"
+    # Point to the right source ffiles
+    if version > 1:
+        out +=  "{{AlgorithmLinks|%s%d}}\n" % (algo_name, version)
+    else:
+        out +=  "{{AlgorithmLinks|%s}}\n" % (algo_name)
 
     return out
 
@@ -158,6 +162,7 @@ def make_wiki(algo_name, version, latest_version):
 
 
 
+#======================================================================
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
@@ -199,6 +204,15 @@ def confirm(prompt=None, resp=False):
     
     
 #======================================================================
+def make_redirect(from_page, to_page):
+    """Make a redirect from_page to to_page"""
+    print "Making a redirect from %s to %s" % (from_page, to_page)
+    site = wiki_tools.site
+    page = site.Pages[from_page]
+    contents = "#REDIRECT [[%s]]" % to_page
+    page.save(contents, summary = 'Bot: created redirect to the latest version.' )
+    
+#======================================================================
 def do_algorithm(args, algo):
     """ Do the wiki page
     @param algo :: the name of the algorithm, possibly with suffix #"""
@@ -221,8 +235,11 @@ def do_algorithm(args, algo):
     
     # What should the name on the wiki page be?
     wiki_page_name = algo
-    if version != latest_version:
-        wiki_page_name = algo + str(version)
+    if latest_version > 1:
+        wiki_page_name = algo + " v." + str(version)
+        # Make sure there is a redirect to latest version
+        make_redirect(algo, algo + " v." + str(latest_version))
+        
     
     print "Generating wiki page for %s at http://www.mantidproject.org/%s" % (algo, wiki_page_name)
     site = wiki_tools.site

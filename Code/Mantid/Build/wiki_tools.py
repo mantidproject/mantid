@@ -96,11 +96,14 @@ def intialize_files():
           python_files_bare.append( os.path.split(fullfile)[1] )
 
 #======================================================================
-def find_algo_file(algo):
-    """Find the files for a given algorithm"""
+def find_algo_file(algo, version=-1):
+    """Find the files for a given algorithm (and version)"""
     source = ''
-    cpp = algo + ".cpp"
-    pyfile = algo + ".py"
+    filename = algo
+    if version > 1:
+        filename += '%d' % version
+    cpp = filename + ".cpp"
+    pyfile = filename + ".py"
     if cpp in cpp_files_bare:
         n = cpp_files_bare.index(cpp, )
         source = cpp_files[n]
@@ -155,7 +158,7 @@ def find_misnamed_algos():
     print "\n--- The following algorithms have misnamed class files."
     print   "--- No file matching their algorithm name could be found.\n"
     for algo in algos:
-        source = find_algo_file(algo)
+        source = find_algo_file(algo, -1)
         if source=='':
             print "%s was NOT FOUND" % (algo, )
             

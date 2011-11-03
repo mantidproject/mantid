@@ -6,7 +6,6 @@
 
 * The vanadium peaks are fit to a function combined from Gaussian and linear/quadratic background.
 
-
 *WIKI*/
 
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"

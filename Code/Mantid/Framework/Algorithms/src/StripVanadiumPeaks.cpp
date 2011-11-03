@@ -1,18 +1,15 @@
 /*WIKI* 
 
-
-
-
 * A list of vanadium peak positions in d-spacing is used for the central peak positions: 0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401
+** You can specify AlternativePeakPositions to use other value (e.g. in other units).
 
-* StripPeaks is called by providing the list of vanadium peak positions.
-
-* The vanadium peaks are fit to a function combined from Gaussian and linear background.  Quadratic background will be applied in future. 
-
-
-
+* The PeakWidthPercent value is used to estimate the width of the peak (as a percentage of the d-spacing value).
+* The algorithm performs a simple linear fit of the background exluding the peak.
+** It uses two use averaging regions of 1/2 width, centered at +- width/2 from the center, and interpolates the linear background from it.
+** The values between the average regions are replaced with the interpolated linear background drawn as a straight line.
 
 *WIKI*/
+
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -41,9 +38,6 @@ using namespace DataObjects;
 using namespace API;
 using namespace Kernel::VectorHelper;
 
-static const std::string PARAM_WIDTH( "PeakWidthPercent" );
-static const std::string PARAM_POSITIONS( "AlternativePeakPositions" );
-
 StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
 
 void StripVanadiumPeaks::init()
@@ -58,10 +52,10 @@ void StripVanadiumPeaks::init()
   BoundedValidator<double> *min = new BoundedValidator<double>();
   min->setLower(1e-3);
   // The estimated width of a peak in terms of number of channels
-  declareProperty(PARAM_WIDTH, 1.0, min,
+  declareProperty("PeakWidthPercent", 1.0, min,
     "The estimated peak width as a percentage of the d-spacing of the center of the peak." );
 
-  declareProperty(PARAM_POSITIONS, "",
+  declareProperty("AlternativePeakPositions", "",
     "Optional: enter a comma-separated list of the expected X-position of the centre of the peaks. \n"
     "Only peaks near these positions will be fitted.\n"
     "If not entered, the default vanadium peak positions will be used.");
@@ -111,7 +105,7 @@ void StripVanadiumPeaks::exec()
   }
 
   //Get the peak center positions
-  std::string peakPositions = getPropertyValue(PARAM_POSITIONS);
+  std::string peakPositions = getPropertyValue("AlternativePeakPositions");
   if (peakPositions.length() == 0)
   {
     //Use the default Vanadium peak positions instead
@@ -123,7 +117,7 @@ void StripVanadiumPeaks::exec()
   std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
 
   //Get the width percentage
-  double widthPercent = getProperty(PARAM_WIDTH);
+  double widthPercent = getProperty("PeakWidthPercent");
 
   for (int k = 0; k < nhists; ++k)
   {
