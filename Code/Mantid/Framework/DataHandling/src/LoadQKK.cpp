@@ -182,8 +182,8 @@ namespace Mantid
       Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
       // Initialise the detector specifying the sizes.
       bank->initialize(shape,int(nx),0,pixel_width,int(ny),0,pixel_height,1,true,int(nx));
-      for (size_t i = 0; i < ny; ++i)
-      for (size_t j = 0; j < nx; ++j)
+      for (int i = 0; i < static_cast<int>(ny); ++i)
+      for (int j = 0; j < static_cast<int>(nx); ++j)
       {
         instrument->markAsDetector(bank->getAtXY(j,i).get());
       }
