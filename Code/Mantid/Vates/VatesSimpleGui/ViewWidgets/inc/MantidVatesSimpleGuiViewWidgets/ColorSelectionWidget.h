@@ -56,6 +56,15 @@ public:
   /// Default destructor.
   virtual ~ColorSelectionWidget() {}
 
+public slots:
+  /**
+   * Function to set the color scale range into the range widgets.
+   *
+   * @param min the minimum value of the color scale range
+   * @param max the maximum value of the color scale range
+   */
+  void setColorScaleRange(double min, double max);
+
 signals:
   /**
    * Signal to let views know that autoscaling is on.
@@ -91,13 +100,6 @@ protected slots:
    * Function to get the new color scale range.
    */
   void getColorScaleRange();
-  /**
-   * Function to set the color scale range into the range widgets.
-   *
-   * @param min the minimum value of the color scale range
-   * @param max the maximum value of the color scale range
-   */
-  void setColorScaleRange(double min, double max);
   /**
    * Function that presents the user with the available color presets and 
    * gets the
