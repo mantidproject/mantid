@@ -9,6 +9,7 @@
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -24,6 +25,9 @@ public:
     BoundedValidator<int> * val2 = new BoundedValidator<int>(900, 2000);
     CompositeValidator<int> comp;
     comp.add(val1);
+    //
+    TS_ASSERT(  comp.allowedValues().empty());
+
     TS_ASSERT(  comp.isValid(150).empty() );
     TS_ASSERT(  comp.isValid(950).empty() );
     TS_ASSERT( !comp.isValid(1200).empty() );
@@ -31,12 +35,41 @@ public:
     TS_ASSERT( !comp.isValid(150).empty() ); // This one is now blocked by validator 2
     TS_ASSERT(  comp.isValid(950).empty() );
     TS_ASSERT( !comp.isValid(1200).empty() );
+    //
+    TS_ASSERT(  comp.allowedValues().empty());
 
     // Test cloning
     IValidator<int> * comp2 = comp.clone();
     TS_ASSERT( !comp2->isValid(150).empty() );
     TS_ASSERT(  comp2->isValid(950).empty() );
+
+    TS_ASSERT( comp2->allowedValues().empty());
   }
+  void test_isListObtained()
+  {
+    std::vector<std::string> allowed_val1(3);
+    allowed_val1[0]="a1"; allowed_val1[1]="b2"; allowed_val1[2]="c"; 
+
+    ListValidator * val1 = new ListValidator(allowed_val1);
+    CompositeValidator<std::string> comp;
+    comp.add(val1);
+     
+    std::set<std::string> allowed=comp.allowedValues();
+    TS_ASSERT_EQUALS(allowed_val1.size(),allowed.size());
+   
+    std::vector<std::string> allowed_val2(3);
+    allowed_val2[0]="a2"; allowed_val2[1]="b2"; allowed_val2[2]="c2";
+
+    ListValidator * val2 = new ListValidator(allowed_val2);
+    comp.add(val2);
+
+    std::set<std::string> allowed2=comp.allowedValues();
+    TS_ASSERT_EQUALS(1,allowed2.size());
+    TS_ASSERT_EQUALS("b2",*(allowed2.begin()));
+
+  
+  }
+
 
 };
 

@@ -183,6 +183,7 @@ set ( INC_FILES
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/ValidatorSignalChange.h
 )
 
 set ( TEST_FILES
@@ -257,6 +258,7 @@ set ( TEST_FILES
 	test/VMDTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
+	test/ValidatorSignalChangeTest.h
 )
 
 if(UNITY_BUILD)

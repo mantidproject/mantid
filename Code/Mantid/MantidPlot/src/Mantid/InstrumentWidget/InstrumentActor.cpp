@@ -29,6 +29,7 @@ double InstrumentActor::m_tolerance = 0.00001;
 InstrumentActor::InstrumentActor(const QString wsName): 
 m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),
 m_maskedColor(100,100,100),
+m_failedColor(200,200,200),
 m_sampleActor(NULL)
 {
   if (!m_workspace)
@@ -236,16 +237,23 @@ void InstrumentActor::resetColors()
   for (size_t wi=0; wi < m_specIntegrs.size(); wi++)
   {
     double integratedValue = m_specIntegrs[wi];
-    Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
-    boost::shared_ptr<Mantid::Geometry::Parameter> masked = m_workspace->instrumentParameters().get(det.get(),"masked");
-    if (masked)
-    {
-      m_colors[wi] = m_maskedColor;
+    try {
+      Mantid::Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
+      boost::shared_ptr<Mantid::Geometry::Parameter> masked = m_workspace->instrumentParameters().get(det.get(),"masked");
+      if (masked)
+      {
+        m_colors[wi] = m_maskedColor;
+      }
+      else
+      {
+        QRgb color = m_colorMap.rgb(qwtInterval,integratedValue);
+        m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
+      }
     }
-    else
+    catch(NotFoundError)
     {
-      QRgb color = m_colorMap.rgb(qwtInterval,integratedValue);
-      m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
+      m_colors[wi] = m_failedColor;
+      continue;
     }
   }
   if (m_scene.getNumberOfActors() > 0)

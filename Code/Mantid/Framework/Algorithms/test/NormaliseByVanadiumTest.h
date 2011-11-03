@@ -87,8 +87,8 @@ public:
   {
     using Mantid::API::AnalysisDataService;
 
-    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10);
-    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10); //Effectively normalisation by itself.
+    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5000, 10);
+    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5000, 10); //Effectively normalisation by itself.
     
     NormaliseByVanadium alg;
     alg.initialize();
@@ -132,8 +132,8 @@ public:
   {
     using Mantid::API::AnalysisDataService;
 
-    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(200, 10);
-    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(200, 10); //Effectively normalisation by itself.
+    MatrixWorkspace_sptr sampleWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2000, 10);
+    MatrixWorkspace_sptr vanadiumWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2000, 10); //Effectively normalisation by itself.
     
     NormaliseByVanadium alg;
     alg.initialize();
