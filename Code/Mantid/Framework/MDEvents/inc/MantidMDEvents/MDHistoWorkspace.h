@@ -75,6 +75,12 @@ namespace MDEvents
     MDHistoWorkspace & operator/=(const MDHistoWorkspace & b);
     MDHistoWorkspace & operator/=(const Mantid::DataObjects::WorkspaceSingleValue & b);
 
+    MDHistoWorkspace & operator&=(const MDHistoWorkspace & b);
+    MDHistoWorkspace & operator|=(const MDHistoWorkspace & b);
+    MDHistoWorkspace & operator^=(const MDHistoWorkspace & b);
+
+    void operatorNot();
+
 
 
     // --------------------------------------------------------------------------------------------

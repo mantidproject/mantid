@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
@@ -32,16 +33,25 @@ public:
   MDHistoWorkspace_sptr two;
   MDHistoWorkspace_sptr three;
 
-  MDHistoWorkspace_sptr ma
-
+  /** Create some fake workspace, 5x5, with 2.0 and 3.0 each */
   MDHistoWorkspaceTest()
   {
-    MDEventsTestHelper::makeFakeMDHistoWorkspace(
-    two.
+    two = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
+    three = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0);
+  }
+
+  /** Check that a workspace has the right signal/error*/
+  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal, double expectedErrorSquared)
+  {
+    for (size_t i=0; i < ws->getNPoints(); i++)
+    {
+      TS_ASSERT_DELTA( ws->getSignalAt(i), expectedSignal, 1e-5 );
+      TS_ASSERT_DELTA( ws->getErrorAt(i), expectedErrorSquared, 1e-5 );
+    }
   }
 
 
-
+  //--------------------------------------------------------------------------------------
   void test_constructor()
   {
     MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
@@ -364,7 +374,7 @@ public:
   void test_getSignalAtCoord()
   {
     // 2D workspace with signal[i] = i (linear index)
-    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i=0; i<100; i++)
       ws->setSignalAt(i, double(i));
     IMDWorkspace_sptr iws(ws);
@@ -378,6 +388,133 @@ public:
     TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(10.01, 2.5)) ) );
     TS_ASSERT( boost::math::isnan(iws->getSignalAtCoord(VMD(3.5, 10.02)) ) );
   }
+
+  //--------------------------------------------------------------------------------------
+  void test_plus_ws()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
+    *a += *b;
+    checkWorkspace(a, 5.0, 6.0);
+  }
+
+  void test_plus_scalar()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    WorkspaceSingleValue b(3.0, sqrt(3.5) );
+    *a += b;
+    checkWorkspace(a, 5.0, 6.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_minus_ws()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 3.5 /*errorSquared*/);
+    *a -= *b;
+    checkWorkspace(a, 1.0, 6.0);
+  }
+
+  void test_minus_scalar()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 2.5 /*errorSquared*/);
+    WorkspaceSingleValue b(2.0, sqrt(3.5) );
+    *a -= b;
+    checkWorkspace(a, 1.0, 6.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_times_ws()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
+    *a *= *b;
+    checkWorkspace(a, 6.0, 36. * (.5 + 1./3.));
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_times_scalar()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    WorkspaceSingleValue b(3.0, sqrt(3.0) );
+    *a *= b;
+    checkWorkspace(a, 6.0, 36. * (.5 + 1./3.));
+    // Scalar without error
+    MDHistoWorkspace_sptr d = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    WorkspaceSingleValue e(3.0, 0);
+    *d *= e;
+    checkWorkspace(d, 6.0, 9 * 2.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_divide_ws()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0 /*errorSquared*/);
+    *a /= *b;
+    checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1./3.));
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_divide_scalar()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
+    WorkspaceSingleValue b(2.0, sqrt(2.0) );
+    *a /= b;
+    checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1./3.));
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_and()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr c = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    *a &= *b;
+    checkWorkspace(a, 1.0, 0.0);
+    *b &= *c;
+    checkWorkspace(b, 0.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_or()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr c = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    *a |= *b;
+    checkWorkspace(a, 1.0, 0.0);
+    *b |= *c;
+    checkWorkspace(b, 1.0, 0.0);
+    *c |= *c;
+    checkWorkspace(c, 0.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_xor()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    MDHistoWorkspace_sptr c = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    *a ^= *b;
+    checkWorkspace(a, 0.0, 0.0);
+    *b ^= *c;
+    checkWorkspace(b, 1.0, 0.0);
+    *c ^= *c;
+    checkWorkspace(c, 0.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_operatorNot()
+  {
+    MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    MDHistoWorkspace_sptr b = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 2.0);
+    a->operatorNot();
+    checkWorkspace(a, 0.0, 0.0);
+    b->operatorNot();
+    checkWorkspace(b, 1.0, 0.0);
+  }
+
 
 };
 
