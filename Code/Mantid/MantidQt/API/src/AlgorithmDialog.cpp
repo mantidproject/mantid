@@ -1,11 +1,14 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/MantidWidget.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/IWorkspaceProperty.h"
 
 #include <QIcon>
 #include <QLabel>
@@ -20,8 +23,9 @@
 #include <QUrl>
 #include <QHBoxLayout>
 #include <QSignalMapper>
-#include "MantidAPI/MultipleFileProperty.h"
+
 using namespace MantidQt::API;
+using Mantid::API::IAlgorithm;
 
 //------------------------------------------------------
 // Public member functions
@@ -897,7 +901,23 @@ void AlgorithmDialog::accept()
  */
 void AlgorithmDialog::helpClicked()
 {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + m_algName));
+  // Default help URL
+  QString url = QString("http://www.mantidproject.org/") + m_algName;
+
+  if (m_algorithm)
+  {
+    // Find the latest version
+    IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(m_algName.toStdString(), -1);
+    int latest_version = alg->version();
+    delete alg;
+    // Adjust the link if you're NOT looking at the latest version of the algo
+    int this_version = m_algorithm->version();
+    if ((this_version != latest_version))
+      url += "_v." + QString::number(this_version);
+  }
+
+  // Open the URL
+  QDesktopServices::openUrl(QUrl(url));
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -58,6 +58,10 @@ def run(args):
     num_good = 0
     num_bad = 0
     num_notenoughstats=0
+    # The timing resolution is different across platforms and the faster tests
+    # can cause more false positives on the lower-resolution clocks. We'll
+    # up the tolerance for those taking less time than 10ms.
+    timer_resolution = 0.01
     
     for name in names:
         (r, t) = analysis.get_runtime_data(name, x_field='revision')
@@ -66,6 +70,12 @@ def run(args):
         
         # this is the timing of the current revision
         current_time = t[r == rev]
+        tolerance = tol
+        if current_time < timer_resolution:
+            # Increase the tolerance to avoid false positives
+            tolerance = 70
+            print "%s is fast, tolerance has been increased to 70%%" % name
+
         
         # Cut out any times after or = to the current rev
         t = t[r < rev]
@@ -86,13 +96,13 @@ def run(args):
                 print "   %s" % timing_str
                 
             # Did we fail (slow down too much)
-            if pct < -tol:
+            if pct < -tolerance:
                 bad_results += "Warning! Slow down in performance test %s\n" % name
                 bad_results += "    (%s)\n" % timing_str
                 num_bad += 1
             
             # Hey you got better!
-            elif pct > tol:
+            elif pct > tolerance:
                 good_results += "Congratulations! You sped up the performance of test %s\n" % name
                 good_results += "    (%s)\n" % timing_str
                 num_good += 1
