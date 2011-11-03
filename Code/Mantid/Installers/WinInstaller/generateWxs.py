@@ -14,7 +14,10 @@ if len(sys.argv) == 3:
     MANTIDRELEASE = sys.argv[1]
     MANTIDRELEASE = MANTIDRELEASE.replace('\\','/')
     WXSDIR = sys.argv[2]
-    WXSFILE = WXSDIR.replace('\\','/') + '/msi_input.wxs'
+    WXSDIR = WXSDIR.replace('\\','/')
+    WXSFILE =  WXSDIR + '/msi_input.wxs'
+else:
+    sys.exit("Invalid number of arguments to generateWxs")
 
 # Hack while we still have scons around in some places
 if not os.path.exists(MANTIDRELEASE + '/MantidPlot.exe'):
@@ -24,16 +27,20 @@ if not os.path.exists(MANTIDRELEASE + '/MantidPlot.exe'):
 subp = subprocess.Popen([MANTIDRELEASE + '/MantidPlot',  '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 subout, suberr = subp.communicate()
 if suberr != '':
-    print 'Could not determine Mantid version from MantidPlot using 1.0.0'
+    sys.exit('Could not determine Mantid version from MantidPlot') # The upgrade stuff gets screwed up without a correct version number
     MantidVersion = '1.0.0'
 else:
     MantidVersion = subout.strip() # This contains the date as well, we only want the numbers
     try:
         MantidVersion = MantidVersion.split()[0]
     except IndexError:
-        print ('Invalid version format "%s", expecting "x.x.x (DATE)"' % MantidVersion)
-        MantidVersion = '1.0.0'
-print('Mantid version '+ MantidVersion)
+        sys.exit('Invalid version format "%s", expecting "x.x.x (DATE)"' % MantidVersion)
+
+
+print('Saving Mantid version to '+ WXSDIR + '/version.txt')
+version_file = open(WXSDIR + '/version.txt','w')
+version_file.write(str(MantidVersion))
+version_file.close()
 
 # Architecture
 if platform.architecture()[0] == '64bit':
@@ -92,11 +99,6 @@ else:
     comp_guid['MantidQtPlugins'] = '{22fa661e-17d5-4e33-8f2c-654c473268c3}'
     
 MantidInstallDir = 'MantidInstall'
-
-pfile = open('mantid_version.txt','w')
-pfile.write(MantidVersion+'\n')
-pfile.write(product_uuid)
-pfile.close()
 
 globalFileCount = 0
 
@@ -332,7 +334,8 @@ def createPropertiesFile(filename):
 
     template = open(filename,'r')
     original = template.readlines()
-    prop_file = open('Mantid.properties','w')
+    prop_filename = WXSDIR + '/Mantid.properties'
+    prop_file = open(prop_filename,'w')
     continuation = False
     nlines = len(original)
     index = 0
@@ -355,7 +358,7 @@ def createPropertiesFile(filename):
     
     template.close()
     prop_file.close()
-
+    return prop_filename
     
 doc = xml.dom.minidom.Document()
 #doc.encoding('Windows-1252')
@@ -394,16 +397,55 @@ else:
     Package.setAttribute('InstallerVersion','100')
     Package.setAttribute('Platforms','Intel')
 
+#############################################################################################
+# Handle upgrades. All upgrades are considered as major upgrades hence the product GUID
+# changes each time.
+# When we started allowing non-admin installations we moved the installer from a per-machine
+# installation to a per-user installer. What was not apparent at the time was that a per-user
+# installation could not remove an old per-machine installation.
+#
+# The code below deals with allowing the upgrade but also asks the user to remove an old
+# product if it cannot be removed automatically.
+#############################################################################################
+
 Upgrade = addTo(Product,'Upgrade',{'Id':upgrade_uuid})
 addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'no','Property':'PREVIOUSFOUND','Minimum': '1.0.0','IncludeMinimum':'yes','Maximum':MantidVersion,'IncludeMaximum':'no'})
 addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'yes','Property':'NEWERFOUND','Minimum':MantidVersion,'IncludeMinimum':'no'})
 
-addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [ProductName] is already installed.'})
-exeSec = addTo(Product,'InstallExecuteSequence',{})
-NoDowngrade = addTo(exeSec,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
-addText('NEWERFOUND',NoDowngrade)
-addTo(exeSec,'RemoveExistingProducts',{'After':'InstallInitialize'})
+# The UI sequence handles at what point in the UI dialogs that actions happen
+uiSeq = addTo(Product,'InstallUISequence',{})
+# The Execute sequence handles at what point in the actual installation, i.e. after feature/directory selection that actions happen
+exeSeq = addTo(Product,'InstallExecuteSequence',{})
 
+# First check whether a newer one has been found, if so don't "upgrade"
+NoDowngrade = addTo(uiSeq,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
+addText('NEWERFOUND',NoDowngrade)
+addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [ProductName] is already installed.'})
+
+# Check whether old thing can actually be removed using our own custom action in MantidMSI
+addTo(uiSeq,'Custom',{'Action':'OldProduct_Check','After':'NoDowngrade'})
+addTo(Product, 'Property', {'Id':'MACHINE_CONTEXT_NAME', 'Secure':'yes'})
+addTo(Product,'CustomAction',{'Id':'OldProduct_Check','BinaryKey':'MantidMSI','DllEntry':'FindOldMachineContextInstall','Execute':'immediate','Return':'ignore'})
+addTo(Product, 'Binary', {'Id':'MantidMSI', 'src':r"MantidMSI\MantidMSI\bin\Release\MantidMSI.dll"})
+
+# The control panel has been reorganized between XP and Windows Vista/7 so we need a different message. I'm going to assume 64-bit machines are Vista onwards
+removal_error = """A previous version of Mantid could not be removed.
+Please remove the \"[MACHINE_CONTEXT_NAME]\" entry from the Control Panel/%s menu before continuing.
+This will not be necessary for future installations"""
+if ARCH == '64':
+    removal_error = removal_error % ("Programs")
+else:
+    removal_error = removal_error % ("Add or Remove Programs")
+addTo(Product,'CustomAction',{'Id':'RemovalCheck','Error':removal_error})
+cannot_remove = addTo(uiSeq,'Custom',{'Action':'RemovalCheck','After':'OldProduct_Check'})
+addText('MACHINE_CONTEXT_NAME',cannot_remove)
+
+# Schedule removal of existing procducts if we can. This has to happen during the InstallExecuteSequence
+addTo(exeSeq,'RemoveExistingProducts',{'After':'InstallInitialize'})
+
+##############################################################################################
+## Package
+##############################################################################################
 Media = doc.createElement('Media')
 Media.setAttribute('Id','1')
 Media.setAttribute('Cabinet','Mantid.cab')
@@ -416,7 +458,12 @@ Prop.setAttribute('Id','DiskPrompt')
 Prop.setAttribute('Value','Mantid Installation')
 Product.appendChild(Prop)
 
-
+###################################################################################################################
+# Wix does not allow elements to have null values despite the MS installer tables having conditions that include them
+# i.e. the ALLUSERS value. See http://msdn.microsoft.com/en-us/library/windows/desktop/aa367559%28v=vs.85%29.aspx
+# To get around Wix we have to use a Publish element that can only be attached to a
+# dialog, which we hide here so that no one actually sees anything different
+#
 # <Property Id="ASSISTANCE_USERS" Value="cur"/>
 # <UI Id="UserUI">
 # <Dialog Id="MyDialog" Height="100" Width="100" Hidden="yes">
@@ -428,13 +475,8 @@ Product.appendChild(Prop)
 
 # </Dialog>
 # </UI>
-
 # To produce this we need to write the following!
-#
-# Wix does not allow elements to have null values despite the MS installer tables
-# having conditions that include them.
-# To get around Wix we have to use a Publish element that can only be attached to a 
-# dialog, which we hide here so that no one actually sees anything different
+
 Prop = doc.createElement('Property')
 Prop.setAttribute('Id','ALLUSER_PROXY')
 Prop.setAttribute('Value','current')
@@ -471,8 +513,8 @@ binDir = addDirectory('MantidBin','bin','bin',InstallDir)
 MantidDlls = addComponent('MantidDLLs',comp_guid['MantidDLLs'],binDir)
 
 # Need to create Mantid.properties file. A template exists but some entries point to the incorrect locations so those need modifying
-createPropertiesFile(FRAMEWORKDIR + '/Properties/Mantid.properties.template')
-addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties',MantidDlls)
+filename = createPropertiesFile(FRAMEWORKDIR + '/Properties/Mantid.properties.template')
+addFileV('MantidProperties','Mantid.pro','Mantid.properties',filename,MantidDlls)
 
 MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat',FRAMEWORKDIR + '/PythonAPI/MantidScript.bat',MantidDlls)
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
@@ -510,11 +552,16 @@ addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/
 addFileV('MtdSimple_py', 'MSimple.py', 'mantidsimple.py', FRAMEWORKDIR + '/PythonAPI/mantidsimple.py', MantidDlls)
 
 # Our old installation would have left a PyQt4 directory lying around, it must be removed or the new bundled python will
-# be confusd
-addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
+# be confused. Unfortunately MantidMDDataObjects also ended up being left around so make sure it is gone.
+addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
+
+addTo(exeSeq,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
 addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c rmdir /S /Q "[INSTALLDIR]\\bin\\PyQt4"'})
 addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
-addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
+addTo(Product,'CustomAction',{'Id':'SetSecondCleanup','Property':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del /Q "[INSTALLDIR]\\plugins\\MantidMDDataObjects.dll"'})
+addTo(exeSeq,'Custom',{'Action':'SetSecondCleanup','After':'cleanup'})
+addTo(Product,'CustomAction',{'Id':'cleanup2','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
+addTo(exeSeq,'Custom',{'Action':'cleanup2','After':'SetSecondCleanup'})
 
 #------------- Environment settings ---------------------- 
 # MantidPATH to point to the bin directory
@@ -594,7 +641,7 @@ qtimagedlls = addComponent('QtImagePlugins',comp_guid['QtImagePlugins'],qtimagef
 addDlls(QTPLUGINDIR + '/imageformats', 'imgdll',qtimagedlls)
 
 # Now we need a file in the main Qt library to tell Qt where the plugins are using the qt.conf file
-addSingleFile('./','qt.conf','qtcfile', MantidDlls)
+addSingleFile(os.path.dirname(__file__),'qt.conf','qtcfile', MantidDlls)
 
 # Qt plugins
 mtdqtdllDir = addDirectory('MantidQtPluginsDir','mqtdir','mantid',qtpluginsDir)
