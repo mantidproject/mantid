@@ -58,8 +58,11 @@ pqRenderView* StandardView::getView()
 
 void StandardView::render()
 {
-
   this->origSrc = pqActiveObjects::instance().activeSource();
+  if (NULL == this->origSrc)
+  {
+    return;
+  }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Show the data
