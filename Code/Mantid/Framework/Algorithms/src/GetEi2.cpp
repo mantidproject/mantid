@@ -1,3 +1,24 @@
+/*WIKI*
+
+Uses E= (1/2)mv^2 to calculate the energy of neutrons leaving the source. The velocity is calculated from the time it takes for the neutron pulse to travel between the two monitors whose spectra were specified.
+
+An initial energy guess is required for the algorithm to find the correct peak. The analysis will be done on the highest peak that is within 8% of the estimated TOF given by the estimate.
+
+Not all neutrons arrive at the monitors at the same time because their kinetic energies, and therefore velocities, are all different. The time of arrival of the neutron pulse is taken to be the mean of the two half peak height locations. The half height points are found as follows:
+# the peak height is the largest number of counts above the background in any bin in the window
+# the half height is half the above number
+# examine bins to the left of the bin with the highest number of counts looking for a bin with less than half that number above background
+# interpolate between this point bin and the one immediately previous to find the first half height location
+# repeat the steps 3 and 4 looking to the left of the highest point to get the second half height point
+# the mean of the X-values of the two half height points is the TOF arrival time of the neutrons
+
+The above process is illustrated on a peak is shown below in the image below
+[[File:monitorspect_getei.jpg|Monitor Peak|centre|618px]]
+
+The distances between the monitors are read from the instrument definition file. It is assumed that the source and the monitors all lie on one line and that the monitors have the same delay time.
+
+*WIKI*/
+
 #include "MantidAlgorithms/GetEi2.h"
 
 #include "MantidKernel/PhysicalConstants.h"
@@ -56,9 +77,9 @@ void GetEi2::init()
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", -1, mustBePositive,
-    "The spectrum number to use as the first monitor\n");
+    "The spectrum number of the output of the first monitor, e.g. MAPS 41474, MARI 2, MERLIN 69634\n");
   declareProperty("Monitor2Spec", -1, mustBePositive->clone(),
-    "The spectrum number to use as the second monitor\n");
+    "The spectrum number of the output of the second monitor e.g. MAPS 41475, MARI 3, MERLIN 69638\n");
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   positiveDouble->setLower(0.0);
   declareProperty("EnergyEstimate", -1.0 , positiveDouble,
@@ -66,10 +87,19 @@ void GetEi2::init()
     "neutrons leaving the source (meV)");
   declareProperty("FixEi", false, "If true, the incident energy will be set to the value of the \n"
     "EnergyEstimate property.");
-  declareProperty("IncidentEnergy", -1.0, Direction::Output);
-  declareProperty("FirstMonitorPeak", -1.0, Direction::Output);
-  declareProperty("FirstMonitorIndex", (size_t)0, Direction::Output);
-  declareProperty("Tzero", EMPTY_DBL(), Direction::Output);
+
+  declareProperty("IncidentEnergy", -1.0,
+    "The energy of neutron in meV, it is also printed to the Mantid's log", Direction::Output);
+
+  declareProperty("FirstMonitorPeak", -1.0,
+    "The time in <math>\\mu s</math> when the count rate of the first monitor, which defaults to the last monitor the beam hits before the sample, is greatest. It is the mean X value for the bin with the highest number of counts per second and is also writen to Mantid's log.",
+    Direction::Output);
+
+  declareProperty("FirstMonitorIndex", (size_t)0,
+    "The spectrum index of the first montitor in the input workspace.", Direction::Output);
+
+  declareProperty("Tzero", EMPTY_DBL(),
+    "", Direction::Output);
 
 }
 

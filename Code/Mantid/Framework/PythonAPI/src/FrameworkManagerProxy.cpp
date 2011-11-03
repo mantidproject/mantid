@@ -170,10 +170,10 @@ API::IAlgorithm_sptr FrameworkManagerProxy::createUnmanagedAlgorithm(const std::
  * @param version :: The version number (default=-1=highest version).
  * @return string, empty if algo is NOT deprecated.
  **/
-std::string FrameworkManagerProxy::algorithmDeprecationMessage(const std::string& algName)
+std::string FrameworkManagerProxy::algorithmDeprecationMessage(const std::string& algName, int version)
 {
   std::string deprecMessage = "";
-  API::Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algName);
+  API::Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
   API::DeprecatedAlgorithm * depr = dynamic_cast<API::DeprecatedAlgorithm *>(alg.get());
   if (depr)
     deprecMessage = depr->deprecationMsg(alg.get());
