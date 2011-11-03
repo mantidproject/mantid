@@ -14,7 +14,9 @@ class pqPipelineSource;
 class vtkSMDoubleVectorProperty;
 
 class QAction;
+class QEvent;
 class QHBoxLayout;
+class QObject;
 class QString;
 
 namespace Mantid
@@ -74,6 +76,8 @@ public:
    * @param action the action to connect data loading to
    */
   void connectLoadDataReaction(QAction *action);
+  /// Filter events to check for hide.
+  bool eventFilter(QObject *obj, QEvent *ev);
   /// See MantidQt::API::VatesViewerInterface
   void renderWorkspace(QString wsname, int wstype);
   /// See MantidQt::API::VatesViewerInterface
@@ -100,6 +104,7 @@ private:
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
   bool isPluginInitialized; ///< Flag for plugin initialization
+  bool pluginMode; ///< Flag to say widget is in plugin mode
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   MantidQt::API::VatesViewerInterface::WorkspaceType wsType; ///< Identifies the current dataset type
