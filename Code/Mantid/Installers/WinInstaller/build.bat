@@ -13,13 +13,13 @@ if /i %1 == x86 (
   echo Building 32-bit installer
   set ARCH=x86
   set WIX_LOC="C:\Program Files\Windows Installer XML\bin"
-  set WIX_SDK="C:\Program Files\Windows Installer XML\bin\sdk\"
+  set "WIXSDK=C:\Program Files\Windows Installer XML\bin\sdk\"
 ) else (
   if /i %1 == amd64 (
     echo Building 64-bit installer
     set ARCH=amd64
     set WIX_LOC="C:\Program Files (x86)\Windows Installer XML\bin"
-    set WIX_SDK="C:\Program Files (x86)\Windows Installer XML\bin\sdk\"
+    set "WIXSDK=C:\Program Files (x86)\Windows Installer XML\bin\sdk\"
   ) else (
     goto usage
   )
