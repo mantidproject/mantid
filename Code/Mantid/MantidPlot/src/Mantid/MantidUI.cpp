@@ -31,6 +31,7 @@
 #include "MantidKernel/FacilityInfo.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -455,6 +456,22 @@ void MantidUI::importWorkspace()
   importWorkspace(wsName,true,true);
 }
 
+/**  Import the selected table workspace transposed.
+ */
+void MantidUI::importTransposed()
+{
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  QString wsName = getSelectedWorkspaceName();
+  ITableWorkspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    Table *t = importTableWorkspace(wsName,true,true,true);
+    appWindow()->addListViewItem(t);
+  }
+  QApplication::restoreOverrideCursor();
+}
+
 
 /**  Create a TableWorkspace of box data from the MDEventWorkspace
  */
@@ -521,7 +538,7 @@ void MantidUI::showVatesSimpleInterface()
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();
-        //m_appWindow->setGeometry(usr_win, vsui);
+        //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType);
@@ -595,9 +612,10 @@ void MantidUI::showAlgorithmHistory()
      @param wsName :: Workspace name
      @param showDlg :: If true show a dialog box to set some import parameters
      @param makeVisible :: If true show the created Table, hide otherwise.
+     @param transpose :: Transpose the table
      @return A pointer to the new Table.
  */
-Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisible)
+Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisible, bool transpose)
 {
   ITableWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -613,7 +631,7 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
     return 0;
   }
 
-  Table* t = new MantidTable(appWindow()->scriptingEnv(), ws, wsName, appWindow(), 0);
+  Table* t = new MantidTable(appWindow()->scriptingEnv(), ws, wsName, appWindow(), transpose);
   if (makeVisible) t->showNormal();
   else t->showMinimized();
   return t;

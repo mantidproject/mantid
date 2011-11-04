@@ -22,8 +22,7 @@ namespace Vates
 namespace SimpleGui
 {
 
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent),
-  pluginMode(false)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 {
 }
 
@@ -91,11 +90,16 @@ void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
   UNUSED_ARG(pbw);
 }
 
+/**
+ * This function checks a pqPipelineSource (either from a file or workspace)
+ * to see if it is derived from a PeaksWorkspace.
+ * @param src the pipeline source to check
+ * @return true if the pipeline source is derived from PeaksWorkspace
+ */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName").GetAsString());
-  std::cout << "WS Type: " << wsType.toStdString() << std::endl;
   return wsType.contains("PeaksWorkspace");
 }
 
@@ -105,23 +109,48 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
-void ViewBase::setSource(pqPipelineSource *src, bool pluginMode)
+/**
+ * Create a ParaView source from a given plugin name and workspace name. This is
+ * used in the plugin mode of the simple interface.
+ * @param pluginName name of the ParaView plugin
+ * @param wsName name of the Mantid workspace to pass to the plugin
+ */
+void ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
-  this->pluginMode = pluginMode;
-  if (this->pluginMode)
-  {
-    vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-    srcProxy->UpdateVTKObjects();
-    srcProxy->Modified();
-    srcProxy->UpdatePipelineInformation();;
-  }
+  // Create the source from the plugin
+  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqPipelineSource *src = builder->createSource("sources", pluginName,
+                                                server);
+  vtkSMPropertyHelper(src->getProxy(),
+                      "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
-  if (this->isPeaksWorkspace(src) && !this->origSrc)
-  {
-    emit this->disableViews();
-  }
+  // Update the source so that it retrieves the data from the Mantid workspace
+  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+  srcProxy->UpdateVTKObjects();
+  srcProxy->Modified();
+  srcProxy->UpdatePipelineInformation();;
 }
 
+/**
+ * Retrieve the active pqPipelineSource object according to ParaView's
+ * ActiveObjects mechanism.
+ * @return the currently active source
+ */
+pqPipelineSource *ViewBase::getPvActiveSrc()
+{
+  return pqActiveObjects::instance().activeSource();
+}
+
+/**
+ * Function that sets the status for the view mode control buttons. This
+ * implementation looks at the original source for a view. Views may override
+ * this function to provide alternate checks.
+ */
+void ViewBase::checkView()
+{
+  emit this->setViewsStatus(!this->isPeaksWorkspace(this->origSrc));
+}
 
 }
 }

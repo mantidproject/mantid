@@ -22,6 +22,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 #include <float.h>
 
@@ -91,7 +92,7 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create
       ws->initialize();
 
       // Build up the box controller
-      MDEvents::BoxController_sptr bc = ws->getBoxController();
+      Mantid::API::BoxController_sptr bc = ws->getBoxController();
       bc->setSplitInto(5);
 //      bc->setSplitThreshold(1500);
       bc->setSplitThreshold(10);

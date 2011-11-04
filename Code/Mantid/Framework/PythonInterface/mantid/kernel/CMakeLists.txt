@@ -21,6 +21,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PropertyMarshal.h
+  ${HEADER_DIR}/kernel/TypedHandler.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
 

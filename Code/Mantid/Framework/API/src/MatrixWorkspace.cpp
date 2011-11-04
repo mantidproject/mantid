@@ -381,7 +381,7 @@ namespace Mantid
      * @param nNeighbours :: unsigned int, number of neighbours to include.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const unsigned int nNeighbours) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours) const
     {
       if ( !m_nearestNeighbours )
       {

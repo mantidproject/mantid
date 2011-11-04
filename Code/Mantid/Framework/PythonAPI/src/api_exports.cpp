@@ -273,6 +273,7 @@ using namespace boost::python;
       .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&API::MatrixWorkspace::getSpectrum, return_internal_reference<>() )
       .def("getDetector", (Geometry::IDetector_sptr (API::MatrixWorkspace::*) (const size_t) const)&API::MatrixWorkspace::getDetector)
       .def("getRun", &API::MatrixWorkspace::mutableRun, return_internal_reference<>() )
+      .def("getSample", &API::MatrixWorkspace::sample, return_internal_reference<>() )
       .def("getSampleInfo", &API::MatrixWorkspace::sample, return_internal_reference<>() )
       .def("getNumberAxes", &API::MatrixWorkspace::axes)
       .def("getAxis", &API::MatrixWorkspace::getAxis, return_internal_reference<>())
@@ -327,6 +328,35 @@ using namespace boost::python;
         ;
   }
 
+  void export_BoxController()
+  {
+    register_ptr_to_python<API::BoxController_sptr>();
+
+    class_< BoxController, boost::noncopyable >("BoxController", no_init)
+            .def("getNDims", &BoxController::getNDims)
+            .def("getSplitThreshold", &BoxController::getSplitThreshold)
+            .def("getSplitInto", &BoxController::getSplitInto)
+            .def("getMaxDepth", &BoxController::getMaxDepth)
+            .def("getTotalNumMDBoxes", &BoxController::getTotalNumMDBoxes)
+            .def("getTotalNumMDGridBoxes", &BoxController::getTotalNumMDGridBoxes)
+            .def("getAverageDepth", &BoxController::getAverageDepth)
+            .def("isFileBacked", &BoxController::isFileBacked)
+            .def("getFilename", &BoxController::getFilename, return_value_policy< copy_const_reference >())
+            .def("useMRU", &BoxController::useMRU)
+        ;
+  }
+
+  void export_IMDEventWorkspace()
+  {
+    register_ptr_to_python<API::IMDEventWorkspace_sptr>();
+
+    // MDEventWorkspace class
+    class_< IMDEventWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDEventWorkspace", no_init)
+            .def("getNPoints", &IMDEventWorkspace::getNPoints)
+            .def("getNumDims", &IMDEventWorkspace::getNumDims)
+            .def("getBoxController", (BoxController_sptr(IMDEventWorkspace::*)() )  &IMDEventWorkspace::getBoxController)
+        ;
+  }
   void export_eventworkspace()
   {
     register_ptr_to_python<IEventWorkspace_sptr>();
@@ -381,16 +411,6 @@ using namespace boost::python;
         ;
   }
 
-  void export_mdeventworkspace()
-  {
-    register_ptr_to_python<API::IMDEventWorkspace_sptr>();
-
-    // MDEventWorkspace class
-    class_< IMDEventWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDEventWorkspace", no_init)
-            .def("getNPoints", &IMDEventWorkspace::getNPoints)
-            .def("getNumDims", &IMDEventWorkspace::getNumDims)
-        ;
-  }
 
   void export_tableworkspace()
   {
@@ -614,7 +634,8 @@ using namespace boost::python;
     export_matrixworkspace();
     export_eventworkspace();
     export_IMDWorkspace();
-    export_mdeventworkspace();
+    export_IMDEventWorkspace();
+    export_BoxController();
     export_tableworkspace();
     export_workspacegroup();
     export_axis();

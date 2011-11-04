@@ -61,6 +61,8 @@ public:
   /// Default destructor.
   virtual ~ViewBase() {}
 
+  /// Poll the view to set status for mode control buttons.
+  virtual void checkView();
   /**
    * Function used to correct post-accept visibility issues. Most
    * views won't need to do anything.
@@ -82,11 +84,14 @@ public:
    * Destroy sources and view relevant to mode switching.
    */
   virtual void destroyView() = 0;
+  /// Get the active ParaView source.
+  pqPipelineSource *getPvActiveSrc();
   /**
    * The function gets the main view.
    * @return the main view
    */
   virtual pqRenderView *getView() = 0;
+  /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /**
    * This function makes the view render itself.
@@ -100,7 +105,8 @@ public:
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
-  virtual void setSource(pqPipelineSource *src, bool pluginMode);
+  /// Create source for plugin mode.
+  virtual void setPluginSource(QString pluginName, QString wsName);
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
@@ -135,9 +141,13 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
-  void disableViews();
   /// Signal to trigger pipeline update.
   void triggerAccept();
+  /**
+   * Signal to set the status of the view mode buttons.
+   * @param state whether or not to enable to view mode buttons
+   */
+  void setViewsStatus(bool state);
 
 private:
   Q_DISABLE_COPY(ViewBase)
@@ -146,7 +156,6 @@ private:
   pqPipelineRepresentation *getPvActiveRep();
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
-  bool pluginMode;
 };
 
 }

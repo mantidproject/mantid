@@ -1,8 +1,6 @@
 # Make sure Third_Party doesn't get checked into the main repository
 Third_Party/
-# For an out-of-source build: make sure it doesn't get checked in either.
+# Common out-of-source build directory names. Usually, these should go in your .git/info/exclude
 dbg/
 debug/
 release/
-qtcreator-build/
-update.sh

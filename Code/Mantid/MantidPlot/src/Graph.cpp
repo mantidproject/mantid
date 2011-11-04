@@ -5591,6 +5591,8 @@ void Graph::enableFixedAspectRatio(bool on)
   if (on){
     d_rescaler = new QwtPlotRescaler(cnvs, QwtPlot::xBottom, QwtPlotRescaler::Fixed);
     d_rescaler->setExpandingDirection(QwtPlotRescaler::ExpandBoth);
+    // prevent the colormap axis from rescaling
+    d_rescaler->setAspectRatio(QwtPlot::yRight,0);
   } else {
     d_rescaler = NULL;
   }

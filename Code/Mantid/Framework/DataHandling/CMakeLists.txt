@@ -242,6 +242,7 @@ set ( TEST_FILES
 	test/LoadNexusTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNexusMonitorsTest.h
+	test/LoadQKKTest.h
 	test/LoadRKHTest.h
 	test/LoadRSaveNLoadNcspTest.h
 	test/LoadRaw2Test.h

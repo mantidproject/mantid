@@ -6,7 +6,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -209,13 +209,13 @@ namespace MDEvents
 
     // -------------------------------------------------------------------------------------------
     /// @return the box controller saved.
-    BoxController_sptr getBoxController() const
+    Mantid::API::BoxController_sptr getBoxController() const
     { return m_BoxController; }
 
     /** Set the box controller used.
-     * @param controller :: BoxController_sptr
+     * @param controller :: Mantid::API::BoxController_sptr
      */
-    void setBoxController(BoxController_sptr controller)
+    void setBoxController(Mantid::API::BoxController_sptr controller)
     { m_BoxController = controller; }
 
     //-----------------------------------------------------------------------------------------------
@@ -411,7 +411,7 @@ namespace MDEvents
     coord_t m_inverseVolume;
 
     /// The box splitting controller, shared with all boxes in the hierarchy
-    BoxController_sptr m_BoxController;
+    Mantid::API::BoxController_sptr m_BoxController;
 
     /// Recursion depth
     size_t m_depth;

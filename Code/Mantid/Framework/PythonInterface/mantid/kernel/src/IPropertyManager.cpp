@@ -4,7 +4,7 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
-using Mantid::PythonInterface::PropertyMarshal;
+namespace PropertyMarshal = Mantid::PythonInterface::PropertyMarshal;
 using namespace boost::python;
 
 void export_IPropertyManager()

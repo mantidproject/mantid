@@ -12,7 +12,14 @@ mantid_initialized = False
 def get_all_algorithms():
     """REturns a list of all algorithm names"""
     temp = mtd._getRegisteredAlgorithms(True)
-    algos = [x for (x, version) in temp]
+    algos = []
+    for (x, versions) in temp:
+        for v in versions:
+            if len(versions) > 1:
+                algos.append( x + str(v) )
+            else:
+                algos.append( x )
+    print "\n".join(algos)
     return algos
 
 #======================================================================
@@ -23,6 +30,7 @@ def initialize_Mantid():
     if mantid_initialized:   return
     sys.path.append(os.getcwd())
     sys.path.append( os.path.join( os.getcwd(), 'bin') )
+    sys.path.append( os.path.join( os.getcwd(), '../dbg/bin') )
     import MantidFramework
     from MantidFramework import mtd
     mtd.initialise()
@@ -65,6 +73,8 @@ if __name__ == "__main__":
         name = name.replace(".cpp", "")
         if name in all_algos:
             my_algos.add(name)
+        if name+'1' in all_algos:
+            my_algos.add(name+'1')
     
     my_algos = list(my_algos)
     my_algos.sort()        

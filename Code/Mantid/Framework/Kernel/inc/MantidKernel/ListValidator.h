@@ -43,7 +43,7 @@ public:
   ListValidator();
   explicit ListValidator(const std::vector<std::string>& values);  
   explicit ListValidator(const std::set<std::string>& values);  
-	virtual ~ListValidator();
+    virtual ~ListValidator();
   IValidator<std::string>* clone();
   
   std::set<std::string> allowedValues() const;

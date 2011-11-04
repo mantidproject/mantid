@@ -91,6 +91,38 @@ public:
     AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_MDHistoWorkspace()
+  {
+    // Name of the output workspace.
+    std::string outWSName("CloneMDWorkspaceTest_OutputWS");
+
+    // Make a fake file-backed (or not) MDEW
+    MDHistoWorkspace_sptr ws1 = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 2.34);
+    AnalysisDataService::Instance().addOrReplace("CloneMDWorkspaceTest_ws", ws1);
+
+    CloneMDWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CloneMDWorkspaceTest_ws") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    MDHistoWorkspace_sptr ws2;
+    TS_ASSERT_THROWS_NOTHING( ws2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(ws2); if (!ws2) return;
+
+    // Compare the WS
+    TS_ASSERT_EQUALS( ws1->getNPoints(), ws2->getNPoints());
+    TS_ASSERT_DELTA( ws1->getSignalAt(0), ws2->getSignalAt(0), 1e-5);
+    TS_ASSERT_DELTA( ws1->getErrorAt(0), ws2->getErrorAt(0), 1e-5);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");
+    AnalysisDataService::Instance().remove(outWSName);
+  }
   
 
 };

@@ -1,6 +1,6 @@
 /*WIKI* 
 
-This algorithm will clones an existing MDEventWorkspace into a new one.
+This algorithm will clones an existing [[MDEventWorkspace]] or [[MDHistoWorkspace]] into a new one.
 
 If the InputWorkspace is a file-backed MDEventWorkspace, then the algorithm
 will copy the original file into a new one with the suffix '_clone' added to its filename, in the same directory.
@@ -19,6 +19,7 @@ followed by a simple LoadMD call to the file in question.
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidAPI/FileProperty.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -52,8 +53,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void CloneMDWorkspace::initDocs()
   {
-    this->setWikiSummary("Clones (copies) an existing MDEventWorkspace into a new one.");
-    this->setOptionalMessage("Clones (copies) an existing [[MDEventWorkspace]] into a new one.");
+    this->setWikiSummary("Clones (copies) an existing MDEventWorkspace or MDHistoWorkspace into a new one.");
+    this->setOptionalMessage("Clones (copies) an existing [[MDEventWorkspace]] or [[MDHistoWorkspace]] into a new one.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -61,10 +62,10 @@ namespace MDEvents
    */
   void CloneMDWorkspace::init()
   {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
-        "An input MDEventWorkspace.");
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output MDEventWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace","",Direction::Input),
+        "An input MDEventWorkspace/MDHistoWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output MDEventWorkspace/MDHistoWorkspace.");
 
     std::vector<std::string> exts(1, ".nxs");
     declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
@@ -128,13 +129,13 @@ namespace MDEvents
 
       // Set the output workspace to this
       IMDEventWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-      this->setProperty("OutputWorkspace", outWS);
+      this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(outWS) );
     }
     else
     {
       // Perform the clone in memory.
       boost::shared_ptr<MDEventWorkspace<MDE,nd> > outWS(new MDEventWorkspace<MDE,nd>(*ws));
-      this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS) );
+      this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(outWS) );
     }
   }
 
@@ -144,9 +145,26 @@ namespace MDEvents
    */
   void CloneMDWorkspace::exec()
   {
-    IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
+    IMDWorkspace_sptr inBaseWS = getProperty("InputWorkspace");
+    IMDEventWorkspace_sptr inWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inBaseWS);
+    MDHistoWorkspace_sptr inHistoWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(inBaseWS);
 
-    CALL_MDEVENT_FUNCTION(this->doClone, inWS);
+    if (inWS)
+    {
+      CALL_MDEVENT_FUNCTION(this->doClone, inWS);
+    }
+    else if (inHistoWS)
+    {
+      // Clone using the copy constructor
+      MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(*inHistoWS));
+      // And set to the output. Easy.
+      this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(outWS) );
+    }
+    else
+    {
+      // Call CloneWorkspace as a fall-back?
+      throw std::runtime_error("CloneMDWorkspace can only clone a MDEventWorkspace or MDHistoWorkspace. Try CloneWorkspace.");
+    }
   }
 
 

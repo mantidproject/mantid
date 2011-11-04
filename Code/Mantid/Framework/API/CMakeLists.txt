@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
+	src/BoxController.cpp
 	src/CatalogFactory.cpp
 	src/CloneableAlgorithm.cpp
 	src/Column.cpp
@@ -99,6 +100,7 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
+	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/CloneableAlgorithm.h
 	inc/MantidAPI/Column.h
@@ -199,6 +201,7 @@ set ( TEST_FILES
 	test/AlgorithmTest.h
 	test/AnalysisDataServiceTest.h
 	test/AsynchronousTest.h
+	test/BoxControllerTest.h
 	test/CompositeFunctionTest.h
 	test/CoordTransformTest.h
 	test/CostFunctionFactoryTest.h

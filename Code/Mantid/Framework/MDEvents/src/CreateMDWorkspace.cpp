@@ -22,6 +22,7 @@ You can create a file-backed MDEventWorkspace by specifying the Filename and Mem
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidKernel/Memory.h"
 #include <math.h>
+#include "MantidKernel/EnabledWhenProperty.h"
 
 namespace Mantid
 {
@@ -82,24 +83,14 @@ namespace MDEvents
       new ArrayProperty<std::string>("Units"),
       "A comma separated list of the units of each dimension.");
 
-    declareProperty(
-      new ArrayProperty<int>("SplitInto", "5"),
-      "A comma separated list of into how many sub-grid elements each dimension should split; \n"
-      "or just one to split into the same number for all dimensions. Default 5.");
-
-    declareProperty(
-      new PropertyWithValue<int>("SplitThreshold", 1000),
-      "How many events in a box before it should be split. Default 1000.");
+    // Set the box controller properties
+    this->initBoxControllerProps("5", 1000, 5);
 
     declareProperty(
       new PropertyWithValue<int>("MinRecursionDepth", 0),
       "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 0 = no splitting, 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).");
-
-    declareProperty(
-      new PropertyWithValue<int>("MaxRecursionDepth", 5),
-      "How many levels of box splitting recursion are allowed. \n"
-      "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). Default 10.");
+    setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
 
@@ -112,6 +103,7 @@ namespace MDEvents
         "If Filename is specified to use a file back end:\n"
         "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
         "  If not specified, a default of 40% of free physical memory is used.");
+    setPropertySettings("Memory", new EnabledWhenProperty(this, "Filename", IS_NOT_DEFAULT));
 
   }
 
@@ -125,26 +117,7 @@ namespace MDEvents
   {
     // ------------ Set up the box controller ----------------------------------
     BoxController_sptr bc = ws->getBoxController();
-    int val;
-    val = this->getProperty("SplitThreshold");
-    bc->setSplitThreshold( val );
-    val = this->getProperty("MaxRecursionDepth");
-    bc->setMaxDepth( val );
-
-    // Build MDGridBox
-    std::vector<int> splits = getProperty("SplitInto");
-    if (splits.size() == 1)
-    {
-      bc->setSplitInto(splits[0]);
-    }
-    else if (splits.size() == nd)
-    {
-      for (size_t d=0; d<nd; ++d)
-        bc->setSplitInto(d, splits[0]);
-    }
-    else
-      throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
-    bc->resetNumBoxes();
+    this->setBoxController(bc);
 
     // Split to level 1
     ws->splitBox();

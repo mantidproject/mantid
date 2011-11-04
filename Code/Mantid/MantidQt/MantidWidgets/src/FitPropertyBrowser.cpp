@@ -1323,6 +1323,7 @@ void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFitFunction* f)c
 void FitPropertyBrowser::fit()
 {
   std::string wsName = workspaceName();
+
   if (wsName.empty())
   {
     QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
@@ -1390,6 +1391,7 @@ void FitPropertyBrowser::fit()
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
       alg->setPropertyValue("InputWorkspace",wsName);
+      //alg->setPropertyValue("GroupWorkspace",groupName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
       alg->setProperty("StartX",startX());
       alg->setProperty("EndX",endX());
@@ -1406,6 +1408,7 @@ void FitPropertyBrowser::fit()
       {
         QMap<QString,QString> algParams;
         algParams["InputWorkspace"] = QString::fromStdString(wsName);
+        //algParams["GroupWorkspace"] = QString::fromStdString(groupName);
         algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
         algParams["StartX"] = QString::number(startX());
         algParams["EndX"] = QString::number(endX());
@@ -1420,6 +1423,7 @@ void FitPropertyBrowser::fit()
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
         alg->initialize();
         alg->setPropertyValue("InputWorkspace",wsName);
+        //alg->setPropertyValue("GroupWorkspace",groupName);
         alg->setProperty("WorkspaceIndex",workspaceIndex());
         alg->setProperty("StartX",startX());
         alg->setProperty("EndX",endX());
@@ -1441,6 +1445,9 @@ void FitPropertyBrowser::fit()
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
+  // Emit a signal to show that the fitting has completed. (workspaceName that the fit has been done against is sent as a parameter)
+  emit fittingDone(QString::fromStdString(alg->getProperty("InputWorkspace")));
+
   getFitResults();
   if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace"))
   {

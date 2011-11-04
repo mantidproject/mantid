@@ -191,7 +191,7 @@ public:
   void releaseFreeMemory();
 
   /// Returns the deprecation message (if any) for deprecated algorithms.
-  std::string algorithmDeprecationMessage(const std::string& algName);
+  std::string algorithmDeprecationMessage(const std::string& algName, int version=-1);
 
  private:
   /// Copy constructor

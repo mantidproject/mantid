@@ -26,7 +26,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 
   if( ENABLE_CPACK )
     message( STATUS "In Vates CPack" )
-    set( CPACK_PACKAGE_NAME Mantid_Vates )
+    set( CPACK_PACKAGE_NAME mantid_vates )
     include( CPackCommon )
     set( CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackVatesConfig.cmake" )
 	

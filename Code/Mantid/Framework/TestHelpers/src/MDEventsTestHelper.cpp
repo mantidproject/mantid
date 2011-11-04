@@ -6,7 +6,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -22,6 +22,7 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::API::FrameworkManager;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -204,7 +205,7 @@ namespace MDEventsTestHelper
    * @return the MDHisto
    */
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-      double max)
+      double max, double errorSquared)
   {
     Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
     if (numDims ==1)
@@ -235,7 +236,7 @@ namespace MDEventsTestHelper
           );
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
-    ws_sptr->setTo(signal, signal);
+    ws_sptr->setTo(signal, errorSquared);
     return ws_sptr;
   }
 

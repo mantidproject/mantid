@@ -41,7 +41,8 @@ public:
   template<typename MDE, size_t nd>
   void do_test_exec(std::string name1, std::string name2, std::string name3, std::string name4,
       uint64_t expectedNumPoints, size_t expectedNumDims,
-      bool willFail = false)
+      bool willFail = false,
+      std::string OutputFilename = "")
   {
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -56,6 +57,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", name3));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputFilename", OutputFilename));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
 
@@ -113,6 +115,9 @@ public:
   }
 
 
+  void test_exec_3D_fileBackedOutput()
+  { do_test_exec<MDEvent<3>,3>("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 3", "",  6*6*6 /*# of events*/, 3 /*dims*/, false /*WillFail*/, "SliceMDTest_output.nxs");
+  }
 
 
   /** Test the algorithm, with a coordinate transformation.

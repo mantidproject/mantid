@@ -10,7 +10,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskMRU.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"

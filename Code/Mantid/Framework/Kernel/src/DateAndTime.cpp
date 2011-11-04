@@ -10,6 +10,8 @@ namespace Mantid
 namespace Kernel
 {
 
+// Initialize the logger
+Logger& DateAndTime::g_log = Logger::get("DateAndTime");
 
 /// Max allowed nanoseconds in the time; 2^62-1
 static int64_t MAX_NANOSECONDS = 4611686018427387903LL;
@@ -400,6 +402,26 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
 {
   //Make a copy
   std::string time = str;
+
+  // Some ARGUS files have an invalid date with a spac3e instead of zero.
+  // To enable such files to be loaded we correct the date and issue a warning (ticket #4017).
+  {
+      std::string date = time.substr(0,10); // just take the date not the time or any date-time separator
+	  size_t n = date.find(' ');
+	  if (n != std::string::npos)
+	     {
+			 g_log.warning() << "Invalid ISO8601 date in "  << time ;
+		     time[n] = '0'; // replace space with 0
+
+	        // Do again in case of second space
+		     date[n] = '0';
+		     n = date.find(' ');
+			 if(n != std::string::npos) time[n] = '0';
+
+			 g_log.warning() << " corrected to " << time << "\n";
+	      }
+  }
+
 
   //Default of no timezone offset
   bool positive_offset = true;

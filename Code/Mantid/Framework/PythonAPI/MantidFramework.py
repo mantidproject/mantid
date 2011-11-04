@@ -1171,14 +1171,13 @@ class MantidPyFramework(FrameworkManager):
         except(RuntimeError):
             pass
 
-        # IMD and IMDEventWorkspaces are at the same level (lower than MatrixWorkspace).
-        try:
-            return self._getRawIMDWorkspacePointer(name)
-        except RuntimeError:
-            pass
-        
         try:
             return self._getRawIMDEventWorkspacePointer(name)
+        except RuntimeError:
+            pass
+       
+        try:
+            return self._getRawIMDWorkspacePointer(name)
         except RuntimeError:
             pass
         

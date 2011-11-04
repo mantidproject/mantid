@@ -2,7 +2,7 @@ import unittest
 import sys
 from testhelpers import run_algorithm
 
-from mantid.api import algorithm_mgr, Workspace, WorkspaceProperty_Workspace
+from mantid.api import algorithm_mgr, Workspace, WorkspaceProperty_Workspace, MatrixWorkspace
 
 class WorkspaceTest(unittest.TestCase):
   
@@ -17,12 +17,15 @@ class WorkspaceTest(unittest.TestCase):
     def test_that_alg_get_property_is_converted_correctly(self):
         nspec = 2
         wsname = 'LOQ48127' 
-        alg = run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=nspec, child=True)
+        alg = run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=nspec, child=True)
         ws_prop = alg.get_property('OutputWorkspace')
         self.assertEquals(type(ws_prop), WorkspaceProperty_Workspace)
+        workspace = ws_prop.value
         # Is Workspace in the hierarchy of the value
-        self.assertTrue(isinstance(ws_prop.value, Workspace))
-        mem = ws_prop.value.get_memory_size()
+        self.assertTrue(isinstance(workspace, Workspace))
+        # Have got a MatrixWorkspace back and not just the generic interface
+        # self.assertEquals(type(workspace), MatrixWorkspace)
+        mem = workspace.get_memory_size()
         self.assertTrue( (mem > 0) )
         
     # Disabled until the get/set property stuff in IPropertyManager can be a little more forgiving.

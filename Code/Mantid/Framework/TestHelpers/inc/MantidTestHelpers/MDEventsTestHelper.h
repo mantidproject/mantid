@@ -4,7 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/BoxController.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -43,7 +43,8 @@ namespace MDEventsTestHelper
   DLL_TESTHELPERS Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
 
   /// Make a fake n-dimensional MDHistoWorkspace
-  DLL_TESTHELPERS Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0);
+  DLL_TESTHELPERS Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0,
+      double errorSquared=1.0);
 
 
   //-------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ namespace MDEventsTestHelper
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
             out(new Mantid::MDEvents::MDEventWorkspace<MDE,nd>());
-    Mantid::MDEvents::BoxController_sptr bc = out->getBoxController();
+    Mantid::API::BoxController_sptr bc = out->getBoxController();
     bc->setSplitThreshold(100);
     bc->setSplitInto(splitInto);
 
@@ -134,7 +135,7 @@ namespace MDEventsTestHelper
   static MDGridBox<MDLeanEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, coord_t dimensionMin=0.0, coord_t dimensionMax=10.0)
   {
     // Split at 5 events
-    BoxController_sptr splitter(new BoxController(nd));
+    Mantid::API::BoxController_sptr splitter(new Mantid::API::BoxController(nd));
     splitter->setSplitThreshold(5);
     // Splits into 10x10x.. boxes
     splitter->setSplitInto(split0);
@@ -228,7 +229,7 @@ namespace MDEventsTestHelper
   static MDGridBox<MDLeanEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
   {
     // Split at 5 events
-    BoxController_sptr splitter(new BoxController(nd));
+    Mantid::API::BoxController_sptr splitter(new Mantid::API::BoxController(nd));
     splitter->setSplitThreshold(5);
     splitter->resetNumBoxes();
     splitter->setMaxDepth(levels+1);

@@ -17,8 +17,8 @@ The above process is illustrated on a peak is shown below in the image below
 
 The distances between the monitors are read from the instrument definition file. It is assumed that the source and the monitors all lie on one line and that the monitors have the same delay time.
 
-
 *WIKI*/
+
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"

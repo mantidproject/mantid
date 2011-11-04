@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/IValidator.h"
 #include <vector>
+#include <set>
 
 
 namespace Mantid
@@ -56,7 +57,40 @@ namespace Kernel
     // IValidator methods
     ///Gets the type of the validator
     std::string getType() const { return "composite"; }
+    /** returns allowed values as intersection of non-empty sets of allowed values for child validators; 
+     *
+     * not very consistent but reasonable as non-list validators often return empty sets of allowed values;
+     * primary purpose -- return only one set of values from single list validator placed within a composite validator;   */
+    std::set<std::string> allowedValues() const 
+    {
+      std::set<std::string>      elem_unique;
+      std::multiset<std::string> elem_all;
+      // how many validators return non-empty list of allowed values
+      int n_combinations(0);
+      for (unsigned int i=0; i < m_children.size(); ++i)
+      {
+         std::set<std::string> subs = m_children[i]->allowedValues();
+         if ( subs.empty())continue;
+           elem_unique.insert(subs.begin(),subs.end());
+           elem_all.insert(subs.begin(),subs.end());
+           n_combinations++;
+      }
+ 
 
+      // empty or single set of allowed values
+      if(n_combinations<2)return elem_unique;
+      // there is more then one combination and we have to identify its union;   
+      for(std::set<std::string>::const_iterator its=elem_unique.begin();its!=elem_unique.end();its++){
+          std::multiset<std::string>::iterator im = elem_all.find(*its);
+          elem_all.erase(im);
+      }
+      std::set<std::string> rez;
+      for(std::multiset<std::string>::const_iterator im=elem_all.begin();im!=elem_all.end();im++){
+          rez.insert(*im);
+      }
+      return rez;
+       
+    }
     // ------------------------------------------------------------------------------------
     Kernel::IValidator<TYPE>* clone()
     {

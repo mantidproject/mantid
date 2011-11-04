@@ -417,10 +417,13 @@ namespace Mantid
 
       m_filename = getPropertyValue("Filename");
       NXRoot root(m_filename);
+
       std::string start_time = root.getString("run/start_time");
       runDetails.addProperty("run_start", start_time);
+
       std::string stop_time = root.getString("run/end_time");
       runDetails.addProperty("run_end", stop_time);
+
     }
 
   } // namespace DataHandling

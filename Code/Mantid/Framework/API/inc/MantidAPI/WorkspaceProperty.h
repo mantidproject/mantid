@@ -203,20 +203,7 @@ namespace Mantid
         // If an output workspace it must have a name, although it might not exist in the ADS yet
         if ( this->direction() == Kernel::Direction::Output ) 
         {
-          if ( !this->value().empty() )
-          {
-            //it has a name and that is enough so return the success
-            return "";
-          }
-          else
-          {
-            if( m_optional ) return "";
-            //Return a user level error
-            error = "Enter a name for the Output workspace";
-            //the debug message has more detail to put it in context
-            g_log.debug() << "Problem validating workspace: " << error << std::endl;
-            return error;
-          }
+          return isValidOutputWs();
         }
 
         // If an input (or inout) workspace, must point to something, although it doesn't have to have a name
@@ -233,56 +220,14 @@ namespace Mantid
             }
             catch( Kernel::Exception::NotFoundError &)
             {
-              if( m_workspaceName.empty() ) 
-              {
-                if( m_optional )
-                {
-                  error = "";
-                }
-                else
-                {
-                  error = "Enter a name for the Input/InOut workspace";
-                }
-              }
-              else
-              {
-                error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
-              }
-              if( !error.empty() )
-                g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
-              return error;
+              // Check to see if the workspace is not logged with the ADS because it is optional.
+              return isOptionalWs();
             }
 
             //At this point we have a valid pointer to a Workspace so we need to test whether it is a group
             if( boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp) )
             {
-              g_log.debug() << " Input WorkspaceGroup found " <<std::endl;
-
-              boost::shared_ptr<WorkspaceGroup> wsGroup = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp);
-              std::vector<std::string> wsGroupNames = wsGroup->getNames();
-              std::vector<std::string>::iterator it = wsGroupNames.begin();
-
-              // Cycle through each workspace in the group ...
-              for( ; it != wsGroupNames.end(); ++it )
-              {
-                std::string memberWsName = *it;
-                boost::shared_ptr<Workspace> memberWs = AnalysisDataService::Instance().retrieve(memberWsName);
-
-                // ... and if it is a workspace of incorrect type, exclude the group by returning an error.
-                if( NULL == boost::dynamic_pointer_cast<TYPE>(memberWs) )
-                {
-                  error = "Workspace " + memberWsName + " is not of type " + Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() + ".";
-                  
-                  g_log.debug() << error << std::endl;
-
-                  return error;
-                }
-                // If it is of the correct type, it may still be invalid. Check.
-                else
-                {
-
-                }
-              }
+              return isValidGroup(boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
             }
             else
             {
@@ -375,6 +320,101 @@ namespace Mantid
       }
 
     private:
+
+      /** Checks whether the entered workspace group is valid.
+      *  To be valid *all* members of the group have to be valid.
+      *  @param wsGroup :: the WorkspaceGroup of which to check the validity
+      *  @returns A user level description of the problem or "" if it is valid.
+      */
+      std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const
+      {
+        g_log.debug() << " Input WorkspaceGroup found " <<std::endl;
+
+        std::vector<std::string> wsGroupNames = wsGroup->getNames();
+        std::vector<std::string>::iterator it = wsGroupNames.begin();
+
+        std::string error;
+
+        // Cycle through each workspace in the group ...
+        for( ; it != wsGroupNames.end(); ++it )
+        {
+          std::string memberWsName = *it;
+          boost::shared_ptr<Workspace> memberWs = AnalysisDataService::Instance().retrieve(memberWsName);
+
+          // ... and if it is a workspace of incorrect type, exclude the group by returning an error.
+          if( NULL == boost::dynamic_pointer_cast<TYPE>(memberWs) )
+          {
+            error = "Workspace " + memberWsName + " is not of type " + Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() + ".";
+
+            g_log.debug() << error << std::endl;
+
+            return error;
+          }
+          // If it is of the correct type, it may still be invalid. Check.
+          else
+          {
+            Mantid::API::WorkspaceProperty<TYPE> memberWsProperty(*this);
+            std::string memberError = memberWsProperty.setValue(memberWsName);
+            if( !memberError.empty() )
+              return memberError; // Since if this member is invalid, then the whole group is invalid.
+          }
+        }
+
+        return ""; // Since all members of the group are valid.
+      }
+
+      /** Checks whether the entered output workspace is valid.
+      *  To be valid the only thing it needs is a name.
+      *  @returns A user level description of the problem or "" if it is valid.
+      */
+      std::string isValidOutputWs() const
+      {
+        if ( !this->value().empty() )
+        {
+          //it has a name and that is enough so return the success
+          return "";
+        }
+        else
+        {
+          std::string error;
+
+          if( m_optional ) return "";
+          //Return a user level error
+          error = "Enter a name for the Output workspace";
+          //the debug message has more detail to put it in context
+          g_log.debug() << "Problem validating workspace: " << error << std::endl;
+          return error;
+        }
+      }
+
+      /** Checks whether the entered workspace (that by this point we've found is not in the ADS)
+      *  is actually an optional workspace and so still valid.
+      *  @returns A user level description of the problem or "" if it is valid.
+      */
+      std::string isOptionalWs() const
+      {
+        std::string error;
+
+        if( m_workspaceName.empty() )
+        {
+          if( m_optional )
+          {
+            error = "";
+          }
+          else
+          {
+            error = "Enter a name for the Input/InOut workspace";
+          }
+        }
+        else
+        {
+          error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
+        }
+        if( !error.empty() )
+          g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
+        return error;
+      }
+
       /// Reset the pointer to the workspace
       void clear()
       {

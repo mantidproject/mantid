@@ -131,7 +131,8 @@ protected:
   mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<GLColor> m_colors; ///< colors in order of workspace indexes
   QString m_currentColorMap;
-  GLColor m_maskedColor;
+  GLColor m_maskedColor; ///< Colour of a masked detector
+  GLColor m_failedColor; ///< Colour of a "failed" detector
 
   GLActorCollection m_scene;
   SampleActor* m_sampleActor;

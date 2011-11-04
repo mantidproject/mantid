@@ -75,6 +75,7 @@ REGISTER_VATESGUI(MdViewerWidget)
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
   this->isPluginInitialized = false;
+  this->pluginMode = true;
   this->wsType = VatesViewerInterface::MDEW;
 }
 
@@ -84,6 +85,7 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
   this->checkEnvSetup();
   // We're in the standalone application mode
   this->isPluginInitialized = false;
+  this->pluginMode = false;
   this->setupUiAndConnections();
   // FIXME: This doesn't allow a clean split of the classes. I will need
   //        to investigate creating the individual behaviors to see if that
@@ -135,6 +137,7 @@ void MdViewerWidget::setupMainView()
   // Set the standard view as the default
   this->currentView = this->setMainViewWidget(this->ui.viewWidget,
                                               ModeControlWidget::STANDARD);
+  this->currentView->installEventFilter(this);
 
   // Create a layout to manage the view properly
   this->viewLayout = new QHBoxLayout(this->ui.viewWidget);
@@ -277,6 +280,9 @@ void MdViewerWidget::setParaViewComponentsForView()
                      SLOT(updateSelectedIndicator()));
   }
 
+  QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
+                   this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
+
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorMapChanged(const pqColorMapModel *)),
                    this->currentView,
@@ -296,10 +302,6 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  if (this->currentView->origSrc)
-  {
-    pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSrc);
-  }
   if (QString("PeaksReader") == source->getProxy()->GetXMLName())
   {
     this->wsType = VatesViewerInterface::PEAKS;
@@ -329,12 +331,6 @@ void MdViewerWidget::checkForTimesteps()
 
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
-  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  if (this->currentView->origSrc)
-  {
-    this->ui.modeControlWidget->setToStandardView();
-    builder->destroySources();
-  }
   QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == wstype)
   {
@@ -347,16 +343,7 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
     sourcePlugin = "MDEW Source";
   }
 
-  this->currentView->origSrc = builder->createSource("sources", sourcePlugin,
-                                                        pqActiveObjects::instance().activeServer());
-  vtkSMPropertyHelper(this->currentView->origSrc->getProxy(),
-                      "Mantid Workspace Name").Set(wsname.toStdString().c_str());
-
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
-  srcProxy->UpdateVTKObjects();
-  srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();
-
+  this->currentView->setPluginSource(sourcePlugin, wsname);
   this->renderAndFinalSetup();
   this->setTimesteps();
 }
@@ -364,13 +351,7 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
-  this->currentView->onAutoScale();
-  this->ui.proxyTabWidget->getObjectInspector()->accept();
-
-  if (VatesViewerInterface::MDEW == this->wsType)
-  {
-    this->ui.modeControlWidget->enableViewButtons();
-  }
+  this->currentView->checkView();
 }
 
 void MdViewerWidget::checkForUpdates()
@@ -379,8 +360,17 @@ void MdViewerWidget::checkForUpdates()
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->resetDisplay();
+    //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
     this->updateTimesteps();
+  }
+  if (QString(proxy->GetXMLName()).contains("Threshold"))
+  {
+    vtkSMDoubleVectorProperty *range = \
+        vtkSMDoubleVectorProperty::SafeDownCast(\
+          proxy->GetProperty("ThresholdBetween"));
+    this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
+                                                      range->GetElement(1));
   }
 }
 
@@ -438,6 +428,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->viewLayout->removeWidget(this->currentView);
   this->swapViews();
   this->viewLayout->addWidget(this->currentView);
+  this->currentView->installEventFilter(this);
   this->currentView->show();
   this->hiddenView->hide();
   this->setParaViewComponentsForView();
@@ -454,6 +445,29 @@ void MdViewerWidget::swapViews()
   temp = this->currentView;
   this->currentView = this->hiddenView;
   this->hiddenView = temp;
+}
+
+/**
+ * This function allows one to filter the Qt events and look for a hide
+ * event. It then executes source cleanup and view mode switch if the viewer
+ * is in plugin mode.
+ * @param obj the subject of the event
+ * @param ev the actual event
+ * @return true if the event was handled
+ */
+bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
+{
+  if (this->currentView == obj)
+  {
+    if (this->pluginMode && QEvent::Hide == ev->type())
+    {
+      pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+      builder->destroySources();
+      this->ui.modeControlWidget->setToStandardView();
+    }
+    return true;
+  }
+  return VatesViewerInterface::eventFilter(obj, ev);
 }
 
 }

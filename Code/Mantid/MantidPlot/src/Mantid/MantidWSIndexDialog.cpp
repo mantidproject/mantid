@@ -124,6 +124,12 @@ void MantidWSIndexDialog::plot()
   // TODO - Add functionality to warn the user?
 }
 
+void MantidWSIndexDialog::plotAll()
+{
+  m_wsIndexChoice = m_wsIndexIntervals;
+  accept();
+}
+
 void MantidWSIndexDialog::editedWsField()
 {
   if(m_spectra) m_spectraField->clear();
@@ -142,8 +148,8 @@ void MantidWSIndexDialog::init()
   m_outer = new QVBoxLayout;
 
   setWindowTitle(tr("MantidPlot"));
-  initWorkspaceBox();
   initSpectraBox();
+  initWorkspaceBox();
   initButtons();
   setLayout(m_outer);
 
@@ -169,13 +175,15 @@ void MantidWSIndexDialog::initWorkspaceBox()
 void MantidWSIndexDialog::initSpectraBox()
 {
   m_spectraBox = new QVBoxLayout;
-  m_spectraMessage = new QLabel(tr("Or<br><br>Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
+  m_spectraMessage = new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
   m_spectraField = new QLineEdit();
+  m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
   //m_spectraField->setPlaceholderText(tr("E.g. \"3-5,10-17,20\" would work for IDs 1-30"));
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
+  m_spectraBox->add(m_orMessage);
   if(m_spectra) m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField, SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
@@ -188,14 +196,17 @@ void MantidWSIndexDialog::initButtons()
   
   m_okButton = new QPushButton("Ok");
   m_cancelButton = new QPushButton("Cancel");
+  m_plotAllButton = new QPushButton("Plot All");
 
   m_buttonBox->addWidget(m_okButton);
   m_buttonBox->addWidget(m_cancelButton);
+  m_buttonBox->addWidget(m_plotAllButton);
 
   m_outer->addItem(m_buttonBox);
 
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(plot()));
   connect(m_cancelButton, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_plotAllButton, SIGNAL(clicked()), this, SLOT(plotAll()));
 }
 
 void MantidWSIndexDialog::checkForSpectraAxes()

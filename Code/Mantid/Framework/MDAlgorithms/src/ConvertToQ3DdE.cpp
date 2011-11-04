@@ -86,7 +86,7 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(cons
       ws->initialize();
 
       // Build up the box controller
-      MDEvents::BoxController_sptr bc = ws->getBoxController();
+      Mantid::API::BoxController_sptr bc = ws->getBoxController();
       bc->setSplitInto(5);
 //      bc->setSplitThreshold(1500);
       bc->setSplitThreshold(10);

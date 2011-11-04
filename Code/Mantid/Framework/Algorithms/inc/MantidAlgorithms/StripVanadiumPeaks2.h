@@ -10,9 +10,9 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** StripVanadiumPeaks2 : TODO: DESCRIPTION
+  /** StripVanadiumPeaks2
     
-    @author
+    @author Wenduo Zhou
     @date 2011-10-07
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -49,8 +49,8 @@ namespace Algorithms
     virtual const std::string category() const { return "Diffraction"; }
 
   private:
+    void initDocs();
     void init();
-
     void exec();
 
   };

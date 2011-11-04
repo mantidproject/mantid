@@ -60,6 +60,8 @@ public:
   /// Default destructor
   virtual ~SplatterPlotView();
 
+  /// @see ViewBase::checkView
+  void checkView();
   /**
    * ViewBase::destroyView
    */
@@ -90,6 +92,7 @@ protected slots:
 private:
   Q_DISABLE_COPY(SplatterPlotView)
 
+  QPointer<pqPipelineSource> peaksSource; ///< A peaks source
   QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
   QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
   QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
