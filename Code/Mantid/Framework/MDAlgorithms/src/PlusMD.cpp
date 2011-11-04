@@ -1,27 +1,25 @@
 /*WIKI* 
 
-
 This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: it combines the events from the two workspaces together to form one large workspace.
 
-
-
-
 *WIKI*/
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/PlusMD.h"
+#include "MantidMDAlgorithms/PlusMD.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
@@ -209,5 +207,4 @@ namespace MDEvents
 
 
 } // namespace Mantid
-} // namespace MDEvents
-
+} // namespace MDAlgorithms
