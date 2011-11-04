@@ -90,6 +90,12 @@ void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
   UNUSED_ARG(pbw);
 }
 
+/**
+ * This function checks a pqPipelineSource (either from a file or workspace)
+ * to see if it is derived from a PeaksWorkspace.
+ * @param src the pipeline source to check
+ * @return true if the pipeline source is derived from PeaksWorkspace
+ */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
