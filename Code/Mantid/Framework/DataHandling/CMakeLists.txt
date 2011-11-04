@@ -36,14 +36,15 @@ set ( SRC_FILES
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
+	src/LoadMaskingFile.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus2.cpp
+	src/LoadNXSPE.cpp
 	src/LoadNexus.cpp
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
-	src/LoadNXSPE.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexusMonitors.cpp
 	src/LoadQKK.cpp
@@ -136,14 +137,15 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
+	inc/MantidDataHandling/LoadMaskingFile.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus2.h
+	inc/MantidDataHandling/LoadNXSPE.h
 	inc/MantidDataHandling/LoadNexus.h
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
-  inc/MantidDataHandling/LoadNXSPE.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadQKK.h
@@ -229,14 +231,15 @@ set ( TEST_FILES
 	test/LoadLogTest.h
 	test/LoadLogsFromSNSNexusTest.h
 	test/LoadMappingTableTest.h
+	test/LoadMaskingFileTest.h
 	test/LoadMuonLogTest.h
 	test/LoadMuonNexus2Test.h
 	test/LoadMuonNexusTest.h
+	test/LoadNXSPETest.h
 	test/LoadNexusLogsTest.h
 	test/LoadNexusMonitorsTest.h
 	test/LoadNexusProcessedTest.h
 	test/LoadNexusTest.h
-  test/LoadNXSPETest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNexusMonitorsTest.h
 	test/LoadRKHTest.h
