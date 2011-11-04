@@ -61,6 +61,7 @@ public:
   /// Default destructor.
   virtual ~ViewBase() {}
 
+  /// Poll the view to set status for mode control buttons.
   void checkView();
   /**
    * Function used to correct post-accept visibility issues. Most
@@ -83,6 +84,7 @@ public:
    * Destroy sources and view relevant to mode switching.
    */
   virtual void destroyView() = 0;
+  /// Get the active ParaView source.
   pqPipelineSource *getPvActiveSrc();
   /**
    * The function gets the main view.
@@ -102,6 +104,7 @@ public:
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
+  /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
 
   /// Enumeration for Cartesian coordinates

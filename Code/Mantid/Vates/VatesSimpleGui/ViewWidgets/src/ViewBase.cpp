@@ -103,6 +103,12 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
+/**
+ * Create a ParaView source from a given plugin name and workspace name. This is
+ * used in the plugin mode of the simple interface.
+ * @param pluginName name of the ParaView plugin
+ * @param wsName name of the Mantid workspace to pass to the plugin
+ */
 void ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -118,11 +124,21 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   srcProxy->UpdatePipelineInformation();;
 }
 
+/**
+ * Retrieve the active pqPipelineSource object according to ParaView's
+ * ActiveObjects mechanism.
+ * @return the currently active source
+ */
 pqPipelineSource *ViewBase::getPvActiveSrc()
 {
   return pqActiveObjects::instance().activeSource();
 }
 
+/**
+ * Function that sets the status for the view mode control buttons. This
+ * implementation looks at the original source for a view. Other views may
+ * override this function to provide alternate checks.
+ */
 void ViewBase::checkView()
 {
   emit this->setViewsStatus(!this->isPeaksWorkspace(this->origSrc));
