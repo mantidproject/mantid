@@ -213,11 +213,11 @@ ConvertToQNDany::   build_default_properties(size_t max_n_dims)
         n_dims = 3;
     }
     size_t n_dim_visible  = n_dims+n_add_dims;
-    size_t n_dim_invisible= max_n_dims-n_dim_visible;
+//    size_t n_dim_invisible= max_n_dims-n_dim_visible;
 
     std::vector<std::string> dim_ID(max_n_dims);
     dim_ID[0]=std::string("DeltaE");
-    for(int i=1;i<max_n_dims;i++){
+    for(size_t i=1;i<max_n_dims;i++){
         std::string num     = boost::lexical_cast<std::string>(i+1);
         std::string dim_num = "dim_"+num; 
         dim_ID[i] = dim_num;
