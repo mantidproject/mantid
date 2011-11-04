@@ -17,7 +17,8 @@ namespace Kernel
     IS_DEFAULT,
     IS_NOT_DEFAULT,
     IS_EQUAL_TO,
-    IS_NOT_EQUAL_TO
+    IS_NOT_EQUAL_TO,
+    IS_MORE_OR_EQ
   };
 
   /** IPropertySettings for a property that sets it to enabled (in the GUI)
@@ -121,6 +122,10 @@ namespace Kernel
         return (propValue == m_value);
       case IS_NOT_EQUAL_TO:
         return (propValue != m_value);
+      case IS_MORE_OR_EQ:{
+          int check = boost::lexical_cast<int>(m_value);
+          int iPropV= boost::lexical_cast<int>(propValue);
+          return (iPropV>=check);}
       default:
         // Unknown criterion
         return true;
