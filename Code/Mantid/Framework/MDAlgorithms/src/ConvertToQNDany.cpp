@@ -212,7 +212,7 @@ ConvertToQNDany::   build_default_properties(size_t max_n_dims)
     }else{                                 // QxQyQz -- 3 dimensions     
         n_dims = 3;
     }
-    size_t n_dim_visible  = n_dims+n_add_dims;
+//    size_t n_dim_visible  = n_dims+n_add_dims;
 //    size_t n_dim_invisible= max_n_dims-n_dim_visible;
 
     std::vector<std::string> dim_ID(max_n_dims);
