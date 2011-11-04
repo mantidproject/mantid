@@ -1,0 +1,210 @@
+"""
+    Simple local data catalog for Mantid
+    Gets main information from data files in a directory and stores
+    that information in a database in the user home area.
+"""
+import os
+import sqlite3
+import re
+import time
+import sys
+
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    import mantidsimple
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False    
+
+class DataSet(object):
+    def __init__(self, run_number, title, run_start, duration, ssd):
+        self.run_number = run_number
+        self.title = title
+        self.run_start = run_start
+        self.duration = duration
+        self.ssd = ssd
+        
+    @classmethod
+    def header(cls):
+        """
+            Return the column headers
+        """
+        return "%-6s %-60s %-16s %-7s %-10s" % ("Run", "Title", "Start", "Time[s]", "SDD[mm]")
+    
+    @classmethod
+    def load_meta_data(cls, file_path, outputWorkspace):
+        """
+            Load method that needs to be implemented for each catalog/instrument
+        """
+        return False
+    
+    @classmethod
+    def handle(cls, file_path):
+        """
+            Return a DB handle for the given file, such as a run number
+        """
+        return file_path
+    
+    @classmethod
+    def read_properties(cls, ws, run, cursor):
+        return None
+    
+    def __str__(self):
+        """
+            Pretty print the current data set attributes
+        """
+        return "%-6s %-60s %-16s %-7g %-10.0f" % (self.run_number, self.title, self.run_start, self.duration, self.ssd)
+    
+    def as_list(self):
+        """
+            Return a list of data set attributes
+        """
+        return (self.run_number, self.title, self.run_start, self.duration, self.ssd)
+    
+    def as_string_list(self):
+        """
+            Return a list of data set attributes as strings
+        """
+        return (str(self.run_number), self.title, self.run_start, "%-g"%self.duration, "%-10.0f"%self.ssd)
+    
+    @classmethod
+    def find(cls, file_path, cursor, process_files=True):
+        """
+            Find an entry in the database, or create on as needed
+        """
+        run = cls.handle(file_path)
+        if run is None:
+            return None
+        
+        t = (run,)
+        cursor.execute('select * from dataset where run=?', t)
+        rows = cursor.fetchall()
+
+        if len(rows) == 0:
+            if HAS_MANTID and process_files:
+                log_ws = "__log"                
+                if cls.load_meta_data(file_path, outputWorkspace=log_ws):
+                    return cls.read_properties(log_ws, run, cursor)
+                else:
+                    return None
+            else:
+                return None
+        else:
+            row = rows[0]
+            return DataSet(row[0], row[1], row[2], row[3], row[4])
+
+class DataCatalog(object):
+    """
+        Data catalog
+    """
+    extension = "nxs"
+    data_set_cls = DataSet
+    
+    def __init__(self, replace_db=False):
+        ## List of data sets
+        self.catalog = []
+        
+        # Connect/create to DB
+        db_path = os.path.join(os.path.expanduser("~"), ".mantid_data_sets")
+        self.db_exists = False
+        self.db = None
+        
+        try:
+             self._create_db(db_path, replace_db)
+        except:
+            if HAS_MANTID:
+                mtd.sendLogMessage("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
+            else:
+                raise
+        
+    def _create_db(self, db_path, replace_db):
+        """
+            Create the database if we need to
+        """
+        self.db_exists = False
+        if os.path.isfile(db_path):
+            if replace_db:
+                os.remove(db_path)
+            else: 
+                self.db_exists = True
+                
+        self.db = sqlite3.connect(db_path)
+        cursor = self.db.cursor()
+        
+        if not self.db_exists:
+            cursor.execute("""create table dataset (run text, title text, start text, duration real, ssd real)""")
+            self.db.commit()
+            cursor.close()
+        
+    def __str__(self):
+        """
+            Pretty print the whole list of data
+        """
+        output = "%s\n" % self.data_set_cls.header()
+        for r in self.catalog:
+            output += "%s\n" % str(r)
+        return output
+        
+    def size(self):
+        """
+            Return size of the catalog
+        """
+        return len(self.catalog)
+    
+    def get_list(self, data_dir=None):
+        """
+            Get list of catalog entries
+        """
+        self.list_data_sets(data_dir, process_files=False)
+        output = []
+        for r in self.catalog:
+            output.append(r.as_list())
+        return output
+    
+    def get_string_list(self, data_dir=None):
+        """
+            Get list of catalog entries
+        """
+        self.list_data_sets(data_dir, process_files=False)
+        output = []
+        for r in self.catalog:
+            output.append(r.as_string_list())
+        return output
+    
+    def list_data_sets(self, data_dir=None, call_back=None, process_files=True):
+        """
+            Process a data directory
+        """
+        self.catalog = []
+        
+        if self.db is None:
+            if HAS_MANTID:
+                mtd.sendLogMessage("DataCatalog: Could not access local data catalog")
+            return
+        
+        c = self.db.cursor()
+        
+        if not os.path.isdir(data_dir):
+            return
+        
+        try:
+            for f in os.listdir(data_dir):
+                if f.endswith(self.extension):
+                    path = os.path.join(data_dir, f)
+                    d = self.data_set_cls.find(path, c, process_files=process_files)
+                    if d is not None:
+                        if call_back is not None:
+                            call_back(d.as_string_list())
+                        self.catalog.append(d)
+        
+            self.db.commit()
+            c.close()
+        except:
+            if HAS_MANTID:
+                mtd.sendLogMessage("DataCatalog: Error working with the local data catalog\n%s" % sys.exc_value)
+            else:
+                raise
+        
+        self.db_exists = True
