@@ -75,6 +75,7 @@ REGISTER_VATESGUI(MdViewerWidget)
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
   this->isPluginInitialized = false;
+  this->pluginMode = true;
   this->wsType = VatesViewerInterface::MDEW;
 }
 
@@ -84,6 +85,7 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
   this->checkEnvSetup();
   // We're in the standalone application mode
   this->isPluginInitialized = false;
+  this->pluginMode = false;
   this->setupUiAndConnections();
   // FIXME: This doesn't allow a clean split of the classes. I will need
   //        to investigate creating the individual behaviors to see if that
@@ -135,6 +137,7 @@ void MdViewerWidget::setupMainView()
   // Set the standard view as the default
   this->currentView = this->setMainViewWidget(this->ui.viewWidget,
                                               ModeControlWidget::STANDARD);
+  this->currentView->installEventFilter(this);
 
   // Create a layout to manage the view properly
   this->viewLayout = new QHBoxLayout(this->ui.viewWidget);
@@ -299,11 +302,6 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  this->currentView->isPeaksWorkspace(source);
-  if (this->currentView->origSrc)
-  {
-    pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSrc);
-  }
   if (QString("PeaksReader") == source->getProxy()->GetXMLName())
   {
     this->wsType = VatesViewerInterface::PEAKS;
@@ -333,12 +331,6 @@ void MdViewerWidget::checkForTimesteps()
 
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
-  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  if (this->currentView->origSrc)
-  {
-    this->ui.modeControlWidget->setToStandardView();
-    builder->destroySources();
-  }
   QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == wstype)
   {
@@ -371,6 +363,14 @@ void MdViewerWidget::checkForUpdates()
     //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
     this->updateTimesteps();
+  }
+  if (QString(proxy->GetXMLName()).contains("Threshold"))
+  {
+    vtkSMDoubleVectorProperty *range = \
+        vtkSMDoubleVectorProperty::SafeDownCast(\
+          proxy->GetProperty("ThresholdBetween"));
+    this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
+                                                      range->GetElement(1));
   }
 }
 
@@ -428,6 +428,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->viewLayout->removeWidget(this->currentView);
   this->swapViews();
   this->viewLayout->addWidget(this->currentView);
+  this->currentView->installEventFilter(this);
   this->currentView->show();
   this->hiddenView->hide();
   this->setParaViewComponentsForView();
@@ -444,6 +445,29 @@ void MdViewerWidget::swapViews()
   temp = this->currentView;
   this->currentView = this->hiddenView;
   this->hiddenView = temp;
+}
+
+/**
+ * This function allows one to filter the Qt events and look for a hide
+ * event. It then executes source cleanup and view mode switch if the viewer
+ * is in plugin mode.
+ * @param obj the subject of the event
+ * @param ev the actual event
+ * @return true if the event was handled
+ */
+bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
+{
+  if (this->currentView == obj)
+  {
+    if (this->pluginMode && QEvent::Hide == ev->type())
+    {
+      pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+      builder->destroySources();
+      this->ui.modeControlWidget->setToStandardView();
+    }
+    return true;
+  }
+  return VatesViewerInterface::eventFilter(obj, ev);
 }
 
 }

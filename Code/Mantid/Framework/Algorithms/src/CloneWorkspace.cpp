@@ -1,22 +1,17 @@
 /*WIKI* 
 
-
-
 This algorithm performs a deep copy of all of the information in the workspace. It maintains events if the input is an [[EventWorkspace]].
-
-
-
-
+It will call CloneMDWorkspace for a [[MDEventWorkspace]] or a [[MDHistoWorkspace]].
+It can also clone a [[PeaksWorkspace]].
 
 *WIKI*/
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+
 #include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -51,7 +46,7 @@ void CloneWorkspace::exec()
   Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_const_sptr inputMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
   EventWorkspace_const_sptr inputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
-  IMDEventWorkspace_sptr inputMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(inputWorkspace);
+  IMDWorkspace_sptr inputMD = boost::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace);
   PeaksWorkspace_const_sptr inputPeaks = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   
   if (inputEvent)
@@ -103,7 +98,7 @@ void CloneWorkspace::exec()
     alg->setProperty("InputWorkspace", inputMD);
     alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
     alg->executeAsSubAlg();
-    IMDEventWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+    IMDWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
   }
   else if (inputPeaks)
@@ -112,7 +107,7 @@ void CloneWorkspace::exec()
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
   }
   else
-    throw std::runtime_error("Expected a MatrixWorkspace, PeaksWorkspace, or a MDEventWorkspace. Cannot clone this type of workspace.");
+    throw std::runtime_error("Expected a MatrixWorkspace, PeaksWorkspace, MDEventWorkspace, or a MDHistoWorkspace. Cannot clone this type of workspace.");
   
 }
 

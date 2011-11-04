@@ -19,10 +19,14 @@ from wiki_tools import *
 import difflib
 
 #======================================================================
-def get_wiki_description(algo):
-    source = find_algo_file(algo)
-    if source == '': 
-        alg = mtd.createAlgorithm(algo)
+def get_wiki_description(algo, version):
+    """
+    @param algo :: name of the algorithm
+    @param version :: version, -1 for latest 
+    """
+    source = find_algo_file(algo, version)
+    if source == '':
+        alg = mtd.createAlgorithm(algo, version)
         return alg.getWikiDescription()
     else:
         f = open(source,'r')
@@ -79,20 +83,37 @@ def make_property_table_line(propnum, p):
     
         
 #======================================================================
-def make_wiki(algo_name):
-    """ Return wiki text for a given algorithm """ 
+def make_wiki(algo_name, version, latest_version):
+    """ Return wiki text for a given algorithm
+    @param algo_name :: name of the algorithm (bare)
+    @param version :: version requested
+    @param latest_version :: the latest algorithm 
+    """ 
     
     # Deprecated algorithms: Simply returnd the deprecation message
-    deprec = mtd.algorithmDeprecationMessage(algo_name)
+    deprec = mtd.algorithmDeprecationMessage(algo_name,version)
     if len(deprec) != 0:
         out = deprec
         out = out.replace(". Use ", ". Use [[")
         out = out.replace(" instead.", "]] instead.")
         return out
     
-    alg = mtd.createAlgorithm(algo_name)
-    
     out = ""
+    alg = mtd.createAlgorithm(algo_name, version)
+    
+    if (version < latest_version):
+        out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
+    else:
+        out += "Note: This page refers to version %d of %s. "% (version, algo_name)
+        if latest_version > 2:
+            out += "The documentation for older versions is available at: "
+        else:
+            out += "The documentation for the older version is available at: "
+        for v in xrange(1,latest_version):
+            out += "[[%s v.%d]] " % (algo_name, v)
+        out += "\n\n"
+        
+    
     out += "== Summary ==\n\n"
     out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
     out += "== Properties ==\n\n"
@@ -115,7 +136,7 @@ def make_wiki(algo_name):
 
     out += "== Description ==\n"
     out += "\n"
-    desc = get_wiki_description(algo_name)
+    desc = get_wiki_description(algo_name,version)
     if (desc == ""):
       out += "INSERT FULL DESCRIPTION HERE\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
@@ -129,7 +150,11 @@ def make_wiki(algo_name):
     for categ in categories:
       out += "[[Category:" + categ + "]]\n"
 
-    out +=  "{{AlgorithmLinks|" + algo_name + "}}\n"
+    # Point to the right source ffiles
+    if version > 1:
+        out +=  "{{AlgorithmLinks|%s%d}}\n" % (algo_name, version)
+    else:
+        out +=  "{{AlgorithmLinks|%s}}\n" % (algo_name)
 
     return out
 
@@ -137,6 +162,7 @@ def make_wiki(algo_name):
 
 
 
+#======================================================================
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
@@ -178,13 +204,49 @@ def confirm(prompt=None, resp=False):
     
     
 #======================================================================
-def do_algorithm(args, algo):
-    print "Generating wiki page for %s" % (algo)
+def make_redirect(from_page, to_page):
+    """Make a redirect from_page to to_page"""
+    print "Making a redirect from %s to %s" % (from_page, to_page)
     site = wiki_tools.site
-    new_contents = make_wiki(algo) 
+    page = site.Pages[from_page]
+    contents = "#REDIRECT [[%s]]" % to_page
+    page.save(contents, summary = 'Bot: created redirect to the latest version.' )
+    
+#======================================================================
+def do_algorithm(args, algo):
+    """ Do the wiki page
+    @param algo :: the name of the algorithm, possibly with suffix #"""
+    
+    is_latest_version = True
+    version = -1;
+    latest_version = -1
+    if algo.endswith('1'): version = 1
+    if algo.endswith('2'): version = 2
+    if algo.endswith('3'): version = 3
+    if algo.endswith('4'): version = 4
+    if algo.endswith('5'): version = 5
+    if version > 0:
+        algo = algo[:-1]
+
+    # Find the latest version        
+    latest_version = mtd.createAlgorithm(algo, -1).version()
+    if (version == -1): version = latest_version
+    print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
+    
+    # What should the name on the wiki page be?
+    wiki_page_name = algo
+    if latest_version > 1:
+        wiki_page_name = algo + " v." + str(version)
+        # Make sure there is a redirect to latest version
+        make_redirect(algo, algo + " v." + str(latest_version))
+        
+    
+    print "Generating wiki page for %s at http://www.mantidproject.org/%s" % (algo, wiki_page_name)
+    site = wiki_tools.site
+    new_contents = make_wiki(algo, version, latest_version) 
     
     #Open the page with the name of the algo
-    page = site.Pages[algo]
+    page = site.Pages[wiki_page_name]
     
     old_contents = page.edit() + "\n"
     
@@ -202,7 +264,7 @@ def do_algorithm(args, algo):
         print
         
         if args.force or confirm("Do you want to replace the website wiki page?", True):
-            print "Saving page to http://www.mantidproject.org/%s" % algo
+            print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
             page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
 
 #======================================================================
@@ -225,7 +287,7 @@ if __name__ == "__main__":
                                       'or more algorithms, and updates the mantidproject.org website')
     
     parser.add_argument('algos', metavar='ALGORITHM', type=str, nargs='*',
-                        help='Name of the algorithm(s) to generate wiki docs.')
+                        help='Name of the algorithm(s) to generate wiki docs. Add a number after the name (no space) to specify the algorithm version.')
     
     parser.add_argument('--user', dest='username', default=defaultuser,
                         help="User name, to log into the www.mantidproject.org wiki. Default: '%s'. This value is saved to a .ini file so that you don't need to specify it after." % defaultuser)

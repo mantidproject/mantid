@@ -201,6 +201,8 @@ public:
 private slots:
   /// Called when the OK button is pressed.
   void plot();
+  /// Called when the "Plot All" button is pressed.
+  void plotAll();
   /// Called when the wsField has been edited.
   void editedWsField();
   /// Called when the spectraField has been edited.
@@ -236,7 +238,7 @@ private:
   QLineEdit *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox; 
   QHBoxLayout *m_buttonBox;
-  QPushButton *m_okButton, *m_cancelButton;
+  QPushButton *m_okButton, *m_cancelButton, *m_plotAllButton;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;

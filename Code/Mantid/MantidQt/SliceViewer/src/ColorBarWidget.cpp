@@ -7,6 +7,7 @@
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
 #include <QKeyEvent>
+#include <qwt_plot.h>
 
 //-------------------------------------------------------------------------------------------------
 /** Constructor */
@@ -18,14 +19,24 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   // Default values.
   m_min = 0;
   m_max = 1000;
+  m_rangeMin = 0;
+  m_rangeMax = 1000;
   m_log = false;
   m_colorMap.changeScaleType( GraphOptions::Linear );
-  this->setDataRange(0, 1000);
 
   // Create and add the color bar
   m_colorBar = new QwtScaleWidgetExtended();
   m_colorBar->setToolTip("");
   ui.verticalLayout->insertWidget(2,m_colorBar, 1,0 );
+
+//  QwtPlot * plot = new QwtPlot(this);
+//  plot->enableAxis( QwtPlot::xBottom, false);
+//  plot->enableAxis( QwtPlot::yLeft, false);
+//  plot->enableAxis( QwtPlot::yRight, true);
+//  plot->axisScaleDraw(QwtPlot::yRight)->
+//  plot->setAxisScale(QwtPlot::yRight, 0, 1e12);
+//  ui.verticalLayout->insertWidget(2,plot, 1,0 );
+
 
   // Hook up signals
   QObject::connect(ui.checkLog, SIGNAL(stateChanged(int)), this, SLOT(changedLogState(int)));
@@ -36,7 +47,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   QObject::connect(m_colorBar, SIGNAL(mouseMoved(QPoint, double)), this, SLOT(colorBarMouseMoved(QPoint, double)));
 
   // Initial view
-  this->update();
+  this->updateColorMap();
 }
 
 
@@ -106,16 +117,22 @@ void ColorBarWidget::setSpinBoxesSteps()
   ui.valMax->setMinimum( m_rangeMin );
   ui.valMax->setMaximum( m_rangeMax );
 
+  if (m_min < m_rangeMin) m_min = m_rangeMin;
+  if (m_max > m_rangeMax) m_max = m_rangeMax;
+
   ui.valMin->setSingleStep(step);
   ui.valMax->setSingleStep(step);
   int dec = 2;
   ui.valMin->setDecimals(dec);
   ui.valMax->setDecimals(dec);
+
+  updateMinMaxGUI();
 }
 
 
 //-------------------------------------------------------------------------------------------------
 /** Set the range of values in the overall data (limits to selections)
+ * Update the display.
  *
  * @param min
  * @param max
@@ -139,8 +156,9 @@ void ColorBarWidget::setViewRange(double min, double max)
 {
   m_min = min;
   m_max = max;
-  update();
+  updateMinMaxGUI();
 }
+
 void ColorBarWidget::setViewRange(QwtDoubleInterval range)
 { this->setViewRange(range.minValue(), range.maxValue()); }
 
@@ -165,7 +183,6 @@ void ColorBarWidget::setLog(bool log)
   ui.valMin->setLogSteps( m_log );
   ui.valMax->setLogSteps( m_log );
   setSpinBoxesSteps();
-  update();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -176,7 +193,7 @@ void ColorBarWidget::changedMinimum()
   if (m_min > m_max)
   {
     m_max = m_min+0.001;
-    update();
+    ui.valMax->setValue( m_max );
   }
   emit changedColorRange(m_min,m_max,m_log);
 }
@@ -189,7 +206,7 @@ void ColorBarWidget::changedMaximum()
   if (m_max < m_min)
   {
     m_min = m_max-0.001;
-    update();
+    ui.valMin->setValue( m_min );
   }
   emit changedColorRange(m_min,m_max,m_log);
 }
@@ -209,14 +226,15 @@ void ColorBarWidget::colorBarMouseMoved(QPoint globalPos, double fraction)
 
 
 //-------------------------------------------------------------------------------------------------
-/** Update the widget when the color map is changed in any way */
-void ColorBarWidget::update()
+/** Update the widget when the color map is changed */
+void ColorBarWidget::updateColorMap()
 {
+  // The color bar alway shows the same range. Doesn't matter since the ticks don't show up
+  QwtDoubleInterval range(1.0, 100.0);
   m_colorBar->setColorBarEnabled(true);
-  QwtDoubleInterval range(m_min, m_max);
-
   m_colorBar->setColorMap( range, m_colorMap);
   m_colorBar->setColorBarWidth(15);
+  m_colorBar->setEnabled(true);
 
   QwtScaleDiv scaleDiv;
   scaleDiv.setInterval(range);
@@ -225,18 +243,16 @@ void ColorBarWidget::update()
   else
     m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Linear), scaleDiv);
 
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Updatet the widget when changing min/max*/
+void ColorBarWidget::updateMinMaxGUI()
+{
   ui.valMin->setValue( m_min );
   ui.valMax->setValue( m_max );
-
-//  QList<double> ticks;
-//  ticks.push_back(1);
-//  ticks.push_back(2);
-//  ticks.push_back(3);
-//  ticks.push_back(4);
-//  ticks.push_back(5);
-//  scaleDiv.setTicks(QwtScaleDiv::MajorTick, ticks);
-
 }
+
 
 
 ColorBarWidget::~ColorBarWidget()

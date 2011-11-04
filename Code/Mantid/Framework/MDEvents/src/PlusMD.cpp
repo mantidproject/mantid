@@ -189,10 +189,11 @@ namespace MDEvents
 
       // Clone the lhs workspace into ws1
       IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
-      clone->setProperty("InputWorkspace", (cloneLHS ? lhs_ws : rhs_ws) );
+      clone->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(cloneLHS ? lhs_ws : rhs_ws) );
       clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
       clone->executeAsSubAlg();
-      iws1 = clone->getProperty("OutputWorkspace");
+      IMDWorkspace_sptr temp = clone->getProperty("OutputWorkspace");
+      iws1 = boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
 
       iws2 = (cloneLHS ? rhs_ws : lhs_ws); // The other one (not cloned) goes on the RHS
       out_ws = iws1;

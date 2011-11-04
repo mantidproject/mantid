@@ -124,6 +124,12 @@ void MantidWSIndexDialog::plot()
   // TODO - Add functionality to warn the user?
 }
 
+void MantidWSIndexDialog::plotAll()
+{
+  m_wsIndexChoice = m_wsIndexIntervals;
+  accept();
+}
+
 void MantidWSIndexDialog::editedWsField()
 {
   if(m_spectra) m_spectraField->clear();
@@ -190,14 +196,17 @@ void MantidWSIndexDialog::initButtons()
   
   m_okButton = new QPushButton("Ok");
   m_cancelButton = new QPushButton("Cancel");
+  m_plotAllButton = new QPushButton("Plot All");
 
   m_buttonBox->addWidget(m_okButton);
   m_buttonBox->addWidget(m_cancelButton);
+  m_buttonBox->addWidget(m_plotAllButton);
 
   m_outer->addItem(m_buttonBox);
 
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(plot()));
   connect(m_cancelButton, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_plotAllButton, SIGNAL(clicked()), this, SLOT(plotAll()));
 }
 
 void MantidWSIndexDialog::checkForSpectraAxes()

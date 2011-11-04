@@ -5,6 +5,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -43,12 +44,36 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Copy constructor
+   *
+   * @param other :: MDHistoWorkspace to copy from.
+   */
+  MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace & other)
+  {
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    for (size_t d=0; d< other.getNumDims(); d++)
+    {
+      // Copy the dimension
+      MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(0).get() ) );
+      dimensions.push_back(dim);
+    }
+    this->init(dimensions);
+    // Now copy all the data
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = other.m_signals[i];
+      m_errorsSquared[i] = other.m_errorsSquared[i];
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   MDHistoWorkspace::~MDHistoWorkspace()
   {
     delete [] m_signals;
-    delete [] m_errors;
+    delete [] m_errorsSquared;
     delete [] indexMultiplier;
     delete [] m_vertexesArray;
     delete [] m_boxLength;
@@ -91,7 +116,7 @@ namespace MDEvents
 
     // Allocate the linear arrays
     m_signals = new signal_t[m_length];
-    m_errors = new signal_t[m_length];
+    m_errorsSquared = new signal_t[m_length];
 
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
@@ -112,14 +137,14 @@ namespace MDEvents
   /** Sets all signals/errors in the workspace to the given values
    *
    * @param signal :: signal value to set
-   * @param error :: error value to set
+   * @param errorSquared :: error (squared) value to set
    */
-  void MDHistoWorkspace::setTo(signal_t signal, signal_t error)
+  void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared)
   {
     for (size_t i=0; i < m_length; i++)
     {
       m_signals[i] = signal;
-      m_errors[i] = error;
+      m_errorsSquared[i] = errorSquared;
     }
   }
 
@@ -129,7 +154,7 @@ namespace MDEvents
   * @param signal :: signal value to set when function evaluates to false
   * @param error :: error value to set when function evaluates to false
   */
-  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error)
+  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared)
   {
     if (numDimensions<3) throw std::invalid_argument("Need 3 dimensions for ImplicitFunction.");
     Mantid::coord_t coord[3];
@@ -146,7 +171,7 @@ namespace MDEvents
           if (!function->isPointContained(coord))
           {
             m_signals[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = signal;
-            m_errors[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = error;
+            m_errorsSquared[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = errorSquared;
           }
         }
       }
@@ -319,10 +344,275 @@ namespace MDEvents
     std::vector<signal_t> out;
     out.resize(m_length, 0.0);
     for (size_t i=0; i<m_length; ++i)
-        out[i] = m_errors[i];
+        out[i] = m_errorsSquared[i];
     // This copies again! :(
     return out;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Check if the two workspace's sizes match (for comparison or element-by-element operation
+   *
+   * @param other :: the workspace to compare to
+   * @param operation :: descriptive string (for the error message)
+   * @throw an error if they don't match
+   */
+  void MDHistoWorkspace::checkWorkspaceSize(const MDHistoWorkspace & other, std::string operation)
+  {
+    if (other.getNumDims() != this->getNumDims())
+      throw std::invalid_argument("Cannot perform the " + operation + " operation on this MDHistoWorkspace. The number of dimensions does not match.");
+    if (other.m_length != this->m_length)
+      throw std::invalid_argument("Cannot perform the " + operation + " operation on this MDHistoWorkspace. The length of the signals vector does not match.");
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the += operation, element-by-element, for two MDHistoWorkspace's
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator+=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "+=");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] += b.m_signals[i];
+      m_errorsSquared[i] += b.m_errorsSquared[i];
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the += operation with a scalar as the RHS argument
+   *
+   * @param b :: WorkspaceSingleValue (signal and error) as the RHS argument
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator+=(const Mantid::DataObjects::WorkspaceSingleValue & b)
+  {
+    signal_t signal = b.dataY(0)[0];
+    signal_t errorSquared = b.dataE(0)[0];
+    errorSquared *= errorSquared;
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] += signal;
+      m_errorsSquared[i] += errorSquared;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the -= operation, element-by-element, for two MDHistoWorkspace's
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator-=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "-=");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] -= b.m_signals[i];
+      m_errorsSquared[i] += b.m_errorsSquared[i];
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the -= operation with a scalar as the RHS argument
+   *
+   * @param b :: WorkspaceSingleValue (signal and error) as the RHS argument
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator-=(const Mantid::DataObjects::WorkspaceSingleValue & b)
+  {
+    signal_t signal = b.dataY(0)[0];
+    signal_t errorSquared = b.dataE(0)[0];
+    errorSquared *= errorSquared;
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] -= signal;
+      m_errorsSquared[i] += errorSquared;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the *= operation, element-by-element, for two MDHistoWorkspace's
+   *
+   * Error propagation of \f$ f = a * b \f$  is given by:
+   * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+   *
+   * @param b_ws :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator*=(const MDHistoWorkspace & b_ws)
+  {
+    checkWorkspaceSize(b_ws, "*=");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t da2 = m_errorsSquared[i];
+
+      signal_t b = b_ws.m_signals[i];
+      signal_t db2 = b_ws.m_errorsSquared[i];
+
+      signal_t f = a * b;
+      signal_t df2 = (f * f) * ( da2 / (a*a) + db2 / (b*b) );
+
+      m_signals[i] = f;
+      m_errorsSquared[i] = df2;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the *= operation with a scalar as the RHS argument
+   *
+   * Error propagation of \f$ f = a * b \f$  is given by:
+   * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+   *
+   * @param b_ws :: WorkspaceSingleValue (signal and error) as the RHS argument
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator*=(const Mantid::DataObjects::WorkspaceSingleValue & b_ws)
+  {
+    signal_t b = b_ws.dataY(0)[0];
+    signal_t db2 = b_ws.dataE(0)[0] * b_ws.dataE(0)[0];
+    signal_t db2_relative = db2 / (b*b);
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t da2 = m_errorsSquared[i];
+
+      signal_t f = a * b;
+      signal_t df2 = (f * f) * ( da2 / (a*a) + db2_relative );
+
+      m_signals[i] = f;
+      m_errorsSquared[i] = df2;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the /= operation, element-by-element, for two MDHistoWorkspace's
+   *
+   * Error propagation of \f$ f = a / b \f$  is given by:
+   * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+   *
+   * @param b_ws :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator/=(const MDHistoWorkspace & b_ws)
+  {
+    checkWorkspaceSize(b_ws, "/=");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t da2 = m_errorsSquared[i];
+
+      signal_t b = b_ws.m_signals[i];
+      signal_t db2 = b_ws.m_errorsSquared[i];
+
+      signal_t f = a / b;
+      signal_t df2 = (f * f) * ( da2 / (a*a) + db2 / (b*b) );
+
+      m_signals[i] = f;
+      m_errorsSquared[i] = df2;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the /= operation with a scalar as the RHS argument
+   *
+   * Error propagation of \f$ f = a / b \f$  is given by:
+   * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+   *
+   * @param b_ws :: WorkspaceSingleValue (signal and error) as the RHS argument
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator/=(const Mantid::DataObjects::WorkspaceSingleValue & b_ws)
+  {
+    signal_t b = b_ws.dataY(0)[0];
+    signal_t db2 = b_ws.dataE(0)[0] * b_ws.dataE(0)[0];
+    signal_t db2_relative = db2 / (b*b);
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t da2 = m_errorsSquared[i];
+
+      signal_t f = a / b;
+      signal_t df2 = (f * f) * ( da2 / (a*a) + db2_relative );
+
+      m_signals[i] = f;
+      m_errorsSquared[i] = df2;
+    }
+    return *this;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean &= (and) operation, element-by-element, for two MDHistoWorkspace's.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator&=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "&= (and)");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = m_signals[i] && b.m_signals[i];
+      m_errorsSquared[i] = 0;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean |= (or) operation, element-by-element, for two MDHistoWorkspace's.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator|=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "|= (or)");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = m_signals[i] || b.m_signals[i];
+      m_errorsSquared[i] = 0;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean ^= (xor) operation, element-by-element, for two MDHistoWorkspace's.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator^=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "^= (xor)");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = bool(m_signals[i]) ^ bool(b.m_signals[i]);
+      m_errorsSquared[i] = 0;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean not operation, performed in-place.
+   * All errors are set to 0.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   */
+  void MDHistoWorkspace::operatorNot()
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = !bool(m_signals[i]);
+      m_errorsSquared[i] = 0;
+    }
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

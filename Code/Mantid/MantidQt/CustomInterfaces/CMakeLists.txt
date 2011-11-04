@@ -134,7 +134,9 @@ add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser )
+Find_Package(Threads)
+
+target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
 
 if ( CXXTEST_FOUND )
   
