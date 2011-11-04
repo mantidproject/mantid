@@ -8,7 +8,7 @@ import datetime
 import re
 import cmakelists_utils
 from cmakelists_utils import *
-
+import commands
 
 #======================================================================
 def write_header(subproject, classname, filename, args):
@@ -30,6 +30,13 @@ def write_header(subproject, classname, filename, args):
     void exec();
 
 """
+
+    # ---- Find the author, default to blank string ----
+    author = ""
+    try:
+        author = commands.getoutput('git config user.name')
+    except:
+        pass
         
     alg_class_declare = " : public API::Algorithm"
     alg_include = """#include "MantidAPI/Algorithm.h" """
@@ -53,7 +60,7 @@ namespace %s
 
   /** %s : TODO: DESCRIPTION
     
-    @author
+    @author %s
     @date %s
 
     Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -89,7 +96,9 @@ namespace %s
 } // namespace Mantid
 
 #endif  /* %s */
-""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now().date(), datetime.datetime.now().date().year, classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
+""" % (guard, guard, alg_include, subproject, classname, 
+       author, datetime.datetime.now().date(), 
+       datetime.datetime.now().date().year, classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
     f.write(s)
     f.close()
 
