@@ -4,6 +4,7 @@
 from data_cat import DataCatalog as BaseCatalog
 from data_cat import DataSet as BaseDataSet
 import os
+import time
 
 # Check whether Mantid is available
 try:
@@ -53,7 +54,8 @@ class HFIRDataSet(BaseDataSet):
         
         title = read_prop("run_title")
         t_str = read_prop("start_time")
-        run_start = ""
+        t = time.strptime(t_str, '%Y-%m-%d %H:%M:%S')
+        run_start = time.strftime('%y-%m-%d %H:%M', t)
 
         duration = read_prop("timer")
         try:
