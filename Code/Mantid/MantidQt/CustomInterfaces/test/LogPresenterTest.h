@@ -85,8 +85,8 @@ public:
    void testInitalizationEditableView()
    {
      MockLogView view;
-     EXPECT_CALL(view, initalize(_)).Times(1);
-     EXPECT_CALL(view, hide()).Times(1);
+     EXPECT_CALL(view, initalize(_)).Times(AnyNumber());
+     EXPECT_CALL(view, hide()).Times(AnyNumber());
 
      WorkspaceMemento* wsMemento = makeMemento();
      LoanedMemento loanedMemento(wsMemento);
@@ -94,6 +94,56 @@ public:
      LogPresenter presenter(loanedMemento);
      presenter.acceptEditableView(&view);
 
+     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+   }
+
+   void testThrowsWithoutReadOnlyView()
+   {
+     MockLogView view;
+     EXPECT_CALL(view, initalize(_)).Times(AnyNumber());
+     EXPECT_CALL(view, hide()).Times(AnyNumber());
+
+     WorkspaceMemento* wsMemento = makeMemento();
+     LoanedMemento loanedMemento(wsMemento);
+
+     LogPresenter presenter(loanedMemento);
+     presenter.acceptEditableView(&view);
+     //presenter.acceptReadOnlyView(&view);
+
+     TS_ASSERT_THROWS(presenter.update(), std::runtime_error);
+     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+   }
+
+   void testThrowsWithoutEditableView()
+   {
+     MockLogView view;
+     EXPECT_CALL(view, initalize(_)).Times(AnyNumber());
+     EXPECT_CALL(view, show()).Times(AnyNumber());
+
+     WorkspaceMemento* wsMemento = makeMemento();
+     LoanedMemento loanedMemento(wsMemento);
+
+     LogPresenter presenter(loanedMemento);
+     //presenter.acceptEditableView(&view);
+     presenter.acceptReadOnlyView(&view);
+
+     TS_ASSERT_THROWS(presenter.update(), std::runtime_error);
+     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+   }
+
+   void testThrowsWithoutBothViews()
+   {
+     MockLogView view;
+     EXPECT_CALL(view, initalize(_)).Times(AnyNumber());
+
+     WorkspaceMemento* wsMemento = makeMemento();
+     LoanedMemento loanedMemento(wsMemento);
+
+     LogPresenter presenter(loanedMemento);
+     //presenter.acceptEditableView(&view);
+     //presenter.acceptReadOnlyView(&view);
+
+     TS_ASSERT_THROWS(presenter.update(), std::runtime_error);
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
    }
 
