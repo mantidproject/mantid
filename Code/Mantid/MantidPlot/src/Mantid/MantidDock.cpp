@@ -309,6 +309,10 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_delete = new QAction(tr("Delete"),this);
   connect(m_delete,SIGNAL(triggered()),this,SLOT(deleteWorkspaces()));
+
+  m_showTransposed = new QAction(tr("Show Transposed"),this);
+  connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
+
 }
 
 /**
@@ -906,6 +910,7 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
 {
   menu->addAction(m_showData);
+  menu->addAction(m_showTransposed);
   menu->addAction(m_showHist);
 }
 
