@@ -11,6 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include <gmock/gmock.h>
 #include <map>
+#include "MantidQtCustomInterfaces/Approach.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -30,9 +31,10 @@ private:
       LogDataMap());
     MOCK_METHOD0(indicateModified, void());
     MOCK_METHOD0(indicateDefault, void());
-    MOCK_CONST_METHOD0(getRequestEdit, bool());
+    MOCK_METHOD0(show, void());
+    MOCK_METHOD0(hide, void());
+    MOCK_CONST_METHOD0(swapMode, bool());
   };
-
   // Helper method to generate a workspace memento;
   static WorkspaceMemento* makeMemento()
   {
@@ -65,17 +67,32 @@ public:
 // Functional tests
 //=====================================================================================
   
-   void testInitalization()
+   void testInitalizationReadOnlyView()
    {
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(1);
-     //Test that it initalizes the view on accept
-     
+     EXPECT_CALL(view, show()).Times(1);
+
      WorkspaceMemento* wsMemento = makeMemento();
      LoanedMemento loanedMemento(wsMemento);
 
      LogPresenter presenter(loanedMemento);
-     presenter.acceptView(&view);
+     presenter.acceptReadOnlyView(&view);
+
+     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+   }
+
+   void testInitalizationEditableView()
+   {
+     MockLogView view;
+     EXPECT_CALL(view, initalize(_)).Times(1);
+     EXPECT_CALL(view, hide()).Times(1);
+
+     WorkspaceMemento* wsMemento = makeMemento();
+     LoanedMemento loanedMemento(wsMemento);
+
+     LogPresenter presenter(loanedMemento);
+     presenter.acceptEditableView(&view);
 
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
    }
@@ -91,13 +108,16 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
-     EXPECT_CALL(view, getRequestEdit()).Times(1);
-     
+     EXPECT_CALL(view, swapMode()).Times(1);
+     EXPECT_CALL(view, show()).Times(AnyNumber());
+     EXPECT_CALL(view, hide()).Times(AnyNumber());
+
      WorkspaceMemento* wsMemento = makeMemento();
      LoanedMemento loanedMemento(wsMemento);
 
      LogPresenter presenter(loanedMemento);
-     presenter.acceptView(&view);
+     presenter.acceptReadOnlyView(&view);
+     presenter.acceptEditableView(&view);
      presenter.update(); // Updated should call getLogData on view
 
      //Check that the edited log values persist
@@ -132,14 +152,17 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
-     EXPECT_CALL(view, getRequestEdit()).Times(1);
+     EXPECT_CALL(view, swapMode()).Times(1);
+     EXPECT_CALL(view, show()).Times(AnyNumber());
+     EXPECT_CALL(view, hide()).Times(AnyNumber());
      
      WorkspaceMemento* wsMemento = makeMemento();
      int originalColCount = wsMemento->getData()->columnCount();
      LoanedMemento loanedMemento(wsMemento);
 
      LogPresenter presenter(loanedMemento);
-     presenter.acceptView(&view);
+     presenter.acceptReadOnlyView(&view);
+     presenter.acceptEditableView(&view);
      presenter.update(); // Updated should call getLogData on view
 
      //Check that the edited log values persist

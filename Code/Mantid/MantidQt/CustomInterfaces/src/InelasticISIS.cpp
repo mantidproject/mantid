@@ -17,7 +17,7 @@ namespace MantidQt
     Creational method for the lattice view.
     @return a new ParameterisedLatticeView
     */
-    ParameterisedLatticeView* InelasticISIS::createLatticeView(boost::shared_ptr<LatticePresenter> presenter)
+    ParameterisedLatticeView* InelasticISIS::createLatticeView(LatticePresenter_sptr presenter)
     {
       return new ParameterisedLatticeView(presenter);
     }
@@ -26,9 +26,14 @@ namespace MantidQt
     Creational method for the log view.
     @return a new Standard log view
     */
-    StandardLogView* InelasticISIS::createLogView(boost::shared_ptr<LogPresenter> presenter)
+    StandardLogView* InelasticISIS::createLogView(LogPresenter_sptr presenter)
     {
       return new StandardLogView(presenter);
+    }
+
+    EditableLogView* InelasticISIS::createEditableLogView(LogPresenter_sptr presenter)
+    {
+      return new EditableLogView(presenter);
     }
   }
 }

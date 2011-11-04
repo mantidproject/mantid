@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/ParameterisedLatticeView.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
 #include "MantidQtCustomInterfaces/StandardLogView.h"
+#include "MantidQtCustomInterfaces/EditableLogView.h"
 
 
 namespace MantidQt
@@ -16,8 +17,9 @@ namespace MantidQt
     {
     public:
       InelasticISIS();
-      virtual ParameterisedLatticeView* createLatticeView(boost::shared_ptr<LatticePresenter> presenter);
-      virtual StandardLogView* createLogView(boost::shared_ptr<LogPresenter> presenter);
+      virtual ParameterisedLatticeView* createLatticeView(LatticePresenter_sptr presenter);
+      virtual StandardLogView* createLogView(LogPresenter_sptr presenter);
+      virtual EditableLogView* createEditableLogView(LogPresenter_sptr presenter);
     };
   }
 }

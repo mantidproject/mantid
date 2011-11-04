@@ -1,44 +1,52 @@
-//----------------------
-// Includes
-//----------------------
-#include "MantidQtCustomInterfaces/StandardLogView.h"
+#include "MantidQtCustomInterfaces/EditableLogView.h"
 #include "MantidQtCustomInterfaces/LogPresenter.h"
-#include <qtablewidget.h>
-#include <qpushbutton.h>
+#include "MantidKernel/System.h"
 #include <qboxlayout.h>
+#include <qpushbutton.h>
+#include <qtablewidget.h>
+
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /// Constructor
-    StandardLogView::StandardLogView(boost::shared_ptr<LogPresenter> presenter) : m_presenter(presenter), m_request_edit(false), m_tableWidget(new QTableWidget(this))
+    //----------------------------------------------------------------------------------------------
+    /** Constructor
+    */
+    EditableLogView::EditableLogView(boost::shared_ptr<LogPresenter>  presenter) : m_presenter(presenter), m_request_close(false), m_tableWidget(new QTableWidget(this))
     {
-      presenter->acceptReadOnlyView(this);
+      presenter->acceptEditableView(this);
     }
 
-    /// Destructor
-    StandardLogView::~StandardLogView()
+    //----------------------------------------------------------------------------------------------
+    /** Destructor
+    */
+    EditableLogView::~EditableLogView()
     {
     }
 
     /// Indicate that the view has been modified.
-    void StandardLogView::indicateModified()
+    void EditableLogView::indicateModified()
     {
+      //TODO
     }
 
     /// Indicate that the view is unmodified.
-    void StandardLogView::indicateDefault()
+    void EditableLogView::indicateDefault()
     {
+      //TODO
     }
 
     /// Initalization method.
-    void StandardLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
+    void EditableLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
     {
       int logsSize = int(logs.size());
       m_tableWidget->setRowCount(logsSize);
       m_tableWidget->setColumnCount(2);
-      
+
       //Populate the tree with log names and values
       for(int i = 0; i < logsSize; i++)
       {
@@ -54,20 +62,20 @@ namespace MantidQt
         m_tableWidget->setItem(i, 1, valueItem);
       }
 
-      QPushButton* btnEdit = new QPushButton("Edit");
-      connect(btnEdit, SIGNAL(clicked()), this, SLOT(edited()));
+      QPushButton* btnEdit = new QPushButton("Close");
+      connect(btnEdit, SIGNAL(clicked()), this, SLOT(close()));
 
       QVBoxLayout* layout = new QVBoxLayout();
       layout->addWidget(m_tableWidget);
       layout->addWidget(btnEdit);
       this->setLayout(layout);
-      m_request_edit = false;
+      m_request_close = false;
     }
 
     /** Getter for the log data.
     @return LogDataMap containing the log data.
     */
-    LogDataMap StandardLogView::getLogData() const
+    LogDataMap EditableLogView::getLogData() const
     {
       LogDataMap result;
       for(int i = 0; i < m_tableWidget->rowCount(); i++)
@@ -82,29 +90,31 @@ namespace MantidQt
     /** Getter for the edit request status.
     @return true if an edit request has been made.
     */
-    bool StandardLogView::swapMode() const
+    bool EditableLogView::swapMode() const
     {
-      return m_request_edit;
+      return m_request_close;
     }
 
     /// Listener for the edit button click event.
-    void StandardLogView::edited()
+    void EditableLogView::close()
     {
-      m_request_edit = true;
+      m_request_close = true;
       m_presenter->update();
     }
 
     /// Show the widget.
-    void StandardLogView::show()
+    void EditableLogView::show()
     {
       QWidget::show();
     }
 
-    /// Hide the widget.
-    void StandardLogView::hide()
+    /// Hide the widget
+    void EditableLogView::hide()
     {
       QWidget::hide();
     }
 
-  }
-}
+
+
+  } // namespace Mantid
+} // namespace CustomInterfaces

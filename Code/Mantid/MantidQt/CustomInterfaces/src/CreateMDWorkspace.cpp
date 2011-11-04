@@ -122,21 +122,22 @@ void CreateMDWorkspace::addWorkspaceClicked()
     MatrixWorkspace_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if(matrixWS)
     {
-      m_data->registerWorkspace(matrixWS, m_model); //TODO better handle any incompatibility here.
+      m_data->registerWorkspace(matrixWS, m_model);
 
       // Key off the selected index. --------------------------------------------
-      LoanedMemento memento = m_data->at(0); 
+      LoanedMemento memento = m_data->at(0); //TODO. Key properly!
 
       if(ISISInelastic == m_approachType)
       {
-        m_approach = boost::shared_ptr<Approach>(new InelasticISIS);
+        m_approach = Approach_sptr(new InelasticISIS);
       }
 
       m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
       m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(memento))));
       m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
-      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(LogPresenter_sptr(new LogPresenter(memento))));
-      //------------------------------------------------------------------------------
+      LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(memento));
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(logPresenter));
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createEditableLogView(logPresenter));
     }
     else
     {

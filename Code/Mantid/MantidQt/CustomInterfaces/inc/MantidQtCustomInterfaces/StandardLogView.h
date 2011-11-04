@@ -60,7 +60,13 @@ namespace MantidQt
       virtual LogDataMap getLogData() const;
 
       /// Getter for the edit request status.
-      virtual bool getRequestEdit() const;
+      virtual bool swapMode() const;
+
+      /// Shows the view.
+      void show();
+
+      /// Hides the view.
+      void hide();
 
     };
   }
