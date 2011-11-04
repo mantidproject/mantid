@@ -2,11 +2,10 @@
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/numeric.hpp>
 
-#include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidPythonInterface/kernel/TypedHandler.h"
 
-using Mantid::PythonInterface::PropertyMarshal;
-using Mantid::PythonInterface::TypedHandler;
-
+using namespace Mantid::PythonInterface;
+using PropertyMarshal::TypedHandler;
 
 // Forward declare
 @EXPORT_DECLARE@

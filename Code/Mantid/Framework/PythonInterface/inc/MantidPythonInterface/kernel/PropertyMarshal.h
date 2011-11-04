@@ -1,6 +1,27 @@
 #ifndef MANTID_PYTHONINTERFACE_PROPERTYMARSHAL_H_
 #define MANTID_PYTHONINTERFACE_PROPERTYMARSHAL_H_
 
+/**
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -48,73 +69,30 @@ namespace Mantid
       virtual ~PropertyHandler() {};
       /// Virtual set function to handle Python -> C++ calls
       virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value) = 0;
-    };
-    /**
-     * A templated marshal that calls the corresponding setProperty method on the given algorithm
-     */
-    template<typename CType>
-    struct DLLExport TypedHandler : public PropertyHandler
-    {
-      /// Set function to handle Python -> C++ calls and get the correct type
-      void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
-      {
-        // Seems like a lot for 1 line of code but for more complex types we'll
-        // need to specialise
-        alg->setProperty<CType>(name, boost::python::extract<CType>(value));
-      }
+      /// Return the type_info of the handled type
+      virtual const std::type_info & typeInfo() const = 0;
     };
 
+    //------------------------------------------------------------------------------------------------------------
     /**
-     * Specialized string version to avoid a current bug where string property values are not
-     * assigned polymorphically. This can be removed when the bug is fixed
+     * A namespace for marhsalling calls involving transfering property values in/out of an IPropertyManager.
+     *
+     * This allows us to have a single method that is called when a user runs, from Python, alg.setProperty
+     * or property.value. For the value return it attemps to upcast the object to correct type
+     *
      */
-    template<>
-    struct DLLExport TypedHandler<std::string> : public PropertyHandler
+    namespace PropertyMarshal
     {
-      /// Set function to handle Python -> C++ calls and get the correct type
-      void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
-      {
-        // Seems like a lot for 1 line of code but for more complex types we'll
-        // need to specialise
-        alg->setPropertyValue(name, boost::python::extract<std::string>(value));
-      }
-    };
-
-    //------------------------------------------------------------------------------------------------
-    /**
-     * Defines static functions that allow method calls on Python
-     * objects to be routed here
-     */
-    class DLLExport PropertyMarshal
-    {
-    public:
-      /// Typedef the map of python types to C++ functions
-      typedef std::map<PyTypeObject*, PropertyHandler*> PyTypeLookup;
-    public:
-      /// This static function allows a call to a method on an IAlgorithm object
-      static void setProperty(boost::python::object self, const std::string & name,
+      /// This static function allows a call to a method on an IPropertyManager object
+      DLLExport void setProperty(boost::python::object self, const std::string & name,
                               boost::python::object value);
-
+      /// Converts the value of a property to the most appropriate type, i.e. the most dervied exported interface
+      DLLExport boost::python::object value(boost::python::object self);
       /// Insert a new property handler
-      static void insert(PyTypeObject* typeObject, PropertyHandler* handler);
-    private:
-      /// Map a python type object to a C++ setter
-      static PyTypeLookup g_handlers;
+      DLLExport void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler);
     };
 
   }
 }
-
-/**
- * A macro to declare property handlers
- *
- * @param export_type :: The C++ type that is to be converted
- * @param base_type :: The C++ type that the export_type is to be treated as
- */
-#define DECLARE_PROPERTYHANDLER(export_type, base_type) \
-  const boost::python::converter::registration *reg = boost::python::converter::registry::query(typeid(export_type));\
-  Mantid::PythonInterface::PropertyMarshal::insert(reg->get_class_object(), new Mantid::PythonInterface::TypedHandler<base_type>());\
-
-
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTYMARSHAL_H_ */
