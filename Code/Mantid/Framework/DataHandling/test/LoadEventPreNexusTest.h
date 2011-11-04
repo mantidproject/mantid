@@ -13,7 +13,6 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-//#include <boost/date_time/gregorian/gregorian.hpp>
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -33,7 +32,6 @@ using std::size_t;
 using std::vector;
 using std::cout;
 using std::endl;
-//using namespace boost::posix_time;
 
 
 
@@ -64,7 +62,7 @@ public:
     TS_ASSERT_THROWS(
         eventLoader->setPropertyValue("EventFilename", "this_file_doesnt_exist.blabla.data")
        , std::invalid_argument);
-    //Execut fails since the properties aren't set correctly.
+    //Execute fails since the properties aren't set correctly.
     TS_ASSERT_THROWS( eventLoader->execute() , std::runtime_error);
 
   }
@@ -276,7 +274,38 @@ public:
     TS_ASSERT_EQUALS( *dets.begin(), 110);
   }
 
+  void test_invalid_chunk_number()
+  {
+    eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
+    eventLoader->setPropertyValue("ChunkNumber","3");
+    eventLoader->setPropertyValue("TotalChunks","2");
+    TS_ASSERT_THROWS( eventLoader->execute(), std::runtime_error );
+  }
 
+  void test_loading_chunks()
+  {
+    // Load chunk 1 of 2
+    eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
+    eventLoader->setPropertyValue("ChunkNumber","1");
+    eventLoader->setPropertyValue("TotalChunks","2");
+    eventLoader->setPropertyValue("OutputWorkspace", "chunk1");
+    TS_ASSERT( eventLoader->execute() );
+    EventWorkspace_sptr chunk1 = boost::dynamic_pointer_cast<EventWorkspace>
+            (AnalysisDataService::Instance().retrieve("chunk1"));
+
+    // Load chunk 2 of 10
+    eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
+    eventLoader->setPropertyValue("ChunkNumber","2");
+    eventLoader->setPropertyValue("TotalChunks","2");
+    eventLoader->setPropertyValue("OutputWorkspace", "chunk2");
+    TS_ASSERT( eventLoader->execute() );
+    EventWorkspace_sptr chunk2 = boost::dynamic_pointer_cast<EventWorkspace>
+            (AnalysisDataService::Instance().retrieve("chunk2"));
+
+    // The number of events should be roughly equal and the sum should be 112266
+    TS_ASSERT_EQUALS( chunk1->getNumberEvents(), 56139 )
+    TS_ASSERT_EQUALS( chunk2->getNumberEvents(), 56127 )
+  }
 
 };
 

@@ -206,7 +206,6 @@ public:
     std::vector<DasEvent> data;
     DasEvent * buffer = NULL;
     TS_ASSERT_EQUALS(file2.getNumElements(), 0);
-    TS_ASSERT_THROWS(file2.getFileSize(), std::runtime_error );
     TS_ASSERT_THROWS(file2.loadAll(), std::runtime_error );
     TS_ASSERT_THROWS(file2.loadAllInto( data), std::runtime_error );
     TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), std::runtime_error );
