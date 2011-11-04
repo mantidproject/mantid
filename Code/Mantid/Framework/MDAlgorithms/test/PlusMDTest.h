@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/PlusMD.h"
+#include "MantidMDAlgorithms/PlusMD.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -14,6 +14,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
 class PlusMDTest : public CxxTest::TestSuite
@@ -131,4 +132,3 @@ public:
 
 
 #endif /* MANTID_MDEVENTS_PLUSMDEWTEST_H_ */
-
