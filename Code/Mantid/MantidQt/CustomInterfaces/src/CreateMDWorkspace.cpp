@@ -4,6 +4,8 @@
 #include "MantidQtCustomInterfaces/InelasticISIS.h"
 #include "MantidQtCustomInterfaces/CreateMDWorkspace.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
+#include "MantidQtCustomInterfaces/LatticePresenter.h"
+#include "MantidQtCustomInterfaces/LogPresenter.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -30,7 +32,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
@@ -127,13 +129,13 @@ void CreateMDWorkspace::addWorkspaceClicked()
 
       if(ISISInelastic == m_approachType)
       {
-        m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+        m_approach = boost::shared_ptr<Approach>(new InelasticISIS);
       }
 
       m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
-      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(memento))));
       m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
-      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView());
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(LogPresenter_sptr(new LogPresenter(memento))));
       //------------------------------------------------------------------------------
     }
     else

@@ -8,9 +8,8 @@ namespace MantidQt
   {
     /**
     Constructor
-    @param wsMemento : ref to LoanedMemento
     */
-    InelasticISIS::InelasticISIS(LoanedMemento& wsMemento) : m_WsMemento(wsMemento)
+    InelasticISIS::InelasticISIS()
     {
     }
 
@@ -18,18 +17,18 @@ namespace MantidQt
     Creational method for the lattice view.
     @return a new ParameterisedLatticeView
     */
-    ParameterisedLatticeView* InelasticISIS::createLatticeView() 
+    ParameterisedLatticeView* InelasticISIS::createLatticeView(boost::shared_ptr<LatticePresenter> presenter)
     {
-      return new ParameterisedLatticeView(new LatticePresenter(m_WsMemento));
+      return new ParameterisedLatticeView(presenter);
     }
 
     /**
     Creational method for the log view.
     @return a new Standard log view
     */
-    StandardLogView* InelasticISIS::createLogView()
+    StandardLogView* InelasticISIS::createLogView(boost::shared_ptr<LogPresenter> presenter)
     {
-      return new StandardLogView(new LogPresenter(m_WsMemento));
+      return new StandardLogView(presenter);
     }
   }
 }

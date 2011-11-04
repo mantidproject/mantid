@@ -43,6 +43,7 @@ namespace MantidQt
       virtual LogDataMap getLogData() const = 0;
       virtual void indicateModified() = 0;
       virtual void indicateDefault() = 0;
+      virtual bool getRequestEdit() const = 0;
     };
   }
 }

@@ -30,6 +30,7 @@ private:
       LogDataMap());
     MOCK_METHOD0(indicateModified, void());
     MOCK_METHOD0(indicateDefault, void());
+    MOCK_CONST_METHOD0(getRequestEdit, bool());
   };
 
   // Helper method to generate a workspace memento;
@@ -90,6 +91,7 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
+     EXPECT_CALL(view, getRequestEdit()).Times(1);
      
      WorkspaceMemento* wsMemento = makeMemento();
      LoanedMemento loanedMemento(wsMemento);
@@ -130,6 +132,7 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
+     EXPECT_CALL(view, getRequestEdit()).Times(1);
      
      WorkspaceMemento* wsMemento = makeMemento();
      int originalColCount = wsMemento->getData()->columnCount();

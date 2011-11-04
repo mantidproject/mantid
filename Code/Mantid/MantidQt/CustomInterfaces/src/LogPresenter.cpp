@@ -24,6 +24,12 @@ namespace MantidQt
     */
     void LogPresenter::update()
     {
+      if(m_view->getRequestEdit())
+      {
+        //Create and use an editable view.
+      }
+      else
+      {
       std::map<std::string, std::string> logValues = m_view->getLogData();
 
       WorkspaceMementoService<LoanedMemento> service(m_WsMemento);
@@ -44,6 +50,7 @@ namespace MantidQt
         it++;
       } 
       service.setLogData(newLogValues);
+      }
     }
 
     /**
