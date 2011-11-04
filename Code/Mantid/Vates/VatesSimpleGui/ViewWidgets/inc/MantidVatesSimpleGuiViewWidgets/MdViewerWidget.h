@@ -107,12 +107,9 @@ private:
   bool pluginMode; ///< Flag to say widget is in plugin mode
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
-  MantidQt::API::VatesViewerInterface::WorkspaceType wsType; ///< Identifies the current dataset type
 
   /// Check the environmental variables to make sure PV_PLUGIN_PATH is available
   void checkEnvSetup();
-  /// Check if an incoming dataset has timesteps for animation control.
-  void checkForTimesteps();
   /// Function to create the pqPVApplicationCore object in plugin mode
   void createAppCoreForPlugin();
   /// Disable communication with the proxy tab widget.
@@ -134,8 +131,6 @@ private:
    * @return the requested view
    */
   ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
-  /// Set the animation controls in plugin more for "time" data.
-  void setTimesteps();
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
   /**

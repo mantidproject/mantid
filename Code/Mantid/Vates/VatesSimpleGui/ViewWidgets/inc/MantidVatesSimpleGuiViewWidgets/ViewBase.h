@@ -13,6 +13,7 @@ class pqPipelineBrowserWidget;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
+class vtkSMDoubleVectorProperty;
 
 class QString;
 
@@ -133,6 +134,8 @@ public slots:
    * @param state flag to determine whether or not to use log color scaling
    */
   void onLogScale(int state);
+  /// Setup the animation controls.
+  void setTimeSteps();
 
 signals:
   /**
@@ -144,6 +147,18 @@ signals:
   /// Signal to trigger pipeline update.
   void triggerAccept();
   /**
+   * Signal to update state of animation controls.
+   * @param state flag to enable/disable animantion controls
+   */
+  void setAnimationControlState(bool state);
+  /**
+   * Signal to update animation control information.
+   * @param start the value of start "time"
+   * @param stop the value of the end "time"
+   * @param numSteps the number of "time" steps
+   */
+  void setAnimationControlInfo(double start, double stop, int numSteps);
+  /**
    * Signal to set the status of the view mode buttons.
    * @param state whether or not to enable to view mode buttons
    */
@@ -154,6 +169,10 @@ private:
 
   /// Return the active representation determined by ParaView.
   pqPipelineRepresentation *getPvActiveRep();
+  /// Find the number of true sources in the pipeline.
+  unsigned int getNumSources();
+  /// Collect time information for animation controls.
+  void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };
