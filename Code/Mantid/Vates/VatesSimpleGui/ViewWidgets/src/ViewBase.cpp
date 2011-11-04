@@ -90,6 +90,12 @@ void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
   UNUSED_ARG(pbw);
 }
 
+/**
+ * This function checks a pqPipelineSource (either from a file or workspace)
+ * to see if it is derived from a PeaksWorkspace.
+ * @param src the pipeline source to check
+ * @return true if the pipeline source is derived from PeaksWorkspace
+ */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
 {
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
@@ -111,6 +117,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
  */
 void ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
+  // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqPipelineSource *src = builder->createSource("sources", pluginName,
@@ -118,6 +125,7 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
+  // Update the source so that it retrieves the data from the Mantid workspace
   vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
@@ -136,8 +144,8 @@ pqPipelineSource *ViewBase::getPvActiveSrc()
 
 /**
  * Function that sets the status for the view mode control buttons. This
- * implementation looks at the original source for a view. Other views may
- * override this function to provide alternate checks.
+ * implementation looks at the original source for a view. Views may override
+ * this function to provide alternate checks.
  */
 void ViewBase::checkView()
 {

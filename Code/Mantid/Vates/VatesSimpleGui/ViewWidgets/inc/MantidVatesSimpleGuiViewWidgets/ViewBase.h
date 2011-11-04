@@ -62,7 +62,7 @@ public:
   virtual ~ViewBase() {}
 
   /// Poll the view to set status for mode control buttons.
-  void checkView();
+  virtual void checkView();
   /**
    * Function used to correct post-accept visibility issues. Most
    * views won't need to do anything.
@@ -91,6 +91,7 @@ public:
    * @return the main view
    */
   virtual pqRenderView *getView() = 0;
+  /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /**
    * This function makes the view render itself.

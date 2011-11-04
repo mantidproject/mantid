@@ -60,6 +60,8 @@ public:
   /// Default destructor
   virtual ~SplatterPlotView();
 
+  /// @see ViewBase::checkView
+  void checkView();
   /**
    * ViewBase::destroyView
    */
