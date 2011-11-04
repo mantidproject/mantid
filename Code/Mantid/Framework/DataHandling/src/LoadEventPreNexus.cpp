@@ -20,10 +20,10 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include <stdexcept>
 #include <functional>
 #include <iostream>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <set>
 #include <vector>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/timer.hpp>
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
@@ -42,6 +42,7 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 namespace Mantid
 {
@@ -176,8 +177,18 @@ void LoadEventPreNexus::init()
       "A list of individual spectra (pixel IDs) to read, specified as e.g. 10:20. Only used if set.");
 
   // how many events to process
-  declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
-      "Number of events to read from the file.");
+//  declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
+//      "Number of events to read from the file.");
+
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(1);
+  declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
+      "If loading the file by sections ('chunks'), this is the section number of this execution of the algorithm.");
+  declareProperty("TotalChunks", EMPTY_INT(), mustBePositive->clone(),
+      "If loading the file by sections ('chunks'), this is the total number of sections.");
+  // TotalChunks is only meaningful if ChunkNumber is set
+  // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at validation
+  setPropertySettings("TotalChunks", new VisibleWhenProperty(this, "ChunkNumber", IS_NOT_DEFAULT));
 
   std::vector<std::string> propOptions;
   propOptions.push_back("Auto");
@@ -293,6 +304,13 @@ string getRunnumber(const string &filename) {
 /** Execute the algorithm */
 void LoadEventPreNexus::exec()
 {
+  // Check 'chunk' properties are valid, if set
+  const int chunks = getProperty("TotalChunks");
+  if ( !isEmpty(chunks) && int(getProperty("ChunkNumber")) > chunks )
+  {
+    throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
+  }
+
   prog = new Progress(this,0.0,1.0,100);
 
   // what spectra (pixel ID's) to load
@@ -421,16 +439,6 @@ inline void LoadEventPreNexus::fixPixelId(PixelType &pixel, uint32_t &period) co
 }
 
 //-----------------------------------------------------------------------------
-/** Special function to reduce the number of loaded events.
- *
- */
-void LoadEventPreNexus::setMaxEventsToLoad(std::size_t max_events_to_load)
-{
-  this->max_events = max_events_to_load;
-}
-
-
-//-----------------------------------------------------------------------------
 /** Process the event file properly.
  * @param workspace :: EventWorkspace to write to.
  */
@@ -440,15 +448,14 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   this->num_good_events = 0;
   this->num_ignored_events = 0;
 
-
   //Default values in the case of no parallel
-  loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE * 2;
+  size_t loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE * 2;
 
   shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
   longest_tof = 0.;
 
   //Initialize progress reporting.
-  size_t numBlocks = (eventfile->getNumElements() + loadBlockSize - 1) / loadBlockSize;
+  size_t numBlocks = (max_events + loadBlockSize - 1) / loadBlockSize;
 
   // We want to pad out empty pixels.
   detid2det_map detector_map;
@@ -466,7 +473,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     // (which is sped up by ~ x 3 with parallel processing, say 10 million per second, e.g. 7 million events more per seconds).
     // compared to a setup time/merging time of about 10 seconds per million detectors.
     double setUpTime = double(detector_map.size()) * 10e-6;
-    parallelProcessing = ((double(eventfile->getNumElements()) / 7e6) > setUpTime);
+    parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using") << " parallel processing." << std::endl;
   }
 
@@ -589,13 +596,15 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     EventVector_pt * theseEventVectors = eventVectors[threadNum];
 
     // Where to start in the file?
-    size_t fileOffset = loadBlockSize * blockNum;
-    size_t current_event_buffer_size = 0;
+    size_t fileOffset = first_event + (loadBlockSize * blockNum);
+    // May need to reduce size of last (or only) block
+    size_t current_event_buffer_size =
+        ( blockNum == int(numBlocks-1) ) ? ( max_events - (numBlocks-1)*loadBlockSize ) : loadBlockSize;
 
     // Load this chunk of event data (critical block)
     PARALLEL_CRITICAL( LoadEventPreNexus_fileAccess )
     {
-      current_event_buffer_size = eventfile->loadBlockAt(event_buffer, fileOffset, loadBlockSize);
+      current_event_buffer_size = eventfile->loadBlockAt(event_buffer, fileOffset, current_event_buffer_size);
     }
 
     // This processes the events. Can be done in parallel!
@@ -914,20 +923,27 @@ void LoadEventPreNexus::loadPixelMap(const std::string &filename)
 void LoadEventPreNexus::openEventFile(const std::string &filename)
 {
   //Open the file
-  this->eventfile = new BinaryFile<DasEvent>(filename);
-  this->num_events = eventfile->getNumElements();
+  eventfile = new BinaryFile<DasEvent>(filename);
+  num_events = eventfile->getNumElements();
+  g_log.debug() << "File contains " << num_events << " event records.\n";
 
-  // determine if we should truncate the event list by the parameter list
-  int numeventsparam = this->getProperty("NumberOfEvents");
-  if (numeventsparam > 0)
-    this->setMaxEventsToLoad(static_cast<size_t>(numeventsparam));
+  // Check if we are only loading part of the event file
+  const int chunk = getProperty("ChunkNumber");
+  if ( isEmpty(chunk) ) // We are loading the whole file
+  {
+    first_event = 0;
+    max_events = num_events;
+  }
+  else // We are loading part - work out the event number range
+  {
+    const int totalChunks = getProperty("TotalChunks");
+    max_events = num_events/totalChunks;
+    first_event = (chunk - 1) * max_events;
+    // Need to add any remainder to the final chunk
+    if ( chunk == totalChunks ) max_events += num_events%totalChunks;
+  }
 
-  //Limit the # of events to load?
-  if (this->max_events > 0)
-    this->num_events = this->max_events;
-
-  this->g_log.information()<< "Reading " <<  this->num_events << " event records\n";
-
+  g_log.information()<< "Reading " <<  max_events << " event records\n";
 }
 
 //-----------------------------------------------------------------------------
