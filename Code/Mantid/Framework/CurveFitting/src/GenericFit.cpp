@@ -102,6 +102,7 @@ namespace CurveFitting
   */
   void GenericFit::exec()
   {
+
     // Try to retrieve optional properties
     const int maxInterations = getProperty("MaxIterations");
 
@@ -410,7 +411,6 @@ namespace CurveFitting
     
     // minimizer may have dynamically allocated memory hence make sure this memory is freed up
     delete minimizer;
-
     return;
   }
 

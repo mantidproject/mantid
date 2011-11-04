@@ -181,6 +181,9 @@ void MuonAnalysis::initLayout()
   // Detect if the graph should be customised and call the two functions that change the different curves on the graph.
   connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QString &)), this, SLOT(changeDataPlotType(const QString &)));
   connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
+
+  // Detect when the fit has finished and group the workspaces that have been created as a result.
+  connect(m_uiForm.fitBrowser,SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
 }
 
 
@@ -2858,6 +2861,42 @@ void MuonAnalysis::changeDataPlotType(const QString & plotDetails)
   QString fitType("");
   fitType.setNum(m_uiForm.connectPlotType->currentIndex());
   changePlotType(fitType + ".Data." + plotDetails + "." + "Black");
+}
+
+/**
+* Group the fitted workspaces that are created from the 'fit' algorithm
+*
+* @params workspaceName :: The workspaceName that the fit has been done against
+*/
+void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
+{
+  QString groupName = workspaceName.left(workspaceName.find(';'));
+  QString wsNormalised = workspaceName + "_NormalisedCovarianceMatrix";
+  QString wsParameters = workspaceName + "_Parameters";
+  QString wsWorkspace = workspaceName + "_Workspace";
+
+  if ( Mantid::API::AnalysisDataService::Instance().doesExist(groupName.toStdString()) )
+  {
+    QString groupStr("");
+    //if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised.toStdString()) )
+    //{
+    //  groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsNormalised + "," + groupName
+    //      + "',OutputWorkspace='" + groupName + "')\n";
+    //  runPythonCode( groupStr ).trimmed();
+    //}
+    //if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters.toStdString()) )
+    //{
+    //  groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsParameters + "," + groupName
+    //      + "',OutputWorkspace='" + groupName + "')\n";
+    //  runPythonCode( groupStr ).trimmed();
+    //}
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace.toStdString()) )
+    {
+      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsWorkspace + "," + groupName
+          + "',OutputWorkspace='" + groupName + "')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
+  }
 }
 
 }//namespace MantidQT

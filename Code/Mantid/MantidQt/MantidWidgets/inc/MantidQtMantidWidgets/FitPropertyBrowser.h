@@ -231,7 +231,6 @@ signals:
 
   void changeFitPlotStyle(const QString &);
 
-  // @Rob_Whitley Need to implement. 
   void bunchData(const std::string&);
   void rawData(const std::string&);
 
@@ -251,6 +250,7 @@ signals:
 
   void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
+  void fittingDone(QString);
 
 private slots:
 
