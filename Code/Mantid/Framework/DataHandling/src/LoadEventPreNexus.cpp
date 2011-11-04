@@ -13,6 +13,8 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 
 
 *WIKI*/
+
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
@@ -25,7 +27,6 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include <boost/timer.hpp>
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -99,16 +100,13 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
-LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IDataFileChecker()
+LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IDataFileChecker(), eventfile(NULL), max_events(0)
 {
-  this->eventfile = NULL;
-  this->max_events = 0;
 }
 
 LoadEventPreNexus::~LoadEventPreNexus()
 {
-  if (this->eventfile)
-    delete this->eventfile;
+  delete this->eventfile;
 }
 
 /**
@@ -180,10 +178,6 @@ void LoadEventPreNexus::init()
   // how many events to process
   declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
       "Number of events to read from the file.");
-  //
-  //  // how many events to process
-  //  declareProperty(new PropertyWithValue<bool>("UseParallelProcessing", false, Direction::Input),
-  //          "Use multiple cores for loading the data?");
 
   std::vector<std::string> propOptions;
   propOptions.push_back("Auto");
@@ -454,7 +448,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   longest_tof = 0.;
 
   //Initialize progress reporting.
-  size_t numBlocks = (eventfile->getFileSize() + loadBlockSize - 1) / loadBlockSize;
+  size_t numBlocks = (eventfile->getNumElements() + loadBlockSize - 1) / loadBlockSize;
 
   // We want to pad out empty pixels.
   detid2det_map detector_map;
@@ -472,7 +466,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     // (which is sped up by ~ x 3 with parallel processing, say 10 million per second, e.g. 7 million events more per seconds).
     // compared to a setup time/merging time of about 10 seconds per million detectors.
     double setUpTime = double(detector_map.size()) * 10e-6;
-    parallelProcessing = ((double(eventfile->getFileSize()) / 7e6) > setUpTime);
+    parallelProcessing = ((double(eventfile->getNumElements()) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using") << " parallel processing." << std::endl;
   }
 
