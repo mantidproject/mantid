@@ -116,6 +116,14 @@ void SplatterPlotView::onThresholdButtonClicked()
                                              this->splatSource);
 }
 
+void SplatterPlotView::checkView()
+{
+  if (NULL == this->peaksSource)
+  {
+    ViewBase::checkView();
+  }
+}
+
 }
 }
 }

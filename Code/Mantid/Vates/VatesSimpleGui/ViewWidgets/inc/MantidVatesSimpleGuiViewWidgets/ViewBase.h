@@ -62,7 +62,7 @@ public:
   virtual ~ViewBase() {}
 
   /// Poll the view to set status for mode control buttons.
-  void checkView();
+  virtual void checkView();
   /**
    * Function used to correct post-accept visibility issues. Most
    * views won't need to do anything.
