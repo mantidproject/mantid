@@ -91,6 +91,7 @@ public:
    * @return the main view
    */
   virtual pqRenderView *getView() = 0;
+  /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /**
    * This function makes the view render itself.

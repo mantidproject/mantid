@@ -31,6 +31,14 @@ void TimeControlWidget::updateAnimationControls(double timeStart,
   vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
 }
 
+/**
+ * Function to enable or disable the entire animation controls widget.
+ * @param state how to set the animation controls
+ */
+void TimeControlWidget::enableAnimationControls(bool state)
+{
+  this->setEnabled(state);
+}
 
 }
 }
