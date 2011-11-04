@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_PLUSMD_H_
-#define MANTID_MDEVENTS_PLUSMD_H_
+#ifndef MANTID_MDALGORITHMS_PLUSMD_H_
+#define MANTID_MDALGORITHMS_PLUSMD_H_
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
@@ -8,12 +8,12 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** PlusMD : TODO: DESCRIPTION
+  /** Sum to MDWorkspaces together.
     
-    @author
+    @author Janik Zikovsky
     @date 2011-08-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -47,7 +47,7 @@ namespace MDEvents
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "General";}
+    virtual const std::string category() const { return "Arithmetic,MDEvents";}
     
   private:
     /// Sets documentation strings for this algorithm
@@ -58,7 +58,7 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
-    void doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     /// Workspace into which stuff will get added
     Mantid::API::IMDEventWorkspace_sptr iws1;
@@ -68,7 +68,7 @@ namespace MDEvents
   };
 
 
-} // namespace MDEvents
+} // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_PLUSMD_H_ */
+#endif  /* MANTID_MDALGORITHMS_PLUSMD_H_ */

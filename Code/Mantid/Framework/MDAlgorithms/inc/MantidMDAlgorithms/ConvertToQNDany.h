@@ -73,22 +73,20 @@ namespace MDAlgorithms
  
    /// helper function which does exatly what it says
    void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
-   //
-   void build_default_dimID();
-
-   /// function attempts to obtain and build input properties as function of the part of input data
-   bool try2redefine_input_properties();
+ 
+   /// function generates input properties from defaults
+   bool build_default_properties(size_t max_nadd_dims=5);
    /// functon generates properties to build N-dimensional workspace from user selected workspace properties
    void build_ND_property_selector(size_t n_dims,const std::vector<std::string> & dim_ID_possible);
    /// the variable which describes the number of the dimensions, currently used by algorithm. Changes in input properties can change this number;
    size_t n_activated_dimensions;
-   //
+   /// this variable describes default possible ID-s for Q-dimensions
    std::vector<std::string> Q_ID_possible;
+  
   protected: //for testing
    /// function returns the list of names, which are possible dimensions for current matrix workspace
    std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
-   // the dimension ID-s which can be used as dimensions
-   std::vector<std::string> add_ID_possible;
+
  };
 
 
