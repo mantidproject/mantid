@@ -860,9 +860,6 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		int margin = (int)((1/2.54)*printer->logicalDpiY()); // 1 cm margins
 		double scaleFactorX=(double)(paperRect.width()-2*margin)/(double)canvasRect.width();
 		double scaleFactorY=(double)(paperRect.height()-2*margin)/(double)canvasRect.height();
-		// Force both scale factors to be equal to minimum scale factor
-		if ( scaleFactorX > scaleFactorY) scaleFactorX = scaleFactorY;
-		else scaleFactorY = scaleFactorX;
 	     if (d_print_cropmarks)
         {
 			cr.moveTo(QPoint(margin + static_cast<int>(cr.x()*scaleFactorX),
@@ -891,9 +888,6 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		int margin = (int)((1/2.54)*printer->logicalDpiY()); // 1 cm margins
 		double scaleFactorX=(double)(paperRect.width()-4*margin)/(double)canvasRect.width();
 		double scaleFactorY=(double)(paperRect.height()-4*margin)/(double)canvasRect.height();
-		// Force both scale factors to be equal to minimum scale factor
-		if ( scaleFactorX > scaleFactorY) scaleFactorX = scaleFactorY;
-		else scaleFactorY = scaleFactorX;
 		
 		for (int i=0; i<(int)graphsList.count(); i++)
 		{
