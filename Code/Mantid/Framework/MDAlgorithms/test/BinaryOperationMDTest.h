@@ -1,19 +1,19 @@
 #ifndef MANTID_MDALGORITHMS_BINARYOPERATIONMDTEST_H_
 #define MANTID_MDALGORITHMS_BINARYOPERATIONMDTEST_H_
 
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;

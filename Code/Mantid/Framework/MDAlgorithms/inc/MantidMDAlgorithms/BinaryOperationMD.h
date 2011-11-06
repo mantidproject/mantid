@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_BINARYOPERATIONMD_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
