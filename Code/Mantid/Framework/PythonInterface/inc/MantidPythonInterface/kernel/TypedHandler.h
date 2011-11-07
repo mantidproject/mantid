@@ -58,11 +58,9 @@ namespace Mantid
         /// Set function to handle Python -> C++ calls and get the correct type
         void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
         {
-          // Seems like a lot for 1 line of code but for more complex types we'll
-          // need to specialise
           alg->setPropertyValue(name, boost::python::extract<std::string>(value));
         }
-        /// Return a reference tp the type_info of the derived type
+        /// Return a reference to the type_info of the derived type
         const std::type_info & typeInfo() const
         {
           return typeid(std::string);

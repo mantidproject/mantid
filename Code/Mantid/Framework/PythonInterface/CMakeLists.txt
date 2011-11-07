@@ -61,6 +61,7 @@ set ( TEST_PY_FILES
   test/python/FilePropertyTest.py
   test/python/FrameworkManagerTest.py
   test/python/ImportModuleTest.py
+  test/python/MatrixWorkspaceTest.py
   test/python/PythonAlgorithmTest.py
   test/python/QuatTest.py
   test/python/V3DTest.py

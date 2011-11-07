@@ -83,13 +83,13 @@ namespace Mantid
      */
     namespace PropertyMarshal
     {
-      /// This static function allows a call to a method on an IPropertyManager object
-      DLLExport void setProperty(boost::python::object self, const std::string & name,
-                              boost::python::object value);
-      /// Converts the value of a property to the most appropriate type, i.e. the most dervied exported interface
-      DLLExport boost::python::object value(boost::python::object self);
       /// Insert a new property handler
       DLLExport void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler);
+      /// This static function allows a call to a method on an IPropertyManager object
+      DLLExport void setProperty(boost::python::object self, const std::string & name,
+                                 boost::python::object value);
+      /// Converts the value of a property to the most appropriate type, i.e. the most dervied exported interface
+      DLLExport boost::python::object value(boost::python::object self);
     };
 
   }
