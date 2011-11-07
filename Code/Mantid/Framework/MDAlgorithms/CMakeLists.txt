@@ -1,21 +1,24 @@
 # GLOBs should be replaced with explicit listings
 set ( SRC_FILES
+	# src/CreateMDFitWorkspace.cpp
+	src/BinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToQ3DdE.cpp
-	src/ConvertToQNDany.cpp	
-	# src/CreateMDFitWorkspace.cpp
+	src/ConvertToQNDany.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/NullImplicitFunction.cpp
+	src/PlusMD.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
 	src/TobyFitSimulate.cpp
+	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 )
 
@@ -23,22 +26,25 @@ set ( SRC_FILES
 #)
 
 set ( INC_FILES
+	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
-	inc/MantidMDAlgorithms/ConvertToQNDany.h	
-	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+	inc/MantidMDAlgorithms/ConvertToQNDany.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
+	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
+	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 )
@@ -50,18 +56,21 @@ set ( TEST_FILES
 	#test/CreateMDFitWorkspaceTest.h
 	#test/QuadEnBackgroundTest.h
 	test/ConvertToQ3DdETest.h
-	test/ConvertToQNDanyTest.h	
+	test/ConvertToQNDanyTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
+	test/PlusMDTest.h
 	test/RunParamTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
+	test/UnaryOperationMDTest.h
 )
 
 set ( GMOCK_TEST_FILES
 	test/CompositeBuilderTest.h
 	test/CompositeImplicitFunctionTest.h
 	test/NullImplicitFunctionTest.h
+	test/BinaryOperationMDTest.h
 )
 
 if(UNITY_BUILD)

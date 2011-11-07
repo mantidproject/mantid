@@ -435,8 +435,10 @@ class ISISInstrument(instrument.Instrument):
             @param: end defines the end
             @param monitor: spectrum number of the monitor's spectrum, if none given affect the default
         """
-        start = float(start)
-        end = float(end)
+        if start != None:
+            start = float(start)
+        if end != None:
+            end = float(end)
         
         if monitor:
             self._back_ground[int(monitor)] = { 'start' : start, 'end' : end }
@@ -444,10 +446,19 @@ class ISISInstrument(instrument.Instrument):
             self._back_start = start
             self._back_end = end 
 
-    def reset_TOFs(self):
-        self._back_ground = {}
-        self._back_start = None
-        self._back_end = None
+    def reset_TOFs(self, monitor=None):
+        """
+            Reset background region set by set_TOFs
+            @param monitor: spectrum number of the monitor's spectrum, if none given affect the default
+        """
+        if monitor:
+            monitor = int(monitor)
+            if self._back_ground.has_key(monitor):
+                del self._back_ground[int(monitor)]
+        else:
+            self._back_ground = {}
+            self._back_start = None
+            self._back_end = None
 
     def move_components(self, ws):
         """

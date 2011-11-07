@@ -58,7 +58,6 @@ ConvertToQNDany::ConvertToQNDany():
 n_activated_dimensions(2),
 Q_ID_possible(2)
 {
-    this->build_default_dimID();
     Q_ID_possible[0]="|Q|";
     Q_ID_possible[1]="QxQyQz";
   
@@ -126,17 +125,12 @@ ConvertToQNDany::init()
     declareProperty("QDimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
                               "You can select mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
     min_nDim->setLower(0);
-    declareProperty(new PropertyWithValue<int>("NumAddDim",0,min_nDim,Direction::Input),
+    declareProperty(new PropertyWithValue<int>("NumAddDim",3,min_nDim,Direction::Input),
         " Number of additional to Q (orthogonal) dimensions in the target workspace");
 
 // -------- Dynamic properties;
     // build properties for possible additional dimensions
-      if(try2redefine_input_properties()){
-        convert_log.information()<<" input properties have changed\n";
-      }else{
-          // one additional property dimension by default. 
-          build_ND_property_selector(1,this->add_ID_possible);
-      }
+      build_default_properties(8);
 
 //    declareProperty(new ArrayProperty<std::string>("dim1"),
 
@@ -172,11 +166,6 @@ ConvertToQNDany::setPropertyValue(const std::string &name, const std::string &va
         }
         API::Algorithm::PropertyManagerOwner::setProperty(name,value);
 };
-void 
-ConvertToQNDany::build_default_dimID(){
-    this->add_ID_possible.resize(1);
-     add_ID_possible[0]="DeltaE";
-}
 
 std::vector<std::string > 
 ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_prop,MatrixWorkspace_const_sptr inMatrixWS)const{
@@ -210,37 +199,35 @@ ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_pro
 }
 
 bool
-ConvertToQNDany::try2redefine_input_properties()
-{
-    // -------- Input workspace 
-    MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
-    if(!inMatrixWS)return false;
-    Workspace2D_sptr inWS2D         = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
-    if(!inMatrixWS)return false;
-
-    // number of additional dimensions:
+ConvertToQNDany::   build_default_properties(size_t max_n_dims)
+{ 
+    // number of additional known dimensions:
     size_t n_add_dims =boost::lexical_cast<size_t>(getPropertyValue("NumAddDim"));
     // number of total dimensions is also defined by the value of the Q -dimensions
-    std::string ind =   getPropertyValue("QDimensions");
+    std::string dim_id =   getPropertyValue("QDimensions");
     // check if the number of dimensions have not changed and new input is needed
     size_t n_dims;
-    if    (ind.compare(Q_ID_possible[0])){ // |Q|    -- 1 dimension
-        n_dims = 1+n_add_dims;
-    }else{           // QxQyQz -- 3 dimensions     
-        n_dims = 3+ n_add_dims;
+    if    (dim_id.compare(Q_ID_possible[0])){ // |Q|    -- 1 dimension
+        n_dims = 1;
+    }else{                                 // QxQyQz -- 3 dimensions     
+        n_dims = 3;
     }
+//    size_t n_dim_visible  = n_dims+n_add_dims;
+//    size_t n_dim_invisible= max_n_dims-n_dim_visible;
 
-    std::vector<std::string> current_dimID = this->add_ID_possible;
-    this->build_default_dimID();
-    std::vector<std::string> new_dim_IDs=get_dimension_names(this->add_ID_possible,inMatrixWS);
-    // all toolbox and main part of the menue has to be redefined;
-    if(n_dims!=n_activated_dimensions){
-        this->n_activated_dimensions=n_dims;
-        // one less real dimensions as 
-        build_ND_property_selector(n_activated_dimensions-1,new_dim_IDs);
-        return true;
+    std::vector<std::string> dim_ID(max_n_dims);
+    dim_ID[0]=std::string("DeltaE");
+    for(size_t i=1;i<max_n_dims;i++){
+        std::string num     = boost::lexical_cast<std::string>(i+1);
+        std::string dim_num = "dim_"+num; 
+        dim_ID[i] = dim_num;
     }
-    return false;
+    for(size_t i=0;i<max_n_dims;i++){
+          if(this->existsProperty(dim_ID[i])) this->removeProperty(dim_ID[i]);         
+          this->declareProperty(dim_ID[i],dim_ID[i],new ListValidator(dim_ID),"",Direction::InOut);        
+          this->setPropertySettings(dim_ID[i], new EnabledWhenProperty(this, "NumAddDim", IS_MORE_OR_EQ, boost::lexical_cast<std::string>(i)));
+    }   
+   return true; 
 }
 //
 void 
@@ -252,16 +239,7 @@ ConvertToQNDany::build_ND_property_selector(size_t n_dims,const std::vector<std:
         throw(std::invalid_argument(" nuber of dimensions exceed the possible dimension number"));
     }
 
-    for(size_t i=0;i<n_dims;i++){
-        std::string num     = boost::lexical_cast<std::string>(i+1);
-        std::string dim_num = "dim"+num; 
-        if(this->existsProperty(dim_num)) this->removeProperty(dim_num);
-     
-        std::string info=std::string("possible variables for the dimension ")+num;
-        this->declareProperty(dim_num,dim_ID[i],new ListValidator(dim_ID),
-                              info,Direction::InOut);        
-
-    }  
+   
 }
 
 
@@ -282,11 +260,8 @@ ConvertToQNDany::check_max_morethen_min(const std::vector<double> &min,const std
   /* Execute the algorithm.   */
 void ConvertToQNDany::exec(){
 
-    if(try2redefine_input_properties()){
-        convert_log.information()<<" number of dimensions have changed from the previous value, neded to select new dim_id to work with\n";
         return;
-    }
-
+   
 }
 
 

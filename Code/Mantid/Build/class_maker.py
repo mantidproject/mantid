@@ -23,7 +23,7 @@ def write_header(subproject, classname, filename, args):
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
-    
+
   private:
     virtual void initDocs();
     void init();
@@ -39,7 +39,7 @@ def write_header(subproject, classname, filename, args):
         pass
         
     alg_class_declare = " : public API::Algorithm"
-    alg_include = """#include "MantidAPI/Algorithm.h" """
+    alg_include = '#include "MantidAPI/Algorithm.h"'
     
     if not args.alg:
         algorithm_header = ""
@@ -95,10 +95,12 @@ namespace %s
 } // namespace %s
 } // namespace Mantid
 
-#endif  /* %s */
-""" % (guard, guard, alg_include, subproject, classname, 
-       author, datetime.datetime.now().date(), 
-       datetime.datetime.now().date().year, classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
+#endif  /* %s */""" % (guard, guard,
+       alg_include, subproject, classname,
+       author, datetime.datetime.now().date(),
+       datetime.datetime.now().date().year, classname, alg_class_declare,
+       classname, classname, algorithm_header, subproject, guard)
+
     f.write(s)
     f.close()
 
@@ -199,9 +201,9 @@ namespace %s
 %s
 
 } // namespace Mantid
-} // namespace %s
-
-""" % (subproject, args.subfolder, classname, subproject, algorithm_top, classname, classname, classname, classname, algorithm_source, subproject)
+} // namespace %s""" % (
+        subproject, args.subfolder, classname, subproject, algorithm_top,
+        classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)
     f.close()
 
@@ -283,9 +285,10 @@ public:
 };
 
 
-#endif /* %s */
-
-""" % (guard, guard, subproject, args.subfolder, classname, subproject, classname, classname, classname, classname, algorithm_test, guard)
+#endif /* %s */""" % (
+          guard, guard, subproject, args.subfolder, classname,
+          subproject, classname, classname, classname, classname,
+          algorithm_test, guard)
     f.write(s)
     f.close()
     

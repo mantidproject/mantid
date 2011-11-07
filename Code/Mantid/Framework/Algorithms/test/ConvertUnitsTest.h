@@ -247,8 +247,8 @@ public:
     loader.setPropertyValue("PulseidFilename", pulsefile);
     loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     loader.setPropertyValue("OutputWorkspace", this->inputSpace);
-    loader.setMaxEventsToLoad(10000);
-//    loader.setPropertyValue("InstrumentFilename", "CNCS_Definition.xml");
+    loader.setPropertyValue("ChunkNumber", "1");
+    loader.setPropertyValue("TotalChunks", "10");
     loader.execute();
     TS_ASSERT (loader.isExecuted() );
   }

@@ -1,0 +1,120 @@
+from PyQt4 import QtGui, uic, QtCore
+import os
+from reduction_gui.settings.application_settings import GeneralSettings
+from reduction_gui.widgets.base_widget import BaseWidget
+import ui.ui_data_catalog
+
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    from MantidFramework import *
+    mtd.initialise(False)
+    from mantidsimple import *
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+
+from reduction_gui.reduction.scripter import BaseScriptElement
+class Catalog(BaseScriptElement):
+    def __init__(self):
+        pass
+    
+class SANSCatalogWidget(BaseWidget):    
+    """
+        Widget that present a data catalog to the user
+    """
+    ## Widget name
+    name = "Data Catalog"      
+         
+    def __init__(self, parent=None, state=None, settings=None, catalog_cls=None):      
+        super(SANSCatalogWidget, self).__init__(parent, state, settings) 
+
+        self._catalog_cls = catalog_cls
+        
+        class DataFrame(QtGui.QFrame, ui.ui_data_catalog.Ui_Frame): 
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
+                
+        self._content = DataFrame(self)
+        self.initialize_content()
+        self._layout.addWidget(self._content)
+                
+        # General GUI settings
+        if settings is None:
+            settings = GeneralSettings()
+        self._settings = settings
+
+    def initialize_content(self):
+        self.connect(self._content.refresh_button, QtCore.SIGNAL("clicked()"), self._update_content)
+        self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
+        self.connect(self._content.directory_edit, QtCore.SIGNAL("returnPressed()"), self._update_content)        
+        self._content.directory_edit.setText(self._settings.data_path)
+        self._update_content(False)
+        
+    def _update_content(self, process_files=True):
+        self._settings.data_path = str(self._content.directory_edit.text())
+        self._content.data_set_table.clear()
+        self._content.data_set_table.setSortingEnabled(False)
+        self._content.data_set_table.setRowCount(0)
+        headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]"]
+        self._content.data_set_table.setColumnCount(len(headers))
+        self._content.data_set_table.setHorizontalHeaderLabels(headers)
+
+        if self._catalog_cls is not None:
+            dc = self._catalog_cls()
+            def _add_item(data):
+                row = dc.size()
+                self._content.data_set_table.insertRow(row)
+                for i in range(5):
+                    item = QtGui.QTableWidgetItem(str(data[i]))
+                    item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    self._content.data_set_table.setItem(row, i, item)
+            
+            dc.list_data_sets(self._settings.data_path, call_back=_add_item, process_files=process_files)
+                            
+        self._content.data_set_table.setSortingEnabled(True)
+        self._content.data_set_table.resizeColumnsToContents()
+        
+    def _get_catalog(self):
+        rows = []
+        if self._catalog_cls is not None:
+            dc = self._catalog_cls()
+            rows = dc.get_string_list(self._settings.data_path)
+
+        self._content.data_set_table.clear()
+        self._content.data_set_table.setSortingEnabled(False)
+        self._content.data_set_table.setRowCount(len(rows))
+        headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]"]
+        self._content.data_set_table.setColumnCount(len(headers))
+        self._content.data_set_table.setHorizontalHeaderLabels(headers)
+
+        for row, data in enumerate(rows):
+            for i in range(5):
+                item = QtGui.QTableWidgetItem(str(data[i]))
+                item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                self._content.data_set_table.setItem(row, i, item)
+                
+        self._content.data_set_table.setSortingEnabled(True)
+        self._content.data_set_table.resizeColumnsToContents()
+        
+    def _browse_directory(self):
+            dir = QtGui.QFileDialog.getExistingDirectory(self, "Open Directory",
+                                                    self._settings.data_path)                                   
+            if dir:
+                # Store the location of the loaded file
+                self._settings.data_path = str(dir)
+                self._content.directory_edit.setText(dir)
+                self._update_content()
+                
+    def set_state(self, state):
+        """
+            Update the catalog according to the new data path
+        """
+        if not self._settings.data_path == str(self._content.directory_edit.text())\
+            and len(self._settings.data_path)>0:
+            self._content.directory_edit.setText(self._settings.data_path)
+            self._update_content(False)
+    
+    def get_state(self):
+        return Catalog()

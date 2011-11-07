@@ -30,7 +30,6 @@ set ( SRC_FILES
 	src/MDLeanEvent.cpp
 	src/MergeMD.cpp
 	src/OneStepMDEW.cpp
-	src/PlusMD.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -79,7 +78,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MergeMD.h
 	inc/MantidMDEvents/OneStepMDEW.h
-	inc/MantidMDEvents/PlusMD.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
@@ -118,7 +116,6 @@ set ( TEST_FILES
 	test/MDLeanEventTest.h
 	test/MergeMDTest.h
 	test/OneStepMDEWTest.h
-	test/PlusMDTest.h
 	test/SaveMDTest.h
 	test/SliceMDTest.h
 	test/SlicingAlgorithmTest.h
