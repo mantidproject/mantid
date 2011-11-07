@@ -64,6 +64,11 @@ namespace Mantid
       if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_in))
         throw std::invalid_argument("UnaryOperationMD: can't have a MatrixWorkspace (e.g. WorkspaceSingleValue) as the argument of " + this->name() + ".");
 
+      // Check for validity
+      m_in_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_in);
+      m_in_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_in);
+      this->checkInputs();
+
       if (m_out != m_in)
       {
         // B = f(A) -> So first we clone A (lhs) into B

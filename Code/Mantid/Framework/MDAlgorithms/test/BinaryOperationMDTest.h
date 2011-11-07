@@ -26,6 +26,7 @@ class MockBinaryOperationMD : public BinaryOperationMD
 {
 public:
   MOCK_CONST_METHOD0(commutative, bool());
+  MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD0(execEvent, void());
   MOCK_METHOD2(execHistoHisto, void(Mantid::MDEvents::MDHistoWorkspace_sptr, Mantid::MDEvents::MDHistoWorkspace_const_sptr));
   MOCK_METHOD2(execHistoScalar, void(Mantid::MDEvents::MDHistoWorkspace_sptr, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
@@ -76,6 +77,14 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
+  /// Sub-class can abort
+  void test_checkInputs()
+  {
+    MockBinaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).WillOnce(Throw( std::runtime_error("Bad inputs!") ));
+    doTest(alg, "histo_A", "histo_B", "some_output", false /*it fails*/ );
+  }
+
   /// Run the mock algorithm
   void doTest(MockBinaryOperationMD & alg, std::string lhs, std::string rhs, std::string outName,
       bool succeeds=true)
@@ -107,6 +116,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     doTest(alg, "histo_A", "histo3d", "new_out", false);
   }
 
@@ -115,6 +125,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     doTest(alg, "histo_A", "histo2d_100", "new_out", false);
   }
 
@@ -123,6 +134,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).Times(0);
     doTest(alg, "scalar", "scalar", "some_output", false /*it fails*/ );
   }
 
@@ -136,6 +148,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoHisto(_,_)).WillOnce(Return());
 
     doTest(alg, "histo_A", "histo_B", "new_out");
@@ -150,6 +163,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoHisto(_,_)).WillOnce(Return());
 
     doTest(alg, "histo_A", "histo_B", "histo_A");
@@ -163,6 +177,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoHisto(_,_)).WillOnce(Return());
 
     doTest(alg, "histo_B", "histo_A", "histo_A");
@@ -176,6 +191,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(false));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoHisto(_,_)).WillOnce(Return());
 
     doTest(alg, "histo_B", "histo_A", "histo_A");
@@ -206,6 +222,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoScalar(_,_)).WillOnce(Return());
     doTest(alg, "histo_A", "scalar", "histo_A");
     TSM_ASSERT("Done in-place", out == histo_A);
@@ -216,6 +233,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoScalar(_,_)).WillOnce(Return());
     doTest(alg, "scalar", "histo_A", "some_output");
     TS_ASSERT( out != histo_A); // Output is new
@@ -235,6 +253,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHistoScalar(_,_)).WillOnce(Return());
     doTest(alg, "scalar", "histo_A", "histo_A");
     TSM_ASSERT("Done in-place", out == histo_A);
@@ -249,6 +268,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent()).WillOnce(Return());
     doTest(alg, "event_A", "event_B", "other_output");
     TSM_ASSERT("Not Done in-place", out != histo_A);
@@ -259,6 +279,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent()).WillOnce(Return());
     doTest(alg, "event_A", "event_B", "event_A");
     TSM_ASSERT("Done in-place", out == event_A);
@@ -269,6 +290,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent()).WillOnce(Return());
     doTest(alg, "event_B", "event_A", "event_A");
     TSM_ASSERT("Done in-place", out == event_A);
@@ -279,6 +301,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(false));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent()).WillOnce(Return());
     doTest(alg, "event_B", "event_A", "event_A");
     TSM_ASSERT("Output replaced A", out != event_A);
@@ -290,6 +313,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent()).WillOnce(Return());
     doTest(alg, "event_A", "scalar", "other_output");
     TSM_ASSERT("Not Done in-place", out != histo_A);
@@ -300,6 +324,7 @@ public:
   {
     MockBinaryOperationMD alg;
     EXPECT_CALL(alg, commutative()).WillRepeatedly(Return(true));
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent()).WillOnce(Return());
     doTest(alg, "event_A", "histo_A", "other_output");
   }

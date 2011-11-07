@@ -69,6 +69,9 @@ namespace MDAlgorithms
     void init();
     virtual void exec();
 
+    /// Check the inputs and throw if the algorithm cannot be run
+    virtual void checkInputs() = 0;
+
     /// Run the algorithm with an MDEventWorkspace as output
     virtual void execEvent() = 0;
 
@@ -85,6 +88,11 @@ namespace MDAlgorithms
     /// Output workspace
     Mantid::API::IMDWorkspace_sptr m_out;
 
+    /// For checkInputs
+    Mantid::API::IMDEventWorkspace_sptr m_lhs_event;
+    Mantid::API::IMDEventWorkspace_sptr m_rhs_event;
+    Mantid::MDEvents::MDHistoWorkspace_sptr m_lhs_histo;
+    Mantid::MDEvents::MDHistoWorkspace_sptr m_rhs_histo;
 
     /// Operand MDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr m_operand_event;
