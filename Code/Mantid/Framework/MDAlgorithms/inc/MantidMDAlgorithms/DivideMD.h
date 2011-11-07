@@ -38,7 +38,7 @@ namespace MDAlgorithms
   {
   public:
     DivideMD();
-    ~DivideMD();
+    virtual ~DivideMD();
     
     virtual const std::string name() const;
     virtual int version() const;

@@ -1,17 +1,14 @@
 /*WIKI*
-Subtract two [[MDHistoWorkspace]]'s or [[MDEventWorkspace]]'s.
+Subtract two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
 
-=== MDHistoWorkspace - MDHistoWorkspace ===
-
-The operation is performed element-by-element.
-
-=== MDHistoWorkspace - Scalar ===
-
-The scalar (and its error) is subtracted from every element of the MDHistoWorkspace.
-
-=== Scalar - MDHistoWorkspace ===
-
-This is not allowed.
+* '''MDHistoWorkspace - MDHistoWorkspace'''
+** The operation is performed element-by-element.
+* '''MDHistoWorkspace - Scalar '''
+** The scalar is subtracted from every element of the MDHistoWorkspace. The squares of errors are summed.
+* '''Scalar - MDHistoWorkspace'''
+** This is not allowed.
+* '''[[MDEventWorkspace]]'s'''
+** This is not currently supported, but it could be in the future.
 
 *WIKI*/
 
@@ -52,8 +49,8 @@ namespace MDAlgorithms
   /// Sets documentation strings for this algorithm
   void MinusMD::initDocs()
   {
-    this->setWikiSummary("Subtract two [[MDHistoWorkspace]]'s or [[MDEventWorkspace]]'s.");
-    this->setOptionalMessage("Subtract two MDHistoWorkspace's or MDEventWorkspace's.");
+    this->setWikiSummary("Subtract two [[MDHistoWorkspace]]s");
+    this->setOptionalMessage("Subtract two MDHistoWorkspaces.");
   }
 
 

@@ -38,7 +38,7 @@ namespace MDAlgorithms
   {
   public:
     MultiplyMD();
-    ~MultiplyMD();
+    virtual ~MultiplyMD();
     
     virtual const std::string name() const;
     virtual int version() const;

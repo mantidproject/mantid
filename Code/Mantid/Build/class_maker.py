@@ -86,7 +86,7 @@ namespace %s
   {
   public:
     %s();
-    ~%s();
+    virtual ~%s();
     %s
   };
 

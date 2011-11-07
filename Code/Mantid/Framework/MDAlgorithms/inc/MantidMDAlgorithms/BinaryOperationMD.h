@@ -48,7 +48,7 @@ namespace MDAlgorithms
   {
   public:
     BinaryOperationMD();
-    ~BinaryOperationMD();
+    virtual ~BinaryOperationMD();
     
     virtual const std::string name() const;
     virtual int version() const;

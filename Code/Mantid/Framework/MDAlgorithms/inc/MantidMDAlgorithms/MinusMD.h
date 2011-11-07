@@ -38,7 +38,7 @@ namespace MDAlgorithms
   {
   public:
     MinusMD();
-    ~MinusMD();
+    virtual ~MinusMD();
     
     virtual const std::string name() const;
     virtual int version() const;

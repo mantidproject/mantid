@@ -40,7 +40,7 @@ namespace MDAlgorithms
   {
   public:
     PlusMD();
-    ~PlusMD();
+    virtual ~PlusMD();
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "PlusMD";};

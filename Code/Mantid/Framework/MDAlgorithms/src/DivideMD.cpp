@@ -1,5 +1,17 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Divide two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
+
+The error of <math> f = a / b </math> is propagated with <math> df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) </math>
+
+* '''MDHistoWorkspace / MDHistoWorkspace'''
+** The operation is performed element-by-element.
+* '''MDHistoWorkspace / Scalar'''
+** Every element of the MDHistoWorkspace is divided by the scalar.
+* '''Scalar / MDHistoWorkspace'''
+** This is not allowed.
+* '''[[MDEventWorkspace]]'s'''
+** This operation is not supported, as it is not clear what its meaning would be.
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/DivideMD.h"
@@ -16,7 +28,6 @@ namespace MDAlgorithms
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(DivideMD)
   
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
