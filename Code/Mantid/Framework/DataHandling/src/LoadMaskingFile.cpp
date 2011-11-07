@@ -23,6 +23,7 @@ The format can be
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 
 #include <Poco/DOM/Document.h>
@@ -125,6 +126,7 @@ namespace DataHandling
     std::vector<int32_t> maskdetidpairsU;
 
     this->bankToDetectors(mask_bankid_single, maskdetids, maskdetidpairsL, maskdetidpairsU);
+    this->componentToDetectors(mask_bankid_single, maskdetids);
     this->spectrumToDetectors(mask_specid_single, mask_specid_pair_low, mask_specid_pair_up, maskdetids, maskdetidpairsL, maskdetidpairsU);
     this->detectorToDetectors(mask_detid_single, mask_detid_pair_low, mask_detid_pair_up, maskdetids, maskdetidpairsL, maskdetidpairsU);
 
@@ -186,6 +188,60 @@ namespace DataHandling
 
   }
 
+
+  /*
+   * Convert a component to detectors.  It is a generalized version of bankToDetectors()
+   * @params
+   *  -
+   */
+  void LoadMaskingFile::componentToDetectors(std::vector<std::string> componentnames,
+      std::vector<int32_t>& detectors){
+
+    Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
+
+    for (size_t i = 0; i < componentnames.size(); i ++){
+
+      g_log.notice() << "Component name = " << componentnames[i] << std::endl;
+
+      // a) get componenet
+      Geometry::IComponent_const_sptr component = minstrument->getComponentByName(componentnames[i]);
+      g_log.debug() << "Component ID = " << component->getComponentID() << std::endl;
+
+      // b) component -> component assembly --> children (more than detectors)
+      boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
+      std::vector<Geometry::IComponent_const_sptr> children;
+      asmb->getChildren(children, true);
+
+      g_log.notice() << "Number of Children = " << children.size() << std::endl;
+
+      int32_t numdets = 0;
+      int32_t id_min = 1000000;
+      int32_t  id_max = 0;
+
+      for (size_t ic = 0; ic < children.size(); ic++){
+        // c) convert component to detector
+        Geometry::IComponent_const_sptr child = children[ic];
+        Geometry::IDetector_const_sptr det = boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
+
+        if (det){
+          int32_t detid = det->getID();
+          detectors.push_back(detid);
+          numdets ++;
+          if (detid < id_min)
+            id_min = detid;
+          if (detid > id_max)
+            id_max = detid;
+        }
+      }
+
+      g_log.notice() << "Number of Detectors in Children = " << numdets << "  Range = " << id_min << ", " << id_max << std::endl;
+
+      return;
+    }
+
+    return;
+  }
+
   /*
    * Convert bank to detectors
    */
@@ -204,7 +260,7 @@ namespace DataHandling
         std::vector<Geometry::IDetector_const_sptr> idetectors;
 
         minstrument->getDetectorsInBank(idetectors, singlebanks[ib]);
-        g_log.information() << singlebanks[ib] << " has " << idetectors.size() << " detectors" << std::endl;
+        g_log.notice() << "Bank: " << singlebanks[ib] << " has " << idetectors.size() << " detectors" << std::endl;
 
         // a) get information
         size_t numdets = idetectors.size();
@@ -220,7 +276,7 @@ namespace DataHandling
           detectorpairsup.push_back(detid_last);
 
         } else {
-          g_log.information() << "Apply 1 by 1  " << "DetID: " << detid_first << ", " << detid_last << std::endl;
+          g_log.notice() << "Apply 1 by 1  " << "DetID: " << detid_first << ", " << detid_last << std::endl;
 
           for (size_t i = 0; i < idetectors.size(); i ++){
             Geometry::IDetector_const_sptr det = idetectors[i];
@@ -378,6 +434,19 @@ namespace DataHandling
           g_log.error() << "XML File (detids) heirachial error!" << std::endl;
         }
 
+      } else if (pNode->nodeName().compare("detector-masking") == 0){
+        // Node "detector-masking".  Check default value
+        Poco::XML::NamedNodeMap* att = pNode->attributes();
+        if (att->length() > 0){
+          Poco::XML::Node* cNode = att->item(0);
+          if (cNode->localName().compare("default") == 0){
+            if (cNode->getNodeValue().compare("use") == 0){
+              mDefaultToUse = true;
+            } else {
+              mDefaultToUse = false;
+            }
+          }
+        } // if - att-length
       }
 
       pNode = it.nextNode();

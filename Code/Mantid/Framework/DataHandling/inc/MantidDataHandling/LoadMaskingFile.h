@@ -72,6 +72,8 @@ namespace DataHandling
     void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
     /// Initialize a Mask Workspace
     void intializeMaskWorkspace();
+    /// Convert component to detectors
+    void componentToDetectors(std::vector<std::string> componentnames, std::vector<int32_t>& detectors);
     /// Convert bank to detector
     void bankToDetectors(std::vector<std::string> singlebanks,
         std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
@@ -92,6 +94,9 @@ namespace DataHandling
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML
     Poco::XML::Element* pRootElem;
+
+    /// Default setup.  If true, not masking, but use the pixel
+    bool mDefaultToUse;
 
     std::vector<int32_t> mask_detid_single;
     std::vector<int32_t> mask_specid_single;
