@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
 	src/TobyFitSimulate.cpp
+	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 )
 
@@ -43,6 +44,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
+	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 )
@@ -61,6 +63,7 @@ set ( TEST_FILES
 	test/RunParamTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
+	test/UnaryOperationMDTest.h
 )
 
 set ( GMOCK_TEST_FILES

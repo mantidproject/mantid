@@ -76,12 +76,10 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
   this->isPluginInitialized = false;
   this->pluginMode = true;
-  this->wsType = VatesViewerInterface::MDEW;
 }
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 {
-  this->wsType = VatesViewerInterface::MDEW;
   this->checkEnvSetup();
   // We're in the standalone application mode
   this->isPluginInitialized = false;
@@ -283,6 +281,7 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
 
+  // Set color selection widget <-> view signals/slots
   QObject::connect(this->ui.colorSelectionWidget,
                    SIGNAL(colorMapChanged(const pqColorMapModel *)),
                    this->currentView,
@@ -298,35 +297,22 @@ void MdViewerWidget::setParaViewComponentsForView()
                    this->currentView, SLOT(onAutoScale()));
   QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
                    this->currentView, SLOT(onLogScale(int)));
+
+  // Set animation (time) control widget <-> view signals/slots.
+  QObject::connect(this->currentView,
+                   SIGNAL(setAnimationControlState(bool)),
+                   this->ui.timeControlWidget,
+                   SLOT(enableAnimationControls(bool)));
+  QObject::connect(this->currentView,
+                   SIGNAL(setAnimationControlInfo(double, double, int)),
+                   this->ui.timeControlWidget,
+                   SLOT(updateAnimationControls(double, double, int)));
 }
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  if (QString("PeaksReader") == source->getProxy()->GetXMLName())
-  {
-    this->wsType = VatesViewerInterface::PEAKS;
-  }
-  else
-  {
-    this->wsType = VatesViewerInterface::MDEW;
-  }
-
+  UNUSED_ARG(source);
   this->renderAndFinalSetup();
-  this->checkForTimesteps();
-}
-
-void MdViewerWidget::checkForTimesteps()
-{
-  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
-  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
-  if (NULL != tsv && 0 != tsv->GetNumberOfElements())
-  {
-    this->ui.timeControlWidget->setEnabled(true);
-  }
-  else
-  {
-    this->ui.timeControlWidget->setEnabled(false);
-  }
 }
 
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
@@ -334,24 +320,22 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
   QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == wstype)
   {
-    this->wsType = VatesViewerInterface::PEAKS;
     sourcePlugin = "Peaks Source";
   }
   else
   {
-    this->wsType = VatesViewerInterface::MDEW;
     sourcePlugin = "MDEW Source";
   }
 
   this->currentView->setPluginSource(sourcePlugin, wsname);
   this->renderAndFinalSetup();
-  this->setTimesteps();
 }
 
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
   this->currentView->checkView();
+  this->currentView->setTimeSteps();
 }
 
 void MdViewerWidget::checkForUpdates()
@@ -362,7 +346,7 @@ void MdViewerWidget::checkForUpdates()
     this->currentView->resetDisplay();
     //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
-    this->updateTimesteps();
+    this->currentView->setTimeSteps(true);
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {
@@ -372,52 +356,6 @@ void MdViewerWidget::checkForUpdates()
     this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
                                                       range->GetElement(1));
   }
-}
-
-void MdViewerWidget::updateAnimationControls(vtkSMDoubleVectorProperty *dvp)
-{
-  const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
-  if (0 != numTimesteps)
-  {
-    double tStart = dvp->GetElement(0);
-    double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
-    pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
-    vtkSMPropertyHelper(scene->getProxy(), "StartTime").Set(tStart);
-    vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
-    vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
-    this->ui.timeControlWidget->setEnabled(true);
-  }
-  else
-  {
-    this->ui.timeControlWidget->setEnabled(false);
-  }
-}
-
-void MdViewerWidget::setTimesteps()
-{
-  if (VatesViewerInterface::PEAKS == this->wsType)
-  {
-    return;
-  }
-  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
-  srcProxy1->Modified();
-  srcProxy1->UpdatePipelineInformation();
-  //srcProxy1->UpdatePipeline();
-  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(srcProxy1->GetProperty("TimestepValues"));
-  this->updateAnimationControls(tsv);
-}
-
-void MdViewerWidget::updateTimesteps()
-{
-  vtkSMSourceProxy *rbcProxy = vtkSMSourceProxy::SafeDownCast(pqActiveObjects::instance().activeSource()->getProxy());
-  rbcProxy->Modified();
-  rbcProxy->UpdatePipelineInformation();
-  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(rbcProxy->GetProperty("TimestepValues"));
-  const int numTimesteps = static_cast<int>(tsv->GetNumberOfElements());
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
-  vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(tsv->GetElements(),
-                                                      numTimesteps);
-  this->updateAnimationControls(tsv);
 }
 
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)

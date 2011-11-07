@@ -2,36 +2,6 @@ import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
 
-REDUCTION_WARNING = False
-WARNING_MESSAGE = ""
-try:
-    import reduction
-    if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
-        REDUCTION_WARNING = True
-        home_dir = os.path.expanduser('~')
-        if os.path.abspath(reduction.__file__).startswith(home_dir):
-            WARNING_MESSAGE = "The following file is in your home area, please delete it and restart Mantid:\n\n"
-        else:
-            WARNING_MESSAGE = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
-        WARNING_MESSAGE += os.path.abspath(reduction.__file__)
-except:
-    REDUCTION_WARNING = True
-    WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
-    WARNING_MESSAGE += unicode(traceback.format_exc())
-
-from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
-from reduction_gui.settings.application_settings import GeneralSettings
-import ui.ui_reduction_main
-import ui.ui_instrument_dialog
-
-IS_IN_MANTIDPLOT = False
-try:
-    import qti
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
-    
-
 # Check whether Mantid is available
 try:
     from MantidFramework import *
@@ -39,6 +9,37 @@ try:
     HAS_MANTID = True
 except:
     HAS_MANTID = False    
+
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+
+REDUCTION_WARNING = False
+WARNING_MESSAGE = ""
+
+if HAS_MANTID:
+    try:
+        import reduction
+        if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
+            REDUCTION_WARNING = True
+            home_dir = os.path.expanduser('~')
+            if os.path.abspath(reduction.__file__).startswith(home_dir):
+                WARNING_MESSAGE = "The following file is in your home area, please delete it and restart Mantid:\n\n"
+            else:
+                WARNING_MESSAGE = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
+            WARNING_MESSAGE += os.path.abspath(reduction.__file__)
+    except:
+        REDUCTION_WARNING = True
+        WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
+        WARNING_MESSAGE += unicode(traceback.format_exc())
+
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
+from reduction_gui.settings.application_settings import GeneralSettings
+import ui.ui_reduction_main
+import ui.ui_instrument_dialog
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def __init__(self, instrument=None, instrument_list=None):

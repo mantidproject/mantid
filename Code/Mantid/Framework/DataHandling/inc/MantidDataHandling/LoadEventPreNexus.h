@@ -18,10 +18,7 @@ namespace Mantid
 
     A data loading routine for SNS pre-nexus event files
     
-    @author Janik, SNS ORNL
-    @date 4/02/2010
-    
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -122,15 +119,9 @@ public:
   /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
   int fileCheck(const std::string& filePath);
   
-  /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
-  std::vector<PixelType> pixelmap;
-
-  void setMaxEventsToLoad(std::size_t max_events_to_load);
-
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
-  
 
   /// Initialisation code
   void init();
@@ -142,7 +133,6 @@ private:
   std::vector<int64_t> spectra_list; ///<the list of Spectra
 
   /// The times for each pulse.
-  //Kernel::DateAndTime * pulsetimes;
   std::vector<Kernel::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
@@ -152,22 +142,25 @@ private:
   double proton_charge_tot;
   /// The value of the vector is the workspace index. The index into it is the pixel ID from DAS
   std::vector<std::size_t> pixel_to_wkspindex;
+  /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
+  std::vector<PixelType> pixelmap;
 
   /// The maximum detector ID possible
   Mantid::detid_t detid_max;
 
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> * eventfile;
-  std::size_t num_events; ///<the number of events
+  std::size_t num_events; ///< The number of events in the file
   std::size_t num_pulses; ///<the number of pulses
   uint32_t numpixel; ///<the number of pixels
 
-  std::size_t num_good_events; ///<the number of good events
-  std::size_t num_error_events; ///<the number of error events
+  std::size_t num_good_events; ///< The number of good events loaded
+  std::size_t num_error_events; ///< The number of error events encountered
   /// the number of events that were ignored (not loaded) because, e.g. of only loading some spectra.
   std::size_t num_ignored_events;
-  /// max events to load
-  std::size_t max_events;
+  std::size_t first_event;   ///< The first event to load (count from zero)
+  std::size_t max_events;    ///< Number of events to load
+
 
   /// Set to true if a valid Mapping file was provided.
   bool using_mapping_file;
@@ -184,9 +177,6 @@ private:
 
   /// Flag to allow for parallel loading
   bool parallelProcessing;
-
-  /// How many events to load at a time
-  size_t loadBlockSize;
 
   void loadPixelMap(const std::string &filename);
 

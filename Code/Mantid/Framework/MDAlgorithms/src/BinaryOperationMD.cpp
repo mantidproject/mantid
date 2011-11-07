@@ -88,6 +88,13 @@ namespace MDAlgorithms
     if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_lhs))
       throw std::invalid_argument("BinaryOperationMD: can't have a MatrixWorkspace (e.g. WorkspaceSingleValue) as the LHS argument of " + this->name() + ".");
 
+    // Check the inputs. First cast to everything
+    m_lhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
+    m_lhs_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_lhs);
+    m_rhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
+    m_rhs_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_rhs);
+    this->checkInputs();
+
     if (m_out == m_lhs)
     {
       // A = A * B. -> we will do A *= B

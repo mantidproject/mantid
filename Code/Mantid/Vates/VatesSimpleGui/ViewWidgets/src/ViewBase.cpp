@@ -1,14 +1,18 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 
 #include <pqActiveObjects.h>
+#include <pqAnimationManager.h>
+#include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineSource.h>
 #include <pqPipelineRepresentation.h>
+#include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
+#include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMSourceProxy.h>
 
@@ -150,6 +154,98 @@ pqPipelineSource *ViewBase::getPvActiveSrc()
 void ViewBase::checkView()
 {
   emit this->setViewsStatus(!this->isPeaksWorkspace(this->origSrc));
+}
+
+/**
+ * This function is responsible for checking if a pipeline source has time
+ * step information. If not, it will disable the animation controls. If the
+ * pipeline source has time step information, the animation controls will be
+ * enabled and the start, stop and number of time steps updated for the
+ * animation scene. If the withUpdate flag is used (default off), then the
+ * original pipeline source is updated with the number of "time" steps.
+ * @param withUpdate update the original source with "time" step info
+ */
+void ViewBase::setTimeSteps(bool withUpdate)
+{
+  pqPipelineSource *src = this->getPvActiveSrc();
+  unsigned int numSrcs = this->getNumSources();
+  if (!withUpdate && this->isPeaksWorkspace(src))
+  {
+    if (1 == numSrcs)
+    {
+      emit this->setAnimationControlState(false);
+      return;
+    }
+    if (2 == numSrcs)
+    {
+      return;
+    }
+  }
+  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+  srcProxy1->Modified();
+  srcProxy1->UpdatePipelineInformation();
+  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(\
+                                     srcProxy1->GetProperty("TimestepValues"));
+  this->handleTimeInfo(tsv, withUpdate);
+}
+
+/**
+ * This function looks through the ParaView server manager model and finds
+ * those pipeline sources whose server manager group name is "sources". It
+ * returns the total count of those present;
+ * @return the number of true pipeline sources
+ */
+unsigned int ViewBase::getNumSources()
+{
+  unsigned int count = 0;
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  QList<pqPipelineSource *>::Iterator source;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+  for (source = sources.begin(); source != sources.end(); ++source)
+  {
+    const QString sourceName = (*source)->getSMGroup();
+    if (sourceName == QString("sources"))
+    {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
+ * This function takes the incoming property and determines the start "time",
+ * end "time" and the number of "time" steps. It also enables/disables the
+ * animation controls widget based on the number of "time" steps.
+ * @param dvp the vector property containing the "time" information
+ * @param doUpdate flag to update original source with "time" step info
+ */
+void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
+{
+  const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
+  if (0 != numTimesteps)
+  {
+    if (doUpdate)
+    {
+      vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(\
+                                     this->origSrc->getProxy());
+      vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(dvp->GetElements(),
+                                                          numTimesteps);
+    }
+    double tStart = dvp->GetElement(0);
+    double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
+    pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
+    vtkSMPropertyHelper(scene->getProxy(), "StartTime").Set(tStart);
+    vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
+    vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
+    emit this->setAnimationControlState(true);
+    emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
+  }
+  else
+  {
+    emit this->setAnimationControlState(false);
+  }
 }
 
 }

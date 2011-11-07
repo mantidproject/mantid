@@ -90,47 +90,15 @@ public:
     handle = NULL;
   }
 
-
   //-----------------------------------------------------------------------------
-  /** Get the size of a file as a multiple of a particular data type
-   * @return the size of the file normalized to the data type
-   * @throw runtime_error if the file size is not compatible
-   * @throw runtime_error if the handle is not open.
-   * */
-  size_t getFileSize()
-  {
-    this->obj_size = sizeof(T);
-
-    if (!handle) {
-      throw std::runtime_error("BinaryFile::getFileSize: Cannot find the size of a file from a null handle");
-    }
-
-    // get the size of the file in bytes and reset the handle back to the beginning
-    handle->seekg(0, std::ios::end);
-    size_t filesize = static_cast<size_t>(handle->tellg());
-    handle->seekg(0, std::ios::beg);
-
-    // check the file is a compatible size
-    if (filesize % obj_size != 0) {
-      std::stringstream msg;
-      msg << "BinaryFile::getFileSize: File size is not compatible with data size ";
-      msg << filesize << "%" << obj_size << "=";
-      msg << filesize % obj_size;
-      throw std::runtime_error(msg.str());
-    }
-
-    return filesize / sizeof(T);
-  }
-
-  //-----------------------------------------------------------------------------
-  /// Returns the # of elements in the file
-  size_t getNumElements()
+  /// Returns the # of elements in the file (cached result of getFileSize)
+  size_t getNumElements() const
   {
     return this->num_elements;
   }
 
   /// Returns the current offset into the file.
-  size_t getOffset()
+  size_t getOffset() const
   {
     return this->offset;
   }
@@ -138,10 +106,10 @@ public:
 
   //-----------------------------------------------------------------------------
   /** Get a buffer size for loading blocks of data.
-   * @param num_items
-::    * @return the buffer size
+   *  @param num_items
+   *  @return the buffer size
    */
-  size_t getBufferSize(const size_t num_items)
+  size_t getBufferSize(const size_t num_items) const
   {
     if (num_items < DEFAULT_BLOCK_SIZE)
       return num_items;
@@ -279,6 +247,36 @@ public:
 
 
 private:
+  /** Get the size of a file as a multiple of a particular data type
+   *  @return the size of the file normalized to the data type
+   *  @throw runtime_error if the file size is not compatible
+   *  @throw runtime_error if the handle is not open.
+   */
+  size_t getFileSize()
+  {
+    this->obj_size = sizeof(T);
+
+    if (!handle) {
+      throw std::runtime_error("BinaryFile::getFileSize: Cannot find the size of a file from a null handle");
+    }
+
+    // get the size of the file in bytes and reset the handle back to the beginning
+    handle->seekg(0, std::ios::end);
+    size_t filesize = static_cast<size_t>(handle->tellg());
+    handle->seekg(0, std::ios::beg);
+
+    // check the file is a compatible size
+    if (filesize % obj_size != 0) {
+      std::stringstream msg;
+      msg << "BinaryFile::getFileSize: File size is not compatible with data size ";
+      msg << filesize << "%" << obj_size << "=";
+      msg << filesize % obj_size;
+      throw std::runtime_error(msg.str());
+    }
+
+    return filesize / sizeof(T);
+  }
+
   /// File stream
   std::ifstream * handle;
   /// Size of each object.
