@@ -64,9 +64,12 @@ namespace Mantid
        */
       PyTypeObject * getUpcastedType(bpl::object value)
       {
-        // The search proceeds by first finding all possible candidates
-        // that the value can be converted to. The most derived type
-        // is then found among these.
+        // This has to be a search as it is at runtime.
+        // Each of the registered type handlers is checked
+        // to see if its type is a subclass the value type.
+        // Each one is checked so that the most derived type
+        // can be found
+
         PyTypeObject *result(NULL);
 
         PyTypeLookup::const_iterator iend = typeHandlers.end();
