@@ -36,15 +36,26 @@ namespace Mantid
       template<typename BaseType, typename DerivedType=BaseType>
       struct DLLExport TypedHandler : public PropertyHandler
       {
-        /// Set function to handle Python -> C++ calls and get the correct type
+        /**
+         * Set function to handle Python -> C++ calls and get the correct type
+         * @param alg :: A pointer to an IPropertyManager
+         * @param name :: The name of the property
+         * @param value :: A boost python object that stores the value
+         */
         void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
         {
           alg->setProperty<BaseType>(name, boost::python::extract<BaseType>(value));
         }
-        /// Return a reference tp the type_info of the derived type
-        const std::type_info & typeInfo() const
+        /**
+         * Is the python object an instance of the Derived template type
+         * @param value ::
+         * @returns True if it is, false otherwise
+         */
+        bool isInstance(boost::python::object value) const
         {
-          return typeid(DerivedType);
+          // Can we extract the derived type from the object?
+          boost::python::extract<DerivedType> extractor(value);
+          return extractor.check();
         }
       };
 
@@ -55,16 +66,28 @@ namespace Mantid
       template<>
       struct DLLExport TypedHandler<std::string> : public PropertyHandler
       {
-        /// Set function to handle Python -> C++ calls and get the correct type
+        /**
+         * Set function to handle Python -> C++ calls and get the correct type
+         * @param alg :: A pointer to an IPropertyManager
+         * @param name :: The name of the property
+         * @param value :: A boost python object that stores the value
+         */
         void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
         {
           alg->setPropertyValue(name, boost::python::extract<std::string>(value));
         }
-        /// Return a reference to the type_info of the derived type
-        const std::type_info & typeInfo() const
+        /**
+         * Is the python object an instance of the string template type
+         * @param value ::
+         * @returns True if it is, false otherwise
+         */
+        bool isInstance(boost::python::object value) const
         {
-          return typeid(std::string);
+          // Can we extract the derived type from the object?
+          boost::python::extract<std::string> extractor(value);
+          return extractor.check();
         }
+
       };
 
     }
