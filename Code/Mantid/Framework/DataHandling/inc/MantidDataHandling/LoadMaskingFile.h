@@ -61,7 +61,7 @@ namespace DataHandling
     /// Parse XML
     void parseXML();
     /// Convert value to data
-    void parseBank(std::string valuetext, bool tomask);
+    void parseComponent(std::string valuetext, bool tomask);
     /// Convert value to detector ids
     void parseDetectorIDs(std::string inputstr, bool tomask);
     /// Convert value to spectrum ids
@@ -85,6 +85,7 @@ namespace DataHandling
         std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
     void processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
         std::vector<int32_t> pairdetids_up);
+    void initDetectors();
 
     /// Mask Workspace
     API::MatrixWorkspace_sptr mMaskWS;
