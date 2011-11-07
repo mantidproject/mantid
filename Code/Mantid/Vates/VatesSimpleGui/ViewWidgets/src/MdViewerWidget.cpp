@@ -304,9 +304,9 @@ void MdViewerWidget::setParaViewComponentsForView()
                    this->ui.timeControlWidget,
                    SLOT(enableAnimationControls(bool)));
   QObject::connect(this->currentView,
-                   SIGNAL(setAnimationControlInfo(double,double,int)),
+                   SIGNAL(setAnimationControlInfo(double, double, int)),
                    this->ui.timeControlWidget,
-                   SLOT(updateAnimationControls(double,double,int)));
+                   SLOT(updateAnimationControls(double, double, int)));
 }
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
@@ -346,7 +346,7 @@ void MdViewerWidget::checkForUpdates()
     this->currentView->resetDisplay();
     //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
-    this->updateTimesteps();
+    this->currentView->setTimeSteps(true);
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {
@@ -356,38 +356,6 @@ void MdViewerWidget::checkForUpdates()
     this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
                                                       range->GetElement(1));
   }
-}
-
-void MdViewerWidget::updateAnimationControls(vtkSMDoubleVectorProperty *dvp)
-{
-  const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
-  if (0 != numTimesteps)
-  {
-    double tStart = dvp->GetElement(0);
-    double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
-    pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
-    vtkSMPropertyHelper(scene->getProxy(), "StartTime").Set(tStart);
-    vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
-    vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
-    this->ui.timeControlWidget->setEnabled(true);
-  }
-  else
-  {
-    this->ui.timeControlWidget->setEnabled(false);
-  }
-}
-
-void MdViewerWidget::updateTimesteps()
-{
-  vtkSMSourceProxy *rbcProxy = vtkSMSourceProxy::SafeDownCast(pqActiveObjects::instance().activeSource()->getProxy());
-  rbcProxy->Modified();
-  rbcProxy->UpdatePipelineInformation();
-  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(rbcProxy->GetProperty("TimestepValues"));
-  const int numTimesteps = static_cast<int>(tsv->GetNumberOfElements());
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->currentView->origSrc->getProxy());
-  vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(tsv->GetElements(),
-                                                      numTimesteps);
-  this->updateAnimationControls(tsv);
 }
 
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
