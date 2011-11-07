@@ -31,6 +31,8 @@ namespace MantidQt
       static std::string name() { return "Create MD Workspace"; }
       /// Default Constructor
       CreateMDWorkspace(QWidget *parent = 0);
+      /// Destructor
+      ~CreateMDWorkspace();
 
     private:
       /// Initialize the layout
@@ -52,6 +54,7 @@ namespace MantidQt
       boost::shared_ptr<Approach> m_approach;
       QtWorkspaceMementoModel* m_model;
       ApproachType m_approachType;
+      LoanedMemento m_memento;
       
     };
   }

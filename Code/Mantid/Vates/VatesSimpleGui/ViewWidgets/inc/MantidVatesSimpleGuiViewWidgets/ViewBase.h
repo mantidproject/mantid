@@ -135,7 +135,7 @@ public slots:
    */
   void onLogScale(int state);
   /// Setup the animation controls.
-  void setTimeSteps();
+  void setTimeSteps(bool withUpdate = false);
 
 signals:
   /**
@@ -172,7 +172,7 @@ private:
   /// Find the number of true sources in the pipeline.
   unsigned int getNumSources();
   /// Collect time information for animation controls.
-  void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
+  void handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };

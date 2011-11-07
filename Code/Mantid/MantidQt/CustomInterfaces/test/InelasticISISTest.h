@@ -22,7 +22,7 @@ class InelasticISISTest : public CxxTest::TestSuite
 private:
 
     // Helper method to generate a workspace memento;
-  static WorkspaceMemento* makeMemento()
+  /*static WorkspaceMemento* makeMemento()
   {
     TableWorkspace_sptr ws(new MementoTableWorkspace(1));
     TableRow row = ws->getRow(0);
@@ -33,7 +33,7 @@ private:
     WorkspaceMementoService<LoanedMemento> service(managed);
     service.addAllItems(ws, rowIndex);
     return memento;
-  }
+  }*/
 
 public:
 
