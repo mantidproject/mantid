@@ -36,6 +36,9 @@ namespace MantidQt
         m_readOnlyView->hide();
         m_editableMode = true;
       }
+      //Ensure that displays on both views are kept synchronised.
+      WorkspaceMementoService<LoanedMemento> service(m_WsMemento);
+      m_currentView->initalize(service.getLogData());
     }
 
     /**
@@ -53,17 +56,28 @@ namespace MantidQt
         throw std::runtime_error("A read-only view has not been provided for this LogPresenter");
       }
 
+      LogViewStatus viewStatus = m_currentView->fetchStatus();
+      WorkspaceMementoService<LoanedMemento> service(m_WsMemento);
+      std::vector<AbstractMementoItem_sptr> existingLogData = service.getLogData();
+
       //Swap the views.
-      if(m_currentView->swapMode())
+      if(LogViewStatus::switching_mode == viewStatus)
       {
         swapViews();
       }
-      else
+      else if(LogViewStatus::cancelling == viewStatus)
       {
-        std::map<std::string, std::string> logValues = m_currentView->getLogData();
-
-        WorkspaceMementoService<LoanedMemento> service(m_WsMemento);
-        std::vector<AbstractMementoItem_sptr> existingLogData = service.getLogData();
+        std::vector<AbstractMementoItem_sptr>::iterator it = existingLogData.begin();
+        while(it != existingLogData.end())
+        {
+          (*it)->rollback(); //Roll back changes to logs.
+          it++;
+        }
+        swapViews();
+      }
+      else if(LogViewStatus::saving == viewStatus)
+      {
+        LogDataMap logValues = m_currentView->getLogData();
         size_t proposedSize = logValues.size();
         size_t existingSize = existingLogData.size();
         LogDataMap::iterator it = logValues.begin();
@@ -80,6 +94,7 @@ namespace MantidQt
           it++;
         }
         service.setLogData(newLogValues);
+        swapViews();
       }
     }
 

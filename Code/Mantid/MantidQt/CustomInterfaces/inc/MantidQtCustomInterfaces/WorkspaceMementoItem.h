@@ -70,19 +70,32 @@ namespace MantidQt
       int m_colIndex;
       /// Name for the item.
       std::string name;
+      /// Flag indicating that a column has been created in the table workspace for this item.
+      bool m_newDefinition;
 
     protected:
 
+      /**
+      Getter for the type info.
+      @return type_info of stored value type.
+      */
       virtual const std::type_info& get_type_info() const
       {
          return typeid(ColType);
       }
 
+      /**
+      Get the stored value as a void ptr.
+      @return void* to underlying data.
+      */
       void* getValueVoidPtr()
       {
         return &m_value;
       }
 
+      /**
+      Set the value.
+      */
       void setValueVoidPtr(void* value)
       {
         m_value = *static_cast<ColType*>(value);
@@ -98,9 +111,22 @@ namespace MantidQt
       @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
       @param colIndex : column index of the same table workspace.
       */
-      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, Row rowIndex, Column colIndex) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex)
+      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, Row rowIndex, Column colIndex) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex), m_newDefinition(false)
       {
         m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
+      }
+
+        /**
+      Constructor
+      @param data : ref to table workspace storing the data.
+      @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
+      @param colIndex : column index of the same table workspace.
+      @param newDefinition : true if a on-the-fly definition/column in the table workspace has been created
+      */
+      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, Row rowIndex, Column colIndex, bool newDefinition) : m_data(data), m_rowIndex(rowIndex), m_colIndex(colIndex), m_newDefinition(newDefinition)
+      {
+        m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
+        name = m_data->getColumn(m_colIndex)->name();
       }
 
       /**
@@ -136,6 +162,14 @@ namespace MantidQt
       */
       virtual bool hasChanged() const 
       {
+        /*
+        If a column has had to be deleted out of the underlying table workspace, see (bool m_newDefinition),
+        then this object cannot peform comparisions against that column anymore.
+        */
+        if(m_data->columnCount() <= m_colIndex)
+        {
+          return false;
+        }
         return m_data->cell<ItemType>(m_rowIndex, m_colIndex) != m_value;
       }
 
@@ -201,13 +235,31 @@ namespace MantidQt
       /// Synchronise the changes (via setvalue) with the underlying table workspace. This is a non reversible operation. 
       void commit()
       {
-        m_data->cell<ItemType>(m_rowIndex, m_colIndex) = m_value;
+        /*
+        If a column has had to be deleted out of the underlying table workspace, see (bool m_newDefinition),
+        then this object cannot peform comparisions/operations against that column anymore, so check first.
+        */
+        if(m_data->columnCount() > m_colIndex)
+        {
+          m_data->cell<ItemType>(m_rowIndex, m_colIndex) = m_value;
+        }
       }
 
       /// Undo changes via setValue. 
       void rollback()
       {
         m_value = m_data->cell<ItemType>(m_rowIndex, m_colIndex);
+        //Remove the column if it was introduced as part of a new definition
+        if(m_newDefinition)
+        {
+          try
+          {
+            m_data->removeColumn(name);
+          }
+          catch(std::runtime_error&)
+          { //m_data->getColumn(name) will throw if the column does not exist.
+          }
+        }
       }
 
       /**
@@ -226,6 +278,14 @@ namespace MantidQt
       const std::string& getName() const
       {
         return m_data->getColumn(m_colIndex)->name();
+      }
+
+      /**
+      Getter for the new definition flag.
+      */
+      bool getIsNewDefinition() const
+      {
+        return m_newDefinition;
       }
 
     };

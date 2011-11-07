@@ -18,8 +18,9 @@ private:
 
 public:
 
-WorkspaceMementoItemTest() : ws(new TableWorkspace(2))
+void setUp()
 {
+  ws =  boost::shared_ptr<Mantid::API::ITableWorkspace>(new TableWorkspace(2));
   //Set up a table workspace with one column and one row. then put a single 
   //value integer in that workspace with value 1.
   ws->addColumn("int", "test_col1");
@@ -39,6 +40,14 @@ void testConstructor()
   //Integer Item
   WorkspaceMementoItem<int> a(ws, Row(0), Column(0));
   TS_ASSERT_EQUALS(1, a.getValue());
+  TSM_ASSERT_EQUALS("Should be default using this constructor", false, a.getIsNewDefinition());
+}
+
+void testOtherConstructor()
+{
+  WorkspaceMementoItem<std::string> a(ws, Row(0), Column(2), true);
+  TS_ASSERT_EQUALS("val", a.getValue());
+  TS_ASSERT("New definition was set to true in constructor", true == a.getIsNewDefinition());
 }
 
 void testEqualsThrows()
@@ -137,6 +146,23 @@ void testRevertChanges()
   //Apply changes in memento over to the table workspace.
   TS_ASSERT_THROWS_NOTHING(item.rollback());
   TSM_ASSERT("Changes have been reverted. Should not indicate outstanding!", !item.hasChanged())
+}
+
+void testRevertChangesWithNewDefintion()
+{
+
+  /*
+  For this test schenario, we're indicating that column index == 2 is a new definition and should therefore be
+  culled from the underlying workspace as part of the roll-back.
+  */
+  bool isNewDefintion = true;
+  WorkspaceMementoItem<std::string> item(ws, Row(0), Column(2), isNewDefintion);
+
+  //Apply changes in memento over to the table workspace.
+  TS_ASSERT_THROWS_NOTHING(item.rollback());
+  TSM_ASSERT("Changes have been reverted. Should not indicate outstanding!", !item.hasChanged());
+  TSM_ASSERT("Table workspace should have one fewer columns after roll-back", 2 == ws->columnCount());
+  TSM_ASSERT_THROWS_NOTHING("Calling commit after this type of rollback should gracefully do nothing", item.commit());
 }
 
 void testGetName()

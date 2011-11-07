@@ -32,12 +32,12 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
 */
-CreateMDWorkspace::CreateMDWorkspace(QWidget *) : m_data(new WorkspaceMementoCollection)
+CreateMDWorkspace::CreateMDWorkspace(QWidget *) : m_data(new WorkspaceMementoCollection), m_memento(NULL)
 {
   //Generate memento view model.
   m_model = new QtWorkspaceMementoModel(m_data->getWorkingData());
@@ -125,7 +125,16 @@ void CreateMDWorkspace::addWorkspaceClicked()
       m_data->registerWorkspace(matrixWS, m_model);
 
       // Key off the selected index. --------------------------------------------
-      LoanedMemento memento = m_data->at(0); //TODO. Key properly!
+      m_memento = m_data->at(0); //TODO. Key properly!
+      /*
+      Note: there is an issue to resolve here. I think that the workspacecollection should pass out a reference to the LoanedMemento!
+      Problem at the moment is:
+
+      1) loaned memento goes out of scope and the presenters have an invalid loaned memento (if stored in presenters as a ref).
+      2) workspace collection is destroyed before the presenters (which are attached to views). LoanedMementos are therefore trying to unlock a bad ptr.
+
+      At the momement, this problem is solved by storing the loaned memento as a member variable on this CreateMDWorkspace object, but this is not an ideal solution.
+      */
 
       if(ISISInelastic == m_approachType)
       {
@@ -133,9 +142,9 @@ void CreateMDWorkspace::addWorkspaceClicked()
       }
 
       m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
-      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(memento))));
+      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(m_memento))));
       m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
-      LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(memento));
+      LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(m_memento));
       m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(logPresenter));
       m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createEditableLogView(logPresenter));
     }
@@ -167,6 +176,11 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   //Kick-off finalisation wizard. See mockups.
 
   //Must always update the model-view.
+}
+
+/// Destructor
+CreateMDWorkspace::~CreateMDWorkspace()
+{
 }
 
 } //namespace CustomInterfaces

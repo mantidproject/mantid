@@ -12,7 +12,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     /// Constructor
-    StandardLogView::StandardLogView(boost::shared_ptr<LogPresenter> presenter) : m_presenter(presenter), m_request_edit(false), m_tableWidget(new QTableWidget(this))
+    StandardLogView::StandardLogView(boost::shared_ptr<LogPresenter> presenter) : m_presenter(presenter), m_status(LogViewStatus::no_change)
     {
       presenter->acceptReadOnlyView(this);
     }
@@ -35,6 +35,8 @@ namespace MantidQt
     /// Initalization method.
     void StandardLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
     {
+      m_tableWidget = new QTableWidget();
+
       int logsSize = int(logs.size());
       m_tableWidget->setRowCount(logsSize);
       m_tableWidget->setColumnCount(2);
@@ -61,7 +63,7 @@ namespace MantidQt
       layout->addWidget(m_tableWidget);
       layout->addWidget(btnEdit);
       this->setLayout(layout);
-      m_request_edit = false;
+      m_status = LogViewStatus::no_change;
     }
 
     /** Getter for the log data.
@@ -79,18 +81,18 @@ namespace MantidQt
       return result;
     }
 
-    /** Getter for the edit request status.
-    @return true if an edit request has been made.
+    /** Getter for the LogViewStatus.
+    @return the current LogViewStatus.
     */
-    bool StandardLogView::swapMode() const
+    LogViewStatus StandardLogView::fetchStatus() const
     {
-      return m_request_edit;
+      return m_status;
     }
 
     /// Listener for the edit button click event.
     void StandardLogView::edited()
     {
-      m_request_edit = true;
+      m_status = LogViewStatus::switching_mode;
       m_presenter->update();
     }
 

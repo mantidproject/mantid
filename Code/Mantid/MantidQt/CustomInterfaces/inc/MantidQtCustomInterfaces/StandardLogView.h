@@ -29,8 +29,8 @@ namespace MantidQt
       /// Default/Cached palette.
       QPalette m_pal;
 
-      /// Flag indicating that editing has been requested.
-      bool m_request_edit;
+      /// Flag/enum indicating current status.
+      LogViewStatus m_status;
 
       /// table widget;
       QTableWidget* m_tableWidget;
@@ -60,14 +60,13 @@ namespace MantidQt
       virtual LogDataMap getLogData() const;
 
       /// Getter for the edit request status.
-      virtual bool swapMode() const;
+      virtual LogViewStatus fetchStatus() const;
 
       /// Shows the view.
       void show();
 
       /// Hides the view.
       void hide();
-
     };
   }
 }

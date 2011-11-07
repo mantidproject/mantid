@@ -45,7 +45,7 @@ namespace MantidQt
       void acceptEditableView(LogView* view);
     private:
       void swapViews();
-      LoanedMemento m_WsMemento;
+      LoanedMemento& m_WsMemento;
       LogView* m_readOnlyView;
       LogView* m_editableView;
       LogView* m_currentView;

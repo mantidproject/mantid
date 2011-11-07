@@ -7,6 +7,8 @@
 #include <boost/shared_ptr.hpp>
 
 class QTableWidget;
+class QLineEdit;
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -49,14 +51,31 @@ namespace CustomInterfaces
       QPalette m_pal;
 
       /// Flag indicating that close has been requested.
-      bool m_request_close;
+      LogViewStatus m_status;
 
       /// table widget;
       QTableWidget* m_tableWidget;
 
+      /// txtbox holding log name
+      QLineEdit* m_txtName;
+
+      /// txtbox holding log value
+      QLineEdit* m_txtValue;
+
+      /// helper  method.
+      void addRow(const std::string& name, const std::string& value, const int& row);
+
     private slots:
 
-      void close();
+      void cancel();
+
+      void ok();
+
+      void add();
+
+      void update();
+
+      void remove();
 
     public:
 
@@ -78,14 +97,16 @@ namespace CustomInterfaces
       /// Getter for the log data.
       virtual LogDataMap getLogData() const;
 
-      /// Getter indicating that a mode swap has been requested.
-      virtual bool swapMode() const;
-
       /// Hides the view.
       void show();
 
       /// Shows the view.
       void hide();
+
+      /** Getter for the current status
+      @return current LogViewStatus.
+      */
+      LogViewStatus fetchStatus() const;
 
   };
 

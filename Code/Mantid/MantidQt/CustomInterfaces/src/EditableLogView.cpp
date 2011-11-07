@@ -2,8 +2,11 @@
 #include "MantidQtCustomInterfaces/LogPresenter.h"
 #include "MantidKernel/System.h"
 #include <qboxlayout.h>
+#include <qgridlayout.h>
 #include <qpushbutton.h>
 #include <qtablewidget.h>
+#include <qlabel.h>
+#include <qlineedit.h>
 
 
 using namespace Mantid::Kernel;
@@ -16,7 +19,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    EditableLogView::EditableLogView(boost::shared_ptr<LogPresenter>  presenter) : m_presenter(presenter), m_request_close(false), m_tableWidget(new QTableWidget(this))
+    EditableLogView::EditableLogView(boost::shared_ptr<LogPresenter>  presenter) : m_presenter(presenter), m_status(no_change)
     {
       presenter->acceptEditableView(this);
     }
@@ -40,13 +43,18 @@ namespace MantidQt
       //TODO
     }
 
-    /// Initalization method.
+    /**
+    Initalization method.
+    @param logs : log values to initalise from.
+    */
     void EditableLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
     {
-      int logsSize = int(logs.size());
-      m_tableWidget->setRowCount(logsSize);
-      m_tableWidget->setColumnCount(2);
+      m_tableWidget = new QTableWidget(this);
+      m_txtName = new QLineEdit();
+      m_txtValue = new QLineEdit();
 
+      int logsSize = int(logs.size());
+      m_tableWidget->setColumnCount(2);
       //Populate the tree with log names and values
       for(int i = 0; i < logsSize; i++)
       {
@@ -55,21 +63,42 @@ namespace MantidQt
 
         std::string name = logs[i]->getName();
 
-        QTableWidgetItem *nameItem = new QTableWidgetItem(name.c_str());
-        QTableWidgetItem *valueItem = new QTableWidgetItem(value.c_str());
-
-        m_tableWidget->setItem(i, 0, nameItem);
-        m_tableWidget->setItem(i, 1, valueItem);
+        //Add the row to the QTableWidget.
+        addRow(name, value, i);
       }
 
-      QPushButton* btnEdit = new QPushButton("Close");
-      connect(btnEdit, SIGNAL(clicked()), this, SLOT(close()));
+      QHBoxLayout* editLayout = new QHBoxLayout;
+      editLayout->addWidget(new QLabel("Log"));
+      editLayout->addWidget(m_txtName);
+      editLayout->addWidget(new QLabel("Value"));
+      editLayout->addWidget(m_txtValue);
+
+      QPushButton* addBtn = new QPushButton("Add");
+      QPushButton* updateBtn = new QPushButton("Update");
+      QPushButton* removeBtn = new QPushButton("Remove");
+
+      connect(addBtn, SIGNAL(clicked()), this, SLOT(add()));
+      connect(updateBtn, SIGNAL(clicked()), this, SLOT(update()));
+      connect(removeBtn, SIGNAL(clicked()), this, SLOT(remove()));
+
+      editLayout->addWidget(addBtn);
+      editLayout->addWidget(updateBtn);
+      editLayout->addWidget(removeBtn);
+
+      QPushButton* btnCancel = new QPushButton("Cancel");
+      connect(btnCancel, SIGNAL(clicked()), this, SLOT(cancel()));
+
+      QPushButton* btnOK = new QPushButton("OK");
+      connect(btnOK, SIGNAL(clicked()), this, SLOT(ok()));
 
       QVBoxLayout* layout = new QVBoxLayout();
       layout->addWidget(m_tableWidget);
-      layout->addWidget(btnEdit);
+      layout->addLayout(editLayout);
+      layout->addWidget(btnCancel);
+      layout->addWidget(btnOK);
       this->setLayout(layout);
-      m_request_close = false;
+      //Clean/reset output result.
+      m_status = LogViewStatus::no_change;
     }
 
     /** Getter for the log data.
@@ -87,18 +116,18 @@ namespace MantidQt
       return result;
     }
 
-    /** Getter for the edit request status.
-    @return true if an edit request has been made.
-    */
-    bool EditableLogView::swapMode() const
+    /// Listener for the edit button click event.
+    void EditableLogView::cancel()
     {
-      return m_request_close;
+      //Remove any new logs!
+      m_status = LogViewStatus::cancelling;
+      m_presenter->update();
     }
 
     /// Listener for the edit button click event.
-    void EditableLogView::close()
+    void EditableLogView::ok()
     {
-      m_request_close = true;
+      m_status = LogViewStatus::saving;
       m_presenter->update();
     }
 
@@ -112,6 +141,47 @@ namespace MantidQt
     void EditableLogView::hide()
     {
       QWidget::hide();
+    }
+
+    /**
+    Getter for the LogViewStatus
+    @return current LogViewStatus
+    */
+    LogViewStatus EditableLogView::fetchStatus() const
+    {
+      return m_status;
+    }
+
+    /*
+    Helper method to add a row to the QTableWidget.
+    @param name : name of the item to add.
+    @param value : value of the item to add.
+    @param row : row index of QTableWidget.
+    */
+    void EditableLogView::addRow(const std::string& name, const std::string& value, const int& row)
+    {
+      QTableWidgetItem *nameItem = new QTableWidgetItem(name.c_str());
+      QTableWidgetItem *valueItem = new QTableWidgetItem(value.c_str());
+      m_tableWidget->insertRow(row);
+      m_tableWidget->setItem(row, 0, nameItem); // Name goes in first column
+      m_tableWidget->setItem(row, 1, valueItem); // Value goes in second column
+    }
+
+    void EditableLogView::add()
+    {
+      int rowCount = m_tableWidget->rowCount();
+      addRow(m_txtName->text().toStdString(), m_txtValue->text().toStdString(), rowCount);
+    }
+
+    void EditableLogView::update()
+    {
+      int row = m_tableWidget->currentRow();
+      m_tableWidget->setItem(row, 1, new QTableWidgetItem(m_txtValue->text()));
+    }
+
+    void EditableLogView::remove()
+    {
+      //Remove item by name.
     }
 
 

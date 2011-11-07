@@ -33,7 +33,7 @@ private:
     MOCK_METHOD0(indicateDefault, void());
     MOCK_METHOD0(show, void());
     MOCK_METHOD0(hide, void());
-    MOCK_CONST_METHOD0(swapMode, bool());
+    MOCK_CONST_METHOD0(fetchStatus, LogViewStatus());
   };
   // Helper method to generate a workspace memento;
   static WorkspaceMemento* makeMemento()
@@ -82,6 +82,7 @@ public:
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
    }
 
+   //Should not be able to update the presenter without providing both views first.
    void testInitalizationEditableView()
    {
      MockLogView view;
@@ -97,6 +98,7 @@ public:
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
    }
 
+   //Should not be able to update the presenter without providing both views first.
    void testThrowsWithoutReadOnlyView()
    {
      MockLogView view;
@@ -114,6 +116,7 @@ public:
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
    }
 
+   //Should not be able to update the presenter without providing both views first.
    void testThrowsWithoutEditableView()
    {
      MockLogView view;
@@ -147,9 +150,9 @@ public:
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
    }
 
-   void testEdited()
+   void testCancelledAfterEdit()
    {
-     //Created some edited log values
+      //Created some edited log values
      std::map<std::string, std::string> logs;
      logs.insert(std::make_pair("LogValueA", "A"));
      logs.insert(std::make_pair("LogValueB", "B"));
@@ -157,8 +160,7 @@ public:
 
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
-     EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
-     EXPECT_CALL(view, swapMode()).Times(1);
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::cancelling)); //No change to status, but log value data is now different.
      EXPECT_CALL(view, show()).Times(AnyNumber());
      EXPECT_CALL(view, hide()).Times(AnyNumber());
 
@@ -170,19 +172,118 @@ public:
      presenter.acceptEditableView(&view);
      presenter.update(); // Updated should call getLogData on view
 
-     //Check that the edited log values persist
-     wsMemento->commit();
+     ///Service acts as helper in picking out log values.
      WorkspaceMementoService<LoanedMemento> service(loanedMemento);
 
      std::string temp;
 
      service.getLogData()[0]->getValue(temp);
-     TS_ASSERT_EQUALS("A", temp);
+     TSM_ASSERT_EQUALS("Should have rolled-back to default", "", temp);
 
      service.getLogData()[1]->getValue(temp);
-     TS_ASSERT_EQUALS("B", temp);
+     TSM_ASSERT_EQUALS("Should have rolled-back to default", "", temp);
 
      service.getLogData()[2]->getValue(temp);
+     TSM_ASSERT_EQUALS("Should have rolled-back to default", "", temp);
+
+     //Check that mock object has been used as expected
+     std::vector<AbstractMementoItem_sptr> persistedLogs = service.getLogData();
+     TSM_ASSERT_EQUALS("Should have same number of logs as at start", 3, persistedLogs.size());
+     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+   }
+
+   void testCancelledAfterInsertion()
+   {
+     //Created some edited log values + an additional log value
+     std::map<std::string, std::string> logs;
+     logs.insert(std::make_pair("LogValueA", "A"));
+     logs.insert(std::make_pair("LogValueB", "B"));
+     logs.insert(std::make_pair("LogValueC", "C"));
+     logs.insert(std::make_pair("LogValueD", "D")); //Additional log value.
+
+     MockLogView view;
+     EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::cancelling));
+     EXPECT_CALL(view, show()).Times(AnyNumber());
+     EXPECT_CALL(view, hide()).Times(AnyNumber());
+     WorkspaceMemento* wsMemento = makeMemento();
+     int originalColCount = wsMemento->getData()->columnCount();
+     LoanedMemento loanedMemento(wsMemento);
+
+     LogPresenter presenter(loanedMemento);
+     presenter.acceptReadOnlyView(&view);
+     presenter.acceptEditableView(&view);
+     presenter.update(); // Updated should call getLogData on view
+
+     ///Service acts as helper in picking out log values.
+     WorkspaceMementoService<LoanedMemento> service(loanedMemento);
+
+     std::vector<AbstractMementoItem_sptr> persistedLogs = service.getLogData();
+     TSM_ASSERT_EQUALS("Aborted insertion operation, should have same number of log values as start", 3, persistedLogs.size());
+     TSM_ASSERT_EQUALS("Aborted insertion operation, should have same number of columns as at start", originalColCount, wsMemento->getData()->columnCount());
+
+     std::string temp; //Temp variable for templated member functions
+
+     persistedLogs[0]->getValue(temp);
+     TS_ASSERT_EQUALS("", temp);
+
+     persistedLogs[1]->getValue(temp);
+     TS_ASSERT_EQUALS("", temp);
+
+     persistedLogs[2]->getValue(temp);
+     TS_ASSERT_EQUALS("", temp);
+
+     //Check that mock object has been used as expected
+     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+
+   }
+
+   /// Assume that the view is already an Editable one.
+   void testEdited()
+   {
+     //Created some edited log values
+     std::map<std::string, std::string> logs;
+     logs.insert(std::make_pair("LogValueA", "A"));
+     logs.insert(std::make_pair("LogValueB", "B"));
+     logs.insert(std::make_pair("LogValueC", "C"));
+
+     MockLogView view;
+     EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
+     EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::saving)); //No change to status, but log value data is now different.
+     EXPECT_CALL(view, show()).Times(AnyNumber());
+     EXPECT_CALL(view, hide()).Times(AnyNumber());
+
+     WorkspaceMemento* wsMemento = makeMemento();
+     LoanedMemento loanedMemento(wsMemento);
+
+     LogPresenter presenter(loanedMemento);
+     presenter.acceptReadOnlyView(&view);
+     presenter.acceptEditableView(&view);
+     presenter.update(); // Updated should call getLogData on view
+
+     /*
+     Check that the edited log values persist. We need to call commit here in order to overwrite the table workspace
+     with the newely edited values. Note that commit on the workspace would only be called once user was satisfied with the edits made to the
+     entire workspace metadata, including logs.
+     */
+     wsMemento->commit();
+
+     // Instantiate a service to help pickout log values.
+     WorkspaceMementoService<LoanedMemento> service(loanedMemento);
+
+     std::string temp;
+
+     std::vector<AbstractMementoItem_sptr> persistedLogs = service.getLogData();
+     TSM_ASSERT_EQUALS("Edit operation, should have same number of log values as start", 3, persistedLogs.size());
+
+     persistedLogs[0]->getValue(temp);
+     TS_ASSERT_EQUALS("A", temp);
+
+     persistedLogs[1]->getValue(temp);
+     TS_ASSERT_EQUALS("B", temp);
+
+     persistedLogs[2]->getValue(temp);
      TS_ASSERT_EQUALS("C", temp);
 
      //Check that mock object has been used as expected
@@ -202,7 +303,7 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
-     EXPECT_CALL(view, swapMode()).Times(1);
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::saving));
      EXPECT_CALL(view, show()).Times(AnyNumber());
      EXPECT_CALL(view, hide()).Times(AnyNumber());
      
@@ -215,25 +316,33 @@ public:
      presenter.acceptEditableView(&view);
      presenter.update(); // Updated should call getLogData on view
 
-     //Check that the edited log values persist
+     /*
+     Check that the edited log values persist. We need to call commit here in order to overwrite the table workspace
+     with the newely edited values. Note that commit on the workspace would only be called once user was satisfied with the edits made to the
+     entire workspace metadata, including logs.
+     */
      wsMemento->commit();
+
+     //Instantiate a service to help pick out log values.
      WorkspaceMementoService<LoanedMemento> service(loanedMemento);
 
      std::string temp; //Temp variable for templated member functions
 
-     service.getLogData()[0]->getValue(temp);
+     std::vector<AbstractMementoItem_sptr> persistedLogs = service.getLogData();
+     TSM_ASSERT_EQUALS("Should have one additional log value in WSMemento", 4, persistedLogs.size());
+     TSM_ASSERT_EQUALS("Should have one additional column in Table WS", originalColCount + 1, wsMemento->getData()->columnCount());
+
+     persistedLogs[0]->getValue(temp);
      TS_ASSERT_EQUALS("A", temp);
 
-     service.getLogData()[1]->getValue(temp);
+     persistedLogs[1]->getValue(temp);
      TS_ASSERT_EQUALS("B", temp);
 
-     service.getLogData()[2]->getValue(temp);
+     persistedLogs[2]->getValue(temp);
      TS_ASSERT_EQUALS("C", temp);
 
-     service.getLogData()[3]->getValue(temp);
+     persistedLogs[3]->getValue(temp);
      TS_ASSERT_EQUALS("D", temp);
-
-     TS_ASSERT_EQUALS(originalColCount + 1, wsMemento->getData()->columnCount());
 
      //Check that mock object has been used as expected
      TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
