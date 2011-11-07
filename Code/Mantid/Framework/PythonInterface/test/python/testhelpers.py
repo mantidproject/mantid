@@ -6,10 +6,10 @@ from mantid.api import algorithm_mgr
 def run_algorithm(name, **kwargs):
     """Run a named algorithm and return the
     algorithm handle
-    
-    Parameters: 
+
+    Parameters:
         name - The name of the algorithm
-        kwargs - A dictionary of property name:value pairs    
+        kwargs - A dictionary of property name:value pairs
     """
     alg = algorithm_mgr.create_unmanaged(name)
     alg.initialize()
@@ -24,4 +24,19 @@ def run_algorithm(name, **kwargs):
     for key, value in kwargs.iteritems():
         alg.set_property(key, value)
     alg.execute()
-    return alg 
+    return alg
+
+def can_be_instantiated(cls):
+    """The Python unittest assertRaises does not
+    seem to catch the assertion raised by being unable
+    to instantiate a class (or maybe it's just the boost
+    python stuff).
+    In any case this little function tests for it and returns
+    a boolean
+    """
+    try:
+        cls()
+        result = True
+    except RuntimeError:
+        result = False
+    return result
