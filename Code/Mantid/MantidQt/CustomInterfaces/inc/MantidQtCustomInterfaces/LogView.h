@@ -10,7 +10,11 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
+    /// Enum type to indicate requsts issued by the log view.
+    enum LogViewStatus{no_change=0, cancelling, saving, switching_mode};
+    /// Map type linking a log name to a log value.
     typedef std::map<std::string, std::string> LogDataMap;
+
     /** Abstract log view.
   
       @author Owen Arnold, RAL ISIS
@@ -43,6 +47,9 @@ namespace MantidQt
       virtual LogDataMap getLogData() const = 0;
       virtual void indicateModified() = 0;
       virtual void indicateDefault() = 0;
+      virtual void show() = 0;
+      virtual void hide() = 0;
+      virtual LogViewStatus fetchStatus() const = 0;
     };
   }
 }
