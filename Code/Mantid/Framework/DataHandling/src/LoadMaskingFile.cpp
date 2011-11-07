@@ -151,6 +151,7 @@ namespace DataHandling
   void LoadMaskingFile::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
       std::vector<int32_t> pairdetids_up){
 
+    UNUSED_ARG(pairdetids_up)
     // 1. Initialize
     if (tomask){
       for (size_t i = 0; i < mMaskWS->getNumberHistograms(); i ++){
@@ -241,6 +242,9 @@ namespace DataHandling
       std::vector<int32_t>& detectors,
       std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
 
+    UNUSED_ARG(detectors)
+    UNUSED_ARG(detectorpairslow)
+    UNUSED_ARG(detectorpairsup)
     g_log.error() << "SpectrumID in XML File (ids) Is Not Supported!  Spectrum IDs" << std::endl;
 
     for (size_t i = 0; i < singles.size(); i ++){
@@ -258,6 +262,8 @@ namespace DataHandling
   void LoadMaskingFile::detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
       std::vector<int32_t>& detectors,
       std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
+    UNUSED_ARG(detectorpairslow)
+    UNUSED_ARG(detectorpairsup)
 
     /*
     for (size_t i = 0; i < singles.size(); i ++){
