@@ -98,7 +98,7 @@ namespace MantidQt
       layout->addWidget(btnOK);
       this->setLayout(layout);
       //Clean/reset output result.
-      m_status = LogViewStatus::no_change;
+      m_status = no_change;
     }
 
     /** Getter for the log data.
@@ -120,14 +120,14 @@ namespace MantidQt
     void EditableLogView::cancel()
     {
       //Remove any new logs!
-      m_status = LogViewStatus::cancelling;
+      m_status = cancelling_mode;
       m_presenter->update();
     }
 
     /// Listener for the edit button click event.
     void EditableLogView::ok()
     {
-      m_status = LogViewStatus::saving;
+      m_status = saving_mode;
       m_presenter->update();
     }
 

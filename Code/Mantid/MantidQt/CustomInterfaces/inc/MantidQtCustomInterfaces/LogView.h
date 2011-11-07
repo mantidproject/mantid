@@ -11,7 +11,7 @@ namespace MantidQt
   {
 
     /// Enum type to indicate requsts issued by the log view.
-    enum LogViewStatus{no_change=0, cancelling, saving, switching_mode};
+    enum LogViewStatus{no_change=0, cancelling_mode, saving_mode, switching_mode};
     /// Map type linking a log name to a log value.
     typedef std::map<std::string, std::string> LogDataMap;
 

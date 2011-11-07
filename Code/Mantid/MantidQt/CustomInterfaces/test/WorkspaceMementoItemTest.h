@@ -47,7 +47,7 @@ void testOtherConstructor()
 {
   WorkspaceMementoItem<std::string> a(ws, Row(0), Column(2), true);
   TS_ASSERT_EQUALS("val", a.getValue());
-  TS_ASSERT("New definition was set to true in constructor", true == a.getIsNewDefinition());
+  TSM_ASSERT("New definition was set to true in constructor", true == a.getIsNewDefinition());
 }
 
 void testEqualsThrows()

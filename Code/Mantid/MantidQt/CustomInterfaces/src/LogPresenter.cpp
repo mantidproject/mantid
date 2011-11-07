@@ -61,11 +61,11 @@ namespace MantidQt
       std::vector<AbstractMementoItem_sptr> existingLogData = service.getLogData();
 
       //Swap the views.
-      if(LogViewStatus::switching_mode == viewStatus)
+      if(switching_mode == viewStatus)
       {
         swapViews();
       }
-      else if(LogViewStatus::cancelling == viewStatus)
+      else if(cancelling_mode == viewStatus)
       {
         std::vector<AbstractMementoItem_sptr>::iterator it = existingLogData.begin();
         while(it != existingLogData.end())
@@ -75,7 +75,7 @@ namespace MantidQt
         }
         swapViews();
       }
-      else if(LogViewStatus::saving == viewStatus)
+      else if(saving_mode == viewStatus)
       {
         LogDataMap logValues = m_currentView->getLogData();
         size_t proposedSize = logValues.size();

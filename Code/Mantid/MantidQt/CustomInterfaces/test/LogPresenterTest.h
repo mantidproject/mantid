@@ -160,7 +160,7 @@ public:
 
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
-     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::cancelling)); //No change to status, but log value data is now different.
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(cancelling_mode)); //No change to status, but log value data is now different.
      EXPECT_CALL(view, show()).Times(AnyNumber());
      EXPECT_CALL(view, hide()).Times(AnyNumber());
 
@@ -203,7 +203,7 @@ public:
 
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
-     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::cancelling));
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(cancelling_mode));
      EXPECT_CALL(view, show()).Times(AnyNumber());
      EXPECT_CALL(view, hide()).Times(AnyNumber());
      WorkspaceMemento* wsMemento = makeMemento();
@@ -250,7 +250,7 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
-     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::saving)); //No change to status, but log value data is now different.
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(saving_mode)); //No change to status, but log value data is now different.
      EXPECT_CALL(view, show()).Times(AnyNumber());
      EXPECT_CALL(view, hide()).Times(AnyNumber());
 
@@ -303,7 +303,7 @@ public:
      MockLogView view;
      EXPECT_CALL(view, initalize(_)).Times(AtLeast(1));
      EXPECT_CALL(view, getLogData()).WillOnce(Return(logs));
-     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(LogViewStatus::saving));
+     EXPECT_CALL(view, fetchStatus()).WillOnce(Return(saving_mode));
      EXPECT_CALL(view, show()).Times(AnyNumber());
      EXPECT_CALL(view, hide()).Times(AnyNumber());
      

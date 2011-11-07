@@ -12,7 +12,7 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     /// Constructor
-    StandardLogView::StandardLogView(boost::shared_ptr<LogPresenter> presenter) : m_presenter(presenter), m_status(LogViewStatus::no_change)
+    StandardLogView::StandardLogView(boost::shared_ptr<LogPresenter> presenter) : m_presenter(presenter), m_status(no_change)
     {
       presenter->acceptReadOnlyView(this);
     }
@@ -63,7 +63,7 @@ namespace MantidQt
       layout->addWidget(m_tableWidget);
       layout->addWidget(btnEdit);
       this->setLayout(layout);
-      m_status = LogViewStatus::no_change;
+      m_status = no_change;
     }
 
     /** Getter for the log data.
@@ -92,7 +92,7 @@ namespace MantidQt
     /// Listener for the edit button click event.
     void StandardLogView::edited()
     {
-      m_status = LogViewStatus::switching_mode;
+      m_status = switching_mode;
       m_presenter->update();
     }
 
