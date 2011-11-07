@@ -1799,12 +1799,22 @@ class UserFile(ReductionStep):
     def _read_back_region(self, arguments, reducer):
         """
             Parses a line of the form BACK/M... to sets the default TOF
-            window for the background region for a specific monitor
+            window for the background region for a specific monitor, or
+            turning off if of the format BACK/M3/OFF.
             @param arguments: the contents of the line after the first keyword
             @param reducer: the object that contains all the settings
             @return any errors encountered or ''
         """
         try:
+            # check first if what to turn of a background for a specific
+            # monitor using 'BACK/M2/OFF'.
+            parts = arguments.split('/OFF')
+            print parts
+            if len(parts) == 2:
+                # set specific monitor to OFF
+                reducer.inst.set_TOFs(None, None, int(parts[0]))
+                return ''
+
             # assume a line of the form BACK/M1/TIME 
             parts = arguments.split('/TIME')
             if len(parts) == 2:

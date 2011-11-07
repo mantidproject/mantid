@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/ParameterisedLatticeView.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
 #include "MantidQtCustomInterfaces/StandardLogView.h"
+#include "MantidQtCustomInterfaces/EditableLogView.h"
+
 
 namespace MantidQt
 {
@@ -14,12 +16,10 @@ namespace MantidQt
     class DLLExport InelasticISIS : public Approach
     {
     public:
-      InelasticISIS(LoanedMemento& memento);
-      virtual ParameterisedLatticeView* createLatticeView();
-      virtual StandardLogView* createLogView();
-    private:
-      /// Memento containing all the meta data of interest for the workspace.
-      LoanedMemento m_WsMemento;
+      InelasticISIS();
+      virtual ParameterisedLatticeView* createLatticeView(LatticePresenter_sptr presenter);
+      virtual StandardLogView* createLogView(LogPresenter_sptr presenter);
+      virtual EditableLogView* createEditableLogView(LogPresenter_sptr presenter);
     };
   }
 }

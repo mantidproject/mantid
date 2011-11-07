@@ -11,6 +11,9 @@ from reduction_gui.widgets.sans.hfir_sample_data import SampleDataWidget
 from reduction_gui.widgets.sans.hfir_background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.hfir_reduction import HFIRReductionScripter
+from reduction_gui.widgets.sans.sans_catalog import SANSCatalogWidget
+
+from reduction_gui.reduction.sans.hfir_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
 
@@ -39,3 +42,6 @@ class HFIRInterface(InstrumentInterface):
         
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
+        
+        # Catalog
+        self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))

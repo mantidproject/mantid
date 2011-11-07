@@ -16412,7 +16412,7 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
   else
   {
     plotDetailsList = plotDetails.split('.');
-    if (plotDetailsList.size() >= 4) 
+    if (plotDetailsList.size() >= 3)
     {
       plotType = plotDetailsList[0].toInt();
 

@@ -22,10 +22,14 @@ using namespace MantidQt::API;
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
-    ApplicationWindow* parent, const QString& /*name*/, Qt::WFlags f):
-Table(env,ws->rowCount(),ws->columnCount(),label,parent,"",f),
+    ApplicationWindow* parent, bool transpose):
+Table(env,
+  transpose? ws->columnCount() : ws->rowCount(),
+  transpose? ws->rowCount() + 1 : ws->columnCount(),
+  label,parent,"",0),
 m_ws(ws),
-m_wsName(ws->getName())
+m_wsName(ws->getName()),
+m_transposed(transpose)
 {
   // Set name and stuff
   parent->initTable(this, parent->generateUniqueName("Table-"));
@@ -43,6 +47,12 @@ m_wsName(ws->getName())
 /** Refresh the table by filling it */
 void MantidTable::fillTable()
 {
+  if (m_transposed)
+  {
+    fillTableTransposed();
+    return;
+  }
+
   setNumCols(m_ws->columnCount());
   setNumRows(m_ws->rowCount());
 
@@ -98,6 +108,76 @@ void MantidTable::fillTable()
 
 }
 
+/**
+ * Make the trasposed table.
+ */
+void MantidTable::fillTableTransposed()
+{
+
+  int ncols = m_ws->rowCount() + 1;
+  int nrows = m_ws->columnCount();
+
+  setNumCols(ncols);
+  setNumRows(nrows);
+
+  // Track the column width. All text should fit in.
+  std::vector<int> maxWidth(numCols(), 6);
+  QFontMetrics fm( this->getTextFont() );
+  // Add all columns
+  for(int i = 0; i < m_ws->columnCount(); ++i)
+  {
+    Mantid::API::Column_sptr c = m_ws->getColumn(i);
+
+    QString colName = QString::fromStdString(c->name());
+
+    int row = i;
+    setText(row, 0, colName);
+
+    int thisWidth = fm.width(colName) + 20;
+    if (thisWidth > maxWidth[0]) maxWidth[0] = thisWidth;
+
+    // Print out the data in each row of this column
+    for(int j = 0; j < m_ws->rowCount(); ++j)
+    {
+      std::ostringstream ostr;
+      // This is the method on the Column object to convert to a string.
+      c->print(ostr,j);
+      QString qstr = QString::fromStdString(ostr.str());
+
+      int col = j + 1;
+      setText(row, col, qstr);
+
+      // Measure the width
+      thisWidth = fm.width(qstr) + 20;
+      if (thisWidth > maxWidth[col]) maxWidth[col] = thisWidth;
+      // Avoid crazy widths
+      if (maxWidth[col] > 300)
+      {
+        maxWidth[col] = 300;
+      }
+    }
+
+  }
+  // Make columns of ITableWorkspaces read only, and of the right width
+  for(int j = 0; j < numCols(); ++j)
+  {
+    setReadOnlyColumn(j);
+    setColumnWidth(j,maxWidth[j]);
+    // make columns unplottable
+    setColPlotDesignation(j,Table::None);
+    if (j == 0)
+    {
+      setColName(j,"Name");
+    }
+    else
+    {
+      // give names to columns as corresponding row numbers in the TableWorkspace
+      setColName(j,QString::number(j-1));
+    }
+  }
+
+}
+
 //------------------------------------------------------------------------------------------------
 void MantidTable::closeTable()
 {
@@ -133,6 +213,11 @@ void MantidTable::afterReplaceHandle(const std::string& wsName,const boost::shar
 /** Called when a cell is edited */
 void MantidTable::cellEdited(int row,int col)
 {
+  if (m_transposed)
+  {
+    return;
+  }
+
   std::string text = d_table->text(row,col).remove(QRegExp("\\s")).toStdString();
   Mantid::API::Column_sptr c = m_ws->getColumn(col);
 
@@ -156,6 +241,12 @@ void MantidTable::cellEdited(int row,int col)
  */
 void MantidTable::deleteRows(int startRow, int endRow)
 {
+  if (m_transposed)
+  {
+    QMessageBox::warning(this,"MantidPlot - Warning","Cannot delete rows in a transposed table");
+    return;
+  }
+
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows");
   alg->setPropertyValue("TableWorkspace",m_ws->getName());
   QStringList rows;

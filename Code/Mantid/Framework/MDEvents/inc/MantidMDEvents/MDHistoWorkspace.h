@@ -66,22 +66,30 @@ namespace MDEvents
 
     // --------------------------------------------------------------------------------------------
     MDHistoWorkspace & operator+=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator+=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void add(const MDHistoWorkspace & b);
+    void add(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator-=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator-=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void subtract(const MDHistoWorkspace & b);
+    void subtract(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator*=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator*=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void multiply(const MDHistoWorkspace & b);
+    void multiply(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator/=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator/=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void divide(const MDHistoWorkspace & b);
+    void divide(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator&=(const MDHistoWorkspace & b);
     MDHistoWorkspace & operator|=(const MDHistoWorkspace & b);
     MDHistoWorkspace & operator^=(const MDHistoWorkspace & b);
 
     void operatorNot();
+    void log();
+    void log10();
+    void exp();
+    void power(double exponent);
 
 
 

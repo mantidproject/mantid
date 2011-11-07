@@ -331,6 +331,7 @@ public slots:
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
     void importBoxDataTable();
+    void importTransposed();
 
     // Invoke the Vates Simple User Interface
     void showVatesSimpleInterface();
@@ -349,7 +350,7 @@ public slots:
 				      bool showDlg = true, bool makeVisible = true);
 
     // Create a MantidMatrix from workspace wsName
-    Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
+    Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true, bool transpose = false);
 
     void createLoadDAEMantidMatrix(const QString&);
 

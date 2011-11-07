@@ -13,11 +13,7 @@ namespace MantidQt
       */
       LoanedMemento::LoanedMemento (WorkspaceMemento *memento) : m_memento (memento) 
       {
-        if(!m_memento)
-        {
-          throw std::runtime_error("Cannot construct with null WorkspaceMemento");
-        }
-        else
+        if(m_memento)
         {
           m_memento->lock();
         }
@@ -40,8 +36,11 @@ namespace MantidQt
       {
         if(this != &other)
         {
-          this->m_memento->unlock(); //Is this the right thing to do?
-          this->m_memento = NULL; //Is this the right thing to do?
+          if(m_memento != NULL)
+          {
+            this->m_memento->unlock();
+          }
+          this->m_memento = NULL;
           this->m_memento = other.m_memento;
         }
         return *this;
@@ -59,11 +58,11 @@ namespace MantidQt
       /// Destructor
       LoanedMemento::~LoanedMemento () 
       {
-        if(m_memento)
+        if(m_memento != NULL)
         {
-          this->m_memento->unlock();
+          m_memento->unlock();
         }
-        //Explicitly do not delete memento.
       }
+
   }
 }

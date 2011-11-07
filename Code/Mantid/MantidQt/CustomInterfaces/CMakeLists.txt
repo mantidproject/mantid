@@ -1,71 +1,73 @@
-set ( SRC_FILES 
-                src/ApproachDialog.cpp
-                src/background.cpp
-                src/ConvertToEnergy.cpp
-                src/CreateMDWorkspace.cpp
-                src/deltaECalc.cpp
-                src/Homer.cpp
-                src/Indirect.cpp
-                src/IndirectDataAnalysis.cpp
-                src/IndirectDiffractionReduction.cpp
-                src/IO_MuonGrouping.cpp
-                src/InelasticISIS.cpp
-                src/QtWorkspaceMementoModel.cpp
-                src/LatticePresenter.cpp
-                src/LoanedMemento.cpp
-                src/LogPresenter.cpp
-                src/MuonAnalysis.cpp
-                src/MuonAnalysisHelper.cpp
-                src/MuonAnalysisOptionTab.cpp
-                src/ParameterisedLatticeView.cpp
-                src/SANSAddFiles.cpp
-                src/SANSPlotSpecial.cpp
-                src/SANSRunWindow.cpp
-                src/SANSDiagnostics.cpp
-                src/SingleOwnerLock.cpp
-                src/StandardLogView.cpp
-                src/WorkspaceMementoCollection.cpp
-                src/WorkspaceMementoService.cpp
-                src/WorkspaceMemento.cpp
+set ( SRC_FILES
+	src/ApproachDialog.cpp
+	src/ConvertToEnergy.cpp
+	src/CreateMDWorkspace.cpp
+	src/EditableLogView.cpp
+	src/Homer.cpp
+	src/IO_MuonGrouping.cpp
+	src/Indirect.cpp
+	src/IndirectDataAnalysis.cpp
+	src/IndirectDiffractionReduction.cpp
+	src/InelasticISIS.cpp
+	src/LatticePresenter.cpp
+	src/LoanedMemento.cpp
+	src/LogPresenter.cpp
+	src/MuonAnalysis.cpp
+	src/MuonAnalysisHelper.cpp
+	src/MuonAnalysisOptionTab.cpp
+	src/ParameterisedLatticeView.cpp
+	src/QtWorkspaceMementoModel.cpp
+	src/SANSAddFiles.cpp
+	src/SANSDiagnostics.cpp
+	src/SANSPlotSpecial.cpp
+	src/SANSRunWindow.cpp
+	src/SingleOwnerLock.cpp
+	src/StandardLogView.cpp
+	src/WorkspaceMemento.cpp
+	src/WorkspaceMementoCollection.cpp
+	src/WorkspaceMementoService.cpp
+	src/background.cpp
+	src/deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set ( INC_FILES 
-                inc/MantidQtCustomInterfaces/AbstractMementoItem.h
-                inc/MantidQtCustomInterfaces/Approach.h
-                inc/MantidQtCustomInterfaces/ApproachDialog.h
-                inc/MantidQtCustomInterfaces/Background.h
-                inc/MantidQtCustomInterfaces/ConvertToEnergy.h
-                inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
-                inc/MantidQtCustomInterfaces/deltaECalc.h
-                inc/MantidQtCustomInterfaces/Updateable.h
-                inc/MantidQtCustomInterfaces/Homer.h
-                inc/MantidQtCustomInterfaces/Indirect.h
-                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
-                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-                inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
-                inc/MantidQtCustomInterfaces/InelasticISIS.h
-                inc/MantidQtCustomInterfaces/LatticePresenter.h
-                inc/MantidQtCustomInterfaces/LatticeView.h
-                inc/MantidQtCustomInterfaces/LoanedMemento.h
-                inc/MantidQtCustomInterfaces/LogPresenter.h
-                inc/MantidQtCustomInterfaces/LogView.h
-                inc/MantidQtCustomInterfaces/MuonAnalysis.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-                inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
-                inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
-                inc/MantidQtCustomInterfaces/SANSAddFiles.h
-                inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
-                inc/MantidQtCustomInterfaces/SANSRunWindow.h
-                inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-                inc/MantidQtCustomInterfaces/SingleOwnerLock.h
-                inc/MantidQtCustomInterfaces/StandardLogView.h
-                inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
-                inc/MantidQtCustomInterfaces/WorkspaceMementoLock.h
-                inc/MantidQtCustomInterfaces/WorkspaceMemento.h
-                inc/MantidQtCustomInterfaces/WorkspaceMementoService.h
-                inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
+set ( INC_FILES
+	inc/MantidQtCustomInterfaces/AbstractMementoItem.h
+	inc/MantidQtCustomInterfaces/Approach.h
+	inc/MantidQtCustomInterfaces/ApproachDialog.h
+	inc/MantidQtCustomInterfaces/Background.h
+	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+	inc/MantidQtCustomInterfaces/EditableLogView.h
+	inc/MantidQtCustomInterfaces/Homer.h
+	inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
+	inc/MantidQtCustomInterfaces/Indirect.h
+	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+	inc/MantidQtCustomInterfaces/InelasticISIS.h
+	inc/MantidQtCustomInterfaces/LatticePresenter.h
+	inc/MantidQtCustomInterfaces/LatticeView.h
+	inc/MantidQtCustomInterfaces/LoanedMemento.h
+	inc/MantidQtCustomInterfaces/LogPresenter.h
+	inc/MantidQtCustomInterfaces/LogView.h
+	inc/MantidQtCustomInterfaces/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
+	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
+	inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
+	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
+	inc/MantidQtCustomInterfaces/SANSAddFiles.h
+	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
+	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/SingleOwnerLock.h
+	inc/MantidQtCustomInterfaces/StandardLogView.h
+	inc/MantidQtCustomInterfaces/Updateable.h
+	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
+	inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
+	inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
+	inc/MantidQtCustomInterfaces/WorkspaceMementoLock.h
+	inc/MantidQtCustomInterfaces/WorkspaceMementoService.h
+	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -74,6 +76,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+                inc/MantidQtCustomInterfaces/EditableLogView.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
@@ -134,7 +137,9 @@ add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser )
+Find_Package(Threads)
+
+target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
 
 if ( CXXTEST_FOUND )
   

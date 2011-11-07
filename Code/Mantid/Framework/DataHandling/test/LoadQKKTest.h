@@ -1,5 +1,5 @@
-#ifndef LOADRKHTEST_H_
-#define LOADRKHTEST_H_
+#ifndef LOADQKKTEST_H_
+#define LOADQKKTEST_H_
 
 //-----------------
 // Includes
@@ -57,4 +57,4 @@ public:
 };
 
 
-#endif //LOADRKHTEST_H_
+#endif //LOADQKKTEST_H_

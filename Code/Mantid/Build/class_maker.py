@@ -8,7 +8,7 @@ import datetime
 import re
 import cmakelists_utils
 from cmakelists_utils import *
-
+import commands
 
 #======================================================================
 def write_header(subproject, classname, filename, args):
@@ -23,16 +23,23 @@ def write_header(subproject, classname, filename, args):
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
-    
+
   private:
     virtual void initDocs();
     void init();
     void exec();
 
 """
+
+    # ---- Find the author, default to blank string ----
+    author = ""
+    try:
+        author = commands.getoutput('git config user.name')
+    except:
+        pass
         
     alg_class_declare = " : public API::Algorithm"
-    alg_include = """#include "MantidAPI/Algorithm.h" """
+    alg_include = '#include "MantidAPI/Algorithm.h"'
     
     if not args.alg:
         algorithm_header = ""
@@ -53,7 +60,6 @@ namespace %s
 
   /** %s : TODO: DESCRIPTION
     
-    @author
     @date %s
 
     Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -88,8 +94,12 @@ namespace %s
 } // namespace %s
 } // namespace Mantid
 
-#endif  /* %s */
-""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now().date(), datetime.datetime.now().date().year, classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
+#endif  /* %s */""" % (guard, guard,
+       alg_include, subproject, classname,
+       datetime.datetime.now().date(),
+       datetime.datetime.now().date().year, classname, alg_class_declare,
+       classname, classname, algorithm_header, subproject, guard)
+
     f.write(s)
     f.close()
 
@@ -190,9 +200,9 @@ namespace %s
 %s
 
 } // namespace Mantid
-} // namespace %s
-
-""" % (subproject, args.subfolder, classname, subproject, algorithm_top, classname, classname, classname, classname, algorithm_source, subproject)
+} // namespace %s""" % (
+        subproject, args.subfolder, classname, subproject, algorithm_top,
+        classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)
     f.close()
 
@@ -274,9 +284,10 @@ public:
 };
 
 
-#endif /* %s */
-
-""" % (guard, guard, subproject, args.subfolder, classname, subproject, classname, classname, classname, classname, algorithm_test, guard)
+#endif /* %s */""" % (
+          guard, guard, subproject, args.subfolder, classname,
+          subproject, classname, classname, classname, classname,
+          algorithm_test, guard)
     f.write(s)
     f.close()
     

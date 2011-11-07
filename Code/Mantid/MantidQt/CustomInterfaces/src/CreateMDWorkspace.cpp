@@ -4,6 +4,8 @@
 #include "MantidQtCustomInterfaces/InelasticISIS.h"
 #include "MantidQtCustomInterfaces/CreateMDWorkspace.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
+#include "MantidQtCustomInterfaces/LatticePresenter.h"
+#include "MantidQtCustomInterfaces/LogPresenter.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -35,7 +37,7 @@ namespace CustomInterfaces
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
 */
-CreateMDWorkspace::CreateMDWorkspace(QWidget *) : m_data(new WorkspaceMementoCollection)
+CreateMDWorkspace::CreateMDWorkspace(QWidget *) : m_data(new WorkspaceMementoCollection), m_memento(NULL)
 {
   //Generate memento view model.
   m_model = new QtWorkspaceMementoModel(m_data->getWorkingData());
@@ -120,21 +122,32 @@ void CreateMDWorkspace::addWorkspaceClicked()
     MatrixWorkspace_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if(matrixWS)
     {
-      m_data->registerWorkspace(matrixWS, m_model); //TODO better handle any incompatibility here.
+      m_data->registerWorkspace(matrixWS, m_model);
 
       // Key off the selected index. --------------------------------------------
-      LoanedMemento memento = m_data->at(0); 
+      LoanedMemento temp = m_data->at(0);
+      m_memento.operator=(temp);
+      /*
+      Note: there is an issue to resolve here. I think that the workspacecollection should pass out a reference to the LoanedMemento!
+      Problem at the moment is:
+
+      1) loaned memento goes out of scope and the presenters have an invalid loaned memento (if stored in presenters as a ref).
+      2) workspace collection is destroyed before the presenters (which are attached to views). LoanedMementos are therefore trying to unlock a bad ptr.
+
+      At the momement, this problem is solved by storing the loaned memento as a member variable on this CreateMDWorkspace object, but this is not an ideal solution.
+      */
 
       if(ISISInelastic == m_approachType)
       {
-        m_approach = boost::shared_ptr<Approach>(new InelasticISIS(memento));
+        m_approach = Approach_sptr(new InelasticISIS);
       }
 
       m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
-      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView());
+      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(m_memento))));
       m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
-      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView());
-      //------------------------------------------------------------------------------
+      LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(m_memento));
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(logPresenter));
+      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createEditableLogView(logPresenter));
     }
     else
     {
@@ -164,6 +177,11 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   //Kick-off finalisation wizard. See mockups.
 
   //Must always update the model-view.
+}
+
+/// Destructor
+CreateMDWorkspace::~CreateMDWorkspace()
+{
 }
 
 } //namespace CustomInterfaces

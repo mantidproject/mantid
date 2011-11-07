@@ -243,7 +243,7 @@ class BaseReductionScripter(object):
             """
                 Reset state
             """
-            if self._state is not None:
+            if self._state is not None and self._state is not NotImplemented:
                 self._state.reset()
             else:
                 raise RuntimeError, "State reset called without a valid initialized state"

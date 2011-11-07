@@ -161,6 +161,8 @@ private slots:
   /// Change the data style and color
   void changeDataPlotType(const QString &);
 
+  void groupFittedWorkspaces(QString);
+
 private:
   /// Initialize the layout
   virtual void initLayout();

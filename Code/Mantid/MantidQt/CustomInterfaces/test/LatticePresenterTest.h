@@ -228,7 +228,6 @@ public:
      delete wsMemento;
      delete view;
    }
-
 };
 
 #endif

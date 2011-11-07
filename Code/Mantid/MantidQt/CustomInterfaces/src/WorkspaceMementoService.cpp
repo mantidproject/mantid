@@ -312,7 +312,7 @@ namespace MantidQt
 
 
     /*Templated Types*/
-    template class WorkspaceMementoService<LoanedMemento>;
-    template class WorkspaceMementoService<WorkspaceMemento*>;
+    template DLLExport class WorkspaceMementoService<LoanedMemento>;
+    template DLLExport class WorkspaceMementoService<WorkspaceMemento*>;
   }
 }

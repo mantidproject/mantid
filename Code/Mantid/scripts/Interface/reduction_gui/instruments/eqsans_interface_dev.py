@@ -10,6 +10,9 @@ from reduction_gui.widgets.sans.eqsans_instrument import SANSInstrumentWidget
 from reduction_gui.widgets.sans.eqsans_data import DataSetsWidget
 from reduction_gui.widgets.sans.eqsans_output import EQSANSOutputWidget
 from reduction_gui.reduction.eqsans_reduction import EQSANSReductionScripter
+from reduction_gui.widgets.sans.sans_catalog import SANSCatalogWidget
+
+from reduction_gui.reduction.sans.eqsans_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
 
@@ -36,3 +39,6 @@ class EQSANSInterface(InstrumentInterface):
         
         # Reduction output
         self.attach(EQSANSOutputWidget(settings = self._settings))
+        
+        # Catalog
+        self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))

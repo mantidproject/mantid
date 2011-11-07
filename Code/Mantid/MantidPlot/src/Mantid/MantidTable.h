@@ -15,7 +15,7 @@ class MantidTable: public Table, public MantidQt::API::WorkspaceObserver
   Q_OBJECT
 public:
   MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
-    ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+    ApplicationWindow* parent, bool transpose = false);
 
   /// returns the workspace name
   const std::string & getWorkspaceName() {return m_wsName; }
@@ -28,12 +28,14 @@ public slots:
 protected slots:
   void closeTable();
   void fillTable();
+  void fillTableTransposed();
 protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 private:
   Mantid::API::ITableWorkspace_sptr m_ws;
   const std::string m_wsName;
+  bool m_transposed; ///< Show the table workspace transposed
 
 };
 

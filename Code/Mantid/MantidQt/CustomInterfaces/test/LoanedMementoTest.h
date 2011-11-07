@@ -57,12 +57,6 @@ public:
 // Functional tests
 //=====================================================================================
 
-  void testThrowsIfWsMementoNULL()
-  {
-    WorkspaceMemento* memento = NULL;
-    TSM_ASSERT_THROWS("Cannot wrap NULL, should throw!", LoanedMemento loan(memento), std::runtime_error); //Should automatically lock
-  }
-
   //Test that smart loaned pointer performs lock/unlock
   void  testAutoLockUnlock()
   {

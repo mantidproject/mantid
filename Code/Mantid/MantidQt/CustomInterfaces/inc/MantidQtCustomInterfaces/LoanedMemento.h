@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_LOANEDMEMENTO_H_
 
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
 namespace MantidQt
 {
@@ -40,7 +41,8 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport LoanedMemento {
+    class DLLExport LoanedMemento
+    {
     public:
       LoanedMemento (WorkspaceMemento *memento);
       LoanedMemento(const LoanedMemento& other);
