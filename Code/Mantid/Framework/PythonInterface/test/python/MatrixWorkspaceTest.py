@@ -1,6 +1,6 @@
 import unittest
 
-from testhelpers import run_algorithm
+from testhelpers import run_algorithm, can_be_instantiated
 
 from mantid.api import MatrixWorkspace, WorkspaceProperty_Workspace, Workspace
 
@@ -15,12 +15,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.__class__._test_ws = alg.get_property('OutputWorkspace').value
 
     def test_that_one_cannot_be_instantiated_directly(self):
-        try:
-            MatrixWorkspace()
-            error = False
-        except RuntimeError: # For some reason self.assertRaises doesn't catch this
-            error = True
-        self.assertTrue(error, True)
+        self.assertFalse(can_be_instantiated(MatrixWorkspace))
 
     def test_meta_information(self):
         self.assertEquals(self._test_ws.id(), "Workspace2D")
