@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/BinaryOperationMDTestHelper.cpp
 	src/ComponentCreationHelper.cpp
 	src/MDEventsTestHelper.cpp
 	src/SANSInstrumentCreationHelper.cpp
@@ -6,6 +7,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+	inc/MantidTestHelpers/BinaryOperationMDTestHelper.h
 	inc/MantidTestHelpers/ComponentCreationHelper.h
 	inc/MantidTestHelpers/DLLExport.h
 	inc/MantidTestHelpers/MDEventsTestHelper.h
@@ -17,6 +19,7 @@ set ( INC_FILES
 include_directories ( inc)
 include_directories ( ../DataHandling/inc )
 include_directories ( ../MDEvents/inc )
+include_directories ( ../MDAlgorithms/inc )
 include_directories ( ../Nexus/inc )
 
 # For Windows:

@@ -58,17 +58,6 @@ namespace MDAlgorithms
     /// Is the operation commutative?
     virtual bool commutative() const = 0;
 
-    /// The name of the first input workspace property
-    virtual std::string inputPropName1() const { return "LHSWorkspace";}
-    /// The name of the second input workspace property
-    virtual std::string inputPropName2() const { return "RHSWorkspace";}
-    /// The name of the output workspace property
-    virtual std::string outputPropName() const { return "OutputWorkspace";}
-
-  protected:
-    void init();
-    virtual void exec();
-
     /// Check the inputs and throw if the algorithm cannot be run
     virtual void checkInputs() = 0;
 
@@ -80,6 +69,16 @@ namespace MDAlgorithms
 
     /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
     virtual void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) = 0;
+
+    /// The name of the first input workspace property
+    virtual std::string inputPropName1() const { return "LHSWorkspace";}
+    /// The name of the second input workspace property
+    virtual std::string inputPropName2() const { return "RHSWorkspace";}
+    /// The name of the output workspace property
+    virtual std::string outputPropName() const { return "OutputWorkspace";}
+
+    void init();
+    virtual void exec();
 
     /// LHS workspace
     Mantid::API::IMDWorkspace_sptr m_lhs;
@@ -93,6 +92,8 @@ namespace MDAlgorithms
     Mantid::API::IMDEventWorkspace_sptr m_rhs_event;
     Mantid::MDEvents::MDHistoWorkspace_sptr m_lhs_histo;
     Mantid::MDEvents::MDHistoWorkspace_sptr m_rhs_histo;
+    Mantid::DataObjects::WorkspaceSingleValue_sptr m_lhs_scalar;
+    Mantid::DataObjects::WorkspaceSingleValue_sptr m_rhs_scalar;
 
     /// Operand MDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr m_operand_event;

@@ -1,10 +1,8 @@
-#ifndef MANTID_MDALGORITHMS_PLUSMD_H_
-#define MANTID_MDALGORITHMS_PLUSMD_H_
-    
+#ifndef MANTID_MDALGORITHMS_MINUSMD_H_
+#define MANTID_MDALGORITHMS_MINUSMD_H_
+
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid
@@ -12,9 +10,9 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-  /** Sum two MDWorkspaces together.
+  /** MinusMD : minus operation for MDWorkspaces
     
-    @date 2011-08-12
+    @date 2011-11-07
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -36,19 +34,16 @@ namespace MDAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PlusMD  : public BinaryOperationMD
+  class DLLExport MinusMD  : public BinaryOperationMD
   {
   public:
-    PlusMD();
-    ~PlusMD();
+    MinusMD();
+    ~MinusMD();
     
-    /// Algorithm's name for identification 
-    virtual const std::string name() const { return "PlusMD";};
-    /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
-    
+    virtual const std::string name() const;
+    virtual int version() const;
+
   private:
-    /// Sets documentation strings for this algorithm
     virtual void initDocs();
 
     /// Is the operation commutative?
@@ -66,18 +61,10 @@ namespace MDAlgorithms
     /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
     void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 
-    template<typename MDE, size_t nd>
-    void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
-
-    /// Workspace into which stuff will get added
-    Mantid::API::IMDEventWorkspace_sptr iws1;
-    /// Workspace that will be added into ws1
-    Mantid::API::IMDEventWorkspace_sptr iws2;
-
   };
 
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_PLUSMD_H_ */
+#endif  /* MANTID_MDALGORITHMS_MINUSMD_H_ */
