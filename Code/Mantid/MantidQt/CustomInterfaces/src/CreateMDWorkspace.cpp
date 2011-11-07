@@ -125,7 +125,8 @@ void CreateMDWorkspace::addWorkspaceClicked()
       m_data->registerWorkspace(matrixWS, m_model);
 
       // Key off the selected index. --------------------------------------------
-      m_memento = m_data->at(0); //TODO. Key properly!
+      LoanedMemento temp = m_data->at(0);
+      m_memento.operator=(temp);
       /*
       Note: there is an issue to resolve here. I think that the workspacecollection should pass out a reference to the LoanedMemento!
       Problem at the moment is:
