@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <iostream>
 #include <Poco/File.h>
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -127,6 +128,37 @@ public:
 //
 //  void test_file_plus_file_inPlace_ofRHS()
 //  { do_test(true, true, 2); }
+
+
+
+
+  void test_histo_histo()
+  {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "histo_B", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 5.0, 1e-5);
+  }
+
+  void test_histo_scalar()
+  {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "scalar", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 5.0, 1e-5);
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "histo_A", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 5.0, 1e-5);
+  }
+
+  void test_event_scalar_fails()
+  {
+    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "scalar", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "event_A", "out", false /*fails*/);
+  }
+
+  void test_event_histo_fails()
+  {
+    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "histo_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "event_A", "out", false /*fails*/);
+  }
 
 };
 

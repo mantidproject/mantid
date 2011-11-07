@@ -33,14 +33,13 @@ class LoadIsawDetCalTest : public CxxTest::TestSuite
 {
 public:
 
-  void testSNAP()
+  void testMINITOPAZ()
   {
     LoadEmptyInstrument loaderCAL;
 
     loaderCAL.initialize();
     loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename",  ConfigService::Instance().getString(
-        "instrumentDefinition.directory")+"/SNAP_Definition.xml");
+    loaderCAL.setPropertyValue("Filename",  "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
     inputFile = loaderCAL.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestCAL";
     loaderCAL.setPropertyValue("OutputWorkspace", wsName);
