@@ -74,8 +74,8 @@ public:
     outputFile = saver->getPropertyValue("Filename");//get absolute path
 
     TS_ASSERT_THROWS_NOTHING( saver->setProperty("Efixed", 0.0));
-    TS_ASSERT_THROWS_NOTHING( saver->setProperty("psi", 0.0));
-    TS_ASSERT_THROWS_NOTHING( saver->setProperty("ki_over_kf_scaling", true));
+    TS_ASSERT_THROWS_NOTHING( saver->setProperty("Psi", 0.0));
+    TS_ASSERT_THROWS_NOTHING( saver->setProperty("KiOverKfScaling", true));
 
 
     TS_ASSERT_THROWS_NOTHING( saver->execute() );
