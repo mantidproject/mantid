@@ -13,6 +13,7 @@ class pqPipelineBrowserWidget;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
+class vtkSMDoubleVectorProperty;
 
 class QString;
 
@@ -61,7 +62,8 @@ public:
   /// Default destructor.
   virtual ~ViewBase() {}
 
-  void checkView();
+  /// Poll the view to set status for mode control buttons.
+  virtual void checkView();
   /**
    * Function used to correct post-accept visibility issues. Most
    * views won't need to do anything.
@@ -83,12 +85,14 @@ public:
    * Destroy sources and view relevant to mode switching.
    */
   virtual void destroyView() = 0;
+  /// Get the active ParaView source.
   pqPipelineSource *getPvActiveSrc();
   /**
    * The function gets the main view.
    * @return the main view
    */
   virtual pqRenderView *getView() = 0;
+  /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /**
    * This function makes the view render itself.
@@ -102,6 +106,7 @@ public:
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
+  /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
 
   /// Enumeration for Cartesian coordinates
@@ -129,6 +134,8 @@ public slots:
    * @param state flag to determine whether or not to use log color scaling
    */
   void onLogScale(int state);
+  /// Setup the animation controls.
+  void setTimeSteps();
 
 signals:
   /**
@@ -140,6 +147,18 @@ signals:
   /// Signal to trigger pipeline update.
   void triggerAccept();
   /**
+   * Signal to update state of animation controls.
+   * @param state flag to enable/disable animantion controls
+   */
+  void setAnimationControlState(bool state);
+  /**
+   * Signal to update animation control information.
+   * @param start the value of start "time"
+   * @param stop the value of the end "time"
+   * @param numSteps the number of "time" steps
+   */
+  void setAnimationControlInfo(double start, double stop, int numSteps);
+  /**
    * Signal to set the status of the view mode buttons.
    * @param state whether or not to enable to view mode buttons
    */
@@ -150,6 +169,10 @@ private:
 
   /// Return the active representation determined by ParaView.
   pqPipelineRepresentation *getPvActiveRep();
+  /// Find the number of true sources in the pipeline.
+  unsigned int getNumSources();
+  /// Collect time information for animation controls.
+  void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };

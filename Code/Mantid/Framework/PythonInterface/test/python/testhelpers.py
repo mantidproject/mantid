@@ -20,6 +20,7 @@ def run_algorithm(name, **kwargs):
     if 'child'in kwargs:
         alg.set_child(True)
         del kwargs['child']
+        alg.set_property_value("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
     for key, value in kwargs.iteritems():
         alg.set_property(key, value)
     alg.execute()

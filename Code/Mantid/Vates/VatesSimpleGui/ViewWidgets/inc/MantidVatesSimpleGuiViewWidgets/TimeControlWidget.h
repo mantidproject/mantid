@@ -52,6 +52,8 @@ public:
   virtual ~TimeControlWidget();
 
 public slots:
+  /// Enable/disable the animation controls.
+  void enableAnimationControls(bool state);
   /**
    * Function to update the animation scene with "time" information. This
    * updates the animation controls automatically. The "time" information

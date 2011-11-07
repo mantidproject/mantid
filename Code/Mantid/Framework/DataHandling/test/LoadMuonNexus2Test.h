@@ -362,7 +362,7 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
-  void xtestExec2()
+  void testExec2()
   {
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();

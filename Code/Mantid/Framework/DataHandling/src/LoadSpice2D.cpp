@@ -154,6 +154,10 @@ namespace Mantid
       {
         throw Kernel::Exception::NotFoundError("No root element in Spice XML file", fileName);
       }
+
+      // Read in start time
+      const std::string start_time = pRootElem->getAttribute("start_time");
+
       Element* sasEntryElem = pRootElem->getChildElement("Header");
       throwException(sasEntryElem, "Header", fileName);
 
@@ -344,6 +348,7 @@ namespace Mantid
       ws->mutableRun().addProperty("wavelength-spread", dwavelength, "Angstrom", true);
       ws->mutableRun().addProperty("timer", countingTime, "sec", true);
       ws->mutableRun().addProperty("monitor", monitorCounts, "", true);
+      ws->mutableRun().addProperty("start_time", start_time, "", true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");

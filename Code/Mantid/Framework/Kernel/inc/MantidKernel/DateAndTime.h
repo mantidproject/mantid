@@ -1,6 +1,7 @@
 #ifndef DATE_AND_TIME_H
 #define DATE_AND_TIME_H
 
+#include "IValidator.h"
 #include "MantidKernel/DllConfig.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 //#include "c:\Mantid\Code\Third_Party\include\boost\date_time\posix_time\posix_time.hpp"
@@ -115,6 +116,9 @@ public:
 private:
   ///A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
   int64_t _nanoseconds;
+
+  /// A reference to the logger
+  static Logger & g_log;
 };
 #pragma pack(pop)
 
@@ -205,6 +209,7 @@ private:
     DateAndTime m_begin;
     /// end
     DateAndTime m_end;
+
 };
 
 

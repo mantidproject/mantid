@@ -101,17 +101,18 @@ def make_wiki(algo_name, version, latest_version):
     out = ""
     alg = mtd.createAlgorithm(algo_name, version)
     
-    if (version < latest_version):
-        out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
-    else:
-        out += "Note: This page refers to version %d of %s. "% (version, algo_name)
-        if latest_version > 2:
-            out += "The documentation for older versions is available at: "
+    if (latest_version > 1):
+        if (version < latest_version):
+            out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
         else:
-            out += "The documentation for the older version is available at: "
-        for v in xrange(1,latest_version):
-            out += "[[%s v.%d]] " % (algo_name, v)
-        out += "\n\n"
+            out += "Note: This page refers to version %d of %s. "% (version, algo_name)
+            if latest_version > 2:
+                out += "The documentation for older versions is available at: "
+            else:
+                out += "The documentation for the older version is available at: "
+            for v in xrange(1,latest_version):
+                out += "[[%s v.%d]] " % (algo_name, v)
+            out += "\n\n"
         
     
     out += "== Summary ==\n\n"

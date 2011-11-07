@@ -41,14 +41,15 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class testChanger;
 template <typename TYPE>
-class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<void (Property const *const)>
+class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<std::string (Property const *const)>
 {
 public:
   /// Constructor; takes property to check
   ValidatorSignalChange(Property const *const pProp):
       IValidator<TYPE>() ,
-      boost::signal<void (Property const* const)>(),
+      boost::signal<std::string (Property const* const)>(),
       pPropObserved(pProp)
   {}
 
@@ -57,12 +58,11 @@ public:
 
   //------------------------------------------------------------------------------------------------------------
   /** Calls the validator, but validates nothing. Sends signal to subscribers instead
-   *  Always valid
+   *  Returns the results of the function, which is excecuted, when the signal has been called;
    */
   std::string isValid(const TYPE &) const
-  {
-      this->operator()(pPropObserved);
-      return "";
+  {     
+      return  this->operator()(pPropObserved);
   }
 
   //------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ public:
   std::set<std::string> allowedValues() const { return std::set<std::string>(); }
    //
    /** Make a copy of the present type of validator  */
-  IValidator<TYPE>* clone(){return static_cast<IValidator<TYPE>* >(NULL);}
+  IValidator<TYPE>* clone(){return new ValidatorSignalChange<TYPE>(pPropObserved);}
   //
 protected:
     /// always valid
