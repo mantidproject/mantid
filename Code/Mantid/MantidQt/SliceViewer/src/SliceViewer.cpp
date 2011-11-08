@@ -478,11 +478,21 @@ QwtDoubleInterval getRange(IMDIterator * it)
     if (signal > maxSignal) maxSignal = signal;
   } while (it->next());
 
+  if (minSignal == DBL_MAX)
+  {
+    minSignal = 0.0;
+    maxSignal = 1.0;
+  }
   if (minSignal < maxSignal)
     return QwtDoubleInterval(minSignal, maxSignal);
   else
-    // Possibly only one value in range
-    return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
+  {
+    if (minSignal != 0)
+      // Possibly only one value in range
+      return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
+    else
+      return QwtDoubleInterval(0., 1.0);
+  }
 }
 
 //------------------------------------------------------------------------------------

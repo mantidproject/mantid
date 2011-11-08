@@ -116,7 +116,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def _progress_updated(self, value):
         self.progress_bar.setValue(value)
         
-    def setup_layout(self):
+    def setup_layout(self, load_last=False):
         """
             Sets up the instrument-specific part of the UI layout
         """
@@ -140,6 +140,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.tabWidget.addTab(tab[1], tab[0])
             self._set_window_title()
             self.progress_bar.hide()
+            
+            if load_last:
+                self._interface.load_last_reduction()
         else:
             self.close()
             
@@ -368,9 +371,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             
         self.reduce_button.setEnabled(False)   
         self.export_button.setEnabled(False)
+        self.save_button.setEnabled(False)
         self._interface.load_file(file_path)
         self.reduce_button.setEnabled(True)
         self.export_button.setEnabled(True)
+        self.save_button.setEnabled(True)
 
         self._filename = file_path
         self._update_file_menu()
@@ -482,7 +487,7 @@ def start(argv=[]):
     app.setApplicationName("Mantid Reduction")
     
     reducer = ReductionGUI()    
-    reducer.setup_layout()
+    reducer.setup_layout(load_last=True)
     reducer.show()
     app.exec_() 
         

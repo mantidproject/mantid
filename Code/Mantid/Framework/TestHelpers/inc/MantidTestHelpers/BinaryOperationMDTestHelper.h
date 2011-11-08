@@ -7,7 +7,8 @@ namespace BinaryOperationMDTestHelper
 {
   /// Run a binary algorithm.
   DLLExport Mantid::MDEvents::MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs, std::string rhs, std::string outName,
-      bool succeeds=true);
+      bool succeeds=true,
+      std::string otherProp="", std::string otherPropValue="");
 
 } // (end namespace)
 

@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculateUMatrix.cpp
+	src/CentroidPeaks.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
@@ -23,6 +24,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/CalculateUMatrix.h
+	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h

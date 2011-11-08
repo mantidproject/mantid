@@ -2,7 +2,7 @@
 
 This executes the power function on a MDHistoWorkspace.
 
-The signal <math>a</math> becomes <math> f = f = a^b </math>
+The signal <math>a</math> becomes <math> f = a^b </math>
 
 The error <math>da</math> becomes <math> df^2 = f^2 * b^2 * (da^2 / a^2) </math>
 

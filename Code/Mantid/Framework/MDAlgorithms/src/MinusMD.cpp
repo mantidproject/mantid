@@ -10,6 +10,10 @@ Subtract two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
 * '''[[MDEventWorkspace]]'s'''
 ** This is not currently supported, but it could be in the future.
 
+== Usage ==
+
+See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/MinusMD.h"

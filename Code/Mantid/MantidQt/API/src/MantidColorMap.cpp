@@ -66,6 +66,7 @@ void MantidColorMap::changeScaleType(GraphOptions::ScaleType type)
     m_scale_type = type;
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Load a color map from a file
  * @param filename :: The full path to the color map file
@@ -112,6 +113,19 @@ bool MantidColorMap::loadMap(const QString & filename)
   return is_success;
 }
 
+//-------------------------------------------------------------------------------------------------
+/** Set a color for Not-a-number
+ *
+ * @param r :: red, from 0 to 255
+ * @param g :: green, from 0 to 255
+ * @param b :: blue, from 0 to 255
+ */
+void MantidColorMap::setNanColor(int r, int g, int b)
+{
+  m_nan_color = qRgb(r,g,b);
+}
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Define a default color map to be used if a file is unavailable.
  */
@@ -157,6 +171,7 @@ void MantidColorMap::setupDefaultMap()
     reader >> red >> green >> blue;
     m_colors.push_back(qRgb((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
   }  
+  this->setNanColor(255,255,255);
 }
 
 
@@ -209,14 +224,17 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
  */
 QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
 {
+  // Special case for NAN which is != NAN
+  if (value != value)
+    return m_nan_color;
+
   short ci = static_cast<short>(colorIndex(interval, value));
   if( ci >= 0 && ci < m_num_colors )
   {
     return m_colors[ci];
   }
-  return
-      // Return black
-      QRgb();
+  // Return black
+  return QRgb();
 
 //  QRgb col = getColor();
 //  float r(0.0f), g(0.0f), b(0.0f), a(0.0f);
