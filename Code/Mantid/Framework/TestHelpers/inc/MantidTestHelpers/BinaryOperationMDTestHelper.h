@@ -11,4 +11,12 @@ namespace BinaryOperationMDTestHelper
 
 } // (end namespace)
 
+namespace UnaryOperationMDTestHelper
+{
+  /// Run a unary algorithm.
+  Mantid::MDEvents::MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName, std::string outName,
+      bool succeeds=true);
+
+} // (end namespace)
+
 #endif

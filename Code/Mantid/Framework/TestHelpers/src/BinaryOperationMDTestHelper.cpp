@@ -72,3 +72,41 @@ namespace BinaryOperationMDTestHelper
   }
 
 } // (end namespace)
+
+
+
+namespace UnaryOperationMDTestHelper
+{
+
+  MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName, std::string outName,
+      bool succeeds)
+  {
+    MDHistoWorkspace_sptr histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
+    IMDEventWorkspace_sptr event = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
+    WorkspaceSingleValue_sptr scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
+    AnalysisDataService::Instance().addOrReplace("histo", histo);
+    AnalysisDataService::Instance().addOrReplace("event", event);
+    AnalysisDataService::Instance().addOrReplace("scalar", scalar);
+
+    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algoName);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", inName );
+    alg->setPropertyValue("OutputWorkspace", outName );
+    alg->execute();
+    if (succeeds)
+    {
+      if (!alg->isExecuted())
+        throw std::runtime_error("Algorithm " + algoName + " did not succeed.");
+      IMDWorkspace_sptr out = boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve(outName));
+      if (!out)
+        throw std::runtime_error("Algorithm " + algoName + " did not create the output workspace.");
+      return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+    }
+    else
+    {
+      if (alg->isExecuted())
+        throw std::runtime_error("Algorithm " + algoName + " did not fail as expected.");
+      return (MDHistoWorkspace_sptr());
+    }
+  }
+} // (end namespace)
