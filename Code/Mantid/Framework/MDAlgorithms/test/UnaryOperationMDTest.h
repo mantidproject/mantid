@@ -27,6 +27,7 @@ class MockUnaryOperationMD : public UnaryOperationMD
 {
 public:
   MOCK_METHOD1(execEvent, void(Mantid::API::IMDEventWorkspace_sptr));
+  MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD1(execHisto, void(Mantid::MDEvents::MDHistoWorkspace_sptr));
   void exec()
   { UnaryOperationMD::exec();  }
@@ -87,10 +88,19 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
+  /// Sub-class can abort
+  void test_checkInputs()
+  {
+    MockUnaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).WillOnce(Throw( std::runtime_error("Bad inputs!") ));
+    doTest(alg, "histo", "some_output", false /*it fails*/ );
+  }
+
   /// A = log(2)  = NOT ALLOWED!
   void test_scalar_fails()
   {
     MockUnaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).Times(0);
     doTest(alg, "scalar", "some_output", false /*it fails*/ );
   }
 
@@ -98,6 +108,7 @@ public:
   void test_histo()
   {
     MockUnaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHisto(_)).WillOnce(Return());
 
     doTest(alg, "histo", "new_out");
@@ -110,6 +121,7 @@ public:
   void test_histo_inPlace()
   {
     MockUnaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execHisto(_)).WillOnce(Return());
 
     doTest(alg, "histo", "histo");
@@ -121,6 +133,7 @@ public:
   void test_event()
   {
     MockUnaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent(_)).WillOnce(Return());
 
     doTest(alg, "event", "new_out");
@@ -133,6 +146,7 @@ public:
   void test_event_inPlace()
   {
     MockUnaryOperationMD alg;
+    EXPECT_CALL(alg, checkInputs()).WillOnce(DoDefault());
     EXPECT_CALL(alg, execEvent(_)).WillOnce(Return());
 
     doTest(alg, "event", "event");

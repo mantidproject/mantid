@@ -8,9 +8,12 @@ set ( SRC_FILES
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToQ3DdE.cpp
 	src/ConvertToQNDany.cpp
+	src/DivideMD.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
+	src/MinusMD.cpp
+	src/MultiplyMD.cpp
 	src/NullImplicitFunction.cpp
 	src/PlusMD.cpp
 	src/QuadEnBackground.cpp
@@ -34,9 +37,12 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/ConvertToQNDany.h
+	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
+	inc/MantidMDAlgorithms/MinusMD.h
+	inc/MantidMDAlgorithms/MultiplyMD.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
@@ -57,8 +63,11 @@ set ( TEST_FILES
 	#test/QuadEnBackgroundTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToQNDanyTest.h
+	test/DivideMDTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
+	test/MinusMDTest.h
+	test/MultiplyMDTest.h
 	test/PlusMDTest.h
 	test/RunParamTest.h
 	test/SimulateMDDTest.h

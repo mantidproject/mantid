@@ -202,7 +202,7 @@ bool
 ConvertToQNDany::   build_default_properties(size_t max_n_dims)
 { 
     // number of additional known dimensions:
-    size_t n_add_dims =boost::lexical_cast<size_t>(getPropertyValue("NumAddDim"));
+    // size_t n_add_dims =boost::lexical_cast<size_t>(getPropertyValue("NumAddDim"));
     // number of total dimensions is also defined by the value of the Q -dimensions
     std::string dim_id =   getPropertyValue("QDimensions");
     // check if the number of dimensions have not changed and new input is needed

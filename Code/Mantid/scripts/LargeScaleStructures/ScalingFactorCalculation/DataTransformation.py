@@ -31,12 +31,6 @@ class Setup:
     x_pixel_min = 90
     x_pixel_max = 190
 
-    peak_pixel_min = 129
-    peak_pixel_max = 136
-
-    back_pixel_min = 126
-    back_pixel_max = 140
-
     #from,width,to in microS
     rebin_parameters = '0,200,200000'  
 
@@ -57,7 +51,9 @@ class Setup:
     b = None
     
     def __init__(self):
-        pass
+        self.x_axis_ratio = None
+        self.y_axis_ratio = None
+        self.y_axis_error_ratio = None
     
     def setNexusPath(self, nexus_path=''):
         """
@@ -141,8 +137,13 @@ class Setup:
         """
         operator * between two instances of the class
         """
+        
         product = Setup()
-        product.x_axis_ratio = other.x_axis_ratio
+        
+        product.id_numerator = self.id_numerator + '*' + other.id_numerator
+        product.id_denominator = self.id_denominator + '*' + other.id_denominator
+        
+        product.x_axis_ratio = self.x_axis_ratio
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
         product.y_axis_error_ratio = sqrt((other.y_axis_ratio*self.y_axis_error_ratio)**2 +
                                           (other.y_axis_error_ratio*self.y_axis_ratio)**2)
@@ -176,6 +177,23 @@ class CalculateAD(Setup):
     _y_axis_error_denominator = None
     _x_axis = None     
          
+    #define the peak region      
+    n_peak_pixel_min = 130
+    n_peak_pixel_max = 135
+    d_peak_pixel_min = 130
+    d_peak_pixel_max = 135
+
+    peak_pixel_min = None
+    peak_pixel_max = None
+    back_pixel_min = None
+    back_pixel_max = None
+
+    #define the background range used in the background subtraction
+    n_back_pixel_min = 125
+    n_back_pixel_max = 140
+    d_back_pixel_min = 125
+    d_back_pixel_max = 140
+
     _y_axis_ratio = None
     _y_axis_error_ratio = None
     _x_axis_ratio = None
@@ -184,8 +202,33 @@ class CalculateAD(Setup):
         
         self.id_numerator = id_numerator
         self.id_denominator = id_denominator
+
+        self.x_axis_ratio = None
+        self.y_axis_error_ratio = None
+        self.y_axis_ratio = None
+        
         #Launch the calculation
-        self.run()
+        #self.run()
+
+    def setNumerator(self, minPeak=None, maxPeak=None, minBack=None, maxBack=None):
+        if minPeak is not None:
+            self.n_peak_pixel_min = minPeak
+        if maxPeak is not None:
+            self.n_peak_pixel_max = maxPeak
+        if minBack is not None:
+            self.n_back_pixel_min = minBack
+        if maxBack is not None:
+            self.n_back_pixel_max = maxBack
+        
+    def setDenominator(self, minPeak=None, maxPeak=None, minBack=None, maxBack=None):
+        if minPeak is not None:
+            self.d_peak_pixel_min = minPeak
+        if maxPeak is not None:
+            self.d_peak_pixel_max = maxPeak
+        if minBack is not None:
+            self.d_back_pixel_min = minBack
+        if maxBack is not None:
+            self.d_back_pixel_max = maxBack
         
     def run(self):
         """
@@ -213,8 +256,16 @@ class CalculateAD(Setup):
         """
         if bNumerator is True:
             _id = self.id_numerator
+            self.peak_pixel_min = self.n_peak_pixel_min
+            self.peak_pixel_max = self.n_peak_pixel_max
+            self.back_pixel_min = self.n_back_pixel_min
+            self.back_pixel_max = self.n_back_pixel_max
         else:
             _id = self.id_denominator
+            self.peak_pixel_min = self.d_peak_pixel_min
+            self.peak_pixel_max = self.d_peak_pixel_max
+            self.back_pixel_min = self.d_back_pixel_min
+            self.back_pixel_max = self.d_back_pixel_max
         
         nexus_file_numerator = self._determineNexusFileName(_id)    
         LoadEventNexus(Filename=nexus_file_numerator, 
@@ -224,34 +275,36 @@ class CalculateAD(Setup):
         rebin(InputWorkspace='EventDataWks', 
               OutputWorkspace='HistoDataWks', 
               Params=self.rebin_parameters)
-        mtd.deleteWorkspace('EventDataWks')
+        #mtd.deleteWorkspace('EventDataWks')
         mt2 = mtd['HistoDataWks']
         _x_axis = mt2.readX(0)[:]
         self._x_axis = _x_axis
+        
         self._createIntegratedWorkspace(InputWorkspace=mt2, 
                                         OutputWorkspace='IntegratedDataWks',
                                         proton_charge=proton_charge, 
                                         from_pixel=self.x_pixel_min, 
                                         to_pixel=self.x_pixel_max)
-        mtd.deleteWorkspace('HistoDataWks')
+
+        #mtd.deleteWorkspace('HistoDataWks')
         Transpose(InputWorkspace='IntegratedDataWks', 
                   OutputWorkspace='TransposeIntegratedDataWks')
-        mtd.deleteWorkspace('IntegratedDataWks')
+        #mtd.deleteWorkspace('IntegratedDataWks')
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks')
+        #mtd.deleteWorkspace('TransposeIntegratedDataWks')
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks',
                        StartX=self.back_pixel_min,
-                       EndX=self.back_pixel_max)
-        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
+                       EndX=self.peak_pixel_min)
+        #mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
         Transpose(InputWorkspace='TransposeHistoFlatDataWks',
                   OutputWorkspace='DataWks')
-        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
+        #mtd.deleteWorkspace('TransposeHistoFlatDataWks')
         mt3 = mtd['DataWks']        
         self._calculateFinalAxis(Workspace=mt3, 
                            bNumerator=bNumerator)
-        mtd.deleteWorkspace('DataWks')
+        #mtd.deleteWorkspace('DataWks')
     
     
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
@@ -261,6 +314,7 @@ class CalculateAD(Setup):
         mt = Workspace
         _x_axis = mt.readX(0)[:]
         self._x_axis = _x_axis
+        
         counts_vs_tof = zeros(len(_x_axis))
         counts_vs_tof_error = zeros(len(_x_axis))
         for x in range(self.alpha_pixel_nbr):
@@ -269,6 +323,7 @@ class CalculateAD(Setup):
         counts_vs_tof_error = sqrt(counts_vs_tof_error)
         index_tof_min = self._getIndex(self.tof_min, _x_axis)
         index_tof_max = self._getIndex(self.tof_max, _x_axis)
+
         if (bNumerator is True):
             self._y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max]
             self._y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max]
@@ -276,7 +331,7 @@ class CalculateAD(Setup):
         else:
             self._y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
             self._y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
-    
+
     def _determineNexusFileName(self, id):
         """
         returns the full path to the nexus file
@@ -342,58 +397,93 @@ class CalculateAD(Setup):
             return proton_charge
         return None              
             
+
+def plotObject(instance):
+    
+    return
+    
+    print 'a: ' + str(instance.a)
+    print 'b: ' + str(instance.b)    
+    
+    figure()
+    errorbar(instance.x_axis_ratio, 
+             instance.y_axis_ratio, 
+             instance.y_axis_error_ratio, 
+             marker='s', 
+             mfc='red',
+             linestyle='')
+    x=linspace(10000,22000,100)
+    plot(x,instance.a+instance.b*x)
+    xlabel("TOF (microsS)")
+    ylabel("Ratio")
+    title(instance.id_numerator + '/' + instance.id_denominator)
+    show()
+
+
 if __name__ == '__main__':
     
-    t_start = time.time()
+#    t_start = time.time()
     
     cal_D1 = CalculateAD(id_numerator='AiD1', id_denominator='AiD0')
+    cal_D1.run()
     cal_D1.fit()
+    plotObject(cal_D1)
     
-#    cal_D2 = CalculateAD(id_numerator='AiD2', id_denominator='AiD0')
-#    cal_D2.fit()
-#               
-#    cal_D3 = CalculateAD(id_numerator='AiD3', id_denominator='AiD0')
-#    cal_D3.fit()
-#
-#    cal_D4 = CalculateAD(id_numerator='AiD4', id_denominator='AiD0')
-#    cal_D4.fit()
-#
-#    cal_D5 = CalculateAD(id_numerator='AiD5', id_denominator='AiD0')
-#    cal_D5.fit()
-#
-#    cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
-#    product_D6 = cal_D6 * cal_D5
-#    product_D6.fit()
-#
-#    cal_D7 = CalculateAD(id_numerator='AiiAiD7', id_denominator='AiiAiD5')
-#    product_D7 = cal_D7 * cal_D5
-#    product_D7.fit()
-#    
-#    cal_D8 = CalculateAD(id_numerator='AiiiAiiAiD8', id_denominator='AiiiAiiAiD7')
-#    product_D8 = cal_D8 * product_D7
-#    product_D8.fit()
-#    
-#    cal_D9 = CalculateAD(id_numerator='AivAiiiAiiAiD9', id_denominator='AivAiiiAiiAiD8')
-#    product_D9 = cal_D9 * product_D8 
-#    product_D9.fit()
+    cal_D2 = CalculateAD(id_numerator='AiD2', id_denominator='AiD0')
+    cal_D2.run()
+    cal_D2.fit()
+    plotObject(cal_D2)
+               
+    cal_D3 = CalculateAD(id_numerator='AiD3', id_denominator='AiD0')
+    cal_D3.run()
+    cal_D3.fit()
+    plotObject(cal_D3)
+
+    cal_D4 = CalculateAD(id_numerator='AiD4', id_denominator='AiD0')
+    cal_D4.run()
+    cal_D4.fit()
+    plotObject(cal_D4)
+
+    cal_D5 = CalculateAD(id_numerator='AiD5', id_denominator='AiD0')
+    cal_D5.run()
+    cal_D5.fit()
+    plotObject(cal_D5)
+
+    cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
+    cal_D6.run()
+    cal_D6.fit()
+    plotObject(cal_D6)
+
+    cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
+    cal_D6.run()
+    product_D6 = cal_D6 * cal_D5
+    product_D6.fit()
+    plotObject(product_D6)
+
+    cal_D7 = CalculateAD(id_numerator='AiiAiD7', id_denominator='AiiAiD5')
+    cal_D7.setNumerator(minPeak=128, maxPeak=136, minBack=120, maxBack=145)
+    cal_D7.run()
+    product_D7 = cal_D7 * cal_D5
+    product_D7.fit()
+    plotObject(product_D7)
+
+    cal_D8 = CalculateAD(id_numerator='AiiiAiiAiD8', id_denominator='AiiiAiiAiD7')
+    cal_D8.setNumerator(minPeak=125, maxPeak=140, minBack=115, maxBack=150)
+    cal_D8.setDenominator(minPeak=128, maxPeak=136, minBack=120, maxBack=145)
+    cal_D8.run()
+    product_D8 = cal_D8 * product_D7
+    product_D8.fit()
+    plotObject(product_D8)
     
-#    print 'a: ' + str(product.a)
-#    print 'b: ' + str(product.b)    
-#    figure()
-#    errorbar(product.x_axis_ratio, 
-#             product.y_axis_ratio, 
-#             product.y_axis_error_ratio, 
-#             marker='s', 
-#             mfc='red',
-#             linestyle='')
-#    x=linspace(10000,22000,100)
-#    plot(x,product.a+product.b*x)
-#    xlabel("TOF (microsS)")
-#    ylabel("Ratio")
-#    show()
+    cal_D9 = CalculateAD(id_numerator='AivAiiiAiiAiD9', id_denominator='AivAiiiAiiAiD8')
+    cal_D9.setNumerator(minPeak=120, maxPeak=145, minBack=105, maxBack=155)
+    cal_D9.setDenominator(minPeak=125, maxPeak=140, minBack=115, maxBack=150)
+    cal_D9.run()
+    product_D9 = cal_D9 * product_D8 
+    product_D9.fit()
+    plotObject(product_D9)
 
-
-    t_end = time.time()
-    print 'Time to run the process: %0.1f s' % (t_end-t_start)                   
+#    t_end = time.time()
+#    print 'Time to run the process: %0.1f s' % (t_end-t_start)                   
                      
             

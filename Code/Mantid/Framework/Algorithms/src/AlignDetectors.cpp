@@ -39,7 +39,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
-// Register the algorithm into the algorithm factor
+// Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors)
 
 /// Sets documentation strings for this algorithm
@@ -203,14 +203,11 @@ void AlignDetectors::exec()
   bool intofonly = getProperty("InTOFOnly");
 
   if (intofonly){
-    g_log.notice() << "Working only in TOF" << std::endl;
     if (calFileName.empty()){
       throw std::invalid_argument("Must use Ke's calibration file in TOF");
     }
 
     this->execTOFEvent(calFileName, inputWS);
-
-    g_log.notice() << "Return TOF Only!" << std::endl;
 
     return;
   }
@@ -240,7 +237,6 @@ void AlignDetectors::exec()
   if (eventW != NULL)
   {
     this->execEvent();
-    g_log.notice() << "Return Event!" << std::endl;
     return;
   }
 

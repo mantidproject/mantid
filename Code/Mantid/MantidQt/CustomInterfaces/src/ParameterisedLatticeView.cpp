@@ -13,7 +13,7 @@ namespace MantidQt
   {
 
     /// Constructor
-    ParameterisedLatticeView::ParameterisedLatticeView(LatticePresenter* presenter) : m_presenter(presenter)
+    ParameterisedLatticeView::ParameterisedLatticeView(boost::shared_ptr<LatticePresenter> presenter) : m_presenter(presenter)
     {
       m_presenter->acceptView(this);
     }

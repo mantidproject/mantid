@@ -161,13 +161,15 @@ void ViewBase::checkView()
  * step information. If not, it will disable the animation controls. If the
  * pipeline source has time step information, the animation controls will be
  * enabled and the start, stop and number of time steps updated for the
- * animation scene.
+ * animation scene. If the withUpdate flag is used (default off), then the
+ * original pipeline source is updated with the number of "time" steps.
+ * @param withUpdate update the original source with "time" step info
  */
-void ViewBase::setTimeSteps()
+void ViewBase::setTimeSteps(bool withUpdate)
 {
   pqPipelineSource *src = this->getPvActiveSrc();
   unsigned int numSrcs = this->getNumSources();
-  if (this->isPeaksWorkspace(src))
+  if (!withUpdate && this->isPeaksWorkspace(src))
   {
     if (1 == numSrcs)
     {
@@ -184,7 +186,7 @@ void ViewBase::setTimeSteps()
   srcProxy1->UpdatePipelineInformation();
   vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(\
                                      srcProxy1->GetProperty("TimestepValues"));
-  this->handleTimeInfo(tsv);
+  this->handleTimeInfo(tsv, withUpdate);
 }
 
 /**
@@ -217,12 +219,20 @@ unsigned int ViewBase::getNumSources()
  * end "time" and the number of "time" steps. It also enables/disables the
  * animation controls widget based on the number of "time" steps.
  * @param dvp the vector property containing the "time" information
+ * @param doUpdate flag to update original source with "time" step info
  */
-void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp)
+void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
 {
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
   if (0 != numTimesteps)
   {
+    if (doUpdate)
+    {
+      vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(\
+                                     this->origSrc->getProxy());
+      vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(dvp->GetElements(),
+                                                          numTimesteps);
+    }
     double tStart = dvp->GetElement(0);
     double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
     pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
