@@ -108,6 +108,63 @@ public:
     AnalysisDataService::Instance().remove("testEW");
   }
 
+  void testWithUnsignedNumberOfNeighbours()
+  {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS("Cannot have number of neighbours < 1",alg.setProperty("NumberOfNeighbours", -1), std::invalid_argument);
+  }
+
+  void testWithNonIntegerNumberOfNeighbours()
+  {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS("Cannot have non-integer number of neighbours",alg.setProperty("NumberOfNeighbours", 1.1), std::invalid_argument);
+  }
+
+  void testWithValidNumberOfNeighbours()
+  {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS_NOTHING("A single neighbour is valid",alg.setProperty("NumberOfNeighbours", 1), std::invalid_argument);
+    int value = alg.getProperty("NumberOfNeighbours");
+    TS_ASSERT_EQUALS(1, value);
+  }
+
+  void testWithNumberOfNeighbours()
+  {
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
+
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("WeightedSum", false);
+    alg.setProperty("ProvideRadius", false);
+    alg.setProperty("NumberOfNeighbours", 8);
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testMW")) );
+
+    TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
+    TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
+
+    //Input workspace created via helper has same value for every pixel, should thefore have identical output workspace.
+    for(size_t i = 0; i < outWS->getNumberHistograms(); i++)
+    {
+      for(size_t j = 0; j < outWS->readY(i).size(); j++)
+      {
+        double expected= inWS->readY(i)[j];
+        double actual = outWS->readY(i)[j];
+        TS_ASSERT_DELTA(expected, actual, 0.001);
+      }
+    }
+  }
+
   void test_event_WEIGHTED()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
