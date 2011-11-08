@@ -5,7 +5,7 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/LatticeView.h"
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <qwidget.h>
 
 class QLineEdit;
@@ -54,7 +54,7 @@ namespace MantidQt
       QLineEdit* m_b3;
 
       /// MVP presenter
-      boost::scoped_ptr<LatticePresenter> m_presenter;
+      boost::shared_ptr<LatticePresenter> m_presenter;
 
       /// Helper method to create an edit box with standard format and signal-slots.
       QLineEdit* createEditBox(double value);
@@ -69,7 +69,7 @@ namespace MantidQt
     public:
 
       /// Constructor
-      ParameterisedLatticeView(LatticePresenter* presenter);
+      ParameterisedLatticeView(boost::shared_ptr<LatticePresenter> presenter);
 
       /// Destructor
       ~ParameterisedLatticeView();

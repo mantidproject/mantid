@@ -33,6 +33,7 @@ namespace API
   public:
     IMDEventWorkspace();
     IMDEventWorkspace(const IMDEventWorkspace & other);
+	virtual ~IMDEventWorkspace() {}
 
     /// Perform initialization after dimensions (and others) have been set.
     virtual void initialize() = 0;

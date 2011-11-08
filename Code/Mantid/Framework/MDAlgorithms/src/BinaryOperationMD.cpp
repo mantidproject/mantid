@@ -77,7 +77,6 @@ namespace MDAlgorithms
     if (this->commutative() && ((m_out == m_rhs) ||
             boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs) ))
     {
-      //
       // So we flip RHS/LHS
       Mantid::API::IMDWorkspace_sptr temp = m_lhs;
       m_lhs = m_rhs;
@@ -91,8 +90,27 @@ namespace MDAlgorithms
     // Check the inputs. First cast to everything
     m_lhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
     m_lhs_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_lhs);
+    m_lhs_scalar = boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_lhs);
     m_rhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
     m_rhs_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_rhs);
+    m_rhs_scalar = boost::dynamic_pointer_cast<WorkspaceSingleValue>(m_rhs);
+
+    // MDEventWorkspaces only:
+    // If you have to clone any WS, and the operation is commutative, and is NOT in-place, then clone the one that is file-backed.
+    if (this->commutative() && (m_lhs_event && m_rhs_event) && (m_out != m_lhs))
+    {
+      if (m_rhs_event->isFileBacked() && !m_lhs_event->isFileBacked())
+      {
+        // So we flip RHS/LHS
+        Mantid::API::IMDWorkspace_sptr temp = m_lhs;
+        m_lhs = m_rhs;
+        m_rhs = temp;
+        m_lhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_lhs);
+        m_rhs_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_rhs);
+      }
+    }
+
+
     this->checkInputs();
 
     if (m_out == m_lhs)

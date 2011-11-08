@@ -60,7 +60,6 @@ namespace %s
 
   /** %s : TODO: DESCRIPTION
     
-    @author %s
     @date %s
 
     Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -87,7 +86,7 @@ namespace %s
   {
   public:
     %s();
-    ~%s();
+    virtual ~%s();
     %s
   };
 
@@ -97,7 +96,7 @@ namespace %s
 
 #endif  /* %s */""" % (guard, guard,
        alg_include, subproject, classname,
-       author, datetime.datetime.now().date(),
+       datetime.datetime.now().date(),
        datetime.datetime.now().date().year, classname, alg_class_declare,
        classname, classname, algorithm_header, subproject, guard)
 
@@ -187,7 +186,6 @@ namespace %s
    */
   %s::%s()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -195,7 +193,6 @@ namespace %s
    */
   %s::~%s()
   {
-    // TODO Auto-generated destructor stub
   }
   
 %s

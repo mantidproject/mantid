@@ -8,6 +8,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <qwidget.h>
 
+class QTableWidget;
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -23,10 +24,16 @@ namespace MantidQt
     private:
 
       /// MVP presenter
-      boost::scoped_ptr<LogPresenter> m_presenter;
+      boost::shared_ptr<LogPresenter> m_presenter;
 
       /// Default/Cached palette.
       QPalette m_pal;
+
+      /// Flag/enum indicating current status.
+      LogViewStatus m_status;
+
+      /// table widget;
+      QTableWidget* m_tableWidget;
 
     private slots:
 
@@ -35,7 +42,7 @@ namespace MantidQt
     public:
 
       /// Constructor
-      StandardLogView(LogPresenter* presenter);
+      StandardLogView(boost::shared_ptr<LogPresenter> presenter);
 
       /// Destructor
       ~StandardLogView();
@@ -52,6 +59,14 @@ namespace MantidQt
       /// Getter for the log data.
       virtual LogDataMap getLogData() const;
 
+      /// Getter for the edit request status.
+      virtual LogViewStatus fetchStatus() const;
+
+      /// Shows the view.
+      void show();
+
+      /// Hides the view.
+      void hide();
     };
   }
 }

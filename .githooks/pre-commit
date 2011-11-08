@@ -69,7 +69,7 @@ fi
 
 #-----------------------------------------------------------------------------
 # Builtin whitespace checks.
-bad=$(git diff-index --check --cached $against --) || die "$bad"
+bad=$(git diff-index --check --cached $against -- --ignore-space-at-eol) || die "$bad"
 
 # Approximate whitespace=tab-in-indent check with Git < 1.7.2.
 git --version | grep -q " \(1\.[0-6]\|1\.7\.[01]\)" &&

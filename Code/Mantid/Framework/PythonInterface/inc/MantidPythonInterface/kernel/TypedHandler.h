@@ -51,7 +51,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<DerivedType> extractor(value);
@@ -81,7 +81,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<std::string> extractor(value);
@@ -89,6 +89,47 @@ namespace Mantid
         }
 
       };
+
+      /**
+       * Specialized integer version to deal with situations where a property
+       * is of type double but an integer is passed.
+       */
+      template<>
+      struct DLLExport TypedHandler<int> : public PropertyHandler
+      {
+        /**
+         * Set function to handle Python -> C++ calls and get the correct type
+         * @param alg :: A pointer to an IPropertyManager
+         * @param name :: The name of the property
+         * @param value :: A boost python object that stores the integer value
+         */
+        void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value)
+        {
+          int intValue = boost::python::extract<int>(value)();
+          try
+          {
+            alg->setProperty(name, intValue);
+          }
+          catch(std::invalid_argument&)
+          {
+            // Throws this also if the type is wrong. The type could be a double so check first and extract as a double if necessary
+            alg->setProperty(name, static_cast<double>(intValue));
+          }
+        }
+        /**
+         * Is the python object an instance of the string template type
+         * @param value ::
+         * @returns True if it is, false otherwise
+         */
+        bool isInstance(const boost::python::object & value) const
+        {
+          // Can we extract the derived type from the object?
+          boost::python::extract<int> extractor(value);
+          return extractor.check();
+        }
+
+      };
+
 
     }
   }

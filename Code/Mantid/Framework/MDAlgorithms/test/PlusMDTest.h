@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <iostream>
 #include <Poco/File.h>
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -31,6 +32,7 @@ public:
   
   void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile=true)
   {
+	AnalysisDataService::Instance().clear();
     // Make two input workspaces
     MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
     MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
@@ -94,7 +96,6 @@ public:
         }
       }
     }
-
   }
   
   void test_mem_plus_mem()
@@ -119,14 +120,45 @@ public:
   { do_test(false, true, 1); }
 
 //FIXME: Test fails on Windows7 build server. http://trac.mantidproject.org/mantid/ticket/4028
-//  void test_file_plus_file()
-//  { do_test(true, true, 0); }
-//
-//  void test_file_plus_file_inPlace()
-//  { do_test(true, true, 1); }
-//
-//  void test_file_plus_file_inPlace_ofRHS()
-//  { do_test(true, true, 2); }
+  void test_file_plus_file()
+  { do_test(true, true, 0); }
+
+  void test_file_plus_file_inPlace()
+  { do_test(true, true, 1); }
+
+  void test_file_plus_file_inPlace_ofRHS()
+  { do_test(true, true, 2); }
+
+
+
+
+  void test_histo_histo()
+  {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "histo_B", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 5.0, 1e-5);
+  }
+
+  void test_histo_scalar()
+  {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "scalar", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 5.0, 1e-5);
+    out = BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "histo_A", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 5.0, 1e-5);
+  }
+
+  void test_event_scalar_fails()
+  {
+    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "scalar", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "scalar", "event_A", "out", false /*fails*/);
+  }
+
+  void test_event_histo_fails()
+  {
+    BinaryOperationMDTestHelper::doTest("PlusMD", "event_A", "histo_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("PlusMD", "histo_A", "event_A", "out", false /*fails*/);
+  }
 
 };
 

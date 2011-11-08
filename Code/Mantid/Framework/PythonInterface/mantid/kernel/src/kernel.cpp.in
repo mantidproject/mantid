@@ -17,7 +17,7 @@ BOOST_PYTHON_MODULE(_kernel)
   // Use numpy arrays
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
   
-  // Map builtin type objects to templated setter functions for properties
+  // Map builtin type objects to appropriate handler classes for properties
   PropertyMarshal::registerHandler(&PyInt_Type, new TypedHandler<int>());
   PropertyMarshal::registerHandler(&PyBool_Type, new TypedHandler<bool>());
   PropertyMarshal::registerHandler(&PyFloat_Type, new TypedHandler<double>());
