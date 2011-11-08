@@ -126,7 +126,7 @@ public:
   {
     SmoothNeighbours alg;
     alg.initialize();
-    TSM_ASSERT_THROWS_NOTHING("A single neighbour is valid",alg.setProperty("NumberOfNeighbours", 1), std::invalid_argument);
+    TSM_ASSERT_THROWS_NOTHING("A single neighbour is valid",alg.setProperty("NumberOfNeighbours", 1));
     int value = alg.getProperty("NumberOfNeighbours");
     TS_ASSERT_EQUALS(1, value);
   }
