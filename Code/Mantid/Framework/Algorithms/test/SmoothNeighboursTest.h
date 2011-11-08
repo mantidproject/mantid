@@ -2,6 +2,7 @@
 #define SmoothNeighboursTEST_H_
 
 #include "MantidAlgorithms/SmoothNeighbours.h"
+#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
@@ -163,6 +164,17 @@ public:
         TS_ASSERT_DELTA(expected, actual, 0.001);
       }
     }
+
+    //Check that the workspaces are identical, including x and y values.
+    CheckWorkspacesMatch* checkAlg = new CheckWorkspacesMatch;
+    checkAlg->initialize();
+    checkAlg->setProperty("Workspace1", inWS);
+    checkAlg->setProperty("Workspace2", outWS);
+    checkAlg->setProperty("Tolerance", 0.001);
+    checkAlg->execute();
+    std::string result = checkAlg->getProperty("Result");
+    TS_ASSERT_EQUALS("Success!", result);
+
   }
 
   void test_event_WEIGHTED()

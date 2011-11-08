@@ -103,7 +103,7 @@ void SmoothNeighbours::init()
   declareProperty("WeightedSum", true,
     "Adjust the weight of neighboring pixels when summing them, based on their distance.");
   setPropertySettings("WeightedSum", new EnabledWhenProperty(this, "ProvideRadius", IS_DEFAULT)); //Weighted sum needs the radius for the calculation.
-
+  
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
 
@@ -359,7 +359,7 @@ void SmoothNeighbours::exec()
 
   // Get the input workspace
   inWS = getProperty("InputWorkspace");
-
+  
   // Progress reporting, first for the sorting
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
 
@@ -389,10 +389,20 @@ void SmoothNeighbours::exec()
 /** Execute the algorithm for a Workspace2D/don't preserve events input */
 void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 {
+  /*
+  Note that there is an issue with using managed workspaces with this algorithm see issue 4075.
+  */
+  if(!ws->threadSafe())
+  {
+    throw std::invalid_argument("This algorithm does not work for ManagedWorkspaces.");
+  }
+
+
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   //Get some stuff from the input workspace
   const size_t numberOfSpectra = inWS->getNumberHistograms();
+  
   const size_t YLength = inWS->blocksize();
 
   MatrixWorkspace_sptr outWS;
@@ -415,6 +425,8 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
     MantidVec & outY = outSpec->dataY();
     // We will temporarily carry the squared error
     MantidVec & outE = outSpec->dataE();
+    // tmp to carry the X Data.
+    MantidVec & outX = outSpec->dataX();
 
     // Which are the neighbours?
     std::vector< weightedNeighbour > & neighbours = m_neighbours[outWI];
@@ -426,6 +438,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
       const MantidVec & inY = ws->readY(inWI);
       const MantidVec & inE = ws->readE(inWI);
+      const MantidVec & inX = ws->readX(inWI);
 
       for (size_t i=0; i<YLength; i++)
       {
@@ -436,6 +449,11 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
         errorSquared *= errorSquared;
         errorSquared *= weight;
         outE[i] += errorSquared;
+        outX[i] = inX[i];
+      }
+      if(ws->isHistogramData())
+      {
+        outX[YLength] = inX[YLength];
       }
     } //(each neighbour)
 
