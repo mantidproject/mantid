@@ -16,8 +16,9 @@ except:
     HAS_MANTID = False    
 
 class HFIRDataSet(BaseDataSet):
-    def __init__(self, run_number, title, run_start, duration, ssd):
-        super(HFIRDataSet, self).__init__(run_number, title, run_start, duration, ssd)
+    TABLE_NAME="hfir_dataset"
+    def __init__(self, run_number, title, run_start, duration, sdd):
+        super(HFIRDataSet, self).__init__(run_number, title, run_start, duration, sdd)
 
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
@@ -26,8 +27,6 @@ class HFIRDataSet(BaseDataSet):
             return True
         except:
             return False
-            import sys
-            print sys.exc_value
 
     @classmethod
     def handle(cls, file_path):
@@ -65,9 +64,9 @@ class HFIRDataSet(BaseDataSet):
         
         sdd = float(read_prop("sample-detector-distance"))
 
-        t = (run, title, run_start, duration, sdd)
-        cursor.execute('insert into dataset values (?,?,?,?,?)', t)
-        return HFIRDataSet(run, title, run_start, duration, sdd)
+        d = HFIRDataSet(run, title, run_start, duration, sdd)
+        d.insert_in_db(cursor)
+        return d
     
 
 class DataCatalog(BaseCatalog):

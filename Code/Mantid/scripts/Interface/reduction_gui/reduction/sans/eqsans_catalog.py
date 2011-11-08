@@ -16,17 +16,17 @@ except:
     HAS_MANTID = False    
 
 class EQSANSDataSet(BaseDataSet):
-    def __init__(self, run_number, title, run_start, duration, ssd):
-        super(EQSANSDataSet, self).__init__(run_number, title, run_start, duration, ssd)
+    TABLE_NAME="eqsans_dataset"
+    def __init__(self, run_number, title, run_start, duration, sdd):
+        super(EQSANSDataSet, self).__init__(run_number, title, run_start, duration, sdd)
 
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
-        if HAS_MANTID:
-            try:
-                mantidsimple.LoadEventNexus(file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
-                return True
-            except:
-                return False
+        try:
+            mantidsimple.LoadEventNexus(file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
+            return True
+        except:
+            return False
 
     @classmethod
     def handle(cls, file_path):
@@ -68,10 +68,10 @@ class EQSANSDataSet(BaseDataSet):
             duration = 0
         
         sdd = read_series("detectorZ")
-
-        t = (runno, title, run_start, duration, sdd)
-        cursor.execute('insert into dataset values (?,?,?,?,?)', t)
-        return EQSANSDataSet(runno, title, run_start, duration, sdd)
+        
+        d = EQSANSDataSet(runno, title, run_start, duration, sdd)
+        d.insert_in_db(cursor)
+        return d
     
 
 class DataCatalog(BaseCatalog):
