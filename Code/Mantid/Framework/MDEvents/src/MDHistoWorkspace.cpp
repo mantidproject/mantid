@@ -349,6 +349,10 @@ namespace MDEvents
     return out;
   }
 
+  //==============================================================================================
+  //============================== ARITHMETIC OPERATIONS =========================================
+  //==============================================================================================
+
   //----------------------------------------------------------------------------------------------
   /** Check if the two workspace's sizes match (for comparison or element-by-element operation
    *
@@ -588,6 +592,79 @@ namespace MDEvents
     }
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Perform the natural logarithm on each signal in the workspace.
+   *
+   * Error propagation of \f$ f = ln(a) \f$  is given by:
+   * \f$ df^2 = a^2 / da^2 \f$
+   */
+  void MDHistoWorkspace::log()
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t da2 = m_errorsSquared[i];
+      m_signals[i] = std::log(a);
+      m_errorsSquared[i] = da2 / (a*a);
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the base-10 logarithm on each signal in the workspace.
+   *
+   * Error propagation of \f$ f = ln(a) \f$  is given by:
+   * \f$ df^2 = a^2 / da^2 \f$
+   */
+  void MDHistoWorkspace::log10()
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t da2 = m_errorsSquared[i];
+      m_signals[i] = std::log10(a);
+      m_errorsSquared[i] = da2 / (a*a);
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the exp() function on each signal in the workspace.
+   *
+   * Error propagation of \f$ f = exp(a) \f$  is given by:
+   * \f$ df^2 = f^2 * da^2 \f$
+   */
+  void MDHistoWorkspace::exp()
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t f = std::exp(m_signals[i]);
+      signal_t da2 = m_errorsSquared[i];
+      m_signals[i] = f;
+      m_errorsSquared[i] = f*f * da2;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the power function (signal^exponent) on each signal S in the workspace.
+   *
+   * Error propagation of \f$ f = a^b \f$  is given by:
+   * \f$ df^2 = f^2 * b^2 * (da^2 / a^2) \f$
+   */
+  void MDHistoWorkspace::power(double exponent)
+  {
+    double exponent_squared = exponent * exponent;
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t a = m_signals[i];
+      signal_t f = std::pow(a, exponent);
+      signal_t da2 = m_errorsSquared[i];
+      m_signals[i] = f;
+      m_errorsSquared[i] = f*f * exponent_squared * da2 / (a*a);
+    }
+  }
+
+  //==============================================================================================
+  //============================== BOOLEAN OPERATIONS ============================================
+  //==============================================================================================
 
   //----------------------------------------------------------------------------------------------
   /** A boolean &= (and) operation, element-by-element, for two MDHistoWorkspace's.
@@ -658,73 +735,173 @@ namespace MDEvents
     }
   }
 
+
   //----------------------------------------------------------------------------------------------
-  /** Perform the natural logarithm on each signal in the workspace.
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is < b[i].
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
    *
-   * Error propagation of \f$ f = ln(a) \f$  is given by:
-   * \f$ df^2 = a^2 / da^2 \f$
+   * @param b :: workspace on the RHS of the comparison.
    */
-  void MDHistoWorkspace::log()
+  void MDHistoWorkspace::lessThan(const MDHistoWorkspace & b)
   {
+    checkWorkspaceSize(b, "lessThan");
     for (size_t i=0; i<m_length; ++i)
     {
-      signal_t a = m_signals[i];
-      signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = std::log(a);
-      m_errorsSquared[i] = da2 / (a*a);
+      m_signals[i] = (m_signals[i] < b.m_signals[i]) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
     }
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Perform the base-10 logarithm on each signal in the workspace.
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is < signal.
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
    *
-   * Error propagation of \f$ f = ln(a) \f$  is given by:
-   * \f$ df^2 = a^2 / da^2 \f$
+   * @param signal :: signal value on the RHS of the comparison.
    */
-  void MDHistoWorkspace::log10()
+  void MDHistoWorkspace::lessThan(const signal_t signal)
   {
     for (size_t i=0; i<m_length; ++i)
     {
-      signal_t a = m_signals[i];
-      signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = std::log10(a);
-      m_errorsSquared[i] = da2 / (a*a);
+      m_signals[i] = (m_signals[i] < signal) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
     }
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Perform the exp() function on each signal in the workspace.
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is > b[i].
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
    *
-   * Error propagation of \f$ f = exp(a) \f$  is given by:
-   * \f$ df^2 = f^2 * da^2 \f$
+   * @param b :: workspace on the RHS of the comparison.
    */
-  void MDHistoWorkspace::exp()
+  void MDHistoWorkspace::greaterThan(const MDHistoWorkspace & b)
   {
+    checkWorkspaceSize(b, "greaterThan");
     for (size_t i=0; i<m_length; ++i)
     {
-      signal_t f = std::exp(m_signals[i]);
-      signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = f;
-      m_errorsSquared[i] = f*f * da2;
+      m_signals[i] = (m_signals[i] > b.m_signals[i]) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
     }
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Perform the power function (signal^exponent) on each signal S in the workspace.
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is > signal.
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
    *
-   * Error propagation of \f$ f = a^b \f$  is given by:
-   * \f$ df^2 = f^2 * b^2 * (da^2 / a^2) \f$
+   * @param signal :: signal value on the RHS of the comparison.
    */
-  void MDHistoWorkspace::power(double exponent)
+  void MDHistoWorkspace::greaterThan(const signal_t signal)
   {
-    double exponent_squared = exponent * exponent;
     for (size_t i=0; i<m_length; ++i)
     {
-      signal_t a = m_signals[i];
-      signal_t f = std::pow(a, exponent);
-      signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = f;
-      m_errorsSquared[i] = f*f * exponent_squared * da2 / (a*a);
+      m_signals[i] = (m_signals[i] > signal) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is == b[i].
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the comparison.
+   * @param tolerance :: accept this deviation from a perfect equality
+   */
+  void MDHistoWorkspace::equalTo(const MDHistoWorkspace & b, const signal_t tolerance)
+  {
+    checkWorkspaceSize(b, "equalTo");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t diff = fabs(m_signals[i] - b.m_signals[i]);
+      m_signals[i] = (diff < tolerance) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is == signal.
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param signal :: signal value on the RHS of the comparison.
+   * @param tolerance :: accept this deviation from a perfect equality
+   */
+  void MDHistoWorkspace::equalTo(const signal_t signal, const signal_t tolerance)
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t diff = fabs(m_signals[i] - signal);
+      m_signals[i] = (diff < tolerance) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy the values from another workspace onto this workspace, but only
+   * where a mask is true (non-zero)
+   *
+   * For example, in matlab or numpy python, you might write something like:
+   *  "mask = (array < 5.0); array[mask] = other[mask];"
+   *
+   * The equivalent here is:
+   *  mask = array;
+   *  mask.lessThan(5.0);
+   *  array.setUsingMask(mask, other);
+   *
+   * @param mask :: MDHistoWorkspace where (signal == 0.0) means false, and (signal != 0.0) means true.
+   * @param values :: MDHistoWorkspace of values to copy.
+   */
+  void MDHistoWorkspace::setUsingMask(const MDHistoWorkspace & mask, const MDHistoWorkspace & values)
+  {
+    checkWorkspaceSize(mask, "setUsingMask");
+    checkWorkspaceSize(values, "setUsingMask");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      if (mask.m_signals[i] != 0.0)
+      {
+        m_signals[i] = values.m_signals[i];
+        m_errorsSquared[i] = values.m_errorsSquared[i];
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy the values from another workspace onto this workspace, but only
+   * where a mask is true (non-zero)
+   *
+   * For example, in matlab or numpy python, you might write something like:
+   *  "mask = (array < 5.0); array[mask] = other[mask];"
+   *
+   * The equivalent here is:
+   *  mask = array;
+   *  mask.lessThan(5.0);
+   *  array.setUsingMask(mask, other);
+   *
+   * @param mask :: MDHistoWorkspace where (signal == 0.0) means false, and (signal != 0.0) means true.
+   * @param signal :: signal to set everywhere mask is true
+   * @param error :: error (not squared) to set everywhere mask is true
+   */
+  void MDHistoWorkspace::setUsingMask(const MDHistoWorkspace & mask, const signal_t signal, const signal_t error)
+  {
+    signal_t errorSquared = error * error;
+    checkWorkspaceSize(mask, "setUsingMask");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      if (mask.m_signals[i] != 0.0)
+      {
+        m_signals[i] = signal;
+        m_errorsSquared[i] = errorSquared;
+      }
     }
   }
 
