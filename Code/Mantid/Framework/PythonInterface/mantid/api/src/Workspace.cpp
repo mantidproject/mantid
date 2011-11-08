@@ -1,7 +1,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/TypedHandler.h"
+#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -39,7 +39,7 @@ void export_Workspace()
          "Return read-only access to the workspace history")
     ;
 
-  DECLARE_TYPEHANDLER(Workspace, DataItem_sptr);
+  DECLARE_SINGLEVALUETYPEHANDLER(Workspace, DataItem_sptr);
 }
 
 void export_WorkspaceProperty()
