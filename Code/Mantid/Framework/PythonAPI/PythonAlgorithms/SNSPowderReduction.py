@@ -360,9 +360,6 @@ class SNSPowderReduction(PythonAlgorithm):
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        if not info.has_dspace:
-            self.log().information("time-of-flight binning: " + str(binning))
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         if normByCurrent:
             NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
