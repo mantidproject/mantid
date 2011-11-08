@@ -3,7 +3,7 @@
 Perform the == (equals to) boolean operation on two MDHistoWorkspaces or a MDHistoWorkspace and a scalar.
 The output workspace has a signal of 0.0 to mean "false" and a signal of 1.0 to mean "true". Errors are 0.
 
-For two MDHistoWorkspaces, the operation is performed element-by-element.
+For two MDHistoWorkspaces, the operation is performed element-by-element. Only the signal is compared.
 
 For a MDHistoWorkspace and a scalar, the operation is performed on each element of the output.
 
@@ -43,17 +43,27 @@ namespace MDAlgorithms
   int EqualToMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
+  /// Extra properties
+  void EqualToMD::initExtraProperties()
+  {
+    declareProperty("Tolerance", 1e-5,
+        "Tolerance when performing the == comparison. Default 10^-5.");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /// Run the algorithm with a MDHisotWorkspace as output and operand
   void EqualToMD::execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand)
   {
-    out->equalTo(*operand);
+    double tolerance = getProperty("Tolerance");
+    out->equalTo(*operand, tolerance);
   }
 
   //----------------------------------------------------------------------------------------------
   /// Run the algorithm with a MDHisotWorkspace as output and a scalar on the RHS
   void EqualToMD::execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar)
   {
-    out->equalTo(scalar->dataY(0)[0]);
+    double tolerance = getProperty("Tolerance");
+    out->equalTo(scalar->dataY(0)[0], tolerance);
   }
 
 

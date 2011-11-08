@@ -55,6 +55,8 @@ namespace MDAlgorithms
       throw std::runtime_error("Cannot perform the " + this->name() + " operation on a MDEventWorkspace.");
     if (!acceptScalar() && (m_lhs_scalar || m_rhs_scalar))
       throw std::runtime_error("Cannot perform the " + this->name() + " operation on a WorkspaceSingleValue.");
+    if (!this->commutative() && m_lhs_scalar)
+      throw std::runtime_error("Cannot perform the " + this->name() + " operation with a scalar on the left-hand side.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -66,7 +68,7 @@ namespace MDAlgorithms
 
   //----------------------------------------------------------------------------------------------
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-  void BooleanBinaryOperationMD::execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar)
+  void BooleanBinaryOperationMD::execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr /*out*/, Mantid::DataObjects::WorkspaceSingleValue_const_sptr /*scalar*/)
   {
     throw std::runtime_error("Cannot perform the " + this->name() + " operation on a WorkspaceSingleValue.");
   }

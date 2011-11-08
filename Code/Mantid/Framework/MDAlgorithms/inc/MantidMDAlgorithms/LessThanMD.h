@@ -44,8 +44,8 @@ namespace MDAlgorithms
     virtual int version() const;
 
   private:
-    bool acceptScalar()  { return true; }
-    bool commutative() { return false; }
+    bool acceptScalar() const  { return true; }
+    bool commutative() const { return false; }
 
     void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
     void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);

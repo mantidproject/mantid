@@ -44,6 +44,7 @@ namespace MDAlgorithms
     virtual int version() const;
 
   private:
+    void initExtraProperties();
     bool acceptScalar()  { return true; }
     void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
     void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);

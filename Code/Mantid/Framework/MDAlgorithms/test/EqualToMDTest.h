@@ -8,55 +8,56 @@
 #include <iomanip>
 
 #include "MantidMDAlgorithms/EqualToMD.h"
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
+using Mantid::MDEvents::MDHistoWorkspace_sptr;
 
 class EqualToMDTest : public CxxTest::TestSuite
 {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static EqualToMDTest *createSuite() { return new EqualToMDTest(); }
-  static void destroySuite( EqualToMDTest *suite ) { delete suite; }
-
-
   void test_Init()
   {
     EqualToMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  
-  void test_exec()
+
+  void test_histo_histo()
   {
-    // Name of the output workspace.
-    std::string outWSName("EqualToMDTest_OutputWS");
-  
-    EqualToMD alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-    
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("EqualToMD", "histo_A", "histo_B", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 0.0, 1e-5);
+    out = BinaryOperationMDTestHelper::doTest("EqualToMD", "histo_B", "histo_B", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 1.0, 1e-5);
   }
-  
-  void test_Something()
+
+  void test_histo_scalar()
   {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("EqualToMD", "histo_A", "scalar", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 0.0, 1e-5);
+    out = BinaryOperationMDTestHelper::doTest("EqualToMD", "scalar", "histo_B", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 1.0, 1e-5);
   }
+
+  void test_event_fails()
+  {
+    BinaryOperationMDTestHelper::doTest("EqualToMD", "event_A", "scalar", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("EqualToMD", "event_A", "event_B", "out", false /*fails*/);
+  }
+
+  void test_Tolerance()
+  {
+    MDHistoWorkspace_sptr out;
+    out = BinaryOperationMDTestHelper::doTest("EqualToMD", "histo_A", "histo_B", "out", true, "Tolerance", "1.5");
+    // Large enough tolerance to say that 2 == 3 (give or take 1.5)
+    TS_ASSERT_DELTA( out->getSignalAt(0), 1.0, 1e-5);
+  }
+
 
 
 };

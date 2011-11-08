@@ -45,11 +45,11 @@ namespace MDAlgorithms
 
   protected:
     /// Return true if the algorithm can operate on a scalar.
-    virtual bool acceptScalar()
+    virtual bool acceptScalar() const
     { return true; }
+    virtual bool commutative() const;
 
     virtual void initDocs();
-    bool commutative() const;
     void checkInputs();
     void execEvent();
     virtual void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
