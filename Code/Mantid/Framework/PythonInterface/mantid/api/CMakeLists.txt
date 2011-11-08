@@ -16,6 +16,7 @@ set ( EXPORT_FILES
   src/FrameworkManager.cpp
   src/Workspace.cpp
   src/MatrixWorkspace.cpp
+  src/IEventWorkspace.cpp
 )  
 
 # Files containing addtional helper code that do not require processing

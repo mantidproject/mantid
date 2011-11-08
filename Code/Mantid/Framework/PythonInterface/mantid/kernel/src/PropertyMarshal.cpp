@@ -22,6 +22,16 @@ namespace Mantid
       static PyTypeLookup typeHandlers;
 
       /**
+       * Insert a new property handler
+       * @param typeObject :: A pointer to a type object
+       * @param handler :: An object to handle to corresponding templated C++ type
+       */
+      void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler)
+      {
+        typeHandlers.insert(std::make_pair(typeObject, handler));
+      }
+
+      /**
       * This static function allows a call to a method on an IAlgorithm object
       * in Python to get routed here.
       * The first argument MUST be an object of type bpl::object that
@@ -47,6 +57,62 @@ namespace Mantid
       }
 
       /**
+       * Attempts to find an upcasted pointer type for the given object that is
+       * assumed to be of type DataItem
+       * @param value :: An object derived from DataItem
+       * @return A pointer to an upcasted type or NULL if one cannot be found
+       */
+      PyTypeObject * getUpcastedType(bpl::object value)
+      {
+        // This has to be a search as it is at runtime.
+        // Each of the registered type handlers is checked
+        // to see if its type is a subclass the value type.
+        // Each one is checked so that the most derived type
+        // can be found
+
+        PyTypeObject *result(NULL);
+
+        PyTypeLookup::const_iterator iend = typeHandlers.end();
+        PyObject *valueType = (PyObject*)value.ptr()->ob_type;
+        for(PyTypeLookup::const_iterator it = typeHandlers.begin(); it != iend; ++it)
+        {
+          if( PyObject_IsSubclass((PyObject*)it->first, valueType) )
+          {
+            if( !result && it->second->isInstance(value) ) // First one
+            {
+              result = it->first;
+            }
+            // Check if this match is further up the chain than the last
+            else if(PyObject_IsSubclass((PyObject*)it->first, (PyObject*)result) && it->second->isInstance(value) )
+            {
+              result = it->first;
+            }
+          }
+        }
+        return result;
+      }
+
+      /**
+       * Assuming the given object is a sub class of DataItem, attempt to
+       * upcast it to the most derived exported type
+       * @param value :: An object derived from DataItem
+       * @return A (possibly) upcasted pointer
+       */
+      void upcastFromDataItem(bpl::object value)
+      {
+        static const bpl::converter::registration *reg = bpl::converter::registry::query(typeid(Kernel::DataItem));
+        PyTypeObject *cls = reg->get_class_object();
+        if( PyObject_IsInstance(value.ptr(), (PyObject*)cls) ) // Is this a subtype of DataItem
+        {
+          PyTypeObject *derivedType = getUpcastedType(value);
+          if( derivedType )
+          {
+            PyObject_SetAttrString(value.ptr(), "__class__", (PyObject*)derivedType);
+          }
+        }
+      }
+
+      /**
       * Attempts to convert the value of the property to an appropriate type
       * e.g. for DataItem objects it tries to give back the most derived exported
       * type of the object
@@ -56,35 +122,11 @@ namespace Mantid
       */
       bpl::object value(bpl::object self)
       {
-        bpl::object declaredType = bpl::object(bpl::handle<>(PyObject_GetAttrString(self.ptr(), "value_as_declared")));
-
-        // Work in progress to upcast pointers
-
-        //static const bpl::converter::registration *reg = bpl::converter::registry::query(typeid(Kernel::DataItem));
-        //PyTypeObject *cls = reg->get_class_object();
-        //if( !PyObject_IsInstance(declaredType.ptr(), (PyObject*)cls) )
-        //{
-        //  return declaredType;
-        //}
-        //// Try and deduce the actual object type rather than just returning the low-level interface
-        //const bpl::converter::registration *mwReg = bpl::converter::registry::query(typeid(API::MatrixWorkspace));
-        //if( reg )
-        //{
-        //  PyObject_SetAttrString(declaredType.ptr(), "__class__", (PyObject*)mwReg->get_class_object());
-        //}
-
-        return declaredType;
+        bpl::object value = bpl::object(bpl::handle<>(PyObject_GetAttrString(self.ptr(), "value_as_declared")));
+        upcastFromDataItem(value);
+        return value;
       }
 
-      /**
-      * Insert a new property handler
-      * @param typeObject :: A pointer to a type object
-      * @param handler :: An object to handle to corresponding templated C++ type
-      */
-      void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler)
-      {
-        typeHandlers.insert(std::make_pair(typeObject, handler));
-      }
 
     }
   }
