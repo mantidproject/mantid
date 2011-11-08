@@ -7,6 +7,10 @@ For two MDHistoWorkspaces, the operation is performed element-by-element.
 
 For a MDHistoWorkspace and a scalar, the operation is performed on each element of the output.
 
+== Usage ==
+
+See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/GreaterThanMD.h"

@@ -2,7 +2,7 @@
 
 This executes the exponential function on a MDHistoWorkspace.
 
-The signal <math>a</math> becomes <math> f = exp(a) </math>
+The signal <math>a</math> becomes <math> f = e^a </math>
 
 The error <math>da</math> becomes <math> df^2 = f^2 * da^2 </math>
 
