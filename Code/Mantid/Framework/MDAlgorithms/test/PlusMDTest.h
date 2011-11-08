@@ -32,6 +32,7 @@ public:
   
   void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile=true)
   {
+	AnalysisDataService::Instance().clear();
     // Make two input workspaces
     MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
     MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
@@ -95,7 +96,6 @@ public:
         }
       }
     }
-
   }
   
   void test_mem_plus_mem()
@@ -120,14 +120,14 @@ public:
   { do_test(false, true, 1); }
 
 //FIXME: Test fails on Windows7 build server. http://trac.mantidproject.org/mantid/ticket/4028
-//  void test_file_plus_file()
-//  { do_test(true, true, 0); }
-//
-//  void test_file_plus_file_inPlace()
-//  { do_test(true, true, 1); }
-//
-//  void test_file_plus_file_inPlace_ofRHS()
-//  { do_test(true, true, 2); }
+  void test_file_plus_file()
+  { do_test(true, true, 0); }
+
+  void test_file_plus_file_inPlace()
+  { do_test(true, true, 1); }
+
+  void test_file_plus_file_inPlace_ofRHS()
+  { do_test(true, true, 2); }
 
 
 

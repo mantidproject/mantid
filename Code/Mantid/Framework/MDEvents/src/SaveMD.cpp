@@ -20,6 +20,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -126,6 +127,10 @@ namespace MDEvents
     }
     else
     {
+		// Erase the file if it exists
+		Poco::File oldFile(filename);
+		if (oldFile.exists())
+			oldFile.remove();
       // Create a new file in HDF5 mode.
       file = new ::NeXus::File(filename, NXACC_CREATE5);
     }
