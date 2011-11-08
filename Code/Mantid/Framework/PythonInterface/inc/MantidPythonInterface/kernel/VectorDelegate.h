@@ -49,9 +49,9 @@ namespace Mantid
     struct VectorDelegate
     {
       /// Convert a Python type into a C++ std vector using the template element type
-      static const std::vector<ElementType> toStdVector(PyObject *value);
+      DLLExport static const std::vector<ElementType> toStdVector(PyObject *value);
       /// Check that the list contains items of the required type for the C++ type
-      static std::string isConvertibleToStdVector(PyObject* value);
+      DLLExport static std::string isConvertibleToStdVector(PyObject* value);
     };
 
   }
