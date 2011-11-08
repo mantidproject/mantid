@@ -161,6 +161,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             PredictPeaks(InputWorkspace=wksp,WavelengthMin=self._minWL,WavelengthMax=self._maxWL,MinDSpacing=self._minD,
                 ReflectionCondition="Rhombohedrally centred, obverse",OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
+            CentroidPeaks(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,

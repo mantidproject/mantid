@@ -1,6 +1,7 @@
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
-#include <boost/python/numeric.hpp>
+
+#include <numpy/arrayobject.h>
 
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 
@@ -14,8 +15,9 @@ BOOST_PYTHON_MODULE(_kernel)
 {
   // Doc string options - User defined, python arguments, C++ call signatures
   boost::python::docstring_options docstrings(true, true, false);
-  // Use numpy arrays
-  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+  // Import numpy
+  _import_array();
+  
   
   // Map builtin type objects to appropriate handler classes for properties
   PropertyMarshal::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
