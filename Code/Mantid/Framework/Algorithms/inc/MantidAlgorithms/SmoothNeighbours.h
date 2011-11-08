@@ -62,7 +62,7 @@ private:
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);
 
   void findNeighboursRectangular();
-  void findNeighboursRadius();
+  void findNeighboursUbiqutious();
 
   /// Pixels in the detector
   int XPixels;
