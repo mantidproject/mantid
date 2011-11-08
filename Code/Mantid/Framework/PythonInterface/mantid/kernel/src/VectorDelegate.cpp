@@ -52,8 +52,8 @@ namespace Mantid
     //--------------------------------------------------------------------------
     // Concrete Instantiations
     //--------------------------------------------------------------------------
-    DLLExport template class VectorDelegate<int>;
-    DLLExport template class VectorDelegate<double>;
+    template DLLExport class VectorDelegate<int>;
+    template DLLExport class VectorDelegate<double>;
   }
 }
 

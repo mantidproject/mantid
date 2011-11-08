@@ -65,7 +65,7 @@ namespace Mantid
       //-----------------------------------------------------------------------
       // Forward declarations
       //-----------------------------------------------------------------------
-      class PropertyHandler;
+      struct PropertyHandler;
 
       /// Insert a new property handler
       DLLExport void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler);

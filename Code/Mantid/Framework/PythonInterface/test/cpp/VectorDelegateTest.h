@@ -64,7 +64,7 @@ private:
     PyObject *lst = PyList_New((Py_ssize_t)length);
     for(Py_ssize_t i = 0; i < length; ++i)
     {
-      PyList_SetItem(lst, i, PyInt_FromSsize_t(i));
+      PyList_SetItem(lst, i, PyInt_FromLong((int)i)); // Cast avoids RHEL5 problem that doesn't have size_t
     }
     if(addItemOfDiffType)
     {
