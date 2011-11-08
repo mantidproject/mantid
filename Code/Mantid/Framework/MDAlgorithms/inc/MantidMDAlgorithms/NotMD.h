@@ -3,13 +3,14 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/UnaryOperationMD.h"
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
-  /** NotMD : TODO: DESCRIPTION
+  /** NotMD : boolean negation of a MDHistoWorkspace
     
     @date 2011-11-08
 
@@ -33,7 +34,7 @@ namespace MDAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport NotMD  : public API::Algorithm
+  class DLLExport NotMD  : public UnaryOperationMD
   {
   public:
     NotMD();
@@ -41,13 +42,18 @@ namespace MDAlgorithms
     
     virtual const std::string name() const;
     virtual int version() const;
-    virtual const std::string category() const;
 
   private:
     virtual void initDocs();
-    void init();
-    void exec();
 
+    /// Check the inputs and throw if the algorithm cannot be run
+    void checkInputs();
+
+    /// Run the algorithm on a MDEventWorkspace
+    void execEvent(Mantid::API::IMDEventWorkspace_sptr out);
+
+    /// Run the algorithm with a MDHistoWorkspace
+    void execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out);
 
   };
 

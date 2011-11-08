@@ -1,5 +1,10 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+Perform the Not (negation) boolean operation on a [[MDHistoWorkspace]].
+The not operation is performed element-by-element.
+Any 0.0 signal is changed to 1.0 (meaning true).
+Any non-zero signal is changed to 0.0 (meaning false).
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/NotMD.h"
@@ -15,24 +20,19 @@ namespace MDAlgorithms
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(NotMD)
-  
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   NotMD::NotMD()
-  {
-  }
+  {  }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   NotMD::~NotMD()
-  {
-  }
+  {  }
   
-
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string NotMD::name() const { return "NotMD";};
@@ -40,32 +40,34 @@ namespace MDAlgorithms
   /// Algorithm's version for identification. @see Algorithm::version
   int NotMD::version() const { return 1;};
   
-  /// Algorithm's category for identification. @see Algorithm::category
-  const std::string NotMD::category() const { return "General";}
-
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void NotMD::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Performs a boolean negation on a [[MDHistoWorkspace]].");
+    this->setOptionalMessage("Performs a boolean negation on a MDHistoWorkspace.");
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void NotMD::init()
+  /// Check the inputs and throw if the algorithm cannot be run
+  void NotMD::checkInputs()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    if (!m_in_histo)
+      throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace.");
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void NotMD::exec()
+  /// Run the algorithm on a MDEventWorkspace
+  void NotMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/)
   {
-    // TODO Auto-generated execute stub
+    throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace.");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /// NotMD::Run the algorithm with a MDHistoWorkspace
+  void NotMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out)
+  {
+    out->operatorNot();
   }
 
 

@@ -694,7 +694,7 @@ namespace MDEvents
     checkWorkspaceSize(b, "&= (and)");
     for (size_t i=0; i<m_length; ++i)
     {
-      m_signals[i] = m_signals[i] && b.m_signals[i];
+      m_signals[i] = ((m_signals[i] != 0) && (b.m_signals[i] != 0)) ? 1.0 : 0.0;
       m_errorsSquared[i] = 0;
     }
     return *this;
@@ -712,7 +712,7 @@ namespace MDEvents
     checkWorkspaceSize(b, "|= (or)");
     for (size_t i=0; i<m_length; ++i)
     {
-      m_signals[i] = m_signals[i] || b.m_signals[i];
+      m_signals[i] = ((m_signals[i] != 0) || (b.m_signals[i] != 0)) ? 1.0 : 0.0;
       m_errorsSquared[i] = 0;
     }
     return *this;
@@ -730,7 +730,7 @@ namespace MDEvents
     checkWorkspaceSize(b, "^= (xor)");
     for (size_t i=0; i<m_length; ++i)
     {
-      m_signals[i] = bool(m_signals[i]) ^ bool(b.m_signals[i]);
+      m_signals[i] = ((m_signals[i] != 0) ^ (b.m_signals[i] != 0)) ? 1.0 : 0.0;
       m_errorsSquared[i] = 0;
     }
     return *this;
@@ -746,7 +746,7 @@ namespace MDEvents
   {
     for (size_t i=0; i<m_length; ++i)
     {
-      m_signals[i] = !bool(m_signals[i]);
+      m_signals[i] = (m_signals[i] == 0.0);
       m_errorsSquared[i] = 0;
     }
   }

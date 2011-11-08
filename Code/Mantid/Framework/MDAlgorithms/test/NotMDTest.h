@@ -8,54 +8,34 @@
 #include <iomanip>
 
 #include "MantidMDAlgorithms/NotMD.h"
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
+using Mantid::MDEvents::MDHistoWorkspace_sptr;
 
 class NotMDTest : public CxxTest::TestSuite
 {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static NotMDTest *createSuite() { return new NotMDTest(); }
-  static void destroySuite( NotMDTest *suite ) { delete suite; }
-
-
   void test_Init()
   {
     NotMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  
-  void test_exec()
+
+  void test_histo()
   {
-    // Name of the output workspace.
-    std::string outWSName("NotMDTest_OutputWS");
-  
-    NotMD alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-    
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    MDHistoWorkspace_sptr out;
+    out = UnaryOperationMDTestHelper::doTest("NotMD", "histo", "out");
+    TS_ASSERT_DELTA( out->getSignalAt(0), 0.0, 1e-5);
   }
-  
-  void test_Something()
+
+  void test_event_fails()
   {
+    UnaryOperationMDTestHelper::doTest("NotMD", "event", "out", false /* fails*/);
   }
 
 
