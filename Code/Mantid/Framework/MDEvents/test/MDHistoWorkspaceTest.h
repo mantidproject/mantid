@@ -491,7 +491,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(10.0, 2, 5, 10.0, 3.0);
     a->log10();
-    checkWorkspace(a, 1.0, 3./100.);
+    checkWorkspace(a, 1.0, 0.1886117 * 3./100.);
   }
 
   //--------------------------------------------------------------------------------------

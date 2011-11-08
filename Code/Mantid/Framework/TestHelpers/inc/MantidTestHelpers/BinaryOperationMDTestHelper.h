@@ -15,7 +15,8 @@ namespace UnaryOperationMDTestHelper
 {
   /// Run a unary algorithm.
   DLLExport Mantid::MDEvents::MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName, std::string outName,
-      bool succeeds=true);
+      bool succeeds=true,
+      std::string otherProp="", std::string otherPropValue="");
 
 } // (end namespace)
 

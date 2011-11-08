@@ -81,8 +81,8 @@ namespace MDEvents
     void divide(const MDHistoWorkspace & b);
     void divide(const signal_t signal, const signal_t error);
 
-    void log();
-    void log10();
+    void log(double filler = 0.0);
+    void log10(double filler = 0.0);
     void exp();
     void power(double exponent);
 

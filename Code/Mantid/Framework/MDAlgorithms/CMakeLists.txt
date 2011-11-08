@@ -9,13 +9,16 @@ set ( SRC_FILES
 	src/ConvertToQ3DdE.cpp
 	src/ConvertToQNDany.cpp
 	src/DivideMD.cpp
+	src/ExponentialMD.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
+	src/LogarithmMD.cpp
 	src/MinusMD.cpp
 	src/MultiplyMD.cpp
 	src/NullImplicitFunction.cpp
 	src/PlusMD.cpp
+	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
 	src/SimulateMDD.cpp
@@ -38,13 +41,16 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/ConvertToQNDany.h
 	inc/MantidMDAlgorithms/DivideMD.h
+	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
+	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MinusMD.h
 	inc/MantidMDAlgorithms/MultiplyMD.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/PlusMD.h
+	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
@@ -64,11 +70,14 @@ set ( TEST_FILES
 	test/ConvertToQ3DdETest.h
 	test/ConvertToQNDanyTest.h
 	test/DivideMDTest.h
+	test/ExponentialMDTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
+	test/LogarithmMDTest.h
 	test/MinusMDTest.h
 	test/MultiplyMDTest.h
 	test/PlusMDTest.h
+	test/PowerMDTest.h
 	test/RunParamTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h

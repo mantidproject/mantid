@@ -598,14 +598,22 @@ namespace MDEvents
    * Error propagation of \f$ f = ln(a) \f$  is given by:
    * \f$ df^2 = a^2 / da^2 \f$
    */
-  void MDHistoWorkspace::log()
+  void MDHistoWorkspace::log(double filler)
   {
     for (size_t i=0; i<m_length; ++i)
     {
       signal_t a = m_signals[i];
       signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = std::log(a);
-      m_errorsSquared[i] = da2 / (a*a);
+      if (a <= 0)
+      {
+        m_signals[i] = filler;
+        m_errorsSquared[i] = 0;
+      }
+      else
+      {
+        m_signals[i] = std::log(a);
+        m_errorsSquared[i] = da2 / (a*a);
+      }
     }
   }
 
@@ -613,16 +621,24 @@ namespace MDEvents
   /** Perform the base-10 logarithm on each signal in the workspace.
    *
    * Error propagation of \f$ f = ln(a) \f$  is given by:
-   * \f$ df^2 = a^2 / da^2 \f$
+   * \f$ df^2 = (ln(10)^-2) * a^2 / da^2 \f$
    */
-  void MDHistoWorkspace::log10()
+  void MDHistoWorkspace::log10(double filler)
   {
     for (size_t i=0; i<m_length; ++i)
     {
       signal_t a = m_signals[i];
       signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = std::log10(a);
-      m_errorsSquared[i] = da2 / (a*a);
+      if (a <= 0)
+      {
+        m_signals[i] = filler;
+        m_errorsSquared[i] = 0;
+      }
+      else
+      {
+        m_signals[i] = std::log10(a);
+        m_errorsSquared[i] = 0.1886117 * da2 / (a*a); // 0.1886117  = ln(10)^-2
+      }
     }
   }
 

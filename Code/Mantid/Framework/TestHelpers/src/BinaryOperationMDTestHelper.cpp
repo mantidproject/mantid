@@ -79,9 +79,9 @@ namespace UnaryOperationMDTestHelper
 {
 
   MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName, std::string outName,
-      bool succeeds)
+      bool succeeds, std::string otherProp, std::string otherPropValue)
   {
-    MDHistoWorkspace_sptr histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
+    MDHistoWorkspace_sptr histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
     IMDEventWorkspace_sptr event = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
     WorkspaceSingleValue_sptr scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
     AnalysisDataService::Instance().addOrReplace("histo", histo);
@@ -92,6 +92,8 @@ namespace UnaryOperationMDTestHelper
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", inName );
     alg->setPropertyValue("OutputWorkspace", outName );
+    if (!otherProp.empty())
+      alg->setPropertyValue(otherProp, otherPropValue);
     alg->execute();
     if (succeeds)
     {
