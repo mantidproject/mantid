@@ -70,7 +70,7 @@ namespace Mantid
       /// Set function to handle Python -> C++ calls
       virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value) = 0;
       /// Is the given object an instance the handler's type
-      virtual bool isInstance(boost::python::object) const  = 0;
+      virtual bool isInstance(const boost::python::object&) const  = 0;
     };
 
     //------------------------------------------------------------------------------------------------------------

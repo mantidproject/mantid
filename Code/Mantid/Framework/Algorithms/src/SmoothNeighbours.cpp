@@ -81,22 +81,33 @@ void SmoothNeighbours::init()
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );
 
+  declareProperty("ProvideRadius", true, "Provide the radius for the search. Otherwise will need to specify number of neighbours");
 
+  //Unsigned double
   BoundedValidator<double> *mustBePositiveDouble = new BoundedValidator<double>();
   mustBePositiveDouble->setLower(0.0);
-  declareProperty("Radius", 0.0, mustBePositiveDouble,
-    "The radius around a pixel to look for nearest neighbours to average. \n"
-    "If 0, will use the AdjX and AdjY parameters for rectangular detectors instead." );
 
-  declareProperty("WeightedSum", true,
-    "Adjust the weight of neighboring pixels when summing them, based on their distance.");
-
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
+  //Unsigned int.
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
 
-  declareProperty("AdjX", 1, mustBePositive,
+  declareProperty("Radius", 0.0, mustBePositiveDouble,
+    "The radius around a pixel to look for nearest neighbours to average. \n"
+    "If 0, will use the AdjX and AdjY parameters for rectangular detectors instead." );
+  setPropertySettings("Radius", new EnabledWhenProperty(this, "ProvideRadius", IS_DEFAULT));
+
+  declareProperty("NumberOfNeighbours", 8, mustBePositive->clone(), "Number of nearest neighbouring pixels.\n"
+    "Alternative to providing the radius. The default is 8.");
+  setPropertySettings("NumberOfNeighbours", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
+
+  declareProperty("WeightedSum", true,
+    "Adjust the weight of neighboring pixels when summing them, based on their distance.");
+  setPropertySettings("WeightedSum", new EnabledWhenProperty(this, "ProvideRadius", IS_DEFAULT)); //Weighted sum needs the radius for the calculation.
+  
+  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
+  // pointer to each property.
+
+  declareProperty("AdjX", 1, mustBePositive->clone(),
     "The number of X (horizontal) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
   setPropertySettings("AdjX", new EnabledWhenProperty(this, "Radius", IS_DEFAULT) );
 
@@ -256,7 +267,7 @@ void SmoothNeighbours::findNeighboursRectangular()
 //--------------------------------------------------------------------------------------------
 /** Use NearestNeighbours to find the neighbours for any instrument
  */
-void SmoothNeighbours::findNeighboursRadius()
+void SmoothNeighbours::findNeighboursUbiqutious()
 {
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
@@ -266,13 +277,23 @@ void SmoothNeighbours::findNeighboursRadius()
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
+  //Get the use radius flag.
+  bool useRadius = getProperty("ProvideRadius");
+  int nNeighbours = getProperty("NumberOfNeighbours");
 
   // Go through every input workspace pixel
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
   {
     specid_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
-    std::map<specid_t, double> neighbSpectra = inWS->getNeighbours(inSpec, Radius);
-
+    std::map<specid_t, double> neighbSpectra;
+    if(useRadius)
+    {
+      neighbSpectra = inWS->getNeighbours(inSpec, Radius);
+    }
+    else
+    {
+      neighbSpectra = inWS->getNeighboursExact(inSpec, nNeighbours);
+    }
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0
     neighbSpectra[inSpec] = 0.0;
@@ -338,15 +359,16 @@ void SmoothNeighbours::exec()
 
   // Get the input workspace
   inWS = getProperty("InputWorkspace");
-
+  
   // Progress reporting, first for the sorting
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Collect the neighbours with either method.
-  if (Radius <= 0.0)
+  bool useRadius = getProperty("ProvideRadius");
+  if (Radius <= 0.0 && useRadius)
     findNeighboursRectangular();
   else
-    findNeighboursRadius();
+    findNeighboursUbiqutious();
 
   // Find the right method to exec
   EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
@@ -367,10 +389,20 @@ void SmoothNeighbours::exec()
 /** Execute the algorithm for a Workspace2D/don't preserve events input */
 void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 {
+  /*
+  Note that there is an issue with using managed workspaces with this algorithm see issue 4075.
+  */
+  if(!ws->threadSafe())
+  {
+    throw std::invalid_argument("This algorithm does not work for ManagedWorkspaces.");
+  }
+
+
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   //Get some stuff from the input workspace
   const size_t numberOfSpectra = inWS->getNumberHistograms();
+  
   const size_t YLength = inWS->blocksize();
 
   MatrixWorkspace_sptr outWS;
@@ -393,6 +425,8 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
     MantidVec & outY = outSpec->dataY();
     // We will temporarily carry the squared error
     MantidVec & outE = outSpec->dataE();
+    // tmp to carry the X Data.
+    MantidVec & outX = outSpec->dataX();
 
     // Which are the neighbours?
     std::vector< weightedNeighbour > & neighbours = m_neighbours[outWI];
@@ -404,6 +438,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
       const MantidVec & inY = ws->readY(inWI);
       const MantidVec & inE = ws->readE(inWI);
+      const MantidVec & inX = ws->readX(inWI);
 
       for (size_t i=0; i<YLength; i++)
       {
@@ -414,6 +449,11 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
         errorSquared *= errorSquared;
         errorSquared *= weight;
         outE[i] += errorSquared;
+        outX[i] = inX[i];
+      }
+      if(ws->isHistogramData())
+      {
+        outX[YLength] = inX[YLength];
       }
     } //(each neighbour)
 

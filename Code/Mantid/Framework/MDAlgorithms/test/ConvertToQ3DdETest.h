@@ -87,7 +87,7 @@ void testExecFailsOnNewWorkspaceNoMaxLimits(){
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMin", "-50.,-50.,-50,-2"));
 
     pAlg->execute();
     TSM_ASSERT("Should fail as no max limits were specied ",!pAlg->isExecuted());
@@ -102,8 +102,8 @@ void testExecFailsLimits_MinGeMax(){
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxQdE_values", " 50., 50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMin", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMax", " 50., 50.,-50,-2"));
 
     pAlg->execute();
     TSM_ASSERT("Should fail as no max limits were specied ",!pAlg->isExecuted());
@@ -122,8 +122,8 @@ void testExecFine(){
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxQdE_values", " 50., 50., 50, 20"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMin", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMax", " 50., 50., 50, 20"));
 
     pAlg->execute();
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
@@ -145,8 +145,8 @@ void testExecAndAdd(){
     TSM_ASSERT_THROWS_NOTHING("the inital is not in the units of energy transfer",pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinQdE_values", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxQdE_values", " 50., 50., 50, 20"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMin", "-50.,-50.,-50,-2"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMax", " 50., 50., 50, 20"));
 
 
     pAlg->execute();
