@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
+	src/ArrayLengthValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
@@ -91,6 +92,7 @@ set ( INC_FILES
 	inc/MantidKernel/ANN/ANNperf.h
 	inc/MantidKernel/ANN/ANNx.h
 	inc/MantidKernel/ArrayBoundedValidator.h
+	inc/MantidKernel/ArrayLengthValidator.h
 	inc/MantidKernel/ArrayProperty.h
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
@@ -180,14 +182,15 @@ set ( INC_FILES
 	inc/MantidKernel/V2D.h
 	inc/MantidKernel/V3D.h
 	inc/MantidKernel/VMD.h
+	inc/MantidKernel/ValidatorSignalChange.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
-	inc/MantidKernel/ValidatorSignalChange.h
 )
 
 set ( TEST_FILES
 	test/ArrayBoundedValidatorTest.h
+	test/ArrayLengthValidatorTest.h
 	test/ArrayPropertyTest.h
 	test/AtomTest.h
 	test/BinFinderTest.h
@@ -256,9 +259,9 @@ set ( TEST_FILES
 	test/V2DTest.h
 	test/V3DTest.h
 	test/VMDTest.h
+	test/ValidatorSignalChangeTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
-	test/ValidatorSignalChangeTest.h
 )
 
 if(UNITY_BUILD)
