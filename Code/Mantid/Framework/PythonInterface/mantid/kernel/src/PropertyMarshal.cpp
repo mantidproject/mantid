@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidPythonInterface/kernel/PropertyHandler.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <boost/python/extract.hpp>
 

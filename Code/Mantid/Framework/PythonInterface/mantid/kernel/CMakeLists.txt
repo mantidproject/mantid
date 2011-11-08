@@ -14,14 +14,18 @@ set ( EXPORT_FILES
 
 set ( SRC_FILES
   src/PropertyMarshal.cpp
+  src/SequenceTypeHandler.cpp
+  src/VectorDelegate.cpp
   src/WrapperHelpers.cpp
 )
 
 set ( INC_FILES 
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
+  ${HEADER_DIR}/kernel/PropertyHandler.h
   ${HEADER_DIR}/kernel/PropertyMarshal.h
   ${HEADER_DIR}/kernel/SingleValueTypeHandler.h
+  ${HEADER_DIR}/kernel/VectorDelegate.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
 
