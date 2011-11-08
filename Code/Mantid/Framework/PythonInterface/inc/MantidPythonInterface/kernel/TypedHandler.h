@@ -51,7 +51,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<DerivedType> extractor(value);
@@ -81,7 +81,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<std::string> extractor(value);
@@ -121,7 +121,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<int> extractor(value);
