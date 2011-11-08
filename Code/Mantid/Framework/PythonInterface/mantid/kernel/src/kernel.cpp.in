@@ -2,10 +2,10 @@
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/numeric.hpp>
 
-#include "MantidPythonInterface/kernel/TypedHandler.h"
+#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 
 using namespace Mantid::PythonInterface;
-using PropertyMarshal::TypedHandler;
+using PropertyMarshal::SingleValueTypeHandler;
 
 // Forward declare
 @EXPORT_DECLARE@
@@ -18,10 +18,10 @@ BOOST_PYTHON_MODULE(_kernel)
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
   
   // Map builtin type objects to appropriate handler classes for properties
-  PropertyMarshal::registerHandler(&PyInt_Type, new TypedHandler<int>());
-  PropertyMarshal::registerHandler(&PyBool_Type, new TypedHandler<bool>());
-  PropertyMarshal::registerHandler(&PyFloat_Type, new TypedHandler<double>());
-  PropertyMarshal::registerHandler(&PyString_Type, new TypedHandler<std::string>());
+  PropertyMarshal::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
+  PropertyMarshal::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
+  PropertyMarshal::registerHandler(&PyFloat_Type, new SingleValueTypeHandler<double>());
+  PropertyMarshal::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
 
 @EXPORT_FUNCTIONS@
 }

@@ -19,12 +19,13 @@ except:
     HAS_MANTID = False    
 
 class DataSet(object):
-    def __init__(self, run_number, title, run_start, duration, ssd):
+    TABLE_NAME = "dataset"
+    def __init__(self, run_number, title, run_start, duration, sdd):
         self.run_number = run_number
         self.title = title
         self.run_start = run_start
         self.duration = duration
-        self.ssd = ssd
+        self.sdd = sdd
         
     @classmethod
     def header(cls):
@@ -55,19 +56,19 @@ class DataSet(object):
         """
             Pretty print the current data set attributes
         """
-        return "%-6s %-60s %-16s %-7g %-10.0f" % (self.run_number, self.title, self.run_start, self.duration, self.ssd)
+        return "%-6s %-60s %-16s %-7g %-10.0f" % (self.run_number, self.title, self.run_start, self.duration, self.sdd)
     
     def as_list(self):
         """
             Return a list of data set attributes
         """
-        return (self.run_number, self.title, self.run_start, self.duration, self.ssd)
+        return (self.run_number, self.title, self.run_start, self.duration, self.sdd)
     
     def as_string_list(self):
         """
             Return a list of data set attributes as strings
         """
-        return (str(self.run_number), self.title, self.run_start, "%-g"%self.duration, "%-10.0f"%self.ssd)
+        return (str(self.run_number), self.title, self.run_start, "%-g"%self.duration, "%-10.0f"%self.sdd)
     
     @classmethod
     def find(cls, file_path, cursor, process_files=True):
@@ -79,7 +80,7 @@ class DataSet(object):
             return None
         
         t = (run,)
-        cursor.execute('select * from dataset where run=?', t)
+        cursor.execute('select * from %s where run=?'% cls.TABLE_NAME, t)
         rows = cursor.fetchall()
 
         if len(rows) == 0:
@@ -93,7 +94,20 @@ class DataSet(object):
                 return None
         else:
             row = rows[0]
-            return DataSet(row[0], row[1], row[2], row[3], row[4])
+            return DataSet(row[1], row[2], row[3], row[4], row[5])
+        
+    @classmethod
+    def create_table(cls, cursor):
+        cursor.execute("""create table if not exists %s (
+                            id integer primary key, 
+                            run text unique, 
+                            title text, 
+                            start text, 
+                            duration real, sdd real)""" % cls.TABLE_NAME)
+
+    def insert_in_db(self, cursor):
+        t = (self.run_number, self.title, self.run_start, self.duration, self.sdd)
+        cursor.execute('insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)'%self.TABLE_NAME, t)
 
 class DataCatalog(object):
     """
@@ -102,7 +116,7 @@ class DataCatalog(object):
     extension = "nxs"
     data_set_cls = DataSet
     
-    def __init__(self, replace_db=False):
+    def __init__(self, replace_db=True):
         ## List of data sets
         self.catalog = []
         
@@ -123,20 +137,15 @@ class DataCatalog(object):
         """
             Create the database if we need to
         """
-        self.db_exists = False
         if os.path.isfile(db_path):
             if replace_db:
                 os.remove(db_path)
-            else: 
-                self.db_exists = True
                 
         self.db = sqlite3.connect(db_path)
         cursor = self.db.cursor()
-        
-        if not self.db_exists:
-            cursor.execute("""create table dataset (run text, title text, start text, duration real, ssd real)""")
-            self.db.commit()
-            cursor.close()
+        self.data_set_cls.create_table(cursor)
+        self.db.commit()
+        cursor.close()
         
     def __str__(self):
         """
@@ -206,5 +215,3 @@ class DataCatalog(object):
                 mtd.sendLogMessage("DataCatalog: Error working with the local data catalog\n%s" % sys.exc_value)
             else:
                 raise
-        
-        self.db_exists = True

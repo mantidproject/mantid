@@ -242,7 +242,7 @@ namespace MantidQt
     {
       try
       {
-        return  alg->getProperty("isValid");
+        return  alg->getProperty("IsValid");
       }
       catch (Mantid::Kernel::Exception::NotFoundError&e)
       {

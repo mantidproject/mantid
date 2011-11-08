@@ -54,7 +54,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinD","8.0") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MaxD","13.0") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("NumInitial","20") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("tolerance","0.15") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerance","0.15") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 

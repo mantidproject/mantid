@@ -1,19 +1,18 @@
-#ifndef MANTID_MDALGORITHMS_UNARYOPERATIONMD_H_
-#define MANTID_MDALGORITHMS_UNARYOPERATIONMD_H_
+#ifndef MANTID_MDALGORITHMS_POWERMD_H_
+#define MANTID_MDALGORITHMS_POWERMD_H_
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/UnaryOperationMD.h"
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
-  /** Abstract base class for unary operations (e.g. Log or Exp)
-   * on MDWorkspaces.
+  /** PowerMD : raise a MDHistoWorkspace to a power.
+    
+    @date 2011-11-08
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,46 +34,27 @@ namespace MDAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport UnaryOperationMD  : public API::Algorithm
+  class DLLExport PowerMD  : public UnaryOperationMD
   {
   public:
-    UnaryOperationMD();
-    ~UnaryOperationMD();
-
+    PowerMD();
+    virtual ~PowerMD();
+    
     virtual const std::string name() const;
     virtual int version() const;
-    virtual const std::string category() const;
 
-  protected:
-    /// The name of the input workspace property
-    virtual const std::string inputPropName() const { return "InputWorkspace";}
-    /// The name of the output workspace property
-    virtual const std::string outputPropName() const { return "OutputWorkspace";}
-
-    void init();
+  private:
+    virtual void initDocs();
     virtual void initExtraProperties();
-    void exec();
 
     /// Check the inputs and throw if the algorithm cannot be run
-    virtual void checkInputs() = 0;
+    void checkInputs();
 
     /// Run the algorithm on a MDEventWorkspace
-    virtual void execEvent(Mantid::API::IMDEventWorkspace_sptr out) = 0;
+    void execEvent(Mantid::API::IMDEventWorkspace_sptr out);
 
     /// Run the algorithm with a MDHistoWorkspace
-    virtual void execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) = 0;
-
-    /// Input workspace
-    Mantid::API::IMDWorkspace_sptr m_in;
-
-    /// Input workspace (MDEvent)
-    Mantid::API::IMDEventWorkspace_sptr m_in_event;
-
-    /// Input workspace (MDHisto)
-    Mantid::MDEvents::MDHistoWorkspace_sptr m_in_histo;
-
-    /// Output workspace
-    Mantid::API::IMDWorkspace_sptr m_out;
+    void execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out);
 
   };
 
@@ -82,4 +62,4 @@ namespace MDAlgorithms
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_UNARYOPERATIONMD_H_ */
+#endif  /* MANTID_MDALGORITHMS_POWERMD_H_ */

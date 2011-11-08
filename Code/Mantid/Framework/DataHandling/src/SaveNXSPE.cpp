@@ -81,10 +81,10 @@ namespace Mantid
           "Value of the fixed energy to write into NXSPE file.");
       // if the value is not set, one should better have it invalid, e.g. NaN
       NullValidator<double> *numberValidator = new NullValidator<double> ();
-      declareProperty("psi", SaveNXSPE::MASK_FLAG, numberValidator,
+      declareProperty("Psi", SaveNXSPE::MASK_FLAG, numberValidator,
           "Value of PSI to write into NXSPE file.");
 
-      declareProperty("ki_over_kf_scaling", true,
+      declareProperty("KiOverKfScaling", true,
           "Flags in the file whether Ki/Kf scaling has been done or not.");
 
 // optional par or phx file
@@ -166,23 +166,23 @@ namespace Mantid
       nxFile.putAttr("units", "meV");
       nxFile.closeData();
 
-      double psi = getProperty("psi");
+      double psi = getProperty("Psi");
       if (psi != EMPTY_DBL())
         {
-          nxFile.writeData("psi", psi);
-          nxFile.openData("psi");
+          nxFile.writeData("Psi", psi);
+          nxFile.openData("Psi");
           nxFile.putAttr("units", "degrees");
           nxFile.closeData();
         }
 
-      bool kikfScaling = getProperty("ki_over_kf_scaling");
+      bool kikfScaling = getProperty("KiOverKfScaling");
       if (kikfScaling)
         {
-           nxFile.writeData("ki_over_kf_scaling", 1);
+           nxFile.writeData("KiOverKfScaling", 1);
         }
       else
         {
-           nxFile.writeData("ki_over_kf_scaling", 0);
+           nxFile.writeData("KiOverKfScaling", 0);
         }
 
       nxFile.closeGroup(); // NXSPE_info

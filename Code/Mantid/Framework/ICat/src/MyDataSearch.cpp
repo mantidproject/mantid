@@ -26,7 +26,7 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
           "The name of the workspace to store the result of MyData search ");
-      declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);
+      declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Direction::Output);
     }
 
     /// Execution method.
@@ -56,7 +56,7 @@ namespace Mantid
       }
       catch(SessionException& e)
       {
-        setProperty("isValid",false);
+        setProperty("IsValid",false);
         throw std::runtime_error(e.what());
       }
       setProperty("OutputWorkspace",outputws);

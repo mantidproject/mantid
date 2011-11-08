@@ -66,6 +66,7 @@ namespace MDEvents
   MDEventWorkspace)::~MDEventWorkspace()
   {
     delete data;
+	m_BoxController->closeFile();
   }
 
 

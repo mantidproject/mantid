@@ -362,6 +362,22 @@ public:
 
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadEventNexusTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
 
 #endif /*LOADEVENTNEXUSTEST_H_*/
 
