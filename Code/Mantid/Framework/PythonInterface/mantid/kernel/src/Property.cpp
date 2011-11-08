@@ -1,5 +1,4 @@
 #include "MantidKernel/Property.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -35,16 +34,4 @@ void export_Property()
     .add_property("units", &Mantid::Kernel::Property::units, "The units attached to this property")
     .add_property("is_default", &Mantid::Kernel::Property::isDefault, "Is the property set at the default value")
    ;
-}
-
-/**
- * I see know way around explicitly declaring each we use
- */
-void export_PropertyWithValue()
-{
-  // See MantidPythonInterface/kernel/PropertyWithValue.h for macro definition
-  EXPORT_PROP_W_VALUE(int);
-  EXPORT_PROP_W_VALUE(double);
-  EXPORT_PROP_W_VALUE(bool);
-  EXPORT_PROP_W_VALUE(std::string);
 }

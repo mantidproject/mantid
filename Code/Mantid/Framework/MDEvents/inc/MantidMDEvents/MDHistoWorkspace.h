@@ -66,22 +66,41 @@ namespace MDEvents
 
     // --------------------------------------------------------------------------------------------
     MDHistoWorkspace & operator+=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator+=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void add(const MDHistoWorkspace & b);
+    void add(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator-=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator-=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void subtract(const MDHistoWorkspace & b);
+    void subtract(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator*=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator*=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void multiply(const MDHistoWorkspace & b);
+    void multiply(const signal_t signal, const signal_t error);
 
     MDHistoWorkspace & operator/=(const MDHistoWorkspace & b);
-    MDHistoWorkspace & operator/=(const Mantid::DataObjects::WorkspaceSingleValue & b);
+    void divide(const MDHistoWorkspace & b);
+    void divide(const signal_t signal, const signal_t error);
 
+    void log(double filler = 0.0);
+    void log10(double filler = 0.0);
+    void exp();
+    void power(double exponent);
+
+    // --------------------------------------------------------------------------------------------
     MDHistoWorkspace & operator&=(const MDHistoWorkspace & b);
     MDHistoWorkspace & operator|=(const MDHistoWorkspace & b);
     MDHistoWorkspace & operator^=(const MDHistoWorkspace & b);
-
     void operatorNot();
+
+    void lessThan(const MDHistoWorkspace & b);
+    void lessThan(const signal_t signal);
+    void greaterThan(const MDHistoWorkspace & b);
+    void greaterThan(const signal_t signal);
+    void equalTo(const MDHistoWorkspace & b, const signal_t tolerance=1e-5);
+    void equalTo(const signal_t signal, const signal_t tolerance=1e-5);
+
+    void setUsingMask(const MDHistoWorkspace & mask, const MDHistoWorkspace & values);
+    void setUsingMask(const MDHistoWorkspace & mask, const signal_t signal, const signal_t error);
 
 
 

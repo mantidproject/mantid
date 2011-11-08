@@ -5,15 +5,15 @@
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
-  /** Sum to MDWorkspaces together.
+  /** Sum two MDWorkspaces together.
     
-    @author Janik Zikovsky
     @date 2011-08-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -36,26 +36,35 @@ namespace MDAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PlusMD  : public API::Algorithm
+  class DLLExport PlusMD  : public BinaryOperationMD
   {
   public:
     PlusMD();
-    ~PlusMD();
+    virtual ~PlusMD();
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "PlusMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "Arithmetic";}
     
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
-    /// Initialise the properties
-    void init();
-    /// Run the algorithm
-    void exec();
+
+    /// Is the operation commutative?
+    bool commutative() const;
+
+    /// Check the inputs and throw if the algorithm cannot be run
+    void checkInputs();
+
+    /// Run the algorithm with an MDEventWorkspace as output
+    void execEvent();
+
+    /// Run the algorithm with a MDHisotWorkspace as output and operand
+    void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+
+    /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
+    void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 
     template<typename MDE, size_t nd>
     void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);

@@ -83,7 +83,7 @@ namespace Crystal
           atLeast3Int,Direction::Input), 
           "Number of Peaks to Use on First Pass(20)");
 
-    this->declareProperty(new PropertyWithValue<double>( "tolerance",0.15,
+    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
           mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");
   }
 
@@ -95,7 +95,7 @@ namespace Crystal
     double min_d       = this->getProperty("MinD");
     double max_d       = this->getProperty("MaxD");
     int    num_initial = this->getProperty("NumInitial");
-    double tolerance   = this->getProperty("tolerance");
+    double tolerance   = this->getProperty("Tolerance");
                                           
     int    base_index         = -1;   // these "could" be properties if need be
     double degrees_per_step   =  1;
