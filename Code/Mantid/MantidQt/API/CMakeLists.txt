@@ -46,6 +46,10 @@ set ( MOC_FILES inc/MantidQtAPI/AlgorithmDialog.h
 set ( UI_FILES inc/MantidQtAPI/ManageUserDirectories.ui 
 )
 
+set( TEST_FILES
+               test/MantidColorMapTest.h
+)
+
 include_directories ( inc )
 include_directories ( ../MantidWidgets/inc )
 include_directories ( ../MantidWidgets )
@@ -65,6 +69,24 @@ ADD_PRECOMPILED_HEADER( inc/MantidQtAPI/PrecompiledHeader.h MantidQtAPI src/Prec
 add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+
+###########################################################################
+# Testing
+###########################################################################
+
+if ( CXXTEST_FOUND )
+  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+    target_link_libraries( MantidQtAPITest MantidQtAPI ${MANTIDLIBS}
+         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
+         TestHelpers DataObjects)
+    add_dependencies( FrameworkTests MantidQtAPITest )
+    # Add to the 'UnitTests' group in VS
+    set_property( TARGET MantidQtAPITest PROPERTY FOLDER "UnitTests" )
+  endif ()
+endif ()
+
 
 ###########################################################################
 # Installation settings
