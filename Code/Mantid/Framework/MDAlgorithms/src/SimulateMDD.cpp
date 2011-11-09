@@ -47,18 +47,18 @@ namespace Mantid
             // may have different backgrounds for different cuts, which will require an extension
             // 
             declareProperty("ForegroundModel","",Direction::Input );
-            declareProperty("ForegroundModel_p1",0.0, "First param of bg model", Direction::Input);
-            declareProperty("ForegroundModel_p2",0.0, "Second param of bg model", Direction::Input);
-            declareProperty("ForegroundModel_p3",0.0, "Third param of bg model", Direction::Input);
+            declareProperty("ForegroundModelP1",0.0, "First param of bg model", Direction::Input);
+            declareProperty("ForegroundModelP2",0.0, "Second param of bg model", Direction::Input);
+            declareProperty("ForegroundModelP3",0.0, "Third param of bg model", Direction::Input);
             declareProperty("BackgroundModel","",Direction::Input );
-            declareProperty("BackgroundModel_p1",0.0, "Background bp1", Direction::Input);
-            declareProperty("BackgroundModel_p2",0.0, "Background bp2", Direction::Input);
-            declareProperty("BackgroundModel_p3",0.0, "Background bp3", Direction::Input);
-            declareProperty("BackgroundModel_p4",0.0, "Background bp4", Direction::Input);
-            declareProperty("BackgroundModel_p5",0.0, "Background bp5", Direction::Input);
-            declareProperty("BackgroundModel_p6",0.0, "Background bp6", Direction::Input);
-            declareProperty("BackgroundModel_p7",0.0, "Background bp7", Direction::Input);
-            declareProperty("BackgroundModel_p8",0.0, "Background bp8", Direction::Input);
+            declareProperty("BackgroundModelP1",0.0, "Background bp1", Direction::Input);
+            declareProperty("BackgroundModelP2",0.0, "Background bp2", Direction::Input);
+            declareProperty("BackgroundModelP3",0.0, "Background bp3", Direction::Input);
+            declareProperty("BackgroundModelP4",0.0, "Background bp4", Direction::Input);
+            declareProperty("BackgroundModelP5",0.0, "Background bp5", Direction::Input);
+            declareProperty("BackgroundModelP6",0.0, "Background bp6", Direction::Input);
+            declareProperty("BackgroundModelP7",0.0, "Background bp7", Direction::Input);
+            declareProperty("BackgroundModelP8",0.0, "Background bp8", Direction::Input);
             // In future, should be a new MDData workspace with the simulated results
             declareProperty("OutputMDWorkspace","",Direction::Output);
             declareProperty("Residual", -1.0, Direction::Output);
@@ -68,19 +68,19 @@ namespace Mantid
         {
             std::string inputMDwrkspc = getProperty("InputMDWorkspace");
             std::string bgmodel = getProperty("BackgroundModel");
-            const double bgparaP1 = getProperty("BackgroundModel_p1");
-            const double bgparaP2 = getProperty("BackgroundModel_p2");
-            const double bgparaP3 = getProperty("BackgroundModel_p3");
-            const double bgparaP4 = getProperty("BackgroundModel_p4");
-            const double bgparaP5 = getProperty("BackgroundModel_p5");
-            const double bgparaP6 = getProperty("BackgroundModel_p6");
-            const double bgparaP7 = getProperty("BackgroundModel_p7");
-            const double bgparaP8 = getProperty("BackgroundModel_p8");
+            const double bgparaP1 = getProperty("BackgroundModelP1");
+            const double bgparaP2 = getProperty("BackgroundModelP2");
+            const double bgparaP3 = getProperty("BackgroundModelP3");
+            const double bgparaP4 = getProperty("BackgroundModelP4");
+            const double bgparaP5 = getProperty("BackgroundModelP5");
+            const double bgparaP6 = getProperty("BackgroundModelP6");
+            const double bgparaP7 = getProperty("BackgroundModelP7");
+            const double bgparaP8 = getProperty("BackgroundModelP8");
 
             std::string fgmodel = getProperty("ForegroundModel");
-            const double fgparaP1 = getProperty("ForegroundModel_p1");
-            const double fgparaP2 = getProperty("ForegroundModel_p2");
-            const double fgparaP3 = getProperty("ForegroundModel_p3");
+            const double fgparaP1 = getProperty("ForegroundModelP1");
+            const double fgparaP2 = getProperty("ForegroundModelP2");
+            const double fgparaP3 = getProperty("ForegroundModelP3");
             std::string inputMDoutput = getProperty("OutputMDWorkspace");
 
             //boost::shared_ptr<Mantid::API::Workspace> inputWS = getProperty("InputWorkspaceTMP");

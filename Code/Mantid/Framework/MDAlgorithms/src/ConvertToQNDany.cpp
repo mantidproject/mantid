@@ -146,12 +146,12 @@ ConvertToQNDany::init()
     ////declareProperty(new ArrayProperty<double>("v"), "second base vecotors");
 
 
-    // declareProperty(new ArrayProperty<double>("MinQdE_values"),
+    // declareProperty(new ArrayProperty<double>("QdEValuesMin"),
     //     "An array containing minimal values for Q[A^-1] and energy transfer[meV] in a form qx_min,qy_min,qz_min, dE min\n"
     //     "(momentum and energy transfer values lower that this one will be ignored if this is set.\n"
     //     " If a minimal output workspace range is higer then specified, the workspace range will be used intstead)" );
 
-    // declareProperty(new ArrayProperty<double>("MaxQdE_values"),
+    // declareProperty(new ArrayProperty<double>("QdEValuesMax"),
     //     "An array containing maximal values for Q[A^-1] and energy transfer[meV] in a form qx_max,qy_max,qz_max, dE_max\n"
     //     "(momentum and energy transfer values higher that this one will be ignored if this is set.\n"
     //     " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
