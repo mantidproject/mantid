@@ -1,7 +1,9 @@
 # GLOBs should be replaced with explicit listings
 set ( SRC_FILES
 	# src/CreateMDFitWorkspace.cpp
+	src/AndMD.cpp
 	src/BinaryOperationMD.cpp
+	src/BooleanBinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompositeFunctionBuilder.cpp
 	src/CompositeImplicitFunction.cpp
@@ -9,13 +11,21 @@ set ( SRC_FILES
 	src/ConvertToQ3DdE.cpp
 	src/ConvertToQNDany.cpp
 	src/DivideMD.cpp
+	src/EqualToMD.cpp
+	src/ExponentialMD.cpp
+	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
+	src/LessThanMD.cpp
+	src/LogarithmMD.cpp
 	src/MinusMD.cpp
 	src/MultiplyMD.cpp
+	src/NotMD.cpp
 	src/NullImplicitFunction.cpp
+	src/OrMD.cpp
 	src/PlusMD.cpp
+	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
 	src/RunParam.cpp
 	src/SimulateMDD.cpp
@@ -23,6 +33,7 @@ set ( SRC_FILES
 	src/TobyFitSimulate.cpp
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
+	src/XorMD.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -30,7 +41,9 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+	inc/MantidMDAlgorithms/AndMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
+	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
@@ -38,13 +51,21 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/ConvertToQNDany.h
 	inc/MantidMDAlgorithms/DivideMD.h
+	inc/MantidMDAlgorithms/EqualToMD.h
+	inc/MantidMDAlgorithms/ExponentialMD.h
+	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
+	inc/MantidMDAlgorithms/LessThanMD.h
+	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MinusMD.h
 	inc/MantidMDAlgorithms/MultiplyMD.h
+	inc/MantidMDAlgorithms/NotMD.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
+	inc/MantidMDAlgorithms/OrMD.h
 	inc/MantidMDAlgorithms/PlusMD.h
+	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
@@ -53,6 +74,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
+	inc/MantidMDAlgorithms/XorMD.h
 )
 
 # Test files. Other source files required.
@@ -61,18 +83,29 @@ set ( TEST_FILES
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	#test/QuadEnBackgroundTest.h
+	test/AndMDTest.h
+	test/BooleanBinaryOperationMDTest.h
 	test/ConvertToQ3DdETest.h
 	test/ConvertToQNDanyTest.h
 	test/DivideMDTest.h
+	test/EqualToMDTest.h
+	test/ExponentialMDTest.h
+	test/GreaterThanMDTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
+	test/LessThanMDTest.h
+	test/LogarithmMDTest.h
 	test/MinusMDTest.h
 	test/MultiplyMDTest.h
+	test/NotMDTest.h
+	test/OrMDTest.h
 	test/PlusMDTest.h
+	test/PowerMDTest.h
 	test/RunParamTest.h
 	test/SimulateMDDTest.h
 	test/TobyFitSimulateTest.h
 	test/UnaryOperationMDTest.h
+	test/XorMDTest.h
 )
 
 set ( GMOCK_TEST_FILES

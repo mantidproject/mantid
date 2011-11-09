@@ -78,6 +78,7 @@ namespace MDAlgorithms
     virtual std::string outputPropName() const { return "OutputWorkspace";}
 
     void init();
+    virtual void initExtraProperties();
     virtual void exec();
 
     /// LHS workspace

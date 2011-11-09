@@ -293,7 +293,7 @@ public:
     EventWorkspace_sptr chunk1 = boost::dynamic_pointer_cast<EventWorkspace>
             (AnalysisDataService::Instance().retrieve("chunk1"));
 
-    // Load chunk 2 of 10
+    // Load chunk 2 of 2
     eventLoader->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("ChunkNumber","2");
     eventLoader->setPropertyValue("TotalChunks","2");
@@ -307,6 +307,23 @@ public:
     TS_ASSERT_EQUALS( chunk2->getNumberEvents(), 56127 )
   }
 
+};
+
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadEventPreNexusTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadEventPreNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
 };
 
 #endif /* LOADEVENTPRENEXUSTEST_H_ */

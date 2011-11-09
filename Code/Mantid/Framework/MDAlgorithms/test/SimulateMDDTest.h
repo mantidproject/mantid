@@ -213,9 +213,9 @@ public:
         alg.setPropertyValue("InputMDWorkspace",FakeWSname);
         alg.setPropertyValue("OutputMDWorkspace","test_out1");
         alg.setPropertyValue("BackgroundModel","QuadEnTrans");
-        alg.setPropertyValue("BackgroundModel_p1", "1.0" );
-        alg.setPropertyValue("BackgroundModel_p2", "0.1" );
-        alg.setPropertyValue("BackgroundModel_p3", "0.01" );
+        alg.setPropertyValue("BackgroundModelP1", "1.0" );
+        alg.setPropertyValue("BackgroundModelP2", "0.1" );
+        alg.setPropertyValue("BackgroundModelP3", "0.01" );
         alg.setPropertyValue("ForegroundModel","Simple cubic Heisenberg FM spin waves, DSHO, uniform damping");
         TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -231,9 +231,9 @@ public:
 
         // test bg Exponential model in energy transfer with same data
         alg.setPropertyValue("BackgroundModel","ExpEnTrans");
-        alg.setPropertyValue("BackgroundModel_p1", "1.0" );
-        alg.setPropertyValue("BackgroundModel_p2", "1.0" );
-        alg.setPropertyValue("BackgroundModel_p3", "-0.5" );
+        alg.setPropertyValue("BackgroundModelP1", "1.0" );
+        alg.setPropertyValue("BackgroundModelP2", "1.0" );
+        alg.setPropertyValue("BackgroundModelP3", "-0.5" );
         TS_ASSERT_THROWS_NOTHING(alg.execute());
 
         // Test output of model

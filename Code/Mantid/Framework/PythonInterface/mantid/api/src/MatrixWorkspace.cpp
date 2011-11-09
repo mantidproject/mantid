@@ -1,7 +1,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/TypedHandler.h"
+#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -21,12 +21,12 @@ void export_MatrixWorkspace()
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     ;
 
-  DECLARE_TYPEHANDLER(MatrixWorkspace, DataItem_sptr);
+  DECLARE_SINGLEVALUETYPEHANDLER(MatrixWorkspace, DataItem_sptr);
 }
 
 void export_MatrixWorkspaceProperty()
 {
-  EXPORT_PROP_W_VALUE(MatrixWorkspace_sptr);
+  EXPORT_PROP_W_VALUE(MatrixWorkspace_sptr, MatrixWorkspace);
   register_ptr_to_python<WorkspaceProperty<MatrixWorkspace>*>();
   class_<WorkspaceProperty<MatrixWorkspace>, bases<PropertyWithValue<MatrixWorkspace_sptr>,IWorkspaceProperty>,
          boost::noncopyable>("WorkspaceProperty_MatrixWorkspace", no_init)

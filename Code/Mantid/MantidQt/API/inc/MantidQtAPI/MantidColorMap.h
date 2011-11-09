@@ -65,6 +65,8 @@ public:
   /// Load a color map file
   bool loadMap(const QString & filename);
   
+  void setNanColor(int r, int g, int b);
+
   /// Setup a default color map. This is used if a file is not available
   void setupDefaultMap();
   
@@ -108,6 +110,9 @@ private:
 
   /// The number of colors in this map
   short m_num_colors;
+
+  /// Color to show for not-a-number
+  QRgb m_nan_color;
 
 };
 

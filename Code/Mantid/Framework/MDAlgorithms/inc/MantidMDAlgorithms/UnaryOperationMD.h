@@ -52,6 +52,7 @@ namespace MDAlgorithms
     virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
     void init();
+    virtual void initExtraProperties();
     void exec();
 
     /// Check the inputs and throw if the algorithm cannot be run
