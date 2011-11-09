@@ -36,16 +36,6 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   //m_colorBar->setCursor(Qt::OpenHandCursor);
   ui.verticalLayout->insertWidget(2,m_colorBar, 1,0 );
 
-
-//  QwtPlot * plot = new QwtPlot(this);
-//  plot->enableAxis( QwtPlot::xBottom, false);
-//  plot->enableAxis( QwtPlot::yLeft, false);
-//  plot->enableAxis( QwtPlot::yRight, true);
-//  plot->axisScaleDraw(QwtPlot::yRight)->
-//  plot->setAxisScale(QwtPlot::yRight, 0, 1e12);
-//  ui.verticalLayout->insertWidget(2,plot, 1,0 );
-
-
   // Hook up signals
   QObject::connect(ui.checkLog, SIGNAL(stateChanged(int)), this, SLOT(changedLogState(int)));
   QObject::connect(ui.valMin, SIGNAL(editingFinished()), this, SLOT(changedMinimum()));
