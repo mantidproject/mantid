@@ -16,6 +16,7 @@ set ( EXPORT_FILES
 )  
 
 set ( SRC_FILES
+  src/NumpyTypeHandler.cpp
   src/PropertyMarshal.cpp
   src/SequenceTypeHandler.cpp
   src/VectorDelegate.cpp
@@ -23,6 +24,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES 
+  ${HEADER_DIR}/kernel/NumpyTypeHandler.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PropertyHandler.h

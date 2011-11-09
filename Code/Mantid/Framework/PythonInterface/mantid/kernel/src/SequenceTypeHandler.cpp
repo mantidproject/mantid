@@ -37,12 +37,12 @@ namespace Mantid
           const std::type_info * propTypeInfo = prop->type_info();
           if( typeid(std::vector<int>) == *propTypeInfo )
           {
-            std::vector<int> propValues = VectorDelegate<int>::toStdVector(value.ptr());
+            std::vector<int> propValues = VectorDelegate::toStdVector<int>(value.ptr());
             alg->setProperty(name, propValues);
           }
           else if( typeid(std::vector<size_t>) == *propTypeInfo )
           {
-            std::vector<size_t> propValues = VectorDelegate<size_t>::toStdVector(value.ptr());
+            std::vector<size_t> propValues = VectorDelegate::toStdVector<size_t>(value.ptr());
             alg->setProperty(name, propValues);
           }
           else
@@ -52,7 +52,7 @@ namespace Mantid
         }
         else if( PyFloat_Check(firstElement) )
         {
-          std::vector<double> propValues = VectorDelegate<double>::toStdVector(value.ptr());
+          std::vector<double> propValues = VectorDelegate::toStdVector<double>(value.ptr());
           alg->setProperty(name, propValues);
         }
         else

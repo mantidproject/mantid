@@ -62,3 +62,18 @@ class PropertyWithValueTest(unittest.TestCase):
         values = [2,3,4.0,5,6]
         self.assertRaises(TypeError, self._mask_dets.set_property, "WorkspaceIndexList", values) #size_t
 
+    def _do_numpy_test(self, int_type=False):
+        create_ws = algorithm_mgr.create_unmanaged('CreateWorkspace')
+        create_ws.initialize()
+        if int_type:
+            datax = np.arange(10)
+        else:
+            datax = np.arange(10.0)
+        create_ws.set_property('DataX', datax)
+	x_values = create_ws.get_property('DataX').value
+	self.assertEquals(len(x_values), 10)
+        for i in range(10):
+            self.assertEquals(x_values[i], i)	
+
+    def test_set_property_succeeds_with_numpy_array_of_correct_type(self):
+        self._do_numpy_test()

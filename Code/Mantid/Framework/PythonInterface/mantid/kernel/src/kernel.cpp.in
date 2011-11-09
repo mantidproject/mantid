@@ -1,10 +1,13 @@
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
 
-#include <numpy/arrayobject.h>
-
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 #include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/NumpyTypeHandler.h"
+
+// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#include <numpy/arrayobject.h>
 
 using namespace Mantid::PythonInterface;
 using PropertyMarshal::SingleValueTypeHandler;
@@ -27,7 +30,7 @@ BOOST_PYTHON_MODULE(_kernel)
   PropertyMarshal::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
   PropertyMarshal::registerHandler(&PyList_Type, new SequenceTypeHandler());
   PropertyMarshal::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
-  PropertyMarshal::registerHandler(&PyArray_Type, new SequenceTypeHandler()); // Numpy array
+  PropertyMarshal::registerHandler(&PyArray_Type, new PropertyMarshal::NumpyTypeHandler()); // Numpy array
   
 
 @EXPORT_FUNCTIONS@
