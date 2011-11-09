@@ -8,6 +8,7 @@
 #include <qwt_scale_widget.h>
 #include <QKeyEvent>
 #include <qwt_plot.h>
+#include <qwt_scale_engine.h>
 
 //-------------------------------------------------------------------------------------------------
 /** Constructor */
@@ -21,13 +22,20 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   m_max = 1000;
   m_rangeMin = 0;
   m_rangeMax = 1000;
+  m_showTooltip = false;
   m_log = false;
   m_colorMap.changeScaleType( GraphOptions::Linear );
 
   // Create and add the color bar
   m_colorBar = new QwtScaleWidgetExtended();
   m_colorBar->setToolTip("");
+  m_colorBar->setColorBarEnabled(true);
+  m_colorBar->setColorBarWidth(20);
+  m_colorBar->setAlignment(QwtScaleDraw::RightScale);
+  m_colorBar->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
+  //m_colorBar->setCursor(Qt::OpenHandCursor);
   ui.verticalLayout->insertWidget(2,m_colorBar, 1,0 );
+
 
 //  QwtPlot * plot = new QwtPlot(this);
 //  plot->enableAxis( QwtPlot::xBottom, false);
@@ -81,6 +89,15 @@ void ColorBarWidget::mouseDoubleClickEvent(QMouseEvent * event)
   if (m_colorBar->rect().contains(event->x(), event->y()))
     emit colorBarDoubleClicked();
 }
+
+//-------------------------------------------------------------------------------------------------
+/// Event called after resizing
+void ColorBarWidget::resizeEvent(QResizeEvent * event)
+{
+  updateColorMap();
+  QWidget::resizeEvent(event);
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /** Adjust the steps of the spin boxes for log/linear mode */
@@ -183,6 +200,7 @@ void ColorBarWidget::setLog(bool log)
   ui.valMin->setLogSteps( m_log );
   ui.valMax->setLogSteps( m_log );
   setSpinBoxesSteps();
+  updateColorMap();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -195,6 +213,7 @@ void ColorBarWidget::changedMinimum()
     m_max = m_min+0.001;
     ui.valMax->setValue( m_max );
   }
+  updateColorMap();
   emit changedColorRange(m_min,m_max,m_log);
 }
 
@@ -208,6 +227,7 @@ void ColorBarWidget::changedMaximum()
     m_min = m_max-0.001;
     ui.valMin->setValue( m_min );
   }
+  updateColorMap();
   emit changedColorRange(m_min,m_max,m_log);
 }
 
@@ -215,13 +235,16 @@ void ColorBarWidget::changedMaximum()
 /** SLOT called when the mouse moves over the color bar*/
 void ColorBarWidget::colorBarMouseMoved(QPoint globalPos, double fraction)
 {
-  double val = 0;
-  if (m_log)
-    val = pow(10., fraction * (log10(m_max)-log10(m_min)) + log10(m_min));
-  else
-    val = fraction * (m_max-m_min) + m_min;
-  QString tooltip = QString::number(val,'g', 4);
-  QToolTip::showText(globalPos, tooltip, m_colorBar);
+  if (m_showTooltip)
+  {
+    double val = 0;
+    if (m_log)
+      val = pow(10., fraction * (log10(m_max)-log10(m_min)) + log10(m_min));
+    else
+      val = fraction * (m_max-m_min) + m_min;
+    QString tooltip = QString::number(val,'g', 4);
+    QToolTip::showText(globalPos, tooltip, m_colorBar);
+  }
 }
 
 
@@ -236,12 +259,27 @@ void ColorBarWidget::updateColorMap()
   m_colorBar->setColorBarWidth(15);
   m_colorBar->setEnabled(true);
 
-  QwtScaleDiv scaleDiv;
-  scaleDiv.setInterval(range);
-  if (m_log)
-    m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Log10), scaleDiv);
+  // Try to limit the number of steps based on the height of the color bar
+  int maxMajorSteps = m_colorBar->height()/15; // 15 pixels per div looked about right
+  //std::cout << "maxMajorSteps" << maxMajorSteps << std::endl;
+  if (maxMajorSteps > 10) maxMajorSteps = 10;
+
+  // Show the scale on the right
+  double minValue = m_min;
+  double maxValue = m_max;
+  GraphOptions::ScaleType type = m_colorMap.getScaleType();
+  if( type == GraphOptions::Linear )
+  {
+    QwtLinearScaleEngine linScaler;
+    m_colorBar->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
+    m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue),m_colorMap);
+  }
   else
-    m_colorBar->setScaleDiv(new QwtScaleTransformation(QwtScaleTransformation::Linear), scaleDiv);
+ {
+    QwtLog10ScaleEngine logScaler;
+    m_colorBar->setScaleDiv(logScaler.transformation(), logScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
+    m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue), m_colorMap);
+  }
 
 }
 
