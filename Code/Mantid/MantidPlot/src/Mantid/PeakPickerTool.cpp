@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser) : //MantidUI *mantidUI) :
+PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, bool showFitPropertyBrowser) : //MantidUI *mantidUI) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
 m_fitPropertyBrowser(fitPropertyBrowser),m_wsName(),m_spec(),m_init(false), //m_current(0),
@@ -72,7 +72,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(m_fitPropertyBrowser,SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
   //Show the fitPropertyBrowser if it isn't already.
-  m_fitPropertyBrowser->show();
+  if (showFitPropertyBrowser) m_fitPropertyBrowser->show();
   connect(this,SIGNAL(isOn(bool)),m_fitPropertyBrowser,SLOT(setPeakToolOn(bool)));
   emit isOn(true);
 

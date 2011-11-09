@@ -77,7 +77,7 @@ class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public Qw
   Q_OBJECT
 public:
   /// Constructor
-  PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser); //MantidUI *mantidUI);
+  PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, bool showFitPropertyBrowser=true); //MantidUI *mantidUI);
   /// Destructor
   ~PeakPickerTool();
   /// Runtime type identifier
