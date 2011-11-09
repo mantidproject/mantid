@@ -49,6 +49,13 @@ namespace Mantid
           "A MDEventWorkspace or MDHistoWorkspace on which to apply the operation.");
       declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(),"",Direction::Output),
           "Name of the output MDEventWorkspace or MDHistoWorkspace.");
+      this->initExtraProperties();
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /// Optional method to be subclassed to add properties
+    void UnaryOperationMD::initExtraProperties()
+    {
     }
 
     //----------------------------------------------------------------------------------------------

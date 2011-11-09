@@ -2,6 +2,7 @@
 #define SmoothNeighboursTEST_H_
 
 #include "MantidAlgorithms/SmoothNeighbours.h"
+#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
@@ -106,6 +107,64 @@ public:
 
 
     AnalysisDataService::Instance().remove("testEW");
+  }
+
+  void testWithUnsignedNumberOfNeighbours()
+  {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS("Cannot have number of neighbours < 1",alg.setProperty("NumberOfNeighbours", -1), std::invalid_argument);
+  }
+
+  void testWithNonIntegerNumberOfNeighbours()
+  {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS("Cannot have non-integer number of neighbours",alg.setProperty("NumberOfNeighbours", 1.1), std::invalid_argument);
+  }
+
+  void testWithValidNumberOfNeighbours()
+  {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS_NOTHING("A single neighbour is valid",alg.setProperty("NumberOfNeighbours", 1));
+    int value = alg.getProperty("NumberOfNeighbours");
+    TS_ASSERT_EQUALS(1, value);
+  }
+
+  void testWithNumberOfNeighbours()
+  {
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
+
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("WeightedSum", false);
+    alg.setProperty("ProvideRadius", false);
+    alg.setProperty("NumberOfNeighbours", 8);
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testMW")) );
+
+    //Some basic checks
+    TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
+    TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
+
+    //Check that the workspaces are identical, including x and y values.
+    CheckWorkspacesMatch* checkAlg = new CheckWorkspacesMatch;
+    checkAlg->initialize();
+    checkAlg->setProperty("Workspace1", inWS);
+    checkAlg->setProperty("Workspace2", outWS);
+    checkAlg->setProperty("Tolerance", 0.001);
+    checkAlg->execute();
+    std::string result = checkAlg->getProperty("Result");
+    TS_ASSERT_EQUALS("Success!", result);
+
   }
 
   void test_event_WEIGHTED()

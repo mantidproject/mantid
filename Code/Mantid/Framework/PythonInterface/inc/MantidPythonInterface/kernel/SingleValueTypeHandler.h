@@ -19,7 +19,15 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidPythonInterface/kernel/PropertyHandler.h"
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidKernel/IPropertyManager.h"
+
+#ifdef __GNUC__
+  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
+#include <boost/python/extract.hpp>
 
 namespace Mantid
 {
@@ -31,10 +39,10 @@ namespace Mantid
       /**
        * A templated handler that calls the appropriate setProperty method for the type on the given PropertyManager
        * A new typedhandler should be inserted into the type look up map with the
-       * DECLARE_TYPEHANDLER macro whenever a new class is exported that will be used with PropertyWithValue
+       * DECLARE_SINGLEVALUETYPEHANDLER macro whenever a new class is exported that will be used with PropertyWithValue
        */
       template<typename BaseType, typename DerivedType=BaseType>
-      struct DLLExport TypedHandler : public PropertyHandler
+      struct DLLExport SingleValueTypeHandler : public PropertyHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -51,7 +59,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<DerivedType> extractor(value);
@@ -64,7 +72,7 @@ namespace Mantid
        * assigned polymorphically. This can be removed when the bug is fixed
        */
       template<>
-      struct DLLExport TypedHandler<std::string> : public PropertyHandler
+      struct DLLExport SingleValueTypeHandler<std::string> : public PropertyHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -81,7 +89,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<std::string> extractor(value);
@@ -95,7 +103,7 @@ namespace Mantid
        * is of type double but an integer is passed.
        */
       template<>
-      struct DLLExport TypedHandler<int> : public PropertyHandler
+      struct DLLExport SingleValueTypeHandler<int> : public PropertyHandler
       {
         /**
          * Set function to handle Python -> C++ calls and get the correct type
@@ -121,7 +129,7 @@ namespace Mantid
          * @param value ::
          * @returns True if it is, false otherwise
          */
-        bool isInstance(boost::python::object value) const
+        bool isInstance(const boost::python::object & value) const
         {
           // Can we extract the derived type from the object?
           boost::python::extract<int> extractor(value);
@@ -140,6 +148,6 @@ namespace Mantid
   * @param export_type :: The C++ type that is to be converted
   * @param base_type :: The C++ type that the export_type is to be treated as
   */
-#define DECLARE_TYPEHANDLER(export_type, base_type) \
+#define DECLARE_SINGLEVALUETYPEHANDLER(export_type, base_type) \
   const boost::python::converter::registration *reg = boost::python::converter::registry::query(typeid(export_type));\
-  Mantid::PythonInterface::PropertyMarshal::registerHandler(reg->get_class_object(), new Mantid::PythonInterface::PropertyMarshal::TypedHandler<base_type, export_type>());
+  Mantid::PythonInterface::PropertyMarshal::registerHandler(reg->get_class_object(), new Mantid::PythonInterface::PropertyMarshal::SingleValueTypeHandler<base_type, export_type>());

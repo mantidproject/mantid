@@ -15,6 +15,7 @@ class InstrumentInterface(object):
     ## List of widgets with associated observers
     widgets = []  
     ERROR_REPORT_NAME = "sans_error_report.xml"    
+    LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
     ERROR_REPORT_DIR = ""
     
     def __init__(self, name, settings):
@@ -62,7 +63,14 @@ class InstrumentInterface(object):
         if len(self.widgets)>0:
             QtGui.QMessageBox.warning(self.widgets[0], title, message)
                       
-    
+    def load_last_reduction(self):
+        try:
+            red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
+            if os.path.isfile(red_path):
+                self.load_file(red_path)
+        except:
+            print "Could not load last reduction\n  %s" % str(traceback.format_exc())
+        
     def load_file(self, file_name):
         """
             Load an XML file containing reduction parameters and
@@ -117,8 +125,17 @@ class InstrumentInterface(object):
         """
         self.scripter.update()
         
+        # Save the last reduction for later
         try:
+            red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
+            self.save_file(red_path)
+        except:
+            print "Could not save last reduction\n  %s" % str(traceback.format_exc())        
+        
+        try:
+            self.set_running(True)
             self.scripter.apply()
+            self.set_running(False)
         except RuntimeError, e:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
@@ -137,7 +154,7 @@ class InstrumentInterface(object):
             self._error_report(traceback.format_exc())
         # Update widgets
         self.scripter.push_state()
-        
+                
     def _error_report(self, trace=''):
         """
             Try to dump the state of the UI to a file, with a traceback
@@ -166,6 +183,13 @@ class InstrumentInterface(object):
             tab_list.append([item.name, item])
         return tab_list
 
+    def set_running(self, is_running=True):
+        """
+            Tell the widgets whether they are running or not
+        """
+        for widget in self.widgets:
+            widget.is_running(is_running)
+        
     def reset(self):
         """
             Reset the interface

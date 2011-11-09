@@ -14,6 +14,7 @@
 #include <pqServerManagerModel.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 
 #include <QHBoxLayout>
@@ -205,8 +206,8 @@ unsigned int ViewBase::getNumSources()
   sources = smModel->findItems<pqPipelineSource *>(server);
   for (source = sources.begin(); source != sources.end(); ++source)
   {
-    const QString sourceName = (*source)->getSMGroup();
-    if (sourceName == QString("sources"))
+    const QString srcProxyName = (*source)->getProxy()->GetXMLGroup();
+    if (srcProxyName == QString("sources"))
     {
       count++;
     }

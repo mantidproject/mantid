@@ -1,6 +1,6 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
-#include "MantidPythonInterface/kernel/TypedHandler.h"
+#include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 
 #include <boost/python/class.hpp>
 
@@ -20,5 +20,5 @@ void export_IEventWorkspace()
 
     ;
 
-  DECLARE_TYPEHANDLER(IEventWorkspace, Mantid::Kernel::DataItem_sptr);
+  DECLARE_SINGLEVALUETYPEHANDLER(IEventWorkspace, Mantid::Kernel::DataItem_sptr);
 }

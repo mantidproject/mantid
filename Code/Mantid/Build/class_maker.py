@@ -86,7 +86,7 @@ namespace %s
   {
   public:
     %s();
-    ~%s();
+    virtual ~%s();
     %s
   };
 
@@ -186,7 +186,6 @@ namespace %s
    */
   %s::%s()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -194,7 +193,6 @@ namespace %s
    */
   %s::~%s()
   {
-    // TODO Auto-generated destructor stub
   }
   
 %s

@@ -349,6 +349,10 @@ namespace MDEvents
     return out;
   }
 
+  //==============================================================================================
+  //============================== ARITHMETIC OPERATIONS =========================================
+  //==============================================================================================
+
   //----------------------------------------------------------------------------------------------
   /** Check if the two workspace's sizes match (for comparison or element-by-element operation
    *
@@ -588,90 +592,28 @@ namespace MDEvents
     }
   }
 
-
-  //----------------------------------------------------------------------------------------------
-  /** A boolean &= (and) operation, element-by-element, for two MDHistoWorkspace's.
-   *
-   * 0.0 is "false", all other values are "true". All errors are set to 0.
-   *
-   * @param b :: workspace on the RHS of the operation
-   * @return *this after operation */
-  MDHistoWorkspace & MDHistoWorkspace::operator&=(const MDHistoWorkspace & b)
-  {
-    checkWorkspaceSize(b, "&= (and)");
-    for (size_t i=0; i<m_length; ++i)
-    {
-      m_signals[i] = m_signals[i] && b.m_signals[i];
-      m_errorsSquared[i] = 0;
-    }
-    return *this;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** A boolean |= (or) operation, element-by-element, for two MDHistoWorkspace's.
-   *
-   * 0.0 is "false", all other values are "true". All errors are set to 0.
-   *
-   * @param b :: workspace on the RHS of the operation
-   * @return *this after operation */
-  MDHistoWorkspace & MDHistoWorkspace::operator|=(const MDHistoWorkspace & b)
-  {
-    checkWorkspaceSize(b, "|= (or)");
-    for (size_t i=0; i<m_length; ++i)
-    {
-      m_signals[i] = m_signals[i] || b.m_signals[i];
-      m_errorsSquared[i] = 0;
-    }
-    return *this;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** A boolean ^= (xor) operation, element-by-element, for two MDHistoWorkspace's.
-   *
-   * 0.0 is "false", all other values are "true". All errors are set to 0.
-   *
-   * @param b :: workspace on the RHS of the operation
-   * @return *this after operation */
-  MDHistoWorkspace & MDHistoWorkspace::operator^=(const MDHistoWorkspace & b)
-  {
-    checkWorkspaceSize(b, "^= (xor)");
-    for (size_t i=0; i<m_length; ++i)
-    {
-      m_signals[i] = bool(m_signals[i]) ^ bool(b.m_signals[i]);
-      m_errorsSquared[i] = 0;
-    }
-    return *this;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** A boolean not operation, performed in-place.
-   * All errors are set to 0.
-   *
-   * 0.0 is "false", all other values are "true". All errors are set to 0.
-   */
-  void MDHistoWorkspace::operatorNot()
-  {
-    for (size_t i=0; i<m_length; ++i)
-    {
-      m_signals[i] = !bool(m_signals[i]);
-      m_errorsSquared[i] = 0;
-    }
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Perform the natural logarithm on each signal in the workspace.
    *
    * Error propagation of \f$ f = ln(a) \f$  is given by:
    * \f$ df^2 = a^2 / da^2 \f$
    */
-  void MDHistoWorkspace::log()
+  void MDHistoWorkspace::log(double filler)
   {
     for (size_t i=0; i<m_length; ++i)
     {
       signal_t a = m_signals[i];
       signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = std::log(a);
-      m_errorsSquared[i] = da2 / (a*a);
+      if (a <= 0)
+      {
+        m_signals[i] = filler;
+        m_errorsSquared[i] = 0;
+      }
+      else
+      {
+        m_signals[i] = std::log(a);
+        m_errorsSquared[i] = da2 / (a*a);
+      }
     }
   }
 
@@ -679,16 +621,24 @@ namespace MDEvents
   /** Perform the base-10 logarithm on each signal in the workspace.
    *
    * Error propagation of \f$ f = ln(a) \f$  is given by:
-   * \f$ df^2 = a^2 / da^2 \f$
+   * \f$ df^2 = (ln(10)^-2) * a^2 / da^2 \f$
    */
-  void MDHistoWorkspace::log10()
+  void MDHistoWorkspace::log10(double filler)
   {
     for (size_t i=0; i<m_length; ++i)
     {
       signal_t a = m_signals[i];
       signal_t da2 = m_errorsSquared[i];
-      m_signals[i] = std::log10(a);
-      m_errorsSquared[i] = da2 / (a*a);
+      if (a <= 0)
+      {
+        m_signals[i] = filler;
+        m_errorsSquared[i] = 0;
+      }
+      else
+      {
+        m_signals[i] = std::log10(a);
+        m_errorsSquared[i] = 0.1886117 * da2 / (a*a); // 0.1886117  = ln(10)^-2
+      }
     }
   }
 
@@ -725,6 +675,249 @@ namespace MDEvents
       signal_t da2 = m_errorsSquared[i];
       m_signals[i] = f;
       m_errorsSquared[i] = f*f * exponent_squared * da2 / (a*a);
+    }
+  }
+
+  //==============================================================================================
+  //============================== BOOLEAN OPERATIONS ============================================
+  //==============================================================================================
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean &= (and) operation, element-by-element, for two MDHistoWorkspace's.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator&=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "&= (and)");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = ((m_signals[i] != 0) && (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean |= (or) operation, element-by-element, for two MDHistoWorkspace's.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator|=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "|= (or)");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = ((m_signals[i] != 0) || (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean ^= (xor) operation, element-by-element, for two MDHistoWorkspace's.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the operation
+   * @return *this after operation */
+  MDHistoWorkspace & MDHistoWorkspace::operator^=(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "^= (xor)");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = ((m_signals[i] != 0) ^ (b.m_signals[i] != 0)) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** A boolean not operation, performed in-place.
+   * All errors are set to 0.
+   *
+   * 0.0 is "false", all other values are "true". All errors are set to 0.
+   */
+  void MDHistoWorkspace::operatorNot()
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = (m_signals[i] == 0.0);
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is < b[i].
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the comparison.
+   */
+  void MDHistoWorkspace::lessThan(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "lessThan");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = (m_signals[i] < b.m_signals[i]) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is < signal.
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param signal :: signal value on the RHS of the comparison.
+   */
+  void MDHistoWorkspace::lessThan(const signal_t signal)
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = (m_signals[i] < signal) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is > b[i].
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the comparison.
+   */
+  void MDHistoWorkspace::greaterThan(const MDHistoWorkspace & b)
+  {
+    checkWorkspaceSize(b, "greaterThan");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = (m_signals[i] > b.m_signals[i]) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is > signal.
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param signal :: signal value on the RHS of the comparison.
+   */
+  void MDHistoWorkspace::greaterThan(const signal_t signal)
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      m_signals[i] = (m_signals[i] > signal) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is == b[i].
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param b :: workspace on the RHS of the comparison.
+   * @param tolerance :: accept this deviation from a perfect equality
+   */
+  void MDHistoWorkspace::equalTo(const MDHistoWorkspace & b, const signal_t tolerance)
+  {
+    checkWorkspaceSize(b, "equalTo");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t diff = fabs(m_signals[i] - b.m_signals[i]);
+      m_signals[i] = (diff < tolerance) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Turn this workspace into a boolean workspace, where
+   * signal[i] -> becomes true (1.0) if it is == signal.
+   * signal[i] -> becomes false (0.0) otherwise
+   * Errors are set to 0.
+   *
+   * @param signal :: signal value on the RHS of the comparison.
+   * @param tolerance :: accept this deviation from a perfect equality
+   */
+  void MDHistoWorkspace::equalTo(const signal_t signal, const signal_t tolerance)
+  {
+    for (size_t i=0; i<m_length; ++i)
+    {
+      signal_t diff = fabs(m_signals[i] - signal);
+      m_signals[i] = (diff < tolerance) ? 1.0 : 0.0;
+      m_errorsSquared[i] = 0;
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy the values from another workspace onto this workspace, but only
+   * where a mask is true (non-zero)
+   *
+   * For example, in matlab or numpy python, you might write something like:
+   *  "mask = (array < 5.0); array[mask] = other[mask];"
+   *
+   * The equivalent here is:
+   *  mask = array;
+   *  mask.lessThan(5.0);
+   *  array.setUsingMask(mask, other);
+   *
+   * @param mask :: MDHistoWorkspace where (signal == 0.0) means false, and (signal != 0.0) means true.
+   * @param values :: MDHistoWorkspace of values to copy.
+   */
+  void MDHistoWorkspace::setUsingMask(const MDHistoWorkspace & mask, const MDHistoWorkspace & values)
+  {
+    checkWorkspaceSize(mask, "setUsingMask");
+    checkWorkspaceSize(values, "setUsingMask");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      if (mask.m_signals[i] != 0.0)
+      {
+        m_signals[i] = values.m_signals[i];
+        m_errorsSquared[i] = values.m_errorsSquared[i];
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy the values from another workspace onto this workspace, but only
+   * where a mask is true (non-zero)
+   *
+   * For example, in matlab or numpy python, you might write something like:
+   *  "mask = (array < 5.0); array[mask] = other[mask];"
+   *
+   * The equivalent here is:
+   *  mask = array;
+   *  mask.lessThan(5.0);
+   *  array.setUsingMask(mask, other);
+   *
+   * @param mask :: MDHistoWorkspace where (signal == 0.0) means false, and (signal != 0.0) means true.
+   * @param signal :: signal to set everywhere mask is true
+   * @param error :: error (not squared) to set everywhere mask is true
+   */
+  void MDHistoWorkspace::setUsingMask(const MDHistoWorkspace & mask, const signal_t signal, const signal_t error)
+  {
+    signal_t errorSquared = error * error;
+    checkWorkspaceSize(mask, "setUsingMask");
+    for (size_t i=0; i<m_length; ++i)
+    {
+      if (mask.m_signals[i] != 0.0)
+      {
+        m_signals[i] = signal;
+        m_errorsSquared[i] = errorSquared;
+      }
     }
   }
 

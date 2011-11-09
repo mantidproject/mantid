@@ -491,7 +491,7 @@ public:
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(10.0, 2, 5, 10.0, 3.0);
     a->log10();
-    checkWorkspace(a, 1.0, 3./100.);
+    checkWorkspace(a, 1.0, 0.1886117 * 3./100.);
   }
 
   //--------------------------------------------------------------------------------------
@@ -551,6 +551,104 @@ public:
     checkWorkspace(a, 0.0, 0.0);
     b->operatorNot();
     checkWorkspace(b, 1.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_lessThan()
+  {
+    MDHistoWorkspace_sptr a, b, c;
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    a->lessThan(*b);
+    checkWorkspace(a, 1.0, 0.0);
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 3.0);
+    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    a->lessThan(*b);
+    checkWorkspace(a, 0.0, 0.0);
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 3.0);
+    a->lessThan(4.57);
+    checkWorkspace(a, 1.0, 0.0);
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 3.0);
+    a->lessThan(4.55);
+    checkWorkspace(a, 0.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_greaterThan()
+  {
+    MDHistoWorkspace_sptr a, b, c;
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    a->greaterThan(*b);
+    checkWorkspace(a, 0.0, 0.0);
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 3.0);
+    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.34, 2, 5, 10.0, 2.0);
+    a->greaterThan(*b);
+    checkWorkspace(a, 1.0, 0.0);
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 3.0);
+    a->greaterThan(4.57);
+    checkWorkspace(a, 0.0, 0.0);
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 3.0);
+    a->greaterThan(4.55);
+    checkWorkspace(a, 1.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_equalTo()
+  {
+    MDHistoWorkspace_sptr a, b, c;
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    b = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23000001, 2, 5, 10.0, 2.0);
+    a->equalTo(*b);
+    checkWorkspace(a, 1.0, 0.0);
+
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.12, 2, 5, 10.0, 3.0);
+    a->equalTo(*b);
+    checkWorkspace(a, 0.0, 0.0);
+
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    a->equalTo(1.2300001);
+    checkWorkspace(a, 1.0, 0.0);
+
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    a->equalTo(2.34, 1e-4);
+    checkWorkspace(a, 0.0, 0.0);
+
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    a->equalTo(2.34, 3 /* large tolerance */);
+    checkWorkspace(a, 1.0, 0.0);
+  }
+
+
+  //--------------------------------------------------------------------------------------
+  void test_setUsingMask()
+  {
+    MDHistoWorkspace_sptr a, mask, c;
+    a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    mask = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.00, 2, 5, 10.0, 0.0); //mask
+    c = MDEventsTestHelper::makeFakeMDHistoWorkspace(4.56, 2, 5, 10.0, 2.0);
+    a->setUsingMask(*mask, *c);
+    checkWorkspace(a, 1.23, 3.0);
+
+    mask->setTo(1.0, 0.0);
+    a->setUsingMask(*mask, *c);
+    checkWorkspace(a, 4.56, 2.0);
+
+    a->setUsingMask(*mask, 7.89, 11);
+    checkWorkspace(a, 7.89, 11*11 );
+
+    mask->setTo(0.0, 0.0);
+    a->setUsingMask(*mask, 6.66, 7.77);
+    checkWorkspace(a, 7.89, 11*11 );
+
+    // Now a partial mask
+    mask->setSignalAt(0, 1.0);
+    mask->setSignalAt(2, 1.0);
+    a->setTo(1.23, 4.56);
+    a->setUsingMask(*mask, 6.78, 7.89);
+    TS_ASSERT_DELTA( a->getSignalAt(0), 6.78, 1e-5);
+    TS_ASSERT_DELTA( a->getSignalAt(1), 1.23, 1e-5);
+    TS_ASSERT_DELTA( a->getSignalAt(2), 6.78, 1e-5);
   }
 
 

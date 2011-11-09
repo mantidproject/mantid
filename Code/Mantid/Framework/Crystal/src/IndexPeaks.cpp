@@ -63,7 +63,7 @@ namespace Crystal
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
     mustBePositive->setLower(0.0);
 
-    this->declareProperty(new PropertyWithValue<double>( "tolerance",0.15,
+    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
           mustBePositive,Direction::Input),"Indexing Tolerance (0.15)");
   }
 
@@ -103,7 +103,7 @@ namespace Crystal
       q_vectors.push_back( peaks[i].getQSampleFrame() );
     }
 
-    double tolerance = this->getProperty("tolerance");
+    double tolerance = this->getProperty("Tolerance");
     double average_error;
 
     int num_indexed = IndexingUtils::CalculateMillerIndices( UB, q_vectors, 

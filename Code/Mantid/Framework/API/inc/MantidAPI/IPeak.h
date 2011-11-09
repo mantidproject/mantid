@@ -52,6 +52,7 @@ namespace API
 
     virtual void setWavelength(double wavelength) = 0;
     virtual double getWavelength() const = 0;
+    virtual double getScattering() const = 0;
     virtual double getDSpacing() const = 0;
     virtual double getTOF() const = 0;
 

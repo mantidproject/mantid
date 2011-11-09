@@ -448,4 +448,22 @@ public:
   }
 
 };
+
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadMuonNexus2TestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadMuonNexus2 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "emu00006475.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
+
 #endif /*LOADMUONNEXUS2TEST_H_*/
