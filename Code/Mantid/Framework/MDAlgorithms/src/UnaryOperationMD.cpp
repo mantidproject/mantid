@@ -49,6 +49,13 @@ namespace Mantid
           "A MDEventWorkspace or MDHistoWorkspace on which to apply the operation.");
       declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(),"",Direction::Output),
           "Name of the output MDEventWorkspace or MDHistoWorkspace.");
+      this->initExtraProperties();
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /// Optional method to be subclassed to add properties
+    void UnaryOperationMD::initExtraProperties()
+    {
     }
 
     //----------------------------------------------------------------------------------------------
@@ -63,6 +70,11 @@ namespace Mantid
       // Can't do log(123)
       if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_in))
         throw std::invalid_argument("UnaryOperationMD: can't have a MatrixWorkspace (e.g. WorkspaceSingleValue) as the argument of " + this->name() + ".");
+
+      // Check for validity
+      m_in_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_in);
+      m_in_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_in);
+      this->checkInputs();
 
       if (m_out != m_in)
       {

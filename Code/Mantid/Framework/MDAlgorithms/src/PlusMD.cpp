@@ -1,6 +1,32 @@
 /*WIKI* 
 
+This algorithm sums two [[MDHistoWorkspace]]s or merges two [[MDEventWorkspace]]s together.
+
+=== MDHistoWorkspaces ===
+
+* '''MDHistoWorkspace + MDHistoWorkspace'''
+** The operation is performed element-by-element.
+* '''MDHistoWorkspace + Scalar''' or '''Scalar + MDHistoWorkspace'''
+** The scalar is subtracted from every element of the MDHistoWorkspace. The squares of errors are summed.
+
+=== MDEventWorkspaces ===
+
 This algorithm operates similary to calling Plus on two [[EventWorkspace]]s: it combines the events from the two workspaces together to form one large workspace.
+
+==== Note for file-backed workspaces ====
+
+The algorithm uses [[CloneMDWorkspace]] to create the output workspace, except when adding in place (e.g. <math> A = A + B </math> ).
+See [[CloneMDWorkspace]] for details, but note that a file-backed [[MDEventWorkspace]] will have its file copied.
+
+* If A is in memory and B is file-backed, the operation <math> C = A + B </math> will clone the B file-backed workspace and add A to it.
+* However, the operation <math> A = A + B </math> will clone the A workspace and add B into memory (which might be too big!)
+
+Also, be aware that events added to a MDEventWorkspace are currently added '''in memory''' and are not cached to file until [[SaveMD]]
+or another algorithm requiring it is called. The workspace is marked as 'requiring file update'.
+
+== Usage ==
+
+See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
 
 *WIKI*/
 
@@ -25,46 +51,32 @@ namespace MDAlgorithms
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(PlusMD)
   
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   PlusMD::PlusMD()
-  {
-  }
+  {  }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   PlusMD::~PlusMD()
-  {
-  }
+  {  }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void PlusMD::initDocs()
   {
-    this->setWikiSummary("Merge two MDEventWorkspaces together by combining their events together in one workspace.");
-    this->setOptionalMessage("Merge two MDEventWorkspaces together by combining their events together in one workspace.");
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void PlusMD::init()
-  {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("LHSWorkspace","",Direction::Input),
-        "One of the workspaces to add together.");
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("RHSWorkspace","",Direction::Input),
-        "One of the workspaces to add together.");
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "The output workspace. Note that this can be a new workspace, or one of the input workspaces in which case that workspace will be modified in-place.");
+    this->setWikiSummary("Sum two [[MDHistoWorkspace]]s or merges two [[MDEventWorkspace]]s together by combining their events together in one workspace.");
+    this->setOptionalMessage("Sum two MDHistoWorkspaces or merges two MDEventWorkspaces together by combining their events together in one workspace.");
   }
 
 
   //----------------------------------------------------------------------------------------------
-  /** Perform the adding
+  /** Perform the adding.
+   *
+   * Will do m_out_event += m_operand_event
    *
    * @param ws ::  MDEventWorkspace to clone
    */
@@ -72,7 +84,7 @@ namespace MDAlgorithms
   void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     typename MDEventWorkspace<MDE, nd>::sptr ws1 = ws;
-    typename MDEventWorkspace<MDE, nd>::sptr ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(iws2);
+    typename MDEventWorkspace<MDE, nd>::sptr ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(m_operand_event);
     if (!ws1 || !ws2)
       throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
 
@@ -149,59 +161,48 @@ namespace MDAlgorithms
 
 
   //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void PlusMD::exec()
+  /// Is the operation commutative?
+  bool PlusMD::commutative() const
+  { return true; }
+
+  //----------------------------------------------------------------------------------------------
+  /// Check the inputs and throw if the algorithm cannot be run
+  void PlusMD::checkInputs()
   {
-    IMDEventWorkspace_sptr lhs_ws = getProperty("LHSWorkspace");
-    IMDEventWorkspace_sptr rhs_ws = getProperty("RHSWorkspace");
-    IMDEventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
-
-    if (lhs_ws->id() != rhs_ws->id())
-      throw std::invalid_argument("LHS and RHS workspaces must be of the same type and number of dimensions.");
-
-    if ((lhs_ws == out_ws) && (rhs_ws == out_ws))
-      throw std::invalid_argument("Sorry, cannot perform PlusMD in place with the same WS on LHS and RHS (A = A + A). Please specify a different output workspace.");
-
-    bool inPlace = false;
-    if (out_ws == rhs_ws)
-    { // Adding inplace on the right workspace
-      inPlace = true;
-      iws1 = rhs_ws;
-      iws2 = lhs_ws;
+    if (m_lhs_event || m_rhs_event)
+    {
+      if (m_lhs_histo || m_rhs_histo)
+        throw std::runtime_error("Cannot sum a MDHistoWorkspace and a MDEventWorkspace (only MDEventWorkspace + MDEventWorkspace is allowed).");
+      if (m_lhs_scalar || m_rhs_scalar)
+        throw std::runtime_error("Cannot sum a MDEventWorkspace and a scalar (only MDEventWorkspace + MDEventWorkspace is allowed).");
     }
-    else if (out_ws == lhs_ws)
-    { // Adding inplace on the left workspace
-      inPlace = true;
-      iws1 = lhs_ws;
-      iws2 = rhs_ws;
-    }
-    else
-    { // Not adding in place
-      inPlace = false;
+  }
 
-      // If you have to clone any WS, clone the one that is file-backed.
-      bool cloneLHS = true;
-      if (rhs_ws->isFileBacked() && !lhs_ws->isFileBacked())
-        cloneLHS = false;
+  //----------------------------------------------------------------------------------------------
+  /// Run the algorithm with a MDHisotWorkspace as output and operand
+  void PlusMD::execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::MDEvents::MDHistoWorkspace_const_sptr operand)
+  {
+    out->add(*operand);
+  }
 
-      // Clone the lhs workspace into ws1
-      IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
-      clone->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(cloneLHS ? lhs_ws : rhs_ws) );
-      clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-      clone->executeAsSubAlg();
-      IMDWorkspace_sptr temp = clone->getProperty("OutputWorkspace");
-      iws1 = boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
+  //----------------------------------------------------------------------------------------------
+  /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
+  void PlusMD::execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar)
+  {
+    out->add(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  }
 
-      iws2 = (cloneLHS ? rhs_ws : lhs_ws); // The other one (not cloned) goes on the RHS
-      out_ws = iws1;
-    }
 
-    // Now we add ws2 into ws1.
-    CALL_MDEVENT_FUNCTION(this->doPlus, iws1);
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm with an MDEventWorkspace as output
+   */
+  void PlusMD::execEvent()
+  {
+    // Now we add m_operand_event into m_out_event.
+    CALL_MDEVENT_FUNCTION(this->doPlus, m_out_event);
 
     // Set to the output
-    setProperty("OutputWorkspace", out_ws);
+    setProperty("OutputWorkspace", m_out_event);
   }
 
 

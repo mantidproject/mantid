@@ -133,13 +133,6 @@ private:
   ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
-  /**
-   * Function to update animation controls when the rebinner is used.
-   * @param dvp the array containing the new timestep information
-   */
-  void updateAnimationControls(vtkSMDoubleVectorProperty *dvp);
-  /// Update the timesteps in the animation control.
-  void updateTimesteps();
 };
 
 }

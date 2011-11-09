@@ -61,7 +61,7 @@ namespace DataHandling
     /// Parse XML
     void parseXML();
     /// Convert value to data
-    void parseBank(std::string valuetext, bool tomask);
+    void parseComponent(std::string valuetext, bool tomask);
     /// Convert value to detector ids
     void parseDetectorIDs(std::string inputstr, bool tomask);
     /// Convert value to spectrum ids
@@ -72,6 +72,8 @@ namespace DataHandling
     void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
     /// Initialize a Mask Workspace
     void intializeMaskWorkspace();
+    /// Convert component to detectors
+    void componentToDetectors(std::vector<std::string> componentnames, std::vector<int32_t>& detectors);
     /// Convert bank to detector
     void bankToDetectors(std::vector<std::string> singlebanks,
         std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
@@ -83,6 +85,7 @@ namespace DataHandling
         std::vector<int32_t>& detectors, std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup);
     void processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
         std::vector<int32_t> pairdetids_up);
+    void initDetectors();
 
     /// Mask Workspace
     API::MatrixWorkspace_sptr mMaskWS;
@@ -92,6 +95,9 @@ namespace DataHandling
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML
     Poco::XML::Element* pRootElem;
+
+    /// Default setup.  If true, not masking, but use the pixel
+    bool mDefaultToUse;
 
     std::vector<int32_t> mask_detid_single;
     std::vector<int32_t> mask_specid_single;

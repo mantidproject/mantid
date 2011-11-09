@@ -2,6 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_LOG_PRESENTER_H
 
 #include "MantidQtCustomInterfaces/Updateable.h"
+#include "MantidQtCustomInterfaces/LoanedMemento.h"
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt
 {
@@ -32,7 +34,6 @@ namespace MantidQt
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class LoanedMemento;
     class LogView;
     class DLLExport LogPresenter : public Updateable
     {
@@ -40,10 +41,15 @@ namespace MantidQt
       LogPresenter(LoanedMemento& memento);
       ~LogPresenter();
       void update();
-      void acceptView(LogView* view);
+      void acceptReadOnlyView(LogView* view);
+      void acceptEditableView(LogView* view);
     private:
+      void swapViews();
       LoanedMemento& m_WsMemento;
-      LogView* m_view;
+      LogView* m_readOnlyView;
+      LogView* m_editableView;
+      LogView* m_currentView;
+      bool m_editableMode;
     };
   }
 }

@@ -23,15 +23,10 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/DataItem.h"
 
 #include <boost/python/object.hpp>
-#include <boost/python/extract.hpp>
 
 #include <string>
-#include <iostream>
 
 namespace Mantid
 {
@@ -54,41 +49,30 @@ namespace Mantid
      * The helpers declared here deal with calling the correct function depending
      * on the type passed to it.
 
-     * We will also need more marshaling for these functions as we want be able to
-     * pass numpy arrays seamlessly to algorithms.
+     * We will also need marshaling for these functions as we want be able to
+     * pass numpy arrays to algorithms.
      */
 
     /**
-     * A non-templated base class that can be stored in a map so that
-     * its virtual functions are overridden in templated derived classes
-     * that can extract the correct type from the Python object
-     */
-    struct DLLExport PropertyHandler
-    {
-      /// Virtual Destructor
-      virtual ~PropertyHandler() {};
-      /// Virtual set function to handle Python -> C++ calls
-      virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value) = 0;
-      /// Return the type_info of the handled type
-      virtual const std::type_info & typeInfo() const = 0;
-    };
-
-    //------------------------------------------------------------------------------------------------------------
-    /**
-     * A namespace for marhsalling calls involving transfering property values in/out of an IPropertyManager.
+     * A namespace for marshaling calls involving transferring property values in/out of an IPropertyManager.
      *
      * This allows us to have a single method that is called when a user runs, from Python, alg.setProperty
-     * or property.value. For the value return it attemps to upcast the object to correct type
+     * or property.value. For the value return it attempts to upcast the object to correct type
      *
      */
     namespace PropertyMarshal
     {
+      //-----------------------------------------------------------------------
+      // Forward declarations
+      //-----------------------------------------------------------------------
+      struct PropertyHandler;
+
       /// Insert a new property handler
       DLLExport void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler);
       /// This static function allows a call to a method on an IPropertyManager object
       DLLExport void setProperty(boost::python::object self, const std::string & name,
                                  boost::python::object value);
-      /// Converts the value of a property to the most appropriate type, i.e. the most dervied exported interface
+      /// Converts the value of a property to the most appropriate type, i.e. the most derived exported interface
       DLLExport boost::python::object value(boost::python::object self);
     };
 

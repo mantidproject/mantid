@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_UNARYOPERATIONMD_H_
 #define MANTID_MDALGORITHMS_UNARYOPERATIONMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
 namespace Mantid
@@ -52,7 +52,11 @@ namespace MDAlgorithms
     virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
     void init();
+    virtual void initExtraProperties();
     void exec();
+
+    /// Check the inputs and throw if the algorithm cannot be run
+    virtual void checkInputs() = 0;
 
     /// Run the algorithm on a MDEventWorkspace
     virtual void execEvent(Mantid::API::IMDEventWorkspace_sptr out) = 0;
@@ -62,6 +66,13 @@ namespace MDAlgorithms
 
     /// Input workspace
     Mantid::API::IMDWorkspace_sptr m_in;
+
+    /// Input workspace (MDEvent)
+    Mantid::API::IMDEventWorkspace_sptr m_in_event;
+
+    /// Input workspace (MDHisto)
+    Mantid::MDEvents::MDHistoWorkspace_sptr m_in_histo;
+
     /// Output workspace
     Mantid::API::IMDWorkspace_sptr m_out;
 

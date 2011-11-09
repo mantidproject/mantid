@@ -523,8 +523,8 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
   
-  g_log.information() << "Fit Peak @ " << X[i4] << "  of Spectrum " << spectrum << "  ";
-  g_log.information() << "Peak In Range " << X[i0] << ", " << X[i2] << "  Peak @ " << X[i4] << std::endl;
+  g_log.debug() << "Fit Peak @ " << X[i4] << "  of Spectrum " << spectrum << "  ";
+  g_log.debug() << "Peak In Range " << X[i0] << ", " << X[i2] << "  Peak @ " << X[i4] << std::endl;
 
   // Get the initial estimate of the width, in # of bins
   const int fitWidth = i0-i2;
@@ -537,7 +537,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   if (i_min<1) i_min=1;
   if (i_max>=Y.size()-1) i_max=static_cast<unsigned int>(Y.size()-2); // TODO this is dangerous
 
-  g_log.information() << "Background + Peak -- Bounds = " << X[i_min] << ", " << X[i_max] << std::endl;
+  g_log.debug() << "Background + Peak -- Bounds = " << X[i_min] << ", " << X[i_max] << std::endl;
 
   // Estimate height, boundary, and etc for fitting
   const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
@@ -596,7 +596,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
         throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
       }
       std::string function = ss.str();
-      g_log.information() << "Background Type = " << backgroundtype << "  Function: " << function << std::endl;
+      g_log.debug() << "Background Type = " << backgroundtype << "  Function: " << function << std::endl;
 
       // d) complete fit
       fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
@@ -664,7 +664,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
         }
         else
         {
-          g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width
+          g_log.debug() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width
               << ", Height=" << height << ", Background slope=" << bgslope
               << ", Background intercept=" << bgintercept << std::endl;
           API::TableRow t = m_peaks->appendRow();
@@ -675,7 +675,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
       } // if SUCCESS
       else
       {
-        g_log.information() << "Fit Status = " << fitStatus << std::endl;
+        g_log.debug() << "Fit Status = " << fitStatus << std::endl;
       } // if FAILED
 
     }
@@ -689,7 +689,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
   } // if high background
 
-  g_log.information() << "Fit Peak Over" << std::endl;
+  g_log.debug() << "Fit Peak Over" << std::endl;
 
   return;
 
@@ -812,7 +812,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
   }
   std::string function = ss.str();
-  g_log.information() << "Background Type = " << backgroundtype << "  Function: " << function << std::endl;
+  g_log.debug() << "Background Type = " << backgroundtype << "  Function: " << function << std::endl;
 
   // d) complete fit
   fit->setProperty("StartX", (X[i0] - 5 * (X[i0] - X[i2])));
@@ -839,7 +839,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   if (backgroundtype.compare("Quadratic")==0){
     a2 = params[2];
   }
-  g_log.notice() << "Backgound parameters: a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
+  g_log.debug() << "Backgound parameters: a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
 
   // f) Create theoretic background workspace and thus peak workspace
   // TODO theortic background workspace will be removed when the code is matured
@@ -918,7 +918,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     gfit->setProperty("CostFunction", "Least squares");
     gfit->setProperty("Function", function);
 
-    g_log.notice() << "Function: " << function << "  From " << (X[i4] - 5 * (X[i0] - X[i2])) << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
+    g_log.debug() << "Function: " << function << "  From " << (X[i4] - 5 * (X[i0] - X[i2])) << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
     gfit->executeAsSubAlg();
@@ -952,7 +952,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     std::string outputstatus = gfit->getProperty("OutputStatus");
 
     if (fheight <= 0 || fsigma <= 0){
-      g_log.information() << "Wrong Fit!!!" << std::endl;
+      g_log.debug() << "Wrong Fit!!!" << std::endl;
     } else {
       if (chi2 < mincost){
         bestheight = fheight;
@@ -960,7 +960,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         bestsigma = fsigma;
       }
     }
-    g_log.information() << "Status: " << outputstatus << " Cost = " << chi2 << "  Height, Center, Sigma = " << fheight << ", " << fcenter << ", " << fsigma << std::endl;
+    g_log.debug() << "Status: " << outputstatus << " Cost = " << chi2 << "  Height, Center, Sigma = " << fheight << ", " << fcenter << ", " << fsigma << std::endl;
 
   } // ENDFOR
 
@@ -998,7 +998,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     throw std::invalid_argument("Background type is not supported in FindPeak.cpp");
   }
   function = ss2.str();
-  g_log.information() << "Final Fit Function: " << function << std::endl;
+  g_log.debug() << "Final Fit Function: " << function << std::endl;
 
   // d) complete fit
   lastfit->setProperty("StartX", (X[i4] - 2 * (X[i0] - X[i2])));

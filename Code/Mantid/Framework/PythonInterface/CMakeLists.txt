@@ -36,10 +36,10 @@ add_subdirectory ( mantid )
 ###########################################################################
 # tests 
 ###########################################################################
-# cxx unit tests # Not currently stable on all environments
-
+# C++ unit tests
 set ( TEST_FILES
-  test/cpp/PythonObjectInstantiatorTest.h 
+  test/cpp/PythonObjectInstantiatorTest.h
+#  test/cpp/VectorDelegateTest.h # Windows doesn't like having two around
 )  
   
 if ( CXXTEST_FOUND )
@@ -60,8 +60,10 @@ set ( TEST_PY_FILES
   test/python/AnalysisDataServiceTest.py
   test/python/FilePropertyTest.py
   test/python/FrameworkManagerTest.py
+  test/python/IEventWorkspaceTest.py
   test/python/ImportModuleTest.py
   test/python/MatrixWorkspaceTest.py
+  test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmTest.py
   test/python/QuatTest.py
   test/python/V3DTest.py

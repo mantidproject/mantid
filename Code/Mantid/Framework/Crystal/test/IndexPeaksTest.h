@@ -74,11 +74,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("tolerance","0.1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerance","0.1") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    double tolerance = alg.getProperty("tolerance");
+    double tolerance = alg.getProperty("Tolerance");
 
                                        // Check that the peaks were all indexed 
     for ( size_t i = 0; i < n_peaks; i++ )
