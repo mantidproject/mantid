@@ -111,6 +111,9 @@ namespace Kernel
       m_children.push_back(child);
     }
 
+     virtual void modify_validator(IValidator<TYPE> *pNewValidator)
+     {
+     }
   private:
     /// Private Copy constructor: NO DIRECT COPY ALLOWED
     CompositeValidator(const CompositeValidator&);

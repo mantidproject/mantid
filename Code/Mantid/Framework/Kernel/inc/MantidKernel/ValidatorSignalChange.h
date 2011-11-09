@@ -18,7 +18,7 @@ namespace Kernel
 
 /** ValidatorSignalChange is a validator, which connects to a property and signals to subscribers that this property has changed
 
-    @author Alex Buts
+   DO NOT USE -- currently incorrect
     @date 03/11/2011
 
     Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

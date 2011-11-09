@@ -10,11 +10,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Poco/StringTokenizer.h>
 #include <vector>
 #include "MantidKernel/IPropertySettings.h"
+
 
 namespace Mantid
 {
@@ -417,7 +419,40 @@ public:
   {
     return m_validator->allowedValues();
   }
-
+  /** function modyfies validator e.g. replaces it by the new one if the old and new validator types are equivalent.
+    *
+    * if existing validator is a composite validator, it looks through all memeber validators and replaces the first, 
+    * which has the same type as the new. 
+    * if the validator types are different, a composite validator consising of old and new validator is created
+    *@param *pNewValidator -- new validator
+    *@param just_replace   -- if set to true, the old validator is just replaced by the new one regardless of their types. 
+   */
+  virtual void modify_validator(IValidator<TYPE> *pNewValidator,bool just_replace=false)
+  {
+      if(!pNewValidator)return;
+      //
+    //  if(just_replace){
+          delete m_validator;
+          m_validator = pNewValidator;
+          return;
+    //  }
+      //// need to build composite validator, combining new and old validators 
+      //CompositeValidator<TYPE> *compo_val  = dynamic_cast<CompositeValidator<TYPE>* >(m_validator);
+      //if(compo_val ){
+      //    compo_val->modify_validator(pNewValidator);
+      //    return;
+      //}
+      //// the validator is just replacement for the old one;
+      //if(typeid(m_validator)==typeid(pNewValidator)){
+      //    delete m_validator;
+      //    m_validator = pNewValidator;
+      //}else{ // build composite validator
+      //    CompositeValidator<TYPE> *new_val = new CompositeValidator<TYPE>();
+      //    new_val->add(m_validator);
+      //    new_val->add(pNewValidator);
+      //    m_validator = new_val;
+      //}
+  }
 protected:
   /// The value of the property
   TYPE m_value;

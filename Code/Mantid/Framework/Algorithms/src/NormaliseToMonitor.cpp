@@ -88,7 +88,7 @@ void
 prop_changer::monitor_id_reader()const
 {
     allowed_values.clear();
-    API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(host_monws_name);
+    API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(host_ws_name);
     if(!inputWS){
         return ;
     }

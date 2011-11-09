@@ -61,7 +61,7 @@ class IPropertyManager;
     /** Is the property to be shown in the GUI? Default true. */
     virtual bool isVisible() const
     { return true; }
-    /** to verify if the properties, this one depends on are changed
+    /** to verify if the properties, this one depends on have changed
         or other special condition occurs which needs the framework to react to */
     virtual bool isConditionChanged()const
     {return false;}
