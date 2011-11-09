@@ -73,7 +73,6 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
 
   //Show the fitPropertyBrowser if it isn't already.
   m_fitPropertyBrowser->show();
-
   connect(this,SIGNAL(isOn(bool)),m_fitPropertyBrowser,SLOT(setPeakToolOn(bool)));
   emit isOn(true);
 
@@ -602,7 +601,6 @@ void PeakPickerTool::startXChanged(double sX)
 {
   xMin(sX);
   graph()->replot();
-  emit xRangeChanged(m_xMin, m_xMax);
 }
 
 /**
@@ -613,7 +611,6 @@ void PeakPickerTool::endXChanged(double eX)
 {
   xMax(eX);
   graph()->replot();
-  emit xRangeChanged(m_xMin, m_xMax);
 }
 
 /**

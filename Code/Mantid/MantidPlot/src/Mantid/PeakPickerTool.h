@@ -98,10 +98,6 @@ public slots:
 
 signals:
   void peakChanged();
-  // Signal used to dispatch the current selected X range
-  // It would be much cleaner if the FitPropertyBrowser and the PeakPickerTool
-  // were disentangled.
-  void xRangeChanged(double, double);
   void isOn(bool);
 
 private slots:
