@@ -413,4 +413,5 @@ class SANSInstrumentWidget(BaseWidget):
                 ids_str = masked_detectors.getPropertyValue("DetectorList")
                 m.detector_ids = map(int, ids_str.split(','))
         
+        self._settings.emit_key_value("DARK_CURRENT", QtCore.QString(str(self._summary.dark_file_edit.text())))
         return m

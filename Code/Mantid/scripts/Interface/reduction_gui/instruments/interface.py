@@ -133,7 +133,9 @@ class InstrumentInterface(object):
             print "Could not save last reduction\n  %s" % str(traceback.format_exc())        
         
         try:
+            self.set_running(True)
             self.scripter.apply()
+            self.set_running(False)
         except RuntimeError, e:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
@@ -181,6 +183,13 @@ class InstrumentInterface(object):
             tab_list.append([item.name, item])
         return tab_list
 
+    def set_running(self, is_running=True):
+        """
+            Tell the widgets whether they are running or not
+        """
+        for widget in self.widgets:
+            widget.is_running(is_running)
+        
     def reset(self):
         """
             Reset the interface

@@ -24,7 +24,7 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
     //std::cout << "MantidApplication::notify( event.type() == " << event->type() << ")\n";
     res = QApplication::notify(receiver,event);
   }
-  catch(std::exception& e) 
+  catch(std::exception& e)
   {
 
     if (MantidQt::API::MantidDialog::handle(receiver,e))
@@ -51,7 +51,7 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
     }else
         g_log.fatal("Continue working.");
   }
-  catch(...) 
+  catch(...)
   {
 
     g_log.fatal()<<"Unknown exception\n";

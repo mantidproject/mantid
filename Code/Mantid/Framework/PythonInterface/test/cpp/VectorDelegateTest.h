@@ -22,7 +22,7 @@ public:
   void test_that_a_non_sequence_type_returns_an_appropriate_error_string_from_isConvertible()
   {
     PyObject *dict = PyDict_New();
-    TS_ASSERT_EQUALS(VectorDelegate<int>::isConvertibleToStdVector(dict), "Cannot convert dict object to a std::vector.");
+    TS_ASSERT_EQUALS(VectorDelegate<int>::isSequenceType(dict), "Cannot convert dict object to a std::vector.");
     Py_DECREF(dict);
   }
 

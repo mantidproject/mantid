@@ -151,19 +151,9 @@ public:
     MatrixWorkspace_sptr outWS;
     TS_ASSERT_THROWS_NOTHING(outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testMW")) );
 
+    //Some basic checks
     TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
     TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
-
-    //Input workspace created via helper has same value for every pixel, should thefore have identical output workspace.
-    for(size_t i = 0; i < outWS->getNumberHistograms(); i++)
-    {
-      for(size_t j = 0; j < outWS->readY(i).size(); j++)
-      {
-        double expected= inWS->readY(i)[j];
-        double actual = outWS->readY(i)[j];
-        TS_ASSERT_DELTA(expected, actual, 0.001);
-      }
-    }
 
     //Check that the workspaces are identical, including x and y values.
     CheckWorkspacesMatch* checkAlg = new CheckWorkspacesMatch;
