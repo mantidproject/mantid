@@ -5,9 +5,9 @@
 
 #include <QWidget>
 
+class QBoxLayout;
 class QGraphicsScene;
 class QGraphicsView;
-class QGridLayout;
 class QMenu;
 class QMouseEvent;
 class QString;
@@ -186,7 +186,7 @@ private:
   QMenu *indicatorContextMenu; ///< The indicator context menu
   QwtScaleEngine *engine; ///< The scale type for the axis widget
   QGraphicsView *graphicsView; ///< The holder for the slice indicators
-  QGridLayout *gridLayout; ///< Layout manager for widgets
+  QBoxLayout *boxLayout; ///< Layout manager for widgets
   bool isSceneGeomInit; ///< Flag to ensure the scene is initialized once
   Qt::Orientation orientation; ///< The overall orientation of the widget
   ScalePicker *scalePicker; ///< The picker that retrieves the axis location

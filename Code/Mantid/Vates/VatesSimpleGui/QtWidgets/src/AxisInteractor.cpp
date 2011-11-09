@@ -12,11 +12,12 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
-#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QList>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QString>
+#include <QVBoxLayout>
 
 #include <cmath>
 #include <iostream>
@@ -41,14 +42,18 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
   this->graphicsView->setFrameShape(QFrame::NoFrame);
   this->graphicsView->setFrameShadow(QFrame::Plain);
   this->graphicsView->setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);
+  this->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  this->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  this->gridLayout = new QGridLayout(this);
   this->scaleWidget = new QwtScaleWidget(this);
+  this->scaleWidget->setSpacing(0);
+  this->scaleWidget->setMargin(0);
 
   this->scene = new QGraphicsScene(this);
   this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
   this->isSceneGeomInit = false;
 
+  //this->setScalePosition(pos);
   //this->widgetLayout();
 
   this->graphicsView->setScene(this->scene);
@@ -70,71 +75,74 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 
 void AxisInteractor::widgetLayout()
 {
-  if (!this->gridLayout->isEmpty())
+  /*
+  if (!this->boxLayout->isEmpty())
   {
-    for (int i = 0; i < this->gridLayout->count(); ++i)
+    for (int i = 0; i < this->boxLayout->count(); ++i)
     {
-      this->gridLayout->removeItem(this->gridLayout->itemAt(i));
+      this->boxLayout->removeItem(this->boxLayout->itemAt(i));
     }
   }
-
+*/
   // All set for vertical orientation
-  int scaleWidth = 50;
-  int scaleHeight = 150;
-  int gvWidth = 50;
-  int gvHeight = 150;
-  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+  QSize scaleSize(80, 400);
+  QSize gvSize(20, 400);
+  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
   if (this->orientation == Qt::Vertical)
   {
+    this->boxLayout = new QHBoxLayout(this);
+    this->scaleWidget->setFixedSize(scaleSize);
+    this->graphicsView->setFixedSize(gvSize);
     switch (this->scalePos)
     {
     case LeftScale:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::RightScale);
-      this->gridLayout->addWidget(this->graphicsView, 0, 0, 1, 1);
-      this->gridLayout->addWidget(this->scaleWidget, 0, 1, 1, 1);
+      this->boxLayout->addWidget(this->graphicsView, 0);
+      this->boxLayout->addWidget(this->scaleWidget, 1);
       break;
     }
     case RightScale:
     default:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::LeftScale);
-      this->gridLayout->addWidget(this->scaleWidget, 0, 0, 1, 1);
-      this->gridLayout->addWidget(this->graphicsView, 0, 1, 1, 1);
+      this->boxLayout->addWidget(this->scaleWidget, 0);
+      this->boxLayout->addWidget(this->graphicsView, 1);
       break;
     }
     }
   }
   else // Qt::Horizontal
   {
-    qSwap(scaleWidth, scaleHeight);
-    qSwap(gvWidth, gvHeight);
-    policy.transpose();
+    this->boxLayout = new QVBoxLayout(this);
+    scaleSize.transpose();
+    gvSize.transpose();
+    this->scaleWidget->setFixedSize(scaleSize);
+    this->graphicsView->setFixedSize(gvSize);
     switch (this->scalePos)
     {
     case BottomScale:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::TopScale);
-      this->gridLayout->addWidget(this->scaleWidget, 0, 0, 1, 1);
-      this->gridLayout->addWidget(this->graphicsView, 1, 0, 1, 1);
+      this->boxLayout->addWidget(this->scaleWidget, 0);
+      this->boxLayout->addWidget(this->graphicsView, 1);
       break;
     }
     case TopScale:
     default:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::BottomScale);
-      this->gridLayout->addWidget(this->graphicsView, 0, 0, 1, 1);
-      this->gridLayout->addWidget(this->scaleWidget, 1, 0, 1, 1);
+      this->boxLayout->addWidget(this->graphicsView, 0);
+      this->boxLayout->addWidget(this->scaleWidget, 1);
       break;
     }
     }
   }
+  this->boxLayout->setContentsMargins(0, 0, 0, 0);
+  this->boxLayout->setSpacing(0);
   this->scaleWidget->setSizePolicy(policy);
-  this->scaleWidget->setMinimumSize(QSize(scaleWidth, scaleHeight));
   this->graphicsView->setSizePolicy(policy);
-  this->graphicsView->setMinimumSize(QSize(gvWidth, gvHeight));
-  this->setSizePolicy(policy);
 }
 
 void AxisInteractor::setInformation(QString title, double min, double max)
