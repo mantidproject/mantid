@@ -21,6 +21,7 @@
 #include <iostream>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
@@ -341,7 +342,24 @@ namespace Geometry
     return m_instrument;
   }
 
+  //-----------------------------------------------------------------------------------------------------------------------
+  /** Save DOM tree to xml file. This method was initially added for testing purpose
+   *  but may be useful for other purposes. During the parsing of the DOM tree
+   *  in parseXML() the tree may be modified, e.g. if <combine-components-into-one-shape>
+   *  is used.
+   *
+   *  @param outFilename :: To set position/location off
+   */
+  void InstrumentDefinitionParser::saveDOM_Tree(std::string& outFilename)
+  {
+    Poco::XML::DOMWriter writer;
+    writer.setNewLine("\n");
+    writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
 
+    std::ofstream outFile(outFilename.c_str());
+    writer.writeNode(outFile, pDoc);
+    outFile.close();
+  }
 
   //-----------------------------------------------------------------------------------------------------------------------
   /** Set location (position) of comp as specified in XML location element.
