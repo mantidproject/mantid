@@ -32,7 +32,7 @@ namespace CustomInterfaces
 {
 
 //Add this class to the list of specialised dialogs in this namespace
-//DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
+DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
@@ -142,9 +142,7 @@ void CreateMDWorkspace::addWorkspaceClicked()
         m_approach = Approach_sptr(new InelasticISIS);
       }
 
-      m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
       m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(m_memento))));
-      m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
       LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(m_memento));
       m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(logPresenter));
       m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createEditableLogView(logPresenter));

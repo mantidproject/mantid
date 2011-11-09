@@ -6,7 +6,8 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-    QtWorkspaceMementoModel::QtWorkspaceMementoModel(Mantid::API::ITableWorkspace_sptr displayData) : m_displayData(displayData)
+    QtWorkspaceMementoModel::QtWorkspaceMementoModel(Mantid::API::ITableWorkspace_sptr displayData) : 
+      QAbstractTableModel(NULL), m_displayData(displayData)
     {
     }
 
@@ -25,8 +26,9 @@ namespace CustomInterfaces
       return 4; //Only display a subset of the actual available columns in the table workspace.
     }
 
-    QVariant QtWorkspaceMementoModel::data(const QModelIndex &index, int) const
+    QVariant QtWorkspaceMementoModel::data(const QModelIndex &index, int role) const
     {
+      if( role != Qt::DisplayRole ) return QVariant();
       Mantid::API::Column_sptr col;
       const int colNumber = index.column();
 
@@ -43,7 +45,7 @@ namespace CustomInterfaces
       }
       std::stringstream strstream;
       col->print(strstream, index.row());
-         return QString(strstream.str().c_str());
+      return QString(strstream.str().c_str());
     }
 
     QVariant QtWorkspaceMementoModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -74,7 +76,9 @@ namespace CustomInterfaces
 
     Qt::ItemFlags QtWorkspaceMementoModel::flags(const QModelIndex &index) const
     {
-      return QAbstractTableModel::flags(index);
+      if (!index.isValid()) return 0;
+
+      return Qt::ItemIsEnabled;
     }
 
     QtWorkspaceMementoModel::~QtWorkspaceMementoModel()
