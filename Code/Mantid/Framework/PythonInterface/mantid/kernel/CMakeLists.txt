@@ -8,6 +8,8 @@ set ( EXPORT_FILES
   src/DataItem.cpp
   src/IPropertyManager.cpp
   src/Property.cpp
+  src/PropertyWithValue.cpp
+  src/ArrayProperty.cpp
   src/Quat.cpp
   src/V3D.cpp
 )  

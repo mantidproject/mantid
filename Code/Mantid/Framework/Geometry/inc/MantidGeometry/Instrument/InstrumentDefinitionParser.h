@@ -65,6 +65,9 @@ namespace Geometry
     /// get name of location element
     static std::string getNameOfLocationElement(Poco::XML::Element* pElem);
 
+    /// Save DOM tree to xml file
+    void saveDOM_Tree(std::string& outFilename);
+
   private:
     /// Static reference to the logger class
     static Kernel::Logger& g_log;

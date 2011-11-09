@@ -4,9 +4,11 @@
 #include <numpy/arrayobject.h>
 
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
 
 using namespace Mantid::PythonInterface;
 using PropertyMarshal::SingleValueTypeHandler;
+using PropertyMarshal::SequenceTypeHandler;
 
 // Forward declare
 @EXPORT_DECLARE@
@@ -24,6 +26,9 @@ BOOST_PYTHON_MODULE(_kernel)
   PropertyMarshal::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
   PropertyMarshal::registerHandler(&PyFloat_Type, new SingleValueTypeHandler<double>());
   PropertyMarshal::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
+  PropertyMarshal::registerHandler(&PyList_Type, new SequenceTypeHandler());
+  PropertyMarshal::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
+  
 
 @EXPORT_FUNCTIONS@
 }
