@@ -2,7 +2,8 @@
     Data catalog for EQSANS
 """
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
-from reduction_gui.reduction.sans.data_cat import DataSet as BaseDataSet   
+from reduction_gui.reduction.sans.data_cat import DataSet
+from data_cat import DataType
 import re
 import time
 
@@ -15,8 +16,13 @@ try:
 except:
     HAS_MANTID = False    
 
-class EQSANSDataSet(BaseDataSet):
+class EQSANSDataType(DataType):
+    TABLE_NAME="eqsans_datatype"
+
+class EQSANSDataSet(DataSet):
     TABLE_NAME="eqsans_dataset"
+    data_type_cls = EQSANSDataType
+
     def __init__(self, run_number, title, run_start, duration, sdd):
         super(EQSANSDataSet, self).__init__(run_number, title, run_start, duration, sdd)
 
@@ -33,11 +39,18 @@ class EQSANSDataSet(BaseDataSet):
         """
             Return a DB handle for the given file, such as a run number
         """
+        file_path = file_path.strip()
         r_re = re.search("EQSANS_([0-9]+)_event", file_path)
-        if r_re is None:
-            return None
-        
-        return r_re.group(1)
+        if r_re is not None:   
+            return r_re.group(1)
+        else:
+            # Check whether we simply have a run number
+            try:
+                run = int(file_path)
+                return file_path
+            except:
+                return None
+        return None
     
     @classmethod
     def read_properties(cls, ws, run, cursor):
