@@ -20,7 +20,6 @@ BOOST_PYTHON_MODULE(_kernel)
   // Import numpy
   _import_array();
   
-  
   // Map builtin type objects to appropriate handler classes for properties
   PropertyMarshal::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
   PropertyMarshal::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
@@ -28,6 +27,7 @@ BOOST_PYTHON_MODULE(_kernel)
   PropertyMarshal::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
   PropertyMarshal::registerHandler(&PyList_Type, new SequenceTypeHandler());
   PropertyMarshal::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
+  PropertyMarshal::registerHandler(&PyArray_Type, new SequenceTypeHandler()); // Numpy array
   
 
 @EXPORT_FUNCTIONS@

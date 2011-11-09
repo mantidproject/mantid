@@ -51,7 +51,7 @@ namespace Mantid
       /// Convert a Python type into a C++ std vector using the template element type
       DLLExport static const std::vector<ElementType> toStdVector(PyObject *value);
       /// Check that the list contains items of the required type for the C++ type
-      DLLExport static std::string isConvertibleToStdVector(PyObject* value);
+      DLLExport static std::string isSequenceType(PyObject* value);
     };
 
   }

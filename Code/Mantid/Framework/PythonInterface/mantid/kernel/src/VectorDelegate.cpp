@@ -17,7 +17,7 @@ namespace Mantid
     template<typename ElementType>
     const std::vector<ElementType> VectorDelegate<ElementType>::toStdVector(PyObject *value)
     {
-      const std::string msg = isConvertibleToStdVector(value);
+      const std::string msg = isSequenceType(value);
       if( !msg.empty() )
       {
         throw std::invalid_argument(msg);
@@ -39,7 +39,7 @@ namespace Mantid
      *  @return ""if the list can be converted to a vector, otherwise it returns an error string
      */
     template<typename ElementType>
-    std::string VectorDelegate<ElementType>::isConvertibleToStdVector(PyObject* value)
+    std::string VectorDelegate<ElementType>::isSequenceType(PyObject* value)
     {
       std::string error("");
       if( !PySequence_Check(value) )
@@ -53,6 +53,7 @@ namespace Mantid
     // Concrete Instantiations
     //--------------------------------------------------------------------------
     template DLLExport struct VectorDelegate<int>;
+    template DLLExport struct VectorDelegate<std::size_t>;
     template DLLExport struct VectorDelegate<double>;
   }
 }
