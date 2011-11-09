@@ -168,15 +168,6 @@ protected slots:
    */
   void showContextMenu(const QPoint &pos);
 
-protected:
-  /**
-   * Intercept mouse clicks to avoid inadvertent creation of indicators. This
-   * forces the mode of right clicking near the axis to get an indicator.
-   * @param obj the QObject that spawned the event
-   * @param event the associated QEvent
-   */
-  bool eventFilter(QObject *obj, QEvent *event);
-
 private:
   /// Create the context menu of the indicators
   void createContextMenu();

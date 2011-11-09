@@ -52,12 +52,7 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
   this->scene = new QGraphicsScene(this);
   this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
   this->isSceneGeomInit = false;
-
-  //this->setScalePosition(pos);
-  //this->widgetLayout();
-
   this->graphicsView->setScene(this->scene);
-  //this->graphicsView->installEventFilter(this);
 
   this->engine = new QwtLinearScaleEngine;
   this->transform = new QwtScaleTransformation(QwtScaleTransformation::Linear);
@@ -75,15 +70,6 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 
 void AxisInteractor::widgetLayout()
 {
-  /*
-  if (!this->boxLayout->isEmpty())
-  {
-    for (int i = 0; i < this->boxLayout->count(); ++i)
-    {
-      this->boxLayout->removeItem(this->boxLayout->itemAt(i));
-    }
-  }
-*/
   // All set for vertical orientation
   QSize scaleSize(80, 400);
   QSize gvSize(20, 400);
@@ -237,36 +223,6 @@ void AxisInteractor::updateIndicator(double value)
   {
     Indicator *item = static_cast<Indicator *>(list.at(0));
     item->updatePos(*pos);
-  }
-}
-
-bool AxisInteractor::eventFilter(QObject *obj, QEvent *event)
-{
-  if (obj == this->graphicsView)
-  {
-    if (event->type() == QEvent::MouseButtonPress ||
-        event->type() == QEvent::MouseButtonDblClick)
-    {
-      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-      if (mouseEvent->button() == Qt::RightButton)
-      {
-        // Want to eat these so users don't add the indicators
-        // via the QGraphicsView (Yum!)
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    else
-    {
-      return false;
-    }
-  }
-  else
-  {
-    return AxisInteractor::eventFilter(obj, event);
   }
 }
 
