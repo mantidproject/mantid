@@ -27,6 +27,9 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include <QGroupBox>
 #include <climits>
+//HACK: (temporary)
+#include "MantidKernel/ValidatorAnyList.h"
+
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -377,7 +380,24 @@ void GenericDialog::initLayout()
 void
 GenericDialog::createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row)
 {
-  
+//HACK: (temporary)
+    if(pProp->isConditionChanged()){
+        std::vector<std::string> new_values = pProp->getSettings()->getAllowedValues();
+        PropertyWithValue<std::string>* plProp  = dynamic_cast<PropertyWithValue<std::string>* >(pProp);
+        if(plProp){
+            plProp->modify_validator(new ListValidator(new_values));
+        }
+        PropertyWithValue<int>* piProp  = dynamic_cast<PropertyWithValue<int>* >(pProp);
+        if(piProp){
+            std::vector<int> ival(new_values.size());
+            for(size_t i=0;i<new_values.size();i++){
+                ival[i]=boost::lexical_cast<int>(new_values[i]);
+            }
+            piProp->modify_validator(new ValidatorAnyList<int>(ival));
+        }
+    }
+//END HACK
+
       // Look for specific property types
       Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(pProp);
       Mantid::API::MultipleFileProperty* multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty*>(pProp);
@@ -397,15 +417,16 @@ GenericDialog::createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int
       }
 
 }
+//
 int
 GenericDialog::deletePropertyWidgets(Mantid::Kernel::Property *pProp)
 {
    QString propName=QString::fromStdString(pProp->name());
-   QHash<QString, QSignalMapper *>::iterator it;
-   while((it = m_mappers.find(propName))!=m_mappers.end()){
-        delete it.value();
-        it=m_mappers.erase(it);
-   }
+   //QHash<QString, QSignalMapper *>::iterator it;
+   //while((it = m_mappers.find(propName))!=m_mappers.end()){
+   //     delete it.value();
+   //     it=m_mappers.erase(it);
+   //} 
 
   int nRow=INT_MAX;
   QList<QWidget*> widgets = m_tied_all_widgets[propName];
@@ -418,6 +439,8 @@ GenericDialog::deletePropertyWidgets(Mantid::Kernel::Property *pProp)
        widgets[i]->close();
    }
   m_currentGrid->parentWidget()->repaint(true);
+
+  
   return nRow;
 }
 

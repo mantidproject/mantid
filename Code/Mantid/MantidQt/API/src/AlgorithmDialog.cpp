@@ -266,7 +266,7 @@ void AlgorithmDialog::hideOrDisableProperties()
 
       if (p->isConditionChanged()){
           int row = this->deletePropertyWidgets(p);
-          //this->createSpecificPropertyWidget(p,row);
+          this->createSpecificPropertyWidget(p,row);
       }
 
       // Show/hide the validator label (that red star)

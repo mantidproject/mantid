@@ -77,8 +77,11 @@ public:
        monitor_id_reader();
        // if no monitors are associated with workspace -- ok -- you just have to use spectra_ID (may be not on an monitor)
        if(allowed_values.empty())return false;
+       //Kernel::Property *pProperty = host_algo->getPointerToProperty(
        return true;
    }
+   // temporary
+   std::vector<std::string> getAllowedValues()const{return allowed_values;}
    //
    virtual IPropertySettings* clone(){return new prop_changer(host_algo,host_ws_name,host_monws_name);}
 
@@ -100,7 +103,7 @@ prop_changer::monitor_id_reader()const
     std::vector<detid_t> mon = pInstr->getMonitors();
     allowed_values.resize(mon.size());
     for(size_t i=0;i<mon.size();i++){
-        allowed_values[i]="mon_id"+boost::lexical_cast<std::string>(mon[i]);
+        allowed_values[i]=boost::lexical_cast<std::string>(mon[i]);
     }
     return ;
 }

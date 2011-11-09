@@ -65,6 +65,8 @@ class IPropertyManager;
         or other special condition occurs which needs the framework to react to */
     virtual bool isConditionChanged()const
     {return false;}
+    // temporary patch function, allowing to do what I need in very dirty way;
+    virtual std::vector<std::string> getAllowedValues()const{return std::vector<std::string>();};
     //------------------------------------------------------------------------------------------------------------
     /** Set the property manager (i.e. algorithm) containing the other properties to use to validate
      * @param propertyManager :: pointer  */
