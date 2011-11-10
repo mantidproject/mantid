@@ -179,4 +179,21 @@ public:
     }
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadISISNexusTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadISISNexus2 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ49886.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
+
 #endif /*LOADISISNEXUSTEST_H_*/

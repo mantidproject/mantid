@@ -2,7 +2,8 @@
     Data catalog for HFIR SANS
 """
 from data_cat import DataCatalog as BaseCatalog
-from data_cat import DataSet as BaseDataSet
+from data_cat import DataSet
+from data_cat import DataType
 import os
 import time
 
@@ -15,8 +16,13 @@ try:
 except:
     HAS_MANTID = False    
 
-class HFIRDataSet(BaseDataSet):
+class HFIRDataType(DataType):
+    TABLE_NAME="hfir_datatype"
+    
+class HFIRDataSet(DataSet):
     TABLE_NAME="hfir_dataset"
+    data_type_cls = HFIRDataType
+    
     def __init__(self, run_number, title, run_start, duration, sdd):
         super(HFIRDataSet, self).__init__(run_number, title, run_start, duration, sdd)
 

@@ -77,14 +77,13 @@ double QwtRasterDataMD::value(double x, double y) const
   }
   // Get the signal at that point
   signal_t value = m_ws->getSignalAtCoord(lookPoint);
-  if (value < m_minVal) m_minVal = value;
-  if (value > m_maxVal) m_maxVal = value;
   delete [] lookPoint;
 
+  // Special case for 0 = show as NAN
   if (value == 0.)
     return nan;
-  else
-    return value;
+
+  return value;
 }
 
 

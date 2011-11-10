@@ -280,10 +280,21 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   //Get the use radius flag.
   bool useRadius = getProperty("ProvideRadius");
   int nNeighbours = getProperty("NumberOfNeighbours");
-
+  IDetector_const_sptr det;
   // Go through every input workspace pixel
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
   {
+    // We want to skip monitors
+    try
+    {
+      det = inWS->getDetector(wi);
+      if( det->isMonitor() ) continue; //skip monitor
+    }
+    catch(Kernel::Exception::NotFoundError&)
+    {
+      continue; //skip missing detector
+    }
+
     specid_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
     std::map<specid_t, double> neighbSpectra;
     if(useRadius)
@@ -389,15 +400,6 @@ void SmoothNeighbours::exec()
 /** Execute the algorithm for a Workspace2D/don't preserve events input */
 void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 {
-  /*
-  Note that there is an issue with using managed workspaces with this algorithm see issue 4075.
-  */
-  if(!ws->threadSafe())
-  {
-    throw std::invalid_argument("This algorithm does not work for ManagedWorkspaces.");
-  }
-
-
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
   //Get some stuff from the input workspace
