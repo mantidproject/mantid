@@ -62,7 +62,13 @@ class PropertyWithValueTest(unittest.TestCase):
         values = [2,3,4.0,5,6]
         self.assertRaises(TypeError, self._mask_dets.set_property, "WorkspaceIndexList", values) #size_t
 
-    def _do_numpy_test(self, int_type=False):
+    def test_set_property_of_vector_double_succeeds_with_numpy_array_of_float_type(self):
+        self._do_vector_double_numpy_test()
+
+    def test_set_property_of_vector_double_succeeds_with_numpy_array_of_int_type(self):
+        self._do_vector_double_numpy_test(True)
+
+    def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = algorithm_mgr.create_unmanaged('CreateWorkspace')
         create_ws.initialize()
         if int_type:
@@ -73,10 +79,22 @@ class PropertyWithValueTest(unittest.TestCase):
         x_values = create_ws.get_property('DataX').value
         self.assertEquals(len(x_values), 10)
         for i in range(10):
-            self.assertEquals(x_values[i], i)	
+            self.assertEquals(x_values[i], i)    
 
-    def test_set_property_succeeds_with_numpy_array_of_correct_type(self):
-        self._do_numpy_test()
+    def _do_vector_int_numpy_test(self, property_name, dtype=None):
+        # Use the maskdetectors alg
+        indices = np.arange(6,dtype=dtype)
+        self._mask_dets.set_property(property_name, indices)
+        prop_values = self._mask_dets.get_property(property_name).value
+        self.assertEquals(len(prop_values), 6)
+        for i in range(6):
+            self.assertEquals(prop_values[i], i)    
 
-    def test_set_property_succeeds_with_numpy_array_of_correct_type(self):
-        self._do_numpy_test(True)
+    def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
+        # Minor hole with int64 as that technically can't be converted to an int32 without precision loss 
+        # but I don't think it will be heavily used so we'll see
+        self._do_vector_int_numpy_test('DetectorList', np.int32) 
+
+    def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
+        self._do_vector_int_numpy_test('WorkspaceIndexList')
+
