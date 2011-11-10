@@ -1,6 +1,7 @@
 #ifndef PYTHONOBJECTINSTANTIATORTEST_H_
 #define PYTHONOBJECTINSTANTIATORTEST_H_
 
+#include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
@@ -8,6 +9,40 @@
 #include "MantidKernel/ConfigService.h"
 
 #include <boost/python/object.hpp>
+
+// ---------- Test world initialization ---------------------------------
+
+/**
+ * The cxxtest code ensures that the setup/tearDownWorld methods
+ * are called exactly once per test-process. We use this
+ * to initialize/shutdown the python interpreter
+ */
+class PythonProcessHandler : CxxTest::GlobalFixture
+{
+public:
+  bool setUpWorld()
+  {
+    Py_Initialize();
+    // A fatal error occurs if initialization fails so
+    // everything should be okay if we got here
+    return true;
+  }
+
+  bool tearDownWorld()
+  {
+    // Py_Finalize(); // This kills RHEL5 for some reason
+    return true;
+  }
+};
+
+// From the cxxtest manual:
+//
+// We can rely on this file being included exactly once
+// and declare this global variable in the header file.
+//
+static PythonProcessHandler pythonProcessHandler;
+
+//-------------------------------------------------------------------------
 
 using Mantid::PythonInterface::PythonObjectInstantiator;
 using Mantid::API::IAlgorithm;
@@ -25,7 +60,7 @@ public:
   //
   PythonObjectInstantiatorTest() : m_creator(NULL)
   {
-    Py_Initialize();
+    //Py_Initialize();
   }
 
   ~PythonObjectInstantiatorTest()

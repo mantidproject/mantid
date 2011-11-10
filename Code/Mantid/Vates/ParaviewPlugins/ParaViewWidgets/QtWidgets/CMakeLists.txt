@@ -35,7 +35,7 @@ ${MANTID_SUBPROJECT_LIBS} )
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 
 # Put library into subfolder.
-#output_binary_to(MantidParaViewQtWidgets PVPlugins)
+#SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewQtWidgets PVPlugins)
 
 install( TARGETS MantidParaViewQtWidgets ${TARGET_TYPE} DESTINATION ${LIB_DIR} )
 

@@ -348,7 +348,7 @@ namespace Geometry
    *  in parseXML() the tree may be modified, e.g. if <combine-components-into-one-shape>
    *  is used.
    *
-   *  @param outFilename :: To set position/location off
+   *  @param outFilename :: Output filename
    */
   void InstrumentDefinitionParser::saveDOM_Tree(std::string& outFilename)
   {

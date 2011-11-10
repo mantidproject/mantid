@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_
-#define MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_
+#ifndef MANTID_PYTHONINTERFACE_NUMPYTYPEHANDLER_H_
+#define MANTID_PYTHONINTERFACE_NUMPYTYPEHANDLER_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -23,6 +23,11 @@
 */
 #include "MantidPythonInterface/kernel/PropertyHandler.h"
 
+//-----------------------------------------------------------------------------
+// Forward delcarations
+//-----------------------------------------------------------------------------
+struct PyArrayObject;
+
 namespace Mantid
 {
   namespace PythonInterface
@@ -30,20 +35,22 @@ namespace Mantid
     namespace PropertyMarshal
     {
       /**
-       * A property handler that deals with translation of multi-value
-       * Python types, i.e. python arrays etc to/from Mantid algorithm properties
-       * It does not handle Numpy arrays, @see NumpyTypeHandler
+       * A property handler that deals with translation of numpy arrays
+       * etc to/from Mantid algorithm properties
        */
-      struct DLLExport SequenceTypeHandler : PropertyHandler
+      struct DLLExport NumpyTypeHandler : PropertyHandler
       {
         /// Call to set a named property where the value is some container type
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value);
         /// Is the given object an instance the handler's type
         virtual bool isInstance(const boost::python::object&) const;
+      private:
+        /// Handle double-type properties
+        void setDoubleArrayProperty(Kernel::IPropertyManager* alg, const std::string &name, PyArrayObject * nparray);
       };
 
     }
   }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_ */
+#endif /* MANTID_PYTHONINTERFACE_NUMPYTYPEHANDLER_H_ */

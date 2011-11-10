@@ -315,6 +315,17 @@ namespace DataObjects
   }
 
   // -------------------------------------------------------------------------------------
+  /** Calculate the scattering angle of the peak  */
+  double Peak::getScattering() const
+  {
+    // The detector is at 2 theta scattering angle
+    V3D beamDir = samplePos - sourcePos;
+    V3D detDir = detPos - samplePos;
+
+    return detDir.angle(beamDir);
+  }
+
+  // -------------------------------------------------------------------------------------
   /** Calculate the d-spacing of the peak, in 1/Angstroms  */
   double Peak::getDSpacing() const
   {

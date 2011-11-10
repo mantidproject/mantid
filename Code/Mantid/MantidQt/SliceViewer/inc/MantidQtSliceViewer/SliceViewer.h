@@ -18,6 +18,7 @@
 #include <qwt_scale_widget.h>
 #include <vector>
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidAPI/IMDIterator.h"
 
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
@@ -55,6 +56,7 @@ private:
   void updateDisplay(bool resetAxes = false);
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
+  QwtDoubleInterval getRange(Mantid::API::IMDIterator * it);
 
   void findRangeFull();
   void findRangeSlice();
@@ -116,6 +118,8 @@ private:
   QMenu * m_menuColorOptions;
   QMenu * m_menuView;
 
+  /// Cached double for infinity
+  double m_inf;
 };
 
 #endif // SLICEVIEWER_H
