@@ -287,23 +287,6 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
 
-  // Set color selection widget <-> view signals/slots
-  QObject::connect(this->ui.colorSelectionWidget,
-                   SIGNAL(colorMapChanged(const pqColorMapModel *)),
-                   this->currentView,
-                   SLOT(onColorMapChange(const pqColorMapModel *)));
-  QObject::connect(this->ui.colorSelectionWidget,
-                   SIGNAL(colorScaleChanged(double, double)),
-                   this->currentView,
-                   SLOT(onColorScaleChange(double, double)));
-  QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
-                   this->ui.colorSelectionWidget,
-                   SLOT(setColorScaleRange(double, double)));
-  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(autoScale()),
-                   this->currentView, SLOT(onAutoScale()));
-  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
-                   this->currentView, SLOT(onLogScale(int)));
-
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
                    SIGNAL(setAnimationControlState(bool)),
@@ -359,8 +342,11 @@ void MdViewerWidget::checkForUpdates()
     vtkSMDoubleVectorProperty *range = \
         vtkSMDoubleVectorProperty::SafeDownCast(\
           proxy->GetProperty("ThresholdBetween"));
-    this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
-                                                      range->GetElement(1));
+    if (NULL != this->colorDialog)
+    {
+      this->colorDialog->setColorScaleRange(range->GetElement(0),
+                                            range->GetElement(1));
+    }
   }
 }
 

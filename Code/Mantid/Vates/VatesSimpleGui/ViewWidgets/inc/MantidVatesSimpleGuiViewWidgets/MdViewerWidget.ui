@@ -36,9 +36,6 @@
       <widget class="Mantid::Vates::SimpleGui::ModeControlWidget" name="modeControlWidget" native="true"/>
      </item>
      <item>
-      <widget class="Mantid::Vates::SimpleGui::ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -130,12 +127,6 @@
    <class>Mantid::Vates::SimpleGui::ModeControlWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
-   <extends>QWidget</extends>
-   <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
