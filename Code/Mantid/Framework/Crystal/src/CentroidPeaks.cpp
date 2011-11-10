@@ -57,6 +57,9 @@ namespace Crystal
     declareProperty(new PropertyWithValue<int>("PeakRadius",10,Direction::Input),
         "Fixed radius around each peak position in which to calculate the centroid.");
 
+    declareProperty(new PropertyWithValue<int>("EdgePixels",0,Direction::Input),
+      "The number of pixels where peaks are removed at edges. Only for instruments with RectangularDetectors. " );
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace","",Direction::Output),
         "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
         "with the peaks' positions modified by the new found centroids.");
@@ -176,6 +179,31 @@ namespace Crystal
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
+    for (int i= int(peakWS->getNumberPeaks())-1; i>=0; --i)
+    {
+      // Get a direct ref to that peak.
+      IPeak & peak = peakWS->getPeak(i);
+      int col = peak.getCol();
+      int row = peak.getRow();
+      Geometry::Instrument_const_sptr Iptr = peak.getInstrument();
+      std::string bankName = peak.getBankName();
+
+      boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+
+      if (parent->type().compare("RectangularDetector") != 0)
+      {
+
+        std::cout<<"   getPanel C type="<<parent->type()<<std::endl;
+                throw std::runtime_error("Improper Peak Argument");
+      }
+      boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
+                const RectangularDetector>(parent);
+      int Edge = getProperty("EdgePixels");
+      if (col < Edge || col > (RDet->xpixels()-Edge) || row < Edge || row > (RDet->ypixels()-Edge))
+      {
+        peakWS->removePeak(i);
+      }
+    }
     // Save the output
     setProperty("OutPeaksWorkspace", peakWS);
 
@@ -187,9 +215,13 @@ namespace Crystal
   void CentroidPeaks::exec()
   {
     inWS = getProperty("InputWorkspace");
-
+    
     // For quickly looking up workspace index from det id
     wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap(true);
+
+    eventW = boost::dynamic_pointer_cast<EventWorkspace>( inWS );
+    if(eventW)eventW->sortAll(TOF_SORT, NULL);
+
     integrate(inWS);
   }
 
