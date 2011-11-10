@@ -8,6 +8,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -71,7 +75,9 @@ namespace Mantid
     //
     //**********************************************************************************
 
-    /** Binary operation for two workspaces
+    /** Binary operation for two workspaces. Generic for IMDWorkspaces or MatrixWorkspaces...
+     * Called by python overloads for _binary_op (see api_exports.cpp)
+     *
      * @param lhs :: the left hand side workspace of the operation
      * @param rhs :: the right hand side workspace of the operation
      * @param op :: The operation
@@ -85,17 +91,33 @@ namespace Mantid
                         const std::string& op, const std::string & name,
                         bool inplace,bool reverse)
     {
+      std::string algoName = op;
+
+      // ----- Determine which version of the algo should be called -----
+      MatrixWorkspace_const_sptr lhs_mat = boost::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
+      MatrixWorkspace_const_sptr rhs_mat = boost::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
+      WorkspaceGroup_const_sptr lhs_grp = boost::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
+      WorkspaceGroup_const_sptr rhs_grp = boost::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
+
+      if ( (lhs_mat || lhs_grp) && (rhs_mat || rhs_grp) )
+        // Both sides are matrixworkspace - use the original algos (e..g "Plus.")
+        algoName = op;
+      else
+        // One of the workspaces must be MDHistoWorkspace or MDEventWorkspace
+        // Use the MD version, e.g. "PlusMD"
+        algoName = op + "MD";
+
       ResultType result;
       std::string error("");
       try
       {
         if( reverse )
         {
-          result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType, ResultType>(op, rhs, lhs, inplace, false, name, true);
+          result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType, ResultType>(algoName, rhs, lhs, inplace, false, name, true);
         }
         else
         {
-          result = API::OperatorOverloads::executeBinaryOperation<LHSType, RHSType, ResultType>(op, lhs, rhs, inplace, false, name, true);
+          result = API::OperatorOverloads::executeBinaryOperation<LHSType, RHSType, ResultType>(algoName, lhs, rhs, inplace, false, name, true);
         }
       }
       catch(std::runtime_error & exc)
@@ -114,8 +136,12 @@ namespace Mantid
       return result;
     }
 
+
     /** 
-    * Perform the given binary operation on a workspace and a double
+    * Perform the given binary operation on a workspace and a double.
+    * Generic to MDWorkspaces.
+    * Called by python overloads for _binary_op (see api_exports.cpp)
+    *
     * @param lhs :: The input workspace
     * @param rhs :: The input value
     * @param op :: The operation
@@ -128,6 +154,8 @@ namespace Mantid
         const std::string& op, const std::string & name,
         bool inplace, bool reverse)
     {
+      std::string algoName = op;
+
       // Create the single valued workspace first so that it is run as a top-level algorithm
       // such that it's history can be recreated
       API::Algorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged("CreateSingleValuedWorkspace");
@@ -147,22 +175,30 @@ namespace Mantid
       {
         throw std::runtime_error("performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
       }      
-      ResultType result = performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(inputWS, singleValue, op, name, inplace, reverse);
+      // Call the function above with the signle-value workspace
+      ResultType result = performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(inputWS, singleValue, algoName, name, inplace, reverse);
       // Delete the temporary
       data_store.remove(tmp_name);
       return result;
     }
 
+
+
     // Concrete instantations
-    template MatrixWorkspace_sptr performBinaryOp(const MatrixWorkspace_sptr, const MatrixWorkspace_sptr, const std::string& , const std::string & name,
-                                    bool, bool);
+    template IMDWorkspace_sptr performBinaryOp(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string& , const std::string & name,
+        bool, bool);
+    template WorkspaceGroup_sptr performBinaryOp(const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string& , const std::string & name,
+        bool, bool);
+    template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string& , const std::string & name,
+        bool, bool);
     template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string& , const std::string & name,
-                                    bool, bool);
+        bool, bool);
+
     // Double variants
-    template MatrixWorkspace_sptr performBinaryOpWithDouble(const MatrixWorkspace_sptr, const double, const std::string& op,
-                                                  const std::string &, bool, bool);
+    template IMDWorkspace_sptr performBinaryOpWithDouble(const IMDWorkspace_sptr, const double, const std::string& op,
+        const std::string &, bool, bool);
     template WorkspaceGroup_sptr performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double, const std::string& op,
-                                                    const std::string &, bool, bool);
+        const std::string &, bool, bool);
 
   }
 

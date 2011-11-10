@@ -60,6 +60,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
        C += B
        C *= B
        C /= B
+       # Commutative: double + workspace
+       C = B * A
+       C = B + A
         
         
 

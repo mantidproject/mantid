@@ -47,6 +47,9 @@ namespace Mantid
       private:
         /// Handle double-type properties
         void setDoubleArrayProperty(Kernel::IPropertyManager* alg, const std::string &name, PyArrayObject * nparray);
+        /// Handle int-type properties
+        void setIntNumpyProperty(Kernel::IPropertyManager* alg, const std::string &name,
+            const std::type_info & typeInfo, PyArrayObject * nparray);
       };
 
     }

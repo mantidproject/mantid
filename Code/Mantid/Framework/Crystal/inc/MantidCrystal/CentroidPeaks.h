@@ -10,6 +10,7 @@ This algorithm starts with a PeaksWorkspace containing the expected positions of
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -41,13 +42,13 @@ namespace Crystal
     void init();
     /// Run the algorithm
     void exec();
-    void integrate(API::MatrixWorkspace_sptr inWS);
+    void integrate();
+    void integrateEvent();
 
     /// Input 2D Workspace
     API::MatrixWorkspace_sptr inWS;
+    DataObjects::EventWorkspace_sptr eventW;
     Mantid::detid2index_map * wi_to_detid_map;
-
-
 
   };
 

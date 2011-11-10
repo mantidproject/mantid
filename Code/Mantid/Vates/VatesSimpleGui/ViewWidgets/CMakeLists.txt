@@ -3,6 +3,7 @@ project( MantidVatesSimpleGuiViewWidgets )
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
@@ -16,6 +17,7 @@ set( INCLUDE_FILES
 
 set( SOURCE_FILES
   src/ColorSelectionWidget.cpp
+  src/ColorSelectionDialog.cpp
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
@@ -30,6 +32,7 @@ set( SOURCE_FILES
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -43,6 +46,7 @@ qt4_wrap_cpp( MOC_SOURCES
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui

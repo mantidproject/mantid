@@ -97,10 +97,23 @@ namespace Mantid
       template DLLExport const std::vector<int> toStdVector<int>(PyObject *value);
       template DLLExport const std::vector<size_t> toStdVector<size_t>(PyObject *value);
       template DLLExport const std::vector<double> toStdVector<double>(PyObject *value);
-
+      // To Double vector types
       template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_double>(PyArrayObject *value);
       template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_int64>(PyArrayObject *value);
       template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_int32>(PyArrayObject *value);
+
+      // To size_t vector
+      template DLLExport const std::vector<size_t> toStdVectorFromNumpy<size_t, npy_int32>(PyArrayObject *value);
+      template DLLExport const std::vector<size_t> toStdVectorFromNumpy<size_t, npy_int64>(PyArrayObject *value);
+      template DLLExport const std::vector<size_t> toStdVectorFromNumpy<size_t, npy_uint>(PyArrayObject *value);
+
+      // To int32_t vector
+      template DLLExport const std::vector<int32_t> toStdVectorFromNumpy<int32_t, npy_int32>(PyArrayObject *value);
+
+      // To int64_t vector
+      template DLLExport const std::vector<int64_t> toStdVectorFromNumpy<int64_t, npy_int64>(PyArrayObject *value);
+
+
     }
   }
 }
