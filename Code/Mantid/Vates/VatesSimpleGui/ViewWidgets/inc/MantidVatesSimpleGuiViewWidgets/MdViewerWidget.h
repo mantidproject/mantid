@@ -89,6 +89,8 @@ public:
 protected slots:
   /// Check for certain updates when an accept is fired.
   void checkForUpdates();
+  /// Pop-up the color options dialog.
+  void onColorOptions();
   /**
    * Load and render data from the given source.
    * @param source a ParaView compatible source
