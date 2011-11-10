@@ -26,6 +26,11 @@ or another algorithm requiring it is called. The workspace is marked as 'requiri
 
 == Usage ==
 
+ C = A + B
+ C = A + 123.4
+ A += B
+ A += 123.4
+
 See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
 
 *WIKI*/
