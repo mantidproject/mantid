@@ -63,11 +63,9 @@ private:
   /// overridden execute method
   void exec();
   /// method to check the input workspaces are of same types
-  bool isCompatibleWorkspaces(const std::string & firstWS,const std::string& newWStoAdd );
+  bool isCompatibleWorkspaces(const std::string & wsName,std::string& firstWs);
   /// add member workspace to the groupworkspace
-  void addworkspacetoGroup(Mantid::API::WorkspaceGroup_sptr  outgrp_sptr,const std::string &wsName);
-
- 
+  void addworkspacetoGroup(Mantid::API::WorkspaceGroup_sptr  outgrp_sptr,const std::string &wsName, std::string& firstWs);
 };
 
 } // namespace Algorithm

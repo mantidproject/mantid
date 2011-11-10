@@ -21,6 +21,7 @@
 //#include <MantidDataObjects/PeaksWorkspace.h>
 
 #include <Poco/NObserver.h>
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 
 //-------------------------------
@@ -139,8 +140,10 @@ public:
 //  boost::shared_ptr<DataObjects::PeaksWorkspace> retrievePeaksWorkspace(const std::string& wsName);
 //  /// Returns a pointer to the IEventWorkpace requested
 //  boost::shared_ptr<DataObjects::EventWorkspace> retrieveEventWorkspace(const std::string& wsName);
-//  /// Returns a pointer to the IMDWorkspace requested
+  /// Returns a pointer to the IMDWorkspace requested
   boost::shared_ptr<API::IMDWorkspace> retrieveIMDWorkspace(const std::string& wsName);
+  /// Returns a pointer to the IMDWorkspace requested
+  boost::shared_ptr<API::IMDHistoWorkspace> retrieveIMDHistoWorkspace(const std::string& wsName);
   /// Returns a pointer to the IMDEventWorkspace requested
   boost::shared_ptr<API::IMDEventWorkspace> retrieveIMDEventWorkspace(const std::string& wsName);
   /// Returns a pointer to the TableWorkspace requested

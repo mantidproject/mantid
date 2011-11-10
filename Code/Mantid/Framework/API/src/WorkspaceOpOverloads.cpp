@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
 #include <numeric>
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -41,7 +42,6 @@ namespace OperatorOverloads
     {
       alg->setProperty<LHSType>("LHSWorkspace",lhs);
       alg->setProperty<RHSType>("RHSWorkspace",rhs);
-      alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
       // Have to set a text name for the output workspace if the algorithm is a child even
       // though it will not be used.
       alg->setPropertyValue("OutputWorkspace","��NotApplicable");
@@ -55,7 +55,6 @@ namespace OperatorOverloads
     {
       alg->setPropertyValue("LHSWorkspace",lhs->getName());
       alg->setPropertyValue("RHSWorkspace",rhs->getName());
-      alg->setProperty<bool>("AllowDifferentNumberSpectra",false);
       if( lhsAsOutput )
       {
         alg->setPropertyValue("OutputWorkspace",lhs->getName());
@@ -102,6 +101,18 @@ namespace OperatorOverloads
   template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr, const MatrixWorkspace_sptr, bool,
       bool, const std::string &, bool);
   template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr, const WorkspaceGroup_sptr, bool,
+      bool, const std::string &, bool);
+
+  template DLLExport IMDWorkspace_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr, const IMDWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr, const IMDWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport WorkspaceGroup_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr, const WorkspaceGroup_sptr, bool,
+      bool, const std::string &, bool);
+
+  template DLLExport IMDWorkspace_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr, const MatrixWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport IMDWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr, const IMDWorkspace_sptr, bool,
       bool, const std::string &, bool);
 
 } // namespace OperatorOverloads

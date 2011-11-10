@@ -1380,6 +1380,20 @@ void FitPropertyBrowser::fit()
     {
       funStr = *(m_compositeFunction->getFunction(0));
     }
+
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
+    }
+
     // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
     if (m_customFittings)
     {
@@ -2759,7 +2773,6 @@ void FitPropertyBrowser::processMultiBGResults()
   {
     table->addColumn("double",par.toStdString());
   }
-
   // Create WorkspaceGroup with the fit results
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for(size_t i = 0; i < compositeFunction()->nFunctions(); ++i)

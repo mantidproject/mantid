@@ -15,6 +15,7 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -26,6 +27,7 @@
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
 //Poco
 #include <Poco/ActiveResult.h>
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -80,6 +82,7 @@ using namespace boost::python;
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
       .def("_getRawIMDWorkspacePointer", &FrameworkManagerProxy::retrieveIMDWorkspace)
+      .def("_getRawIMDHistoWorkspacePointer", &FrameworkManagerProxy::retrieveIMDHistoWorkspace)
       .def("_getRawIMDEventWorkspacePointer", &FrameworkManagerProxy::retrieveIMDEventWorkspace)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
       .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
@@ -216,6 +219,7 @@ using namespace boost::python;
   // Overloads for createSubAlgorithm function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloader, API::Workspace::isDirty, 0, 1)
 
+  //-----------------------------------------------------------------------------------------------
   void export_workspace()
   {
     /// Shared pointer registration
@@ -237,6 +241,7 @@ using namespace boost::python;
   // Overloads for binIndexOf function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads, API::MatrixWorkspace::binIndexOf, 1, 2)
 
+  //-----------------------------------------------------------------------------------------------
   void export_matrixworkspace()
   {
     /// Shared pointer registration
@@ -284,24 +289,15 @@ using namespace boost::python;
       ;
 
     //Operator overloads dispatch through the above structure. The typedefs save some typing
-    typedef MatrixWorkspace_sptr(*binary_fn1)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr,const std::string &,const std::string &,bool, bool);
-    typedef WorkspaceGroup_sptr(*binary_fn2)(const API::WorkspaceGroup_sptr, const API::WorkspaceGroup_sptr,const std::string &,const std::string &,bool, bool);
-    typedef MatrixWorkspace_sptr(*binary_fn3)(const API::MatrixWorkspace_sptr, double,const std::string&,const std::string &,bool,bool);
-    typedef WorkspaceGroup_sptr(*binary_fn4)(const API::WorkspaceGroup_sptr, double,const std::string&,const std::string &,bool,bool);
-
     typedef bool(*binary_fn5)(const API::MatrixWorkspace_sptr, const API::MatrixWorkspace_sptr,double);
 
       // Binary operations helpers
-    def("_binary_op", (binary_fn1)&PythonAPI::performBinaryOp);
-    def("_binary_op", (binary_fn2)&PythonAPI::performBinaryOp);
-    def("_binary_op", (binary_fn3)&PythonAPI::performBinaryOpWithDouble);
-    def("_binary_op", (binary_fn4)&PythonAPI::performBinaryOpWithDouble);
-
     def("_equals_op", (binary_fn5)&API::equals);
 
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   void export_IMDWorkspace()
   {
     register_ptr_to_python<API::IMDWorkspace_sptr>();
@@ -312,8 +308,51 @@ using namespace boost::python;
         .def("getNumDims", &IMDWorkspace::getNumDims)
         .def("getDimension", &IMDWorkspace::getDimension )
         ;
+
+    //Operator overloads dispatch through the above structure. The typedefs save some typing
+    typedef IMDWorkspace_sptr(*binary_fn_md_md)(const API::IMDWorkspace_sptr, const API::IMDWorkspace_sptr, const std::string &,const std::string &,bool, bool);
+    typedef WorkspaceGroup_sptr(*binary_fn_md_gp)(const API::IMDWorkspace_sptr, const API::WorkspaceGroup_sptr, const std::string &,const std::string &,bool, bool);
+    typedef WorkspaceGroup_sptr(*binary_fn_gp_md)(const API::WorkspaceGroup_sptr, const API::IMDWorkspace_sptr, const std::string &,const std::string &,bool, bool);
+    typedef WorkspaceGroup_sptr(*binary_fn_gp_gp)(const API::WorkspaceGroup_sptr, const API::WorkspaceGroup_sptr, const std::string &,const std::string &,bool, bool);
+
+    typedef IMDWorkspace_sptr(*binary_fn_md_db)(const API::IMDWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
+    typedef WorkspaceGroup_sptr(*binary_fn_gp_db)(const API::WorkspaceGroup_sptr, double, const std::string&,const std::string &,bool,bool);
+
+      // Binary operations helpers
+    def("_binary_op", (binary_fn_md_md)&PythonAPI::performBinaryOp);
+    def("_binary_op", (binary_fn_md_gp)&PythonAPI::performBinaryOp);
+    def("_binary_op", (binary_fn_gp_md)&PythonAPI::performBinaryOp);
+    def("_binary_op", (binary_fn_gp_gp)&PythonAPI::performBinaryOp);
+
+    def("_binary_op", (binary_fn_md_db)&PythonAPI::performBinaryOpWithDouble);
+    def("_binary_op", (binary_fn_gp_db)&PythonAPI::performBinaryOpWithDouble);
+
   }
 
+  //-----------------------------------------------------------------------------------------------
+  void export_IMDHistoWorkspace()
+  {
+    register_ptr_to_python<API::IMDHistoWorkspace_sptr>();
+
+    // EventWorkspace class
+    class_< IMDHistoWorkspace, bases<API::IMDWorkspace>, boost::noncopyable >("IMDHistoWorkspace", no_init)
+      .def("signalAt", &IMDHistoWorkspace::signalAt, return_value_policy<copy_non_const_reference>())
+      .def("errorSquaredAt", &IMDHistoWorkspace::errorSquaredAt, return_value_policy<copy_non_const_reference>())
+      .def("setSignalAt", &IMDHistoWorkspace::setSignalAt)
+      .def("setErrorSquaredAt", &IMDHistoWorkspace::setErrorSquaredAt)
+      .def("setTo", &IMDHistoWorkspace::setTo)
+      .def("getInverseVolume", &IMDHistoWorkspace::getInverseVolume, return_value_policy< return_by_value >())
+      .def("getLinearIndex", (size_t(IMDHistoWorkspace::*)(size_t,size_t) const)  &IMDHistoWorkspace::getLinearIndex, return_value_policy< return_by_value >())
+      .def("getLinearIndex", (size_t(IMDHistoWorkspace::*)(size_t,size_t,size_t) const)  &IMDHistoWorkspace::getLinearIndex, return_value_policy< return_by_value >())
+      .def("getLinearIndex", (size_t(IMDHistoWorkspace::*)(size_t,size_t,size_t,size_t) const)  &IMDHistoWorkspace::getLinearIndex, return_value_policy< return_by_value >())
+      .def("getCenter", &IMDHistoWorkspace::getCenter, return_value_policy< return_by_value >())
+//      .def("__getitem__", &IMDHistoWorkspace::operator[])
+        ;
+
+
+  }
+
+  //-----------------------------------------------------------------------------------------------
   void export_IMDDimension()
   {
     register_ptr_to_python<Geometry::IMDDimension_sptr>();
@@ -328,6 +367,7 @@ using namespace boost::python;
         ;
   }
 
+  //-----------------------------------------------------------------------------------------------
   void export_BoxController()
   {
     register_ptr_to_python<API::BoxController_sptr>();
@@ -346,6 +386,7 @@ using namespace boost::python;
         ;
   }
 
+  //-----------------------------------------------------------------------------------------------
   void export_IMDEventWorkspace()
   {
     register_ptr_to_python<API::IMDEventWorkspace_sptr>();
@@ -357,6 +398,9 @@ using namespace boost::python;
             .def("getBoxController", (BoxController_sptr(IMDEventWorkspace::*)() )  &IMDEventWorkspace::getBoxController)
         ;
   }
+
+
+  //-----------------------------------------------------------------------------------------------
   void export_eventworkspace()
   {
     register_ptr_to_python<IEventWorkspace_sptr>();
@@ -371,6 +415,7 @@ using namespace boost::python;
            ;
   }
 
+  //-----------------------------------------------------------------------------------------------
   void export_ISpectrum()
   {
     register_ptr_to_python<ISpectrum*>();
@@ -385,6 +430,7 @@ using namespace boost::python;
       ;
   }
 
+  //-----------------------------------------------------------------------------------------------
   void export_EventList()
   {
     register_ptr_to_python<IEventList *>();
@@ -412,6 +458,7 @@ using namespace boost::python;
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   void export_tableworkspace()
   {
     // Declare the pointer
@@ -435,6 +482,7 @@ using namespace boost::python;
      ;
   }
 
+  //-----------------------------------------------------------------------------------------------
   // WorkspaceGroup
   void export_workspacegroup()
   {
@@ -451,6 +499,7 @@ using namespace boost::python;
       ;
   }
 
+  //-----------------------------------------------------------------------------------------------
   void export_axis()
   {
     // Pointer
@@ -488,6 +537,7 @@ using namespace boost::python;
     def("createTextAxis", & Mantid::PythonAPI::createTextAxis, return_internal_reference<>());
   }
   
+  //-----------------------------------------------------------------------------------------------
   void export_sample()
   {
     //Pointer
@@ -634,6 +684,7 @@ using namespace boost::python;
     export_matrixworkspace();
     export_eventworkspace();
     export_IMDWorkspace();
+    export_IMDHistoWorkspace();
     export_IMDEventWorkspace();
     export_BoxController();
     export_tableworkspace();

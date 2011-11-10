@@ -145,7 +145,8 @@ namespace Kernel
     {
       return true;
     }
-
+    /// does nothing in this case and put here to satisfy the interface.
+    void modify_allowed_values(Property * const){}
     //--------------------------------------------------------------------------------------------
     /// Make a copy of the present type of validator
     virtual IPropertySettings * clone()
