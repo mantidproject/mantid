@@ -53,6 +53,12 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         A /= B
         A -= B
         
+    def test_compound_arithmetic(self):
+        A = mtd['A']
+        B = mtd['B']
+        C = (A + B) / (A - B) 
+        self.assertIsNotNone( C )
+
     """ boolean_workspace = MDHistoWorkspace < MDHistoWorkspace """
     def test_comparisons_and_boolean_operations(self):
         A = mtd['A']
@@ -85,7 +91,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         D = A > 1.0
         self.assertEqual( D.getName(), 'D')
         self.assertEqual( D.signalAt(0), 1.0)
-        
+
     def test_inplace_boolean_operations(self):
         A = mtd['A']
         B = mtd['B']
@@ -102,6 +108,36 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         C ^= C
         self.assertEqual( C.signalAt(0), 0.0)
         
+    def test_not_operator(self):
+        A = mtd['A']
+        A *= 0
+        self.assertEqual( A.signalAt(0), 0.0)
+        # Do with a copy
+        B = ~A
+        self.assertEqual( B.signalAt(0), 1.0)
+        # Do in-place
+        A = ~A
+        self.assertEqual( A.signalAt(0), 1.0)
+
+    def test_compound_comparison(self):
+        A = mtd['A']
+        B = mtd['B']
+        C = (A > B) & (A > 123) & (B < 2345)
+        self.assertIsNotNone( C )
+
+        
+    def test_compound_boolean_operations(self):
+        A = mtd['A']
+        A *= 0
+        B = A + 1
+        C = ~(A | B) 
+        self.assertEqual( C.signalAt(0), 0.0)
+        C = ~(A | B) | B 
+        self.assertEqual( C.signalAt(0), 1.0)
+        C = ~(A | B) | ~A 
+        self.assertEqual( C.signalAt(0), 1.0)
+        C = ~(A | B) | ~(A & B) 
+        self.assertEqual( C.signalAt(0), 1.0)
         
 if __name__ == '__main__':
     unittest.main()

@@ -613,6 +613,10 @@ using namespace boost::python;
       ;
     class_< WorkspaceProperty<IEventWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("EventWorkspaceProperty", no_init)
       ;
+    class_< WorkspaceProperty<IMDWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("MDWorkspaceProperty", no_init)
+      ;
+    class_< WorkspaceProperty<IMDHistoWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("MDHistoWorkspaceProperty", no_init)
+      ;
 
   }
   
