@@ -79,6 +79,9 @@
        <property name="text">
         <string>Choose Preset</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -116,6 +119,9 @@
        <property name="text">
         <string>Close</string>
        </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
     </layout>
@@ -124,9 +130,11 @@
  </widget>
  <tabstops>
   <tabstop>autoColorScaleCheckBox</tabstop>
+  <tabstop>useLogScaleCheckBox</tabstop>
   <tabstop>minValLineEdit</tabstop>
   <tabstop>maxValLineEdit</tabstop>
   <tabstop>presetButton</tabstop>
+  <tabstop>closeButton</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -137,8 +145,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
-     <y>196</y>
+     <x>455</x>
+     <y>167</y>
     </hint>
     <hint type="destinationlabel">
      <x>175</x>
