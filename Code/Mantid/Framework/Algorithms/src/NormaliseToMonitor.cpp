@@ -48,20 +48,26 @@ namespace Mantid
 //
 namespace Kernel {
 
-
+// the class to verify and modify interconnected properties. 
 class prop_changer: public IPropertySettings
 {
-    std::string host_ws_name,host_monws_name;
+    // the name of the property, which specifies the workspace which has to be modified
+    std::string host_ws_name;
+    // the name of the property, which specifies the workspace which can contain single spectra to normalize by 
+    std::string host_monws_name;
+    // the pointer to the main host algorithm.
     const IPropertyManager * host_algo;
 
-
+    // the string with allowed monitors indexes
     mutable std::vector<std::string> allowed_values;
+    // if the monitors id input string is enabled. 
     mutable bool is_enabled;
-    /// auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
+    // auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
    void  monitor_id_reader()const;
 public:
     prop_changer(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty):
-      host_algo(algo), host_ws_name(WSProperty),host_monws_name(MonWSProperty),is_enabled(true) {}
+      host_ws_name(WSProperty),host_monws_name(MonWSProperty), host_algo(algo),is_enabled(true){}
+  // if input to "
    bool isEnabled()const{
        API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(host_monws_name);
        if(monitorsWS){
@@ -94,11 +100,12 @@ public:
        piProp->modify_validator(new ValidatorAnyList<int>(ival));
            
    }
-   //
+   // interface needs it but if indeed proper clone used -- do not know. 
    virtual IPropertySettings* clone(){return new prop_changer(host_algo,host_ws_name,host_monws_name);}
 
 
 };
+// read the monitors list from the workspace;
 void
 prop_changer::monitor_id_reader()const
 {
