@@ -12,6 +12,11 @@ Subtract two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
 
 == Usage ==
 
+ C = A - B
+ C = A - 123.4
+ A -= B
+ A -= 123.4
+
 See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
 
 *WIKI*/

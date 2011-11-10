@@ -7,6 +7,9 @@ Any non-zero signal is changed to 0.0 (meaning false).
 
 == Usage ==
 
+ B = ~A
+ A = ~A
+
 See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
 
 *WIKI*/

@@ -9,6 +9,11 @@ For a MDHistoWorkspace and a scalar, the operation is performed on each element 
 
 == Usage ==
 
+ # Compare two workspaces, element-by-element
+ C = A > B
+ # Compare a workspace and a number, element-by-element
+ C = A > 123.4
+
 See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
 
 *WIKI*/
