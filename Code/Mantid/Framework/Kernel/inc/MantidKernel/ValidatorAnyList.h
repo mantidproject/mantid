@@ -64,8 +64,8 @@ public:
     std::set<std::string> allowedValues() const
     {
       std::set<std::string> rez;
-      std::set<TYPE>::const_iterator it;
-      for(it=m_allowedValues.begin();it!=m_allowedValues.end();it++){
+      std::set<TYPE >::const_iterator it=m_allowedValues.begin();
+      for(;it!=m_allowedValues.end();it++){
           rez.insert(rez.end(),boost::lexical_cast<std::string>(*it));
       }
       return rez;         
