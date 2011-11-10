@@ -27,9 +27,6 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include <QGroupBox>
 #include <climits>
-//HACK: (temporary)
-#include "MantidKernel/ValidatorAnyList.h"
-
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -381,21 +378,7 @@ void
 GenericDialog::createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row)
 {
 //HACK: (temporary)
-    if(pProp->isConditionChanged()){
-        std::vector<std::string> new_values = pProp->getSettings()->getAllowedValues();
-        PropertyWithValue<std::string>* plProp  = dynamic_cast<PropertyWithValue<std::string>* >(pProp);
-        if(plProp){
-            plProp->modify_validator(new ListValidator(new_values));
-        }
-        PropertyWithValue<int>* piProp  = dynamic_cast<PropertyWithValue<int>* >(pProp);
-        if(piProp){
-            std::vector<int> ival(new_values.size());
-            for(size_t i=0;i<new_values.size();i++){
-                ival[i]=boost::lexical_cast<int>(new_values[i]);
-            }
-            piProp->modify_validator(new ValidatorAnyList<int>(ival));
-        }
-    }
+  
 //END HACK
 
       // Look for specific property types

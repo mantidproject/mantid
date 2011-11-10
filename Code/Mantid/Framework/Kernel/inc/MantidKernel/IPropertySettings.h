@@ -11,6 +11,7 @@ namespace Kernel
 // Forward Declaration
 //----------------------------------------------------------------------
 class IPropertyManager;
+class Property;
 
   /** Interface for modifiers to Property's that specify
    * if they should be enabled or in a GUI.
@@ -65,8 +66,16 @@ class IPropertyManager;
         or other special condition occurs which needs the framework to react to */
     virtual bool isConditionChanged()const
     {return false;}
-    // temporary patch function, allowing to do what I need in very dirty way;
-    virtual std::vector<std::string> getAllowedValues()const{return std::vector<std::string>();};
+    /** The function user have to overload it in his custom code to modify allowed property values.
+     *  Allowed property valies are obtrained from property's allowedValues function, and the purpose the  
+     *  function interfaced here is to modify its output.
+     *  
+     *  allowedValues function on propertyWithValue class obtains its data from a validator, so in the case of 
+     *  simple PropertyWithValue, this function has to replace the validator. 
+     *  For WorkspaceProperty, which obtains its values from dataservice and filters them by validators, 
+     *  a new validator has to be a new filter      */
+    virtual void modify_allowed_values(Property * const){};
+ 
     //------------------------------------------------------------------------------------------------------------
     /** Set the property manager (i.e. algorithm) containing the other properties to use to validate
      * @param propertyManager :: pointer  */

@@ -38,6 +38,7 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ValidatorAnyList.h"
 #include <cfloat>
 #include <iomanip>
 
@@ -80,8 +81,19 @@ public:
        //Kernel::Property *pProperty = host_algo->getPointerToProperty(
        return true;
    }
-   // temporary
-   std::vector<std::string> getAllowedValues()const{return allowed_values;}
+   // function which modifies the allowed values for the list of monitors. 
+   void modify_allowed_values(Property *const pProp){
+       PropertyWithValue<int>* piProp  = dynamic_cast<PropertyWithValue<int>* >(pProp);
+       if(!piProp){
+           throw(std::invalid_argument("modify allowed value has been called on wrong property"));
+       }
+       std::vector<int> ival(allowed_values.size());
+       for(size_t i=0;i<ival.size();i++){
+                ival[i]=boost::lexical_cast<int>(allowed_values[i]);
+       }
+       piProp->modify_validator(new ValidatorAnyList<int>(ival));
+           
+   }
    //
    virtual IPropertySettings* clone(){return new prop_changer(host_algo,host_ws_name,host_monws_name);}
 
