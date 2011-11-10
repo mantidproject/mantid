@@ -10,7 +10,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
 
-class UnGroupWorkspacesTest : public CxxTest::TestSuite
+class UnGroupWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 	void testName()
