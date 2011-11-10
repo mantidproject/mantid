@@ -35,25 +35,30 @@ typedef int Py_ssize_t;
 #define PY_SSIZE_T_MIN INT_MIN
 #endif
 
+#include <string>
 #include <vector>
+
+//-----------------------------------------------------------------------------
+// Forward declaration
+//-----------------------------------------------------------------------------
+struct PyArrayObject;
 
 namespace Mantid
 {
   namespace PythonInterface
   {
-    /**
-     * A templated struct that is responsible for converting between Python sequence types
-     * C++ std::vector types
-     */
-    template<typename ElementType>
-    struct VectorDelegate
+    namespace VectorDelegate
     {
+      /// Check the object contains a type that is some container of values
+      DLLExport std::string isSequenceType(PyObject* value);
       /// Convert a Python type into a C++ std vector using the template element type
-      DLLExport static const std::vector<ElementType> toStdVector(PyObject *value);
-      /// Check that the list contains items of the required type for the C++ type
-      DLLExport static std::string isConvertibleToStdVector(PyObject* value);
-    };
+      template<typename ElementType>
+      DLLExport const std::vector<ElementType> toStdVector(PyObject *value);
+      /// Convert a numpy array to a std::vector
+      template<typename VectorElementType, typename NumpyType>
+      DLLExport const std::vector<VectorElementType> toStdVectorFromNumpy(PyArrayObject *value);
 
+    }
   }
 }
 

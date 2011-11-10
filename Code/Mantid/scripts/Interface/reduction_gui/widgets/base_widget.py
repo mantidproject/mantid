@@ -62,6 +62,14 @@ class BaseWidget(QtGui.QWidget):
         self._data_proxy = data_proxy
         self._in_mantidplot = IS_IN_MANTIDPLOT and self._data_proxy is not None
         
+        self._is_running = True
+        
+    def is_running(self, is_running):
+        """
+            Change running state
+        """
+        self._is_running = is_running
+        
     def initialize_content(self):
         """
             Declare the validators and event connections for the 

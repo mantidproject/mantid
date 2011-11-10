@@ -7602,7 +7602,7 @@ void ApplicationWindow::showCursor()
 /**  Switch on the multi-peak selecting tool for fitting
  * with the Fit algorithm of multiple peaks on a single background
  */
-void ApplicationWindow::selectMultiPeak()
+void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser)
 {
   MultiLayer *plot = (MultiLayer *)activeWindow(MultiLayerWindow);
   if (!plot)
@@ -7631,7 +7631,7 @@ void ApplicationWindow::selectMultiPeak()
     if (g->validCurvesDataSize())
     {
       //Called when setting up usual peakPickerTool
-      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser());
+      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), showFitPropertyBrowser);
       g->setActiveTool(ppicker);
       connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
     }

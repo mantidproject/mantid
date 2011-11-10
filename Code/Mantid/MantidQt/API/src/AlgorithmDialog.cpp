@@ -261,8 +261,14 @@ void AlgorithmDialog::hideOrDisableProperties()
     if (m_tied_properties.contains(pName))
     {
       // Set the enabled and visible flags based on what the validators say. Default is always true.
-      bool enabled = isWidgetEnabled(pName);
-      bool visible = p->isVisible();
+      bool enabled     = isWidgetEnabled(pName);
+      bool visible     = p->isVisible();
+
+      if (p->isConditionChanged()){
+          p->getSettings()->modify_allowed_values(p);
+          int row = this->deletePropertyWidgets(p);
+          this->createSpecificPropertyWidget(p,row);
+      }
 
       // Show/hide the validator label (that red star)
       QString error = "";
@@ -275,9 +281,11 @@ void AlgorithmDialog::hideOrDisableProperties()
       QList<QWidget*> widgets = m_tied_all_widgets[pName];
       for (int i=0; i<widgets.size(); i++)
       {
+
         QWidget * widget = widgets[i];
         widget->setEnabled( enabled );
         widget->setVisible( visible );
+
       }
 
       if (visible)
@@ -493,7 +501,7 @@ void AlgorithmDialog::untie(const QString & property)
  *          returns a pointer to the QLabel instance marking the validity
  */
 QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout *parent_layout, 
-			      bool readHistory, QWidget * otherWidget1, QWidget * otherWidget2, QWidget * otherWidget3)
+                  bool readHistory, QWidget * otherWidget1, QWidget * otherWidget2, QWidget * otherWidget3)
 {
   if( m_tied_properties.contains(property) )
     m_tied_properties.remove(property);
@@ -790,7 +798,7 @@ void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textFiel
   {
     Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
     if( property && property->isValid().empty() && 
-	( m_python_arguments.contains(propName) || !property->isDefault() ) ) 
+    ( m_python_arguments.contains(propName) || !property->isDefault() ) ) 
     {
       textField->setText(QString::fromStdString(property->value()));
     }
@@ -803,8 +811,8 @@ void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textFiel
 /** Layout the buttons and others in the generic dialog */
 QHBoxLayout *
 AlgorithmDialog::createDefaultButtonLayout(const QString & helpText,
-					   const QString & loadText,
-					   const QString & cancelText)
+                       const QString & loadText,
+                       const QString & cancelText)
 {
   QPushButton *okButton = new QPushButton(loadText);
   connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
@@ -891,7 +899,7 @@ void AlgorithmDialog::accept()
   else
   {
     QMessageBox::critical(this, "", 
-			  "One or more properties are invalid. The invalid properties are\n"
+              "One or more properties are invalid. The invalid properties are\n"
         "marked with a *, hold your mouse over the * for more information." );
   } 
 }
@@ -1095,8 +1103,8 @@ QString AlgorithmDialog::getValue(QWidget *widget)
   else
   {
     QMessageBox::warning(this, windowTitle(), 
-			 QString("Cannot parse input from ") + widget->metaObject()->className() + 
-			 ". Update AlgorithmDialog::getValue() to cope with this widget.");
+             QString("Cannot parse input from ") + widget->metaObject()->className() + 
+             ". Update AlgorithmDialog::getValue() to cope with this widget.");
     return "";
   }
 }
@@ -1172,8 +1180,8 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString & propName
       //Need to check if this is the default value as we don't fill them in if they are
       if( m_python_arguments.contains(propName) || !property->isDefault() )
       {
-	if( textfield ) textfield->setText(value);
-	else mtdwidget->setUserInput(value);
+    if( textfield ) textfield->setText(value);
+    else mtdwidget->setUserInput(value);
       }
     }
     return;
@@ -1181,6 +1189,6 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString & propName
   
   // Reaching here means we have a widget type we don't understand. Tell the developer
   QMessageBox::warning(this, windowTitle(), 
-		       QString("Cannot set value for ") + widget->metaObject()->className() + 
-		       ". Update AlgorithmDialog::setValue() to cope with this widget.");
+               QString("Cannot set value for ") + widget->metaObject()->className() + 
+               ". Update AlgorithmDialog::setValue() to cope with this widget.");
 }

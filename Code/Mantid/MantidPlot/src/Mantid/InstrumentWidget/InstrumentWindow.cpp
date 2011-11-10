@@ -51,6 +51,7 @@ using namespace MantidQt::API;
 InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ):
   MdiSubWindow(label, app, name, f), WorkspaceObserver(),
   m_workspaceName(wsName),
+  m_instrumentActor(NULL),
   mViewChanged(false), m_blocked(false)
 {
   m_surfaceType = FULL3D;
@@ -161,6 +162,28 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   connect(this,SIGNAL(needSetIntegrationRange(double,double)),this,SLOT(setIntegrationRange(double,double)));
   setAcceptDrops(true);
 
+  setWindowTitle(QString("Instrument - ") + m_workspaceName);
+}
+
+/**
+ * Destructor
+ */
+InstrumentWindow::~InstrumentWindow()
+{
+  if (m_instrumentActor)
+  {
+    saveSettings();
+    delete m_instrumentActor;
+  }
+  delete m_InstrumentDisplay;
+}
+
+/**
+ * Init the geometry and colour map outside constructor to prevent creating a broken MdiSubwindow.
+ * Must be called straight after constructor.
+ */
+void InstrumentWindow::init()
+{
   // Previously in (now removed) setWorkspaceName method
   m_InstrumentDisplay->makeCurrent();
   m_instrumentActor = new InstrumentActor(m_workspaceName);
@@ -170,18 +193,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   setupColorMap();
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
   setInfoText(m_InstrumentDisplay->getSurface()->getInfoText());
-
-  setWindowTitle(QString("Instrument - ") + m_workspaceName);
-}
-
-/**
- * Destructor
- */
-InstrumentWindow::~InstrumentWindow()
-{
-  saveSettings();
-  delete m_InstrumentDisplay;
-  delete m_instrumentActor;
 }
 
 /**

@@ -27,6 +27,7 @@
 #include <sstream>
 #include <vector>
 #include <qfiledialog.h>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -42,6 +43,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_logColor(false)
 {
 	ui.setupUi(this);
+
+	m_inf = std::numeric_limits<double>::infinity();
 
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
@@ -462,7 +465,7 @@ void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr 
  * @param it :: IMDIterator of what to find
  * @return the min/max range, or 0-1.0 if not found
  */
-QwtDoubleInterval getRange(IMDIterator * it)
+QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 {
   if (!it)
     return QwtDoubleInterval(0., 1.0);
@@ -474,8 +477,12 @@ QwtDoubleInterval getRange(IMDIterator * it)
   do
   {
     double signal = it->getNormalizedSignal();
-    if (signal > 0 && signal < minSignal) minSignal = signal;
-    if (signal > maxSignal) maxSignal = signal;
+    // Skip any 'infs' as it screws up the color scale
+    if (signal != m_inf)
+    {
+      if (signal > 0 && signal < minSignal) minSignal = signal;
+      if (signal > maxSignal) maxSignal = signal;
+    }
   } while (it->next());
 
   if (minSignal == DBL_MAX)

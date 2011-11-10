@@ -41,6 +41,8 @@ In addition, this only works for instruments that use [[RectangularDetector]]s (
 #include <string.h>
 #include <time.h>
 
+
+
 namespace Mantid
 {
 namespace DataHandling
@@ -471,7 +473,7 @@ namespace DataHandling
 
       // Give a 50% margin of error in allocating the memory
       memory_available = memory_available/2;
-      if (memory_available > 5e9) memory_available = 5e9;
+      if (memory_available > (size_t)5e9) memory_available = (size_t)5e9;
 
       if (memory_available < memory_required)
       {

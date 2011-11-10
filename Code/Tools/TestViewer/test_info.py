@@ -1060,7 +1060,6 @@ class MultipleProjects(object):
         for fname in dirList:
             # Look for executables ending in Test
             if fname.endswith("Test") and os.path.isfile( os.path.join(path, fname) ):
-                print fname, ' found'
                 testnames.add(fname)
                 
         # Now add the known tests, in case they were deleted

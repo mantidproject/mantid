@@ -23,6 +23,10 @@
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidKernel/IPropertyManager.h"
 
+#ifdef __GNUC__
+  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 #include <boost/python/extract.hpp>
 
 namespace Mantid

@@ -245,7 +245,7 @@ namespace MDEvents
   coord_t * MDHistoWorkspace::getVertexesArray(size_t linearIndex, size_t & numVertices) const
   {
     // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
-    numVertices = 1 << numDimensions;
+    numVertices = (size_t)(1) << numDimensions; // Cast avoids warning about result of 32-bit shift implicitly converted to 64 bits on MSVC
 
     // Index into each dimension. Built from the linearIndex.
     size_t dimIndexes[10];
