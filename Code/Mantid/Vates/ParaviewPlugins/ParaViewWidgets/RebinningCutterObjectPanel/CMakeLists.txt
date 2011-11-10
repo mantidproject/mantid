@@ -19,7 +19,7 @@ target_link_libraries( MantidParaViewRebinningCutterObjectPanel
 MantidParaViewQtWidgets )
 
 # Put library into subfolder.
-output_binary_to( MantidParaViewRebinningCutterObjectPanel  ${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY( MantidParaViewRebinningCutterObjectPanel  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewRebinningCutterObjectPanel ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

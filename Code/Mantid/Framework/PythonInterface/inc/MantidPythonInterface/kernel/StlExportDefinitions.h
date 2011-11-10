@@ -25,7 +25,10 @@
 */
 #include <boost/python/class.hpp>
 #include <boost/python/init.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#ifdef _MSC_VER
+  #pragma warning(disable:4267) // Kill warning from line 176 of indexing suite
+#endif
+  #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <vector>
 #include <set>
