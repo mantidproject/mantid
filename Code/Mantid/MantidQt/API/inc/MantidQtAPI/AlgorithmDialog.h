@@ -199,8 +199,8 @@ protected:
 
   /// Create a row layout of buttons with specified text
   QHBoxLayout *createDefaultButtonLayout(const QString & helpText = QString("?"),
-					 const QString & loadText = QString("Run"), 
-					 const QString & cancelText = QString("Cancel"));
+                     const QString & loadText = QString("Run"), 
+                     const QString & cancelText = QString("Cancel"));
 
   /// Create a help button for this algorithm
   QPushButton* createHelpButton(const QString & helpText = QString("?")) const;
@@ -242,8 +242,20 @@ private:
   void setOptionalMessage(const QString & message);
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString & property);
-    
 protected:
+ /** The function analyses the property type and creates specific widget for it; 
+     It used in dynamic propeties, which change as property contents, validators or settings change
+     @pProp -- the pointer to the property
+     @row   -- the vertical position of the property widget within the initated dialog box
+     Should be pure virtual but as current custom vidgets do not use it, made empty unless overloaded */
+    virtual void createSpecificPropertyWidget(Mantid::Kernel::Property *, int ){};
+ /** The function deletes widgets, associated with property;
+     It used in dynamic propeties, which change as property contents, validators or settings change
+     @pProp -- the pointer to the property
+     returns-- the vertical position of the composite widget within the widget window;
+     Should be pure virtual but as current custom vidgets do not use it, made empty unless overloaded */
+    virtual int deletePropertyWidgets(Mantid::Kernel::Property *){return -1;}
+
   /** @name Member variables. */
   //@{
   /// The algorithm associated with this dialog
