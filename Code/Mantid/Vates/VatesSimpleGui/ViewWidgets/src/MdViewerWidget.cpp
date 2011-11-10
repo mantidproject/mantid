@@ -409,6 +409,8 @@ void MdViewerWidget::createMenus()
   if (this->pluginMode)
   {
     menubar = new QMenuBar(this);
+    QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    menubar->setSizePolicy(policy);
   }
   else
   {
