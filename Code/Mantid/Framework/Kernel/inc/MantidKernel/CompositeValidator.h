@@ -113,6 +113,7 @@ namespace Kernel
 
      virtual void modify_validator(IValidator<TYPE> *pNewValidator)
      {
+         UNUSED_ARG(pNewValidator);
      }
   private:
     /// Private Copy constructor: NO DIRECT COPY ALLOWED

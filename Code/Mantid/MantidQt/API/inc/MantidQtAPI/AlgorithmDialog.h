@@ -248,13 +248,13 @@ protected:
      @pProp -- the pointer to the property
      @row   -- the vertical position of the property widget within the initated dialog box
      Should be pure virtual but as current custom vidgets do not use it, made empty unless overloaded */
-    virtual void createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row){};
+    virtual void createSpecificPropertyWidget(Mantid::Kernel::Property *, int ){};
  /** The function deletes widgets, associated with property;
      It used in dynamic propeties, which change as property contents, validators or settings change
      @pProp -- the pointer to the property
      returns-- the vertical position of the composite widget within the widget window;
      Should be pure virtual but as current custom vidgets do not use it, made empty unless overloaded */
-    virtual int deletePropertyWidgets(Mantid::Kernel::Property *pProp){return -1;}
+    virtual int deletePropertyWidgets(Mantid::Kernel::Property *){return -1;}
 
   /** @name Member variables. */
   //@{
