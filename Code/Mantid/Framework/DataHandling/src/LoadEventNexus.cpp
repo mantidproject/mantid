@@ -1225,7 +1225,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   instrument = nxfile.getStrData();
   alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
   }
-  catch ( ::NeXus::Exception & e)
+  catch ( ::NeXus::Exception &)
   {
     // Get the instrument name from the file instead
     size_t n = nexusfilename.rfind('/');

@@ -13,7 +13,7 @@ target_link_libraries( MantidParaViewSQWEventReaderSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-output_binary_to(MantidParaViewSQWEventReaderSMPlugin ${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewSQWEventReaderSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewSQWEventReaderSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

@@ -71,7 +71,12 @@ private:
 
   /// This does the work and must be overridden in each deriving class
   virtual void initLayout();
-
+protected:
+ /// the function analyses the property type and creates specific widget for it 
+  void createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row);
+ /** The function deletes widgets, associated with property;
+     returns-- the vertical position of the composite widget within the widget window; */
+    virtual int deletePropertyWidgets(Mantid::Kernel::Property *pProp);
 private slots:
 
   /// Any property changed

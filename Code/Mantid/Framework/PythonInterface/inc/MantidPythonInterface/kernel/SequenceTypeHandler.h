@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_MULTIVALUETYPEHANDLER_H_
-#define MANTID_PYTHONINTERFACE_MULTIVALUETYPEHANDLER_H_
+#ifndef MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_
+#define MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,8 +31,8 @@ namespace Mantid
     {
       /**
        * A property handler that deals with translation of multi-value
-       * Python types, i.e. arrays (python and numpy) etc to/from Mantid
-       * algorithm properties
+       * Python types, i.e. python arrays etc to/from Mantid algorithm properties
+       * It does not handle Numpy arrays, @see NumpyTypeHandler
        */
       struct DLLExport SequenceTypeHandler : PropertyHandler
       {
@@ -46,4 +46,4 @@ namespace Mantid
   }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_MULTIVALUETYPEHANDLER_H_ */
+#endif /* MANTID_PYTHONINTERFACE_SEQUENCETYPEHANDLER_H_ */

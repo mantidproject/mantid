@@ -51,7 +51,7 @@ using namespace DataObjects;
  */
 void SumNeighbours::init()
 {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<EventWorkspace>),
     "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours)." );
 
   declareProperty(

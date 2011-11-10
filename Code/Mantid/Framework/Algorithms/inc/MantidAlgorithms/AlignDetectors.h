@@ -71,7 +71,7 @@ private:
 
   void execEvent();
 
-  void execTOFEvent(std::string calfilename, Mantid::API::MatrixWorkspace_const_sptr inputWS);
+  // void execTOFEvent(std::string calfilename, Mantid::API::MatrixWorkspace_const_sptr inputWS);
 
   /// Pointer for an event workspace
   Mantid::DataObjects::EventWorkspace_const_sptr eventW;

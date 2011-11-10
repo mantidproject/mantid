@@ -80,6 +80,7 @@ private:
   void setSpinBoxesSteps();
   void mouseDoubleClickEvent(QMouseEvent * event);
   void updateMinMaxGUI();
+  void resizeEvent(QResizeEvent * event);
 
   /// Auto-gen UI classes
   Ui::ColorBarWidgetClass ui;
@@ -104,6 +105,9 @@ private:
 
   /// Min value being displayed
   double m_max;
+
+  /// Show the value tooltip (off by default)
+  bool m_showTooltip;
 };
 
 #endif // COLORBARWIDGET_H
