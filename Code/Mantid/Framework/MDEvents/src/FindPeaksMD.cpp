@@ -256,10 +256,10 @@ namespace MDEvents
         }
 
         peakBoxes.push_back(box);
-        g_log.information() << "Found box at ";
+        g_log.debug() << "Found box at ";
         for (size_t d=0; d<nd; d++)
-          g_log.information() << (d>0?",":"") << boxCenter[d];
-        g_log.information() << "; Density = " << density << std::endl;
+          g_log.debug() << (d>0?",":"") << boxCenter[d];
+        g_log.debug() << "; Density = " << density << std::endl;
         // Report progres for each box found.
         prog->report("Finding Peaks");
       }
