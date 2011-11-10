@@ -55,8 +55,10 @@
 #include <pqViewFrameActionsBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 
+#include <QAction>
 #include <QHBoxLayout>
 #include <QMainWindow>
+#include <QMenuBar>
 #include <QModelIndex>
 #include <QWidget>
 
@@ -154,6 +156,7 @@ void MdViewerWidget::setupPluginMode()
   if (!this->isPluginInitialized)
   {
     this->setupParaViewBehaviors();
+    this->createMenus();
   }
   this->setupMainView();
 }
@@ -406,6 +409,39 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
     return true;
   }
   return VatesViewerInterface::eventFilter(obj, ev);
+}
+
+/**
+ * This function creates the main view widget specific menu items.
+ */
+void MdViewerWidget::createMenus()
+{
+  QMenuBar *menubar;
+  if (this->pluginMode)
+  {
+    menubar = new QMenuBar(this);
+  }
+  else
+  {
+    menubar = qobject_cast<QMainWindow *>(this->parentWidget())->menuBar();
+  }
+
+  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));
+
+  if (this->pluginMode)
+  {
+    this->ui.verticalLayout->insertWidget(0, menubar);
+  }
+}
+
+/**
+ * This function adds the menus defined here to a QMainWindow menu bar.
+ * This must be done after the setup of the standalone application so that
+ * the MdViewerWidget menus aren't added before the standalone ones.
+ */
+void MdViewerWidget::addMenus()
+{
+  this->createMenus();
 }
 
 }
