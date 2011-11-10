@@ -429,6 +429,8 @@ public:
    */
   virtual void modify_validator(IValidator<TYPE> *pNewValidator,bool just_replace=false)
   {
+      // temporary
+      UNUSED_ARG(just_replace);
       if(!pNewValidator)return;
       //
     //  if(just_replace){
