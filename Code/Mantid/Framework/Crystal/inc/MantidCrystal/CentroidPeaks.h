@@ -42,7 +42,8 @@ namespace Crystal
     void init();
     /// Run the algorithm
     void exec();
-    void integrate(API::MatrixWorkspace_sptr inWS);
+    void integrate();
+    void integrateEvent();
 
     /// Input 2D Workspace
     API::MatrixWorkspace_sptr inWS;
