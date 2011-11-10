@@ -61,11 +61,15 @@ namespace Mantid
        * @param arr :: A pointer to a numpy array
        * @return A new vector created from the python values (i.e. a copy)
        */
-      template<typename ElementType>
-      const std::vector<ElementType> toStdVectorFromNumpy(PyArrayObject *arr)
+      template<typename VectorElementType, typename NumpyType>
+      const std::vector<VectorElementType> toStdVectorFromNumpy(PyArrayObject *arr)
       {
+        // A numpy array is a homogeneous array, i.e each type is identical and the underlying array is contiguous
+        const int ndim = PyArray_NDIM(arr);
+        if( ndim > 1 ) throw std::invalid_argument("toStdVectorNumpy - Unable to handle arrays with greater than 1 dimension.");
+
         npy_intp length = PyArray_SIZE(arr);
-        std::vector<ElementType> result(length);
+        std::vector<VectorElementType> result(length);
         if(length == 0)
         {
           return result;
@@ -78,9 +82,8 @@ namespace Mantid
         size_t index(0);
         do
         {
-          void *item = PyArray_ITER_DATA(iter);
-          ElementType *v = (ElementType*)item;
-          result[index] = *v;
+          NumpyType *item = (NumpyType*)PyArray_ITER_DATA(iter);
+          result[index] = static_cast<VectorElementType>(*item);
           ++index;
           PyArray_ITER_NEXT(iter);
         }
@@ -95,7 +98,9 @@ namespace Mantid
       template DLLExport const std::vector<size_t> toStdVector<size_t>(PyObject *value);
       template DLLExport const std::vector<double> toStdVector<double>(PyObject *value);
 
-      template DLLExport const std::vector<double> toStdVectorFromNumpy<double>(PyArrayObject *value);
+      template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_double>(PyArrayObject *value);
+      template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_int64>(PyArrayObject *value);
+      template DLLExport const std::vector<double> toStdVectorFromNumpy<double, npy_int32>(PyArrayObject *value);
     }
   }
 }

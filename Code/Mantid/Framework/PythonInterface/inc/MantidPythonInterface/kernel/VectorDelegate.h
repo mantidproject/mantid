@@ -55,8 +55,8 @@ namespace Mantid
       template<typename ElementType>
       DLLExport const std::vector<ElementType> toStdVector(PyObject *value);
       /// Convert a numpy array to a std::vector
-      template<typename ElementType>
-      DLLExport const std::vector<ElementType> toStdVectorFromNumpy(PyArrayObject *value);
+      template<typename VectorElementType, typename NumpyType>
+      DLLExport const std::vector<VectorElementType> toStdVectorFromNumpy(PyArrayObject *value);
 
     }
   }
