@@ -39,14 +39,17 @@ set ( TEST_FILES
 )
 
 # Python unit tests
-set ( TEST_PY_FILES test/ImportTest.py
-                    test/PythonAlgorithmTest.py
-                    test/NumpyTest.py
-		    test/WorkspaceHistoryTest.py
-		    test/MatrixWorkspaceTest.py
-		    test/SettingsTest.py
-		    test/SANSWorkflowTest.py
-		    test/SANSMaskCommandsTest.py
+set ( TEST_PY_FILES 
+	test/ImportTest.py
+	test/PythonAlgorithmTest.py
+	test/MDHistoWorkspaceTest.py
+	test/NumpyTest.py
+	test/MatrixWorkspaceTest.py
+	test/SettingsTest.py
+	test/SANSWorkflowTest.py
+	test/SANSMaskCommandsTest.py
+	test/WorkspaceHistoryTest.py
+	test/WorkspaceGroupTest.py
 )
 
 if(UNITY_BUILD)

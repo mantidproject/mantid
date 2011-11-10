@@ -10,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 using Mantid::DataObjects::WorkspaceSingleValue;
 
@@ -32,7 +33,7 @@ namespace MDEvents
   * @author Janik Zikovsky
   * @date 2011-03-24 11:21:06.280523
   */
-  class DLLExport MDHistoWorkspace : public API::IMDWorkspace
+  class DLLExport MDHistoWorkspace : public API::IMDHistoWorkspace
   {
   public:
     MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
@@ -120,7 +121,7 @@ namespace MDEvents
     }
 
     /** @return the inverse of volume of EACH cell in the workspace. For normalizing. */
-    coord_t getInverseVolumeVolume() const
+    coord_t getInverseVolume() const
     {
       return m_inverseVolume;
     }
@@ -149,13 +150,13 @@ namespace MDEvents
     }
 
     /// Sets the error (squared) at the specified index.
-    void setErrorAt(size_t index, signal_t value)
+    void setErrorSquaredAt(size_t index, signal_t value)
     {
       m_errorsSquared[index] = value;
     }
 
 
-    /// Get the error of the signal at the specified index.
+    /// Get the error (squared) of the signal at the specified index.
     signal_t getErrorAt(size_t index) const
     {
       return m_errorsSquared[index];
@@ -257,6 +258,64 @@ namespace MDEvents
     {
       return getErrorAt(index1,index2,index3,index4) * m_inverseVolume;
     }
+
+    //---------------------------------------------------------------------------------------------
+    /** @return a reference to the error (squared) at the linear index
+     * @param index :: linear index (see getLinearIndex).  */
+    signal_t & errorSquaredAt(size_t index)
+    {
+      if (index < m_length)
+        return m_errorsSquared[index];
+      else
+        throw std::invalid_argument("MDHistoWorkspace::array index out of range");
+    }
+
+    /** @return a reference to the signal at the linear index
+     * @param index :: linear index (see getLinearIndex).  */
+    signal_t & signalAt(size_t index)
+    {
+      if (index < m_length)
+        return m_signals[index];
+      else
+        throw std::invalid_argument("MDHistoWorkspace::array index out of range");
+    }
+
+    //---------------------------------------------------------------------------------------------
+    size_t getLinearIndex(size_t index1, size_t index2) const
+    {
+      if (this->getNumDims() != 2)
+        throw std::runtime_error("Workspace does not have 2 dimensions!");
+      return index1 + indexMultiplier[0]*index2;
+    }
+
+    size_t getLinearIndex(size_t index1, size_t index2, size_t index3) const
+    {
+      if (this->getNumDims() != 3)
+        throw std::runtime_error("Workspace does not have 3 dimensions!");
+      return index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3;
+    }
+
+    size_t getLinearIndex(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      if (this->getNumDims() != 4)
+        throw std::runtime_error("Workspace does not have 4 dimensions!");
+      return index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4;
+    }
+
+
+
+    /** Array subscript operator
+     * @param index :: linear index into array
+     * @return the signal (not normalized) at that index.
+     */
+    signal_t& operator [](const size_t & index)
+    {
+      if (index < m_length)
+        return m_signals[index];
+      else
+        throw std::invalid_argument("MDHistoWorkspace::array index out of range");
+    }
+
 
 
     /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.

@@ -596,6 +596,14 @@ class WorkspaceProxy(ProxyObject):
         return self.__do_operation('Divide', rhs,inplace=True, reverse=False,
                                    lhs_vars=lhs)
     
+    def __lt__(self, rhs):
+        """
+        Do the (self < rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('LessThan', rhs, inplace=True, reverse=False,
+                                   lhs_vars=lhs)
+    
     def equals(self, rhs, tol):
         """
         Checks whether the given workspace matches this one within the allowed
@@ -1173,6 +1181,11 @@ class MantidPyFramework(FrameworkManager):
 
         try:
             return self._getRawIMDEventWorkspacePointer(name)
+        except RuntimeError:
+            pass
+       
+        try:
+            return self._getRawIMDHistoWorkspacePointer(name)
         except RuntimeError:
             pass
        
