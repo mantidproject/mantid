@@ -72,6 +72,8 @@ class DirectBeam(BaseWidget):
         m.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
         m.sample_file = unicode(self._content.sample_edit.text())
         m.direct_beam = unicode(self._content.direct_edit.text())
+        self._settings.emit_key_value("TRANS_SAMPLE", QtCore.QString(str(self._content.sample_edit.text())))
+        self._settings.emit_key_value("TRANS_DIRECT", QtCore.QString(str(self._content.direct_edit.text())))
         return m
     
     def _sample_browse(self):

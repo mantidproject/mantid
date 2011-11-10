@@ -8,6 +8,7 @@ import sqlite3
 import re
 import time
 import sys
+import traceback
 
 # Check whether Mantid is available
 try:
@@ -18,14 +19,55 @@ try:
 except:
     HAS_MANTID = False    
 
+class DataType(object):
+    TABLE_NAME = "datatype"
+    
+    # Data type names
+    DATA_TYPES = {"FLOOD_FIELD":"Flood Field", 
+                  "DARK_CURRENT":"Dark Current",
+                  "TRANS_SAMPLE":"Transmission Sample",
+                  "TRANS_BCK":"Transmission Background",
+                  "TRANS_DIRECT":"Transmission Empty"}
+    
+    @classmethod
+    def create_table(cls, cursor, data_set_table):
+        cursor.execute("""create table if not exists %s (
+                            id integer primary key, 
+                            type_id integer, 
+                            dataset_id integer,
+                            foreign key(dataset_id) references %s(id))""" % (cls.TABLE_NAME, data_set_table))
+    
+    @classmethod
+    def add(cls, dataset_id, type_id, cursor):
+        """
+            Add a data type entry to the datatype table
+        """
+        if not type_id in cls.DATA_TYPES.keys():
+            raise RuntimeError, "DataType got an unknown type ID: %s" % type_id
+        
+        t = (type_id, dataset_id,)
+        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" % cls.TABLE_NAME, t)
+        
+    @classmethod
+    def get_likely_type(cls, dataset_id, cursor):
+        t = (dataset_id,)
+        cursor.execute("select type_id from %s where dataset_id=?" % cls.TABLE_NAME, t)
+        rows = cursor.fetchall()
+        if len(rows)>1:
+            return cls.DATA_TYPES[rows[len(rows)-1][0]]
+        return None
+    
 class DataSet(object):
     TABLE_NAME = "dataset"
-    def __init__(self, run_number, title, run_start, duration, sdd):
+    data_type_cls = DataType
+    
+    def __init__(self, run_number, title, run_start, duration, sdd, id=None):
         self.run_number = run_number
         self.title = title
         self.run_start = run_start
         self.duration = duration
         self.sdd = sdd
+        self.id = id
         
     @classmethod
     def header(cls):
@@ -71,6 +113,16 @@ class DataSet(object):
         return (str(self.run_number), self.title, self.run_start, "%-g"%self.duration, "%-10.0f"%self.sdd)
     
     @classmethod
+    def get_data_set_id(cls, run, cursor):
+        t = (run,)
+        cursor.execute('select * from %s where run=?'% cls.TABLE_NAME, t)
+        rows = cursor.fetchall()
+        if len(rows) == 0:
+            return -1
+        else:
+            return rows[0][0]
+        
+    @classmethod
     def find(cls, file_path, cursor, process_files=True):
         """
             Find an entry in the database, or create on as needed
@@ -94,7 +146,7 @@ class DataSet(object):
                 return None
         else:
             row = rows[0]
-            return DataSet(row[1], row[2], row[3], row[4], row[5])
+            return DataSet(row[1], row[2], row[3], row[4], row[5], id=row[0])
         
     @classmethod
     def create_table(cls, cursor):
@@ -104,10 +156,13 @@ class DataSet(object):
                             title text, 
                             start text, 
                             duration real, sdd real)""" % cls.TABLE_NAME)
+        
+        cls.data_type_cls.create_table(cursor, cls.TABLE_NAME)
 
     def insert_in_db(self, cursor):
-        t = (self.run_number, self.title, self.run_start, self.duration, self.sdd)
+        t = (self.run_number, self.title, self.run_start, self.duration, self.sdd,)
         cursor.execute('insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)'%self.TABLE_NAME, t)
+        return cursor.lastrowid
 
 class DataCatalog(object):
     """
@@ -182,6 +237,20 @@ class DataCatalog(object):
             output.append(r.as_string_list())
         return output
     
+    def add_type(self, run, type):
+        if self.db is None:
+            if HAS_MANTID:
+                mtd.sendLogMessage("DataCatalog: Could not access local data catalog")
+            return
+        
+        c = self.db.cursor()
+        id = self.data_set_cls.get_data_set_id(run, c)
+        if id>0:
+            self.data_set_cls.data_type_cls.add(id, type, c)
+        
+        self.db.commit()
+        c.close()
+        
     def list_data_sets(self, data_dir=None, call_back=None, process_files=True):
         """
             Process a data directory
@@ -205,13 +274,16 @@ class DataCatalog(object):
                     d = self.data_set_cls.find(path, c, process_files=process_files)
                     if d is not None:
                         if call_back is not None:
-                            call_back(d.as_string_list())
+                            attr_list = d.as_string_list()
+                            type_id = self.data_set_cls.data_type_cls.get_likely_type(d.id, c)
+                            attr_list += (type_id,)
+                            call_back(attr_list)
                         self.catalog.append(d)
         
             self.db.commit()
             c.close()
         except:
             if HAS_MANTID:
-                mtd.sendLogMessage("DataCatalog: Error working with the local data catalog\n%s" % sys.exc_value)
+                mtd.sendLogMessage("DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc()))
             else:
                 raise

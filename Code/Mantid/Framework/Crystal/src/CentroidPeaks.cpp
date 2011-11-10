@@ -49,13 +49,13 @@ namespace Crystal
    */
   void CentroidPeaks::init()
   {
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace","",Direction::Input),
+        "A PeaksWorkspace containing the peaks to centroid.");
+
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input 2D Workspace.");
 
     declareProperty(new PropertyWithValue<int>("PeakRadius",10,Direction::Input),
         "Fixed radius around each peak position in which to calculate the centroid.");
-
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace","",Direction::Input),
-        "A PeaksWorkspace containing the peaks to centroid.");
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace","",Direction::Output),
         "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
@@ -81,9 +81,10 @@ namespace Crystal
     /// Radius to use around peaks
     int PeakRadius = getProperty("PeakRadius");
 
-    PRAGMA_OMP(parallel for schedule(dynamic, 10) )
+    PARALLEL_FOR2(ws,peakWS)
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
     {
+      PARALLEL_START_INTERUPT_REGION
       // Get a direct ref to that peak.
       IPeak & peak = peakWS->getPeak(i);
       int col = peak.getCol();
@@ -113,77 +114,67 @@ namespace Crystal
       Mantid::MantidVec histogram = ws->readY(workspaceIndex);
 
       int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
-      int chanstart = chan-PeakRadius;
-      int chanend = chan+PeakRadius;
-      for (int ichan=chanstart; ichan<=chanend; ++ichan)
-      {
-        intensity += histogram[ichan];
-        chancentroid += ichan*histogram[ichan];
-      }
-      chan = int(chancentroid/intensity);
-      intensity = 0.0;
+      int chanstart = std::max(0,chan-PeakRadius);
+      int chanend = std::min(static_cast<int>(X.size()),chan+PeakRadius);
       double rowcentroid = 0.0;
       int rowstart = std::max(0,row-PeakRadius);
       int rowend = std::min(RDet->ypixels()-1,row+PeakRadius);
-      for (int irow=rowstart; irow<=rowend; ++irow)
-      {
-        boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, irow);
-        Mantid::detid2index_map::iterator it;
-        it = (*wi_to_detid_map).find(pixel->getID());
-        size_t workspaceIndex = (it->second);
-
-        Mantid::MantidVec X = ws->readX(workspaceIndex);
-        Mantid::MantidVec histogram = ws->readY(workspaceIndex);
-
-        int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
-        intensity += histogram[chan];
-        rowcentroid += irow*histogram[chan];
-      }
-      row = std::min(RDet->ypixels()-1,int(rowcentroid/intensity));
-      row = std::max(0,row);
-      intensity = 0.0;
       double colcentroid = 0.0;
       int colstart = std::max(0,col-PeakRadius);
       int colend = std::min(RDet->xpixels()-1,col+PeakRadius);
-      for (int icol=colstart; icol<=colend; ++icol)
+      for (int ichan=chanstart; ichan<=chanend; ++ichan)
       {
-        boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, row);
-        Mantid::detid2index_map::iterator it;
-        it = (*wi_to_detid_map).find(pixel->getID());
-        size_t workspaceIndex = (it->second);
-
-        Mantid::MantidVec X = ws->readX(workspaceIndex);
-        Mantid::MantidVec histogram = ws->readY(workspaceIndex);
-
-        int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
-        intensity += histogram[chan];
-        colcentroid += icol*histogram[chan];
+        for (int irow=rowstart; irow<=rowend; ++irow)
+        {
+          for (int icol=colstart; icol<=colend; ++icol)
+          {
+            boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, irow);
+            Mantid::detid2index_map::iterator it;
+            it = (*wi_to_detid_map).find(pixel->getID());
+            size_t workspaceIndex = (it->second);
+    
+            Mantid::MantidVec X = ws->readX(workspaceIndex);
+            Mantid::MantidVec histogram = ws->readY(workspaceIndex);
+    
+            intensity += histogram[ichan];
+            rowcentroid += irow*histogram[ichan];
+            colcentroid += icol*histogram[ichan];
+            chancentroid += ichan*histogram[ichan];
+          }
+        }
       }
-      col = std::min(RDet->xpixels()-1,int(colcentroid/intensity));
-      col = std::max(0,col);
-      intensity = 0.0;
-      rowcentroid = 0.0;
-      rowstart = std::max(0,row-PeakRadius);
-      rowend = std::min(RDet->ypixels()-1,row+PeakRadius);
-      for (int irow=rowstart; irow<=rowend; ++irow)
-      {
-        boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, irow);
-        Mantid::detid2index_map::iterator it;
-        it = (*wi_to_detid_map).find(pixel->getID());
-        size_t workspaceIndex = (it->second);
-
-        Mantid::MantidVec X = ws->readX(workspaceIndex);
-        Mantid::MantidVec histogram = ws->readY(workspaceIndex);
-
-        int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
-        intensity += histogram[chan];
-        rowcentroid += irow*histogram[chan];
-      }
+    // Set pixelID to change row and col
       row = std::min(RDet->ypixels()-1,int(rowcentroid/intensity));
       row = std::max(0,row);
+      col = std::min(RDet->xpixels()-1,int(colcentroid/intensity));
+      col = std::max(0,col);
       pixel = RDet->getAtXY(col, row);
       peak.setDetectorID(pixel->getID());
+    // Set wavelength to change tof for peak object
+      it = (*wi_to_detid_map).find(pixel->getID());
+      workspaceIndex = (it->second);
+
+      X = ws->readX(workspaceIndex);
+      histogram = ws->readY(workspaceIndex);
+
+      chan = int(chancentroid/intensity);
+      chan = std::max(0,chan);
+      chan = std::min(static_cast<int>(X.size()),chan);
+      Mantid::Kernel::Units::Wavelength wl;
+      std::vector<double> timeflight;
+      timeflight.push_back(X[chan]);
+      double scattering = peak.getScattering();
+      double L1 = peak.getL1();
+      double L2 = peak.getL2();
+      wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
+      const double lambda = timeflight[0];
+      timeflight.clear();
+
+      peak.setWavelength(lambda);
+      peak.setBinCount(histogram[chan]);
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // Save the output
     setProperty("OutPeaksWorkspace", peakWS);

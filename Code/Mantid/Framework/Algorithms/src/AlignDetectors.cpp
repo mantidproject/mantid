@@ -168,14 +168,11 @@ void AlignDetectors::init()
 
   std::vector<std::string> exts;
   exts.push_back(".cal");
-  exts.push_back(".dat");
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
      "Optional: The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to be specified.");
 
   declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, true),
      "Optional: A OffsetsWorkspace containing the calibration offsets. Either this or CalibrationFile needs to be specified.");
-
-  declareProperty("InTOFOnly", false, "Working in TOF space only");
 
 }
 
@@ -199,18 +196,6 @@ void AlignDetectors::exec()
       throw std::invalid_argument("You must specify either CalibrationFile or OffsetsWorkspace but not both.");
   if (!offsetsWS && calFileName.empty())
       throw std::invalid_argument("You must specify either CalibrationFile or OffsetsWorkspace.");
-
-  bool intofonly = getProperty("InTOFOnly");
-
-  if (intofonly){
-    if (calFileName.empty()){
-      throw std::invalid_argument("Must use Ke's calibration file in TOF");
-    }
-
-    this->execTOFEvent(calFileName, inputWS);
-
-    return;
-  }
 
   if (!calFileName.empty())
   {
@@ -286,134 +271,6 @@ void AlignDetectors::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-}
-
-/*
- * Compute TOF with Offset
- */
-void AlignDetectors::execTOFEvent(std::string calfilename, Mantid::API::MatrixWorkspace_const_sptr inputWS){
-
-  g_log.notice() << "Processing in TOF only!" << std::endl;
-
-  // 1. Read spectral - offset file
-  std::map<detid_t, double> specmap;
-
-  std::ifstream calfile(calfilename.c_str());
-  if (!calfile){
-    g_log.error() << "File " << calfilename << " is not readable" << std::endl;
-  }
-  std::string line;
-  detid_t specid;
-  double offset;
-  while(getline(calfile, line)){
-    std::istringstream ss(line);
-    ss >> specid >> offset;
-    specmap.insert(std::make_pair(specid, offset));
-  }
-
-  // 2. Convert to Eventworkspace and generate a new workspace for output
-  EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-
-  API::MatrixWorkspace_sptr outputMatrixWS = this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (outputMatrixWS == inputWS){
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
-  } else {
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", eventWS->getNumberHistograms(), 2, 1));
-    API::WorkspaceFactory::Instance().initializeFromParent(eventWS, outputWS, false);
-    outputWS->copyDataFrom((*eventWS));
-
-    outputMatrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", outputMatrixWS);
-  }
-
-  // 3. Convert!
-  for (int ispec = 0; ispec < static_cast<int>(outputWS->getNumberHistograms()); ispec ++){
-    // For each spectrum
-
-    EventList events = outputWS->getEventList(ispec);
-    std::set<detid_t> detectorids = eventWS->getSpectrum(size_t(ispec))->getDetectorIDs();
-
-    // a) Check! There is only one possible detector ID in the set
-    if (detectorids.size() != 1){
-      g_log.error() << "Spectrum " << ispec << " Detectors = " << detectorids.size() << std::endl;
-    }
-
-    std::set<detid_t>::iterator setiter;
-    double shiftfactor = 1.0;
-    detid_t detid = 0;
-    for (setiter=detectorids.begin(); setiter != detectorids.end(); ++setiter){
-
-      detid = *setiter;
-      std::map<detid_t, double>::iterator mapiter = specmap.find(detid);
-      if (mapiter == specmap.end()){
-        // No match
-        g_log.error() << "Detector (ID) = " << detid << "  Has No Entry In Calibration File" << std::endl;
-      } else {
-        // Matched
-        // i) Inner-module offset
-        double offset1 = mapiter->second;
-
-        // ii) Inter-module offset
-        detid_t index2 = detid_t(detid/1250)*1250+1250-2;
-        std::map<detid_t, double>::iterator itermodule = specmap.find(index2);
-        if (itermodule == specmap.end()){
-          throw std::invalid_argument("Inter-module offset cannot be found");
-        }
-        double offset2 = itermodule->second;
-
-        // iii) Inter-stack offset
-        detid_t index3 = index2 + 1;
-        std::map<detid_t, double>::iterator iterstack = specmap.find(index3);
-        if (iterstack == specmap.end()){
-          throw std::invalid_argument("Inter-stack offset cannot be found");
-        }
-        double offset3 = iterstack->second;
-
-        // iv) overall factor
-        shiftfactor = pow(10.0, -(offset1+offset2+offset3));
-
-        /*
-        if (ispec < 30){
-          g_log.notice() << "Detector " << detid << "  Shift Factor = " << shiftfactor << "  Inner-module = " << offset1 << std::endl;
-        }
-        */
-      }
-
-    } // for one and only one detector
-    if (ispec < 30){
-      g_log.notice() << "Detector " << detid << "  Shift Factor = " << shiftfactor << "  Number of events = " << events.getNumberEvents() << std::endl;
-    }
-
-    /*
-    if (ispec == 11){
-      std::vector<double> tofs;
-      outputWS->getEventList(ispec).getTofs(tofs);
-      // events.getTofs(tofs);
-      g_log.notice() << "Before: TOF[0] = " << tofs[0] << std::endl;
-    }
-    */
-    outputWS->getEventList(ispec).convertTof(shiftfactor, 0.0);
-    /*
-    if (ispec == 11){
-      std::vector<double> tofs;
-      events.getTofs(tofs);
-      g_log.notice() << "After: TOF[0] = " << tofs[0] << std::endl;
-    }
-    */
-
-  } // for spec
-
-  // Another check
-  /*
-  EventList checklist = outputWS->getEventList(11);
-  std::vector<double> tofs;
-  checklist.getTofs(tofs);
-  g_log.notice() << "Final Check: TOF[11][0]" << tofs[0] << std::endl;
-  */
-
-  return;
 }
 
 //-----------------------------------------------------------------------
