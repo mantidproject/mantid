@@ -58,7 +58,6 @@ void GLObject::construct()const
         this->define();
 	glEndList();
         //if (dynamic_cast<ObjCompAssemblyActor*>(this))
-        std::cerr<<"construct " << getName() << ' ' << mDisplayListId << '\n';
 	if(glGetError()==GL_OUT_OF_MEMORY) //Throw an exception
 	  throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
 	mChanged=false;  //Object Marked as changed.

@@ -76,6 +76,7 @@ public:
 
   explicit InstrumentWindow(const QString& wsName, const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
   ~InstrumentWindow();
+  void init();
   QString getWorkspaceName() const { return m_workspaceName; }
   void updateWindow();
 
