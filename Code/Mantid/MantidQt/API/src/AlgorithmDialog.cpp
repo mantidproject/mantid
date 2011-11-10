@@ -265,7 +265,7 @@ void AlgorithmDialog::hideOrDisableProperties()
       bool visible     = p->isVisible();
 
       if (p->isConditionChanged()){
-          p->getSettings()->modify_allowed_values(p);
+          p->getSettings()->applyChanges(p);
           int row = this->deletePropertyWidgets(p);
           this->createSpecificPropertyWidget(p,row);
       }

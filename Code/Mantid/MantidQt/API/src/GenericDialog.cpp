@@ -377,9 +377,6 @@ void GenericDialog::initLayout()
 void
 GenericDialog::createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row)
 {
-//HACK: (temporary)
-  
-//END HACK
 
       // Look for specific property types
       Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(pProp);
@@ -410,12 +407,16 @@ GenericDialog::deletePropertyWidgets(Mantid::Kernel::Property *pProp)
    //     delete it.value();
    //     it=m_mappers.erase(it);
    //} 
+   int iRow,iCol,irowSpan,icolSpan;
+
 
   int nRow=INT_MAX;
   QList<QWidget*> widgets = m_tied_all_widgets[propName];
   for (int i=0; i<widgets.size(); i++){
-       QPoint pos = widgets[i]->pos();
-       if(pos.y()<nRow)nRow=pos.y();
+       int wInd = m_currentGrid->indexOf(widgets[i]);
+       m_currentGrid->getItemPosition(wInd,&iRow,&iCol,&irowSpan,&icolSpan);
+       if(iRow<nRow)nRow=iRow;
+
        widgets[i]->setVisible(false);
        widgets[i]->setEnabled(false);
        widgets[i]->setAttribute(Qt::WA_DeleteOnClose);
