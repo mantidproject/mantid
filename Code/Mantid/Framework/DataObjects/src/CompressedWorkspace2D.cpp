@@ -156,9 +156,9 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
     j += m_YLength;
   }
 
-  uLongf nBuff = m_outBuffer.size();
+  uLongf nBuff = static_cast<uLongf>(m_outBuffer.size());
 
-  compress2(&m_outBuffer[0],&nBuff,reinterpret_cast<Bytef*>(&m_inBuffer[0]),m_vectorSize*m_vectorsPerBlock,1);
+  compress2(&m_outBuffer[0],&nBuff,reinterpret_cast<Bytef*>(&m_inBuffer[0]),static_cast<uLong>(m_vectorSize*m_vectorsPerBlock),1);
 
   Bytef* tmp = new Bytef[nBuff];
   memcpy(tmp,&m_outBuffer[0],nBuff);
@@ -172,10 +172,9 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
  */
 void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,size_t startIndex)const
 {
-  //std::cerr<<"uncompress "<<startIndex<<'\n';
-  uLongf nBuff = m_outBuffer.size();
+  uLongf nBuff = static_cast<uLongf>(m_outBuffer.size());
   CompressedPointer p = m_compressedData[startIndex];
-  int status = uncompress (&m_outBuffer[0], &nBuff, p.first, p.second);
+  int status = uncompress (&m_outBuffer[0], &nBuff, p.first, static_cast<uLong>(p.second));
 
   if (status == Z_MEM_ERROR)
     throw std::runtime_error("There is not enough memory to complete the uncompress operation.");

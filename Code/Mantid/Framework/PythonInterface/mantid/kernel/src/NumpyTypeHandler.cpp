@@ -16,7 +16,6 @@ namespace Mantid
   {
     namespace PropertyMarshal
     {
-
       /**
        * Handle Python -> C++ calls to a property manager and get the correct type from the
        * python object
@@ -31,27 +30,12 @@ namespace Mantid
         {
           throw std::invalid_argument(std::string("NumpyTypeHandler::set - Cannot handle non-numpy array. Type passed: ") + value.ptr()->ob_type->tp_name);
         }
-        PyArrayObject *nparray=(PyArrayObject*)value.ptr();
-        // A numpy array is a homogeneous array, i.e each type is identical and the underlying array is contiguous
-        const int ndim = PyArray_NDIM(nparray);
-        if( ndim > 1 ) throw std::invalid_argument("NumpyTypeHandler::set - Currently unable to handle arrays with greater than 1.");
-
-        // Numpy has type checking macros
         Kernel::Property *prop = alg->getPointerToProperty(name);
         const std::type_info * propTypeInfo = prop->type_info();
+        PyArrayObject *nparray=(PyArrayObject*)value.ptr();
         if( typeid(std::vector<double>) == *propTypeInfo )
         {
-          if( PyArray_CanCastSafely(nparray->descr->type_num, NPY_DOUBLE) )
-          {
-            std::vector<double> propValues = VectorDelegate::toStdVectorFromNumpy<double>(nparray);
-            alg->setProperty(name, propValues);
-          }
-          else
-          {
-            throw std::invalid_argument(
-                std::string("NumpyTypeHandler::set - Cannot convert from ") + nparray->descr->type
-                    + " to a C++ double without loss of precision");
-          }
+          this->setDoubleArrayProperty(alg, name, nparray);
         }
         else
         {
@@ -69,6 +53,37 @@ namespace Mantid
         UNUSED_ARG(value);
         return false;
       }
+
+      //-----------------------------------------------------------------------
+      // Private memebers
+      //-----------------------------------------------------------------------
+      /**
+       *  Handle double-type properties, i.e PropertyWithValue<std::vector<double> > types
+       */
+       void NumpyTypeHandler::setDoubleArrayProperty(Kernel::IPropertyManager* alg, const std::string &name, PyArrayObject * nparray)
+       {
+         // If we have a property of type double then we should still be able to accept integer arrays
+         // MG: Not overly happy about how I'm doing this
+         std::vector<double> propValues;
+         switch(PyArray_TYPE(nparray))
+         {
+         case NPY_DOUBLE:
+            propValues = VectorDelegate::toStdVectorFromNumpy<double, npy_double>(nparray);
+           break;
+         case NPY_INT64:
+           propValues = VectorDelegate::toStdVectorFromNumpy<double, npy_int64>(nparray);
+           break;
+         case NPY_INT32:
+           propValues = VectorDelegate::toStdVectorFromNumpy<double, npy_int32>(nparray);
+           break;
+         default:
+           throw std::invalid_argument(
+               std::string("NumpyTypeHandler::set - Cannot convert from ") + nparray->descr->type
+                   + " to a C++ double without loss of precision");
+         }
+
+         alg->setProperty(name, propValues);
+       }
 
     }
   }

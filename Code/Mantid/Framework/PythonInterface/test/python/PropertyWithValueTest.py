@@ -70,10 +70,13 @@ class PropertyWithValueTest(unittest.TestCase):
         else:
             datax = np.arange(10.0)
         create_ws.set_property('DataX', datax)
-	x_values = create_ws.get_property('DataX').value
-	self.assertEquals(len(x_values), 10)
+        x_values = create_ws.get_property('DataX').value
+        self.assertEquals(len(x_values), 10)
         for i in range(10):
             self.assertEquals(x_values[i], i)	
 
     def test_set_property_succeeds_with_numpy_array_of_correct_type(self):
         self._do_numpy_test()
+
+    def test_set_property_succeeds_with_numpy_array_of_correct_type(self):
+        self._do_numpy_test(True)

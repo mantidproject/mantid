@@ -9,15 +9,6 @@ using namespace Mantid::PythonInterface;
 class VectorDelegateTest : public CxxTest::TestSuite
 {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static VectorDelegateTest *createSuite() { return new VectorDelegateTest(); }
-  static void destroySuite( VectorDelegateTest *suite ) { delete suite; }
-
-  VectorDelegateTest()
-  {
-    Py_Initialize();
-  }
 
   void test_that_a_non_sequence_type_returns_an_appropriate_error_string_from_isConvertible()
   {

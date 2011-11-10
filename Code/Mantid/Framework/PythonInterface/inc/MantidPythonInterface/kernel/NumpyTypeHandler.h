@@ -23,6 +23,11 @@
 */
 #include "MantidPythonInterface/kernel/PropertyHandler.h"
 
+//-----------------------------------------------------------------------------
+// Forward delcarations
+//-----------------------------------------------------------------------------
+struct PyArrayObject;
+
 namespace Mantid
 {
   namespace PythonInterface
@@ -39,6 +44,9 @@ namespace Mantid
         virtual void set(Kernel::IPropertyManager* alg, const std::string &name, boost::python::object value);
         /// Is the given object an instance the handler's type
         virtual bool isInstance(const boost::python::object&) const;
+      private:
+        /// Handle double-type properties
+        void setDoubleArrayProperty(Kernel::IPropertyManager* alg, const std::string &name, PyArrayObject * nparray);
       };
 
     }
