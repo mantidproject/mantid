@@ -87,9 +87,9 @@ namespace Mantid
 
     };
     
-    /// Shared pointer to the matrix workspace base class
+    /// Shared pointer to the IMDWorkspace base class
     typedef boost::shared_ptr<IMDWorkspace> IMDWorkspace_sptr;
-    /// Shared pointer to the matrix workspace base class (const version)
+    /// Shared pointer to the IMDWorkspace base class (const version)
     typedef boost::shared_ptr<const IMDWorkspace> IMDWorkspace_const_sptr;
   }
 }
