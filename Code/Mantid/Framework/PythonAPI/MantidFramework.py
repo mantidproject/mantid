@@ -170,7 +170,8 @@ __operator_names=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_N
                       'INPLACE_DIVIDE', 'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
                       'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT', 
                       'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
-                      'INPLACE_OR'])
+                      'INPLACE_OR',
+                      'COMPARE_OP'])
 
 #-------------------------------------------------------------------------------
 
@@ -601,7 +602,39 @@ class WorkspaceProxy(ProxyObject):
         Do the (self < rhs) comparison and return a new proxy managing that object
         """
         lhs = lhs_info()
-        return self.__do_operation('LessThan', rhs, inplace=True, reverse=False,
+        return self.__do_operation('LessThan', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __gt__(self, rhs):
+        """
+        Do the (self > rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('GreaterThan', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __or__(self, rhs):
+        """
+        Do the (self || rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('Or', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __and__(self, rhs):
+        """
+        Do the (self && rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('And', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __xor__(self, rhs):
+        """
+        Do the (self ^ rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('Xor', rhs, inplace=False, reverse=False,
                                    lhs_vars=lhs)
     
     def equals(self, rhs, tol):

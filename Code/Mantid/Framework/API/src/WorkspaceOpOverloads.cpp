@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include <numeric>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 namespace Mantid
 {
@@ -113,6 +114,13 @@ namespace OperatorOverloads
   template DLLExport IMDWorkspace_sptr executeBinaryOperation(const std::string &, const IMDWorkspace_sptr, const MatrixWorkspace_sptr, bool,
       bool, const std::string &, bool);
   template DLLExport IMDWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr, const IMDWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+
+  template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr, const MatrixWorkspace_sptr, bool,
+      bool, const std::string &, bool);
+  template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr, const IMDHistoWorkspace_sptr, bool,
       bool, const std::string &, bool);
 
 } // namespace OperatorOverloads
