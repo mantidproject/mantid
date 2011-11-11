@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>358</width>
+    <width>192</width>
     <height>40</height>
    </rect>
   </property>
@@ -49,8 +49,12 @@
      <property name="toolTip">
       <string>Standard Mode</string>
      </property>
-     <property name="text">
-      <string>Standard</string>
+     <property name="icon">
+      <iconset resource="../../icons/QtWidgetsIcons.qrc">
+       <normaloff>:/VatesSimpleGuiQtWidgets/icons/standard_view.png</normaloff>:/VatesSimpleGuiQtWidgets/icons/standard_view.png</iconset>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -62,8 +66,9 @@
      <property name="toolTip">
       <string>MultiSlice Mode</string>
      </property>
-     <property name="text">
-      <string>MultiSlice</string>
+     <property name="icon">
+      <iconset resource="../../icons/QtWidgetsIcons.qrc">
+       <normaloff>:/VatesSimpleGuiQtWidgets/icons/multislice_view.png</normaloff>:/VatesSimpleGuiQtWidgets/icons/multislice_view.png</iconset>
      </property>
     </widget>
    </item>
@@ -72,11 +77,15 @@
      <property name="enabled">
       <bool>false</bool>
      </property>
-     <property name="whatsThis">
+     <property name="toolTip">
       <string>Three Slice Mode</string>
      </property>
-     <property name="text">
-      <string>ThreeSlice</string>
+     <property name="whatsThis">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../icons/QtWidgetsIcons.qrc">
+       <normaloff>:/VatesSimpleGuiQtWidgets/icons/threeslice_view.png</normaloff>:/VatesSimpleGuiQtWidgets/icons/threeslice_view.png</iconset>
      </property>
     </widget>
    </item>
@@ -88,14 +97,18 @@
      <property name="toolTip">
       <string>Scatter Plot Mode</string>
      </property>
-     <property name="text">
-      <string>Splatter</string>
+     <property name="icon">
+      <iconset resource="../../../../ParaviewPlugins/ParaViewFilters/SplatterPlot/SplatterPlot.qrc">
+       <normaloff>:/Splatter.png</normaloff>:/Splatter.png</iconset>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../../../ParaviewPlugins/ParaViewFilters/SplatterPlot/SplatterPlot.qrc"/>
+  <include location="../../icons/QtWidgetsIcons.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -28,6 +28,9 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiQtWidgets/ScalePicker.h
 )
 
+# Add the QtWidgets icons
+qt4_add_resources( RES_FILES icons/QtWidgetsIcons.qrc )
+
 # These are the ui files to be processed using
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
@@ -41,11 +44,18 @@ include_directories(
   ${QWT_INCLUDE_DIR} 
 )
 
+set( ALL_FILES
+${INCLUDE_FILES}
+${SOURCE_FILES}
+${MOC_SOURCES}
+${UI_BUILT_SOURCES}
+${RES_FILES}
+)
+
 # For Windows
 add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_QTWIDGETS )
 # Add the target for this directory
-add_library( VatesSimpleGuiQtWidgets ${INCLUDE_FILES} ${SOURCE_FILES} 
-${MOC_SOURCES} ${UI_BUILT_SOURCES} )
+add_library( VatesSimpleGuiQtWidgets ${ALL_FILES} )
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiQtWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgets )
 # Add to the 'VatesSimpleGui' group in VS
