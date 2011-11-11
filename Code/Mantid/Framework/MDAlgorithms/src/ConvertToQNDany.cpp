@@ -24,6 +24,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 
+#include <algorithm>
 #include <float.h>
 
 using namespace Mantid;
@@ -38,86 +39,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
     // the parameter, which specifies maximal default number of dimensions, the algorithm accepts (should be moved to configuration). 
-    static int MAX_DIM_NUMBER=8;
 
-// the class to verify and modify interconnected properties. 
-class PropChanger: public IPropertySettings
-{
-    // h specifies the workspace which has to be modified
-    std::string source_ws_name;
-    // the name of the property, which specifies the workspace which can contain single spectra to normalize by 
-    std::string host_monws_name;
-    // the pointer to the main host algorithm.
-    const IPropertyManager * host_algo;
-
-    // the string with log names, which can be used as dimension ID-s
-    mutable std::vector<std::string> possible_dim_ID;
-    // if the current dimension id is enabled
-    mutable bool is_enabled;
-    // auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
-   void  monitor_id_reader()const;
-public:
-    PropChanger(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty):
-      host_ws_name(WSProperty),host_monws_name(MonWSProperty), host_algo(algo),is_enabled(true){}
-  // if input to "
-   bool isEnabled()const{
-       API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(host_monws_name);
-       if(monitorsWS){
-           is_enabled = false;
-       }else{
-           is_enabled = true;
-       }
-       return is_enabled;
-   }
-   //
-   bool isConditionChanged()const{
-       if(!is_enabled)return false;
-       // read monitors list from the input workspace
-       monitor_id_reader();
-       // if no monitors are associated with workspace -- ok -- you just have to use spectra_ID (may be not on an monitor)
-       if(possible_dim_ID.empty())return false;
-       //Kernel::Property *pProperty = host_algo->getPointerToProperty(
-       return true;
-   }
-   // function which modifies the allowed values for the list of monitors. 
-   void applyChanges(Property *const pProp){
-       PropertyWithValue<int>* piProp  = dynamic_cast<PropertyWithValue<int>* >(pProp);
-       if(!piProp){
-           throw(std::invalid_argument("modify allowed value has been called on wrong property"));
-       }
-       std::vector<int> ival(allowed_values.size());
-       for(size_t i=0;i<ival.size();i++){
-                ival[i]=boost::lexical_cast<int>(allowed_values[i]);
-       }
-       piProp->modify_validator(new ValidatorAnyList<int>(ival));
-           
-   }
-   // interface needs it but if indeed proper clone used -- do not know. 
-   virtual IPropertySettings* clone(){return new PropChanger(host_algo,host_ws_name,host_monws_name);}
-
-
-};
-// read the monitors list from the workspace;
-void
-PropChanger::monitor_id_reader()const
-{
-    allowed_values.clear();
-    API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(host_ws_name);
-    if(!inputWS){
-        return ;
-    }
-
-    Geometry::Instrument_const_sptr pInstr = inputWS->getInstrument();
-    if (!pInstr){
-        return ;
-    }
-    std::vector<detid_t> mon = pInstr->getMonitors();
-    allowed_values.resize(mon.size());
-    for(size_t i=0;i<mon.size();i++){
-        allowed_values[i]=boost::lexical_cast<std::string>(mon[i]);
-    }
-    return ;
-}
 
 
 // logger for loading workspaces  
@@ -138,20 +60,29 @@ void ConvertToQNDany::initDocs()
 /** Constructor
 */
 ConvertToQNDany::ConvertToQNDany():
-n_activated_dimensions(2),
-Q_ID_possible(2)
+ Q_ID_possible(3)
 {
     Q_ID_possible[0]="|Q|";
-    Q_ID_possible[1]="QxQyQz";
+    Q_ID_possible[1]="QxQyQz";    
+    Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
   
+    alg_selector.resize(ConvertToQNDany::Unknow);
+
+    alg_selector[NoQND]   = &ConvertToQNDany::processNoQ;
+    alg_selector[modQdE]  = &ConvertToQNDany::processModQdE;
+    alg_selector[modQND]  = &ConvertToQNDany::processModQND;
+    alg_selector[modQdEND]= &ConvertToQNDany::processModQdEND;
+    alg_selector[Q3D]     = &ConvertToQNDany::processQ3D;
+    alg_selector[Q3DdE]   = &ConvertToQNDany::processQ3DdE;
+    alg_selector[Q3DND]   = &ConvertToQNDany::processQ3DND;
+    alg_selector[Q3DdEND] = &ConvertToQNDany::processQ3DdEND;
 }
     
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 ConvertToQNDany::~ConvertToQNDany()
-{
-}
+{}
 
 
 //
@@ -199,27 +130,32 @@ ConvertToQNDany::init()
 
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
-        "An input Matrix Workspace 2D, processed by Convert to energy (homer) algorithm and its x-axis has to be in the units of energy transfer with energy in mev.");
-    BoundedValidator<int> *min_nDim = new BoundedValidator<int>();
-
+        "An input Matrix Workspace 2D has to have units, which can be used as one of the dimensions ");
+   
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
-  
-    declareProperty("QDimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
+
+     declareProperty("QDimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
                               "You can select mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
-    min_nDim->setLower(0);
-    declareProperty(new PropertyWithValue<int>("NumAddDim",3,min_nDim,Direction::Input),
-        " Number of additional to Q (orthogonal) dimensions in the target workspace");
 
-// -------- Dynamic properties;
-    // build properties for possible additional dimensions
-      build_default_properties(8);
+     
+    declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
+        " List(comma separated) of additional to Q (orthogonal) dimensions in the target workspace.\n"
+        " The names of these dimensions have to coinside with the log names in the source workspace");
 
-//    declareProperty(new ArrayProperty<std::string>("dim1"),
 
-    // BoundedValidator<double> *minEn = new BoundedValidator<double>();
-    // minEn->setLower(0);
-    // declareProperty("EnergyInput",0.000000001,minEn,"The value for the incident energy of the neutrons leaving the source (meV)",Direction::InOut);
+    declareProperty(new ArrayProperty<double>("MinValues"),
+         "An array of size 1+N_OtherDimensions if first dimension is equal |Q| or \n"
+         "3+N_OtherDimensions if first (3) dimensions  QxQyQz containing minimal values for all dimensions"
+         " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
+         " All other values are in uints they are expressed in their log files\n"
+         " Values lower then the specified one will be ignored\n"
+         " If a minimal output workspace range is higer then specified, the workspace range will be used intstead)" );
+
+   declareProperty(new ArrayProperty<double>("MaxValues"),
+         "An array of the same size as MinValues array"
+         " Values higher then the specified by the array will be ignored\n"
+        " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
 
     // // this property is mainly for subalgorithms to set-up as they have to identify 
     //declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
@@ -229,26 +165,132 @@ ConvertToQNDany::init()
     ////declareProperty(new ArrayProperty<double>("v"), "second base vecotors");
 
 
-    // declareProperty(new ArrayProperty<double>("QdEValuesMin"),
-    //     "An array containing minimal values for Q[A^-1] and energy transfer[meV] in a form qx_min,qy_min,qz_min, dE min\n"
-    //     "(momentum and energy transfer values lower that this one will be ignored if this is set.\n"
-    //     " If a minimal output workspace range is higer then specified, the workspace range will be used intstead)" );
-
-    // declareProperty(new ArrayProperty<double>("QdEValuesMax"),
-    //     "An array containing maximal values for Q[A^-1] and energy transfer[meV] in a form qx_max,qy_max,qz_max, dE_max\n"
-    //     "(momentum and energy transfer values higher that this one will be ignored if this is set.\n"
-    //     " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
+    
 
 
 }
-//
-void
-ConvertToQNDany::setPropertyValue(const std::string &name, const std::string &value){
-        if(name.compare("Num_dimensions")){
 
+void 
+ConvertToQNDany::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
+    for(size_t i=0; i<min.size();i++){
+        if(max[i]<=min[i]){
+            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
+            throw(std::invalid_argument("min limit not smaller then max limit"));
         }
-        API::Algorithm::PropertyManagerOwner::setProperty(name,value);
-};
+    }
+}
+ 
+
+ 
+  //----------------------------------------------------------------------------------------------
+  /* Execute the algorithm.   */
+void ConvertToQNDany::exec(){
+    // -------- Input workspace 
+    MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
+    Workspace2D_sptr inWS2D         = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
+
+    // Identify what dimension names we can obtain from the input workspace;
+    std::vector<std::string> dim_names_availible;
+    // assume that |Q| and QxQyQz availible from any workspace?
+    std::vector<std::string> wsNames(2);
+    wsNames[0]="|Q|";
+    wsNames[1]="QxQyQz";
+
+// get the X axis
+    NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
+    if(!pXAxis )
+    {
+        convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inWS2D->getName()<<std::endl;
+        throw(std::invalid_argument("Input workspace has to have X-axis"));
+    }
+    std::string Dim1Name = pXAxis->unit()->unitID();
+    wsNames.push_back(Dim1Name);
+    //
+    dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
+
+
+    // get dim_names requested by user:
+    std::vector<std::string> dim_requested;
+    //a) by Q selector:
+    std::string Q_dim_requested       = getProperty("QDimensions");  
+    //b) by other dim property;
+   std::vector<std::string> other_dim  =getProperty("OtherDimensions");
+
+
+   // Verify input parameters;
+    std::vector<std::string> dim_selected;
+    known_algorithms algo_id = identify_requested_alg(dim_names_availible, Q_dim_requested,other_dim,n_activated_dimensions);
+
+    return;
+   
+}
+ /** function processes input arguments and tries to istablish what algorithm should be deployed; 
+    *
+    * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
+    * @param Q_dim_requested     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
+    * @param dim_selected        -- vector of other dimension names requested by the algorithm
+    *
+    * @return known_algorithms   -- enum identifying one of the known algorithms; if unknown, should fail. 
+   */
+ConvertToQNDany::known_algorithms
+ConvertToQNDany::identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &Q_dim_requested, const std::vector<std::string> &dim_requested, size_t &nDims)const
+{
+
+    nDims = 0;
+    // verify if everything requested is availible:
+    for(size_t i=0;i<dim_requested.size();i++){
+        if(std::find(dim_names_availible.begin(),dim_names_availible.end(),dim_requested[i])==dim_names_availible.end()){
+            g_log.error()<<" The dimension: "<<dim_requested[i]<<" requested but can not be found in the list of availible parameters & data\n";
+            throw(std::invalid_argument(" the data for availible dimension are not among the input data"));
+        }
+    }
+   // NoQND
+    if(Q_dim_requested.empty()){ 
+        nDims = dim_requested.size();
+        return ConvertToQNDany::NoQND;
+    }
+
+    // modQdE,modQND,modQdEND
+    if(Q_dim_requested.compare("|Q|")==0){
+        if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){ // modQdE,modQdEND
+            if(dim_requested.size()==1){ //  modQdE;
+                nDims = 2;
+                return ConvertToQNDany::modQdE;
+            }else{
+                nDims = 1+dim_requested.size();
+                return ConvertToQNDany::modQdEND;
+            }
+        }else{                          // modQND
+            nDims=    dim_requested.size()+1;
+            return ConvertToQNDany::modQND;
+        }
+    }
+
+    if(!(Q_dim_requested.compare("QxQyQz")==0)){
+            g_log.error()<<" Q-value equal to: "<<Q_dim_requested<<" is not recognized\n";
+            throw(std::invalid_argument(" invalid Q argument"));
+    }
+    //Q3D,Q3DdE,Q3DND,Q3DdEND
+    if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){ // modQdE,modQdEND
+            if(dim_requested.size()==1){ //  Q3DdE,Q3DdEND;
+                nDims = 4;
+                return ConvertToQNDany::Q3DdE;
+            }else{
+                nDims = 3+dim_requested.size();
+                return ConvertToQNDany::Q3DdEND;
+            }
+   }else{       // Q3D,Q3DND
+       if(dim_requested.size()==0){
+            nDims = 3;
+            return ConvertToQNDany::Q3D;
+       }else{
+            nDims= dim_requested.size()+3;
+            return ConvertToQNDany::Q3DND;
+       }
+    }
+
+  
+}
 
 std::vector<std::string > 
 ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_prop,MatrixWorkspace_const_sptr inMatrixWS)const{
@@ -281,72 +323,40 @@ ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_pro
     return prop_names;
 }
 
-bool
-ConvertToQNDany::   build_default_properties(size_t max_n_dims)
-{ 
-    // number of additional known dimensions:
-    // size_t n_add_dims =boost::lexical_cast<size_t>(getPropertyValue("NumAddDim"));
-    // number of total dimensions is also defined by the value of the Q -dimensions
-    std::string dim_id =   getPropertyValue("QDimensions");
-    // check if the number of dimensions have not changed and new input is needed
-    size_t n_dims;
-    if    (dim_id.compare(Q_ID_possible[0])){ // |Q|    -- 1 dimension
-        n_dims = 1;
-    }else{                                 // QxQyQz -- 3 dimensions     
-        n_dims = 3;
-    }
-//    size_t n_dim_visible  = n_dims+n_add_dims;
-//    size_t n_dim_invisible= max_n_dims-n_dim_visible;
 
-    std::vector<std::string> dim_ID(max_n_dims);
-    dim_ID[0]=std::string("DeltaE");
-    for(size_t i=1;i<max_n_dims;i++){
-        std::string num     = boost::lexical_cast<std::string>(i+1);
-        std::string dim_num = "dim_"+num; 
-        dim_ID[i] = dim_num;
-    }
-    for(size_t i=0;i<max_n_dims;i++){
-          if(this->existsProperty(dim_ID[i])) this->removeProperty(dim_ID[i]);         
-          this->declareProperty(dim_ID[i],dim_ID[i],new ListValidator(dim_ID),"",Direction::InOut);        
-          this->setPropertySettings(dim_ID[i], new EnabledWhenProperty(this, "NumAddDim", IS_MORE_OR_EQ, boost::lexical_cast<std::string>(i)));
-    }   
-   return true; 
-}
-//
-void 
-ConvertToQNDany::build_ND_property_selector(size_t n_dims,const std::vector<std::string> & dim_ID)
+void ConvertToQNDany::processNoQ()
 {
-
-    if(dim_ID.size()<n_dims){
-        convert_log.error()<<" number of dimensions requested="<<n_dims<<" and this has to be less or equal to the number of possible workspace variables"<<dim_ID.size()<<std::endl;
-        throw(std::invalid_argument(" nuber of dimensions exceed the possible dimension number"));
-    }
-
-   
+    throw(Kernel::Exception::NotImplementedError(""));
+}
+void ConvertToQNDany::processModQdE()
+{
+    throw(Kernel::Exception::NotImplementedError(""));
+}
+void ConvertToQNDany::processModQND()
+{
+    throw(Kernel::Exception::NotImplementedError(""));
+}
+void ConvertToQNDany::processModQdEND()
+{
+    throw(Kernel::Exception::NotImplementedError(""));
+}
+void ConvertToQNDany::processQ3D()
+{
+    throw(Kernel::Exception::NotImplementedError(""));
+}
+void ConvertToQNDany::processQ3DdE( )
+{
+    throw(Kernel::Exception::NotImplementedError(""));
 }
 
-
-
-void 
-ConvertToQNDany::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
-    for(size_t i=0; i<min.size();i++){
-        if(max[i]<=min[i]){
-            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
-            throw(std::invalid_argument("min limit not smaller then max limit"));
-        }
-    }
+void ConvertToQNDany::processQ3DND( )
+{
+    throw(Kernel::Exception::NotImplementedError(""));
 }
- 
-
- 
-  //----------------------------------------------------------------------------------------------
-  /* Execute the algorithm.   */
-void ConvertToQNDany::exec(){
-
-        return;
-   
+void ConvertToQNDany::processQ3DdEND()
+{
+    throw(Kernel::Exception::NotImplementedError(""));
 }
-
 
 } // namespace Mantid
 } // namespace MDAlgorithms
