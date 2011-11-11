@@ -2878,18 +2878,18 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
   if ( Mantid::API::AnalysisDataService::Instance().doesExist(groupName.toStdString()) )
   {
     QString groupStr("");
-    //if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised.toStdString()) )
-    //{
-    //  groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsNormalised + "," + groupName
-    //      + "',OutputWorkspace='" + groupName + "')\n";
-    //  runPythonCode( groupStr ).trimmed();
-    //}
-    //if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters.toStdString()) )
-    //{
-    //  groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsParameters + "," + groupName
-    //      + "',OutputWorkspace='" + groupName + "')\n";
-    //  runPythonCode( groupStr ).trimmed();
-    //}
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised.toStdString()) )
+    {
+      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsNormalised + "," + groupName
+          + "',OutputWorkspace='" + groupName + "')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters.toStdString()) )
+    {
+      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsParameters + "," + groupName
+          + "',OutputWorkspace='" + groupName + "')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
     if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace.toStdString()) )
     {
       groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsWorkspace + "," + groupName

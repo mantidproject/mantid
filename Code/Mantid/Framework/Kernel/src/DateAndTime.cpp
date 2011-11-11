@@ -502,7 +502,7 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
     //The timezone is - so we need to ADD the hours
     this->set_from_ptime( boost::posix_time::time_from_string(time) + tz_offset );
   }
-  catch (boost::bad_lexical_cast & e)
+  catch (boost::bad_lexical_cast &)
   {
     // Re-throw a more helpful error message
     throw std::invalid_argument("Error interpreting string '" + time + "' as a date/time.");

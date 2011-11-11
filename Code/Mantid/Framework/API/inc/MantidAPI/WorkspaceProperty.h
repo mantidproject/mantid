@@ -67,7 +67,7 @@ namespace Mantid
       *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
-      WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
+      explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
           Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(false)
@@ -341,22 +341,32 @@ namespace Mantid
           std::string memberWsName = *it;
           boost::shared_ptr<Workspace> memberWs = AnalysisDataService::Instance().retrieve(memberWsName);
 
-          // ... and if it is a workspace of incorrect type, exclude the group by returning an error.
-          if( NULL == boost::dynamic_pointer_cast<TYPE>(memberWs) )
+          // Table Workspaces are ignored
+          if ("TableWorkspace" == memberWs->id())
           {
-            error = "Workspace " + memberWsName + " is not of type " + Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() + ".";
-
+            error = "Workspace " + memberWsName + " is of type TableWorkspace and will therefore be ignored as part of the GroupedWorkspace.";
+            
             g_log.debug() << error << std::endl;
-
-            return error;
           }
-          // If it is of the correct type, it may still be invalid. Check.
           else
           {
-            Mantid::API::WorkspaceProperty<TYPE> memberWsProperty(*this);
-            std::string memberError = memberWsProperty.setValue(memberWsName);
-            if( !memberError.empty() )
-              return memberError; // Since if this member is invalid, then the whole group is invalid.
+            // ... and if it is a workspace of incorrect type, exclude the group by returning an error.
+            if( NULL == boost::dynamic_pointer_cast<TYPE>(memberWs) )
+            {
+              error = "Workspace " + memberWsName + " is not of type " + Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() + ".";
+
+              g_log.debug() << error << std::endl;
+
+              return error;
+            }
+            // If it is of the correct type, it may still be invalid. Check.
+            else
+            {
+              Mantid::API::WorkspaceProperty<TYPE> memberWsProperty(*this);
+              std::string memberError = memberWsProperty.setValue(memberWsName);
+              if( !memberError.empty() )
+                return memberError; // Since if this member is invalid, then the whole group is invalid.
+            }
           }
         }
 

@@ -126,8 +126,7 @@ namespace API
       EnabledWhenWorkspaceIsType * out = new EnabledWhenWorkspaceIsType<T>(this->m_propertyManager, m_otherPropName, m_enabledSetting);
       return out;
     }
-
-  protected:
+   protected:
     /// Name of the OTHER property that we will check.
     std::string m_otherPropName;
     /// Set Enabled to this.

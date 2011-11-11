@@ -175,7 +175,7 @@ public:
       Q1D.setProperty("PixelAdj", m_pixel);
       Q1D.setPropertyValue("OutputWorkspace", outputWS);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-      Q1D.setProperty("RadiusCut", 0.22);
+      Q1D.setProperty("RadiusCut", 220.0);
       Q1D.setProperty("WaveCut", 8.0);
     )
     //#default is don't correct for gravity
@@ -218,7 +218,7 @@ public:
       Q1D.setPropertyValue("OutputWorkspace", outputWS);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
       //this raduis is too small to exclude anything
-      Q1D.setProperty("RadiusCut", 0.05);
+      Q1D.setProperty("RadiusCut", 50.0);
       //this is the entire wavelength range
       Q1D.setProperty("WaveCut", 30.0);
     )

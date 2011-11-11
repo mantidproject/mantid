@@ -1,10 +1,10 @@
-#ifndef COLORSELECTIONWIDGET_H_
-#define COLORSELECTIONWIDGET_H_
+#ifndef COLORSELECTIONDIALOG_H_
+#define COLORSELECTIONDIALOG_H_
 
-#include "ui_ColorSelectionWidget.h"
+#include "ui_ColorSelectionDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-#include <QWidget>
+#include <QDialog>
 
 class pqColorMapModel;
 class pqColorPresetManager;
@@ -43,7 +43,7 @@ namespace SimpleGui
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionDialog : public QDialog
 {
   Q_OBJECT
 
@@ -52,9 +52,9 @@ public:
    * Default constructor.
    * @param parent the parent widget of the mode control widget
    */
-  ColorSelectionWidget(QWidget *parent = 0);
+  ColorSelectionDialog(QWidget *parent = 0);
   /// Default destructor.
-  virtual ~ColorSelectionWidget() {}
+  virtual ~ColorSelectionDialog() {}
 
 public slots:
   /**
@@ -127,7 +127,7 @@ private:
   void setEditorStatus(bool status);
 
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
-  Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
+  Ui::ColorSelectionDialogClass ui; ///< The mode control widget's UI form
 };
 
 }

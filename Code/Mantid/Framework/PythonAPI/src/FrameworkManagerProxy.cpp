@@ -16,6 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 using Mantid::API::AlgorithmManager;
 
@@ -352,6 +353,27 @@ boost::shared_ptr<API::IMDWorkspace> FrameworkManagerProxy::retrieveIMDWorkspace
     throw std::runtime_error("\"" + wsName + "\" is not an MD workspace. ");
   }
 }
+
+
+/** Return pointer to IMDHistoWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<API::IMDHistoWorkspace> FrameworkManagerProxy::retrieveIMDHistoWorkspace(const std::string& wsName)
+{
+  API::IMDHistoWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(retrieveWorkspace(wsName));
+  if (ws != NULL)
+  {
+    return ws;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an MDHistoWorkspace. ");
+  }
+}
+
+
 
 /** Return pointer to IMDEventWorkspace
  * @param wsName :: The name of the workspace to retrieve.

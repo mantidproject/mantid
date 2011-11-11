@@ -357,14 +357,14 @@ namespace MDEvents
     exents_dims[0] = (int(maxBoxes));
     exents_dims[1] = (nd*2);
     std::vector<int> exents_chunk(2,0);
-    exents_chunk[0] = int(100000);
+    exents_chunk[0] = int(16384);
     exents_chunk[1] = (nd*2);
 
     std::vector<int> box_2_dims(2,0);
     box_2_dims[0] = int(maxBoxes);
     box_2_dims[1] = (2);
     std::vector<int> box_2_chunk(2,0);
-    box_2_chunk[0] = int(100000);
+    box_2_chunk[0] = int(16384);
     box_2_chunk[1] = (2);
 
     if (!update)

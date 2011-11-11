@@ -269,7 +269,7 @@ namespace Algorithms
   void DiffractionEventCalibrateDetectors::init()
   {
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input, new InstrumentValidator<EventWorkspace>),
                             "The workspace containing the geometry to be calibrated." );
 
     declareProperty("Params", "",

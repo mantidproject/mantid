@@ -1,4 +1,4 @@
-#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h"
 
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
@@ -16,7 +16,7 @@ namespace Vates
 namespace SimpleGui
 {
 
-ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
+ColorSelectionDialog::ColorSelectionDialog(QWidget *parent) : QDialog(parent)
 {
   this->ui.setupUi(this);
   this->ui.autoColorScaleCheckBox->setChecked(true);
@@ -42,7 +42,7 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
                    this, SLOT(useLogScaling(int)));
 }
 
-void ColorSelectionWidget::setEditorStatus(bool status)
+void ColorSelectionDialog::setEditorStatus(bool status)
 {
   this->ui.maxValLabel->setEnabled(status);
   this->ui.maxValLineEdit->setEnabled(status);
@@ -50,7 +50,7 @@ void ColorSelectionWidget::setEditorStatus(bool status)
   this->ui.minValLineEdit->setEnabled(status);
 }
 
-void ColorSelectionWidget::loadBuiltinColorPresets()
+void ColorSelectionDialog::loadBuiltinColorPresets()
 {
   pqColorMapModel colorMap;
   pqColorPresetModel *model = this->presets->getModel();
@@ -105,7 +105,7 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   model->addBuiltinColorMap(colorMap, "CIELab Blue to Red");
 }
 
-void ColorSelectionWidget::autoOrManualScaling(int state)
+void ColorSelectionDialog::autoOrManualScaling(int state)
 {
   switch (state)
   {
@@ -119,7 +119,7 @@ void ColorSelectionWidget::autoOrManualScaling(int state)
   }
 }
 
-void ColorSelectionWidget::loadPreset()
+void ColorSelectionDialog::loadPreset()
 {
   this->presets->setUsingCloseButton(false);
   if (this->presets->exec() == QDialog::Accepted)
@@ -135,14 +135,14 @@ void ColorSelectionWidget::loadPreset()
   }
 }
 
-void ColorSelectionWidget::getColorScaleRange()
+void ColorSelectionDialog::getColorScaleRange()
 {
   double min = this->ui.minValLineEdit->text().toDouble();
   double max = this->ui.maxValLineEdit->text().toDouble();
   emit this->colorScaleChanged(min, max);
 }
 
-void ColorSelectionWidget::setColorScaleRange(double min, double max)
+void ColorSelectionDialog::setColorScaleRange(double min, double max)
 {
   if (this->ui.autoColorScaleCheckBox->isChecked())
   {
@@ -157,7 +157,7 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
   }
 }
 
-void ColorSelectionWidget::useLogScaling(int state)
+void ColorSelectionDialog::useLogScaling(int state)
 {
   // Qt::Checked is 2, need it to be 1 for boolean true conversion
   if (Qt::Checked == state)

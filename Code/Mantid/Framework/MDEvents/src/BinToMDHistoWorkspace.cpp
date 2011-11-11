@@ -458,7 +458,7 @@ namespace MDEvents
 
         // Save the data into the dense histogram
         outWS->setSignalAt(linear_index, bin.m_signal);
-        outWS->setErrorAt(linear_index, bin.m_errorSquared);
+        outWS->setErrorSquaredAt(linear_index, bin.m_errorSquared);
       }
 
       // Report progress but not too often.

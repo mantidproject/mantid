@@ -1617,7 +1617,8 @@ class UserFile(ReductionStep):
             if len(limits) != 2:
                 _issueWarning("Badly formed L/Q/RCUT line")
             else:
-                reducer.to_Q.r_cut = float(limits[1])
+                # When read from user file the unit is in mm but stored here it units of meters
+                reducer.to_Q.r_cut = float(limits[1]) / 1000.0
             return
         if limits.upper().startswith('Q/WCUT'):
             limits = limits.upper().split('WCUT')

@@ -1,6 +1,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
@@ -55,8 +56,10 @@
 #include <pqViewFrameActionsBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 
+#include <QAction>
 #include <QHBoxLayout>
 #include <QMainWindow>
+#include <QMenuBar>
 #include <QModelIndex>
 #include <QWidget>
 
@@ -76,6 +79,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
   this->isPluginInitialized = false;
   this->pluginMode = true;
+  this->colorDialog = NULL;
 }
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
@@ -84,6 +88,7 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
   // We're in the standalone application mode
   this->isPluginInitialized = false;
   this->pluginMode = false;
+  this->colorDialog = NULL;
   this->setupUiAndConnections();
   // FIXME: This doesn't allow a clean split of the classes. I will need
   //        to investigate creating the individual behaviors to see if that
@@ -154,6 +159,7 @@ void MdViewerWidget::setupPluginMode()
   if (!this->isPluginInitialized)
   {
     this->setupParaViewBehaviors();
+    this->createMenus();
   }
   this->setupMainView();
 }
@@ -281,23 +287,6 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
 
-  // Set color selection widget <-> view signals/slots
-  QObject::connect(this->ui.colorSelectionWidget,
-                   SIGNAL(colorMapChanged(const pqColorMapModel *)),
-                   this->currentView,
-                   SLOT(onColorMapChange(const pqColorMapModel *)));
-  QObject::connect(this->ui.colorSelectionWidget,
-                   SIGNAL(colorScaleChanged(double, double)),
-                   this->currentView,
-                   SLOT(onColorScaleChange(double, double)));
-  QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
-                   this->ui.colorSelectionWidget,
-                   SLOT(setColorScaleRange(double, double)));
-  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(autoScale()),
-                   this->currentView, SLOT(onAutoScale()));
-  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
-                   this->currentView, SLOT(onLogScale(int)));
-
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
                    SIGNAL(setAnimationControlState(bool)),
@@ -353,8 +342,11 @@ void MdViewerWidget::checkForUpdates()
     vtkSMDoubleVectorProperty *range = \
         vtkSMDoubleVectorProperty::SafeDownCast(\
           proxy->GetProperty("ThresholdBetween"));
-    this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
-                                                      range->GetElement(1));
+    if (NULL != this->colorDialog)
+    {
+      this->colorDialog->setColorScaleRange(range->GetElement(0),
+                                            range->GetElement(1));
+    }
   }
 }
 
@@ -406,6 +398,81 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
     return true;
   }
   return VatesViewerInterface::eventFilter(obj, ev);
+}
+
+/**
+ * This function creates the main view widget specific menu items.
+ */
+void MdViewerWidget::createMenus()
+{
+  QMenuBar *menubar;
+  if (this->pluginMode)
+  {
+    menubar = new QMenuBar(this);
+    QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    menubar->setSizePolicy(policy);
+  }
+  else
+  {
+    menubar = qobject_cast<QMainWindow *>(this->parentWidget())->menuBar();
+  }
+
+  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));
+
+  QAction *colorAction = new QAction(QApplication::tr("&Color Options"), this);
+  colorAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+C"));
+  colorAction->setStatusTip(QApplication::tr("Open the color options dialog."));
+  QObject::connect(colorAction, SIGNAL(triggered()),
+                   this, SLOT(onColorOptions()));
+  viewMenu->addAction(colorAction);
+
+  if (this->pluginMode)
+  {
+    this->ui.verticalLayout->insertWidget(0, menubar);
+  }
+}
+
+/**
+ * This function adds the menus defined here to a QMainWindow menu bar.
+ * This must be done after the setup of the standalone application so that
+ * the MdViewerWidget menus aren't added before the standalone ones.
+ */
+void MdViewerWidget::addMenus()
+{
+  this->createMenus();
+}
+
+/**
+ * This function handles creating the color options dialog box and setting
+ * the signal and slot comminucation between it and the current view.
+ */
+void MdViewerWidget::onColorOptions()
+{
+  if (NULL == this->colorDialog)
+  {
+    this->colorDialog = new ColorSelectionDialog(this);
+
+    // Set color selection widget <-> view signals/slots
+    QObject::connect(this->colorDialog,
+                     SIGNAL(colorMapChanged(const pqColorMapModel *)),
+                     this->currentView,
+                     SLOT(onColorMapChange(const pqColorMapModel *)));
+    QObject::connect(this->colorDialog,
+                     SIGNAL(colorScaleChanged(double, double)),
+                     this->currentView,
+                     SLOT(onColorScaleChange(double, double)));
+    QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
+                     this->colorDialog,
+                     SLOT(setColorScaleRange(double, double)));
+    QObject::connect(this->colorDialog, SIGNAL(autoScale()),
+                     this->currentView, SLOT(onAutoScale()));
+    QObject::connect(this->colorDialog, SIGNAL(logScale(int)),
+                     this->currentView, SLOT(onLogScale(int)));
+    this->currentView->onAutoScale();
+  }
+  this->colorDialog->show();
+  this->colorDialog->raise();
+  this->colorDialog->activateWindow();
 }
 
 }

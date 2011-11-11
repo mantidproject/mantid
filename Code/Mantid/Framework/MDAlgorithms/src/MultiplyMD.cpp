@@ -12,6 +12,11 @@ The error of <math> f = a * b </math> is propagated with <math>df^2 = f^2 * (da^
 
 == Usage ==
 
+ C = A * B
+ C = A * 123.4
+ A *= B
+ A *= 123.4
+
 See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
 
 *WIKI*/
