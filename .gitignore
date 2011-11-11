@@ -139,3 +139,5 @@ Thumbs.db
 
 # Folder config file
 Desktop.ini
+
+/Code/Mantid/Build/CMake/OutputBinaryTo.cmake
