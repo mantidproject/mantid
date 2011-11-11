@@ -1745,12 +1745,13 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
       while(ev != ev_end && ev->m_tof < right)
       {
         ++ev;
-        ++m; // count events in the i-th bin
+        ++m;  // count events in the i-th bin
       }
       
       if (m > 0)
       {// m events in this bin
-        boost::uniform_real<> distribution(double(tof[i-1]),right);
+        double left = double(tof[i-1]);
+        boost::uniform_real<> distribution(left,right);
         // spread the events uniformly inside the bin
         for(std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev; ++ev1)
         {
