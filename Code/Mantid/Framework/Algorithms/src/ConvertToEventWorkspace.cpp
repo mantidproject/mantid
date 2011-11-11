@@ -14,6 +14,7 @@ If the GenerateMultipleEvents option is set, then instead of a single event per 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include <limits>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -86,6 +87,10 @@ namespace Algorithms
     //Copy geometry, etc. over.
     API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
 
+    // Cached values for later checks
+    double inf = std::numeric_limits<double>::infinity();
+    double ninf = -inf;
+
     Progress prog(this, 0.0, 1.0, inWS->getNumberHistograms());
     PARALLEL_FOR1(inWS)
     for (int iwi=0; iwi<int(inWS->getNumberHistograms()); iwi++)
@@ -109,46 +114,52 @@ namespace Algorithms
       for (size_t i=0; i<X.size()-1; i++)
       {
         double weight = Y[i];
-        if (weight != 0.0)
+        if ((weight != 0.0) && (weight == weight) /*NAN check*/
+            && (weight != inf) && (weight != ninf))
         {
-          if (GenerateMultipleEvents)
+          double error = E[i];
+          // Also check that the error is not a bad number
+          if ((error == error) /*NAN check*/
+              && (error != inf) && (error != ninf))
           {
-            // --------- Multiple events per bin ----------
-            double errorSquared = E[i];
-            errorSquared *= errorSquared;
-            // Find how many events to fake
-            double val = weight / E[i];
-            val *= val;
-            // Convert to int with slight rounding up. This is to avoid rounding errors
-            int numEvents = int(val + 0.2);
-            if (numEvents < 1) numEvents = 1;
-            if (numEvents > MaxEventsPerBin) numEvents = MaxEventsPerBin;
-            // Scale the weight and error for each
-            weight /= numEvents;
-            errorSquared /= numEvents;
-
-            // Spread the TOF. e.g. 2 events = 0.25, 0.75.
-            double tofStep = (X[i+1] - X[i]) / (numEvents);
-            for (size_t j=0; j<size_t(numEvents); j++)
+            if (GenerateMultipleEvents)
             {
-              double tof = X[i] + tofStep * (0.5 + double(j));
+              // --------- Multiple events per bin ----------
+              double errorSquared = error * error;
+              // Find how many events to fake
+              double val = weight / E[i];
+              val *= val;
+              // Convert to int with slight rounding up. This is to avoid rounding errors
+              int numEvents = int(val + 0.2);
+              if (numEvents < 1) numEvents = 1;
+              if (numEvents > MaxEventsPerBin) numEvents = MaxEventsPerBin;
+              // Scale the weight and error for each
+              weight /= numEvents;
+              errorSquared /= numEvents;
+
+              // Spread the TOF. e.g. 2 events = 0.25, 0.75.
+              double tofStep = (X[i+1] - X[i]) / (numEvents);
+              for (size_t j=0; j<size_t(numEvents); j++)
+              {
+                double tof = X[i] + tofStep * (0.5 + double(j));
+                // Create and add the event
+                el.addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
+              }
+            }
+            else
+            {
+              // --------- Single event per bin ----------
+              // TOF = midpoint of the bin
+              double tof = (X[i] + X[i+1]) / 2.0;
+              // Error squared is carried in the event
+              double errorSquared = E[i];
+              errorSquared *= errorSquared;
               // Create and add the event
               el.addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
             }
-          }
-          else
-          {
-            // --------- Single event per bin ----------
-            // TOF = midpoint of the bin
-            double tof = (X[i] + X[i+1]) / 2.0;
-            // Error squared is carried in the event
-            double errorSquared = E[i];
-            errorSquared *= errorSquared;
-            // Create and add the event
-            el.addEventQuickly( WeightedEventNoTime(tof, weight, errorSquared) );
-          }
-        }
-      }
+          } // error is nont NAN or infinite
+        } // weight is non-zero, not NAN, and non-infinite
+      } // (each bin)
 
       // Set the X binning parameters
       el.setX( inSpec->ptrX() );

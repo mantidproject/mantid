@@ -28,8 +28,8 @@ function( SET_TARGET_OUTPUT_DIRECTORY TARGET OUTPUT_DIR )
                           ${OUTPUT_DIR} )
       add_custom_command ( TARGET ${TARGET} POST_BUILD
                            COMMAND ${CMAKE_COMMAND} ARGS -E echo 
-                           "Moving \"$(TargetName)${LIB_EXT}\" to ${OUTPUT_DIR}/$(TargetName)${LIB_EXT}"
-                           COMMAND ${CMAKE_COMMAND} ARGS -E rename
+                           "Copying \"$(TargetName)${LIB_EXT}\" to ${OUTPUT_DIR}/$(TargetName)${LIB_EXT}"
+                           COMMAND ${CMAKE_COMMAND} ARGS -E copy
                            ${SRC_DIR}/$(TargetName)${LIB_EXT}
                            ${OUTPUT_DIR}/$(TargetName)${LIB_EXT} )
       # Clean up

@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddSampleLog.cpp
+	src/AlignDetectorInTOF.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
@@ -158,7 +159,7 @@ set ( SRC_FILES
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/Transpose.cpp
-	src/UnGroupWorkspaces.cpp
+	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
@@ -172,6 +173,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddSampleLog.h
+	inc/MantidAlgorithms/AlignDetectorInTOF.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -328,7 +330,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/Transpose.h
-	inc/MantidAlgorithms/UnGroupWorkspaces.h
+	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
@@ -340,6 +342,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
+	test/AlignDetectorInTOFTest.h
 	test/AlignDetectorsTest.h
 	test/AlphaCalcTest.h
 	test/AnyShapeAbsorptionTest.h
@@ -479,7 +482,7 @@ set ( TEST_FILES
 	test/SumRowColumnTest.h
 	test/SumSpectraTest.h
 	test/TransposeTest.h
-	test/UnGroupWorkspacesTest.h
+	test/UnGroupWorkspaceTest.h
 	test/UnaryOperationTest.h
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h

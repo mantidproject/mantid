@@ -50,6 +50,7 @@ void GroupWorkspaces::exec()
   std::string outputWorkspace = "OutputWorkspace";
   int count = 0;
   std::vector<std::string>::const_iterator citr;
+  std::string firstWs("");
   // iterate through the input workspaces
   for (citr = inputworkspaces.begin(); citr != inputworkspaces.end(); ++citr)
   {
@@ -73,9 +74,8 @@ void GroupWorkspaces::exec()
         declareProperty(new WorkspaceProperty<Workspace> (outws, wsName,
             Direction::Output));
         setProperty(outws, ws_sptr);
-
         //add to output group
-        addworkspacetoGroup(outgrp_sptr, (*itr));
+        addworkspacetoGroup(outgrp_sptr, (*itr), firstWs);
       }
       inws_sptr.reset();
       ingrp_sptr.reset();
@@ -94,9 +94,8 @@ void GroupWorkspaces::exec()
       declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
       setProperty(outws, ws_sptr);
       //add to output group
-      addworkspacetoGroup(outgrp_sptr, (*citr));
+      addworkspacetoGroup(outgrp_sptr, *citr, firstWs);
     }
-
   }//end of for loop for input workspaces
 
   // Notify listeners that a new grop has been created
@@ -105,62 +104,56 @@ void GroupWorkspaces::exec()
 
 }
 
-/** checks the input workspaces are of same types
- *  @param firstWS ::    first workspace added to group vector
- *  @param newWStoAdd ::   new workspace to add to group
- *  @retval boolean  true if two workspaces are of same types else false
- */
-bool GroupWorkspaces::isCompatibleWorkspaces(const std::string & firstWS, const std::string& newWStoAdd)
+///** checks the input workspaces are of same types
+// *  @param wsName ::    name of the workspace to be added
+// *  @param firstWs ::   the first workspace type (not including table workspaces)
+// *  @retval boolean  true if two workspaces are of same types else false
+// */
+bool GroupWorkspaces::isCompatibleWorkspaces(const std::string &wsName, std::string& firstWs)
 {
-  bool bStatus = 0;
-  try
+  bool bStatus(true);
+  Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+  //check to see if compatible with each other (exception for TableWorkspaces.)
+  if ( ws->id() != "TableWorkspace" )
   {
-    std::string firstWSTypeId;
-
-    Workspace_sptr wsSptr1 = Mantid::API::AnalysisDataService::Instance().retrieve(firstWS);
-    firstWSTypeId = wsSptr1->id();
-
-    //check the typeid  of the  next workspace
-    std::string wsTypeId("");
-    Workspace_sptr wsSptr = Mantid::API::AnalysisDataService::Instance().retrieve(newWStoAdd);
-    if (wsSptr)
+    if (firstWs == "")
     {
-      wsTypeId = wsSptr->id();
+      firstWs = ws->id();
     }
-    (firstWSTypeId == wsTypeId) ? (bStatus = true) : (bStatus = false);
-  } catch (Kernel::Exception::NotFoundError& e)
-  {
-    g_log.error() << e.what() << std::endl;
-    bStatus = false;
+    else
+    {
+      if (ws->id() != firstWs)
+      {
+        bStatus = false;
+      }
+    }
   }
-
   return bStatus;
 }
 
-/** add workspace to groupworkspace
- *  @param outgrp_sptr ::    shared pointer to groupworkspace
- *  @param wsName ::   name of the workspace to add to group
- */
-void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const std::string &wsName)
+///** add workspace to groupworkspace
+// *  @param outgrp_sptr ::    shared pointer to groupworkspace
+// *  @param wsName ::   name of the workspace to add to group
+// *  @param firstWs ::   the first workspace type (not including table workspaces)
+// */
+void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const std::string &wsName, std::string &firstWs)
 {
   std::vector<std::string> groupVec = outgrp_sptr->getNames();
   if (groupVec.size() > 0)
   {
-    std::string firstws = groupVec[0];
-    if (isCompatibleWorkspaces(firstws, wsName))
+    if( isCompatibleWorkspaces( wsName, firstWs ) )
     {
       outgrp_sptr->add(wsName);
     }
     else
     {
       throw std::runtime_error("Selected workspaces are not of same Types.\n"
-        "Check the selected workspaces and ensure that they are of same types to group");
+            "Check the selected workspaces and ensure that they are of same types to group");
     }
   }
   else
   {
     outgrp_sptr->add(wsName);
-	
   }
 }
 

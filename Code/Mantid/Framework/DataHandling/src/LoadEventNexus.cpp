@@ -1094,7 +1094,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
 
   //Info reporting
-  g_log.information() << "Read " << WS->getNumberEvents() << " events"
+  const std::size_t eventsLoaded = WS->getNumberEvents();
+  g_log.information() << "Read " << eventsLoaded << " events"
       << ". Shortest TOF: " << shortest_tof << " microsec; longest TOF: "
       << longest_tof << " microsec." << std::endl;
 
@@ -1105,9 +1106,12 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   //Now, create a default X-vector for histogramming, with just 2 bins.
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec& xRef = axis.access();
-  xRef.resize(2);
-  xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
-  xRef[1] = longest_tof + 1;
+  xRef.resize(2,0.0);
+  if ( eventsLoaded > 0)
+  {
+    xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
+    xRef[1] = longest_tof + 1;
+  }
   //Set the binning axis using this.
   WS->setAllX(axis);
 
@@ -1221,7 +1225,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   instrument = nxfile.getStrData();
   alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
   }
-  catch ( ::NeXus::Exception & e)
+  catch ( ::NeXus::Exception &)
   {
     // Get the instrument name from the file instead
     size_t n = nexusfilename.rfind('/');

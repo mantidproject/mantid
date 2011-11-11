@@ -26,7 +26,7 @@ void export_MatrixWorkspace()
 
 void export_MatrixWorkspaceProperty()
 {
-  EXPORT_PROP_W_VALUE(MatrixWorkspace_sptr);
+  EXPORT_PROP_W_VALUE(MatrixWorkspace_sptr, MatrixWorkspace);
   register_ptr_to_python<WorkspaceProperty<MatrixWorkspace>*>();
   class_<WorkspaceProperty<MatrixWorkspace>, bases<PropertyWithValue<MatrixWorkspace_sptr>,IWorkspaceProperty>,
          boost::noncopyable>("WorkspaceProperty_MatrixWorkspace", no_init)

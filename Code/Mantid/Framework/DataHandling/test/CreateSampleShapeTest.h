@@ -79,11 +79,11 @@ public:
     
     if( inside )
     {
-      TS_ASSERT_EQUALS( sample.isValid(point), 1); 
+      TS_ASSERT_EQUALS( sample.isValid(point), true); 
     }
     else
     {
-      TS_ASSERT_EQUALS( sample.isValid(point), 0); 
+      TS_ASSERT_EQUALS( sample.isValid(point), false); 
     }
 
     TS_ASSERT_THROWS_NOTHING( Mantid::API::AnalysisDataService::Instance().remove("TestWorkspace") );

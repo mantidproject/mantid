@@ -363,8 +363,10 @@ namespace DataHandling
    */
   void LoadMaskingFile::initializeXMLParser(const std::string & filename)
   {
-    // const std::string instName;
+    // const std::string instName
+    std::cout << "Load File " << filename << std::endl;
     const std::string xmlText = Kernel::Strings::loadFile(filename);
+    std::cout << "Successfully Load XML File " << std::endl;
 
     // Set up the DOM parser and parse xml file
     DOMParser pParser;

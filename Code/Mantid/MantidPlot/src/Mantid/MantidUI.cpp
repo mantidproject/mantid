@@ -187,6 +187,10 @@ void MantidUI::init()
 
 }
 
+/// Slot: Receives a new X range from a FitPropertyBrowser and re-emits it.
+void MantidUI::x_range_from_picker(double xmin, double xmax){
+  emit x_range_update(xmin, xmax);
+}
 /// Updates the algorithms tree as this may have changed
 void MantidUI::updateAlgorithms()
 {
@@ -1682,19 +1686,37 @@ void MantidUI::manageMantidWorkspaces()
  */
 InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
-
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
   Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return NULL;
   Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty())
   {
+    QApplication::restoreOverrideCursor();
+    QMessageBox::critical(appWindow(),"MantidPlot - Error","Instrument view cannot be opened");
     return NULL;
   }
 
   //Need a new window
   const QString windowName(QString("InstrumentWindow:") + wsName);
   InstrumentWindow *insWin = new InstrumentWindow(wsName,QString("Instrument"),appWindow(),windowName);
+  try
+  {
+    insWin->init();
+  }
+  catch(const std::exception& e)
+  {
+    QApplication::restoreOverrideCursor();
+    QMessageBox::critical(appWindow(),"MantidPlot - Error",e.what());
+    if (insWin)
+    {
+      appWindow()->closeWindow(insWin);
+      insWin->close();
+    }
+    return NULL;
+  }
+
   insWin->selectTab(tab);
 
   appWindow()->d_workspace->addSubWindow(insWin);
@@ -1709,22 +1731,20 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
       SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
       SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
+
+  QApplication::restoreOverrideCursor();
   return insWin;
 }
 
 
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   InstrumentWindow *insWin = getInstrumentView(wsName);
   if (!insWin)
   {
-    QApplication::restoreOverrideCursor();
-    QMessageBox::critical(appWindow(),"MantidPlot - Error","Instrument view cannot be opened");
     return;
   }
   insWin->show();
-  QApplication::restoreOverrideCursor();
 }
 
 void MantidUI::showMantidInstrument()

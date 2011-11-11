@@ -1,11 +1,17 @@
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
-#include <boost/python/numeric.hpp>
 
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/NumpyTypeHandler.h"
+
+// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#include <numpy/arrayobject.h>
 
 using namespace Mantid::PythonInterface;
 using PropertyMarshal::SingleValueTypeHandler;
+using PropertyMarshal::SequenceTypeHandler;
 
 // Forward declare
 @EXPORT_DECLARE@
@@ -14,14 +20,18 @@ BOOST_PYTHON_MODULE(_kernel)
 {
   // Doc string options - User defined, python arguments, C++ call signatures
   boost::python::docstring_options docstrings(true, true, false);
-  // Use numpy arrays
-  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+  // Import numpy
+  _import_array();
   
   // Map builtin type objects to appropriate handler classes for properties
   PropertyMarshal::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
   PropertyMarshal::registerHandler(&PyBool_Type, new SingleValueTypeHandler<bool>());
   PropertyMarshal::registerHandler(&PyFloat_Type, new SingleValueTypeHandler<double>());
   PropertyMarshal::registerHandler(&PyString_Type, new SingleValueTypeHandler<std::string>());
+  PropertyMarshal::registerHandler(&PyList_Type, new SequenceTypeHandler());
+  PropertyMarshal::registerHandler(&PyTuple_Type, new SequenceTypeHandler());
+  PropertyMarshal::registerHandler(&PyArray_Type, new PropertyMarshal::NumpyTypeHandler()); // Numpy array
+  
 
 @EXPORT_FUNCTIONS@
 }

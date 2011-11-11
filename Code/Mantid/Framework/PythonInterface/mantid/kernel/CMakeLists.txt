@@ -8,20 +8,30 @@ set ( EXPORT_FILES
   src/DataItem.cpp
   src/IPropertyManager.cpp
   src/Property.cpp
+  src/PropertyWithValue.cpp
+  src/ArrayProperty.cpp
   src/Quat.cpp
   src/V3D.cpp
+  src/StlContainers.cpp
 )  
 
 set ( SRC_FILES
+  src/NumpyTypeHandler.cpp
   src/PropertyMarshal.cpp
+  src/SequenceTypeHandler.cpp
+  src/VectorDelegate.cpp
   src/WrapperHelpers.cpp
 )
 
 set ( INC_FILES 
+  ${HEADER_DIR}/kernel/NumpyTypeHandler.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
+  ${HEADER_DIR}/kernel/PropertyHandler.h
   ${HEADER_DIR}/kernel/PropertyMarshal.h
   ${HEADER_DIR}/kernel/SingleValueTypeHandler.h
+  ${HEADER_DIR}/kernel/StlExportDefinitions.h
+  ${HEADER_DIR}/kernel/VectorDelegate.h
   ${HEADER_DIR}/kernel/WrapperHelpers.h
 )
 

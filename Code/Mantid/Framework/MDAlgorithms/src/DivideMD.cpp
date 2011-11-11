@@ -12,6 +12,15 @@ The error of <math> f = a / b </math> is propagated with <math> df^2 = f^2 * (da
 * '''[[MDEventWorkspace]]'s'''
 ** This operation is not supported, as it is not clear what its meaning would be.
 
+== Usage ==
+
+ C = A / B
+ C = A / 123.4
+ A /= B
+ A /= 123.4
+
+See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/DivideMD.h"

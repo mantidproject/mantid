@@ -869,4 +869,23 @@ private:
   std::string outputSpace;
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadRaw3TestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "HET15869.raw");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
+
+
+
 #endif /*LoadRaw3TEST_H_*/

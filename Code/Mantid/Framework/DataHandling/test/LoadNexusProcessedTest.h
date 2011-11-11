@@ -448,4 +448,21 @@ private:
   std::string testFile, output_ws;
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadNexusProcessedTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testHistogramWorkspace()
+  {
+    LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "PG3_733_focussed.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
+
 #endif /*LOADNEXUSPROCESSEDTESTRAW_H_*/

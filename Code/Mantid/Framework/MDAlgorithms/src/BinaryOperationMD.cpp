@@ -59,6 +59,13 @@ namespace MDAlgorithms
         "An MDEventWorkspace, MDHistoWorkspace or WorkspaceSingleValue as the right-hand side of the operation.");
     declareProperty(new WorkspaceProperty<IMDWorkspace>(outputPropName(),"",Direction::Output),
         "Name of the output MDEventWorkspace or MDHistoWorkspace.");
+    this->initExtraProperties();
+  }
+
+
+  /// Optional extra properties
+  void BinaryOperationMD::initExtraProperties()
+  {
   }
 
   //----------------------------------------------------------------------------------------------

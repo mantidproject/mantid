@@ -236,6 +236,7 @@ signals:
 
   void startXChanged(double);
   void endXChanged(double);
+  void xRangeChanged(double, double);
   void parameterChanged(const Mantid::API::IFitFunction*);
   void functionCleared();
   void plotGuess();

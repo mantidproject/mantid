@@ -209,6 +209,7 @@ namespace API
   class IMDEventWorkspace;
   class IMDWorkspace;
   class IEventWorkspace;
+  class IMDHistoWorkspace;
 }
 namespace DataObjects
 {
@@ -274,6 +275,8 @@ std::string getUnmangledTypeName(const std::type_info& type)
                                       string("OffsetsWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(), 
                                       string("SpecialWorkspace2D")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IMDHistoWorkspace>).name(),
+                                      string("IMDHistoWorkspace")));
 
 
   }

@@ -45,11 +45,13 @@ class Setup:
     y_axis_ratio = None
     y_axis_error_ratio = None
     x_axis_ratio = None
-    
+
     #fitting parameters  y=a+b*x
     a = None
     b = None
-    
+    error_a = None
+    error_b = None
+            
     def __init__(self):
         self.x_axis_ratio = None
         self.y_axis_ratio = None
@@ -165,10 +167,13 @@ class Setup:
         res = mtd['Res_Parameters']
         self.a = res.getDouble("Value",0)
         self.b = res.getDouble("Value",1)
-        
+        self.error_a = res.getDouble("Error",0)
+        self.error_b = res.getDouble("Error",1)
+                
 class CalculateAD(Setup):      
     
-    id_numerator = None  #ex: AiD0
+    #name of numerators and denominators
+    id_numerator = None #ex: AiD0
     id_denominator = None   #ex: AiD1
 
     _y_axis_numerator = None
@@ -275,7 +280,6 @@ class CalculateAD(Setup):
         rebin(InputWorkspace='EventDataWks', 
               OutputWorkspace='HistoDataWks', 
               Params=self.rebin_parameters)
-        #mtd.deleteWorkspace('EventDataWks')
         mt2 = mtd['HistoDataWks']
         _x_axis = mt2.readX(0)[:]
         self._x_axis = _x_axis
@@ -286,27 +290,29 @@ class CalculateAD(Setup):
                                         from_pixel=self.x_pixel_min, 
                                         to_pixel=self.x_pixel_max)
 
-        #mtd.deleteWorkspace('HistoDataWks')
         Transpose(InputWorkspace='IntegratedDataWks', 
                   OutputWorkspace='TransposeIntegratedDataWks')
-        #mtd.deleteWorkspace('IntegratedDataWks')
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
-        #mtd.deleteWorkspace('TransposeIntegratedDataWks')
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks',
                        StartX=self.back_pixel_min,
                        EndX=self.peak_pixel_min)
-        #mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
         Transpose(InputWorkspace='TransposeHistoFlatDataWks',
                   OutputWorkspace='DataWks')
-        #mtd.deleteWorkspace('TransposeHistoFlatDataWks')
         mt3 = mtd['DataWks']        
         self._calculateFinalAxis(Workspace=mt3, 
                            bNumerator=bNumerator)
-        #mtd.deleteWorkspace('DataWks')
-    
-    
+
+        #cleanup workspaces
+#        mtd.deleteWorkspace('EventDataWks')
+#        mtd.deleteWorkspace('HistoDataWks')
+#        mtd.deleteWorkspace('IntegratedDataWks')
+#        mtd.deleteWorkspace('TransposeIntegratedDataWks')
+#        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
+#        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
+#        mtd.deleteWorkspace('DataWks')
+        
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
         this calculates the final y_axis and y_axis_error of numerator and denominator
@@ -402,8 +408,8 @@ def plotObject(instance):
     
     return
     
-    print 'a: ' + str(instance.a)
-    print 'b: ' + str(instance.b)    
+    print 'a: ' + str(instance.a[-1])
+    print 'b: ' + str(instance.b[-1])    
     
     figure()
     errorbar(instance.x_axis_ratio, 
@@ -419,45 +425,93 @@ def plotObject(instance):
     title(instance.id_numerator + '/' + instance.id_denominator)
     show()
 
+def record_settings(a,b,error_a,error_b,name,instance):
+    """
+    This function will record the various fitting parameters and the 
+    name of the ratio
+    """
+    a.append(instance.a)
+    b.append(instance.b)
+    error_a.append(instance.error_a)
+    error_b.append(instance.error_b)
+    name.append(instance.id_numerator + '/' + instance.id_denominator)
+
+def outputFittingParameters(a,b,a_error,b_error,name,output_file_name):
+    """
+    Create an ascii file of the various fittings parameters
+    y=a+bx
+    1st column: name of numerator/denominator
+    2nd column: a
+    3rd column: b
+    4th column: error_a
+    5th column: error_b
+    """
+    _content = ['#y=a+bx\n','#numerator/denominator a b error_a error_b\n','#\n']
+    sz = len(a)
+    for i in range(sz):
+        _line = name[i] + ' '
+        _line += str(a[i]) + ' '
+        _line += str(b[i]) + ' '
+        _line += str(error_a[i]) + ' '
+        _line += str(error_b[i]) + '\n'
+        _content.append(_line)
+    
+    f = open(output_file_name, 'w')
+    f.writelines(_content)
+    f.close()
 
 if __name__ == '__main__':
     
 #    t_start = time.time()
     
+    #initialize record fitting parameters arrays
+    a=[]
+    b=[]
+    error_a=[]
+    error_b=[]
+    name=[]
+    
     cal_D1 = CalculateAD(id_numerator='AiD1', id_denominator='AiD0')
     cal_D1.run()
     cal_D1.fit()
+    record_settings(a,b,error_a,error_b,name,cal_D1)
     plotObject(cal_D1)
     
     cal_D2 = CalculateAD(id_numerator='AiD2', id_denominator='AiD0')
     cal_D2.run()
     cal_D2.fit()
+    record_settings(a,b,error_a,error_b,name,cal_D2)
     plotObject(cal_D2)
                
     cal_D3 = CalculateAD(id_numerator='AiD3', id_denominator='AiD0')
     cal_D3.run()
     cal_D3.fit()
+    record_settings(a,b,error_a,error_b,name,cal_D3)
     plotObject(cal_D3)
 
     cal_D4 = CalculateAD(id_numerator='AiD4', id_denominator='AiD0')
     cal_D4.run()
     cal_D4.fit()
+    record_settings(a,b,error_a,error_b,name,cal_D4)    
     plotObject(cal_D4)
 
     cal_D5 = CalculateAD(id_numerator='AiD5', id_denominator='AiD0')
     cal_D5.run()
     cal_D5.fit()
+    record_settings(a,b,error_a,error_b,name,cal_D5)
     plotObject(cal_D5)
 
     cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
     cal_D6.run()
     cal_D6.fit()
+    record_settings(a,b,error_a,error_b,name,cal_D6)
     plotObject(cal_D6)
 
     cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
     cal_D6.run()
     product_D6 = cal_D6 * cal_D5
     product_D6.fit()
+    record_settings(a,b,error_a,error_b,name,product_D6)
     plotObject(product_D6)
 
     cal_D7 = CalculateAD(id_numerator='AiiAiD7', id_denominator='AiiAiD5')
@@ -465,6 +519,7 @@ if __name__ == '__main__':
     cal_D7.run()
     product_D7 = cal_D7 * cal_D5
     product_D7.fit()
+    record_settings(a,b,error_a,error_b,name,product_D7)    
     plotObject(product_D7)
 
     cal_D8 = CalculateAD(id_numerator='AiiiAiiAiD8', id_denominator='AiiiAiiAiD7')
@@ -473,6 +528,7 @@ if __name__ == '__main__':
     cal_D8.run()
     product_D8 = cal_D8 * product_D7
     product_D8.fit()
+    record_settings(a,b,error_a,error_b,name,product_D8)    
     plotObject(product_D8)
     
     cal_D9 = CalculateAD(id_numerator='AivAiiiAiiAiD9', id_denominator='AivAiiiAiiAiD8')
@@ -481,7 +537,12 @@ if __name__ == '__main__':
     cal_D9.run()
     product_D9 = cal_D9 * product_D8 
     product_D9.fit()
+    record_settings(a,b,error_a,error_b,name,product_D9)    
     plotObject(product_D9)
+
+    #output the fitting parameters in an ascii
+    output_file_name = '/home/j35/Desktop/SFcalculator.txt'
+    outputFittingParameters(a,b,error_a,error_b,name,output_file_name)
 
 #    t_end = time.time()
 #    print 'Time to run the process: %0.1f s' % (t_end-t_start)                   

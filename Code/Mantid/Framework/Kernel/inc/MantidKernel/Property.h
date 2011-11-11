@@ -115,6 +115,12 @@ public:
     if (m_settings) return m_settings->isVisible();
     else return true;
   }
+  /// function reports if the property limits have changed and property widgets have to be reset in GUI
+  virtual bool isConditionChanged()const
+  {
+      if(m_settings) return m_settings->isConditionChanged();
+      else return false;
+  }
 
   /** Set the PropertySettings determining when this property is visible/enabled */
   void setSettings(IPropertySettings * settings)

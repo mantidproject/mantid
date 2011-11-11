@@ -13,6 +13,10 @@ from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
+# Overload for consistency with qtiplot table(..) & matrix(..) commands
+def workspace(name):
+    return mtd[name]
+
 def plotSpectrum(source, indices, error_bars = False):
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)

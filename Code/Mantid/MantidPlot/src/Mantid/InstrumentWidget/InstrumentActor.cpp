@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 #include <QSettings>
 #include <QMessageBox>
 
@@ -191,6 +193,11 @@ void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
   for (size_t i=0; i < m_specIntegrs.size(); i++)
   {
     double sum = m_specIntegrs[i];
+    if( boost::math::isinf(sum) || boost::math::isnan(sum) )
+    {
+      throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
+                               "Please run ReplaceSpecialValues algorithm for correction.");
+    }
     //integrated_values[i] = sum;
     if( sum < m_DataMinValue )
     {

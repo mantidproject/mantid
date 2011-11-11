@@ -19,7 +19,15 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidPythonInterface/kernel/PropertyHandler.h"
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
+#include "MantidKernel/IPropertyManager.h"
+
+#ifdef __GNUC__
+  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
+#include <boost/python/extract.hpp>
 
 namespace Mantid
 {
@@ -31,7 +39,7 @@ namespace Mantid
       /**
        * A templated handler that calls the appropriate setProperty method for the type on the given PropertyManager
        * A new typedhandler should be inserted into the type look up map with the
-       * DECLARE_TYPEHANDLER macro whenever a new class is exported that will be used with PropertyWithValue
+       * DECLARE_SINGLEVALUETYPEHANDLER macro whenever a new class is exported that will be used with PropertyWithValue
        */
       template<typename BaseType, typename DerivedType=BaseType>
       struct DLLExport SingleValueTypeHandler : public PropertyHandler

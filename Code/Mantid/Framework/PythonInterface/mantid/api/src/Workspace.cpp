@@ -49,7 +49,7 @@ void export_WorkspaceProperty()
       ;
 
   // Export the WorkspaceProperty hierarchy so that the plain Property* return from getPointerToProperty is automatically upcast to a WorkspaceProperty*
-  EXPORT_PROP_W_VALUE(Workspace_sptr);
+  EXPORT_PROP_W_VALUE(Workspace_sptr, Workspace);
   register_ptr_to_python<WorkspaceProperty<Workspace>*>();
   class_<WorkspaceProperty<Workspace>, bases<PropertyWithValue<Workspace_sptr>,IWorkspaceProperty>, boost::noncopyable>("WorkspaceProperty_Workspace", no_init)
       ;
