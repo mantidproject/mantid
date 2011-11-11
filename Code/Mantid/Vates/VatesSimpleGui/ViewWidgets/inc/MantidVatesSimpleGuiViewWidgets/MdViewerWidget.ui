@@ -14,6 +14,21 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>1</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>1</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -34,9 +49,6 @@
      </item>
      <item>
       <widget class="Mantid::Vates::SimpleGui::ModeControlWidget" name="modeControlWidget" native="true"/>
-     </item>
-     <item>
-      <widget class="Mantid::Vates::SimpleGui::ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
@@ -130,12 +142,6 @@
    <class>Mantid::Vates::SimpleGui::ModeControlWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
-   <extends>QWidget</extends>
-   <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
