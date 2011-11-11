@@ -15,6 +15,7 @@ VsgMainWindow::VsgMainWindow(QWidget *parent) : QMainWindow(parent)
 
   this->createActions();
   this->createMenus();
+  this->mdViewer->addMenus();
 }
 
 VsgMainWindow::~VsgMainWindow()

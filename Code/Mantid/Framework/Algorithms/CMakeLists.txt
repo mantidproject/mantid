@@ -159,7 +159,7 @@ set ( SRC_FILES
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/Transpose.cpp
-	src/UnGroupWorkspaces.cpp
+	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
@@ -330,7 +330,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/Transpose.h
-	inc/MantidAlgorithms/UnGroupWorkspaces.h
+	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
@@ -482,7 +482,7 @@ set ( TEST_FILES
 	test/SumRowColumnTest.h
 	test/SumSpectraTest.h
 	test/TransposeTest.h
-	test/UnGroupWorkspacesTest.h
+	test/UnGroupWorkspaceTest.h
 	test/UnaryOperationTest.h
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h

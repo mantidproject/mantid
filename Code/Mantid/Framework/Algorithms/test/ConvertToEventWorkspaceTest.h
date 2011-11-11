@@ -138,6 +138,55 @@ public:
   }
   
 
+  /// Workspace with infinity or NAN = don't create events there.
+  void test_with_nan_and_inf()
+  {
+    // Create the input
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    double inf = std::numeric_limits<double>::infinity();
+    double ninf = -inf;
+
+    inWS->dataY(0)[0] = 1.0;
+    inWS->dataE(0)[0] = 1.0;
+
+    // But nan or inf in either Y or error
+    inWS->dataY(0)[1] = nan;
+    inWS->dataE(0)[2] = nan;
+    inWS->dataY(0)[3] = inf;
+    inWS->dataE(0)[4] = inf;
+    inWS->dataY(0)[5] = ninf;
+    inWS->dataE(0)[6] = ninf;
+
+    for (size_t i=7; i<10; i++)
+    {
+      inWS->dataY(0)[i] = 0;
+      inWS->dataE(0)[i] = 0;
+    }
+
+    // Name of the output workspace.
+    std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");
+
+    ConvertToEventWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GenerateMultipleEvents", false) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    EventWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING( outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(outWS);
+    if (!outWS) return;
+
+    // Only 1 bin had a valid weight/error, so it should have 1 event
+    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 1);
+  }
+
 };
 
 

@@ -315,7 +315,10 @@ using namespace boost::python;
     typedef WorkspaceGroup_sptr(*binary_fn_gp_md)(const API::WorkspaceGroup_sptr, const API::IMDWorkspace_sptr, const std::string &,const std::string &,bool, bool);
     typedef WorkspaceGroup_sptr(*binary_fn_gp_gp)(const API::WorkspaceGroup_sptr, const API::WorkspaceGroup_sptr, const std::string &,const std::string &,bool, bool);
 
+    typedef IMDHistoWorkspace_sptr(*binary_fn_mh_mh)(const API::IMDHistoWorkspace_sptr, const API::IMDHistoWorkspace_sptr, const std::string &,const std::string &,bool, bool);
+
     typedef IMDWorkspace_sptr(*binary_fn_md_db)(const API::IMDWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
+    typedef IMDHistoWorkspace_sptr(*binary_fn_mh_db)(const API::IMDHistoWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
     typedef WorkspaceGroup_sptr(*binary_fn_gp_db)(const API::WorkspaceGroup_sptr, double, const std::string&,const std::string &,bool,bool);
 
       // Binary operations helpers
@@ -323,8 +326,10 @@ using namespace boost::python;
     def("_binary_op", (binary_fn_md_gp)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn_gp_md)&PythonAPI::performBinaryOp);
     def("_binary_op", (binary_fn_gp_gp)&PythonAPI::performBinaryOp);
+    def("_binary_op", (binary_fn_mh_mh)&PythonAPI::performBinaryOp);
 
     def("_binary_op", (binary_fn_md_db)&PythonAPI::performBinaryOpWithDouble);
+    def("_binary_op", (binary_fn_mh_db)&PythonAPI::performBinaryOpWithDouble);
     def("_binary_op", (binary_fn_gp_db)&PythonAPI::performBinaryOpWithDouble);
 
   }
@@ -607,6 +612,10 @@ using namespace boost::python;
     class_< WorkspaceProperty<ITableWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("TableWorkspaceProperty", no_init)
       ;
     class_< WorkspaceProperty<IEventWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("EventWorkspaceProperty", no_init)
+      ;
+    class_< WorkspaceProperty<IMDWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("MDWorkspaceProperty", no_init)
+      ;
+    class_< WorkspaceProperty<IMDHistoWorkspace>, bases<Kernel::Property,API::IWorkspaceProperty>, boost::noncopyable>("MDHistoWorkspaceProperty", no_init)
       ;
 
   }

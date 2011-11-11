@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 using namespace Mantid::API;
 
@@ -194,8 +195,16 @@ namespace Mantid
     template WorkspaceGroup_sptr performBinaryOp(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string& , const std::string & name,
         bool, bool);
 
+    template IMDHistoWorkspace_sptr performBinaryOp(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr, const std::string& , const std::string & name,
+        bool, bool);
+    template IMDHistoWorkspace_sptr performBinaryOp(const IMDHistoWorkspace_sptr, const MatrixWorkspace_sptr, const std::string& , const std::string & name,
+        bool, bool);
+
+
     // Double variants
     template IMDWorkspace_sptr performBinaryOpWithDouble(const IMDWorkspace_sptr, const double, const std::string& op,
+        const std::string &, bool, bool);
+    template IMDHistoWorkspace_sptr performBinaryOpWithDouble(const IMDHistoWorkspace_sptr, const double, const std::string& op,
         const std::string &, bool, bool);
     template WorkspaceGroup_sptr performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double, const std::string& op,
         const std::string &, bool, bool);

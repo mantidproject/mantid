@@ -440,8 +440,8 @@ using namespace DataObjects;
 
       std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
   
-      if ( col->isType<double>() )
-      {
+      if ( col->isType<double>() )  
+      {  
         double * toNexus = new double[nRows];
         for (int ii = 0; ii < nRows; ii++)
           toNexus[ii] = col->cell<double>(ii);
@@ -452,6 +452,23 @@ using namespace DataObjects;
         status=NXopendata(fileID, str.c_str());
         std::string units = "Not known";
         std::string interpret_as = "A double";
+        status=NXputattr(fileID, "units", (void*)units.c_str(), static_cast<int>(units.size()), NX_CHAR);
+        status=NXputattr(fileID, "interpret_as", (void*)interpret_as.c_str(), 
+                         static_cast<int>(interpret_as.size()), NX_CHAR);
+        status=NXclosedata(fileID);
+      }
+      else if ( col->isType<int>() )  
+      {  
+        int * toNexus = new int[nRows];
+        for (int ii = 0; ii < nRows; ii++)
+          toNexus[ii] = col->cell<int>(ii);
+        NXwritedata(str.c_str(), NX_INT32, 1, dims_array, (void *)(toNexus), false);
+        delete[] toNexus;
+
+        // attributes
+        status=NXopendata(fileID, str.c_str());
+        std::string units = "Not known";
+        std::string interpret_as = "An integer";
         status=NXputattr(fileID, "units", (void*)units.c_str(), static_cast<int>(units.size()), NX_CHAR);
         status=NXputattr(fileID, "interpret_as", (void*)interpret_as.c_str(), 
                          static_cast<int>(interpret_as.size()), NX_CHAR);
