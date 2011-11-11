@@ -22,7 +22,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/IPropertySettings.h"
 
 #include <float.h>
 
@@ -37,6 +37,89 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
+    // the parameter, which specifies maximal default number of dimensions, the algorithm accepts (should be moved to configuration). 
+    static int MAX_DIM_NUMBER=8;
+
+// the class to verify and modify interconnected properties. 
+class PropChanger: public IPropertySettings
+{
+    // h specifies the workspace which has to be modified
+    std::string source_ws_name;
+    // the name of the property, which specifies the workspace which can contain single spectra to normalize by 
+    std::string host_monws_name;
+    // the pointer to the main host algorithm.
+    const IPropertyManager * host_algo;
+
+    // the string with log names, which can be used as dimension ID-s
+    mutable std::vector<std::string> possible_dim_ID;
+    // if the current dimension id is enabled
+    mutable bool is_enabled;
+    // auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
+   void  monitor_id_reader()const;
+public:
+    PropChanger(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty):
+      host_ws_name(WSProperty),host_monws_name(MonWSProperty), host_algo(algo),is_enabled(true){}
+  // if input to "
+   bool isEnabled()const{
+       API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(host_monws_name);
+       if(monitorsWS){
+           is_enabled = false;
+       }else{
+           is_enabled = true;
+       }
+       return is_enabled;
+   }
+   //
+   bool isConditionChanged()const{
+       if(!is_enabled)return false;
+       // read monitors list from the input workspace
+       monitor_id_reader();
+       // if no monitors are associated with workspace -- ok -- you just have to use spectra_ID (may be not on an monitor)
+       if(possible_dim_ID.empty())return false;
+       //Kernel::Property *pProperty = host_algo->getPointerToProperty(
+       return true;
+   }
+   // function which modifies the allowed values for the list of monitors. 
+   void applyChanges(Property *const pProp){
+       PropertyWithValue<int>* piProp  = dynamic_cast<PropertyWithValue<int>* >(pProp);
+       if(!piProp){
+           throw(std::invalid_argument("modify allowed value has been called on wrong property"));
+       }
+       std::vector<int> ival(allowed_values.size());
+       for(size_t i=0;i<ival.size();i++){
+                ival[i]=boost::lexical_cast<int>(allowed_values[i]);
+       }
+       piProp->modify_validator(new ValidatorAnyList<int>(ival));
+           
+   }
+   // interface needs it but if indeed proper clone used -- do not know. 
+   virtual IPropertySettings* clone(){return new PropChanger(host_algo,host_ws_name,host_monws_name);}
+
+
+};
+// read the monitors list from the workspace;
+void
+PropChanger::monitor_id_reader()const
+{
+    allowed_values.clear();
+    API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(host_ws_name);
+    if(!inputWS){
+        return ;
+    }
+
+    Geometry::Instrument_const_sptr pInstr = inputWS->getInstrument();
+    if (!pInstr){
+        return ;
+    }
+    std::vector<detid_t> mon = pInstr->getMonitors();
+    allowed_values.resize(mon.size());
+    for(size_t i=0;i<mon.size();i++){
+        allowed_values[i]=boost::lexical_cast<std::string>(mon[i]);
+    }
+    return ;
+}
+
+
 // logger for loading workspaces  
    Kernel::Logger& ConvertToQNDany::convert_log =Kernel::Logger::get("MD-Algorithms");
 
