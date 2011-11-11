@@ -18,9 +18,9 @@ class SaveDetectorMasksTest : public CxxTest::TestSuite
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveDetectorMasks *createSuite() { return new SaveDetectorMasksTest(); }
+  static SaveDetectorMasksTest *createSuite() { return new SaveDetectorMasksTest(); }
 
-  static void destroySuite( SaveMaskingToFileTest *suite ) { delete suite; }
+  static void destroySuite( SaveDetectorMasksTest *suite ) { delete suite; }
 
   void test_Something()
   {
