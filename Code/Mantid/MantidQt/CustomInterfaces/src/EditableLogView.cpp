@@ -3,7 +3,7 @@
 #include "MantidKernel/System.h"
 
 #include <QGridLayout>
-#include <QTableWidget.h>
+#include <QTableWidget>
 #include <QPushButton>
 #include <QBoxLayout>
 #include <QHeaderView>

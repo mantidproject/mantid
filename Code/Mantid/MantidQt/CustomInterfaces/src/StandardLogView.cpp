@@ -3,7 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/StandardLogView.h"
 #include "MantidQtCustomInterfaces/LogPresenter.h"
-#include <QTableWidget.h>
+#include <QTableWidget>
 #include <QPushButton>
 #include <QBoxLayout>
 #include <QHeaderView>
