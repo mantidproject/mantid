@@ -198,7 +198,7 @@ namespace Algorithms
       instrument->markAsDetector(detector);
 
       // Check
-      g_log.notice() << "New: Spectrum: " << specids[i] << ": # Detectros = " << spectrum->getDetectorIDs().size() << std::endl;
+      g_log.notice() << "New: Spectrum: " << specids[i] << ": # Detectors = " << spectrum->getDetectorIDs().size() << std::endl;
 
 
     } // for i
