@@ -1,12 +1,14 @@
 #include "MantidQtCustomInterfaces/EditableLogView.h"
 #include "MantidQtCustomInterfaces/LogPresenter.h"
 #include "MantidKernel/System.h"
-#include <qboxlayout.h>
-#include <qgridlayout.h>
-#include <qpushbutton.h>
-#include <qtablewidget.h>
-#include <qlabel.h>
-#include <qlineedit.h>
+
+#include <QGridLayout>
+#include <QTableWidget.h>
+#include <QPushButton>
+#include <QBoxLayout>
+#include <QHeaderView>
+#include <QLabel>
+#include <QLineEdit>
 
 
 using namespace Mantid::Kernel;
@@ -50,6 +52,7 @@ namespace MantidQt
     void EditableLogView::initalize(std::vector<AbstractMementoItem_sptr> logs)
     {
       m_tableWidget = new QTableWidget(this);
+      m_tableWidget->horizontalHeader()->setStretchLastSection(true);
       m_txtName = new QLineEdit();
       m_txtValue = new QLineEdit();
 
@@ -167,18 +170,21 @@ namespace MantidQt
       m_tableWidget->setItem(row, 1, valueItem); // Value goes in second column
     }
 
+    /// Add a new item
     void EditableLogView::add()
     {
       int rowCount = m_tableWidget->rowCount();
       addRow(m_txtName->text().toStdString(), m_txtValue->text().toStdString(), rowCount);
     }
 
+    /// Edit an existing item
     void EditableLogView::update()
     {
       int row = m_tableWidget->currentRow();
       m_tableWidget->setItem(row, 1, new QTableWidgetItem(m_txtValue->text()));
     }
 
+    /// Remove an existing item
     void EditableLogView::remove()
     {
       //Remove item by name.
