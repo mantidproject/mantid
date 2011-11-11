@@ -212,7 +212,8 @@ void testFuncSelector()
 void testExecSelection()
 {
     
-    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    pAlg->setRethrows(true);
+    TS_ASSERT_THROWS(pAlg->execute(),Kernel::Exception::NotImplementedError);
 }
 
 

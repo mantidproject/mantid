@@ -221,6 +221,8 @@ void ConvertToQNDany::exec(){
     std::vector<std::string> dim_selected;
     known_algorithms algo_id = identify_requested_alg(dim_names_availible, Q_dim_requested,other_dim,n_activated_dimensions);
 
+    // call selected algorithm. 
+    alg_selector[algo_id](this);
     return;
    
 }
