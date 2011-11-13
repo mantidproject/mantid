@@ -599,12 +599,9 @@ void SaveCanSAS1D::createSASProcessElement(std::string& sasProcess)
   sasProcname+="Mantid generated CanSAS1D XML";
   sasProcname+="</name>";
   sasProcess+=sasProcname;
-  //outFile<<sasProcname;
 
   time_t date;
-  time(&date);
-  std::tm*  t;
-  t=localtime(&date);
+  localtime(&date);
 
   char temp [25];
   strftime (temp,25,"%d-%b-%Y %H:%M:%S",localtime(&date));

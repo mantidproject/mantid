@@ -128,7 +128,6 @@ void MaskDetectors::exec()
   
   // If explicitly given a list of detectors to mask, just mark those.
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
-  bool detsMasked = false;
   std::vector<detid_t>::const_iterator it;
   Instrument_const_sptr instrument = WS->getInstrument();
   if ( !detectorList.empty() )
@@ -140,7 +139,6 @@ void MaskDetectors::exec()
         if ( const Geometry::ComponentID det = instrument->getDetector(*it)->getComponentID() )
         {
           pmap.addBool(det,"masked",true);
-          //std::cout << "Manually masking det " << det->getID() << std::endl;
         }
       }
       catch(Kernel::Exception::NotFoundError &e)
@@ -148,7 +146,6 @@ void MaskDetectors::exec()
         g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
       }
     }
-    detsMasked = true;
   }
   
   if ( indexList.size() == 0 )

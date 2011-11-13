@@ -73,13 +73,14 @@ namespace Mantid
 
 
       int i, XPeak, YPeak;
-      double col, row, l1, l2, wl;
+      double col, row;
 
       // Build a map to sort by the peak bin count
       std::vector <std::pair<double, int> > v1;
       for (i = 0; i<peaksW->getNumberPeaks(); i++)
+      {
         v1.push_back(std::pair<double, int>(peaksW->getPeaks()[i].getBinCount(), i));
-
+      }
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
       //Get some stuff from the input workspace
@@ -95,12 +96,9 @@ namespace Mantid
         // Direct ref to that peak
         Peak & peak = peaksW->getPeaks()[i];
 
-        l1 = peak.getL1();
         col = peak.getCol();
         row = peak.getRow();
         Kernel::V3D pos = peak.getDetPos();
-        l2 = pos.norm();
-        wl = peak.getWavelength();
 
         XPeak = int(col+0.5)-1;
         YPeak = int(row+0.5)-1;

@@ -191,7 +191,6 @@ namespace Mantid
 
       // For tracking when to split boxes
       size_t eventsAdded = 0;
-      size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
       BoxController_sptr bc = ws->getBoxController();
       DiskMRU & mru = bc->getDiskMRU();
 
@@ -269,7 +268,6 @@ namespace Mantid
           mru.flushCache();
           // Flush memory
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-          lastNumBoxes = bc->getTotalNumMDBoxes();
           eventsAdded = 0;
         }
 
