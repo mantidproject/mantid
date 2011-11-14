@@ -9,7 +9,7 @@ This algorithm edits the diffractomer detectors' parameters
 
 *WIKI*/
 
-#include "MantidAlgorithms/EditTOFPowderDiffractomerGeometry.h"
+#include "MantidAlgorithms/EditInstrumentGeometry.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/ISpectrum.h"
@@ -24,12 +24,12 @@ namespace Mantid
 namespace Algorithms
 {
 
-  DECLARE_ALGORITHM(EditTOFPowderDiffractomerGeometry);
+  DECLARE_ALGORITHM(EditInstrumentGeometry);
 
   //---------------------------------------------- ------------------------------------------------
   /** Constructor
    */
-  EditTOFPowderDiffractomerGeometry::EditTOFPowderDiffractomerGeometry()
+  EditInstrumentGeometry::EditInstrumentGeometry()
   {
     // TODO Auto-generated constructor stub
   }
@@ -37,14 +37,14 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  EditTOFPowderDiffractomerGeometry::~EditTOFPowderDiffractomerGeometry()
+  EditInstrumentGeometry::~EditInstrumentGeometry()
   {
     // TODO Auto-generated destructor stub
   }
   
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void EditTOFPowderDiffractomerGeometry::initDocs()
+  void EditInstrumentGeometry::initDocs()
   {
     this->setWikiSummary("Add and/or edit T.O.F. powder diffractomer instrument geometry information");
     this->setOptionalMessage("The edit or added information will be attached to a Workspace.  Currently it is in an overwrite mode only.");
@@ -53,7 +53,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void EditTOFPowderDiffractomerGeometry::init()
+  void EditInstrumentGeometry::init()
   {
     declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
         "Workspace to edit the detector information");
@@ -73,7 +73,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void EditTOFPowderDiffractomerGeometry::exec()
+  void EditInstrumentGeometry::exec()
   {
 
     // 1. Get Input

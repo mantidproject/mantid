@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/EditTOFPowderDiffractomerGeometry.h"
+#include "MantidAlgorithms/EditInstrumentGeometry.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/ISpectrum.h"
