@@ -42,32 +42,33 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class MANTID_GEOMETRY_DLL OpenGLContextImpl
+    class MANTID_GEOMETRY_DLL OpenGLContext
     {
     public:
       /// True if OpenGL is avalable
       bool isAvailable() const {return m_isOn;}
       /// Set avalability of OpenGL. Must be updated by the GL widget.
       void setAvalable(bool yes) {m_isOn = yes;}
+      static OpenGLContext& Instance();
     private:
-      friend struct Mantid::Kernel::CreateUsingNew<OpenGLContextImpl>;
+      //friend struct Mantid::Kernel::CreateUsingNew<OpenGLContextImpl>;
 
-      OpenGLContextImpl();       ///< Constructor
-      OpenGLContextImpl(const OpenGLContextImpl&);             ///< Private copy constructor
-      OpenGLContextImpl& operator=(const OpenGLContextImpl&);  ///< Private assignment operator
-      ~OpenGLContextImpl(){}      ///< Destructor
+      OpenGLContext();       ///< Constructor
+      OpenGLContext(const OpenGLContext&);             ///< Private copy constructor
+      OpenGLContext& operator=(const OpenGLContext&);  ///< Private assignment operator
+      ~OpenGLContext(){}      ///< Destructor
 
       bool m_isOn;    ///< flag indicating whether OpenGL is avalable or not
       static Kernel::Logger& g_log;   ///< The logger
 
     };
 
-        ///Forward declaration of a specialisation of SingletonHolder for OpenGLContextImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-        template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<OpenGLContextImpl>;
-#endif /* _WIN32 */
-        typedef MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<OpenGLContextImpl> OpenGLContext;
+//        ///Forward declaration of a specialisation of SingletonHolder for OpenGLContextImpl (needed for dllexport/dllimport) and a typedef for it.
+//#ifdef _WIN32
+//// this breaks new namespace declaraion rules; need to find a better fix
+//        template class MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<OpenGLContextImpl>;
+//#endif /* _WIN32 */
+//        typedef MANTID_GEOMETRY_DLL Mantid::Kernel::SingletonHolder<OpenGLContextImpl> OpenGLContext;
 
   }   // NAMESPACE Geometry
 

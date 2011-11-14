@@ -5,11 +5,17 @@ namespace Mantid
   namespace Geometry
   {
 
-    Kernel::Logger& OpenGLContextImpl::g_log(Kernel::Logger::get("OpenGLContextImpl"));
+    Kernel::Logger& OpenGLContext::g_log(Kernel::Logger::get("OpenGLContext"));
 
-    OpenGLContextImpl::OpenGLContextImpl():
+    OpenGLContext::OpenGLContext():
     m_isOn(false)
     {
+    }
+
+    OpenGLContext& OpenGLContext::Instance()
+    {
+      static OpenGLContext context;
+      return context;
     }
 
 
