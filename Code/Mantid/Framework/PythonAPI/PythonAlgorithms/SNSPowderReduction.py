@@ -355,14 +355,14 @@ class SNSPowderReduction(PythonAlgorithm):
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         if not "histo" in self.getProperty("Extension"):
             SortEvents(InputWorkspace=wksp)
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
-                             PreserveEvents=preserveEvents)
+        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group")
+        if not "histo" in self.getProperty("Extension"):
+            SortEvents(InputWorkspace=wksp)
+        if not preserveEvents:
+            ConvertToMatrixWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        if not info.has_dspace:
-            self.log().information("time-of-flight binning: " + str(binning))
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         if normByCurrent:
             NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
