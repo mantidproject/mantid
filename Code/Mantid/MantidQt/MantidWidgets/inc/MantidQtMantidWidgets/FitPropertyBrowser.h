@@ -191,9 +191,6 @@ public:
   /// Returns true if the difference plot should be drawn
   bool plotDiff()const;
 
-  /// Returns true if the fit should be done against binned (bunched) data.
-  bool data()const;
-
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
@@ -251,7 +248,13 @@ signals:
 
   void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
+
+  /// signal which can optionally be caught for customization after a fit has 
+  /// been done
   void fittingDone(QString);
+  /// signal which can optionally be caught for customization before a fit has 
+  /// been done  
+  void beforeFitting(const QtBoolPropertyManager*);
 
 private slots:
 

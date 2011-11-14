@@ -21,6 +21,7 @@ namespace CustomInterfaces
 namespace Muon
 {
   class MuonAnalysisOptionTab;
+  class MuonAnalysisFitDataTab;
 }
 
 
@@ -162,6 +163,8 @@ private slots:
   void changeDataPlotType(const QString &);
 
   void groupFittedWorkspaces(QString);
+
+  void beforeDoFit(const QtBoolPropertyManager*);
 
 private:
   /// Initialize the layout
@@ -344,8 +347,10 @@ private:
   /// Include the 0's fromt eh beginning of the file that were lost in conversion from QString to int
   void getFullCode(int size, QString & limitedCode);
 
-  ///
+  /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
+  /// handles fit data work
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab* m_fitDataTab;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

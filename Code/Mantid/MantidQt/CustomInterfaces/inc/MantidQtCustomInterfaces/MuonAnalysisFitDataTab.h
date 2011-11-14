@@ -62,11 +62,16 @@ class MuonAnalysisFitDataTab : public QWidget
 
 public:
 
+  MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
+
 public slots:
 
 signals:
 
 private:
+
+  ///
+  Ui::MuonAnalysis& m_uiForm;
 
 private slots:
 
