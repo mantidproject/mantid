@@ -20,6 +20,7 @@ namespace SliceViewer
   {
     m_pointA = QPointF(0.0, 0.0);
     m_pointB = QPointF(1.0, 1.0);
+    m_width = 0.1;
     setAttribute(Qt::WA_TransparentForMouseEvents);
   }
     
@@ -82,25 +83,58 @@ namespace SliceViewer
   int LineOverlay::width() const
   { return m_plot->canvas()->width(); }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Tranform from plot coordinates to pixel coordinates
+   * @param coords :: coordinate point in plot coordinates
+   * @return pixel coordinates */
+  QPoint LineOverlay::transform(QPointF coords) const
+  {
+    int xA = m_plot->transform( QwtPlot::xBottom, coords.x() );
+    int yA = m_plot->transform( QwtPlot::yLeft, coords.y() );
+    return QPoint(xA, yA);
+  }
+
   //----------------------------------------------------------------------------------------------
   void LineOverlay::paintEvent(QPaintEvent */*event*/)
   {
-
+    return;
     QPainter painter(this);
+    painter.setCompositionMode( QPainter::CompositionMode_Xor );
+
     int r = rand() % 255;
     int g = rand() % 255;
     int b = rand() % 255;
-    painter.setPen(QColor(r,g,b));
     painter.setBrush(QBrush(QColor(r,g,b)));
 
-//    int x1 = m_plot->transform( QwtPlot::xBottom, m_pointA.x() );
-//    int y1 = m_plot->transform( QwtPlot::yLeft, m_pointA.y() );
-//    int x2 = m_plot->transform( QwtPlot::xBottom, m_pointB.x() );
-//    int y2 = m_plot->transform( QwtPlot::yLeft, m_pointB.y() );
+    QPointF diff = m_pointB - m_pointA;
+    // Angle of the "width" perpendicular to the line
+    double angle = atan2(diff.y(), diff.x()) + M_PI / 2.0;
+    QPointF widthOffset( m_width * cos(angle), m_width * sin(angle) );
+
+    // Rectangle with a rotation
+    QPointF pA1 = m_pointA + widthOffset;
+    QPointF pA2 = m_pointA - widthOffset;
+    QPointF pB1 = m_pointB + widthOffset;
+    QPointF pB2 = m_pointB - widthOffset;
+
+    // --- Draw the central line ---
+    QPen centerPen(QColor(155,155,155, 250));
+    centerPen.setWidthF(10.0);
+    centerPen.setCapStyle(Qt::FlatCap);
+    painter.setPen(centerPen);
+    painter.drawLine(transform(m_pointA), transform(m_pointB));
+
+    // --- Draw the box ---
+    QPen boxPen(QColor(255,255,255, 250));
+    boxPen.setWidthF(1.0);
+    painter.setPen(boxPen);
+    painter.drawLine(transform(pA1), transform(pB1));
+    painter.drawLine(transform(pB1), transform(pB2));
+    painter.drawLine(transform(pB2), transform(pA2));
+    painter.drawLine(transform(pA2), transform(pA1));
 
     //std::cout << "LineOverlay::paintEvent " << x1 << "," << y1 << " : " << x2 << "," << y2 << "\n";
-
-//    painter.drawLine(x1,y1, x2,y2);
   }
 
 

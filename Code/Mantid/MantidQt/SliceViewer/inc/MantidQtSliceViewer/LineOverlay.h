@@ -57,11 +57,13 @@ namespace SliceViewer
     double getWidth() const;
 
   private:
+    QPoint transform(QPointF coords) const;
     QSize sizeHint() const;
     QSize size() const;
     int height() const;
     int width() const;
     void paintEvent(QPaintEvent *event);
+
 
   protected:
     /// QwtPlot containing this
