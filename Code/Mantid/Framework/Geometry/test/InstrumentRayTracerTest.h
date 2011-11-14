@@ -40,15 +40,13 @@ public:
   
   void test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument()
   {
-    InstrumentRayTracer *rayTracker(NULL);
-    TS_ASSERT_THROWS(rayTracker = new InstrumentRayTracer(boost::shared_ptr<Instrument>()), std::invalid_argument);
+    TS_ASSERT_THROWS(new InstrumentRayTracer(boost::shared_ptr<Instrument>()), std::invalid_argument);
   }
 
   void test_That_Constructor_Throws_Invalid_Argument_On_Giving_An_Instrument_With_No_Source()
   {
     Instrument_sptr testInst(new Instrument("empty"));
-    InstrumentRayTracer *rayTracker(NULL);
-    TS_ASSERT_THROWS(rayTracker = new InstrumentRayTracer(testInst), std::invalid_argument);
+    TS_ASSERT_THROWS(new InstrumentRayTracer(testInst), std::invalid_argument);
   }
 
   void test_That_A_Trace_For_A_Ray_That_Intersects_Many_Components_Gives_These_Components_As_A_Result()

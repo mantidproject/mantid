@@ -184,7 +184,6 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
               required_tolerance );
 
   double  fit_error = 0;
-  int     num_indexed;
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
   miller_ind.reserve( q_vectors.size() );
@@ -207,8 +206,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
     try
     {
-      num_indexed = GetIndexedPeaks( UB, some_qs, required_tolerance,
-                                     miller_ind, indexed_qs, fit_error );
+      GetIndexedPeaks( UB, some_qs, required_tolerance,
+                       miller_ind, indexed_qs, fit_error );
       Matrix<double> temp_UB(3,3,false);
       fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
       UB = temp_UB;
@@ -223,8 +222,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   {
     try 
     {
-      num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                                     miller_ind, indexed_qs, fit_error );
+      GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                       miller_ind, indexed_qs, fit_error );
       Matrix<double> temp_UB(3,3,false);
       fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
       UB = temp_UB;
@@ -237,8 +236,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                  // Regardless of how we got the UB, find the
                                  // sum-squared errors for the indexing in 
                                  // HKL space.
-  num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                                 miller_ind, indexed_qs, fit_error );
+  GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                   miller_ind, indexed_qs, fit_error );
   return fit_error;
 }
 
@@ -421,7 +420,6 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
   Matrix<double> temp_UB(3,3,false);
   double         fit_error;
-  int            num_indexed = 0;
   while ( num_initial < sorted_qs.size() )
   {
     num_initial = round(1.5 * (double)num_initial + 3);
@@ -433,8 +431,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     for ( size_t i = some_qs.size(); i < num_initial; i++ )
       some_qs.push_back( sorted_qs[i] );
 
-    num_indexed = GetIndexedPeaks( UB, some_qs, required_tolerance,
-                                   miller_ind, indexed_qs, fit_error );
+    GetIndexedPeaks( UB, some_qs, required_tolerance,
+                     miller_ind, indexed_qs, fit_error );
 
     try
     {
@@ -450,8 +448,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
   if ( q_vectors.size() >= 5 )   // try one last refinement using all peaks
   {
-    num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
-                                   miller_ind, indexed_qs, fit_error );
+    GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                     miller_ind, indexed_qs, fit_error );
     try
     {
       fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );

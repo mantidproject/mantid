@@ -196,8 +196,6 @@ std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IA
   std::sort(properties.begin(), properties.end(), PropertyOrdering());
 
   // generate the sanitized names
-  PropertyVector::const_iterator pIter = properties.begin();
-  PropertyVector::const_iterator pEnd = properties.end();
   std::vector<std::string>* names = new std::vector<std::string>();
   names->reserve(properties.size());
   size_t numProps = properties.size();
@@ -225,8 +223,6 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
   std::sort(properties.begin(), properties.end(), PropertyOrdering());
 
   // generate the sanitized names
-  PropertyVector::const_iterator pIter = properties.begin();
-  PropertyVector::const_iterator pEnd = properties.end();
   StringVector names(properties.size());
   size_t numProps = properties.size();
   for ( size_t i = 0; i < numProps; ++i) 

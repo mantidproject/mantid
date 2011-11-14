@@ -190,7 +190,7 @@ namespace MDEvents
     this->data->getBoxes(boxes, depth, true);
     typename std::vector<IMDBox<MDE,nd>*>::iterator it;
     typename std::vector<IMDBox<MDE,nd>*>::iterator it_end = boxes.end();
-    for (it = boxes.begin(); it != boxes.end(); it++)
+    for (it = boxes.begin(); it != it_end; it++)
     {
       IMDBox<MDE,nd>* box = *it;
       if (box->getNPoints() > 0)

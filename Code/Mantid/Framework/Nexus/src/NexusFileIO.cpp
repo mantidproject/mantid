@@ -136,9 +136,8 @@ using namespace DataObjects;
   //-----------------------------------------------------------------------------------------------
   int NexusFileIO::closeNexusFile()
   {
-    NXstatus status;
-    status=NXclosegroup(fileID);
-    status=NXclose(&fileID);
+    NXclosegroup(fileID);
+    NXclose(&fileID);
     return(0);
   }
 
@@ -609,21 +608,20 @@ using namespace DataObjects;
   /** Write out an array to the open file. */
   void NexusFileIO::NXwritedata( const char * name, int datatype, int rank, int * dims_array, void * data, bool compress) const
   {
-    NXstatus status;
     if (compress)
     {
       // We'll use the same slab/buffer size as the size of the array
-      status=NXcompmakedata(fileID, name, datatype, rank, dims_array, m_nexuscompression, dims_array);
+      NXcompmakedata(fileID, name, datatype, rank, dims_array, m_nexuscompression, dims_array);
     }
     else
     {
       // Write uncompressed.
-      status=NXmakedata(fileID, name, datatype, rank, dims_array);
+      NXmakedata(fileID, name, datatype, rank, dims_array);
     }
 
-    status=NXopendata(fileID, name);
-    status=NXputdata(fileID, data );
-    status=NXclosedata(fileID);
+    NXopendata(fileID, name);
+    NXputdata(fileID, data );
+    NXclosedata(fileID);
   }
 
   //-------------------------------------------------------------------------------------
@@ -833,9 +831,8 @@ using namespace DataObjects;
   {
     // see if the given attribute name is in the current level
     // return true if it is.
-    NXstatus status;
     int length=NX_MAXNAMELEN,type;
-    status=NXinitattrdir(fileID);
+    NXinitattrdir(fileID);
     char aname[NX_MAXNAMELEN];
     //    char avalue[NX_MAXNAMELEN]; // value is not restricted to this, but it is a reasonably large value
     while(NXgetnextattr(fileID,aname,&length,&type)==NX_OK)
@@ -854,7 +851,7 @@ using namespace DataObjects;
     // find the X values for spectra. If uniform, the spectra number is ignored.
     //
     NXstatus status;
-    int rank,dim[2],type,nx;
+    int rank,dim[2],type;
 
     //open workspace group
     status=NXopengroup(fileID,"workspace","NXdata");
@@ -865,11 +862,6 @@ using namespace DataObjects;
     if(status==NX_ERROR)
       return(2);
     status=NXgetinfo(fileID, &rank, dim, &type);
-    // non-uniform X has 2D axis1 data
-    if(rank==2)
-      nx=dim[1];
-    else
-      nx=dim[0];
     if(rank==1)
     {
       status=NXgetdata(fileID,&xValues[0]);

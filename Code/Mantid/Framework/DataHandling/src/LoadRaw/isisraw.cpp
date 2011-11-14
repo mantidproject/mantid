@@ -746,18 +746,17 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 /// stuff
 		int ISISRAW::ioRAW(FILE* file, int* s, int len, bool from_file) 
 		{
-			size_t n;
 			if ( (len <= 0) || (s == 0) )
 			{
 				return 0;
 			}
 			if (from_file)
 			{
-				n = fread(s, sizeof(int), len, file);
+				fread(s, sizeof(int), len, file);
 			}
 			else
 			{
-				n = fwrite(s, sizeof(int), len, file);
+				fwrite(s, sizeof(int), len, file);
 			}
 			return 0;
 		}
@@ -765,18 +764,17 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 /// stuff
 		int ISISRAW::ioRAW(FILE* file, uint32_t* s, int len, bool from_file) 
 		{
-			size_t n;
 			if ( (len <= 0) || (s == 0) )
 			{
 				return 0;
 			}
 			if (from_file)
 			{
-				n = fread(s, sizeof(uint32_t), len, file);
+				fread(s, sizeof(uint32_t), len, file);
 			}
 			else
 			{
-				n = fwrite(s, sizeof(uint32_t), len, file);
+				fwrite(s, sizeof(uint32_t), len, file);
 			}
 			return 0;
 		}
@@ -784,7 +782,6 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 /// stuff
 		int ISISRAW::ioRAW(FILE* file, float* s, int len, bool from_file) 
 		{
-			size_t n;
 			int errcode = 0;
 			if ( (len <= 0) || (s == 0) )
 			{
@@ -792,13 +789,13 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 			}
 			if (from_file)
 			{
-				n = fread(s, sizeof(float), len, file);
+				fread(s, sizeof(float), len, file);
 				vaxf_to_local(s, &len, &errcode);
 			}
 			else
 			{
 				local_to_vaxf(s, &len, &errcode);
-				n = fwrite(s, sizeof(float), len, file);
+				fwrite(s, sizeof(float), len, file);
 				vaxf_to_local(s, &len, &errcode);
 			}
 			return 0;
@@ -1097,7 +1094,6 @@ int ISISRAW::writeToFile(const char* filename)
 int ISISRAW::printInfo(std::ostream& os)
 {
 	int i;
-	long offset;
 	os << "INST section at " << add.ad_inst << " 0x" << std::hex << 4*add.ad_inst << std::dec << std::endl;
 	os << "SE section at " << add.ad_se << " 0x" << std::hex << 4*add.ad_se << std::dec << std::endl;
 	os << "Dae section at " << add.ad_dae << " 0x" << std::hex << 4*add.ad_dae << std::dec << std::endl;
@@ -1110,7 +1106,6 @@ int ISISRAW::printInfo(std::ostream& os)
 	os << "Compression is " << (dhdr.d_comp == 0 ? "NONE" : "BYTE-RELATIVE") << std::endl;
 	os << "Compression ratio of data = " << dhdr.d_crdata << std::endl;
 	os << "Offsets of spectrum data" << std::endl;
-	offset = add.ad_data;
 	for(i=0; i < ((t_nsp1+1) * t_nper); i++)
 	{
 		os << i << " " << ddes[i].nwords << " words at offset " << ddes[i].offset << std::endl;

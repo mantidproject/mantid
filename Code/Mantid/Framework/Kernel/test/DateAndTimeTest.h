@@ -287,7 +287,6 @@ public:
 
   void test_time_t_support()
   {
-    DateAndTime cur = DateAndTime::get_current_time();
     DateAndTime t;
     std::time_t current = time (NULL);
     t.set_from_time_t( current );
@@ -421,8 +420,8 @@ public:
   {
     boost::posix_time::ptime time(boost::posix_time::not_a_date_time);
     DateAndTime dt(time);
-    TS_ASSERT_THROWS(std::tm tm = boost::posix_time::to_tm(time), std::out_of_range);
-    TS_ASSERT_THROWS_NOTHING(std::tm tm2 = dt.to_tm());
+    TS_ASSERT_THROWS(boost::posix_time::to_tm(time), std::out_of_range);
+    TS_ASSERT_THROWS_NOTHING(dt.to_tm());
   }
 
   void test_duration_limits()

@@ -81,8 +81,7 @@ public:
   void test_ctor_with_null_box_fails()
   {
     typedef MDBoxIterator<MDLeanEvent<1>,1> boxit_t;
-    boxit_t * it;
-    TS_ASSERT_THROWS_ANYTHING( it = new boxit_t(NULL, 10, false); );
+    TS_ASSERT_THROWS_ANYTHING( new boxit_t(NULL, 10, false); );
   }
 
   //--------------------------------------------------------------------------------------
@@ -611,12 +610,10 @@ public:
 
     // Now we still need to iterate through the vector to do anything, so this is a more fair comparison
     size_t counter = 0;
-    IMDBox<MDLeanEvent<3>,3> * box;
     std::vector< IMDBox<MDLeanEvent<3>,3> * >::iterator it;
     std::vector< IMDBox<MDLeanEvent<3>,3> * >::iterator it_end = boxes.end();
     for (it = boxes.begin(); it != it_end; it++)
     {
-      box = *it;
       counter++;
     }
 
