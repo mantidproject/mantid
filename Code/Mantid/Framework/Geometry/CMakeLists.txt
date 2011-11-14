@@ -62,7 +62,6 @@ set ( SRC_FILES
 	src/Rendering/OCGeometryGenerator.cpp
 	src/Rendering/OCGeometryHandler.cpp
 	src/Rendering/OCGeometryRenderer.cpp
-	src/Rendering/OpenGLContext.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
 	src/Surfaces/Cone.cpp
@@ -159,7 +158,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/OCGeometryRenderer.h
 	inc/MantidGeometry/Rendering/OpenCascadeConfig.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
-	inc/MantidGeometry/Rendering/OpenGLContext.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h

@@ -1,6 +1,5 @@
 #include "MantidGeometry/Rendering/CacheGeometryRenderer.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidGeometry/Rendering/OpenGLContext.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidKernel/Quat.h"
 #include <climits>
@@ -30,7 +29,7 @@ namespace Mantid
  */
     CacheGeometryRenderer::~CacheGeometryRenderer()
     {
-      if (OpenGLContext::Instance().isAvailable() && boolDisplaylistCreated && glIsList(iDisplaylistId) == GL_TRUE)
+      if (boolDisplaylistCreated && glIsList(iDisplaylistId) == GL_TRUE)
       {
         glDeleteLists(iDisplaylistId, 1);
       }
