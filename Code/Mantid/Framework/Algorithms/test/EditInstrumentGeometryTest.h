@@ -18,13 +18,13 @@ using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class EditTOFPowderDiffractomerGeometryTest : public CxxTest::TestSuite
+class EditInstrumentGeometryTest : public CxxTest::TestSuite
 {
 public:
 
   void test_Initialize(){
 
-    EditTOFPowderDiffractomerGeometry editdetector;
+    EditInstrumentGeometry editdetector;
     TS_ASSERT_THROWS_NOTHING(editdetector.initialize());
     TS_ASSERT(editdetector.isInitialized());
 
@@ -33,7 +33,7 @@ public:
   void test_SingleSpectrum()
   {
     // 1. Init
-    EditTOFPowderDiffractomerGeometry editdetector;
+    EditInstrumentGeometry editdetector;
     editdetector.initialize();
 
     // 2. Load Data
