@@ -3,6 +3,11 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::Geometry::IMDDimension_const_sptr;
@@ -146,3 +151,6 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Manti
   for (size_t d=0; d<m_nd; d++)
     m_slicePoint[d] = slicePoint[d];
 }
+
+} //namespace
+} //namespace
