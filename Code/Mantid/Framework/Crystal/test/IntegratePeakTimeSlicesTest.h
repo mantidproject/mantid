@@ -48,6 +48,10 @@ using namespace std;
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
 {
 public:
+  IntegratePeakTimeSlicesTest()
+  {
+    Mantid::API::FrameworkManager::Instance();
+  }
   void test_abc()
   {
     int NRC = 30;

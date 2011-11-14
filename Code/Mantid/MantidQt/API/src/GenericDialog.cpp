@@ -266,57 +266,31 @@ void GenericDialog::initLayout()
       {
         group = prop->getGroup();
 
-        if (false)
+        if (group == "")
         {
-          // --------- Draw boxes using separator lines and labels ----------------
-          // Make a separator line
-          QFrame * line = new QFrame;
-          line->setObjectName(QString::fromUtf8("line"));
-          line->setGeometry(QRect(320, 150, 118, 3));
-          line->setFrameShape(QFrame::HLine);
-          line->setFrameShadow(QFrame::Sunken);
-          m_currentGrid->addWidget(line, row, 0, 1, 4);
-          row++;
-          if (group != "")
-          {
-            QLabel * groupLabel = new QLabel(QString::fromStdString(group));
-            groupLabel->setAlignment(Qt::AlignCenter);
-            QFont font = groupLabel->font();
-            font.setBold(true);
-            groupLabel->setFont(font);
-            m_currentGrid->addWidget(groupLabel, row, 0, 1, 4);
-            row++;
-          }
+        // Return to the original grid
+        m_currentGrid = m_inputGrid;
         }
         else
         {
-          if (group == "")
-          {
-            // Return to the original grid
-            m_currentGrid = m_inputGrid;
-          }
-          else
-          {
-            // Make a groupbox with a border and a light background
-            QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
-            grpBox->setAutoFillBackground(true);
-            grpBox->setStyleSheet(
-                "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 1.8ex; }"
-                "QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px;  } ");
-            QPalette pal = grpBox->palette();
-            pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
-            grpBox->setPalette(pal);
+        // Make a groupbox with a border and a light background
+        QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
+        grpBox->setAutoFillBackground(true);
+        grpBox->setStyleSheet(
+            "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }"
+            "QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } ");
+        QPalette pal = grpBox->palette();
+        pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
+        grpBox->setPalette(pal);
 
-            // Put the frame in the main grid
-            m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
+        // Put the frame in the main grid
+        m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
 
-            // Make a layout in the grp box
-            m_currentGrid = new QGridLayout;
-            grpBox->setLayout(m_currentGrid);
-            row++;
-          }
+        // Make a layout in the grp box
+        m_currentGrid = new QGridLayout;
+        grpBox->setLayout(m_currentGrid);
+        row++;
         }
-
 
 
 //          QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );

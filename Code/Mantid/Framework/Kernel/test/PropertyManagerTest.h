@@ -205,14 +205,16 @@ public:
     TS_ASSERT_THROWS_NOTHING( i = manager->getProperty("aprop") );
     TS_ASSERT_EQUALS( i, 1 );
     double dd(0.0);
-    TS_ASSERT_THROWS( dd= manager->getProperty("aprop"), std::runtime_error );
+    TS_ASSERT_THROWS( dd = manager->getProperty("aprop"), std::runtime_error );
+    TS_ASSERT_EQUALS(dd, 0.0); // If dd is bot used you get a compiler warning
     std::string s = manager->getProperty("aprop");
     TS_ASSERT( ! s.compare("1") );
     double d(0.0);
     TS_ASSERT_THROWS_NOTHING( d = manager->getProperty("anotherProp") );
     TS_ASSERT_EQUALS( d, 1.11 );
-    int ii;
+    int ii(0);
     TS_ASSERT_THROWS( ii = manager->getProperty("anotherprop"), std::runtime_error );
+    TS_ASSERT_EQUALS(ii, 0); // Compiler warning if ii is not used
     std::string ss = manager->getProperty("anotherprop");
     // Note that some versions of boost::lexical_cast > 1.34 give a string such as
     // 9.9900000000000002 rather than 9.99. Converting back to a double however does

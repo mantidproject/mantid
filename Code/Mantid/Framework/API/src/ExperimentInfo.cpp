@@ -388,16 +388,6 @@ namespace API
     return 0;
   }
 
-
-
-
-
-
-
-
-
-
-
   // used to terminate SAX process
   class DummyException {
   public:
@@ -537,6 +527,21 @@ namespace API
 
     // No date match found return most recent
     return mostRecentIDF;
+  }
+
+  /** A given instrument may have multiple IDFs associated with it. This method return an
+  *  identifier which identify a given IDF for a given instrument. An IDF filename is
+  *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
+  *  then is the part of a filename that identifies the IDF valid at the current date.
+  *
+  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+  *  @return full path of IDF
+  */
+  std::string ExperimentInfo::getInstrumentFilename(const std::string &instrumentName)
+  {
+      // Just use the current date
+      const std::string date = Kernel::DateAndTime::get_current_time().to_ISO8601_string();
+      return ExperimentInfo::getInstrumentFilename(instrumentName, date);
   }
 
 

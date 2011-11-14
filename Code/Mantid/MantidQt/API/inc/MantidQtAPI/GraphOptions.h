@@ -1,5 +1,6 @@
 #ifndef MANTIDGRAPHOPTIONS_H_
 #define MANTIDGRAPHOPTIONS_H_
+#include "DllOption.h"
 
 /**
  * This file contains declarations of options such as scale types that are 
@@ -11,12 +12,12 @@ namespace GraphOptions
 /**
  * Scale type enumeration
  */
-  enum ScaleType { Linear = 0, Log10 };
+  EXPORT_OPT_MANTIDQT_API enum ScaleType { Linear = 0, Log10 };
 
   /**
    * Axis choice
    */
-  enum Axis { Left, Right, Bottom, Top };
+  EXPORT_OPT_MANTIDQT_API enum Axis { Left, Right, Bottom, Top };
 }
 
 #endif //MANTIDSCALETYPE_H_

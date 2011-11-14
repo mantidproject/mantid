@@ -51,6 +51,9 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.ui
 )
 
+# Add the QtWidgets icons
+qt4_add_resources( RES_FILES icons/ViewWidgetsIcons.qrc )
+
 # Setup the include locations.
 include_directories(
   inc
@@ -58,11 +61,18 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
 )
 
+set( ALL_FILES
+${INCLUDE_FILES}
+${SOURCE_FILES}
+${MOC_SOURCES}
+${UI_BUILT_SOURCES}
+${RES_FILES}
+)
+
 # For Windows
 add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS )
 # Add the target for this directory
-add_library( VatesSimpleGuiViewWidgets ${INCLUDE_FILES} ${SOURCE_FILES}
-${MOC_SOURCES} ${UI_BUILT_SOURCES} )
+add_library( VatesSimpleGuiViewWidgets ${ALL_FILES} )
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgets )
 # Add to the 'VatesSimpleGui' group in VS

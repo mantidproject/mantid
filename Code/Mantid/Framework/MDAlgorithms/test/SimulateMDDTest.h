@@ -223,12 +223,6 @@ public:
             boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(FakeWSname)) );
         TS_ASSERT_EQUALS( outCut->getNPoints(),16);
 
-        // Test output of quadratic in energy transfer model
-        double expected_residual = 42.4907;
-        double residual = alg.getProperty("Residual");
-
-//        TS_ASSERT_DELTA(residual, expected_residual, 1e-03);
-
         // test bg Exponential model in energy transfer with same data
         alg.setPropertyValue("BackgroundModel","ExpEnTrans");
         alg.setPropertyValue("BackgroundModelP1", "1.0" );
@@ -236,15 +230,6 @@ public:
         alg.setPropertyValue("BackgroundModelP3", "-0.5" );
         TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-        // Test output of model
-        expected_residual = 12.3237;
-        residual = alg.getProperty("Residual");
-
-//        TS_ASSERT_DELTA(residual, expected_residual, 1e-03);
-
-        // test incorrect model name - Does not throw as expected
-        //alg.setPropertyValue("BackgroundModel","notAmodel");
-        //TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
         AnalysisDataService::Instance().remove(FakeWSname);
     }
     void testTidyUp()

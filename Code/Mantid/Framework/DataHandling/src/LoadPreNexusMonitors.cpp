@@ -69,7 +69,6 @@ void LoadPreNexusMonitors::exec()
 {
   // time of flight channel parameters
   double tmin = 0.0;
-  double tmax = 0.0;
   double tstep = 0.0;
   int tchannels = 0;
   std::string instrumentName;
@@ -123,12 +122,6 @@ void LoadPreNexusMonitors::exec()
       g_log.debug() << "\tname: " << pE->getAttribute("name") << std::endl;
       g_log.debug() << "\tdescription: " << pE->getAttribute("description") << std::endl;
 
-      // Now lets get the tof binning settings
-      Poco::XML::Element* pTimeChannels = pE->getChildElement("NumTimeChannels");
-      tmin = boost::lexical_cast<double>(pTimeChannels->getAttribute("startbin"));
-      tmax = boost::lexical_cast<double>(pTimeChannels->getAttribute("endbin"));
-      tstep = boost::lexical_cast<double>(pTimeChannels->getAttribute("width"));
-
     }
 
     // Look for the 'DataList' node to get the monitor dims.
@@ -172,13 +165,9 @@ void LoadPreNexusMonitors::exec()
     }
 
     pNode = it.nextNode();
-    //  std::cout << pNode->nodeName() << ":" << pNode->getNodeValue() << std::endl;
   }
 
   g_log.information() << "Found " << nMonitors << " beam monitors." << std::endl;
-
-  //tchannels = static_cast<size_t> ((tmax - tmin) / tstep);
-  //std::cout << "tchannels = " << tchannels << std::endl;
 
   g_log.information() << "Number of Time Channels = " << tchannels << std::endl;
 

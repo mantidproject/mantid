@@ -304,12 +304,11 @@ public:
     conv.addFunction(res);
 
     const int N = 116;
-    double x[N],xr[N],out[N],x0 = 0, dx = 0.13;
+    double x[N],out[N],x0 = 0, dx = 0.13;
     double Dx = dx*N;
     for(int i=0;i<N;i++)
     {
       x[i] = x0 + i*dx;
-      xr[i] = x[i] - x0 - Dx/2;
     }
 
     double c2 = x0 + Dx/2;
@@ -362,12 +361,10 @@ private:
     Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
       (WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
 
-    double spec;
     double x;
 
     for(int iSpec=0;iSpec<nSpec;iSpec++)
     {
-      spec = iSpec;
       Mantid::MantidVec& X = ws->dataX(iSpec);
       Mantid::MantidVec& Y = ws->dataY(iSpec);
       Mantid::MantidVec& E = ws->dataE(iSpec);

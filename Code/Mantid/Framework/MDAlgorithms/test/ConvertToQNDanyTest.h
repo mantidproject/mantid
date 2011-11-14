@@ -31,13 +31,19 @@ public:
        return ConvertToQNDany::get_dimension_names(default_properties,inMatrixWS);
     }
 
-   ConvertToQNDany::known_algorithms identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &QOption,const std::vector<std::string> &dim_selected,size_t &nDims)const
-   { return   ConvertToQNDany::identify_requested_alg( dim_names_availible,QOption,dim_selected,nDims);
+   std::string identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &QOption,const std::vector<std::string> &dim_selected,size_t &nDims)const
+   { return   ConvertToQNDany::identify_the_alg( dim_names_availible,QOption,dim_selected,nDims);
    }
 
-   void run_algo(size_t n_mentod){       
-       alg_selector[n_mentod](this);
-      
+   void run_algo(const std::string &algo_id){   
+   // call selected algorithm
+        pMethod algo =  alg_selector[algo_id];
+        if(algo){
+            algo(this);
+        }else{
+            g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
+            throw(std::invalid_argument("undefined subalgoritm requested "));
+        }      
    }
 };
 // helper function to provide list of names to test:
@@ -101,7 +107,7 @@ void testSetUpThrow()
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions", "DeltaE,omega"));
 
 }
-void testAlgoSelectorThrows()
+void testAlgoSelectorThrowsWrongNDim()
 {
     std::vector<std::string> data_names_in_WS = dim_availible();
 
@@ -109,20 +115,29 @@ void testAlgoSelectorThrows()
     dim_requested[0]="AA";
     size_t nDims;
     TSM_ASSERT_THROWS("AA property is unavalible among ws parameters ",pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims),std::invalid_argument);
-    
+}
+
+void testAlgoSelectorThrowsInalidQ()
+{
+   std::vector<std::string> data_names_in_WS = dim_availible();
+
+    std::vector<std::string> dim_requested(2);
     dim_requested[0]="DeltaE";
+    dim_requested[1]="alpha";
+    size_t nDims;
     TSM_ASSERT_THROWS("Invalid Q argument ",pAlg->identify_requested_alg(data_names_in_WS,"wrong",dim_requested,nDims),std::invalid_argument);
 }
      
 void testAlgoSelector0()
 {
     std::vector<std::string> data_names_in_WS = dim_availible();
-    std::vector<std::string> dim_requested(1);
+    std::vector<std::string> dim_requested(2);
     size_t nDims;
 
-    dim_requested[0]="DeltaE";
-    TSM_ASSERT_EQUALS("NoQND: ",0,(int)pAlg->identify_requested_alg(data_names_in_WS,"",dim_requested,nDims));
-    TS_ASSERT_EQUALS(1,nDims);
+    dim_requested[0]="T";
+    dim_requested[1]="alpha";
+    TS_ASSERT_EQUALS("NoQND",pAlg->identify_requested_alg(data_names_in_WS,"",dim_requested,nDims));
+    TS_ASSERT_EQUALS(2,nDims);
 }
 void testAlgoSelector1()
 {
@@ -131,7 +146,7 @@ void testAlgoSelector1()
     size_t nDims;
 
     dim_requested[0]="DeltaE";
-    TSM_ASSERT_EQUALS("modQdE: ",1,(int)pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims));
+    TS_ASSERT_EQUALS("modQdE",pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims));
     TS_ASSERT_EQUALS(2,nDims);
 }
 void testAlgoSelector2()
@@ -142,7 +157,7 @@ void testAlgoSelector2()
 
     dim_requested[0]="alpha";
     dim_requested[1]="beta";
-    TSM_ASSERT_EQUALS("modQND: ",2,(int)pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims));
+    TS_ASSERT_EQUALS("modQND",pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims));
     TS_ASSERT_EQUALS(3,nDims);
 }
 void testAlgoSelector3()
@@ -154,7 +169,7 @@ void testAlgoSelector3()
     dim_requested[0]="alpha";
     dim_requested[1]="beta";
     dim_requested[2]="DeltaE";
-    TSM_ASSERT_EQUALS("modQdEND: ",3,(int)pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims));
+    TS_ASSERT_EQUALS("modQdEND",pAlg->identify_requested_alg(data_names_in_WS,"|Q|",dim_requested,nDims));
     TS_ASSERT_EQUALS(4,nDims);
 }
 void testAlgoSelector4()
@@ -163,7 +178,7 @@ void testAlgoSelector4()
     std::vector<std::string> dim_requested;
     size_t nDims;
 
-    TSM_ASSERT_EQUALS("Q3D: ",4,(int)pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
+    TS_ASSERT_EQUALS("Q3D",pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
     TS_ASSERT_EQUALS(3,nDims);
   
 }
@@ -173,7 +188,7 @@ void testAlgoSelector5()
     std::vector<std::string> dim_requested(1);
     size_t nDims;
     dim_requested[0]="DeltaE";
-    TSM_ASSERT_EQUALS("Q3DdE: ",5,(int)pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
+    TS_ASSERT_EQUALS("Q3DdE",pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
     TS_ASSERT_EQUALS(4,nDims);
   
 }
@@ -185,7 +200,7 @@ void testAlgoSelector6()
 
     dim_requested[0]="alpha";
     dim_requested[1]="beta";
-    TSM_ASSERT_EQUALS("Q3DND: ",6,(int)pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
+    TS_ASSERT_EQUALS("Q3DND",pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
     TS_ASSERT_EQUALS(5,nDims);  
 }
 void testAlgoSelector7()
@@ -197,16 +212,27 @@ void testAlgoSelector7()
     dim_requested[0]="alpha";
     dim_requested[1]="beta";
     dim_requested[2]="DeltaE";
-    TSM_ASSERT_EQUALS("Q3DdEND: ",7,(int)pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
+    TS_ASSERT_EQUALS("Q3DdEND",pAlg->identify_requested_alg(data_names_in_WS,"QxQyQz",dim_requested,nDims));
     TS_ASSERT_EQUALS(6,nDims);
 }
 
 
 void testFuncSelector()
 {
+    std::vector<std::string> known_algo(8);
+    known_algo[0]="NoQND";
+    known_algo[1]="modQND";
+    known_algo[2]="modQdE";
+    known_algo[3]="modQdEND";
+    known_algo[4]="Q3D";
+    known_algo[5]="Q3DdE";
+    known_algo[6]="Q3DND";
+    known_algo[7]="Q3DdEND";
+
     for(size_t i=0;i<8;i++){
-        TSM_ASSERT_THROWS("f:"+boost::lexical_cast<std::string>(i),pAlg->run_algo(i),Kernel::Exception::NotImplementedError);
+        TSM_ASSERT_THROWS("f:"+boost::lexical_cast<std::string>(i),pAlg->run_algo(known_algo[i]),Kernel::Exception::NotImplementedError);
     }
+    TS_ASSERT_THROWS(pAlg->run_algo("Unknown_algo"),std::invalid_argument);
 }
 
 void testExecSelection()

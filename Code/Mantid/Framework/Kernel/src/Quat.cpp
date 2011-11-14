@@ -270,8 +270,6 @@ void Quat::operator()(const V3D& rX, const V3D& rY, const V3D& rZ)
   //Find the axis that rotates oYr onto rY
   V3D ax2 = roY.cross_prod(rY);
   double angle2 = roY.angle(rY);
-  double sign = 1.0;
-  if (ax2.scalar_prod(rX) < 0) { sign = -1.0; };
   Quat Q2(angle2 * 180.0/M_PI, ax2);
 
   //Final = those two rotations in succession; Q1 is done first.
@@ -279,14 +277,6 @@ void Quat::operator()(const V3D& rX, const V3D& rY, const V3D& rZ)
 
   //Set it
   this->operator()(final);
-
- /*
-  std::cout << "Angle1 is: " << angle1 << "; axis " << ax1 << " ... ";
-  std::cout << "Q1 is: " << Q1 << "\n";
-  std::cout << "Angle2 is: " << angle2 << "; axis " << ax2 << " ... ";
-  std::cout << "Q2 is: " << Q2 << "\n";
-  std::cout << "Final is: " << final << "\n";
- */
 }
 
 //! Destructor

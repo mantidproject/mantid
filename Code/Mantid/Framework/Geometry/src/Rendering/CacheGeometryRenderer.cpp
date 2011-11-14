@@ -30,7 +30,9 @@ namespace Mantid
     CacheGeometryRenderer::~CacheGeometryRenderer()
     {
       if (boolDisplaylistCreated && glIsList(iDisplaylistId) == GL_TRUE)
-	glDeleteLists(iDisplaylistId, 1);
+      {
+        glDeleteLists(iDisplaylistId, 1);
+      }
     }
 
 /**

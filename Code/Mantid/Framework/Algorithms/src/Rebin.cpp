@@ -133,21 +133,8 @@ namespace Mantid
           g_log.notice() << "Non-EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
 
         } else {
-          // Event Workspace, then need to figure out the value carefully
-          xmin = xmax = -1;
-          for (size_t ispec = 0; ispec < inEventWS->getNumberHistograms(); ispec ++){
-            DataObjects::EventList el = inEventWS->getEventList(ispec);
-            double tempmin = el.getTofMin();
-            double tempmax = el.getTofMax();
-            if (tempmin < xmin || xmin < 0){
-              xmin = tempmin;
-            }
-            if (tempmax > xmax){
-              xmax = tempmax;
-            }
-            g_log.information() << "For Spectrum " << ispec << ": Min = " << tempmin << " , Max = " << tempmax << std::endl;
-          }
-
+          xmin = inEventWS->getTofMin();
+          xmax = inEventWS->getTofMax();
           g_log.notice() << "EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
 
         } // ENDIF

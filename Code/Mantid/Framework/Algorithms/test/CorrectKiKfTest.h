@@ -48,7 +48,6 @@ public:
     TS_ASSERT( alg.isExecuted() );
     Workspace2D_sptr result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     double ei,ef,factor,deltaE,stdval;
-    size_t numHists = result->getNumberHistograms();
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
@@ -72,7 +71,6 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
-    numHists = result->getNumberHistograms();
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
@@ -96,7 +94,6 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
-    numHists = result->getNumberHistograms();
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;
@@ -120,7 +117,6 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
-    numHists = result->getNumberHistograms();
     for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;

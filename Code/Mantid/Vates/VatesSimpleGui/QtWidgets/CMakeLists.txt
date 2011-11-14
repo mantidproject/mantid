@@ -7,6 +7,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiQtWidgets/GeometryParser.h
   inc/MantidVatesSimpleGuiQtWidgets/Indicator.h
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
+  inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
   inc/MantidVatesSimpleGuiQtWidgets/ScalePicker.h
   inc/MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h
 )
@@ -18,6 +19,7 @@ set( SOURCE_FILES
   src/Indicator.cpp
   src/ModeControlWidget.cpp
   src/ScalePicker.cpp
+  src/RotationPointDialog.cpp
 )
 
 # These are the headers to be preprocessed using Qt's moc preprocessor.
@@ -26,6 +28,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiQtWidgets/Indicator.h
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
   inc/MantidVatesSimpleGuiQtWidgets/ScalePicker.h
+  inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
 )
 
 # Add the QtWidgets icons
@@ -35,6 +38,7 @@ qt4_add_resources( RES_FILES icons/QtWidgetsIcons.qrc )
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.ui
+  inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.ui
 )
 
 # Setup the include locations.

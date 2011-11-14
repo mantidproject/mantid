@@ -125,7 +125,6 @@ namespace Mantid
 
 	  std::vector<DataObjects::Histogram1D> spectra;
 	  //size_t iLine=0;    // line number
-	  size_t ncols = 3;  // number of columns
 	  int nSpectra = 0;
 	  int nBins = 0; //number of rows
 	  std::string first_character;
@@ -161,7 +160,6 @@ namespace Mantid
 	      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 		  boost::char_separator<char> sep(" ");
 		  tokenizer tok(str, sep);
-		  ncols = 0;
 		  for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
 		  {
 		    std::stringstream ss;
