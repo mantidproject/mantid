@@ -296,6 +296,12 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SIGNAL(setAnimationControlInfo(double, double, int)),
                    this->ui.timeControlWidget,
                    SLOT(updateAnimationControls(double, double, int)));
+
+  // Set the connections for the rotation center buttons
+  QObject::connect(this->ui.resetCenterToDataButton,
+                   SIGNAL(clicked()),
+                   this->currentView,
+                   SLOT(onResetCenterToData()));
 }
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)

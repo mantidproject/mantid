@@ -134,6 +134,7 @@ public slots:
    * @param state flag to determine whether or not to use log color scaling
    */
   void onLogScale(int state);
+  void onResetCenterToData();
   /// Setup the animation controls.
   void setTimeSteps(bool withUpdate = false);
 
