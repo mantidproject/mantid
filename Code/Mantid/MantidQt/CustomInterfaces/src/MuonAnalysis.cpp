@@ -2740,9 +2740,7 @@ void MuonAnalysis::changeRun(int amountToChange)
 */
 void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, int &runNumber)
 {
-   //QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
   int firstFileNumber(-1);
-  int lastFileNumber(-1);
 
   //Find where the run number begins
   for (int i = 0; i<currentFile.size(); i++)
@@ -2751,15 +2749,6 @@ void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, in
     {
       firstFileNumber = i;
       break;
-    }
-  }
-
-  //Find where the run number ends
-  for (int i = firstFileNumber; i<currentFile.size(); i++)
-  {
-    if(currentFile[i].isDigit())
-    {
-      lastFileNumber = i;
     }
   }
 
@@ -2878,18 +2867,18 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
   if ( Mantid::API::AnalysisDataService::Instance().doesExist(groupName.toStdString()) )
   {
     QString groupStr("");
-    //if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised.toStdString()) )
-    //{
-    //  groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsNormalised + "," + groupName
-    //      + "',OutputWorkspace='" + groupName + "')\n";
-    //  runPythonCode( groupStr ).trimmed();
-    //}
-    //if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters.toStdString()) )
-    //{
-    //  groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsParameters + "," + groupName
-    //      + "',OutputWorkspace='" + groupName + "')\n";
-    //  runPythonCode( groupStr ).trimmed();
-    //}
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised.toStdString()) )
+    {
+      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsNormalised + "," + groupName
+          + "',OutputWorkspace='" + groupName + "')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters.toStdString()) )
+    {
+      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsParameters + "," + groupName
+          + "',OutputWorkspace='" + groupName + "')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
     if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace.toStdString()) )
     {
       groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsWorkspace + "," + groupName

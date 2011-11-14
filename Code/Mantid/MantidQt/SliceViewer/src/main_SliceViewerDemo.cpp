@@ -23,6 +23,7 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
+using MantidQt::SliceViewer::SliceViewer;
 
 /** Demo application for quickly testing the SliceViewer GUI.
  *

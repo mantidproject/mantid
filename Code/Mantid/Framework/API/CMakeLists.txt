@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/IMDEventWorkspace.cpp
+	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
 	src/IPeak.cpp
@@ -137,6 +138,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h
+	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IPeak.h

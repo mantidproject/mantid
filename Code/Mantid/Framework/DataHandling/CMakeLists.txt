@@ -86,6 +86,7 @@ set ( SRC_FILES
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
+	src/SaveDetectorMasks.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNexus.cpp
@@ -182,6 +183,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
+	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNexus.h
@@ -271,6 +273,7 @@ set ( TEST_FILES
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
 	test/SaveIsawDetCalTest.h
+	test/SaveDetectorMasksTest.h 
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
 	test/SaveNexusProcessedTest.h

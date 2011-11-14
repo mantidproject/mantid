@@ -2,7 +2,7 @@
 #define UNGROUPWORKSPACESTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/UnGroupWorkspaces.h"
+#include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidDataHandling/LoadRaw3.h"
 
 using namespace Mantid::API;
@@ -10,7 +10,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
 
-class UnGroupWorkspacesTest : public CxxTest::TestSuite
+class UnGroupWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 	void testName()

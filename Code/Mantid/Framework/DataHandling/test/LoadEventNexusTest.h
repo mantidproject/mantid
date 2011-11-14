@@ -125,7 +125,6 @@ public:
 
       it = logMap.begin();
       it2 = logMap2.begin();
-      Kernel::DateAndTime start = it->first;
       for (; it != logMap.end(); )
       {
         //Same times within a millisecond

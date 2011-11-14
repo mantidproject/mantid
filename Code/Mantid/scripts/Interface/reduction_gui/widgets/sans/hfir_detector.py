@@ -203,6 +203,8 @@ class DetectorWidget(BaseWidget):
         m.flood_use_finder = self._content.use_beam_finder_checkbox_2.isChecked()
         m.flood_beam_file = unicode(self._content.beam_data_file_edit_2.text())
         m.flood_use_direct_beam = self._content.direct_beam_2.isChecked()    
+
+        self._settings.emit_key_value("FLOOD_FIELD", QtCore.QString(str(self._content.sensitivity_file_edit.text())))
         return m
     
     def _use_sample_center_changed(self, is_checked):

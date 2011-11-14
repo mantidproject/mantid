@@ -64,7 +64,7 @@ void Q1D2::init()
   mustBePositive->setLower(0.0);
   declareProperty("RadiusCut", 0.0, mustBePositive,
     "To increase resolution some wavelengths are excluded within this distance from\n"
-    "the beam center (m)");
+    "the beam center (mm)");
   declareProperty("WaveCut", 0.0, mustBePositive->clone(),
     "To increase resolution by starting to remove some wavelengths below this"
     "freshold (angstrom)");

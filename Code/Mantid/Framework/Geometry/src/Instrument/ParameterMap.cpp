@@ -5,6 +5,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include <cstring>
+#include <boost/algorithm/string.hpp>
+
 
 namespace Mantid
 {
@@ -322,7 +324,7 @@ namespace Mantid
       std::pair<pmap_cit,pmap_cit> components = m_map.equal_range(id);
       for( pmap_cit itr = components.first; itr != components.second; ++itr )
       {
-        if( strcmp(itr->second->nameAsCString(), name) == 0 )
+        if( boost::iequals(itr->second->nameAsCString(), name) )
         {
           return true;
         }
@@ -349,7 +351,7 @@ namespace Mantid
       for( pmap_cit itr = components.first; itr != components.second; ++itr )
       {
         boost::shared_ptr<Parameter> param = itr->second;
-        if( param->name() == name && (anytype || param->type() == type) )
+        if( boost::iequals(param->name(),name) && (anytype || param->type() == type) )
         {
           return true;
         }
@@ -376,7 +378,7 @@ namespace Mantid
       for( ; itr != itr_end; ++itr )
       {
         Parameter_sptr param = itr->second;
-        if( strcmp(param->nameAsCString(), name) == 0 )
+        if( boost::iequals(param->nameAsCString(), name) )
         {
           return param;
         }
@@ -408,7 +410,7 @@ namespace Mantid
       for( ; itr != itr_end; ++itr )
       {
         Parameter_sptr param = itr->second;
-        if( param->name() == name && (anytype || param->type() == type) )
+        if( boost::iequals(param->name(), name) && (anytype || param->type() == type) )
         {
           return param;
         }

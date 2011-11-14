@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "IValidator.h"
 #include <vector>
+#include <set>
 
 namespace Mantid
 {

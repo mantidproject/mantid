@@ -67,6 +67,7 @@ namespace DataObjects
 
     void setWavelength(double wavelength);
     double getWavelength() const;
+    double getScattering() const;
     double getDSpacing() const;
     double getTOF() const;
 

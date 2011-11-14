@@ -11,6 +11,7 @@ try:
     mtd.initialise(False)
     from mantidsimple import *
     IS_IN_MANTIDPLOT = True
+    from reduction.find_data import find_data
 except:
     pass
 
@@ -25,6 +26,7 @@ class SANSCatalogWidget(BaseWidget):
     """
     ## Widget name
     name = "Data Catalog"      
+    _current_run = None
          
     def __init__(self, parent=None, state=None, settings=None, catalog_cls=None):      
         super(SANSCatalogWidget, self).__init__(parent, state, settings) 
@@ -45,6 +47,9 @@ class SANSCatalogWidget(BaseWidget):
             settings = GeneralSettings()
         self._settings = settings
 
+       # Connect do UI data update
+        self._settings.data_updated.connect(self._data_updated)
+
     def initialize_content(self):
         self.connect(self._content.refresh_button, QtCore.SIGNAL("clicked()"), self._update_content)
         self.connect(self._content.browse_button, QtCore.SIGNAL("clicked()"), self._browse_directory)
@@ -52,12 +57,43 @@ class SANSCatalogWidget(BaseWidget):
         self._content.directory_edit.setText(self._settings.data_path)
         self._update_content(False)
         
+    def is_running(self, is_running):
+        """
+            Enable/disable controls depending on whether a reduction is running or not
+            @param is_running: True if a reduction is running
+        """
+        super(SANSCatalogWidget, self).is_running(is_running)
+        self._content.refresh_button.setEnabled(not is_running)
+        self._content.browse_button.setEnabled(not is_running)
+        self._content.directory_edit.setEnabled(not is_running)
+        
+    def _data_updated(self, key, value):
+        """
+            Respond to application-level key/value pair updates.
+            @param key: key string
+            @param value: value string
+        """
+        try:
+            if key == "sample_run":
+                self._current_run = self._catalog_cls.data_set_cls.handle(str(value))
+            elif key in self._catalog_cls.data_set_cls.data_type_cls.DATA_TYPES.keys():
+                run = self._catalog_cls.data_set_cls.handle(str(value))                
+                if self._catalog_cls is not None and run is not None:
+                    #TODO: At some point we want to tie the type to a given sample run too
+                    self._catalog_cls().add_type(run, key)
+        except:
+            if IS_IN_MANTIDPLOT:
+                mtd.sendLogMessage("SANSCatalogWidget: Could not access local data catalog")
+            else:
+                print "SANSCatalogWidget: Could not access local data catalog"
+            
+        
     def _update_content(self, process_files=True):
         self._settings.data_path = str(self._content.directory_edit.text())
         self._content.data_set_table.clear()
         self._content.data_set_table.setSortingEnabled(False)
         self._content.data_set_table.setRowCount(0)
-        headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]"]
+        headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]", "Comment"]
         self._content.data_set_table.setColumnCount(len(headers))
         self._content.data_set_table.setHorizontalHeaderLabels(headers)
 
@@ -66,10 +102,11 @@ class SANSCatalogWidget(BaseWidget):
             def _add_item(data):
                 row = dc.size()
                 self._content.data_set_table.insertRow(row)
-                for i in range(5):
-                    item = QtGui.QTableWidgetItem(str(data[i]))
-                    item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
-                    self._content.data_set_table.setItem(row, i, item)
+                for i in range(len(data)):
+                    if data[i] is not None:
+                        item = QtGui.QTableWidgetItem(str(data[i]))
+                        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                        self._content.data_set_table.setItem(row, i, item)
             
             dc.list_data_sets(self._settings.data_path, call_back=_add_item, process_files=process_files)
                             
@@ -85,15 +122,16 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.clear()
         self._content.data_set_table.setSortingEnabled(False)
         self._content.data_set_table.setRowCount(len(rows))
-        headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]"]
+        headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]", "Comment"]
         self._content.data_set_table.setColumnCount(len(headers))
         self._content.data_set_table.setHorizontalHeaderLabels(headers)
 
         for row, data in enumerate(rows):
-            for i in range(5):
-                item = QtGui.QTableWidgetItem(str(data[i]))
-                item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
-                self._content.data_set_table.setItem(row, i, item)
+            for i in range(len(data)):
+                if data[i] is not None:
+                    item = QtGui.QTableWidgetItem(str(data[i]))
+                    item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+                    self._content.data_set_table.setItem(row, i, item)
                 
         self._content.data_set_table.setSortingEnabled(True)
         self._content.data_set_table.resizeColumnsToContents()

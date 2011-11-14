@@ -26,6 +26,7 @@
 #include <QDir>
 #include "MantidAPI/MultipleFileProperty.h"
 #include <QGroupBox>
+#include <climits>
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -49,9 +50,30 @@ GenericDialog::~GenericDialog()
 {
   // Delete all the mappers
   QHash<QString, QSignalMapper *>::iterator it;
-  for (it = m_mappers.begin(); it != m_mappers.end(); it++)
+  for(it = m_mappers.begin(); it != m_mappers.end(); it++)
     delete it.value();
 }
+
+
+//---------------------------------------------------------------------------------------------------------------
+bool haveInputWS(const std::vector<Property*> & prop_list)
+{
+  // For the few algorithms (mainly loading) that do not have input workspaces, we do not
+  // want to render the 'replace input workspace button'. Do a quick scan to check.
+  // Also the ones that don't have a set of allowed values as input workspace
+  std::vector<Property*>::const_iterator pEnd = prop_list.end();
+  for(std::vector<Property*>::const_iterator pIter = prop_list.begin();
+    pIter != pEnd; ++pIter)
+  {
+    Property *prop = *pIter;
+    if( prop->direction() == Direction::Input && dynamic_cast<IWorkspaceProperty*>(prop) )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 
 
@@ -114,26 +136,6 @@ void GenericDialog::layoutOptionsProperty(Property* prop, int row)
   m_mappers.insert(propName, mapper);
 }
 
-
-
-//---------------------------------------------------------------------------------------------------------------
-bool haveInputWS(const std::vector<Property*> & prop_list)
-{
-  // For the few algorithms (mainly loading) that do not have input workspaces, we do not
-  // want to render the 'replace input workspace button'. Do a quick scan to check.
-  // Also the ones that don't have a set of allowed values as input workspace
-  std::vector<Property*>::const_iterator pEnd = prop_list.end();
-  for(std::vector<Property*>::const_iterator pIter = prop_list.begin();
-    pIter != pEnd; ++pIter)
-  {
-    Property *prop = *pIter;
-    if( prop->direction() == Direction::Input && dynamic_cast<IWorkspaceProperty*>(prop) )
-    {
-      return true;
-    }
-  }
-  return false;
-}
 
 
 //---------------------------------------------------------------------------------------------------------------
@@ -218,8 +220,6 @@ void GenericDialog::layoutTextProperty(Property* prop, int row)
 
 
 
-
-
 //----------------------------------
 // Protected member functions
 //----------------------------------
@@ -266,57 +266,31 @@ void GenericDialog::initLayout()
       {
         group = prop->getGroup();
 
-        if (false)
+        if (group == "")
         {
-          // --------- Draw boxes using separator lines and labels ----------------
-          // Make a separator line
-          QFrame * line = new QFrame;
-          line->setObjectName(QString::fromUtf8("line"));
-          line->setGeometry(QRect(320, 150, 118, 3));
-          line->setFrameShape(QFrame::HLine);
-          line->setFrameShadow(QFrame::Sunken);
-          m_currentGrid->addWidget(line, row, 0, 1, 4);
-          row++;
-          if (group != "")
-          {
-            QLabel * groupLabel = new QLabel(QString::fromStdString(group));
-            groupLabel->setAlignment(Qt::AlignCenter);
-            QFont font = groupLabel->font();
-            font.setBold(true);
-            groupLabel->setFont(font);
-            m_currentGrid->addWidget(groupLabel, row, 0, 1, 4);
-            row++;
-          }
+        // Return to the original grid
+        m_currentGrid = m_inputGrid;
         }
         else
         {
-          if (group == "")
-          {
-            // Return to the original grid
-            m_currentGrid = m_inputGrid;
-          }
-          else
-          {
-            // Make a groupbox with a border and a light background
-            QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
-            grpBox->setAutoFillBackground(true);
-            grpBox->setStyleSheet(
-                "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 1.8ex; }"
-                "QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px;  } ");
-            QPalette pal = grpBox->palette();
-            pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
-            grpBox->setPalette(pal);
+        // Make a groupbox with a border and a light background
+        QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
+        grpBox->setAutoFillBackground(true);
+        grpBox->setStyleSheet(
+            "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }"
+            "QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } ");
+        QPalette pal = grpBox->palette();
+        pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
+        grpBox->setPalette(pal);
 
-            // Put the frame in the main grid
-            m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
+        // Put the frame in the main grid
+        m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
 
-            // Make a layout in the grp box
-            m_currentGrid = new QGridLayout;
-            grpBox->setLayout(m_currentGrid);
-            row++;
-          }
+        // Make a layout in the grp box
+        m_currentGrid = new QGridLayout;
+        grpBox->setLayout(m_currentGrid);
+        row++;
         }
-
 
 
 //          QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
@@ -325,29 +299,14 @@ void GenericDialog::initLayout()
 //          m_inputGrid->addWidget(grpBox, row, 0, 0, 4);
 
       }
-
-      // Only accept input for output properties or workspace properties
+    // Only accept input for output properties or workspace properties
       bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
       if( prop->direction() == Direction::Output && !isWorkspaceProp )
         continue;
 
-      // Look for specific property types
-      Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(prop);
-      Mantid::API::MultipleFileProperty* multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty*>(prop);
-      PropertyWithValue<bool>* boolProp = dynamic_cast<PropertyWithValue<bool>* >(prop);
-
-      if (boolProp)
-      { // CheckBox shown for BOOL properties
-        layoutBoolProperty(boolProp, row);
-      }
-      else if ( !prop->allowedValues().empty() && !fileType && !multipleFileType )
-      { //Check if there are only certain allowed values for the property
-        layoutOptionsProperty(prop, row);
-      }
-      else 
-      { //For everything else render a text box
-        layoutTextProperty(prop, row);
-      }
+      // the function analyses the property type and creates specific widget for it 
+      // in the vertical position, specified by row;
+      this->createSpecificPropertyWidget(prop, row);
 
       ++row;
     } //(end for each property)
@@ -389,8 +348,59 @@ void GenericDialog::initLayout()
   dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
+void
+GenericDialog::createSpecificPropertyWidget(Mantid::Kernel::Property *pProp, int row)
+{
+
+      // Look for specific property types
+      Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(pProp);
+      Mantid::API::MultipleFileProperty* multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty*>(pProp);
+      PropertyWithValue<bool>* boolProp = dynamic_cast<PropertyWithValue<bool>* >(pProp);
+
+      if (boolProp)
+      { // CheckBox shown for BOOL properties
+        layoutBoolProperty(boolProp, row);
+      }
+      else if ( !pProp->allowedValues().empty() && !fileType && !multipleFileType )
+      { //Check if there are only certain allowed values for the property
+        layoutOptionsProperty(pProp, row);
+      }
+      else 
+      { //For everything else render a text box
+        layoutTextProperty(pProp, row);
+      }
+
+}
+//
+int
+GenericDialog::deletePropertyWidgets(Mantid::Kernel::Property *pProp)
+{
+   QString propName=QString::fromStdString(pProp->name());
+   //QHash<QString, QSignalMapper *>::iterator it;
+   //while((it = m_mappers.find(propName))!=m_mappers.end()){
+   //     delete it.value();
+   //     it=m_mappers.erase(it);
+   //} 
+   int iRow,iCol,irowSpan,icolSpan;
 
 
+  int nRow=INT_MAX;
+  QList<QWidget*> widgets = m_tied_all_widgets[propName];
+  for (int i=0; i<widgets.size(); i++){
+       int wInd = m_currentGrid->indexOf(widgets[i]);
+       m_currentGrid->getItemPosition(wInd,&iRow,&iCol,&irowSpan,&icolSpan);
+       if(iRow<nRow)nRow=iRow;
+
+       widgets[i]->setVisible(false);
+       widgets[i]->setEnabled(false);
+       widgets[i]->setAttribute(Qt::WA_DeleteOnClose);
+       widgets[i]->close();
+   }
+  m_currentGrid->parentWidget()->repaint(true);
+
+  
+  return nRow;
+}
 
 
 //--------------------------------------------------------------------------------------

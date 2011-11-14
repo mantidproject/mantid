@@ -19,7 +19,7 @@ namespace MDAlgorithms
 /** ConvertToDiffractionMDWorkspace :
    *  Transfrom processed inelastic workspace into MD(Event)Workspace with 3 components of momentum transfer plus energy transfer for Indirect?(should be expanded) geometry instrument
    * 
-   * @author Alex Buts, ISIS
+   * @modyfier Alex Buts, ISIS; copypasted with minimal variatuions from ConvertToDiffractionMDWorkspace;  @author Janik Zikovsky, SNS  @date 2011-03-01 
    * @date 07-09-2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

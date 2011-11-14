@@ -409,29 +409,10 @@ void BivariateNormal::initCommon( double* LastParams,double* expVals,
  {
   //std::cout<<"in INIt Common1"<< std::endl;
     isNaNs= false;
-   double mIx,mIy,mx,my,SIxx,SIyy,SIxy,Sxx,Syy,Sxy;
-  
-  {
-    Attrib[S_1] = Attrib[NRows] * Attrib[NCols];
-    mIx = Attrib[S_xint] / Attrib[S_int];
-    mIy = Attrib[S_yint] / Attrib[S_int];
-    mx = Attrib[S_x] / Attrib[S_1];
-    my = Attrib[S_y] / Attrib[S_1];
-    SIxx = Attrib[S_x2int] - (Attrib[S_xint] * Attrib[S_xint]) / Attrib[S_int];
-
-    SIyy = Attrib[S_y2int] - (Attrib[S_yint]) * (Attrib[S_yint]) / Attrib[S_int];
-    SIxy = Attrib[S_xyint] - (Attrib[S_xint]) * (Attrib[S_yint]) / Attrib[S_int];
-    Sxx = Attrib[S_x2] - (Attrib[S_x]) * (Attrib[S_x]) / Attrib[S_1];
-
-    Syy = Attrib[S_y2] - (Attrib[S_y]) * (Attrib[S_y]) / Attrib[S_1];
-    Sxy = Attrib[S_xy] - (Attrib[S_x]) * (Attrib[S_y]) / Attrib[S_1];
-
-
-
-  }
-
     for (size_t i = 0; i < nParams(); i++)
+    {
       LastParams[i] = getParameter(i);
+    }
     uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
 
     coefNorm = .5 / M_PI / sqrt(uu);

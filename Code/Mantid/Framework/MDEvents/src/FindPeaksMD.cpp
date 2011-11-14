@@ -161,7 +161,14 @@ namespace MDEvents
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
     thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * densityScalingFactor;
+    if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
+        || (thresholdDensity == -std::numeric_limits<double>::infinity()))
+    {
+      g_log.warning() << "Infinite or NaN overall density found. Your input data may be invaliud. Using a 0 threshold instead." << std::endl;
+      thresholdDensity = 0;
+    }
     g_log.notice() << "Threshold signal density: " << thresholdDensity << std::endl;
+
 
     // We will fill this vector with pointers to all the boxes (up to a given depth)
     typename std::vector<boxPtr> boxes;
@@ -249,10 +256,10 @@ namespace MDEvents
         }
 
         peakBoxes.push_back(box);
-        g_log.information() << "Found box at ";
+        g_log.debug() << "Found box at ";
         for (size_t d=0; d<nd; d++)
-          g_log.information() << (d>0?",":"") << boxCenter[d];
-        g_log.information() << "; Density = " << density << std::endl;
+          g_log.debug() << (d>0?",":"") << boxCenter[d];
+        g_log.debug() << "; Density = " << density << std::endl;
         // Report progres for each box found.
         prog->report("Finding Peaks");
       }

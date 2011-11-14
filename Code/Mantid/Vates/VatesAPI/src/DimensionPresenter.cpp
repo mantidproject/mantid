@@ -133,7 +133,7 @@ namespace Mantid
       {
        return Mantid::Geometry::createDimension(m_model->toXMLString(), nbins, min, max);
       }
-      catch(std::invalid_argument& err)
+      catch(std::invalid_argument&)
       {
         m_view->configureStrongly();
         m_view->displayError("Check the ranges just entered. Must have min < max.");

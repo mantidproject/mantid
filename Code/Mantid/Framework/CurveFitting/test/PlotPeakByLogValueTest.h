@@ -294,12 +294,10 @@ private:
       ws->getAxis(1)->spectraNo(i) = 0;
     } 
 
-    double spec;
     double x;
 
     for(int iSpec=0;iSpec<nSpec;iSpec++)
     {
-      spec = iSpec;
       Mantid::MantidVec& X = ws->dataX(iSpec);
       Mantid::MantidVec& Y = ws->dataY(iSpec);
       Mantid::MantidVec& E = ws->dataE(iSpec);

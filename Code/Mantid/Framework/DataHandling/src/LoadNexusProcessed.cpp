@@ -349,6 +349,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
     NXInfo info = nx_tw.getDataSetInfo(str.c_str());
     if (info.stat == NX_ERROR)
     {
+	  // Assume we done last column of table
       break;
     }
 
@@ -368,6 +369,24 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
         }
         for (int i = 0; i < length; i++)
           workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
+      }
+    }
+	else if ( info.type == NX_INT32 )
+    {
+      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      std::string columnTitle = nxInt.attributes("name");
+      if (!columnTitle.empty())
+      {
+        workspace->addColumn("int", columnTitle);
+        nxInt.load();
+        int length = nxInt.dim0();
+        if ( !hasNumberOfRowBeenSet )
+        { 
+          workspace->setRowCount(length);
+          hasNumberOfRowBeenSet = true;
+        }
+        for (int i = 0; i < length; i++)
+          workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
       }
     }
     else if ( info.type == NX_CHAR )

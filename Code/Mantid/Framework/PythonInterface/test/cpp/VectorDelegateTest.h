@@ -1,35 +1,26 @@
 #ifndef VECTORDELEGATETEST_H_
 #define VECTORDELEGATETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidPythonInterface/kernel/VectorDelegate.h"
+#include <cxxtest/TestSuite.h>
 
-using Mantid::PythonInterface::VectorDelegate;
+using namespace Mantid::PythonInterface;
 
 class VectorDelegateTest : public CxxTest::TestSuite
 {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static VectorDelegateTest *createSuite() { return new VectorDelegateTest(); }
-  static void destroySuite( VectorDelegateTest *suite ) { delete suite; }
-
-  VectorDelegateTest()
-  {
-    Py_Initialize();
-  }
 
   void test_that_a_non_sequence_type_returns_an_appropriate_error_string_from_isConvertible()
   {
     PyObject *dict = PyDict_New();
-    TS_ASSERT_EQUALS(VectorDelegate<int>::isConvertibleToStdVector(dict), "Cannot convert dict object to a std::vector.");
+    TS_ASSERT_EQUALS(VectorDelegate::isSequenceType(dict), "Cannot convert dict object to a std::vector.");
     Py_DECREF(dict);
   }
 
   void test_that_a_non_sequence_type_throws_an_error_when_trying_to_convert_to_a_vector()
   {
     PyObject *dict = PyDict_New();
-    TS_ASSERT_THROWS(VectorDelegate<int>::toStdVector(dict), std::invalid_argument);
+    TS_ASSERT_THROWS(VectorDelegate::toStdVector<int>(dict), std::invalid_argument);
     Py_DECREF(dict);
   }
 
@@ -37,7 +28,7 @@ public:
   {
     const size_t length(3);
     boost::python::object lst = createPyIntList((Py_ssize_t)length, false);
-    std::vector<int> cppvec = VectorDelegate<int>::toStdVector(lst.ptr());
+    std::vector<int> cppvec = VectorDelegate::toStdVector<int>(lst.ptr());
     TS_ASSERT_EQUALS(cppvec.size(), length);
     // Check values
     for( size_t i = 0; i < length; ++i )
@@ -50,7 +41,7 @@ public:
   {
     const size_t length(4);
     boost::python::object lst = createPyIntList((Py_ssize_t)length, true);
-    TS_ASSERT_THROWS(VectorDelegate<int>::toStdVector(lst.ptr()), boost::python::error_already_set);
+    TS_ASSERT_THROWS(VectorDelegate::toStdVector<int>(lst.ptr()), boost::python::error_already_set);
   }
 
 private:

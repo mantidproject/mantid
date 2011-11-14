@@ -153,7 +153,6 @@ namespace DataHandling
     // 4. Parse
     std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
     size_t index = 0;
-    unsigned int chopperindices[4];
     unsigned int localdelaytimes[4];
     for (size_t p = 0; p < numpulses; p ++){
         for (size_t i = 0; i < m_numchoppers; i ++){
@@ -175,7 +174,6 @@ namespace DataHandling
             if (delaytime != 0){
                 g_log.debug() << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << std::endl;
             }
-            chopperindices[i] = chopperindex;
             localdelaytimes[i] = delaytime;
         }
 

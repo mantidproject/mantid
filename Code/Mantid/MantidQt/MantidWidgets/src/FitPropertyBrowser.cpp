@@ -177,6 +177,8 @@ m_mantidui(mantidui)
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
+  connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
+
   /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
   QtProperty* settingsGroup(NULL);
@@ -1078,6 +1080,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
       getHandler()->setAttribute(QString("Start (%1s)" ).arg(QChar(0x03BC)), value); // (mu)
     }
     emit startXChanged(startX());
+    emit xRangeChanged(startX(), endX());
     return;
   }
   else if (prop == m_endX )
@@ -1093,6 +1096,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
       getHandler()->setAttribute(QString("End (%1s)" ).arg(QChar(0x03BC)), value); 
     }
     emit endXChanged(endX());
+    emit xRangeChanged(startX(), endX());
     return;
   }
   else if(getHandler()->setParameter(prop))
@@ -1376,6 +1380,20 @@ void FitPropertyBrowser::fit()
     {
       funStr = *(m_compositeFunction->getFunction(0));
     }
+
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
+    }
+
     // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
     if (m_customFittings)
     {
@@ -2755,7 +2773,6 @@ void FitPropertyBrowser::processMultiBGResults()
   {
     table->addColumn("double",par.toStdString());
   }
-
   // Create WorkspaceGroup with the fit results
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for(size_t i = 0; i < compositeFunction()->nFunctions(); ++i)

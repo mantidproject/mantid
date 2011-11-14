@@ -679,14 +679,12 @@ namespace Mantid
           value.openLocal();
           Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
           value.load();
-          int prev_index = 0;
           for(int i=0;i<value.dim0();i++)
           {
             if (i == 0 || value[i] != value[i-1] || times[i] != times[i-1])
             {
               Kernel::DateAndTime t = start_t + boost::posix_time::seconds(int(times[i]));
               logv->addValue(t,value[i]);
-              prev_index = i;
             }
           }
           return logv;

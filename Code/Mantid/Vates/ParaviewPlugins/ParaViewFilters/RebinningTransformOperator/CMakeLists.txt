@@ -14,7 +14,7 @@ target_link_libraries( MantidParaViewRebinningTransformSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-output_binary_to(MantidParaViewRebinningTransformSMPlugin  ${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewRebinningTransformSMPlugin  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewRebinningTransformSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

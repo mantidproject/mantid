@@ -539,7 +539,6 @@ namespace Mantid
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      bool executionSuccessful(true);
       try
       {
         loadInst->setPropertyValue("InstrumentName", m_instrument_name);
@@ -550,12 +549,10 @@ namespace Mantid
       catch( std::invalid_argument&)
       {
         g_log.information("Invalid argument to LoadInstrument sub-algorithm");
-        executionSuccessful = false;
       }
       catch (std::runtime_error&)
       {
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-        executionSuccessful = false;
       }
 
       // If loading instrument definition file fails, run LoadInstrumentFromNexus instead

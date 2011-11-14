@@ -5,9 +5,9 @@
 
 #include <QWidget>
 
+class QBoxLayout;
 class QGraphicsScene;
 class QGraphicsView;
-class QGridLayout;
 class QMenu;
 class QMouseEvent;
 class QString;
@@ -168,15 +168,6 @@ protected slots:
    */
   void showContextMenu(const QPoint &pos);
 
-protected:
-  /**
-   * Intercept mouse clicks to avoid inadvertent creation of indicators. This
-   * forces the mode of right clicking near the axis to get an indicator.
-   * @param obj the QObject that spawned the event
-   * @param event the associated QEvent
-   */
-  bool eventFilter(QObject *obj, QEvent *event);
-
 private:
   /// Create the context menu of the indicators
   void createContextMenu();
@@ -186,7 +177,7 @@ private:
   QMenu *indicatorContextMenu; ///< The indicator context menu
   QwtScaleEngine *engine; ///< The scale type for the axis widget
   QGraphicsView *graphicsView; ///< The holder for the slice indicators
-  QGridLayout *gridLayout; ///< Layout manager for widgets
+  QBoxLayout *boxLayout; ///< Layout manager for widgets
   bool isSceneGeomInit; ///< Flag to ensure the scene is initialized once
   Qt::Orientation orientation; ///< The overall orientation of the widget
   ScalePicker *scalePicker; ///< The picker that retrieves the axis location

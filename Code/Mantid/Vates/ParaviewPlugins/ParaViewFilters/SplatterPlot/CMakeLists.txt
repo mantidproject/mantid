@@ -13,7 +13,7 @@ target_link_libraries( MantidParaViewSplatterPlotSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-output_binary_to(MantidParaViewSplatterPlotSMPlugin  ${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewSplatterPlotSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewSplatterPlotSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

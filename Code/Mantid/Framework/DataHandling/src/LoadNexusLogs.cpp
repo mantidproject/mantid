@@ -135,7 +135,7 @@ namespace Mantid
           file.openPath("/" + entry_name + "/" + eventEntry + "/event_frame_number");
           file.getData(event_frame_number);
         }
-        catch(const ::NeXus::Exception& exc)
+        catch(const ::NeXus::Exception&)
         {
           this->getLogger().warning() << "Unable to load event_frame_number - filtering events by time will not work " << std::endl;
         }

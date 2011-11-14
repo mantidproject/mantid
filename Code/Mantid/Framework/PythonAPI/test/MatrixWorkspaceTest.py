@@ -36,6 +36,35 @@ class MatrixWorkspaceTest(unittest.TestCase):
         Scale(InputWorkspace="test", OutputWorkspace="test", Factor=2.0)
         self.assertTrue(mtd["test"].isDirty())
         
+    def test_operators(self):
+       CreateWorkspace('A', DataX=[1,2,3], DataY=[2,3], DataE=[2,3])
+       CreateWorkspace('B', DataX=[1,2,3], DataY=[2,3], DataE=[2,3])
+       A = mtd['A']
+       B = mtd['B']
+       # Two workspaces
+       C = A + B
+       C = A - B
+       C = A * B
+       C = A / B
+       C -= B
+       C += B
+       C *= B
+       C /= B
+       # Workspace + double
+       B = 123.456
+       C = A + B
+       C = A - B
+       C = A * B
+       C = A / B
+       C -= B
+       C += B
+       C *= B
+       C /= B
+       # Commutative: double + workspace
+       C = B * A
+       C = B + A
+        
+        
 
 if __name__ == '__main__':
     unittest.main()

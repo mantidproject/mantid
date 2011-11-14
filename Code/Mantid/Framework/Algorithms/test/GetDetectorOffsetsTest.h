@@ -18,6 +18,12 @@ using Mantid::DataObjects::OffsetsWorkspace_sptr;
 class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
 public:
+
+  GetDetectorOffsetsTest()
+  {
+    Mantid::API::FrameworkManager::Instance();
+  }
+
   void testTheBasics()
   {
     TS_ASSERT_EQUALS( offsets.name(), "GetDetectorOffsets" );

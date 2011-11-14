@@ -244,4 +244,21 @@ public:
   };
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadTOFRawNexusTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadTOFRawNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "REF_L_32035.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
+
 #endif /*LOADTOFRAWNEXUSTEST_H_*/

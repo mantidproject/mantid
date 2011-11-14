@@ -71,6 +71,7 @@ public:
   /// Make a copy of the present type of validator
   virtual IValidator* clone() = 0;
 
+ 
 protected:
   /** Checks the value based on the validator's rules
    * 

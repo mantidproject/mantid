@@ -170,7 +170,8 @@ __operator_names=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_N
                       'INPLACE_DIVIDE', 'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
                       'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT', 
                       'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
-                      'INPLACE_OR'])
+                      'INPLACE_OR',
+                      'COMPARE_OP'])
 
 #-------------------------------------------------------------------------------
 
@@ -595,6 +596,93 @@ class WorkspaceProxy(ProxyObject):
         lhs = lhs_info()
         return self.__do_operation('Divide', rhs,inplace=True, reverse=False,
                                    lhs_vars=lhs)
+    
+    def __lt__(self, rhs):
+        """
+        Do the (self < rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('LessThan', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __gt__(self, rhs):
+        """
+        Do the (self > rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('GreaterThan', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __or__(self, rhs):
+        """
+        Do the (self || rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('Or', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __and__(self, rhs):
+        """
+        Do the (self && rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('And', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+    
+    def __xor__(self, rhs):
+        """
+        Do the (self ^ rhs) comparison and return a new proxy managing that object
+        """
+        lhs = lhs_info()
+        return self.__do_operation('Xor', rhs, inplace=False, reverse=False,
+                                   lhs_vars=lhs)
+        
+        
+        
+
+    def __do_unary_operation(self, op, lhs_vars):
+        """
+        Perform the unary operation
+
+        @param op :: name of the algorithm to run
+        @param lhs_vars :: is expected to be a tuple containing the number of lhs variables and
+                their names as the first and second element respectively
+        """
+        global _binary_op_tmps
+
+        if lhs_vars[0] > 0:
+            # Assume the first and clear the tempoaries as this
+            # must be the final assignment
+            output_name = lhs_vars[1][0]
+            clear_tmps = True
+        else:
+            # Give it a temporary name and keep track of it
+            clear_tmps = False
+            output_name = _binary_op_prefix + str(len(_binary_op_tmps))
+            _binary_op_tmps.append(output_name)
+
+        # Do the operation
+        alg = mtd.createAlgorithm(op)
+        alg.setPropertyValue("InputWorkspace", self.getName())
+        alg.setPropertyValue("OutputWorkspace", output_name)
+        alg.execute()
+        resultws = alg.workspace()
+
+        if clear_tmps:
+            for name in _binary_op_tmps:
+                if mtd.workspaceExists(name) and output_name != name:
+                    mtd.deleteWorkspace(name)
+            _binary_op_tmps = []
+            
+        return resultws
+        
+    def __invert__(self):
+        """
+        Return the inversion (NOT operator) on self
+        """
+        lhs = lhs_info()
+        return self.__do_unary_operation('NotMD', lhs_vars=lhs)
+
     
     def equals(self, rhs, tol):
         """
@@ -1173,6 +1261,11 @@ class MantidPyFramework(FrameworkManager):
 
         try:
             return self._getRawIMDEventWorkspacePointer(name)
+        except RuntimeError:
+            pass
+       
+        try:
+            return self._getRawIMDHistoWorkspacePointer(name)
         except RuntimeError:
             pass
        

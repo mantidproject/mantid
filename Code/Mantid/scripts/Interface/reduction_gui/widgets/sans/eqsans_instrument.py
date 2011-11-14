@@ -223,6 +223,10 @@ class SANSInstrumentWidget(BaseWidget):
         use_data_dir = self._summary.use_data_dir_radio.isChecked()
         self._summary.output_dir_edit.setEnabled(not use_data_dir)
         self._summary.output_dir_browse_button.setEnabled(not use_data_dir)
+        if use_data_dir:
+            self._settings.emit_key_value("OUTPUT_DIR", self._settings.data_path)
+        else:
+            self._settings.emit_key_value("OUTPUT_DIR", str(self._summary.output_dir_edit.text()))
 
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -458,6 +462,7 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_data_directory = self._summary.use_data_dir_radio.isChecked()
         m.output_directory = str(self._summary.output_dir_edit.text())
         
+        self._settings.emit_key_value("DARK_CURRENT", QtCore.QString(str(self._summary.dark_file_edit.text())))
         return m
 
     def _show_help(self):

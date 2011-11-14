@@ -6,8 +6,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_sample_data
 
-from hfir_sample_data import DirectBeam
-
 class DataSetsWidget(BaseWidget):    
     """
         Widget that presents the transmission options to the user
@@ -260,6 +258,10 @@ class DataSetsWidget(BaseWidget):
         d.sample_file = unicode(self._content.bck_sample_edit.text())
         d.direct_beam = unicode(self._content.bck_empty_edit.text())
 
+        self._settings.emit_key_value("TRANS_SAMPLE", QtCore.QString(str(self._content.sample_edit.text())))
+        self._settings.emit_key_value("TRANS_DIRECT", QtCore.QString(str(self._content.empty_edit.text())))
+        self._settings.emit_key_value("TRANS_BCK", QtCore.QString(str(self._content.bck_sample_edit.text())))
+        self._settings.emit_key_value("TRANS_DIRECT", QtCore.QString(str(self._content.bck_empty_edit.text())))
         return m
 
     def _background_clicked(self, is_checked):

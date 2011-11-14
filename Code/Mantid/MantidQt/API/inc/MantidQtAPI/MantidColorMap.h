@@ -38,47 +38,35 @@ class EXPORT_OPT_MANTIDQT_API MantidColorMap : public QwtColorMap
 {
 
 public:
-  /// Default constructor
   MantidColorMap();
-
-  /// Constructor with a type parameter
   explicit MantidColorMap(const QString & filename, GraphOptions::ScaleType type);
-
-  /// (virtual) Destructor
   virtual ~MantidColorMap();
-
-  /// Create a clone of the color map
   QwtColorMap* copy() const;
 
-  /// Change the scale type
   void changeScaleType(GraphOptions::ScaleType type);
 
-  /** 
+  bool loadMap(const QString & filename);
+  
+  void setNanColor(int r, int g, int b);
+
+  void setupDefaultMap();
+  
+  QRgb rgb(const QwtDoubleInterval & interval, double value) const;
+
+  double normalize(const QwtDoubleInterval &interval, double value) const;
+
+  unsigned char colorIndex (const QwtDoubleInterval &interval, double value) const;
+
+  QVector<QRgb> colorTable(const QwtDoubleInterval & interval) const;
+
+  /**
    * Retrieve the scale type
    * @returns the current scale type
    */
-  GraphOptions::ScaleType getScaleType() const 
+  GraphOptions::ScaleType getScaleType() const
   {
     return m_scale_type;
-  }  
-  
-  /// Load a color map file
-  bool loadMap(const QString & filename);
-  
-  /// Setup a default color map. This is used if a file is not available
-  void setupDefaultMap();
-  
-  /// Compute an rgb value for the given data value and interval
-  QRgb rgb(const QwtDoubleInterval & interval, double value) const;
-
-  /// Compute fraction for the given value and range using the current scale type
-  double normalize(const QwtDoubleInterval &interval, double value) const;
-
-  /// Compute a color index for the given data value and interval
-  unsigned char colorIndex (const QwtDoubleInterval &interval, double value) const;
-
-  /// Compute a lookup table
-  QVector<QRgb> colorTable(const QwtDoubleInterval & interval) const;
+  }
 
   /**
    * Get the number of colors in this map
@@ -108,6 +96,12 @@ private:
 
   /// The number of colors in this map
   short m_num_colors;
+
+  /// Color to show for not-a-number
+  QRgb m_nan_color;
+
+  /// Cached NAN value
+  double m_nan;
 
 };
 

@@ -26,6 +26,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
 
+#include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -33,9 +34,9 @@
 /**
  * Define a macro to export PropertyWithValue template types
  */
-#define EXPORT_PROP_W_VALUE(type)   \
-  class_<Mantid::Kernel::PropertyWithValue<type>, \
-     boost::python::bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#type, boost::python::no_init) \
+#define EXPORT_PROP_W_VALUE(type,suffix)   \
+  boost::python::class_<Mantid::Kernel::PropertyWithValue< type >, \
+     boost::python::bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, boost::python::no_init) \
      .add_property("value", Mantid::PythonInterface::PropertyMarshal::value) \
      .add_property("value_as_declared", make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(), \
        boost::python::return_value_policy<boost::python::copy_const_reference>())) \

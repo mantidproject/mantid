@@ -177,9 +177,9 @@ public:
   {
     //Mantid.legs is defined in the properties script as 6
     int value = 0;
-    int retVal = ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",value);
+    ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",value);
     double dblValue = 0;
-    retVal = ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",dblValue);
+    ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize",dblValue);
 
     TS_ASSERT_EQUALS(value, 4000);
     TS_ASSERT_EQUALS(dblValue, 4000.0);

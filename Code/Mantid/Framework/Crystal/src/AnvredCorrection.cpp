@@ -492,14 +492,12 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
                                              // incident spectrum
     double   lamda;
 
-    bool use_incident_spectrum = true;
     double power = power_th;
 
     //GetSpectrumWeights( spectrum_file_name, lamda_weight);
 
     if ( lamda_weight.size() == 0 )              // loading spectrum failed so use
     {                                        // array of 1's
-      use_incident_spectrum = false;
 //    power = power_ns;                      // This is commented out, so we
                                              // don't override user specified 
                                              // value.

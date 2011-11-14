@@ -449,7 +449,6 @@ namespace Mantid
           const int64_t blocksize = 8;
           const int64_t rangesize = (m_spec_max - m_spec_min + 1) - m_monitors.size();
           const int64_t fullblocks = rangesize / blocksize;
-          int64_t read_stop = 0;
           int64_t spectra_no = m_spec_min;
           if (first_monitor_spectrum == 1)
           {// this if crudely checks whether the monitors are at the begining or end of the spectra
@@ -459,8 +458,6 @@ namespace Mantid
           int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           if( fullblocks > 0 )
           {
-            read_stop = (fullblocks * blocksize);// + m_monitors.size(); //RNT: I think monitors are excluded from the data
-            //for( ; hist_index < read_stop; )
             for(int64_t i = 0; i < fullblocks; ++i)
             {
               loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);

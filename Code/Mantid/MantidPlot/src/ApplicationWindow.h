@@ -616,7 +616,7 @@ public slots:
   void showScreenReader();
   void pickPointerCursor();
   void disableTools();
-  void selectMultiPeak();
+  void selectMultiPeak(bool showFitPropertyBrowser=true);
   void pickDataTool( QAction* action );
 
   void updateLog(const QString& result);

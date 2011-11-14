@@ -16,6 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 using Mantid::API::AlgorithmManager;
 
@@ -195,8 +196,6 @@ std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IA
   std::sort(properties.begin(), properties.end(), PropertyOrdering());
 
   // generate the sanitized names
-  PropertyVector::const_iterator pIter = properties.begin();
-  PropertyVector::const_iterator pEnd = properties.end();
   std::vector<std::string>* names = new std::vector<std::string>();
   names->reserve(properties.size());
   size_t numProps = properties.size();
@@ -224,8 +223,6 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
   std::sort(properties.begin(), properties.end(), PropertyOrdering());
 
   // generate the sanitized names
-  PropertyVector::const_iterator pIter = properties.begin();
-  PropertyVector::const_iterator pEnd = properties.end();
   StringVector names(properties.size());
   size_t numProps = properties.size();
   for ( size_t i = 0; i < numProps; ++i) 
@@ -352,6 +349,27 @@ boost::shared_ptr<API::IMDWorkspace> FrameworkManagerProxy::retrieveIMDWorkspace
     throw std::runtime_error("\"" + wsName + "\" is not an MD workspace. ");
   }
 }
+
+
+/** Return pointer to IMDHistoWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<API::IMDHistoWorkspace> FrameworkManagerProxy::retrieveIMDHistoWorkspace(const std::string& wsName)
+{
+  API::IMDHistoWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDHistoWorkspace>(retrieveWorkspace(wsName));
+  if (ws != NULL)
+  {
+    return ws;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an MDHistoWorkspace. ");
+  }
+}
+
+
 
 /** Return pointer to IMDEventWorkspace
  * @param wsName :: The name of the workspace to retrieve.

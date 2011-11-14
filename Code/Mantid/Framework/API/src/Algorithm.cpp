@@ -856,80 +856,85 @@ namespace Mantid
       std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
       for(;wsItr!=inputWSNames.end();++wsItr)
       { //set  properties
-        std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-        for (itr=props.begin();itr!=props.end();++itr)
+        
+        if (API::AnalysisDataService::Instance().retrieve(*wsItr)->id() != "TableWorkspace")
         {
-          int outWSCount=0;
-
-          if(isWorkspaceProperty(*itr) )
-          {             
-            if(isInputWorkspaceProperty(*itr))
-            {
-
-              if(!setInputWSProperties(alg,*itr,*wsItr))
-              {
-                throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-              }
-
-            }
-            if(isOutputWorkspaceProperty(*itr))
-            {
-              ++outWSCount;
-              //create a group and pass that to setOutputWSProperties 
-              if(outWSCount==1)
-              { 
-                if( bnewGoup1)
-                {
-                  wsgrp1_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
-                  bnewGoup1=false;
-                }
-                if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
-                {
-                  throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                }
-
-              }
-              if(outWSCount==2)
-              {
-                if( bnewGoup2)
-                {
-                  wsgrp2_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
-                  bnewGoup2=false;
-                }
-                if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp2_sptr,bSimilarNames,bequal))
-                {
-                  throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
-                }
-              }
-
-            }//end of isOutputWorkspaceProperty
-
-          }// end of isWorkspaceProperty
-          else
+          // Do the rest of the for loop
+          std::vector<Mantid::Kernel::Property*>::const_iterator itr;
+          for (itr=props.begin();itr!=props.end();++itr)
           {
-            this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
+            int outWSCount=0;
+
+            if(isWorkspaceProperty(*itr) )
+            {             
+              if(isInputWorkspaceProperty(*itr))
+              {
+
+                if(!setInputWSProperties(alg,*itr,*wsItr))
+                {
+                  throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
+                }
+
+              }
+              if(isOutputWorkspaceProperty(*itr))
+              {
+                ++outWSCount;
+                //create a group and pass that to setOutputWSProperties 
+                if(outWSCount==1)
+                { 
+                  if( bnewGoup1)
+                  {
+                    wsgrp1_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
+                    bnewGoup1=false;
+                  }
+                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp1_sptr,bSimilarNames,bequal))
+                  {
+                    throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
+                  }
+
+                }
+                if(outWSCount==2)
+                {
+                  if( bnewGoup2)
+                  {
+                    wsgrp2_sptr= WorkspaceGroup_sptr(new WorkspaceGroup);
+                    bnewGoup2=false;
+                  }
+                  if(!setOutputWSProperties(alg,*itr,nPeriod,*wsItr,wsgrp2_sptr,bSimilarNames,bequal))
+                  {
+                    throw std::runtime_error("Invalid value found for the property " +(*itr)->name()+ " when executing the algorithm"+this->name());
+                  }
+                }
+
+              }//end of isOutputWorkspaceProperty
+
+            }// end of isWorkspaceProperty
+            else
+            {
+              this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
+            }
+          }//end of for loop for setting properties
+          //resetting the previous properties at the end of each execution 
+          prevPropName="";
+          // execute the algorithm 
+          bool bStatus = false;
+          if ( alg->validateProperties() ) 
+          {bStatus = alg->execute();
           }
-        }//end of for loop for setting properties
-        //resetting the previous properties at the end of each execution 
-        prevPropName="";
-        // execute the algorithm 
-        bool bStatus = false;
-        if ( alg->validateProperties() ) 
-        {bStatus = alg->execute();
-        }
-        // status of each execution is checking 
-        bgroupPassed=bgroupPassed&&bStatus;
-        bgroupFailed=bgroupFailed||bStatus;
-        execPercentage+=10;
-        progress(double((execPercentage)/execTotal));
-        //if a workspace execution fails
-        if(!bStatus)
-        {  
-          throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
+          // status of each execution is checking 
+          bgroupPassed=bgroupPassed&&bStatus;
+          bgroupFailed=bgroupFailed||bStatus;
+          execPercentage+=10;
+          progress(double((execPercentage)/execTotal));
+          //if a workspace execution fails
+          if(!bStatus)
+          {  
+            throw std::runtime_error("execution failed for the input workspace "+(*wsItr));
+          }
         }
         //increment count for outworkpsace name
         nPeriod++;
-
+        
       }//end of for loop for input workspace group members processing
       //if all passed 
       if(bgroupPassed)

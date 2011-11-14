@@ -23,7 +23,7 @@
 int main( int argc, char ** argv )
 {
   double min=0;
-  double max=100;
+  double max=1e9;
 
   QApplication app(argc, argv);
   app.setOrganizationName("MantidProject");

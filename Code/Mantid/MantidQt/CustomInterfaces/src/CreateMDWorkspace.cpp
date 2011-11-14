@@ -142,9 +142,7 @@ void CreateMDWorkspace::addWorkspaceClicked()
         m_approach = Approach_sptr(new InelasticISIS);
       }
 
-      m_uiForm.groupBox_lattice->setLayout(new QGridLayout());
       m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(m_memento))));
-      m_uiForm.groupBox_logvalues->setLayout(new QGridLayout());
       LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(m_memento));
       m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(logPresenter));
       m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createEditableLogView(logPresenter));

@@ -63,6 +63,7 @@ def make_property_table_line(propnum, p):
     defaultstr = str(default)
     # Replace the ugly default values with "optional"
     if (defaultstr == "8.9884656743115785e+307") or \
+       (defaultstr == "1.7976931348623157e+308") or \
        (defaultstr == "2147483647"):
         defaultstr = "Optional"
         

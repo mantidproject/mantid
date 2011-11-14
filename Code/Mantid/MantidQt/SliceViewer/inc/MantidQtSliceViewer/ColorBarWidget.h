@@ -10,6 +10,11 @@
 #include <QKeyEvent>
 #include <QtGui>
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 //=============================================================================
 /** Extended version of QwtScaleWidget */
 class QwtScaleWidgetExtended : public QwtScaleWidget
@@ -80,6 +85,7 @@ private:
   void setSpinBoxesSteps();
   void mouseDoubleClickEvent(QMouseEvent * event);
   void updateMinMaxGUI();
+  void resizeEvent(QResizeEvent * event);
 
   /// Auto-gen UI classes
   Ui::ColorBarWidgetClass ui;
@@ -104,6 +110,12 @@ private:
 
   /// Min value being displayed
   double m_max;
+
+  /// Show the value tooltip (off by default)
+  bool m_showTooltip;
 };
+
+} // namespace SliceViewer
+} // namespace Mantid
 
 #endif // COLORBARWIDGET_H

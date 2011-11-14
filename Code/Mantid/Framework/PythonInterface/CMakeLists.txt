@@ -13,7 +13,7 @@ find_package ( Boost REQUIRED python )
 add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
 
 find_package ( Numpy REQUIRED )
-include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
+include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
 include_directories ( inc )
 
@@ -39,7 +39,7 @@ add_subdirectory ( mantid )
 # C++ unit tests
 set ( TEST_FILES
   test/cpp/PythonObjectInstantiatorTest.h
-#  test/cpp/VectorDelegateTest.h # Windows doesn't like having two around
+  test/cpp/VectorDelegateTest.h # Windows doesn't like having two around
 )  
   
 if ( CXXTEST_FOUND )

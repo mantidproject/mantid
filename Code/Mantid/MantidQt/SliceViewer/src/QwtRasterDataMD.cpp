@@ -3,6 +3,11 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::Geometry::IMDDimension_const_sptr;
@@ -77,14 +82,13 @@ double QwtRasterDataMD::value(double x, double y) const
   }
   // Get the signal at that point
   signal_t value = m_ws->getSignalAtCoord(lookPoint);
-  if (value < m_minVal) m_minVal = value;
-  if (value > m_maxVal) m_maxVal = value;
   delete [] lookPoint;
 
+  // Special case for 0 = show as NAN
   if (value == 0.)
     return nan;
-  else
-    return value;
+
+  return value;
 }
 
 
@@ -147,3 +151,6 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Manti
   for (size_t d=0; d<m_nd; d++)
     m_slicePoint[d] = slicePoint[d];
 }
+
+} //namespace
+} //namespace

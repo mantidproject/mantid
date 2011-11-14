@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <QRgb>
+#include <limits>
 
 //--------------------------------------
 // Public member functions
@@ -21,9 +22,12 @@
 MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_type(GraphOptions::Log10),
 				     m_colors(0), m_num_colors(0)
 {
+  m_nan = std::numeric_limits<double>::quiet_NaN();
+  this->setNanColor(255,255,255);
   setupDefaultMap();
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Constructor with filename and type
  * @param 
@@ -32,6 +36,8 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
   QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0)
 {
+  m_nan = std::numeric_limits<double>::quiet_NaN();
+  this->setNanColor(255,255,255);
   // Check and load default if this doesn't work
   if( !loadMap(filename) )
   {
@@ -39,6 +45,7 @@ MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType
   }
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Destructor
  */
@@ -46,6 +53,7 @@ MantidColorMap::~MantidColorMap()
 {
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Create a clone of the color map
  */
@@ -57,6 +65,7 @@ QwtColorMap* MantidColorMap::copy() const
   return map;
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Change the scale type
  * @param type :: The new scale type
@@ -66,6 +75,7 @@ void MantidColorMap::changeScaleType(GraphOptions::ScaleType type)
     m_scale_type = type;
 }
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Load a color map from a file
  * @param filename :: The full path to the color map file
@@ -108,10 +118,27 @@ bool MantidColorMap::loadMap(const QString & filename)
   {
     m_num_colors = count;
     m_colors = new_colormap;
+    if (m_num_colors > 1)
+      m_colors[0] = m_nan_color;
   } 
   return is_success;
 }
 
+//-------------------------------------------------------------------------------------------------
+/** Set a color for Not-a-number
+ *
+ * @param r :: red, from 0 to 255
+ * @param g :: green, from 0 to 255
+ * @param b :: blue, from 0 to 255
+ */
+void MantidColorMap::setNanColor(int r, int g, int b)
+{
+  m_nan_color = qRgb(r,g,b);
+  if (m_num_colors > 1)
+    m_colors[0] = m_nan_color;
+}
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Define a default color map to be used if a file is unavailable.
  */
@@ -157,9 +184,11 @@ void MantidColorMap::setupDefaultMap()
     reader >> red >> green >> blue;
     m_colors.push_back(qRgb((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
   }  
+  this->setNanColor(255,255,255);
 }
 
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Normalize the value to the range[0,1]
  * @param interval :: The data range
@@ -168,21 +197,17 @@ void MantidColorMap::setupDefaultMap()
  */
 double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value) const
 {
-  if( interval.isNull() || m_num_colors == 0 ) 
-  {
-    return -1.0;
-  }
+  // nan numbers have the property that nan != nan, treat nan as being invalid
+  if( interval.isNull() || m_num_colors == 0 || value != value )
+    return m_nan;
 
   const double width = interval.width();
   if( width <= 0.0 || value <= interval.minValue() )
-  {
     return 0.0;
-  }
-  // nan numbers have the property that nan != nan, treat nan as being the maximum
-  if ( value >= interval.maxValue() || value != value )
-  {
+
+  if ( value >= interval.maxValue())
     return 1.0;
-  }
+
   double ratio(0.0);
   if( m_scale_type == GraphOptions::Linear)
   {
@@ -202,6 +227,7 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
 }
 
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Compute an rgb value for the given data value and interval
  * @param interval :: The data range
@@ -214,17 +240,12 @@ QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
   {
     return m_colors[ci];
   }
-  return
-      // Return black
-      QRgb();
-
-//  QRgb col = getColor();
-//  float r(0.0f), g(0.0f), b(0.0f), a(0.0f);
-//  col.get(r,g,b,a);
-//  return qRgb(int(r*255),int(g*255),int(b*255));
+  // Return black
+  return QRgb();
 }
 
 
+//-------------------------------------------------------------------------------------------------
 /**
  * Compute a color index
  * @param interval :: The data range
@@ -235,7 +256,10 @@ QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
 unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, double value) const
 {
   double fraction = normalize(interval, value);
-  if( fraction < 0.0 )return static_cast<unsigned char>(0);
+  // NAN: return index 0
+  if (fraction != fraction) return static_cast<unsigned char>(0);
+  // Below minimum: return index 1
+  if( fraction < 0.0 ) return static_cast<unsigned char>(1);
 
   short index = short(std::floor(fraction * m_num_colors));
   // If the ratio gives back 1 then we need to adjust the index down 1
@@ -243,13 +267,15 @@ unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, dou
   {
     index = short(m_num_colors - 1);
   }
-  if( index < 0 )
+  if( index < 1 )
   {
-    index = 0;
+    index = 1;
   }
   return static_cast<unsigned char>(index);
 }
 
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Compute a lookup table
  * @param interval :: The interval for the table to cover
@@ -261,14 +287,16 @@ QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) con
   m_scale_type = GraphOptions::Linear;
 
   short table_size = (m_num_colors > 1) ? m_num_colors : 2;
-  QVector<QRgb> rgbtable(table_size);
+  QVector<QRgb> rgbtable(table_size+1);
   if( interval.isValid() )
   {
     const double step = interval.width() / table_size;
     for( short i = 0; i < table_size; ++i )
     {
-      rgbtable[i] = rgb(interval, interval.minValue() + step*i);
+      rgbtable[i+1] = rgb(interval, interval.minValue() + step*i);
     }
+    // Special NAN at index 0
+    rgbtable[0] = rgb(interval, m_nan);
   }
   
   //Restore scaling type

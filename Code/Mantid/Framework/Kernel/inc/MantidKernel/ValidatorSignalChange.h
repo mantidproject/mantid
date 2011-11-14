@@ -18,7 +18,7 @@ namespace Kernel
 
 /** ValidatorSignalChange is a validator, which connects to a property and signals to subscribers that this property has changed
 
-    @author Alex Buts
+   DO NOT USE -- it is currently the concept, which has memory leak. 
     @date 03/11/2011
 
     Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -41,7 +41,6 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class testChanger;
 template <typename TYPE>
 class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<std::string (Property const *const)>
 {

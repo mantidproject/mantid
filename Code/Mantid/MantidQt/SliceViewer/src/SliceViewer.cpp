@@ -9,6 +9,7 @@
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/LineOverlay.h"
 #include "qmenubar.h"
 #include <iomanip>
 #include <iosfwd>
@@ -24,15 +25,21 @@
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
+#include <qwt_picker_machine.h>
 #include <sstream>
 #include <vector>
 #include <qfiledialog.h>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
 
 //------------------------------------------------------------------------------------
 /** Constructor */
@@ -42,6 +49,8 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_logColor(false)
 {
 	ui.setupUi(this);
+
+	m_inf = std::numeric_limits<double>::infinity();
 
 	// Create the plot
   m_spectLayout = new QHBoxLayout(ui.frmPlot);
@@ -93,6 +102,13 @@ SliceViewer::SliceViewer(QWidget *parent)
   loadSettings();
 
   updateDisplay();
+
+  // TODO: Remove
+  LineOverlay * over = new LineOverlay(m_plot);
+  over->setVisible(true);
+//  m_spectLayout->addWidget(over, 0,0);
+//  this->insertChild(over);
+
 }
 
 //------------------------------------------------------------------------------------
@@ -462,7 +478,7 @@ void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr 
  * @param it :: IMDIterator of what to find
  * @return the min/max range, or 0-1.0 if not found
  */
-QwtDoubleInterval getRange(IMDIterator * it)
+QwtDoubleInterval SliceViewer::getRange(IMDIterator * it)
 {
   if (!it)
     return QwtDoubleInterval(0., 1.0);
@@ -474,15 +490,29 @@ QwtDoubleInterval getRange(IMDIterator * it)
   do
   {
     double signal = it->getNormalizedSignal();
-    if (signal > 0 && signal < minSignal) minSignal = signal;
-    if (signal > maxSignal) maxSignal = signal;
+    // Skip any 'infs' as it screws up the color scale
+    if (signal != m_inf)
+    {
+      if (signal > 0 && signal < minSignal) minSignal = signal;
+      if (signal > maxSignal) maxSignal = signal;
+    }
   } while (it->next());
 
+  if (minSignal == DBL_MAX)
+  {
+    minSignal = 0.0;
+    maxSignal = 1.0;
+  }
   if (minSignal < maxSignal)
     return QwtDoubleInterval(minSignal, maxSignal);
   else
-    // Possibly only one value in range
-    return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
+  {
+    if (minSignal != 0)
+      // Possibly only one value in range
+      return QwtDoubleInterval(minSignal*0.5, minSignal*1.5);
+    else
+      return QwtDoubleInterval(0., 1.0);
+  }
 }
 
 //------------------------------------------------------------------------------------
@@ -655,3 +685,5 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 }
 
 
+} //namespace
+}

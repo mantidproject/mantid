@@ -13,7 +13,7 @@ target_link_libraries( MantidParaViewMDEWNexusReaderSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-output_binary_to(MantidParaViewMDEWNexusReaderSMPlugin ${PVPLUGINS_DIR})
+SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewMDEWNexusReaderSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewMDEWNexusReaderSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 
