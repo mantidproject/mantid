@@ -5,6 +5,8 @@
 #include "OpenGLError.h"
 #include "UnwrappedSurface.h"
 
+#include "MantidGeometry/Rendering/OpenGLContext.h"
+
 #include <boost/shared_ptr.hpp>
 
 #include <QtOpenGL>
@@ -152,10 +154,12 @@ void MantidGLWidget::paintEvent(QPaintEvent *event)
 {
   UNUSED_ARG(event)
   makeCurrent();
+  Mantid::Geometry::OpenGLContext::Instance().setAvalable(true);
   if(m_surface)
   {
     m_surface->draw(this);
   }
+  Mantid::Geometry::OpenGLContext::Instance().setAvalable(false);
 
   //swapBuffers();
   OpenGLError::check("paintEvent");
