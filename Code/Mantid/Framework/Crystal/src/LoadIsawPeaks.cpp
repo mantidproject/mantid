@@ -168,10 +168,9 @@ namespace Crystal
   Mantid::DataObjects::Peak readPeak( PeaksWorkspace_sptr outWS, std::string & lastStr,  std::ifstream& in, int & seqNum, std::string bankName)
   {
     double h ; double k ;  double l ;  double col ;
-    double row ; double chan ;  double L2 ;
-    double  ScatAng ; double Az ;  double wl ;
-    double D ;  double IPK ; double Inti ;
-    double SigI ;  int iReflag;
+    double row ; double wl ;
+    double IPK ; double Inti ;
+    double SigI ;
 
     seqNum = -1;
 
@@ -209,18 +208,18 @@ namespace Crystal
 
     col = strtod( getWord( in ,  false ).c_str() ,  0 ) ;
     row = strtod( getWord( in ,  false ).c_str() ,  0 ) ;
-    chan = strtod( getWord( in ,  false ).c_str() ,  0 ) ;
-    L2 = strtod( getWord( in ,  false ).c_str() ,  0 )/100 ;
-    ScatAng = strtod( getWord( in ,  false ).c_str() ,  0 ) ;
+    strtod( getWord( in ,  false ).c_str() ,  0 ) ; //chan
+    strtod( getWord( in ,  false ).c_str() ,  0 ) ; //L2
+    strtod( getWord( in ,  false ).c_str() ,  0 ) ; //ScatAng
 
-    Az = strtod( getWord( in , false ).c_str() , 0 ) ;
+    strtod( getWord( in , false ).c_str() , 0 ) ; //Az
     wl = strtod( getWord( in , false ).c_str() , 0 ) ;
-    D = strtod( getWord( in , false ).c_str() , 0 ) ;
+    strtod( getWord( in , false ).c_str() , 0 ) ; //D
     IPK = strtod( getWord( in , false ).c_str() , 0 ) ;
 
     Inti = strtod( getWord( in , false ).c_str() , 0 ) ;
     SigI = strtod( getWord( in , false ).c_str() , 0 ) ;
-    iReflag = atoi( getWord( in , false ).c_str() ) ;
+    atoi( getWord( in , false ).c_str() ) ; // iReflag
 
     // Finish the line and get the first word of next line
     readToEndOfLine( in ,  true );

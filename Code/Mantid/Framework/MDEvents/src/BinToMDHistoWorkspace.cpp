@@ -386,9 +386,6 @@ namespace MDEvents
     // Create the threadpool with: all CPUs, a progress reporter
     ThreadPool tp(ts, 0, prog);
 
-    // Big efficiency gain is obtained by grouping a few bins per task.
-    size_t binsPerTask = 100;
-
     // For progress reporting, the approx  # of tasks
     if (prog)
       prog->setNumSteps( int(outWS->getNPoints()/100) );
@@ -405,6 +402,9 @@ namespace MDEvents
     Utils::NestedForLoop::SetUpIndexMaker(outD, index_maker, index_max);
 
     int numPoints = int(outWS->getNPoints());
+
+    // Big efficiency gain is obtained by grouping a few bins per task.
+    size_t binsPerTask = 100; (void)binsPerTask; // Avoid a compiler warning on gcc 4.6
 
     // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
     // Right now, not parallel for file-backed systems.
@@ -434,10 +434,6 @@ namespace MDEvents
         bin.m_max[d] = binDimensions[bd]->getX(idx+1);
       }
       bin.m_index = linear_index;
-
-      bool dimensionsUsed[nd];
-      for (size_t d=0; d<nd; d++)
-        dimensionsUsed[d] = (d<3);
 
       // Check if the bin is in the ImplicitFunction (if any)
       bool binContained = true;

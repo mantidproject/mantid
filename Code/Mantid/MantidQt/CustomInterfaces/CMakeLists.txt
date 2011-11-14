@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/LoanedMemento.cpp
 	src/LogPresenter.cpp
 	src/MuonAnalysis.cpp
+	src/MuonAnalysisFitDataTab.cpp
 	src/MuonAnalysisHelper.cpp
 	src/MuonAnalysisOptionTab.cpp
 	src/ParameterisedLatticeView.cpp
@@ -51,6 +52,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/LogPresenter.h
 	inc/MantidQtCustomInterfaces/LogView.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
@@ -82,6 +84,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
+                inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h

@@ -326,10 +326,8 @@ void ConvertToQ3DdE::exec(){
 //
       size_t n_added_events(0);
       size_t SPLIT_LEVEL(1000);
-     // PARALLEL_FOR1(inWS2D)
       for (int64_t i = 0; i < int64_t(numSpec); ++i)
       {
-   //     PARALLEL_START_INTERUPT_REGION
         const MantidVec& E_transfer = inWS2D->readX(i);
         const MantidVec& Signal     = inWS2D->readY(i);
         const MantidVec& Error      = inWS2D->readE(i);
@@ -371,15 +369,13 @@ void ConvertToQ3DdE::exec(){
         }
         //tp.joinAll();
         progress.report(i);  
-   //       PARALLEL_END_INTERUPT_REGION
       }
- //    PARALLEL_CHECK_INTERUPT_REGION
-        if(n_added_events>0){
-            ws->splitAllIfNeeded(NULL);
-            n_added_events=0;
-        }
-        ws->refreshCache();
-        progress.report();      
+      if(n_added_events>0){
+         ws->splitAllIfNeeded(NULL);
+         n_added_events=0;
+      }
+      ws->refreshCache();
+      progress.report();      
 
 
     // Save the output

@@ -23,8 +23,7 @@ public:
 
   void test_constructor()
   {
-    ThreadPoolRunnable * tpr;
-    TS_ASSERT_THROWS( tpr = new ThreadPoolRunnable(0, NULL), std::invalid_argument);
+    TS_ASSERT_THROWS( new ThreadPoolRunnable(0, NULL), std::invalid_argument);
   }
 
   //=======================================================================================

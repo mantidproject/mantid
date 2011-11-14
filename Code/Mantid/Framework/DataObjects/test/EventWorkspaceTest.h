@@ -568,27 +568,15 @@ public:
     //But the Y is still 2.0
     TS_ASSERT_DELTA( ew2->dataY(0)[1], 2.0, 1e-6);
 
-    int mem1 = memory_usage();
-    int mem2 = 0;
     int last = 100;
     //Read more; memory use should be the same?
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataE(i);
 
-//#ifndef WIN32
-//    mem2 = memory_usage();
-//    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-//#endif
-
     //Do it some more
-    last=200; mem1=mem2;
+    last=200;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataE(i);
-
-//#ifndef WIN32
-//    mem2 = memory_usage();
-//    TS_ASSERT_LESS_THAN( mem2-mem1, 10); //Memory usage should be ~the same.
-//#endif
 
   }
 

@@ -57,7 +57,6 @@ namespace Kernel
       UNUSED_ARG(threadnum);
 
       Task * temp = NULL;
-      std::set<Mutex *>::iterator mutexes_end = m_mutexes.end();
 
       m_queueLock.lock();
       // Check the size within the same locking block; otherwise the size may change before you get the next item.

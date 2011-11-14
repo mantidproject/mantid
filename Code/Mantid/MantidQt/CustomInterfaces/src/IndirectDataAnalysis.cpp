@@ -1284,18 +1284,15 @@ void IndirectDataAnalysis::fixItem()
 void IndirectDataAnalysis::unFixItem()
 {
   QtBrowserItem* item(NULL);
-  QtDoublePropertyManager* dblMng(NULL);
   
   int pageNo = m_uiForm.tabWidget->currentIndex();
   if ( pageNo == 3 )
   { // FuryFit
     item = m_ffTree->currentItem();
-    dblMng = m_ffDblMng;
   }
   else if ( pageNo == 4 )
   { // Convolution Fit
     item = m_cfTree->currentItem();
-    dblMng = m_cfDblMng;
   }
 
   QtProperty* prop = item->property();

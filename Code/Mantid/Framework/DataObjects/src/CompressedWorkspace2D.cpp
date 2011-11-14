@@ -138,21 +138,21 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
   {
     ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
     MantidVec& X = spec->directDataX();
-    MantidVec::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
+    std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
     j += m_XLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
     MantidVec& Y = spec->directDataY();
-    MantidVec::iterator it = std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
+    std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
     MantidVec& E = spec->directDataE();
-    MantidVec::iterator it = std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
+    std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
 

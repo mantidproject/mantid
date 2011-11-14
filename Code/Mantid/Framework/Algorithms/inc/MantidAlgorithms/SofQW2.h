@@ -125,6 +125,8 @@ namespace Mantid
       double calculateQ(const Kernel::V3D scatterDir, const double energy) const;
       /// E Mode
       int m_emode;
+      /// EFixed has been provided
+      bool m_efixedGiven;
       /// EFixed
       double m_efixed;
       /// Beam direction

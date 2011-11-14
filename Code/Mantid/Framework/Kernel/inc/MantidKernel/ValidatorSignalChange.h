@@ -41,7 +41,6 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class testChanger;
 template <typename TYPE>
 class DLLExport ValidatorSignalChange : public IValidator< TYPE >, public boost::signal<std::string (Property const *const)>
 {

@@ -487,7 +487,6 @@ namespace Mantid
       if (i != std::string::npos) instrumentID.erase(i);
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-      bool successfulExecution(true);
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
@@ -498,12 +497,10 @@ namespace Mantid
       }
       catch(std::invalid_argument &)
       {
-        successfulExecution = false;
         g_log.information("Invalid argument to LoadInstrument sub-algorithm");
       }
       catch (std::runtime_error&)
       {
-        successfulExecution = false;
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
       }
 

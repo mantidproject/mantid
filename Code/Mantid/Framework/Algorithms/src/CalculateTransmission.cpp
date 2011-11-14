@@ -158,7 +158,8 @@ void CalculateTransmission::exec()
   if (normaliseToMonitor) M2_direct = this->extractSpectrum(directWS,indices[1]);
   MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,indices[0]);
   
-  Progress progress(this, m_done, m_done += 0.2, 2);
+  double start = m_done;
+  Progress progress(this, start, m_done += 0.2, 2);
   progress.report("CalculateTransmission: Dividing transmission by incident");
   // The main calculation
   MatrixWorkspace_sptr transmission = M3_sample/M3_direct;
@@ -202,7 +203,8 @@ void CalculateTransmission::exec()
  */
 API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum", m_done, m_done += 0.1);
+  double start = m_done;
+  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum", start, m_done += 0.1);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
   childAlg->executeAsSubAlg();
@@ -233,7 +235,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
 
     MantidVec & Y = output->dataY(0);
     MantidVec & E = output->dataE(0);
-    Progress prog2(this, m_done, m_done+=0.1 ,Y.size());
+    double start = m_done;
+    Progress prog2(this, start, m_done+=0.1 ,Y.size());
     for (size_t i=0; i < Y.size(); ++i)
     {
       // Take the log of each datapoint for fitting. Recalculate errors remembering that d(log(a))/da  = 1/a
@@ -302,7 +305,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
 API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sptr WS, double & grad, double & offset)
 {
   g_log.information("Fitting the experimental transmission curve");
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear", m_done, m_done=0.9);
+  double start = m_done;
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear", start, m_done=0.9);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->executeAsSubAlg();
 
@@ -327,7 +331,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
 */
 API::MatrixWorkspace_sptr CalculateTransmission::rebin(std::vector<double> & binParams, API::MatrixWorkspace_sptr ws)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin", m_done, m_done += 0.05);
+  double start = m_done;
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin", start, m_done += 0.05);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setProperty< std::vector<double> >("Params", binParams);
   childAlg->executeAsSubAlg();

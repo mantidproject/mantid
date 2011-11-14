@@ -12,10 +12,15 @@ using namespace Mantid::ICat;
 class SearchTest: public CxxTest::TestSuite
 {
 public:
+
+  SearchTest()
+  {
+    Mantid::API::FrameworkManager::Instance();
+  }
 	
 	void testInit()
 	{
-    		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+	  Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
 		CSearch searchobj;
 		Login loginobj;

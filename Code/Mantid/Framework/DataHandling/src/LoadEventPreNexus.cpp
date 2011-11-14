@@ -725,8 +725,6 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & /*wo
     std::vector<TofEvent> ** arrayOfVectors, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
 {
-  uint32_t period=0;
-
   //Starting pulse time
   DateAndTime pulsetime;
   int64_t pulse_i = 0;
@@ -759,7 +757,6 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & /*wo
     if (this->using_mapping_file)
     {
       PixelType unmapped_pid = pid % this->numpixel;
-      period = (pid - unmapped_pid) / this->numpixel;
       pid = this->pixelmap[unmapped_pid];
     }
 

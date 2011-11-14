@@ -79,7 +79,7 @@ void LoadSPE::exec()
 
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   char comment[100];
-  char* _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Create the axis that will hold the phi values
@@ -108,10 +108,10 @@ void LoadSPE::exec()
     phiAxis->setValue(i,phi);
   }
   // Read to EOL
-  _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
 
   // Next line should be comment line: "### Energy Grid"
-  _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Now the X bin boundaries
@@ -130,7 +130,7 @@ void LoadSPE::exec()
     }
   }
   // Read to EOL
-  _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
 
   // Now create the output workspace
   MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create("Workspace2D",nhist,nbins+1,nbins);
@@ -168,7 +168,7 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 {
   // First, there should be a comment line
   char comment[100];
-  char* _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Then it's the Y values
@@ -193,10 +193,10 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 
   }
   // Read to EOL
-  _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
 
   // Another comment line
-  _tmp = fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // And then the error values
@@ -212,7 +212,7 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
     }
   }
   // Read to EOL
-  _tmp =fgets(comment,100,speFile);
+  fgets(comment,100,speFile);
 
   return;
 }

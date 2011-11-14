@@ -205,6 +205,7 @@ set ( TEST_FILES
 	test/ObjectTest.h
 	test/OneToOneSpectraDetectorMapTest.h
 	test/OrientedLatticeTest.h
+	test/ParameterMapTest.h
 	test/ParCompAssemblyTest.h
 	test/ParComponentFactoryTest.h
 	test/ParDetectorTest.h

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
-    <height>337</height>
+    <width>291</width>
+    <height>16</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,19 +22,40 @@
   <property name="styleSheet">
    <string notr="true">TimeControlWidget { border: 2px groove black; }</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="pqAnimationTimeToolbar" name="animWidget" native="true"/>
-   </item>
-   <item row="1" column="0">
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>1</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>1</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>1</number>
+   </property>
+   <item>
     <widget class="pqVCRToolbar" name="vcrWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
-       <width>280</width>
+       <width>220</width>
        <height>0</height>
       </size>
      </property>
     </widget>
+   </item>
+   <item>
+    <widget class="pqAnimationTimeToolbar" name="animWidget" native="true"/>
    </item>
   </layout>
  </widget>
