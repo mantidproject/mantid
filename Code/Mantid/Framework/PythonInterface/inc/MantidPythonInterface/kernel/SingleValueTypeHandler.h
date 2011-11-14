@@ -23,7 +23,7 @@
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidKernel/IPropertyManager.h"
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
