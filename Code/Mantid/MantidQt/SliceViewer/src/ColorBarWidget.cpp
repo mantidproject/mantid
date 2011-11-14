@@ -10,6 +10,11 @@
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 //-------------------------------------------------------------------------------------------------
 /** Constructor */
 ColorBarWidget::ColorBarWidget(QWidget *parent)
@@ -285,5 +290,7 @@ void ColorBarWidget::updateMinMaxGUI()
 
 ColorBarWidget::~ColorBarWidget()
 {
+}
 
+} //namespace
 }

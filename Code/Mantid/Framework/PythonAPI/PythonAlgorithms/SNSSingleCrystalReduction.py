@@ -40,6 +40,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MinimumWavelength", 0.6, Description="Minimum Wavelength.  Default is 0.6")
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
+        self.declareProperty("EdgePixels", 24, Description="Number of edge pixels to ignore.  Default is 24")
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl', 'nxs']
@@ -161,7 +162,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             PredictPeaks(InputWorkspace=wksp,WavelengthMin=self._minWL,WavelengthMax=self._maxWL,MinDSpacing=self._minD,
                 ReflectionCondition="Rhombohedrally centred, obverse",OutputWorkspace='Peaks')
             peaksWS = mtd['Peaks']
-            CentroidPeaks(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
+            CentroidPeaks(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,EdgePixels=self._edge,OutPeaksWorkspace=peaksWS)
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
@@ -213,6 +214,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._maxWL = self.getProperty("MaximumWavelength")
         self._vanradius = self.getProperty("VanadiumRadius")
         self._powlam = self.getProperty("PowerLambda")
+        self._edge = self.getProperty("EdgePixels")
         self._ubfile = self.getProperty("IsawUBFile")
         self._DetCalfile = self.getProperty("IsawDetCalFile")
         self._append = self.getProperty("AppendHKLFile")
@@ -326,7 +328,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
                 #Remove data at edges of rectangular detectors
                 SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
-                    AdjX=0, AdjY=0, ZeroEdgePixels=24)
+                    AdjX=0, AdjY=0, ZeroEdgePixels=self._edge)
                 #Anvred corrections converts from TOF to Wavelength now.
                 if self._radius > 0:
                     AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,

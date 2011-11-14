@@ -9,6 +9,7 @@
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/LineOverlay.h"
 #include "qmenubar.h"
 #include <iomanip>
 #include <iosfwd>
@@ -24,6 +25,7 @@
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
+#include <qwt_picker_machine.h>
 #include <sstream>
 #include <vector>
 #include <qfiledialog.h>
@@ -34,6 +36,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
 
 //------------------------------------------------------------------------------------
 /** Constructor */
@@ -96,6 +102,13 @@ SliceViewer::SliceViewer(QWidget *parent)
   loadSettings();
 
   updateDisplay();
+
+  // TODO: Remove
+  LineOverlay * over = new LineOverlay(m_plot);
+  over->setVisible(true);
+//  m_spectLayout->addWidget(over, 0,0);
+//  this->insertChild(over);
+
 }
 
 //------------------------------------------------------------------------------------
@@ -672,3 +685,5 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 }
 
 
+} //namespace
+}

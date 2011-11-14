@@ -4,6 +4,11 @@
 #include <iomanip>
 #include <qlayout.h>
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
     : QWidget(parent),
      m_dimIndex(0), m_shownDim(0),
@@ -164,3 +169,5 @@ void DimensionSliceWidget::setDimension(int index, Mantid::Geometry::IMDDimensio
   this->setMinMax(min,max);
 }
 
+}
+}
