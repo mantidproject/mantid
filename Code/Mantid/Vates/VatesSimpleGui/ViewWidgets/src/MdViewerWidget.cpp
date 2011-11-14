@@ -1,6 +1,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
+#include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
@@ -77,18 +78,14 @@ REGISTER_VATESGUI(MdViewerWidget)
 
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
-  this->isPluginInitialized = false;
-  this->pluginMode = true;
-  this->colorDialog = NULL;
+  this->internalSetup(true);
 }
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 {
   this->checkEnvSetup();
   // We're in the standalone application mode
-  this->isPluginInitialized = false;
-  this->pluginMode = false;
-  this->colorDialog = NULL;
+  this->internalSetup(false);
   this->setupUiAndConnections();
   // FIXME: This doesn't allow a clean split of the classes. I will need
   //        to investigate creating the individual behaviors to see if that
@@ -103,6 +100,19 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
 
 MdViewerWidget::~MdViewerWidget()
 {
+}
+
+/**
+ * This function consolidates setting up some of the internal members between
+ * the standalone and plugin modes.
+ * @param pMode flag to set the plugin mode
+ */
+void MdViewerWidget::internalSetup(bool pMode)
+{
+  this->isPluginInitialized = false;
+  this->pluginMode = pMode;
+  this->colorDialog = NULL;
+  this->rotPointDialog = NULL;
 }
 
 void MdViewerWidget::checkEnvSetup()
@@ -128,6 +138,12 @@ void MdViewerWidget::setupUiAndConnections()
   QObject::connect(this->ui.modeControlWidget,
                    SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
                    this, SLOT(switchViews(ModeControlWidget::Views)));
+
+  // Setup rotation point button
+  QObject::connect(this->ui.resetCenterToPointButton,
+                   SIGNAL(clicked()),
+                   this,
+                   SLOT(onRotationPoint()));
 }
 
 void MdViewerWidget::setupMainView()
@@ -479,6 +495,26 @@ void MdViewerWidget::onColorOptions()
   this->colorDialog->show();
   this->colorDialog->raise();
   this->colorDialog->activateWindow();
+}
+
+/**
+ * This function handles creating the rotation point input dialog box and
+ * setting the communication between it and the current view.
+ */
+void MdViewerWidget::onRotationPoint()
+{
+  if (NULL == this->rotPointDialog)
+  {
+    this->rotPointDialog = new RotationPointDialog(this);
+
+    QObject::connect(this->rotPointDialog,
+                     SIGNAL(sendCoordinates(double,double,double)),
+                     this->currentView,
+                     SLOT(onResetCenterToPoint(double,double,double)));
+  }
+  this->rotPointDialog->show();
+  this->rotPointDialog->raise();
+  this->rotPointDialog->activateWindow();
 }
 
 }

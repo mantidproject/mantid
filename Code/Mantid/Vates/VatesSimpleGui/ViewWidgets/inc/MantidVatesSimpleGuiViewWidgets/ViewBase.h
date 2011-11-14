@@ -134,7 +134,10 @@ public slots:
    * @param state flag to determine whether or not to use log color scaling
    */
   void onLogScale(int state);
+  /// Reset center of rotation to center of data volume.
   void onResetCenterToData();
+  /// Reset center of rotation to given point.
+  void onResetCenterToPoint(double x, double y, double z);
   /// Setup the animation controls.
   void setTimeSteps(bool withUpdate = false);
 
