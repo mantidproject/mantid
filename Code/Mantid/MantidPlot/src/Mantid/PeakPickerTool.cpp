@@ -873,7 +873,8 @@ void PeakPickerTool::plotGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
-  m_fitPropertyBrowser->customisation(m_wsName);
+  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
+  m_fitPropertyBrowser->customisation(m_wsName + "." + axisLabel);
   d_graph->replot();
 }
 
@@ -882,8 +883,9 @@ void PeakPickerTool::plotCurrentGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
+  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
+  m_fitPropertyBrowser->customisation(m_wsName + "." + axisLabel);
   d_graph->replot();
-  
 }
 
 /**
