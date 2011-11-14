@@ -38,7 +38,7 @@ namespace Mantid
 
     /// Default constructor
     SofQW2::SofQW2() 
-      : SofQW(), m_emode(0), m_efixed(0.0), m_beamDir(), 
+      : SofQW(), m_emode(0), m_efixedGiven(false), m_efixed(0.0), m_beamDir(),
         m_samplePos(), m_progress(), m_qcached()
     {
     }
@@ -216,8 +216,6 @@ namespace Mantid
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
-            // std::cerr << "Areas " << newPoly << "  " << oldPoly << "\n";
-            // std::cerr << "Areas " << overlap.area() << "  " << oldPoly.area() << "\n";
             overlaps.push_back(BinWithWeight(itr->wsIndex,j,itr->weight*overlap.area()/oldPoly.area()));
           }
           catch(Geometry::NoIntersectionException &)
@@ -242,6 +240,38 @@ namespace Mantid
       if (emode == "Direct") m_emode=1;
       else if (emode == "Indirect") m_emode = 2;
       m_efixed = getProperty("EFixed");
+
+      // Check whether they should have supplied an EFixed value
+      if( m_emode == 1 ) // Direct
+      {
+        // If GetEi was run then it will have been stored in the workspace, if not the user will need to enter one
+        if( m_efixed == 0.0 )
+        {
+          if ( workspace->run().hasProperty("Ei") )
+          {
+            Kernel::Property *p = workspace->run().getProperty("Ei");
+            Kernel::PropertyWithValue<double> *eiProp = dynamic_cast<Kernel::PropertyWithValue<double>*>(p);
+            if( !eiProp ) throw std::runtime_error("Input workspace contains Ei but its property type is not a double.");
+            m_efixed = (*eiProp)();
+          }
+          else
+          {
+            throw std::invalid_argument("Input workspace does not contain an EFixed value. Please provide one or run GetEi.");
+          }
+        }
+        else
+        {
+          m_efixedGiven = true;
+        }
+      }
+      else
+      {
+        if( m_efixed != 0.0 )
+        {
+          m_efixedGiven = true;
+        }
+      }
+
 
       // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
       m_EtoK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 / 
@@ -357,9 +387,15 @@ namespace Mantid
       double ei_min(0.0), ei_max(0.0), ef_min(0.0), ef_max(0.0);
       if( m_emode == 2 )
       {
-        std::vector<double> param = det->getNumberParameter("EFixed");
-        double efixed = m_efixed;
-        if( param.size() != 0 ) efixed = param[0];
+        double efixed(0.0);
+        if( m_efixedGiven ) efixed = m_efixed; // user provided a value
+        else
+        {
+          std::vector<double> param = det->getNumberParameter("EFixed");
+          if( param.empty() ) throw std::runtime_error("Cannot find EFixed parameter for component \"" + det->getName()
+                                                        + "\". This is required in indirect mode. Please check the IDF contains these values.");
+          efixed = param[0];
+        }
         ei_min = efixed + dEMin;
         ei_max = efixed + dEMax;
         ef_min = ef_max = efixed;
