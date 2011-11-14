@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/VatesSimpleGuiViewWidgets/icons">
+        <file>pqResetCenterToData24.png</file>
+        <file>pqResetCenterToPoint24.png</file>
+    </qresource>
+</RCC>
