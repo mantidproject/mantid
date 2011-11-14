@@ -31,6 +31,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>1</number>
+     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -62,6 +65,22 @@
      </item>
      <item>
       <widget class="Mantid::Vates::SimpleGui::ModeControlWidget" name="modeControlWidget" native="true"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="pqCameraToolbar" name="widget" native="true"/>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
@@ -167,6 +186,12 @@
    <class>pqStatusBar</class>
    <extends>QWidget</extends>
    <header>pqStatusBar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqCameraToolbar</class>
+   <extends>QWidget</extends>
+   <header>pqCameraToolbar.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
