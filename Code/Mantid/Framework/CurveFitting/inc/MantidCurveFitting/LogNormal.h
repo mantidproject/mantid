@@ -12,7 +12,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Provide Log Normal function: h*(t/x)*exp(-(log(x/t))^2 / (2*b^2) )
+    Provide Log Normal function: h*exp(-(log(x)-t)^2 / (2*b^2) )/x
 
     @author Jose Borreguero, NScD
     @date 11/14/2011
