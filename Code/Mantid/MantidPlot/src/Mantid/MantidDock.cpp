@@ -9,6 +9,7 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
+#include <MantidQtAPI/InterfaceManager.h>
 #include "VatesConfig.h"
 #include "MantidMatrix.h"
 #include <QInputDialog>
@@ -855,6 +856,10 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   (void) WS;
   menu->addAction(m_showBoxData); // Show MD Box data
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
+  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  {
+    m_showVatesGui->setEnabled(false);
+  }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);  // Algorithm history
 }
@@ -878,6 +883,10 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPea
   //menu->addAction(m_showInst); // Show instrument
   menu->addAction(m_showLogs); // Sample logs
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
+  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  {
+    m_showVatesGui->setEnabled(false);
+  }
   menu->addAction(m_showHist);
 }
 
