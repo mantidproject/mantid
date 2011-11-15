@@ -103,6 +103,7 @@ set ( TEST_FILES
 	test/IkedaCarpenterPVTest.h
 	test/LinearBackgroundTest.h
 	test/LinearTest.h
+	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
 	test/MultiBGTest.h
