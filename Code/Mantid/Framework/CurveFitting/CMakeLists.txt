@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
+	src/StretchExp.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 )
