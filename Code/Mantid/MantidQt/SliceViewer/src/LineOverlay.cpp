@@ -135,7 +135,8 @@ namespace SliceViewer
     QPointF pB2 = m_pointB - widthOffset;
 
     // Special XOR pixel drawing
-    painter.setCompositionMode( QPainter::RasterOp_SourceXorDestination );
+
+    //painter.setCompositionMode( QPainter::RasterOp_SourceXorDestination ); // RHEL5 is too old for this ship
 
     // --- Draw the box ---
     QPen boxPen(QColor(255,255,255, 255));
