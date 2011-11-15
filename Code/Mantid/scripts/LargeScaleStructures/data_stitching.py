@@ -138,8 +138,12 @@ class DataSet(object):
         """
         if os.path.isfile(self._file_path):
             self._ws_name = os.path.basename(self._file_path)
-            self._ws_scaled = self._ws_name+"_scaled"
             Load(Filename=self._file_path, OutputWorkspace=self._ws_name)
+        elif mtd.workspaceExists(self._file_path):
+            self._ws_name = self._file_path
+        
+        if mtd.workspaceExists(self._ws_name):
+            self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
                 self._xmin = min(mtd[self._ws_name].readX(0))
                 self._xmax = max(mtd[self._ws_name].readX(0))
@@ -227,7 +231,7 @@ class Stitcher(object):
         
         # Check that we have an overlap
         if ref_max<d_min or ref_min>d_max:
-            mtd.sendLogMessage("No overlap between %s and %d" % (str(data_ref), str(data_to_scale)))
+            mtd.sendLogMessage("No overlap between %s and %s" % (str(data_ref), str(data_to_scale)))
             return
         
         # Get overlap
