@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/LevenbergMarquardtMinimizer.cpp
 	src/Linear.cpp
 	src/LinearBackground.cpp
+	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
 	src/MultiBG.cpp
