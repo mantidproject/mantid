@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRY_H_
-#define MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRY_H_
+#ifndef MANTID_ALGORITHMS_EDITINSTRUMENTGEOMETRY_H_
+#define MANTID_ALGORITHMS_EDITINSTRUMENTGEOMETRY_H_
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -9,7 +9,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** EditTOFPowderDiffractomerGeometry : TODO: DESCRIPTION
+  /** EditInstrumentGeometry : TODO: DESCRIPTION
     
     @author
     @date 2011-08-22
@@ -34,12 +34,12 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport EditTOFPowderDiffractomerGeometry : public API::Algorithm
+  class DLLExport EditInstrumentGeometry : public API::Algorithm
   {
   public:
-    EditTOFPowderDiffractomerGeometry();
-    ~EditTOFPowderDiffractomerGeometry();
-    virtual const std::string name() const { return "EditTOFPowderDiffractomerGeometry"; }
+    EditInstrumentGeometry();
+    ~EditInstrumentGeometry();
+    virtual const std::string name() const { return "EditInstrumentGeometry"; }
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Diffraction";}
     /// Algorithm's version for identification overriding a virtual method
@@ -62,4 +62,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRY_H_ */
+#endif  /* MANTID_ALGORITHMS_EDITINSTRUMENTGEOMETRY_H_ */

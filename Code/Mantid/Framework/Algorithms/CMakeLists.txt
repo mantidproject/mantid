@@ -58,7 +58,7 @@ set ( SRC_FILES
 	src/DspacemaptoCal.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
-	src/EditTOFPowderDiffractomerGeometry.cpp
+	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
@@ -228,7 +228,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DspacemaptoCal.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
-	inc/MantidAlgorithms/EditTOFPowderDiffractomerGeometry.h
+	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
@@ -394,7 +394,7 @@ set ( TEST_FILES
 	test/DiffractionFocussingTest.h
 	test/DivideTest.h
 	test/DspacemaptoCalTest.h
-	test/EditTOFPowderDiffractomerGeometryTest.h
+	test/EditInstrumentGeometryTest.h
 	test/ExponentialCorrectionTest.h
 	test/ExponentialTest.h
 	test/ExtractFFTSpectrumTest.h
