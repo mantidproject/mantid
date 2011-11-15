@@ -228,9 +228,6 @@ signals:
 
   void changeFitPlotStyle(const QString &);
 
-  void bunchData(const std::string&);
-  void rawData(const std::string&);
-
   void startXChanged(double);
   void endXChanged(double);
   void xRangeChanged(double, double);
@@ -409,7 +406,6 @@ private:
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
-  QtProperty *m_data;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
