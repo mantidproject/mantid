@@ -265,11 +265,11 @@ class StitcherWidget(BaseWidget):
             Pop up a file dialog box.
         """
         title = "Data file - Choose a reduced I(Q) file"
-        if not os.path.isdir(self._output_dir):
+        if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
         fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
                                                                    self._output_dir,
-                                                                   "Data files (*.xml)")).filePath()
+                                                                   "Reduced XML files (*.xml);; Reduced Nexus files (*.nxs);; All files (*.*)")).filePath()
         if fname:
             # Store the location of the loaded file
             self._output_dir = str(QtCore.QFileInfo(fname).path())
