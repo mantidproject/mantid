@@ -50,7 +50,7 @@ class StitcherWidget(BaseWidget):
         
         self._referenceID = 0
         
-        self._graph = None
+        self._graph = "StitchedData"
         self._output_dir = None
         self._stitcher = None
 
@@ -351,7 +351,10 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._high_q_data.get_scaled_ws())
         
         if len(ws_list)>0:
-            self._graph = qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+            g = qti.app.graph(self._graph)
+            if g is None:
+                g = qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+                g.setName(self._graph)
                 
     def _save_result(self):
         """
