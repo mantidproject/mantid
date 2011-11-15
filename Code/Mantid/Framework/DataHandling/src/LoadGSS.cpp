@@ -120,6 +120,7 @@ namespace Mantid
         } // if
 
         // 2. Loop all the lines
+        bool isOutOfHead = false;
         while (!input.eof() && input.getline(currentLine, 256))
         {
 
@@ -196,6 +197,8 @@ namespace Mantid
           {
             // Line start with Bank including file format, X0 information and etc.
 
+            isOutOfHead = true;
+
             // 1. Save the previous to array and initialze new MantiVec for (X, Y, E)
             if (X->size() != 0)
             {
@@ -270,7 +273,7 @@ namespace Mantid
               calslogx0 = true;
             }
           } // Line with B
-          else
+          else if (isOutOfHead)
           {
             double xValue;
             double yValue;
@@ -344,6 +347,9 @@ namespace Mantid
             Y->push_back(yValue);
             E->push_back(eValue);
           } // Date Line
+          else{
+            g_log.debug() << "Line not defined: " << currentLine << std::endl;
+          }
         } // while
 
         // Clean up after file is read through
