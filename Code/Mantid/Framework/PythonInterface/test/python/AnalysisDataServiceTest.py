@@ -37,11 +37,12 @@ class AnalysisDataServiceTest(unittest.TestCase):
         ws_from_op = analysis_data_svc[wsname]
         ws_from_method = analysis_data_svc.retrieve(wsname)
         
-        self.assertNotEquals(ws_from_op.name(), '')
-        self.assertEquals(ws_from_op.name(), ws_from_method.name())
+        self.assertNotEquals(ws_from_op.get_name(), '')
+        self.assertEquals(ws_from_op.get_name(), ws_from_method.get_name())
         self.assertEquals(ws_from_op.get_memory_size(), ws_from_method.get_memory_size())
 
         # Type check
+        #self.assertTrue(isinstance(ws, MatrixWorkspace))
         #self.assertTrue(isinstance(ws_from_op, MatrixWorkspace))
         #self.assertTrue(isinstance(ws_from_method, MatrixWorkspace))
 
