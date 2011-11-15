@@ -35,7 +35,7 @@ protected:
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
   /// The SliceViewer
-  SliceViewer * m_slicer;
+  MantidQt::SliceViewer::SliceViewer * m_slicer;
 
   /// Workspace being looked at
   Mantid::API::IMDWorkspace_sptr m_ws;

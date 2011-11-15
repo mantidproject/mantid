@@ -1676,43 +1676,6 @@ public:
   }
 
 
-  //----------------------------------------------------------------------------------------------
-  // TODO: Figure out why this fails on mac?
-  void xtest_compressEvents_Parallel()
-  {
-    for (int this_type=0; this_type<3; this_type++)
-    {
-      for (size_t inplace=0; inplace < 2; inplace++)
-      {
-        el = EventList();
-        el.clear();
-        for (double i=0; i<1000; i+= 1.0)
-          el.addEventQuickly( TofEvent(i) );
-        el.switchTo(static_cast<EventType>(this_type));
-
-        double mult = 1.0;
-        if (this_type > 0)
-        {
-          mult = 2.0;
-          el *= mult;
-        }
-
-        EventList * el_out = &el;
-        if (!inplace)
-          el_out = new EventList();
-
-        TS_ASSERT_THROWS_NOTHING( el.compressEvents(9.9, el_out, true); )
-
-        // Right number of events, of the type without times
-        TS_ASSERT_EQUALS( el_out->getEventType(), WEIGHTED_NOTIME);
-        // The exact number of events depends on the number of cores. So we allow some imprecision
-        TS_ASSERT_DELTA( el_out->getNumberEvents(), 100 + PARALLEL_GET_MAX_THREADS-1, PARALLEL_GET_MAX_THREADS * 2);
-        TS_ASSERT( el_out->isSortedByTof() );
-      }// inplace
-    }// starting event type
-  }
-
-
 
 
   void test_getEventsFrom()

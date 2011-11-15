@@ -20,6 +20,11 @@
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidAPI/IMDIterator.h"
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
 {
@@ -121,5 +126,8 @@ private:
   /// Cached double for infinity
   double m_inf;
 };
+
+} // namespace SliceViewer
+} // namespace Mantid
 
 #endif // SLICEVIEWER_H

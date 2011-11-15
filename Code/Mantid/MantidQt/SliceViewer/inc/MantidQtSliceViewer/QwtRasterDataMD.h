@@ -7,6 +7,11 @@
 #include <qwt_raster_data.h>
 #include <vector>
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 /** Implemenation of QwtRasterData that can display the data
  * from a slice of an IMDWorkspace.
  *
@@ -60,5 +65,8 @@ protected:
   /// Not a number
   double nan;
 };
+
+} // namespace SliceViewer
+} // namespace Mantid
 
 #endif /* QwtRasterDataMD_H_ */

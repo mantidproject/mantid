@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -34,6 +35,8 @@
 #include <algorithm>
 
 #include <QLineEdit>
+#include <QVariant>
+#include <QtProperty>
 #include <QFileDialog>
 #include <QHash>
 #include <QTextStream>
@@ -95,13 +98,14 @@ void MuonAnalysis::initLayout()
   m_uiForm.appendRun->setDisabled(true);
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
+  m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_optionTab->initLayout();
 
   // connect guess alpha 
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
 
-        // signal/slot connections to respond to changes in instrument selection combo boxes
-        connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
+  // signal/slot connections to respond to changes in instrument selection combo boxes
+  connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
   // Load current
   connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent())); 
@@ -165,10 +169,6 @@ void MuonAnalysis::initLayout()
   // connect the fit function widget buttons to their respective slots.
   loadFittings();
 
-  // If the data is set to bunch then fit against the bunched data, if make raw then fit against the raw data
-  connect(m_uiForm.fitBrowser,SIGNAL(rawData(const std::string&)), this, SLOT(makeRaw(const std::string&)));
-  connect(m_uiForm.fitBrowser,SIGNAL(bunchData(const std::string&)), this, SLOT(reBunch(const std::string&)));
-
   // Detected a workspace change and therefore the peak picker tool needs to be reassigned.
   connect(m_uiForm.fitBrowser,SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
 
@@ -184,6 +184,19 @@ void MuonAnalysis::initLayout()
 
   // Detect when the fit has finished and group the workspaces that have been created as a result.
   connect(m_uiForm.fitBrowser,SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
+
+  // Detect when the fit has finished and group the workspaces that have been created as a result.
+  connect(m_uiForm.fitBrowser,SIGNAL(beforeFitting(const QtBoolPropertyManager*)), this, SLOT(beforeDoFit(const QtBoolPropertyManager*)));
+}
+
+/**
+*  Before fitting data (slot)
+*  @param p contain parameters set by the user in the fit property browser
+*/
+void MuonAnalysis::beforeDoFit(const QtBoolPropertyManager* p)
+{
+  // call method which do the work
+  m_fitDataTab->beforeDoFit(p);
 }
 
 
@@ -1378,6 +1391,8 @@ void MuonAnalysis::clearTablesAndCombo()
  * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to Plot Options.
  * If period data then the resulting cropped WS is on for the period, or sum/difference of, selected 
  * by the user on the front panel
+ * @param groupName  Group to add created workspace to
+ * @param wsname 
  */
 void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string& wsname)
 {

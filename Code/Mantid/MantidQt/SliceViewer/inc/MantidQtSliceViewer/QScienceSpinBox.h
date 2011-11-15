@@ -8,6 +8,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QString>
 
+
 class QScienceSpinBox : public QDoubleSpinBox
 {
   Q_OBJECT
