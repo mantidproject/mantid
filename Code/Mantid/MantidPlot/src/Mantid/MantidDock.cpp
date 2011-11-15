@@ -10,7 +10,6 @@
 #include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidQtAPI/InterfaceManager.h>
-#include "VatesConfig.h"
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>

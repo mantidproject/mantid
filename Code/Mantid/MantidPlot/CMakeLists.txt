@@ -674,10 +674,6 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageCustomMenus.ui
 )
 
-# Create Vates configuration file
-configure_file(src/Mantid/VatesConfig.h.in
-${CMAKE_CURRENT_BINARY_DIR}/VatesConfig.h)
-
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
 # Call separate function on third-party code that expects moc output to have certain name
 qt4_generate_moc ( src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
