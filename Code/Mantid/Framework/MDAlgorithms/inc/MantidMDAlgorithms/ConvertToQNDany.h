@@ -9,7 +9,9 @@
 
 #include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidMDAlgorithms/ConvertToQ3DdE.h"
 //#include <boost/function>
 
 namespace Mantid
@@ -79,27 +81,41 @@ namespace MDAlgorithms
    size_t n_activated_dimensions;
    /// this variable describes default possible ID-s for Q-dimensions
    std::vector<std::string> Q_ID_possible;
+   /// pointer to output workspace;
+   API::IMDEventWorkspace_sptr i_out; 
+   /// pointer to input workspace;
+   Mantid::API::MatrixWorkspace_sptr inWS2D;
+   // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
+    static preprocessed_detectors det_loc;  
+ /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
+      and places the resutls into static cash to be used in subsequent calls to this algorithm */
+    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
+    // helper function to create MDWorkspace
+    API::IMDEventWorkspace_sptr 
+    create_emptyNDEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
+                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax,int nd);
   protected: //for testing
    /** function returns the list of names, which can be possible dimensions for current matrix workspace */
    std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
-   /** function processes arguments entered by user and tries to istablish what algorithm should be deployed;   */
+   /** function processes arguments entered by user and tries to establish which algorithm should be deployed;   */
    std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims)const;
-   //NoQND
-   void processNoQND();
-//         modQdE, // specific algorithm  -- 2D, powder
-    void processModQdE();
-//      modQND, // ModQND -- good for powders
-    void processModQND();
-//          modQdEND, // inelastic powders plus something
-    void processModQdEND();
-//          Q3D,    // specific algorithm -- diffraction
-    void processQ3D();
-//     Q3DdE,  // specific algorithn -- inelastic
-    void processQ3DdE();
-//          Q3DND,  // generic diffraction algorithm. 
-    void processQ3DND();
-//          Q3DdEND, // generic algorithn -- inelastic + other dependencies
-    void processQ3DdEND();
+    //NoQND
+   template<size_t nd>
+   void process_NoQ__ND(boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > ws);
+   //  modQdE, // specific algorithm  -- 2D, powder
+    void process_ModQ_dE_();
+    //  modQND, // ModQND -- good for powders
+    void process_ModQ__ND();
+    //   modQdEND, // inelastic powders plus something
+    void process_ModQ_dE_ND();
+    //   Q3D,    // specific algorithm -- diffraction
+    void process_Q3D___();
+    //  Q3DdE,  // specific algorithn -- inelastic
+    void process_Q3D_dE_();
+    //  Q3DND,  // generic diffraction algorithm. 
+    void process_Q3D__ND();
+    //  Q3DdEND, // generic algorithn -- inelastic + other dependencies
+    void process_Q3D_dE_ND();
     //
     std::map<std::string, pMethod> alg_selector;
  };

@@ -23,6 +23,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidMDEvents/MDEventFactory.h"
 
 #include <algorithm>
 #include <float.h>
@@ -45,6 +46,8 @@ namespace MDAlgorithms
 // logger for loading workspaces  
    Kernel::Logger& ConvertToQNDany::convert_log =Kernel::Logger::get("MD-Algorithms");
 
+// the variable describes the locations of the preprocessed detectors, which can be stored and reused it the algorithm runs for more once;
+preprocessed_detectors ConvertToQNDany::det_loc;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToQNDany)
@@ -66,14 +69,14 @@ ConvertToQNDany::ConvertToQNDany():
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND",&ConvertToQNDany::processNoQND));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQdE",&ConvertToQNDany::processModQdE));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND",&ConvertToQNDany::processModQND));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQdEND",&ConvertToQNDany::processModQdEND));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3D",&ConvertToQNDany::processQ3D));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdE",&ConvertToQNDany::processQ3DdE));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND",&ConvertToQNDany::processQ3DND));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdEND",&ConvertToQNDany::processQ3DdEND));
+ //   alg_selector.insert(std::pair<std::string,pMethod>("NoQND",&ConvertToQNDany::process_NoQ__ND));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQdE",&ConvertToQNDany::process_ModQ_dE_));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND",&ConvertToQNDany::process_ModQ__ND));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQdEND",&ConvertToQNDany::process_ModQ_dE_ND));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3D",&ConvertToQNDany::process_Q3D___));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdE",&ConvertToQNDany::process_Q3D_dE_));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND",&ConvertToQNDany::process_Q3D__ND));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdEND",&ConvertToQNDany::process_Q3D_dE_ND));
 }
     
 //----------------------------------------------------------------------------------------------
@@ -86,31 +89,38 @@ ConvertToQNDany::~ConvertToQNDany()
 //
 const double rad2deg = 180.0 / M_PI;
 /// helper function to create empty MDEventWorkspace with nd dimensions 
-template<size_t nd>
-boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create_emptyNDEventWS(const std::string dimensionNames[nd],const std::string dimensionUnits[nd],
-                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax)
+API::IMDEventWorkspace_sptr 
+ConvertToQNDany::create_emptyNDEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
+                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax,int nd)
 {
 
-       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
-       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >(new MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd>());
-    
-      // Give all the dimensions
-      for (size_t d=0; d<nd; d++)
-      {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
-        ws->addDimension(MDHistoDimension_sptr(dim));
-      }
-      ws->initialize();
+     // Try to get the output workspace
+    i_out = getProperty("OutputWorkspace");
+    if(i_out){ // temporary, to agvoid complications of adding particular data to ws.
+        g_log.warning()<<" Output workspace"<<i_out->name()<<" will be replaced\n";
+    }
+    MDEvents::MDEventFactory wsFactory;
+    i_out = wsFactory.CreateMDWorkspace(n_activated_dimensions,"MDEvent");
 
-      // Build up the box controller
-      Mantid::API::BoxController_sptr bc = ws->getBoxController();
+
+    
+    // Give all the dimensions
+    for (size_t d=0; d<nd; d++)
+    {
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
+        i_out->addDimension(MDHistoDimension_sptr(dim));
+    }
+    i_out->initialize();
+
+     // Build up the box controller
+    Mantid::API::BoxController_sptr bc = i_out->getBoxController();
       bc->setSplitInto(5);
 //      bc->setSplitThreshold(1500);
       bc->setSplitThreshold(10);
       bc->setMaxDepth(20);
       // We always want the box to be split (it will reject bad ones)
-      ws->splitBox();
-      return ws;
+     // i_out->splitBox();
+      return i_out;
 }
 
 
@@ -174,8 +184,52 @@ ConvertToQNDany::check_max_morethen_min(const std::vector<double> &min,const std
     }
 }
  
+/// helper function to preprocess the detectors directions
+void 
+ConvertToQNDany::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
+{
 
+    const size_t nHist = inputWS->getNumberHistograms();
+
+    det_loc.det_dir.resize(nHist);
+    det_loc.det_id.resize(nHist);
+     // Loop over the spectra
+   size_t ic(0);
+   for (size_t i = 0; i < nHist; i++){
+
+     Geometry::IDetector_const_sptr spDet;
+     try{
+        spDet= inputWS->getDetector(i);
+     }catch(Kernel::Exception::NotFoundError &){
+        continue;
+     }
  
+    // Check that we aren't dealing with monitor...
+    if (spDet->isMonitor())continue;   
+
+     det_loc.det_id[ic] = spDet->getID();
+    // dist     =  spDet->getDistance(*sample);
+     double polar    =  inputWS->detectorTwoTheta(spDet);
+     double azim     =  spDet->getPhi();    
+
+     double sPhi=sin(polar);
+     double ez = cos(polar);
+     double ex = sPhi*cos(azim);
+     double ey = sPhi*sin(azim);
+ 
+     det_loc.det_dir[ic].setX(ex);
+     det_loc.det_dir[ic].setY(ey);
+     det_loc.det_dir[ic].setZ(ez);
+
+     ic++;
+   }
+   // 
+   if(ic<nHist){
+       det_loc.det_dir.resize(ic);
+       det_loc.det_id.resize(ic);
+   }
+
+}
   //----------------------------------------------------------------------------------------------
   /* Execute the algorithm.   */
 void ConvertToQNDany::exec(){
@@ -214,6 +268,11 @@ void ConvertToQNDany::exec(){
    // Verify input parameters;
     std::string algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim,n_activated_dimensions);
 
+ 
+    bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
+    if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
+   
+   
     // call selected algorithm
     pMethod algo =  alg_selector[algo_id];
     if(algo){
@@ -335,39 +394,185 @@ ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_pro
 }
 
 
-void ConvertToQNDany::processNoQND()
+
+
+void ConvertToQNDany::process_ModQ_dE_()
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
-void ConvertToQNDany::processModQdE()
+void ConvertToQNDany::process_ModQ__ND()
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
-void ConvertToQNDany::processModQND()
+void ConvertToQNDany::process_ModQ_dE_ND()
+{
+
+      //size_t n_added_events(0);
+      //size_t SPLIT_LEVEL(1000);
+      //for (int64_t i = 0; i < int64_t(numSpec); ++i)
+      //{
+
+      //  const MantidVec& E_transfer = inWS2D->readX(i);
+      //  const MantidVec& Signal     = inWS2D->readY(i);
+      //  const MantidVec& Error      = inWS2D->readE(i);
+      //  int32_t det_id              = det_loc.det_id[i];
+    
+      //  coord_t QE[4];
+      //  for (size_t j = 0; j < specSize; ++j)
+      //  {
+      //      // drop emtpy events 
+      //      if(Signal[j]<FLT_EPSILON)continue;
+
+      //      double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
+      //      if(E_tr<E_min||E_tr>=E_max)continue;
+
+      //      double k_tr = sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+   
+      //      double  ex = det_loc.det_dir[i].X();
+      //      double  ey = det_loc.det_dir[i].Y();
+      //      double  ez = det_loc.det_dir[i].Z();
+      //      double  qx  =  -ex*k_tr;                
+      //      double  qy  =  -ey*k_tr;
+      //      double  qz  = ki - ez*k_tr;
+
+      //      QE[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(QE[0]<QEmin[0]||QE[0]>=QEmax[0])continue;
+      //      QE[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(QE[1]<QEmin[1]||QE[1]>=QEmax[1])continue;
+      //      QE[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(QE[2]<QEmin[2]||QE[2]>=QEmax[2])continue;
+      //      QE[3]  = (coord_t)E_tr;
+      //      float ErrSq = float(Error[j]*Error[j]);
+      //      i_out->addEvent(MDE(float(Signal[j]),ErrSq,runIndex,det_id,QE));
+      //      n_added_events++;
+      //  }
+  
+      //// This splits up all the boxes according to split thresholds and sizes.
+      //  //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+      //  //ThreadPool tp(NULL);
+      //  if(n_added_events>SPLIT_LEVEL){
+      //      ws->splitAllIfNeeded(NULL);
+      //      n_added_events=0;
+      //  }
+      //  //tp.joinAll();
+      //  progress.report(i);  
+      //}
+      //if(n_added_events>0){
+      //   i_out->splitAllIfNeeded(NULL);
+      //   n_added_events=0;
+      //}
+      //i_out->refreshCache();
+      //progress.report();      
+
+      //setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(i_out));
+}
+void ConvertToQNDany::process_Q3D___()
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
-void ConvertToQNDany::processModQdEND()
-{
-    throw(Kernel::Exception::NotImplementedError(""));
-}
-void ConvertToQNDany::processQ3D()
-{
-    throw(Kernel::Exception::NotImplementedError(""));
-}
-void ConvertToQNDany::processQ3DdE( )
+void ConvertToQNDany::process_Q3D_dE_( )
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
 
-void ConvertToQNDany::processQ3DND( )
+void ConvertToQNDany::process_Q3D__ND( )
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
-void ConvertToQNDany::processQ3DdEND()
+void ConvertToQNDany::process_Q3D_dE_ND()
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
+
+template<size_t nd>
+boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create_emptyEventWS(const std::string dimensionNames[nd],const std::string dimensionUnits[nd],
+                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax)
+{
+
+       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
+       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >(new MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd>());
+    
+      // Give all the dimensions
+      for (size_t d=0; d<nd; d++)
+      {
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
+        ws->addDimension(MDHistoDimension_sptr(dim));
+      }
+      ws->initialize();
+
+      // Build up the box controller
+      Mantid::API::BoxController_sptr bc = ws->getBoxController();
+      bc->setSplitInto(5);
+//      bc->setSplitThreshold(1500);
+      bc->setSplitThreshold(10);
+      bc->setMaxDepth(20);
+      // We always want the box to be split (it will reject bad ones)
+      ws->splitBox();
+      return ws;
+}
+
+template<size_t nd>
+void ConvertToQNDany::process_NoQ__ND(boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > ws)
+{
+
+    // one of the dimensions has to be X-ws dimension -> need to add check for that;
+
+    // copy experiment info into target workspace
+    ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
+    uint16_t runIndex = ws->addExperimentInfo(ExperimentInfo);
+
+
+    const size_t numSpec  = inWS2D->getNumberHistograms();
+    const size_t specSize = inWS2D->blocksize();    
+    std::vector<coord_t> Coord(nd);
+
+
+    size_t n_added_events(0);
+    size_t SPLIT_LEVEL(1024);
+    for (int64_t i = 0; i < int64_t(numSpec); ++i)
+    {
+
+        const MantidVec& E_transfer = inWS2D->readX(i);
+        const MantidVec& Signal     = inWS2D->readY(i);
+        const MantidVec& Error      = inWS2D->readE(i);
+        int32_t det_id              = det_loc.det_id[i];
+    
+   
+        for (size_t j = 0; j < specSize; ++j)
+        {
+            // drop emtpy events
+            if(Signal[j]<FLT_EPSILON)continue;
+
+            double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
+            Coord[0]    = (coord_t)E_tr;
+ 
+
+            float ErrSq = float(Error[j]*Error[j]);
+            ws->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
+            n_added_events++;
+        }
+  
+      // This splits up all the boxes according to split thresholds and sizes.
+        //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+        //ThreadPool tp(NULL);
+      if(n_added_events>SPLIT_LEVEL){
+            ws->splitAllIfNeeded(NULL);
+            n_added_events=0;
+       }
+        //tp.joinAll();
+        progress.report(i);  
+     }
+     if(n_added_events>0){
+         ws->splitAllIfNeeded(NULL);
+         n_added_events=0;
+     }
+      ws->refreshCache();
+      progress.report();      
+
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(i_out));
+}
+
+template void ConvertToQNDany::process_NoQ__ND<4>(boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> >);
+template boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> >  create_emptyEventWS(const std::string dimensionNames[4],const std::string dimensionUnits[4],
+                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax);
+
 
 } // namespace Mantid
 } // namespace MDAlgorithms
