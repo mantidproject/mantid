@@ -69,6 +69,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/Linear.h
 	inc/MantidCurveFitting/LinearBackground.h
+	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MultiBG.h
