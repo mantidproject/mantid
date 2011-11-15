@@ -17,8 +17,6 @@ namespace Mantid
 
       This class is treated by Boost Python as if it were of type Algorithm.
 
-      @author Martyn Gigg, Tessella plc
-
       Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
       This file is part of Mantid.
