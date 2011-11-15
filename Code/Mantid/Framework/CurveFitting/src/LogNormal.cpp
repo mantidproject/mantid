@@ -61,8 +61,8 @@ void LogNormal::functionDerivMW(Jacobian* out, const double* xValues, const size
         	double c = (log(x)-t)/b;
         	double e = exp( -c*c/2 )/x;
         	out->set(i,0, e);           //partial derivative with respect to Height
-        	out->set(i,1, h*e*(c/b);    //partial derivative with respect to Location parameter
-        	out->set(i,2, h*e*(c*c/b);  //partial derivative with respect to Scale parameter
+        	out->set(i,1, h*e*(c/b));    //partial derivative with respect to Location parameter
+        	out->set(i,2, h*e*(c*c/b));  //partial derivative with respect to Scale parameter
         }
     }
 
