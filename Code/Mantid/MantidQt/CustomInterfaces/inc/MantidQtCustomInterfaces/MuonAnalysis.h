@@ -164,6 +164,9 @@ private slots:
 
   void groupFittedWorkspaces(QString);
 
+  /// Do stuff before executing fit - e.g. handle fitting against 
+  /// raw while the data are plotted as bunch
+  /// This slot is a placeholder for executing MuonAnalysisFitDataTab::beforeDoFit 
   void beforeDoFit(const QtBoolPropertyManager*);
 
 private:
