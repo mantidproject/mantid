@@ -3,6 +3,11 @@
 #include <iosfwd>
 #include <iostream>
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 
 /** Called each time the mouse moves over the canvas */
 QwtText CustomPicker::trackerText(const QwtDoublePoint & pos) const
@@ -12,3 +17,5 @@ QwtText CustomPicker::trackerText(const QwtDoublePoint & pos) const
   return QwtText();
 }
 
+}
+}

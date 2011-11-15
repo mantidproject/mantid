@@ -34,12 +34,9 @@ namespace Mantid
 
     /**
      * Constructor
-     * Generated the display list
      */
     OCGeometryRenderer::OCGeometryRenderer()
     {
-      boolDisplaylistCreated=false;
-      iDisplaylistId=UINT_MAX;
     }
 
     /**
@@ -56,8 +53,7 @@ namespace Mantid
      */
     void OCGeometryRenderer::Render(TopoDS_Shape* ObjSurf)
     {
-      (void) ObjSurf; //Avoid compiler warning
-      glCallList(iDisplaylistId);
+      Initialize(ObjSurf);
     }
 
     /**
@@ -86,18 +82,10 @@ namespace Mantid
      */
     void OCGeometryRenderer::Initialize(TopoDS_Shape* ObjSurf)
     {
-      if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-      {
-	iDisplaylistId=glGenLists(1);
-	glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-	glBegin(GL_TRIANGLES);
-	//Here goes the traversing through TopoDS_Shape triangles
-	RenderTopoDS(ObjSurf);
-	glEnd();
-	glEndList();
-//				WriteVTK(ObjSurf);
-	boolDisplaylistCreated=true;
-      }
+        glBegin(GL_TRIANGLES);
+        //Here goes the traversing through TopoDS_Shape triangles
+        RenderTopoDS(ObjSurf);
+        glEnd();
     }
 
     /**
@@ -126,38 +114,38 @@ namespace Mantid
     {
       if((ObjSurf!=NULL) && !ObjSurf->IsNull())
       {
-	TopExp_Explorer Ex;
-	for(Ex.Init(*ObjSurf,TopAbs_FACE);Ex.More();Ex.Next())
-	{
-	  TopoDS_Face F=TopoDS::Face(Ex.Current());
-	  TopLoc_Location L;
-	  Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	  TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
-	  tab = facing->Nodes();
-	  Poly_Array1OfTriangle tri(1,facing->NbTriangles());
-	  tri = facing->Triangles();
-	  for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
-	    Poly_Triangle trian = tri.Value(i);
-	    Standard_Integer index1,index2,index3;
-	    trian.Get(index1,index2,index3);
-	    gp_Pnt point1=tab.Value(index1);
-	    gp_Pnt point2=tab.Value(index2);
-	    gp_Pnt point3=tab.Value(index3);
-	    gp_XYZ pt1 = tab.Value(index1).XYZ();
-	    gp_XYZ pt2 = tab.Value(index2).XYZ();
-	    gp_XYZ pt3 = tab.Value(index3).XYZ();
+        TopExp_Explorer Ex;
+        for(Ex.Init(*ObjSurf,TopAbs_FACE);Ex.More();Ex.Next())
+        {
+          TopoDS_Face F=TopoDS::Face(Ex.Current());
+          TopLoc_Location L;
+          Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+          TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+          tab = facing->Nodes();
+          Poly_Array1OfTriangle tri(1,facing->NbTriangles());
+          tri = facing->Triangles();
+          for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
+            Poly_Triangle trian = tri.Value(i);
+            Standard_Integer index1,index2,index3;
+            trian.Get(index1,index2,index3);
+            gp_Pnt point1=tab.Value(index1);
+            gp_Pnt point2=tab.Value(index2);
+            gp_Pnt point3=tab.Value(index3);
+            gp_XYZ pt1 = tab.Value(index1).XYZ();
+            gp_XYZ pt2 = tab.Value(index2).XYZ();
+            gp_XYZ pt3 = tab.Value(index3).XYZ();
 
-	    gp_XYZ v1 = pt2-pt1;
-	    gp_XYZ v2 = pt3-pt2;
+            gp_XYZ v1 = pt2-pt1;
+            gp_XYZ v2 = pt3-pt2;
 
-	    gp_XYZ normal = v1^v2;
-	    normal.Normalize();
-	    glNormal3d(normal.X(),normal.Y(),normal.Z());
-	    glVertex3d(point1.X(),point1.Y(),point1.Z());
-	    glVertex3d(point2.X(),point2.Y(),point2.Z());
-	    glVertex3d(point3.X(),point3.Y(),point3.Z());
-	  }
-	}
+            gp_XYZ normal = v1^v2;
+            normal.Normalize();
+            glNormal3d(normal.X(),normal.Y(),normal.Z());
+            glVertex3d(point1.X(),point1.Y(),point1.Z());
+            glVertex3d(point2.X(),point2.Y(),point2.Z());
+            glVertex3d(point3.X(),point3.Y(),point3.Z());
+          }
+        }
       }
     }
 
@@ -169,49 +157,49 @@ namespace Mantid
       FILE *fp=fopen("C:\\outputcascade.vtk","w+");
       fprintf(fp,"# vtk DataFile Version 2.0 \nOpenCascade data\nASCII\n");
       fprintf(fp,"DATASET POLYDATA\n");
-//			BRepMesh::Mesh(out,0.1);
+      //			BRepMesh::Mesh(out,0.1);
       TopExp_Explorer Ex;
       int countVert=0;
       int countFace=0;
       for(Ex.Init(*out,TopAbs_FACE);Ex.More();Ex.Next())
       {
-	TopoDS_Face F=TopoDS::Face(Ex.Current());
-	TopLoc_Location L;
-	Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	countVert+=facing->NbNodes();
-	countFace+=facing->NbTriangles();
+        TopoDS_Face F=TopoDS::Face(Ex.Current());
+        TopLoc_Location L;
+        Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+        countVert+=facing->NbNodes();
+        countFace+=facing->NbTriangles();
       }
       fprintf(fp,"POINTS %d float\n",countVert);
       for(Ex.Init(*out,TopAbs_FACE);Ex.More();Ex.Next())
       {
-	TopoDS_Face F=TopoDS::Face(Ex.Current());
-	TopLoc_Location L;
-	Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
-	tab = facing->Nodes();
-	for (Standard_Integer i=1;i<=(facing->NbNodes());i++) {
-	  gp_Pnt pnt=tab.Value(i);
-	  fprintf(fp,"%f %f %f\n",pnt.X(),pnt.Y(),pnt.Z());
-	}
+        TopoDS_Face F=TopoDS::Face(Ex.Current());
+        TopLoc_Location L;
+        Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+        TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+        tab = facing->Nodes();
+        for (Standard_Integer i=1;i<=(facing->NbNodes());i++) {
+          gp_Pnt pnt=tab.Value(i);
+          fprintf(fp,"%f %f %f\n",pnt.X(),pnt.Y(),pnt.Z());
+        }
       }
       fprintf(fp,"POLYGONS %d %d\n",countFace,countFace*4);
       int maxindex=0;
       for(Ex.Init(*out,TopAbs_FACE);Ex.More();Ex.Next())
       {
-	TopoDS_Face F=TopoDS::Face(Ex.Current());
-	TopLoc_Location L;
-	Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
-	tab = facing->Nodes();
-	Poly_Array1OfTriangle tri(1,facing->NbTriangles());
-	tri = facing->Triangles();
-	for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
-	  Poly_Triangle trian = tri.Value(i);
-	  Standard_Integer index1,index2,index3;
-	  trian.Get(index1,index2,index3);
-	  fprintf(fp,"3 %d %d %d\n",maxindex+index1-1,maxindex+index2-1,maxindex+index3-1);
-	}
-	maxindex+=facing->NbNodes();
+        TopoDS_Face F=TopoDS::Face(Ex.Current());
+        TopLoc_Location L;
+        Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+        TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+        tab = facing->Nodes();
+        Poly_Array1OfTriangle tri(1,facing->NbTriangles());
+        tri = facing->Triangles();
+        for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
+          Poly_Triangle trian = tri.Value(i);
+          Standard_Integer index1,index2,index3;
+          trian.Get(index1,index2,index3);
+          fprintf(fp,"3 %d %d %d\n",maxindex+index1-1,maxindex+index2-1,maxindex+index3-1);
+        }
+        maxindex+=facing->NbNodes();
       }
       fclose(fp);
     }

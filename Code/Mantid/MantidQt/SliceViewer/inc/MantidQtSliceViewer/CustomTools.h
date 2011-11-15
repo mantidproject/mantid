@@ -13,6 +13,11 @@
  *      Author: Janik zikovsky
  */
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 
 //========================================================================
 /** Picker for looking at the data under the mouse */
@@ -77,5 +82,8 @@ protected:
   }
 };
 
+
+} // namespace SliceViewer
+} // namespace Mantid
 
 #endif /* CUSTOMTOOLS_H_ */

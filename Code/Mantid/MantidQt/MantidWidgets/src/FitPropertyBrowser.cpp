@@ -264,12 +264,12 @@ m_mantidui(mantidui)
   if (m_customFittings)
   {
     QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
-    m_data = m_boolManager->addProperty("Fit To binned data");
+    QtProperty* rawBunchdata = m_boolManager->addProperty("Fit To binned data");
     bool data = settings.value("Fit To binned data",QVariant(false)).toBool();
-    m_boolManager->setValue(m_data,data);
+    m_boolManager->setValue(rawBunchdata,data);
     customSettingsGroup->addSubProperty(m_minimizer);
     customSettingsGroup->addSubProperty(m_plotDiff);
-    customSettingsGroup->addSubProperty(m_data);
+    customSettingsGroup->addSubProperty(rawBunchdata);
     m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
   }
 
@@ -1328,6 +1328,13 @@ void FitPropertyBrowser::fit()
 {
   std::string wsName = workspaceName();
 
+  // Emit a signal before the fitting is started. 
+  // This gives the opportunity to customize a fit - before its starts
+  // which is e.g. used by MuonAnalysis fitting
+  // (wsName that the fit has been done against is sent as a parameter)
+  //emit beforeFitting(QString::fromStdString(wsName));
+  emit beforeFitting(m_boolManager);
+
   if (wsName.empty())
   {
     QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
@@ -1397,15 +1404,6 @@ void FitPropertyBrowser::fit()
     // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
     if (m_customFittings)
     {
-      // Find out if it bunch has been selected and rebunch if appropraite 
-      if (data())
-      {
-        emit bunchData(wsName);
-      }
-      else //Raw must have been selected
-      {
-        emit rawData(wsName);
-      } 
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
       alg->setPropertyValue("InputWorkspace",wsName);
@@ -2604,11 +2602,6 @@ void FitPropertyBrowser::setDecimals(int d)
 bool FitPropertyBrowser::plotDiff()const
 {
   return m_boolManager->value(m_plotDiff);
-}
-
-bool FitPropertyBrowser::data()const
-{
-  return m_boolManager->value(m_data);
 }
 
 void FitPropertyBrowser::setTextPlotGuess(const QString text) 

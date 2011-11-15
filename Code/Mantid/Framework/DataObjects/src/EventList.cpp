@@ -1545,6 +1545,7 @@ namespace DataObjects
    * @param parallel :: if true, the compression will be done with all available cores in parallel.
    *        Note: The parallel results may be slightly different than the serial calculation.
    *        There will typically be more events because of the list was split up.
+   *        Note: CURRENTLY IGNORED!
    */
   void EventList::compressEvents(double tolerance, EventList * destination, bool parallel)
   {
@@ -1556,17 +1557,17 @@ namespace DataObjects
     switch (eventType)
     {
     case TOF:
-      if (parallel)
-        compressEventsParallelHelper(this->events, destination->weightedEventsNoTime, tolerance);
-      else
-        compressEventsHelper(this->events, destination->weightedEventsNoTime, tolerance);
+//      if (parallel)
+//        compressEventsParallelHelper(this->events, destination->weightedEventsNoTime, tolerance);
+//      else
+      compressEventsHelper(this->events, destination->weightedEventsNoTime, tolerance);
       break;
 
     case WEIGHTED:
-      if (parallel)
-        compressEventsParallelHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
-      else
-        compressEventsHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
+//      if (parallel)
+//        compressEventsParallelHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
+//      else
+      compressEventsHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
 
       break;
 
@@ -1575,19 +1576,19 @@ namespace DataObjects
       {
         // Put results in a temp output
         std::vector<WeightedEventNoTime> out;
-        if (parallel)
-          compressEventsParallelHelper(this->weightedEventsNoTime, out, tolerance);
-        else
-          compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
+//        if (parallel)
+//          compressEventsParallelHelper(this->weightedEventsNoTime, out, tolerance);
+//        else
+        compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
         // Put it back
         this->weightedEventsNoTime.swap(out);
       }
       else
       {
-        if (parallel)
-          compressEventsParallelHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
-        else
-          compressEventsHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
+//        if (parallel)
+//          compressEventsParallelHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
+//        else
+        compressEventsHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
       }
       break;
     }
