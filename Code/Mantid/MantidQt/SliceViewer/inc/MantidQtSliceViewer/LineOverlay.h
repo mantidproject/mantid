@@ -7,6 +7,7 @@
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
+#include <qpainter.h>
 
 
 namespace MantidQt
@@ -15,8 +16,8 @@ namespace SliceViewer
 {
 
   /** GUI for overlaying a line with a width onto the plot
-   * in the SliceViewer. Should be generic to overlays on any QwtPlot.
-   * Drag/droppable.
+    in the SliceViewer. Should be generic to overlays on any QwtPlot.
+    Drag/droppable.
     
     @date 2011-11-14
 
@@ -44,6 +45,16 @@ namespace SliceViewer
   {
     Q_OBJECT
 
+    /// Enum giving IDs to the 4 handles on the widget
+    enum eHandleID
+    {
+      HandleNone = -1,
+      HandleA = 0,
+      HandleB = 1,
+      HandleWidthTop = 2,
+      HandleWidthBottom = 3
+    };
+
   public:
     LineOverlay(QwtPlot * parent);
     virtual ~LineOverlay();
@@ -62,8 +73,12 @@ namespace SliceViewer
     QSize size() const;
     int height() const;
     int width() const;
+
+    QRect drawHandle(QPainter & painter, QPointF coords);
     void paintEvent(QPaintEvent *event);
 
+    eHandleID mouseOverHandle(QPoint pos);
+    void mouseMoveEvent(QMouseEvent * event);
 
   protected:
     /// QwtPlot containing this
@@ -75,6 +90,8 @@ namespace SliceViewer
     QPointF m_pointB;
     /// Width of the line (in coordinates of the plot)
     double m_width;
+    /// Rects defining where the 4 handles are
+    QVector<QRect> m_handles;
 
   };
 
