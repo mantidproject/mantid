@@ -41,6 +41,7 @@ The Precount option will count the number of events in each pixel before allocat
 #include <Poco/Path.h>
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using std::endl;
 using std::map;

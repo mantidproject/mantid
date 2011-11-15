@@ -192,9 +192,9 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 ###########################################################################
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
+  include_directories ( ../TestHelpers/inc ) # For FakeObjects.h
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI TestHelpers )
+  target_link_libraries( PythonAPITest PythonAPI )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonAPITest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonAPITest )

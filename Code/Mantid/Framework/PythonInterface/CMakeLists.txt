@@ -48,11 +48,8 @@ set ( TEST_FILES
 )  
   
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc )
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
-  target_link_libraries( PythonInterfaceTest TestHelpers PythonKernelModule PythonAPIModule )
-  # Specify implicit dependency, but don't link to it
-  add_dependencies ( PythonInterfaceTest UserAlgorithms )
+  target_link_libraries( PythonInterfaceTest PythonKernelModule PythonAPIModule )
   add_dependencies ( FrameworkTests PythonInterfaceTest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET PythonInterfaceTest PROPERTY FOLDER "UnitTests" )
