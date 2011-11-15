@@ -48,7 +48,7 @@ public:
     do_test_exec(23, "SaveMDTest.nxs", true);
   }
 
-  void xtest_MakeFileBacked_then_UpdateFileBackEnd()
+  void test_MakeFileBacked_then_UpdateFileBackEnd()
   {
     do_test_exec(23, "SaveMDTest_updating.nxs", true, true);
   }
