@@ -170,7 +170,7 @@ Crystal
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc)
-  set ( TESTHELPER_SRCS ../TestHelpers/src/MDEventsTestHelper.cpp )
+  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
   target_link_libraries( VatesAPITest VatesAPI TestHelpers DataHandling ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies( FrameworkTests VatesAPITest )
