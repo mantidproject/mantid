@@ -1,3 +1,6 @@
+#ifndef MANTIDPLOT_MANTIDQWTMATRIXWORKSPACEDATA_H
+#define MANTIDPLOT_MANTIDQWTMATRIXWORKSPACEDATA_H
+
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QObject>
@@ -87,3 +90,4 @@ private:
   bool m_isDistribution;
 
 };
+#endif
