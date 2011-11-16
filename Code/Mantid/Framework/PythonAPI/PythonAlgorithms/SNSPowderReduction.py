@@ -357,7 +357,7 @@ class SNSPowderReduction(PythonAlgorithm):
             SortEvents(InputWorkspace=wksp)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
                              PreserveEvents=preserveEvents)
-        if not "histo" in self.getProperty("Extension") and not preserveEvents:
+        if not "histo" in self.getProperty("Extension") and preserveEvents:
             SortEvents(InputWorkspace=wksp)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
