@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/LoanedMemento.cpp
 	src/LogPresenter.cpp
 	src/MuonAnalysis.cpp
+	src/MuonAnalysisFitDataTab.cpp
 	src/MuonAnalysisHelper.cpp
 	src/MuonAnalysisOptionTab.cpp
 	src/ParameterisedLatticeView.cpp
@@ -51,6 +52,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/LogPresenter.h
 	inc/MantidQtCustomInterfaces/LogView.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
@@ -82,6 +84,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
+                inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -143,12 +146,10 @@ target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBro
 
 if ( CXXTEST_FOUND )
   
-  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
+  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( CustomInterfacesTest CustomInterfaces ${MANTIDLIBS}
-         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
-         TestHelpers DataObjects)
+    target_link_libraries( CustomInterfacesTest CustomInterfaces DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
 
     add_dependencies( FrameworkTests CustomInterfacesTest )
     # Add to the 'UnitTests' group in VS

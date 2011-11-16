@@ -1,6 +1,6 @@
 #include "MantidQtSliceViewer/QScienceSpinBox.h"
-
 #include <limits>
+
 
 //#define QSPINBOX_QSBDEBUG
 #ifdef QSPINBOX_QSBDEBUG

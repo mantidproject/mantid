@@ -13,6 +13,7 @@
  * @date Oct 3, 2011
  */
 
+using namespace MantidQt::SliceViewer;
 
 /** Main application
  *

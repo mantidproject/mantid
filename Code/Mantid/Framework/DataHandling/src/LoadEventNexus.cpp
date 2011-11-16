@@ -41,6 +41,7 @@ The Precount option will count the number of events in each pixel before allocat
 #include <Poco/Path.h>
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using std::endl;
 using std::map;
@@ -145,6 +146,9 @@ public:
 
     //Default pulse time (if none are found)
     Mantid::Kernel::DateAndTime pulsetime;
+    Mantid::Kernel::DateAndTime lastpulsetime(0);
+
+    bool pulsetimesincreasing = true;
 
     // Index into the pulse array
     int pulse_i = 0;
@@ -206,6 +210,12 @@ public:
         {
           alg->eventVectors[detId]->push_back( event );
 
+          // determine if pulse times continue to increase
+          if (pulsetime < lastpulsetime)
+            pulsetimesincreasing = false;
+          else
+            lastpulsetime = pulsetime;
+
 //        //Find the the workspace index corresponding to that pixel ID
 //        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[event_id[i]]);
 //        // Add it to the list at that workspace index
@@ -216,18 +226,14 @@ public:
           if (tof > my_longest_tof) { my_longest_tof = tof;}
 
           // Track all the touched wi
-          if (compress)
-          {
-            usedDetIds[detId] = true;
-          }
+          usedDetIds[detId] = true;
         } // valid detector IDs
 
       }
     } //(for each event)
 
-
-    //------------ Compress Events ------------------
-    if (compress)
+    //------------ Compress Events (or set sort order) ------------------
+    if (compress || pulsetimesincreasing)
     {
       // Do it on all the detector IDs we touched
       std::set<size_t>::iterator it;
@@ -238,7 +244,10 @@ public:
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID ]);
           EventList * el = WS->getEventListPtr(wi);
-          el->compressEvents(alg->compressTolerance, el);
+          if (compress)
+            el->compressEvents(alg->compressTolerance, el);
+          else if (pulsetimesincreasing)
+            el->setSortOrder(DataObjects::PULSETIME_SORT);
         }
       }
     }

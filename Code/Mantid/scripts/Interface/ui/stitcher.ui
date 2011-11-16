@@ -48,7 +48,20 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="low_q_edit"/>
+         <widget class="QComboBox" name="low_q_combo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="low_q_browse_button">
@@ -350,7 +363,17 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="medium_q_edit"/>
+         <widget class="QComboBox" name="medium_q_combo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="medium_q_browse_button">
@@ -655,7 +678,17 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="high_q_edit"/>
+         <widget class="QComboBox" name="high_q_combo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="high_q_browse_button">

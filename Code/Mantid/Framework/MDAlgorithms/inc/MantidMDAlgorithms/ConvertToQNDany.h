@@ -45,24 +45,11 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
+  class ConvertToQNDany;
+  typedef boost::function<void (ConvertToQNDany*)> pMethod;
+//
   class DLLExport ConvertToQNDany  : public API::Algorithm
   {
-  protected:
-      // the enum counts the algorithms, which can be applied to workspace and differs
-      // additional switch would be direct/indirect mode .
-      enum known_algorithms
-      {
-          NoQND,  // no Q just combine log values in ND workspace (simplest case -- irrelevant to any instruments)
-          modQdE, // specific algorithm  -- 2D, powder
-          modQND, // ModQND -- good for powders
-          modQdEND, // inelastic powders plus something
-          Q3D,    // specific algorithm -- diffraction
-          Q3DdE,  // specific algorithn -- inelastic
-          Q3DND,  // generic diffraction algorithm. 
-          Q3DdEND, // generic algorithn -- inelastic + other dependencies
-          Unknow   // if everything else failed
-      };
   public:
     ConvertToQNDany();
     ~ConvertToQNDany();
@@ -96,9 +83,9 @@ namespace MDAlgorithms
    /** function returns the list of names, which can be possible dimensions for current matrix workspace */
    std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
    /** function processes arguments entered by user and tries to istablish what algorithm should be deployed;   */
-   known_algorithms identify_requested_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims)const;
+   std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims)const;
    //NoQND
-   void processNoQ();
+   void processNoQND();
 //         modQdE, // specific algorithm  -- 2D, powder
     void processModQdE();
 //      modQND, // ModQND -- good for powders
@@ -114,7 +101,7 @@ namespace MDAlgorithms
 //          Q3DdEND, // generic algorithn -- inelastic + other dependencies
     void processQ3DdEND();
     //
-    std::vector<boost::function<void (ConvertToQNDany*)> > alg_selector;
+    std::map<std::string, pMethod> alg_selector;
  };
 
 

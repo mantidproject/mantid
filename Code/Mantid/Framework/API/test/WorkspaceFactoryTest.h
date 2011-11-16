@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MemoryManager.h"
-#include "FakeObjects.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;
 using std::size_t;

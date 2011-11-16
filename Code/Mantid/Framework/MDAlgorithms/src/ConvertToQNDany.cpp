@@ -65,17 +65,15 @@ ConvertToQNDany::ConvertToQNDany():
     Q_ID_possible[0]="|Q|";
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
-  
-    alg_selector.resize(ConvertToQNDany::Unknow);
-
-    alg_selector[NoQND]   = &ConvertToQNDany::processNoQ;
-    alg_selector[modQdE]  = &ConvertToQNDany::processModQdE;
-    alg_selector[modQND]  = &ConvertToQNDany::processModQND;
-    alg_selector[modQdEND]= &ConvertToQNDany::processModQdEND;
-    alg_selector[Q3D]     = &ConvertToQNDany::processQ3D;
-    alg_selector[Q3DdE]   = &ConvertToQNDany::processQ3DdE;
-    alg_selector[Q3DND]   = &ConvertToQNDany::processQ3DND;
-    alg_selector[Q3DdEND] = &ConvertToQNDany::processQ3DdEND;
+     
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND",&ConvertToQNDany::processNoQND));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQdE",&ConvertToQNDany::processModQdE));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND",&ConvertToQNDany::processModQND));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQdEND",&ConvertToQNDany::processModQdEND));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3D",&ConvertToQNDany::processQ3D));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdE",&ConvertToQNDany::processQ3DdE));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND",&ConvertToQNDany::processQ3DND));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdEND",&ConvertToQNDany::processQ3DdEND));
 }
     
 //----------------------------------------------------------------------------------------------
@@ -162,11 +160,7 @@ ConvertToQNDany::init()
     //    "Store the part of the detectors transfromation into reciprocal space to save/reuse it later;");
     //// // this property is mainly for subalgorithms to set-up as they have to identify 
     ////declareProperty(new ArrayProperty<double>("u"), "first base vecotor");
-    ////declareProperty(new ArrayProperty<double>("v"), "second base vecotors");
-
-
-    
-
+    ////declareProperty(new ArrayProperty<double>("v"), "second base vecotors");  
 
 }
 
@@ -218,11 +212,17 @@ void ConvertToQNDany::exec(){
 
 
    // Verify input parameters;
-    std::vector<std::string> dim_selected;
-    known_algorithms algo_id = identify_requested_alg(dim_names_availible, Q_dim_requested,other_dim,n_activated_dimensions);
+    std::string algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim,n_activated_dimensions);
 
-    // call selected algorithm. 
-    alg_selector[algo_id](this);
+    // call selected algorithm
+    pMethod algo =  alg_selector[algo_id];
+    if(algo){
+        algo(this);
+    }else{
+        g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
+        throw(std::invalid_argument("undefined subalgoritm requested "));
+    }
+
     return;
    
 }
@@ -232,66 +232,75 @@ void ConvertToQNDany::exec(){
     * @param Q_dim_requested     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
     * @param dim_selected        -- vector of other dimension names requested by the algorithm
     *
-    * @return known_algorithms   -- enum identifying one of the known algorithms; if unknown, should fail. 
-   */
-ConvertToQNDany::known_algorithms
-ConvertToQNDany::identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &Q_dim_requested, const std::vector<std::string> &dim_requested, size_t &nDims)const
+    * @return the_algID       -- the string, identifying one of the known algorithms; if unknown, should fail. 
+*/
+std::string
+ConvertToQNDany::identify_the_alg(const std::vector<std::string> &dim_names_availible, const std::string &Q_dim_requested, const std::vector<std::string> &dim_requested, size_t &nDims)const
 {
+    std::string the_algID;
+    std::string Q_mode("Unknown");
+    std::string dE_mode("Unknown");
+    std::string ND_mode("Unknown");
+    //TODO: add direct./indirect;
+    int nQ_dims(0),ndE_dims(0),nAdd_dims(0);
 
     nDims = 0;
-    // verify if everything requested is availible:
+    // verify if everything requested is availible in logs:
     for(size_t i=0;i<dim_requested.size();i++){
         if(std::find(dim_names_availible.begin(),dim_names_availible.end(),dim_requested[i])==dim_names_availible.end()){
             g_log.error()<<" The dimension: "<<dim_requested[i]<<" requested but can not be found in the list of availible parameters & data\n";
             throw(std::invalid_argument(" the data for availible dimension are not among the input data"));
         }
     }
-   // NoQND
-    if(Q_dim_requested.empty()){ 
-        nDims = dim_requested.size();
-        return ConvertToQNDany::NoQND;
+    // Q_mode (one of 3 possible)  
+    if(Q_dim_requested.empty())
+    { 
+        nQ_dims=0;
+        Q_mode="NoQ";
+    }
+    if(Q_dim_requested.compare("|Q|")==0)
+    {
+        nQ_dims=1;
+        Q_mode="modQ";
+    }
+    if((Q_dim_requested.compare("QxQyQz")==0))
+    {
+       nQ_dims=3;
+       Q_mode="Q3D";
     }
 
-    // modQdE,modQND,modQdEND
-    if(Q_dim_requested.compare("|Q|")==0){
-        if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){ // modQdE,modQdEND
-            if(dim_requested.size()==1){ //  modQdE;
-                nDims = 2;
-                return ConvertToQNDany::modQdE;
-            }else{
-                nDims = 1+dim_requested.size();
-                return ConvertToQNDany::modQdEND;
-            }
-        }else{                          // modQND
-            nDims=    dim_requested.size()+1;
-            return ConvertToQNDany::modQND;
-        }
+   // Elastic/inelastic -- should introduce additional switch;
+    nAdd_dims=(int)dim_requested.size();
+    if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){
+        ndE_dims   =1;
+        nAdd_dims -=1;
+        dE_mode   ="dE";
+    }else{
+        ndE_dims   =0;
+        dE_mode   ="";
     }
 
-    if(!(Q_dim_requested.compare("QxQyQz")==0)){
-            g_log.error()<<" Q-value equal to: "<<Q_dim_requested<<" is not recognized\n";
-            throw(std::invalid_argument(" invalid Q argument"));
-    }
-    //Q3D,Q3DdE,Q3DND,Q3DdEND
-    if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){ // modQdE,modQdEND
-            if(dim_requested.size()==1){ //  Q3DdE,Q3DdEND;
-                nDims = 4;
-                return ConvertToQNDany::Q3DdE;
-            }else{
-                nDims = 3+dim_requested.size();
-                return ConvertToQNDany::Q3DdEND;
-            }
-   }else{       // Q3D,Q3DND
-       if(dim_requested.size()==0){
-            nDims = 3;
-            return ConvertToQNDany::Q3D;
-       }else{
-            nDims= dim_requested.size()+3;
-            return ConvertToQNDany::Q3DND;
-       }
+    //ND mode;
+    if(nAdd_dims>0){
+        ND_mode = "ND";
+    }else{
+        ND_mode = "";
     }
 
-  
+    the_algID  = Q_mode+dE_mode+ND_mode;
+    nDims      = nQ_dims+ndE_dims+nAdd_dims;
+    if(nDims<2||nQ_dims<0||ndE_dims<0||nAdd_dims<0){
+        g_log.error()<<" Requested: "<<nQ_dims<<" Q-dimensions, "<<ndE_dims<<" dE dimesions and "<<nAdd_dims<<" additional dimesnions not supported\n";
+        throw(std::invalid_argument("wrong or unsupported number of dimensions"));
+    }
+
+    if(the_algID.find("Unknown")!=std::string::npos){
+        g_log.error()<<" Algorithm with ID: "<<the_algID<<" do not recognized\n";
+        throw(std::invalid_argument("wrong or unsupported algorithm ID"));
+    }
+
+    return the_algID;
+
 }
 
 std::vector<std::string > 
@@ -326,7 +335,7 @@ ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_pro
 }
 
 
-void ConvertToQNDany::processNoQ()
+void ConvertToQNDany::processNoQND()
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }

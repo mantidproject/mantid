@@ -600,11 +600,11 @@ void SaveCanSAS1D::createSASProcessElement(std::string& sasProcess)
   sasProcname+="</name>";
   sasProcess+=sasProcname;
 
-  time_t date;
-  localtime(&date);
+  time_t rawtime;
+  time(&rawtime);
 
   char temp [25];
-  strftime (temp,25,"%d-%b-%Y %H:%M:%S",localtime(&date));
+  strftime (temp,25,"%d-%b-%Y %H:%M:%S",localtime(&rawtime));
   std::string sasDate(temp);
 
   std::string sasProcdate="\n\t\t\t<date>";

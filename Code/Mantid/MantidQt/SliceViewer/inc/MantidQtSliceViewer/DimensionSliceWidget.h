@@ -6,6 +6,11 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "DllOption.h"
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 
 /** Widget for the 2D slice viewer. Select whether the dimension
  * is X or Y, or if it is not one to be shown, where is the
@@ -74,5 +79,8 @@ private:
   bool m_insideSetShownDim;
   bool m_insideSpinBoxChanged;
 };
+
+} // namespace SliceViewer
+} // namespace Mantid
 
 #endif // DIMENSIONSLICEWIDGET_H

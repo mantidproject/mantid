@@ -46,7 +46,6 @@ namespace Kernel
       Poco::File(filename).remove();
     file = new ::NeXus::File(filename, NXACC_CREATE5);
     file->makeGroup("test_entry", "NXentry", 1);
-
   }
 
   //----------------------------------------------------------------------------------------------

@@ -45,8 +45,6 @@ namespace Mantid
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
-      mutable unsigned int    iDisplaylistId; ///< OpenGL display list id
-      mutable bool            boolDisplaylistCreated; ///< flag to store whether display list is created or not
 
     public:
       CacheGeometryRenderer();       ///< Constructor
