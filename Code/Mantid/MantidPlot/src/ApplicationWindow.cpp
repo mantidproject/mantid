@@ -120,7 +120,7 @@
 #include "PlotToolInterface.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidTable.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/RemoveErrorsDialog.h"

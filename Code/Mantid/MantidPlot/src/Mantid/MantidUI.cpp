@@ -6,7 +6,7 @@
 #include "AlgMonitor.h"
 #include "MantidSampleLogDialog.h"
 #include "AlgorithmHistoryWindow.h"
-#include "MantidCurve.h"
+#include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"

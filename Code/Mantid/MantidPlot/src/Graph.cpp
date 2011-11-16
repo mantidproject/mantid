@@ -58,7 +58,7 @@
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
 #include "UserFunction.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 #include "Mantid/MantidQwtMatrixWorkspaceData.h"
 
 #ifdef EMF_OUTPUT

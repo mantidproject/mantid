@@ -61,7 +61,7 @@
 #include <ColorButton.h>
 
 #include "Mantid/MantidDock.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 
 #include <gsl/gsl_vector.h>
 

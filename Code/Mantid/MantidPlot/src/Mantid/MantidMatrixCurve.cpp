@@ -1,4 +1,4 @@
-#include "MantidCurve.h"
+#include "MantidMatrixCurve.h"
 #include "MantidQwtMatrixWorkspaceData.h"
 
 #include <qpainter.h>

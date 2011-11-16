@@ -1,5 +1,5 @@
 #include "PeakPickerTool.h"
-#include "MantidCurve.h"
+#include "MantidMatrixCurve.h"
 #include "MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "../FunctionCurve.h"

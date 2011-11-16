@@ -35,7 +35,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "pixmaps.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 
 #include <QPushButton>
 #include <QLabel>
