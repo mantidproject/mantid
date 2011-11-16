@@ -143,13 +143,36 @@ void DiffractionFocussing2::exec()
   // It also initializes the groupAtWorkspaceIndex[] array.
   determineRebinParameters();
 
+  // determine event workspace min/max tof
+  double eventXMin = 0.;
+  double eventXMax = 0.;
+
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( matrixInputW );
-  if ((getProperty("PreserveEvents")) && (eventW != NULL))
+  if (eventW != NULL)
   {
-    //Input workspace is an event workspace. Use the other exec method
-    this->execEvent();
-    this->cleanup();
-    return;
+    if (getProperty("PreserveEvents"))
+    {
+      //Input workspace is an event workspace. Use the other exec method
+      this->execEvent();
+      this->cleanup();
+      return;
+    }
+    else
+    {
+      eventXMin = std::numeric_limits<double>::max();
+      eventXMax = -1. * eventXMin;
+
+      double temp;
+      for (int64_t workspaceIndex = 0; workspaceIndex < nHist; workspaceIndex++)
+      {
+        temp = matrixInputW->dataX(workspaceIndex).front();
+        if (temp < eventXMin)
+          eventXMin = temp;
+        temp = matrixInputW->dataX(workspaceIndex).back();
+        if (temp > eventXMax)
+          eventXMax = temp;
+      }
+    }
   }
 
   //No problem? Then it is a normal Workspace2D
@@ -264,8 +287,17 @@ void DiffractionFocussing2::exec()
     }
     else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
     {
-      limits[0] = Xin.front();
-      limits[1] = Xin.back();
+      if (eventXMin > 0. && eventXMax > 0)
+      {
+        limits[0] = eventXMin;
+        limits[1] = eventXMax;
+      }
+      else
+      {
+        limits[0] = Xin.front();
+        limits[1] = Xin.back();
+      }
+
       // Rebin the weights - note that this is a distribution
       VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
     }
