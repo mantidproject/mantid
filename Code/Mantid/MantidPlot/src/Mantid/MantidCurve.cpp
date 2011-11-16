@@ -1,4 +1,5 @@
 #include "MantidCurve.h"
+#include "MantidQwtMatrixWorkspaceData.h"
 
 #include <qpainter.h>
 #include <qwt_symbol.h>
@@ -9,6 +10,7 @@
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
+
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -109,7 +111,7 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
 {
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
-  MantidQwtData data(workspace,index, log,distr);
+  MantidQwtMatrixWorkspaceData data(workspace,index, log,distr);
   setData(data);
   Mantid::API::Axis* ax = workspace->getAxis(0);
   if (ax->unit())
@@ -199,7 +201,7 @@ void MantidCurve::loadData()
   // This should only be called for waterfall plots
   // Calculate the offsets...
   computeWaterfallOffsets();
-  MantidQwtData * data = mantidData();
+  MantidQwtMatrixWorkspaceData * data = mantidData();
   // ...and apply them
   data->applyOffsets(d_x_offset,d_y_offset);
   invalidateBoundingRect();
@@ -207,8 +209,8 @@ void MantidCurve::loadData()
 
 void MantidCurve::setData(const QwtData &data)
 {
-  if (!dynamic_cast<const MantidQwtData*>(&data)) 
-    throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
+  if (!dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data)) 
+    throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidCurve");
   PlotCurve::setData(data);
 }
 
@@ -216,7 +218,7 @@ QwtDoubleRect MantidCurve::boundingRect() const
 {
   if (m_boundingRect.isNull())
   {
-    const MantidQwtData* data = mantidData();
+    const MantidQwtMatrixWorkspaceData* data = mantidData();
     if (data->size() == 0) return QwtDoubleRect(0,0,1,1);
     double y_min = std::numeric_limits<double>::infinity();
     double y_max = -y_min;
@@ -242,9 +244,9 @@ void MantidCurve::draw(QPainter *p,
 
   if (m_drawErrorBars)// drawing error bars
   {
-    const MantidQwtData* d = dynamic_cast<const MantidQwtData*>(&data());
+    const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
     if (!d)
-      throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
+      throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidCurve");
     int xi0 = 0;
     p->setPen(pen());
     const int dx = 3;
@@ -275,7 +277,7 @@ void MantidCurve::draw(QPainter *p,
 
 void MantidCurve::itemChanged()
 {
-  MantidQwtData* d = dynamic_cast<MantidQwtData*>(&data());
+  MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
   if (d && d->m_isHistogram)
   {
     if (style() == Steps) d->m_binCentres = false;
@@ -330,7 +332,7 @@ void MantidCurve::dataReset(const QString& wsName)
   }
 
   if (!mws) return;
-  const MantidQwtData * new_mantidData(NULL);
+  const MantidQwtMatrixWorkspaceData * new_mantidData(NULL);
   try {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);
@@ -343,7 +345,7 @@ void MantidCurve::dataReset(const QString& wsName)
     {
       setStyle(QwtPlotCurve::Lines);
     }
-    // Queue this plot to be updated once all MantidQwtData objects for this workspace have been
+    // Queue this plot to be updated once all MantidQwtMatrixWorkspaceData objects for this workspace have been
     emit dataUpdated();
   } catch(std::range_error) {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
@@ -374,22 +376,22 @@ QString MantidCurve::saveToString()
 /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
 int MantidCurve::workspaceIndex()const
 {
-  if (dynamic_cast<const MantidQwtData*>(mantidData()) != 0)
+  if (dynamic_cast<const MantidQwtMatrixWorkspaceData*>(mantidData()) != 0)
   {
     return m_index;
   }
   return -1;
 }
 
-MantidQwtData* MantidCurve::mantidData()
+MantidQwtMatrixWorkspaceData* MantidCurve::mantidData()
 {
-  MantidQwtData* d = dynamic_cast<MantidQwtData*>(&data());
+  MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
   return d;
 }
 
-const MantidQwtData* MantidCurve::mantidData()const
+const MantidQwtMatrixWorkspaceData* MantidCurve::mantidData()const
 {
-  const MantidQwtData* d = dynamic_cast<const MantidQwtData*>(&data());
+  const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
   return d;
 }
 
@@ -421,124 +423,4 @@ bool MantidCurve::isDistribution() const
 bool MantidCurve::hasErrorBars() const
 {
   return m_drawErrorBars;
-}
-
-//==========================================
-//
-//  MantdQwtData methods
-//
-//==========================================
-
-/// Constructor
-MantidQwtData::MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
-: QObject(),
-m_workspace(workspace),
-m_spec(specIndex),
-m_X(workspace->readX(specIndex)),
-m_Y(workspace->readY(specIndex)),
-m_E(workspace->readE(specIndex)),
-m_isHistogram(workspace->isHistogramData()),
-m_binCentres(false),
-m_logScale(logScale),
-m_minPositive(0),
-m_isDistribution(distr)
-{}
-
-/// Copy constructor
-MantidQwtData::MantidQwtData(const MantidQwtData& data)
-: QObject(),
-m_workspace(data.m_workspace),
-m_spec(data.m_spec),
-m_X(data.m_workspace->readX(data.m_spec)),
-m_Y(data.m_workspace->readY(data.m_spec)),
-m_E(data.m_workspace->readE(data.m_spec)),
-m_isHistogram(m_workspace->isHistogramData()),
-m_binCentres(data.m_binCentres),
-m_logScale(data.m_logScale),
-m_minPositive(0),
-m_isDistribution(data.m_isDistribution)
-{}
-
-/** Size of the data set
- */
-size_t MantidQwtData::size() const
-{
-  if (m_binCentres || !m_isHistogram)
-  {
-    return m_Y.size();
-  }
-
-  return m_X.size();
-}
-
-/**
-Return the x value of data point i
-@param i :: Index
-@return x X value of data point i
-*/
-double MantidQwtData::x(size_t i) const
-{
-  return m_binCentres ? (m_X[i] + m_X[i+1])/2 : m_X[i];
-}
-
-/**
-Return the y value of data point i
-@param i :: Index
-@return y Y value of data point i
-*/
-double MantidQwtData::y(size_t i) const
-{
-  double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
-  if (m_isDistribution)
-  {
-    tmp /= (m_X[i+1] - m_X[i]);
-  }
-  if (m_logScale && tmp <= 0.)
-  {
-    tmp = m_minPositive;
-  }
-
-  return tmp;
-}
-
-double MantidQwtData::ex(size_t i) const
-{
-  return m_isHistogram ? (m_X[i] + m_X[i+1])/2 : m_X[i];
-}
-
-double MantidQwtData::e(size_t i) const
-{
-  return m_E[i];
-}
-
-size_t MantidQwtData::esize() const
-{
-  return m_E.size();
-}
-
-bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
-{
-  return workspace.get() == m_workspace.get();
-}
-
-void MantidQwtData::setLogScale(bool on)
-{
-  m_logScale = on;
-}
-
-void MantidQwtData::saveLowestPositiveValue(const double v)
-{
-  if (v > 0) m_minPositive = v;
-}
-
-void MantidQwtData::applyOffsets(const double xOffset, const double yOffset)
-{
-  std::transform(m_workspace->readX(m_spec).begin(),m_workspace->readX(m_spec).end(),m_X.begin(),std::bind2nd(std::plus<double>(),xOffset));
-  std::transform(m_workspace->readY(m_spec).begin(),m_workspace->readY(m_spec).end(),m_Y.begin(),std::bind2nd(std::plus<double>(),yOffset));
-}
-
-bool MantidQwtData::setAsDistribution(bool on)
-{
-  m_isDistribution = on && m_isHistogram;
-  return m_isDistribution;
 }

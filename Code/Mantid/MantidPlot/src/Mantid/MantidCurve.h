@@ -9,7 +9,7 @@
 
 // Forward definitions
 
-class MantidQwtData;
+class MantidQwtMatrixWorkspaceData;
 class Graph;
 class MantidUI;
 
@@ -68,7 +68,7 @@ public:
   /// Used for waterfall plots: updates the data curves with an offset
   void loadData();
 
-  /// Overrides qwt_plot_curve::setData to make sure only data of MantidQwtData type can  be set
+  /// Overrides qwt_plot_curve::setData to make sure only data of MantidQwtMatrixWorkspaceData type can  be set
   void setData(const QwtData &data);
 
   /// Overrides qwt_plot_curve::boundingRect
@@ -77,9 +77,9 @@ public:
   void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
   /// Return pointer to the data if it of the right type or 0 otherwise
-  MantidQwtData* mantidData();
+  MantidQwtMatrixWorkspaceData* mantidData();
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
-  const MantidQwtData* mantidData()const;
+  const MantidQwtMatrixWorkspaceData* mantidData()const;
 
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
@@ -166,92 +166,5 @@ private:
   /// y units
   Mantid::Kernel::Unit_sptr m_yUnits;
 };
-
-
-//=================================================================================================
-//=================================================================================================
-/**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
- */
-class MantidQwtData: public QObject, public QwtData
-{
-  Q_OBJECT
-public:
-  /// Constructor
-  MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
-
-  /// Copy constructor
-  MantidQwtData(const MantidQwtData& data);
-
-    //! @return Pointer to a copy (virtual copy constructor)
-  virtual QwtData *copy() const {return new MantidQwtData(*this);}
-
-  //! @return Size of the data set
-  virtual size_t size() const;
-
-  /**
-  Return the x value of data point i
-  @param i :: Index
-  @return x X value of data point i
-  */
-  virtual double x(size_t i) const;
-  /**
-  Return the y value of data point i
-  @param i :: Index
-  @return y Y value of data point i
-  */
-  virtual double y(size_t i) const;
-
-  /// Return a new data object of the same type but with a new workspace
-  virtual MantidQwtData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
-  {
-    return new MantidQwtData(workspace,m_spec, m_logScale);
-  }
-  /// Returns the error of the i-th data point
-  double e(size_t i)const;
-  /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i)const;
-  /// Number of error bars to plot
-  size_t esize()const;
-
-  bool isHistogram()const{return m_isHistogram;}
-
-  bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
-
-  /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on);
-  bool logScale()const{return m_logScale;}
-  void saveLowestPositiveValue(const double v);
-  bool setAsDistribution(bool on = true);
-
-  void applyOffsets(const double xOffset, const double yOffset);
-
-private:
-
-  friend class MantidCurve;
-
-  /// Pointer to the Mantid workspace
-  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
-  /// Spectrum index in the workspace
-  int m_spec;
-  /// Copy of the X vector
-  Mantid::MantidVec m_X;
-  /// Copy of the Y vector
-  Mantid::MantidVec m_Y;
-  /// Copy of the E vector
-  Mantid::MantidVec m_E;
-
-  /// Is the spectrum a histogram?
-  bool m_isHistogram;
-  /// This field can be set true for a histogram workspace. If it's true x(i) returns (X[i]+X[i+1])/2
-  bool m_binCentres;
-  /// Indicates that the data is plotted on a log y scale
-  bool m_logScale;
-  /// lowest positive y value
-  mutable double m_minPositive;
-  /// Is plotting as distribution
-  bool m_isDistribution;
-
-};
-
 
 #endif // MANTID_CURVE_H
