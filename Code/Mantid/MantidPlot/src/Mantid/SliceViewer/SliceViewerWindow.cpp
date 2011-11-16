@@ -7,10 +7,12 @@
 #include "../../../MantidQt/SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
 #include "SliceViewerWindow.h"
 #include <qlayout.h>
+#include "MantidQtSliceViewer/SliceViewer.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using MantidQt::SliceViewer::SliceViewer;
 
 
 SliceViewerWindow::SliceViewerWindow(const QString& wsName, ApplicationWindow *app , const QString& label, Qt::WFlags f)

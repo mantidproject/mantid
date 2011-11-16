@@ -4,25 +4,31 @@ from mantidsimple import *
 from pylab import *
 import time
 
-class Setup:
+class sfSetup:
         
     nexus_path = '/mnt/hgfs/j35/'
-    list_runs = {'D0': 55889,    #0
-             'AiD0': 55890,  #1
-             'AiD1': 55891,  #2
-             'AiD2': 55892,  #3
-             'AiD3': 55893,  #4
-             'AiD4': 55894,  #5
-             'AiD5': 55895,  #6
-             'AiiAiD5': 55896,  #7
-             'AiiAiD6': 55897,  #8
-             'AiiAiD7': 55898,  #9
-             'AiiiAiiAiD7': 55899,  #10
-             'AiiiAiiAiD8': 55900,  #11
-             'AivAiiiAiiAiD8': 55901,  #12
-             'AivAiiiAiiAiD9': 55902}  #13
+#    list_runs = {'D0': 55889,    #0
+#             'AiD0': 55890,  #1
+#             'AiD1': 55891,  #2
+#             'AiD2': 55892,  #3
+#             'AiD3': 55893,  #4
+#             'AiD4': 55894,  #5
+#             'AiD5': 55895,  #6
+#             'AiiAiD5': 55896,  #7
+#             'AiiAiD6': 55897,  #8
+#             'AiiAiD7': 55898,  #9
+#             'AiiiAiiAiD7': 55899,  #10
+#             'AiiiAiiAiD8': 55900,  #11
+#             'AivAiiiAiiAiD8': 55901,  #12
+#             'AivAiiiAiiAiD9': 55902}  #13
+    
+    list_runs = []
+    
     pre = 'REF_L_'
     post = '_event.nxs'
+
+    #new way to specify input
+    #run number: nbr of attenuators
 
     tof_min = 10000  #microS
     tof_max = 21600  #microS
@@ -140,10 +146,10 @@ class Setup:
         operator * between two instances of the class
         """
         
-        product = Setup()
+        product = sfSetup()
         
-        product.id_numerator = self.id_numerator + '*' + other.id_numerator
-        product.id_denominator = self.id_denominator + '*' + other.id_denominator
+        product.numerator = self.numerator + '*' + other.numerator
+        product.denominator = self.denominator + '*' + other.denominator
         
         product.x_axis_ratio = self.x_axis_ratio
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
@@ -170,11 +176,11 @@ class Setup:
         self.error_a = res.getDouble("Error",0)
         self.error_b = res.getDouble("Error",1)
                 
-class CalculateAD(Setup):      
+class sfCalculator(sfSetup):      
     
     #name of numerators and denominators
-    id_numerator = None #ex: AiD0
-    id_denominator = None   #ex: AiD1
+    numerator = None #ex: AiD0
+    denominator = None   #ex: AiD1
 
     _y_axis_numerator = None
     _y_axis_error_numerator = None
@@ -203,10 +209,10 @@ class CalculateAD(Setup):
     _y_axis_error_ratio = None
     _x_axis_ratio = None
             
-    def __init__(self, id_numerator=None, id_denominator=None):
+    def __init__(self, numerator=None, denominator=None):
         
-        self.id_numerator = id_numerator
-        self.id_denominator = id_denominator
+        self.numerator = numerator
+        self.denominator = denominator
 
         self.x_axis_ratio = None
         self.y_axis_error_ratio = None
@@ -260,19 +266,21 @@ class CalculateAD(Setup):
         run full calculation for numerator or denominator
         """
         if bNumerator is True:
-            _id = self.id_numerator
+            file = self.numerator
+#            _id = self.id_numerator
             self.peak_pixel_min = self.n_peak_pixel_min
             self.peak_pixel_max = self.n_peak_pixel_max
             self.back_pixel_min = self.n_back_pixel_min
             self.back_pixel_max = self.n_back_pixel_max
         else:
-            _id = self.id_denominator
+            file = self.denominator
+#            _id = self.id_denominator
             self.peak_pixel_min = self.d_peak_pixel_min
             self.peak_pixel_max = self.d_peak_pixel_max
             self.back_pixel_min = self.d_back_pixel_min
             self.back_pixel_max = self.d_back_pixel_max
         
-        nexus_file_numerator = self._determineNexusFileName(_id)    
+        nexus_file_numerator = file
         LoadEventNexus(Filename=nexus_file_numerator, 
                        OutputWorkspace='EventDataWks')
         mt1 = mtd['EventDataWks']
@@ -337,17 +345,8 @@ class CalculateAD(Setup):
         else:
             self._y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
             self._y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
+            self.x_axis_ratio = self._x_axis[index_tof_min:index_tof_max]
 
-    def _determineNexusFileName(self, id):
-        """
-        returns the full path to the nexus file
-        """
-        run_number = self.list_runs[id]
-        full_path = self.nexus_path + self.pre
-        full_path += str(run_number) + self.post
-        return full_path
-            
-            
     def _createIntegratedWorkspace(self,
                                    InputWorkspace=None, 
                                    OutputWorkspace=None,
@@ -406,10 +405,10 @@ class CalculateAD(Setup):
 
 def plotObject(instance):
     
-    return
-    
-    print 'a: ' + str(instance.a[-1])
-    print 'b: ' + str(instance.b[-1])    
+#    return
+
+#    print 'a: ' + str(instance.a[-1])
+#    print 'b: ' + str(instance.b[-1])    
     
     figure()
     errorbar(instance.x_axis_ratio, 
@@ -417,15 +416,22 @@ def plotObject(instance):
              instance.y_axis_error_ratio, 
              marker='s', 
              mfc='red',
-             linestyle='')
-    x=linspace(10000,22000,100)
-    plot(x,instance.a+instance.b*x)
+             linestyle='',
+             label='Exp. data')
+    
+    if (instance.a is not None):
+        x=linspace(10000,22000,100)
+        _label = "%.3f + x*%.2e" % (instance.a, instance.b)
+        plot(x,instance.a+instance.b*x, label=_label)
+    
     xlabel("TOF (microsS)")
     ylabel("Ratio")
-    title(instance.id_numerator + '/' + instance.id_denominator)
+    
+    title(instance.numerator + '/' + instance.denominator)
     show()
+    legend()
 
-def record_settings(a,b,error_a,error_b,name,instance):
+def recordSettings(a,b,error_a,error_b,name,instance):
     """
     This function will record the various fitting parameters and the 
     name of the ratio
@@ -434,7 +440,7 @@ def record_settings(a,b,error_a,error_b,name,instance):
     b.append(instance.b)
     error_a.append(instance.error_a)
     error_b.append(instance.error_b)
-    name.append(instance.id_numerator + '/' + instance.id_denominator)
+    name.append(instance.numerator + '/' + instance.denominator)
 
 def outputFittingParameters(a,b,a_error,b_error,name,output_file_name):
     """
@@ -460,91 +466,276 @@ def outputFittingParameters(a,b,a_error,b_error,name,output_file_name):
     f.writelines(_content)
     f.close()
 
+def createInputDictionary(list_files):
+    """
+    Using the list_files, will produce a dictionary of the run number and number of attenuator
+    ex:
+        list_files = "1000:0, 1001:1, 1002:1, 1003:2"
+        return {1000:0, 1001:1, 1002:2, 1003:2}
+    """
+    if (list_files == ''):
+        return None
+    first_split = list_files.split(',')
+    _input_dico = {}
+    _nbr_files = len(first_split)
+    for i in range(_nbr_files):
+        _second_split = first_split[i].split(':')
+        _input_dico[_second_split[0]] = _second_split[1]
+    return _input_dico
+
+def getSh(mt, top_tag, bottom_tag):
+    """
+        returns the height and units of the given slit#
+    """
+    mt_run = mt.getRun()
+    st = mt_run.getProperty(top_tag).value
+    sb = mt_run.getProperty(bottom_tag).value
+    sh = float(sb[0]) - float(st[0])
+    units = mt_run.getProperty(top_tag).units
+    return sh, units
+    
+def getS1h(mt=None):
+    """    
+        returns the height and units of the slit #1 
+    """
+    if mt != None:
+        _h,units = getSh(mt,'s1t','s1b') 
+        return _h,units
+    return None,''
+    
+def getS2h(mt=None):
+    """    
+        returns the height and units of the slit #2 
+    """
+    if mt != None:
+        _h,units = getSh(mt,'s2t','s2b') 
+        return _h,units
+    return None,None
+
+def getSlitsValue(full_list_runs, S1H, S2H):
+    """
+    Retrieve the S1H and S2H values
+    """
+    _nbr_files = len(full_list_runs)
+    for i in range(_nbr_files):
+        _full_file_name = full_list_runs[i]
+        LoadEventNexus(Filename=_full_file_name, 
+                       OutputWorkspace='tmpWks')
+        mt1 = mtd['tmpWks']
+        _s1h_value, _s1h_units = getS1h(mt1)
+        _s2h_value, _s2h_units = getS2h(mt1)
+        S1H[i] = _s1h_value
+        S2H[i] = _s2h_value
+
+def isRunsSorted(list_runs, S1H, S2H):
+    """
+    Make sure the files have been sorted
+    """
+    sz = len(S1H)
+    sTotal = zeros(sz)
+    for i in range(sz):
+        sTotal[i] = S1H[i] + S2H[i]
+     
+    sorted_sTotal = sorted(sTotal)
+     
+    for i in range(len(sTotal)):
+        _left = list(sTotal)[i]
+        _right = sorted_sTotal[i]
+        
+        _left_formated = "%2.1f" %_left
+        _right_formated = "%2.1f" %_right
+        if (_left_formated != _right_formated):
+            return False
+    
+    return True
+
 if __name__ == '__main__':
     
-#    t_start = time.time()
+    #Input from user
+    list_runs = ['55889','55890','55891','55892','55893','55894','55895','55896','55897','55898','55899','55900','55901','55902']
+    list_attenuator = [0,1,1,1,1,1,1,2,2,2,3,3,4,4]
     
-    #initialize record fitting parameters arrays
-    a=[]
-    b=[]
-    error_a=[]
-    error_b=[]
-    name=[]
+    nexus_path = '/mnt/hgfs/j35/'
+    pre = 'REF_L_'
+    nexus_path_pre = nexus_path + pre
+    post = '_event.nxs'
     
-    cal_D1 = CalculateAD(id_numerator='AiD1', id_denominator='AiD0')
-    cal_D1.run()
-    cal_D1.fit()
-    record_settings(a,b,error_a,error_b,name,cal_D1)
-    plotObject(cal_D1)
+    for (offset,item) in enumerate(list_runs):
+        list_runs[offset] = nexus_path_pre + list_runs[offset] + post
+
+    #####
+    #Input file should be as it is here !
+    #####
     
-    cal_D2 = CalculateAD(id_numerator='AiD2', id_denominator='AiD0')
-    cal_D2.run()
-    cal_D2.fit()
-    record_settings(a,b,error_a,error_b,name,cal_D2)
-    plotObject(cal_D2)
-               
-    cal_D3 = CalculateAD(id_numerator='AiD3', id_denominator='AiD0')
-    cal_D3.run()
-    cal_D3.fit()
-    record_settings(a,b,error_a,error_b,name,cal_D3)
-    plotObject(cal_D3)
+    #retrieve the S1H and S2H val/units for each NeXus    
+    S1H={}
+    S2H={}
+    getSlitsValue(list_runs, S1H, S2H)
+ 
+    #make sure the file are sorted from smaller to bigger openning
+    if isRunsSorted(list_runs, S1H, S2H):
+        
+        #initialize record fitting parameters arrays
+        a=[]
+        b=[]
+        error_a=[]
+        error_b=[]
+        name=[]
+        _previous_cal = None
 
-    cal_D4 = CalculateAD(id_numerator='AiD4', id_denominator='AiD0')
-    cal_D4.run()
-    cal_D4.fit()
-    record_settings(a,b,error_a,error_b,name,cal_D4)    
-    plotObject(cal_D4)
+        _first_1A = True
+        _first_2A = True
+        _first_3A = True
+        _first_4A = True
+        _first_5A = True
+        _first_6A = True
 
-    cal_D5 = CalculateAD(id_numerator='AiD5', id_denominator='AiD0')
-    cal_D5.run()
-    cal_D5.fit()
-    record_settings(a,b,error_a,error_b,name,cal_D5)
-    plotObject(cal_D5)
-
-    cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
-    cal_D6.run()
-    cal_D6.fit()
-    record_settings(a,b,error_a,error_b,name,cal_D6)
-    plotObject(cal_D6)
-
-    cal_D6 = CalculateAD(id_numerator='AiiAiD6', id_denominator='AiiAiD5')
-    cal_D6.run()
-    product_D6 = cal_D6 * cal_D5
-    product_D6.fit()
-    record_settings(a,b,error_a,error_b,name,product_D6)
-    plotObject(product_D6)
-
-    cal_D7 = CalculateAD(id_numerator='AiiAiD7', id_denominator='AiiAiD5')
-    cal_D7.setNumerator(minPeak=128, maxPeak=136, minBack=120, maxBack=145)
-    cal_D7.run()
-    product_D7 = cal_D7 * cal_D5
-    product_D7.fit()
-    record_settings(a,b,error_a,error_b,name,product_D7)    
-    plotObject(product_D7)
-
-    cal_D8 = CalculateAD(id_numerator='AiiiAiiAiD8', id_denominator='AiiiAiiAiD7')
-    cal_D8.setNumerator(minPeak=125, maxPeak=140, minBack=115, maxBack=150)
-    cal_D8.setDenominator(minPeak=128, maxPeak=136, minBack=120, maxBack=145)
-    cal_D8.run()
-    product_D8 = cal_D8 * product_D7
-    product_D8.fit()
-    record_settings(a,b,error_a,error_b,name,product_D8)    
-    plotObject(product_D8)
-    
-    cal_D9 = CalculateAD(id_numerator='AivAiiiAiiAiD9', id_denominator='AivAiiiAiiAiD8')
-    cal_D9.setNumerator(minPeak=120, maxPeak=145, minBack=105, maxBack=155)
-    cal_D9.setDenominator(minPeak=125, maxPeak=140, minBack=115, maxBack=150)
-    cal_D9.run()
-    product_D9 = cal_D9 * product_D8 
-    product_D9.fit()
-    record_settings(a,b,error_a,error_b,name,product_D9)    
-    plotObject(product_D9)
-
-    #output the fitting parameters in an ascii
-    output_file_name = '/home/j35/Desktop/SFcalculator.txt'
-    outputFittingParameters(a,b,error_a,error_b,name,output_file_name)
-
-#    t_end = time.time()
-#    print 'Time to run the process: %0.1f s' % (t_end-t_start)                   
-                     
+        _index_first_1A = -1
+        _index_first_2A = -1
+        _index_first_3A = -1
+        _index_first_4A = -1
+        _index_first_5A = -1
+        _index_first_6A = -1
+        
+        _previous_cal=None
+        _keep_cal=None
+        
+        for i in range(len(list_runs)):
             
+            if list_attenuator[i] == 0:
+                continue
+
+            if list_attenuator[i] == 1: #skip first 1 attenuator
+                if (_first_1A):
+                    _first_1A = False
+                    _index_first_1A = i
+                    continue
+                else:
+                    index_numerator = i
+                    index_denominator = _index_first_1A
+            
+                cal = sfCalculator(numerator=list_runs[index_numerator], 
+                                   denominator=list_runs[index_denominator])
+                cal.run()
+                cal.fit()
+                recordSettings(a,b,error_a,error_b,name,cal)
+                #plotObject(cal)
+                _keep_cal=cal
+            
+            if list_attenuator[i] == 2:
+                if (_first_2A):
+                    _first_2A = False
+                    _index_first_2A = i
+                    _previous_cal = _keep_cal 
+                    continue
+                else:
+                    index_numerator = i
+                    index_denominator = _index_first_2A
+                    
+                print _previous_cal.numerator
+                print _previous_cal.denominator
+                plotObject(_previous_cal)
+                cal = sfCalculator(numerator=list_runs[index_numerator], 
+                                   denominator=list_runs[index_denominator])
+                print _previous_cal.numerator
+                print _previous_cal.denominator
+                plotObject(_previous_cal)
+                cal.run()
+                print _previous_cal.numerator
+                print _previous_cal.denominator
+                plotObject(_previous_cal)
+
+                new_cal = cal * _previous_cal
+                new_cal.fit()
+                recordSettings(a,b,error_a,error_b,name,new_cal)
+                #plotObject(new_cal)
+                _keep_cal=new_cal
+
+                break
+
+            if list_attenuator[i] == 3: 
+                if (_first_3A):
+                    _first_3A = False
+                    _index_first_3A = i
+                    _previous_cal = _keep_cal
+                    continue
+                else:
+                    index_numerator = i
+                    index_denominator = _index_first_3A
+                    
+                cal = sfCalculator(numerator=list_runs[index_numerator], 
+                                   denominator=list_runs[index_denominator])
+                cal.run()
+                new_cal = cal * _previous_cal
+                new_cal.fit()
+                recordSettings(a,b,error_a,error_b,name,new_cal)
+                plotObject(new_cal)
+                _keep_cal = new_cal
+        
+            if list_attenuator[i] == 4: 
+                if (_first_4A):
+                    _first_4A = False
+                    _index_first_4A = i
+                    _previous_cal = _keep_cal
+                    continue
+                else:
+                    index_numerator = i
+                    index_denominator = _index_first_4A
+                    
+                cal = sfCalculator(numerator=list_runs[index_numerator], 
+                                   denominator=list_runs[index_denominator])
+                cal.run()
+                new_cal = cal * _previous_cal
+                new_cal.fit()
+                recordSettings(a,b,error_a,error_b,name,new_cal)
+                plotObject(new_cal)
+                _keep_cal = new_cal
+        
+            if list_attenuator[i] == 5: 
+                if (_first_5A):
+                    _first_5A = False
+                    _index_first_5A = i
+                    _previous_cal = _keep_cal
+                    continue
+                else:
+                    index_numerator = i
+                    index_denominator = _index_first_5A
+                    
+                cal = sfCalculator(numerator=list_runs[index_numerator], 
+                                   denominator=list_runs[index_denominator])
+                cal.run()
+                new_cal = cal * _previous_cal
+                new_cal.fit()
+                recordSettings(a,b,error_a,error_b,name,new_cal)
+                plotObject(new_cal)
+                _keep_cal = new_cal
+        
+            if list_attenuator[i] == 6: 
+                if (_first_6A):
+                    _first_6A = False
+                    _index_first_6A = i
+                    _previous_cal = _keep_cal
+                    continue
+                else:
+                    index_numerator = i
+                    index_denominator = _index_first_6A
+                    
+                cal = sfCalculator(numerator=list_runs[index_numerator], 
+                                   denominator=list_runs[index_denominator])
+                cal.run()
+                new_cal = cal * _previous_cal
+                new_cal.fit()
+                recordSettings(a,b,error_a,error_b,name,new_cal)
+                plotObject(new_cal)
+                _keep_cal = new_cal
+    
+        #output the fitting parameters in an ascii
+        output_file_name = '/home/j35/Desktop/SFcalculator.txt'
+        outputFittingParameters(a,b,error_a,error_b,name,output_file_name)
+
+    else:
+        """
+        sort the files 
+        """
+        pass
+    

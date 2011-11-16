@@ -146,3 +146,6 @@ workspace.sendto.SansView.saveusing=SaveCanSAS1D
 workspace.sendto.SansView.target=%SANSVIEWPATH%/SansView.exe
 workspace.sendto.SansView.visible=Yes
 workspace.sendto.name.SansView=0
+
+# Change this property to On to make Mantid case sensitive
+filefinder.casesensitive=Off

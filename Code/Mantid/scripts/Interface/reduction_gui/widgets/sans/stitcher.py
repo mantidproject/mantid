@@ -50,7 +50,7 @@ class StitcherWidget(BaseWidget):
         
         self._referenceID = 0
         
-        self._graph = None
+        self._graph = "StitchedData"
         self._output_dir = None
         self._stitcher = None
 
@@ -68,10 +68,10 @@ class StitcherWidget(BaseWidget):
         self.connect(self._content.medium_q_browse_button, QtCore.SIGNAL("clicked()"), self._medium_q_browse)
         self.connect(self._content.high_q_browse_button, QtCore.SIGNAL("clicked()"), self._high_q_browse)
         
-        self.connect(self._content.low_q_edit, QtCore.SIGNAL("returnPressed()"), self._update_low_q)
-        self.connect(self._content.medium_q_edit, QtCore.SIGNAL("returnPressed()"), self._update_medium_q)
-        self.connect(self._content.high_q_edit, QtCore.SIGNAL("returnPressed()"), self._update_high_q)
-
+        self.connect(self._content.low_q_combo, QtCore.SIGNAL("activated(int)"), self._update_low_q)
+        self.connect(self._content.medium_q_combo, QtCore.SIGNAL("activated(int)"), self._update_medium_q)
+        self.connect(self._content.high_q_combo, QtCore.SIGNAL("activated(int)"), self._update_high_q)
+        
         # Radio buttons
         self.connect(self._content.low_radio, QtCore.SIGNAL("clicked()"), self._low_q_selected)
         self.connect(self._content.medium_radio, QtCore.SIGNAL("clicked()"), self._medium_q_selected)
@@ -97,6 +97,48 @@ class StitcherWidget(BaseWidget):
         g.addButton(self._content.high_radio)
         g.setExclusive(True)
         self._content.low_radio.setChecked(True)
+        
+        self._content.low_q_combo.insertItem(0,"")
+        self.populate_combobox(self._content.low_q_combo)
+        self._content.low_q_combo.setEditable(True)
+        
+        self._content.medium_q_combo.insertItem(0,"")
+        self.populate_combobox(self._content.medium_q_combo)
+        self._content.medium_q_combo.setEditable(True)
+        
+        self._content.high_q_combo.insertItem(0,"")
+        self.populate_combobox(self._content.high_q_combo)
+        self._content.high_q_combo.setEditable(True)
+        
+        class ShowEventFilter(QtCore.QObject):
+            def eventFilter(obj_self, filteredObj, event):
+                if event.type() == QtCore.QEvent.HoverEnter:
+                    self.populate_combobox(filteredObj)
+                    filteredObj.update()
+                elif event.type() == QtCore.QEvent.KeyPress:
+                    if event.key() == QtCore.Qt.Key_Return or event.key() == QtCore.Qt.Key_Enter:
+                        filteredObj.setItemText(0, filteredObj.lineEdit().text())
+                        if filteredObj==self._content.low_q_combo:
+                            self._update_low_q()
+                        elif filteredObj==self._content.medium_q_combo:
+                            self._update_medium_q()
+                        elif filteredObj==self._content.high_q_combo:
+                            self._update_high_q()
+                        return True
+                    
+                return QtCore.QObject.eventFilter(obj_self, filteredObj, event)
+        
+        eventFilter = ShowEventFilter(self)
+        self._content.low_q_combo.installEventFilter(eventFilter)
+        self._content.medium_q_combo.installEventFilter(eventFilter)
+        self._content.high_q_combo.installEventFilter(eventFilter)
+
+    def populate_combobox(self, combo):
+        ws_list = mtd.getWorkspaceNames()
+        for ws in ws_list:
+            if not ws.startswith("__") and combo.findText(ws)<0\
+             and hasattr(mtd[ws], "getNumberHistograms") and  mtd[ws].getNumberHistograms()==1:
+                combo.addItem(ws)
         
     def _update_low_scale(self):
         """
@@ -170,64 +212,64 @@ class StitcherWidget(BaseWidget):
         self._content.high_scale_edit.setText("1.0")
         self._referenceID = 2
         
-    def _update_low_q(self):
+    def _update_low_q(self, ws=None):
         """
             Update Low-Q data set
         """
-        file = str(self._content.low_q_edit.text())
-        if os.path.isfile(file):
+        file = str(self._content.low_q_combo.lineEdit().text())
+        if os.path.isfile(file) or mtd.workspaceExists(file):
             self._low_q_data = DataSet(file)
             self._low_q_data.load(True)
             minx, maxx = self._low_q_data.get_range()
             self._content.low_min_edit.setText(str(minx))
             self._content.low_max_edit.setText(str(maxx))
             self._content.low_scale_edit.setText("1.0")
-            util.set_valid(self._content.low_q_edit, True)
+            util.set_valid(self._content.low_q_combo.lineEdit(), True)
         else:
             self._low_q_data = None
-            util.set_valid(self._content.low_q_edit, False)
+            util.set_valid(self._content.low_q_combo.lineEdit(), False)
 
-    def _update_medium_q(self):
+    def _update_medium_q(self, ws=None):
         """
             Update Medium-Q data set
         """
-        file = str(self._content.medium_q_edit.text())
-        if os.path.isfile(file):
+        file = str(self._content.medium_q_combo.lineEdit().text())
+        if os.path.isfile(file) or mtd.workspaceExists(file):
             self._medium_q_data = DataSet(file)
             self._medium_q_data.load(True)
             minx, maxx = self._medium_q_data.get_range()
             self._content.medium_min_edit.setText(str(minx))
             self._content.medium_max_edit.setText(str(maxx))
             self._content.medium_scale_edit.setText("1.0")
-            util.set_valid(self._content.medium_q_edit, True)
+            util.set_valid(self._content.medium_q_combo.lineEdit(), True)
         else:
             self._medium_q_data = None
-            util.set_valid(self._content.medium_q_edit, False)
+            util.set_valid(self._content.medium_q_combo.lineEdit(), False)
 
-    def _update_high_q(self):
+    def _update_high_q(self, ws=None):
         """
             Update High-Q data set
         """
-        file = str(self._content.high_q_edit.text())
-        if os.path.isfile(file):
+        file = str(self._content.high_q_combo.lineEdit().text())
+        if os.path.isfile(file) or mtd.workspaceExists(file):
             self._high_q_data = DataSet(file)
             self._high_q_data.load(True)
             self._content.high_scale_edit.setText("1.0")
-            util.set_valid(self._content.high_q_edit, True)
+            util.set_valid(self._content.high_q_combo.lineEdit(), True)
         else:
             self._high_q_data = None
-            util.set_valid(self._content.high_q_edit, False)
+            util.set_valid(self._content.high_q_combo.lineEdit(), False)
 
     def data_browse_dialog(self):
         """
             Pop up a file dialog box.
         """
         title = "Data file - Choose a reduced I(Q) file"
-        if not os.path.isdir(self._output_dir):
+        if not os.path.isdir(str(self._output_dir)):
             self._output_dir = os.path.expanduser("~")
         fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
                                                                    self._output_dir,
-                                                                   "Data files (*.xml)")).filePath()
+                                                                   "Reduced XML files (*.xml);; Reduced Nexus files (*.nxs);; All files (*.*)")).filePath()
         if fname:
             # Store the location of the loaded file
             self._output_dir = str(QtCore.QFileInfo(fname).path())
@@ -239,7 +281,7 @@ class StitcherWidget(BaseWidget):
         """
         fname = self.data_browse_dialog()
         if fname:
-            self._content.low_q_edit.setText(fname)   
+            self._content.low_q_combo.setItemText(0,fname)
             self._update_low_q()
 
     def _medium_q_browse(self):
@@ -248,7 +290,7 @@ class StitcherWidget(BaseWidget):
         """
         fname = self.data_browse_dialog()
         if fname:
-            self._content.medium_q_edit.setText(fname) 
+            self._content.medium_q_combo.setItemText(0,fname)
             self._update_medium_q()
 
     def _high_q_browse(self):
@@ -257,7 +299,7 @@ class StitcherWidget(BaseWidget):
         """
         fname = self.data_browse_dialog()
         if fname:
-            self._content.high_q_edit.setText(fname)   
+            self._content.high_q_combo.setItemText(0,fname)
             self._update_high_q()   
 
     def is_running(self, is_running):
@@ -351,7 +393,10 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._high_q_data.get_scaled_ws())
         
         if len(ws_list)>0:
-            self._graph = qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+            g = qti.app.graph(self._graph)
+            if g is None:
+                g = qti.app.mantidUI.pyPlotSpectraList(ws_list,[0],True)
+                g.setName(self._graph)
                 
     def _save_result(self):
         """

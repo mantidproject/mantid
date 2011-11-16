@@ -41,6 +41,13 @@ namespace Mantid
       {
         Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
       }
+
+      // determine from Mantid property how sensitive Mantid should be
+      std::string casesensitive = Mantid::Kernel::ConfigService::Instance().getString("filefinder.casesensitive");
+      if ( casesensitive == "Off" )
+        globOption = Poco::Glob::GLOB_CASELESS;
+      else
+        globOption = Poco::Glob::GLOB_DEFAULT;
     }
 
     /**
@@ -77,7 +84,7 @@ namespace Mantid
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
-          Kernel::Glob::glob(pathPattern, files);
+          Kernel::Glob::glob(pathPattern, files, globOption);
           if (!files.empty())
           {
             return *files.begin();
@@ -428,7 +435,7 @@ namespace Mantid
             {
               continue;
               std::set < std::string > files;
-              Kernel::Glob::glob(pathPattern, files);
+              Kernel::Glob::glob(pathPattern, files, globOption);
             }
             else
             {

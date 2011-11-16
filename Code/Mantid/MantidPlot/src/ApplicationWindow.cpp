@@ -8860,20 +8860,23 @@ void ApplicationWindow::newProject()
 }
 
 void ApplicationWindow::savedProject()
-{	QCoreApplication::processEvents();
-if(actionSaveFile) actionSaveFile->setEnabled(false);
-if(actionSaveProject)actionSaveProject->setEnabled(false);
-saved = true;
+{	
+  QCoreApplication::processEvents();
+  if(actionSaveFile) actionSaveFile->setEnabled(false);
+  if(actionSaveProject)actionSaveProject->setEnabled(false);
+  saved = true;
 
-Folder *f = projectFolder();
-while (f){
-  QList<MdiSubWindow *> folderWindows = f->windowsList();
-  foreach(MdiSubWindow *w, folderWindows){
-    if (w->isA("Matrix"))
-      ((Matrix *)w)->undoStack()->setClean();
+  Folder *f = projectFolder();
+  while (f)
+  {
+    QList<MdiSubWindow *> folderWindows = f->windowsList();
+    foreach(MdiSubWindow *w, folderWindows)
+    {
+      if (w->isA("Matrix"))
+        ((Matrix *)w)->undoStack()->setClean();
+    }
+    f = f->folderBelow();
   }
-  f = f->folderBelow();
-}
 }
 
 void ApplicationWindow::modifiedProject()
@@ -10549,16 +10552,19 @@ void ApplicationWindow::openMantidMatrix(const QStringList &list)
   QString wsName=qlist[1];
   MantidMatrix *m=newMantidMatrix(wsName,-1,-1);//mantidUI->importMatrixWorkspace(wsName,-1,-1,false,false);
   //if(!m)throw std::runtime_error("Error on opening matrixworkspace ");
-  if(!m) return;
+  if(!m) 
+    return;
   //adding the mantid matrix windows opened to a list.
   //this list is used for find the MantidMatrix window pointer to open a 3D/2DGraph
   m_mantidmatrixWindows<<m;
   QStringList::const_iterator line = list.begin();
   for (line++; line!=list.end(); line++)
-  {	QStringList fields = (*line).split("\t");
-  if (fields[0] == "geometry" || fields[0] == "tgeometry") {
-    restoreWindowGeometry(this, m, *line);
-  }
+  {	
+    QStringList fields = (*line).split("\t");
+    if (fields[0] == "geometry" || fields[0] == "tgeometry") 
+    {
+      restoreWindowGeometry(this, m, *line);
+    }
   }
 }
 void ApplicationWindow::openInstrumentWindow(const QStringList &list)
@@ -10567,42 +10573,134 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
   QStringList qlist=s.split("\t");
   QString wsName=qlist[1];
   InstrumentWindow *insWin = mantidUI->getInstrumentView(wsName);
-  if(!insWin) return;
+  if(!insWin) 
+    return;
   insWin->show();
   QStringList::const_iterator line = list.begin();
   for (line++; line!=list.end(); line++)
-  {	QStringList fields = (*line).split("\t");
-  if (fields[0] == "geometry" || fields[0] == "tgeometry") {
-    restoreWindowGeometry(this, insWin, *line);
-  }
+  {	
+    QStringList fields = (*line).split("\t");
+    if (fields[0] == "geometry" || fields[0] == "tgeometry") 
+    {
+      restoreWindowGeometry(this, insWin, *line);
+    }
   }
 }
+
 /** This method opens script window when  project file is loaded
  */
 void ApplicationWindow::openScriptWindow(const QStringList &list)
-{	showScriptWindow();
-if(!scriptingWindow) return;
-scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->scriptingLanguage() + " Window");
-QString s=list[0];
-QStringList scriptnames=s.split("\t");
-int count=scriptnames.size();
-if(count==0) return;
-// don't create a new tab when the first script file from theproject file  opened
-if(!scriptnames[1].isEmpty()) scriptingWindow->open(scriptnames[1],false);
-// create a new tab  and open the script for all otehr filenames
-for(int i=2;i<count;++i)
-{   if(!scriptnames[i].isEmpty())scriptingWindow->open(scriptnames[i],true);
+{	
+  showScriptWindow();
+  if(!scriptingWindow) 
+    return;
+  scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->scriptingLanguage() + " Window");
+  QString s=list[0];
+  QStringList scriptnames=s.split("\t");
+  int count=scriptnames.size();
+  if(count==0) 
+    return;
+  // don't create a new tab when the first script file from theproject file  opened
+  if(!scriptnames[1].isEmpty()) 
+    scriptingWindow->open(scriptnames[1],false);
+  // create a new tab  and open the script for all otehr filenames
+  for(int i=2;i<count;++i)
+  {   
+    if(!scriptnames[i].isEmpty())
+      scriptingWindow->open(scriptnames[i],true);
+  }
 }
-}
-/** This method populates the mantid workspace tree when  project file is loaded 
- */
+
+/** This method populates the mantid workspace tree when project file is loaded and
+*   then groups all the workspaces that belonged to a group when the project was saved. 
+*
+*   @params &s :: A QString that contains all the names of workspaces and group workspaces
+*                 that the user is trying to load from a project.
+*/
 void ApplicationWindow::populateMantidTreeWdiget(const QString &s)
 {	
   QStringList list = s.split("\t");
   QStringList::const_iterator line = list.begin();
   for (++line; line!=list.end(); ++line)
-  {	std::string wsName=(*line).toStdString();
-  if(wsName.empty())throw std::runtime_error("Workspace Name not found in project file ");
+  {	
+    if ((*line).contains(',')) // ...it is a group and more work needs to be done
+    {
+      // Format of string is "GroupName, Workspace, Workspace, Workspace, .... and so on "
+      QStringList groupWorkspaces = (*line).split(','); 
+      std::string groupName = groupWorkspaces[0].toStdString();
+      std::vector<std::string> inputWsVec;
+      // Work through workspaces, load into Mantid and then push into vectorgroup (ignore group name, start at 1)
+      for (int i=1; i<groupWorkspaces.size(); i++)
+      {
+        std::string wsName = groupWorkspaces[i].toStdString();
+        loadWsToMantidTree(wsName);
+        inputWsVec.push_back(wsName);
+      }      
+
+      try
+      { 
+        bool smallGroup(inputWsVec.size() < 2);
+        if (smallGroup) // if the group contains less than two items...
+        {
+          // ...create a new workspace and then delete it later on (group workspace requires two workspaces in order to run the alg)
+          Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace",1);
+          alg->setProperty("OutputWorkspace", "boevsMoreBoevs");
+          alg->setProperty< std::vector<double> >("DataX", std::vector<double>(2,0.0) );
+          alg->setProperty< std::vector<double> >("DataY", std::vector<double>(2,0.0) );
+          // execute the algorithm
+          alg->execute();
+          // name picked because random and won't ever be used.
+          inputWsVec.push_back("boevsMoreBoevs");
+        }
+
+        // Group the workspaces as they were when the project was saved
+        std::string algName("GroupWorkspaces");
+        Mantid::API::IAlgorithm_sptr groupingAlg = Mantid::API::AlgorithmManager::Instance().create(algName,1);
+        groupingAlg->initialize();
+        groupingAlg->setProperty("InputWorkspaces",inputWsVec);
+        groupingAlg->setPropertyValue("OutputWorkspace",groupName);
+        //execute the algorithm
+        groupingAlg->execute();
+
+        if (smallGroup)
+        {
+          // Delete the temporary workspace used to create a group of 1 or less (currently can't have group of 0)
+          Mantid::API::AnalysisDataService::Instance().remove("boevsMoreBoevs");
+        }
+      }
+      // Error catching for algorithms
+      catch(std::invalid_argument &)
+      {
+        QMessageBox::critical(this,"MantidPlot - Algorithm error"," Error in Grouping Workspaces");
+      }
+      catch(Mantid::Kernel::Exception::NotFoundError&)
+      {
+        QMessageBox::critical(this,"MantidPlot - Algorithm error"," Error in Grouping Workspaces");
+      }
+      catch(std::runtime_error& )
+      {
+        QMessageBox::critical(this,"MantidPlot - Algorithm error"," Error in Grouping Workspaces");
+      }
+      catch(std::exception& )
+      {
+        QMessageBox::critical(this,"MantidPlot - Algorithm error"," Error in Grouping Workspaces");
+      }
+    }
+    else // ...not a group so just load the workspace
+    {
+      loadWsToMantidTree((*line).toStdString());
+    }
+  }
+}
+
+/** This method populates the mantid workspace tree when  project file is loaded 
+ */
+void ApplicationWindow::loadWsToMantidTree(const std::string & wsName)
+{
+  if(wsName.empty())
+  {
+    throw std::runtime_error("Workspace Name not found in project file ");
+  }
   std::string fileName(workingDir.toStdString()+"/"+wsName);
   fileName.append(".nxs");
   try
@@ -10612,8 +10710,8 @@ void ApplicationWindow::populateMantidTreeWdiget(const QString &s)
   catch(...)
   {
   }
-  }
 }
+
 /** This method opens mantid matrix window when  project file is loaded 
  */
 MantidMatrix* ApplicationWindow::newMantidMatrix(const QString& wsName,int lower,int upper)

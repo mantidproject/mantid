@@ -52,28 +52,28 @@ namespace Mantid
     {
       //Check whether Object is triangulated otherwise triangulate
       if(Obj!=NULL&&!boolTriangulated){
-	Triangulator->Generate();
-	boolTriangulated=true;
+        Triangulator->Generate();
+        boolTriangulated=true;
       }
     }
 
     void OCGeometryHandler::Render()
     {
       if(Obj!=NULL){
-	if(boolTriangulated==false)	Triangulate();
-	Renderer->Render(Triangulator->getObjectSurface());
+        if(boolTriangulated==false)	Triangulate();
+        Renderer->Render(Triangulator->getObjectSurface());
       }else if(ObjComp!=NULL){
-	Renderer->Render(ObjComp);
+        Renderer->Render(ObjComp);
       }
     }
 
     void OCGeometryHandler::Initialize()
     {
       if(Obj!=NULL){
-	if(boolTriangulated==false)	Triangulate();
-	Renderer->Initialize(Triangulator->getObjectSurface());
+        if(boolTriangulated==false)	Triangulate();
+        Renderer->Initialize(Triangulator->getObjectSurface());
       }else if(ObjComp!=NULL){
-	Renderer->Initialize(ObjComp);
+        Renderer->Initialize(ObjComp);
       }
     }
 
@@ -81,12 +81,12 @@ namespace Mantid
     {
       if(Obj!=NULL)
       {
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getNumberOfTriangles();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getNumberOfTriangles();
       }
       else
       {
-	return 0;
+        return 0;
       }
     }
 
@@ -94,12 +94,12 @@ namespace Mantid
     {
       if(Obj!=NULL)
       {
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getNumberOfPoints();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getNumberOfPoints();
       }
       else
       {
-	return 0;
+        return 0;
       }
     }
 
@@ -107,12 +107,12 @@ namespace Mantid
     {
       if(Obj!=NULL)
       {
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getTriangleVertices();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getTriangleVertices();
       }
       else
       {
-	return NULL;
+        return NULL;
       }
     }
 
@@ -120,12 +120,12 @@ namespace Mantid
     {
       if(Obj!=NULL)
       {
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getTriangleFaces();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getTriangleFaces();
       }
       else
       {
-	return NULL;
+        return NULL;
       }
     }
 

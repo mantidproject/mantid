@@ -17,6 +17,14 @@ from reduction_gui.reduction.sans.hfir_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
 
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    from reduction_gui.widgets.sans.stitcher import StitcherWidget
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+
 class HFIRInterface(InstrumentInterface):
     """
         Defines the widgets for HFIR reduction
@@ -45,3 +53,7 @@ class HFIRInterface(InstrumentInterface):
         
         # Catalog
         self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
+
+        # Stitcher
+        if IS_IN_MANTIDPLOT:
+            self.attach(StitcherWidget(settings = self._settings))
