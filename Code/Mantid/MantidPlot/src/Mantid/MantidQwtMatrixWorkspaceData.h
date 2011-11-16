@@ -65,7 +65,7 @@ public:
 
 private:
 
-  friend class MantidCurve;
+  friend class MantidMatrixCurve;
 
   /// Pointer to the Mantid workspace
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;

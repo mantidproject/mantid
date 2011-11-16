@@ -2776,12 +2776,12 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
   appWindow()->setPreferences(g);
   g->newLegend("");
-  MantidCurve* mc(NULL);
+  MantidMatrixCurve* mc(NULL);
 
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
+      mc = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr);
       UNUSED_ARG(mc)
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 

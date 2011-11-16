@@ -59,7 +59,7 @@ public:
 
 private:
 
-  friend class MantidCurve;
+  friend class MantidMatrixCurve;
 
   /// Pointer to the Mantid workspace
   Mantid::API::IMDWorkspace_const_sptr m_workspace;

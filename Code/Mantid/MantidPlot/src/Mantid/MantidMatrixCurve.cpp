@@ -24,7 +24,7 @@ using namespace MantidQt::API;
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,int index,bool err,bool distr)
+MantidMatrixCurve::MantidMatrixCurve(const QString& name,const QString& wsName,Graph* g,int index,bool err,bool distr)
   :PlotCurve(name), 
   WorkspaceObserver(),
   m_drawErrorBars(err),
@@ -57,7 +57,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,int 
  *  @param err :: True if the errors are to be plotted
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidCurve::MantidCurve(const QString& wsName,Graph* g,int index,bool err,bool distr)
+MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bool err,bool distr)
   :PlotCurve(), 
   WorkspaceObserver(), 
   m_drawErrorBars(err),
@@ -85,7 +85,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,int index,bool err,bool 
   observeADSClear();
 }
 
-MantidCurve::MantidCurve(const MantidCurve& c)
+MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
   :PlotCurve(createCopyName(c.title().text())),
   WorkspaceObserver(),
   m_drawErrorBars(c.m_drawErrorBars),
@@ -107,7 +107,7 @@ MantidCurve::MantidCurve(const MantidCurve& c)
  *  @param g :: The Graph widget which will display the curve
  *  @param index :: The index of the spectrum or bin in the workspace
  */
-void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index,bool distr)
+void MantidMatrixCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index,bool distr)
 {
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
@@ -179,16 +179,16 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
 }
 
 
-MantidCurve::~MantidCurve()
+MantidMatrixCurve::~MantidMatrixCurve()
 {
 }
 
 /**
  * Clone the curve for the use by a particular Graph
  */
-PlotCurve* MantidCurve::clone(const Graph* g)const
+PlotCurve* MantidMatrixCurve::clone(const Graph* g)const
 {
-  MantidCurve* mc = new MantidCurve(*this);
+  MantidMatrixCurve* mc = new MantidMatrixCurve(*this);
   if (g)
   {
     mc->setDrawAsDistribution(g->isDistribution());
@@ -196,7 +196,7 @@ PlotCurve* MantidCurve::clone(const Graph* g)const
   return mc;
 }
 
-void MantidCurve::loadData()
+void MantidMatrixCurve::loadData()
 {
   // This should only be called for waterfall plots
   // Calculate the offsets...
@@ -207,14 +207,14 @@ void MantidCurve::loadData()
   invalidateBoundingRect();
 }
 
-void MantidCurve::setData(const QwtData &data)
+void MantidMatrixCurve::setData(const QwtData &data)
 {
   if (!dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data)) 
-    throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidCurve");
+    throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
   PlotCurve::setData(data);
 }
 
-QwtDoubleRect MantidCurve::boundingRect() const
+QwtDoubleRect MantidMatrixCurve::boundingRect() const
 {
   if (m_boundingRect.isNull())
   {
@@ -236,7 +236,7 @@ QwtDoubleRect MantidCurve::boundingRect() const
   return m_boundingRect;
 }
 
-void MantidCurve::draw(QPainter *p, 
+void MantidMatrixCurve::draw(QPainter *p, 
           const QwtScaleMap &xMap, const QwtScaleMap &yMap,
           const QRect &rect) const
 {
@@ -246,7 +246,7 @@ void MantidCurve::draw(QPainter *p,
   {
     const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
     if (!d)
-      throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidCurve");
+      throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
     int xi0 = 0;
     p->setPen(pen());
     const int dx = 3;
@@ -275,7 +275,7 @@ void MantidCurve::draw(QPainter *p,
   }
 }
 
-void MantidCurve::itemChanged()
+void MantidMatrixCurve::itemChanged()
 {
   MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
   if (d && d->m_isHistogram)
@@ -291,7 +291,7 @@ void MantidCurve::itemChanged()
  *  @param wsName :: The workspace name
  *  @param index ::  The spectra (bin) index
  */
-QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
+QString MantidMatrixCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
                                      const QString& wsName,int index)
 {
   QString name = wsName + "-" + QString::fromStdString(ws->getAxis(1)->label(index));
@@ -301,7 +301,7 @@ QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::
 /** Create the name for a curve which is a copy of another curve.
  *  @param curveName :: The original curve name.
  */
-QString MantidCurve::createCopyName(const QString& curveName)
+QString MantidMatrixCurve::createCopyName(const QString& curveName)
 {
   int i = curveName.lastIndexOf(" (copy");
   if (i < 0) return curveName+" (copy)";
@@ -314,7 +314,7 @@ QString MantidCurve::createCopyName(const QString& curveName)
 /**  Resets the data if wsName is the name of this workspace
  *  @param wsName :: The name of a workspace which data has been changed in the data service.
  */
-void MantidCurve::dataReset(const QString& wsName)
+void MantidMatrixCurve::dataReset(const QString& wsName)
 {
   if (m_wsName != wsName) return;
   const std::string wsNameStd = wsName.toStdString();
@@ -326,7 +326,7 @@ void MantidCurve::dataReset(const QString& wsName)
   }
   catch(std::runtime_error&)
   {
-    Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
+    Mantid::Kernel::Logger::get("MantidMatrixCurve").information() << "Workspace " << wsNameStd
         << " could not be found - plotted curve(s) deleted\n";
     mws = Mantid::API::MatrixWorkspace_sptr();
   }
@@ -349,14 +349,14 @@ void MantidCurve::dataReset(const QString& wsName)
     emit dataUpdated();
   } catch(std::range_error) {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
-    Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
+    Mantid::Kernel::Logger::get("MantidMatrixCurve").information() << "Workspace " << wsNameStd
         << " now has fewer spectra - plotted curve(s) deleted\n";
     deleteHandle(wsNameStd,mws);
   }
   delete new_mantidData;
 }
 
-void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void MantidMatrixCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   (void) ws;
 
@@ -366,15 +366,15 @@ void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shar
 /* This method saves the curve details to a string.
  * Useful for loading/saving mantid project.
 */
-QString MantidCurve::saveToString()
+QString MantidMatrixCurve::saveToString()
 {
 	QString s;
-	s="MantidCurve\t"+m_wsName+"\tsp\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
+	s="MantidMatrixCurve\t"+m_wsName+"\tsp\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
 	return s;
 }
 
 /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
-int MantidCurve::workspaceIndex()const
+int MantidMatrixCurve::workspaceIndex()const
 {
   if (dynamic_cast<const MantidQwtMatrixWorkspaceData*>(mantidData()) != 0)
   {
@@ -383,19 +383,19 @@ int MantidCurve::workspaceIndex()const
   return -1;
 }
 
-MantidQwtMatrixWorkspaceData* MantidCurve::mantidData()
+MantidQwtMatrixWorkspaceData* MantidMatrixCurve::mantidData()
 {
   MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
   return d;
 }
 
-const MantidQwtMatrixWorkspaceData* MantidCurve::mantidData()const
+const MantidQwtMatrixWorkspaceData* MantidMatrixCurve::mantidData()const
 {
   const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
   return d;
 }
 
-void MantidCurve::axisScaleChanged(int axis, bool toLog)
+void MantidMatrixCurve::axisScaleChanged(int axis, bool toLog)
 {
   if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
   {
@@ -408,19 +408,19 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 }
 
 /// Enables/disables drawing as distribution, ie dividing each y-value by the bin width.
-bool MantidCurve::setDrawAsDistribution(bool on)
+bool MantidMatrixCurve::setDrawAsDistribution(bool on)
 {
   return mantidData()->setAsDistribution(on);
 }
 
 /// Returns whether the curve is plotted as a distribution
-bool MantidCurve::isDistribution() const
+bool MantidMatrixCurve::isDistribution() const
 {
   return mantidData()->m_isDistribution;
 }
 
 /// Returns whether the curve has error bars
-bool MantidCurve::hasErrorBars() const
+bool MantidMatrixCurve::hasErrorBars() const
 {
   return m_drawErrorBars;
 }

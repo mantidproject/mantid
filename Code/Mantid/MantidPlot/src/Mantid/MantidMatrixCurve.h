@@ -42,23 +42,23 @@ class MantidUI;
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
 
-class MantidCurve:public PlotCurve, public MantidQt::API::WorkspaceObserver
+class MantidMatrixCurve:public PlotCurve, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:
 
   /// More complex constructor setting some defaults for the curve
-  MantidCurve(const QString& name,const QString& wsName,Graph* g,
+  MantidMatrixCurve(const QString& name,const QString& wsName,Graph* g,
               int index,bool err=false,bool distr = false);
 
   /// More complex constructor setting some defaults for the curve
-  MantidCurve(const QString& wsName,Graph* g,
+  MantidMatrixCurve(const QString& wsName,Graph* g,
               int index,bool err=false,bool distr = false);
 
   /// Copy constructor 
-  MantidCurve(const MantidCurve& c);
+  MantidMatrixCurve(const MantidMatrixCurve& c);
 
-  ~MantidCurve();
+  ~MantidMatrixCurve();
 
   PlotCurve* clone(const Graph*)const;
 
@@ -99,7 +99,7 @@ public:
 
   /// Overriden virtual method
   void itemChanged();
-  /// saves the mantidcurve details to project file.
+  /// saves the MantidMatrixCurve details to project file.
   QString saveToString();
 
   /// The workspace name

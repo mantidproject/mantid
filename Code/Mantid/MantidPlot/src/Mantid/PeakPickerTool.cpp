@@ -40,7 +40,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
     }
     else
     {
-      MantidCurve* mcurve = dynamic_cast<MantidCurve*>(curve);
+      MantidMatrixCurve* mcurve = dynamic_cast<MantidMatrixCurve*>(curve);
       if (mcurve)
       {
         m_wsName = mcurve->workspaceName();
@@ -549,10 +549,10 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(m_curveFitName);
   graph()->removeCurve(m_curveDifName);
 
-  new MantidCurve(m_curveFitName,out,graph(),1,false);
+  new MantidMatrixCurve(m_curveFitName,out,graph(),1,false);
   if (m_fitPropertyBrowser->plotDiff())
   {
-    new MantidCurve(m_curveDifName,out,graph(),2,false);
+    new MantidMatrixCurve(m_curveDifName,out,graph(),2,false);
   }
 
   //customise the plot

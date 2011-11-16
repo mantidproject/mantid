@@ -1276,7 +1276,7 @@ void MultiLayer::dropEvent( QDropEvent * event )
 
   if(g->curves() > 0)
   {
-    MantidCurve * c = dynamic_cast<MantidCurve*>(g->curve(0));
+    MantidMatrixCurve * c = dynamic_cast<MantidMatrixCurve*>(g->curve(0));
     // If this is Mantid curve, then see if it has error bars ...
     if(NULL != c)
     {
@@ -1301,7 +1301,7 @@ void MultiLayer::dropEvent( QDropEvent * event )
     for( ; setIt != it.value().end(); setIt++)
     {
       try {
-        new MantidCurve(it.key(),g,(*setIt),errorBars);
+        new MantidMatrixCurve(it.key(),g,(*setIt),errorBars);
       } catch (Mantid::Kernel::Exception::NotFoundError) {
         // Get here if workspace name is invalid - shouldn't be possible, but just in case
       } catch (std::invalid_argument&) {
