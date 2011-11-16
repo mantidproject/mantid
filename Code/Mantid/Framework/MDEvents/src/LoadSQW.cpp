@@ -111,11 +111,20 @@ namespace Mantid
         if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
           g_log.notice() << "You have enough memory available to load the " << m_nDataPoints << " points into memory; this would be faster than using a file back-end." << std::endl;
 
-        IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05, true);
+        IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.04, true);
         saver->setProperty("InputWorkspace", ws);
         saver->setPropertyValue("Filename", m_outputFile);
-        saver->setProperty("MakeFileBacked", true);
         saver->executeAsSubAlg();
+
+        // Re-load into a file-backed workspace
+        IAlgorithm_sptr loader = this->createSubAlgorithm("LoadMD" ,0.04, 0.05, true);
+        loader->setPropertyValue("Filename", m_outputFile);
+        loader->setProperty("FileBackEnd", true);
+        loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+        loader->executeAsSubAlg();
+        ws = loader->getProperty("OutputWorkspace");
+        MDEventWorkspace<MDEvent<4>,4>::sptr ws4 = boost::dynamic_pointer_cast< MDEventWorkspace<MDEvent<4>,4> >(ws);
+        pWs = ws4.get();
         m_prog->resetNumSteps(100, 0.05, 0.75);
       }
       else

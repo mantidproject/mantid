@@ -3,9 +3,9 @@
 Save a [[MDEventWorkspace]] to a .nxs file. The workspace's current box structure and entire list of events is preserved.
 The resulting file can be loaded via [[LoadMD]].
 
-If you specify MakeFileBacked, then this will turn an in-memory workspace to a file-backed one. Memory will be released as it is written to disk.
-
 If you specify UpdateFileBackEnd, then any changes (e.g. events added using the PlusMD algorithm) will be saved to the file back-end.
+
+You can make a workspace backed by a file by calling SaveMD and re-loading with [[LoadMD]] with FileBackEnd = True.
 
 *WIKI*/
 
@@ -75,12 +75,6 @@ namespace MDEvents
     declareProperty("UpdateFileBackEnd", false,
         "Only for MDEventWorkspaces with a file back end: check this to update the NXS file on disk\n"
         "to reflect the current data structure. Filename parameter is ignored.");
-    setPropertySettings("UpdateFileBackEnd", new EnabledWhenProperty(this,"MakeFileBacked", IS_EQUAL_TO, "0"));
-
-    declareProperty("MakeFileBacked", false,
-        "For an MDEventWorkspace that was created in memory:\n"
-        "This saves it to a file AND makes the workspace into a file-backed one.");
-    setPropertySettings("MakeFileBacked", new EnabledWhenProperty(this,"UpdateFileBackEnd", IS_EQUAL_TO, "0"));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -94,13 +88,6 @@ namespace MDEvents
   {
     std::string filename = getPropertyValue("Filename");
     bool update = getProperty("UpdateFileBackEnd");
-    bool MakeFileBacked = getProperty("MakeFileBacked");
-
-    if (update && MakeFileBacked)
-      throw std::invalid_argument("Please choose either UpdateFileBackEnd or MakeFileBacked, not both.");
-
-    if (MakeFileBacked && ws->isFileBacked())
-      throw std::invalid_argument("You picked MakeFileBacked but the workspace is already file-backed!");
 
     BoxController_sptr bc = ws->getBoxController();
 
@@ -188,9 +175,6 @@ namespace MDEvents
     if (!update)
     {
       MDE::prepareNexusData(file, chunkSize);
-      // Initialize the file-backing
-      if (MakeFileBacked)
-        bc->setFile(file, filename, 0);
     }
     else
     {
@@ -281,14 +265,6 @@ namespace MDEvents
               mdbox->setFileIndex(uint64_t(start), numEvents);
               // Just save but don't clear the events or anything
               mdbox->saveNexus(file);
-              if (MakeFileBacked)
-              {
-                // Save, set that it is on disk and clear the actual events to free up memory
-                mdbox->setOnDisk(true);
-                mdbox->clearDataOnly();
-//                mdbox->setDataAdded(false);
-//                mdbox->setDataModified(false);
-              }
               // Save the index
               box_event_index[id*2] = start;
               box_event_index[id*2+1] = numEvents;
@@ -399,7 +375,7 @@ namespace MDEvents
     // Finished - close the file. This ensures everything gets written out even when updating.
     file->close();
 
-    if (update || MakeFileBacked)
+    if (update)
     {
       //std::cout << "Finished updating file " << uint64_t(bc->getFile()) << std::endl;
       // Need to keep the file open since it is still used as a back end.
