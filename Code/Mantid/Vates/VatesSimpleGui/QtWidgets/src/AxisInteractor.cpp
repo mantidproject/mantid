@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiQtWidgets/AxisInteractor.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
 #include "MantidVatesSimpleGuiQtWidgets/Indicator.h"
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
@@ -48,6 +49,8 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
   this->scaleWidget = new QwtScaleWidget(this);
   this->scaleWidget->setSpacing(0);
   this->scaleWidget->setMargin(0);
+  this->scaleWidget->setColorBarWidth(0);
+  this->scaleWidget->setPenWidth(1);
 
   this->scene = new QGraphicsScene(this);
   this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -131,11 +134,26 @@ void AxisInteractor::widgetLayout()
   this->graphicsView->setSizePolicy(policy);
 }
 
-void AxisInteractor::setInformation(QString title, double min, double max)
+/**
+ * This function is responsible for setting the scale widget with the incoming
+ * information for the associated dataset axis. If an update or a change to the
+ * axis is necessary, the QwtScaleTransformation must be passed as NULL to the
+ * setScaleDiv call.
+ * @param info the incoming axis information container
+ * @param update flag to determine if scale just needs updating
+ */
+void AxisInteractor::setInformation(AxisInformation *info, bool update)
 {
-  this->scaleWidget->setTitle(title);
-  this->scaleWidget->setScaleDiv(this->transform,
-                                 this->engine->divideScale(min, max, 10, 0));
+  QwtScaleTransformation *temp = this->transform;
+  if (update)
+  {
+    temp = NULL;
+  }
+  this->scaleWidget->setScaleDiv(temp,
+                                 this->engine->divideScale(info->getMinimum(),
+                                                           info->getMaximum(),
+                                                           10, 0));
+  this->scaleWidget->setTitle(QString(info->getTitle().c_str()));
 }
 
 void AxisInteractor::createIndicator(const QPoint &point)
@@ -321,6 +339,28 @@ int AxisInteractor::numIndicators()
     }
   }
   return count;
+}
+
+void AxisInteractor::deleteAllIndicators()
+{
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      this->scene->removeItem(item);
+      emit this->deleteIndicator(item->toolTip());
+    }
+  }
+}
+
+/**
+ * @return the axis scale title
+ */
+QString AxisInteractor::getTitle()
+{
+  return this->scaleWidget->title().text();
 }
 
 }

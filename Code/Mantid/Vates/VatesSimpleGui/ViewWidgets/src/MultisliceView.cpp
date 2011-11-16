@@ -151,15 +151,9 @@ void MultiSliceView::setupAxisInfo()
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
   AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
 
-  this->ui.xAxisWidget->setInformation(QString(xinfo->getTitle().c_str()),
-                                       xinfo->getMinimum(),
-                                       xinfo->getMaximum());
-  this->ui.yAxisWidget->setInformation(QString(yinfo->getTitle().c_str()),
-                                       yinfo->getMinimum(),
-                                       yinfo->getMaximum());
-  this->ui.zAxisWidget->setInformation(QString(zinfo->getTitle().c_str()),
-                                       zinfo->getMinimum(),
-                                       zinfo->getMaximum());
+  this->ui.xAxisWidget->setInformation(xinfo);
+  this->ui.yAxisWidget->setInformation(yinfo);
+  this->ui.zAxisWidget->setInformation(zinfo);
 
   delete xinfo;
   delete yinfo;
@@ -336,6 +330,63 @@ bool MultiSliceView::noIndicatorsLeft()
   count += this->ui.yAxisWidget->numIndicators();
   count += this->ui.zAxisWidget->numIndicators();
   return count == 0;
+}
+
+/**
+ * This function is responsible for resetting all of the axis scale information
+ * when the rebinner is used. All cuts will be deleted if the axis labeling
+ * has changed. Nothing will be done if only the number of bins has been
+ * changed.
+ */
+void MultiSliceView::setAxisScales()
+{
+  pqPipelineSource *src = this->getPvActiveSrc();
+  const char *geomXML = vtkSMPropertyHelper(src->getProxy(),
+                                            "InputGeometryXML").GetAsString();
+  GeometryParser parser(geomXML);
+  AxisInformation *xinfo = parser.getAxisInfo("XDimension");
+  AxisInformation *yinfo = parser.getAxisInfo("YDimension");
+  AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
+
+  bool isXChanged = this->checkTitles(xinfo, this->ui.xAxisWidget);
+  bool isYChanged = this->checkTitles(yinfo, this->ui.yAxisWidget);
+  bool isZChanged = this->checkTitles(zinfo, this->ui.zAxisWidget);
+  bool haveAxesChanged = isXChanged || isYChanged || isZChanged;
+
+  if (haveAxesChanged)
+  {
+    if (isXChanged)
+    {
+      this->ui.xAxisWidget->deleteAllIndicators();
+      this->ui.xAxisWidget->setInformation(xinfo, true);
+    }
+    if (isYChanged)
+    {
+      this->ui.yAxisWidget->deleteAllIndicators();
+      this->ui.yAxisWidget->setInformation(yinfo, true);
+    }
+    if (isZChanged)
+    {
+      this->ui.zAxisWidget->deleteAllIndicators();
+      this->ui.zAxisWidget->setInformation(zinfo, true);
+    }
+  }
+
+  delete xinfo;
+  delete yinfo;
+  delete zinfo;
+}
+
+/**
+ * This function compares the axis title from the request one to the currently
+ * view one.
+ * @param info the information from the incoming axis
+ * @param axis the information from the current axis
+ * @return true if the titles are not equal
+ */
+bool MultiSliceView::checkTitles(AxisInformation *info, AxisInteractor *axis)
+{
+  return QString(info->getTitle().c_str()) != axis->getTitle();
 }
 
 }
