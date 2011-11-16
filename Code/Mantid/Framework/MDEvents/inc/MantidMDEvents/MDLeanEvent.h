@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <numeric>
 #include <cmath>
+#include <iostream>
 
 namespace Mantid
 {
@@ -242,8 +243,9 @@ namespace MDEvents
       dims[1] = (nd)+2; // One point per dimension, plus signal, plus error = nd+2
 
       // Now the chunk size.
-      std::vector<int64_t> chunk(dims);
+      std::vector<int64_t> chunk(2, 0);
       chunk[0] = int64_t(chunkSize);
+      chunk[1] = (nd)+2;
 
       // Make and open the data
       file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
@@ -264,7 +266,8 @@ namespace MDEvents
       // Open the data
       file->openData("event_data");
       // Return the size of dimension 0 = the number of events in the field
-      return uint64_t(file->getInfo().dims[0]);
+      uint64_t currentSize = uint64_t(file->getInfo().dims[0]);
+      return currentSize;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -297,10 +300,12 @@ namespace MDEvents
         signal_t & totalSignal, signal_t & totalErrorSquared)
     {
       size_t numEvents = events.size();
+      //std::cout << "Saving " << numEvents << " at " << startIndex << " in file " << uint64_t(file) << std::endl;
       std::vector<double> data;
       data.reserve(numEvents*(nd+2));
       std::vector<int64_t> start(2,0);
       start[0] = int64_t(startIndex);
+      start[1] = 0;
 
       totalSignal = 0;
       totalErrorSquared = 0;

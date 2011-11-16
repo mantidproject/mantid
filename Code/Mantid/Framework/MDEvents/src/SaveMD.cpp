@@ -259,7 +259,7 @@ namespace MDEvents
         {
           if (update)
           {
-            // File-backed: update where on the file it is
+            // File-backed: re-save any boxes THAT WERE MODIFED
             // This will relocate and save the box if it has any events
             mdbox->save();
             // We've now forced it to go on disk
@@ -267,7 +267,9 @@ namespace MDEvents
             // Save the index
             box_event_index[id*2] = mdbox->getFileIndexStart();
             box_event_index[id*2+1] = mdbox->getFileNumEvents();
-            std::cout << file->getInfo().dims[0] << " size of event_data (updating) \n";
+//            file->closeData();
+//            file->openData("event_data");
+            //std::cout << file->getInfo().dims[0] << " size of event_data (updating) \n";
           }
           else
           {
@@ -284,6 +286,8 @@ namespace MDEvents
                 // Save, set that it is on disk and clear the actual events to free up memory
                 mdbox->setOnDisk(true);
                 mdbox->clearDataOnly();
+//                mdbox->setDataAdded(false);
+//                mdbox->setDataModified(false);
               }
               // Save the index
               box_event_index[id*2] = start;
@@ -292,7 +296,7 @@ namespace MDEvents
               start += numEvents;
             }
 
-            std::cout << file->getInfo().dims[0] << " size of event_data (writing) \n";
+            //std::cout << file->getInfo().dims[0] << " size of event_data (writing) \n";
             mdbox->releaseEvents();
           }
         }
@@ -397,6 +401,7 @@ namespace MDEvents
 
     if (update || MakeFileBacked)
     {
+      //std::cout << "Finished updating file " << uint64_t(bc->getFile()) << std::endl;
       // Need to keep the file open since it is still used as a back end.
       // Reopen the file
       filename = bc->getFilename();
@@ -405,6 +410,7 @@ namespace MDEvents
       file->openGroup("MDEventWorkspace", "NXentry");
       file->openGroup("event_data", "NXdata");
       uint64_t totalNumEvents = MDE::openNexusData(file);
+      std::cout << totalNumEvents << " events in reopened file \n";
       bc->setFile(file, filename, totalNumEvents);
       // Mark file is up-to-date
       ws->setFileNeedsUpdating(false);
