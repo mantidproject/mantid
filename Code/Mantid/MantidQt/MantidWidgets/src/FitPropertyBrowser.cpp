@@ -264,12 +264,12 @@ m_mantidui(mantidui)
   if (m_customFittings)
   {
     QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
-    m_data = m_boolManager->addProperty("Fit To binned data");
+    QtProperty* rawBunchdata = m_boolManager->addProperty("Fit To binned data");
     bool data = settings.value("Fit To binned data",QVariant(false)).toBool();
-    m_boolManager->setValue(m_data,data);
+    m_boolManager->setValue(rawBunchdata,data);
     customSettingsGroup->addSubProperty(m_minimizer);
     customSettingsGroup->addSubProperty(m_plotDiff);
-    customSettingsGroup->addSubProperty(m_data);
+    customSettingsGroup->addSubProperty(rawBunchdata);
     m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
   }
 

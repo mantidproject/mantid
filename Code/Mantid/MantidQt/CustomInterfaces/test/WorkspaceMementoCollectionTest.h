@@ -13,7 +13,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces;
@@ -51,7 +51,7 @@ public:
 
   void testRegisterWorkspace()
   {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    MatrixWorkspace_sptr ws(new WorkspaceTester);
     ws->setName("WSName");
 
     MockExternalDrivenModel model;
@@ -68,7 +68,7 @@ public:
 
   void testGetMemento()
   {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    MatrixWorkspace_sptr ws(new WorkspaceTester);
     ws->setName("WSName");
 
     MockExternalDrivenModel model;

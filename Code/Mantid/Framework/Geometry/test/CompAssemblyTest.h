@@ -8,11 +8,7 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
-// Including the cpp instead of the header in just one test in the pacakge pulls
-// in the definitions and avoids having to link the whole package to the TestHelpers
-// package (which is bad because of all the other packages it depends on)
-#include "../../TestHelpers/src/ComponentCreationHelper.cpp"
-
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;

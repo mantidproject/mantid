@@ -139,17 +139,19 @@ target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories(../CurveFitting/inc ../MDEvents/inc ../Nexus/inc ../TestHelpers/inc 
-          ../DataHandling/inc ../DataObjects/inc )	
+  include_directories( ../TestHelpers/inc ../DataHandling/inc )	
+  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../TestHelpers/src/MDEventsTestHelper.cpp
+                        ../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms CurveFitting MDEvents API DataHandling Nexus 
-	   TestHelpers
-      ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms CurveFitting MDEvents API  
-	TestHelpers DataHandling Nexus )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS

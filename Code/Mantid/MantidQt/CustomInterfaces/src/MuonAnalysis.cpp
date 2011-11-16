@@ -34,7 +34,6 @@
 
 #include <algorithm>
 
-#include <QtBoolPropertyManager>
 #include <QLineEdit>
 #include <QVariant>
 #include <QtProperty>
@@ -170,10 +169,6 @@ void MuonAnalysis::initLayout()
   // connect the fit function widget buttons to their respective slots.
   loadFittings();
 
-  // If the data is set to bunch then fit against the bunched data, if make raw then fit against the raw data
-  connect(m_uiForm.fitBrowser,SIGNAL(rawData(const std::string&)), this, SLOT(makeRaw(const std::string&)));
-  connect(m_uiForm.fitBrowser,SIGNAL(bunchData(const std::string&)), this, SLOT(reBunch(const std::string&)));
-
   // Detected a workspace change and therefore the peak picker tool needs to be reassigned.
   connect(m_uiForm.fitBrowser,SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
 
@@ -195,19 +190,13 @@ void MuonAnalysis::initLayout()
 }
 
 /**
-*  (slot)
+*  Before fitting data (slot)
+*  @param p contain parameters set by the user in the fit property browser
 */
 void MuonAnalysis::beforeDoFit(const QtBoolPropertyManager* p)
 {
-  bool wantToFitAgainstBunchData = p->property("Fit To binned data").isValid();
-  if (wantToFitAgainstBunchData)
-  {
-
-  }
-  else //Raw must have been selected
-  {
-    
-  } 
+  // call method which do the work
+  m_fitDataTab->beforeDoFit(p);
 }
 
 

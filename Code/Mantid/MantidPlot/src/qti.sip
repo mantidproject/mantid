@@ -658,6 +658,7 @@ public:
   void insertCurve(MultiLayer* ml, int i); 
   void setCols(int);
   void setRows(int);
+  void setName(const QString&);
   void setSpacing (int, int);
   void setMargins (int, int, int, int);
   void setLayerCanvasSize (int, int);

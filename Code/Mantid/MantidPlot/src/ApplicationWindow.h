@@ -1033,6 +1033,7 @@ private:
   MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
   void openScriptWindow(const QStringList &list);
   void populateMantidTreeWdiget(const QString &s);
+  void loadWsToMantidTree(const std::string& wsName);
   void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);

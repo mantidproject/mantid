@@ -18,128 +18,49 @@ namespace Mantid
 
 /**
  * Constructor
- * Generated the display list
  */
     GluGeometryRenderer::GluGeometryRenderer()
     {
-      boolDisplaylistCreated=false;
-      iDisplaylistId=UINT_MAX;
     }
 
 /**
  * Destructor
- * Deletes the display list
  */
     GluGeometryRenderer::~GluGeometryRenderer()
     {
-      if(boolDisplaylistCreated && iDisplaylistId!=0 && glIsList(iDisplaylistId)==GL_TRUE)
-        glDeleteLists(iDisplaylistId,1);
     }
 
     void GluGeometryRenderer::RenderSphere(const V3D& center,double radius)
     {
-      if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-      {
-        while(glGetError() != GL_NO_ERROR);
-        iDisplaylistId=glGenLists(1);
-        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-        CreateSphere(center,radius);
-        glEndList();
-        boolDisplaylistCreated=true;
-        mErrorCode=glGetError();
-        glCallList(iDisplaylistId);
-      }else if(mErrorCode == GL_NO_ERROR){
-        glCallList(iDisplaylistId);
-      }else{
-        CreateSphere(center,radius);
-      }
+      while(glGetError() != GL_NO_ERROR);
+      CreateSphere(center,radius);
     }
 
 
     void GluGeometryRenderer::RenderCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4)
     {
-      if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-      {
-        while(glGetError() != GL_NO_ERROR );
-        iDisplaylistId=glGenLists(1);
-        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-        CreateCube(Point1,Point2,Point3,Point4);
-        glEndList();
-        mErrorCode=glGetError();
-        boolDisplaylistCreated=true;
-        glCallList(iDisplaylistId);
-      }else if(mErrorCode == GL_NO_ERROR){
-        glCallList(iDisplaylistId);
-      }else{
-        CreateCube(Point1,Point2,Point3,Point4);
-      }
+      while(glGetError() != GL_NO_ERROR );
+      CreateCube(Point1,Point2,Point3,Point4);
     }
 
 
     void GluGeometryRenderer::RenderCone(const V3D& center,const V3D& axis,double radius,double height)
     {
-      if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-      {
-        while(glGetError() != GL_NO_ERROR);
-        iDisplaylistId=glGenLists(1);
-        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-        CreateCone(center,axis,radius,height);
-        glEndList();
-        mErrorCode=glGetError();
-        boolDisplaylistCreated=true;
-        glCallList(iDisplaylistId);
-      }else if(mErrorCode == GL_NO_ERROR){
-        glCallList(iDisplaylistId);
-      }else {
-        CreateCone(center,axis,radius,height);
-      }
+      while(glGetError() != GL_NO_ERROR);
+      CreateCone(center,axis,radius,height);
     }
 
 
     void GluGeometryRenderer::RenderCylinder(const V3D& center,const V3D& axis,double radius,double height)
     {
-      if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-      {
-        GLenum error;
-        do{
-          error=glGetError();
-          if(error==GL_OUT_OF_MEMORY)
-          {
-            mErrorCode=GL_OUT_OF_MEMORY;
-            return;
-          }
-        }while(error != GL_NO_ERROR);
-        iDisplaylistId=glGenLists(1);
-        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+        while(glGetError() != GL_NO_ERROR);
         CreateCylinder(center,axis,radius,height);
-        glEndList();
-        mErrorCode=glGetError();
-        boolDisplaylistCreated=true;
-        glCallList(iDisplaylistId);
-      }else if(mErrorCode == GL_NO_ERROR){
-        glCallList(iDisplaylistId);
-      }else{
-        CreateCylinder(center,axis,radius,height);
-      }
     }
 
     void GluGeometryRenderer::RenderSegmentedCylinder(const V3D& center,const V3D& axis,double radius,double height)
     {
-      if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
-      {
-        while(glGetError() != GL_NO_ERROR);
-        iDisplaylistId=glGenLists(1);
-        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-        CreateSegmentedCylinder(center,axis,radius,height);
-        glEndList();
-        mErrorCode=glGetError();
-        boolDisplaylistCreated=true;
-        glCallList(iDisplaylistId);
-      }else if(mErrorCode == GL_NO_ERROR){
-        glCallList(iDisplaylistId);
-      }else {
-        CreateSegmentedCylinder(center,axis,radius,height);
-      }
+      while(glGetError() != GL_NO_ERROR);
+      CreateSegmentedCylinder(center,axis,radius,height);
     }
 
 /**

@@ -107,25 +107,25 @@ public:
   void test_mem_plus_mem_inPlace_ofRHS()
   { do_test(false, false, 2); }
 
-  void xtest_file_plus_mem()
+  void test_file_plus_mem()
   { do_test(true, false, 0); }
 
-  void xtest_file_plus_mem_inPlace()
+  void test_file_plus_mem_inPlace()
   { do_test(true, false, 1); }
 
-  void xtest_mem_plus_file()
+  void test_mem_plus_file()
   { do_test(false, true, 0); }
 
   void test_mem_plus_file_inPlace()
   { do_test(false, true, 1); }
 
-  void xtest_file_plus_file()
+  void test_file_plus_file()
   { do_test(true, true, 0); }
 
-  void xtest_file_plus_file_inPlace()
+  void test_file_plus_file_inPlace()
   { do_test(true, true, 1); }
 
-  void xtest_file_plus_file_inPlace_ofRHS()
+  void test_file_plus_file_inPlace_ofRHS()
   { do_test(true, true, 2); }
 
 
