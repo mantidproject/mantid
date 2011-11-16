@@ -16,9 +16,9 @@ DECLARE_FUNCTION(LogNormal)
 
 LogNormal::LogNormal()
 {
-  declareParameter("Height", 1.0);
-  declareParameter("Location", 1.0);
-  declareParameter("Scale", 1.0);
+  declareParameter("Height", 90.0);
+  declareParameter("Location", 2.0);
+  declareParameter("Scale", 0.20);
 }
 
 
