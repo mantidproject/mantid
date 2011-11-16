@@ -1847,9 +1847,8 @@ QString MantidUI::saveToString(const std::string& workingDir)
       wsNames+="\t";
       //wsName is a group, add it to list and indicate what the group contains by a "[" and end the group with a "]"
       wsNames+=wsName;
-      int secondLevelCount = group->getNumberOfEntries();
       std::vector<std::string> secondLevelItems = group->getNames();
-      for(int j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
+      for(size_t j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
       {
         wsNames+=",";
         wsNames+=QString::fromStdString(secondLevelItems[j]);

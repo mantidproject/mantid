@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
-#include "FakeObjects.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using std::size_t;
 using namespace Mantid::Kernel;

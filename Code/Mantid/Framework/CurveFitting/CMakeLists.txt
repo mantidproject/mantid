@@ -135,9 +135,9 @@ include_directories ( inc )
 target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../Nexus/inc )
+  include_directories ( ../DataHandling/inc )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES} )
-  target_link_libraries( CurveFittingTest CurveFitting DataHandling Nexus )
+  target_link_libraries( CurveFittingTest CurveFitting DataHandling )
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CurveFittingTest PROPERTY FOLDER "UnitTests" )

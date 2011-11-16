@@ -19,13 +19,15 @@ set ( EXPORT_FILES
   src/IEventWorkspace.cpp
 )  
 
-# Files containing addtional helper code that do not require processing
+# Files containing additional helper code that do not require processing
 set ( SRC_FILES 
   src/AlgorithmWrapper.cpp
+  src/WorkspaceToNumpy.cpp
 )
 
 set ( INC_FILES 
   ${HEADER_DIR}/api/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/WorkspaceToNumpy.h
 )
 
 set ( PY_FILES 

@@ -539,8 +539,14 @@ if ( CXXTEST_FOUND )
   
   # Make the rest of the tests
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
+  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../TestHelpers/src/SANSInstrumentCreationHelper.cpp
+                        ../TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
+  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling MDEvents )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )

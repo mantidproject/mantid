@@ -6,7 +6,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
-#include "FakeObjects.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;

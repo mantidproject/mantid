@@ -1,10 +1,9 @@
 #ifndef SANSINSTRUMENTCREATIONHELPER_H_
 #define SANSINSTRUMENTCREATIONHELPER_H_
 
-#include "MantidTestHelpers/DLLExport.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-class DLL_TESTHELPERS SANSInstrumentCreationHelper
+class SANSInstrumentCreationHelper
 {
 public:
 
