@@ -340,6 +340,7 @@ void AlignDetectors::execEvent()
         <<  outputWS->getTofMin() << " d_max " << outputWS->getTofMax();
     throw std::runtime_error(msg.str());
   }
+  outputWS->clearMRU();
 }
 
 
