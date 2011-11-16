@@ -3278,7 +3278,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
   return c;
 }
 
-/**  Insert a curve with its own data source. It doesnot have to be 
+/**  Insert a curve with its own data source. It does not have to be
  *   a Table or a Function. The Graph takes ownership of the curve.
  */
 PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
