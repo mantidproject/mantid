@@ -381,7 +381,11 @@ QString AxisInteractor::getTitle()
  */
 double AxisInteractor::getMaximum()
 {
+#if QWT_VERSION >= 0x050200
+  return this->scaleWidget->scaleDraw()->scaleDiv().upperBound();
+#else
   return this->scaleWidget->scaleDraw()->scaleDiv().hBound();
+#endif
 }
 
 /**
@@ -389,7 +393,11 @@ double AxisInteractor::getMaximum()
  */
 double AxisInteractor::getMinimum()
 {
+#if QWT_VERSION >= 0x050200
+  return this->scaleWidget->scaleDraw()->scaleDiv().lowerBound();
+#else
   return this->scaleWidget->scaleDraw()->scaleDiv().lBound();
+#endif
 }
 
 }
