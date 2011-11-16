@@ -141,7 +141,9 @@ signals:
 private:
   Q_DISABLE_COPY(MultiSliceView)
 
-  /// Determine if the incoming and current axis have same title.
+  /// Determine if the incoming and current axis have the same bounds.
+  bool checkBounds(AxisInformation *info, AxisInteractor *axis);
+  /// Determine if the incoming and current axis have the same title.
   bool checkTitles(AxisInformation *info, AxisInteractor *axis);
   /// Clear all axis indicator highlighting.
   void clearIndicatorSelections();

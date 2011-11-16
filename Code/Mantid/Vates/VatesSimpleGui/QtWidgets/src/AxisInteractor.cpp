@@ -144,6 +144,20 @@ void AxisInteractor::widgetLayout()
  */
 void AxisInteractor::setInformation(AxisInformation *info, bool update)
 {
+  this->setBounds(info, update);
+  this->scaleWidget->setTitle(QString(info->getTitle().c_str()));
+}
+
+/**
+ * This function is responsible for setting the upper and lower limit of the
+ * axis scale from the incoming information. If an update or a change to the
+ * axis is necessary, the QwtScaleTransformation must be passed as NULL to the
+ * setScaleDiv call.
+ * @param info the incoming axis information container
+ * @param update flag to determine if scale just needs updating
+ */
+void AxisInteractor::setBounds(AxisInformation *info, bool update)
+{
   QwtScaleTransformation *temp = this->transform;
   if (update)
   {
@@ -153,7 +167,6 @@ void AxisInteractor::setInformation(AxisInformation *info, bool update)
                                  this->engine->divideScale(info->getMinimum(),
                                                            info->getMaximum(),
                                                            10, 0));
-  this->scaleWidget->setTitle(QString(info->getTitle().c_str()));
 }
 
 void AxisInteractor::createIndicator(const QPoint &point)
@@ -361,6 +374,22 @@ void AxisInteractor::deleteAllIndicators()
 QString AxisInteractor::getTitle()
 {
   return this->scaleWidget->title().text();
+}
+
+/**
+ * @return the axis scale maximum
+ */
+double AxisInteractor::getMaximum()
+{
+  return this->scaleWidget->scaleDraw()->scaleDiv().hBound();
+}
+
+/**
+ * @return the axis scale minimum
+ */
+double AxisInteractor::getMinimum()
+{
+  return this->scaleWidget->scaleDraw()->scaleDiv().lBound();
 }
 
 }

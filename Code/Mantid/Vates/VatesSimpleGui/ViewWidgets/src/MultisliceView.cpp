@@ -335,7 +335,8 @@ bool MultiSliceView::noIndicatorsLeft()
 /**
  * This function is responsible for resetting all of the axis scale information
  * when the rebinner is used. All cuts will be deleted if the axis labeling
- * has changed. Nothing will be done if only the number of bins has been
+ * has changed. If the bounds have been changed, those will be updated.
+ * Nothing will be done if only the number of bins has been
  * changed.
  */
 void MultiSliceView::setAxisScales()
@@ -348,6 +349,7 @@ void MultiSliceView::setAxisScales()
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
   AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
 
+  // Check to see if axis mapping has changed and update if necessary.
   bool isXChanged = this->checkTitles(xinfo, this->ui.xAxisWidget);
   bool isYChanged = this->checkTitles(yinfo, this->ui.yAxisWidget);
   bool isZChanged = this->checkTitles(zinfo, this->ui.zAxisWidget);
@@ -372,14 +374,36 @@ void MultiSliceView::setAxisScales()
     }
   }
 
+  // Axis mapping not changed, so check if boundaries changed.
+  bool xBoundsChanged = this->checkBounds(xinfo, this->ui.xAxisWidget);
+  bool yBoundsChanged = this->checkBounds(yinfo, this->ui.yAxisWidget);
+  bool zBoundsChanged = this->checkBounds(zinfo, this->ui.zAxisWidget);
+  bool haveBoundsChanged = xBoundsChanged || yBoundsChanged || zBoundsChanged;
+
+  if (haveBoundsChanged)
+  {
+    if (xBoundsChanged)
+    {
+      this->ui.xAxisWidget->setBounds(xinfo, true);
+    }
+    if (yBoundsChanged)
+    {
+      this->ui.yAxisWidget->setBounds(yinfo, true);
+    }
+    if (zBoundsChanged)
+    {
+      this->ui.zAxisWidget->setBounds(zinfo, true);
+    }
+  }
+
   delete xinfo;
   delete yinfo;
   delete zinfo;
 }
 
 /**
- * This function compares the axis title from the request one to the currently
- * view one.
+ * This function compares the axis title from the requested one to the title of
+ * the currently viewed one.
  * @param info the information from the incoming axis
  * @param axis the information from the current axis
  * @return true if the titles are not equal
@@ -387,6 +411,20 @@ void MultiSliceView::setAxisScales()
 bool MultiSliceView::checkTitles(AxisInformation *info, AxisInteractor *axis)
 {
   return QString(info->getTitle().c_str()) != axis->getTitle();
+}
+
+/**
+ * This function compares the axis bounds from the requested one to the
+ * bounds of the currently viewed one.
+ * @param info the information from the incoming axis
+ * @param axis the information from the current axis
+ * @return true if the bounds are not equal
+ */
+bool MultiSliceView::checkBounds(AxisInformation *info, AxisInteractor *axis)
+{
+  bool upperChanged = info->getMaximum() != axis->getMaximum();
+  bool lowerChanged = info->getMinimum() != axis->getMinimum();
+  return upperChanged || lowerChanged;
 }
 
 }

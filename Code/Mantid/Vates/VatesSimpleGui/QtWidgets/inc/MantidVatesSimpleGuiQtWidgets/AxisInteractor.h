@@ -88,6 +88,10 @@ public:
    * @return the associated ScalePicker
    */
   ScalePicker *getScalePicker() { return this->scalePicker; }
+  /// Get the axis scale maximum.
+  double getMaximum();
+  /// Get the axis scale minimum.
+  double getMinimum();
   /// Get the axis title.
   QString getTitle();
   /**
@@ -110,6 +114,8 @@ public:
    * @param name the name of the slice being highlighted
    */
   void selectIndicator(const QString &name);
+  /// Set the bounds for the axis scale.
+  void setBounds(AxisInformation *info, bool update=false);
   /// Set the axis information.
   void setInformation(AxisInformation *info, bool update=false);
   /**
