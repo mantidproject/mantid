@@ -25,8 +25,7 @@ using namespace MantidQt::API;
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidMatrixCurve::MantidMatrixCurve(const QString& name,const QString& wsName,Graph* g,int index,bool err,bool distr)
-  :PlotCurve(name), 
-  WorkspaceObserver(),
+  :MantidCurve(),
   m_drawErrorBars(err),
   m_drawAllErrorBars(false),
   m_wsName(wsName),
@@ -58,8 +57,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString& name,const QString& wsName,G
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bool err,bool distr)
-  :PlotCurve(), 
-  WorkspaceObserver(), 
+  :MantidCurve(),
   m_drawErrorBars(err),
   m_drawAllErrorBars(false),
   m_wsName(wsName),
@@ -86,8 +84,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bo
 }
 
 MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
-  :PlotCurve(createCopyName(c.title().text())),
-  WorkspaceObserver(),
+  :MantidCurve(createCopyName(c.title().text())),
   m_drawErrorBars(c.m_drawErrorBars),
   m_drawAllErrorBars(c.m_drawAllErrorBars),
   m_wsName(c.m_wsName),

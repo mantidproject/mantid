@@ -162,10 +162,11 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
-                   src/Mantid/MantidMatrixCurve.cpp
+				   src/Mantid/MantidCurve.cpp
                    src/Mantid/MantidDock.cpp
                    src/Mantid/MantidLog.cpp
                    src/Mantid/MantidMatrix.cpp
+				   src/Mantid/MantidMatrixCurve.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
@@ -376,9 +377,10 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
-                   src/Mantid/MantidMatrixCurve.h
-                   src/Mantid/MantidDock.h
+				   src/Mantid/MantidCurve.h
+				   src/Mantid/MantidDock.h
                    src/Mantid/MantidLog.h
+                   src/Mantid/MantidMatrixCurve.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidSampleLogDialog.h
@@ -639,9 +641,10 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/ManageCustomMenus.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
-                       src/Mantid/MantidMatrixCurve.h
+                       src/Mantid/MantidCurve.h
                        src/Mantid/MantidDock.h
                        src/Mantid/MantidLog.h
+					   src/Mantid/MantidMatrixCurve.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidSampleLogDialog.h
