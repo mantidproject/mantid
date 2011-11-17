@@ -400,6 +400,28 @@ double AxisInteractor::getMinimum()
 #endif
 }
 
+/**
+ * This function searches the list of indicators and deletes the requested
+ * one.
+ * @param name the requested indicator to delete
+ */
+void AxisInteractor::deleteRequestedIndicator(const QString &name)
+{
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      if (item->toolTip() == name)
+      {
+        this->scene->removeItem(item);
+        emit this->deleteIndicator(item->toolTip());
+      }
+    }
+  }
+}
+
 }
 }
 }

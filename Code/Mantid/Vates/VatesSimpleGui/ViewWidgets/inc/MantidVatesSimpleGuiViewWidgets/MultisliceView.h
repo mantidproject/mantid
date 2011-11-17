@@ -159,6 +159,8 @@ private:
    * @param orient the cartesian coordinates of the slice normal
    */
   void makeCut(double origin[], double orient[]);
+  /// Reset or delete indicator when bounds change.
+  void resetOrDeleteIndicators(AxisInteractor *axis, int pos);
   /// Pull the dataset information and setup the axis interactors.
   void setupAxisInfo();
   /// Create the current data representation.
