@@ -1346,7 +1346,7 @@ void ApplicationWindow::plotMenuAboutToShow()
   reloadCustomActions();
 }
 
-void ApplicationWindow::customMenu(QMdiSubWindow* w)
+void ApplicationWindow::customMenu(MdiSubWindow* w)
 {
   menuBar()->clear();
   menuBar()->insertItem(tr("&File"), fileMenu);
@@ -1596,7 +1596,7 @@ void ApplicationWindow::customColumnActions()
     actionSwapColumns->setEnabled(true);
 }
 
-void ApplicationWindow::customToolBars(QMdiSubWindow* w)
+void ApplicationWindow::customToolBars(MdiSubWindow* w)
 {
   disableToolbars();
   if (!w)
@@ -3351,8 +3351,8 @@ void ApplicationWindow::windowActivated(QMdiSubWindow *w)
   if( d_active_window && d_active_window == qti_subwin ) return;
 
   d_active_window = qti_subwin;
-  customToolBars(w);
-  customMenu(w);
+  customToolBars(qti_subwin);
+  customMenu(qti_subwin);
 
   if (d_opening_file) return;
 
@@ -8283,7 +8283,9 @@ void ApplicationWindow::resizeWindow()
   if (!w)
     return;
 
-  d_workspace->setActiveSubWindow(w);
+#ifndef MDISUBWINDOW_FLOATABLE
+  d_workspace->setActiveSubWindow(w); //JZ
+#endif
 
   ImageDialog *id = new ImageDialog(this);
   id->setAttribute(Qt::WA_DeleteOnClose);
@@ -8312,7 +8314,9 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
     return;
 
   w->setNormal();
-  d_workspace->setActiveSubWindow(w);
+#ifndef MDISUBWINDOW_FLOATABLE
+  d_workspace->setActiveSubWindow(w); //JZ
+#endif
 
   updateWindowLists(w);
   emit modified();
@@ -8832,7 +8836,9 @@ void ApplicationWindow::windowsMenuActivated( int id )
       hiddenWindows->takeAt(hiddenWindows->indexOf(w));
       setListView(w->objectName(), tr("Normal"));
     }
-    d_workspace->setActiveSubWindow(w);
+#ifndef MDISUBWINDOW_FLOATABLE
+    d_workspace->setActiveSubWindow(w); //JZ
+#endif
   }
 }
 
@@ -10024,7 +10030,7 @@ void ApplicationWindow::pickFloorStyle( QAction* action )
   emit modified();
 }
 
-void ApplicationWindow::custom3DActions(QMdiSubWindow *w)
+void ApplicationWindow::custom3DActions(MdiSubWindow *w)
 {
   if (w && w->isA("Graph3D"))
   {
@@ -15210,7 +15216,9 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force)
 
   if (active_window){
     d_active_window = active_window;
-    d_workspace->setActiveSubWindow(active_window);
+#ifndef MDISUBWINDOW_FLOATABLE
+    d_workspace->setActiveSubWindow(active_window);  //JZ
+#endif
     customMenu(active_window);
     customToolBars(active_window);
     if (active_window_state == MdiSubWindow::Minimized)

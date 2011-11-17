@@ -811,7 +811,7 @@ public slots:
   void pickPlotStyle( QAction* action );
   void pickCoordSystem( QAction* action);
   void pickFloorStyle( QAction* action);
-  void custom3DActions(QMdiSubWindow *w);
+  void custom3DActions(MdiSubWindow *w);
   void custom3DGrids(int grids);
   //@}
 
@@ -1053,9 +1053,9 @@ private:
   void disableActions();
   void customColumnActions();
   void disableToolbars();
-  void customToolBars(QMdiSubWindow* w);
+  void customToolBars(MdiSubWindow* w);
   void customMultilayerToolButtons(MultiLayer* w);
-  void customMenu(QMdiSubWindow* w);
+  void customMenu(MdiSubWindow* w);
   void windowActivated(QMdiSubWindow *w);
   //@}
 

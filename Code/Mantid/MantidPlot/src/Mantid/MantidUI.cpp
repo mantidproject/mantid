@@ -351,7 +351,7 @@ Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
 
 /**   Extension to ApplicationWindow::menuAboutToShow() to deal with Mantid.
  */
-bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
+bool MantidUI::menuAboutToShow(MdiSubWindow *w)
 {
 
   if (w && w->isA("MantidMatrix"))
@@ -371,7 +371,7 @@ bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 
 Graph3D *MantidUI::plot3DMatrix(int style)
 {	
-  QMdiSubWindow *w = appWindow()->activeWindow();
+  MdiSubWindow *w = appWindow()->activeWindow();
   if (w->isA("MantidMatrix"))
   {
     return static_cast<MantidMatrix*>(w)->plotGraph3D(style);

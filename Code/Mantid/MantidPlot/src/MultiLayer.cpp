@@ -978,7 +978,7 @@ bool MultiLayer::eventFilter(QObject *object, QEvent *e)
     {
       const QMouseEvent *me = (const QMouseEvent *)e;
       if (me->button() == Qt::RightButton)
-        return QMdiSubWindow::eventFilter(object, e);
+        return MdiSubWindowParent_t::eventFilter(object, e);
 
       QPoint pos = canvas->mapFromParent(me->pos());
       // iterate backwards, so layers on top are preferred for selection

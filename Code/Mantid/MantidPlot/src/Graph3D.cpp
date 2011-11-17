@@ -1615,7 +1615,7 @@ void Graph3D::resizeEvent(QResizeEvent *e)
 	}
 	emit resizedWindow(this);
 	emit modified();
-	QMdiSubWindow::resizeEvent(e);
+	MdiSubWindow::resizeEvent(e);
 }
 
 void Graph3D::setFramed()
