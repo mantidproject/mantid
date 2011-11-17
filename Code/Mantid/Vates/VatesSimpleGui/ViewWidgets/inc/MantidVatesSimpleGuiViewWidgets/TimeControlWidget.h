@@ -43,25 +43,15 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget : public QW
   Q_OBJECT
 
 public:
-  /**
-   * Default constructor.
-   * @param parent the parent widget for the time control widget
-   */
-  TimeControlWidget(QWidget *parent = 0);
   /// Default constructor.
+  TimeControlWidget(QWidget *parent = 0);
+  /// Default destructor.
   virtual ~TimeControlWidget();
 
 public slots:
   /// Enable/disable the animation controls.
   void enableAnimationControls(bool state);
-  /**
-   * Function to update the animation scene with "time" information. This
-   * updates the animation controls automatically. The "time" information
-   * can be any fourth dimension to the dataset, i.e. energy transfer.
-   * @param timeStart the start "time" for the data
-   * @param timeEnd the end "time" for the data
-   * @param numTimesteps the number of "time" steps for the data
-   */
+  /// Update information in animation controls.
   void updateAnimationControls(double timeStart, double timeEnd,
                                int numTimesteps);
 

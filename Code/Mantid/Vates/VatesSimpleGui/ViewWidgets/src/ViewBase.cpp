@@ -236,13 +236,8 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
     }
     double tStart = dvp->GetElement(0);
     double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
-    pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
-    vtkSMPropertyHelper(scene->getProxy(), "StartTime").Set(tStart);
-    vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
-    vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
     emit this->setAnimationControlState(true);
     emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
-    scene->getProxy()->InvokeCommand("GoToFirst");
   }
   else
   {
