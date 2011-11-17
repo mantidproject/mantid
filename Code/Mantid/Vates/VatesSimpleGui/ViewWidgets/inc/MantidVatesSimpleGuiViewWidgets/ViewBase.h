@@ -138,6 +138,8 @@ public slots:
    * @param state flag to determine whether or not to use log color scaling
    */
   void onLogScale(int state);
+  /// Set the view to use a parallel projection.
+  void onParallelProjection(bool state);
   /// Reset center of rotation to center of data volume.
   void onResetCenterToData();
   /// Reset center of rotation to given point.
@@ -177,6 +179,8 @@ private:
 
   /// Return the active representation determined by ParaView.
   pqPipelineRepresentation *getPvActiveRep();
+  /// Return the active view determined by ParaView
+  pqRenderView *getPvActiveView();
   /// Find the number of true sources in the pipeline.
   unsigned int getNumSources();
   /// Collect time information for animation controls.

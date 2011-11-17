@@ -311,6 +311,30 @@ void ViewBase::setAxisScales()
 {
 }
 
+/**
+ * This function is used to set the current state of the view between a
+ * parallel projection and the normal projection.
+ * @param state whether or not to use parallel projection
+ */
+void ViewBase::onParallelProjection(bool state)
+{
+  pqRenderView *cview = this->getPvActiveView();
+  vtkSMProxy *proxy = cview->getProxy();
+  vtkSMPropertyHelper(proxy, "CameraParallelProjection").Set(state);
+  proxy->UpdateVTKObjects();
+  cview->render();
+}
+
+/**
+ * Retrieve the active pqRenderView object according to ParaView's
+ * ActiveObjects mechanism.
+ * @return the currently active view
+ */
+pqRenderView *ViewBase::getPvActiveView()
+{
+  return qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
+}
+
 }
 }
 }
