@@ -383,22 +383,17 @@ ConvertToQ3DdE::get_transf_matrix(API::MatrixWorkspace_sptr inWS2D,const Kernel:
     Geometry::OrientedLattice Latt = inWS2D->sample().getOrientedLattice();
 
     // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
-    Kernel::Matrix<double> ub = Latt.getUBFromVectors(u,v);
-    std::vector<double> ubv = ub.get_vector();
-
+    Latt.setUFromVectors(u,v);
+    Kernel::Matrix<double> ub = Latt.getUB();
     Kernel::Matrix<double> b  = Latt.getB();
-    std::vector<double>  bv = b.get_vector();
+
 
     Kernel::Matrix<double> umat= ub*b.Invert();
-    std::vector<double>  umv = umat.get_vector();
     Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
     umat.Invert();
-    umv=umat.get_vector();
-    std::vector<double>  gonv = gon.get_vector();
 
-  // Initalize the 3x3 matrix
-    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3);
-    mat = umat*gon;
+  // Obtain the transformation matrix:
+    Kernel::Matrix<double> mat = umat*gon;
 
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;

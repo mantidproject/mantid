@@ -121,15 +121,17 @@ namespace Geometry
 
 
 
- /** The method returns the matrix 
-   *  to tansform a vector, expressin in rlu (hkl)  into orthonormal frame defined by 2 vectors u, v 
-   *  expressed in rlu (hkl)
+ /**  Set the U rotation matrix, to provide the transformation, which translate an 
+   *  arbitrary vector V expressed in RLU (hkl) 
+   *  into another coordinate system defined by vectors u and v, expressed in RLU (hkl) 
    *  Author: Alex Buts
-   *  @param u :: vector defines first axis of new coordinate system
-   *  @param v :: vector defines second axis of new coordinate system
-   *  @returns the transformation matrix calculated,
+   *  @param u :: first vector of new coordinate system (in hkl units)
+   *  @param v :: second vector of the new coordinate system 
+   *  @return the U matrix calculated
+   *  The transformation from old coordinate system to new coordinate system is performed by 
+   *  the whole UB matrix
    **/
-  DblMatrix OrientedLattice::getUBFromVectors(const V3D &u, const V3D &v)const
+  DblMatrix OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
   {
     //get  B-matrix of Busing and Levy
     DblMatrix B = this->getB();
@@ -155,8 +157,8 @@ namespace Geometry
     double det = Transf.determinant();
     Transf /=det;
 
-   // this->setU(Transf);
-    return Transf*B;
+    this->setU(Transf);
+    return Transf;
   }
 
 
