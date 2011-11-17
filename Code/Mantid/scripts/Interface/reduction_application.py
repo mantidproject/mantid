@@ -101,7 +101,28 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         for w in QtCore.QCoreApplication.instance().topLevelWidgets():
             self.connect(w, QtCore.SIGNAL("shutting_down()"), self.close)
             
-        self.general_settings.progress.connect(self._progress_updated)        
+        self.general_settings.progress.connect(self._progress_updated)    
+        
+        # Flag to let use know that we need to close the window as soon as possible
+        self._quit_asap = False 
+        
+        # There is an edge-case where the user doesn't have a facility/instrument
+        # selected and hits cancel when the instrument selection dialog shows up.
+        # In that case, the main window is shown empty and it should be closed.
+        # Since the close() method can only be called after the QApplication has been
+        # started, we use the _quit_asap flag to close it as soon as we can.
+        # Note that we choose to show the dialog before showing the main window because
+        # we don't want to have the main window appear empty in the main use-case. 
+        class ShowEventFilter(QtCore.QObject):
+            def eventFilter(obj_self, filteredObj, event):
+                if event.type() == QtCore.QEvent.ActivationChange\
+                    and filteredObj.isActiveWindow()\
+                    and self._quit_asap:
+                    self.close()
+                return QtCore.QObject.eventFilter(obj_self, filteredObj, event)
+        
+        eventFilter = ShowEventFilter(self)
+        self.installEventFilter(eventFilter)
 
     def _set_window_title(self):
         """
@@ -120,16 +141,29 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             Sets up the instrument-specific part of the UI layout
         """
+        # Clean up the widgets that have already been created
+        self.tabWidget.clear()
+        self.progress_bar.hide()
+        
         if self._instrument == '':
-            self._change_instrument()
-            if self._instrument == '':
-                self.close()
-                return
+            if IS_IN_MANTIDPLOT:
+                c = ConfigService()
+                facility = str(c.facility().name())
+                if facility in INSTRUMENT_DICT.keys():
+                    instr = str(c.facility().instrument())
+                    instr = instr.replace("-","")
+                    if instr in INSTRUMENT_DICT[facility].keys():
+                        self._instrument = instr
+            else:
+                self._change_instrument()
+                
+        if self._instrument == '':
+            self.close()
+            self._quit_asap = True
+            return
         
         self._update_file_menu()
 
-        # Clean up the widgets that have already been created
-        self.tabWidget.clear()
         if self._interface is not None:
             self._interface.destroy()
             
@@ -139,7 +173,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             for tab in tab_list:
                 self.tabWidget.addTab(tab[1], tab[0])
             self._set_window_title()
-            self.progress_bar.hide()
             
             if load_last:
                 self._interface.load_last_reduction()

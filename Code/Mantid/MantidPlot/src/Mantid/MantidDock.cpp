@@ -1461,7 +1461,15 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
-  QList<QString> wsNames = this->getSelectedWorkspaceNames();
+  QList<QString> allWsNames = this->getSelectedWorkspaceNames();
+  QList<QString> wsNames;
+
+  for (int i=0; i<allWsNames.size(); i++)
+  {
+    if (AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString())->id() != "TableWorkspace")
+      wsNames.append(allWsNames[i]);
+  }
+
   QList<QString>::const_iterator it = wsNames.constBegin();
 
   // Check to see if all workspaces have a *single* histogram ...

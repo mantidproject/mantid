@@ -22,6 +22,7 @@ namespace Vates
 namespace SimpleGui
 {
 
+class AxisInformation;
 class ScalePicker;
 
 /**
@@ -80,11 +81,19 @@ public:
    * Remove highlights from all selected indicators.
    */
   void clearSelections();
+  /// Delete all of the indicators
+  void deleteAllIndicators();
   /**
    * Get the associated ScalePicker for the indicator.
    * @return the associated ScalePicker
    */
   ScalePicker *getScalePicker() { return this->scalePicker; }
+  /// Get the axis scale maximum.
+  double getMaximum();
+  /// Get the axis scale minimum.
+  double getMinimum();
+  /// Get the axis title.
+  QString getTitle();
   /**
    * Is there at least one indicator?
    * @return true if yes
@@ -105,13 +114,10 @@ public:
    * @param name the name of the slice being highlighted
    */
   void selectIndicator(const QString &name);
-  /**
-   * Set the axis information for the associated dataset axis.
-   * @param title the dataset axis title
-   * @param min the dataset axis minimum extent
-   * @param max the dataset axis maximum extent
-   */
-  void setInformation(QString title, double min, double max);
+  /// Set the bounds for the axis scale.
+  void setBounds(AxisInformation *info, bool update=false);
+  /// Set the axis information.
+  void setInformation(AxisInformation *info, bool update=false);
   /**
    * Set the orientation of the axis scale and graphicsview.
    * @param orient the orientation of the graphicsview
