@@ -9,7 +9,7 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
-#include "VatesConfig.h"
+#include <MantidQtAPI/InterfaceManager.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
@@ -854,9 +854,11 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 {
   (void) WS;
   menu->addAction(m_showBoxData); // Show MD Box data
-#ifdef MAKE_VATES
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
-#endif
+  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  {
+    m_showVatesGui->setEnabled(false);
+  }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);  // Algorithm history
 }
@@ -879,9 +881,11 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPea
   //menu->addAction(m_showData); // Show data
   //menu->addAction(m_showInst); // Show instrument
   menu->addAction(m_showLogs); // Sample logs
-#ifdef MAKE_VATES
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
-#endif
+  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  {
+    m_showVatesGui->setEnabled(false);
+  }
   menu->addAction(m_showHist);
 }
 
@@ -1457,7 +1461,15 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
-  QList<QString> wsNames = this->getSelectedWorkspaceNames();
+  QList<QString> allWsNames = this->getSelectedWorkspaceNames();
+  QList<QString> wsNames;
+
+  for (int i=0; i<allWsNames.size(); i++)
+  {
+    if (AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString())->id() != "TableWorkspace")
+      wsNames.append(allWsNames[i]);
+  }
+
   QList<QString>::const_iterator it = wsNames.constBegin();
 
   // Check to see if all workspaces have a *single* histogram ...

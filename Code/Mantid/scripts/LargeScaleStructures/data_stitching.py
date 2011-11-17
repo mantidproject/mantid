@@ -16,7 +16,7 @@ class RangeSelector(object):
     class _Selector(object):
         def __init__(self):
             self._call_back = None
-            self._graph = None
+            self._graph = "StitcherRangeSelector"
             
         def disconnect(self):
             qti.app.disconnect(qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
@@ -24,7 +24,10 @@ class RangeSelector(object):
         def connect(self, ws, call_back):
             self._call_back = call_back
             qti.app.connect(qti.app.mantidUI, QtCore.SIGNAL("x_range_update(double,double)"), self._call_back)
-            self._graph = qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)            
+            g = qti.app.graph(self._graph)
+            if g is None:
+                g = qti.app.mantidUI.pyPlotSpectraList(ws,[0],True)
+                g.setName(self._graph)        
             qti.app.selectMultiPeak(False)
             qti.app.selectMultiPeak(False)
     
@@ -48,12 +51,15 @@ class DataSet(object):
         self._ws_scaled = None
         self._scale = 1.0
         self._last_applied_scale = 1.0
-        self._graph = None
         self._skip_last = 0
         self._skip_first = 0
+        self._npts = None
         
     def __str__(self):
         return self._ws_name
+    
+    def get_number_of_points(self):
+        return self._npts
     
     def get_scaled_ws(self):
         """
@@ -136,11 +142,16 @@ class DataSet(object):
         """
         if os.path.isfile(self._file_path):
             self._ws_name = os.path.basename(self._file_path)
-            self._ws_scaled = self._ws_name+"_scaled"
             Load(Filename=self._file_path, OutputWorkspace=self._ws_name)
+        elif mtd.workspaceExists(self._file_path):
+            self._ws_name = self._file_path
+        
+        if mtd.workspaceExists(self._ws_name):
+            self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
                 self._xmin = min(mtd[self._ws_name].readX(0))
                 self._xmax = max(mtd[self._ws_name].readX(0))
+            self._npts = len(mtd[self._ws_name].readY(0))
             self._last_applied_scale = 1.0
         
     def integrate(self, xmin=None, xmax=None):
@@ -225,7 +236,7 @@ class Stitcher(object):
         
         # Check that we have an overlap
         if ref_max<d_min or ref_min>d_max:
-            mtd.sendLogMessage("No overlap between %s and %d" % (str(data_ref), str(data_to_scale)))
+            mtd.sendLogMessage("No overlap between %s and %s" % (str(data_ref), str(data_to_scale)))
             return
         
         # Get overlap

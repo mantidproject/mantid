@@ -1,7 +1,6 @@
 #ifndef MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 #define MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -17,7 +16,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDEvents;
 

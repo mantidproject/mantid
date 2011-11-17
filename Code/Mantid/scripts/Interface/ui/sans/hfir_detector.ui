@@ -259,10 +259,10 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>Click to browse.</string>
+                 <string/>
                 </property>
                 <property name="text">
-                 <string>Browse...</string>
+                 <string>Browse</string>
                 </property>
                </widget>
               </item>
@@ -480,10 +480,10 @@
                </sizepolicy>
               </property>
               <property name="toolTip">
-               <string>Click to browse.</string>
+               <string/>
               </property>
               <property name="text">
-               <string>Browse...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -596,11 +596,8 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="toolTip">
-               <string>Click to browse.</string>
-              </property>
               <property name="text">
-               <string>Browse...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -1058,11 +1055,8 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="toolTip">
-                    <string>Click to browse.</string>
-                   </property>
                    <property name="text">
-                    <string>Browse...</string>
+                    <string>Browse</string>
                    </property>
                   </widget>
                  </item>

@@ -10,7 +10,7 @@
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "FakeObjects.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 using namespace Mantid;

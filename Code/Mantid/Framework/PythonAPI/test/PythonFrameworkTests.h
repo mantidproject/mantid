@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -31,8 +31,6 @@ public:
   PythonFrameworkTests()
   {
     mgr = new Mantid::PythonAPI::FrameworkManagerProxy;
-    // @TODO This line can go once scons does
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries("../../Build/Plugins/",false);
   }
 
   ~PythonFrameworkTests()
@@ -54,7 +52,9 @@ public:
 
   void testGetDeleteWorkspace()
   {
-    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
+    boost::shared_ptr<WorkspaceTester> wsIn(new WorkspaceTester);
+    wsIn->initialize(22,10,1);
+    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",wsIn);
     Mantid::API::MatrixWorkspace_sptr ws = mgr->retrieveMatrixWorkspace("TestWorkspace1");
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 22);
@@ -66,7 +66,7 @@ public:
     std::set<std::string> temp = mgr->getWorkspaceNames();
     TS_ASSERT(temp.empty());
     const std::string name = "outer";
-    Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
+    Mantid::API::AnalysisDataService::Instance().add(name,boost::shared_ptr<API::Workspace>(new WorkspaceTester));
 
     temp = mgr->getWorkspaceNames();
     TS_ASSERT(!temp.empty());
@@ -81,7 +81,7 @@ public:
     const std::string name = "outer";
     TS_ASSERT_EQUALS(mgr->workspaceExists(name), false);
     //Add the workspace
-    Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
+    Mantid::API::AnalysisDataService::Instance().add(name,boost::shared_ptr<API::Workspace>(new WorkspaceTester));
 
     TS_ASSERT_EQUALS(mgr->workspaceExists(name), true);
     //Remove it to clean up afterwards

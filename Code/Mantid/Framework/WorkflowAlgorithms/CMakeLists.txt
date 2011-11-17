@@ -57,9 +57,9 @@ target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} 
 
 if ( CXXTEST_FOUND )
   # Make the rest of the tests
-  include_directories ( ../DataHandling/inc ../TestHelpers/inc ../Nexus/inc)
+  include_directories ( ../DataHandling/inc )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling Nexus TestHelpers )
+  target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET WorkflowAlgorithmsTest PROPERTY FOLDER "UnitTests" )

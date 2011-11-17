@@ -35,8 +35,10 @@ MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<
 
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
-  if(m_spectra) generateSpectraIdIntervals();
-
+  if(m_spectra)
+  {
+    generateSpectraIdIntervals();
+  }
   // Set up UI.
   init();
 }
@@ -224,7 +226,8 @@ void MantidWSIndexDialog::checkForSpectraAxes()
     bool hasSpectra = false;
     for(int i = 0; i < ws->axes(); i++)
     {
-      if(ws->getAxis(i)->isSpectra()) hasSpectra = true;
+      if(ws->getAxis(i)->isSpectra()) 
+        hasSpectra = true;
     }
     if(hasSpectra == false)
     {

@@ -1750,9 +1750,11 @@ void MantidUI::showMantidInstrument(const QString& wsName)
 void MantidUI::showMantidInstrument()
 {
   MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
-  if (!m || !m->isA("MantidMatrix")) return;
+  if (!m || !m->isA("MantidMatrix")) 
+    return;
   if(!m->workspaceName().isEmpty())
-  {showMantidInstrument(m->workspaceName());
+  {
+    showMantidInstrument(m->workspaceName());
   }
 }
 
@@ -1836,20 +1838,46 @@ QString MantidUI::saveToString(const std::string& workingDir)
   QTreeWidget *tree=m_exploreMantid->m_tree;
   int count=tree->topLevelItemCount();
   for(int i=0;i<count;++i)
-  { QTreeWidgetItem* item=tree->topLevelItem(i);
-  QString wsName=item->text(0);
-  wsNames+="\t";
-  wsNames+=wsName;
+  { 
+    QTreeWidgetItem* item=tree->topLevelItem(i);
+    QString wsName=item->text(0);
+    if (Mantid::API::FrameworkManager::Instance().getWorkspace(wsName.toStdString())->id() == "WorkspaceGroup")
+    {
+      Mantid::API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+      wsNames+="\t";
+      //wsName is a group, add it to list and indicate what the group contains by a "[" and end the group with a "]"
+      wsNames+=wsName;
+      std::vector<std::string> secondLevelItems = group->getNames();
+      for(size_t j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
+      {
+        wsNames+=",";
+        wsNames+=QString::fromStdString(secondLevelItems[j]);
+        std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
+        //saving to  nexus file
+        try
+        {
+          savedatainNexusFormat(fileName,secondLevelItems[j]);
+        }
+        catch(...)
+        {
+        }
+      }
+    }
+    else
+    {
+      wsNames+="\t";
+      wsNames+=wsName;
 
-  std::string fileName(workingDir+"//"+wsName.toStdString()+".nxs");
-  //saving to  nexus file
-  try
-  {
-    savedatainNexusFormat(fileName,wsName.toStdString());
-  }
-  catch(...)
-  {
-  }
+      std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
+      //saving to  nexus file
+      try
+      {
+        savedatainNexusFormat(fileName,wsName.toStdString());
+      }
+      catch(...)
+      {
+      }
+    }
   }
   wsNames+="\n</mantidworkspaces>\n";
   return wsNames;
@@ -1967,7 +1995,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
  * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
  * argument
  */
-MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs)
+MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs, Graph::CurveType style)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -1989,7 +2017,7 @@ MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QL
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs);
+  return plotSpectraList(pairs,errs,false,style);
 }
 
 /**
@@ -2709,7 +2737,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
     @param toPlot :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors to the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   UNUSED_ARG(errs);
@@ -2753,8 +2781,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
-      UNUSED_ARG(mc)
+      mc = new MantidCurve(it.key(),g,it.value(),errs,distr,style);
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {

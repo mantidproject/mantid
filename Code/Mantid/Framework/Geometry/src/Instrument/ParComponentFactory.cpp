@@ -12,99 +12,6 @@ namespace Mantid
   namespace Geometry
   {
 
-    //--------------------------------------------------------------------------
-    // ComponentPool
-    //--------------------------------------------------------------------------
-    /**
-     * Constructor
-     * @param poolSize The size of the pool to create
-     */
-    template<typename ClassType>
-    ComponentPool<ClassType>::ComponentPool(const size_t poolSize) : 
-      m_storeSize(poolSize), m_store(poolSize, PtrType())
-    {
-    }
-
-    /**
-     * Get a pointer to a ParComponent object whether replacing
-     * store or creating a new object
-     * @param base The base object to wrap
-     * @param map A pointer to the ParamterMap
-     * @returns A parameterized object
-     */
-    template<typename ClassType>
-    typename ComponentPool<ClassType>::PtrType
-    ComponentPool<ClassType>::create(const ClassType *base, 
-             const ParameterMap *map)
-    {
-      try
-      {
-        const size_t index = getIndexInCache();
-        PtrType & cached = m_store[index];
-        if( !cached ) 
-        {
-          // Creating cached object
-          cached = PtrType(createUsingNew(base, map));
-        }
-        cached->swap(base, map);
-        return cached;
-      }
-      catch(std::runtime_error&)
-      {
-        return PtrType(createUsingNew(base, map));
-      }
-      // This will never get hit but MSVC complains if it's not here.
-      return PtrType();
-    }
-
-    /**
-     * Retrieve a index for a pre-allocated object, throwing if one cannot be found
-     * @returns An index pointing to a valid area within the cache
-     * @throws std::runtime_error if unable to provide a suitable index
-     */
-    template<typename ClassType>
-    size_t ComponentPool<ClassType>::getIndexInCache() const
-    {
-      size_t index = PARALLEL_THREAD_NUMBER;
-      // Use the range-checking vector accessor to guard against the (slim) possibility
-      // that someone has increased the number of threads since the pool was created
-      try {
-        const PtrType & cached_first = m_store.at(index);
-        if( cached_first && !cached_first.unique() )
-        {
-          // Try the extra storage
-          index += PARALLEL_GET_MAX_THREADS;
-          const PtrType & cached_second = m_store.at(index);
-          if( cached_second && !cached_second.unique() )
-          {
-            throw std::runtime_error("ComponentPool::getIndexInCache - Cannot use cache index.");
-          }
-        }
-      } catch (std::out_of_range& ex) {
-        // Get here if trying to go past end of storage vector
-        throw std::runtime_error(ex.what());
-      }
-      return index;
-    }    
-    
-    /**
-     * Create an object with the new operator
-     * @param base The base object to wrap
-     * @param map A pointer to the ParamterMap
-     * @returns A parameterized object
-     */
-    template<typename ClassType>
-    ClassType* 
-    ComponentPool<ClassType>::createUsingNew(const ClassType *base, 
-               const ParameterMap *map)
-    {
-      return new ClassType(base,map);
-    }
-
-    //--------------------------------------------------------------------------
-    // ParComponentFactory
-    //--------------------------------------------------------------------------
-
     /**
      * Create a parameterized detector from the given base detector and ParameterMap. This version
      * avoids a cast by directly returning the Detector pointer
@@ -115,15 +22,10 @@ namespace Mantid
     boost::shared_ptr<Detector> 
     ParComponentFactory::createDetector(const IDetector *base, const ParameterMap *map)
     {
-      // Use a pool for the detectors as the are created very frequently
-      // Create it statically here as it's not used elsewhere, which means there's an opportunity
-      // for the number of threads to be updated programatically (unlike the previous way of having
-      // this as a static member of the class).
-      static ComponentPool<Detector> g_detPool(2*PARALLEL_GET_MAX_THREADS);
       const Detector *baseDet = dynamic_cast<const Detector*>(base);
       if( baseDet )
       {
-        return g_detPool.create(baseDet,map);
+        return boost::shared_ptr<Detector>(new Detector(baseDet, map));//g_detPool.create(baseDet,map);
       }
       return boost::shared_ptr<Detector>();
     }

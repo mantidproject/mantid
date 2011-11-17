@@ -21,6 +21,9 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+class AxisInformation;
+class AxisInteractor;
 /**
  *
   This class creates a multislice view which is based on the Matlab(C)
@@ -78,10 +81,14 @@ public:
    * ViewBase::renderAll
    */
   void renderAll();
+  /// ViewBase::resetCamera()
+  void resetCamera();
   /**
    * ViewBase::resetDisplay()
    */
   void resetDisplay();
+  /// ViewBase::setAxisScales()
+  void setAxisScales();
 
 protected slots:
   /**
@@ -136,6 +143,10 @@ signals:
 private:
   Q_DISABLE_COPY(MultiSliceView)
 
+  /// Determine if the incoming and current axis have the same bounds.
+  bool checkBounds(AxisInformation *info, AxisInteractor *axis);
+  /// Determine if the incoming and current axis have the same title.
+  bool checkTitles(AxisInformation *info, AxisInteractor *axis);
   /// Clear all axis indicator highlighting.
   void clearIndicatorSelections();
   /**
@@ -150,6 +161,8 @@ private:
    * @param orient the cartesian coordinates of the slice normal
    */
   void makeCut(double origin[], double orient[]);
+  /// Reset or delete indicator when bounds change.
+  void resetOrDeleteIndicators(AxisInteractor *axis, int pos);
   /// Pull the dataset information and setup the axis interactors.
   void setupAxisInfo();
   /// Create the current data representation.

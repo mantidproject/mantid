@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeak.h"
 #include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid
@@ -13,6 +12,8 @@ namespace Mantid
 
 namespace API
 {
+  class IPeak;
+
   //==========================================================================================
   /** Interface to the class Mantid::DataObjects::PeaksWorkspace
 

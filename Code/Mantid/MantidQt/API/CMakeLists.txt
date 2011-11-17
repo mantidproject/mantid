@@ -75,12 +75,9 @@ target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIB
 ###########################################################################
 
 if ( CXXTEST_FOUND )
-  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MantidQtAPITest MantidQtAPI ${MANTIDLIBS}
-         ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}
-         TestHelpers DataObjects)
+    target_link_libraries( MantidQtAPITest MantidQtAPI ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
     add_dependencies( FrameworkTests MantidQtAPITest )
     # Add to the 'UnitTests' group in VS
     set_property( TARGET MantidQtAPITest PROPERTY FOLDER "UnitTests" )

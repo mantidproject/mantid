@@ -22,7 +22,8 @@ using namespace MantidQt::API;
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,int index,bool err,bool distr)
+MantidCurve::MantidCurve(const QString& name, const QString& wsName, Graph* g, int index,
+                         bool err, bool distr, Graph::CurveType style)
   :PlotCurve(name), 
   WorkspaceObserver(),
   m_drawErrorBars(err),
@@ -30,22 +31,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,int 
   m_wsName(wsName),
   m_index(index)
 {
-  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-              AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
-
-  if ( !ws || index >= static_cast<int>(ws->getNumberHistograms()) )
-  {
-    std::stringstream ss;
-    ss << index << " is an invalid spectrum index for workspace " << ws->getName()
-       << " - not plotted";
-    throw std::invalid_argument(ss.str());
-  }
-
-  init(ws,g,index,distr);
-  observeDelete();
-  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
-  observeAfterReplace();
-  observeADSClear();
+  init(g,distr,style);
 }
 
 /**
@@ -55,7 +41,8 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,int 
  *  @param err :: True if the errors are to be plotted
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidCurve::MantidCurve(const QString& wsName,Graph* g,int index,bool err,bool distr)
+MantidCurve::MantidCurve(const QString& wsName, Graph* g, int index,
+                         bool err, bool distr, Graph::CurveType style)
   :PlotCurve(), 
   WorkspaceObserver(), 
   m_drawErrorBars(err),
@@ -63,24 +50,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,int index,bool err,bool 
   m_wsName(wsName),
   m_index(index)
 {
-  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-              AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
-
-  if ( !ws || index >= static_cast<int>(ws->getNumberHistograms()) )
-  {
-    std::stringstream ss;
-    ss << index << " is an invalid spectrum index for workspace " << ws->getName()
-       << " - not plotted";
-    throw std::invalid_argument(ss.str());
-  }
-  // If there's only one spectrum in the workspace, title is simply workspace name
-  if (ws->getNumberHistograms() == 1) this->setTitle(wsName);
-  else this->setTitle(createCurveName(ws,wsName,index));
-  init(ws,g,index,distr);
-  observeDelete();
-  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
-  observeAfterReplace();
-  observeADSClear();
+  init(g,distr,style);
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
@@ -105,11 +75,30 @@ MantidCurve::MantidCurve(const MantidCurve& c)
  *  @param g :: The Graph widget which will display the curve
  *  @param index :: The index of the spectrum or bin in the workspace
  */
-void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index,bool distr)
+void MantidCurve::init(Graph* g, bool distr, Graph::CurveType style)
 {
+  MatrixWorkspace_const_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+              AnalysisDataService::Instance().retrieve(m_wsName.toStdString()) );
+
+  if ( !workspace || m_index >= static_cast<int>(workspace->getNumberHistograms()) )
+  {
+    std::stringstream ss;
+    ss << m_index << " is an invalid spectrum index for workspace " << m_wsName.toStdString()
+       << " - not plotted";
+    throw std::invalid_argument(ss.str());
+  }
+
+  // Set the curve name if it the non-naming constructor was called
+  if ( this->title().isEmpty() )
+  {
+    // If there's only one spectrum in the workspace, title is simply workspace name
+    if (workspace->getNumberHistograms() == 1) this->setTitle(m_wsName);
+    else this->setTitle(createCurveName(workspace,m_wsName,m_index));
+  }
+
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
-  MantidQwtData data(workspace,index, log,distr);
+  MantidQwtData data(workspace,m_index,log,distr);
   setData(data);
   Mantid::API::Axis* ax = workspace->getAxis(0);
   if (ax->unit())
@@ -132,14 +121,17 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   }
   int lineWidth = 1;
   MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
-  if (ml && ml->applicationWindow()->applyCurveStyleToMantid)
+  if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )
   {
+    if ( style == Graph::Unspecified )
+      style = static_cast<Graph::CurveType>(ml->applicationWindow()->defaultCurveStyle);
+
     QwtPlotCurve::CurveStyle qwtStyle;
     // Get the symbol size from the user preferences and create solid black circle symbol
     // of that size for use if the preferred plot style is scatter or line+symbol
     const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
     const QwtSymbol symbol(QwtSymbol::Ellipse,QBrush(Qt::black),QPen(),QSize(symbolSize,symbolSize));
-    switch(ml->applicationWindow()->defaultCurveStyle)
+    switch(style)
     {
     case Graph::Line :
       qwtStyle = QwtPlotCurve::Lines;
@@ -174,6 +166,11 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
     g->insertCurve(this,lineWidth);
   }
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
+
+  observeDelete();
+  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
+  observeAfterReplace();
+  observeADSClear();
 }
 
 

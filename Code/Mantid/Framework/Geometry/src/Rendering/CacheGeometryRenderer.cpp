@@ -19,8 +19,6 @@ namespace Mantid
  */
     CacheGeometryRenderer::CacheGeometryRenderer()
     {
-      boolDisplaylistCreated = false;
-      iDisplaylistId = UINT_MAX;
     }
 
 /**
@@ -29,10 +27,6 @@ namespace Mantid
  */
     CacheGeometryRenderer::~CacheGeometryRenderer()
     {
-      if (boolDisplaylistCreated && glIsList(iDisplaylistId) == GL_TRUE)
-      {
-        glDeleteLists(iDisplaylistId, 1);
-      }
     }
 
 /**
@@ -61,16 +55,11 @@ namespace Mantid
       (void) points;
       (void) faces; //Avoid compiler warning
       Initialize(noPts, noFaces, points, faces);
-      glCallList(iDisplaylistId);
     }
 
     void CacheGeometryRenderer::Initialize(int noPts, int noFaces, double* points, int* faces)const
     {
       (void) noPts; //Avoid compiler warning
-      if (!boolDisplaylistCreated || glIsList(iDisplaylistId) == GL_FALSE)
-      {
-        iDisplaylistId = glGenLists(1);
-        glNewList(iDisplaylistId, GL_COMPILE); //Construct display list for object representation
         glBegin(GL_TRIANGLES);
         int index1, index2, index3;
         V3D normal;
@@ -91,9 +80,6 @@ namespace Mantid
           glVertex3dv(points + index3);
         }
         glEnd();
-        glEndList();
-        boolDisplaylistCreated = true;
-      }
     }
 
     void CacheGeometryRenderer::Initialize(IObjComponent *ObjComp)

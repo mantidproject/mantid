@@ -5,10 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Sample.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 //Copy of the NexusCpp API was placed in MantidNexus

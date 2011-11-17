@@ -8,14 +8,15 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "../../TestHelpers/src/ComponentCreationHelper.cpp"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_direct_beam.ui'
 #
-# Created: Tue Sep 13 11:41:54 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Nov 16 13:57:35 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -39,6 +39,7 @@ class Ui_GroupBox(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sample_browse.sizePolicy().hasHeightForWidth())
         self.sample_browse.setSizePolicy(sizePolicy)
+        self.sample_browse.setToolTip("")
         self.sample_browse.setObjectName("sample_browse")
         self.gridLayout.addWidget(self.sample_browse, 0, 3, 1, 1)
         self.label_2 = QtGui.QLabel(GroupBox)
@@ -60,6 +61,7 @@ class Ui_GroupBox(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.direct_browse.sizePolicy().hasHeightForWidth())
         self.direct_browse.setSizePolicy(sizePolicy)
+        self.direct_browse.setToolTip("")
         self.direct_browse.setObjectName("direct_browse")
         self.gridLayout.addWidget(self.direct_browse, 1, 3, 1, 1)
         self.beam_radius_edit = QtGui.QLineEdit(GroupBox)
@@ -105,12 +107,10 @@ class Ui_GroupBox(object):
         GroupBox.setTitle(QtGui.QApplication.translate("GroupBox", "Direct Beam", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("GroupBox", "Sample direct beam data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_browse.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("GroupBox", "Empty direct beam data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_browse.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("GroupBox", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
