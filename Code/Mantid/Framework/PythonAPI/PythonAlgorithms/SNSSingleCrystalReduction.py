@@ -44,7 +44,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl', 'nxs']
-        self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
+        self.declareProperty("SaveAs", "hkl", ListValidator(outfiletypes))
         self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
         self.declareProperty("AppendHKLFile", False, Description="Append existing hkl file")
 
@@ -162,6 +162,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                     SplitInto=2,SplitThreshold=150)
             wkspMD = mtd['MD2']
             FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=500,OutputWorkspace='Peaks')
+            mtd.deleteWorkspace('MD2')
+            mtd.releaseFreeMemory()
             peaksWS = mtd['Peaks']
             # Find the UB matrix using the peaks and known lattice parameters
             FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=10.3522,b=6.0768,c=4.7276,
