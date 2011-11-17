@@ -106,6 +106,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="parallelProjButton">
+       <property name="toolTip">
+        <string>Toggle Parallel Projection</string>
+       </property>
        <property name="icon">
         <iconset resource="../../icons/ViewWidgetsIcons.qrc">
          <normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</iconset>
