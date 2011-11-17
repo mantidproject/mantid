@@ -74,7 +74,6 @@ set ( SRC_FILES
 	src/VMD.cpp
 	src/VectorHelper.cpp
 	src/VisibleWhenProperty.cpp
-	src/WriteBuffer.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
@@ -183,12 +182,11 @@ set ( INC_FILES
 	inc/MantidKernel/V2D.h
 	inc/MantidKernel/V3D.h
 	inc/MantidKernel/VMD.h
-	inc/MantidKernel/ValidatorAnyList.h
-	inc/MantidKernel/ValidatorSignalChange.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
-	inc/MantidKernel/WriteBuffer.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/ValidatorSignalChange.h	
+	inc/MantidKernel/ValidatorAnyList.h
 )
 
 set ( TEST_FILES
@@ -262,11 +260,10 @@ set ( TEST_FILES
 	test/V2DTest.h
 	test/V3DTest.h
 	test/VMDTest.h
-	test/ValidatorAnyListTest.h
 	test/ValidatorSignalChangeTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
-	test/WriteBufferTest.h
+	test/ValidatorAnyListTest.h
 )
 
 if(UNITY_BUILD)

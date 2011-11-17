@@ -250,8 +250,8 @@ namespace MDEvents
       this->m_dataBusy = false;
       // If not using the MRU, then immediately save it back (if it changed)
       //    or clear memory if unchanged.
-      if (!this->m_BoxController->useMRU())
-        this->save();
+      //if (!this->m_BoxController->useMRU())
+//        this->save();
     }
   }
 
