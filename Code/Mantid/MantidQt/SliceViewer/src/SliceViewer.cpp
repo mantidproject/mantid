@@ -103,11 +103,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   updateDisplay();
 
-  // TODO: Remove
-  LineOverlay * over = new LineOverlay(m_plot);
-  over->setVisible(true);
-//  m_spectLayout->addWidget(over, 0,0);
-//  this->insertChild(over);
+//  // TODO: Remove
+//  LineOverlay * over = new LineOverlay(m_plot);
+//  over->setVisible(true);
 
 }
 
