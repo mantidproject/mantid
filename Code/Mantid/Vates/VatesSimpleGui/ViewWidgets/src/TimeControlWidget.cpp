@@ -4,6 +4,7 @@
 #include <pqAnimationScene.h>
 #include <pqPVApplicationCore.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMProxy.h>
 
 namespace Mantid
 {
@@ -12,6 +13,9 @@ namespace Vates
 namespace SimpleGui
 {
 
+/**
+ * @param parent the parent widget for the time control widget
+ */
 TimeControlWidget::TimeControlWidget(QWidget *parent) : QWidget(parent)
 {
     this->ui.setupUi(this);
@@ -21,14 +25,24 @@ TimeControlWidget::~TimeControlWidget()
 {
 }
 
+/**
+ * Function to update the animation scene with "time" information. This
+ * updates the animation controls automatically. The "time" information
+ * can be any fourth dimension to the dataset, i.e. energy transfer.
+ * @param timeStart the start "time" for the data
+ * @param timeEnd the end "time" for the data
+ * @param numTimesteps the number of "time" steps for the data
+ */
 void TimeControlWidget::updateAnimationControls(double timeStart,
                                                 double timeEnd,
                                                 int numTimesteps)
 {
   pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
-  vtkSMPropertyHelper(scene->getProxy(), "StartTime").Set(timeStart);
-  vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(timeEnd);
-  vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
+  vtkSMProxy *proxy = scene->getProxy();
+  vtkSMPropertyHelper(proxy, "StartTime").Set(timeStart);
+  vtkSMPropertyHelper(proxy, "EndTime").Set(timeEnd);
+  vtkSMPropertyHelper(proxy, "NumberOfFrames").Set(numTimesteps);
+  proxy->InvokeCommand("GoToFirst");
 }
 
 /**

@@ -80,7 +80,7 @@ class SelectionMoveResizer;
 class RangeSelectorTool;
 class DataCurve;
 class PlotCurve;
-class MantidCurve;
+class MantidMatrixCurve;
 class QwtErrorPlotCurve;
 class MultiLayer;
 class Spectrogram;
@@ -564,7 +564,7 @@ public slots:
   QString axisFormula(int axis);
   void setAxisFormula(int axis, const QString &);
   
-  void checkValuesInAxisRange(MantidCurve* mc);
+  void checkValuesInAxisRange(MantidMatrixCurve* mc);
   
   //@}
 

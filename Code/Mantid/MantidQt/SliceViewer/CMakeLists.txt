@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
+	src/LineViewer.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -14,6 +15,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
+	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
@@ -23,6 +25,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
+	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
@@ -31,6 +34,7 @@ set ( MOC_FILES
 set ( UI_FILES 
 	inc/MantidQtSliceViewer/DimensionSliceWidget.ui
 	inc/MantidQtSliceViewer/SliceViewer.ui
+	inc/MantidQtSliceViewer/LineViewer.ui
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
 )
 
@@ -75,6 +79,13 @@ include_directories ( ../../Framework/Geometry/inc )
 add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerDemo.cpp  
                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
 target_link_libraries ( SliceViewerDemo 
+                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
+                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
+
+# Extra, optional target for demoing a GUI element
+add_executable ( LineViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_LineViewerDemo.cpp  
+                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+target_link_libraries ( LineViewerDemo 
                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
                        QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
 
