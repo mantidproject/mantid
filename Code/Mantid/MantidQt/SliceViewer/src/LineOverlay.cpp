@@ -229,7 +229,7 @@ namespace SliceViewer
    * @param mouse event info */
   void LineOverlay::mouseMoveEvent(QMouseEvent * event)
   {
-    if (event->buttons() & Qt::MiddleButton)
+    if (event->buttons() & Qt::MidButton)
       m_middleButton = true;
 
     // --- Initial creation mode - wait for first click ----
@@ -337,7 +337,7 @@ namespace SliceViewer
    * @param mouse event info */
   void LineOverlay::mouseReleaseEvent(QMouseEvent * event)
   {
-    if (!(event->buttons() & Qt::MiddleButton))
+    if (!(event->buttons() & Qt::MidButton))
       m_middleButton = false;
 
     if (m_dragHandle != HandleNone)
