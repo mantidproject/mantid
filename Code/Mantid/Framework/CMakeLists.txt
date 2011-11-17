@@ -142,7 +142,6 @@ endif ()
 
 # Unit test helper packages 
 if ( CXXTEST_FOUND )
-  add_subdirectory (TestHelpers)
   add_subdirectory (UserAlgorithms)
 endif ()
 

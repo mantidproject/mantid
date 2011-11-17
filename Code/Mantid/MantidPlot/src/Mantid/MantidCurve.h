@@ -48,12 +48,12 @@ class MantidCurve:public PlotCurve, public MantidQt::API::WorkspaceObserver
 public:
 
   /// More complex constructor setting some defaults for the curve
-  MantidCurve(const QString& name,const QString& wsName,Graph* g,
-              int index,bool err=false,bool distr = false);
+  MantidCurve(const QString& name, const QString& wsName, Graph* g, int index,
+              bool err = false, bool distr = false, Graph::CurveType style = Graph::Unspecified);
 
   /// More complex constructor setting some defaults for the curve
-  MantidCurve(const QString& wsName,Graph* g,
-              int index,bool err=false,bool distr = false);
+  MantidCurve(const QString& wsName, Graph* g, int index,
+              bool err = false, bool distr = false, Graph::CurveType style = Graph::Unspecified);
 
   /// Copy constructor 
   MantidCurve(const MantidCurve& c);
@@ -115,8 +115,7 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
-              int index,bool distr);
+  void init(Graph* g, bool distr, Graph::CurveType style);
 
   /// Handles delete notification
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
