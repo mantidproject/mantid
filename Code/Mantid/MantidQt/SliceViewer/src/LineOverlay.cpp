@@ -165,26 +165,32 @@ namespace SliceViewer
     QPointF pB2 = m_pointB - widthOffset;
 
 
-    QPen boxPen(QColor(255,255,255, 255));
+    QPen boxPenLight(QColor(255,255,255, 200));
+    QPen boxPenDark(QColor(0,0,0, 200));
     QPen centerPen(QColor(192,192,192, 128));
 
-#if QT_VERSION >= 0x030100
     // Special XOR pixel drawing
-    painter.setCompositionMode( QPainter::RasterOp_SourceXorDestination );
-#else
-    // RHEL5 has an old version of QT?
-    boxPen = QPen(QColor(255,128,128, 255));
-#endif
+    //painter.setCompositionMode( QPainter::RasterOp_SourceXorDestination ); // RHEL5 has an old version of QT?
 
-//    painter.setCompositionMode( QPainter::CompositionMode_Plus );
+    boxPenLight.setDashPattern(  QVector<qreal>() << 5 << 5  );
+    boxPenDark.setDashPattern(  QVector<qreal>() << 0 << 5 << 5 << 0 );
 
     // --- Draw the box ---
-//    boxPen = QColor(r,g,b, 255);
-    boxPen.setWidthF(1.0);
-    painter.setPen(boxPen);
+    boxPenLight.setWidthF(1.0);
+    boxPenDark.setWidthF(1.0);
+
+//    QPoint points[4] = {transform(pA1), transform(pB1), transform(pB2), transform(pA2)};
+//    painter.drawPolygon(points, 4);
+
+    painter.setPen(boxPenLight);
     painter.drawLine(transform(pA1), transform(pB1));
     painter.drawLine(transform(pB1), transform(pB2));
-    painter.drawLine(transform(pB2), transform(pA2));
+    painter.drawLine(transform(pA2), transform(pB2));
+    painter.drawLine(transform(pA2), transform(pA1));
+    painter.setPen(boxPenDark);
+    painter.drawLine(transform(pA1), transform(pB1));
+    painter.drawLine(transform(pB1), transform(pB2));
+    painter.drawLine(transform(pA2), transform(pB2));
     painter.drawLine(transform(pA2), transform(pA1));
 
     // Go back to normal drawing mode
@@ -198,8 +204,8 @@ namespace SliceViewer
 
     // --- Draw and store the rects of the 4 handles ---
     m_handles.clear();
-    m_handles.push_back(drawHandle(painter, m_pointA, QColor(255,255,255) ));
-    m_handles.push_back(drawHandle(painter, m_pointB, QColor(0,0,0) ));
+    m_handles.push_back(drawHandle(painter, m_pointA, QColor(0,0,0) ));
+    m_handles.push_back(drawHandle(painter, m_pointB, QColor(255,255,255) ));
     m_handles.push_back(drawHandle(painter, (m_pointA + m_pointB)/2 + widthOffset, QColor(0,255,255)) );
     m_handles.push_back(drawHandle(painter, (m_pointA + m_pointB)/2 - widthOffset, QColor(0,255,255)) );
   }
