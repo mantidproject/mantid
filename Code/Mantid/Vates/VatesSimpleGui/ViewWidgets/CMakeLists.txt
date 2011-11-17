@@ -86,4 +86,4 @@ ${QT_LIBRARIES}
 MantidQtAPI
 )
 
-install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${LIB_DIR} )
+install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )
