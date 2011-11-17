@@ -250,8 +250,8 @@ namespace MDEvents
       this->m_dataBusy = false;
       // If not using the MRU, then immediately save it back (if it changed)
       //    or clear memory if unchanged.
-      if (!this->m_BoxController->useMRU())
-        this->save();
+      //if (!this->m_BoxController->useMRU())
+//        this->save();
     }
   }
 
@@ -263,6 +263,7 @@ namespace MDEvents
   TMDE(
   void MDBox)::save() const
   {
+    std::cout << "MDBox::save() called on id " << this->getId() << std::endl;
     // Only save to disk when the access was non-const;
     //  or when you added events to a cached data
     if (m_dataModified || m_dataAdded)

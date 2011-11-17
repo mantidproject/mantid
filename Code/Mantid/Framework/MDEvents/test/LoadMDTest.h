@@ -21,6 +21,13 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+class LoadMDExposed : public LoadMD
+{
+public:
+  void exec()
+  { LoadMD::exec(); }
+};
+
 class LoadMDTest : public CxxTest::TestSuite
 {
 public:
@@ -89,7 +96,6 @@ public:
       IMDBox<MDE,nd>* box1 = boxes[j];
       IMDBox<MDE,nd>* box2 = boxes1[j];
 
-      std::cout << "ID: " << box1->getId() << std::endl;
       TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
       TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
       TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
@@ -170,14 +176,15 @@ public:
 
   //=================================================================================================================
   template <size_t nd>
-  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, double memory=0, bool BoxStructureOnly = false)
+  void do_test_exec(bool FileBackEnd, std::string bareFilename, bool deleteWorkspace=true, double memory=0, bool BoxStructureOnly = false)
   {
     typedef MDLeanEvent<nd> MDE;
+    AnalysisDataService::Instance().remove("LoadMDTest_ws");
 
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
-    boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
-    ws1->getBoxController()->setSplitThreshold(100);
+    boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(3, 0.0, 10.0, 0);
+    ws1->getBoxController()->setSplitThreshold(1000);
     // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace("LoadMDTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
     FrameworkManager::Instance().exec("FakeMDEventData", 6,
@@ -196,7 +203,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  "LoadMDTest" + Strings::toString(nd) + ".nxs") );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  bareFilename) );
 
     // Retrieve the full path; delete any pre-existing file
     std::string filename = saver.getPropertyValue("Filename");
@@ -287,13 +294,15 @@ public:
 
   //=================================================================================================================
   /** Follow up test that:
+   *  - Starting with a file-backed MDEW
    *  - Modifies the data in a couple of ways
    *  - Saves AGAIN to update a file back end
    *  - Re-loads to a brand new workspace and compares everything. */
   template <size_t nd>
-  void do_test_UpdateFileBackEnd()
+  void do_test_UpdateFileBackEnd(bool splitContents)
   {
     std::string outWSName("LoadMDTest_OutputWS");
+    AnalysisDataService::Instance().remove("reloaded_again");
     IMDEventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
     TS_ASSERT(iws); if (!iws) return;
@@ -301,8 +310,15 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
-    // Now there are 2002 boxes
-    box->splitContents(12);
+
+    if (splitContents)
+    {
+      std::cout << "About to split contents\n";
+      // Initial workspace had 27 boxes
+      // Now there are 54 boxes
+      box->splitContents(12);
+      std::cout << "Split contents done.\n";
+    }
 
     // And add an ExperimentInfo thingie
     ExperimentInfo_sptr ei(new ExperimentInfo());
@@ -313,14 +329,14 @@ public:
     MDLeanEvent<nd> ev(1.0, 1.0);
     for (size_t d=0; d<nd; d++) ev.setCenter(d, 0.5);
     box->addEvent(ev);
-
-    // Modify a different box by accessing the events
-    MDBox<MDLeanEvent<nd>,nd> * box8 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(8));
-    std::vector<MDLeanEvent<nd> > & events = box8->getEvents();
-    // Add 10 to this signal
-    signal_t newSignal = events[0].getSignal() + 10.0;
-    events[0].setSignal(newSignal);
-    box8->releaseEvents();
+//
+//    // Modify a different box by accessing the events
+//    MDBox<MDLeanEvent<nd>,nd> * box8 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(8));
+//    std::vector<MDLeanEvent<nd> > & events = box8->getEvents();
+//    // Add 10 to this signal
+//    signal_t newSignal = events[0].getSignal() + 10.0;
+//    events[0].setSignal(newSignal);
+//    box8->releaseEvents();
 
 //    // Modify a third box by adding an event
 //    MDBox<MDLeanEvent<nd>,nd> * box17 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(17));
@@ -330,6 +346,7 @@ public:
 //    box17->releaseEvents();
 
     ws2->refreshCache();
+    ws2->setFileNeedsUpdating(true);
 
     // There are now 2 more events
     TS_ASSERT_EQUALS( ws2->getNPoints(), 10001 );
@@ -349,19 +366,19 @@ public:
     ::NeXus::File * file = ws2->getBoxController()->getFile();
     TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10001 long.", 10001, file->getInfo().dims[0] );
 
-
     // The file should have been modified but that's tricky to check directly.
     std::string filename = ws2->getBoxController()->getFilename();
     // Now we re-re-load it!
-    LoadMD alg;
+    LoadMDExposed alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", false) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "reloaded_again") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
+    iws.reset();
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("reloaded_again")) );
     boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
     TS_ASSERT(ws3); if (!ws3) return;
@@ -381,50 +398,72 @@ public:
   /// Load directly to memory
   void test_exec_1D()
   {
-    do_test_exec<1>(false);
+    do_test_exec<1>(false, "LoadMDTest1.nxs");
   }
 
   /// Run the loading but keep the events on file and load on demand
   void test_exec_1D_with_file_backEnd()
   {
-    do_test_exec<1>(true);
+    do_test_exec<1>(true, "LoadMDTest1_fileBacked.nxs");
   }
 
   /// Load directly to memory
   void test_exec_3D()
   {
-    do_test_exec<3>(false);
+    do_test_exec<3>(false, "LoadMDTest3.nxs");
   }
 
   /// Run the loading but keep the events on file and load on demand
   void test_exec_3D_with_FileBackEnd()
   {
-    do_test_exec<3>(true);
+    do_test_exec<3>(true, "LoadMDTest3_fileBacked.nxs");
   }
 
   /// Run the loading but keep the events on file and load on demand
   void test_exec_3D_with_FileBackEnd_andSmallBuffer()
   {
-    do_test_exec<3>(true, true, 1.0);
+    do_test_exec<3>(true, "LoadMDTest3_fileBacked_andSmallBuffer.nxs", true, 1.0);
   }
   
 
   /** Use the file back end,
    * then change it and save to update the file at the back end.
    */
-  void test_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
+  void test_exec_3D_with_FileBackEnd_then_addEvent_then_update_SaveMD()
   {
     std::cout << "Starting the first step\n";
-    do_test_exec<3>(true, false);
+    do_test_exec<3>(true, "LoadMDTest3_updated.nxs", false);
     std::cout << "\nStarting the update step\n";
-    do_test_UpdateFileBackEnd<3>();
+    do_test_UpdateFileBackEnd<3>(false);
+  }
+
+  /** Use the file back end,
+   * then change it and save to update the file at the back end.
+   */
+  void test_exec_3D_with_FileBackEnd_then_splitContents_then_update_SaveMD()
+  {
+    std::cout << "Starting the first step\n";
+    do_test_exec<3>(true, "LoadMDTest3_splitContents_updated.nxs", false);
+    std::cout << "\nStarting the update step\n";
+    do_test_UpdateFileBackEnd<3>(true);
+  }
+
+  /** Use the file back end,
+   * then change it and save to update the file at the back end.
+   */
+  void test_exec_3D_with_FileBackEnd_withMRU_then_splitContents_then_update_SaveMD()
+  {
+    std::cout << "Starting the first step\n";
+    do_test_exec<3>(true, "LoadMDTest3_MRU_splitContents_updated.nxs", false, 200000);
+    std::cout << "\nStarting the update step\n";
+    do_test_UpdateFileBackEnd<3>(true);
   }
 
 
   /// Only load the box structure, no events
   void test_exec_3D_BoxStructureOnly()
   {
-    do_test_exec<3>(false, true, 0.0, true);
+    do_test_exec<3>(false, "LoadMDTest3_BoxStructureOnly.nxs", true, 0.0, true);
   }
 
 
@@ -445,7 +484,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
-    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDTest2.nxs") );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDTest_MetaDataOnly.nxs") );
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
