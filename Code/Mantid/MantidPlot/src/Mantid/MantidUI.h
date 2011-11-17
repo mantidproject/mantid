@@ -341,7 +341,10 @@ public slots:
     // Invoke the Vates Simple User Interface
     void showVatesSimpleInterface();
 
-    // SlcieViewer
+    // Invoke the plot of MD intensity vs non-integrated dimension.
+    void showMDPlot();
+
+    // SliceViewer
     void showSliceViewer();
 
     // #539: For adding Workspace History display to MantidPlot
