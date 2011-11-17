@@ -1464,7 +1464,7 @@ QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected()
   QList<QString> allWsNames = this->getSelectedWorkspaceNames();
   QList<QString> wsNames;
 
-  for (size_t i=0; i<allWsNames.size(); i++)
+  for (int i=0; i<allWsNames.size(); i++)
   {
     if (AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString())->id() != "TableWorkspace")
       wsNames.append(allWsNames[i]);
