@@ -110,6 +110,11 @@ void StandardView::resetDisplay()
   this->view->resetDisplay();
 }
 
+void StandardView::resetCamera()
+{
+  this->view->resetCamera();
+}
+
 }
 }
 }

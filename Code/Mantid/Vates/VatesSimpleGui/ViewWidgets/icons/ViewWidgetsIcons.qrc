@@ -2,5 +2,6 @@
     <qresource prefix="/VatesSimpleGuiViewWidgets/icons">
         <file>pqResetCenterToData24.png</file>
         <file>pqResetCenterToPoint24.png</file>
+        <file>parallel_projection.png</file>
     </qresource>
 </RCC>

@@ -190,12 +190,12 @@ public:
     alg.setProperty("InPeaksWorkspace", "TOPAZ");
     alg.setProperty("OutPeaksWorkspace", "TOPAZ");
     alg.setProperty("FitSlices", slices);
-    alg.setProperty("XMin", -6);
-    alg.setProperty("XMax", 6);
-    alg.setProperty("YMin", -6);
-    alg.setProperty("YMax", 6);
-    alg.setProperty("TOFBinMin", -10);
-    alg.setProperty("TOFBinMax", 10);
+    alg.setProperty("XMin", -7);
+    alg.setProperty("XMax", 7);
+    alg.setProperty("YMin", -7);
+    alg.setProperty("YMax", 7);
+    alg.setProperty("TOFBinMin", -3);
+    alg.setProperty("TOFBinMax", 3);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 
