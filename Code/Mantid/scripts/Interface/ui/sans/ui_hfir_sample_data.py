@@ -2,10 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_sample_data.ui'
 #
-
-# Created: Wed Aug 31 10:50:50 2011
+# Created: Wed Nov 16 13:57:35 2011
 #      by: PyQt4 UI code generator 4.7.4
-
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -316,8 +314,7 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "Scattering data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("Frame", "sample thickness [cm]:", None, QtGui.QApplication.UnicodeUTF8))
@@ -344,8 +341,7 @@ class Ui_Frame(object):
         self.dtransmission_edit.setToolTip(QtGui.QApplication.translate("Frame", "Uncertainty on the sample transmission.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_label.setText(QtGui.QApplication.translate("Frame", "Dark current for transmission:", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.dark_current_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
 

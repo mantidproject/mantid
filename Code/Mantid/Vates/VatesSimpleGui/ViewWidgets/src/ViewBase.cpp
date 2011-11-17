@@ -302,6 +302,14 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z)
   renderView->render();
 }
 
+/**
+ * This function will handle axis scale updates. Most view will not do this,
+ * so the default is to do nothing.
+ */
+void ViewBase::setAxisScales()
+{
+}
+
 }
 }
 }

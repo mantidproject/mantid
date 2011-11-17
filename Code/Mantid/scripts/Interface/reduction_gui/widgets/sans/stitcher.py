@@ -224,6 +224,9 @@ class StitcherWidget(BaseWidget):
             self._content.low_min_edit.setText(str(minx))
             self._content.low_max_edit.setText(str(maxx))
             self._content.low_scale_edit.setText("1.0")
+            npts = self._low_q_data.get_number_of_points()
+            self._content.low_first_spin.setMaximum(npts)
+            self._content.low_last_spin.setMaximum(npts)
             util.set_valid(self._content.low_q_combo.lineEdit(), True)
         else:
             self._low_q_data = None
@@ -241,6 +244,9 @@ class StitcherWidget(BaseWidget):
             self._content.medium_min_edit.setText(str(minx))
             self._content.medium_max_edit.setText(str(maxx))
             self._content.medium_scale_edit.setText("1.0")
+            npts = self._medium_q_data.get_number_of_points()
+            self._content.medium_first_spin.setMaximum(npts)
+            self._content.medium_last_spin.setMaximum(npts)
             util.set_valid(self._content.medium_q_combo.lineEdit(), True)
         else:
             self._medium_q_data = None
@@ -255,6 +261,9 @@ class StitcherWidget(BaseWidget):
             self._high_q_data = DataSet(file)
             self._high_q_data.load(True)
             self._content.high_scale_edit.setText("1.0")
+            npts = self._high_q_data.get_number_of_points()
+            self._content.high_first_spin.setMaximum(npts)
+            self._content.high_last_spin.setMaximum(npts)
             util.set_valid(self._content.high_q_combo.lineEdit(), True)
         else:
             self._high_q_data = None

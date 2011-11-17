@@ -1995,7 +1995,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
  * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
  * argument
  */
-MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs)
+MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs, Graph::CurveType style)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -2017,7 +2017,7 @@ MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QL
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs);
+  return plotSpectraList(pairs,errs,false,style);
 }
 
 /**
@@ -2737,7 +2737,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
     @param toPlot :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors to the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   UNUSED_ARG(errs);
@@ -2781,8 +2781,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
-      UNUSED_ARG(mc)
+      mc = new MantidCurve(it.key(),g,it.value(),errs,distr,style);
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {

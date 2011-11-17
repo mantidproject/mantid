@@ -17,11 +17,11 @@ from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 def workspace(name):
     return mtd[name]
 
-def plotSpectrum(source, indices, error_bars = False):
+def plotSpectrum(source, indices, error_bars = False, style = -1):
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
     if len(workspace_names) > 0 and len(index_list) > 0:
-        return __tryPlot(workspace_names, index_list, error_bars)
+        return __tryPlot(workspace_names, index_list, error_bars, style)
     else:
         return None
 
@@ -106,8 +106,8 @@ def __getWorkspaceIndices(source):
     return index_list
 
 # Try plotting, raising an error if no plot object is created
-def __tryPlot(workspace_names, indices, error_bars):
-    graph = qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars)
+def __tryPlot(workspace_names, indices, error_bars, style):
+    graph = qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars, style)
     if graph == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
