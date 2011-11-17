@@ -93,6 +93,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(colorRangeFullSlot()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
+  QObject::connect(ui.btnDoLine, SIGNAL(toggled(bool)), this, SLOT(btnDoLineToggled(bool)));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -103,9 +104,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   updateDisplay();
 
-//  // TODO: Remove
-//  LineOverlay * over = new LineOverlay(m_plot);
-//  over->setVisible(true);
+  // -------- Line Overlay ----------------
+  m_lineOverlay = new LineOverlay(m_plot);
+  m_lineOverlay->setVisible(false);
 
 }
 
@@ -394,6 +395,13 @@ void SliceViewer::colorRangeChanged()
 {
   m_spect->setColorMap( m_colorBar->getColorMap() );
   this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot called when the btnDoLine button is checked/unchecked
+void SliceViewer::btnDoLineToggled(bool checked)
+{
+  m_lineOverlay->setVisible(checked);
 }
 
 //------------------------------------------------------------------------------------
