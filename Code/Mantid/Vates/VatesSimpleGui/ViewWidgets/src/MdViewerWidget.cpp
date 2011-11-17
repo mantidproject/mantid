@@ -357,6 +357,7 @@ void MdViewerWidget::checkForUpdates()
     this->currentView->resetDisplay();
     //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
+    this->currentView->setAxisScales();
     this->currentView->setTimeSteps(true);
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/trans_spreader.ui'
 #
-# Created: Tue Sep 13 11:41:55 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Nov 16 13:57:36 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -159,16 +159,16 @@ class Ui_GroupBox(object):
         GroupBox.setTitle(QtGui.QApplication.translate("GroupBox", "Beam Spreader", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("GroupBox", "Sample scattering data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_scatt_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_scatt_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_scatt_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("GroupBox", "Sample spreader data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_spread_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_spread_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_spread_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("GroupBox", "Direct scattering data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("GroupBox", "Direct spreader data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_scatt_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_spread_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_scatt_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_spread_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_scatt_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_spread_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("GroupBox", "Beam spreader transmission:", None, QtGui.QApplication.UnicodeUTF8))
         self.spreader_trans_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Transmission of the beam spreader in %.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("GroupBox", "+/-", None, QtGui.QApplication.UnicodeUTF8))

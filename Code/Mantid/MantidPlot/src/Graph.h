@@ -160,7 +160,7 @@ public:
 
   enum Ticks{NoTicks = 0, Out = 1, InOut = 2, In = 3};
   enum MarkerType{None = -1, Text = 0, Arrow = 1, Image = 2};
-  enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
+  enum CurveType{Unspecified = -1, Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
                  Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
                  Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot,User};
 

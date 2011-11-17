@@ -106,6 +106,8 @@ public:
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
+  /// Setup axis scales
+  virtual void setAxisScales();
   /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
 
