@@ -81,8 +81,10 @@ public:
    * Remove highlights from all selected indicators.
    */
   void clearSelections();
-  /// Delete all of the indicators
+  /// Delete all of the indicators.
   void deleteAllIndicators();
+  /// Delete the requested indicator.
+  void deleteRequestedIndicator(const QString &name);
   /**
    * Get the associated ScalePicker for the indicator.
    * @return the associated ScalePicker

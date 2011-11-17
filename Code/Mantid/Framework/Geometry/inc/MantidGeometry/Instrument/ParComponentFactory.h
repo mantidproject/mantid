@@ -4,7 +4,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <stdexcept>
@@ -19,40 +18,6 @@ namespace Mantid
     class IDetector;
     class Detector;
     class Instrument;
-
-    /** 
-     * Pool class for caching memory when creating parameterized components
-     */
-    template<typename ClassType>
-    class ComponentPool
-    {
-    public:
-      /// Typedef for held type
-      typedef boost::shared_ptr<ClassType> PtrType;
-      typedef boost::shared_ptr<const ClassType> ConstPtrType;
-      /// Constructor
-      ComponentPool(const size_t poolSize);
-      
-      /**
-       * Get a pointer to a ParComponent object whether replacing
-       * store or creating a new object
-       * @param base The base object to wrap
-       * @param map A pointer to the ParamterMap
-       * @returns A parameterized object
-       */
-      PtrType create(const ClassType *base, const ParameterMap * map);
-      
-    private:
-      /// Retrieve a index for a pre-allocated object, throwing if one cannot be found
-      size_t getIndexInCache() const;
-      /// Create an object with the new operator
-      ClassType* createUsingNew(const ClassType *base, const ParameterMap *map);
-
-      /// Size of the pool 
-      size_t m_storeSize;
-      /// Store of pre allocated objects
-      std::vector<PtrType> m_store;
-    };
 
     /** 
       @brief A Factory for creating Parameterized component 

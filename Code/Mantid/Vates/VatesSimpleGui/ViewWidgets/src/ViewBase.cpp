@@ -242,6 +242,7 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
     vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
     emit this->setAnimationControlState(true);
     emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
+    scene->getProxy()->InvokeCommand("GoToFirst");
   }
   else
   {
@@ -303,7 +304,7 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z)
 }
 
 /**
- * This function will handle axis scale updates. Most view will not do this,
+ * This function will handle axis scale updates. Most views will not do this,
  * so the default is to do nothing.
  */
 void ViewBase::setAxisScales()

@@ -563,7 +563,12 @@ namespace Mantid
     /// @returns true if the location is in the map, otherwise false
     bool ParameterMap::getCachedLocation(const IComponent* comp, V3D& location) const
     {
-      return m_cacheLocMap.getCache(comp->getComponentID(),location);
+      bool inMap(false);
+      PARALLEL_CRITICAL(positionCache)
+      {
+        inMap = m_cacheLocMap.getCache(comp->getComponentID(),location);
+      }
+      return inMap;
     }
 
     ///Sets a cached rotation on the rotation cache
@@ -584,7 +589,12 @@ namespace Mantid
     /// @returns true if the rotation is in the map, otherwise false
     bool ParameterMap::getCachedRotation(const IComponent* comp, Quat& rotation) const
     {
-      return m_cacheRotMap.getCache(comp->getComponentID(),rotation);
+      bool inMap(false);
+      PARALLEL_CRITICAL(rotationCache)
+      {
+        inMap = m_cacheRotMap.getCache(comp->getComponentID(),rotation);
+      }
+      return inMap;
     }
 
     ///Sets a cached bounding box
