@@ -300,7 +300,7 @@ namespace MDEvents
         signal_t & totalSignal, signal_t & totalErrorSquared)
     {
       size_t numEvents = events.size();
-      std::cout << "Saving " << numEvents << " at " << startIndex << " in file " << uint64_t(file) << std::endl;
+      //std::cout << "Saving " << numEvents << " at " << startIndex << " in file " << uint64_t(file) << std::endl;
       std::vector<double> data;
       data.reserve(numEvents*(nd+2));
       std::vector<int64_t> start(2,0);
