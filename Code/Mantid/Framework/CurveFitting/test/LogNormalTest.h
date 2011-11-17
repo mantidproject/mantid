@@ -86,6 +86,23 @@
 		LogNormal* fn = new LogNormal();
 		fn->initialize();
 
+		// get close to exact values. Otherwise algorithm fails to a local minimum
+		fn->setParameter("Height",90.0);
+		fn->setParameter("Location",2.0);
+		fn->setParameter("Scale",0.20);
+
+		/*Parameters for Height, Location and Scale can be estimated from:
+		 * Let:	dx_i = (x_{i+1}-x_{i-1})/2
+		 * 		P_i = y[i]
+		 * Then:
+		 * 	Location ~ \sum_i[ dx_i * P_i * ln(x[i]) ] / \sum_i[ dx_i * y[i] ]
+		 * 	Scale^2  ~  \sum_i[ dx_i * P_i * (ln(x[i]))^2 ]  / \sum_i[ dx_i * y[i] ] - Location^2
+		 * 	Height   ~ \sum_i[ dx_i * y[i] ] / ( Scale * sqrt(2*pi) )
+		 * These formulas derived from the fact that  logNormal becomes Gaussian with change of variables z = ln(x), that is:
+		 * 	H/x*exp(-(ln(x)-L)^2/(2*S^2))*dx == LN(x)*dx = exp(-(z-L)^2/(2*S^2))*dz == G(z)*dz
+		 * 	Example: Location = \integral dz G(z) z = \integral dx LN(x) z = \integral dx LN(x) ln(x),		 *
+ 		 *  */
+
 		//alg2.setFunction(fn);
 		alg2.setPropertyValue("Function",*fn);
 
