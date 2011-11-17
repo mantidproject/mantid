@@ -26,7 +26,11 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-
+/** GUI for viewing a 2D slice out of a multi-dimensional workspace.
+ * You can select which dimension to plot as X,Y, and the cut point
+ * along the other dimension(s).
+ *
+ */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
 {
   Q_OBJECT
