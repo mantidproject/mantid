@@ -26,7 +26,7 @@ using namespace MantidQt::API;
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidMatrixCurve::MantidMatrixCurve(const QString& name,const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
+MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
   :MantidCurve(),
   m_drawErrorBars(err),
   m_drawAllErrorBars(false),

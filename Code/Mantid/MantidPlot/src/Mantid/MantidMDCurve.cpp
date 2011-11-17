@@ -53,7 +53,7 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve& c)
  *  @param distr :: True if this is a distribution
  *  @param style :: The graph style to use
  */
-void MantidMDCurve::init(Graph* g, bool distr, Graph::CurveType style)
+void MantidMDCurve::init(Graph* g, bool, Graph::CurveType style)
 {
   IMDWorkspace_const_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
               AnalysisDataService::Instance().retrieve(m_wsName.toStdString()) );
@@ -128,7 +128,7 @@ MantidMDCurve::~MantidMDCurve()
 /**
  * Clone the curve for the use by a particular Graph
  */
-MantidMDCurve* MantidMDCurve::clone(const Graph* g)const
+MantidMDCurve* MantidMDCurve::clone(const Graph*)const
 {
   MantidMDCurve* mc = new MantidMDCurve(*this);/*
   if (g)
@@ -232,7 +232,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
 {
   if (m_wsName != wsName) return;
   const std::string wsNameStd = wsName.toStdString();
-  Mantid::API::MatrixWorkspace_sptr mws;
+  Mantid::API::IMDWorkspace_sptr mws;
   try
   {
     Mantid::API::Workspace_sptr base =  Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
@@ -250,15 +250,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
   try {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);
-    if (mws->isHistogramData())
-    {
-      setStyle(QwtPlotCurve::Steps);
-      setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
-    }
-    else
-    {
-      setStyle(QwtPlotCurve::Lines);
-    }
+    setStyle(QwtPlotCurve::Lines);
     // Queue this plot to be updated once all MantidQwtMatrixWorkspaceData objects for this workspace have been
     emit dataUpdated();
   } catch(std::range_error) {
