@@ -83,6 +83,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bo
   observeADSClear();
 }
 
+
 MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
   :MantidCurve(createCopyName(c.title().text())),
   m_drawErrorBars(c.m_drawErrorBars),
@@ -104,13 +105,14 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
  *  @param g :: The Graph widget which will display the curve
  *  @param index :: The index of the spectrum or bin in the workspace
  */
-void MantidMatrixCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index,bool distr)
+void MantidMatrixCurve::init(Mantid::API::Workspace_const_sptr workspace,Graph* g,int index,bool distr)
 {
+  Mantid::API::MatrixWorkspace_const_sptr matrixWS = boost::shared_dynamic_cast<const Mantid::API::MatrixWorkspace>(workspace);
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
-  MantidQwtMatrixWorkspaceData data(workspace,index, log,distr);
+  MantidQwtMatrixWorkspaceData data(matrixWS,index, log,distr);
   setData(data);
-  Mantid::API::Axis* ax = workspace->getAxis(0);
+  Mantid::API::Axis* ax = matrixWS->getAxis(0);
   if (ax->unit())
   {
     m_xUnits = ax->unit();
@@ -120,7 +122,7 @@ void MantidMatrixCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspac
     m_xUnits.reset(new Mantid::Kernel::Units::Empty());
   }
 
-  Mantid::API::Axis* ay = workspace->getAxis(1);
+  Mantid::API::Axis* ay = matrixWS->getAxis(1);
   if (ay->unit())
   {
     m_yUnits = ay->unit();
@@ -161,7 +163,7 @@ void MantidMatrixCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspac
     setStyle(qwtStyle);
     lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
   }
-  else if (workspace->isHistogramData() && !workspace->isDistribution())
+  else if (matrixWS->isHistogramData() && !matrixWS->isDistribution())
   {
     setStyle(QwtPlotCurve::Steps);
     setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
@@ -183,7 +185,7 @@ MantidMatrixCurve::~MantidMatrixCurve()
 /**
  * Clone the curve for the use by a particular Graph
  */
-PlotCurve* MantidMatrixCurve::clone(const Graph* g)const
+MantidMatrixCurve* MantidMatrixCurve::clone(const Graph* g)const
 {
   MantidMatrixCurve* mc = new MantidMatrixCurve(*this);
   if (g)

@@ -9,7 +9,6 @@
 // Forward definitions
 
 class MantidQwtMatrixWorkspaceData;
-class Graph;
 class MantidUI;
 
 /** 
@@ -59,7 +58,7 @@ public:
 
   ~MantidMatrixCurve();
 
-  PlotCurve* clone(const Graph*)const;
+  MantidMatrixCurve* clone(const Graph*)const;
 
   /// Curve type. Used in the QtiPlot API.
   int rtti() const{return Rtti_PlotUserItem;}
@@ -111,10 +110,11 @@ public:
   Mantid::Kernel::Unit_sptr yUnits()const{return m_yUnits;}
 
 private:
+
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
+  void init(Mantid::API::Workspace_const_sptr workspace,Graph* g,
               int index,bool distr);
 
   /// Handles delete notification

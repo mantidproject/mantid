@@ -3,6 +3,7 @@
 
 #include "../PlotCurve.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidAPI/Workspace.h"
 
 /** Base class for MantidCurve types. 
     
@@ -29,6 +30,7 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
+class Graph;
 class MantidCurve :public PlotCurve, public MantidQt::API::WorkspaceObserver
 {
 public:
@@ -38,6 +40,14 @@ public:
   MantidCurve();
   /// Destructor
   virtual ~MantidCurve();
+  /// Clone
+  virtual MantidCurve* clone(const Graph* g) const = 0;
+
+private:
+
+  //To ensure that all MantidCurves can work with Mantid Workspaces.
+  virtual void init(Mantid::API::Workspace_const_sptr workspace,Graph* g,
+              int index,bool distr) = 0;
 };
 
 #endif

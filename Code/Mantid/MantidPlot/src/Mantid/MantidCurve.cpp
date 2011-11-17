@@ -19,3 +19,4 @@ MantidCurve::MantidCurve() : PlotCurve(), WorkspaceObserver()
 MantidCurve::~MantidCurve()
 {
 }
+
