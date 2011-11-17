@@ -105,6 +105,17 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="parallelProjButton">
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
