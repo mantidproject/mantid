@@ -130,8 +130,8 @@ void LineViewer::showPreview()
   double stepLength = step.norm();
 
   // These will be the curve as plotted
-  double x[ numPoints ];
-  double y[ numPoints ];
+  double * x = new double[numPoints];
+  double * y = new double[numPoints];
 
   for (size_t i=0; i<numPoints; i++)
   {
@@ -150,6 +150,9 @@ void LineViewer::showPreview()
   curve->attach(m_plot);
   m_plot->replot();
   m_plot->setTitle("Preview Plot");
+
+  delete [] x;
+  delete [] y;
 }
 
 
