@@ -36,6 +36,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
@@ -133,6 +134,7 @@ namespace DataHandling
     //Get some stuff from the input workspace
     Instrument_const_sptr inst = inputW->getInstrument();
     std::string instname = inst->getName();
+    Geometry::Instrument_sptr instrument(new Geometry::Instrument(instname));
 
     // set-up minimizer
 
@@ -202,6 +204,19 @@ namespace DataHandling
 
     while(std::getline(input, line)) 
     {
+      if(line[0] == '7')
+      {
+        double mL1, mT0;
+        std::stringstream(line) >> count >> mL1 >> mT0;
+        // Convert from cm to m
+        center(0.0, 0.0, -0.01 * mL1,"moderator", inname);
+        //mT0 and time of flight are both in microsec
+        IAlgorithm_sptr alg1 = createSubAlgorithm("ChangeBinOffset");
+        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty("Offset", mT0);
+        alg1->executeAsSubAlg();
+      }
+
       if(line[0] != '5') continue;
 
       std::stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd
@@ -219,10 +234,6 @@ namespace DataHandling
           if (id==10)break;
         }
       }
-      // Convert from cm to m
-      x = x * 0.01;
-      y = y * 0.01;
-      z = z * 0.01;
       boost::shared_ptr<RectangularDetector> det;
       std::ostringstream Detbank;
       Detbank <<"bank"<<id;
@@ -232,6 +243,37 @@ namespace DataHandling
       det = detList[idnum];
       if (det)
       {
+        // Convert from cm to m
+        /*width *= 0.01;
+        height *= 0.01;
+        double xstep = width / det->xpixels();
+        double ystep = height / det->ypixels();
+        double xstart = -width * 0.5;
+        double ystart = -height * 0.5;
+        //Loop through all the pixels
+        int ix, iy;
+        for (ix=0; ix<det->xpixels(); ix++)
+        {
+           for (iy=0; iy<det->ypixels(); iy++)
+           {
+             //Calculate the x,y position
+             double xpos = xstart + ix * xstep;
+             double ypos = ystart + iy * ystep;
+             //Translate (relative to parent)
+             // Get to column
+             ICompAssembly_sptr xCol = boost::dynamic_pointer_cast<ICompAssembly>(det->getChild(ix));
+             if (!xCol)
+             throw std::runtime_error("RectangularDetector::getAtXY: X specified is out of range.");
+             boost::shared_ptr<Detector>child =  boost::dynamic_pointer_cast<Detector>( xCol->getChild(iy) );
+             detname = child->getName();
+             center(xpos, ypos, 0, detname, inname);
+           }
+        }*/
+
+        // Convert from cm to m
+        x *= 0.01;
+        y *= 0.01;
+        z *= 0.01;
         detname = det->getName();
         center(x, y, z, detname, inname);
 
@@ -273,7 +315,6 @@ namespace DataHandling
         if (parent)
         {
             Quat rot0 = parent->getRelativeRot();
-                std::cout <<rot0<<"\n";
             rot0.inverse();
             Rot = Rot * rot0;
         }
@@ -281,7 +322,6 @@ namespace DataHandling
         if (grandparent)
         {
             Quat rot0 = grandparent->getRelativeRot();
-            std::cout <<rot0<<"\n";
             rot0.inverse();
             Rot = Rot * rot0;
         }
@@ -291,7 +331,6 @@ namespace DataHandling
 
         // Set or overwrite "rot" instrument parameter.
         pmap.addQuat(comp.get(),"rot",Rot);
-        std::cout <<Rot<<"\n";
 
       } 
     } 
