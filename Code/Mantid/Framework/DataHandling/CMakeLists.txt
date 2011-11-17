@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/LoadDAE/isisds_command.h
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
+	src/LoadDetectorsGroupingFile.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
@@ -81,12 +82,13 @@ set ( SRC_FILES
 	src/SaveCanSAS1D.cpp
 	src/SaveDASC.cpp
 	src/SaveDaveGrp.cpp
+	src/SaveDetectorMasks.cpp
+	src/SaveDetectorsGrouping.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-	src/SaveDetectorMasks.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNexus.cpp
@@ -122,6 +124,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDAE.h
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
+	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
@@ -178,12 +181,13 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveDaveGrp.h
+	inc/MantidDataHandling/SaveDetectorMasks.h
+	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
-	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNexus.h
@@ -222,6 +226,7 @@ set ( TEST_FILES
 	test/LoadDAETest.h
 	test/LoadDaveGrpTest.h
 	test/LoadDetectorInfoTest.h
+	test/LoadDetectorsGroupingFileTest.h
 	test/LoadDspacemapTest.h
 	test/LoadEmptyInstrumentTest.h
 	test/LoadEventNexusTest.h
@@ -270,10 +275,11 @@ set ( TEST_FILES
 	test/SaveCanSAS1dTest.h
 	test/SaveDASCTest.h
 	test/SaveDaveGrpTest.h
+	test/SaveDetectorMasksTest.h
+	test/SaveDetectorsGroupingTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
 	test/SaveIsawDetCalTest.h
-	test/SaveDetectorMasksTest.h 
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
 	test/SaveNexusProcessedTest.h
