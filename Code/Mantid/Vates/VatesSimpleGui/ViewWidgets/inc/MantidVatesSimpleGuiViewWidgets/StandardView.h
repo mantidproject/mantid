@@ -76,6 +76,8 @@ public:
    * ViewBase::renderAll
    */
   void renderAll();
+  /// ViewBase::resetCamera()
+  void resetCamera();
   /**
    * ViewBase::resetDisplay()
    */

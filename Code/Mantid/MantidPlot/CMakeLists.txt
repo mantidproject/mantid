@@ -162,15 +162,19 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
-                   src/Mantid/MantidCurve.cpp
+				   src/Mantid/MantidCurve.cpp
                    src/Mantid/MantidDock.cpp
                    src/Mantid/MantidLog.cpp
                    src/Mantid/MantidMatrix.cpp
+				   src/Mantid/MantidMatrixCurve.cpp
+				   src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
+				   src/Mantid/MantidQwtIMDWorkspaceData.cpp
+				   src/Mantid/MantidQwtMatrixWorkspaceData.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
@@ -374,15 +378,19 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
-                   src/Mantid/MantidCurve.h
-                   src/Mantid/MantidDock.h
+				   src/Mantid/MantidCurve.h
+				   src/Mantid/MantidDock.h
                    src/Mantid/MantidLog.h
+                   src/Mantid/MantidMatrixCurve.h
+				   src/Mantid/MantidMDCurve.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
+				   src/Mantid/MantidQwtIMDWorkspaceData.h
+				   src/Mantid/MantidQwtMatrixWorkspaceData.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
@@ -638,12 +646,16 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/MantidCurve.h
                        src/Mantid/MantidDock.h
                        src/Mantid/MantidLog.h
+					   src/Mantid/MantidMatrixCurve.h
+					   src/Mantid/MantidMDCurve.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
+					   src/Mantid/MantidQwtIMDWorkspaceData.h
+					   src/Mantid/MantidQwtMatrixWorkspaceData.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
                        src/Mantid/UserFitFunctionDialog.h

@@ -335,9 +335,9 @@ bool MultiSliceView::noIndicatorsLeft()
 /**
  * This function is responsible for resetting all of the axis scale information
  * when the rebinner is used. All cuts will be deleted if the axis labeling
- * has changed. If the bounds have been changed, those will be updated.
- * Nothing will be done if only the number of bins has been
- * changed.
+ * has changed. If the bounds have been changed, those will be updated. If a
+ * cut is outside the new bounds, it will be deleted. Nothing will be done if
+ * only the number of bins has been changed.
  */
 void MultiSliceView::setAxisScales()
 {
@@ -385,14 +385,17 @@ void MultiSliceView::setAxisScales()
     if (xBoundsChanged)
     {
       this->ui.xAxisWidget->setBounds(xinfo, true);
+      this->resetOrDeleteIndicators(this->ui.xAxisWidget, 0);
     }
     if (yBoundsChanged)
     {
       this->ui.yAxisWidget->setBounds(yinfo, true);
+      this->resetOrDeleteIndicators(this->ui.yAxisWidget, 1);
     }
     if (zBoundsChanged)
     {
       this->ui.zAxisWidget->setBounds(zinfo, true);
+      this->resetOrDeleteIndicators(this->ui.zAxisWidget, 2);
     }
   }
 
@@ -425,6 +428,52 @@ bool MultiSliceView::checkBounds(AxisInformation *info, AxisInteractor *axis)
   bool upperChanged = info->getMaximum() != axis->getMaximum();
   bool lowerChanged = info->getMinimum() != axis->getMinimum();
   return upperChanged || lowerChanged;
+}
+
+/**
+ * This function handles either resetting or deleting cuts based on a new
+ * set of axis boundaries. If the cut is outside the bounds, it is deleted.
+ * Those cuts inside the boundaries need to be reset as the scale widget
+ * redraws itself for the bounds change as the graphical indicators do not
+ * handle this one their own.
+ * @param axis the axis containing the information to check
+ * @param pos the integer value for either x, y or z
+ */
+void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
+{
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> cuts = smModel->findItems<pqPipelineSource *>();
+  double axis_min = axis->getMinimum();
+  double axis_max = axis->getMaximum();
+  foreach (pqPipelineSource *cut, cuts)
+  {
+    const QString name = cut->getSMName();
+    if (name.contains("Slice"))
+    {
+      axis->selectIndicator(name);
+      if (axis->hasIndicator())
+      {
+        vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                                "CutFunction").GetAsProxy();
+        double origin[3];
+        vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+        double value = origin[pos];
+        if (value >= axis_min && value <= axis_max)
+        {
+          axis->updateIndicator(value);
+        }
+        else
+        {
+          axis->deleteRequestedIndicator(name);
+        }
+      }
+    }
+  }
+}
+
+void MultiSliceView::resetCamera()
+{
+  this->mainView->resetCamera();
 }
 
 }

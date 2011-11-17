@@ -59,6 +59,10 @@ namespace MantidQt
       inputWSReplace->setEnabled(true);
       m_loaderLayout->addWidget(inputWSReplace, 2, 2, 0);
     
+      checkbox = new QCheckBox ("IkedaCarpenterTOF",this);
+      m_loaderLayout->addWidget(checkbox);
+      tie(checkbox, "IkedaCarpenterTOF", m_loaderLayout);
+    
       checkbox = new QCheckBox ("FitSlices",this);
       m_loaderLayout->addWidget(checkbox);
       tie(checkbox, "FitSlices", m_loaderLayout);

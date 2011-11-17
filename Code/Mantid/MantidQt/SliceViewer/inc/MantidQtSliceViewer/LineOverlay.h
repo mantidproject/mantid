@@ -67,20 +67,33 @@ namespace SliceViewer
     const QPointF & getPointB() const;
     double getWidth() const;
 
+  signals:
+  /// Signal sent while the line is being dragged
+    void lineChanging(QPointF, QPointF, double);
+    /// Signal sent once the drag is completed
+    void lineChanged(QPointF, QPointF, double);
+
   private:
     QPoint transform(QPointF coords) const;
+    QPointF invTransform(QPoint pixels) const;
+
     QSize sizeHint() const;
     QSize size() const;
     int height() const;
     int width() const;
 
-    QRect drawHandle(QPainter & painter, QPointF coords);
+    QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
     void paintEvent(QPaintEvent *event);
 
     eHandleID mouseOverHandle(QPoint pos);
     void mouseMoveEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
 
   protected:
+    /// Marker that we are just creating the line (with the mouse)
+    bool m_creation;
+
     /// QwtPlot containing this
     QwtPlot * m_plot;
 
@@ -92,6 +105,14 @@ namespace SliceViewer
     double m_width;
     /// Rects defining where the 4 handles are
     QVector<QRect> m_handles;
+
+    /// When dragging, this is the handle being dragged
+    eHandleID m_dragHandle;
+    /// Start point (in plot coords) of the drag
+    QPointF m_dragStart;
+
+    /// Marker that the middle mouse button is pressed (panning)
+    bool m_middleButton;
 
   };
 
