@@ -24,6 +24,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDAlgorithms/ConvertToQNDanyMethodsTemplate.h"
 
 #include <algorithm>
 #include <float.h>
@@ -69,14 +70,14 @@ ConvertToQNDany::ConvertToQNDany():
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      
- //   alg_selector.insert(std::pair<std::string,pMethod>("NoQND",&ConvertToQNDany::process_NoQ__ND));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQdE",&ConvertToQNDany::process_ModQ_dE_));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND",&ConvertToQNDany::process_QND<4,NoQ>));
+   /* alg_selector.insert(std::pair<std::string,pMethod>("modQdE",&ConvertToQNDany::process_ModQ_dE_));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND",&ConvertToQNDany::process_ModQ__ND));
     alg_selector.insert(std::pair<std::string,pMethod>("modQdEND",&ConvertToQNDany::process_ModQ_dE_ND));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3D",&ConvertToQNDany::process_Q3D___));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DdE",&ConvertToQNDany::process_Q3D_dE_));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND",&ConvertToQNDany::process_Q3D__ND));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdEND",&ConvertToQNDany::process_Q3D_dE_ND));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DdEND",&ConvertToQNDany::process_Q3D_dE_ND));*/
 }
     
 //----------------------------------------------------------------------------------------------
@@ -88,42 +89,6 @@ ConvertToQNDany::~ConvertToQNDany()
 
 //
 const double rad2deg = 180.0 / M_PI;
-/// helper function to create empty MDEventWorkspace with nd dimensions 
-API::IMDEventWorkspace_sptr 
-ConvertToQNDany::create_emptyNDEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
-                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax,int nd)
-{
-
-     // Try to get the output workspace
-    i_out = getProperty("OutputWorkspace");
-    if(i_out){ // temporary, to agvoid complications of adding particular data to ws.
-        g_log.warning()<<" Output workspace"<<i_out->name()<<" will be replaced\n";
-    }
-    MDEvents::MDEventFactory wsFactory;
-    i_out = wsFactory.CreateMDWorkspace(n_activated_dimensions,"MDEvent");
-
-
-    
-    // Give all the dimensions
-    for (size_t d=0; d<nd; d++)
-    {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
-        i_out->addDimension(MDHistoDimension_sptr(dim));
-    }
-    i_out->initialize();
-
-     // Build up the box controller
-    Mantid::API::BoxController_sptr bc = i_out->getBoxController();
-      bc->setSplitInto(5);
-//      bc->setSplitThreshold(1500);
-      bc->setSplitThreshold(10);
-      bc->setMaxDepth(20);
-      // We always want the box to be split (it will reject bad ones)
-     // i_out->splitBox();
-      return i_out;
-}
-
-
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -150,7 +115,10 @@ ConvertToQNDany::init()
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
         " List(comma separated) of additional to Q (orthogonal) dimensions in the target workspace.\n"
         " The names of these dimensions have to coinside with the log names in the source workspace");
-
+    // this property is mainly for subalgorithms to set-up as they have to identify 
+    declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
+        "Store the part of the detectors transfromation into reciprocal space to save/reuse it later;");
+ 
 
     declareProperty(new ArrayProperty<double>("MinValues"),
          "An array of size 1+N_OtherDimensions if first dimension is equal |Q| or \n"
@@ -235,7 +203,10 @@ ConvertToQNDany::process_detectors_positions(const DataObjects::Workspace2D_cons
 void ConvertToQNDany::exec(){
     // -------- Input workspace 
     MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
-    Workspace2D_sptr inWS2D         = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
+    if(!inMatrixWS){
+        g_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+    }
+    inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
 
     // Identify what dimension names we can obtain from the input workspace;
     std::vector<std::string> dim_names_availible;
@@ -262,26 +233,32 @@ void ConvertToQNDany::exec(){
     //a) by Q selector:
     std::string Q_dim_requested       = getProperty("QDimensions");  
     //b) by other dim property;
-   std::vector<std::string> other_dim  =getProperty("OtherDimensions");
+     other_dim_names                  =  getProperty("OtherDimensions");
 
 
    // Verify input parameters;
-    std::string algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim,n_activated_dimensions);
+    std::string algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
 
  
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
     if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
+    std::vector<double> dimMin(4,-1);
+    std::vector<double> dimMax(4, 1);
    
-   
-    // call selected algorithm
-    pMethod algo =  alg_selector[algo_id];
+     boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3> > spws = create_emptyEventWS<3>(dim_names_availible,dim_names_availible,dimMin,dimMax);
+     process_QND<3,Q3D>(spws.get());
+
+    //// call selected algorithm
+     //pMethod algo =  alg_selector[algo_id];
+     pMethod algo =  alg_selector["NoQND"];
     if(algo){
-        algo(this);
+        boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> > spws = create_emptyEventWS<4>(dim_names_availible,dim_names_availible,dimMin,dimMax);
+        algo(this,spws.get());
     }else{
         g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
         throw(std::invalid_argument("undefined subalgoritm requested "));
     }
-
+     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
     return;
    
 }
@@ -480,99 +457,51 @@ void ConvertToQNDany::process_Q3D_dE_ND()
 {
     throw(Kernel::Exception::NotImplementedError(""));
 }
-
-template<size_t nd>
-boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create_emptyEventWS(const std::string dimensionNames[nd],const std::string dimensionUnits[nd],
-                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax)
-{
-
-       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
-       boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >(new MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd>());
-    
-      // Give all the dimensions
-      for (size_t d=0; d<nd; d++)
-      {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
-        ws->addDimension(MDHistoDimension_sptr(dim));
-      }
-      ws->initialize();
-
-      // Build up the box controller
-      Mantid::API::BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(5);
-//      bc->setSplitThreshold(1500);
-      bc->setSplitThreshold(10);
-      bc->setMaxDepth(20);
-      // We always want the box to be split (it will reject bad ones)
-      ws->splitBox();
-      return ws;
-}
-
-template<size_t nd>
-void ConvertToQNDany::process_NoQ__ND(boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > ws)
-{
-
-    // one of the dimensions has to be X-ws dimension -> need to add check for that;
-
-    // copy experiment info into target workspace
-    ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
-    uint16_t runIndex = ws->addExperimentInfo(ExperimentInfo);
-
-
-    const size_t numSpec  = inWS2D->getNumberHistograms();
-    const size_t specSize = inWS2D->blocksize();    
-    std::vector<coord_t> Coord(nd);
-
-
-    size_t n_added_events(0);
-    size_t SPLIT_LEVEL(1024);
-    for (int64_t i = 0; i < int64_t(numSpec); ++i)
-    {
-
-        const MantidVec& E_transfer = inWS2D->readX(i);
-        const MantidVec& Signal     = inWS2D->readY(i);
-        const MantidVec& Error      = inWS2D->readE(i);
-        int32_t det_id              = det_loc.det_id[i];
-    
-   
-        for (size_t j = 0; j < specSize; ++j)
-        {
-            // drop emtpy events
-            if(Signal[j]<FLT_EPSILON)continue;
-
-            double E_tr = 0.5*(E_transfer[j]+E_transfer[j+1]);
-            Coord[0]    = (coord_t)E_tr;
+/** The matrix to convert 
  
-
-            float ErrSq = float(Error[j]*Error[j]);
-            ws->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
-            n_added_events++;
-        }
-  
-      // This splits up all the boxes according to split thresholds and sizes.
-        //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-        //ThreadPool tp(NULL);
-      if(n_added_events>SPLIT_LEVEL){
-            ws->splitAllIfNeeded(NULL);
-            n_added_events=0;
-       }
-        //tp.joinAll();
-        progress.report(i);  
-     }
-     if(n_added_events>0){
-         ws->splitAllIfNeeded(NULL);
-         n_added_events=0;
-     }
-      ws->refreshCache();
-      progress.report();      
-
-      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(i_out));
+*/
+std::vector<double> 
+ConvertToQNDany::get_transf_matrix()const
+{
+    
+    // Initalize the matrix to 3x3 identity
+    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
+    // Set the matrix based on UB etc.
+    Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
+    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
+    // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
+    mat = gon * ub;
+    std::vector<double> rotMat = mat.get_vector();
+    return rotMat;
 }
 
-template void ConvertToQNDany::process_NoQ__ND<4>(boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> >);
-template boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> >  create_emptyEventWS(const std::string dimensionNames[4],const std::string dimensionUnits[4],
-                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax);
 
+
+#define NOQ
+template void ConvertToQNDany::process_QND<2,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<3,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<4,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<5,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<6,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<7,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<8,NoQ>(API::IMDEventWorkspace *const);
+#undef  NOQ
+#define Q3D_
+template void ConvertToQNDany::process_QND<3,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<4,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<5,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<6,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<7,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToQNDany::process_QND<8,Q3D>(API::IMDEventWorkspace *const);
+#undef  Q3D_
+template   boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<2>, 2> > create_emptyEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
+                                                                                   const std::vector<double> &dimMin,const std::vector<double> &dimMax);
+template   boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3> > create_emptyEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
+                                                                                   const std::vector<double> &dimMin,const std::vector<double> &dimMax);
+template   boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> > create_emptyEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
+                                                                                   const std::vector<double> &dimMin,const std::vector<double> &dimMax);
+
+//
 
 } // namespace Mantid
 } // namespace MDAlgorithms

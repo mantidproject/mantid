@@ -55,7 +55,7 @@ namespace Geometry
       void setU(Kernel::DblMatrix& newU);
       void setUB(Kernel::DblMatrix& newUB);
 
-      Kernel::DblMatrix setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
+      Kernel::DblMatrix getUBFromVectors(const Kernel::V3D &u, const Kernel::V3D &v)const;
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       void loadNexus(::NeXus::File * file, const std::string & group);

@@ -107,9 +107,6 @@ void testExecFailsLimits_MinGeMax(){
     TSM_ASSERT("Should fail as no max limits were specied ",!pAlg->isExecuted());
 
 }
-
-
-
 void testExecFine(){
     // create model processed workpsace with 10x10 cylindrical detectors, 10 energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
@@ -153,6 +150,19 @@ void testExecAndAdd(){
     TSM_ASSERT_EQUALS("The energy, used by the algorithm has not been reset from the workspace", "13",std::string(pAlg->getProperty("EnergyInput")));
 
 }
+void testTransfMat1()
+{
+     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
+     OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
+     ws2D->mutableSample().setOrientedLattice(latt);
+
+    std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
+     Kernel::Matrix<double> unit = Kernel::Matrix<double>(3,3, true);
+     Kernel::Matrix<double> rez(rot);
+     TS_ASSERT(unit.equals(rez,1.e-4));
+
+}
+
 
 //TODO: check the results;
 

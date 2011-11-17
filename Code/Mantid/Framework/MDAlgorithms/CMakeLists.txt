@@ -50,6 +50,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
+	inc/MantidMDAlgorithms/ConvertToQNDanyMethodsTemplate.h
 	inc/MantidMDAlgorithms/ConvertToQNDany.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h

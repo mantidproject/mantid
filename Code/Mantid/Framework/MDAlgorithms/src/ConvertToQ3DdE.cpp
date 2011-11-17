@@ -292,14 +292,7 @@ void ConvertToQ3DdE::exec(){
 
  
 
-    // Initalize the matrix to 3x3 identity
-    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
-    // Set the matrix based on UB etc.
-    Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
-    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
-    // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
-    mat = gon * ub;
-    std::vector<double> rotMat = mat.get_vector();
+    std::vector<double> rotMat = get_transf_matrix(inWS2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
 
     const size_t numSpec  = inWS2D->getNumberHistograms();
     const size_t specSize = inWS2D->blocksize();    
@@ -380,6 +373,36 @@ void ConvertToQ3DdE::exec(){
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+
+ }
+std::vector<double>
+ConvertToQ3DdE::get_transf_matrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u, const Kernel::V3D &v)const
+{
+    
+    // Set the matrix based on UB etc.
+    Geometry::OrientedLattice Latt = inWS2D->sample().getOrientedLattice();
+
+    // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
+    Kernel::Matrix<double> ub = Latt.getUBFromVectors(u,v);
+    std::vector<double> ubv = ub.get_vector();
+
+    Kernel::Matrix<double> b  = Latt.getB();
+    std::vector<double>  bv = b.get_vector();
+
+    Kernel::Matrix<double> umat= ub*b.Invert();
+    std::vector<double>  umv = umat.get_vector();
+    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
+    umat.Invert();
+    umv=umat.get_vector();
+    std::vector<double>  gonv = gon.get_vector();
+
+  // Initalize the 3x3 matrix
+    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3);
+    mat = umat*gon;
+
+    std::vector<double> rotMat = mat.get_vector();
+    return rotMat;
+}
 
 //
 //
@@ -482,8 +505,7 @@ void ConvertToQ3DdE::exec(){
 //    }
 //
 //
-  }
-
+ 
  ////----------------------------------------------------------------------------------------------
  // /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
  //  *
@@ -595,7 +617,6 @@ void ConvertToQ3DdE::exec(){
  //   }
  //   prog->reportIncrement(numEvents, "Adding Events");
  // }
-
 
 
 } // namespace Mantid

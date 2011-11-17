@@ -95,8 +95,7 @@ public:
   {
     OrientedLattice theCell;
     DblMatrix rot;
-    TSM_ASSERT_THROWS_NOTHING("The unit transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
-    rot = theCell.getUB();
+    TSM_ASSERT_THROWS_NOTHING("The unit transformation should not throw",rot=theCell.getUBFromVectors(V3D(1,0,0),V3D(0,1,0)));
 
     std::vector<double> Rot = rot.get_vector();
     std::vector<double> rez(9,0);
@@ -117,8 +116,8 @@ public:
     OrientedLattice theCell;
     DblMatrix rot;
     TSM_ASSERT_THROWS("The transformation to plane defined by two parallel vectors should throw",
-        theCell.setUFromVectors(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
-    rot = theCell.getUB();
+        theCell.getUBFromVectors(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
+   
   }
 
   /** @author Alex Buts */
@@ -126,8 +125,8 @@ public:
   {
     OrientedLattice theCell;
     DblMatrix rot;
-    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(0,1,0),V3D(1,0,0)));
-    rot = theCell.getUB();
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBFromVectors(V3D(0,1,0),V3D(1,0,0)));
+
 
     std::vector<double> Rot = rot.get_vector();
     std::vector<double> rez(9,0);
@@ -147,8 +146,8 @@ public:
   {
     OrientedLattice theCell;
     DblMatrix rot;
-    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,1,0),V3D(1,-1,0)));
-    rot = theCell.getUB();
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBFromVectors(V3D(1,1,0),V3D(1,-1,0)));
+
     V3D dir0(sqrt(2.),0,0);
 
     std::vector<double> Rot = rot.get_vector();
@@ -169,8 +168,8 @@ public:
     // two orthogonal vectors
     V3D ort1(sqrt(2.),-1,-1);
     V3D ort2(sqrt(2.),1,1);
-    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(ort1,ort2));
-    rot = theCell.getUB();
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBFromVectors(ort1,ort2));
+  
 
     V3D dir(1,0,0);
     V3D xx = ort1.cross_prod(ort2);
@@ -194,8 +193,7 @@ public:
   {
     OrientedLattice theCell(1,2,3,30,60,45);
     DblMatrix rot;
-    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
-    rot = theCell.getUB();
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBFromVectors(V3D(1,0,0),V3D(0,1,0)));
 
     V3D dir(1,1,1);
 

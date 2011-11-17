@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertToQ3DdE.h"
 //#include <boost/function>
 
@@ -48,7 +49,13 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
   class ConvertToQNDany;
-  typedef boost::function<void (ConvertToQNDany*)> pMethod;
+  typedef boost::function<void (ConvertToQNDany*, API::IMDEventWorkspace *const)> pMethod;
+
+  enum Q_state{
+       NoQ,
+       modQ,
+       Q3D
+   };
 //
   class DLLExport ConvertToQNDany  : public API::Algorithm
   {
@@ -81,27 +88,36 @@ namespace MDAlgorithms
    size_t n_activated_dimensions;
    /// this variable describes default possible ID-s for Q-dimensions
    std::vector<std::string> Q_ID_possible;
-   /// pointer to output workspace;
-   API::IMDEventWorkspace_sptr i_out; 
+ 
    /// pointer to input workspace;
-   Mantid::API::MatrixWorkspace_sptr inWS2D;
+   Mantid::DataObjects::Workspace2D_sptr inWS2D;
    // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
     static preprocessed_detectors det_loc;  
  /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
     static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
-    // helper function to create MDWorkspace
-    API::IMDEventWorkspace_sptr 
-    create_emptyNDEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
-                                                                              const std::vector<double> &dimMin,const std::vector<double> &dimMax,int nd);
+     /// the names of the log variables, which are used as dimensions
+    std::vector<std::string> other_dim_names;
+    Kernel::V3D u,v;
   protected: //for testing
-   /** function returns the list of names, which can be possible dimensions for current matrix workspace */
+   /** function returns the list of names, which can be treated as dimensions present in current matrix workspace */
    std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
+   
    /** function processes arguments entered by user and tries to establish which algorithm should be deployed;   */
    std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims)const;
-    //NoQND
+
+   /** function provides the linear representation for the transformation matrix, */
+   std::vector<double> get_transf_matrix()const;
+   //
+   template<size_t nd,Q_state Q>
+   void process_QND(API::IMDEventWorkspace *const pOutWs);
+   // helper function to create MDWorkspace
    template<size_t nd>
-   void process_NoQ__ND(boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > ws);
+   boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >    
+   create_emptyNDEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
+                         const std::vector<double> &dimMin,const std::vector<double> &dimMax,int nd);
+  
+
    //  modQdE, // specific algorithm  -- 2D, powder
     void process_ModQ_dE_();
     //  modQND, // ModQND -- good for powders
@@ -120,7 +136,8 @@ namespace MDAlgorithms
     std::map<std::string, pMethod> alg_selector;
  };
 
-
+ template<typename T>
+ void Q_analysis(coord_t &Coord, double X) { }
 } // namespace Mantid
 } // namespace MDAlgorithms
 
