@@ -168,7 +168,7 @@ namespace SliceViewer
     QPen boxPen(QColor(255,255,255, 255));
     QPen centerPen(QColor(192,192,192, 128));
 
-#if QT_VERSION >= 0x040100
+#if QT_VERSION >= 0x030100
     // Special XOR pixel drawing
     painter.setCompositionMode( QPainter::RasterOp_SourceXorDestination );
 #else
