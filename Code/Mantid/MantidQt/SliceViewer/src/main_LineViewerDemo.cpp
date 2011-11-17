@@ -16,6 +16,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid;
 using namespace Mantid::API;;
@@ -24,6 +25,7 @@ using namespace Mantid::Geometry;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
 using MantidQt::SliceViewer::LineViewer;
+using Mantid::Kernel::VMD;
 
 /** Demo application for quickly testing the LineViewer GUI.
  *
@@ -138,7 +140,11 @@ int main( int argc, char ** argv )
   LineViewer * line = new LineViewer(frame);
   line->resize(600,600);
   layout->addWidget(line);
-  //line->setWorkspace(mdew);
+  line->setWorkspace(mdew);
+  line->setStart(VMD(-1,0,0));
+  line->setEnd(VMD(+1,0,0));
+  line->setNumBins(1000);
+  line->showPreview();
   mainWin->move(100, 100);
   mainWin->resize(700, 700);
   mainWin->show();

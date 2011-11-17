@@ -21,41 +21,68 @@
      </property>
      <widget class="QFrame" name="frmTop">
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="lblDim">
-           <property name="text">
-            <string>Dim:</string>
+        <layout class="QHBoxLayout" name="horizontalLayoutTopTop" stretch="0,0,1">
+         <item>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblDim">
+             <property name="text">
+              <string>Dim:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblStart">
+             <property name="text">
+              <string>Start:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblEnd">
+             <property name="text">
+              <string>End:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblWidth">
+             <property name="text">
+              <string>Width:</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QFrame" name="frmTopRight">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="lblStart">
-           <property name="text">
-            <string>Start:</string>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="lblEnd">
-           <property name="text">
-            <string>End:</string>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
            </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="lblWidth">
-           <property name="text">
-            <string>Width:</string>
-           </property>
-          </widget>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -89,15 +116,18 @@
           </widget>
          </item>
          <item>
-          <widget class="QPlainTextEdit" name="plainTextEdit">
+          <widget class="QLineEdit" name="textBinWidth">
            <property name="maximumSize">
             <size>
              <width>100</width>
-             <height>30</height>
+             <height>16777215</height>
             </size>
            </property>
            <property name="toolTip">
-            <string>Specify the width of each bin (will adjust the number of bins)</string>
+            <string>Width of each bin (will set the # of bins)</string>
+           </property>
+           <property name="maxLength">
+            <number>50</number>
            </property>
           </widget>
          </item>
@@ -130,7 +160,7 @@
      </widget>
      <widget class="QFrame" name="frmPlot">
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>

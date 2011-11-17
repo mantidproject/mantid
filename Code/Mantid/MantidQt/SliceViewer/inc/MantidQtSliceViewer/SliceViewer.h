@@ -74,11 +74,10 @@ private:
 
 
 private:
+  // -------------------------- Widgets ----------------------------
+
   /// Auto-generated UI controls.
   Ui::SliceViewerClass ui;
-
-  /// Set to true once the first workspace has been loaded in it
-  bool m_firstWorkspaceOpen;
 
   /// Main plot object
   QwtPlot * m_plot;
@@ -100,6 +99,13 @@ private:
 
 
 
+  // -------------------------- Data Members ----------------------------
+
+  /// Workspace being shown
+  Mantid::API::IMDWorkspace_sptr m_ws;
+
+  /// Set to true once the first workspace has been loaded in it
+  bool m_firstWorkspaceOpen;
 
   /// File of the last loaded color map.
   QString m_currentColorMapFile;
@@ -109,9 +115,6 @@ private:
 
   /// Data presenter
   QwtRasterDataMD * m_data;
-
-  /// Workspace being shown
-  Mantid::API::IMDWorkspace_sptr m_ws;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;
