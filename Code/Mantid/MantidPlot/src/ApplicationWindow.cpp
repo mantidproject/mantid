@@ -120,7 +120,7 @@
 #include "PlotToolInterface.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidTable.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/RemoveErrorsDialog.h"
@@ -10899,7 +10899,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          new MantidCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+          new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
