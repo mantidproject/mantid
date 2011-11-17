@@ -242,6 +242,7 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
     vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
     emit this->setAnimationControlState(true);
     emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
+    scene->getProxy()->InvokeCommand("GoToFirst");
   }
   else
   {
