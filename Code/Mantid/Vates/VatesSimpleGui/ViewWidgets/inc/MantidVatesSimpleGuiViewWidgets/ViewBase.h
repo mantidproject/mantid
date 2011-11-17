@@ -102,6 +102,8 @@ public:
    * This function only calls the render command for the view(s).
    */
   virtual void renderAll() = 0;
+  /// Reset the camera for a given view.
+  virtual void resetCamera() = 0;
   /**
    * This function resets the display(s) for the view(s).
    */

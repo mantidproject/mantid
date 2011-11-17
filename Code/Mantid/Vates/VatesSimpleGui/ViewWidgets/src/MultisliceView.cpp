@@ -471,6 +471,11 @@ void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
   }
 }
 
+void MultiSliceView::resetCamera()
+{
+  this->mainView->resetCamera();
+}
+
 }
 }
 }

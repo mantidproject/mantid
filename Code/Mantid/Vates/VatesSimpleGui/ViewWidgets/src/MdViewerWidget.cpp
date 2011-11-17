@@ -356,11 +356,11 @@ void MdViewerWidget::checkForUpdates()
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->resetDisplay();
-    //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
     this->currentView->setAxisScales();
     pqActiveObjects::instance().setActiveSource(src);
     this->currentView->setTimeSteps(true);
+    this->currentView->resetCamera();
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {

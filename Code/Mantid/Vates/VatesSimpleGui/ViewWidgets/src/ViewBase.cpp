@@ -304,7 +304,7 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z)
 }
 
 /**
- * This function will handle axis scale updates. Most view will not do this,
+ * This function will handle axis scale updates. Most views will not do this,
  * so the default is to do nothing.
  */
 void ViewBase::setAxisScales()
