@@ -35,6 +35,10 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/V3D.h"
@@ -135,6 +139,7 @@ namespace DataHandling
     Instrument_const_sptr inst = inputW->getInstrument();
     std::string instname = inst->getName();
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(instname));
+    inputW->setInstrument(instrument);
 
     // set-up minimizer
 
@@ -208,13 +213,22 @@ namespace DataHandling
       {
         double mL1, mT0;
         std::stringstream(line) >> count >> mL1 >> mT0;
-        // Convert from cm to m
-        center(0.0, 0.0, -0.01 * mL1,"moderator", inname);
         //mT0 and time of flight are both in microsec
         IAlgorithm_sptr alg1 = createSubAlgorithm("ChangeBinOffset");
         alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
         alg1->setProperty("Offset", mT0);
         alg1->executeAsSubAlg();
+        Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample", instrument.get());
+        instrument->add(samplepos);
+        instrument->markAsSamplePos(samplepos);
+        samplepos->setPos(0.0, 0.0, 0.0);
+    
+        Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
+        instrument->add(source);
+        instrument->markAsSource(source);
+        // Convert from cm to m
+        source->setPos(0.0, 0.0, -0.01 * mL1);
+
       }
 
       if(line[0] != '5') continue;
@@ -244,32 +258,38 @@ namespace DataHandling
       if (det)
       {
         // Convert from cm to m
-        /*width *= 0.01;
+        width *= 0.01;
         height *= 0.01;
         double xstep = width / det->xpixels();
         double ystep = height / det->ypixels();
         double xstart = -width * 0.5;
         double ystart = -height * 0.5;
-        //Loop through all the pixels
-        int ix, iy;
-        for (ix=0; ix<det->xpixels(); ix++)
+        Geometry::RectangularDetector * bank = new Geometry::RectangularDetector(det->getName(), instrument.get());
+        boost::shared_ptr<const Mantid::Geometry::Object> cshape(det->shape());
+        boost::shared_ptr<Mantid::Geometry::Object> shape(boost::const_pointer_cast<Mantid::Geometry::Object>(cshape));
+        bank->initialize(shape, det->xpixels(), xstart, xstep, det->ypixels(), ystart, ystep, det->idstart(), det->idfillbyfirst_y(), det->idstepbyrow(), det->idstep());
+      try
+      {
+        for (int x=0; x < bank->nelements(); x++)
         {
-           for (iy=0; iy<det->ypixels(); iy++)
-           {
-             //Calculate the x,y position
-             double xpos = xstart + ix * xstep;
-             double ypos = ystart + iy * ystep;
-             //Translate (relative to parent)
-             // Get to column
-             ICompAssembly_sptr xCol = boost::dynamic_pointer_cast<ICompAssembly>(det->getChild(ix));
-             if (!xCol)
-             throw std::runtime_error("RectangularDetector::getAtXY: X specified is out of range.");
-             boost::shared_ptr<Detector>child =  boost::dynamic_pointer_cast<Detector>( xCol->getChild(iy) );
-             detname = child->getName();
-             center(xpos, ypos, 0, detname, inname);
-           }
-        }*/
-
+          boost::shared_ptr<Geometry::ICompAssembly> xColumn = boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+          for (int y=0; y < xColumn->nelements(); y++)
+          {
+            boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+            if (detector)
+            {
+               //Mark it as a detector (add to the instrument cache)
+               instrument->markAsDetector(detector.get());
+            }
+          }
+        }
+      }
+      catch(Kernel::Exception::ExistsError&)
+      {
+         throw Kernel::Exception::InstrumentDefinitionError(
+           "Duplicate detector ID found when adding RectangularDetector " + det->getName() + " in XML instrument file");
+      }
+              
         // Convert from cm to m
         x *= 0.01;
         y *= 0.01;
@@ -310,7 +330,7 @@ namespace DataHandling
         Quat Rot = Q2 * Q1;
 
         // Then find the corresponding relative position
-        boost::shared_ptr<const IComponent> comp = inst->getComponentByName(detname);
+        boost::shared_ptr<const IComponent> comp = instrument->getComponentByName(detname);
         boost::shared_ptr<const IComponent> parent = comp->getParent();
         if (parent)
         {
