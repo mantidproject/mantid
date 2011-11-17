@@ -236,13 +236,13 @@ void MantidMDCurve::dataReset(const QString& wsName)
   try
   {
     Mantid::API::Workspace_sptr base =  Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
-    mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
+    mws = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(base);
   }
   catch(std::runtime_error&)
   {
     Mantid::Kernel::Logger::get("MantidMDCurve").information() << "Workspace " << wsNameStd
         << " could not be found - plotted curve(s) deleted\n";
-    mws = Mantid::API::MatrixWorkspace_sptr();
+    mws = Mantid::API::IMDWorkspace_sptr();
   }
 
   if (!mws) return;
@@ -251,7 +251,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);
     setStyle(QwtPlotCurve::Lines);
-    // Queue this plot to be updated once all MantidQwtMatrixWorkspaceData objects for this workspace have been
+    // Queue this plot to be updated once all MantidQwtIMDWorkspaceData objects for this workspace have been
     emit dataUpdated();
   } catch(std::range_error) {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
