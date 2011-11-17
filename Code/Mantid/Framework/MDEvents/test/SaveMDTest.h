@@ -46,6 +46,16 @@ public:
     do_test_exec(0, "SaveMDTest_noEvents.nxs");
   }
 
+  void test_MakeFileBacked()
+  {
+    do_test_exec(23, "SaveMDTest_filebacked.nxs", true);
+  }
+
+  void test_MakeFileBacked_then_UpdateFileBackEnd()
+  {
+    do_test_exec(23, "SaveMDTest_updating.nxs", true, true);
+  }
+
   void test_save_then_Load_then_UpdateFileBackEnd()
   {
     do_test_exec(23, "SaveMDTest_reloaded.nxs");
@@ -63,7 +73,7 @@ public:
 
   //===============================================================================================
   //===============================================================================================
-  void do_test_exec(size_t numPerBox, std::string filename)
+  void do_test_exec(size_t numPerBox, std::string filename, bool MakeFileBacked = false, bool UpdateFileBackEnd = false)
   {
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
@@ -86,6 +96,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked", MakeFileBacked) );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
@@ -93,6 +104,25 @@ public:
 
     std::string this_filename = alg.getProperty("Filename");
     TSM_ASSERT( "File was indeed created", Poco::File(this_filename).exists());
+
+    if (MakeFileBacked)
+    {
+      TSM_ASSERT("Workspace was made file-backed", ws->isFileBacked() );
+      TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
+      std::vector<IMDBox1Lean *> boxes;
+      ws->getBox()->getBoxes(boxes, 1000, true);
+      for (size_t i=0; i < boxes.size(); i++)
+      {
+        MDBox1Lean * box = dynamic_cast<MDBox1Lean *>(boxes[i]);
+        TS_ASSERT( box );
+        // All MDBoxes now say "on disk"
+        TS_ASSERT( box->getOnDisk() );
+      }
+    }
+
+    // Continue the test
+    if (UpdateFileBackEnd)
+      do_test_UpdateFileBackEnd(ws, filename);
 
   }
   

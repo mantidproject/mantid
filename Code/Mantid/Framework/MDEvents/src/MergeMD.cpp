@@ -232,139 +232,130 @@ namespace MDEvents
   }
 
 
-//
-//  //----------------------------------------------------------------------------------------------
-//  /** Create the output workspace using the input as a guide
-//   *
-//   * @param ws :: first workspace from the inputs
-//   * @return the MDEventWorkspace sptr.
-//   */
-//  template<typename MDE, size_t nd>
-//  typename MDEventWorkspace<MDE, nd>::sptr MergeMD::createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws)
-//  {
-//    // Use the copy constructor to get the same dimensions etc.
-//    typename MDEventWorkspace<MDE, nd>::sptr outWS(new MDEventWorkspace<MDE, nd>(*ws));
-//    this->outIWS = outWS;
-//
-//    std::string outputFile = getProperty("OutputFilename");
-//
-//    // Fix the box controller settings in the output workspace so that it splits normally
-//    BoxController_sptr bc = outWS->getBoxController();
-//    // TODO: Specify these split parameters some smarter way?
-//    bc->setMaxDepth(20);
-//    bc->setSplitInto(4);
-//    bc->setSplitThreshold(10000);
-//
-//    // Perform the initial box splitting.
-//    IMDBox<MDE,nd> * box = outWS->getBox();
-//    for (size_t d=0; d<nd; d++)
-//      box->setExtents(d, outWS->getDimension(d)->getMinimum(), outWS->getDimension(d)->getMaximum());
-//    box->setBoxController(bc);
-//    outWS->splitBox();
-//
-//    // Save the empty WS and turn it into a file-backed MDEventWorkspace
-//    if (!outputFile.empty())
-//    {
-//      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05);
-//      saver->setProperty("InputWorkspace", outIWS);
-//      saver->setPropertyValue("Filename", outputFile);
-//      saver->executeAsSubAlg();
-//
-//      // Re-load into a file-backed workspace
-//      IAlgorithm_sptr loader = this->createSubAlgorithm("LoadMD" ,0.04, 0.05, true);
-//      loader->setPropertyValue("Filename", outputFile);
-//      loader->setProperty("FileBackEnd", true);
-//      loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-//      loader->executeAsSubAlg();
-//      outIWS = loader->getProperty("OutputWorkspace");
-//      outWS = boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(outIWS);
-//      bc = outWS->getBoxController();
-//    }
-//
-//    // Complete the file-back-end creation.
-//    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-//    g_log.notice() << "Setting cache to 0 MB read, 400 MB write, 2000 MB small objects." << std::endl;
-//    bc->setCacheParameters(sizeof(MDE), 0, 400000000/sizeof(MDE), 2000000000/sizeof(MDE));
-//    g_log.notice() << "Threshold for small boxes: " << bc->getDiskMRU().getSmallThreshold() << " events." << std::endl;
-//
-//
-//    return outWS;
-//  }
-//
-//
-//  //----------------------------------------------------------------------------------------------
-//  /** Perform the merging, with generalized output workspace
-//   *
-//   * @param ws :: first MDEventWorkspace in the list to merge
-//   */
-//  template<typename MDE, size_t nd>
-//  void MergeMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
-//  {
-//    // First, load all the box data
-//    this->loadBoxData<MDE,nd>();
-//
-//    // Now create the output workspace
-//    typename MDEventWorkspace<MDE, nd>::sptr outWS = this->createOutputWS<MDE,nd>(ws);
-//
-//    // Progress report based on events processed.
-//    this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
-//    this->prog->setNotifyStep(0.1);
-//
-//    // For tracking progress
-//    uint64_t totalEventsInTasks = 0;
-//    this->totalLoaded = 0;
-//
-//    // Prepare thread pool
-//    CPUTimer overallTime;
-//    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
-//    ThreadPool tp(ts);
-//
-//    for (size_t ib=0; ib<numBoxes; ib++)
-//    {
-//      // Add a task for each box that actually has some events
-//      if (this->eventsPerBox[ib] > 0)
-//      {
-//        totalEventsInTasks += eventsPerBox[ib];
-//        MergeMDLoadTask<MDE,nd> * task = new MergeMDLoadTask<MDE,nd>(this, ib, outWS);
-//        ts->push(task);
-//      }
-//
-//      // You've added enough tasks that will fill up some memory.
-//      if (totalEventsInTasks > 10000000)
-//      {
-//        // Run all the tasks
-//        tp.joinAll();
-//
-//        // Occasionally release free memory (has an effect on Linux only).
-//        MemoryManager::Instance().releaseFreeMemory();
-//
-//        // Now do all the splitting tasks
-//        g_log.information() << "Splitting boxes since we have added " << totalEventsInTasks << " events." << std::endl;
-//        outWS->splitAllIfNeeded(ts);
-//        if (ts->size() > 0)
-//          prog->doReport("Splitting Boxes");
-//        tp.joinAll();
-//
-//        totalEventsInTasks = 0;
-//      }
-//    } // for each box
-//
-//    // Run any final tasks
-//    tp.joinAll();
-//
-//    // Final splitting
-//    g_log.debug() << "Final splitting of boxes. " << totalEventsInTasks << " events." << std::endl;
-//    outWS->splitAllIfNeeded(ts);
-//    tp.joinAll();
-//    g_log.information() << overallTime << " to do all the adding." << std::endl;
-//
-//    // Finish things up
-//    this->finalizeOutput<MDE,nd>(outWS);
-//  }
-//
-//
-//
-//
+
+  //----------------------------------------------------------------------------------------------
+  /** Create the output workspace using the input as a guide
+   *
+   * @param ws :: first workspace from the inputs
+   * @return the MDEventWorkspace sptr.
+   */
+  template<typename MDE, size_t nd>
+  typename MDEventWorkspace<MDE, nd>::sptr MergeMD::createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // Use the copy constructor to get the same dimensions etc.
+    typename MDEventWorkspace<MDE, nd>::sptr outWS(new MDEventWorkspace<MDE, nd>(*ws));
+    this->outIWS = outWS;
+
+    std::string outputFile = getProperty("OutputFilename");
+
+    // Fix the box controller settings in the output workspace so that it splits normally
+    BoxController_sptr bc = outWS->getBoxController();
+    // TODO: Specify these split parameters some smarter way?
+    bc->setMaxDepth(20);
+    bc->setSplitInto(4);
+    bc->setSplitThreshold(10000);
+
+    // Perform the initial box splitting.
+    IMDBox<MDE,nd> * box = outWS->getBox();
+    for (size_t d=0; d<nd; d++)
+      box->setExtents(d, outWS->getDimension(d)->getMinimum(), outWS->getDimension(d)->getMaximum());
+    box->setBoxController(bc);
+    outWS->splitBox();
+
+    // Save the empty WS and turn it into a file-backed MDEventWorkspace
+    if (!outputFile.empty())
+    {
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05);
+      saver->setProperty("InputWorkspace", outIWS);
+      saver->setPropertyValue("Filename", outputFile);
+      saver->setProperty("MakeFileBacked", true);
+      saver->executeAsSubAlg();
+    }
+
+    // Complete the file-back-end creation.
+    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
+    g_log.notice() << "Setting cache to 0 MB read, 400 MB write, 2000 MB small objects." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 0, 400000000/sizeof(MDE), 2000000000/sizeof(MDE));
+    g_log.notice() << "Threshold for small boxes: " << bc->getDiskMRU().getSmallThreshold() << " events." << std::endl;
+
+
+    return outWS;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the merging, with generalized output workspace
+   *
+   * @param ws :: first MDEventWorkspace in the list to merge
+   */
+  template<typename MDE, size_t nd>
+  void MergeMD::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // First, load all the box data
+    this->loadBoxData<MDE,nd>();
+
+    // Now create the output workspace
+    typename MDEventWorkspace<MDE, nd>::sptr outWS = this->createOutputWS<MDE,nd>(ws);
+
+    // Progress report based on events processed.
+    this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
+    this->prog->setNotifyStep(0.1);
+
+    // For tracking progress
+    uint64_t totalEventsInTasks = 0;
+    this->totalLoaded = 0;
+
+    // Prepare thread pool
+    CPUTimer overallTime;
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+
+    for (size_t ib=0; ib<numBoxes; ib++)
+    {
+      // Add a task for each box that actually has some events
+      if (this->eventsPerBox[ib] > 0)
+      {
+        totalEventsInTasks += eventsPerBox[ib];
+        MergeMDLoadTask<MDE,nd> * task = new MergeMDLoadTask<MDE,nd>(this, ib, outWS);
+        ts->push(task);
+      }
+
+      // You've added enough tasks that will fill up some memory.
+      if (totalEventsInTasks > 10000000)
+      {
+        // Run all the tasks
+        tp.joinAll();
+
+        // Occasionally release free memory (has an effect on Linux only).
+        MemoryManager::Instance().releaseFreeMemory();
+
+        // Now do all the splitting tasks
+        g_log.information() << "Splitting boxes since we have added " << totalEventsInTasks << " events." << std::endl;
+        outWS->splitAllIfNeeded(ts);
+        if (ts->size() > 0)
+          prog->doReport("Splitting Boxes");
+        tp.joinAll();
+
+        totalEventsInTasks = 0;
+      }
+    } // for each box
+
+    // Run any final tasks
+    tp.joinAll();
+
+    // Final splitting
+    g_log.debug() << "Final splitting of boxes. " << totalEventsInTasks << " events." << std::endl;
+    outWS->splitAllIfNeeded(ts);
+    tp.joinAll();
+    g_log.information() << overallTime << " to do all the adding." << std::endl;
+
+    // Finish things up
+    this->finalizeOutput<MDE,nd>(outWS);
+  }
+
+
+
+
 
 
 
@@ -385,7 +376,6 @@ namespace MDEvents
   {
     this->clonedFirst = true;
     std::string outputFile = getProperty("OutputFilename");
-    typename MDEventWorkspace<MDE, nd>::sptr outWS = ws;
 
     // Convert the output workspace to file-backed
     if (!outputFile.empty())
@@ -393,22 +383,14 @@ namespace MDEvents
       IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.05, 0.10, true);
       saver->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
       saver->setPropertyValue("Filename", outputFile);
+      saver->setProperty("MakeFileBacked", true);
       saver->executeAsSubAlg();
-
-      // Re-load into a file-backed workspace
-      IAlgorithm_sptr loader = this->createSubAlgorithm("LoadMD" ,0.04, 0.05, true);
-      loader->setPropertyValue("Filename", outputFile);
-      loader->setProperty("FileBackEnd", true);
-      loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-      loader->executeAsSubAlg();
-      IMDEventWorkspace_sptr outIWS = loader->getProperty("OutputWorkspace");
-      outWS = boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(outIWS);
     }
     // For the output
-    outIWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+    outIWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
 
     // Fix the box controller settings in the output workspace so that it splits normally
-    BoxController_sptr bc = outWS->getBoxController();
+    BoxController_sptr bc = ws->getBoxController();
     // Fix the max depth to something bigger.
     bc->setMaxDepth(20);
     bc->setSplitThreshold(5000);
@@ -418,7 +400,7 @@ namespace MDEvents
     g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 0 MB small objects." << std::endl;
     bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 0/sizeof(MDE));
 
-    return outWS;
+    return ws;
   }
 
 
