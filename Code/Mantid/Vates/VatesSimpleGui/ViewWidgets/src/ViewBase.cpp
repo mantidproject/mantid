@@ -257,8 +257,7 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
  */
 void ViewBase::onResetCenterToData()
 {
-  pqRenderView* renderView =
-      qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
+  pqRenderView *renderView = this->getPvActiveView();
   pqDataRepresentation* repr = pqActiveObjects::instance().activeRepresentation();
   if (!repr || !renderView)
   {
@@ -287,8 +286,7 @@ void ViewBase::onResetCenterToData()
  */
 void ViewBase::onResetCenterToPoint(double x, double y, double z)
 {
-  pqRenderView* renderView =
-      qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
+  pqRenderView *renderView = this->getPvActiveView();
   pqDataRepresentation* repr = pqActiveObjects::instance().activeRepresentation();
   if (!repr || !renderView)
   {
