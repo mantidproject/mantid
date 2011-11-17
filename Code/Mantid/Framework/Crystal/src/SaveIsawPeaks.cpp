@@ -88,7 +88,7 @@ namespace Crystal
     std::vector<Peak> peaks = ws->getPeaks();
 
 	// We cannot assume the peaks have bank type detector modules, so we have a string to check this
-	std::string bankPart = "";
+	std::string bankPart = "?";
 
     // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
     typedef std::map<int, std::vector<size_t> > bankMap_t;
@@ -108,7 +108,7 @@ namespace Crystal
         continue;
       }
 	  // Save the "bank" part once to check whether it really is a bank
-	  if( bankPart == "")  bankPart = bankName.substr(0,4);
+	  if( bankPart == "?")  bankPart = bankName.substr(0,4);
       // Take out the "bank" part of the bank name and convert to an int
       bankName = bankName.substr(4, bankName.size()-4);
 	  Strings::convert(bankName, bank);
@@ -122,9 +122,8 @@ namespace Crystal
     Instrument_const_sptr inst = ws->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
-	if( bankPart != "bank") {
-		  std::ostringstream mess;
-		  mess << "Detector module of type " << bankPart << " not supported in ISAWPeaks. Cannot save peaks file";
+	if( bankPart != "bank" && bankPart != "?" ) {
+		  std::ostringstream mess;		  mess << "Detector module of type " << bankPart << " not supported in ISAWPeaks. Cannot save peaks file";
 		  throw std::runtime_error( mess.str() );
 	}
 
