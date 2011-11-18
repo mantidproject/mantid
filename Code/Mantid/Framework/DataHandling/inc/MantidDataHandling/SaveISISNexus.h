@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <napi.h>
+#include <nexus/napi.h>
 
 #include <climits>
 

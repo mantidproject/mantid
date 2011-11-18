@@ -6,7 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
-#include <napi.h>
+#include <nexus/napi.h>
 #include <climits>
 
 #include <boost/shared_array.hpp>

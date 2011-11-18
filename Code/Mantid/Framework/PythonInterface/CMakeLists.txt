@@ -28,7 +28,7 @@ include_directories ( inc )
 # thread-local variables and this now causes problems whenever we try and load the library from
 # python if other libraries appear before it in the link list.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 else ()
   set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 endif ()

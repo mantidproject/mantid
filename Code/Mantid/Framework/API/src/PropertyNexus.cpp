@@ -8,7 +8,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include "MantidKernel/Strings.h"
-#include <napi.h>
+#include <nexus/napi.h>
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;

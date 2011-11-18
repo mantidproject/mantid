@@ -28,7 +28,7 @@ set_property ( TARGET NexusCPP PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( NexusCPP ${NEXUS_LIBRARIES} ${POCO_LIBRARIES} )
+target_link_libraries ( NexusCPP ${NEXUS_C_LIBRARIES} ${POCO_LIBRARIES} )
 
 
 ###########################################################################
