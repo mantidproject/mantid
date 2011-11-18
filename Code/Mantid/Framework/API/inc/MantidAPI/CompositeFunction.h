@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/Jacobian.h"
 #include <boost/shared_array.hpp>
 
 namespace Mantid
@@ -104,22 +105,22 @@ public:
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
-  IFitFunction* getContainingFunction(const ParameterReference& ref)const;
+  IFunction* getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
-  IFitFunction* getContainingFunction(const IFitFunction* fun);
+  IFunction* getContainingFunction(const IFunction* fun);
 
   /// Apply the ties
   void applyTies();
   /// Remove all ties
   void clearTies();
   // Unhide base class function: removeTie(string). Avoids Intel compiler warning
-  using IFitFunction::removeTie;
+  using IFunction::removeTie;
   /// Removes i-th parameter's tie
   bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   ParameterTie* getTie(size_t i)const;
 
-  /// Overwrite IFitFunction methods
+  /// Overwrite IFunction methods
   void addConstraint(IConstraint* ic);
   /// Get constraint of i-th parameter
   virtual IConstraint* getConstraint(size_t i)const;
@@ -131,17 +132,17 @@ public:
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
-  virtual size_t addFunction(IFitFunction* f);
+  virtual size_t addFunction(IFunction* f);
   /// Returns the pointer to i-th function
-  IFitFunction* getFunction(std::size_t i)const;
+  IFunction* getFunction(std::size_t i)const;
   /// Number of functions
   std::size_t nFunctions()const{return m_functions.size();}
   /// Remove a function
   void removeFunction(size_t i, bool del=true);
   /// Replace a function
-  void replaceFunction(size_t i,IFitFunction* f);
+  void replaceFunction(size_t i,IFunction* f);
   /// Replace a function
-  void replaceFunctionPtr(const IFitFunction* f_old,IFitFunction* f_new);
+  void replaceFunctionPtr(const IFunction* f_old,IFunction* f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i)const;
   /// Get the function index
@@ -170,7 +171,7 @@ private:
   static void parseName(const std::string& varName,size_t& index, std::string& name);
 
   /// Pointers to the included funtions
-  std::vector<IFitFunction*> m_functions;
+  std::vector<IFunction*> m_functions;
   /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
   std::vector<size_t> m_activeOffsets;
@@ -178,9 +179,9 @@ private:
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<size_t> m_paramOffsets;
   /// Keeps the function index for each declared parameter  (parameter declared index)
-  std::vector<size_t> m_IFitFunction;
+  std::vector<size_t> m_IFunction;
   /// Keeps the function index for each active parameter (parameter active index)
-  std::vector<size_t> m_IFitFunctionActive;
+  std::vector<size_t> m_IFunctionActive;
   /// Number of active parameters
   size_t m_nActive;
   /// Total number of parameters

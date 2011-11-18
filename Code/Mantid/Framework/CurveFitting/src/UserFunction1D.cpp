@@ -72,6 +72,7 @@ In this example the fitting function is a*exp(-(x-c)^2*s). The parameter ''s'' i
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/UserFunction1D.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/tokenizer.hpp>

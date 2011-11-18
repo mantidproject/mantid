@@ -57,11 +57,15 @@ public:
 
               /* Overriden methods */
 
+  using CompositeFunction::setWorkspace;
+  virtual void setWorkspace(boost::shared_ptr<const API::Workspace>){}
   /// Set the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std::string& slicing, bool copyData = true);
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws, bool copyData);
+  void setSlicing(const std::string& slicing);
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const{return m_spectra[0].first;}
   /// Returns the function's name
   std::string name()const{return "MultiBG";}
+  virtual void function(API::FunctionDomain& )const{}
 
   /// Returns the size of the fitted data (number of double values returned by the function)
   virtual size_t dataSize()const{return m_data.size();}
@@ -78,6 +82,8 @@ protected:
   boost::shared_ptr<API::WorkspaceGroup> createCalculatedWorkspaceGroup(
     const std::vector<double>& sd = std::vector<double>()
     );
+
+  boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
 
   /// to collect different workspaces found in child functions
   std::vector< std::pair< boost::shared_ptr<const API::MatrixWorkspace>, size_t> > m_spectra;

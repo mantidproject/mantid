@@ -1,27 +1,24 @@
-#ifndef MANTID_API_PARAMETERREFERENCE_H_
-#define MANTID_API_PARAMETERREFERENCE_H_
+#ifndef MANTID_API_FUNCTIONDOMAIN_H_
+#define MANTID_API_FUNCTIONDOMAIN_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFunction.h"
-
-namespace mu
-{
-  class Parser;
-}
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
 namespace API
 {
-/** 
-    A reference to a parameter in a function. To uniquely identify a parameter
-    in a composite function
+/** Abstract class that represents the domain of a function.
+    A domain is a generalisation of x (argument) and y (value) arrays.
+    A domain consists at least of a list of function arguments for which a function should 
+    be evaluated and a buffer for the calculated values. If used in fitting also contains
+    the fit data and weights.
 
-    @author Roman Tolchenov, Tessella Support Services plc
-    @date 26/02/2010
+    @author Roman Tolchenov, Tessella plc
+    @date 15/11/2011
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,26 +37,23 @@ namespace API
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-class MANTID_API_DLL ParameterReference
+*/
+class MANTID_API_DLL FunctionDomain
 {
 public:
-  ParameterReference();
-  ParameterReference(IFunction* fun, std::size_t index);
-  IFunction* getFunction() const;
-  std::size_t getIndex() const;
-  void reset(IFunction* fun, std::size_t index);
-  void setParameter(const double& value);
-  double getParameter() const;
-
-private:
-  IFunction* m_function; ///< pointer to the function
-  std::size_t m_index; ///< parameter index
+  /// Return the number of points, values, etc in the domain
+  virtual size_t size() const = 0;
+  /// store i-th calculated value. 0 <= i < size()
+  virtual void setCalculated(size_t i,double value) = 0;
+  /// get i-th calculated value. 0 <= i < size()
+  virtual double getCalculated(size_t i) const = 0;
+  /// Virtual destructor
+  virtual ~FunctionDomain(){}
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_PARAMETERREFERENCE_H_*/
+#endif /*MANTID_API_FUNCTIONDOMAIN_H_*/

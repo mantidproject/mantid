@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit1D.h"
+#include "MantidAPI/Jacobian.h"
 #include <sstream>
 #include <numeric>
 #include <cmath>

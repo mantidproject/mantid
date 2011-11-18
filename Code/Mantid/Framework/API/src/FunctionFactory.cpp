@@ -150,7 +150,7 @@ namespace Mantid
       if (!wsName.empty())
       {
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-        fun->setWorkspace(ws,wsParam);
+        fun->setWorkspace(ws,wsParam,true);
       }
 
       return fun;
@@ -268,7 +268,7 @@ namespace Mantid
       if (!wsName.empty())
       {
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-        cfun->setWorkspace(ws,wsParam);
+        cfun->setWorkspace(ws,wsParam,true);
       }
 
       return cfun;

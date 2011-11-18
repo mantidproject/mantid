@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -30,11 +31,9 @@ namespace API
 
   /** Set the workspace
     * @param ws :: A shared pointer to a workspace.
-    * @param slicing :: A string identifying the data to be fitted. 
   */
-  void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData)
+  void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,bool copyData)
   {
-    (void)slicing; //Avoid compiler warning
     try
     {
       m_workspace = boost::dynamic_pointer_cast<const IMDWorkspace>(ws);

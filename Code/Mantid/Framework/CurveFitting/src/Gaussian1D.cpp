@@ -6,6 +6,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Gaussian1D.h"
+#include "MantidAPI/Jacobian.h"
 //#include "MantidAlgorithms/MaskBins.h"
 
 //#include "MantidAPI/WorkspaceValidators.h"

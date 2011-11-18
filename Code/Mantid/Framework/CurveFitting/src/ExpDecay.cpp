@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ExpDecay.h"
+#include "MantidAPI/Jacobian.h"
 #include <cmath>
 
 namespace Mantid

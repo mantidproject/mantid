@@ -32,6 +32,8 @@ set ( SRC_FILES
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
 	src/IFitFunction.cpp
+	src/IFunction.cpp
+	src/TempFunction.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/IMDEventWorkspace.cpp
@@ -121,7 +123,9 @@ set ( INC_FILES
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
+	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -133,6 +137,8 @@ set ( INC_FILES
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFitFunction.h
+	inc/MantidAPI/IFunction.h
+	inc/MantidAPI/TempFunction.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -502,7 +503,7 @@ public:
     x.back() = 0.1 * static_cast<double>(y.size());
     AnalysisDataService::Instance().add("IFT_Test_WS",ws);
     IFT_Funct f;
-    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
+    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8",true));
     TS_ASSERT_EQUALS(f.dataSize(),8);
     TS_ASSERT_EQUALS(f.getData(),&y[2]);
     AnalysisDataService::Instance().remove("IFT_Test_WS");
@@ -534,7 +535,7 @@ public:
       IFT_Funct f;
       std::stringstream mess;
       mess << "WorkspaceIndex=" << i << ",StartX=0.2,EndX = 0.8";
-      TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str() ));
+      TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str(),true ));
       TS_ASSERT_EQUALS(f.dataSize(),8);
       TS_ASSERT_EQUALS(*f.getData(), expected);
     }

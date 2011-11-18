@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 

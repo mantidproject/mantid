@@ -52,7 +52,7 @@ std::string CompositeFunctionMW::asString()const
   }
   for(size_t i=0;i<nFunctions();i++)
   {
-    IFitFunction* fun = getFunction(i);
+    IFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunctionMW*>(fun) != 0;
     if (isComp) ostr << '(';
     ostr << fun->asString();
@@ -68,7 +68,7 @@ std::string CompositeFunctionMW::asString()const
     const ParameterTie* tie = getTie(i);
     if (tie)
     {
-      IFitFunction* fun = getFunction(functionIndex(i));
+      IFunction* fun = getFunction(functionIndex(i));
       std::string tmp = tie->asString(fun);
       if (tmp.empty())
       {
@@ -153,13 +153,15 @@ void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::Matrix
 void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData)
 {
   UNUSED_ARG(copyData);
-  IFunctionMW::setWorkspace(ws,slicing);
+  IFunctionMW::setWorkspace(ws,copyData);
+  IFunctionMW::setSlicing(slicing);
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(iFun));
     if (fun)
     {
-      fun->setWorkspace(ws, slicing, copyData); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
+      fun->setWorkspace(ws, copyData); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
+      fun->setSlicing(slicing); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
     }
   }
 }

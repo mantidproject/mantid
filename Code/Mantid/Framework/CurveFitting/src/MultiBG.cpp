@@ -84,7 +84,11 @@ void MultiBG::function(double* out)const
   std::fill_n(out,dataSize(),0);
   for(size_t i = 0; i < nFunctions(); i++)
   {
-    IFitFunction* fun = getFunction(i);
+    IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(i));
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but function of another type found");
+    }
     size_t nWS =  m_funIndex[i].size();
     for(size_t k = 0;k < nWS; ++k)
     {
@@ -126,7 +130,11 @@ void MultiBG::functionDeriv(API::Jacobian* out)
   if (!out) return;
   for(size_t i = 0; i < nFunctions(); i++)
   {
-    IFitFunction* fun = getFunction(i);
+    IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(i));
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but function of another type found");
+    }
     size_t nWS =  m_funIndex[i].size();
     for(size_t k = 0; k < nWS; ++k)
     {
@@ -138,19 +146,24 @@ void MultiBG::functionDeriv(API::Jacobian* out)
   }
 }
 
-/**
- * Sets workspaces to member functions. Constructs the data set for fitting.
- * @param ws :: Pointer to a workspace, not used. Workspaces are taken either from member functions or slicing.
- * @param slicing :: A map between member functions and workspaces or empty string. Format:
- *   "f0,Workspace0,i0;f1,Workspace1,i1;f2,Workspace2,i2;..."
- */
-void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std::string& slicing, bool)
+void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws, bool)
 {
   boost::shared_ptr<const API::MatrixWorkspace> mws = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (ws && !mws)
   {
     throw std::invalid_argument("Workspace in MultiBG has a wrong type (not a MatrixWorkspace)");
   }
+  m_workspace = mws;
+}
+/**
+ * Sets workspaces to member functions. Constructs the data set for fitting.
+ * @param ws :: Pointer to a workspace, not used. Workspaces are taken either from member functions or slicing.
+ * @param slicing :: A map between member functions and workspaces or empty string. Format:
+ *   "f0,Workspace0,i0;f1,Workspace1,i1;f2,Workspace2,i2;..."
+ */
+void MultiBG::setSlicing(const std::string& slicing)
+{
+  boost::shared_ptr<const API::MatrixWorkspace> mws = m_workspace;
 
   m_funIndex.resize(nFunctions());
 
@@ -184,7 +197,12 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std:
         std::pair< boost::shared_ptr<const API::MatrixWorkspace>, size_t> spectrum = std::make_pair(ws,wi);
         m_funIndex[iFun].push_back(m_spectra.size());
         m_spectra.push_back(spectrum);
-        getFunction(iFun)->setWorkspace(ws,"WorkspaceIndex="+e[2].name(),false);
+        IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(iFun));
+        if (!fun)
+        {
+          throw std::runtime_error("IFitFunction expected but function of another type found");
+        }
+        fun->setWorkspace(ws,"WorkspaceIndex="+e[2].name(),false);
       }
       catch(...)
       {
@@ -236,7 +254,12 @@ void MultiBG::setWorkspace(boost::shared_ptr<const API::Workspace> ws,const std:
       index.resize(m_spectra.size());
       int i = 0;
       std::for_each(index.begin(),index.end(),_1 = var(i)++);
-      getFunction(iFun)->setWorkspace(m_spectra[0].first,"WorkspaceIndex="+boost::lexical_cast<std::string>(m_spectra[0].second),false);
+      IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(iFun));
+      if (!fun)
+      {
+        throw std::runtime_error("IFitFunction expected but function of another type found");
+      }
+      fun->setWorkspace(m_spectra[0].first,"WorkspaceIndex="+boost::lexical_cast<std::string>(m_spectra[0].second),false);
     }
   }
 

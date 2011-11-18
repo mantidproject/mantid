@@ -1,3 +1,4 @@
+#include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/QuadraticBackground.h"
 #include "MantidKernel/System.h"
 

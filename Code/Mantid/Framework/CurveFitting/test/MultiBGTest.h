@@ -100,7 +100,7 @@ public:
       "name=LinearBackground,A0=2,Workspace=MultiBGTestWS,WSParam=(WorkspaceIndex=1)";
 
     Mantid::API::IFitFunction* fun = Mantid::API::FunctionFactory::Instance().createInitialized( funIni );
-    fun->setWorkspace(Mantid::API::Workspace_sptr(),"");
+    fun->setWorkspace(Mantid::API::Workspace_sptr(),"",true);
     std::vector<double> out(2*numBins);
 
     fun->function(&out[0]);
@@ -128,7 +128,7 @@ public:
       "name=LinearBackground,A0=2,A1=-0.1,Workspace=MultiBGTestWS,WSParam=(WorkspaceIndex=0);"
       "name=LinearBackground,A0=-1,A1=0.1,Workspace=MultiBGTestWS,WSParam=(WorkspaceIndex=1)"
       );
-    fun1->setWorkspace(Mantid::API::Workspace_sptr(),"");
+    fun1->setWorkspace(Mantid::API::Workspace_sptr(),"",true);
     SimpleJacobian J(fun1->dataSize(),fun1->nActive());
     fun1->functionDeriv(&J);
     double peakDeriv0 = 0;
@@ -184,7 +184,7 @@ public:
     std::vector<double> out(2*numBins);
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve("MultiBGTestWS"));
-    fun->setWorkspace(ws,"");
+    fun->setWorkspace(ws,"",true);
     mbg->function(&out[0]);
 
     Mantid::API::IFunctionMW* bg1 = dynamic_cast<Mantid::API::IFunctionMW*>(mbg->getFunction(1));
