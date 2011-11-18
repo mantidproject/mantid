@@ -27,7 +27,7 @@ set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Nexus ${MANTIDLIBS} ${NEXUS_LIBRARIES} )
+target_link_libraries ( Nexus ${MANTIDLIBS} ${NEXUS_C_LIBRARIES} )
 
 # if ( CXXTEST_FOUND )
 #  cxxtest_add_test ( NexusTest ${TEST_FILES} )

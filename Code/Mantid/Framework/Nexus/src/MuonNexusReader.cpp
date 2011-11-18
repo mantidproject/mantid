@@ -1,6 +1,6 @@
 #include <vector>
 #include <sstream>
-#include <napi.h>
+#include <nexus/napi.h>
 #include "MantidKernel/System.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include <boost/scoped_array.hpp>

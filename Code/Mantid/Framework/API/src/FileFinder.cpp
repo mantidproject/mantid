@@ -94,8 +94,6 @@ namespace Mantid
       std::vector<std::string>::const_iterator it = searchPaths.begin();
       for (; it != searchPaths.end(); ++it)
       {
-	//        if (fName.find("*") != std::string::npos)
-        //{
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
@@ -104,16 +102,6 @@ namespace Mantid
           {
             return *files.begin();
           }
-	  //}
-	  //else
-	  //{
-          //Poco::Path path(*it, fName);
-          //Poco::File file(path);
-          //if (file.exists())
-          //{
-          //  return path.toString();
-          //}
-	  //}
       }
       return "";
     }

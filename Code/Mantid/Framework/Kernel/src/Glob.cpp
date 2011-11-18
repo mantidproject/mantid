@@ -53,28 +53,32 @@ void Glob::glob(const std::string& base, const std::string& pathPattern, std::se
      */
 void Glob::glob(const Poco::Path& pathPattern, std::set<std::string>& files, int options)
 {
-  Poco::Path pattern(pathPattern);
+  Poco::Path pathPattern2(pathPattern.toString());
+  Poco::Path pattern(pathPattern2);
   pattern.makeDirectory(); // to simplify pattern handling later on
   Poco::Path base(pattern);
   Poco::Path absBase(base);
   absBase.makeAbsolute();
   Poco::Path testBase(base);
+  // 
   while (base.depth() > 0 && base[base.depth() - 1] != "..") 
   {
     try
     {
       testBase.popDirectory();
       Poco::DirectoryIterator it(testBase);
+      base.popDirectory();
+      absBase.popDirectory();
+      break;
     }
     catch(...)
     {
-      break;
+      base.popDirectory();
+      absBase.popDirectory();
     }
-    base.popDirectory();
-    absBase.popDirectory();
   }
-  if (pathPattern.isDirectory()) options |= GLOB_DIRS_ONLY;
-  collect(pattern, absBase, base, pathPattern[base.depth()], files, options);             
+  if (pathPattern2.isDirectory()) options |= GLOB_DIRS_ONLY;
+  collect(pattern, absBase, base, pathPattern2[base.depth()], files, options);             
 }
 
     /**
