@@ -76,6 +76,12 @@ void LineViewer::createDimensionWidgets()
 }
 
 
+//-----------------------------------------------------------------------------------------------
+void LineViewer::updateFreeDimensions()
+{
+}
+
+
 // ==============================================================================================
 // ================================== External Setters ==========================================
 // ==============================================================================================
@@ -111,6 +117,18 @@ void LineViewer::setNumBins(size_t numBins)
   m_numBins = numBins;
 }
 
+/** Set the free dimensions - dimensions that are allowed to change
+ *
+ * @param all :: Flag that is true when all dimensions are allowed to change
+ * @param dimX :: Index of the X dimension in the 2D slice
+ * @param dimY :: Index of the Y dimension in the 2D slice
+ */
+void LineViewer::setFreeDimensions(bool all, int dimX, int dimY)
+{
+  m_allDimsFree = all;
+  m_freeDimX = dimX;
+  m_freeDimY = dimY;
+}
 
 
 // ==============================================================================================

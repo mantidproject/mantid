@@ -89,7 +89,7 @@ public:
       IMDBox<MDE,nd>* box1 = boxes[j];
       IMDBox<MDE,nd>* box2 = boxes1[j];
 
-      std::cout << "ID: " << box1->getId() << std::endl;
+      //std::cout << "ID: " << box1->getId() << std::endl;
       TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
       TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
       TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
@@ -301,7 +301,7 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
-    // Now there are 2002 boxes
+    // Now there are 54 boxes
     box->splitContents(12);
 
     // And add an ExperimentInfo thingie

@@ -24,11 +24,13 @@ public:
     void setStart(Mantid::Kernel::VMD start);
     void setEnd(Mantid::Kernel::VMD end);
     void setNumBins(size_t numBins);
+    void setFreeDimensions(bool all, int dimX, int dimY);
 
     void showPreview();
 
 private:
     void createDimensionWidgets();
+    void updateFreeDimensions();
 
 private:
     // -------------------------- Widgets ----------------------------
@@ -64,6 +66,13 @@ private:
 
     /// Number of bins (for regular spacing)
     size_t m_numBins;
+
+    /// Flag that is true when all dimensions are allowed to change
+    bool m_allDimsFree;
+    /// Index of the X dimension in the 2D slice
+    int m_freeDimX;
+    /// Index of the Y dimension in the 2D slice
+    int m_freeDimY;
 
 };
 
