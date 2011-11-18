@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -99,6 +100,8 @@ void MuonAnalysis::initLayout()
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
+  m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
+
   m_optionTab->initLayout();
 
   // connect guess alpha 
