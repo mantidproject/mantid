@@ -68,6 +68,10 @@ namespace Mantid
       FileFinderImpl& operator=(const FileFinderImpl&);
       std::string extractAllowedSuffix(std::string & userString) const;
       std::pair<std::string,std::string> toInstrumentAndNumber(const std::string& hint)const;
+
+      /// glob option - set to case sensitive or insensitive
+      int globOption;
+
       /// reference to the logger class
       Mantid::Kernel::Logger& g_log;
     };

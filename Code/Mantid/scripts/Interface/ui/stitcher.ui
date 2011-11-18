@@ -48,10 +48,29 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="low_q_edit"/>
+         <widget class="QComboBox" name="low_q_combo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Select a reduced data file or a reduced workspace.</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="low_q_browse_button">
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>
@@ -79,6 +98,9 @@
         </item>
         <item>
          <widget class="QRadioButton" name="low_radio">
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Normalize to this data set</string>
           </property>
@@ -114,6 +136,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Enter a scaling factor and hit enter to apply.</string>
+          </property>
+          <property name="statusTip">
+           <string/>
           </property>
          </widget>
         </item>
@@ -298,6 +326,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="low_range_button">
+       <property name="toolTip">
+        <string>Click to select the Q region used to scale the low-Q and medium-Q data sets.</string>
+       </property>
        <property name="text">
         <string>Pick Overlap Region</string>
        </property>
@@ -350,10 +381,26 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="medium_q_edit"/>
+         <widget class="QComboBox" name="medium_q_combo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Select a reduced data file or a reduced workspace.</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="medium_q_browse_button">
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>
@@ -416,6 +463,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Enter a scaling factor and hit enter to apply.</string>
+          </property>
+          <property name="statusTip">
+           <string/>
           </property>
          </widget>
         </item>
@@ -603,6 +656,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="medium_range_button">
+       <property name="toolTip">
+        <string>Click to select the Q region used to scale the low-Q and medium-Q data sets.</string>
+       </property>
        <property name="text">
         <string>Pick Overlap Region</string>
        </property>
@@ -655,10 +711,26 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="high_q_edit"/>
+         <widget class="QComboBox" name="high_q_combo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Select a reduced data file or a reduced workspace.</string>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="high_q_browse_button">
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>
@@ -721,6 +793,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Enter a scaling factor and hit enter to apply.</string>
+          </property>
+          <property name="statusTip">
+           <string/>
           </property>
          </widget>
         </item>
@@ -862,6 +940,9 @@
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="toolTip">
+        <string>Click to automatically scale all data sets to the selected reference.</string>
        </property>
        <property name="autoFillBackground">
         <bool>false</bool>

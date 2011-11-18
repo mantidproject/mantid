@@ -276,7 +276,7 @@ set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
 if ( CXXTEST_FOUND )
-  include_directories (  )
+  include_directories ( ../TestHelpers/inc )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
     target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )

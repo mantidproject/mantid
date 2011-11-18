@@ -102,10 +102,14 @@ public:
    * This function only calls the render command for the view(s).
    */
   virtual void renderAll() = 0;
+  /// Reset the camera for a given view.
+  virtual void resetCamera() = 0;
   /**
    * This function resets the display(s) for the view(s).
    */
   virtual void resetDisplay() = 0;
+  /// Setup axis scales
+  virtual void setAxisScales();
   /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
 
@@ -134,6 +138,8 @@ public slots:
    * @param state flag to determine whether or not to use log color scaling
    */
   void onLogScale(int state);
+  /// Set the view to use a parallel projection.
+  void onParallelProjection(bool state);
   /// Reset center of rotation to center of data volume.
   void onResetCenterToData();
   /// Reset center of rotation to given point.
@@ -173,6 +179,8 @@ private:
 
   /// Return the active representation determined by ParaView.
   pqPipelineRepresentation *getPvActiveRep();
+  /// Return the active view determined by ParaView
+  pqRenderView *getPvActiveView();
   /// Find the number of true sources in the pipeline.
   unsigned int getNumSources();
   /// Collect time information for animation controls.

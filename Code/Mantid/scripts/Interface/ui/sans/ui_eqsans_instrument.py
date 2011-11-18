@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
 #
-
-# Created: Fri Sep  9 17:54:46 2011
+# Created: Wed Nov 16 13:57:35 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -474,8 +473,7 @@ class Ui_Frame(object):
         self.scale_chk.setText(QtGui.QApplication.translate("Frame", "Calculate absolute scale factor", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_beam_label.setText(QtGui.QApplication.translate("Frame", "Direct beam file", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path for a direct beam data file.", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_data_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_data_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.scale_data_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beamstop_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to overright the beam diameter.", None, QtGui.QApplication.UnicodeUTF8))
@@ -486,8 +484,7 @@ class Ui_Frame(object):
         self.dark_current_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to specify a dark current data set.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_check.setText(QtGui.QApplication.translate("Frame", "Dark current file", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.dark_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a solid angle correction.", None, QtGui.QApplication.UnicodeUTF8))
@@ -515,8 +512,7 @@ class Ui_Frame(object):
         self.select_output_dir_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to choose where to write the output files.", None, QtGui.QApplication.UnicodeUTF8))
         self.select_output_dir_radio.setText(QtGui.QApplication.translate("Frame", "Select", None, QtGui.QApplication.UnicodeUTF8))
         self.output_dir_edit.setToolTip(QtGui.QApplication.translate("Frame", "Output directory for reduced data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.output_dir_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.output_dir_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.output_dir_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance is updated automatically when a sample data file is selected.\n"
 "Values can be selected by hand by checking the boxes below.", None, QtGui.QApplication.UnicodeUTF8))
@@ -535,8 +531,7 @@ class Ui_Frame(object):
         self.mask_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply the mask built from the specified data file.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_check.setText(QtGui.QApplication.translate("Frame", "Mask file", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a file to be used to create your mask.", None, QtGui.QApplication.UnicodeUTF8))
-        self.mask_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.mask_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data and edit mask.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_plot_button.setText(QtGui.QApplication.translate("Frame", "Edit Mask", None, QtGui.QApplication.UnicodeUTF8))
 

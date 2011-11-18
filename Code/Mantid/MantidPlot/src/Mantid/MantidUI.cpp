@@ -6,7 +6,8 @@
 #include "AlgMonitor.h"
 #include "MantidSampleLogDialog.h"
 #include "AlgorithmHistoryWindow.h"
-#include "MantidCurve.h"
+#include "MantidMatrixCurve.h"
+#include "MantidMDCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
@@ -350,7 +351,7 @@ Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
 
 /**   Extension to ApplicationWindow::menuAboutToShow() to deal with Mantid.
  */
-bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
+bool MantidUI::menuAboutToShow(MdiSubWindow *w)
 {
 
   if (w && w->isA("MantidMatrix"))
@@ -370,7 +371,7 @@ bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 
 Graph3D *MantidUI::plot3DMatrix(int style)
 {	
-  QMdiSubWindow *w = appWindow()->activeWindow();
+  MdiSubWindow *w = appWindow()->activeWindow();
   if (w->isA("MantidMatrix"))
   {
     return static_cast<MantidMatrix*>(w)->plotGraph3D(style);
@@ -498,6 +499,62 @@ void MantidUI::importBoxDataTable()
   }
   catch (...)
   {
+  }
+}
+
+/*
+Plots a Curve showing intensities for a MDWorkspace only if the workspace meets certain criteria, such as 
+having only one non-integrated dimension. Should exit gracefully otherwise.
+*/
+void MantidUI::showMDPlot()
+{
+  QString wsName = getSelectedWorkspaceName();
+  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
+  ml->setCloseOnEmpty(true);
+  Graph *g = ml->activeGraph();
+  if (!g)
+  {
+    QApplication::restoreOverrideCursor();
+  }
+  try
+  {
+    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
+    appWindow()->setPreferences(g);
+    g->newLegend("");
+
+    bool showErrors = true; //Hard-coded to true. Could set this via another menu option.
+    MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
+    UNUSED_ARG(curve);
+
+    IMDWorkspace_sptr mdews = boost::dynamic_pointer_cast<IMDWorkspace>(
+      AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+
+    g->setTitle(tr("Workspace ")+wsName);
+    g->setYAxisTitle(tr("Normalised Signal"));
+    Mantid::Geometry::IMDDimension_const_sptr nonIntegratedDim = mdews->getNonIntegratedDimensions()[0];
+    std::string xAxisLabel = nonIntegratedDim->getName() + " / " + nonIntegratedDim->getUnits();
+    g->setXAxisTitle(xAxisLabel.c_str());
+    g->setAntialiasing(false);
+    g->setAutoScale();
+  }
+  catch (std::invalid_argument &e)
+  {
+    logMessage(Poco::Message("MantidPlot",e.what(),Poco::Message::PRIO_WARNING));
+  }
+  catch (std::runtime_error &e)
+  { 
+    logMessage(Poco::Message("MantidPlot",e.what(),Poco::Message::PRIO_WARNING));
+  }
+  catch (...)
+  {
+  }
+  /*
+  This is not a good way of doing it. Taken from ::plotSpectraList.
+  */
+  if ( g->curves() == 0 )
+  {
+    ml->close();
+    QApplication::restoreOverrideCursor();
   }
 }
 
@@ -1847,9 +1904,8 @@ QString MantidUI::saveToString(const std::string& workingDir)
       wsNames+="\t";
       //wsName is a group, add it to list and indicate what the group contains by a "[" and end the group with a "]"
       wsNames+=wsName;
-      int secondLevelCount = group->getNumberOfEntries();
       std::vector<std::string> secondLevelItems = group->getNames();
-      for(int j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
+      for(size_t j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
       {
         wsNames+=",";
         wsNames+=QString::fromStdString(secondLevelItems[j]);
@@ -1996,7 +2052,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
  * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
  * argument
  */
-MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs)
+MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs, Graph::CurveType style)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -2018,7 +2074,7 @@ MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QL
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs);
+  return plotSpectraList(pairs,errs,false,style);
 }
 
 /**
@@ -2738,7 +2794,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
     @param toPlot :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors to the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   UNUSED_ARG(errs);
@@ -2777,12 +2833,12 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
   appWindow()->setPreferences(g);
   g->newLegend("");
-  MantidCurve* mc(NULL);
+  MantidMatrixCurve* mc(NULL);
 
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
+      mc = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr,style);
       UNUSED_ARG(mc)
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 

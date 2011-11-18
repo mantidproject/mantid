@@ -206,6 +206,11 @@ void ThreeSliceView::correctColorScaleRange()
   emit this->dataRange(range.first, range.second);
 }
 
+void ThreeSliceView::resetCamera()
+{
+  this->mainView->resetCamera();
+}
+
 }
 }
 }

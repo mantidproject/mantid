@@ -236,10 +236,6 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
     }
     double tStart = dvp->GetElement(0);
     double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
-    pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
-    vtkSMPropertyHelper(scene->getProxy(), "StartTime").Set(tStart);
-    vtkSMPropertyHelper(scene->getProxy(), "EndTime").Set(tEnd);
-    vtkSMPropertyHelper(scene->getProxy(), "NumberOfFrames").Set(numTimesteps);
     emit this->setAnimationControlState(true);
     emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
   }
@@ -256,8 +252,7 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
  */
 void ViewBase::onResetCenterToData()
 {
-  pqRenderView* renderView =
-      qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
+  pqRenderView *renderView = this->getPvActiveView();
   pqDataRepresentation* repr = pqActiveObjects::instance().activeRepresentation();
   if (!repr || !renderView)
   {
@@ -286,8 +281,7 @@ void ViewBase::onResetCenterToData()
  */
 void ViewBase::onResetCenterToPoint(double x, double y, double z)
 {
-  pqRenderView* renderView =
-      qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
+  pqRenderView *renderView = this->getPvActiveView();
   pqDataRepresentation* repr = pqActiveObjects::instance().activeRepresentation();
   if (!repr || !renderView)
   {
@@ -300,6 +294,38 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z)
   center[2] = z;
   renderView->setCenterOfRotation(center);
   renderView->render();
+}
+
+/**
+ * This function will handle axis scale updates. Most views will not do this,
+ * so the default is to do nothing.
+ */
+void ViewBase::setAxisScales()
+{
+}
+
+/**
+ * This function is used to set the current state of the view between a
+ * parallel projection and the normal projection.
+ * @param state whether or not to use parallel projection
+ */
+void ViewBase::onParallelProjection(bool state)
+{
+  pqRenderView *cview = this->getPvActiveView();
+  vtkSMProxy *proxy = cview->getProxy();
+  vtkSMPropertyHelper(proxy, "CameraParallelProjection").Set(state);
+  proxy->UpdateVTKObjects();
+  cview->render();
+}
+
+/**
+ * Retrieve the active pqRenderView object according to ParaView's
+ * ActiveObjects mechanism.
+ * @return the currently active view
+ */
+pqRenderView *ViewBase::getPvActiveView()
+{
+  return qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
 }
 
 }

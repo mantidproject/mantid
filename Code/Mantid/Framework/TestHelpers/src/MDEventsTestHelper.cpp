@@ -8,7 +8,6 @@
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"

@@ -58,7 +58,8 @@
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
 #include "UserFunction.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidQwtMatrixWorkspaceData.h"
 
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"
@@ -2408,7 +2409,7 @@ QString Graph::saveCurves()
         continue;
 
       if (it->rtti()==QwtPlotItem::Rtti_PlotUserItem){
-        s+=((MantidCurve*)it)->saveToString();
+        s+=((MantidMatrixCurve*)it)->saveToString();
         continue;
       }
 
@@ -2963,7 +2964,7 @@ QwtErrorPlotCurve* Graph::addErrorBars(const QString& xColName, const QString& y
  */
 void Graph::addMantidErrorBars(const QString& curveName,bool drawAll)
 {
-  MantidCurve * c = dynamic_cast<MantidCurve*>(curve(curveName));
+  MantidMatrixCurve * c = dynamic_cast<MantidMatrixCurve*>(curve(curveName));
   // Give a message if this isn't a MantidCurve
   if (!c)
   {
@@ -2981,7 +2982,7 @@ void Graph::addMantidErrorBars(const QString& curveName,bool drawAll)
  */
 void Graph::removeMantidErrorBars(const QString& curveName)
 {
-  MantidCurve * c = dynamic_cast<MantidCurve*>(curve(curveName));
+  MantidMatrixCurve * c = dynamic_cast<MantidMatrixCurve*>(curve(curveName));
   // Give a message if this isn't a MantidCurve
   if (!c)
   {
@@ -3278,12 +3279,12 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
   return c;
 }
 
-/**  Insert a curve with its own data source. It doesnot have to be 
+/**  Insert a curve with its own data source. It does not have to be
  *   a Table or a Function. The Graph takes ownership of the curve.
  */
 PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
 {
-  MantidCurve* mc = dynamic_cast<MantidCurve*>(c);
+  MantidMatrixCurve* mc = dynamic_cast<MantidMatrixCurve*>(c);
   if (mc)
   {
     if (curves() == 0)
@@ -5705,16 +5706,16 @@ void Graph::updateDataCurves()
     PlotCurve *pc = dynamic_cast<PlotCurve*>(curve(i));
     if (DataCurve *c = dynamic_cast<DataCurve*>(pc))
       c->loadData();
-    else if (MantidCurve *mc = dynamic_cast<MantidCurve*>(pc))
+    else if (MantidMatrixCurve *mc = dynamic_cast<MantidMatrixCurve*>(pc))
       mc->loadData();
   }
   replot();
   QApplication::restoreOverrideCursor();
 }
 
-void Graph::checkValuesInAxisRange(MantidCurve* mc)
+void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
 {
-  MantidQwtData* data = mc->mantidData();
+  MantidQwtMatrixWorkspaceData* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
   bool changed(false);

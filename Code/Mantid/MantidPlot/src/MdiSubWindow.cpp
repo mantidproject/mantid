@@ -47,7 +47,7 @@ using std::ifstream;
 using std::string;
 
 MdiSubWindow::MdiSubWindow(const QString& label, ApplicationWindow *app, const QString& name, Qt::WFlags f):
-		QMdiSubWindow (app, f),
+    MdiSubWindowParent_t (app, f),
 		d_app(app),
 		d_folder(app->currentFolder()),
 		d_label(label),
@@ -94,7 +94,7 @@ switch (d_caption_policy)
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {
   emit resizedWindow(this);
-	QMdiSubWindow::resizeEvent( e );
+  MdiSubWindowParent_t::resizeEvent( e );
 }
 
 void MdiSubWindow::closeEvent( QCloseEvent *e )
@@ -168,7 +168,7 @@ void MdiSubWindow::changeEvent(QEvent *event)
     		emit statusChanged (this);
 		}
 	}
-	QMdiSubWindow::changeEvent(event);
+	MdiSubWindowParent_t::changeEvent(event);
 }
 
 bool MdiSubWindow::eventFilter(QObject *object, QEvent *e)
@@ -187,7 +187,7 @@ bool MdiSubWindow::eventFilter(QObject *object, QEvent *e)
 			}
 		}
 	}
-	return QMdiSubWindow::eventFilter(object, e);
+  return MdiSubWindowParent_t::eventFilter(object, e);
 }
 
 void MdiSubWindow::setStatus(Status s)

@@ -83,19 +83,6 @@
       <widget class="pqCameraToolbar" name="widget" native="true"/>
      </item>
      <item>
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QToolButton" name="resetCenterToDataButton">
        <property name="toolTip">
         <string>Reset Center to Data Center</string>
@@ -114,6 +101,20 @@
        <property name="icon">
         <iconset resource="../../icons/ViewWidgetsIcons.qrc">
          <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="parallelProjButton">
+       <property name="toolTip">
+        <string>Toggle Parallel Projection</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

@@ -72,10 +72,10 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Click to browse.</string>
+        <string/>
        </property>
        <property name="text">
-        <string>Browse...</string>
+        <string>Browse</string>
        </property>
       </widget>
      </item>
@@ -120,10 +120,10 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Click to browse.</string>
+        <string/>
        </property>
        <property name="text">
-        <string>Browse...</string>
+        <string>Browse</string>
        </property>
       </widget>
      </item>

@@ -135,11 +135,8 @@
              <height>16777215</height>
             </size>
            </property>
-           <property name="toolTip">
-            <string>Click to browse.</string>
-           </property>
            <property name="text">
-            <string>Browse...</string>
+            <string>Browse</string>
            </property>
           </widget>
          </item>
@@ -619,11 +616,8 @@
                 <height>16777215</height>
                </size>
               </property>
-              <property name="toolTip">
-               <string>Click to browse.</string>
-              </property>
               <property name="text">
-               <string>Browse...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
