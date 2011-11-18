@@ -7,7 +7,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "nexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 
 using namespace Mantid::Kernel;
 using Mantid::Geometry::ShapeFactory;

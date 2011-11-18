@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <cmath>
 #include <numeric>
 
@@ -178,14 +178,14 @@ namespace MDEvents
      */
     static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
     {
-      std::vector<int64_t> dims(2,0);
+      std::vector<int> dims(2,0);
       dims[0] = NX_UNLIMITED;
       // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
       dims[1] = (nd)+4;
 
       // Now the chunk size.
-      std::vector<int64_t> chunk(dims);
-      chunk[0] = int64_t(chunkSize);
+      std::vector<int> chunk(dims);
+      chunk[0] = int(chunkSize);
 
       // Make and open the data
       file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
@@ -215,8 +215,9 @@ namespace MDEvents
       size_t numEvents = events.size();
       std::vector<double> data;
       data.reserve(numEvents*(nd+4));
-      std::vector<int64_t> start(2,0);
-      start[0] = int64_t(startIndex);
+      std::vector<int> start(2,0);
+      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
+      start[0] = int(startIndex);
 
       totalSignal = 0;
       totalErrorSquared = 0;
@@ -243,9 +244,9 @@ namespace MDEvents
       }
 
       // Specify the dimensions
-      std::vector<int64_t> dims;
-      dims.push_back(int64_t(numEvents));
-      dims.push_back(int64_t(nd+4));
+      std::vector<int> dims;
+      dims.push_back(int(numEvents));
+      dims.push_back(int(nd+4));
 
       file->putSlab(data, start, dims);
     }
@@ -270,11 +271,11 @@ namespace MDEvents
       double * data = new double[numEvents*(nd+4)];
 
       // Start/size descriptors
-      std::vector<int64_t> start(2,0);
-      start[0] = int64_t(indexStart);
+      std::vector<int> start(2,0);
+      start[0] = int(indexStart); //TODO: What if # events > size of int32???
 
-      std::vector<int64_t> size(2,0);
-      size[0] = int64_t(numEvents);
+      std::vector<int> size(2,0);
+      size[0] = int(numEvents);
       size[1] = nd+4;
 
       // Get the slab into the allocated data
