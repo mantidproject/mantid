@@ -1,6 +1,6 @@
 #ifndef NEXUSFILEIO_H
 #define NEXUSFILEIO_H
-#include <napi.h>
+#include <nexus/napi.h>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"

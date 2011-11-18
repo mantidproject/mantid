@@ -3,7 +3,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <napi.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits.h>
 

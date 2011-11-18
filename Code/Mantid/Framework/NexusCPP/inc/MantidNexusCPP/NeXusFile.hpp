@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <napi.h>
+#include <nexus/napi.h>
 
 #ifdef _WIN32
 
