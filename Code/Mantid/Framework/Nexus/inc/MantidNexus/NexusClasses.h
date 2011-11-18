@@ -8,7 +8,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include <napi.h>
+#include <nexus/napi.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
