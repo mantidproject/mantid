@@ -225,9 +225,31 @@ public:
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
+
     path = FileFinder::Instance().findRun("OFFSPEC4622.log");
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
+  }
+
+
+  // test to see if case sensitive on/off works
+  void testFindFileCaseSensitive()
+  {
+    // By default case insensitive is on
+    std::string path = FileFinder::Instance().findRun("CSp78173.Raw");
+    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    Poco::File file(path);
+    TS_ASSERT(file.exists());
+
+    // turn on case sensitive - this one should fail on none windows
+    FileFinder::Instance().setCaseSensitive(true);
+    std::string pathOn = FileFinder::Instance().findRun("CSp78173.Raw");
+    Poco::File fileOn(pathOn);
+#ifdef _WIN32
+    TS_ASSERT(file.exists());    
+#else
+    TS_ASSERT_THROWS_ANYTHING(fileOn.exists());
+#endif
   }
 
 private:
