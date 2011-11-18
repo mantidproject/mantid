@@ -4,7 +4,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <boost/scoped_array.hpp>
-//Copy of the NexusCpp API was placed in MantidNexus
 #include "nexus/NeXusFile.hpp"
 #include "nexus/NeXusException.hpp"
 

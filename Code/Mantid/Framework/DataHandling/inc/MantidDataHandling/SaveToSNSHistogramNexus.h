@@ -12,8 +12,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-
-//Copy of the NexusCpp API was placed in MantidNexus
 #include "nexus/NeXusFile.hpp"
 #include "nexus/NeXusException.hpp"
 

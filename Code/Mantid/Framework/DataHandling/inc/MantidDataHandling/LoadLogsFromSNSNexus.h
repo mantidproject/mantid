@@ -9,11 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
-
-//Copy of the NexusCpp API was placed in MantidNexus
 #include "nexus/NeXusFile.hpp"
 #include "nexus/NeXusException.hpp"
-
 #include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid

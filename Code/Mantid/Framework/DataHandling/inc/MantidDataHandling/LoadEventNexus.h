@@ -7,7 +7,6 @@
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-//Copy of the NexusCpp API was placed in MantidNexus
 #include "nexus/NeXusFile.hpp"
 #include "nexus/NeXusException.hpp"
 #include "MantidDataObjects/Events.h"
