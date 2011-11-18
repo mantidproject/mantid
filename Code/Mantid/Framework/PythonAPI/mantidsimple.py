@@ -205,8 +205,7 @@ def Load(*args, **kwargs):
         try:
             algm.setPropertyValue(key, _makeString(value).lstrip('? '))
         except RuntimeError:
-            mtd.sendWarningMessage("You've passed a property to Load() that doesn't apply to this filetype.")
-
+            mtd.sendWarningMessage("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
     algm.execute()
     return algm
 
