@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LinearBackground.h"
-#include "MantidAPI/Jacobian.h"
 
 namespace Mantid
 {

@@ -2,7 +2,6 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/Jacobian.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <fstream>

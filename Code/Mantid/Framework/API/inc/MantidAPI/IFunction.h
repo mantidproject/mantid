@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include <boost/shared_ptr.hpp>
@@ -25,7 +26,6 @@ namespace API
 // Forward declaration
 //----------------------------------------------------------------------
 class Workspace;
-class Jacobian;
 class ParameterTie;
 class IConstraint;
 class ParameterReference;

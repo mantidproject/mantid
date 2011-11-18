@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Chebyshev.h"
-#include "MantidAPI/Jacobian.h"
 #include <boost/lexical_cast.hpp>
 
 #include <stdexcept>

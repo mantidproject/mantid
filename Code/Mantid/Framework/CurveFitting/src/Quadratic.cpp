@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Quadratic.h"
-#include "MantidAPI/Jacobian.h"
 
 namespace Mantid
 {

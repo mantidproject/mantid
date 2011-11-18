@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction.h"
-#include "MantidAPI/Jacobian.h"
 #include <boost/tokenizer.hpp>
 #include "MantidGeometry/muParser_Silent.h"
 

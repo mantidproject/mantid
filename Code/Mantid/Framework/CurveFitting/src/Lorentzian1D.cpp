@@ -6,7 +6,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Lorentzian1D.h"
-#include "MantidAPI/Jacobian.h"
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
 

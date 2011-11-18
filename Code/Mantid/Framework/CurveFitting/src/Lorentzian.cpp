@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Lorentzian.h"
-#include "MantidAPI/Jacobian.h"
 #include <cmath>
 
 namespace Mantid

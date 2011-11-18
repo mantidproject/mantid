@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GaussianLinearBG1D.h"
-#include "MantidAPI/Jacobian.h"
 
 namespace Mantid
 {
