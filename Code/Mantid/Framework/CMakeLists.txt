@@ -90,7 +90,7 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI
 add_custom_target ( FrameworkTests ) # target for all framework tests
 add_dependencies ( check FrameworkTests )
 
-set ( MANTIDLIBS ${MANTIDLIBS} NeXusCPP )
+set ( MANTIDLIBS ${MANTIDLIBS} ${NEXUS_LIBRARIES} )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
