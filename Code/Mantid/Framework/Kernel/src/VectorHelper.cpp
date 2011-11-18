@@ -108,8 +108,8 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   if (!addition)
   {
     // Make sure ynew & enew contain zeroes
-    ynew.assign(size_ynew, 0.0);
-    enew.assign(size_ynew, 0.0);
+    std::fill(ynew.begin(), ynew.end(), 0.0);
+    std::fill(enew.begin(), enew.end(), 0.0);
   }
 
   size_t iold = 0, inew = 0;
