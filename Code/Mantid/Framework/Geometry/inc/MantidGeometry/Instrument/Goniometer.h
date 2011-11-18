@@ -5,7 +5,7 @@
 #include <MantidKernel/V3D.h>
 #include <MantidGeometry/Crystal/UnitCell.h> //for angle units
 #include <string>
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 
 namespace Mantid
 {
