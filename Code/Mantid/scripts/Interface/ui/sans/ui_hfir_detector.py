@@ -2,10 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-
-# Created: Tue Sep 13 11:34:59 2011
+# Created: Wed Nov 16 13:57:35 2011
 #      by: PyQt4 UI code generator 4.7.4
-
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -121,6 +119,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_file_browse_button.sizePolicy().hasHeightForWidth())
         self.data_file_browse_button.setSizePolicy(sizePolicy)
+        self.data_file_browse_button.setToolTip("")
         self.data_file_browse_button.setObjectName("data_file_browse_button")
         self.horizontalLayout_4.addWidget(self.data_file_browse_button)
         self.data_file_plot_button = QtGui.QPushButton(self.beam_center_grpbox)
@@ -206,6 +205,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sensitivity_browse_button.sizePolicy().hasHeightForWidth())
         self.sensitivity_browse_button.setSizePolicy(sizePolicy)
+        self.sensitivity_browse_button.setToolTip("")
         self.sensitivity_browse_button.setObjectName("sensitivity_browse_button")
         self.horizontalLayout_9.addWidget(self.sensitivity_browse_button)
         self.sensitivity_plot_button = QtGui.QPushButton(self.sensitivity_grpbox)
@@ -491,8 +491,7 @@ class Ui_Frame(object):
         self.scattering_data.setText(QtGui.QApplication.translate("Frame", "Fit scattering data", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_label.setText(QtGui.QApplication.translate("Frame", "Data file ", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the file path of a direct beam data file.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius [pixels]", None, QtGui.QApplication.UnicodeUTF8))
@@ -502,14 +501,12 @@ class Ui_Frame(object):
         self.sensitivity_chk.setText(QtGui.QApplication.translate("Frame", "Perform sensitivity correction", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_file_label.setText(QtGui.QApplication.translate("Frame", "Sensitivity data file", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the detector sensitivity data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sensitivity_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sensitivity_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sensitivity_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_file_label.setText(QtGui.QApplication.translate("Frame", "Dark current data file", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sensitivity_dark_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sensitivity_dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sensitivity_dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_range_label.setText(QtGui.QApplication.translate("Frame", "Allowed sensitivity range:", None, QtGui.QApplication.UnicodeUTF8))
@@ -532,8 +529,7 @@ class Ui_Frame(object):
         self.scattering_data_2.setText(QtGui.QApplication.translate("Frame", "Fit scattering data", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_label_2.setText(QtGui.QApplication.translate("Frame", "Data file", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_data_file_edit_2.setToolTip(QtGui.QApplication.translate("Frame", "Enter the file path of a direct beam data file.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button_2.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button_2.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_browse_button_2.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button_2.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button_2.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label_2.setText(QtGui.QApplication.translate("Frame", "Beam radius [pixels]", None, QtGui.QApplication.UnicodeUTF8))

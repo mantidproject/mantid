@@ -171,6 +171,10 @@ namespace Crystal
                std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
                calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
       g_log.notice( std::string(logInfo) );
+      sprintf( logInfo, 
+               std::string("Lattice Parameters (Refined - Input): %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+               calc_a-a, calc_b-b, calc_c-c, calc_alpha-alpha, calc_beta-beta, calc_gamma-gamma);
+      g_log.notice( std::string(logInfo) );
 
       ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
     }

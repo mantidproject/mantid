@@ -182,8 +182,17 @@ public:
   virtual void workspaceStoreCleared() {}
   //@}
 
-  ///Send a log message to the Mantid Framework with a specified priority
+  /// Send an error log message to the Mantid Framework
+  void sendErrorMessage(const std::string & msg);
+  /// Send a warning log message to the Mantid Framework
+  void sendWarningMessage(const std::string & msg);
+  /// Send a (notice) log message to the Mantid Framework
   void sendLogMessage(const std::string & msg);
+  /// Send a warning log message to the Mantid Framework
+  void sendInformationMessage(const std::string & msg);
+  /// Send a debug log message to the Mantid Framework
+  void sendDebugMessage(const std::string & msg);
+
   /// Create the simple Python API for Mantid
   void createPythonSimpleAPI();
   /// Register a Python algorithm object with the algorithm factory

@@ -214,6 +214,46 @@ double RectangularDetector::ysize() const
 }
 
 //-------------------------------------------------------------------------------------------------
+/// Returns the idstart
+int RectangularDetector::idstart() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idstart;
+  else
+    return this->m_idstart;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idfillbyfirst_y
+bool RectangularDetector::idfillbyfirst_y() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idfillbyfirst_y;
+  else
+    return this->m_idfillbyfirst_y;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idstepbyrow
+int RectangularDetector::idstepbyrow() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idstepbyrow;
+  else
+    return this->m_idstepbyrow;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idstep
+int RectangularDetector::idstep() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idstep;
+  else
+    return this->m_idstep;
+}
+
+//-------------------------------------------------------------------------------------------------
 /** Returns the position of the center of the pixel at x,y, relative to the center
  * of the RectangularDetector, in the plain X,Y coordinates of the
  * pixels (i.e. unrotated).

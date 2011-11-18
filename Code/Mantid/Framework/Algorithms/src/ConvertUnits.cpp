@@ -254,8 +254,8 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
     else
     {
       // Just copy over
-      outputWS->dataY(i) = inputWS->dataY(i);
-      outputWS->dataE(i) = inputWS->dataE(i);
+      outputWS->dataY(i) = inputWS->readY(i);
+      outputWS->dataE(i) = inputWS->readE(i);
     }
     // Copy over the X data
     outputWS->setX( i, inputWS->refX(i) );
@@ -530,7 +530,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   {
     g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Masking spectrum." << std::endl;
   }
-
+  if (m_inputEvents)
+    eventWS->clearMRU();
 }
 
 /// Calls Rebin as a sub-algorithm to align the bins

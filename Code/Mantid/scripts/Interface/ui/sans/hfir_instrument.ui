@@ -394,11 +394,8 @@ p, li { white-space: pre-wrap; }
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="toolTip">
-               <string>Click to browse.</string>
-              </property>
               <property name="text">
-               <string>Browse...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -597,11 +594,8 @@ p, li { white-space: pre-wrap; }
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="toolTip">
-               <string>Click to browse.</string>
-              </property>
               <property name="text">
-               <string>Browse...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -1118,11 +1112,8 @@ The mask information is saved separately so that your data file will NOT be modi
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="toolTip">
-                 <string>Click to browse.</string>
-                </property>
                 <property name="text">
-                 <string>Browse...</string>
+                 <string>Browse</string>
                 </property>
                </widget>
               </item>

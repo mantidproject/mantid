@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/data_catalog.ui'
 #
-# Created: Fri Nov  4 11:12:07 2011
+# Created: Wed Nov 16 13:57:36 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,5 +47,8 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
+        self.browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.refresh_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to refresh.", None, QtGui.QApplication.UnicodeUTF8))
         self.refresh_button.setText(QtGui.QApplication.translate("Frame", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
+

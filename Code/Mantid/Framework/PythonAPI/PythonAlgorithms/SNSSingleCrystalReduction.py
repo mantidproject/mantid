@@ -44,7 +44,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl', 'nxs']
-        self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
+        self.declareProperty("SaveAs", "hkl", ListValidator(outfiletypes))
         self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
         self.declareProperty("AppendHKLFile", False, Description="Append existing hkl file")
 
@@ -158,10 +158,25 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def _save(self, wksp, normalized):
         if "hkl" in self._outTypes:
-            LoadIsawUB(InputWorkspace=wksp,Filename=self._ubfile)
-            PredictPeaks(InputWorkspace=wksp,WavelengthMin=self._minWL,WavelengthMax=self._maxWL,MinDSpacing=self._minD,
-                ReflectionCondition="Rhombohedrally centred, obverse",OutputWorkspace='Peaks')
+            ConvertToDiffractionMDWorkspace(InputWorkspace=wksp,OutputWorkspace='MD2',LorentzCorrection=0,
+                    SplitInto=2,SplitThreshold=150)
+            wkspMD = mtd['MD2']
+            FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=500,OutputWorkspace='Peaks')
+            mtd.deleteWorkspace('MD2')
+            mtd.releaseFreeMemory()
             peaksWS = mtd['Peaks']
+            # Find the UB matrix using the peaks and known lattice parameters
+            FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=10.3522,b=6.0768,c=4.7276,
+                            alpha=90,beta=90,gamma=90, NumInitial=5, Tolerance=0.12)
+            # Add index to HKL             
+            IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.12')
+            # Refine the UB matrix using only the peaks
+            FindUBUsingIndexedPeaks(PeaksWorkspace=peaksWS)
+            # Reindex HKL             
+            IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.10')
+            # Copy the UB matrix back to the original workspace
+            CopySample(InputWorkspace=peaksWS,OutputWorkspace=wksp,
+                            CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
             CentroidPeaks(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,EdgePixels=self._edge,OutPeaksWorkspace=peaksWS)
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
             hklfile = self._outFile

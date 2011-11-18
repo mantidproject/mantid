@@ -282,6 +282,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
   connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI, SLOT(showVatesSimpleInterface()));
 
+  m_showMDPlot = new QAction(tr("Plot Intensity"), this);
+  connect(m_showMDPlot, SIGNAL(activated()), m_mantidUI, SLOT(showMDPlot()));
+
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
   connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSliceViewer()));
 
@@ -868,6 +871,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   (void) WS;
   menu->addAction(m_showHist); // Algorithm history
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
+  menu->addAction(m_showMDPlot); // A plot of intensity vs bins
 }
 
 
@@ -1461,7 +1465,15 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
-  QList<QString> wsNames = this->getSelectedWorkspaceNames();
+  QList<QString> allWsNames = this->getSelectedWorkspaceNames();
+  QList<QString> wsNames;
+
+  for (int i=0; i<allWsNames.size(); i++)
+  {
+    if (AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString())->id() != "TableWorkspace")
+      wsNames.append(allWsNames[i]);
+  }
+
   QList<QString>::const_iterator it = wsNames.constBegin();
 
   // Check to see if all workspaces have a *single* histogram ...
