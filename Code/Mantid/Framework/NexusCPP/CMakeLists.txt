@@ -26,7 +26,7 @@ endif(MSVC)
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusCPP PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+include_directories ( inc ${NEXUS_INCLUDE_DIR} )
 
 target_link_libraries ( NexusCPP ${NEXUS_C_LIBRARIES} ${POCO_LIBRARIES} )
 
