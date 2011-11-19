@@ -12,7 +12,7 @@ If you use [[LoadSNSEventNexus]] or [[LoadISISNexus]], calling this algorithm is
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexusLogs.h"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusException.hpp"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidAPI/FileProperty.h"

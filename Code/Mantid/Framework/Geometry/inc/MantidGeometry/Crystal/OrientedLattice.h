@@ -1,7 +1,7 @@
 #ifndef MANTID_GEOMETRY_ORIENTEDLATTICE_H_
 #define MANTID_GEOMETRY_ORIENTEDLATTICE_H_
 #include <MantidGeometry/Crystal/UnitCell.h>
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 
 namespace Mantid
 {

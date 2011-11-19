@@ -284,6 +284,8 @@ public:
   }
 
 
+
+  //=================================================================================================================
   /** Follow up test that:
    *  - Modifies the data in a couple of ways
    *  - Saves AGAIN to update a file back end
@@ -345,7 +347,7 @@ public:
 
     // Now we look at the file that's currently open
     ::NeXus::File * file = ws2->getBoxController()->getFile();
-    TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10002 long.", 10002, file->getInfo().dims[0] );
+    TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10001 long.", 10001, file->getInfo().dims[0] );
 
 
     // The file should have been modified but that's tricky to check directly.

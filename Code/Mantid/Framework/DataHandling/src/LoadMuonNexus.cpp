@@ -60,8 +60,8 @@ The subalgorithms used by LoadMuonNexus are:
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusFile.hpp"
+#include "nexus/NeXusException.hpp"
 
 namespace Mantid
 {

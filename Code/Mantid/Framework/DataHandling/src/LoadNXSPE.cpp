@@ -8,10 +8,8 @@ Algorithm to load an NXSPE file into a workspace2D. It will create a new instrum
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-
-//Copy of the NexusCpp API was placed in MantidNexus
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusFile.hpp"
+#include "nexus/NeXusException.hpp"
 #include "MantidNexus/NexusClasses.h"
 #include <vector>
 #include <map>
