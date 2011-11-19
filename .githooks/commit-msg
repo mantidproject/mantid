@@ -62,8 +62,8 @@ msg_first() {
 	if test $len -eq 0; then
 		# not yet first line
 		return
-	elif test $len -lt 11; then
-		die 'The first line must be at least 11 characters:
+	elif test $len -lt 30; then
+		die 'The first line must be at least 30 characters:
 --------
 '"$line"'
 --------'
