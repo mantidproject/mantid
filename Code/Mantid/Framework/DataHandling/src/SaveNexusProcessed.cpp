@@ -40,7 +40,7 @@ None
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/File.h>

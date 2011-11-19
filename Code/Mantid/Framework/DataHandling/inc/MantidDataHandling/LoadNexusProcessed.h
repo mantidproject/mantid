@@ -8,7 +8,7 @@
 #include "MantidAPI/IDataFileChecker.h"
 
 #include "MantidNexus/NexusClasses.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
