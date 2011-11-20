@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS( FrameworkManager::Instance().getWorkspace("wrongname"), std::runtime_error )
   }
 //
-//  /** Ticket #4177: this algorithm segfaults at the point where you've
+//  /** Ticket #4174: this algorithm segfaults at the point where you've
 //   * created 50  (the algorithms.retained property) in a row.
 //   */
 //  void test_CreateAlgorithm_manytimes()
