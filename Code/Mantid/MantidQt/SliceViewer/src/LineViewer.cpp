@@ -82,10 +82,8 @@ void LineViewer::createDimensionWidgets()
       m_startText.push_back(startText);
       m_endText.push_back(endText);
       m_widthText.push_back(widthText);
-      QObject::connect(startText, SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
-      QObject::connect(endText, SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
-      QObject::connect(widthText, SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
-
+      // Signals that don't change
+      QObject::connect(widthText, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
     }
   }
 
@@ -106,15 +104,33 @@ void LineViewer::updateFreeDimensions()
 {
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {
+    // Can always change the start value
+    m_startText[d]->setEnabled(true);
+
     // This dimension is free to move if b == true
     bool b = (m_allDimsFree || d == m_freeDimX || d == m_freeDimY);
-    m_startText[d]->setEnabled(b);
     m_endText[d]->setEnabled(b);
     // If all dims are free, width makes little sense. Only allow one (circular) width
     if (m_allDimsFree)
       m_widthText[d]->setEnabled(d != 0);
     else
       m_widthText[d]->setEnabled(!b);
+
+    // --- Adjust the signals ---
+    m_startText[d]->disconnect();
+    m_endText[d]->disconnect();
+
+    if (d == m_freeDimX || d == m_freeDimY)
+    {
+      // Free dimension - update the preview
+      QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
+      QObject::connect(m_endText[d], SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
+    }
+    else
+    {
+      // Non-Free dimension - link start to end
+      QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this, SLOT(startLinkedToEndText()));
+    }
   }
   // But enable the width setting on the free X dimension
   if (!m_allDimsFree)
@@ -132,6 +148,38 @@ void LineViewer::updateStartEnd()
     m_endText[d]->setText(QString::number(m_end[d]));
     m_widthText[d]->setText(QString::number(m_width[d]));
   }
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Read all the text boxes and interpret their values.
+ * Does not refresh.
+ */
+void LineViewer::readTextboxes()
+{
+  VMD start = m_start;
+  VMD end = m_start;
+  VMD width = m_width;
+  bool allOk = true;
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    bool ok;
+    start[d] = m_startText[d]->text().toDouble(&ok);
+    allOk = allOk && ok;
+
+    end[d] = m_endText[d]->text().toDouble(&ok);
+    allOk = allOk && ok;
+
+    width[d] = m_widthText[d]->text().toDouble(&ok);
+    allOk = allOk && ok;
+
+    //TODO: Color the textbox if it is not a valid number.
+    //m_startText[d]->setBackgroundColor( ok ? QColor::)
+  }
+  // Only continue if all values typed were valid numbers.
+  if (!allOk) return;
+  m_start = start;
+  m_end = end;
+  m_width = width;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -233,38 +281,42 @@ void LineViewer::apply()
 // ==============================================================================================
 // ================================== SLOTS =====================================================
 // ==============================================================================================
+
+//-------------------------------------------------------------------------------------------------
+/** Slot called when the start text of a non-free dimensions is changed.
+ * Changes the end text correspondingly
+ */
+void LineViewer::startLinkedToEndText()
+{
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    if (d != m_freeDimX && d != m_freeDimY)
+    {
+      m_endText[d]->setText( m_startText[d]->text() );
+    }
+  }
+  // Call the slot to update the preview
+  startEndTextEdited();
+}
+
+
+//-------------------------------------------------------------------------------------------------
 /** Slot called when any of the start/end text boxes are edited
  * in GUI. Only changes the values if they are all valid.
  */
 void LineViewer::startEndTextEdited()
 {
-  VMD start = m_start;
-  VMD end = m_start;
-  VMD width = m_width;
-  bool allOk = true;
-  for (int d=0; d<int(m_ws->getNumDims()); d++)
-  {
-    bool ok;
-    start[d] = m_startText[d]->text().toDouble(&ok);
-    allOk = allOk && ok;
-
-    end[d] = m_endText[d]->text().toDouble(&ok);
-    allOk = allOk && ok;
-
-    width[d] = m_widthText[d]->text().toDouble(&ok);
-    allOk = allOk && ok;
-
-    //TODO: Color the textbox if it is not a valid number.
-    //m_startText[d]->setBackgroundColor( ok ? QColor::)
-  }
-  // Only continue if all values typed were valid numbers.
-  if (!allOk) return;
-  m_start = start;
-  m_end = end;
-  m_width = width;
+  this->readTextboxes();
   this->showPreview();
 }
 
+/** Slot called when the width text box is edited */
+void LineViewer::widthTextEdited()
+{
+  this->readTextboxes();
+  //TODO: Don't always auto-apply
+  this->apply();
+}
 
 /** Slot called when the number of bins changes */
 void LineViewer::numBinsChanged()

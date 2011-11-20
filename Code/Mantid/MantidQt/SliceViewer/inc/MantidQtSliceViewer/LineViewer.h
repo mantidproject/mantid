@@ -35,11 +35,14 @@ private:
     void createDimensionWidgets();
     void updateFreeDimensions();
     void updateStartEnd();
+    void readTextboxes();
     void calculateCurve(Mantid::API::IMDWorkspace_sptr ws, Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
         size_t minNumPoints, QwtPlotCurve * curve);
 
 public slots:
     void startEndTextEdited();
+    void widthTextEdited();
+    void startLinkedToEndText();
     void apply();
     void numBinsChanged();
     void adaptiveBinsChanged();
