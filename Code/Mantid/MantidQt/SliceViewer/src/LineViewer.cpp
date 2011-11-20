@@ -5,10 +5,12 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidMDEvents/SlicingAlgorithm.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::MDEvents::SlicingAlgorithm;
 
 namespace MantidQt
 {
@@ -43,6 +45,7 @@ LineViewer::LineViewer(QWidget *parent)
 
   //----------- Connect signals -------------
   QObject::connect(ui.btnApply, SIGNAL(clicked()), this, SLOT(apply()));
+  QObject::connect(ui.chkAdaptiveBins, SIGNAL(  stateChanged(int)), this, SLOT(adaptiveBinsChanged()));
   QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
 
 }
@@ -140,6 +143,7 @@ void LineViewer::apply()
   if (m_allDimsFree)
     throw std::runtime_error("Not currently supported with all dimensions free!");
   std::string outWsName = m_ws->getName() + "_line" ;
+  bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
   double planeWidth = m_width[m_freeDimX];
@@ -168,21 +172,31 @@ void LineViewer::apply()
       origin[d] -= m_width[d];
   }
 
-  IAlgorithm * alg = FrameworkManager::Instance().createAlgorithm("BinToMDHistoWorkspace");
+  IAlgorithm * alg = NULL;
+  size_t numBins = m_numBins;
+  if (adaptive)
+  {
+    alg = FrameworkManager::Instance().createAlgorithm("SliceMD");
+    // "SplitInto" parameter
+    numBins = 2;
+  }
+  else
+    alg = FrameworkManager::Instance().createAlgorithm("BinToMDHistoWorkspace");
+
   alg->setProperty("InputWorkspace", m_ws);
   alg->setPropertyValue("OutputWorkspace", outWsName);
   alg->setProperty("AxisAligned", false);
 
   // The X basis vector
   alg->setPropertyValue("BasisVectorX", "X,units," + basisX.toString(",")
-        + "," + Strings::toString(length) + "," + Strings::toString(m_numBins) );
+        + "," + Strings::toString(length) + "," + Strings::toString(numBins) );
 
   // The Y basis vector, with one bin
   alg->setPropertyValue("BasisVectorY", "Y,units," + basisY.toString(",")
         + "," + Strings::toString(planeWidth*2.0) + ",1" );
 
   // Now each remaining dimension
-  std::string dimChars = "XYZT";
+  std::string dimChars = SlicingAlgorithm::getDimensionChars();
   size_t propNum = 2;
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {
@@ -197,13 +211,16 @@ void LineViewer::apply()
       alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",")
             + "," + Strings::toString(m_width[d]*2.0) + ",1" );
       propNum++;
-      if (propNum >= 4)
+      if (propNum >= dimChars.size())
         throw std::runtime_error("LineViewer::apply(): too many dimensions!");
     }
   }
 
   alg->setPropertyValue("Origin", origin.toString(",") );
-  alg->setProperty("IterateEvents", true);
+  if (!adaptive)
+  {
+    alg->setProperty("IterateEvents", true);
+  }
   alg->execute();
 
   if (alg->isExecuted())
@@ -255,6 +272,13 @@ void LineViewer::startEndTextEdited()
 void LineViewer::numBinsChanged()
 {
   m_numBins = ui.spinNumBins->value();
+  //TODO: Don't always auto-apply
+  this->apply();
+}
+
+/** Slot called when checking the adaptive box */
+void LineViewer::adaptiveBinsChanged()
+{
   //TODO: Don't always auto-apply
   this->apply();
 }
@@ -344,16 +368,18 @@ void LineViewer::setFreeDimensions(bool all, int dimX, int dimY)
  * @param ws :: MDWorkspace to plot
  * @param start :: start point in ND
  * @param end :: end point in ND
+ * @param minNumPoints :: minimum number of points to plot
  * @param curve :: curve to set
  */
-void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end, QwtPlotCurve * curve)
+void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end,
+    size_t minNumPoints, QwtPlotCurve * curve)
 {
   if (!ws) return;
 
   // Use the width of the plot (in pixels) to choose the fineness)
   // That way, there is ~1 point per pixel = as fine as it needs to be
   size_t numPoints = size_t(m_plot->width());
-  if (numPoints < 20) numPoints = 20;
+  if (numPoints < minNumPoints) numPoints = minNumPoints;
 
   VMD step = (end-start) / double(numPoints);
   double stepLength = step.norm();
@@ -385,7 +411,7 @@ void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end, QwtPlo
 /** Calculate and show the preview (non-integrated) line */
 void LineViewer::showPreview()
 {
-  calculateCurve(m_ws, m_start, m_end, m_previewCurve);
+  calculateCurve(m_ws, m_start, m_end, 100, m_previewCurve);
   if (m_fullCurve->isVisible())
   {
     m_fullCurve->setVisible(false);
@@ -407,7 +433,7 @@ void LineViewer::showFull()
   VMD end = start;
   end[0] = m_sliceWS->getDimension(0)->getMaximum();
 
-  calculateCurve(m_sliceWS, start, end, m_fullCurve);
+  calculateCurve(m_sliceWS, start, end, m_numBins, m_fullCurve);
   if (m_previewCurve->isVisible())
   {
     m_previewCurve->setVisible(false);

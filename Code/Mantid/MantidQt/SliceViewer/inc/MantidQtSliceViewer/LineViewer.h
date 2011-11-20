@@ -36,12 +36,13 @@ private:
     void updateFreeDimensions();
     void updateStartEnd();
     void calculateCurve(Mantid::API::IMDWorkspace_sptr ws, Mantid::Kernel::VMD start, Mantid::Kernel::VMD end,
-        QwtPlotCurve * curve);
+        size_t minNumPoints, QwtPlotCurve * curve);
 
 public slots:
     void startEndTextEdited();
     void apply();
     void numBinsChanged();
+    void adaptiveBinsChanged();
 
 private:
     // -------------------------- Widgets ----------------------------

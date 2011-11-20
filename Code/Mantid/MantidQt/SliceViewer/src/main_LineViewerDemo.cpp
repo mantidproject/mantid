@@ -125,8 +125,8 @@ int main( int argc, char ** argv )
       "Names", "h,k,l",
       "Units", "lattice,lattice,lattice",
       "SplitInto", "5",
-      "SplitThreshold", "500",
-      "MaxRecursionDepth", "5",
+      "SplitThreshold", "100",
+      "MaxRecursionDepth", "20",
       "OutputWorkspace", "mdew");
   addPeak(15000,0,0,0, 1);
   addPeak(5000,0,0,0, 0.3);
