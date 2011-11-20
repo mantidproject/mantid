@@ -2,8 +2,12 @@
 #include <qwt_plot_curve.h>
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace MantidQt
@@ -24,9 +28,22 @@ LineViewer::LineViewer(QWidget *parent)
   m_plot->setBackgroundColor(QColor(255,255,255)); // White background
   m_plotLayout->addWidget(m_plot, 1);
 
+  // Make the 2 curves
+  m_previewCurve = new QwtPlotCurve("Preview");
+  m_fullCurve = new QwtPlotCurve("Integrated");
+  m_previewCurve->attach(m_plot);
+  m_fullCurve->attach(m_plot);
+  m_previewCurve->setVisible(false);
+  m_fullCurve->setVisible(false);
+
+
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
   ui.splitter->setStretchFactor(1, 1);
+
+  //----------- Connect signals -------------
+  QObject::connect(ui.btnApply, SIGNAL(clicked()), this, SLOT(apply()));
+  QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
 
 }
 
@@ -64,6 +81,10 @@ void LineViewer::createDimensionWidgets()
       m_startText.push_back(startText);
       m_endText.push_back(endText);
       m_widthText.push_back(widthText);
+      QObject::connect(startText, SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
+      QObject::connect(endText, SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
+      QObject::connect(widthText, SIGNAL(textEdited(QString)), this, SLOT(startEndTextEdited()));
+
     }
   }
 
@@ -77,10 +98,166 @@ void LineViewer::createDimensionWidgets()
 
 
 //-----------------------------------------------------------------------------------------------
+/** Disable any controls relating to dimensions that are not "free"
+ * e.g. if you are in the X-Y plane, the Z position cannot be changed.
+ */
 void LineViewer::updateFreeDimensions()
 {
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    // This dimension is free to move if b == true
+    bool b = (m_allDimsFree || d == m_freeDimX || d == m_freeDimY);
+    m_startText[d]->setEnabled(b);
+    m_endText[d]->setEnabled(b);
+    // If all dims are free, width makes little sense. Only allow one (circular) width
+    if (m_allDimsFree)
+      m_widthText[d]->setEnabled(d != 0);
+    else
+      m_widthText[d]->setEnabled(!b);
+  }
+  // But enable the width setting on the free X dimension
+  if (!m_allDimsFree)
+    m_widthText[m_freeDimX]->setEnabled(true);
+
 }
 
+//-----------------------------------------------------------------------------------------------
+/** Show the start/end/width points in the GUI */
+void LineViewer::updateStartEnd()
+{
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    m_startText[d]->setText(QString::number(m_start[d]));
+    m_endText[d]->setText(QString::number(m_end[d]));
+    m_widthText[d]->setText(QString::number(m_width[d]));
+  }
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Perform the 1D integration using the current parameters */
+void LineViewer::apply()
+{
+  if (m_allDimsFree)
+    throw std::runtime_error("Not currently supported with all dimensions free!");
+  std::string outWsName = m_ws->getName() + "_line" ;
+
+  // (half-width in the plane)
+  double planeWidth = m_width[m_freeDimX];
+  // Length of the line
+  double length = (m_end - m_start).norm();
+  double dx = m_end[m_freeDimX] - m_start[m_freeDimX];
+  double dy = m_end[m_freeDimY] - m_start[m_freeDimY];
+  // Angle of the line
+  double angle = atan2(dy, dx);
+  double perpAngle = angle + M_PI / 2.0;
+
+  // Build the basis vectors using the angles
+  VMD basisX = m_start * 0;
+  basisX[m_freeDimX] = cos(angle);
+  basisX[m_freeDimY] = sin(angle);
+  VMD basisY = m_start * 0;
+  basisY[m_freeDimX] = cos(perpAngle);
+  basisY[m_freeDimY] = sin(perpAngle);
+
+  // Offset the origin in the plane by the width
+  VMD origin = m_start - basisY * planeWidth;
+  // And now offset by the width in each direction
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    if ((d != m_freeDimX) && (d != m_freeDimY))
+      origin[d] -= m_width[d];
+  }
+
+  IAlgorithm * alg = FrameworkManager::Instance().createAlgorithm("BinToMDHistoWorkspace");
+  alg->setProperty("InputWorkspace", m_ws);
+  alg->setPropertyValue("OutputWorkspace", outWsName);
+  alg->setProperty("AxisAligned", false);
+
+  // The X basis vector
+  alg->setPropertyValue("BasisVectorX", "X,units," + basisX.toString(",")
+        + "," + Strings::toString(length) + "," + Strings::toString(m_numBins) );
+
+  // The Y basis vector, with one bin
+  alg->setPropertyValue("BasisVectorY", "Y,units," + basisY.toString(",")
+        + "," + Strings::toString(planeWidth*2.0) + ",1" );
+
+  // Now each remaining dimension
+  std::string dimChars = "XYZT";
+  size_t propNum = 2;
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    if ((d != m_freeDimX) && (d != m_freeDimY))
+    {
+      // Letter of the dimension
+      std::string dim(" "); dim[0] = dimChars[propNum];
+      // Simple basis vector going only in this direction
+      VMD basis = m_start * 0;
+      basis[d] = 1.0;
+      // Set the basis vector with the width *2 and 1 bin
+      alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",")
+            + "," + Strings::toString(m_width[d]*2.0) + ",1" );
+      propNum++;
+      if (propNum >= 4)
+        throw std::runtime_error("LineViewer::apply(): too many dimensions!");
+    }
+  }
+
+  alg->setPropertyValue("Origin", origin.toString(",") );
+  alg->setProperty("IterateEvents", true);
+  alg->execute();
+
+  if (alg->isExecuted())
+  {
+    //m_sliceWS = alg->getProperty("OutputWorkspace");
+    m_sliceWS = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outWsName));
+    this->showFull();
+  }
+  delete alg;
+}
+
+// ==============================================================================================
+// ================================== SLOTS =====================================================
+// ==============================================================================================
+/** Slot called when any of the start/end text boxes are edited
+ * in GUI. Only changes the values if they are all valid.
+ */
+void LineViewer::startEndTextEdited()
+{
+  VMD start = m_start;
+  VMD end = m_start;
+  VMD width = m_width;
+  bool allOk = true;
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+  {
+    bool ok;
+    start[d] = m_startText[d]->text().toDouble(&ok);
+    allOk = allOk && ok;
+
+    end[d] = m_endText[d]->text().toDouble(&ok);
+    allOk = allOk && ok;
+
+    width[d] = m_widthText[d]->text().toDouble(&ok);
+    allOk = allOk && ok;
+
+    //TODO: Color the textbox if it is not a valid number.
+    //m_startText[d]->setBackgroundColor( ok ? QColor::)
+  }
+  // Only continue if all values typed were valid numbers.
+  if (!allOk) return;
+  m_start = start;
+  m_end = end;
+  m_width = width;
+  this->showPreview();
+}
+
+
+/** Slot called when the number of bins changes */
+void LineViewer::numBinsChanged()
+{
+  m_numBins = ui.spinNumBins->value();
+  //TODO: Don't always auto-apply
+  this->apply();
+}
 
 // ==============================================================================================
 // ================================== External Setters ==========================================
@@ -100,14 +277,31 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
  * @param start :: vector for the start point */
 void LineViewer::setStart(Mantid::Kernel::VMD start)
 {
+  if (m_ws && start.getNumDims() != m_ws->getNumDims())
+    throw std::runtime_error("LineViewer::setStart(): Invalid number of dimensions in the start vector.");
   m_start = start;
+  updateStartEnd();
 }
 
 /** Set the end point of the line to integrate
  * @param end :: vector for the end point */
 void LineViewer::setEnd(Mantid::Kernel::VMD end)
 {
+  if (m_ws && end.getNumDims() != m_ws->getNumDims())
+    throw std::runtime_error("LineViewer::setEnd(): Invalid number of dimensions in the end vector.");
   m_end = end;
+  updateStartEnd();
+}
+
+
+/** Set the width of the line in each dimensions
+ * @param width :: vector for the width in each dimension. X dimension stands in for the XY plane width */
+void LineViewer::setWidth(Mantid::Kernel::VMD width)
+{
+  if (m_ws && width.getNumDims() != m_ws->getNumDims())
+    throw std::runtime_error("LineViewer::setwidth(): Invalid number of dimensions in the width vector.");
+  m_width = width;
+  updateStartEnd();
 }
 
 /** Set the number of bins in the line
@@ -115,6 +309,9 @@ void LineViewer::setEnd(Mantid::Kernel::VMD end)
 void LineViewer::setNumBins(size_t numBins)
 {
   m_numBins = numBins;
+  ui.spinNumBins->blockSignals(true);
+  ui.spinNumBins->setValue( int(numBins) );
+  ui.spinNumBins->blockSignals(false);
 }
 
 /** Set the free dimensions - dimensions that are allowed to change
@@ -125,26 +322,40 @@ void LineViewer::setNumBins(size_t numBins)
  */
 void LineViewer::setFreeDimensions(bool all, int dimX, int dimY)
 {
+  int nd = int(m_ws->getNumDims());
+  if (dimX < 0 || dimX >= nd)
+    throw std::runtime_error("LineViewer::setFreeDimensions(): Free X dimension index is out of range.");
+  if (dimY < 0 || dimY >= nd)
+    throw std::runtime_error("LineViewer::setFreeDimensions(): Free Y dimension index is out of range.");
   m_allDimsFree = all;
   m_freeDimX = dimX;
   m_freeDimY = dimY;
+  this->updateFreeDimensions();
 }
 
 
 // ==============================================================================================
 // ================================== Rendering =================================================
 // ==============================================================================================
-/** Calculate and show the preview (non-integrated) line */
-void LineViewer::showPreview()
+
+
+/** Calculate a curve between two points given a linear start/end point
+ *
+ * @param ws :: MDWorkspace to plot
+ * @param start :: start point in ND
+ * @param end :: end point in ND
+ * @param curve :: curve to set
+ */
+void LineViewer::calculateCurve(IMDWorkspace_sptr ws, VMD start, VMD end, QwtPlotCurve * curve)
 {
-  if (!m_ws) return;
+  if (!ws) return;
 
   // Use the width of the plot (in pixels) to choose the fineness)
   // That way, there is ~1 point per pixel = as fine as it needs to be
   size_t numPoints = size_t(m_plot->width());
   if (numPoints < 20) numPoints = 20;
 
-  VMD step = (m_end-m_start) / double(numPoints);
+  VMD step = (end-start) / double(numPoints);
   double stepLength = step.norm();
 
   // These will be the curve as plotted
@@ -154,23 +365,58 @@ void LineViewer::showPreview()
   for (size_t i=0; i<numPoints; i++)
   {
     // Coordinate along the line
-    VMD coord = m_start + step * double(i);
+    VMD coord = start + step * double(i);
     // Signal in the WS at that coordinate
-    signal_t signal = m_ws->getSignalAtCoord(coord);
+    signal_t signal = ws->getSignalAtCoord(coord);
     // Make into array
     x[i] = stepLength * double(i);
     y[i] = signal;
   }
 
   // Make the curve
-  QwtPlotCurve *curve = new QwtPlotCurve("Preview");
   curve->setData(x,y, int(numPoints));
-  curve->attach(m_plot);
-  m_plot->replot();
-  m_plot->setTitle("Preview Plot");
 
   delete [] x;
   delete [] y;
+
+}
+
+
+/** Calculate and show the preview (non-integrated) line */
+void LineViewer::showPreview()
+{
+  calculateCurve(m_ws, m_start, m_end, m_previewCurve);
+  if (m_fullCurve->isVisible())
+  {
+    m_fullCurve->setVisible(false);
+    m_fullCurve->detach();
+    m_previewCurve->attach(m_plot);
+  }
+  m_previewCurve->setVisible(true);
+  m_plot->replot();
+  m_plot->setTitle("Preview Plot");
+}
+
+
+/** Calculate and show the full (integrated) line */
+void LineViewer::showFull()
+{
+  if (!m_sliceWS) return;
+  VMD start(m_sliceWS->getNumDims());
+  start *= 0;
+  VMD end = start;
+  end[0] = m_sliceWS->getDimension(0)->getMaximum();
+
+  calculateCurve(m_sliceWS, start, end, m_fullCurve);
+  if (m_previewCurve->isVisible())
+  {
+    m_previewCurve->setVisible(false);
+    m_previewCurve->detach();
+    m_fullCurve->attach(m_plot);
+  }
+  m_fullCurve->setVisible(true);
+  m_plot->replot();
+  m_plot->setTitle("Integrated Line Plot");
 }
 
 
