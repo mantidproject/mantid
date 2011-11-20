@@ -5,12 +5,10 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidMDEvents/SlicingAlgorithm.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::MDEvents::SlicingAlgorithm;
 
 namespace MantidQt
 {
@@ -196,7 +194,7 @@ void LineViewer::apply()
         + "," + Strings::toString(planeWidth*2.0) + ",1" );
 
   // Now each remaining dimension
-  std::string dimChars = SlicingAlgorithm::getDimensionChars();
+  std::string dimChars = "XYZT"; // SlicingAlgorithm::getDimensionChars();
   size_t propNum = 2;
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {
