@@ -676,6 +676,7 @@ IncludeMantidNexusCPP = addComponent('IncludeMantidNexusCPP',comp_guid['IncludeM
 addAllFiles(FRAMEWORKDIR + '/NexusCPP/inc/MantidNexusCPP','nex',IncludeMantidNexusCPP)
 # Other includes
 # NeXus API header
+addFileV('NAPI', 'napi.h', 'napi.h', CODEDIR + '/Third_Party/include/napi.h', IncludeFilesComp) # Both while we sort the Nexus stuff out
 nexusList = addCompList('nexus',CODEDIR + '/Third_Party/include/nexus','nexus',includeDir)[0]
 boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
 pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
