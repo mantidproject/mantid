@@ -78,26 +78,6 @@ public:
   {
     TS_ASSERT_THROWS( FrameworkManager::Instance().getWorkspace("wrongname"), std::runtime_error )
   }
-//
-//  /** Ticket #4174: this algorithm segfaults at the point where you've
-//   * created 50  (the algorithms.retained property) in a row.
-//   */
-//  void test_CreateAlgorithm_manytimes()
-//  {
-//    for (size_t i=0; i<100; i++)
-//    {
-//      std::cout << "Creating algorithm #" << i << std::endl;
-//      IAlgorithm * alg = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
-//      // The line below segfaults at i = 50 (the algorithms.retained property)
-//      alg->setPropertyValue("OutputWorkspace", "dummy");
-//      alg->setPropertyValue("DataX", "1");
-//      alg->setPropertyValue("DataY", "2");
-//      alg->execute();
-//      delete alg;
-//      // You can add this sleep line and it still segfaults.
-//      //sleep(1);
-//    }
-//  }
 
 };
 
