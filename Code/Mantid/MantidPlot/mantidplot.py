@@ -17,11 +17,18 @@ from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 def workspace(name):
     return mtd[name]
 
-def plotSpectrum(source, indices, error_bars = False, style = -1):
+# Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
+def plot(source, *args, **kwargs):
+    if isinstance(source,WorkspaceProxy):
+        return plotSpectrum(source, *args, **kwargs)
+    else:
+        return qti.app.plot(source, *args, **kwargs)
+
+def plotSpectrum(source, indices, error_bars = False, type = -1):
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
     if len(workspace_names) > 0 and len(index_list) > 0:
-        return __tryPlot(workspace_names, index_list, error_bars, style)
+        return __tryPlot(workspace_names, index_list, error_bars, type)
     else:
         return None
 

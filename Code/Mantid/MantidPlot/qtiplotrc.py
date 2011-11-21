@@ -55,7 +55,7 @@ appImports = (
     "clone", "setWindowName",
     "importImage",
     "setPreferences",
-    "plot", "plot3D",
+    "plot3D",
     "activeFolder", "rootFolder",
     "addFolder", "deleteFolder", "changeFolder", "copyFolder",
     "saveFolder", "appendProject", "saveProjectAs"
