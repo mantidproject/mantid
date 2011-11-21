@@ -51,11 +51,12 @@ namespace
       IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
       std::vector<Property*> properties(algm->getProperties());
       std::sort(properties.begin(), properties.end(), MandatoryFirst());
-      const Py_ssize_t numProps(static_cast<Py_ssize_t>(properties.size()));
+      using boost::python::ssize_t;
+      const ssize_t numProps(static_cast<ssize_t>(properties.size()));
 
       // Build the list
       PyObject *names = PyList_New(numProps);
-      for ( Py_ssize_t i = 0; i < numProps; ++i )
+      for ( ssize_t i = 0; i < numProps; ++i )
       {
         std::string name = properties[i]->name();
         PyList_SetItem(names, i, PyString_FromString(name.c_str()));
