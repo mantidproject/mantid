@@ -2,6 +2,8 @@
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/Strings.h"
+
+#include <boost/python/ssize_t.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -49,11 +51,11 @@ namespace
       IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
       std::vector<Property*> properties(algm->getProperties());
       std::sort(properties.begin(), properties.end(), MandatoryFirst());
-      const size_t numProps(properties.size());
+      const Py_ssize_t numProps(static_cast<Py_ssize_t>(properties.size()));
 
       // Build the list
       PyObject *names = PyList_New(numProps);
-      for ( size_t i = 0; i < numProps; ++i )
+      for ( Py_ssize_t i = 0; i < numProps; ++i )
       {
         std::string name = properties[i]->name();
         PyList_SetItem(names, i, PyString_FromString(name.c_str()));

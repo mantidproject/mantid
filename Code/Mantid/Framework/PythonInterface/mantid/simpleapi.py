@@ -19,7 +19,9 @@
     and assign it to the rebinned variable
     
 """
-from api import framework_mgr 
+from api import framework_mgr
+from kernel import Direction 
+from kernel.funcreturns import lhs_info
 
 def version():
     return "simpleapi - memory-based version"
@@ -60,6 +62,7 @@ def create_algorithm(algorithm, version, _algm_object):
         algm = framework_mgr.create_algorithm(algorithm, _version)
         set_properties(algm, *args, **kwargs)
         algm.execute()
+        
     
     algorithm_wrapper.__name__ = algorithm
     
@@ -75,6 +78,7 @@ def create_algorithm(algorithm, version, _algm_object):
     #      taking care of giving no default values to mandatory parameters
     
     arg_list = []
+    found_output=False
     for p in _algm_object.get_property_order():
         prop = _algm_object.get_property(p)
         # Mandatory parameters are those for which the default value is not valid
