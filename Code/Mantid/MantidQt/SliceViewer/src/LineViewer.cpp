@@ -77,9 +77,9 @@ void LineViewer::createDimensionWidgets()
       startText->setToolTip("Start point of the line in this dimension");
       endText->setToolTip("End point of the line in this dimension");
       widthText->setToolTip("Width of the line in this dimension");
-      startText->setValidator(new QDoubleValidator());
-      endText->setValidator(new QDoubleValidator());
-      widthText->setValidator(new QDoubleValidator());
+      startText->setValidator(new QDoubleValidator(startText));
+      endText->setValidator(new QDoubleValidator(endText));
+      widthText->setValidator(new QDoubleValidator(widthText));
       ui.gridLayout->addWidget(startText, 1, int(d)+1);
       ui.gridLayout->addWidget(endText, 2, int(d)+1);
       ui.gridLayout->addWidget(widthText, 3, int(d)+1);

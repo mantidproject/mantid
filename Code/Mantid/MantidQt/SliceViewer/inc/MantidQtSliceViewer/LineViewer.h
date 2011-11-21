@@ -1,19 +1,20 @@
 #ifndef LINEVIEWER_H
 #define LINEVIEWER_H
 
-#include <QtGui/QWidget>
-#include "ui_LineViewer.h"
+#include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include <qwt_plot.h>
 #include "MantidKernel/VMD.h"
+#include "ui_LineViewer.h"
+#include <QtGui/QWidget>
 #include <qwt_plot_curve.h>
+#include <qwt_plot.h>
 
 namespace MantidQt
 {
 namespace SliceViewer
 {
 
-class LineViewer : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
 {
     Q_OBJECT
 

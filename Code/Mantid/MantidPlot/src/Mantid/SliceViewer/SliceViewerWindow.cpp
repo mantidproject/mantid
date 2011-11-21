@@ -4,12 +4,11 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "../../../MantidQt/SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
+#include "MantidKernel/VMD.h"
+#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
 #include "SliceViewerWindow.h"
 #include <qlayout.h>
-#include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidQtSliceViewer/LineViewer.h"
-#include "MantidKernel/VMD.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
