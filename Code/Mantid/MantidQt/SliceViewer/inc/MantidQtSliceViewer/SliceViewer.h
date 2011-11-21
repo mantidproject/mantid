@@ -20,6 +20,7 @@
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
+#include "MantidKernel/VMD.h"
 
 namespace MantidQt
 {
@@ -43,6 +44,18 @@ public:
   void showControls(bool visible);
   void zoomBy(double factor);
   void loadColorMap(QString filename = QString() );
+  LineOverlay * getLineOverlay() { return m_lineOverlay; }
+  Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
+  size_t getDimX() const { return m_dimX; }
+  size_t getDimY() const { return m_dimY; }
+
+signals:
+  /// Signal emitted when the X/Y index of the shown dimensions is changed
+  void changedShownDim(size_t dimX, size_t dimY);
+  /// Signal emitted when the slice point moves
+  void changedSlicePoint(Mantid::Kernel::VMD slicePoint);
+  /// Signal emitted when the LineViewer should be shown/hidden.
+  void showLineViewer(bool);
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
@@ -121,6 +134,9 @@ private:
   Mantid::Geometry::IMDDimension_const_sptr m_Y;
   size_t m_dimX;
   size_t m_dimY;
+
+  /// The point of slicing in the other dimensions
+  Mantid::Kernel::VMD m_slicePoint;
 
   /// The range of values to fit in the color map.
   QwtDoubleInterval m_colorRange;

@@ -46,6 +46,7 @@ public slots:
     void apply();
     void numBinsChanged();
     void adaptiveBinsChanged();
+    void setFreeDimensions(size_t dimX, size_t dimY);
 
 private:
     // -------------------------- Widgets ----------------------------

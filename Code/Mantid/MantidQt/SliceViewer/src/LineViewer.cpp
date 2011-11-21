@@ -5,6 +5,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include <QIntValidator>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -76,6 +77,9 @@ void LineViewer::createDimensionWidgets()
       startText->setToolTip("Start point of the line in this dimension");
       endText->setToolTip("End point of the line in this dimension");
       widthText->setToolTip("Width of the line in this dimension");
+      startText->setValidator(new QDoubleValidator());
+      endText->setValidator(new QDoubleValidator());
+      widthText->setValidator(new QDoubleValidator());
       ui.gridLayout->addWidget(startText, 1, int(d)+1);
       ui.gridLayout->addWidget(endText, 2, int(d)+1);
       ui.gridLayout->addWidget(widthText, 3, int(d)+1);
@@ -171,9 +175,6 @@ void LineViewer::readTextboxes()
 
     width[d] = m_widthText[d]->text().toDouble(&ok);
     allOk = allOk && ok;
-
-    //TODO: Color the textbox if it is not a valid number.
-    //m_startText[d]->setBackgroundColor( ok ? QColor::)
   }
   // Only continue if all values typed were valid numbers.
   if (!allOk) return;
@@ -404,6 +405,19 @@ void LineViewer::setFreeDimensions(bool all, int dimX, int dimY)
   m_allDimsFree = all;
   m_freeDimX = dimX;
   m_freeDimY = dimY;
+  this->updateFreeDimensions();
+}
+
+/** Slot called to set the free dimensions (called from the SliceViewer widget)
+ *
+ * @param dimX :: index of the X-dimension of the plane
+ * @param dimY :: index of the Y-dimension of the plane
+ */
+void LineViewer::setFreeDimensions(size_t dimX, size_t dimY)
+{
+  m_allDimsFree = false;
+  m_freeDimX = int(dimX);
+  m_freeDimY = int(dimY);
   this->updateFreeDimensions();
 }
 
