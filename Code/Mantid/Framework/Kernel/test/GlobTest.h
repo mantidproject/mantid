@@ -108,6 +108,15 @@ public:
     TS_ASSERT_EQUALS(matches,5);
   }
 
+  void test_filename_contains_directory()
+  {
+    Poco::Path pattern(base.toString() + "instrument","IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+
+    std::set<std::string> files;
+    Glob::glob(pattern,files);
+    TS_ASSERT( !files.empty() );
+  }
+
 };
 
 #endif

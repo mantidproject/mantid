@@ -30,7 +30,7 @@ namespace Kernel
      */
 void Glob::glob(const Poco::Path& pathPattern, std::set<std::string>& files, int options)
 {
-  Poco::Glob::glob(pathPattern,files,options);
+  Poco::Glob::glob(Poco::Path(pathPattern.toString()),files,options);
 }
 
 } // namespace Kernel
