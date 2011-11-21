@@ -62,6 +62,7 @@ set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
 
 set ( PY_FILES
   __init__.py
+  simpleapi.py
 )
 
 # CMake would not let this hang off the PythonInterface target because

@@ -72,7 +72,7 @@ namespace DataHandling
     // 2. Create Map(group ID, workspace-index vector)
     std::map<int, std::vector<detid_t> > groupIDwkspIDMap;
     this->createGroupDetectorIDMap(groupIDwkspIDMap);
-    g_log.notice() << "Size of map = " << groupIDwkspIDMap.size() << std::endl;
+    g_log.debug() << "Size of map = " << groupIDwkspIDMap.size() << std::endl;
 
     // 3. Convert to detectors ranges
     std::map<int, std::vector<detid_t> > groupIDdetectorRangeMap;
@@ -140,7 +140,7 @@ namespace DataHandling
       int groupid = it->first;
       sort(it->second.begin(), it->second.end());
 
-      g_log.notice() << "Group " << groupid << "  has " << it->second.size() << " detectors. " << std::endl;
+      g_log.debug() << "Group " << groupid << "  has " << it->second.size() << " detectors. " << std::endl;
 
       // b) Group to ranges
       std::vector<detid_t> detranges;
@@ -231,7 +231,7 @@ namespace DataHandling
 
       std::string textvalue = ss.str();
 
-      g_log.notice() << "Detector IDs Node: " << textvalue << std::endl;
+      g_log.debug() << "Detector IDs Node: " << textvalue << std::endl;
 
       // c) Create element
       AutoPtr<Element> pDetid = pDoc->createElement("detids");

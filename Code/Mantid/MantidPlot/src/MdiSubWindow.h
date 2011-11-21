@@ -39,8 +39,9 @@ class Folder;
 class ApplicationWindow;
 
 // Experimental, Janik Zikovsky, Nov 17 2011. Floatable MDI windows
-#define MDISUBWINDOW_FLOATABLE 0
-#ifdef MDISUBWINDOW_FLOATABLE
+//#define MDISUBWINDOW_FLOATABLE 0
+#undef MDISUBWINDOW_FLOATABLE
+#ifndef MDISUBWINDOW_FLOATABLE
 /// Define the parent class of MdiSubWindow to make it easier to change
   typedef QMdiSubWindow MdiSubWindowParent_t;
 #else

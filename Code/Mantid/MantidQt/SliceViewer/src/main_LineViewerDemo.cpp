@@ -125,8 +125,8 @@ int main( int argc, char ** argv )
       "Names", "h,k,l",
       "Units", "lattice,lattice,lattice",
       "SplitInto", "5",
-      "SplitThreshold", "500",
-      "MaxRecursionDepth", "5",
+      "SplitThreshold", "100",
+      "MaxRecursionDepth", "20",
       "OutputWorkspace", "mdew");
   addPeak(15000,0,0,0, 1);
   addPeak(5000,0,0,0, 0.3);
@@ -143,7 +143,9 @@ int main( int argc, char ** argv )
   line->setWorkspace(mdew);
   line->setStart(VMD(-1,0,0));
   line->setEnd(VMD(+1,0,0));
+  line->setWidth(VMD(+0.3,0,0.3));
   line->setNumBins(1000);
+  line->setFreeDimensions(false, 0, 1);
   line->showPreview();
   mainWin->move(100, 100);
   mainWin->resize(700, 700);
