@@ -694,10 +694,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Show the new slice. This finds m_dimX and Y
+  this->updateDisplay();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
-  // Show the new slice
-  this->updateDisplay();
 }
 
 

@@ -43,6 +43,8 @@ protected slots:
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
   void showLineViewer(bool);
+  void changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
+  void changePlanarWidth(double);
 
 protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);

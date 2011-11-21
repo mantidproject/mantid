@@ -117,9 +117,10 @@ void LineViewer::updateFreeDimensions()
     m_endText[d]->setEnabled(b);
     // If all dims are free, width makes little sense. Only allow one (circular) width
     if (m_allDimsFree)
-      m_widthText[d]->setEnabled(d != 0);
+      m_widthText[d]->setVisible(d != 0);
     else
-      m_widthText[d]->setEnabled(!b);
+      m_widthText[d]->setVisible(!b);
+    m_widthText[d]->setToolTip("Integration width in this dimension.");
 
     // --- Adjust the signals ---
     m_startText[d]->disconnect();
@@ -139,7 +140,10 @@ void LineViewer::updateFreeDimensions()
   }
   // But enable the width setting on the free X dimension
   if (!m_allDimsFree)
-    m_widthText[m_freeDimX]->setEnabled(true);
+  {
+    m_widthText[m_freeDimX]->setVisible(true);
+    m_widthText[m_freeDimX]->setToolTip("Integration width perpendicular to the line, along the chosen plane.");
+  }
 
 }
 
@@ -194,7 +198,7 @@ void LineViewer::apply()
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
-  double planeWidth = m_width[m_freeDimX];
+  double planeWidth = this->getPlanarWidth();
   // Length of the line
   double length = (m_end - m_start).norm();
   double dx = m_end[m_freeDimX] - m_start[m_freeDimX];
@@ -293,6 +297,7 @@ void LineViewer::startLinkedToEndText()
   {
     if (d != m_freeDimX && d != m_freeDimY)
     {
+      // Copy the start text to the end text
       m_endText[d]->setText( m_startText[d]->text() );
     }
   }
@@ -309,6 +314,8 @@ void LineViewer::startEndTextEdited()
 {
   this->readTextboxes();
   this->showPreview();
+  // Send the signal that the positions changed
+  emit changedStartOrEnd(m_start, m_end);
 }
 
 /** Slot called when the width text box is edited */
@@ -317,6 +324,8 @@ void LineViewer::widthTextEdited()
   this->readTextboxes();
   //TODO: Don't always auto-apply
   this->apply();
+  // Send the signal that the width changed
+  emit changedPlanarWidth(this->getPlanarWidth());
 }
 
 /** Slot called when the number of bins changes */
@@ -334,6 +343,26 @@ void LineViewer::adaptiveBinsChanged()
   this->apply();
 }
 
+
+// ==============================================================================================
+// ================================== External Getters ==========================================
+// ==============================================================================================
+/** @return the width in the plane, or the width in dimension 0 if not restricted to a plane */
+double LineViewer::getPlanarWidth() const
+{
+  if (m_allDimsFree)
+    return m_width[0];
+  else
+    return m_width[m_freeDimX];
+}
+
+/// @return the full width vector in each dimensions
+Mantid::Kernel::VMD LineViewer::getWidth() const
+{
+  return m_width;
+}
+
+
 // ==============================================================================================
 // ================================== External Setters ==========================================
 // ==============================================================================================
@@ -344,6 +373,7 @@ void LineViewer::adaptiveBinsChanged()
 void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
+  m_width = VMD(ws->getNumDims());
   createDimensionWidgets();
 }
 
@@ -376,6 +406,31 @@ void LineViewer::setWidth(Mantid::Kernel::VMD width)
   if (m_ws && width.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setwidth(): Invalid number of dimensions in the width vector.");
   m_width = width;
+  updateStartEnd();
+}
+
+/** Set the width of the line in the planar dimension only.
+ * Other dimensions' widths will follow unless they were manually changed
+ * @param width :: width in the plane. */
+void LineViewer::setPlanarWidth(double width)
+{
+  if (m_allDimsFree)
+  {
+    for (size_t d=0; d<m_width.getNumDims(); d++)
+      m_width[d] = width;
+  }
+  else
+  {
+    double oldPlanarWidth = this->getPlanarWidth();
+    for (size_t d=0; d<m_width.getNumDims(); d++)
+    {
+      // Only modify the locked onese
+      if (m_width[d] == oldPlanarWidth)
+        m_width[d] = width;
+    }
+    // And always set the one
+    m_width[m_freeDimX] = width;
+  }
   updateStartEnd();
 }
 

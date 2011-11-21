@@ -69,7 +69,7 @@ namespace SliceViewer
     double getWidth() const;
 
   signals:
-  /// Signal sent while the line is being dragged
+    /// Signal sent while the line is being dragged
     void lineChanging(QPointF, QPointF, double);
     /// Signal sent once the drag is completed
     void lineChanged(QPointF, QPointF, double);
