@@ -31,40 +31,71 @@ namespace Kernel
   ArrayLengthValidator<TYPE>::~ArrayLengthValidator()
   {
   }
+
+  /**
+    Check if length is set
+    @returns true/false
+   */
   template <typename TYPE>
   bool  ArrayLengthValidator<TYPE>::hasLength() const
   {
     return this->m_hasArraySize;
   }
+
+  /**
+    Function to retun the set length
+    @returns  m_arraySize
+   */
   template <typename TYPE>
   const size_t&   ArrayLengthValidator<TYPE>:: getLength()    const
   {
     return this->m_arraySize;
   }
+
+  /**
+    Function to set the length
+    @params  value:: size_t type
+   */
   template <typename TYPE>
   void ArrayLengthValidator<TYPE>::setLength(const size_t &value)
   {
     this->m_hasArraySize=true;
     this->m_arraySize=value;
   }
+
+  /**
+    Function to unset the length. It sets  m_hasArraySize to false, and the m_arraySize to 0
+   */
   template <typename TYPE>
   void ArrayLengthValidator<TYPE>::clearLength()
   {
     this->m_hasArraySize=false;
     this->m_arraySize=size_t(0);
   }
+  /**
+    Clone function
+    @returns a clone of the validator
+    */
   template <typename TYPE>
   IValidator<std::vector <TYPE> >* ArrayLengthValidator<TYPE>::clone()
   {
     return new ArrayLengthValidator(*this);
   }
 
+  /**
+  Public interface to check validity
+  @returns a string, the result of checkValidity
+  */
   template <typename TYPE>
   std::string ArrayLengthValidator<TYPE>::isValid(const std::vector<TYPE> &value ) const
   {
     return this->checkValidity(value);
   }
 
+  /**
+  Private function to check validity
+  @returns a string. The string is emty if everything is OK, otherwise returns the error
+  */
   template <typename TYPE>
   std::string ArrayLengthValidator<TYPE>::checkValidity( const std::vector<TYPE> &value ) const
   {
