@@ -418,8 +418,8 @@ void SaveISISNexus::toISO8601(std::string& str)
 /// Write isis_vms_compat
 void SaveISISNexus::write_isis_vms_compat()
 {
-  NXstatus status = NXmakegroup(handle,"isis_vms_compat","IXvms");
-  status = NXopengroup(handle,"isis_vms_compat","IXvms");
+  NXmakegroup(handle,"isis_vms_compat","IXvms");
+  NXopengroup(handle,"isis_vms_compat","IXvms");
   int ndet = m_isisRaw->i_det;
   int nmon = m_isisRaw->i_mon;
 
@@ -492,8 +492,8 @@ void SaveISISNexus::write_isis_vms_compat()
 
 void SaveISISNexus::instrument()
 {
-  NXstatus status = NXmakegroup(handle,"instrument","NXinstrument");
-  status = NXopengroup(handle,"instrument","NXinstrument");
+  NXmakegroup(handle,"instrument","NXinstrument");
+  NXopengroup(handle,"instrument","NXinstrument");
     saveCharOpen("name",&m_isisRaw->i_inst,8);
     putAttr("short_name",m_isisRaw->hdr.inst_abrv,3);
     close();
@@ -506,8 +506,8 @@ void SaveISISNexus::instrument()
 
 void SaveISISNexus::detector_1()
 {
-  NXstatus status = NXmakegroup(handle,"detector_1","NXdata");
-  status = NXopengroup(handle,"detector_1","NXdata");
+  NXmakegroup(handle,"detector_1","NXdata");
+  NXopengroup(handle,"detector_1","NXdata");
 
   for(int i = 0; i < nmon; ++i)
   {
@@ -520,7 +520,7 @@ void SaveISISNexus::detector_1()
   dim[0] = nper;
   dim[1] = nsp - nmon;
   dim[2] = ntc;
-  status = NXmakedata(handle,"counts",NX_INT32,3,dim);
+  NXmakedata(handle,"counts",NX_INT32,3,dim);
   NXopendata(handle,"counts");
   putAttr("units","counts");
   putAttr("signal",1);
@@ -589,8 +589,8 @@ void SaveISISNexus::detector_1()
   */
 void SaveISISNexus::moderator()
 {
-  NXstatus status = NXmakegroup(handle,"moderator","NXmoderator");
-  status = NXopengroup(handle,"moderator","NXmoderator");
+  NXmakegroup(handle,"moderator","NXmoderator");
+  NXopengroup(handle,"moderator","NXmoderator");
 
   float l1 = - m_isisRaw->ivpb.i_l1;
   saveFloatOpen("distance",&l1,1);
@@ -604,8 +604,8 @@ void SaveISISNexus::moderator()
   */
 void SaveISISNexus::source()
 {
-  NXstatus status = NXmakegroup(handle,"source","NXsource");
-  status = NXopengroup(handle,"source","NXsource");
+  NXmakegroup(handle,"source","NXsource");
+  NXopengroup(handle,"source","NXsource");
 
   saveString("name","ISIS");
   saveString("probe","neutrons");
@@ -619,8 +619,8 @@ void SaveISISNexus::source()
   */
 void SaveISISNexus::make_detector_1_link()
 {
-  NXstatus status = NXmakegroup(handle,"detector_1","NXdata");
-  status = NXopengroup(handle,"detector_1","NXdata");
+  NXmakegroup(handle,"detector_1","NXdata");
+  NXopengroup(handle,"detector_1","NXdata");
 
   NXmakelink(handle,&counts_link);
   NXmakelink(handle,&period_index_link);

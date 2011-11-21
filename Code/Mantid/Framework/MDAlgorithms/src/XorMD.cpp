@@ -6,6 +6,9 @@ A signal of 0.0 means "false" and any non-zero signal is "true".
 
 == Usage ==
 
+ C = A ^ B
+ A ^= B
+
 See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
 
 *WIKI*/

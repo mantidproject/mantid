@@ -17,13 +17,18 @@ include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
 include_directories ( inc )
 
-# Note: On some Linux systems (seen on various Ubuntu versions) importing Mantid into a standalone python
+# Note: 
+# On some Linux systems (seen on various Ubuntu versions) importing Mantid into a standalone python
 # interpreter causes a segfault. It is some issue due to exception handling but the fix is 
 # to ensure that the stdc++ library appears as early in the link list as possible so that it
 # is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined
 # by the linker.
+# 
+# MG 2011/11/15: A similar issue regarding the Nexus library has now been observed. Nexus 4.3 introduced
+# thread-local variables and this now causes problems whenever we try and load the library from
+# python if other libraries appear before it in the link list.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 else ()
   set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 endif ()
@@ -43,11 +48,8 @@ set ( TEST_FILES
 )  
   
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc )
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
-  target_link_libraries( PythonInterfaceTest TestHelpers PythonKernelModule PythonAPIModule )
-  # Specify implicit dependency, but don't link to it
-  add_dependencies ( PythonInterfaceTest UserAlgorithms )
+  target_link_libraries( PythonInterfaceTest PythonKernelModule PythonAPIModule )
   add_dependencies ( FrameworkTests PythonInterfaceTest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET PythonInterfaceTest PROPERTY FOLDER "UnitTests" )
@@ -56,6 +58,7 @@ endif ()
 # python unit tests
 set ( TEST_PY_FILES
   test/python/AlgorithmTest.py
+  test/python/AlgorithmFactoryTest.py
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
   test/python/FilePropertyTest.py
@@ -65,6 +68,7 @@ set ( TEST_PY_FILES
   test/python/MatrixWorkspaceTest.py
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmTest.py
+  test/python/SimpleAPITest.py
   test/python/QuatTest.py
   test/python/V3DTest.py
   test/python/WorkspaceTest.py

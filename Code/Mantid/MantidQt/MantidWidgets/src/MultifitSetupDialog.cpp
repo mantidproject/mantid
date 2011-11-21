@@ -24,7 +24,11 @@ MultifitSetupDialog::MultifitSetupDialog(FitPropertyBrowser* fitBrowser) :
 QDialog(fitBrowser),m_fitBrowser(fitBrowser)
 {
   ui.setupUi(this);
-  Mantid::API::IFitFunction* f = m_fitBrowser->compositeFunction()->getFunction(0);
+  Mantid::API::IFitFunction* f = dynamic_cast<Mantid::API::IFitFunction*>(m_fitBrowser->compositeFunction()->getFunction(0));
+  if (!f)
+  {
+    throw std::runtime_error("IFitFunction expected but func function of another type");
+  }
   QAbstractItemModel* model = ui.paramTable->model();
   for(size_t i = 0; i < f->nParams(); ++i)
   {

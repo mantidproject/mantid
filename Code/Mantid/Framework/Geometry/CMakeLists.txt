@@ -203,6 +203,7 @@ set ( TEST_FILES
 	test/ObjectTest.h
 	test/OneToOneSpectraDetectorMapTest.h
 	test/OrientedLatticeTest.h
+	test/ParameterMapTest.h
 	test/ParCompAssemblyTest.h
 	test/ParComponentFactoryTest.h
 	test/ParDetectorTest.h
@@ -276,12 +277,13 @@ set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  # This is required to pick up ComponentCreationHelper.h
-  # !!! BUT DON'T EVEN THINK OF LINKING TO TESTHELPERS FROM HERE !!!
-  # Only ComponentCreationHelper can be used by Geometry tests, and that is
-  # pulled in by including ComponentCreationHelper.cpp in one test file (CompAssemblyTest.h)
+  # This is required to pick up ComponentCreationHelper, which is the only TestHelpers class that may be 
+  # used by Geometry tests (as it does not depend on any higher package than geometry)
   include_directories( ../TestHelpers/inc )
-  
+  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp )
+
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
     target_link_libraries( GeometryTest Geometry ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} Kernel)

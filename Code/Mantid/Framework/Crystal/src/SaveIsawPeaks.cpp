@@ -87,6 +87,9 @@ namespace Crystal
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
     std::vector<Peak> peaks = ws->getPeaks();
 
+	// We cannot assume the peaks have bank type detector modules, so we have a string to check this
+	std::string bankPart = "?";
+
     // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
     typedef std::map<int, std::vector<size_t> > bankMap_t;
     typedef std::map<int, bankMap_t> runMap_t;
@@ -104,9 +107,11 @@ namespace Crystal
         g_log.information() << "Could not interpret bank number of peak " << i << "(" << bankName << ")\n";
         continue;
       }
+	  // Save the "bank" part once to check whether it really is a bank
+	  if( bankPart == "?")  bankPart = bankName.substr(0,4);
       // Take out the "bank" part of the bank name and convert to an int
       bankName = bankName.substr(4, bankName.size()-4);
-      Strings::convert(bankName, bank);
+	  Strings::convert(bankName, bank);
 
       // Save in the map
       runMap[run][bank].push_back(i);
@@ -116,6 +121,11 @@ namespace Crystal
 
     Instrument_const_sptr inst = ws->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
+
+	if( bankPart != "bank" && bankPart != "?" ) {
+		  std::ostringstream mess;		  mess << "Detector module of type " << bankPart << " not supported in ISAWPeaks. Cannot save peaks file";
+		  throw std::runtime_error( mess.str() );
+	}
 
     double l1; V3D beamline; double beamline_norm; V3D samplePos;
     inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
@@ -197,7 +207,7 @@ namespace Crystal
            << std::setw(8) << std::right << std::fixed << std::setprecision(5) << up.Z() << " "
            << std::endl;
 
-        }
+        } else g_log.warning() << "Information about detector module " << bankName << " not found and recognised\n";
       }
     }
     }
@@ -225,8 +235,8 @@ namespace Crystal
         if (ids.size() > 0)
         {
           // Write the bank header
-          out << "0 NRUN DETNUM    CHI      PHI    OMEGA   MONCNT" << std::endl;
-          out <<  "1" <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
+          out << "0  NRUN DETNUM    CHI      PHI    OMEGA   MONCNT" << std::endl;
+          out <<  "1 " <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
               std::right <<  bank;
 
           // Determine goniometer angles by calculating from the goniometer matrix of a peak in the list
@@ -337,4 +347,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

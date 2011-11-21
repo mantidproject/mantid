@@ -66,7 +66,11 @@ class Property;
         or other special condition occurs which needs the framework to react to */
     virtual bool isConditionChanged()const
     {return false;}
-    /** The function user have to overload it in his custom code to modify allowed property values.
+    /** The function user have to overload it in his custom code to modify the property 
+        according to the changes to other properties.
+     *
+     *  Currently it has been tested to modify the property values as function of other properties
+     *
      *  Allowed property valies are obtrained from property's allowedValues function, and the purpose the  
      *  function interfaced here is to modify its output.
      *  
@@ -74,7 +78,7 @@ class Property;
      *  simple PropertyWithValue, this function has to replace the validator. 
      *  For WorkspaceProperty, which obtains its values from dataservice and filters them by validators, 
      *  a new validator has to be a new filter      */
-    virtual void modify_allowed_values(Property * const){};
+    virtual void applyChanges(Property * const){};
  
     //------------------------------------------------------------------------------------------------------------
     /** Set the property manager (i.e. algorithm) containing the other properties to use to validate
@@ -92,7 +96,9 @@ class Property;
 
     /** Pointer to the property manager (i.e. algorithm) containing the other properties to use to validate */
     const IPropertyManager * m_propertyManager;
-
+  private:
+      // non-copyable directly
+      IPropertySettings(const IPropertySettings &){}
   };
 
 

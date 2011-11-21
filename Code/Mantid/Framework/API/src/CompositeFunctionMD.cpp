@@ -45,7 +45,11 @@ void CompositeFunctionMD::function(double* out)const
   for(size_t i = 0; i < nFunctions(); i++)
   {
     //IFunctionMD* fun = dynamic_cast<IFunctionMD*>(getFunction(i));
-    IFitFunction* fun = getFunction(i);
+    IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(i));
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but found other type found");
+    }
     size_t nWS =  m_wsIndex[i].size();
     for(size_t k = 0;k < nWS; ++k)
     {
@@ -146,7 +150,11 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
 
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
-    IFitFunction* fun = getFunction(iFun);
+    IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(iFun));
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but found other type found");
+    }
     if (fun->getWorkspace())
     {
       boost::shared_ptr<const IMDWorkspace> iws =  boost::dynamic_pointer_cast<const IMDWorkspace>(fun->getWorkspace());
@@ -182,7 +190,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   }
 
   // set dimensions and calculate ws's contribution to m_dataSize
-  IFunctionMD::setWorkspace(ws,slicing,false);
+  IFitFunction::setWorkspace(ws,slicing,false);
 
   // Cache the iterators
   std::vector<IMDIterator*> iterators;

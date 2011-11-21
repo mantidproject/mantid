@@ -40,7 +40,7 @@ PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
                 Mantid::API::CompositeFunction* parent,
                 FitPropertyBrowser* browser,
                 QtBrowserItem* item)
-                :FitFunctionHandler(fun),m_browser(browser),
+                :FunctionHandler(fun),m_browser(browser),
                 m_cf(dynamic_cast<Mantid::API::CompositeFunction*>(fun)),
                 m_pf(dynamic_cast<Mantid::API::IPeakFunction*>(fun)),
                 m_parent(parent),
@@ -137,7 +137,11 @@ void PropertyHandler::init()
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      Mantid::API::IFitFunction* f = m_cf->getFunction(i);
+      Mantid::API::IFitFunction* f = dynamic_cast<Mantid::API::IFitFunction*>(m_cf->getFunction(i));
+      if (!f)
+      {
+        throw std::runtime_error("IFitFunction expected but func function of another type");
+      }
       PropertyHandler* h = new PropertyHandler(f,m_cf,m_browser);
       f->setHandler(h);
     }
@@ -1408,7 +1412,7 @@ void PropertyHandler::setFunctionWorkspace()
       std::string wsName = m_browser->m_workspaceNames[index].toStdString();
       Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
       QString wsPar = QString("WorkspaceIndex=%1").arg(m_browser->m_intManager->value(m_workspaceIndex));
-      ifun()->setWorkspace(ws,wsPar.toStdString());
+      ifun()->setWorkspace(ws,wsPar.toStdString(),true);
       m_item->property()->insertSubProperty(m_workspaceIndex,m_workspace);
     }
     else

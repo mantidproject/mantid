@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -322,12 +323,10 @@ private:
     Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
       (WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
 
-    double spec;
     double x;
 
     for(int iSpec=0;iSpec<nSpec;iSpec++)
     {
-      spec = iSpec;
       Mantid::MantidVec& X = ws->dataX(iSpec);
       Mantid::MantidVec& Y = ws->dataY(iSpec);
       Mantid::MantidVec& E = ws->dataE(iSpec);

@@ -9,6 +9,7 @@
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/LineOverlay.h"
 #include "qmenubar.h"
 #include <iomanip>
 #include <iosfwd>
@@ -24,6 +25,7 @@
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
+#include <qwt_picker_machine.h>
 #include <sstream>
 #include <vector>
 #include <qfiledialog.h>
@@ -34,6 +36,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
 
 //------------------------------------------------------------------------------------
 /** Constructor */
@@ -87,6 +93,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(colorRangeFullSlot()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
+  QObject::connect(ui.btnDoLine, SIGNAL(toggled(bool)), this, SLOT(btnDoLineToggled(bool)));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -96,6 +103,11 @@ SliceViewer::SliceViewer(QWidget *parent)
   loadSettings();
 
   updateDisplay();
+
+  // -------- Line Overlay ----------------
+  m_lineOverlay = new LineOverlay(m_plot);
+  m_lineOverlay->setVisible(false);
+
 }
 
 //------------------------------------------------------------------------------------
@@ -386,6 +398,14 @@ void SliceViewer::colorRangeChanged()
 }
 
 //------------------------------------------------------------------------------------
+/// Slot called when the btnDoLine button is checked/unchecked
+void SliceViewer::btnDoLineToggled(bool checked)
+{
+  m_lineOverlay->setVisible(checked);
+  emit showLineViewer(checked);
+}
+
+//------------------------------------------------------------------------------------
 /// Slot for zooming into
 void SliceViewer::zoomInSlot()
 {
@@ -605,6 +625,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
   if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
   m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
+  m_slicePoint = VMD(slicePoint);
 
   m_X = m_dimensions[m_dimX];
   m_Y = m_dimensions[m_dimY];
@@ -626,6 +647,9 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
+
+  // Send out a signal
+  emit changedSlicePoint(m_slicePoint);
 //  std::cout << m_plot->sizeHint().width() << " width\n";
 }
 
@@ -668,7 +692,12 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Send out a signal
+  emit changedShownDim(m_dimX, m_dimY);
+  // Show the new slice
   this->updateDisplay();
 }
 
 
+} //namespace
+}

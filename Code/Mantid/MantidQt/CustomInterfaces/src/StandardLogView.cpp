@@ -3,9 +3,10 @@
 //----------------------
 #include "MantidQtCustomInterfaces/StandardLogView.h"
 #include "MantidQtCustomInterfaces/LogPresenter.h"
-#include <qtablewidget.h>
-#include <qpushbutton.h>
-#include <qboxlayout.h>
+#include <QTableWidget>
+#include <QPushButton>
+#include <QBoxLayout>
+#include <QHeaderView>
 
 namespace MantidQt
 {
@@ -40,6 +41,7 @@ namespace MantidQt
       int logsSize = int(logs.size());
       m_tableWidget->setRowCount(logsSize);
       m_tableWidget->setColumnCount(2);
+      m_tableWidget->horizontalHeader()->setStretchLastSection(true);
       
       //Populate the tree with log names and values
       for(int i = 0; i < logsSize; i++)

@@ -1,5 +1,5 @@
 #include "PeakPickerTool.h"
-#include "MantidCurve.h"
+#include "MantidMatrixCurve.h"
 #include "MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "../FunctionCurve.h"
@@ -40,7 +40,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
     }
     else
     {
-      MantidCurve* mcurve = dynamic_cast<MantidCurve*>(curve);
+      MantidMatrixCurve* mcurve = dynamic_cast<MantidMatrixCurve*>(curve);
       if (mcurve)
       {
         m_wsName = mcurve->workspaceName();
@@ -549,10 +549,10 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(m_curveFitName);
   graph()->removeCurve(m_curveDifName);
 
-  new MantidCurve(m_curveFitName,out,graph(),1,false);
+  new MantidMatrixCurve(m_curveFitName,out,graph(),1,false);
   if (m_fitPropertyBrowser->plotDiff())
   {
-    new MantidCurve(m_curveDifName,out,graph(),2,false);
+    new MantidMatrixCurve(m_curveDifName,out,graph(),2,false);
   }
 
   //customise the plot
@@ -873,7 +873,8 @@ void PeakPickerTool::plotGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
-  m_fitPropertyBrowser->customisation(m_wsName);
+  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
+  m_fitPropertyBrowser->customisation(m_wsName + "." + axisLabel);
   d_graph->replot();
 }
 
@@ -882,8 +883,9 @@ void PeakPickerTool::plotCurrentGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
+  QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
+  m_fitPropertyBrowser->customisation(m_wsName + "." + axisLabel);
   d_graph->replot();
-  
 }
 
 /**

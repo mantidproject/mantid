@@ -198,7 +198,7 @@ public:
 		AnalysisDataService::Instance().remove("CSP79590_2");
 		AnalysisDataService::Instance().remove("LOQ48098");
 	}
-	void testExecGroupTwoIncompatibleWorkspaces()
+	void testExecGroupWithDifferentWorkspaces()
 	{
 		LoadRaw3 alg;
 		alg.initialize();
@@ -209,9 +209,14 @@ public:
 
 		Mantid::DataHandling::LoadNexusProcessed loader;
 		loader.initialize();
+
 		loader.setProperty("Filename","focussed.nxs");
 		loader.setProperty("OutputWorkspace","peaksWS");
-		TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+		loader.setProperty("Filename","LOQ49886.nxs");
+		loader.setProperty("OutputWorkspace","LOQ49886");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
 
 		Mantid::Algorithms::FindPeaks finder;
 		finder.initialize();
@@ -222,17 +227,47 @@ public:
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("foundpeaks")) );
 		TS_ASSERT( finder.isExecuted() );
 
-        GroupWorkspaces grpwsalg;
+    GroupWorkspaces grpwsalg;
 		grpwsalg.initialize();
 		std::vector<std::string >input;
 		input.push_back("LOQ48094");
 		input.push_back("foundpeaks");
+    input.push_back("LOQ49886");
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","NewGroup"));
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
 		TS_ASSERT( !grpwsalg.isExecuted() );
-				
+
+    AnalysisDataService::Instance().remove("LOQ48094");
+    AnalysisDataService::Instance().remove("foundpeaks");
+    AnalysisDataService::Instance().remove("LOQ49886");
 	}
+
+  void testExecGroupWithTableWorkspaces()
+  {
+    LoadRaw3 alg;
+		alg.initialize();
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48094.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48094"));
+		TS_ASSERT_THROWS_NOTHING( alg.execute());
+		TS_ASSERT( alg.isExecuted() );
+
+    boost::shared_ptr<Workspace>tw(new Mantid::DataObjects::TableWorkspace);
+    AnalysisDataService::Instance().add("table",tw);
+
+    GroupWorkspaces grpwsalg;
+		grpwsalg.initialize();
+		std::vector<std::string >input;
+		input.push_back("LOQ48094");
+		input.push_back("table");
+		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
+		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","NewGroup"));
+		TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
+		TS_ASSERT( grpwsalg.isExecuted() );
+
+    AnalysisDataService::Instance().remove("LOQ48094");
+    AnalysisDataService::Instance().remove("table");
+  }
 
 	private:
 	//Mantid::Algorithms::GroupWorkspaces grpwsalg;

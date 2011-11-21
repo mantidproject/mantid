@@ -21,6 +21,7 @@
 //#include <MantidDataObjects/PeaksWorkspace.h>
 
 #include <Poco/NObserver.h>
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 
 //-------------------------------
@@ -139,8 +140,10 @@ public:
 //  boost::shared_ptr<DataObjects::PeaksWorkspace> retrievePeaksWorkspace(const std::string& wsName);
 //  /// Returns a pointer to the IEventWorkpace requested
 //  boost::shared_ptr<DataObjects::EventWorkspace> retrieveEventWorkspace(const std::string& wsName);
-//  /// Returns a pointer to the IMDWorkspace requested
+  /// Returns a pointer to the IMDWorkspace requested
   boost::shared_ptr<API::IMDWorkspace> retrieveIMDWorkspace(const std::string& wsName);
+  /// Returns a pointer to the IMDWorkspace requested
+  boost::shared_ptr<API::IMDHistoWorkspace> retrieveIMDHistoWorkspace(const std::string& wsName);
   /// Returns a pointer to the IMDEventWorkspace requested
   boost::shared_ptr<API::IMDEventWorkspace> retrieveIMDEventWorkspace(const std::string& wsName);
   /// Returns a pointer to the TableWorkspace requested
@@ -179,8 +182,17 @@ public:
   virtual void workspaceStoreCleared() {}
   //@}
 
-  ///Send a log message to the Mantid Framework with a specified priority
+  /// Send an error log message to the Mantid Framework
+  void sendErrorMessage(const std::string & msg);
+  /// Send a warning log message to the Mantid Framework
+  void sendWarningMessage(const std::string & msg);
+  /// Send a (notice) log message to the Mantid Framework
   void sendLogMessage(const std::string & msg);
+  /// Send a warning log message to the Mantid Framework
+  void sendInformationMessage(const std::string & msg);
+  /// Send a debug log message to the Mantid Framework
+  void sendDebugMessage(const std::string & msg);
+
   /// Create the simple Python API for Mantid
   void createPythonSimpleAPI();
   /// Register a Python algorithm object with the algorithm factory

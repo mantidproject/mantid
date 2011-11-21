@@ -26,6 +26,8 @@ namespace Vates
 namespace SimpleGui
 {
 
+class ColorSelectionDialog;
+class RotationPointDialog;
 class ViewBase;
 
 /**
@@ -71,6 +73,8 @@ public:
   /// Default destructor.
   virtual ~MdViewerWidget();
 
+  /// Add extra menus for standalone mode.
+  void addMenus();
   /**
    * Connect ParaView's data loader the given action.
    * @param action the action to connect data loading to
@@ -86,6 +90,10 @@ public:
 protected slots:
   /// Check for certain updates when an accept is fired.
   void checkForUpdates();
+  /// Pop-up the color options dialog.
+  void onColorOptions();
+  /// Pop-up the rotation point dialog.
+  void onRotationPoint();
   /**
    * Load and render data from the given source.
    * @param source a ParaView compatible source
@@ -100,11 +108,13 @@ protected slots:
 private:
   Q_DISABLE_COPY(MdViewerWidget)
 
+  ColorSelectionDialog *colorDialog; ///< Holder for the color options dialog
   ViewBase *currentView; ///< Holder for the current view
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
   bool isPluginInitialized; ///< Flag for plugin initialization
   bool pluginMode; ///< Flag to say widget is in plugin mode
+  RotationPointDialog *rotPointDialog; ///< Holder for the rotation point dialog
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
@@ -112,6 +122,10 @@ private:
   void checkEnvSetup();
   /// Function to create the pqPVApplicationCore object in plugin mode
   void createAppCoreForPlugin();
+  /// Add view specific stuff to a menu.
+  void createMenus();
+  /// Consolidate constructor related items.
+  void internalSetup(bool pMode);
   /// Disable communication with the proxy tab widget.
   void removeProxyTabWidgetConnections();
   /// Perform first render and final setup for mode buttons.

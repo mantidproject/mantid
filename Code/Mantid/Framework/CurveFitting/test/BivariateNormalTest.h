@@ -11,6 +11,7 @@
 
 #include "MantidCurveFitting/BivariateNormal.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -234,7 +235,7 @@ public:
     
     ws->setX(0,x_vec_ptr);
 
-    NormalFit.setWorkspace( ws, std::string("StartX=0,EndX=857,WorkspaceIndex=0") );
+    NormalFit.setWorkspace( ws, std::string("StartX=0,EndX=857,WorkspaceIndex=0"), true );
 
     double* out = new double[nCells];
     NormalFit.functionMW(out, x, nCells);

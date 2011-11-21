@@ -146,7 +146,7 @@ public:
     void getSelectedAlgorithm(QString& algName, int& version);
 
     // Adjusts QtiPlot's main menu if a MantidMatrix becomes active (receives focus)
-    bool menuAboutToShow(QMdiSubWindow *w);
+    bool menuAboutToShow(MdiSubWindow *w);
 
     // Removes references to MantidMatrix w in QtiPlot (called when matrix closes)
     void removeWindowFromLists(MdiSubWindow* w);
@@ -202,7 +202,7 @@ public slots:
     MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
 
 public:
-    MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false);
+    MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, Graph::CurveType style = Graph::Unspecified);
     MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false);
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
@@ -249,7 +249,7 @@ public:
    */
     // The Python API wouldn't accept a multimap as a type so had to resort to this which is still more efficient than
     // the old merge plots method
-  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>& spec_list, bool errs=true); 
+  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
@@ -341,7 +341,10 @@ public slots:
     // Invoke the Vates Simple User Interface
     void showVatesSimpleInterface();
 
-    // SlcieViewer
+    // Invoke the plot of MD intensity vs non-integrated dimension.
+    void showMDPlot();
+
+    // SliceViewer
     void showSliceViewer();
 
     // #539: For adding Workspace History display to MantidPlot

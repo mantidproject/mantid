@@ -8,7 +8,6 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidTestHelpers/DLLExport.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
@@ -32,7 +31,7 @@ namespace MDEventsTestHelper
    *
    * @return EventWorkspace_sptr
    */
-  DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents);
+  Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents);
 
   /** Make a (optionally) file backed MDEventWorkspace with 10000 fake random data points
    *
@@ -40,10 +39,10 @@ namespace MDEventsTestHelper
    * @param fileBacked :: true for file-backed
    * @return MDEW sptr
    */
-  DLL_TESTHELPERS Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
+  Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
 
   /// Make a fake n-dimensional MDHistoWorkspace
-  DLL_TESTHELPERS Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0,
+  Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, double max = 10.0,
       double errorSquared=1.0);
 
 
@@ -116,13 +115,13 @@ namespace MDEventsTestHelper
   //=====================================================================================
 
   /** Generate an empty MDBox */
-  DLL_TESTHELPERS MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto=10);
+  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto=10);
 
   /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
-  DLL_TESTHELPERS MDBox<MDLeanEvent<3>,3> * makeMDBox3();
+  MDBox<MDLeanEvent<3>,3> * makeMDBox3();
 
   /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
-  DLL_TESTHELPERS std::vector<MDLeanEvent<1> > makeMDEvents1(size_t num);
+  std::vector<MDLeanEvent<1> > makeMDEvents1(size_t num);
 
 
   //-------------------------------------------------------------------------------------

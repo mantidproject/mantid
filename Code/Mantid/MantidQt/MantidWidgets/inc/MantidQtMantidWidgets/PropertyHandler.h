@@ -35,7 +35,7 @@ class FitPropertyBrowser;
 /**
  * Helps display and edit functions in FitPropertyBrowser
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PropertyHandler:public QObject, public Mantid::API::FitFunctionHandler
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PropertyHandler:public QObject, public Mantid::API::FunctionHandler
 {
   Q_OBJECT
 public:

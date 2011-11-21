@@ -19,6 +19,8 @@
 #include <cctype>
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
+
 namespace Mantid
 {
   namespace API
@@ -41,6 +43,26 @@ namespace Mantid
       {
         Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
       }
+
+      // determine from Mantid property how sensitive Mantid should be
+      std::string casesensitive = Mantid::Kernel::ConfigService::Instance().getString("filefinder.casesensitive");
+      if ( boost::iequals("Off",casesensitive) )
+        globOption = Poco::Glob::GLOB_CASELESS;
+      else
+        globOption = Poco::Glob::GLOB_DEFAULT;
+    }
+
+
+    /**
+     * Option to set if file finder should be case sensitive
+     * @param case :: If true then set to case sensitive
+     */
+    void FileFinderImpl::setCaseSensitive(const bool cs) 
+    {
+      if ( cs )
+        globOption = Poco::Glob::GLOB_DEFAULT;
+      else
+        globOption = Poco::Glob::GLOB_CASELESS;
     }
 
     /**
@@ -72,26 +94,14 @@ namespace Mantid
       std::vector<std::string>::const_iterator it = searchPaths.begin();
       for (; it != searchPaths.end(); ++it)
       {
-        if (fName.find("*") != std::string::npos)
-        {
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
-          Kernel::Glob::glob(pathPattern, files);
+          Kernel::Glob::glob(pathPattern, files, globOption);
           if (!files.empty())
           {
             return *files.begin();
           }
-        }
-        else
-        {
-          Poco::Path path(*it, fName);
-          Poco::File file(path);
-          if (file.exists())
-          {
-            return path.toString();
-          }
-        }
       }
       return "";
     }
@@ -428,7 +438,7 @@ namespace Mantid
             {
               continue;
               std::set < std::string > files;
-              Kernel::Glob::glob(pathPattern, files);
+              Kernel::Glob::glob(pathPattern, files, globOption);
             }
             else
             {

@@ -35,10 +35,13 @@ The Precount option will count the number of events in each pixel before allocat
 #include <fstream>
 #include <sstream>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using std::endl;
 using std::map;
@@ -143,6 +146,9 @@ public:
 
     //Default pulse time (if none are found)
     Mantid::Kernel::DateAndTime pulsetime;
+    Mantid::Kernel::DateAndTime lastpulsetime(0);
+
+    bool pulsetimesincreasing = true;
 
     // Index into the pulse array
     int pulse_i = 0;
@@ -204,6 +210,12 @@ public:
         {
           alg->eventVectors[detId]->push_back( event );
 
+          // determine if pulse times continue to increase
+          if (pulsetime < lastpulsetime)
+            pulsetimesincreasing = false;
+          else
+            lastpulsetime = pulsetime;
+
 //        //Find the the workspace index corresponding to that pixel ID
 //        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[event_id[i]]);
 //        // Add it to the list at that workspace index
@@ -214,18 +226,14 @@ public:
           if (tof > my_longest_tof) { my_longest_tof = tof;}
 
           // Track all the touched wi
-          if (compress)
-          {
-            usedDetIds[detId] = true;
-          }
+          usedDetIds[detId] = true;
         } // valid detector IDs
 
       }
     } //(for each event)
 
-
-    //------------ Compress Events ------------------
-    if (compress)
+    //------------ Compress Events (or set sort order) ------------------
+    if (compress || pulsetimesincreasing)
     {
       // Do it on all the detector IDs we touched
       std::set<size_t>::iterator it;
@@ -236,7 +244,10 @@ public:
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID ]);
           EventList * el = WS->getEventListPtr(wi);
-          el->compressEvents(alg->compressTolerance, el);
+          if (compress)
+            el->compressEvents(alg->compressTolerance, el);
+          else if (pulsetimesincreasing)
+            el->setSortOrder(DataObjects::PULSETIME_SORT);
         }
       }
     }
@@ -1698,11 +1709,15 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObje
  * Load the time of flight data. file must have open the group containing "time_of_flight" data set.
  * @param file :: The nexus file to read from.
  * @param WS :: The event workspace to write to.
+ * @param binsName :: bins name
+ * @param start_wi :: First workspace index to process
+ * @param end_wi :: Last workspace index to process
  */
 void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS,
   const std::string& binsName,size_t start_wi, size_t end_wi)
 {
   file.openData(binsName);
+  // time of flights of events
   std::vector<float> tof;
   file.getData(tof);
   // todo: try to find if tof can be reduced to just 3 numbers: start, end and dt
@@ -1711,31 +1726,48 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
     end_wi = WS->getNumberHistograms();
   }
 
+  // random number generator
+  boost::mt19937 rand_gen;
+
+  // loop over spectra
   for(size_t wi = start_wi; wi < end_wi; ++wi)
   {
     EventList& event_list = WS->getEventList(wi);
+    // sort the events
     event_list.sortTof();
     std::vector<TofEvent>& events = event_list.getEvents();
-    size_t i = 0;
-    size_t n = tof.size() - 1;
-    size_t m = 0;
-    for(std::vector<TofEvent>::iterator ev = events.begin(); ev != events.end(); ++ev)
+    if (events.empty()) continue;
+    size_t n = tof.size();
+    // iterate over the events and time bins
+    std::vector<TofEvent>::iterator ev = events.begin();
+    std::vector<TofEvent>::iterator ev_end = events.end();
+    for(size_t i = 1; i < n; ++i)
     {
-      while(i < n && double(tof[i]) < ev->m_tof)
+      double right = double(tof[i]);
+      // find the right boundary for the current event
+      if( right < ev->m_tof )
       {
-        if (m > 0)
-        {// m events in this bin
-          double dx = double(tof[i+1] - tof[i]) / (double(m) + 1);
-          double x = double(tof[i]);
-          for(std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev; ++ev1, x += dx)
-          {
-            ev1->m_tof = x;
-          }
-        }
-        m = 0;
-        ++i;
+        continue;
       }
-      ++m; // count events in the i-th bin
+      // count events which have the same right boundary
+      size_t m = 0;
+      while(ev != ev_end && ev->m_tof < right)
+      {
+        ++ev;
+        ++m;  // count events in the i-th bin
+      }
+      
+      if (m > 0)
+      {// m events in this bin
+        double left = double(tof[i-1]);
+        boost::uniform_real<> distribution(left,right);
+        // spread the events uniformly inside the bin
+        for(std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev; ++ev1)
+        {
+          ev1->m_tof = distribution(rand_gen);
+        }
+      }
+      
     }
   }
   file.closeData();

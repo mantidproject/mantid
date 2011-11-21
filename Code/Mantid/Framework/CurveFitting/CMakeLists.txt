@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/LevenbergMarquardtMinimizer.cpp
 	src/Linear.cpp
 	src/LinearBackground.cpp
+	src/LogNormal.cpp
 	src/Lorentzian.cpp
 	src/Lorentzian1D.cpp
 	src/MultiBG.cpp
@@ -35,6 +36,7 @@ set ( SRC_FILES
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
+	src/StretchExp.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 )
@@ -68,6 +70,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
 	inc/MantidCurveFitting/Linear.h
 	inc/MantidCurveFitting/LinearBackground.h
+	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MultiBG.h
@@ -101,6 +104,7 @@ set ( TEST_FILES
 	test/IkedaCarpenterPVTest.h
 	test/LinearBackgroundTest.h
 	test/LinearTest.h
+	test/LogNormalTest.h
 	test/Lorentzian1DTest.h
 	test/LorentzianTest.h
 	test/MultiBGTest.h
@@ -135,9 +139,9 @@ include_directories ( inc )
 target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../Nexus/inc )
+  include_directories ( ../DataHandling/inc )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES} )
-  target_link_libraries( CurveFittingTest CurveFitting DataHandling Nexus )
+  target_link_libraries( CurveFittingTest CurveFitting DataHandling )
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CurveFittingTest PROPERTY FOLDER "UnitTests" )

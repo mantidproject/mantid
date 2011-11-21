@@ -202,7 +202,10 @@ def Load(*args, **kwargs):
     algm.setPropertyValue('Filename', filename) # Must be set first
     algm.setPropertyValue('OutputWorkspace', wkspace)
     for key, value in kwargs.iteritems():
-        algm.setPropertyValue(key, _makeString(value).lstrip('? '))
+        try:
+            algm.setPropertyValue(key, _makeString(value).lstrip('? '))
+        except RuntimeError:
+            mtd.sendWarningMessage("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
     algm.execute()
     return algm
 

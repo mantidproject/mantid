@@ -4,15 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IDataFileChecker.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Sample.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-
 
 namespace Mantid
 {

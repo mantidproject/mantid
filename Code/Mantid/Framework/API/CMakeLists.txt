@@ -32,9 +32,12 @@ set ( SRC_FILES
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
 	src/IFitFunction.cpp
+	src/IFunction.cpp
+	src/TempFunction.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/IMDEventWorkspace.cpp
+	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
 	src/IPeak.cpp
@@ -120,7 +123,9 @@ set ( INC_FILES
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
+	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -132,11 +137,14 @@ set ( INC_FILES
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFitFunction.h
+	inc/MantidAPI/IFunction.h
+	inc/MantidAPI/TempFunction.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h
+	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IPeak.h
@@ -268,7 +276,7 @@ set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
 if ( CXXTEST_FOUND )
-  include_directories (  )
+  include_directories ( ../TestHelpers/inc )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
     target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )

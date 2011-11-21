@@ -6,7 +6,7 @@ CSS_VALID = """QLineEdit {
             }"""
             
 CSS_INVALID = """QLineEdit {
-                background-color: #F7E93A;
+                background-color: #FFFF3C;
             }"""
 
 CSS_DEFAULT = """QLineEdit{}"""
@@ -38,3 +38,11 @@ def _check_and_get_int_line_edit(line_edit):
     else:
         line_edit.setStyleSheet(CSS_INVALID)
     return value[0]
+
+def set_valid(line_edit, is_valid):
+    if is_valid:
+        line_edit.setStyleSheet(CSS_DEFAULT)
+    else:
+        line_edit.setStyleSheet(CSS_INVALID)
+        
+    

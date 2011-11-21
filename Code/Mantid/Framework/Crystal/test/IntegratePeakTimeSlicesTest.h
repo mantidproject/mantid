@@ -12,7 +12,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidCurveFitting/Fit.h"
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -48,6 +47,10 @@ using namespace std;
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
 {
 public:
+  IntegratePeakTimeSlicesTest()
+  {
+    Mantid::API::FrameworkManager::Instance();
+  }
   void test_abc()
   {
     int NRC = 30;

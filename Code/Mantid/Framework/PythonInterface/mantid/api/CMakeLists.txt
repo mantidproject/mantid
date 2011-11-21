@@ -9,6 +9,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 #    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
   src/Algorithm.cpp
+  src/AlgorithmFactory.cpp
   src/AlgorithmManager.cpp
   src/AnalysisDataService.cpp
   src/ExperimentInfo.cpp
@@ -19,13 +20,15 @@ set ( EXPORT_FILES
   src/IEventWorkspace.cpp
 )  
 
-# Files containing addtional helper code that do not require processing
+# Files containing additional helper code that do not require processing
 set ( SRC_FILES 
   src/AlgorithmWrapper.cpp
+  src/WorkspaceToNumpy.cpp
 )
 
 set ( INC_FILES 
   ${HEADER_DIR}/api/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/WorkspaceToNumpy.h
 )
 
 set ( PY_FILES 

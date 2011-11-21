@@ -12,7 +12,8 @@ set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qua
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
-set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
+# -Wno-unused-result: Do not warn about unused return values in some C functions
+set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings -Wno-unused-result")
 
 # Set the options fo gcc and g++
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )

@@ -39,14 +39,17 @@ set ( TEST_FILES
 )
 
 # Python unit tests
-set ( TEST_PY_FILES test/ImportTest.py
-                    test/PythonAlgorithmTest.py
-                    test/NumpyTest.py
-		    test/WorkspaceHistoryTest.py
-		    test/MatrixWorkspaceTest.py
-		    test/SettingsTest.py
-		    test/SANSWorkflowTest.py
-		    test/SANSMaskCommandsTest.py
+set ( TEST_PY_FILES 
+	test/ImportTest.py
+	test/PythonAlgorithmTest.py
+	test/MDHistoWorkspaceTest.py
+	test/NumpyTest.py
+	test/MatrixWorkspaceTest.py
+	test/SettingsTest.py
+	test/SANSWorkflowTest.py
+	test/SANSMaskCommandsTest.py
+	test/WorkspaceHistoryTest.py
+	test/WorkspaceGroupTest.py
 )
 
 if(UNITY_BUILD)
@@ -173,7 +176,7 @@ endif ()
 # to ensure that the stdc++ library appears as early in the link list as possible so that it
 # is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 else ()
   set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 endif ()
@@ -189,9 +192,9 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 ###########################################################################
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
+  include_directories ( ../TestHelpers/inc ) # For FakeObjects.h
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI TestHelpers )
+  target_link_libraries( PythonAPITest PythonAPI )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonAPITest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonAPITest )

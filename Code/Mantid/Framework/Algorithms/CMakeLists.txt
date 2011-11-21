@@ -58,7 +58,7 @@ set ( SRC_FILES
 	src/DspacemaptoCal.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
-	src/EditTOFPowderDiffractomerGeometry.cpp
+	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
@@ -159,7 +159,7 @@ set ( SRC_FILES
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/Transpose.cpp
-	src/UnGroupWorkspaces.cpp
+	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
@@ -228,7 +228,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DspacemaptoCal.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
-	inc/MantidAlgorithms/EditTOFPowderDiffractomerGeometry.h
+	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
@@ -330,7 +330,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/Transpose.h
-	inc/MantidAlgorithms/UnGroupWorkspaces.h
+	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
@@ -394,7 +394,7 @@ set ( TEST_FILES
 	test/DiffractionFocussingTest.h
 	test/DivideTest.h
 	test/DspacemaptoCalTest.h
-	test/EditTOFPowderDiffractomerGeometryTest.h
+	test/EditInstrumentGeometryTest.h
 	test/ExponentialCorrectionTest.h
 	test/ExponentialTest.h
 	test/ExtractFFTSpectrumTest.h
@@ -482,7 +482,7 @@ set ( TEST_FILES
 	test/SumRowColumnTest.h
 	test/SumSpectraTest.h
 	test/TransposeTest.h
-	test/UnGroupWorkspacesTest.h
+	test/UnGroupWorkspaceTest.h
 	test/UnaryOperationTest.h
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
@@ -539,8 +539,14 @@ if ( CXXTEST_FOUND )
   
   # Make the rest of the tests
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
+  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../TestHelpers/src/SANSInstrumentCreationHelper.cpp
+                        ../TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
+  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling MDEvents )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )

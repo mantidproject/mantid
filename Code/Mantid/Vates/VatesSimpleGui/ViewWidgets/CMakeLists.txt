@@ -2,7 +2,6 @@ project( MantidVatesSimpleGuiViewWidgets )
 
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
-  inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
@@ -16,7 +15,6 @@ set( INCLUDE_FILES
 )
 
 set( SOURCE_FILES
-  src/ColorSelectionWidget.cpp
   src/ColorSelectionDialog.cpp
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
@@ -31,7 +29,6 @@ set( SOURCE_FILES
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
-  inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
@@ -45,7 +42,6 @@ qt4_wrap_cpp( MOC_SOURCES
 # These are the ui files to be processed using
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
-  inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionDialog.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
@@ -55,6 +51,9 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.ui
 )
 
+# Add the QtWidgets icons
+qt4_add_resources( RES_FILES icons/ViewWidgetsIcons.qrc )
+
 # Setup the include locations.
 include_directories(
   inc
@@ -62,11 +61,18 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
 )
 
+set( ALL_FILES
+${INCLUDE_FILES}
+${SOURCE_FILES}
+${MOC_SOURCES}
+${UI_BUILT_SOURCES}
+${RES_FILES}
+)
+
 # For Windows
 add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS )
 # Add the target for this directory
-add_library( VatesSimpleGuiViewWidgets ${INCLUDE_FILES} ${SOURCE_FILES}
-${MOC_SOURCES} ${UI_BUILT_SOURCES} )
+add_library( VatesSimpleGuiViewWidgets ${ALL_FILES} )
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgets )
 # Add to the 'VatesSimpleGui' group in VS

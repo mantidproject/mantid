@@ -49,7 +49,7 @@ namespace Mantid
 namespace Kernel {
 
 // the class to verify and modify interconnected properties. 
-class prop_changer: public IPropertySettings
+class PropChanger: public IPropertySettings
 {
     // the name of the property, which specifies the workspace which has to be modified
     std::string host_ws_name;
@@ -65,7 +65,7 @@ class prop_changer: public IPropertySettings
     // auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
    void  monitor_id_reader()const;
 public:
-    prop_changer(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty):
+    PropChanger(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty):
       host_ws_name(WSProperty),host_monws_name(MonWSProperty), host_algo(algo),is_enabled(true){}
   // if input to "
    bool isEnabled()const{
@@ -88,7 +88,7 @@ public:
        return true;
    }
    // function which modifies the allowed values for the list of monitors. 
-   void modify_allowed_values(Property *const pProp){
+   void applyChanges(Property *const pProp){
        PropertyWithValue<int>* piProp  = dynamic_cast<PropertyWithValue<int>* >(pProp);
        if(!piProp){
            throw(std::invalid_argument("modify allowed value has been called on wrong property"));
@@ -101,13 +101,13 @@ public:
            
    }
    // interface needs it but if indeed proper clone used -- do not know. 
-   virtual IPropertySettings* clone(){return new prop_changer(host_algo,host_ws_name,host_monws_name);}
+   virtual IPropertySettings* clone(){return new PropChanger(host_algo,host_ws_name,host_monws_name);}
 
 
 };
 // read the monitors list from the workspace;
 void
-prop_changer::monitor_id_reader()const
+PropChanger::monitor_id_reader()const
 {
     allowed_values.clear();
     API::MatrixWorkspace_const_sptr inputWS = host_algo->getProperty(host_ws_name);
@@ -171,7 +171,8 @@ void NormaliseToMonitor::init()
   declareProperty("MonitorSpectrum",-1,
     "The spectrum number of the monitor spectrum within the InputWorkspace");
   // set up the validator, which would verify if spectrum is correct
-   setPropertySettings("MonitorSpectrum",new prop_changer(this,"InputWorkspace","MonitorWorkspace"));
+  setPropertySettings("MonitorSpectrum",new PropChanger(this,"InputWorkspace","MonitorWorkspace"));
+
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
     "A single-spectrum workspace containing the monitor spectrum");

@@ -150,8 +150,7 @@ public:
     Timer tim1;
     for (size_t i=0; i < num; i++)
     {
-      Task * task;
-      task = sc.pop(0);
+      sc.pop(0);
     }
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);
@@ -172,8 +171,7 @@ public:
     Timer tim1;
     for (size_t i=0; i < num; i++)
     {
-      Task * task;
-      task = sc.pop(0);
+      sc.pop(0);
     }
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);

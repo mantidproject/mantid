@@ -497,7 +497,7 @@ public:
   enum TicksStyle{NoTicks = 0, Out = 1, InOut = 2, In = 3};
   enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
 			Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
-			Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, Contour, Function, ImagePlot};
+			Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot};
 
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
@@ -658,6 +658,7 @@ public:
   void insertCurve(MultiLayer* ml, int i); 
   void setCols(int);
   void setRows(int);
+  void setName(const QString&);
   void setSpacing (int, int);
   void setMargins (int, int, int, int);
   void setLayerCanvasSize (int, int);
@@ -1731,7 +1732,7 @@ sipClass=sipFindClass(sipCpp->className());
 %End
 
 public:  
-  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false);
+  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void setIsRunning(bool);
   MantidMatrix* getMantidMatrix(const QString &);

@@ -264,12 +264,12 @@ m_mantidui(mantidui)
   if (m_customFittings)
   {
     QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
-    m_data = m_boolManager->addProperty("Fit To binned data");
+    QtProperty* rawBunchdata = m_boolManager->addProperty("Fit To binned data");
     bool data = settings.value("Fit To binned data",QVariant(false)).toBool();
-    m_boolManager->setValue(m_data,data);
+    m_boolManager->setValue(rawBunchdata,data);
     customSettingsGroup->addSubProperty(m_minimizer);
     customSettingsGroup->addSubProperty(m_plotDiff);
-    customSettingsGroup->addSubProperty(m_data);
+    customSettingsGroup->addSubProperty(rawBunchdata);
     m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
   }
 
@@ -1328,6 +1328,13 @@ void FitPropertyBrowser::fit()
 {
   std::string wsName = workspaceName();
 
+  // Emit a signal before the fitting is started. 
+  // This gives the opportunity to customize a fit - before its starts
+  // which is e.g. used by MuonAnalysis fitting
+  // (wsName that the fit has been done against is sent as a parameter)
+  //emit beforeFitting(QString::fromStdString(wsName));
+  emit beforeFitting(m_boolManager);
+
   if (wsName.empty())
   {
     QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
@@ -1380,18 +1387,23 @@ void FitPropertyBrowser::fit()
     {
       funStr = *(m_compositeFunction->getFunction(0));
     }
+
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
+    }
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
+    {
+      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
+    }
+
     // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
     if (m_customFittings)
     {
-      // Find out if it bunch has been selected and rebunch if appropraite 
-      if (data())
-      {
-        emit bunchData(wsName);
-      }
-      else //Raw must have been selected
-      {
-        emit rawData(wsName);
-      } 
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
       alg->setPropertyValue("InputWorkspace",wsName);
@@ -1862,7 +1874,11 @@ void FitPropertyBrowser::addTieToFunction()
   for(size_t i=0;i<m_compositeFunction->nParams();i++)
   {
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
-    Mantid::API::IFitFunction* fun = ref.getFunction();
+    Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(ref.getFunction());
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but func function of another type");
+    }
     // Pick out parameters with the same name as the one we're tying from
     if ( fun->parameterName(static_cast<int>(ref.getIndex())) == parName )
     {
@@ -2331,7 +2347,7 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFitFunction* f)const
         //}
         QString slice = "WorkspaceIndex="+QString::number(workspaceIndex())+
           ",StartX="+QString::number(startX())+",EndX="+QString::number(endX());
-        f->setWorkspace(ws,slice.toStdString());
+        f->setWorkspace(ws,slice.toStdString(),true);
       }
     }
     catch(...){}
@@ -2592,11 +2608,6 @@ bool FitPropertyBrowser::plotDiff()const
   return m_boolManager->value(m_plotDiff);
 }
 
-bool FitPropertyBrowser::data()const
-{
-  return m_boolManager->value(m_data);
-}
-
 void FitPropertyBrowser::setTextPlotGuess(const QString text) 
 {
   m_displayActionPlotGuess->setText(text);
@@ -2693,7 +2704,11 @@ void FitPropertyBrowser::setupMultifit()
       Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
     if (mws)
     {
-      Mantid::API::IFitFunction* fun = m_compositeFunction->getFunction(0);
+      Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(m_compositeFunction->getFunction(0));
+      if (!fun)
+      {
+        throw std::runtime_error("IFitFunction expected but func function of another type");
+      }
       QString fun1Ini = QString::fromStdString(*fun);
       QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace="+wsName+",WSParam=(WorkspaceIndex=0);";
       QString tieStr;
@@ -2731,7 +2746,11 @@ void FitPropertyBrowser::processMultiBGResults()
 
   // check if member functions are the same
   QStringList parNames;
-  Mantid::API::IFitFunction* fun0 = compositeFunction()->getFunction(0);
+  Mantid::API::IFitFunction* fun0 = dynamic_cast<Mantid::API::IFitFunction*>(compositeFunction()->getFunction(0));
+  if (!fun0)
+  {
+    throw std::runtime_error("IFitFunction expected but func function of another type");
+  }
   for(size_t i = 0; i < fun0->nParams(); ++i)
   {
     parNames << QString::fromStdString(fun0->parameterName(i));
@@ -2739,7 +2758,11 @@ void FitPropertyBrowser::processMultiBGResults()
 
   for(size_t i = 1; i < compositeFunction()->nFunctions(); ++i)
   {
-    Mantid::API::IFitFunction* fun = compositeFunction()->getFunction(i);
+    Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(compositeFunction()->getFunction(i));
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but func function of another type");
+    }
     for(size_t j = 0; j < fun->nParams(); ++j)
     {
       if (parNames.indexOf(QString::fromStdString(fun->parameterName(j))) < 0)
@@ -2759,7 +2782,6 @@ void FitPropertyBrowser::processMultiBGResults()
   {
     table->addColumn("double",par.toStdString());
   }
-
   // Create WorkspaceGroup with the fit results
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for(size_t i = 0; i < compositeFunction()->nFunctions(); ++i)

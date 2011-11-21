@@ -7,15 +7,33 @@
     <x>0</x>
     <y>0</y>
     <width>974</width>
-    <height>662</height>
+    <height>674</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>1</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>1</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>1</number>
+     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -33,10 +51,72 @@
       <widget class="Mantid::Vates::SimpleGui::TimeControlWidget" name="timeControlWidget" native="true"/>
      </item>
      <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="Mantid::Vates::SimpleGui::ModeControlWidget" name="modeControlWidget" native="true"/>
      </item>
      <item>
-      <widget class="Mantid::Vates::SimpleGui::ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="pqCameraToolbar" name="widget" native="true"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetCenterToDataButton">
+       <property name="toolTip">
+        <string>Reset Center to Data Center</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToData24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToData24.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetCenterToPointButton">
+       <property name="toolTip">
+        <string>Reset Center to Point</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="parallelProjButton">
+       <property name="toolTip">
+        <string>Toggle Parallel Projection</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">
@@ -133,12 +213,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
-   <extends>QWidget</extends>
-   <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>Mantid::Vates::SimpleGui::TimeControlWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h</header>
@@ -150,7 +224,15 @@
    <header>pqStatusBar.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>pqCameraToolbar</class>
+   <extends>QWidget</extends>
+   <header>pqCameraToolbar.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../icons/ViewWidgetsIcons.qrc"/>
+ </resources>
  <connections/>
 </ui>
