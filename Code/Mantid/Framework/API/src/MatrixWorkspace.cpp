@@ -652,6 +652,42 @@ namespace Mantid
       } // for each detector ID in the list
     }
 
+    double MatrixWorkspace::getXMin() const
+    {
+      double xmin;
+      double xmax;
+      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      return xmin;
+    }
+
+    double MatrixWorkspace::getXMax() const
+    {
+      double xmin;
+      double xmax;
+      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      return xmax;
+    }
+
+    void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const
+    {
+      // set to crazy values to start
+      xmin = std::numeric_limits<double>::max();
+      xmax = -1.0 * xmin;
+      size_t numberOfSpectra = this->getNumberHistograms();
+
+      // determine the data range
+      double temp;
+      for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
+      {
+        const MantidVec& dataX = this->dataX(workspaceIndex); // force using const version
+        temp = dataX.front();
+        if (temp < xmin)
+          xmin = temp;
+        temp = dataX.back();
+        if (temp > xmax)
+          xmax = temp;
+      }
+    }
 
     //---------------------------------------------------------------------------------------
     /** Integrate all the spectra in the matrix workspace within the range given.
