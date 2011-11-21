@@ -11,7 +11,6 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
-using MantidQt::SliceViewer::LineViewer;
 using Mantid::Kernel::VMD;
 
 
