@@ -372,8 +372,9 @@ class LoadTransmissions(ReductionStep):
         
         if reducer.instrument.name() == 'SANS2D':        
             beamcoords = reducer._beam_finder.get_beam_center()
-            reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1])  
-            reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
+            reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1]) 
+            if  self.trans.wksp_name != self.direct.wksp_name:
+              reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
 
         return self.trans.wksp_name, self.direct.wksp_name
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
+    <width>578</width>
     <height>527</height>
    </rect>
   </property>
@@ -88,6 +88,16 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="layoutNumBins">
+         <item>
+          <widget class="QPushButton" name="btnApply">
+           <property name="toolTip">
+            <string>Apply the 1D slice and calculate the full slice</string>
+           </property>
+           <property name="text">
+            <string>Apply</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QLabel" name="lblBins">
            <property name="text">

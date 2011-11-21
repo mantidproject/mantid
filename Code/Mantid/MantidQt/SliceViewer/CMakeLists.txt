@@ -63,6 +63,10 @@ target_link_libraries ( MantidQtSliceViewer MantidQtAPI QtPropertyBrowser ${QT_L
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 
+if ( WIN32 )
+# Does not work on windows for some reason
+else ()
+
 add_executable ( ColorBarWidgetDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/main_ColorBarWidgetDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
 target_link_libraries ( ColorBarWidgetDemo MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
@@ -75,6 +79,7 @@ include_directories ( ../../Framework/DataHandling/inc )
 include_directories ( ../../Framework/TestHelpers/inc )
 include_directories ( ../../Framework/Geometry/inc )
 
+ 
 # Extra, optional target for demoing a GUI element
 add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerDemo.cpp  
                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
@@ -88,6 +93,8 @@ add_executable ( LineViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${
 target_link_libraries ( LineViewerDemo 
                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
                        QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
+                       
+endif ()
 
 ###########################################################################
 # Installation settings

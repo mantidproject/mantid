@@ -108,20 +108,21 @@ namespace DataHandling
     for (std::map<int, std::vector<std::string> >::iterator it =  mGroupComponentsMap.begin();
         it != mGroupComponentsMap.end(); ++it)
     {
-      g_log.notice() << "Group ID = " << it->first << std::endl;
+      g_log.debug() << "Group ID = " << it->first << " With " << it->second.size() << " Components" << std::endl;
 
       for (size_t i = 0; i < it->second.size(); i ++){
 
         // a) get component
         Geometry::IComponent_const_sptr component = minstrument->getComponentByName(it->second[i]);
-        g_log.debug() << "Component Name = " << it->second[i] << "  Component ID = " << component->getComponentID() << std::endl;
+
 
         // b) component -> component assembly --> children (more than detectors)
         boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
         std::vector<Geometry::IComponent_const_sptr> children;
         asmb->getChildren(children, true);
 
-        g_log.debug() << "Number of Children = " << children.size() << std::endl;
+        g_log.debug() << "Component Name = " << it->second[i] << "  Component ID = "
+            << component->getComponentID() <<  "Number of Children = " << children.size() << std::endl;
 
         for (size_t ic = 0; ic < children.size(); ic++){
           // c) convert component to detector
@@ -135,7 +136,9 @@ namespace DataHandling
             if (itx != indexmap->end()){
               size_t wsindex = itx->second;
               mGroupWS->dataY(wsindex)[0] = it->first;
-            } else {
+            }
+            else
+            {
               g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located" << std::endl;
             }
           } // ENDIF Detector
@@ -165,10 +168,10 @@ namespace DataHandling
     for (std::map<int, std::vector<detid_t> >::iterator it =  mGroupDetectorsMap.begin();
         it != mGroupDetectorsMap.end(); ++it)
     {
-      g_log.notice() << "Group ID = " << it->first << std::endl;
+      g_log.debug() << "Group ID = " << it->first << std::endl;
 
       for (size_t i = 0; i < it->second.size()/2; i ++){
-        g_log.notice() << "Detector From = " << it->second[2*i] << ", " << it->second[2*i+1] << std::endl;
+        g_log.debug() << "Detector From = " << it->second[2*i] << ", " << it->second[2*i+1] << std::endl;
 
         for (detid_t detid = it->second[2*i]; detid <= it->second[2*i+1]; detid ++)
         {
@@ -195,7 +198,7 @@ namespace DataHandling
    */
   void LoadDetectorsGroupingFile::intializeGroupingWorkspace(){
 
-    g_log.notice() << "Instrument Name = " << mInstrumentName << std::endl;
+    g_log.debug() << "Instrument Name = " << mInstrumentName << std::endl;
 
     // 1. Create Instrument
     Algorithm_sptr childAlg = this->createSubAlgorithm("LoadInstrument");

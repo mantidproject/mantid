@@ -9,6 +9,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 #    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
   src/Algorithm.cpp
+  src/AlgorithmFactory.cpp
   src/AlgorithmManager.cpp
   src/AnalysisDataService.cpp
   src/ExperimentInfo.cpp
