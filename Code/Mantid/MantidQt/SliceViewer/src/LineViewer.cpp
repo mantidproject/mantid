@@ -276,7 +276,6 @@ void LineViewer::apply()
     m_sliceWS = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outWsName));
     this->showFull();
   }
-  delete alg;
 }
 
 // ==============================================================================================
