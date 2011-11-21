@@ -127,6 +127,7 @@ void export_algorithm()
     .def("get_property_order",&getPropertyOrder, "Returns a list of property names that is ordered "
           "such that the mandatory properties are first followed by the optional ones.")
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
+    .def("is_initialized", &IAlgorithm::isInitialized, "Returns True if the algorithm is initialized, False otherwise")
     .def("execute", &IAlgorithm::execute, "Runs the algorithm")
     .def("set_child", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")

@@ -57,7 +57,7 @@
 #include <iostream>
 #include <sstream>
 #include "MantidAPI/IMDWorkspace.h"
-#include "Mantid/SliceViewer/SliceViewerWindow.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 
 
 using namespace std;
@@ -636,7 +636,7 @@ void MantidUI::showSliceViewer()
     // Create the slice viewer MDI window
     SliceViewerWindow * w = new SliceViewerWindow(wsName, appWindow());
     // And add it
-    appWindow()->d_workspace->addSubWindow(w);
+    //appWindow()->d_workspace->addSubWindow(w);
     w->showNormal();
   }
 

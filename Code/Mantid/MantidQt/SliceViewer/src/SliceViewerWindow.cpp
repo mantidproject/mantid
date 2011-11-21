@@ -1,5 +1,3 @@
-#include "../../ApplicationWindow.h"
-#include "../../MdiSubWindow.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/DataService.h"
@@ -7,7 +5,9 @@
 #include "MantidKernel/VMD.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
-#include "SliceViewerWindow.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include <qboxlayout.h>
+#include <qmainwindow.h>
 #include <qlayout.h>
 
 using namespace Mantid;
@@ -16,11 +16,13 @@ using namespace Mantid::API;
 using namespace MantidQt::SliceViewer;
 
 
-SliceViewerWindow::SliceViewerWindow(const QString& wsName, ApplicationWindow *app , const QString& label, Qt::WFlags f)
- : MdiSubWindow(QString("Slice Viewer (") + wsName + QString(")") + label,
-                 app, QString("Slice Viewer (") + wsName + QString(")"), f),
+SliceViewerWindow::SliceViewerWindow(const QString& wsName, QWidget *app , const QString& label, Qt::WFlags f)
+ : QMainWindow(app, f),
    WorkspaceObserver()
 {
+  bool isMainWindow = dynamic_cast<QMainWindow*>(this);
+//  bool isMdi = dynamic_cast<QMdiSubWindow*>(this);
+
   // Get the workspace
   m_wsName = wsName.toStdString();
   m_ws = boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve(m_wsName) );
@@ -36,6 +38,11 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, ApplicationWindow *a
 
   // Create the m_slicer and add it to the MDI window
   QLayout * layout = this->layout();
+  if (!layout)
+  {
+    layout = new QVBoxLayout(this);
+    this->setLayout(layout);
+  }
 
   // Make a horizontal splitter
   m_splitter = new QSplitter(this);
@@ -47,15 +54,22 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, ApplicationWindow *a
   m_liner = new LineViewer(m_splitter);
   m_liner->setVisible(false);
 
-  layout->addWidget(m_splitter);
+  if (!isMainWindow)
+    layout->addWidget(m_splitter);
+  else
+    this->setCentralWidget(m_splitter);
+
   m_splitter->addWidget(m_slicer);
   m_splitter->addWidget(m_liner);
 
-
-  // Connect closing signals
-  connect(this, SIGNAL(closedWindow(MdiSubWindow*)), app, SLOT(closeWindow(MdiSubWindow*)));
-  connect(this, SIGNAL(hiddenWindow(MdiSubWindow*)), app, SLOT(hideWindow(MdiSubWindow*)));
-  connect(this, SIGNAL(showContextMenu()), app, SLOT(showWindowContextMenu()));
+  // For MdiSubWindow only
+  if (false)
+  {
+    // Connect closing signals
+    connect(this, SIGNAL(closedWindow(MdiSubWindow*)), app, SLOT(closeWindow(MdiSubWindow*)));
+    connect(this, SIGNAL(hiddenWindow(MdiSubWindow*)), app, SLOT(hideWindow(MdiSubWindow*)));
+    connect(this, SIGNAL(showContextMenu()), app, SLOT(showWindowContextMenu()));
+  }
 
   // Connect WorkspaceObserver signals
   connect(this,SIGNAL(needToClose()),this,SLOT(closeWindow()));
@@ -66,8 +80,8 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, ApplicationWindow *a
             m_liner, SLOT(setFreeDimensions(size_t, size_t)) );
   QObject::connect( m_slicer->getLineOverlay(), SIGNAL(lineChanging(QPointF, QPointF, double)),
             this, SLOT(lineChanging(QPointF, QPointF, double)) );
-//  QObject::connect( m_slicer, SIGNAL(showLineViewer(bool)),
-//            this, SLOT(lineChanging(QPointF, QPointF, double)) );
+  QObject::connect( m_slicer, SIGNAL(showLineViewer(bool)),
+            this, SLOT(showLineViewer(bool)) );
   //QObject::connect( m_slicer, SIGNAL(changedSlicePoint(size_t, size_t)), m_liner, SIGNAL(setFreeDimensions(size_t, size_t)) );
 
   // Set the current workspace
@@ -81,10 +95,18 @@ SliceViewerWindow::~SliceViewerWindow()
 }
 
 //------------------------------------------------------------------------------------------------
+void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
+{
+  if (m_liner->isVisible())
+    m_lastLinerWidth = m_liner->width();
+}
+
+
+//------------------------------------------------------------------------------------------------
 /** Slot to close the window */
 void SliceViewerWindow::closeWindow()
 {
-  askOnCloseEvent(false);
+  //askOnCloseEvent(false); //(MdiSubWindow)
   close();
 }
 
@@ -92,9 +114,40 @@ void SliceViewerWindow::closeWindow()
 /** Slot to replace the workspace being looked at. */
 void SliceViewerWindow::updateWorkspace()
 {
-  m_slicer->setWorkspace(m_ws);
   m_liner->setWorkspace(m_ws);
+  m_slicer->setWorkspace(m_ws);
 }
+
+//------------------------------------------------------------------------------------------------
+/** Slot called when the line viewer should be shown/hidden */
+void SliceViewerWindow::showLineViewer(bool visible)
+{
+  int linerWidth = m_liner->width();
+  if (linerWidth <= 0) linerWidth = m_lastLinerWidth;
+  if (linerWidth <= 0) linerWidth = m_liner->sizeHint().width();
+
+  //std::cout << "width should be " << linerWidth << std::endl;
+  if (visible && !m_liner->isVisible())
+  {
+    // Expand the window to include the liner
+    int w = this->width() + linerWidth;
+    m_liner->setVisible(true);
+    this->resize(w, this->height());
+  }
+  else if (!visible && m_liner->isVisible())
+  {
+    // Shrink the window to exclude the liner
+    int w = this->width() - linerWidth;
+    m_liner->setVisible(false);
+    this->resize(w, this->height());
+  }
+  else
+  {
+    // Toggle the visibility of the liner
+    m_liner->setVisible(visible);
+  }
+}
+
 
 //------------------------------------------------------------------------------------------------
 /** Using the positions from the LineOverlay, set the values in the LineViewer,
@@ -126,6 +179,7 @@ void SliceViewerWindow::lineChanging(QPointF start2D, QPointF end2D, double widt
 /** Slot called when the line overlay drag is released */
 void SliceViewerWindow::lineChanged(QPointF start2D, QPointF end2D, double width)
 {
+  std::cout << "SliceViewerWindow::lineChanged()\n";
   setLineViewerValues(start2D, end2D, width);
   m_liner->apply();
 }

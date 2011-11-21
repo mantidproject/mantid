@@ -19,8 +19,7 @@
     and assign it to the rebinned variable
     
 """
-from api import algorithm_factory, algorithm_mgr
-
+from api import framework_mgr 
 
 def version():
     return "simpleapi - memory-based version"
@@ -58,13 +57,13 @@ def create_algorithm(algorithm, version, _algm_object):
         if "Version" in kwargs:
             _version = kwargs["Version"]
             del kwargs["Version"]
-        algm = algorithm_mgr.create(algorithm, _version)
+        algm = framework_mgr.create_algorithm(algorithm, _version)
         set_properties(algm, *args, **kwargs)
         algm.execute()
     
     algorithm_wrapper.__name__ = algorithm
     
-    # This creates/initializes the algorithm once to make the documentation
+    # Construct the algorithm documentation
     algorithm_wrapper.__doc__ = _algm_object.create_doc_string()
     
     # Dark magic to get the correct function signature
@@ -124,7 +123,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
             if item not in kwargs:
                 kwargs[item] = ""
             
-        algm = algorithm_mgr.create(algorithm, _version)
+        algm = framework_mgr.create_algorithm(algorithm, _version)
         algm.setPropertiesDialog(*args, **kwargs)
         algm.execute()
         return algm
@@ -218,7 +217,7 @@ def Load(*args, **kwargs):
         raise RuntimeError('Load() takes at most 2 positional arguments, %d found.' % len(args))
     
     # Create and execute
-    algm = algorithm_mgr.create('Load')
+    algm = framework_mgr.create_algorithm('Load')
     algm.set_property('Filename', filename) # Must be set first
     algm.set_property('OutputWorkspace', wkspace)
     for key, value in kwargs.iteritems():
@@ -258,7 +257,7 @@ def LoadDialog(*args, **kwargs):
     if 'Enable' not in arguments: arguments['Enable']=''
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
-    algm = algorithm_mgr.create('Load')
+    algm = framework_mgr.create_algorithm('Load')
     algm.setPropertiesDialog(**arguments)
     algm.execute()
 
@@ -267,6 +266,8 @@ def translate():
         Loop through the algorithms and register a function call 
         for each of them
     """
+    from api import algorithm_factory, algorithm_mgr
+     
     algs = algorithm_factory.get_registered_algorithms(True)
     for name, versions in algs.iteritems():
         if name == "Load":
