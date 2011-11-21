@@ -1745,7 +1745,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
     {
       double right = double(tof[i]);
       // find the right boundary for the current event
-      if( right < ev->m_tof )
+      if(ev != ev_end && right < ev->m_tof )
       {
         continue;
       }
@@ -1760,138 +1760,27 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
       if (m > 0)
       {// m events in this bin
         double left = double(tof[i-1]);
-        boost::uniform_real<> distribution(left,right);
         // spread the events uniformly inside the bin
-        for(std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev; ++ev1)
+        boost::uniform_real<> distribution(left,right);
+        std::vector<double> random_numbers(m);
+        for(std::vector<double>::iterator it = random_numbers.begin(); it != random_numbers.end(); ++it)
         {
-          ev1->m_tof = distribution(rand_gen);
+          *it = distribution(rand_gen);
+        }
+        std::sort(random_numbers.begin(),random_numbers.end());
+        std::vector<double>::iterator it = random_numbers.begin();
+        for(std::vector<TofEvent>::iterator ev1 = ev - m; ev1 != ev; ++ev1,++it)
+        {
+          ev1->m_tof = *it;
         }
       }
       
-    }
-  }
+    } // for i
+
+    event_list.sortTof();
+  } // for wi
   file.closeData();
 }
-
-  // --------------------------------------------------------------------------
-  //
-  // This is an alternative ISIS event binning 
-  //
-  /* Fill a histogram given specified histogram bounds in the case of non-zero event width (ISIS). 
-   * Does not modify the eventlist (const method).
-   * @param X :: The x bins
-   * @param Y :: The generated counts histogram
-   */
-  /*void EventList::generateCountsHistogramBinned(const MantidVec& X, MantidVec& Y) const
-  {
-    //For slight speed=up.
-    size_t x_size = X.size();
-
-    if (x_size <= 1)
-    {
-      //X was not set. Return an empty array.
-      Y.resize(0, 0);
-      return;
-    }
-
-    //Sort the events by tof
-    this->sortTof();
-    //Clear the Y data, assign all to 0.
-    Y.resize(x_size-1, 0);
-
-    //---------------------- Histogram without weights ---------------------------------
-
-     std::cerr << "generateCountsHistogramBinned " << std::endl;
-    //Do we even have any events to do?
-    if (this->events.size() > 0)
-    {
-      //Iterate through all events (sorted by tof)
-      std::vector<TofEvent>::const_iterator itev = findFirstEvent(this->events, X[0]);
-      std::vector<TofEvent>::const_iterator itev_end = events.end(); //cache for speed
-      // The above can still take you to end() if no events above X[0], so check again.
-      if (itev == itev_end) return;
-
-      //Find the first event bin (index in this->bins vector)
-      size_t event_bin=0;
-
-      //The tof is greater the first bin boundary, so we need to find the first bin
-      double tof = itev->tof();
-      while (event_bin < bins->size()-2)
-      {
-        //Within range?
-        if ((tof >= (*bins)[event_bin]) && (tof < (*bins)[event_bin+1]))
-        {
-          break;
-        }
-        ++event_bin;
-      }
-
-      //Find the first bin
-      size_t bin=0;
-
-      //The tof is greater the first bin boundary, so we need to find the first bin
-      while (bin < x_size-1)
-      {
-        //Within range?
-        if ((tof >= X[bin]) && (tof < X[bin+1]))
-        {
-          break;
-        }
-        ++bin;
-      }
-
-      double tof_min = (*bins)[event_bin];
-      double tof_max = (*bins)[event_bin+1];
-      //Keep going through all the events
-      while ((itev != itev_end) && (bin < x_size-1))
-      {
-        tof = itev->tof();
-        // find the event bounds
-        while(!(tof >= tof_min && tof < tof_max))
-        {
-          ++event_bin;
-          tof_min = (*bins)[event_bin];
-          tof_max = (*bins)[event_bin+1];
-        }
-        double event_width = tof_max - tof_min;
-        while (bin < x_size-1)
-        {
-          double bin_min = X[bin];
-          double bin_max = X[bin+1];
-          double bin_width = bin_max - bin_min;
-          if (bin_width < event_width)
-          {
-            throw std::runtime_error("Bin width is too small for rebinning events");
-          }
-          //Within range?
-          if ((tof >= bin_min) && (tof < bin_max))
-          {
-            if (tof_min < bin_min && bin > 0) // left border splits the event
-            {
-              double frac = (bin_min - tof_min) / (event_width);
-              Y[bin-1] += frac;
-              Y[bin] += 1.0 - frac;
-            }
-            else if  (tof_max > bin_max && bin < x_size - 1) // left border splits the event
-            {
-              double frac = (tof_max - bin_max) / (event_width);
-              Y[bin+1] += frac;
-              Y[bin] += 1.0 - frac;
-            }
-            else
-            {
-              Y[bin]++;
-            }
-            break;
-          }
-          ++bin;
-        }
-        ++itev;
-      }
-    } // end if (there are any events to histogram)
-
-
-  }*/
 
 } // namespace DataHandling
 } // namespace Mantid
