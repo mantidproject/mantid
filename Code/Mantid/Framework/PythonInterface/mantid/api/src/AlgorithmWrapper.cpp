@@ -92,7 +92,7 @@ namespace Mantid
       else
       {
         std::ostringstream os;
-        os << "Python algorithm '" << this->name() << "' does not define the init_ function, cannot initialize.";
+        os << "Python algorithm '" << this->name() << "' does not define the PyInit function, cannot initialize.";
         throw std::runtime_error(os.str());
       }
     }
@@ -110,7 +110,7 @@ namespace Mantid
       else
       {
         std::ostringstream os;
-        os << "Python algorithm '" << this->name() << "' does not define the exec_ function, cannot execute.";
+        os << "Python algorithm '" << this->name() << "' does not define the PyExec function, cannot execute.";
         throw std::runtime_error(os.str());
       }
     }
