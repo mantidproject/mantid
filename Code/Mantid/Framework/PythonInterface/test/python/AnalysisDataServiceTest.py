@@ -15,17 +15,25 @@ class AnalysisDataServiceTest(unittest.TestCase):
             self.fail('AnalysisDataService did not throw when object does not exist')
         except KeyError:
             pass
+
+    def _run_createws(self, wsname):
+        """
+            Run create workspace storing the output in the named workspace
+        """
+        data = [1.0,2.0,3.0]
+        run_algorithm('CreateWorkspace',OutputWorkspace=wsname,DataX=data,DataY=data,NSpec=1,UnitX='Wavelength')
+        
         
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
-        run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1)    
+        self._run_createws(wsname)
         self.assertEquals(len(analysis_data_svc), 1)
         # Remove to clean the test up
         analysis_data_svc.remove(wsname)
         
     def test_len_decreases_when_item_removed(self):
         wsname = 'ADSTest_test_len_decreases_when_item_removed'
-        run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1)    
+        self._run_createws(wsname)
         self.assertEquals(len(analysis_data_svc), 1)
         # Remove to clean the test up
         del analysis_data_svc[wsname]
@@ -33,7 +41,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
     
     def test_key_operator_does_same_as_retrieve(self):
         wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
-        run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1) 
+        self._run_createws(wsname)
         ws_from_op = analysis_data_svc[wsname]
         ws_from_method = analysis_data_svc.retrieve(wsname)
         
@@ -53,7 +61,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         # and it is then removed. The extracted handle should no longer
         # be able to access the DataItem
         wsname = 'ADSTest_test_removing_item_invalidates_extracted_handles'
-        run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=1)
+        self._run_createws(wsname)
         ws_handle = analysis_data_svc[wsname]
         succeeded = False
         try:

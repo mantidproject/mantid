@@ -81,12 +81,11 @@ namespace Mantid
 
     /**
      * Private init for this algorithm. Expected to be
-     * overridden in the subclass by a function named
-     * init_
+     * overridden in the subclass by a function named PyInit
      */
     void AlgorithmWrapper::init()
     {
-      if( boost::python::override fn = this->get_override("init_") )
+      if( boost::python::override fn = this->get_override("PyInit") )
       {
         fn();
       }
@@ -100,12 +99,11 @@ namespace Mantid
 
     /**
      * Private exec for this algorithm. Expected to be
-     * overridden in the subclass by a function named
-     * "exec_"
+     * overridden in the subclass by a function named PyExec"
      */
     void AlgorithmWrapper::exec()
     {
-      if( boost::python::override fn = this->get_override("init_") )
+      if( boost::python::override fn = this->get_override("PyExec") )
       {
         fn();
       }
