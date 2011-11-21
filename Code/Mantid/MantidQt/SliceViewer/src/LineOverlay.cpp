@@ -351,6 +351,7 @@ namespace SliceViewer
       // Stop draggin
       m_dragHandle = HandleNone;
       // Drag is over - signal that
+      std::cout << "emit lineChanged(m_pointA, m_pointB, m_width);" << std::endl;
       emit lineChanged(m_pointA, m_pointB, m_width);
     }
     else

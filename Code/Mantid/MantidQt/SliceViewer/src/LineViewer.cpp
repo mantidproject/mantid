@@ -18,7 +18,8 @@ namespace SliceViewer
 
 
 LineViewer::LineViewer(QWidget *parent)
-    : QWidget(parent)
+ : QWidget(parent),
+   m_numBins(100)
 {
 	ui.setupUi(this);
 

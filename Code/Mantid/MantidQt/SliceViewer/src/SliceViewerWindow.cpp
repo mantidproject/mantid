@@ -78,8 +78,12 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, QWidget *app , const
   // Connect the SliceViewer and the LineViewer together
   QObject::connect( m_slicer, SIGNAL(changedShownDim(size_t, size_t)),
             m_liner, SLOT(setFreeDimensions(size_t, size_t)) );
+  QObject::connect( m_slicer, SIGNAL(changedSlicePoint(Mantid::Kernel::VMD)),
+            this, SLOT(changedSlicePoint(Mantid::Kernel::VMD)) );
   QObject::connect( m_slicer->getLineOverlay(), SIGNAL(lineChanging(QPointF, QPointF, double)),
             this, SLOT(lineChanging(QPointF, QPointF, double)) );
+  QObject::connect( m_slicer->getLineOverlay(), SIGNAL(lineChanged(QPointF, QPointF, double)),
+            this, SLOT(lineChanged(QPointF, QPointF, double)) );
   QObject::connect( m_slicer, SIGNAL(showLineViewer(bool)),
             this, SLOT(showLineViewer(bool)) );
   //QObject::connect( m_slicer, SIGNAL(changedSlicePoint(size_t, size_t)), m_liner, SIGNAL(setFreeDimensions(size_t, size_t)) );
@@ -97,8 +101,8 @@ SliceViewerWindow::~SliceViewerWindow()
 //------------------------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
 {
-  if (m_liner->isVisible())
-    m_lastLinerWidth = m_liner->width();
+//  if (m_liner->isVisible())
+//    m_lastLinerWidth = m_liner->width();
 }
 
 
@@ -125,20 +129,37 @@ void SliceViewerWindow::showLineViewer(bool visible)
   int linerWidth = m_liner->width();
   if (linerWidth <= 0) linerWidth = m_lastLinerWidth;
   if (linerWidth <= 0) linerWidth = m_liner->sizeHint().width();
+  // Account for the splitter handle
+  linerWidth += m_splitter->handleWidth() - 4;
 
-  //std::cout << "width should be " << linerWidth << std::endl;
+//  std::cout << "Frame width starts at " << this->width() << std::endl;
+//  std::cout << "LinerWidth is " << m_liner->width() << std::endl;
+
+//  this->setUpdatesEnabled(false);
   if (visible && !m_liner->isVisible())
   {
     // Expand the window to include the liner
     int w = this->width() + linerWidth;
     m_liner->setVisible(true);
+    QList<int> sizes = m_splitter->sizes();
+    if (sizes[1] == 0)
+    {
+      sizes[1] = linerWidth;
+      m_splitter->setSizes(sizes);
+    }
     this->resize(w, this->height());
   }
   else if (!visible && m_liner->isVisible())
   {
     // Shrink the window to exclude the liner
     int w = this->width() - linerWidth;
+//    std::cout << "Shrinking to " << w << std::endl;
+    m_lastLinerWidth = m_liner->width();
     m_liner->setVisible(false);
+    m_splitter->setStretchFactor(1, 0);
+    this->resize(w, this->height());
+    this->m_splitter->resize(w, this->height());
+    this->update();
     this->resize(w, this->height());
   }
   else
@@ -146,6 +167,9 @@ void SliceViewerWindow::showLineViewer(bool visible)
     // Toggle the visibility of the liner
     m_liner->setVisible(visible);
   }
+  this->setUpdatesEnabled(true);
+//  std::cout << "Frame width of " << this->width() << std::endl;
+
 }
 
 
@@ -184,6 +208,13 @@ void SliceViewerWindow::lineChanged(QPointF start2D, QPointF end2D, double width
   m_liner->apply();
 }
 
+/** Slot called when changing the slice point of the 2D view
+ * (keeping the line in the same 2D point) */
+void SliceViewerWindow::changedSlicePoint(Mantid::Kernel::VMD slice)
+{
+  setLineViewerValues( m_slicer->getLineOverlay()->getPointA() ,  m_slicer->getLineOverlay()->getPointB(),  m_slicer->getLineOverlay()->getWidth() );
+  m_liner->showPreview();
+}
 
 //------------------------------------------------------------------------------------------------
 /** Signal to close this window if the workspace has just been deleted */
