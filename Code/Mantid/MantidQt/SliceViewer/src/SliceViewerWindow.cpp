@@ -95,6 +95,14 @@ SliceViewerWindow::~SliceViewerWindow()
 }
 
 //------------------------------------------------------------------------------------------------
+void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
+{
+  if (m_liner->isVisible())
+    m_lastLinerWidth = m_liner->width();
+}
+
+
+//------------------------------------------------------------------------------------------------
 /** Slot to close the window */
 void SliceViewerWindow::closeWindow()
 {
@@ -114,7 +122,30 @@ void SliceViewerWindow::updateWorkspace()
 /** Slot called when the line viewer should be shown/hidden */
 void SliceViewerWindow::showLineViewer(bool visible)
 {
-  m_liner->setVisible(visible);
+  int linerWidth = m_liner->width();
+  if (linerWidth <= 0) linerWidth = m_lastLinerWidth;
+  if (linerWidth <= 0) linerWidth = m_liner->sizeHint().width();
+
+  //std::cout << "width should be " << linerWidth << std::endl;
+  if (visible && !m_liner->isVisible())
+  {
+    // Expand the window to include the liner
+    int w = this->width() + linerWidth;
+    m_liner->setVisible(true);
+    this->resize(w, this->height());
+  }
+  else if (!visible && m_liner->isVisible())
+  {
+    // Shrink the window to exclude the liner
+    int w = this->width() - linerWidth;
+    m_liner->setVisible(false);
+    this->resize(w, this->height());
+  }
+  else
+  {
+    // Toggle the visibility of the liner
+    m_liner->setVisible(visible);
+  }
 }
 
 

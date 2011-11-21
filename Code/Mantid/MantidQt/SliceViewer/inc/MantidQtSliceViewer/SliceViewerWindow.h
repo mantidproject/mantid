@@ -9,15 +9,17 @@
 #include <QtGui/QSplitter>
 #include <QtGui/qdialog.h>
 #include <qmainwindow.h>
+#include <QShowEvent>
+#include "DllOption.h"
 
 
-/** A MDI sub window that contains only a
- * SliceViewer widget for a particular workpsace
+/** A window that contains a SliceViewer and a LineViewer widget,
+ * linked together.
  *
  * @author Janik Zikovsky
  * @date October 13, 2011
  */
-class SliceViewerWindow : public QMainWindow, public MantidQt::API::WorkspaceObserver
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow : public QMainWindow, public MantidQt::API::WorkspaceObserver
 {
     Q_OBJECT
 
@@ -27,6 +29,7 @@ public:
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
+  void resizeEvent(QResizeEvent * event);
 
 signals:
   void needToClose();
@@ -56,6 +59,9 @@ protected:
   Mantid::API::IMDWorkspace_sptr m_ws;
   /// Name of the workspace being viewed
   std::string m_wsName;
+
+  /// Width of the LineViewer last time it was open
+  int m_lastLinerWidth;
 
 };
 
