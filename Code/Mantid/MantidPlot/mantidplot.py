@@ -64,7 +64,7 @@ Layer.Top = qti.GraphOptions.Top
 
 def __getWorkspaceNames(source):
     ws_names = []
-    if isinstance(source, list):
+    if isinstance(source, list) or isinstance(source,tuple):
         for w in source:
             names = __getWorkspaceNames(w)
             for n in names:
@@ -94,7 +94,7 @@ def __getWorkspaceNames(source):
     
 def __getWorkspaceIndices(source):
     index_list = []
-    if isinstance(source,list):
+    if isinstance(source,list) or isinstance(source,tuple):
         for i in source:
             nums = __getWorkspaceIndices(i)
             for j in nums:
@@ -123,7 +123,7 @@ def __tryPlot(workspace_names, indices, error_bars, type):
 
 # Refactored functions for common code
 def __doPlotting(source, indices, error_bars,type):
-    if isinstance(source, list):
+    if isinstance(source, list) or isinstance(source, tuple):
         return __PlotList(source, indices, error_bars,type)
     elif isinstance(source, str) or isinstance(source, WorkspaceProxy):
         return __PlotSingle(source, indices, error_bars,type)
@@ -131,7 +131,7 @@ def __doPlotting(source, indices, error_bars,type):
         raise TypeError("Source is not a workspace name or a workspace variable")
     
 def __PlotSingle(workspace, indices, error_bars,type):
-    if isinstance(indices, list):
+    if isinstance(indices, list) or isinstance(indices, tuple):
         master_graph = __CallPlotFunction(workspace, indices[0], error_bars,type)
         for index in indices[1:]:
             mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
@@ -140,7 +140,7 @@ def __PlotSingle(workspace, indices, error_bars,type):
         return __CallPlotFunction(workspace, indices, error_bars,type)
     
 def __PlotList(workspace_list, indices, error_bars,type):
-    if isinstance(indices, list):
+    if isinstance(indices, list) or isinstance(indices, tuple):
         master_graph = __CallPlotFunction(workspace_list[0], indices[0], error_bars,type)
         start = 1
         for workspace in workspace_list:
