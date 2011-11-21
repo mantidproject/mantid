@@ -1,11 +1,13 @@
 #ifndef SLICEVIEWERWINDOW_H
 #define SLICEVIEWERWINDOW_H
 
-#include <QtGui/QMainWindow>
 #include "../../MdiSubWindow.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "../../../MantidQt/SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
+#include <QtGui/QMainWindow>
+#include <QtGui/QSplitter>
 
 
 /** A MDI sub window that contains only a
@@ -19,8 +21,11 @@ class SliceViewerWindow : public MdiSubWindow, public MantidQt::API::WorkspaceOb
     Q_OBJECT
 
 public:
-    SliceViewerWindow(const QString& wsName, ApplicationWindow *app , const QString& label = QString() , Qt::WFlags f=0);
-    ~SliceViewerWindow();
+  SliceViewerWindow(const QString& wsName, ApplicationWindow *app , const QString& label = QString() , Qt::WFlags f=0);
+  ~SliceViewerWindow();
+
+private:
+  void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
 
 signals:
   void needToClose();
@@ -29,6 +34,8 @@ signals:
 protected slots:
   void closeWindow();
   void updateWorkspace();
+  void lineChanging(QPointF start, QPointF end, double width);
+  void lineChanged(QPointF start, QPointF end, double width);
 
 protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
@@ -36,6 +43,12 @@ protected:
 
   /// The SliceViewer
   MantidQt::SliceViewer::SliceViewer * m_slicer;
+
+  /// The LineViewer
+  MantidQt::SliceViewer::LineViewer * m_liner;
+
+  /// Horizontal splitter between slice viewer and LineViewer
+  QSplitter * m_splitter;
 
   /// Workspace being looked at
   Mantid::API::IMDWorkspace_sptr m_ws;

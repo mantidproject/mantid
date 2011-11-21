@@ -23,7 +23,7 @@
 #include <set>
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {

@@ -172,16 +172,10 @@ public:
 
   }
 
-  class SaveNexusProcessedExposed: public SaveNexusProcessed
-  {
-    public:
-    void exec()
-    { SaveNexusProcessed::exec(); }
-  };
 
   void testExecOnMuon()
   {
-    SaveNexusProcessedExposed algToBeTested;
+    SaveNexusProcessed algToBeTested;
 
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
@@ -205,9 +199,6 @@ public:
     // this would make all X's separate
     // output2D->dataX(22)[3]=0.55;
     //
-
-//    output2D->mutableRun().removeLogData("ISIS beam");
-
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
@@ -231,7 +222,7 @@ public:
     //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
     //TS_ASSERT( ! result.compare(entryName));
 
-    algToBeTested.execute();
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
     // Nice idea, but confusing (seg-faulted) if algorithm doesn't clean its state
@@ -239,7 +230,7 @@ public:
     //    // try writing data again
     //    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     //    TS_ASSERT( algToBeTested.isExecuted() );
-//    if(clearfiles) Poco::File(outputFile).remove();
+    if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 

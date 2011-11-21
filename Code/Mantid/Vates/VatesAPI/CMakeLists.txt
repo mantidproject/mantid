@@ -165,7 +165,6 @@ ${MANTID_SUBPROJECT_LIBS}
 vtkCommon 
 vtkFiltering
 Crystal
-NeXusCPP
 )
 
 # Create test file projects

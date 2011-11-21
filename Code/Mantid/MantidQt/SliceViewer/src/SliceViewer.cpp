@@ -402,6 +402,7 @@ void SliceViewer::colorRangeChanged()
 void SliceViewer::btnDoLineToggled(bool checked)
 {
   m_lineOverlay->setVisible(checked);
+  emit showLineViewer(checked);
 }
 
 //------------------------------------------------------------------------------------
@@ -624,6 +625,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
   if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
   m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
+  m_slicePoint = VMD(slicePoint);
 
   m_X = m_dimensions[m_dimX];
   m_Y = m_dimensions[m_dimY];
@@ -645,6 +647,9 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
+
+  // Send out a signal
+  emit changedSlicePoint(m_slicePoint);
 //  std::cout << m_plot->sizeHint().width() << " width\n";
 }
 
@@ -687,6 +692,9 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Send out a signal
+  emit changedShownDim(m_dimX, m_dimY);
+  // Show the new slice
   this->updateDisplay();
 }
 

@@ -40,7 +40,7 @@ None
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/File.h>
@@ -210,9 +210,16 @@ namespace DataHandling
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
     ITableWorkspace_const_sptr tableWorkspace = boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
     // check if inputWorkspace is something we know how to save
-    if (!matrixWorkspace && !tableWorkspace) 
-      return;
+    if (!matrixWorkspace && !tableWorkspace) {
+		g_log.debug() << "Workspace "  << m_title << " not saved because it is not of a type we can presently save.\n";
+        return;
+	}
     m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
+	const std::string workspaceID = inputWorkspace->id();
+    if ((workspaceID.find("Workspace2D") == std::string::npos) &&
+        !m_eventWorkspace && !tableWorkspace)
+      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace or ITableWorkspace.");
+
 
     // If no title's been given, use the workspace title field
     if (m_title.empty()) 
@@ -226,14 +233,7 @@ namespace DataHandling
       if( file.exists() )
         file.remove();
     }
-
-
-    const std::string workspaceID = inputWorkspace->id();
-    if ((workspaceID.find("Workspace2D") == std::string::npos) &&
-        !m_eventWorkspace && !tableWorkspace)
-      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace or ITableWorkspace.");
-
-
+	// Then immediately open the file
     Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO();
 
     if( nexusFile->openNexusWrite( m_filename ) != 0 )

@@ -16,7 +16,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/SaveMD.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -259,7 +259,7 @@ namespace MDEvents
         {
           if (update)
           {
-            // File-backed: re-save any boxes THAT WERE MODIFED
+            // File-backed: update where on the file it is
             // This will relocate and save the box if it has any events
             mdbox->save();
             // We've now forced it to go on disk
@@ -267,9 +267,6 @@ namespace MDEvents
             // Save the index
             box_event_index[id*2] = mdbox->getFileIndexStart();
             box_event_index[id*2+1] = mdbox->getFileNumEvents();
-//            file->closeData();
-//            file->openData("event_data");
-            //std::cout << file->getInfo().dims[0] << " size of event_data (updating) \n";
           }
           else
           {
@@ -286,8 +283,6 @@ namespace MDEvents
                 // Save, set that it is on disk and clear the actual events to free up memory
                 mdbox->setOnDisk(true);
                 mdbox->clearDataOnly();
-//                mdbox->setDataAdded(false);
-//                mdbox->setDataModified(false);
               }
               // Save the index
               box_event_index[id*2] = start;
@@ -296,7 +291,6 @@ namespace MDEvents
               start += numEvents;
             }
 
-            //std::cout << file->getInfo().dims[0] << " size of event_data (writing) \n";
             mdbox->releaseEvents();
           }
         }
@@ -334,8 +328,8 @@ namespace MDEvents
     bc->getDiskMRU().getFreeSpaceVector(freeSpaceBlocks);
     if (freeSpaceBlocks.size() == 0)
       freeSpaceBlocks.resize(2, 0); // Needs a minimum size
-    std::vector<int64_t> free_dims(2,2); free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
-    std::vector<int64_t> free_chunk(2,2); free_chunk[0] = 1000;
+    std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
+    std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;
 
     // Now the free space blocks under event_data
     if (!update)
@@ -359,18 +353,18 @@ namespace MDEvents
     // Add box controller info to this group
     file->putAttr("box_controller_xml", bc->toXMLString());
 
-    std::vector<int64_t> exents_dims(2,0);
-    exents_dims[0] = (int64_t(maxBoxes));
+    std::vector<int> exents_dims(2,0);
+    exents_dims[0] = (int(maxBoxes));
     exents_dims[1] = (nd*2);
-    std::vector<int64_t> exents_chunk(2,0);
-    exents_chunk[0] = int64_t(16384);
+    std::vector<int> exents_chunk(2,0);
+    exents_chunk[0] = int(16384);
     exents_chunk[1] = (nd*2);
 
-    std::vector<int64_t> box_2_dims(2,0);
-    box_2_dims[0] = int64_t(maxBoxes);
+    std::vector<int> box_2_dims(2,0);
+    box_2_dims[0] = int(maxBoxes);
     box_2_dims[1] = (2);
-    std::vector<int64_t> box_2_chunk(2,0);
-    box_2_chunk[0] = int64_t(16384);
+    std::vector<int> box_2_chunk(2,0);
+    box_2_chunk[0] = int(16384);
     box_2_chunk[1] = (2);
 
     if (!update)
@@ -401,7 +395,6 @@ namespace MDEvents
 
     if (update || MakeFileBacked)
     {
-      //std::cout << "Finished updating file " << uint64_t(bc->getFile()) << std::endl;
       // Need to keep the file open since it is still used as a back end.
       // Reopen the file
       filename = bc->getFilename();
@@ -410,7 +403,6 @@ namespace MDEvents
       file->openGroup("MDEventWorkspace", "NXentry");
       file->openGroup("event_data", "NXdata");
       uint64_t totalNumEvents = MDE::openNexusData(file);
-      std::cout << totalNumEvents << " events in reopened file \n";
       bc->setFile(file, filename, totalNumEvents);
       // Mark file is up-to-date
       ws->setFileNeedsUpdating(false);

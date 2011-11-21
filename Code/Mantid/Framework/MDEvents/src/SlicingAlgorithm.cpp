@@ -36,7 +36,7 @@ namespace MDEvents
    */
   void SlicingAlgorithm::initSlicingProps()
   {
-    std::string dimChars = "XYZT";
+    std::string dimChars = getDimensionChars();
 
     // --------------- Axis-aligned properties ---------------------------------------
     declareProperty("AxisAligned", true, "Perform binning aligned with the axes of the input MDEventWorkspace?");

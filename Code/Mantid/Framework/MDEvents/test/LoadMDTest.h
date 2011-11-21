@@ -89,7 +89,7 @@ public:
       IMDBox<MDE,nd>* box1 = boxes[j];
       IMDBox<MDE,nd>* box2 = boxes1[j];
 
-      std::cout << "ID: " << box1->getId() << std::endl;
+      //std::cout << "ID: " << box1->getId() << std::endl;
       TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
       TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
       TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
@@ -284,8 +284,6 @@ public:
   }
 
 
-
-  //=================================================================================================================
   /** Follow up test that:
    *  - Modifies the data in a couple of ways
    *  - Saves AGAIN to update a file back end
@@ -301,7 +299,7 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
-    // Now there are 2002 boxes
+    // Now there are 54 boxes
     box->splitContents(12);
 
     // And add an ExperimentInfo thingie
@@ -347,7 +345,7 @@ public:
 
     // Now we look at the file that's currently open
     ::NeXus::File * file = ws2->getBoxController()->getFile();
-    TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10001 long.", 10001, file->getInfo().dims[0] );
+    TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10002 long.", 10002, file->getInfo().dims[0] );
 
 
     // The file should have been modified but that's tricky to check directly.

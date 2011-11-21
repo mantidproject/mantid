@@ -72,6 +72,8 @@ namespace Mantid
       /// This static function allows a call to a method on an IPropertyManager object
       DLLExport void setProperty(boost::python::object self, const std::string & name,
                                  boost::python::object value);
+      /// Upcast an item from a DataItem to the most exported known type
+      DLLExport void upcastFromDataItem(boost::python::object value);
       /// Converts the value of a property to the most appropriate type, i.e. the most derived exported interface
       DLLExport boost::python::object value(boost::python::object self);
     };
