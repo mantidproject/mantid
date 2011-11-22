@@ -322,6 +322,87 @@ namespace ComponentCreationHelper
     return testInst;
   }
 
+ /** create instrument with cylindrical detecotrs located in specific positions 
+ *
+ *
+ */
+bool double_cmprsn(double x1,double x2){
+    const double TOL(1.e-4);
+    if(abs(x1+x2)<TOL){
+        return abs(x1-x2)<TOL;
+    }else{
+        return(abs((x1-x2)/(x1+x2))<TOL/2);
+    }
+}
+Mantid::Geometry::Instrument_sptr 
+createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim)
+{
+    boost::shared_ptr<Instrument> testInst(new Instrument("processed"));
+
+    double cylRadius(0.004);
+    double cylHeight(0.0002);
+    // find characteristic sizes of the detectors;
+    double dAzi_min(FLT_MAX);
+    double dPol_min(FLT_MAX);
+    double L2_min(FLT_MAX),dAlSq_min(FLT_MAX);
+    double dAzi,dPol;
+    std::vector<double> az(azim);
+    std::vector<double> po(polar);
+    std::sort(az.begin(),az.end());
+    std::sort(po.begin(),po.end());
+    // very crude identification of interdetector distance; no need in more accurate caluclations for example;
+    for(size_t i=0;i<L2.size();i++){
+        if(L2[i]   < L2_min    ) L2_min   = L2[i];
+        for(size_t j=i+1;j<L2.size();j++){
+            if(!double_cmprsn(az[i],az[j])){
+                dAzi=abs(az[i] -az[j]);
+                if(dAzi<dAzi_min)dAzi_min=dAzi;
+            }
+            if(!double_cmprsn(po[i],po[j])){
+                dPol=abs(po[i]-po[j]);
+                if(dPol<dPol_min)dPol_min=dPol;
+            }
+        }
+    }
+    cylRadius =   L2_min*sin(dAzi_min*0.5);
+    cylHeight = 2*L2_min*sin(dPol_min*0.5);
+
+    // One object
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
+ //Just increment pixel ID's
+    int pixelID = 1;
+    // one bank
+    CompAssembly *bank = new CompAssembly("det_ass");
+  
+    for(size_t i=0;i<azim.size();i++){
+          Detector * physicalPixel = new Detector("det"+boost::lexical_cast<std::string>(i), pixelID, pixelShape, bank);
+          double zpos = L2[i]*cos(polar[i]);
+          double xpos = L2[i]*sin(polar[i])*cos(azim[i]);
+          double ypos = L2[i]*sin(polar[i])*sin(azim[i]);
+          physicalPixel->setPos(xpos, ypos,zpos);
+          pixelID++;
+          bank->add(physicalPixel);
+          testInst->markAsDetector(physicalPixel);
+    }
+    testInst->add(bank);
+    bank->setPos(V3D(0.,0.,0.));
+
+    //Define a source component
+    ObjComponent *source = new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
+    source->setPos(V3D(0.0, 0.0, -L2_min));
+    testInst->add(source);
+    testInst->markAsSource(source);
+
+    // Define a sample as a simple sphere
+    Object_sptr sampleSphere = createSphere(cylRadius, V3D(0.0, 0.0, 0.0), "sample-shape");
+    ObjComponent *sample = new ObjComponent("sample", sampleSphere, testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+
+    return testInst;
+}
+
   //----------------------------------------------------------------------------------------------
   /**
    * Create an test instrument with n panels of rectangular detectors, pixels*pixels in size,
