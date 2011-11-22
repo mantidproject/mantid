@@ -64,7 +64,7 @@ void ConvertToQNDany::process_QND(API::IMDEventWorkspace *const piWS)
             // drop emtpy events
            if(Signal[j]<FLT_EPSILON)continue;
 
-           double E_tr = 0.5*( X[j]+ X[j+1]);
+          // double E_tr = 0.5*( X[j]+ X[j+1]);
 #ifdef NOQ
            Coord[0]=(coord_t)E_tr;
 #endif
