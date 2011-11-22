@@ -83,7 +83,7 @@ namespace MDEvents
       output->appendRow();
       output->cell<double>(rowCounter, 0) = it->getNormalizedSignal();
       output->cell<double>(rowCounter, 1) = std::sqrt(it->getNormalizedError());
-      output->cell<int>(rowCounter, 2) = it->getNumEvents();
+      output->cell<int>(rowCounter, 2) = int(it->getNumEvents());
       VMD center = it->getCenter();
       output->cell<std::string>(rowCounter, 3) = center.toString(",");
       progress.report();
