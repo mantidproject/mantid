@@ -106,7 +106,7 @@ namespace Mantid
       //! Rotate the IComponent by an angle in degrees with respect to an axis.
       virtual void rotate(double,const Kernel::V3D&) = 0;
       //! Get the position relative to the parent IComponent (absolute if no parent)
-      virtual const Kernel::V3D & getRelativePos() const = 0;
+      virtual const Kernel::V3D getRelativePos() const = 0;
       //! Get the position of the IComponent. Tree structure is traverse through the parent chain
       virtual Kernel::V3D getPos() const = 0;
       //! Get the relative Orientation

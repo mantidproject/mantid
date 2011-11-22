@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid
 {
@@ -54,6 +55,11 @@ namespace Mantid
     IComponent_sptr ParComponentFactory::create(IComponent_const_sptr base,
             const ParameterMap * map)
     {
+      // RectangularDetectorPixel subclasses Detector so it has to be checked before.
+      const RectangularDetectorPixel* rdp = dynamic_cast<const RectangularDetectorPixel*>(base.get());
+      if (rdp)
+        return boost::shared_ptr<IComponent>(new RectangularDetectorPixel(rdp,map));
+
       boost::shared_ptr<const IDetector> det_sptr = boost::dynamic_pointer_cast<const IDetector>(base);
       if( det_sptr )
       {
