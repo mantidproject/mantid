@@ -53,7 +53,7 @@ void ConvertToQNDany::process_QND(API::IMDEventWorkspace *const piWS)
     for (int64_t i = 0; i < int64_t(numSpec); ++i)
     {
 
-        const MantidVec& X        = inWS2D->readX(i);
+    //    const MantidVec& X        = inWS2D->readX(i);
         const MantidVec& Signal   = inWS2D->readY(i);
         const MantidVec& Error    = inWS2D->readE(i);
         int32_t det_id            = det_loc.det_id[i];
@@ -124,7 +124,7 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create
       for (size_t d=0; d<nd; d++)
       {
         Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
-        ws->addDimension(MDHistoDimension_sptr(dim));
+        ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
       }
       ws->initialize();
 
