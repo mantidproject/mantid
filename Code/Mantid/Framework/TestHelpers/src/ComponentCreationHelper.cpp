@@ -328,10 +328,10 @@ namespace ComponentCreationHelper
  */
 bool double_cmprsn(double x1,double x2){
     const double TOL(1.e-4);
-    if(abs(x1+x2)<TOL){
-        return abs(x1-x2)<TOL;
+    if(std::fabs(x1+x2)<TOL){
+        return (std::fabs(x1-x2)<TOL);
     }else{
-        return(abs((x1-x2)/(x1+x2))<TOL/2);
+        return(std::fabs((x1-x2)/(x1+x2))<TOL/2);
     }
 }
 Mantid::Geometry::Instrument_sptr 
