@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
 	src/BinMD.cpp
+	src/BinToMDHistoWorkspace.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
@@ -50,6 +51,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BinMD.h
+	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
@@ -89,6 +91,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AffineMatrixParameterParserTest.h
 	test/AffineMatrixParameterTest.h
+	test/BinToMDHistoWorkspaceTest.h
 	test/BoxControllerSettingsAlgorithmTest.h
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
