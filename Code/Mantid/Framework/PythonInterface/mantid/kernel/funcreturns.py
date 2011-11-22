@@ -136,8 +136,20 @@ def process_frame(frame):
     # Append the index of the last entry to form the last boundary
     call_function_locs[start_offset] = (start_index, len(ins_stack)-1) 
 
-    # In our case last_i should always be the offset of a call_function_locs instruction. 
-    # We use this to bracket the bit which we are interested in
+    # last_i should be the offset of a call_function_locs instruction. 
+    # We use this to bracket the bit which we are interested in.
+    # Bug:
+    # Some types of call, eg
+    #    def foo(callableObj, *args, **kwargs):
+    #        x = callableObj(*args, **kwargs)
+    #     
+    #     foo(FuncUsingLHS, 'Args')
+    #
+    # have the incorrect index at last_i due to the call being passed through
+    # an intermediate reference. Currently this method does not provide the 
+    # correct answer and throws a KeyError. Ticket #4186
+    
+    print call_function_locs
     output_var_names = []
     max_returns = []
     last_func_offset = call_function_locs[last_i][0]
@@ -177,7 +189,7 @@ def process_frame(frame):
                 output_var_names.append(argvalue_)
             count = count + 1
 
-    return (max_returns,output_var_names)
+    return (max_returns, tuple(output_var_names))
 
 #-------------------------------------------------------------------------------
 
@@ -219,6 +231,7 @@ def lhs_info(output_type='both'):
     # http://docs.python.org/library/inspect.html#the-interpreter-stack
     try:
         ret_vals = process_frame(frame)
+        print ret_vals
     finally:
         del frame
         

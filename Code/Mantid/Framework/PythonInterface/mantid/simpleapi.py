@@ -19,9 +19,8 @@
     and assign it to the rebinned variable
     
 """
-from api import framework_mgr
-from kernel import Direction 
-from kernel.funcreturns import lhs_info
+from kernel import Direction, DataItem, funcreturns
+from api import framework_mgr, analysis_data_svc, IWorkspaceProperty
 
 def version():
     return "simpleapi - memory-based version"
@@ -29,18 +28,85 @@ def version():
 def set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm
-        @param alg_object An initialized algorithm object
+        @param alg_object An initialised algorithm object
         @param *args Positional arguments
         @param **kwargs Keyword arguments  
     """
-    prop_order = alg_object.get_property_order()
+    prop_order = alg_object.mandatory_properties()
     # add the args to the kw list so everything can be set in a single way
     for (key, arg) in zip(prop_order[:len(args)], args):
         kwargs[key] = arg
 
-    # set the properties of the algorithm
+    # Set the properties of the algorithm.
     for key in kwargs.keys():
-        alg_object.set_property(key, kwargs[key])
+        value = kwargs[key]
+        alg_object.set_property(key, value)
+        # Make sure we set the name of any In/Out properties as well
+        # See if this can be done sensibly in WorkspaceProperty
+        if isinstance(value, DataItem):
+            alg_object.set_property_value(key, str(value))
+        
+def get_additional_args(lhs, algm_obj):
+    """
+        Return the extra arguments that are to be passed to the algorithm
+        from the information in the lhs tuple. These are basically the names 
+        of output workspaces.
+        The algorithm properties are iterated over in the same order
+        they were created within the wrapper and for each output
+        workspace property an entry is added to the returned dictionary
+        that contains {PropertyName:lhs_name}.
+        
+        @param lhs :: A 2-tuple that contains the number of variables supplied 
+                      on the lhs of the function call and the names of these
+                      variables
+        @param algm_obj :: An initialised algorithm object
+        @returns A dictionary mapping property names to the values
+                 extracted from the lhs variables
+    """
+    ret_names = lhs[1]
+    extra_args = {}
+
+    output_props = [ algm_obj.get_property(p) for p in algm_obj.output_properties() ]
+    nprops = len(output_props)
+    i = 0
+    while len(ret_names) > 0 and i < nprops:
+        p = output_props[i]
+        if isinstance(p,IWorkspaceProperty):
+            extra_args[p.name] = ret_names[0]
+            ret_names = ret_names[1:]
+        i += 1
+    return extra_args
+    
+def gather_returns(lhs, algm_obj):
+    """
+        Gather the return values and ensure they are in the
+        correct order as defined by the output properties and
+        return them as a tuple. If their is a single return
+        value it is returned on its own
+        
+        @param lhs :: A 2-tuple that contains the number of variables supplied 
+               on the lhs of the function call and the names of these
+               variables
+        @param algm_obj :: An executed algorithm object
+    """
+    # Gather the returns
+    # The minor complication here is the workspace properties have their
+    # values stored in the ADS and not within the property
+    props = [ algm_obj.get_property(p) for p in algm_obj.output_properties() ]
+    retvals = []
+    for p in props:
+        if isinstance(p, IWorkspaceProperty):
+            retvals.append(analysis_data_svc[p.value_as_str])
+        else:
+            retvals.append(p.value)
+
+    nvals = len(retvals)
+    if nvals > 1:
+        return tuple(retvals) # Create a tuple
+    elif nvals == 1:
+        return retvals[0]
+    else:
+        return None
 
 def create_algorithm(algorithm, version, _algm_object):
     """
@@ -60,26 +126,31 @@ def create_algorithm(algorithm, version, _algm_object):
             _version = kwargs["Version"]
             del kwargs["Version"]
         algm = framework_mgr.create_algorithm(algorithm, _version)
+        lhs = funcreturns.lhs_info()
+        extra_args = get_additional_args(lhs, algm)
+        kwargs.update(extra_args)
         set_properties(algm, *args, **kwargs)
         algm.execute()
+        return gather_returns(lhs, algm)
         
     
     algorithm_wrapper.__name__ = algorithm
     
     # Construct the algorithm documentation
-    algorithm_wrapper.__doc__ = _algm_object.create_doc_string()
+    algorithm_wrapper.__doc__ = _algm_object.doc_string()
     
     # Dark magic to get the correct function signature
     # Calling help(...) on the wrapper function will produce a function 
     # signature along the lines of AlgorithmName(*args, **kwargs).
     # We will replace the name "args" by the list of properties, and
     # the name "kwargs" by "Version=1".
-    #   1- Get the algorithm properties and build a string to list them,
-    #      taking care of giving no default values to mandatory parameters
+    #   1 - Get the algorithm properties and build a string to list them,
+    #       taking care of giving no default values to mandatory parameters
+    #   2 - All output properties will be removed from the function
+    #       argument list
     
     arg_list = []
-    found_output=False
-    for p in _algm_object.get_property_order():
+    for p in _algm_object.mandatory_properties():
         prop = _algm_object.get_property(p)
         # Mandatory parameters are those for which the default value is not valid
         if len(str(prop.is_valid))>0:
@@ -138,7 +209,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
     # Dark magic to get the correct function signature
     #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
-    for p in _algm_object.get_property_order():
+    for p in _algm_object.mandatory_properties():
         arg_list.append("%s=None" % p)
     arg_str = ', '.join(arg_list)
     signature = "\b%s" % arg_str
