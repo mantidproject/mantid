@@ -11,13 +11,13 @@ void ConvertToQNDany::process_QND(API::IMDEventWorkspace *const piWS)
     MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const>(piWS);
     if(!pWs){
         g_log.error()<<"ConvertToQNDany: can not cast input worspace pointer into pointer to proper target workspace\n"; 
-        throw(std::bad_cast(""));
+        throw(std::bad_cast());
     }
 
     // one of the dimensions has to be X-ws dimension -> need to add check for that;
 
     // copy experiment info into target workspace
-    ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
+    API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
     uint16_t runIndex = pWs->addExperimentInfo(ExperimentInfo);
 
     
@@ -123,7 +123,7 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new Geometry::MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
+        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();
