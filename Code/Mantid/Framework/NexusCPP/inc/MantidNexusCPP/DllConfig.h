@@ -1,22 +1,12 @@
-#ifndef MANTID_KERNEL_PROPERTYNEXUS_H_
-#define MANTID_KERNEL_PROPERTYNEXUS_H_
+#ifndef MANTID_NEXUSCPP_DLLCONFIG_H_
+#define MANTID_NEXUSCPP_DLLCONFIG_H_
+
+/*  
+    This file contains the DLLExport/DLLImport linkage configuration for the 
+    NexusCPP library
+
+    @author Martyn Gigg, Tessella plc
     
-#include "MantidKernel/System.h"
-#include "MantidKernel/Property.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-
-
-namespace Mantid
-{
-namespace API
-{
-
-  /** Namespace with helper methods for loading and saving Property's (logs)
-   * to NXS files.
-    
-    @author Janik Zikovsky
-    @date 2011-09-08
-
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -33,21 +23,16 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  namespace PropertyNexus
-  {
+*/
+#include "MantidKernel/System.h"
 
-    DLLExport Mantid::Kernel::Property * loadProperty(::NeXus::File * file, const std::string & group);
+#ifdef IN_MANTID_NEXUSCPP
+#define MANTID_NEXUSCPP_DLL DLLExport
+#else
+#define MANTID_NEXUSCPP_DLL DLLImport
+#endif
 
-    DLLExport void saveProperty(::NeXus::File * file, Mantid::Kernel::Property * prop);
-
-  }
-
-
-} // namespace API
-} // namespace Mantid
-
-#endif  /* MANTID_KERNEL_PROPERTYNEXUS_H_ */
+#endif

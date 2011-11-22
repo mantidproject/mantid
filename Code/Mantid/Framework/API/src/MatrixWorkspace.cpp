@@ -20,7 +20,7 @@
 #include <numeric>
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/DateAndTime.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;

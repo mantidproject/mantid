@@ -1,8 +1,8 @@
-#ifndef MANTID_KERNEL_NEXUSTESTHELPER_H_
-#define MANTID_KERNEL_NEXUSTESTHELPER_H_
+#ifndef MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
+#define MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
     
 #include "MantidKernel/System.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 
 namespace Mantid
@@ -58,4 +58,4 @@ namespace Kernel
 } // namespace Kernel
 } // namespace Mantid
 
-#endif  /* MANTID_KERNEL_NEXUSTESTHELPER_H_ */
+#endif  /* MANTID_NEXUSCPP_NEXUSTESTHELPER_H_ */

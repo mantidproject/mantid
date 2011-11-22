@@ -24,7 +24,7 @@ This is why it requires a common box structure.
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MergeMD.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
