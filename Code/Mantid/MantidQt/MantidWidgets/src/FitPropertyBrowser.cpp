@@ -2689,6 +2689,15 @@ void FitPropertyBrowser::updatePPTool(const QString & wsName)
 }
 
 /**
+* Returns the list of workspace names the fit property browser is working on
+*/
+QStringList FitPropertyBrowser::getWorkspaceNames()
+{
+  return m_workspaceNames;
+}
+
+
+/**
  * Call MultifitSetupDialog to populate MultiBG function.
  */
 void FitPropertyBrowser::setupMultifit()

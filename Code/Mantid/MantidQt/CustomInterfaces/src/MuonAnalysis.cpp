@@ -103,6 +103,7 @@ void MuonAnalysis::initLayout()
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
 
   m_optionTab->initLayout();
+  m_resultTableTab->initLayout();
 
   // connect guess alpha 
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
@@ -2817,6 +2818,10 @@ void MuonAnalysis::changeTab(int tabNumber)
   } 
   else
   {
+    if (tabNumber == 4)
+    {
+      m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+    }
     // delete the peak picker tool because it is no longer needed.
     emit fittingRequested(m_uiForm.fitBrowser, "");
   }

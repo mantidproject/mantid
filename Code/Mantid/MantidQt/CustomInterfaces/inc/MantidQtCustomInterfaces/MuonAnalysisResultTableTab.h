@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QTableWidget>
@@ -62,10 +63,19 @@ class MuonAnalysisResultTableTab : public QWidget
 public:
   MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
   void initLayout();
+  void populateTables(const QStringList& wsList);
 
-public slots:
+private slots:
+  void helpResultsClicked();
+  void selectAllLogs();
+  void selectAllFittings();
+  void createTable();
 
 private:
+  void populateLogValues(const QStringList& wsList);
+  void populateFittings(const QStringList& wsList);
+  
+  std::string getFileName();
 
   Ui::MuonAnalysis& m_uiForm;
 };
