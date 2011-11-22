@@ -1,9 +1,8 @@
 /*  This is another User test fitting function.
 
     For a general description of how to create a test
-    fitting function see LorentzianTest.h and LorentzianTest.h
+    fitting function see LorentzianTest.h and LorentzianTest.cpp
 
-    This function was originally provided by the ISIS Muon group.
 */
 
 //----------------------------------------------------------------------
@@ -41,10 +40,7 @@ void Muon_ExpDecayOscTest::functionLocal(double* out, const double* xValues, con
  
   for (int i = 0; i < nData; i++) 
   {
-    if ( gs*xValues[i] < 20 )
       out[i] = gA0*exp(-gs*xValues[i])*cos(2*3.1415926536*gf*xValues[i]+gphi);
-    else
-      out[i] = 0.0;
   }
 }
 void Muon_ExpDecayOscTest::functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)

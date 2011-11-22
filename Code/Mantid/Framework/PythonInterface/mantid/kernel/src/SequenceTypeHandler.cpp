@@ -47,7 +47,7 @@ namespace Mantid
           }
           else
           {
-            throw std::invalid_argument("SequenceTypeHandler::set - Unknown integer property type.");
+            throw std::invalid_argument("SequenceTypeHandler::set - The property type for '" + name  + "' could not been handled.");
           }
         }
         else if( PyFloat_Check(firstElement) )
@@ -57,7 +57,7 @@ namespace Mantid
         }
         else
         {
-          throw std::invalid_argument("SequenceTypeHandler::set - Unknown sequence element type.");
+          throw std::invalid_argument("SequenceTypeHandler::set - The first element of the value for the '" + name + "' property cannot be handled.");
         }
 
       }

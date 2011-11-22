@@ -134,6 +134,7 @@ public:
     typedef boost::shared_ptr<DataObjectOne> DataObjectOne_sptr;
     PropertyWithValue<DataItem_sptr> *otherDataProp = new PropertyWithValue<DataItem_sptr>("DataProp", DataItem_sptr());
     TS_ASSERT_EQUALS(otherDataProp->setValue(item), std::string());
+    delete otherDataProp;
   }
 
   void test_Setting_With_DataItemPtr_Fails_When_Object_Is_Not_Convertible_To_Property_Type()

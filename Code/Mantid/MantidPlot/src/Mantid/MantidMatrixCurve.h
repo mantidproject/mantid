@@ -4,11 +4,9 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
-
+#include "MantidQwtMatrixWorkspaceData.h"
 
 // Forward definitions
-
-class MantidQwtMatrixWorkspaceData;
 class MantidUI;
 
 /** 
@@ -71,13 +69,11 @@ public:
 
   /// Overrides qwt_plot_curve::boundingRect
   QwtDoubleRect boundingRect() const;
-  /// Invalidates the bounding rect forcing it to be recalculated
-  void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
   /// Return pointer to the data if it of the right type or 0 otherwise
   MantidQwtMatrixWorkspaceData* mantidData();
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
-  const MantidQwtMatrixWorkspaceData* mantidData()const;
+  const MantidQwtMatrixWorkspaceData* mantidData() const;
 
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
@@ -88,15 +84,10 @@ public:
   /// Returns whether the curve is plotted as a distribution
   bool isDistribution() const;
 
-  /// Returns whether the curve has error bars
-  bool hasErrorBars() const;
-
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;
 
-  /// Overriden virtual method
-  void itemChanged();
   /// saves the MantidMatrixCurve details to project file.
   QString saveToString();
 
@@ -143,22 +134,15 @@ private slots:
 
   void dataReset(const QString&);
 
-  void axisScaleChanged(int axis, bool toLog);
-
 private:
 
   /// Make the curve name
   static QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
                                  const QString& wsName,int index);
-  /// Make a name for a copied curve
-  static QString createCopyName(const QString& curveName);
-  bool m_drawErrorBars;///< True for drawing error bars
-  bool m_drawAllErrorBars; ///< if true and m_drawErrorBars is true draw all error bars (no skipping)
+
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
   /// workspace index
   int  m_index;
-  /// The bounding rect used by qwt to set the axes
-  mutable QwtDoubleRect m_boundingRect;
   /// x units
   Mantid::Kernel::Unit_sptr m_xUnits;
   /// y units

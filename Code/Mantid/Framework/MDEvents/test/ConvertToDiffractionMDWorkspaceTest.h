@@ -51,18 +51,28 @@ public:
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
 
-    // But you can't add to an existing one of the wrong dimensions type
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
+    // But you can't add to an existing one of the wrong dimensions type, if you choose Append
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
+        "Append", "1",
         "OutputDimensions", "HKL");
     TS_ASSERT( !alg->isExecuted() );
 
-    // Let's remove the old workspace and try again - it will work.
-    AnalysisDataService::Instance().remove("testOutMD");
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
+    // If Append is False, then it does work. The workspace gets replaced
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
+        "Append", "0",
+        "OutputDimensions", "HKL");
+    TS_ASSERT( alg->isExecuted() );
+
+    // Let's remove the old workspace and try again - it will work.
+    AnalysisDataService::Instance().remove("testOutMD");
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
+        "InputWorkspace", "testInEW",
+        "OutputWorkspace", "testOutMD",
+        "Append", "1",
         "OutputDimensions", "HKL");
     TS_ASSERT( alg->isExecuted() );
 
@@ -114,6 +124,7 @@ public:
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
       alg.setProperty("InputWorkspace", in_ws);
+      alg.setProperty("Append", true);
       alg.setPropertyValue("OutputWorkspace", "test_md3");
       TS_ASSERT_THROWS_NOTHING( alg.execute(); )
       TS_ASSERT( alg.isExecuted() )
@@ -146,10 +157,10 @@ public:
 //    do_test_MINITOPAZ(WEIGHTED);
 //  }
 //
-//  void test_MINITOPAZ_addToExistingWorkspace()
-//  {
-//    do_test_MINITOPAZ(TOF, 2);
-//  }
+  void test_MINITOPAZ_addToExistingWorkspace()
+  {
+    do_test_MINITOPAZ(TOF, 2);
+  }
 //
 //  void test_MINITOPAZ_forProfiling()
 //  {

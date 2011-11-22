@@ -72,6 +72,9 @@ namespace MDAlgorithms
   /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
     static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
+
+  /** function provides the linear representation (9 elements) for the transformation matrix FROM: TO:  */
+   std::vector<double> get_transf_matrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u, const Kernel::V3D &v)const;
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();

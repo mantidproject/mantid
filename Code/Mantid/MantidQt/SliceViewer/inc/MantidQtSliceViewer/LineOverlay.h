@@ -52,7 +52,8 @@ namespace SliceViewer
       HandleA = 0,
       HandleB = 1,
       HandleWidthTop = 2,
-      HandleWidthBottom = 3
+      HandleWidthBottom = 3,
+      HandleCenter = 4 // Anywhere inside the center
     };
 
   public:
@@ -68,7 +69,7 @@ namespace SliceViewer
     double getWidth() const;
 
   signals:
-  /// Signal sent while the line is being dragged
+    /// Signal sent while the line is being dragged
     void lineChanging(QPointF, QPointF, double);
     /// Signal sent once the drag is completed
     void lineChanged(QPointF, QPointF, double);
@@ -86,6 +87,7 @@ namespace SliceViewer
     void paintEvent(QPaintEvent *event);
 
     eHandleID mouseOverHandle(QPoint pos);
+    bool mouseOverCenter(QPoint pos);
     void mouseMoveEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
@@ -110,6 +112,10 @@ namespace SliceViewer
     eHandleID m_dragHandle;
     /// Start point (in plot coords) of the drag
     QPointF m_dragStart;
+    /// Original PointA at drag start
+    QPointF m_dragStart_PointA;
+    /// Original PointB at drag start
+    QPointF m_dragStart_PointB;
 
     /// Marker that the middle mouse button is pressed (panning)
     bool m_middleButton;

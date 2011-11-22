@@ -122,7 +122,7 @@ namespace Mantid
       void rotate(double,const Kernel::V3D&);
 
       //! Get the position relative to the parent IComponent (absolute if no parent)
-      const Kernel::V3D & getRelativePos() const;
+      virtual const Kernel::V3D getRelativePos() const;
 
       //! Get the position of the IComponent. Tree structure is traverse through the parent chain
       virtual Kernel::V3D getPos() const;

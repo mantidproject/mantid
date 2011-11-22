@@ -703,7 +703,7 @@ namespace WorkspaceCreationHelper
         OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
         ws->mutableSample().setOrientedLattice(latt);
 
-        AddTSPEntry( ws->mutableRun(), "phi", 2);
+        AddTSPEntry( ws->mutableRun(), "phi", 0);
         AddTSPEntry( ws->mutableRun(), "chi", 0);
         AddTSPEntry( ws->mutableRun(), "omega", 0);
         ws->mutableRun().getGoniometer().makeUniversalGoniometer();
@@ -712,6 +712,73 @@ namespace WorkspaceCreationHelper
     return ws;  
   }
 
+  /// Create a workspace with all components needed for inelastic analysis and 3 detectors in specific places
+  /// @param numPixels --- numbed of detectors
+  /// @param numBins   -- number of energy bins;
+  /// @param Emin      -- minimal energy transfer
+  /// @param Emax      -- maxinal energy transfer
+  /// @param Ei        -- input beam energy
+   Mantid::API::MatrixWorkspace_sptr 
+  createProcessedInelasticWS(const std::vector<double> &L2, const std::vector<double> &polar, const std::vector<double> &azimutal,
+                             size_t numBins,double Emin, double Emax,double Ei)
+   {
+   // not used but interface needs it
+   std::set<int64_t> maskedWorkspaceIndices;
+   size_t numPixels= L2.size();
+
+   Mantid::API::MatrixWorkspace_sptr  ws= Create2DWorkspaceWithValues(uint64_t(numPixels), uint64_t(numBins),true, maskedWorkspaceIndices,0, 1, 0.1);
+  
+
+    ws->setInstrument( ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(L2,polar,azimutal) );
+    for (int g=0; g < static_cast<int>(numPixels); g++)
+    {
+      ISpectrum * spec = ws->getSpectrum(g);
+      spec->addDetectorID(g);
+      spec->setSpectrumNo(g+1);
+      //spec->setSpectrumNo(g+1);
+   //   spec->addDetectorID(g*9);
+   //   spec->setSpectrumNo(g+1); // Match detector ID and spec NO
+    }
+    ws->generateSpectraMap();
+
+    double dE = (Emax-Emin)/double(numBins);    
+    for( size_t j=0;j<numPixels;j++){
+
+         MantidVec& E_transfer = ws->dataX(j);
+         for(size_t i=0; i<= numBins;i++){
+             double E =Emin + static_cast<double>(i)*dE;
+             E_transfer[i]=E;
+         }
+    }
+    // set axis, correspondent to the X-values
+     ws->replaceAxis(1, new SpectraAxis(numPixels, true));
+     NumericAxis *pAxis0 = new NumericAxis(numBins); 
+     MantidVec& E_transfer = ws->dataX(0);
+     for(size_t i=0; i < numBins; i++){
+            double E =0.5*(E_transfer[i]+E_transfer[i+1]);
+            pAxis0->setValue(i,E);
+     }
+
+     pAxis0->setUnit("DeltaE");
+
+     ws->replaceAxis(0,pAxis0);
+
+
+ // define oriented lattice which requested for processed ws   
+    OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
+    ws->mutableSample().setOrientedLattice(latt);
+
+    //TODO: clarify if this property indeed goes there;
+    ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei),true);
+    // these properties have to be different -> specific for processed ws, as time now should be reconciled
+    AddTSPEntry( ws->mutableRun(), "phi", 0);
+    AddTSPEntry( ws->mutableRun(), "chi", 0);
+    AddTSPEntry( ws->mutableRun(), "omega", 0);
+    ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+ 
+
+    return ws;  
+  }
 
 
 }

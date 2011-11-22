@@ -198,6 +198,7 @@ void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
     //}
 
   //}
+  std::cerr << "Context menu\n";
 }
 
 /**

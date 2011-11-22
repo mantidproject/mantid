@@ -121,13 +121,15 @@ namespace Geometry
 
 
 
- /** Set the U rotation matrix, used to transform a vector expressed in the
-   *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)"
-   *  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
+ /**  Set the U rotation matrix, to provide the transformation, which translate an 
+   *  arbitrary vector V expressed in RLU (hkl) 
+   *  into another coordinate system defined by vectors u and v, expressed in RLU (hkl) 
    *  Author: Alex Buts
-   *  @param u :: vector of ?
-   *  @param v :: vector of ?
+   *  @param u :: first vector of new coordinate system (in hkl units)
+   *  @param v :: second vector of the new coordinate system 
    *  @return the U matrix calculated
+   *  The transformation from old coordinate system to new coordinate system is performed by 
+   *  the whole UB matrix
    **/
   DblMatrix OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
   {

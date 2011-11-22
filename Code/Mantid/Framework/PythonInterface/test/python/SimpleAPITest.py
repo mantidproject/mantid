@@ -33,7 +33,6 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
 If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick.
 If false, then the workspace gets converted to a Workspace2D histogram.
 """
-        
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0 )
         self.assertEquals(doc, expected_doc)
@@ -41,12 +40,33 @@ If false, then the workspace gets converted to a Workspace2D histogram.
     def test_function_call_executes_correct_algorithm_when_passed_correct_args(self):
         wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
         data = [1.0,2.0,3.0,4.0,5.0]
-        simpleapi.CreateWorkspace(wsname,data,data,NSpec=1,UnitX='Wavelength')
+        simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength')
         self.assertTrue( wsname in analysis_data_svc )
         analysis_data_svc.remove(wsname)
         
+    def test_function_call_executes_with_output_workspace_on_lhs(self):
+        data = [1.0,2.0,3.0,4.0,5.0]
+        wavelength = simpleapi.CreateWorkspace(data,data,NSpec=1,UnitX='Wavelength')
+        wsname = 'wavelength'
+        self.assertTrue( wsname in analysis_data_svc )
+        analysis_data_svc.remove(wsname)
+        
+    def test_function_call_executes_when_algorithm_has_only_inout_workspace_props(self):
+        data = [1.0,2.0,3.0,4.0,5.0, 6.0]
+        wavelength = simpleapi.CreateWorkspace(data,data,NSpec=3,UnitX='Wavelength')
+        simpleapi.MaskDetectors(wavelength,WorkspaceIndexList=[1,2])
+        
     def test_function_call_raises_ValueError_when_passed_args_with_invalid_values(self):
-        self.assertRaises(ValueError, simpleapi.LoadNexus, 'DoesNotExist.nxs')
+        # lhs code bug means we can't do this --> #4186
+        try:
+            simpleapi.LoadNexus(Filename='DoesNotExist.nxs')
+            self.fail("A ValueError was not thrown")
+        except ValueError:
+            pass
         
     def test_function_call_raises_RuntimeError_when_passed_incorrect_args(self):
-        self.assertRaises(RuntimeError, simpleapi.LoadNexus, NotAProperty=1)
+        try:
+            simpleapi.LoadNexus(NotAProperty=1)
+            self.fail("A RuntimeError was not thrown")
+        except RuntimeError:
+            pass

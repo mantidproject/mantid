@@ -95,10 +95,11 @@ void MuonAsymmetryCalc::exec()
     // Note: the error for F-aB = the error for F+aB
     double quadrature = sqrt(pow(tmpWS->dataE(forward)[j], 2) + pow(tmpWS->dataE(backward)[j], 2));
 
-    double ratio = numerator && denominator ? sqrt(pow(quadrature / numerator, 2) + pow(quadrature
-        / denominator, 2)) : 0.;
+    double ratio = numerator && denominator ? pow(quadrature / numerator, 2) + pow(quadrature
+        / denominator, 2) : 0.;
 
-    outputWS->dataE(0)[j] = ratio * outputWS->dataY(0)[j];
+    outputWS->dataE(0)[j] = sqrt( ratio )* fabs(outputWS->dataY(0)[j]);    
+     
     prog.report();
   }
 

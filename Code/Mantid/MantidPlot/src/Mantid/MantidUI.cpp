@@ -2004,7 +2004,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
   return plotSpectraList(wsName, spec, false);
 }
 
-MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
+MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph::CurveType style)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* m = getMantidMatrix(wsName);
@@ -2035,9 +2035,8 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
     return ml;
   }
 
-  ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-  Graph *g = ml->activeGraph();
-  appWindow()->polishGraph(g,Graph::Line);
+  // TODO: Use the default style instead of a line if nothing is passed into this method
+  ml = appWindow()->multilayerPlot(t,t->colNames(),style);
   setUpBinGraph(ml,wsName, ws);
   ml->askOnCloseEvent(false);
   QApplication::restoreOverrideCursor();

@@ -147,7 +147,7 @@ public:
       {
         // Nothing rejected
         TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
-        TS_ASSERT_DELTA(out->getErrorAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
       }
       else
       {
@@ -155,7 +155,7 @@ public:
         TS_ASSERT( boost::math::isnan( out->getSignalAt(i) ) ); //The implicit function should have ensured that no bins were present.
       }
     }
-    // check basis vectors
+    // chck basis vectors
     TS_ASSERT_EQUALS( out->getBasisVector(0), expectBasisX);
     if (out->getNumDims() > 1) { TS_ASSERT_EQUALS( out->getBasisVector(1), expectBasisY); }
     if (out->getNumDims() > 2) { TS_ASSERT_EQUALS( out->getBasisVector(2), expectBasisZ); }
@@ -356,7 +356,7 @@ public:
     {
       // Nothing rejected
       TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
-      TS_ASSERT_DELTA(out->getErrorAt(i), expected_signal, 1e-5);
+      TS_ASSERT_DELTA(out->getErrorAt(i), std::sqrt(expected_signal), 1e-5);
     }
 
     // check basis vectors

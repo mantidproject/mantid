@@ -5,27 +5,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
-//#include "MantidAPI/IFunctionWithLocation.h"
 namespace Mantid
 {
   namespace CurveFitting
   {
     /**
-    Provide lorentzian peak shape function interface to IPeakFunction.
-    I.e. the function: Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ).
+    This is an example of a peak shape function which is a combination
+    of an exponential decay and cos function.
 
+    This function was originally provided by the ISIS Muon group.
 
-    LorentzianTest parameters:
-    <UL>
-    <LI> Height - height of peak (default 0.0)</LI>
-    <LI> PeakCentre - centre of peak (default 0.0)</LI>
-    <LI> HWHM - half-width half-maximum (default 1.0)</LI>
-    </UL>
+    For a general description of how to create a test
+    fitting function see LorentzianTest.h and LorentzianTest.cpp
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 27/10/2009
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

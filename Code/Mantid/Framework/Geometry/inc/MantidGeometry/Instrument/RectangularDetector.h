@@ -46,6 +46,8 @@ namespace Geometry
 
 class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly, public IObjComponent
 {
+  friend class RectangularDetectorPixel;
+
 public:
   ///String description of the type of component
   virtual std::string type() const { return "RectangularDetector";}

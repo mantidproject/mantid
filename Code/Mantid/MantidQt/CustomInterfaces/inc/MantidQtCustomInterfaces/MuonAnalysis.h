@@ -22,6 +22,7 @@ namespace Muon
 {
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
+  class MuonAnalysisResultTableTab;
 }
 
 
@@ -352,6 +353,8 @@ private:
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab* m_fitDataTab;
+  /// handles result table tab work
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

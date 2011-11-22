@@ -72,6 +72,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_InstrumentDisplay = new MantidGLWidget(this);
   controlPanelLayout->addWidget(m_InstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
+  m_InstrumentDisplay->installEventFilter(this);
 
   m_xIntegration = new XIntegrationControl(this);
   mainLayout->addWidget(m_xIntegration);
@@ -201,6 +202,14 @@ void InstrumentWindow::init()
 void InstrumentWindow::selectTab(int tab)
 {
   mControlsTab->setCurrentIndex(tab);
+}
+
+/**
+ * Return the currently displayed tab.
+ */
+InstrumentWindow::Tab InstrumentWindow::getTab()const
+{
+  return (Tab)mControlsTab->currentIndex();
 }
 
 void InstrumentWindow::setSurfaceType(int type)
@@ -1063,3 +1072,23 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
   }
   e->ignore();
 }
+
+/**
+ * Filter events directed to m_InstrumentDisplay and ContextMenuEvent in particular.
+ * @param obj :: Object which events will be filtered.
+ * @param ev :: An ingoing event.
+ */
+bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
+{
+  if (dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay &&
+    ev->type() == QEvent::ContextMenu)
+  {
+    switch(getTab())
+    {
+    case PICK: m_pickTab->showInstrumentDisplayContextMenu(); break;
+    }
+    return true;
+  }
+  return false;
+}
+
