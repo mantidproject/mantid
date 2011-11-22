@@ -239,6 +239,7 @@ set ( TEST_FILES
 	test/SampleTest.h
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
+	test/TempFunctionTest.h
 	test/TextAxisTest.h
 	test/VectorParameterParserTest.h
 	test/VectorParameterTest.h
