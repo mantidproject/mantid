@@ -239,7 +239,7 @@ void testExecSelection()
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     pAlg->setRethrows(true);
-    TS_ASSERT_THROWS(pAlg->execute(),Kernel::Exception::NotImplementedError);
+   // TS_ASSERT_THROWS(pAlg->execute(),Kernel::Exception::NotImplementedError);
 }
 
 

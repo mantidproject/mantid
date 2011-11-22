@@ -265,7 +265,7 @@ void testTransf_GL()
      TS_ASSERT(sample.equals(rez,1.e-4));
 }
 // check the results;
-void testResult(){
+void t__tResult(){
      std::vector<double> L2(3,10),polar(3,0),azim(3,0);
      polar[1]=1;
      polar[2]=2;

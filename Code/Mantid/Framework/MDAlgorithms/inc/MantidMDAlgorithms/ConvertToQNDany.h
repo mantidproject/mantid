@@ -111,12 +111,6 @@ namespace MDAlgorithms
    //
    template<size_t nd,Q_state Q>
    void process_QND(API::IMDEventWorkspace *const pOutWs);
-   // helper function to create MDWorkspace
-   template<size_t nd>
-   boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> >    
-   create_emptyNDEventWS(const std::vector<std::string> &dimensionNames,const std::vector<std::string> dimensionUnits,
-                         const std::vector<double> &dimMin,const std::vector<double> &dimMax,int nd);
-  
 
    //  modQdE, // specific algorithm  -- 2D, powder
     void process_ModQ_dE_();
