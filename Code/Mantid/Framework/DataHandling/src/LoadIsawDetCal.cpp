@@ -35,16 +35,12 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
+#include <numeric>
 #include <cmath>
 #include <iomanip>
 #include "MantidAPI/WorkspaceValidators.h"
@@ -139,7 +135,6 @@ namespace DataHandling
     Instrument_const_sptr inst = inputW->getInstrument();
     std::string instname = inst->getName();
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(instname));
-    inputW->setInstrument(instrument);
 
     // set-up minimizer
 
@@ -213,22 +208,13 @@ namespace DataHandling
       {
         double mL1, mT0;
         std::stringstream(line) >> count >> mL1 >> mT0;
+        // Convert from cm to m
+        center(0.0, 0.0, -0.01 * mL1,"moderator", inname);
         //mT0 and time of flight are both in microsec
         IAlgorithm_sptr alg1 = createSubAlgorithm("ChangeBinOffset");
         alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
         alg1->setProperty("Offset", mT0);
         alg1->executeAsSubAlg();
-        Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("sample-position", instrument.get());
-        instrument->add(samplepos);
-        instrument->markAsSamplePos(samplepos);
-        samplepos->setPos(0.0, 0.0, 0.0);
-    
-        Geometry::ObjComponent *source = new Geometry::ObjComponent("moderator", instrument.get());
-        instrument->add(source);
-        instrument->markAsSource(source);
-        // Convert from cm to m
-        source->setPos(0.0, 0.0, -0.01 * mL1);
-
       }
 
       if(line[0] != '5') continue;
@@ -257,55 +243,20 @@ namespace DataHandling
       det = detList[idnum];
       if (det)
       {
+        IAlgorithm_sptr alg1 = createSubAlgorithm("ResizeRectangularDetector");
+        alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+        alg1->setProperty("ComponentName", det->getName());
         // Convert from cm to m
-        width *= 0.01;
-        height *= 0.01;
-        double xstep = width / det->xpixels();
-        double ystep = height / det->ypixels();
-        double xstart = -width * 0.5;
-        double ystart = -height * 0.5;
-        Geometry::RectangularDetector * bank = new Geometry::RectangularDetector(det->getName(), instrument.get());
-        std::ostringstream pixel_width;
-        pixel_width << xstep/2;
-        std::ostringstream pixel_height;
-        pixel_height << ystep/2;
-        std::string pixel_depth_str = "-0.0001";
-        std::string detXML =   "<cuboid id=\"pixel\">"
-          "<left-front-bottom-point   x= \""+pixel_width.str()+"\" y=\"-"+pixel_height.str()+"\" z=\"0\"  />"
-          "<left-front-top-point      x= \""+pixel_width.str()+"\" y=\"-"+pixel_height.str()+"\" z=\""+pixel_depth_str+"\"  />"
-          "<left-back-bottom-point    x=\"-"+pixel_width.str()+"\" y=\"-"+pixel_height.str()+"\" z=\"0\"  />"
-          "<right-front-bottom-point  x= \""+pixel_width.str()+"\" y= \""+pixel_height.str()+"\" z=\"0\"  />"
-          "</cuboid>";
-        Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
-        bank->initialize(shape, det->xpixels(), xstart, xstep, det->ypixels(), ystart, ystep, det->idstart(), det->idfillbyfirst_y(), det->idstepbyrow(), det->idstep());
-      try
-      {
-        for (int x=0; x < bank->nelements(); x++)
-        {
-          boost::shared_ptr<Geometry::ICompAssembly> xColumn = boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
-          for (int y=0; y < xColumn->nelements(); y++)
-          {
-            boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
-            if (detector)
-            {
-               //Mark it as a detector (add to the instrument cache)
-               instrument->markAsDetector(detector.get());
-            }
-          }
-        }
-      }
-      catch(Kernel::Exception::ExistsError&)
-      {
-         throw Kernel::Exception::InstrumentDefinitionError(
-           "Duplicate detector ID found when adding RectangularDetector " + det->getName() + " in XML instrument file");
-      }
-              
+        alg1->setProperty("ScaleX", 0.01*width/det->xsize());
+        alg1->setProperty("ScaleY", 0.01*height/det->ysize());
+        alg1->executeAsSubAlg();
+
         // Convert from cm to m
         x *= 0.01;
         y *= 0.01;
         z *= 0.01;
         detname = det->getName();
-        bank->setPos(x,y,z);
+        center(x, y, z, detname, inname);
 
         //These are the ISAW axes
         V3D rX = V3D(base_x, base_y, base_z);
@@ -340,7 +291,7 @@ namespace DataHandling
         Quat Rot = Q2 * Q1;
 
         // Then find the corresponding relative position
-        boost::shared_ptr<const IComponent> comp = instrument->getComponentByName(detname);
+        boost::shared_ptr<const IComponent> comp = inst->getComponentByName(detname);
         boost::shared_ptr<const IComponent> parent = comp->getParent();
         if (parent)
         {
@@ -356,8 +307,11 @@ namespace DataHandling
             Rot = Rot * rot0;
         }
 
+        //Need to get the address to the base instrument component
+        Geometry::ParameterMap& pmap = inputW->instrumentParameters();
+
         // Set or overwrite "rot" instrument parameter.
-        bank->setRot(Rot);
+        pmap.addQuat(comp.get(),"rot",Rot);
 
       } 
     } 
