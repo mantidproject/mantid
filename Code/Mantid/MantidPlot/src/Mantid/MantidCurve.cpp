@@ -145,7 +145,7 @@ QString MantidCurve::createCopyName(const QString& curveName)
 
 void MantidCurve::doDraw(QPainter *p, 
           const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-          const QRect &rect, MantidQwtWorkspaceData const * const d) const
+          const QRect&, MantidQwtWorkspaceData const * const d) const
 {
   int xi0 = 0;
   p->setPen(pen());
