@@ -29,6 +29,7 @@ public:
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
   void init();
+  void showInstrumentDisplayContextMenu();
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -36,6 +37,8 @@ private slots:
   void setPlotCaption();
   void setSelectionType();
   void addPeak(double,double);
+  void storeCurve();
+  void removeCurve(const QString &);
 private:
   void showEvent (QShowEvent *);
   void updatePlot(int detid);
@@ -61,6 +64,9 @@ private:
   QAction *m_integrateTimeBins; ///< Sets summation over time bins (m_plotSum = false)
   QAction *m_logY;
   QAction *m_linearY;
+  // Instrument display context menu actions
+  QAction *m_storeCurve; ///< add the current curve to the list of permanently displayed curves
+
   CollapsiblePanel* m_plotPanel;
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;

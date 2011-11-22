@@ -67,7 +67,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 6 propeties",6,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 7 propeties",7,(size_t)(pAlg->getProperties().size()));
 }
 void testGetDimNames(){
     // get ws from the DS    
@@ -75,7 +75,7 @@ void testGetDimNames(){
     // check the privat function
     std::vector<std::string> dim_names = pAlg->get_dimension_names(ws2D);
 
-   TSM_ASSERT_EQUALS("the algorithm for this workpace can choose from 4 properties",4,dim_names.size());
+   TSM_ASSERT_EQUALS("the algorithm for this workpace can choose from 5 properties",5,dim_names.size());
 
    std::vector<std::string> basic_properties(4);
    basic_properties[0]="DeltaE";

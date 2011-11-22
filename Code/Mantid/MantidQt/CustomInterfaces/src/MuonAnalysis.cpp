@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -99,7 +100,10 @@ void MuonAnalysis::initLayout()
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
+  m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
+
   m_optionTab->initLayout();
+  m_resultTableTab->initLayout();
 
   // connect guess alpha 
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
@@ -2818,6 +2822,10 @@ void MuonAnalysis::changeTab(int tabNumber)
   } 
   else
   {
+    if (tabNumber == 4)
+    {
+      m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+    }
     // delete the peak picker tool because it is no longer needed.
     emit fittingRequested(m_uiForm.fitBrowser, "");
   }
