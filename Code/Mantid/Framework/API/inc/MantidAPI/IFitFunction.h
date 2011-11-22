@@ -120,6 +120,9 @@ public:
   /// Constructor
   IFitFunction():IFunction(){}
 
+  using IFunction::setWorkspace;
+  using IFunction::function;
+  using IFunction::functionDeriv;
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   /// @param slicing :: A string identifying the data in the workspace to be fitted, e.g. spectrum index, starting and ending x values, etc
