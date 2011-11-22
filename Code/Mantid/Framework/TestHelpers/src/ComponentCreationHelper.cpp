@@ -344,7 +344,7 @@ createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const 
     // find characteristic sizes of the detectors;
     double dAzi_min(FLT_MAX);
     double dPol_min(FLT_MAX);
-    double L2_min(FLT_MAX),dAlSq_min(FLT_MAX);
+    double L2_min(FLT_MAX);
     double dAzi,dPol;
     std::vector<double> az(azim);
     std::vector<double> po(polar);
