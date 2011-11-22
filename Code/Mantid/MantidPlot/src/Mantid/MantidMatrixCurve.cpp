@@ -1,5 +1,4 @@
 #include "MantidMatrixCurve.h"
-#include "MantidQwtMatrixWorkspaceData.h"
 
 #include <qpainter.h>
 #include <qwt_symbol.h>
@@ -123,40 +122,9 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   }
   int lineWidth = 1;
   MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
-
-
   if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )
   {
-    if ( style == Graph::Unspecified )
-      style = static_cast<Graph::CurveType>(ml->applicationWindow()->defaultCurveStyle);
-
-    QwtPlotCurve::CurveStyle qwtStyle;
-    // Get the symbol size from the user preferences and create solid black circle symbol
-    // of that size for use if the preferred plot style is scatter or line+symbol
-    const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
-    const QwtSymbol symbol(QwtSymbol::Ellipse,QBrush(Qt::black),QPen(),QSize(symbolSize,symbolSize));
-    switch(style)
-    {
-    case Graph::Line :
-      qwtStyle = QwtPlotCurve::Lines;
-      break;
-    case Graph::Scatter:
-      qwtStyle = QwtPlotCurve::NoCurve;
-      this->setSymbol(symbol);
-      break;
-    case Graph::LineSymbols :
-      qwtStyle = QwtPlotCurve::Lines;
-      this->setSymbol(symbol);
-      break;
-    case 15:
-      qwtStyle = QwtPlotCurve::Steps;
-      break;  // should be Graph::HorizontalSteps but it doesn't work
-    default:
-      qwtStyle = QwtPlotCurve::Lines;
-      break;
-    }
-    setStyle(qwtStyle);
-    lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
+    applyStyleChoice(style, ml, lineWidth);
   }
   else if (matrixWS->isHistogramData() && !matrixWS->isDistribution())
   {
@@ -164,7 +132,9 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
     setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
   }
   else
+  {
     setStyle(QwtPlotCurve::Lines);
+  }
   if (g)
   {
     g->insertCurve(this,lineWidth);
@@ -214,24 +184,7 @@ void MantidMatrixCurve::setData(const QwtData &data)
 
 QwtDoubleRect MantidMatrixCurve::boundingRect() const
 {
-  if (m_boundingRect.isNull())
-  {
-    const MantidQwtMatrixWorkspaceData* data = mantidData();
-    if (data->size() == 0) return QwtDoubleRect(0,0,1,1);
-    double y_min = std::numeric_limits<double>::infinity();
-    double y_max = -y_min;
-    for(size_t i=0;i<data->size();++i)
-    {
-      double y = data->y(i);
-      if (y == std::numeric_limits<double>::infinity() || y != y) continue;
-      if (y < y_min && (!mantidData()->logScale() || y > 0.)) y_min = y;
-      if (y > y_max) y_max = y;
-    }
-    double x_min = data->x(0);
-    double x_max = data->x(data->size()-1);
-    m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
-  }
-  return m_boundingRect;
+  return MantidCurve::boundingRect();
 }
 
 void MantidMatrixCurve::draw(QPainter *p, 
@@ -391,18 +344,6 @@ const MantidQwtMatrixWorkspaceData* MantidMatrixCurve::mantidData()const
 {
   const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
   return d;
-}
-
-void MantidMatrixCurve::axisScaleChanged(int axis, bool toLog)
-{
-  if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
-  {
-    mantidData()->setLogScale(toLog);
-    // force boundingRect calculation at this moment
-    invalidateBoundingRect();
-    boundingRect();
-    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
-  }
 }
 
 /// Enables/disables drawing as distribution, ie dividing each y-value by the bin width.

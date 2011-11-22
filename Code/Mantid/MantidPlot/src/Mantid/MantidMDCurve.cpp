@@ -1,11 +1,10 @@
 #include "MantidMDCurve.h"
-#include "MantidQwtIMDWorkspaceData.h"
-
-#include <qpainter.h>
-#include <qwt_symbol.h>
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+
+#include <qpainter.h>
+#include <qwt_symbol.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -78,37 +77,12 @@ void MantidMDCurve::init(Graph* g, bool, Graph::CurveType style)
   MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
   if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )
   {
-    if ( style == Graph::Unspecified )
-      style = static_cast<Graph::CurveType>(ml->applicationWindow()->defaultCurveStyle);
-
-    QwtPlotCurve::CurveStyle qwtStyle;
-    const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
-    const QwtSymbol symbol(QwtSymbol::Ellipse,QBrush(Qt::black),QPen(),QSize(symbolSize,symbolSize));
-    switch(style)
-    {
-    case Graph::Line :
-      qwtStyle = QwtPlotCurve::Lines;
-      break;
-    case Graph::Scatter:
-      qwtStyle = QwtPlotCurve::NoCurve;
-      this->setSymbol(symbol);
-      break;
-    case Graph::LineSymbols :
-      qwtStyle = QwtPlotCurve::Lines;
-      this->setSymbol(symbol);
-      break;
-    case 15:
-      qwtStyle = QwtPlotCurve::Steps;
-      break;  // should be Graph::HorizontalSteps but it doesn't work
-    default:
-      qwtStyle = QwtPlotCurve::Lines;
-      break;
-    }
-    setStyle(qwtStyle);
-    lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
+    applyStyleChoice(style, ml, lineWidth);
   }
   else
+  {
     setStyle(QwtPlotCurve::Lines);
+  }
   if (g)
   {
     g->insertCurve(this,lineWidth);
@@ -148,24 +122,7 @@ void MantidMDCurve::setData(const QwtData &data)
 
 QwtDoubleRect MantidMDCurve::boundingRect() const
 {
-  if (m_boundingRect.isNull())
-  {
-    const MantidQwtIMDWorkspaceData* data = mantidData();
-    if (data->size() == 0) return QwtDoubleRect(0,0,1,1);
-    double y_min = std::numeric_limits<double>::infinity();
-    double y_max = -y_min;
-    for(size_t i=0;i<data->size();++i)
-    {
-      double y = data->y(i);
-      if (y == std::numeric_limits<double>::infinity() || y != y) continue;
-      if (y < y_min && (!mantidData()->logScale() || y > 0.)) y_min = y;
-      if (y > y_max) y_max = y;
-    }
-    double x_min = data->x(0);
-    double x_max = data->x(data->size()-1);
-    m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
-  }
-  return m_boundingRect;
+  return MantidCurve::boundingRect();
 }
 
 void MantidMDCurve::draw(QPainter *p, 
@@ -280,7 +237,7 @@ QString MantidMDCurve::saveToString()
 }
 
 
-MantidQwtIMDWorkspaceData* MantidMDCurve::mantidData()
+MantidQwtIMDWorkspaceData* MantidMDCurve::mantidData() 
 {
   MantidQwtIMDWorkspaceData* d = dynamic_cast<MantidQwtIMDWorkspaceData*>(&data());
   return d;
@@ -290,18 +247,6 @@ const MantidQwtIMDWorkspaceData* MantidMDCurve::mantidData()const
 {
   const MantidQwtIMDWorkspaceData* d = dynamic_cast<const MantidQwtIMDWorkspaceData*>(&data());
   return d;
-}
-
-void MantidMDCurve::axisScaleChanged(int axis, bool toLog)
-{
-  if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
-  {
-    mantidData()->setLogScale(toLog);
-    // force boundingRect calculation at this moment
-    invalidateBoundingRect();
-    boundingRect();
-    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
-  }
 }
 
 /// Returns whether the curve has error bars

@@ -4,6 +4,7 @@
 #include "../PlotCurve.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidQwtWorkspaceData.h"
 
 /** Base class for MantidCurve types. 
     
@@ -33,6 +34,7 @@
 class Graph;
 class MantidCurve :public PlotCurve, public MantidQt::API::WorkspaceObserver
 {
+  Q_OBJECT
 public:
   /// Constructor
   MantidCurve(const QString& wsName);
@@ -42,9 +44,43 @@ public:
   virtual ~MantidCurve();
   /// Clone
   virtual MantidCurve* clone(const Graph* g) const = 0;
+  /// Get mantid data 
+  virtual const MantidQwtWorkspaceData* mantidData() const = 0;
+  /// Get mantid data 
+  virtual MantidQwtWorkspaceData* mantidData() = 0;
+  /// Invalidates the bounding rect forcing it to be recalculated
+  void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
+  /*-------------------------------------------------------------------------------------
+  Public Base/Common methods
+  -------------------------------------------------------------------------------------*/
+
+   QwtDoubleRect MantidCurve::boundingRect() const;
+
+  /*-------------------------------------------------------------------------------------
+  End Public Base/Common methods
+  -------------------------------------------------------------------------------------*/
+
+protected slots:
+  
+  void axisScaleChanged(int axis, bool toLog);
+
+protected:
+  /*-------------------------------------------------------------------------------------
+  Protected Base/Common methods
+  -------------------------------------------------------------------------------------*/
+
+  /// Apply the style choice
+  void applyStyleChoice(Graph::CurveType style, MultiLayer* ml, int& lineWidth);
+
+  /*-------------------------------------------------------------------------------------
+  End Protected Base/Common methods
+  -------------------------------------------------------------------------------------*/
+  
 private:
-
+  /// The bounding rect used by qwt to set the axes
+  mutable QwtDoubleRect m_boundingRect;
+  
   //To ensure that all MantidCurves can work with Mantid Workspaces.
   virtual void init(Graph* g, bool distr, Graph::CurveType style) = 0;
 };

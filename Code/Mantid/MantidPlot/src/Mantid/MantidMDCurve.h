@@ -4,11 +4,9 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
-
+#include "MantidQwtIMDWorkspaceData.h"
 
 // Forward definitions
-
-class MantidQwtIMDWorkspaceData;
 class MantidUI;
 
 /** 
@@ -64,15 +62,12 @@ public:
 
   /// Overrides qwt_plot_curve::boundingRect
   QwtDoubleRect boundingRect() const;
-  
-  /// Invalidates the bounding rect forcing it to be recalculated
-  void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
   /// Return pointer to the data if it of the right type or 0 otherwise
   MantidQwtIMDWorkspaceData* mantidData();
 
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
-  const MantidQwtIMDWorkspaceData* mantidData()const;
+  virtual const MantidQwtIMDWorkspaceData* mantidData() const;
 
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
@@ -127,8 +122,6 @@ private slots:
 
   void dataReset(const QString&);
 
-  void axisScaleChanged(int axis, bool toLog);
-
 private:
 
   /// Make a name for a copied curve
@@ -136,8 +129,6 @@ private:
   bool m_drawErrorBars;///< True for drawing error bars
   bool m_drawAllErrorBars; ///< if true and m_drawErrorBars is true draw all error bars (no skipping)
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
-  /// The bounding rect used by qwt to set the axes
-  mutable QwtDoubleRect m_boundingRect;
 };
 
 #endif // MANTID_CURVE_H
