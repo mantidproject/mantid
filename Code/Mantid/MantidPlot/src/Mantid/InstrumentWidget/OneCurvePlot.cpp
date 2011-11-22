@@ -28,6 +28,10 @@ QwtPlot(parent),m_curve(NULL)
   m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
       QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, canvas());
   m_zoomer->setRubberBandPen(QPen(Qt::black));
+  QList<QColor> colors;
+  m_colors << Qt::red<< Qt::green  << Qt::blue << Qt::cyan << Qt::magenta << Qt::yellow << Qt::gray;
+  m_colors << Qt::darkRed<< Qt::darkGreen  << Qt::darkBlue << Qt::darkCyan << Qt::darkMagenta << Qt::darkYellow << Qt::darkGray;
+  m_colorIndex = 0;
 }
 
 /**
@@ -95,6 +99,14 @@ void OneCurvePlot::setData(const double* x,const double* y,int dataSize)
 }
 
 /**
+ * Set a label which will identify the curve when it is stored.
+ */
+void OneCurvePlot::setLabel(const QString& label)
+{
+  m_label = label;
+}
+
+/**
   * Hide the curve
   */
 void OneCurvePlot::clearCurve()
@@ -136,6 +148,7 @@ void OneCurvePlot::mousePressEvent(QMouseEvent* e)
     if (m_zoomer->zoomRectIndex() == 0)
     {
       e->accept();
+      // plot owner will display and process context menu
       emit showContextMenu();
     }
     return;
@@ -188,7 +201,7 @@ void OneCurvePlot::setYLinearScale()
  * Add new peak label
  * @param label :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
  */
-void OneCurvePlot::addLabel(PeakLabel* label)
+void OneCurvePlot::addPeakLabel(PeakLabel* label)
 {
   label->attach(this);
   m_peakLabels.append(label);
@@ -197,7 +210,7 @@ void OneCurvePlot::addLabel(PeakLabel* label)
 /**
  * Removes all peak labels.
  */
-void OneCurvePlot::clearLabels()
+void OneCurvePlot::clearPeakLabels()
 {
   foreach(PeakLabel* label, m_peakLabels)
   {
@@ -207,6 +220,61 @@ void OneCurvePlot::clearLabels()
   m_peakLabels.clear();
 }
 
+/**
+ * Returns true if the current curve isn't NULL
+ */
+bool OneCurvePlot::hasCurve()const
+{
+  return m_curve != NULL;
+}
+
+/**
+ * Store current curve.
+ */
+void OneCurvePlot::store()
+{
+  if (m_curve)
+  {
+    m_stored.insert(m_label,m_curve);
+    m_curve->setPen(QPen(m_colors[m_colorIndex]));
+    ++m_colorIndex;
+    m_colorIndex %= m_colors.size();
+    m_curve = NULL;
+  }
+}
+
+/**
+ * Returns true if there are some stored curves.
+ */
+bool OneCurvePlot::hasStored()const
+{
+  return ! m_stored.isEmpty();
+}
+
+QStringList OneCurvePlot::getLabels()const
+{
+  QStringList out;
+  QMap<QString,QwtPlotCurve*>::const_iterator it = m_stored.begin();
+  for(;it!=m_stored.end();++it)
+  {
+    out << it.key();
+  }
+  return out;
+}
+
+/**
+ * Remove a stored curve.
+ * @param label :: The label of a curve to remove.
+ */
+void OneCurvePlot::removeCurve(const QString& label)
+{
+  QMap<QString,QwtPlotCurve*>::iterator it = m_stored.find(label);
+  if (it != m_stored.end())
+  {
+    it.value()->detach();
+    m_stored.erase(it);
+  }
+}
 
 /**
  * Draw PeakLabel on a plot
@@ -221,3 +289,4 @@ void PeakLabel::draw(QPainter *painter,
   painter->drawText(x,y,m_marker->getLabel());
   //std::cerr << x << ' ' << y << ' ' << m_marker->getLabel().toStdString() << std::endl;
 }
+

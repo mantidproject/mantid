@@ -203,6 +203,9 @@ public:
   /// Emits a signal to customise the plot it is associated with
   void customisation(const QString& plotDetails);
 
+  /// Returns the list of workspaces that are currently been worked on by the fit property browser.
+  QStringList getWorkspaceNames();
+
 public slots:
   void fit();
   void sequentialFit();
