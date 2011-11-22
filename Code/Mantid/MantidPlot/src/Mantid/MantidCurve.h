@@ -66,7 +66,7 @@ public:
   Public Base/Common methods
   -------------------------------------------------------------------------------------*/
 
-   QwtDoubleRect MantidCurve::boundingRect() const;
+   QwtDoubleRect boundingRect() const;
 
   /*-------------------------------------------------------------------------------------
   End Public Base/Common methods
