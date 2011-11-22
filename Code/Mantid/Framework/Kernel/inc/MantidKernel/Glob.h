@@ -45,10 +45,6 @@ class MANTID_KERNEL_DLL Glob:public Poco::Glob
 public:
     /// Creates a set of files that match the given pathPattern.
     static void glob(const Poco::Path& pathPattern, std::set<std::string>& files, int options = 0);
-    /// Creates a set of files that match the given pathPattern.
-    static void glob(const std::string& base, const std::string& pathPattern, std::set<std::string>& files, int options = 0);
-    /// Creates a set of files that match the given pathPattern.
-        static void glob(const Poco::Path& base, const Poco::Path& pathPattern, std::set<std::string>& files, int options = 0);
 };
 
 

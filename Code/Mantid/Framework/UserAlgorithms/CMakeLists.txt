@@ -1,5 +1,6 @@
 set ( SRC_FILES HelloWorldAlgorithm.cpp
                 LorentzianTest.cpp
+		Muon_ExpDecayOscTest.cpp
                 ModifyData.cpp
                 PropertyAlgorithm.cpp
                 WorkspaceAlgorithm.cpp
@@ -9,6 +10,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 set ( INC_FILES HelloWorldAlgorithm.h
                 LorentzianTest.h
+		Muon_ExpDecayOscTest.h
                 ModifyData.h
                 PropertyAlgorithm.h
                 WorkspaceAlgorithm.h

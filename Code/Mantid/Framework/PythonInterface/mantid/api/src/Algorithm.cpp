@@ -2,6 +2,8 @@
 #include "MantidPythonInterface/kernel/PropertyMarshal.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/Strings.h"
+
+#include <boost/python/ssize_t.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -49,11 +51,12 @@ namespace
       IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
       std::vector<Property*> properties(algm->getProperties());
       std::sort(properties.begin(), properties.end(), MandatoryFirst());
-      const size_t numProps(properties.size());
+      using boost::python::ssize_t;
+      const ssize_t numProps(static_cast<ssize_t>(properties.size()));
 
       // Build the list
       PyObject *names = PyList_New(numProps);
-      for ( size_t i = 0; i < numProps; ++i )
+      for ( ssize_t i = 0; i < numProps; ++i )
       {
         std::string name = properties[i]->name();
         PyList_SetItem(names, i, PyString_FromString(name.c_str()));
@@ -127,6 +130,7 @@ void export_algorithm()
     .def("get_property_order",&getPropertyOrder, "Returns a list of property names that is ordered "
           "such that the mandatory properties are first followed by the optional ones.")
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
+    .def("is_initialized", &IAlgorithm::isInitialized, "Returns True if the algorithm is initialized, False otherwise")
     .def("execute", &IAlgorithm::execute, "Runs the algorithm")
     .def("set_child", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")

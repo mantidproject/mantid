@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
+	src/SliceViewerWindow.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -19,6 +20,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
+	inc/MantidQtSliceViewer/SliceViewerWindow.h
 )
 
 set ( MOC_FILES 
@@ -27,6 +29,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/SliceViewer.h
+	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 )
@@ -79,15 +82,19 @@ include_directories ( ../../Framework/DataHandling/inc )
 include_directories ( ../../Framework/TestHelpers/inc )
 include_directories ( ../../Framework/Geometry/inc )
 
- 
-# Extra, optional target for demoing a GUI element
+# Extra, optional targets for demoing GUI elements
 add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerDemo.cpp  
                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
 target_link_libraries ( SliceViewerDemo 
                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
                        QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
 
-# Extra, optional target for demoing a GUI element
+add_executable ( SliceViewerWindowDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerWindowDemo.cpp  
+                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
+target_link_libraries ( SliceViewerWindowDemo 
+                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
+                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
+
 add_executable ( LineViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_LineViewerDemo.cpp  
                            ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
 target_link_libraries ( LineViewerDemo 

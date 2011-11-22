@@ -332,9 +332,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
 
-
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
+
+  // Send out a signal
+  emit changedShownDim(m_dimX, m_dimY);
 }
 
 
@@ -692,10 +694,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Show the new slice. This finds m_dimX and Y
+  this->updateDisplay();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
-  // Show the new slice
-  this->updateDisplay();
 }
 
 

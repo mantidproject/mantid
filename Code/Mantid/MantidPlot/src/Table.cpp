@@ -1599,28 +1599,15 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
         if (d_table->isColumnReadOnly(col))
           continue;
 
-        if (columnType(col) == Text){
+        // Since Table::Text option works for all types, use for all columns
+        for (int j=0; j<non_empty_cells; j++)
+          data_string[j] = text(valid_cell[j], col);
+        if(!order)
           for (int j=0; j<non_empty_cells; j++)
-            data_string[j] = text(valid_cell[j], col);
-          if(!order)
-            for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, data_string[static_cast<int>(p[j])]);
-          else
-            for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, data_string[static_cast<int>(p[non_empty_cells-j-1])]);
-        }else{
-          for (int j = 0; j<non_empty_cells; j++)
-            data_double[j] = cell(valid_cell[j], col);
-          int prec;
-          char f;
-          columnNumericFormat(col, &f, &prec);
-          if(!order)
-            for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, locale().toString(data_double[static_cast<int>(p[j])], f, prec));
-          else
-            for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, locale().toString(data_double[static_cast<int>(p[non_empty_cells-j-1])], f, prec));
-        }
+            d_table->setText(valid_cell[j], col, data_string[static_cast<int>(p[j])]);
+        else
+          for (int j=0; j<non_empty_cells; j++)
+            d_table->setText(valid_cell[j], col, data_string[static_cast<int>(p[non_empty_cells-j-1])]);
         emit modifiedData(this, colName(col));
       }
     }

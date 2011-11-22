@@ -10,7 +10,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
-#include <nexus/napi.h>
+#include <napi.h>
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------

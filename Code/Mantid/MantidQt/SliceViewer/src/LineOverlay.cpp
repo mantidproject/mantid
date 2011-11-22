@@ -227,7 +227,40 @@ namespace SliceViewer
         return eHandleID(i);
       }
     }
-    return HandleNone;
+    if (this->mouseOverCenter(pos))
+      return HandleCenter;
+    else
+      return HandleNone;
+  }
+
+  ///@return true if value is between A and B. A can be < or > then B.
+  bool isBetween(double value, double A, double B)
+  {
+    if (B > A)
+      return (value >= A && value <= B);
+    else if (B < A)
+      return (value >= B && value <= A);
+    else
+      return (value == A);
+  }
+
+  /** Return true if the mouse is over the central line
+   * @param pos :: position in pixels of mouse */
+  bool LineOverlay::mouseOverCenter(QPoint pos)
+  {
+    // Mouse position in pixels
+    QPointF current = pos;
+    // Find the distance (in pixels) between the mouse and the center of the line
+    QPointF pixA = transform(m_pointA);
+    QPointF pixB = transform(m_pointB);
+    QPointF diff = pixB - pixA;
+    double distance = fabs( diff.x()*(current.y()-pixA.y()) - (current.x() - pixA.x())*diff.y() )
+        / sqrt(diff.x()*diff.x() + diff.y()*diff.y());
+
+    // Margin of 6 pixels, and must be between the 2 limits
+    return ((distance < 7) &&
+        isBetween( current.x(), pixA.x(), pixB.x()) &&
+        isBetween( current.y(), pixA.y(), pixB.y()) );
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -246,13 +279,13 @@ namespace SliceViewer
       return;
     }
 
-
     // --- Initial creation mode ----
     if (m_dragHandle != HandleNone)
     {
       // Currently dragging!
       QPointF current = this->invTransform( event->pos() );
       QPointF diff = m_pointB - m_pointA;
+      QPointF dragAmount = current - this->m_dragStart;
       double width = 0;
 
       switch (m_dragHandle)
@@ -270,6 +303,14 @@ namespace SliceViewer
         width = fabs( diff.x()*(current.y()-m_pointA.y()) - (current.x() - m_pointA.x())*diff.y() )
             / sqrt(diff.x()*diff.x() + diff.y()*diff.y());
         setWidth(width);
+        break;
+
+      case HandleCenter:
+        // Move the whole line around
+        m_pointA = m_dragStart_PointA + dragAmount;
+        m_pointB = m_dragStart_PointB + dragAmount;
+        this->update();
+        emit lineChanging(m_pointA, m_pointB, m_width);
         break;
 
       default:
@@ -292,6 +333,10 @@ namespace SliceViewer
         case HandleWidthTop:
           this->setCursor(Qt::SizeVerCursor);
           break;
+        case HandleCenter:
+          this->setCursor(Qt::PointingHandCursor);
+          break;
+
         default:
           this->setCursor(Qt::CrossCursor);
           // Pass-through event to underlying widget if not over a marker
@@ -331,6 +376,8 @@ namespace SliceViewer
       // Start dragging
       m_dragHandle = hdl;
       m_dragStart = this->invTransform( event->pos() );
+      m_dragStart_PointA = m_pointA;
+      m_dragStart_PointB = m_pointB;
     }
     else
       // Pass-through event to underlying widget if not over a marker
