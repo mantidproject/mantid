@@ -248,14 +248,20 @@ public:
     FileFinder::Instance().setCaseSensitive(true);
     std::string pathOn = FileFinder::Instance().findRun("CSp78173.Raw");
     Poco::File fileOn(pathOn);
+
     std::string pathOn2 = FileFinder::Instance().getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn2(pathOn2);
+
+    std::string pathOn3 = FileFinder::Instance().getFullPath("IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
+    Poco::File fileOn3(pathOn3);
 #ifdef _WIN32
     TS_ASSERT(file.exists());   
     TS_ASSERT(fileOn2.exists()); 
+    TS_ASSERT(fileOn3.exists()); 
 #else
     TS_ASSERT_THROWS_ANYTHING(fileOn.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
+    TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
 #endif
   }
 
