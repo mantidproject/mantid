@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
@@ -28,7 +28,7 @@ namespace API
 class Jacobian;
 class ParameterTie;
 class IConstraint;
-/** Implements the part of IFitFunction interface dealing with parameters. This function has parameters of its own
+/** Implements the part of IFunction interface dealing with parameters. This function has parameters of its own
     as opposed to a CompositeFunction which list of parameters consists only of parameters of the member functions.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -54,7 +54,7 @@ class IConstraint;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ParamFunction : public virtual IFitFunction
+class MANTID_API_DLL ParamFunction : public virtual IFunction
 {
 public:
   /// Default constructor
@@ -110,15 +110,15 @@ public:
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
-  IFitFunction* getContainingFunction(const ParameterReference& ref)const;
+  IFunction* getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
-  IFitFunction* getContainingFunction(const IFitFunction* fun);
+  IFunction* getContainingFunction(const IFunction* fun);
 
   /// Apply the ties
   virtual void applyTies();
   /// Remove all ties
   virtual void clearTies();
-  virtual void removeTie(const std::string& parName){IFitFunction::removeTie(parName);}
+  virtual void removeTie(const std::string& parName){IFunction::removeTie(parName);}
   /// Removes i-th parameter's tie
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter

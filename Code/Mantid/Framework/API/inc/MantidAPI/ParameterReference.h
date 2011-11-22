@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunction.h"
 
 namespace mu
 {
@@ -47,15 +47,15 @@ class MANTID_API_DLL ParameterReference
 {
 public:
   ParameterReference();
-  ParameterReference(IFitFunction* fun, std::size_t index);
-  IFitFunction* getFunction() const;
+  ParameterReference(IFunction* fun, std::size_t index);
+  IFunction* getFunction() const;
   std::size_t getIndex() const;
-  void reset(IFitFunction* fun, std::size_t index);
+  void reset(IFunction* fun, std::size_t index);
   void setParameter(const double& value);
   double getParameter() const;
 
 private:
-  IFitFunction* m_function; ///< pointer to the function
+  IFunction* m_function; ///< pointer to the function
   std::size_t m_index; ///< parameter index
 };
 

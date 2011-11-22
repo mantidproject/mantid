@@ -21,7 +21,7 @@ public:
   static ArrayLengthValidatorTest *createSuite() { return new ArrayLengthValidatorTest(); }
   static void destroySuite( ArrayLengthValidatorTest *suite ) { delete suite; }
 
-
+  /// test constructors, both empty and with length, also hasLength and getLength
   void testConstructor()
   {
     ArrayLengthValidator<int> av1,av2(3);
@@ -30,6 +30,7 @@ public:
     TS_ASSERT_EQUALS(av2.getLength(),3);
   }
 
+  /// test the clone function
   void testClone()
   {
     ArrayLengthValidator<int> *vi= new ArrayLengthValidator<int>;
@@ -39,6 +40,7 @@ public:
     delete vvi;
   }
 
+  /// test for setLength and clearLength
   void testSetClear()
   {
     ArrayLengthValidator<int> av1;
@@ -51,6 +53,7 @@ public:
     TS_ASSERT_EQUALS(av1.getLength(),0);
   }
 
+  /// test validator, both for OK and for different length
   void testValidator()
   {
     ArrayLengthValidator<int> vi(3);

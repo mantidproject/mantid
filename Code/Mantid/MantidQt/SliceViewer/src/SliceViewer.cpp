@@ -93,6 +93,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(colorRangeFullSlot()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
+  QObject::connect(ui.btnDoLine, SIGNAL(toggled(bool)), this, SLOT(btnDoLineToggled(bool)));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -103,11 +104,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   updateDisplay();
 
-  // TODO: Remove
-  LineOverlay * over = new LineOverlay(m_plot);
-  over->setVisible(true);
-//  m_spectLayout->addWidget(over, 0,0);
-//  this->insertChild(over);
+  // -------- Line Overlay ----------------
+  m_lineOverlay = new LineOverlay(m_plot);
+  m_lineOverlay->setVisible(false);
 
 }
 
@@ -333,9 +332,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
 
-
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
+
+  // Send out a signal
+  emit changedShownDim(m_dimX, m_dimY);
 }
 
 
@@ -396,6 +397,14 @@ void SliceViewer::colorRangeChanged()
 {
   m_spect->setColorMap( m_colorBar->getColorMap() );
   this->updateDisplay();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot called when the btnDoLine button is checked/unchecked
+void SliceViewer::btnDoLineToggled(bool checked)
+{
+  m_lineOverlay->setVisible(checked);
+  emit showLineViewer(checked);
 }
 
 //------------------------------------------------------------------------------------
@@ -618,6 +627,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
   if (m_dimX >= m_ws->getNumDims()) m_dimX = m_ws->getNumDims()-1;
   if (m_dimY >= m_ws->getNumDims()) m_dimY = m_ws->getNumDims()-1;
   m_data->setSliceParams(m_dimX, m_dimY, slicePoint);
+  m_slicePoint = VMD(slicePoint);
 
   m_X = m_dimensions[m_dimX];
   m_Y = m_dimensions[m_dimY];
@@ -639,6 +649,9 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
+
+  // Send out a signal
+  emit changedSlicePoint(m_slicePoint);
 //  std::cout << m_plot->sizeHint().width() << " width\n";
 }
 
@@ -681,7 +694,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Show the new slice. This finds m_dimX and Y
   this->updateDisplay();
+  // Send out a signal
+  emit changedShownDim(m_dimX, m_dimY);
 }
 
 

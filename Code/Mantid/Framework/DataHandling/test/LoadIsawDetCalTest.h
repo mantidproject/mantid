@@ -53,7 +53,7 @@ public:
     testerCAL.setPropertyValue("InputWorkspace", wsName);
     std::string inputFile= "test.DetCal";
     std::ofstream out(inputFile.c_str());
-    out << "5      1    256    256 15.8190 15.8190  0.2000  55.33   50.0000   16.7548  -16.7548  0.00011 -0.00002  1.00000  0.00000  1.00000  0.00000\n";
+    out << "5      1    256    256 50.1000 49.9000  0.2000  55.33   50.0000   16.7548  -16.7548  0.00011 -0.00002  1.00000  0.00000  1.00000  0.00000\n";
     out.close();
     testerCAL.setPropertyValue("Filename", inputFile);
     inputFile = testerCAL.getPropertyValue("Filename");

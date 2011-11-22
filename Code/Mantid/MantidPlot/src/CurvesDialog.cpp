@@ -35,7 +35,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "pixmaps.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 
 #include <QPushButton>
 #include <QLabel>
@@ -331,7 +331,7 @@ void CurvesDialog::init()
         {
           for(int j=0;j<g->curves();j++)
           {
-            MantidCurve* c = dynamic_cast<MantidCurve*>(g->curve(j));
+            MantidMatrixCurve* c = dynamic_cast<MantidMatrixCurve*>(g->curve(j));
             if (c)
             {
               available->addItem(c->title().text());

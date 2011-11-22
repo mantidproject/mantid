@@ -512,6 +512,9 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 //        localOutputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 //        eventWS->getEventList(i).setTofs(tofs);
       }
+      // Clear unit memory
+      delete localFromUnit;
+      delete localOutputUnit;
 
     } catch (Exception::NotFoundError&) {
       // Get to here if exception thrown when calculating distance to detector
@@ -530,7 +533,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   {
     g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Masking spectrum." << std::endl;
   }
-
+  if (m_inputEvents)
+    eventWS->clearMRU();
 }
 
 /// Calls Rebin as a sub-algorithm to align the bins

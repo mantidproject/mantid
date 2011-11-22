@@ -487,12 +487,48 @@ std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const s
 }
 
 /**
- * Send a log message to Mantid
+  * Send an error log message to Mantid
+  * @param msg :: The log message
+  */
+void FrameworkManagerProxy::sendErrorMessage(const std::string &msg)
+{
+    g_log.error(msg);
+}
+
+/**
+  * Send a warning log message to Mantid
+  * @param msg :: The log message
+  */
+void FrameworkManagerProxy::sendWarningMessage(const std::string &msg)
+{
+    g_log.warning(msg);
+}
+
+/**
+ * Send a (notice) log message to Mantid
  * @param msg :: The log message
  */
 void FrameworkManagerProxy::sendLogMessage(const std::string & msg) 
 {
   g_log.notice(msg); 
+}
+
+/**
+  * Send an information log message to Mantid
+  * @param msg :: The log message
+  */
+void FrameworkManagerProxy::sendInformationMessage(const std::string &msg)
+{
+    g_log.information(msg);
+}
+
+/**
+  * Send a debug log message to Mantid
+  * @param msg :: The log message
+  */
+void FrameworkManagerProxy::sendDebugMessage(const std::string &msg)
+{
+    g_log.debug(msg);
 }
 
 /**

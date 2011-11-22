@@ -46,7 +46,7 @@ namespace Kernel
 
     /// Return if it has a length
     bool hasLength() const;
-    /// Return the legth
+    /// Return the length
     const size_t& getLength()    const;
     /// Set lower bound value
     void setLength( const size_t& value );
@@ -55,7 +55,9 @@ namespace Kernel
 
   private:
     std::string checkValidity( const std::vector<TYPE> &value ) const;
+    /// private variable containing the size of the array
     size_t m_arraySize;
+    /// private variable, true if size is set, false if not
     bool m_hasArraySize;
   };
 

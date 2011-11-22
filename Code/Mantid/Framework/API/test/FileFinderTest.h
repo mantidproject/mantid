@@ -225,9 +225,44 @@ public:
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
+
     path = FileFinder::Instance().findRun("OFFSPEC4622.log");
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
+  }
+
+
+  // test to see if case sensitive on/off works
+  void testFindFileCaseSensitive()
+  {
+    // By default case insensitive is on
+    std::string path = FileFinder::Instance().findRun("CSp78173.Raw");
+    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    Poco::File file(path);
+    TS_ASSERT(file.exists());
+    std::string path2 = FileFinder::Instance().getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    Poco::File file2(path2);
+    TS_ASSERT(file2.exists());
+
+    // turn on case sensitive - this one should fail on none windows
+    FileFinder::Instance().setCaseSensitive(true);
+    std::string pathOn = FileFinder::Instance().findRun("CSp78173.Raw");
+    Poco::File fileOn(pathOn);
+
+    std::string pathOn2 = FileFinder::Instance().getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    Poco::File fileOn2(pathOn2);
+
+    std::string pathOn3 = FileFinder::Instance().getFullPath("IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
+    Poco::File fileOn3(pathOn3);
+#ifdef _WIN32
+    TS_ASSERT(file.exists());   
+    TS_ASSERT(fileOn2.exists()); 
+    TS_ASSERT(fileOn3.exists()); 
+#else
+    TS_ASSERT_THROWS_ANYTHING(fileOn.exists());
+    TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
+    TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
+#endif
   }
 
 private:

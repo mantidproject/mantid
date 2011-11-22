@@ -61,6 +61,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, new InstrumentValidator<>)
           , "A 2D workspace with X values of time of flight");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "", Direction::Output), "Name of the output peaks workspace with integrated intensities.");
+      declareProperty("IkedaCarpenterTOF", false, "Integrate TOF using IkedaCarpenter fit.\n"
+        "Default is false which is best for corrected data.");
       declareProperty("FitSlices", true, "Integrate slices using IntegratePeakTimeSlices algorithm (default).\n"
         "If false, then next 6 variables are used for shoebox with pixels masked that are outside peak cluster.");
 
@@ -91,6 +93,7 @@ namespace Mantid
 
       double qspan = 0.01;
       bool slices = getProperty("FitSlices");
+      bool IC = getProperty("IkedaCarpenterTOF");
       if (slices)
       {
         OrientedLattice latt = inputW->mutableSample().getOrientedLattice();
@@ -202,7 +205,7 @@ namespace Mantid
         for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
         double ratio = pktime/bktime;
 
-        if(n >= 8)//Number of fitting parameters
+        if(n >= 8 && IC)//Number of fitting parameters large enough if Ikeda-Carpenter fit
         {
           for (iTOF=TOFmin; iTOF <= TOFmax; iTOF++) 
           {

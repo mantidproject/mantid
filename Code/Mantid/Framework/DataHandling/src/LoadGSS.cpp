@@ -21,6 +21,7 @@ Two types of GSAS files are supported
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidAPI/ISpectrum.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
@@ -120,6 +121,7 @@ namespace Mantid
         } // if
 
         // 2. Loop all the lines
+        bool isOutOfHead = false;
         while (!input.eof() && input.getline(currentLine, 256))
         {
 
@@ -196,6 +198,8 @@ namespace Mantid
           {
             // Line start with Bank including file format, X0 information and etc.
 
+            isOutOfHead = true;
+
             // 1. Save the previous to array and initialze new MantiVec for (X, Y, E)
             if (X->size() != 0)
             {
@@ -270,7 +274,7 @@ namespace Mantid
               calslogx0 = true;
             }
           } // Line with B
-          else
+          else if (isOutOfHead)
           {
             double xValue;
             double yValue;
@@ -344,6 +348,9 @@ namespace Mantid
             Y->push_back(yValue);
             E->push_back(eValue);
           } // Date Line
+          else{
+            g_log.debug() << "Line not defined: " << currentLine << std::endl;
+          }
         } // while
 
         // Clean up after file is read through
@@ -489,15 +496,14 @@ namespace Mantid
     void LoadGSS::createInstrumentGeometry(MatrixWorkspace_sptr workspace, std::string instrumentname, double primaryflightpath,
         std::vector<int> detectorids, std::vector<double> totalflightpaths, std::vector<double> twothetas){
 
-      // 0. Output information
+      // 0. Check Input
       g_log.information() << "L1 = " << primaryflightpath << std::endl;
       if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()){
-        g_log.debug() << "Input error!  cannot create geometry" << std::endl;
-        g_log.information() << "Quit!" << std::endl;
+        g_log.error() << "Input error!  Cannot create geometry due to number of L2, Polar are not same.  Quit!" << std::endl;
         return;
       }
       for (size_t i = 0; i < detectorids.size(); i ++){
-        g_log.information() << "Detector " << detectorids[i] << "  L1+L2 = " << totalflightpaths[i] << "  2Theta = " << twothetas[i] << std::endl;
+        g_log.debug() << "Detector " << detectorids[i] << "  L1+L2 = " << totalflightpaths[i] << "  2Theta = " << twothetas[i] << std::endl;
       }
 
       // 1. Create a new instrument and set its name
@@ -523,46 +529,32 @@ namespace Mantid
       std::vector<int> detID = detectorids;    // detector IDs
       std::vector<double> angle = twothetas;  // angle between indicent beam and direction from sample to detector (two-theta)
 
+      // Assumption: detector IDs are in the same order of workspace index
       for (int i = 0; i < numDetector; ++i)
       {
-        // Create a new detector. Instrument will take ownership of pointer so no need to delete.
+        // a) Create a new detector. Instrument will take ownership of pointer so no need to delete.
         Geometry::Detector *detector = new Geometry::Detector("det",detID[i],samplepos);
         Kernel::V3D pos;
 
-        // FIXME : need to confirm the definition
+        // r is L2
         double r = totalflightpaths[i] - l1;
         pos.spherical(r, angle[i], 0.0 );
 
         detector->setPos(pos);
 
-        // add copy to instrument and mark it
+        // add copy to instrument, spectrum and mark it
+        API::ISpectrum *spec = workspace->getSpectrum(i);
+        if (!spec){
+          g_log.error() << "Workspace " << i << " has no spectrum!" << std::endl;
+          continue;
+        } else {
+          spec->clearDetectorIDs();
+          spec->addDetectorID(detID[i]);
+        }
+
         instrument->add(detector);
         instrument->markAsDetector(detector);
       }
-
-      /*
-      // Now mark the up the monitors
-      const int numMonitors = iraw.i_mon;     // The number of monitors
-      const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
-
-      for (int j = 0; j < numMonitors; ++j)
-      {
-        const int detectorToMark = detID[monIndex[j]-1];
-        boost::shared_ptr<Geometry::IDetector> det = instrument->getDetector(detectorToMark);
-      instrument->markAsMonitor(det.get());
-        g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
-      }
-      std::vector<detid_t> monitorList=instrument->getMonitors();
-      setProperty("MonitorList",monitorList);
-      // Information to the user about what info is extracted from raw file
-      g_log.information() << "SamplePos component added with position set to (0,0,0).\n"
-        << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"
-        << "L2 and two-theta values were read from raw file and used to set the r and theta spherical coordinates; \n"
-        << "the remaining spherical coordinate phi was set to zero.\n"
-        << "Source component added with position set to (0,0,-" << l1 << "). In standard configuration, with \n"
-        << "the beam along z-axis pointing from source to sample, this implies the source is " << l1 << "m in front \n"
-        << "of the sample. This value can be changed via the 'instrument.l1' configuration property.\n";
-      */
 
       return;
     }

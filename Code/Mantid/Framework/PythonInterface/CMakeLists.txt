@@ -28,7 +28,7 @@ include_directories ( inc )
 # thread-local variables and this now causes problems whenever we try and load the library from
 # python if other libraries appear before it in the link list.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 else ()
   set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 endif ()
@@ -58,6 +58,7 @@ endif ()
 # python unit tests
 set ( TEST_PY_FILES
   test/python/AlgorithmTest.py
+  test/python/AlgorithmFactoryTest.py
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
   test/python/FilePropertyTest.py
@@ -67,6 +68,7 @@ set ( TEST_PY_FILES
   test/python/MatrixWorkspaceTest.py
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmTest.py
+  test/python/SimpleAPITest.py
   test/python/QuatTest.py
   test/python/V3DTest.py
   test/python/WorkspaceTest.py

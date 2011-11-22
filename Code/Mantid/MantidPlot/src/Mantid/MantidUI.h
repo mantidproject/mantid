@@ -146,7 +146,7 @@ public:
     void getSelectedAlgorithm(QString& algName, int& version);
 
     // Adjusts QtiPlot's main menu if a MantidMatrix becomes active (receives focus)
-    bool menuAboutToShow(QMdiSubWindow *w);
+    bool menuAboutToShow(MdiSubWindow *w);
 
     // Removes references to MantidMatrix w in QtiPlot (called when matrix closes)
     void removeWindowFromLists(MdiSubWindow* w);
@@ -253,7 +253,7 @@ public:
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
-  MultiLayer* plotBin(const QString& wsName, int bin, bool errors = false);
+  MultiLayer* plotBin(const QString& wsName, int bin, bool errors = false, Graph::CurveType style = Graph::Line);
   void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled);
@@ -341,7 +341,10 @@ public slots:
     // Invoke the Vates Simple User Interface
     void showVatesSimpleInterface();
 
-    // SlcieViewer
+    // Invoke the plot of MD intensity vs non-integrated dimension.
+    void showMDPlot();
+
+    // SliceViewer
     void showSliceViewer();
 
     // #539: For adding Workspace History display to MantidPlot

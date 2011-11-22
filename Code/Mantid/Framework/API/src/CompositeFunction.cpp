@@ -77,7 +77,7 @@ std::string CompositeFunction::asString()const
   }
   for(size_t i=0;i<nFunctions();i++)
   {
-    IFitFunction* fun = getFunction(i);
+    IFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunction*>(fun) != 0;
     if (isComp) ostr << '(';
     ostr << fun->asString();
@@ -93,7 +93,7 @@ std::string CompositeFunction::asString()const
     const ParameterTie* tie = getTie(i);
     if (tie)
     {
-      IFitFunction* fun = getFunction(functionIndex(i));
+      IFunction* fun = getFunction(functionIndex(i));
       std::string tmp = tie->asString(fun);
       if (tmp.empty())
       {
@@ -302,7 +302,7 @@ void CompositeFunction::removeActive(size_t i)
   if (!isActive(i)) return;
   size_t iFun = functionIndex(i);
   size_t ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
-  m_IFitFunctionActive.erase(m_IFitFunctionActive.begin()+ia);
+  m_IFunctionActive.erase(m_IFunctionActive.begin()+ia);
   m_functions[ iFun ]->removeActive(i - m_paramOffsets[iFun]);
 
   m_nActive--;
@@ -319,9 +319,9 @@ void CompositeFunction::restoreActive(size_t i)
   size_t ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
 
   std::vector<size_t>::iterator itFun = 
-    std::find_if(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),std::bind2nd(std::greater<size_t>(),i));
+    std::find_if(m_IFunctionActive.begin(),m_IFunctionActive.end(),std::bind2nd(std::greater<size_t>(),i));
 
-  m_IFitFunctionActive.insert(itFun,1,ia);
+  m_IFunctionActive.insert(itFun,1,ia);
   m_functions[ iFun ]->restoreActive(i - m_paramOffsets[iFun]);
 
   m_nActive++;
@@ -349,15 +349,15 @@ void CompositeFunction::checkFunction()
   m_nActive = 0;
   m_paramOffsets.clear();
   m_activeOffsets.clear();
-  m_IFitFunction.clear();
-  m_IFitFunctionActive.clear();
+  m_IFunction.clear();
+  m_IFunctionActive.clear();
 
-  std::vector<IFitFunction*> functions(m_functions.begin(),m_functions.end());
+  std::vector<IFunction*> functions(m_functions.begin(),m_functions.end());
   m_functions.clear();
 
-  for(std::vector<IFitFunction*>::size_type i=0;i<functions.size();i++)
+  for(std::vector<IFunction*>::size_type i=0;i<functions.size();i++)
   {
-    IFitFunction* f = functions[i];
+    IFunction* f = functions[i];
     CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f);
     if (cf) cf->checkFunction();
     addFunction(f);
@@ -368,10 +368,10 @@ void CompositeFunction::checkFunction()
  * @param f :: A pointer to the added function
  * @return The function index
  */
-size_t CompositeFunction::addFunction(IFitFunction* f)
+size_t CompositeFunction::addFunction(IFunction* f)
 {
-  m_IFitFunction.insert(m_IFitFunction.end(),f->nParams(), m_functions.size());
-  m_IFitFunctionActive.insert(m_IFitFunctionActive.end(),f->nActive(),m_functions.size());
+  m_IFunction.insert(m_IFunction.end(),f->nParams(), m_functions.size());
+  m_IFunctionActive.insert(m_IFunctionActive.end(),f->nActive(),m_functions.size());
   m_functions.push_back(f);
   //?f->init();
   if (m_paramOffsets.size() == 0)
@@ -400,7 +400,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
 
-  IFitFunction* fun = getFunction(i);
+  IFunction* fun = getFunction(i);
 
   size_t dna = fun->nActive();
   size_t dnp = fun->nParams();
@@ -419,12 +419,12 @@ void CompositeFunction::removeFunction(size_t i, bool del)
   }
 
   // Shift down the function indeces for parameters
-  for(std::vector<size_t>::iterator it=m_IFitFunction.begin();it!=m_IFitFunction.end();)
+  for(std::vector<size_t>::iterator it=m_IFunction.begin();it!=m_IFunction.end();)
   {
 
     if (*it == i)
     {
-      it = m_IFitFunction.erase(it);
+      it = m_IFunction.erase(it);
     }
     else
     {
@@ -437,11 +437,11 @@ void CompositeFunction::removeFunction(size_t i, bool del)
   }
 
   // Shift down the function indeces for active parameters
-  for(std::vector<size_t>::iterator it=m_IFitFunctionActive.begin();it!=m_IFitFunctionActive.end();)
+  for(std::vector<size_t>::iterator it=m_IFunctionActive.begin();it!=m_IFunctionActive.end();)
   {
     if (*it == i)
     {
-      it = m_IFitFunctionActive.erase(it);
+      it = m_IFunctionActive.erase(it);
     }
     else
     {
@@ -482,12 +482,12 @@ void CompositeFunction::removeFunction(size_t i, bool del)
  *  a member of this composite function nothing happens
  * @param f_new :: A pointer to the new function
  */
-void CompositeFunction::replaceFunctionPtr(const IFitFunction* f_old,IFitFunction* f_new)
+void CompositeFunction::replaceFunctionPtr(const IFunction* f_old,IFunction* f_new)
 {
-  std::vector<IFitFunction*>::const_iterator it = 
+  std::vector<IFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);
   if (it == m_functions.end()) return;
-  std::vector<IFitFunction*>::difference_type iFun = it - m_functions.begin();
+  std::vector<IFunction*>::difference_type iFun = it - m_functions.begin();
   replaceFunction(iFun,f_new);
 }
 
@@ -495,12 +495,12 @@ void CompositeFunction::replaceFunctionPtr(const IFitFunction* f_old,IFitFunctio
  * @param i :: The index of the function to replace
  * @param f :: A pointer to the new function
  */
-void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
+void CompositeFunction::replaceFunction(size_t i,IFunction* f)
 {
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
 
-  IFitFunction* fun = getFunction(i);
+  IFunction* fun = getFunction(i);
   size_t na_old = fun->nActive();
   size_t np_old = fun->nParams();
 
@@ -509,43 +509,43 @@ void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
 
   // Modify function indeces: The new function may have different number of parameters
   {
-    std::vector<size_t>::iterator itFun = std::find(m_IFitFunction.begin(),m_IFitFunction.end(),i);
-    if(itFun != m_IFitFunction.end()) // functions must have at least 1 parameter
+    std::vector<size_t>::iterator itFun = std::find(m_IFunction.begin(),m_IFunction.end(),i);
+    if(itFun != m_IFunction.end()) // functions must have at least 1 parameter
     {
       if (np_old > np_new)
       {
-        m_IFitFunction.erase(itFun,itFun + np_old - np_new);
+        m_IFunction.erase(itFun,itFun + np_old - np_new);
       }
       else if (np_old < np_new) 
       {
-        m_IFitFunction.insert(itFun,np_new - np_old,i);
+        m_IFunction.insert(itFun,np_new - np_old,i);
       }
     }
     else if (np_new > 0) // it could happen if the old function is an empty CompositeFunction
     {
-      itFun = std::find_if(m_IFitFunction.begin(),m_IFitFunction.end(),std::bind2nd(std::greater<size_t>(),i));
-      m_IFitFunction.insert(itFun,np_new,i);
+      itFun = std::find_if(m_IFunction.begin(),m_IFunction.end(),std::bind2nd(std::greater<size_t>(),i));
+      m_IFunction.insert(itFun,np_new,i);
     }
   }
 
   // Modify function indeces: The new function may have different number of active parameters
   {
-    std::vector<size_t>::iterator itFun = std::find(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),i);
-    if (itFun != m_IFitFunctionActive.end())
+    std::vector<size_t>::iterator itFun = std::find(m_IFunctionActive.begin(),m_IFunctionActive.end(),i);
+    if (itFun != m_IFunctionActive.end())
     {
       if (na_old > na_new)
       {
-        m_IFitFunctionActive.erase(itFun,itFun + na_old - na_new);
+        m_IFunctionActive.erase(itFun,itFun + na_old - na_new);
       }
       else if (na_old < na_new) 
       {
-        m_IFitFunctionActive.insert(itFun,na_new - na_old,i);
+        m_IFunctionActive.insert(itFun,na_new - na_old,i);
       }
     }
     else if (na_new > 0)
     {
-      itFun = std::find_if(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),std::bind2nd(std::greater<size_t>(),i));
-      m_IFitFunctionActive.insert(itFun,na_new,i);
+      itFun = std::find_if(m_IFunctionActive.begin(),m_IFunctionActive.end(),std::bind2nd(std::greater<size_t>(),i));
+      m_IFunctionActive.insert(itFun,na_new,i);
     }
   }
 
@@ -573,7 +573,7 @@ void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
  * @param i :: The index of the function
  * @return function at the requested index
  */
-IFitFunction* CompositeFunction::getFunction(size_t i)const
+IFunction* CompositeFunction::getFunction(size_t i)const
 {
   if ( i >= nFunctions() )
   {
@@ -593,7 +593,7 @@ size_t CompositeFunction::functionIndex(size_t i)const
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  return m_IFitFunction[i];
+  return m_IFunction[i];
 }
 
 /**
@@ -605,7 +605,7 @@ size_t CompositeFunction::functionIndexActive(size_t i)const
 {
   if( i >= nParams() )
     throw std::out_of_range("Function parameter index out of range.");
-  return m_IFitFunctionActive[i];
+  return m_IFunctionActive[i];
 }
 
 /**
@@ -786,7 +786,7 @@ size_t CompositeFunction::getParameterIndex(const ParameterReference& ref)const
   }
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
-    IFitFunction* fun = getFunction(iFun);
+    IFunction* fun = getFunction(iFun);
     size_t iLocalIndex = fun->getParameterIndex(ref);
     if (iLocalIndex < fun->nParams())
     {
@@ -800,7 +800,7 @@ size_t CompositeFunction::getParameterIndex(const ParameterReference& ref)const
  * @param ref :: The reference
  * @return A function containing parameter pointed to by ref
  */
-IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
+IFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
 {
   if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
@@ -808,7 +808,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference&
   }
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
-    IFitFunction* fun = getFunction(iFun)->getContainingFunction(ref);
+    IFunction* fun = getFunction(iFun)->getContainingFunction(ref);
     if (fun)
     {
       return getFunction(iFun);
@@ -821,7 +821,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference&
  * @param fun :: The searched function
  * @return A function containing the argument function fun
  */
-IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
+IFunction* CompositeFunction::getContainingFunction(const IFunction* fun)
 {
   if (fun == this)
   {
@@ -829,7 +829,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
   }
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
-    IFitFunction* f = getFunction(iFun)->getContainingFunction(fun);
+    IFunction* f = getFunction(iFun)->getContainingFunction(fun);
     if (f)
     {
       return getFunction(iFun);

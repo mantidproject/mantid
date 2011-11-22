@@ -27,13 +27,6 @@
 #include "MantidKernel/System.h"
 
 #include <boost/python/object.hpp>
-// Before Python 2.5 all indices were treated as integers
-// Ensure we can still use the Py_ssize_t type
-#if PY_VERSION_HEX < 0x02050000
-typedef int Py_ssize_t;
-#define PY_SSIZE_T_MAX INT_MAX
-#define PY_SSIZE_T_MIN INT_MIN
-#endif
 
 #include <string>
 #include <vector>
