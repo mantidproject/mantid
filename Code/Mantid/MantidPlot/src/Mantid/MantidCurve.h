@@ -37,9 +37,11 @@ class MantidCurve :public PlotCurve, public MantidQt::API::WorkspaceObserver
   Q_OBJECT
 public:
   /// Constructor
-  MantidCurve(const QString& wsName);
+  MantidCurve(const QString& wsName, bool error);
+  /// Constructor
+  MantidCurve(const QString& wsName, bool error, bool allerror);
   /// Default constructor
-  MantidCurve();
+  MantidCurve(bool err);
   /// Destructor
   virtual ~MantidCurve();
   /// Clone
@@ -48,6 +50,15 @@ public:
   virtual const MantidQwtWorkspaceData* mantidData() const = 0;
   /// Get mantid data 
   virtual MantidQwtWorkspaceData* mantidData() = 0;
+  /// Overriden virtual method
+  void itemChanged();
+
+  /// Returns whether the curve has error bars
+  bool hasErrorBars() const
+  {
+    return m_drawErrorBars;
+  }
+
   /// Invalidates the bounding rect forcing it to be recalculated
   void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
@@ -73,16 +84,26 @@ protected:
   /// Apply the style choice
   void applyStyleChoice(Graph::CurveType style, MultiLayer* ml, int& lineWidth);
 
+  /// Make a name for a copied curve
+  static QString createCopyName(const QString& curveName);
+
+  /// Draw the curve.
+  void doDraw(QPainter *p, 
+    const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+    const QRect &rect, MantidQwtWorkspaceData const * const data) const;
+
   /*-------------------------------------------------------------------------------------
   End Protected Base/Common methods
   -------------------------------------------------------------------------------------*/
-  
+   bool m_drawErrorBars; /// Flag indicating that error bars should be drawn.
+   bool m_drawAllErrorBars; ///< if true and m_drawErrorBars is true draw all error bars (no skipping)
 private:
   /// The bounding rect used by qwt to set the axes
   mutable QwtDoubleRect m_boundingRect;
   
   //To ensure that all MantidCurves can work with Mantid Workspaces.
   virtual void init(Graph* g, bool distr, Graph::CurveType style) = 0;
+
 };
 
 #endif

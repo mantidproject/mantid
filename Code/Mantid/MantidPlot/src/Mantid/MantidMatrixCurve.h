@@ -84,15 +84,10 @@ public:
   /// Returns whether the curve is plotted as a distribution
   bool isDistribution() const;
 
-  /// Returns whether the curve has error bars
-  bool hasErrorBars() const;
-
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;
 
-  /// Overriden virtual method
-  void itemChanged();
   /// saves the MantidMatrixCurve details to project file.
   QString saveToString();
 
@@ -144,10 +139,7 @@ private:
   /// Make the curve name
   static QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
                                  const QString& wsName,int index);
-  /// Make a name for a copied curve
-  static QString createCopyName(const QString& curveName);
-  bool m_drawErrorBars;///< True for drawing error bars
-  bool m_drawAllErrorBars; ///< if true and m_drawErrorBars is true draw all error bars (no skipping)
+
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
   /// workspace index
   int  m_index;

@@ -12,15 +12,27 @@
 /**
 Constructor
 @param wsName : Name of the workspace
+@param err : flag indicating that errors should be used.
 */
-MantidCurve::MantidCurve(const QString& wsName) : PlotCurve(wsName), WorkspaceObserver()
+MantidCurve::MantidCurve(const QString& wsName, bool err) : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false)
 {
 }
 
 /**
-Constructor default
+Constructor
+@param wsName : Name of the workspace
+@param err : flag indicating that all error bars should be used.
+@param allError : flag indicating that all error bars should be plotted.
 */
-MantidCurve::MantidCurve() : PlotCurve(), WorkspaceObserver()
+MantidCurve::MantidCurve(const QString& wsName, bool err, bool allError) : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(allError)
+{
+}
+
+/**
+Constructor 
+@param err : flag indicating that errors should be used.
+*/
+MantidCurve::MantidCurve(bool err) : PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false)
 {
 }
 
@@ -109,4 +121,57 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 MantidCurve::~MantidCurve()
 {
 }
+
+
+void MantidCurve::itemChanged()
+{
+  //Forward request onwards
+  PlotCurve::itemChanged();
+}
+
+/** Create the name for a curve which is a copy of another curve.
+ *  @param curveName :: The original curve name.
+ */
+QString MantidCurve::createCopyName(const QString& curveName)
+{
+  int i = curveName.lastIndexOf(" (copy");
+  if (i < 0) return curveName+" (copy)";
+  int j = curveName.lastIndexOf(")");
+  if (j == i + 5) return curveName.mid(0,i)+" (copy2)";
+  int k = curveName.mid(i+5,j-i-5).toInt();
+  return curveName.mid(0,i)+" (copy"+QString::number(k+1)+")";
+}
+
+
+void MantidCurve::doDraw(QPainter *p, 
+          const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+          const QRect &rect, MantidQwtWorkspaceData const * const d) const
+{
+  int xi0 = 0;
+  p->setPen(pen());
+  const int dx = 3;
+  const int dx2 = 2*dx;
+  int x1 = static_cast<int>(floor(xMap.p1()));
+  int x2 = static_cast<int>(floor(xMap.p2()));
+  for (int i = 0; i < static_cast<int>(d->esize()); i++)
+  {
+    const int xi = xMap.transform(d->ex(i));
+    if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
+    {
+      const double Y = y(i);
+      const double E = d->e(i);
+      const int ei1 = yMap.transform(Y - E);
+      const int ei2 = yMap.transform(Y + E);
+
+      // This call can crash MantidPlot if the error is zero,
+      //   so protect against this (line of zero length anyway)
+      if (E) p->drawLine(xi,ei1,xi,ei2);
+      p->drawLine(xi-dx,ei1,xi+dx,ei1);
+      p->drawLine(xi-dx,ei2,xi+dx,ei2);
+
+      xi0 = xi;
+    }
+  }
+}
+
 

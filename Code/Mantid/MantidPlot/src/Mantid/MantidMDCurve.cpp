@@ -1,13 +1,9 @@
 #include "MantidMDCurve.h"
-
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-
 #include <qpainter.h>
 #include <qwt_symbol.h>
-
 #include "MantidAPI/AnalysisDataService.h"
-
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
@@ -25,9 +21,7 @@ using namespace MantidQt::API;
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidMDCurve::MantidMDCurve(const QString& wsName,Graph* g,bool err,bool distr,Graph::CurveType style)
-  :MantidCurve(wsName),
-  m_drawErrorBars(err),
-  m_drawAllErrorBars(err),
+  :MantidCurve(wsName, err),
   m_wsName(wsName)
 {
   init(g,distr,style);
@@ -35,9 +29,7 @@ MantidMDCurve::MantidMDCurve(const QString& wsName,Graph* g,bool err,bool distr,
 
 
 MantidMDCurve::MantidMDCurve(const MantidMDCurve& c)
-  :MantidCurve(createCopyName(c.title().text())),
-  m_drawErrorBars(c.m_drawErrorBars),
-  m_drawAllErrorBars(c.m_drawAllErrorBars),
+  :MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars, c.m_drawAllErrorBars),
   m_wsName(c.m_wsName)
 {
   setData(c.data());
@@ -135,51 +127,11 @@ void MantidMDCurve::draw(QPainter *p,
   {
     const MantidQwtIMDWorkspaceData* d = dynamic_cast<const MantidQwtIMDWorkspaceData*>(&data());
     if (!d)
-      throw std::runtime_error("Only MantidQwtIMDWorkspaceData can be set to a MantidMDCurve");
-    int xi0 = 0;
-    p->setPen(pen());
-    const int dx = 3;
-    const int dx2 = 2*dx;
-    int x1 = static_cast<int>(floor(xMap.p1()));
-    int x2 = static_cast<int>(floor(xMap.p2()));
-    for (int i = 0; i < static_cast<int>(d->esize()); i++)
     {
-      const int xi = xMap.transform(d->ex(i));
-      if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
-      {
-        const double Y = y(i);
-        const double E = d->e(i);
-        const int ei1 = yMap.transform(Y - E);
-        const int ei2 = yMap.transform(Y + E);
-
-        // This call can crash MantidPlot if the error is zero,
-        //   so protect against this (line of zero length anyway)
-        if (E) p->drawLine(xi,ei1,xi,ei2);
-        p->drawLine(xi-dx,ei1,xi+dx,ei1);
-        p->drawLine(xi-dx,ei2,xi+dx,ei2);
-
-        xi0 = xi;
-      }
+      throw std::runtime_error("Only MantidQwtIMDWorkspaceData can be set to a MantidMDCurve");
     }
+    doDraw(p, xMap, yMap, rect, d);
   }
-}
-
-void MantidMDCurve::itemChanged()
-{
-  PlotCurve::itemChanged();
-}
-
-/** Create the name for a curve which is a copy of another curve.
- *  @param curveName :: The original curve name.
- */
-QString MantidMDCurve::createCopyName(const QString& curveName)
-{
-  int i = curveName.lastIndexOf(" (copy");
-  if (i < 0) return curveName+" (copy)";
-  int j = curveName.lastIndexOf(")");
-  if (j == i + 5) return curveName.mid(0,i)+" (copy2)";
-  int k = curveName.mid(i+5,j-i-5).toInt();
-  return curveName.mid(0,i)+" (copy"+QString::number(k+1)+")";
 }
 
 /**  Resets the data if wsName is the name of this workspace
@@ -219,13 +171,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
   delete new_mantidData;
 }
 
-void MantidMDCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
-{
-  (void) ws;
 
-  invalidateBoundingRect();
-  emit resetData(QString::fromStdString(wsName));
-}
 /* This method saves the curve details to a string.
  * Useful for loading/saving mantid project.
 */
@@ -234,6 +180,14 @@ QString MantidMDCurve::saveToString()
 	QString s;
 	s="MantidMDCurve\t"+m_wsName+"\t"+QString::number(m_drawErrorBars)+"\n";
 	return s;
+}
+
+void MantidMDCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  (void) ws;
+
+  invalidateBoundingRect();
+  emit resetData(QString::fromStdString(wsName));
 }
 
 
@@ -249,8 +203,3 @@ const MantidQwtIMDWorkspaceData* MantidMDCurve::mantidData()const
   return d;
 }
 
-/// Returns whether the curve has error bars
-bool MantidMDCurve::hasErrorBars() const
-{
-  return m_drawErrorBars;
-}

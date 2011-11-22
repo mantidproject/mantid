@@ -26,9 +26,7 @@ using namespace MantidQt::API;
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
-  :MantidCurve(),
-  m_drawErrorBars(err),
-  m_drawAllErrorBars(false),
+  :MantidCurve(err),
   m_wsName(wsName),
   m_index(index)
 {
@@ -45,9 +43,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph*
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
-  :MantidCurve(),
-  m_drawErrorBars(err),
-  m_drawAllErrorBars(false),
+  :MantidCurve(err),
   m_wsName(wsName),
   m_index(index)
 {
@@ -56,9 +52,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bo
 
 
 MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
-  :MantidCurve(createCopyName(c.title().text())),
-  m_drawErrorBars(c.m_drawErrorBars),
-  m_drawAllErrorBars(c.m_drawAllErrorBars),
+  :MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars, c.m_drawAllErrorBars),
   m_wsName(c.m_wsName),
   m_index(c.m_index),
   m_xUnits(c.m_xUnits),
@@ -197,45 +191,11 @@ void MantidMatrixCurve::draw(QPainter *p,
   {
     const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
     if (!d)
-      throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
-    int xi0 = 0;
-    p->setPen(pen());
-    const int dx = 3;
-    const int dx2 = 2*dx;
-    int x1 = static_cast<int>(floor(xMap.p1()));
-    int x2 = static_cast<int>(floor(xMap.p2()));
-    for (int i = 0; i < static_cast<int>(d->esize()); i++)
     {
-      const int xi = xMap.transform(d->ex(i));
-      if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
-      {
-        const double Y = y(i);
-        const double E = d->e(i);
-        const int ei1 = yMap.transform(Y - E);
-        const int ei2 = yMap.transform(Y + E);
-
-        // This call can crash MantidPlot if the error is zero,
-        //   so protect against this (line of zero length anyway)
-        if (E) p->drawLine(xi,ei1,xi,ei2);
-        p->drawLine(xi-dx,ei1,xi+dx,ei1);
-        p->drawLine(xi-dx,ei2,xi+dx,ei2);
-
-        xi0 = xi;
-      }
+      throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
     }
+    doDraw(p,xMap,yMap,rect,d);
   }
-}
-
-void MantidMatrixCurve::itemChanged()
-{
-  MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
-  if (d && d->m_isHistogram)
-  {
-    if (style() == Steps) d->m_binCentres = false;
-    else
-      d->m_binCentres = true;
-  }
-  PlotCurve::itemChanged();
 }
 
 /** Create the name for a curve from the following input:
@@ -249,18 +209,6 @@ QString MantidMatrixCurve::createCurveName(const boost::shared_ptr<const Mantid:
   return name;
 }
 
-/** Create the name for a curve which is a copy of another curve.
- *  @param curveName :: The original curve name.
- */
-QString MantidMatrixCurve::createCopyName(const QString& curveName)
-{
-  int i = curveName.lastIndexOf(" (copy");
-  if (i < 0) return curveName+" (copy)";
-  int j = curveName.lastIndexOf(")");
-  if (j == i + 5) return curveName.mid(0,i)+" (copy2)";
-  int k = curveName.mid(i+5,j-i-5).toInt();
-  return curveName.mid(0,i)+" (copy"+QString::number(k+1)+")";
-}
 
 /**  Resets the data if wsName is the name of this workspace
  *  @param wsName :: The name of a workspace which data has been changed in the data service.
@@ -356,10 +304,4 @@ bool MantidMatrixCurve::setDrawAsDistribution(bool on)
 bool MantidMatrixCurve::isDistribution() const
 {
   return mantidData()->m_isDistribution;
-}
-
-/// Returns whether the curve has error bars
-bool MantidMatrixCurve::hasErrorBars() const
-{
-  return m_drawErrorBars;
 }
