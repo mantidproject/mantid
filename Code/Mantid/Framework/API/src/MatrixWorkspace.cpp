@@ -679,7 +679,7 @@ namespace Mantid
       double temp;
       for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
       {
-        const MantidVec& dataX = this->dataX(workspaceIndex); // force using const version
+        const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
         temp = dataX.front();
         if (temp < xmin)
           xmin = temp;
