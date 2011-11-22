@@ -80,7 +80,7 @@ double MantidQwtIMDWorkspaceData::e(size_t i) const
   Mantid::signal_t error;
   while(true)
   {
-    error = std::sqrt(it->getNormalizedError());
+    error = it->getNormalizedError();
     if(counter == i)
     {
       break;

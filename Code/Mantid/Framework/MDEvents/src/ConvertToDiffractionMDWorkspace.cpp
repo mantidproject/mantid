@@ -77,7 +77,10 @@ namespace MDEvents
         "an EventWorkspace using ConvertToEventWorkspace.");
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
-    declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input), "Clear the events from the input workspace during conversion, to save memory.");
+    declareProperty(new PropertyWithValue<bool>("Append", false, Direction::Input),
+        "Append events to the output workspace. The workspace is replaced if unchecked.");
+    declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input),
+        "Clear the events from the input workspace during conversion, to save memory.");
 
     std::vector<std::string> propOptions;
     propOptions.push_back("Q (lab frame)");
@@ -233,6 +236,7 @@ namespace MDEvents
 
     // ---------------------- Extract properties --------------------------------------
     ClearInputWorkspace = getProperty("ClearInputWorkspace");
+    Append = getProperty("Append");
     std::string OutputDimensions = getPropertyValue("OutputDimensions");
     LorentzCorrection = getProperty("LorentzCorrection");
 
@@ -301,7 +305,7 @@ namespace MDEvents
     }
     // Q in the lab frame is the default, so nothing special to do.
 
-    if (ws)
+    if (ws && Append)
     {
       // Check that existing workspace dimensions make sense with the desired one (using the name)
       if (ws->getDimension(0)->getName() != dimensionNames[0])
@@ -311,7 +315,7 @@ namespace MDEvents
 
 
     // ------------------- Create the output workspace if needed ------------------------
-    if (!ws)
+    if (!ws || !Append)
     {
       // Create an output workspace with 3 dimensions.
       size_t nd = 3;
