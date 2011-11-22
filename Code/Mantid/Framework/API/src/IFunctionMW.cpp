@@ -248,6 +248,8 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   m_xValues.reset(new double[m_dataSize]);
   m_weights.reset(new double[m_dataSize]);
 
+  bool negativeError = false;
+
   for (size_t i = 0; i < m_dataSize; ++i)
   {
     if (isHist)
@@ -258,11 +260,22 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
     {
       m_xValues[i] = x[xMin + i];
     }
-    if (e[xMin + i] <= 0.0)
+    if (e[xMin + i] == 0.0)
+    {
       m_weights[i] = 1.0;
+
+    }
+    else if(e[xMin + i] < 0.0)
+    {
+      negativeError = true;
+      m_weights[i] = 1./fabs(e[xMin + i]);   //1.0;
+    }
     else
       m_weights[i] = 1./e[xMin + i];
   }
+
+  if ( negativeError )
+    g_log.warning() << "Negative error values found! These are set to absolute value\n";
 
   if (m_workspace->hasMaskedBins(wi))
   {
