@@ -1,5 +1,8 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+The algorithms will attach an OrientedLattice object to a sample in the workspace. For MD workspaces, you can select to which sample to attach it. If nothing entered, it will attach to all. If bad number is enetered, it will attach to first sample.
+
+If UB matrix elements are entered, lattice parameters and orientation vectors are ignored. The algorithm will throw an exception if the determinant is 0.
+If the UB matrix is all zeros (default), it will calculate it from lattice parameters and orientation vectors. The algorithm will throw an exception if u and v are collinear, or one of them is very small in magnitude.
 *WIKI*/
 
 #include "MantidCrystal/SetUB.h"
@@ -115,38 +118,7 @@ namespace Crystal
       std::vector<double> v = getProperty("v");
 
       o=Mantid::Geometry::OrientedLattice(a,b,c,alpha,beta,gamma);
-      Mantid::Kernel::DblMatrix BMatrix=o.getB();
-      Mantid::Kernel::V3D buVec,bvVec,bwVec;
-      buVec=BMatrix*Mantid::Kernel::V3D(u[0],u[1],u[2]);
-      bvVec=BMatrix*Mantid::Kernel::V3D(v[0],v[1],v[2]);
-      //try to make an orthonormal system
-      if (buVec.norm2()<1e-10) throw std::invalid_argument("|B.u|~0");
-      if (bvVec.norm2()<1e-10) throw std::invalid_argument("|B.v|~0");
-      buVec.normalize(); // 1st unit vector, along Bu
-      bwVec=buVec.cross_prod(bvVec);
-      if (bwVec.normalize()<1e-5) throw std::invalid_argument("u and v are parallel"); // 3rd unit vector, perpendicular to Bu,Bv
-      bvVec=bwVec.cross_prod(buVec); // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
-      Mantid::Kernel::DblMatrix tau(3,3),lab(3,3),U(3,3);
-      /*lab      = U tau
-      / 0 1 0 \     /bu[0] bv[0] bw[0]\
-      | 0 0 1 | = U |bu[1] bv[1] bw[1]|
-      \ 1 0 0 /     \bu[2] bv[2] bw[2]/
-      */
-      lab[0][1]=1.;
-      lab[1][2]=1.;
-      lab[2][0]=1.;
-      tau[0][0]=buVec[0];
-      tau[0][1]=bvVec[0];
-      tau[0][2]=bwVec[0];
-      tau[1][0]=buVec[1];
-      tau[1][1]=bvVec[1];
-      tau[1][2]=bwVec[1];
-      tau[2][0]=buVec[2];
-      tau[2][1]=bvVec[2];
-      tau[2][2]=bwVec[2];
-     tau.Invert();
-      U=lab*tau;
-      o.setU(U);
+      o.setUFromVectors(Mantid::Kernel::V3D(u[0],u[1],u[2]),Mantid::Kernel::V3D(v[0],v[1],v[2]));
     }
     else
     {
