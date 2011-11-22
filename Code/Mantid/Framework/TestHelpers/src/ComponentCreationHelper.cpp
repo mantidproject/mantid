@@ -355,11 +355,11 @@ createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const 
         if(L2[i]   < L2_min    ) L2_min   = L2[i];
         for(size_t j=i+1;j<L2.size();j++){
             if(!double_cmprsn(az[i],az[j])){
-                dAzi=abs(az[i] -az[j]);
+                dAzi=std::fabs(az[i] -az[j]);
                 if(dAzi<dAzi_min)dAzi_min=dAzi;
             }
             if(!double_cmprsn(po[i],po[j])){
-                dPol=abs(po[i]-po[j]);
+                dPol=std::fabs(po[i]-po[j]);
                 if(dPol<dPol_min)dPol_min=dPol;
             }
         }
