@@ -4,13 +4,13 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QObject>
-#include "qwt_data.h"
+#include "MantidQwtWorkspaceData.h"
 
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class MantidQwtMatrixWorkspaceData: public QObject, public QwtData
+class MantidQwtMatrixWorkspaceData:  public QObject,  public MantidQwtWorkspaceData
 {
   Q_OBJECT
 public:

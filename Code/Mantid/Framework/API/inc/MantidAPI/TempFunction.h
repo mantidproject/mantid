@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFitFunction.h"
+#include "MantidKernel/Exception.h"
 
 #ifdef _WIN32
   #pragma warning( disable: 4250 )
@@ -51,9 +52,9 @@ public:
   virtual std::string name()const {return m_function->name();}
   /// Set the workspace. Make 
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) = 0;
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
   /// Get the workspace
-  virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
+  virtual boost::shared_ptr<const API::Workspace> getWorkspace()const {return m_function->getWorkspace();}
 
   /// The categories the Fit function belong to.
   /// Categories must be listed as a comma separated list.
@@ -64,7 +65,7 @@ public:
 
   /// Function you want to fit to. 
   /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(FunctionDomain& domain)const = 0;
+  virtual void function(FunctionDomain& domain)const {throw Kernel::Exception::NotImplementedError("TempFunction not implemented.");}
 
   /// Set i-th parameter
   virtual void setParameter(size_t i, const double& value, bool explicitlySet = true) {m_function->setParameter(i,value,explicitlySet);}
@@ -124,6 +125,7 @@ public:
   virtual void clearTies() {m_function->clearTies();}
   /// Removes i-th parameter's tie
   virtual bool removeTie(size_t i) {return m_function->removeTie(i);}
+  virtual void removeTie(const std::string& parName){IFunction::removeTie(parName);}
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(size_t i)const {return m_function->getTie(i);}
 
@@ -135,6 +137,8 @@ public:
   virtual void removeConstraint(const std::string& parName) {m_function->removeConstraint(parName);}
 
 protected:
+  /// Function initialization. Declare function parameters in this method.
+  virtual void init(){m_function->init();}
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") 
   {

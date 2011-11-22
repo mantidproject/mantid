@@ -76,6 +76,7 @@ public:
   void function(double* out)const;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(API::Jacobian* out);
+  void functionDeriv(API::FunctionDomain& domain, API::Jacobian& jacobian){API::IFunction::functionDeriv(domain,jacobian);}
 
 protected:
 

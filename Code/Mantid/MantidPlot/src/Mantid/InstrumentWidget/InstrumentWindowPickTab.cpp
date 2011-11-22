@@ -29,6 +29,7 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QLineEdit>
+#include <QSignalMapper>
 
 #include <numeric>
 #include <cfloat>
@@ -122,6 +123,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
   connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
   connect(m_plot,SIGNAL(clickedAt(double,double)),this,SLOT(addPeak(double,double)));
 
+  // Plot context menu actions
   m_sumDetectors = new QAction("Sum",this);
   m_integrateTimeBins = new QAction("Integrate",this);
   m_logY = new QAction("Y log scale",this);
@@ -130,6 +132,10 @@ QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
   connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
   connect(m_logY,SIGNAL(triggered()),m_plot,SLOT(setYLogScale()));
   connect(m_linearY,SIGNAL(triggered()),m_plot,SLOT(setYLinearScale()));
+
+  // Instrument display context menu actions
+  m_storeCurve = new QAction("Store curve",this);
+  connect(m_storeCurve,SIGNAL(triggered()),this,SLOT(storeCurve()));
 
   CollapsibleStack* panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
@@ -288,6 +294,23 @@ void InstrumentWindowPickTab::plotContextMenu()
     context.addAction(m_integrateTimeBins);
   }
 
+  if (m_plot->hasStored())
+  {
+    QMenu *removeCurves = new QMenu("Remove",this);
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+    QStringList labels = m_plot->getLabels();
+    foreach(QString label,labels)
+    {
+      QAction *remove = new QAction(label,removeCurves);
+      removeCurves->addAction(remove);
+      connect(remove,SIGNAL(triggered()),signalMapper,SLOT(map()));
+      signalMapper->setMapping(remove,label);
+    }
+    connect(signalMapper, SIGNAL(mapped(const QString &)),
+             this, SLOT(removeCurve(const QString &)));
+    context.addMenu(removeCurves);
+  }
+
   QMenu* axes = new QMenu("Axes",this);
   axes->addAction(m_logY);
   axes->addAction(m_linearY);
@@ -357,7 +380,7 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
  */
 void InstrumentWindowPickTab::plotSingle(int detid)
 {
-  m_plot->clearLabels();
+  m_plot->clearPeakLabels();
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
   size_t wi;
@@ -385,6 +408,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   // set the data 
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
   m_plot->setYScale(*min_it,*max_it);
+  m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
   ProjectionSurface* surface = mInstrumentDisplay->getSurface();
@@ -393,7 +417,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
     QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
     foreach(PeakMarker2D* marker,markers)
     {
-      m_plot->addLabel(new PeakLabel(marker));
+      m_plot->addPeakLabel(new PeakLabel(marker));
       //std::cerr << marker->getLabel().toStdString() << std::endl;
     }
   }
@@ -641,4 +665,35 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
     surface->setInteractionModePick();
   }
   mInstrumentDisplay->setMouseTracking(true);
+}
+
+/**
+ * Show context menu of mInstrumentDisplay
+ */
+void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
+{
+  if (m_plot->hasCurve())
+  {
+    QMenu context(this);
+    context.addAction(m_storeCurve);
+    context.exec(QCursor::pos());
+  }
+}
+
+/**
+ * Keep current curve permanently displayed on the plot.
+ */
+void InstrumentWindowPickTab::storeCurve()
+{
+  m_plot->store();
+}
+
+/**
+ * Remove a stored curve.
+ * @param label :: The label of the curve to remove
+ */
+void InstrumentWindowPickTab::removeCurve(const QString & label)
+{
+  m_plot->removeCurve(label);
+  m_plot->replot();
 }

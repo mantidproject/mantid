@@ -191,6 +191,10 @@ void MuonAnalysis::initLayout()
 
   // Detect when the fit has finished and group the workspaces that have been created as a result.
   connect(m_uiForm.fitBrowser,SIGNAL(beforeFitting(const QtBoolPropertyManager*)), this, SLOT(beforeDoFit(const QtBoolPropertyManager*)));
+
+  // Muon scientists never fits peaks, hence they want the following parameter
+  // set to a high number
+  ConfigService::Instance().setString("curvefitting.peakRadius","99");
 }
 
 /**
