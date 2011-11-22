@@ -272,36 +272,28 @@ def Load(*args, **kwargs):
         except KeyError:
             raise RuntimeError('%s argument not supplied to Load function' % str(key))
     
-    if len(args) == 2:
+    if len(args) == 1:
         filename = args[0]
-        wkspace = args[1]
-    elif len(args) == 1:
-        if 'Filename' in kwargs:
-            wkspace = args[0]
-            filename = get_argument_value('Filename', kwargs)
-        elif 'OutputWorkspace' in kwargs:
-            filename = args[0]
-            wkspace = get_argument_value('OutputWorkspace', kwargs)
-        else:
-            raise RuntimeError('Cannot find "Filename" or "OutputWorkspace" in key word list. '
-                               'Cannot use single positional argument.')
     elif len(args) == 0:
         filename = get_argument_value('Filename', kwargs)
-        wkspace = get_argument_value('OutputWorkspace', kwargs)
     else:
-        raise RuntimeError('Load() takes at most 2 positional arguments, %d found.' % len(args))
+        raise RuntimeError('Load() takes only the filename as a positional argument. %d arguments found.' % len(args))
     
     # Create and execute
     algm = framework_mgr.create_algorithm('Load')
     algm.set_property('Filename', filename) # Must be set first
-    algm.set_property('OutputWorkspace', wkspace)
-    for key, value in kwargs.iteritems():
-        try:
-            algm.set_property(key, value)
-        except RuntimeError:
-            mtd.sendWarningMessage("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
+    lhs = funcreturns.lhs_info()
+    extra_args = get_additional_args(lhs, algm)
+    kwargs.update(extra_args)
+    # Check for any properties that aren't known and warn they will not be used
+    for key in kwargs.keys():
+        if key not in algm:
+            print("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
+            del kwargs[key]
+    set_properties(algm, **kwargs)
     algm.execute()
-    return algm
+    return gather_returns(lhs, algm)
+    
 
 def LoadDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function

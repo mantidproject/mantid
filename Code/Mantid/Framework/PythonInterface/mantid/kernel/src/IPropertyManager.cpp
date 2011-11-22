@@ -17,6 +17,8 @@ void export_IPropertyManager()
     .def("get_property_value", &IPropertyManager::getPropertyValue, "Returns a string representation of the named property's value")
     .def("set_property_value", &IPropertyManager::setPropertyValue, "Set the value of the named property via a string")
     .def("set_property", &PropertyMarshal::setProperty, "Set the value of the named property")
+    // Special methods to act like dicctionary
+    .def("__contains__", &IPropertyManager::existsProperty)
     ;
 }
 

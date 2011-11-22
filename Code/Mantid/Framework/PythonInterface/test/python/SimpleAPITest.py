@@ -70,3 +70,29 @@ If false, then the workspace gets converted to a Workspace2D histogram.
             self.fail("A RuntimeError was not thrown")
         except RuntimeError:
             pass
+        
+    def test_Load_call_with_just_filename_executes_correctly(self):
+        try:
+            raw = simpleapi.Load('IRS21360.raw')
+        except Runtime:
+            self.fail("Load with a filename should not raise an exception")
+        self.assertEquals(116, raw[0].get_number_histograms())
+        analysis_data_svc.remove('raw')
+
+    def test_Load_call_with_other_args_executes_correctly(self):
+        try:
+            raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
+        except Runtime:
+            self.fail("Load with a filename and extra args should not raise an exception")
+        self.assertEquals(1, raw[0].get_number_histograms())
+        analysis_data_svc.remove('raw')
+
+    def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
+        try:
+            raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1,Append=True)
+        except Runtime:
+            self.fail("Load with a filename and extra args should not raise an exception")
+        self.assertEquals(1, raw[0].get_number_histograms())
+        analysis_data_svc.remove('raw')
+
+            
