@@ -45,7 +45,6 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
-#include <numeric>
 #include <cmath>
 #include <iomanip>
 #include "MantidAPI/WorkspaceValidators.h"
@@ -266,14 +265,16 @@ namespace DataHandling
         double xstart = -width * 0.5;
         double ystart = -height * 0.5;
         Geometry::RectangularDetector * bank = new Geometry::RectangularDetector(det->getName(), instrument.get());
-        std::string pixel_width_str = "0.000309";
-        std::string pixel_height_str = "0.000309";
+        std::ostringstream pixel_width;
+        pixel_width << xstep/2;
+        std::ostringstream pixel_height;
+        pixel_height << ystep/2;
         std::string pixel_depth_str = "-0.0001";
         std::string detXML =   "<cuboid id=\"pixel\">"
-          "<left-front-bottom-point   x= \""+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-          "<left-front-top-point      x= \""+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
-          "<left-back-bottom-point    x=\"-"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-          "<right-front-bottom-point  x= \""+pixel_width_str+"\" y= \""+pixel_height_str+"\" z=\"0\"  />"
+          "<left-front-bottom-point   x= \""+pixel_width.str()+"\" y=\"-"+pixel_height.str()+"\" z=\"0\"  />"
+          "<left-front-top-point      x= \""+pixel_width.str()+"\" y=\"-"+pixel_height.str()+"\" z=\""+pixel_depth_str+"\"  />"
+          "<left-back-bottom-point    x=\"-"+pixel_width.str()+"\" y=\"-"+pixel_height.str()+"\" z=\"0\"  />"
+          "<right-front-bottom-point  x= \""+pixel_width.str()+"\" y= \""+pixel_height.str()+"\" z=\"0\"  />"
           "</cuboid>";
         Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
         bank->initialize(shape, det->xpixels(), xstart, xstep, det->ypixels(), ystart, ystep, det->idstart(), det->idfillbyfirst_y(), det->idstepbyrow(), det->idstep());
