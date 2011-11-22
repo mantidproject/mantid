@@ -41,6 +41,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
@@ -218,12 +219,12 @@ namespace DataHandling
         alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
         alg1->setProperty("Offset", mT0);
         alg1->executeAsSubAlg();
-        Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample", instrument.get());
+        Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("sample-position", instrument.get());
         instrument->add(samplepos);
         instrument->markAsSamplePos(samplepos);
         samplepos->setPos(0.0, 0.0, 0.0);
     
-        Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
+        Geometry::ObjComponent *source = new Geometry::ObjComponent("moderator", instrument.get());
         instrument->add(source);
         instrument->markAsSource(source);
         // Convert from cm to m
@@ -265,8 +266,16 @@ namespace DataHandling
         double xstart = -width * 0.5;
         double ystart = -height * 0.5;
         Geometry::RectangularDetector * bank = new Geometry::RectangularDetector(det->getName(), instrument.get());
-        boost::shared_ptr<const Mantid::Geometry::Object> cshape(det->shape());
-        boost::shared_ptr<Mantid::Geometry::Object> shape(boost::const_pointer_cast<Mantid::Geometry::Object>(cshape));
+        std::string pixel_width_str = "0.000309";
+        std::string pixel_height_str = "0.000309";
+        std::string pixel_depth_str = "-0.0001";
+        std::string detXML =   "<cuboid id=\"pixel\">"
+          "<left-front-bottom-point   x= \""+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
+          "<left-front-top-point      x= \""+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
+          "<left-back-bottom-point    x=\"-"+pixel_width_str+"\" y=\"-"+pixel_height_str+"\" z=\"0\"  />"
+          "<right-front-bottom-point  x= \""+pixel_width_str+"\" y= \""+pixel_height_str+"\" z=\"0\"  />"
+          "</cuboid>";
+        Geometry::Object_sptr shape = Geometry::ShapeFactory().createShape(detXML);
         bank->initialize(shape, det->xpixels(), xstart, xstep, det->ypixels(), ystart, ystep, det->idstart(), det->idfillbyfirst_y(), det->idstepbyrow(), det->idstep());
       try
       {
@@ -295,7 +304,7 @@ namespace DataHandling
         y *= 0.01;
         z *= 0.01;
         detname = det->getName();
-        center(x, y, z, detname, inname);
+        bank->setPos(x,y,z);
 
         //These are the ISAW axes
         V3D rX = V3D(base_x, base_y, base_z);
@@ -346,11 +355,8 @@ namespace DataHandling
             Rot = Rot * rot0;
         }
 
-        //Need to get the address to the base instrument component
-        Geometry::ParameterMap& pmap = inputW->instrumentParameters();
-
         // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(),"rot",Rot);
+        bank->setRot(Rot);
 
       } 
     } 
