@@ -12,8 +12,8 @@ class MDHistoWorkspaceTest(unittest.TestCase):
     def setUp(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
         FakeMDEventData("mdw",  UniformParams="1e4")
-        BinToMDHistoWorkspace("mdw", "A",  1, "x,0,10,10", "y,0,10,10", "z,0,10,10", IterateEvents="1", Parallel="0")
-        BinToMDHistoWorkspace("mdw", "B",  1, "x,0,10,10", "y,0,10,10", "z,0,10,10", IterateEvents="1", Parallel="0")
+        BinMD("mdw", "A",  1, "x,0,10,10", "y,0,10,10", "z,0,10,10", IterateEvents="1", Parallel="0")
+        BinMD("mdw", "B",  1, "x,0,10,10", "y,0,10,10", "z,0,10,10", IterateEvents="1", Parallel="0")
         pass
     
     def test_interface(self):

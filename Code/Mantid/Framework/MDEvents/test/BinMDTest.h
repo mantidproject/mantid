@@ -13,7 +13,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDEvents/BinMD.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -34,7 +34,7 @@ using namespace Mantid::Kernel;
 using Mantid::coord_t;
 
 
-class BinToMDHistoWorkspaceTest : public CxxTest::TestSuite
+class BinMDTest : public CxxTest::TestSuite
 {
 
 private:
@@ -91,7 +91,7 @@ public:
 
   void test_Init()
   {
-    BinToMDHistoWorkspace alg;
+    BinMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -110,23 +110,23 @@ public:
       size_t numEventsPerBox=1,
       VMD expectBasisX = VMD(1,0,0), VMD expectBasisY = VMD(0,1,0), VMD expectBasisZ = VMD(0,0,1))
   {
-    BinToMDHistoWorkspace alg;
+    BinMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
-    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", name1));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", name2));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", name3));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
 
@@ -134,7 +134,7 @@ public:
 
     MDHistoWorkspace_sptr out ;
     TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
-        AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
+        AnalysisDataService::Instance().retrieve("BinMDTest_ws")); )
     TS_ASSERT(out);
     if(!out) return;
 
@@ -162,7 +162,7 @@ public:
     const CoordTransform * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
 
-    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
+    AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
   void test_exec_3D()
@@ -279,7 +279,7 @@ public:
       bool IterateEvents,
       bool ForceOrthogonal)
   {
-    BinToMDHistoWorkspace alg;
+    BinMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
@@ -319,15 +319,15 @@ public:
     }
 
     // Save to NXS file for testing
-    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     FrameworkManager::Instance().exec("SaveMD", 4,
-        "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
-        "Filename", "BinToMDHistoWorkspaceTest_ws_rotated.nxs");
+        "InputWorkspace", "BinMDTest_ws",
+        "Filename", "BinMDTest_ws_rotated.nxs");
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorX", "OutX,m," + baseX.toString(",") + ",10," + Strings::toString(binsX) ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorY", "OutY,m," + baseY.toString(",") + ",10," + Strings::toString(binsY) ));
@@ -337,7 +337,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ForceOrthogonal", ForceOrthogonal ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
 
@@ -345,7 +345,7 @@ public:
 
     MDHistoWorkspace_sptr out ;
     TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
-        AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
+        AnalysisDataService::Instance().retrieve("BinMDTest_ws")); )
     TS_ASSERT(out);
     if(!out) return;
 
@@ -380,7 +380,7 @@ public:
     for (size_t d=0; d<3; d++)
     { TS_ASSERT_DELTA( originalPoint[d], originalBack[d], 1e-5); }
 
-    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
+    AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
 
@@ -408,47 +408,47 @@ public:
 };
 
 
-class BinToMDHistoWorkspaceTestPerformance : public CxxTest::TestSuite
+class BinMDTestPerformance : public CxxTest::TestSuite
 {
 public:
   MDEventWorkspace3Lean::sptr in_ws;
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BinToMDHistoWorkspaceTestPerformance *createSuite() { return new BinToMDHistoWorkspaceTestPerformance(); }
-  static void destroySuite( BinToMDHistoWorkspaceTestPerformance *suite ) { delete suite; }
+  static BinMDTestPerformance *createSuite() { return new BinMDTestPerformance(); }
+  static void destroySuite( BinMDTestPerformance *suite ) { delete suite; }
 
-  BinToMDHistoWorkspaceTestPerformance()
+  BinMDTestPerformance()
   {
     in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     in_ws->getBoxController()->setSplitThreshold(2000);
     in_ws->splitAllIfNeeded(NULL);
-    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
+    AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     FrameworkManager::Instance().exec("FakeMDEventData", 4,
-        "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
+        "InputWorkspace", "BinMDTest_ws",
         "UniformParams", "1000000");
     // 1 million random points
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*1000);
     TS_ASSERT_EQUALS( in_ws->getBoxController()->getMaxId(), 1001 );
   }
 
-  ~BinToMDHistoWorkspaceTestPerformance()
+  ~BinMDTestPerformance()
   {
-    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
+    AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
   void do_test(std::string binParams, bool IterateEvents)
   {
-    BinToMDHistoWorkspace alg;
+    BinMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", "Axis0," + binParams));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", "Axis1," + binParams));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", "Axis2," + binParams));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws_histo"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinMDTest_ws_histo"));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() );
   }

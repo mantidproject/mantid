@@ -1,7 +1,5 @@
 /*WIKI* 
 
-
-
 This algorithm performs dense binning of the events in multiple dimensions of an input [[MDEventWorkspace]] and places them into a dense MDHistoWorkspace with 1-4 dimensions.
 
 The input MDEventWorkspace may have more dimensions than the number of output dimensions. The names of the dimensions in the DimX, etc. parameters are used to find the corresponding dimensions that will be created in the output.
@@ -10,9 +8,8 @@ An ImplicitFunction can be defined using the ImplicitFunctionXML parameter; any 
 
 As of now, binning is only performed along axes perpendicular to the dimensions defined in the MDEventWorkspace.
 
-
-
 *WIKI*/
+
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -20,7 +17,7 @@ As of now, binning is only performed along axes perpendicular to the dimensions 
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDEvents/BinMD.h"
 #include "MantidMDEvents/CoordTransformAffineParser.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
 #include "MantidMDEvents/IMDBox.h"
@@ -44,7 +41,7 @@ namespace MDEvents
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(BinToMDHistoWorkspace)
+  DECLARE_ALGORITHM(BinMD)
 
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -54,21 +51,21 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  BinToMDHistoWorkspace::BinToMDHistoWorkspace()
+  BinMD::BinMD()
   {
   }
 
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  BinToMDHistoWorkspace::~BinToMDHistoWorkspace()
+  BinMD::~BinMD()
   {
   }
 
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void BinToMDHistoWorkspace::initDocs()
+  void BinMD::initDocs()
   {
     this->setWikiSummary("Take a [[MDEventWorkspace]] and bin into into a dense, multi-dimensional histogram workspace ([[MDHistoWorkspace]]).");
     this->setOptionalMessage("Take a MDEventWorkspace and bin into into a dense, multi-dimensional histogram workspace (MDHistoWorkspace).");
@@ -77,7 +74,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void BinToMDHistoWorkspace::init()
+  void BinMD::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
 
@@ -113,7 +110,7 @@ namespace MDEvents
    * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
    */
   template<typename MDE, size_t nd>
-  inline void BinToMDHistoWorkspace::binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
+  inline void BinMD::binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
   {
     // An array to hold the rotated/transformed coordinates
     coord_t * outCenter = new coord_t[outD];
@@ -252,7 +249,7 @@ namespace MDEvents
    * @param ws :: MDEventWorkspace of the given type.
    */
   template<typename MDE, size_t nd>
-  void BinToMDHistoWorkspace::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     BoxController_sptr bc = ws->getBoxController();
 
@@ -329,7 +326,7 @@ namespace MDEvents
       // For progress reporting, the # of boxes
       if (prog)
       {
-        PARALLEL_CRITICAL(BinToMDHistoWorkspace_progress)
+        PARALLEL_CRITICAL(BinMD_progress)
         {
           std::cout << "Chunk " << chunk << ": found " << boxes.size() << " boxes within the implicit function." << std::endl;
           progNumSteps += boxes.size();
@@ -371,7 +368,7 @@ namespace MDEvents
    * @param ws :: MDEventWorkspace of the given type
    */
   template<typename MDE, size_t nd>
-  void BinToMDHistoWorkspace::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void BinMD::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     bool DODEBUG = true;
 
@@ -486,7 +483,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void BinToMDHistoWorkspace::exec()
+  void BinMD::exec()
   {
     // Input MDEventWorkspace
     in_ws = getProperty("InputWorkspace");

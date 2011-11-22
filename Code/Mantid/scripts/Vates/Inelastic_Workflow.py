@@ -7,14 +7,14 @@ if not mtd.workspaceExists(ws_in):
  LoadSQW(filename, OutputWorkspace=ws_in)
 
 #Bin the workspace in an axis aligned manner. Creates a Histogrammed MD workspace.
-BinToMDHistoWorkspace(InputWorkspace=ws_in,OutputWorkspace='binned_axis_aligned',AxisAligned=True,
+BinMD(InputWorkspace=ws_in,OutputWorkspace='binned_axis_aligned',AxisAligned=True,
 AlignedDimX='Q_\\zeta,-1.5,5,100',
 AlignedDimY='Q_\\xi,-6,6,100',
 AlignedDimZ='Q_\\eta,-6,6,100',
 AlignedDimT='E,0,150,30')
 
 #Bin the workpace using a coordinate transformation to rotate the output.. Creates a Histogrammed MD workspace.
-BinToMDHistoWorkspace(InputWorkspace=ws_in,OutputWorkspace='binned_rotated',AxisAligned=False,
+BinMD(InputWorkspace=ws_in,OutputWorkspace='binned_rotated',AxisAligned=False,
 BasisVectorX='Qx,Ang,1,0.5,0,0,1,100',
 BasisVectorY='Qy,Ang,-0.5,1,0,0,1,100',
 BasisVectorZ='Qz,Ang,0,0,1.25,0,1,100',

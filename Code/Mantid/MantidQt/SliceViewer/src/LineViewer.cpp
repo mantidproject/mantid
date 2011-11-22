@@ -233,7 +233,7 @@ void LineViewer::apply()
     numBins = 2;
   }
   else
-    alg = FrameworkManager::Instance().createAlgorithm("BinToMDHistoWorkspace");
+    alg = FrameworkManager::Instance().createAlgorithm("BinMD");
 
   alg->setProperty("InputWorkspace", m_ws);
   alg->setPropertyValue("OutputWorkspace", outWsName);

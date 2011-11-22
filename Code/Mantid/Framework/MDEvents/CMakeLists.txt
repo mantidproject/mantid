@@ -2,7 +2,7 @@
 set ( SRC_FILES
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
-	src/BinToMDHistoWorkspace.cpp
+	src/BinMD.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
@@ -49,7 +49,7 @@ set ( SRC_UNITY_IGNORE_FILES
 set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
-	inc/MantidMDEvents/BinToMDHistoWorkspace.h
+	inc/MantidMDEvents/BinMD.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
@@ -125,7 +125,7 @@ set ( TEST_FILES
 )
 
 set ( GMOCK_TEST_FILES
-	test/BinToMDHistoWorkspaceTest.h
+	test/BinMDTest.h
 )
 
 if(UNITY_BUILD)

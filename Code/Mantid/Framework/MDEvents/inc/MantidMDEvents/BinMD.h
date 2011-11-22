@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
-#define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
+#ifndef MANTID_MDEVENTS_BINMD_H_
+#define MANTID_MDEVENTS_BINMD_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
@@ -37,14 +37,14 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-03-29 11:28:06.048254
    */
-  class DLLExport BinToMDHistoWorkspace  : public SlicingAlgorithm
+  class DLLExport BinMD  : public SlicingAlgorithm
   {
   public:
-    BinToMDHistoWorkspace();
-    ~BinToMDHistoWorkspace();
+    BinMD();
+    ~BinMD();
 
     /// Algorithm's name for identification
-    virtual const std::string name() const { return "BinToMDHistoWorkspace";};
+    virtual const std::string name() const { return "BinMD";};
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -90,4 +90,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_ */
+#endif  /* MANTID_MDEVENTS_BINMD_H_ */
