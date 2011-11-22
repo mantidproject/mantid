@@ -97,6 +97,9 @@ namespace ComponentCreationHelper
    * Create a group of two monitors
    */
   boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
+  /** create instrument with cylindrical detecotrs located in specific angular positions */
+  Mantid::Geometry::Instrument_sptr 
+  createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim);
   /**
    * Create an test instrument with n panels of 9 cylindrical detectors, a source and spherical sample shape.
    *

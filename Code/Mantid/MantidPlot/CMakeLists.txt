@@ -390,6 +390,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidTable.h
 				   src/Mantid/MantidQwtIMDWorkspaceData.h
 				   src/Mantid/MantidQwtMatrixWorkspaceData.h
+				   src/Mantid/MantidQwtWorkspaceData.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
