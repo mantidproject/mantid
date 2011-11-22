@@ -123,7 +123,7 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>, nd> > create
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
+        MDHistoDimension * dim = new Geometry::MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits[d], dimMin[d], dimMax[d], 10);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();
