@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/IDetector.h"
@@ -38,18 +37,8 @@ public:
     editdetector.initialize();
 
     // 2. Load Data
-    /*
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename","PG3_2583.nxs");
-    const std::string inputWS = "inputWS";
-    loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.execute();
-    */
     DataObjects::Workspace2D_sptr workspace2d = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 100, false);
     API::AnalysisDataService::Instance().add("inputWS", workspace2d);
-
-    //  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors)
 
     // 3. Set Property
     TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Workspace", "inputWS") );
@@ -120,15 +109,6 @@ public:
     editdetector.initialize();
 
     // 2. Load Data
-    /*
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename","NOM_1818Matrix.nxs");
-    const std::string inputWS = "inputWS";
-    loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.execute();
-    */
-
     DataObjects::Workspace2D_sptr workspace2d = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
     API::AnalysisDataService::Instance().add("inputWS2", workspace2d);
 
@@ -170,14 +150,6 @@ public:
     editdetector.initialize();
 
     // 2. Load Data
-    /*
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename","NOM_1818Matrix.nxs");
-    const std::string inputWS = "inputWS";
-    loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.execute();
-    */
 
     DataObjects::Workspace2D_sptr workspace2d = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
     API::AnalysisDataService::Instance().add("inputWS3", workspace2d);
