@@ -87,6 +87,14 @@ class SNSPowderReduction(PythonAlgorithm):
                 return self._data[frequency][wavelength]
             else:
                 return self.PDInfo(None)
+        def getFocusPos(self):
+            result = {}
+            result['PrimaryFlightPath'] = 19.5
+            result['SpectrumIDs'] = [1,2,3,4,5,6]
+            result['L2'] = [2,2,2,2,2,2]
+            result['Polar'] = [15,31,67,122,154,7]
+            result['Azimuthal'] = [0,0,0,0,0,0]
+            return result
 
     def category(self):
         return "Diffraction"
@@ -359,6 +367,12 @@ class SNSPowderReduction(PythonAlgorithm):
                              PreserveEvents=preserveEvents)
         if not "histo" in self.getProperty("Extension") and preserveEvents:
             SortEvents(InputWorkspace=wksp)
+
+        focusPos = self._config.getFocusPos()
+        self.log().notice("FOCUS:" + str(focusPos))
+        if not focusPos is None:
+            EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
+
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
