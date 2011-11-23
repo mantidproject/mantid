@@ -22,7 +22,7 @@ namespace SliceViewer
   LineOverlay::LineOverlay(QwtPlot * parent)
   : QWidget( parent->canvas() ),
     m_plot(parent),
-    m_snapX(0), m_snapY(0), m_snapLength(0)
+    m_snapX(0.1), m_snapY(0.1), m_snapLength(0)
   {
     m_creation = true; // Will create with the mouse
     m_middleButton = false;
