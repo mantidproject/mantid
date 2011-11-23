@@ -14,7 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/TableRow.h"
 
 #include <QTableWidget>
 
@@ -62,7 +62,7 @@ class MuonAnalysisResultTableTab : public QWidget
 {
  Q_OBJECT
 public:
-  MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
+  MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm), m_numLogsAndParamsDisplayed(0) {}
   void initLayout();
   void populateTables(const QStringList& wsList);
 
@@ -73,14 +73,13 @@ private slots:
   void createTable();
 
 private:
-  void populateLogValues();
-  void populateFittings();
+  void populateLogValues(const QVector<QString>& fittedWsList);
+  void populateFittings(const QVector<QString>& fittedWsList);
   
   std::string getFileName();
-
+  int m_numLogsAndParamsDisplayed;
+  QMap<QString, QMap<QString, double> > m_tableValues;
   Ui::MuonAnalysis& m_uiForm;
-  QVector<QString> m_wsList;
-  QVector<QString> m_logs;
 };
 
 }
