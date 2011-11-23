@@ -441,8 +441,9 @@ void SliceViewer::on_btnSnapToGrid_toggled(bool checked)
     }
     else
     {
-      // Uncheck
+      // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
+      m_lineOverlay->setSnapEnabled(false);
     }
   }
   else

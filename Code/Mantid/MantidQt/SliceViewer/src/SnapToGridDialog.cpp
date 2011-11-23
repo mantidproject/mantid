@@ -1,9 +1,9 @@
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include <QIntValidator>
 
 /// Constructor
 SnapToGridDialog::SnapToGridDialog(QWidget *parent)
-  : QDialog(parent),
-    m_cancelled(false)
+  : QDialog(parent)
 {
 	ui.setupUi(this);
   ui.txtSnapX->setValidator(new QDoubleValidator(ui.txtSnapX));

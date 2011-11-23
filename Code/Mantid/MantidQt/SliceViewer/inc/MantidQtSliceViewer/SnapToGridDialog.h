@@ -3,6 +3,7 @@
 
 #include <QtGui/QDialog>
 #include "ui_SnapToGridDialog.h"
+#include "DllOption.h"
 
 /** Dialog that prompts the user
  * to enter the X and Y snap-to
@@ -10,7 +11,7 @@
  *
  * For use with the SliceViewer.
  */
-class SnapToGridDialog : public QDialog
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SnapToGridDialog : public QDialog
 {
   Q_OBJECT
 
@@ -24,8 +25,6 @@ public:
 
 private:
   Ui::SnapToGridDialogClass ui;
-  /// Was cancel pressed?
-  bool m_cancelled;
 };
 
 #endif // SNAPTOGRIDDIALOG_H
