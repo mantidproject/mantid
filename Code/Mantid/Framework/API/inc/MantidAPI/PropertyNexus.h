@@ -3,7 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 
 
 namespace Mantid
