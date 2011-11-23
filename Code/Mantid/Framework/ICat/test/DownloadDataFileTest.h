@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <iomanip>
 #include <fstream>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
@@ -80,7 +81,8 @@ public:
 
 		AnalysisDataService::Instance().remove("investigations");
 		AnalysisDataService::Instance().remove("investigation");
-
+    // Clean up test files
+    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
 
 	void xtestDownLoadNexusFile()
@@ -140,6 +142,8 @@ public:
 		//remove("EMU00017452.nxs");
 		AnalysisDataService::Instance().remove("investigations");
 		AnalysisDataService::Instance().remove("investigation");
+    // Clean up test files
+    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
 
 	void xtestDownLoadDataFile_Merlin()
@@ -196,8 +200,10 @@ public:
 		TS_ASSERT( downloadobj.isExecuted() );
 		AnalysisDataService::Instance().remove("investigations");
 		AnalysisDataService::Instance().remove("investigation");
-
+    // Clean up test files
+    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
+
 	void testDownloaddataFile1()
 	{	
 		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
@@ -216,10 +222,14 @@ public:
 
 		ofs<<"Time taken for http download from mantidwebserver over internet for a small file of size 1KB is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 
-        //delete the file after execution
+    //delete the file after execution
 		remove("test.htm");
-
+    // Clean up test files
+    std::string htmPath = Kernel::ConfigService::Instance().getString("defaultsave.directory") + "/test.htm";
+    if (Poco::File(htmPath).exists()) Poco::File(htmPath).remove();
+    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
+
 private:
 	    CSearch searchobj;
 	    CGetDataFiles invstObj;
