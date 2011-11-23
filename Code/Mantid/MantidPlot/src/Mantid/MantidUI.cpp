@@ -492,7 +492,7 @@ void MantidUI::importBoxDataTable()
     if (!ws) return;
     ITableWorkspace_sptr tabWs = ws->makeBoxTable(0,0);
     if (!tabWs) return;
-    std::string tableName = wsName.toStdString() + "_boxdata";
+    std::string tableName = wsName.toStdString() + std::string("_boxdata");
     AnalysisDataService::Instance().addOrReplace(tableName, tabWs);
     // Now show that table
     importWorkspace(QString::fromStdString(tableName), true, true);
@@ -556,6 +556,26 @@ void MantidUI::showMDPlot()
     ml->close();
     QApplication::restoreOverrideCursor();
   }
+}
+
+/*
+Generates a table workspace from a md workspace and pulls up
+a grid to display the results.
+*/
+void MantidUI::showListData()
+{
+  QString wsName = getSelectedWorkspaceName();
+  QString tableWsName = wsName + "_data_list_table";
+
+  Mantid::API::IAlgorithm_sptr queryWorkspace = this->createAlgorithm("QueryMDWorkspace");
+  queryWorkspace->initialize();
+  queryWorkspace->setPropertyValue("InputWorkspace", wsName.toStdString());
+  std::string sTableWorkspaceName=tableWsName.toStdString();
+  queryWorkspace->setPropertyValue("OutputWorkspace", sTableWorkspaceName);
+  queryWorkspace->setProperty("LimitRows", false);
+  queryWorkspace->execute();
+
+  importWorkspace(tableWsName);
 }
 
 void MantidUI::showVatesSimpleInterface()
