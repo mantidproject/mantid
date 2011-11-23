@@ -1,6 +1,8 @@
 #include "MantidPythonAPI/geometryhelper.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
-
+#include "MantidKernel/V3D.h"
+#include <numpy/arrayobject.h>
+#include <boost/python/extract.hpp>
 namespace Mantid 
 {
 namespace PythonAPI
@@ -103,5 +105,27 @@ void OrientedLatticeWrapper::setUB(OrientedLattice& self,PyObject* p)
   self.setUB(m); 
 }
 
+void OrientedLatticeWrapper::setUFromVectors(OrientedLattice& self,PyObject* p1, PyObject* p2)
+{
+  _import_array();
+  if ((PyArray_Check(p1)==1)&&(PyArray_Check(p2)==1))
+  {
+    boost::python::numeric::array a1=boost::python::extract<boost::python::numeric::array>(p1);
+    a1=(boost::python::numeric::array) a1.astype('d');//force the array to be of double type (in case it was int)
+    boost::python::numeric::array a2=boost::python::extract<boost::python::numeric::array>(p2);
+    a2=(boost::python::numeric::array) a2.astype('d');//force the array to be of double type (in case it was int)
+    if ((PyArray_Size(a1.ptr())!=3)&&(PyArray_Size(a2.ptr())!=3)) throw std::invalid_argument("Not length=3 vectors");
+    Kernel::V3D u,v;
+    u[0]=boost::python::extract< double >(a1[0]);
+    u[1]=boost::python::extract< double >(a1[1]);
+    u[2]=boost::python::extract< double >(a1[2]);
+    v[0]=boost::python::extract< double >(a2[0]);
+    v[1]=boost::python::extract< double >(a2[1]);
+    v[2]=boost::python::extract< double >(a2[2]);
+    self.setUFromVectors(u,v);
+  }
+  else throw std::invalid_argument("Not a numpy array");
 }
-}
+
+}//PythonAPI
+}//Mantid
