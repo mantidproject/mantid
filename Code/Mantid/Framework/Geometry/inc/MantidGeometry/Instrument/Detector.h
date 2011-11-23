@@ -7,6 +7,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include <string>
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -69,6 +70,10 @@ public:
   /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
       It is different in cartesian and cylindrical (surrounding the beam) coordinate system */
   det_topology getTopology(Kernel::V3D &center)const;
+
+  /// Return the relative position to the parent
+  virtual const Kernel::V3D getRelativePos() const
+  { return ObjComponent::getRelativePos(); }
  
 private:
   /// The detector id

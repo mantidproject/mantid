@@ -136,21 +136,19 @@ void SliceViewerWindow::showLineViewer(bool visible)
   if (linerWidth <= 0) linerWidth = m_lastLinerWidth;
   if (linerWidth <= 0) linerWidth = m_liner->sizeHint().width();
   // Account for the splitter handle
-  linerWidth += m_splitter->handleWidth() - 4;
+  linerWidth += m_splitter->handleWidth() - 3;
 
-//  std::cout << "Frame width starts at " << this->width() << std::endl;
-//  std::cout << "LinerWidth is " << m_liner->width() << std::endl;
-
-//  this->setUpdatesEnabled(false);
+  this->setUpdatesEnabled(false);
   if (visible && !m_liner->isVisible())
   {
     // Expand the window to include the liner
-    int w = this->width() + linerWidth;
+    int w = this->width() + linerWidth + 2;
     m_liner->setVisible(true);
+    // If the right splitter was hidden, show it
     QList<int> sizes = m_splitter->sizes();
-    if (sizes[1] == 0)
+    if (m_lastLinerWidth > 0)
     {
-      sizes[1] = linerWidth;
+      sizes[1] = m_lastLinerWidth;
       m_splitter->setSizes(sizes);
     }
     this->resize(w, this->height());
@@ -158,14 +156,14 @@ void SliceViewerWindow::showLineViewer(bool visible)
   else if (!visible && m_liner->isVisible())
   {
     // Shrink the window to exclude the liner
-    int w = this->width() - linerWidth;
-//    std::cout << "Shrinking to " << w << std::endl;
-    m_lastLinerWidth = m_liner->width();
+    int w = this->width() - (m_liner->width() + m_splitter->handleWidth());
+    if (m_liner->width() > 0)
+      m_lastLinerWidth = m_liner->width();
     m_liner->setVisible(false);
-    m_splitter->setStretchFactor(1, 0);
+    QApplication::processEvents();
     this->resize(w, this->height());
-    this->m_splitter->resize(w, this->height());
-    this->update();
+    // This call is necessary to allow resizing smaller than would be allowed if both left/right widgets were visible.
+    QApplication::processEvents();
     this->resize(w, this->height());
   }
   else
@@ -174,7 +172,7 @@ void SliceViewerWindow::showLineViewer(bool visible)
     m_liner->setVisible(visible);
   }
   this->setUpdatesEnabled(true);
-//  std::cout << "Frame width of " << this->width() << std::endl;
+//  std::cout << "Width is " << width() << std::endl;
 
 }
 

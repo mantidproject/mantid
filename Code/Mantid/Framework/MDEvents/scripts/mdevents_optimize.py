@@ -89,18 +89,18 @@ for SplitInto in SplitInto_list:
 
         start = time.time()
         bin_str = "-6.0, 6.0, 100"
-        alg = BinToMDHistoWorkspace(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
         print time.time()-start, " secs to bin medium: %s." % bin_str
         par.MediumBinTime = time.time()-start
 
         bin_str = "-1.0, 1.0, 200"
-        alg = BinToMDHistoWorkspace(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
         print time.time()-start, " secs to bin fine, close up: %s." % bin_str
         par.FineBinTime = time.time()-start
     
         start = time.time()
         bin_str = "-6.0, 6.0, 20"
-        alg = BinToMDHistoWorkspace(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
         print time.time()-start, " secs to bin coarse: %s." % bin_str
         par.CoarseBinTime = time.time()-start
         

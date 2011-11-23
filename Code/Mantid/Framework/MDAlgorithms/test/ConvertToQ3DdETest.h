@@ -151,7 +151,7 @@ void testExecAndAdd(){
 
 }
 // COMPARISON WITH HORACE:  --->
-void testTransfMat1()
+void xtestTransfMat1()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 90., 90., 90.);
@@ -162,7 +162,7 @@ void testTransfMat1()
      Kernel::Matrix<double> rez(rot);
      TS_ASSERT(unit.equals(rez,1.e-4));
 }
-void testTransfMat2()
+void xtestTransfMat2()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 35.);
@@ -173,7 +173,7 @@ void testTransfMat2()
      Kernel::Matrix<double> rez(rot);
      TS_ASSERT(unit.equals(rez,1.e-4));
 }
-void testTransfMat3()
+void xtestTransfMat3()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 35.);
@@ -186,7 +186,7 @@ void testTransfMat3()
      Kernel::Matrix<double> rez(rot);
      TS_ASSERT(unit.equals(rez,1.e-4));
 }
-void testTransfMat4()
+void xtestTransfMat4()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,3, 90., 90., 90.);
@@ -205,7 +205,7 @@ void testTransfMat4()
      Kernel::Matrix<double> rez(rot);
      TS_ASSERT(sample.equals(rez,1.e-4));
 }
-void testTransfMat5()
+void xtestTransfMat5()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 90.);
@@ -225,7 +225,7 @@ void testTransfMat5()
      Kernel::Matrix<double> rez(rot);
      TS_ASSERT(sample.equals(rez,1.e-4));
 }
-void testTransf_PSI_DPSI()
+void xtestTransf_PSI_DPSI()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
@@ -244,7 +244,7 @@ void testTransf_PSI_DPSI()
      Kernel::Matrix<double> rez(rot);
      TS_ASSERT(sample.equals(rez,1.e-4));
 }
-void testTransf_GL()
+void xtestTransf_GL()
 {
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);

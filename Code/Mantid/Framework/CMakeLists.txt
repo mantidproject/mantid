@@ -90,9 +90,7 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI
 add_custom_target ( FrameworkTests ) # target for all framework tests
 add_dependencies ( check FrameworkTests )
 
-include_directories (NexusCPP/inc)
-add_subdirectory (NexusCPP)
-set ( MANTIDLIBS ${MANTIDLIBS} NexusCPP )
+set ( MANTIDLIBS ${MANTIDLIBS} ${NEXUS_LIBRARIES} )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
@@ -153,8 +151,9 @@ add_subdirectory (MDEvents)
 ###########################################################################
 
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule PythonAPIModule DataObjects
-                     DataHandling Nexus NexusCPP Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms
+                     DataHandling Nexus Algorithms CurveFitting ICat
+                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms 
+                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms 
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

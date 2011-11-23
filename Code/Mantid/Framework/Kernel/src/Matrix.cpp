@@ -1219,7 +1219,7 @@ Matrix<T>::determinant() const
 {
   if (nx!=ny)
     throw Kernel::Exception::MisMatch<size_t>(nx,ny,
-        "Determinate error :: Matrix is not NxN");
+        "Determinant error :: Matrix is not NxN");
 
   Matrix<T> Mt(*this);         //temp copy
   T D=Mt.factor();
@@ -1237,7 +1237,7 @@ Matrix<T>::factor()
   */
 {
   if (nx!=ny || nx<1)
-    throw std::runtime_error("Matirx::fractor Matrix is not NxN");
+    throw std::runtime_error("Matrix::factor Matrix is not NxN");
 
   double Pmax;
   double deter=1.0;
@@ -1255,7 +1255,7 @@ Matrix<T>::factor()
         }
       if (Pmax<1e-8)         // maxtrix signular 
         {
-          std::cerr<<"Matrix Singlular"<<std::endl;
+//          std::cerr<<"Matrix Singular"<<std::endl;
           return 0;
         }
       // Swap Columns

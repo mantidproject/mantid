@@ -2,11 +2,12 @@
 #define MANTID_MDEVENTS_MDLEANEVENT_H_
     
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include "nexus/NeXusFile.hpp"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <numeric>
 #include <cmath>
+#include <iostream>
 
 namespace Mantid
 {
@@ -237,13 +238,14 @@ namespace MDEvents
      */
     static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
     {
-      std::vector<int> dims(2,0);
+      std::vector<int64_t> dims(2,0);
       dims[0] = NX_UNLIMITED;
       dims[1] = (nd)+2; // One point per dimension, plus signal, plus error = nd+2
 
       // Now the chunk size.
-      std::vector<int> chunk(dims);
-      chunk[0] = int(chunkSize);
+      std::vector<int64_t> chunk(2, 0);
+      chunk[0] = int64_t(chunkSize);
+      chunk[1] = (nd)+2;
 
       // Make and open the data
       file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
@@ -264,7 +266,8 @@ namespace MDEvents
       // Open the data
       file->openData("event_data");
       // Return the size of dimension 0 = the number of events in the field
-      return uint64_t(file->getInfo().dims[0]);
+      uint64_t currentSize = uint64_t(file->getInfo().dims[0]);
+      return currentSize;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -297,11 +300,12 @@ namespace MDEvents
         signal_t & totalSignal, signal_t & totalErrorSquared)
     {
       size_t numEvents = events.size();
+      //std::cout << "Saving " << numEvents << " at " << startIndex << " in file " << uint64_t(file) << std::endl;
       std::vector<double> data;
       data.reserve(numEvents*(nd+2));
-      std::vector<int> start(2,0);
-      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
-      start[0] = int(startIndex);
+      std::vector<int64_t> start(2,0);
+      start[0] = int64_t(startIndex);
+      start[1] = 0;
 
       totalSignal = 0;
       totalErrorSquared = 0;
@@ -323,9 +327,9 @@ namespace MDEvents
       }
 
       // Specify the dimensions
-      std::vector<int> dims;
-      dims.push_back(int(numEvents));
-      dims.push_back(int(nd+2));
+      std::vector<int64_t> dims;
+      dims.push_back(int64_t(numEvents));
+      dims.push_back(int64_t(nd+2));
 
       file->putSlab(data, start, dims);
     }
@@ -350,11 +354,11 @@ namespace MDEvents
       double * data = new double[numEvents*(nd+2)];
 
       // Start/size descriptors
-      std::vector<int> start(2,0);
-      start[0] = int(indexStart); //TODO: What if # events > size of int32???
+      std::vector<int64_t> start(2,0);
+      start[0] = int64_t(indexStart);
 
-      std::vector<int> size(2,0);
-      size[0] = int(numEvents);
+      std::vector<int64_t> size(2,0);
+      size[0] = int64_t(numEvents);
       size[1] = nd+2;
 
       // Get the slab into the allocated data

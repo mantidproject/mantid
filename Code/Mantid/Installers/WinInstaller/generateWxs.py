@@ -74,7 +74,6 @@ if ARCH == '32':
     comp_guid['IncludeFiles'] = '{e86d1741-bc2b-4a9f-a6a7-3f7905aaf3aa}'
     comp_guid['IncludeMantidAPI'] = '{4761DDF6-813C-4470-8852-98CB9A69EBC9}'
     comp_guid['IncludeMantidKernel'] = '{AF40472B-5822-4ff6-8E05-B4DA5224AA87}'
-    comp_guid['IncludeMantidNexusCPP'] = '{12cf277b-8224-420c-b54a-8425c0376fc3}'
     comp_guid['Temp'] = '{02D25B60-A114-4f2a-A211-DE88CF648C61}'
     comp_guid['Data'] = '{6D9A0A53-42D5-46a5-8E88-6BB4FB7A5FE1}'
     comp_guid['UserAlgorithms'] = '{A82B4540-3CDB-45fa-A7B3-42F392378D3F}'
@@ -90,7 +89,6 @@ else:
     comp_guid['IncludeFiles'] = '{a291f307-477c-4169-9bdb-65f76eb413bf}'
     comp_guid['IncludeMantidAPI'] = '{878ff1f2-7d09-4817-972b-3590c45ea0c9}'
     comp_guid['IncludeMantidKernel'] = '{187317c0-cc23-4a21-bf19-0e347866620c}'
-    comp_guid['IncludeMantidNexusCPP'] = '{20327246-8f47-448b-ae2b-8d464c3a69c7}'
     comp_guid['Temp'] = '{212cc3fe-95fb-40d9-a3a7-8421791ac19f}'
     comp_guid['Data'] = '{c9577b5b-75e5-4a4a-b2d5-f4905174627c}'
     comp_guid['UserAlgorithms'] = '{496555f0-f719-4db7-bd8e-5bbcd9fe837d}'
@@ -523,7 +521,6 @@ addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd',MANTIDRELEASE +
 addFileV('MantidAPI','MAPI.dll','MantidAPI.dll',MANTIDRELEASE + '/MantidAPI.dll',MantidDlls)
 addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll',MANTIDRELEASE + '/MantidGeometry.dll',MantidDlls)
 addFileV('MantidKernel','MKern.dll','MantidKernel.dll',MANTIDRELEASE + '/MantidKernel.dll',MantidDlls)
-addFileV('MantidNexusCPP','MNxsCPP.dll','MantidNexusCPP.dll',MANTIDRELEASE + '/MantidNexusCPP.dll',MantidDlls)
 
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQtAPI.dll',MantidDlls)
@@ -670,10 +667,6 @@ includeMantidGeometryDirList = addCompList('IncludeMantidGeometryDirList',FRAMEW
 includeMantidKernelDir = addDirectory('IncludeMantidKernelDir','KER','MantidKernel',includeDir)
 IncludeMantidKernel = addComponent('IncludeMantidKernel',comp_guid['IncludeMantidKernel'],includeMantidKernelDir)
 addAllFiles(FRAMEWORKDIR + '/Kernel/inc/MantidKernel','ker',IncludeMantidKernel)
-# NexusCPP
-includeMantidNexusCPPDir = addDirectory('IncludeMantidNexusCPPDir','NEXCPP','MantidNexusCPP',includeDir)
-IncludeMantidNexusCPP = addComponent('IncludeMantidNexusCPP',comp_guid['IncludeMantidNexusCPP'],includeMantidNexusCPPDir)
-addAllFiles(FRAMEWORKDIR + '/NexusCPP/inc/MantidNexusCPP','nex',IncludeMantidNexusCPP)
 # Other includes
 # NeXus API header
 addFileV('NAPI', 'napi.h', 'napi.h', CODEDIR + '/Third_Party/include/napi.h', IncludeFilesComp) # Both while we sort the Nexus stuff out
@@ -771,7 +764,6 @@ addCRef('IncludeFiles', Includes)
 addCRef('IncludeMantidAPI',Includes)
 addCRefs(includeMantidGeometryDirList,Includes)
 addCRef('IncludeMantidKernel',Includes)
-addCRef('IncludeMantidNexusCPP',Includes)
 
 addCRefs(nexusList, Includes)
 addCRefs(boostList,Includes)

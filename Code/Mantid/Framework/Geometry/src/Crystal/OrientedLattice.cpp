@@ -133,32 +133,39 @@ namespace Geometry
    **/
   DblMatrix OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
   {
-    //get  B-matrix of Busing and Levy
-    DblMatrix B = this->getB();
-
-    // get orthogonal system, adjacent to the unit cell;
-    V3D e1 = B*u;
-    e1.normalize();
-    V3D V  = B*v;
-    V3D e3  =e1.cross_prod(V);
-    e3.normalize();
-    double norm2 = e3.norm2();
-    if(norm2<FLT_EPSILON){
-      throw(std::invalid_argument(" two parallel vectors do not define the projection plane"));
-    }
-
-    V3D e2= e3.cross_prod(e1);
-
-    DblMatrix Transf(3,3);
-    Transf.setColumn(0,e1);
-    Transf.setColumn(1,e2);
-    Transf.setColumn(2,e3);
-    // some det may be -1
-    double det = Transf.determinant();
-    Transf /=det;
-
-    this->setU(Transf);
-    return Transf;
+    DblMatrix BMatrix=this->getB();
+    V3D buVec,bvVec,bwVec;
+    buVec=BMatrix*u;
+    bvVec=BMatrix*v;
+    //try to make an orthonormal system
+    if (buVec.norm2()<1e-10) throw std::invalid_argument("|B.u|~0");
+    if (bvVec.norm2()<1e-10) throw std::invalid_argument("|B.v|~0");
+    buVec.normalize(); // 1st unit vector, along Bu
+    bwVec=buVec.cross_prod(bvVec);
+    if (bwVec.normalize()<1e-5) throw std::invalid_argument("u and v are parallel"); // 3rd unit vector, perpendicular to Bu,Bv
+    bvVec=bwVec.cross_prod(buVec); // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
+    DblMatrix tau(3,3),lab(3,3),U(3,3);
+    /*lab      = U tau
+    / 0 1 0 \     /bu[0] bv[0] bw[0]\
+    | 0 0 1 | = U |bu[1] bv[1] bw[1]|
+    \ 1 0 0 /     \bu[2] bv[2] bw[2]/
+    */
+    lab[0][1]=1.;
+    lab[1][2]=1.;
+    lab[2][0]=1.;
+    tau[0][0]=buVec[0];
+    tau[0][1]=bvVec[0];
+    tau[0][2]=bwVec[0];
+    tau[1][0]=buVec[1];
+    tau[1][1]=bvVec[1];
+    tau[1][2]=bwVec[1];
+    tau[2][0]=buVec[2];
+    tau[2][1]=bvVec[2];
+    tau[2][2]=bwVec[2];
+    tau.Invert();
+    U=lab*tau;
+    this->setU(U);
+    return U;
   }
 
 

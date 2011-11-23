@@ -18,9 +18,12 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
 
+
 class RectangularDetectorTest : public CxxTest::TestSuite
 {
 public:
+
+
 	void testEmptyConstructor()
   {
 	  RectangularDetector q;
@@ -102,7 +105,7 @@ public:
 
 
   /** Test on a rectangular detector that will be
-   * repeated on an un-moved parametrized version.
+   * repeated on an un-moved pRectangularDetectorPixelarametrized version.
    */
   void do_test_on(RectangularDetector *det)
   {
@@ -171,6 +174,45 @@ public:
     TS_ASSERT_DELTA(box.zMax(), 3000.5, 1e-08);
   }
 
+  /** Create a parametrized RectangularDetector with a parameter that
+   * resizes it.
+   */
+  void testResizingParameter()
+  {
+    boost::shared_ptr<Geometry::Object> cuboidShape = ComponentCreationHelper::createCuboid(0.5);
+
+    RectangularDetector *det = new RectangularDetector("MyRectangle");
+    det->setPos(1000., 2000., 3000.);
+    det->initialize(cuboidShape, 100, -50.0, 1.0,   200, -100.0, 1.0, 1000000, true, 1000 );
+
+    // --- Now make a parametrized version ----
+    ParameterMap_sptr pmap( new ParameterMap() );
+    RectangularDetector *parDet = new RectangularDetector(det, pmap.get());
+    pmap->addDouble(det, "scalex", 12);
+    pmap->addDouble(det, "scaley", 23);
+
+    // Sizes and steps are scaled by these factors
+    TS_ASSERT_DELTA( parDet->xstep(), 12, 1e-5);
+    TS_ASSERT_DELTA( parDet->ystep(), 23, 1e-5);
+    TS_ASSERT_DELTA( parDet->xstart(), -50*12, 1e-5);
+    TS_ASSERT_DELTA( parDet->ystart(), -100*23, 1e-5);
+    TS_ASSERT_DELTA( parDet->xsize(), 100*12, 1e-5);
+    TS_ASSERT_DELTA( parDet->ysize(), 200*23, 1e-5);
+
+    V3D pos = parDet->getRelativePosAtXY(1,1);
+    TS_ASSERT_EQUALS(pos, V3D( (-50+1)*12., (-100+1)*23., 0.) );
+
+    //Check some positions
+    std::cout << parDet->getAtXY(0,0)->getPos() << std::endl;
+    std::cout << parDet->getAtXY(1,0)->getPos() << std::endl;
+    std::cout << parDet->getAtXY(1,1)->getPos() << std::endl;
+    TS_ASSERT_EQUALS(parDet->getAtXY(0,0)->getPos(), V3D( 1000-(50)*12., 2000-(100*23.), 3000.) );
+    TS_ASSERT_EQUALS(parDet->getAtXY(1,0)->getPos(), V3D( 1000+(-50.+1)*12., 2000-(100*23.), 3000.) );
+    TS_ASSERT_EQUALS(parDet->getAtXY(1,1)->getPos(), V3D( 1000+(-50.+1)*12., 2000+(-100.+1)*23., 3000.) );
+
+    delete det;
+    delete parDet;
+  }
 
 };
 

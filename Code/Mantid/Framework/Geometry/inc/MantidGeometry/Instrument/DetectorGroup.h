@@ -159,7 +159,7 @@ namespace Mantid
       void translate(double, double, double){}
       void rotate(const Kernel::Quat&){}
       void rotate(double,const Kernel::V3D&){}
-      const Kernel::V3D& getRelativePos() const { throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");  }
+      const Kernel::V3D getRelativePos() const { throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");  }
       const Kernel::Quat& getRelativeRot() const{ throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup"); }
       const Kernel::Quat getRotation() const{ return Kernel::Quat(); }
       void printSelf(std::ostream&) const{}
