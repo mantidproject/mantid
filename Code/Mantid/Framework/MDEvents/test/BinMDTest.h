@@ -318,14 +318,11 @@ public:
       baseZ = VMD(0.5, 0.5, 0.5);
     }
 
+    // Save to NXS file for testing
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
-    if (false)
-    {
-      // Save to NXS file for testing
-      FrameworkManager::Instance().exec("SaveMD", 4,
-          "InputWorkspace", "BinMDTest_ws",
-          "Filename", "BinMDTest_ws_rotated.nxs");
-    }
+    FrameworkManager::Instance().exec("SaveMD", 4,
+        "InputWorkspace", "BinMDTest_ws",
+        "Filename", "BinMDTest_ws_rotated.nxs");
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);

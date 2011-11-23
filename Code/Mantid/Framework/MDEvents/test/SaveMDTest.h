@@ -95,11 +95,6 @@ public:
     // Continue the test
     if (UpdateFileBackEnd)
       do_test_UpdateFileBackEnd(ws, filename);
-    else
-    {
-      std::string fullPath = alg.getPropertyValue("Filename");
-      if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
-    }
 
   }
   
@@ -137,9 +132,7 @@ public:
     TS_ASSERT_LESS_THAN( 330, ws->getBoxController()->getFile()->getInfo().dims[0]);
 
     TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
-    // Clean up file
-    std::string fullPath = alg.getPropertyValue("Filename");
-    if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
+
   }
 
 

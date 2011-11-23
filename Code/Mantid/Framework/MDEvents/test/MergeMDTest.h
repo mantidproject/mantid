@@ -87,13 +87,13 @@ public:
       TS_ASSERT( Poco::File(actualOutputFilename).exists());
       ws->getBoxController()->getFile()->close();
       // Remove the file
-      Poco::File(actualOutputFilename).remove();
+      //Poco::File(actualOutputFilename).remove();
     }
 
     // Cleanup generated input files
     for (size_t i=0; i<filenames.size(); i++)
     {
-      Poco::File(filenames[i]).remove();
+        //Poco::File(filenames[i]).remove();
     }
 
     // Remove workspace from the data service.

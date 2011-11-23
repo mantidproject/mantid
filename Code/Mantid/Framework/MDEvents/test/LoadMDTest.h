@@ -280,8 +280,6 @@ public:
     {
       ws->getBoxController()->closeFile();
       AnalysisDataService::Instance().remove(outWSName);
-      Poco::File file(filename);
-      if (file.exists()) file.remove();
     }
   }
 
@@ -319,7 +317,7 @@ public:
     std::vector<MDLeanEvent<nd> > & events = box8->getEvents();
     // Add 10 to this signal
     signal_t newSignal = events[0].getSignal() + 10.0;
-    events[0].setSignal( float(newSignal) );
+    events[0].setSignal(newSignal);
     box8->releaseEvents();
 
 //    // Modify a third box by adding an event
@@ -472,8 +470,6 @@ public:
 
     ws->getBoxController()->closeFile();
     AnalysisDataService::Instance().remove(outWSName);
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
-
   }
 
 };
