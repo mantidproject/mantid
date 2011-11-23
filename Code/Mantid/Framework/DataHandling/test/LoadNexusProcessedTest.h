@@ -15,7 +15,6 @@
 #include <Poco/File.h>
 #include "MantidGeometry/IDTypes.h"
 
-using namespace Mantid::NeXus;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

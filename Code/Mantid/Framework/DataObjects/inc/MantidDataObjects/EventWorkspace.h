@@ -93,6 +93,10 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   double getTofMax() const;
 
+  double getEventXMin() const;
+  double getEventXMax() const;
+  void getEventXMinMax(double &xmin, double &xmax) const;
+
   //------------------------------------------------------------
   // Return the data X vector at a given workspace index
   MantidVec& dataX(const std::size_t);

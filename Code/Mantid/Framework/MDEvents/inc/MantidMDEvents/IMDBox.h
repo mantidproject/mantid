@@ -10,7 +10,7 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <iosfwd>
 #include "MantidKernel/VMD.h"
 

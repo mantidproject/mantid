@@ -18,9 +18,10 @@ class OrientedLatticeTest : public CxxTest::TestSuite
 {
 public:
 
+  /// test constructors, access to some of the variables
   void test_Simple()
   {
-    // test constructors, access to some of the variables
+
     OrientedLattice u1,u2(3,4,5),u3(2,3,4,85.,95.,100),u4;
     u4=u2;
     TS_ASSERT_EQUALS(u1.a1(),1);
@@ -32,10 +33,10 @@ public:
     TS_ASSERT_DELTA(u2.a(),3,1e-10);
   }
 
+  /// test more advanced calculations
+  /// the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
   void test_Advanced()
   {
-    // test more advanced calculations
-    // the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
     DblMatrix newGstar(3,3);
     newGstar[0][0]=0.162546756312;
     newGstar[0][1]=0.00815256992072;
@@ -188,7 +189,33 @@ public:
     TSM_ASSERT_DELTA("Z-coord should be specified correctly",-0.020536948488997286,z,1.e-5);
   }
 
+  ///Test consistency for setUFromVectors
+  void testconsistency()
+  {
+    OrientedLattice theCell(2,2,2,90,90,90);
+    V3D u(1,2,0), v(-2,1,0),expected1(0,0,1),expected2(1,0,0),res1,res2;
+    DblMatrix rot;
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(u,v));
+    rot = theCell.getUB();
+    res1=rot*u; res1.normalize();
+    res2=rot*v; res2.normalize();
+    TSM_ASSERT_EQUALS("Ub*u should be along the beam",res1,expected1);
+    TSM_ASSERT_EQUALS("Ub*v should be along the x direction",res2,expected2);
+  }
 
+  /// test getting u and v vectors
+  void testuvvectors()
+  {
+    OrientedLattice theCell(1,2,3,30,60,45);
+    DblMatrix rot;
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,2,0),V3D(-1,1,0)));
+    rot = theCell.getUB();
+    V3D u=theCell.getuVector(),v=theCell.getvVector(),expected1(0,0,1),expected2(1,0,0),res1,res2;
+    res1=rot*u; res1.normalize();
+    res2=rot*v; res2.normalize();
+    TSM_ASSERT_EQUALS("Ub*u should be along the beam",res1,expected1);
+    TSM_ASSERT_EQUALS("Ub*v should be along the x direction",res2,expected2);
+  }
 
 };
 

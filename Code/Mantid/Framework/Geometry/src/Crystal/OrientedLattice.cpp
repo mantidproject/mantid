@@ -94,6 +94,8 @@ namespace Geometry
     return UB;
   }
 
+  /** Sets the U matrix
+    @param newU :: the new U matrix*/
   void OrientedLattice::setU(DblMatrix& newU)
   {
     if (newU.isRotation()==true)
@@ -104,6 +106,8 @@ namespace Geometry
     else throw std::invalid_argument("U is not a proper rotation");
   }
 
+  /** Sets the UB matrix and recalculates lattice parameters
+    @param newUB :: the new UB matrix*/
   void OrientedLattice::setUB(DblMatrix& newUB)
   {
     if (UB.determinant()>0)
@@ -119,7 +123,27 @@ namespace Geometry
     else throw std::invalid_argument("determinant of UB is not greater than 0");
   }
 
+  /** gets a vector along beam direction when goniometers are at 0. Note, this vector is not unique, but
+    all vectors can be obtaineb by multiplying with a scalar
+    @return u :: V3D vector along beam direction*/
+    Kernel::V3D OrientedLattice::getuVector()
+    {
+      V3D z(0,0,1);
+      DblMatrix UBinv=UB;
+      UBinv.Invert();
+      return UBinv*z;
+    }
 
+  /** gets a vector in the horizontal plane, perpendicular to the beam direction when
+    goniometers are at 0. Note, this vector is not unique, but all vectors can be obtaineb by multiplying with a scalar
+    @return v :: V3D vector perpendicular to the beam direction, in the horizontal plane*/
+    Kernel::V3D OrientedLattice::getvVector()
+    {
+      V3D x(1,0,0);
+      DblMatrix UBinv=UB;
+      UBinv.Invert();
+      return UBinv*x;
+    }
 
  /**  Set the U rotation matrix, to provide the transformation, which translate an 
    *  arbitrary vector V expressed in RLU (hkl) 

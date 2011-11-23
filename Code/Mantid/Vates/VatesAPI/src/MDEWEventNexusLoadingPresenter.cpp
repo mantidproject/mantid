@@ -5,8 +5,8 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
-#include "nexus/NeXusFile.hpp"
-#include "nexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidMDEvents/LoadMD.h"
 
 #include <vtkUnstructuredGrid.h>
