@@ -98,6 +98,10 @@ void ColorBarWidget::resizeEvent(QResizeEvent * event)
 /** Adjust the steps of the spin boxes for log/linear mode */
 void ColorBarWidget::setSpinBoxesSteps()
 {
+  // Large maximum value
+  ui.valMin->setMaximum( +1e100 );
+  ui.valMax->setMaximum( +1e100 );
+
   double step = 1.1;
   if (m_log)
   {
@@ -115,22 +119,25 @@ void ColorBarWidget::setSpinBoxesSteps()
     logRange = log10(m_rangeMax) - log10(m_rangeMin);
     if (logRange > 6) logRange = 6;
     step = pow(10., logRange/100.);
+
+    // Small positive value for the minimum
+    ui.valMin->setMinimum( 1e-99 );
+    ui.valMax->setMinimum( 1e-99 );
+    // Limit the current min/max to positive values
+    if (m_min < m_rangeMin) m_min = m_rangeMin;
+    if (m_max < m_rangeMin) m_max = m_rangeMin;
   }
   else
   {
-    // Linear scale
+    // --- Linear scale ----
     // Round step that is between 1/100 to 1/1000)
     int exponent = int(log10(m_rangeMax)) - 2;
     step = pow(10., double(exponent));
+
+    // Large negative value for the minimum
+    ui.valMin->setMinimum( -1e100 );
+    ui.valMax->setMinimum( -1e100 );
   }
-
-  ui.valMin->setMinimum( m_rangeMin );
-  ui.valMin->setMaximum( m_rangeMax );
-  ui.valMax->setMinimum( m_rangeMin );
-  ui.valMax->setMaximum( m_rangeMax );
-
-  if (m_min < m_rangeMin) m_min = m_rangeMin;
-  if (m_max > m_rangeMax) m_max = m_rangeMax;
 
   ui.valMin->setSingleStep(step);
   ui.valMax->setSingleStep(step);

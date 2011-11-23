@@ -24,7 +24,7 @@ using namespace MantidQt::SliceViewer;
 int main( int argc, char ** argv )
 {
   double min=0;
-  double max=1e9;
+  double max=1e4;
 
   QApplication app(argc, argv);
   app.setOrganizationName("MantidProject");
