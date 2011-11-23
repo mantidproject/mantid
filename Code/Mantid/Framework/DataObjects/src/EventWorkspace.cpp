@@ -234,32 +234,47 @@ namespace DataObjects
 
   double EventWorkspace::getTofMin() const
   {
-    double tmin = std::numeric_limits<double>::max();
-    double temp;
-    size_t numWorkspace = this->data.size();
-    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
-    {
-      const EventList evList = this->getEventList(workspaceIndex);
-      temp = evList.getTofMin();
-      if (temp < tmin)
-        tmin = temp;
-    }
-    return tmin;
+    return this->getEventXMin();
   }
 
   double EventWorkspace::getTofMax() const
   {
-    double tmax = -1.*std::numeric_limits<double>::max(); // min is a small number, not negative
-    double temp;
+    return this->getEventXMax();
+  }
+
+  double EventWorkspace::getEventXMin() const
+  {
+    double xmin;
+    double xmax;
+    this->getEventXMinMax(xmin, xmax);
+    return xmin;
+  }
+
+  double EventWorkspace::getEventXMax() const
+  {
+    double xmin;
+    double xmax;
+    this->getEventXMinMax(xmin, xmax);
+    return xmax;
+  }
+
+  void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const
+  {
+    // set to crazy values to start
+    xmin = std::numeric_limits<double>::max();
+    xmax = -1.0 * xmin;
     size_t numWorkspace = this->data.size();
+    double temp;
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
       const EventList evList = this->getEventList(workspaceIndex);
+      temp = evList.getTofMin();
+      if (temp < xmin)
+        xmin = temp;
       temp = evList.getTofMax();
-      if (temp > tmax)
-        tmax = temp;
+      if (temp > xmax)
+        xmax = temp;
     }
-    return tmax;
   }
 
   //-----------------------------------------------------------------------------
