@@ -9,11 +9,11 @@
 #include <Poco/File.h>
 #include "MantidAPI/IAlgorithm.h"
 
-using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVec;
 
 class LoadTOFRawNexusTest: public CxxTest::TestSuite
 {
