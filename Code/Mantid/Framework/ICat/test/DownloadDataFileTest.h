@@ -225,9 +225,9 @@ public:
     //delete the file after execution
 		remove("test.htm");
     // Clean up test files
-    std::string htmPath = Kernel::ConfigService::Instance().getString("defaultsave.directory") + "/test.htm";
-    if (Poco::File(htmPath).exists()) Poco::File(htmPath).remove();
-    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
+//    std::string htmPath = Kernel::ConfigService::Instance().getString("defaultsave.directory") + "/test.htm";
+//    if (Poco::File(htmPath).exists()) Poco::File(htmPath).remove();
+//    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
 
 private:
