@@ -668,6 +668,13 @@ namespace Mantid
       return xmax;
     }
 
+    namespace {
+      bool isANumber(const double d)
+      {
+        return d == d && fabs(d) != std::numeric_limits<double>::infinity();
+      }
+    }
+
     void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const
     {
       // set to crazy values to start
@@ -676,16 +683,20 @@ namespace Mantid
       size_t numberOfSpectra = this->getNumberHistograms();
 
       // determine the data range
-      double temp;
+      double xfront;
+      double xback;
       for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
       {
         const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
-        temp = dataX.front();
-        if (temp < xmin)
-          xmin = temp;
-        temp = dataX.back();
-        if (temp > xmax)
-          xmax = temp;
+        xfront = dataX.front();
+        xback = dataX.back();
+        if (isANumber(xfront) && isANumber(xback))
+        {
+          if (xfront < xmin)
+            xmin = xfront;
+          if (xback > xmax)
+            xmax = xback;
+        }
       }
     }
 
