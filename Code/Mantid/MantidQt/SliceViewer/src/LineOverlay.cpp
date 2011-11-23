@@ -47,6 +47,17 @@ namespace SliceViewer
   }
   
   //----------------------------------------------------------------------------------------------
+  /** Reset the line. User will have to click to create it */
+  void LineOverlay::reset()
+  {
+    m_creation = true; // Will create with the mouse
+    m_middleButton = false;
+    m_dragHandle = HandleNone;
+    this->update();
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Set point A's position
    * @param pointA :: plot coordinates */
   void LineOverlay::setPointA(QPointF pointA)
@@ -96,6 +107,13 @@ namespace SliceViewer
   {
     m_snapX = spacing;
     m_snapY = spacing;
+  }
+
+  /** Set the snap-to-grid spacing in the Y direction.
+   * @param spacing :: spacing */
+  void LineOverlay::setSnapEnabled(bool enabled)
+  {
+    m_snapEnabled = enabled;
   }
 
   /** Set the snap-to-line-length spacing
@@ -161,18 +179,23 @@ namespace SliceViewer
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Snap a point to the grid
+  /** Snap a point to the grid (if enabled)
    * @param original :: original point
    * @return snapped to grid in either or both dimensions  */
   QPointF LineOverlay::snap(QPointF original) const
   {
-    QPointF out = original;
-    // Snap to grid
-    if (m_snapX > 0)
-      out.setX( Utils::rounddbl(out.x()/m_snapX) * m_snapX);
-    if (m_snapY > 0)
-      out.setY( Utils::rounddbl(out.y()/m_snapY) * m_snapY);
-    return out;
+    if (!m_snapEnabled)
+      return original;
+    else
+    {
+      QPointF out = original;
+      // Snap to grid
+      if (m_snapX > 0)
+        out.setX( Utils::rounddbl(out.x()/m_snapX) * m_snapX);
+      if (m_snapY > 0)
+        out.setY( Utils::rounddbl(out.y()/m_snapY) * m_snapY);
+      return out;
+    }
   }
 
   //----------------------------------------------------------------------------------------------
