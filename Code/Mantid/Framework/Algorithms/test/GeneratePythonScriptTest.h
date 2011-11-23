@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -115,6 +116,7 @@ public:
 
         // Remove workspace from the data service.
         // AnalysisDataService::Instance().remove(outWSName);
+        if (Poco::File(filename).exists()) Poco::File(filename).remove();
     }
 };
 
