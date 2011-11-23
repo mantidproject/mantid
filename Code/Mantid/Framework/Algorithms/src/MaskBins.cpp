@@ -150,7 +150,7 @@ void MaskBins::exec()
 
       // Copy over the data
       outputWS->dataX(wi) = inputWS->readX(wi);
-      const MantidVec& X = outputWS->dataX(wi);
+      const MantidVec& X = outputWS->readX(wi);
       outputWS->dataY(wi) = inputWS->readY(wi);
       outputWS->dataE(wi) = inputWS->readE(wi);
 

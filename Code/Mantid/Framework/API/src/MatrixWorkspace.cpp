@@ -1185,7 +1185,7 @@ namespace Mantid
       {
         throw std::out_of_range("MatrixWorkspace::binIndexOf - Index out of range.");
       }
-      const MantidVec & xValues = this->dataX(index);
+      const MantidVec & xValues = this->readX(index);
       // Lower bound will test if the value is greater than the last but we need to see if X is valid at the start
       if( xValue < xValues.front() )
       {

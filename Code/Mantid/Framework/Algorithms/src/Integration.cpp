@@ -142,9 +142,9 @@ void Integration::exec()
     outSpec->copyInfoFrom(*inSpec);
 
     // Retrieve the spectrum into a vector
-    const MantidVec& X = inSpec->dataX();
-    const MantidVec& Y = inSpec->dataY();
-    const MantidVec& E = inSpec->dataE();
+    const MantidVec& X = inSpec->readX();
+    const MantidVec& Y = inSpec->readY();
+    const MantidVec& E = inSpec->readE();
 
     // If doing partial bins, we want to set the bin boundaries to the specified values
     // regardless of whether they're 'in range' for this spectrum

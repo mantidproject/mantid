@@ -254,7 +254,7 @@ void AlignDetectors::exec()
 
       // Make sure reference to input X vector is obtained after output one because in the case
       // where the input & output workspaces are the same, it might move if the vectors were shared.
-      const MantidVec& xIn = inSpec->dataX();
+      const MantidVec& xIn = inSpec->readX();
       std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
       // Copy the Y&E data
       outputWS->dataY(i) = inSpec->dataY();

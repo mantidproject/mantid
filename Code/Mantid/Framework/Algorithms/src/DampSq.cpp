@@ -74,9 +74,9 @@ namespace Algorithms
 	  }
 
 	  // 2. Get access to all
-	  const MantidVec& iQVec = isqspace->dataX(0);
-	  const MantidVec& iSVec = isqspace->dataY(0);
-	  const MantidVec& iEVec = isqspace->dataE(0);
+		const MantidVec& iQVec = isqspace->readX(0);
+		const MantidVec& iSVec = isqspace->readY(0);
+		const MantidVec& iEVec = isqspace->readE(0);
 
 	  MantidVec& oQVec = osqspace->dataX(0);
 	  MantidVec& oSVec = osqspace->dataY(0);

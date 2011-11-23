@@ -95,9 +95,9 @@ void Linear::exec()
   }
 
   // Get references to the data in the chosen spectrum
-  const MantidVec& X = inputWorkspace->dataX(histNumber);
-  const MantidVec& Y = inputWorkspace->dataY(histNumber);
-  const MantidVec& E = inputWorkspace->dataE(histNumber);
+  const MantidVec& X = inputWorkspace->readX(histNumber);
+  const MantidVec& Y = inputWorkspace->readY(histNumber);
+  const MantidVec& E = inputWorkspace->readE(histNumber);
   // Check if this spectrum has errors
   double errorsCount = 0.0;
 

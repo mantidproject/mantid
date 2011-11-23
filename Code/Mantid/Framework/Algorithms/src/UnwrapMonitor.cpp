@@ -80,10 +80,10 @@ void UnwrapMonitor::exec()
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
   // Get the min & max frame values
-  m_Tmin = m_inputWS->dataX(0).front();
-  m_Tmax = m_inputWS->dataX(0).back();
+  m_Tmin = m_inputWS->readX(0).front();
+  m_Tmax = m_inputWS->readX(0).back();
   g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << std::endl;
-  m_XSize = m_inputWS->dataX(0).size();
+  m_XSize = m_inputWS->readX(0).size();
 
   // Retrieve the source-sample distance
   const double L1 = this->getPrimaryFlightpath();
@@ -232,7 +232,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr& t
   tempX_U.reserve(m_XSize);
 
   // Get a reference to the input x data
-  const MantidVec& xdata = m_inputWS->dataX(spectrum);
+  const MantidVec& xdata = m_inputWS->readX(spectrum);
   // Loop over histogram, selecting bins in appropriate ranges.
   // At the moment, the data in the bin in which a cut-off sits is excluded.
   for (unsigned int bin = 0; bin < m_XSize; ++bin)
