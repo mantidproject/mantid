@@ -2,7 +2,6 @@
 #define LOADEVENTNEXUSTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -20,12 +19,10 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 
-using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
 using namespace Mantid::DataHandling;
 
 class LoadEventNexusTest : public CxxTest::TestSuite
@@ -61,9 +58,9 @@ public:
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
-    DataObjects::EventWorkspace_sptr WS;
+    EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+        WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     //Pixels have to be padded
@@ -92,7 +89,7 @@ public:
     ld2.execute();
     TS_ASSERT( ld2.isExecuted() );
 
-    DataObjects::EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name2));
+    EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name2));
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS2 );
 
@@ -112,14 +109,14 @@ public:
       load->setPropertyValue("MappingFilename","CNCS_TS_2008_08_18.dat");
       load->execute();
       TS_ASSERT( load->isExecuted() );
-      DataObjects::EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs_pre"));
+      EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs_pre"));
       //Valid WS and it is an EventWorkspace
       TS_ASSERT( WS2 );
 
       //Let's compare the proton_charge logs
-      Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
+      TimeSeriesProperty<double> * log = dynamic_cast<TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
       std::map<DateAndTime, double> logMap = log->valueAsCorrectMap();
-      Kernel::TimeSeriesProperty<double> * log2 = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS2->mutableRun().getProperty("proton_charge") );
+      TimeSeriesProperty<double> * log2 = dynamic_cast<TimeSeriesProperty<double> *>( WS2->mutableRun().getProperty("proton_charge") );
       std::map<DateAndTime, double> logMap2 = log2->valueAsCorrectMap();
       std::map<DateAndTime, double>::iterator it, it2;
 
@@ -163,7 +160,7 @@ public:
   void test_FilteredLoad_vs_LoadThenFilter()
   {
     Mantid::API::FrameworkManager::Instance();
-    DataObjects::EventWorkspace_sptr WS1, WS2;
+    EventWorkspace_sptr WS1, WS2;
     std::string ws1Name = "cncs_filtered_on_load";
     std::string ws2Name = "cncs_filtered_after";
 
@@ -179,7 +176,7 @@ public:
     TS_ASSERT( ld->isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING(
-        WS1 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
+        WS1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS1 );
     //Pixels have to be padded
@@ -224,7 +221,7 @@ public:
     TS_ASSERT( alg->isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING(
-        WS2 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
+        WS2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
     TS_ASSERT( WS2 );
     TS_ASSERT_EQUALS( WS2->getNumberHistograms(), 51200);
     TS_ASSERT_EQUALS( WS2->getNumberEvents(), 29753);
@@ -248,9 +245,9 @@ public:
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
-    DataObjects::EventWorkspace_sptr WS;
+    EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
-        WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+        WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     //Pixels have to be padded
@@ -319,7 +316,7 @@ public:
     ld.setProperty<bool>("Precount", Precount);
     ld.execute();
 
-    DataObjects::EventWorkspace_sptr WS;
+    EventWorkspace_sptr WS;
     if (willFail)
     {
       TS_ASSERT( !ld.isExecuted() );
@@ -327,7 +324,7 @@ public:
     }
 
     TS_ASSERT( ld.isExecuted() );
-    TS_ASSERT_THROWS_NOTHING( WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)));
+    TS_ASSERT_THROWS_NOTHING( WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)));
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     if (!WS) return;
