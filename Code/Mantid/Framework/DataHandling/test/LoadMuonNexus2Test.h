@@ -20,12 +20,11 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
-using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::detid_t;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite
 {

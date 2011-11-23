@@ -234,32 +234,88 @@ namespace DataObjects
 
   double EventWorkspace::getTofMin() const
   {
-    double tmin = std::numeric_limits<double>::max();
-    double temp;
-    size_t numWorkspace = this->data.size();
-    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
-    {
-      const EventList evList = this->getEventList(workspaceIndex);
-      temp = evList.getTofMin();
-      if (temp < tmin)
-        tmin = temp;
-    }
-    return tmin;
+    return this->getEventXMin();
   }
 
   double EventWorkspace::getTofMax() const
   {
-    double tmax = -1.*std::numeric_limits<double>::max(); // min is a small number, not negative
-    double temp;
+    return this->getEventXMax();
+  }
+
+  /**
+    * Get them minimum x-value for the events themselves, ignoring the histogram
+    * representation.
+    *
+    * @return The minimum x-value for the all events.
+    *
+    * This does copy some of the code from getEventXMinXMax, but that is because
+    * getting both min and max then throwing away the max is significantly slower
+    * on an unsorted event list.
+    */
+  double EventWorkspace::getEventXMin() const
+  {
+    // set to crazy values to start
+    double xmin = std::numeric_limits<double>::max();
     size_t numWorkspace = this->data.size();
+    double temp;
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
-      const EventList evList = this->getEventList(workspaceIndex);
-      temp = evList.getTofMax();
-      if (temp > tmax)
-        tmax = temp;
+      const EventList &evList = this->getEventList(workspaceIndex);
+      temp = evList.getTofMin();
+      if (temp < xmin)
+        xmin = temp;
     }
-    return tmax;
+    return xmin;
+  }
+
+  /**
+    * Get them maximum x-value for the events themselves, ignoring the histogram
+    * representation.
+    *
+    * @return The maximum x-value for the all events.
+    *
+    * This does copy some of the code from getEventXMinXMax, but that is because
+    * getting both min and max then throwing away the min is significantly slower
+    * on an unsorted event list.
+    */
+  double EventWorkspace::getEventXMax() const
+  {
+    // set to crazy values to start
+    double xmax = -1.0 * std::numeric_limits<double>::max();
+    size_t numWorkspace = this->data.size();
+    double temp;
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
+    {
+      const EventList &evList = this->getEventList(workspaceIndex);
+      temp = evList.getTofMax();
+      if (temp > xmax)
+        xmax = temp;
+    }
+    return xmax;
+  }
+
+  /**
+    * Get them minimum and maximum x-values for the events themselves, ignoring the
+    * histogram representation. Since this does not modify the sort order, the method
+    * will run significantly faster on a TOF_SORT event list.
+    */
+  void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const
+  {
+    // set to crazy values to start
+    xmin = std::numeric_limits<double>::max();
+    xmax = -1.0 * xmin;
+    size_t numWorkspace = this->data.size();
+    double temp;
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
+    {
+      const EventList &evList = this->getEventList(workspaceIndex);
+      temp = evList.getTofMin();
+      if (temp < xmin)
+        xmin = temp;
+      temp = evList.getTofMax();
+      if (temp > xmax)
+        xmax = temp;
+    }
   }
 
   //-----------------------------------------------------------------------------
@@ -615,7 +671,7 @@ namespace DataObjects
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return this->data[index]->dataX();
+    return this->data[index]->constDataX();
   }
 
   /** @return the const data X error vector at a given workspace index

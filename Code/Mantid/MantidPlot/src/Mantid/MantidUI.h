@@ -344,6 +344,9 @@ public slots:
     // Invoke the plot of MD intensity vs non-integrated dimension.
     void showMDPlot();
 
+    // Invoke a grid showing a table of MD summary list data.
+    void showListData();
+
     // SliceViewer
     void showSliceViewer();
 

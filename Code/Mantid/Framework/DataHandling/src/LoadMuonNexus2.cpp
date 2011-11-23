@@ -170,6 +170,7 @@ namespace Mantid
       //g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
       wsGrpSptr->setTitle(entry.getString("title"));
+      wsGrpSptr->setComment(entry.getString("notes"));
 
       if(m_numberOfPeriods>1)
       {
@@ -327,6 +328,7 @@ namespace Mantid
       }
 
       ws->setTitle(entry.getString("title"));
+      ws->setComment(entry.getString("notes"));
 
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       //The sample is left to delete the property

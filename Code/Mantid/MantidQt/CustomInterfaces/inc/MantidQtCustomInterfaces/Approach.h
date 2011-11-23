@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_APPROACH_H_
 #define MANTIDQTCUSTOMINTERFACES_APPROACH_H_
 
-#include <qwidget.h>
+#include <QWidget>
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 

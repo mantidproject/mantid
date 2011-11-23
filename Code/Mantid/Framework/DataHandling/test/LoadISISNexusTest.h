@@ -1,7 +1,8 @@
 #ifndef LOADISISNEXUSTEST_H_
 #define LOADISISNEXUSTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h" 
+#include <cxxtest/TestSuite.h>
+
 #include "MantidDataHandling/LoadISISNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -9,13 +10,11 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceGroup.h"
 
 class LoadISISNexusTest : public CxxTest::TestSuite
 {

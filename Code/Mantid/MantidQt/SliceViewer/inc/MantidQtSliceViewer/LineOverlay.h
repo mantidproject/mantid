@@ -60,6 +60,8 @@ namespace SliceViewer
     LineOverlay(QwtPlot * parent);
     virtual ~LineOverlay();
     
+    void reset();
+
     void setPointA(QPointF pointA);
     void setPointB(QPointF pointB);
     void setWidth(double width);
@@ -67,6 +69,16 @@ namespace SliceViewer
     const QPointF & getPointA() const;
     const QPointF & getPointB() const;
     double getWidth() const;
+
+    void setSnapX(double spacing);
+    void setSnapY(double spacing);
+    void setSnap(double spacing);
+    void setSnapEnabled(bool enabled);
+    void setSnapLength(double spacing);
+
+    ///@return true if the line is in creation mode (waiting for first click)
+    bool getCreationMode() const
+    { return m_creation; }
 
   signals:
     /// Signal sent while the line is being dragged
@@ -77,6 +89,7 @@ namespace SliceViewer
   private:
     QPoint transform(QPointF coords) const;
     QPointF invTransform(QPoint pixels) const;
+    QPointF snap(QPointF original) const;
 
     QSize sizeHint() const;
     QSize size() const;
@@ -88,6 +101,7 @@ namespace SliceViewer
 
     eHandleID mouseOverHandle(QPoint pos);
     bool mouseOverCenter(QPoint pos);
+    void handleDrag(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
@@ -119,6 +133,15 @@ namespace SliceViewer
 
     /// Marker that the middle mouse button is pressed (panning)
     bool m_middleButton;
+
+    /// Is snap-to-grid enabled?
+    bool m_snapEnabled;
+    /// Snap to grid spacing in X
+    double m_snapX;
+    /// Grid spacing in Y
+    double m_snapY;
+    /// Snap to length of the line
+    double m_snapLength;
 
   };
 

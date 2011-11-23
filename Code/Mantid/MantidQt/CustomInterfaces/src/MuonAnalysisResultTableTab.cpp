@@ -146,24 +146,25 @@ void MuonAnalysisResultTableTab::selectAllFittings()
 */
 void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 {
-  QStringList paramWsList;
+  m_wsList.clear();
   
   // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
   for (int i(0); i<wsList.size(); i++)
   {
-    if(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_parameters"))
-      paramWsList.append(wsList[i]);
+    if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
+      m_wsList.append(wsList[i]);
   }
 
-  if (wsList.size() > paramWsList.size())
-  {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "One or more of the data sets loaded has not got fitting information\n"
-      "attached to it and will therefore not be displayed on the list.");
-  }
-  
+  // Error message if one of more data sets loaded by muon analysis don't have parameter information associated with it.
+  //if (wsList.size() > m_wsList.size())
+  //{
+  //  QMessageBox::information(this, "Mantid - Muon Analysis", "One or more of the data sets loaded has not got fitting information\n"
+  //    "attached to it and will therefore not be displayed on the list.");
+  //}
+
   // populate the individual log values and fittings into their respective tables.
-  populateLogValues(paramWsList);
-  populateFittings(paramWsList);
+  populateLogValues();
+  populateFittings();
 }
 
 /**
@@ -172,9 +173,69 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 * @params wsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateLogValues(const QStringList& wsList)
+void MuonAnalysisResultTableTab::populateLogValues()
 {
+  // Clear the logs if not empty and then repopulate.
+  m_logs.clear();
+  
+  for (int i=0; i<m_wsList.size(); i++)
+  {
+    // Get log information
+    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(m_wsList[i].toStdString()));
+    if (!ws)
+    {
+      throw std::runtime_error("Wrong type of Workspace");
+    }
+    
+    const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
+    std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
+    for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
+          pItr != pEnd; ++pItr )
+    {
+      QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
+      // Just get the num.series log values
+      Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);
+      Mantid::Kernel::TimeSeriesProperty<int>    *tspi = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr);
+      Mantid::Kernel::TimeSeriesProperty<bool>   *tspb = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr);
 
+      if( tspd || tspi || tspb ) //If it is then it must be num.series
+      {
+        // Check to see if already registered log.
+        bool isAlreadyLog(false);
+        for (int j=0; j<m_logs.size(); ++j)
+        {
+          if (m_logs[j] == logFile)
+            isAlreadyLog = true;
+        }
+        if (!isAlreadyLog)
+          m_logs.push_back(logFile);
+
+        //std::ostringstream msg;
+        if (tspd)
+          std::cout << "\n\n" << tspd->nthValue(0) << "\n\n";
+        else if (tspi)
+          std::cout << "\n\n" << tspi->nthValue(0) << "\n\n";
+        else if (tspb)
+          std::cout << "\n\n" << tspb->nthValue(0) << "\n\n";
+      }
+    }
+  } // End loop over all workspace's log information
+
+  if(m_logs.size() > m_uiForm.valueTable->rowCount())
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
+  }
+  else
+  {
+    // Populate table with all log values available without repeating any.
+    for (int row = 0; row < m_uiForm.valueTable->rowCount(); row++)
+    {
+      if (row < m_logs.size())
+        m_uiForm.valueTable->setItem(row,0, new QTableWidgetItem(m_logs[row]));
+      else
+        m_uiForm.valueTable->setItem(row,0, NULL);
+    }
+  }
 }
 
 
@@ -184,17 +245,21 @@ void MuonAnalysisResultTableTab::populateLogValues(const QStringList& wsList)
 * @params wsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateFittings(const QStringList& wsList)
+void MuonAnalysisResultTableTab::populateFittings()
 {
-  if(wsList.size() > m_uiForm.fittingResultsTable->rowCount())
+  if(m_wsList.size() > m_uiForm.fittingResultsTable->rowCount())
   {
     QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
   }
   else
   {
-    for (int row = 0; row < wsList.size(); row++)
+    for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++)
     {
-      m_uiForm.fittingResultsTable->setItem(row,0, new QTableWidgetItem(wsList[row]));
+      // Fill values and delete previous old ones.
+      if (row < m_wsList.size())
+        m_uiForm.fittingResultsTable->setItem(row,0, new QTableWidgetItem(m_wsList[row]));
+      else
+        m_uiForm.fittingResultsTable->setItem(row,0, NULL);
     }
   }
 }
@@ -205,9 +270,30 @@ void MuonAnalysisResultTableTab::populateFittings(const QStringList& wsList)
 void MuonAnalysisResultTableTab::createTable()
 {
   //std::string fileName(getFileName());
+  
+  QVector<QString> wsSelected;
+  //std::vector<std::string> logValuesAndParams;
+  
+  //Get the user selected workspaces with _parameters files associated with it
+  for (int i = 0; i < m_wsList.size(); i++)
+  {
+    QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
+    if (includeCell->isChecked())
+    {
+      QTableWidgetItem* wsName = static_cast<QTableWidgetItem*>(m_uiForm.fittingResultsTable->item(i,0));
+      wsSelected.push_back(wsName->text());
+    }
+  }
+
+  // Extract information from the _parameters files.
+  for (int i = 0; i<wsSelected.size(); i++)
+  {
+    Mantid::API::ITableWorkspace_sptr paramTable = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_parameters"));
+    Mantid::API::TableRowHelper row = paramTable->getRow(0);
+  }
 
   //Mantid::API::ITableWorkspace_sptr resultsTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  //std::vector<std::string> logValuesAndParams;
+  //
 }
 
 
