@@ -32,6 +32,8 @@ int main( int argc, char ** argv )
   IMDEventWorkspace_sptr mdew = makeDemoData();
 
   SliceViewerWindow * mainWin = new SliceViewerWindow("mdew", NULL);
+  //mainWin->getSlicer()->getLineOverlay()->setSnap(0.5);
+//  mainWin->getSlicer()->getLineOverlay()->setSnapLength(0.1);
   mainWin->move(100, 100);
   mainWin->resize(700, 700);
   mainWin->show();
