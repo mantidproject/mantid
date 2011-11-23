@@ -356,59 +356,39 @@ int UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const double
 
 void UnwrapSNS::getTofRangeData(const bool isEvent)
 {
+  // get the Tmin/Tmax properties
+  m_Tmin = this->getProperty("Tmin");
+  m_Tmax = this->getProperty("Tmax");
 
-  // Get the min & max frame values
+  // if either the values are not specified by properties, find them from the data
   double empty = Mantid::EMPTY_DBL();
-  double temp;
-
-  // check for Tmin property
-  temp = this->getProperty("Tmin");
-  if (temp == empty)
+  if ((m_Tmin == empty) || (m_Tmax == empty))
   {
-    m_Tmin = std::numeric_limits<double>::max();
+    // get data min/max values
+    double dataTmin;
+    double dataTmax;
     if (isEvent)
     {
-      m_Tmin = m_inputEvWS->getTofMin();
+      m_inputEvWS->sortAll(DataObjects::TOF_SORT, NULL);
+      m_inputEvWS->getEventXMinMax(dataTmin, dataTmax);
     }
     else
     {
-      for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
-      {
-        temp = m_inputWS->dataX(workspaceIndex).front();
-        if (temp < m_Tmin)
-          m_Tmin = temp;
-      }
+      m_inputWS->getXMinMax(dataTmin, dataTmax);
     }
-  }
-  else
-  {
-    m_Tmin = temp;
+
+    // fix the unspecified values
+    if (m_Tmin == empty)
+    {
+      m_Tmin = dataTmin;
+    }
+    if (m_Tmax == empty)
+    {
+      m_Tmax = dataTmax;
+    }
   }
 
-  // check for Tmax property
-  temp = this->getProperty("Tmax");
-  if (temp == empty)
-  {
-    m_Tmax = std::numeric_limits<double>::min();
-    if (isEvent)
-    {
-      m_Tmax = m_inputEvWS->getTofMax();
-    }
-    else
-    {
-      for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
-      {
-        temp = m_inputWS->dataX(workspaceIndex).back();
-        if (temp > m_Tmax)
-          m_Tmax = temp;
-      }
-    }
-  }
-  else
-  {
-    m_Tmax = temp;
-  }
-
+  // check the frame width
   m_frameWidth = m_Tmax - m_Tmin;
 
   g_log.information() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << "\n";
