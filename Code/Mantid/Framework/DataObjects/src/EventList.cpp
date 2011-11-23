@@ -1240,15 +1240,15 @@ namespace DataObjects
    */
   MantidVec& EventList::dataX()
   {
-    return this->refX.access();
     if (mru) mru->deleteIndex(this->m_specNo);
+    return this->refX.access();
   }
 
   /** Returns a const reference to the x data.
    *  @return a reference to the X (bin) vector. */
   const MantidVec& EventList::dataX() const
   {
-    return *refX;
+    return *this->refX;
   }
 
   /** Returns a reference to the x data.

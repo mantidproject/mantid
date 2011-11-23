@@ -71,6 +71,9 @@ namespace API
     virtual const MantidVec& dataX() const;
     virtual const MantidVec& dataDx() const;
 
+    virtual const MantidVec& readX() const;
+    virtual const MantidVec& readDx() const;
+
     virtual MantidVecPtr ptrX() const;
 
     virtual void setData(const MantidVec& Y) = 0;
@@ -89,6 +92,8 @@ namespace API
 
     virtual const MantidVec& dataY() const = 0;
     virtual const MantidVec& dataE() const = 0;
+    virtual const MantidVec& readY() const;
+    virtual const MantidVec& readE() const;
 
     virtual size_t getMemorySize() const = 0;
 

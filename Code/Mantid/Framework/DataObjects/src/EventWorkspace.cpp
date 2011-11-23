@@ -615,7 +615,7 @@ namespace DataObjects
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return this->data[index]->dataX();
+    return this->data[index]->constDataX();
   }
 
   /** @return the const data X error vector at a given workspace index

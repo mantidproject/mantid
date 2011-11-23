@@ -15,7 +15,7 @@
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;

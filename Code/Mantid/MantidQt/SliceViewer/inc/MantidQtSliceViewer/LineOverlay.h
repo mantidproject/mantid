@@ -68,6 +68,11 @@ namespace SliceViewer
     const QPointF & getPointB() const;
     double getWidth() const;
 
+    void setSnapX(double spacing);
+    void setSnapY(double spacing);
+    void setSnap(double spacing);
+    void setSnapLength(double spacing);
+
   signals:
     /// Signal sent while the line is being dragged
     void lineChanging(QPointF, QPointF, double);
@@ -77,6 +82,7 @@ namespace SliceViewer
   private:
     QPoint transform(QPointF coords) const;
     QPointF invTransform(QPoint pixels) const;
+    QPointF snap(QPointF original) const;
 
     QSize sizeHint() const;
     QSize size() const;
@@ -88,6 +94,7 @@ namespace SliceViewer
 
     eHandleID mouseOverHandle(QPoint pos);
     bool mouseOverCenter(QPoint pos);
+    void handleDrag(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
@@ -119,6 +126,13 @@ namespace SliceViewer
 
     /// Marker that the middle mouse button is pressed (panning)
     bool m_middleButton;
+
+    /// Snap to grid spacing in X
+    double m_snapX;
+    /// Grid spacing in Y
+    double m_snapY;
+    /// Snap to length of the line
+    double m_snapLength;
 
   };
 

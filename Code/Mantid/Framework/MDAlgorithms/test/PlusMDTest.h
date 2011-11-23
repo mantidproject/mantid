@@ -5,7 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/PlusMD.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>

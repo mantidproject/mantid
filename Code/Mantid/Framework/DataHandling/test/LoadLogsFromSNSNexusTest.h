@@ -10,11 +10,12 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::DataObjects::Workspace2D;
+using Mantid::DataObjects::Workspace2D_sptr;
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
@@ -33,7 +34,7 @@ public:
       ld.setPropertyValue("Filename","REF_L_32035.nxs");
 
       //Create an empty workspace with some fake size, to start from.
-      DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+      Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>
           (WorkspaceFactory::Instance().create("Workspace2D",1000,18+1,18));
       //Put it in the object.
       ld.setProperty("Workspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
@@ -71,7 +72,7 @@ public:
         TS_ASSERT_DELTA( tsp->nthValue(1), 13715.55, 2);
 
         //The time diff between the 0th and 1st entry is 0.328 seconds
-        TS_ASSERT_DELTA( Kernel::DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 0.328, 0.01);
+        TS_ASSERT_DELTA( DateAndTime::seconds_from_duration(tsp->nthInterval(0).length()), 0.328, 0.01);
 
         //Now the stats
 

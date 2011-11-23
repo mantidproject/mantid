@@ -404,6 +404,9 @@ void SliceViewer::colorRangeChanged()
 void SliceViewer::btnDoLineToggled(bool checked)
 {
   m_lineOverlay->setVisible(checked);
+  if (checked)
+    QToolTip::showText( ui.btnDoLine->mapToGlobal(ui.btnDoLine->pos() ),
+        "Click and drag to draw an integration line.", this);
   emit showLineViewer(checked);
 }
 

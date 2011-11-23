@@ -5,6 +5,9 @@
 #include <qpainter.h>
 #include <QRect>
 #include <QShowEvent>
+#include "MantidKernel/Utils.h"
+
+using namespace Mantid::Kernel;
 
 
 namespace MantidQt
@@ -18,7 +21,8 @@ namespace SliceViewer
    */
   LineOverlay::LineOverlay(QwtPlot * parent)
   : QWidget( parent->canvas() ),
-    m_plot(parent)
+    m_plot(parent),
+    m_snapX(0), m_snapY(0), m_snapLength(0)
   {
     m_creation = true; // Will create with the mouse
     m_middleButton = false;
@@ -69,6 +73,38 @@ namespace SliceViewer
     this->update(); //repaint
     emit lineChanging(m_pointA, m_pointB, m_width);
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the snap-to-grid spacing in the X direction.
+   * @param spacing :: spacing */
+  void LineOverlay::setSnapX(double spacing)
+  {
+    m_snapX = spacing;
+  }
+
+  /** Set the snap-to-grid spacing in the Y direction.
+   * @param spacing :: spacing */
+  void LineOverlay::setSnapY(double spacing)
+  {
+    m_snapY = spacing;
+  }
+
+  /** Set the snap-to-grid spacing in both directions.
+   * @param spacing :: spacing */
+  void LineOverlay::setSnap(double spacing)
+  {
+    m_snapX = spacing;
+    m_snapY = spacing;
+  }
+
+  /** Set the snap-to-line-length spacing
+   * @param spacing :: spacing */
+  void LineOverlay::setSnapLength(double spacing)
+  {
+    m_snapLength = spacing;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /// @return point A's position in plot coordinates
@@ -122,6 +158,21 @@ namespace SliceViewer
     double xA = m_plot->invTransform( QwtPlot::xBottom, pixels.x() );
     double yA = m_plot->invTransform( QwtPlot::yLeft, pixels.y() );
     return QPointF(xA, yA);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Snap a point to the grid
+   * @param original :: original point
+   * @return snapped to grid in either or both dimensions  */
+  QPointF LineOverlay::snap(QPointF original) const
+  {
+    QPointF out = original;
+    // Snap to grid
+    if (m_snapX > 0)
+      out.setX( Utils::rounddbl(out.x()/m_snapX) * m_snapX);
+    if (m_snapY > 0)
+      out.setY( Utils::rounddbl(out.y()/m_snapY) * m_snapY);
+    return out;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -264,6 +315,83 @@ namespace SliceViewer
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Handle the mouse move event when the line is being dragged
+   * @param mouse event info */
+  void LineOverlay::handleDrag(QMouseEvent * event)
+  {
+    // Is the shift key pressed?
+    bool shiftPressed = (event->modifiers() & Qt::ShiftModifier);
+    // Currently dragging!
+    QPointF current = this->invTransform( event->pos() );
+    QPointF currentSnap = this->snap(current);
+    QPointF diff = m_pointB - m_pointA;
+    QPointF dragAmount = current - this->m_dragStart;
+    dragAmount = snap(dragAmount);
+    double width = 0;
+    double angle = 0;
+    double length = 0;
+
+    // Adjust the current mouse position if needed.
+    if ((m_snapLength > 0) || shiftPressed)
+    {
+      // This is the distance between the fixed and dragged point
+      QPointF currentDiff;
+      if (m_dragHandle == HandleA)
+        currentDiff = current - m_pointB;
+      else if (m_dragHandle == HandleB)
+        currentDiff = current - m_pointA;
+
+      // Limit angles to 45 degree increments with shift pressed
+      angle = atan2(currentDiff.y(), currentDiff.x());
+      // Round angle to closest 45 degrees
+      if (shiftPressed)
+        angle = Utils::rounddbl(angle / (M_PI / 4.0)) * (M_PI / 4.0);
+
+      // Round length to m_snapLength, if specified
+      length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());
+      if (m_snapLength > 0)
+        length = Utils::rounddbl(length / m_snapLength) * m_snapLength;
+
+      // Rebuild the mouse position
+      currentDiff = QPointF( cos(angle) * length, sin(angle) * length);
+      if (m_dragHandle == HandleA)
+        currentSnap = snap(m_pointB + currentDiff);
+      else if (m_dragHandle == HandleB)
+        currentSnap = snap(m_pointA + currentDiff);
+    }
+
+    switch (m_dragHandle)
+    {
+    case HandleA:
+      setPointA(currentSnap);
+      break;
+
+    case HandleB:
+      setPointB(currentSnap);
+      break;
+
+    case HandleWidthBottom:
+    case HandleWidthTop:
+      // Find the distance between the mouse and the line (see http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html )
+      width = fabs( diff.x()*(current.y()-m_pointA.y()) - (current.x() - m_pointA.x())*diff.y() )
+          / sqrt(diff.x()*diff.x() + diff.y()*diff.y());
+      setWidth(width);
+      break;
+
+    case HandleCenter:
+      // Move the whole line around
+      m_pointA = m_dragStart_PointA + dragAmount;
+      m_pointB = m_dragStart_PointB + dragAmount;
+      this->update();
+      emit lineChanging(m_pointA, m_pointB, m_width);
+      break;
+
+    default:
+      break;
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Event when the mouse moves
    * @param mouse event info */
   void LineOverlay::mouseMoveEvent(QMouseEvent * event)
@@ -282,40 +410,7 @@ namespace SliceViewer
     // --- Initial creation mode ----
     if (m_dragHandle != HandleNone)
     {
-      // Currently dragging!
-      QPointF current = this->invTransform( event->pos() );
-      QPointF diff = m_pointB - m_pointA;
-      QPointF dragAmount = current - this->m_dragStart;
-      double width = 0;
-
-      switch (m_dragHandle)
-      {
-      case HandleA:
-        setPointA(current);
-        break;
-      case HandleB:
-        setPointB(current);
-        break;
-
-      case HandleWidthBottom:
-      case HandleWidthTop:
-        // Find the distance between the mouse and the line (see http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html )
-        width = fabs( diff.x()*(current.y()-m_pointA.y()) - (current.x() - m_pointA.x())*diff.y() )
-            / sqrt(diff.x()*diff.x() + diff.y()*diff.y());
-        setWidth(width);
-        break;
-
-      case HandleCenter:
-        // Move the whole line around
-        m_pointA = m_dragStart_PointA + dragAmount;
-        m_pointB = m_dragStart_PointB + dragAmount;
-        this->update();
-        emit lineChanging(m_pointA, m_pointB, m_width);
-        break;
-
-      default:
-        break;
-      }
+      this->handleDrag(event);
     }
     else
     {
@@ -359,7 +454,7 @@ namespace SliceViewer
     // First left-click = create!
     if (m_creation && (event->buttons() & Qt::LeftButton))
     {
-      QPointF pt = this->invTransform( event->pos() );
+      QPointF pt = snap(this->invTransform( event->pos() ));
       m_pointB = pt;
       setPointA(pt);
       // And now we are in drag B mode

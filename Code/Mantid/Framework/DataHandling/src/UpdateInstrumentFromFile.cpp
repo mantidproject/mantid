@@ -16,8 +16,8 @@ It is assumed that the positions specified in the raw file are all with respect 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "LoadRaw/isisraw2.h"
-#include "nexus/NeXusFile.hpp"
-#include "nexus/NeXusException.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid

@@ -23,7 +23,7 @@
 #include <set>
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -186,6 +186,10 @@ namespace Mantid
       virtual const MantidVec& dataE(const std::size_t index) const { return getSpectrum(index)->dataE(); }
       /// Returns the error const
       virtual const MantidVec& dataDx(const std::size_t index) const { return getSpectrum(index)->dataDx(); }
+
+      virtual double getXMin() const;
+      virtual double getXMax() const;
+      virtual void getXMinMax(double &xmin, double &xmax) const;
 
       /// Returns a pointer to the x data
       virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { return getSpectrum(index)->ptrX(); }

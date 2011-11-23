@@ -402,7 +402,9 @@ public:
       // By default, use all available indices
       size_t start_event = 0;
       ::NeXus::Info id_info = file.getInfo();
-      size_t stop_event = static_cast<size_t>(id_info.dims[0]);
+      // dims[0] can be negative in ISIS meaning 2^32 + dims[0]. Take that into account
+      int64_t dim0 = recalculateDataSize(id_info.dims[0]);
+      size_t stop_event = static_cast<size_t>(dim0);
 
       //TODO: Handle the time filtering by changing the start/end offsets.
       for (size_t i=0; i < alg->pulseTimes.size(); i++)
@@ -414,12 +416,12 @@ public:
         }
       }
 
-      if (start_event > static_cast<size_t>(id_info.dims[0]))
+      if (start_event > static_cast<size_t>(dim0))
       {
         // For bad file around SEQ_7872, Jul 15, 2011, Janik Zikovsky
         alg->getLogger().information() << this->entry_name << "'s field 'event_index' seem to be invalid (> than the number of events in the bank). Filtering by time ignored.\n";
         start_event = 0;
-        stop_event =  static_cast<size_t>(id_info.dims[0]);
+        stop_event =  static_cast<size_t>(dim0);
       }
       else
       {
@@ -434,8 +436,8 @@ public:
       }
 
       // Make sure it is within range
-      if (stop_event > static_cast<size_t>(id_info.dims[0]))
-        stop_event = id_info.dims[0];
+      if (stop_event > static_cast<size_t>(dim0))
+        stop_event = dim0;
 
       alg->getLogger().debug() << entry_name << ": start_event " << start_event << " stop_event "<< stop_event << std::endl;
 
@@ -450,9 +452,9 @@ public:
         event_time_of_flight = new float[load_size[0]];
 
         // Check that the required space is there in the file.
-        if (id_info.dims[0] < load_size[0]+load_start[0])
+        if (dim0 < load_size[0]+load_start[0])
         {
-          alg->getLogger().warning() << "Entry " << entry_name << "'s event_id field is too small (" << id_info.dims[0]
+          alg->getLogger().warning() << "Entry " << entry_name << "'s event_id field is too small (" << dim0
                           << ") to load the desired data size (" << load_size[0]+load_start[0] << ").\n";
           loadError = true;
         }
@@ -484,7 +486,8 @@ public:
 
           // Check that the required space is there in the file.
           ::NeXus::Info tof_info = file.getInfo();
-          if (tof_info.dims[0] < load_size[0]+load_start[0])
+          int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
+          if (tof_dim0 < load_size[0]+load_start[0])
           {
             alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is too small to load the desired data.\n";
             loadError = true;
@@ -555,7 +558,20 @@ public:
     scheduler->push(newTask);
   }
 
-
+  /**
+  * Interpret the value describing the number of events. If the number is positive return it unchanged.
+  * If the value is negative (can happen at ISIS) add 2^32 to it.
+  * @param size :: The size of events value.
+  */
+  int64_t recalculateDataSize(const int64_t& size)
+  {
+    if (size < 0)
+    {
+      const int64_t shift = int64_t(1) << 32;
+      return shift + size;
+    }
+    return size;
+  }
 
 private:
   /// Algorithm being run

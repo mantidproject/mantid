@@ -107,7 +107,6 @@ namespace MDEvents
 
 
     /** Set whether the box is cached on disk (true) or in memory (false)
-     * DON'T CALL THIS DIRECTLY UNLESS YOU KNOW WHAT YOU ARE DOING!
      * @param onDisk :: true if it is on disk  */
     void setOnDisk(const bool onDisk)
     { m_onDisk = onDisk; }
@@ -121,7 +120,6 @@ namespace MDEvents
     { return m_inMemory; }
 
     /** Set whether the box data (from disk) is loaded in memory (for SaveMD with MakeFileBacked).
-     * DON'T CALL THIS DIRECTLY UNLESS YOU KNOW WHAT YOU ARE DOING!
      * @param inMem :: true if it is in memory  */
     void setInMemory(const bool inMem)
     { m_inMemory = inMem; }
@@ -139,7 +137,6 @@ namespace MDEvents
     { return m_dataModified; }
 
     /** Set the dataModified flag.
-     * DON'T CALL THIS DIRECTLY UNLESS YOU KNOW WHAT YOU ARE DOING!
      * @param value :: true if the data was modified in some way.   */
     void setDataModified(const bool value)
     { m_dataModified = value; }
@@ -147,12 +144,6 @@ namespace MDEvents
     /// @return true if any events were added to the data
     bool dataAdded() const
     { return m_dataAdded; }
-
-    /** Set the dataAdded flag.
-     * DON'T CALL THIS DIRECTLY UNLESS YOU KNOW WHAT YOU ARE DOING!
-     * @param value :: true if data was added in some way.   */
-    void setDataAdded(const bool value)
-    { m_dataAdded = value; }
 
 
     std::vector< MDE > & getEvents();

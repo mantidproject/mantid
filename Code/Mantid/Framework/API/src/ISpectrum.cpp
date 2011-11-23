@@ -104,6 +104,23 @@ namespace API
   const MantidVec& ISpectrum::dataDx() const
   { return *refDx; }
 
+
+  /// Returns the x data const
+  const MantidVec& ISpectrum::readX() const
+  { return *refX; }
+
+  /// Returns the x error data const
+  const MantidVec& ISpectrum::readDx() const
+  { return *refDx; }
+
+  /// Returns the y data const
+  const MantidVec& ISpectrum::readY() const
+  { return this->dataY(); }
+
+  /// Returns the y error data const
+  const MantidVec& ISpectrum::readE() const
+  { return this->dataE(); }
+
   /// Returns a pointer to the x data
   MantidVecPtr ISpectrum::ptrX() const
   { return refX; }
