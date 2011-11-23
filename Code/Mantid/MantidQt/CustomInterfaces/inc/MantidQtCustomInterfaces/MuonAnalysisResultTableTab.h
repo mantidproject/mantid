@@ -14,6 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <QTableWidget>
 
@@ -72,12 +73,14 @@ private slots:
   void createTable();
 
 private:
-  void populateLogValues(const QStringList& wsList);
-  void populateFittings(const QStringList& wsList);
+  void populateLogValues();
+  void populateFittings();
   
   std::string getFileName();
 
   Ui::MuonAnalysis& m_uiForm;
+  QVector<QString> m_wsList;
+  QVector<QString> m_logs;
 };
 
 }

@@ -149,7 +149,6 @@ def process_frame(frame):
     # an intermediate reference. Currently this method does not provide the 
     # correct answer and throws a KeyError. Ticket #4186
     
-    print call_function_locs
     output_var_names = []
     max_returns = []
     last_func_offset = call_function_locs[last_i][0]

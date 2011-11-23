@@ -20,7 +20,6 @@ if os.path.exists(os.path.join(_bindir, 'Mantid.properties')):
 ########################################################
 # Mantid imports
 ########################################################
-# Mantid imports
 from api import framework_mgr
 
 # Start Mantid (mtd for old times sake)

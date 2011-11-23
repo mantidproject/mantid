@@ -60,8 +60,8 @@ The subalgorithms used by LoadMuonNexus are:
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include "nexus/NeXusFile.hpp"
+#include "nexus/NeXusException.hpp"
 
 namespace Mantid
 {
@@ -681,6 +681,7 @@ namespace Mantid
 
       NXEntry nxRun = root.openEntry("run");
       localWorkspace->setTitle(nxRun.getString("title"));
+      localWorkspace->setComment(nxRun.getString("notes"));
 
       std::string run_num = boost::lexical_cast<std::string>(nxRun.getInt("number"));
       //The sample is left to delete the property
