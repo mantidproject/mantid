@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
 	src/SliceViewerWindow.cpp
+	src/SnapToGridDialog.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -21,6 +22,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
+	inc/MantidQtSliceViewer/SnapToGridDialog.h
 )
 
 set ( MOC_FILES 
@@ -32,6 +34,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
+	inc/MantidQtSliceViewer/SnapToGridDialog.h
 )
 
 set ( UI_FILES 
@@ -39,6 +42,7 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
+	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 )
 
 

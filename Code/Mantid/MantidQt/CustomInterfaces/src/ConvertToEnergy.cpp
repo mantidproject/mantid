@@ -9,6 +9,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 #include <QMessageBox>
 #include <QDir>
@@ -194,7 +195,14 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
     return;
   }
 
-  QString defFile = getIDFPath(name);
+  //QString defFile = getIDFPath(name);
+  QString defFile = (Mantid::API::ExperimentInfo::getInstrumentFilename(name.toStdString())).c_str();
+
+
+        //  m_filename = ExperimentInfo::getInstrumentFilename(m_instName,date);
+
+  std::cout << "ConvertToEnergy::instrumentSelectChanged(): name = " << name.toStdString() << std::endl;
+  std::cout << "ConvertToEnergy::instrumentSelectChanged(): defFile = " << defFile.toStdString() << std::endl;
 
   if ( defFile == "" )
   {
@@ -233,42 +241,44 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
   m_curInterfaceSetup = name;
   m_curEmodeType = desired;
   m_uiForm.pbRun->setEnabled(true);
+
+  std::cout << "ConvertToEnergy::instrumentSelectChanged() - leaving" << std::endl;
 }
 
-/**
- * Gets the path to the selected instrument's Instrument Definition File (IDF), if the instrument has a parameter file.
- * @param prefix :: the instrument's name from the QComboBox
- * @return A string containing the path to the IDF, or an empty string if no parameter file exists.
- */
-QString ConvertToEnergy::getIDFPath(const QString& prefix)
-{
-  QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));
-  QDir paramdir(paramfile_dir);
-  paramdir.setFilter(QDir::Files);
-  QStringList filters;
-  filters << prefix + "*_Parameters.xml";
-  paramdir.setNameFilters(filters);
+///**
+// * Gets the path to the selected instrument's Instrument Definition File (IDF), if the instrument has a parameter file.
+// * @param prefix :: the instrument's name from the QComboBox
+// * @return A string containing the path to the IDF, or an empty string if no parameter file exists.
+// */
+//QString ConvertToEnergy::getIDFPath(const QString& prefix)
+//{
+//  QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));
+//  QDir paramdir(paramfile_dir);
+//  paramdir.setFilter(QDir::Files);
+//  QStringList filters;
+//  filters << prefix + "*_Parameters.xml";
+//  paramdir.setNameFilters(filters);
 
-  QStringList entries = paramdir.entryList();
-  QString defFilePrefix;
+//  QStringList entries = paramdir.entryList();
+//  QString defFilePrefix;
 
-  if( entries.isEmpty() )
-  {
-    QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + prefix + ") does not have a parameter file.\nCannot run analysis");
-    m_uiForm.cbInst->blockSignals(true);
-    m_uiForm.cbInst->setCurrentIndex(m_uiForm.cbInst->findText(m_curInterfaceSetup));
-    m_uiForm.cbInst->blockSignals(false);
-    return "";
-  }
-  else
-  {
-    defFilePrefix = entries[(entries.count()-1)];
-    defFilePrefix.chop(15); // cut "_Parameters.xml" off the string
-  }
+//  if( entries.isEmpty() )
+//  {
+//    QMessageBox::warning(this, "MantidPlot", "Selected instrument (" + prefix + ") does not have a parameter file.\nCannot run analysis");
+//    m_uiForm.cbInst->blockSignals(true);
+//    m_uiForm.cbInst->setCurrentIndex(m_uiForm.cbInst->findText(m_curInterfaceSetup));
+//    m_uiForm.cbInst->blockSignals(false);
+//    return "";
+//  }
+//  else
+//  {
+//    defFilePrefix = entries[(entries.count()-1)];
+//    defFilePrefix.chop(15); // cut "_Parameters.xml" off the string
+//  }
 
-  QString defFile = paramdir.filePath(defFilePrefix + "_Definition.xml");
-  return defFile;
-}
+//  QString defFile = paramdir.filePath(defFilePrefix + "_Definition.xml");
+//  return defFile;
+//}
 
 /**
  * Runs a Python script to discover whether the selected instrument is direct or indirect.

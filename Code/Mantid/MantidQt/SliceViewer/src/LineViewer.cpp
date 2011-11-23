@@ -6,6 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <QIntValidator>
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -194,6 +195,16 @@ void LineViewer::apply()
 {
   if (m_allDimsFree)
     throw std::runtime_error("Not currently supported with all dimensions free!");
+
+  // BinMD fails on MDHisto.
+  IMDHistoWorkspace_sptr mdhws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws);
+  if (mdhws)
+  {
+    this->showPreview();
+    m_plot->setTitle("Integrating MDHistoWorkspaces not yet supported - coming soon!");
+    return;
+  }
+
   std::string outWsName = m_ws->getName() + "_line" ;
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 

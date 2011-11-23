@@ -76,6 +76,14 @@ namespace SliceViewer
     void setSnapEnabled(bool enabled);
     void setSnapLength(double spacing);
 
+    ///@return the snap-to X interval
+    double getSnapX()
+    { return m_snapX; }
+
+    ///@return the snap-to X interval
+    double getSnapY()
+    { return m_snapY; }
+
     ///@return true if the line is in creation mode (waiting for first click)
     bool getCreationMode() const
     { return m_creation; }

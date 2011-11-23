@@ -30,6 +30,7 @@
 #include <vector>
 #include <qfiledialog.h>
 #include <limits>
+#include "MantidQtSliceViewer/SnapToGridDialog.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -430,10 +431,20 @@ void SliceViewer::on_btnSnapToGrid_toggled(bool checked)
 {
   if (checked)
   {
-    //TODO: Ask the user for snap size
-    m_lineOverlay->setSnapEnabled(true);
-    m_lineOverlay->setSnapX(0.1);
-    m_lineOverlay->setSnapY(0.1);
+    SnapToGridDialog * dlg = new SnapToGridDialog(this);
+    dlg->setSnap( m_lineOverlay->getSnapX(), m_lineOverlay->getSnapY() );
+    if (dlg->exec() == QDialog::Accepted)
+    {
+      m_lineOverlay->setSnapEnabled(true);
+      m_lineOverlay->setSnapX( dlg->getSnapX() );
+      m_lineOverlay->setSnapY( dlg->getSnapY() );
+    }
+    else
+    {
+      // Uncheck - the user clicked cancel
+      ui.btnSnapToGrid->setChecked(false);
+      m_lineOverlay->setSnapEnabled(false);
+    }
   }
   else
   {

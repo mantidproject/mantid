@@ -60,12 +60,15 @@ public:
     savealg.execute();
     TS_ASSERT(savealg.isExecuted());
 
+    // Retrieve the full path to file
+    std::string file1 = savealg.getPropertyValue("OutputFile");
+
     // 4. Load the new XML file
     LoadMaskingFile loadfile2;
     loadfile2.initialize();
 
     loadfile2.setProperty("Instrument", "POWGEN");
-    loadfile2.setProperty("InputFile", "maskcopy.xml");
+    loadfile2.setProperty("InputFile", file1);
     loadfile2.setProperty("OutputWorkspace", "PG3MaskCopy");
 
     TS_ASSERT_EQUALS(loadfile2.execute(),true);
@@ -79,7 +82,7 @@ public:
     }
 
     // 6. Clean the file
-    Poco::File cleanfile("maskcopy.xml");
+    Poco::File cleanfile(file1);
     cleanfile.remove(false);
 
   }

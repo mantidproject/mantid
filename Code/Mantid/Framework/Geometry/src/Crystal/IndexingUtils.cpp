@@ -1465,6 +1465,50 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
 
 
 /**
+  Calculate the number of Q vectors that are mapped to a integer index
+  value by taking the dot product with the specified direction vector.  The 
+  direction vector represents a possible unit cell edge vector in real space.
+  The dot product must be within the specified tolerance of an integer, 
+  in order to count as indexed.
+  
+  @param direction    A V3D specifying a possible edge vector in real space.
+  @param q_vectors    std::vector of V3D objects that contains the list of 
+                      q_vectors that are indexed by the corresponding hkl
+                      vectors.
+  @param tolerance    The maximum allowed distance to an integer from the dot
+                      products of peaks with the specified direction.
+
+  @return A non-negative integer giving the number of q-vectors indexed in
+          one direction by the specified direction vector. 
+ */
+int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
+                                     const std::vector<V3D>  & q_vectors,
+                                           double              tolerance )
+{
+  if ( direction.norm() == 0 )
+    return 0;
+
+  double proj_value;
+  double error;
+  int    nearest_int;
+  int    count = 0;
+ 
+  for ( size_t i = 0; i < q_vectors.size(); i++ )
+  {
+    proj_value = direction.scalar_prod( q_vectors[i] );
+    nearest_int = round( proj_value );
+    error = fabs( proj_value - nearest_int );
+    if ( error <= tolerance )
+    {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+
+/**
   Calculate the Miller Indices for each of the specified Q vectors, using the
   inverse of the specified UB matrix.  The Miller Indices will be set to 
   0, 0, 0 for any peak for which h, k or l differs from an intenger by more 

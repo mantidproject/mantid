@@ -395,35 +395,33 @@ public:
 
   void test_NumberIndexed()
   {
-    Matrix<double> UB(3,3,false);
+    std::vector<V3D> q_list = getNatroliteQs();
+    Matrix<double>   UB     = getNatroliteUB();
 
-    V3D row_values( -0.141251, 0.3042650, -0.147160 );
-    UB.setRow( 0, row_values );    
+    int num_indexed;
 
-    row_values( 0.120633,  0.0907082,  0.106323 );
-    UB.setRow( 1, row_values );    
+    num_indexed = IndexingUtils::NumberIndexed( UB, q_list, 0.05 );
+    TS_ASSERT_EQUALS( num_indexed, 10 )
+  }
 
-    row_values( 0.258332, -0.0062807, -0.261151 );
-    UB.setRow( 2, row_values );    
 
-    std::vector<V3D> q_list( 5 );
+  void test_NumberIndexed_1D()
+  {
+    std::vector<V3D> q_list = getNatroliteQs();
+    Matrix<double>   UB     = getNatroliteUB();
+    UB.Invert();
+    V3D direction( UB[0][0], UB[0][1], UB[0][2] );
+ 
+    int num_indexed; 
 
-    V3D qxyz( -1.02753, 0.47106, -0.25957 );
-    q_list[0] = qxyz;
+    num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.10 );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
 
-    qxyz( -2.05753, 0.93893, -0.51988 );
-    q_list[1] = qxyz;
+    num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.05 );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
 
-    qxyz( -2.19878, 1.05926, -0.27486 );
-    q_list[2] = qxyz;
-
-    qxyz( -2.63576, 1.39119, -0.53007 );
-    q_list[3] = qxyz;
-
-    qxyz( -1.75324, 1.02999, -0.52537 );
-    q_list[4] = qxyz;
-
-    TS_ASSERT_EQUALS( IndexingUtils::NumberIndexed( UB, q_list, 0.017 ), 4 );
+    num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.01 );
+    TS_ASSERT_EQUALS( num_indexed,  8 );
   }
 
 
