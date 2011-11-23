@@ -7,7 +7,7 @@
 #include <vector>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {

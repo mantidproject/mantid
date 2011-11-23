@@ -12,7 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -235,7 +235,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
           // Count how many pixels in the bank
           file->openData("pixel_id");
-          std::vector<int64_t> dims = file->getInfo().dims;
+          std::vector<int> dims = file->getInfo().dims;
           file->closeData();
 
           size_t newPixels = 1;
@@ -251,7 +251,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
         {
           // Get the size of the X vector
           file->openData(m_axisField);
-          std::vector<int64_t> dims = file->getInfo().dims;
+          std::vector<int> dims = file->getInfo().dims;
           // Find the units, if available
           if (file->hasAttr("units"))
             file->getAttr("units", m_xUnits);

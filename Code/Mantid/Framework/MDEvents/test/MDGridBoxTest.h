@@ -17,7 +17,7 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
-#include "nexus/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MDBoxTest.h"
 #include <boost/random/linear_congruential.hpp>
