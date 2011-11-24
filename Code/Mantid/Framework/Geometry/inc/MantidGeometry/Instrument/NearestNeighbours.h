@@ -1,14 +1,7 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 #define MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IDTypes.h"
-// Boost graphing
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include "MantidGeometry/Instrument/INearestNeighbours.h"
 
 namespace Mantid
 {
@@ -21,12 +14,6 @@ namespace Mantid
   }
   namespace Geometry
   {
-    //------------------------------------------------------------------------------
-    // Forward Declarations
-    //------------------------------------------------------------------------------
-    class Instrument;
-    class IComponent;
-    class ISpectraDetectorMap;
 
     /**
      *  This class is used to find the nearest neighbours of a detector in the instrument
@@ -66,7 +53,7 @@ namespace Mantid
      *  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      *  Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class MANTID_GEOMETRY_DLL NearestNeighbours
+    class MANTID_GEOMETRY_DLL NearestNeighbours : public INearestNeighbours
     {
     public:
       /// Constructor with an instrument and a spectra map
