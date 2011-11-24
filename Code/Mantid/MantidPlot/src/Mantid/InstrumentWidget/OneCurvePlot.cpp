@@ -61,11 +61,11 @@ void OneCurvePlot::setXScale(double from, double to)
   if (!ticks.empty() && ticks.size() < nMajorTicks)
   {
     // how much first tick is shifted from the lower bound
-    double firstShift = ticks.front() - div.lowerBound();
+    double firstShift = ticks.front() - div.lBound();
     // how much last tick is shifted from the upper bound
-    double lastShift = div.upperBound() - ticks.back();
+    double lastShift = div.hBound() - ticks.back();
     // range of the scale
-    double range = fabs(div.upperBound() - div.lowerBound());
+    double range = fabs(div.hBound() - div.lBound());
     // we say that 1st tick is missing if first tick is father away from its end of the scale
     // than the last tick is from its end
     bool isFirstMissing =  fabs(firstShift) > fabs(lastShift) ;
