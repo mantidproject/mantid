@@ -325,7 +325,7 @@ void MuonAnalysisResultTableTab::createTable()
   }
 
   // Get the user selected log file and parameters
-  for (size_t i = 0; i < m_numLogsAndParamsDisplayed; i++)
+  for (int i = 0; i < m_numLogsAndParamsDisplayed; i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,3));
     if (includeCell->isChecked())
