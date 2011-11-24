@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -38,14 +39,118 @@ static const int MONITOR =          2;
 static const int NUMRANDOM =        7;
 static const int DETECTS[NUMRANDOM]={4101,4804,1323,1101,3805,1323,3832};
 
+namespace SmallTestDatFile
+{
+  const int NDETECTS = 6;
+}
+
+namespace
+{
+  std::string delta[] = {"4", "4.500", "4.500", "4.500", "-6.00", "0.000"};
+  std::string pressure[] = {"10.0000", "10.0000", "10.0000", "10.0001", "10.000",  "10.0001"};
+  std::string wallThick[] = {"0.00080", "0.00080", "0.00080", "-0.00080", "0.00080",  "9.500"};
+  std::string code[] = {"3", "1", "3", "3", "3",  "3"};
+  std::string det_l2[] = {"1.5", "1.5", "1.5", "1.5", "1.5", "1.5"};
+  std::string det_theta[] = {"30", "35", "40", "45", "50", "55"};
+  std::string det_phi[] = {"-105", "-110", "-115", "-120", "-125", "-130"};
+
+  void writeSmallDatFile(const std::string & filename)
+  {
+    std::ofstream file(filename.c_str());
+    const int NOTUSED = -123456;
+    file << "DETECTOR.DAT writen by LoadDetectorInfoTest" << std::endl;
+    file << 165888  <<  " " << 14 << std::endl;
+    file << "det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4" << std::endl;
+    for( int i = 0; i < SmallTestDatFile::NDETECTS; ++i )
+    {
+      file << i  << "\t" << delta[i]<< "\t"  << det_l2[i] << "\t"  << code[i]<< "\t"  << det_theta[i]<< "\t"   << det_phi[i]<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED << "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"  << NOTUSED<< "\t"  << pressure[i]<< "\t"  << wallThick[i]<< "\t"  << NOTUSED << std::endl;
+    }
+    file.close();
+  }
+
+  void writeLargeTestDatFile(const std::string & filename, const int ndets)
+  {
+    // The array is the same value across all spectra as this is meant as a
+    // performance test not a validation test
+
+    std::ofstream file(filename.c_str());
+    const int NOTUSED = -123456;
+    file << "DETECTOR.DAT writen by LoadDetectorInfoTest" << std::endl;
+    file << 165888  <<  " " << 14 << std::endl;
+    file << "det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4" << std::endl;
+    for( int i = 0; i < ndets ; ++i )
+    {
+      file << i  << "\t" << delta[0]<< "\t"  << det_l2[0] << "\t"  << code[0]<< "\t"  << det_theta[0]<< "\t"   << det_phi[0]<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED << "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"  << NOTUSED<< "\t"  << pressure[0]<< "\t"  << wallThick[0]<< "\t"  << NOTUSED << std::endl;
+    }
+    file.close();
+
+  }
+
+
+  // Set up a small workspace for testing
+  void makeTestWorkspace(const int ndets, const int nbins, const std::string & ads_name)
+  {
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", ndets, nbins+1, nbins);
+    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    Mantid::MantidVecPtr xs, errors, data[ndets];
+    xs.access().resize(nbins+1, 0.0);
+    errors.access().resize(nbins, 1.0);
+    int detIDs[ndets];
+    int specNums[ndets];
+    for (int j = 0; j < ndets; ++j)
+    {
+      space2D->setX(j,xs);
+      data[j].access().resize(nbins, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
+      space2D->setData(j, data[j], errors);
+      space2D->getAxis(1)->spectraNo(j) = j+1;  // spectra numbers are also 1 + index_numbers because this is the tradition
+      detIDs[j] = j;
+      specNums[j] = j+1;
+    }
+
+    Instrument_sptr instr(new Instrument);
+    space->setInstrument(instr);
+    ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
+    instr->markAsSamplePos(samplePos);
+
+    for( int i = 0; i < ndets; ++i)
+    {
+      std::ostringstream os;
+      os << "det-" << i;
+      Detector *d = new Detector(os.str(),i,0);
+      instr->markAsDetector(d);
+    }
+
+
+    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
+    space->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, ndets));
+
+    // Register the workspace in the data service
+    AnalysisDataService::Instance().add(ads_name, space);
+  }
+
+}
+
 class LoadDetectorInfoTest : public CxxTest::TestSuite
 {
-
-
-
 public:
   static LoadDetectorInfoTest *createSuite() { return new LoadDetectorInfoTest(); }
   static void destroySuite(LoadDetectorInfoTest *suite) { delete suite; }
+
+  LoadDetectorInfoTest() :
+    m_InoutWS("loaddetectorinfotest_input_workspace"),
+    m_DatFile("loaddetectorinfotest_filename.dat"),
+    m_MariWS("MARfromRaw")
+  {
+    // create a .dat file in the current directory that we'll load later
+    writeSmallDatFile(m_DatFile);
+    m_rawFile = RAWFILE;
+  }
+
+  ~LoadDetectorInfoTest()
+  {
+    Poco::File(m_DatFile).remove();
+  }
 
   void testLoadDat()
   {// also tests changing X-values with   -same bins, different offsets
@@ -59,7 +164,7 @@ public:
     TS_ASSERT( grouper.isInitialized() );
 
     // Set up a small workspace for testing
-    makeSmallWS();
+    makeTestWorkspace(SmallTestDatFile::NDETECTS, NBINS, m_InoutWS);
     grouper.setPropertyValue("Workspace", m_InoutWS);
     grouper.setPropertyValue("DataFilename", m_DatFile);
     grouper.setPropertyValue("RelocateDets", "1");
@@ -74,7 +179,7 @@ public:
 
     const ParameterMap& pmap = WS->instrumentParameters();
 
-    for ( int j = 0; j < NDETECTS; ++j)
+    for ( int j = 0; j < SmallTestDatFile::NDETECTS; ++j)
     {
 
       boost::shared_ptr<const IDetector> detector =WS->getInstrument()->getDetector(j);
@@ -149,7 +254,7 @@ public:
     info.initialize();
     info.isInitialized();
     // Set up a small workspace for testing
-    makeSmallWS();
+    makeTestWorkspace(SmallTestDatFile::NDETECTS, NBINS, m_InoutWS);
 
     info.setPropertyValue("Workspace", m_InoutWS);
     info.setPropertyValue("DataFilename", m_DatFile);
@@ -160,8 +265,7 @@ public:
     const int alteredHist = 4, alteredBin = 1;
     const double alteredAmount = 1e-4;
 
-    WS->dataX(alteredHist)[alteredBin] =
-        WS->dataX(alteredHist)[alteredBin] + alteredAmount;
+    WS->dataX(alteredHist)[alteredBin] =  WS->dataX(alteredHist)[alteredBin] + alteredAmount;
 
     TS_ASSERT_THROWS_NOTHING(info.execute());
     TS_ASSERT( info.isExecuted() );
@@ -265,97 +369,65 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
-  LoadDetectorInfoTest() :
-    m_InoutWS("loaddetectorinfotest_input_workspace"),
-    m_DatFile("loaddetectorinfotest_filename.dat"),
-    m_MariWS("MARfromRaw")
-  {
-    // create a .dat file in the current directory that we'll load later
-    writeDatFile();
-    m_rawFile = RAWFILE;
-  }
-
-  ~LoadDetectorInfoTest()
-  {
-    Poco::File(m_DatFile).remove();
-  }
-
-  // Set up a small workspace for testing
-  void makeSmallWS()
-  {
-    MatrixWorkspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", NDETECTS, NBINS+1, NBINS);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Mantid::MantidVecPtr xs, errors, data[NDETECTS];
-    xs.access().resize(NBINS+1, 0.0);
-    errors.access().resize(NBINS, 1.0);
-    int detIDs[NDETECTS];
-    int specNums[NDETECTS];
-    for (int j = 0; j < NDETECTS; ++j)
-    {
-      space2D->setX(j,xs);
-      data[j].access().resize(NBINS, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
-      space2D->setData(j, data[j], errors);
-      space2D->getAxis(1)->spectraNo(j) = j+1;  // spectra numbers are also 1 + index_numbers because this is the tradition
-      detIDs[j] = j;
-      specNums[j] = j+1;
-    }
-
-    Instrument_sptr instr(new Instrument);
-    space->setInstrument(instr);
-
-    Detector *d = new Detector("det",0,0);
-    instr->markAsDetector(d);
-    Detector *d1 = new Detector("det",1,0);
-    instr->markAsDetector(d1);
-    Detector *d2 = new Detector("det",2,0);
-    instr->markAsDetector(d2);
-    Detector *d3 = new Detector("det",3,0);
-    instr->markAsDetector(d3);
-    Detector *d4 = new Detector("det",4,0);
-    instr->markAsDetector(d4);
-    Detector *d5 = new Detector("det",5,0);
-    instr->markAsDetector(d5);
-
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, NDETECTS));
-
-    // Register the workspace in the data service
-    AnalysisDataService::Instance().add(m_InoutWS, space);
-  }
-
 private:
   const std::string m_InoutWS, m_DatFile, m_MariWS;
   std::string m_rawFile;
-  enum constants { NDETECTS = 6, NBINS = 4, NOTUSED = -123456, DAT_MONTOR_IND = 1};
-  static const std::string delta[NDETECTS], pressure[NDETECTS], wallThick[NDETECTS], code[NDETECTS], 
-    det_l2[NDETECTS], det_theta[NDETECTS], det_phi[NDETECTS];
+  enum constants { NBINS = 4, DAT_MONTOR_IND = 1};
 
-  void writeDatFile()
-  {
-    std::ofstream file(m_DatFile.c_str());
-    file << "DETECTOR.DAT writen by LoadDetecs" << std::endl;
-    file << 165888  <<  " " << 14 << std::endl;
-    file << "det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4" << std::endl;
-    for( int i = 0; i < NDETECTS; ++i )
-    {
-      file << i  << "\t" << delta[i]<< "\t"  << det_l2[i] << "\t"  << code[i]<< "\t"  << det_theta[i]<< "\t"   << det_phi[i]<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED << "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"  << NOTUSED<< "\t"  << pressure[i]<< "\t"  << wallThick[i]<< "\t"  << NOTUSED << std::endl;
-    }
-    file.close();
-  }
   std::string castaround(std::string floatNum)
   {
     return boost::lexical_cast<std::string>(boost::lexical_cast<double>(floatNum));
   }
 };
 
-const std::string LoadDetectorInfoTest::delta[] = {"4", "4.500", "4.500", "4.500", "-6.00", "0.000"};
-const std::string LoadDetectorInfoTest::pressure[] = {"10.0000", "10.0000", "10.0000", "10.0001", "10.000",  "10.0001"};
-const std::string LoadDetectorInfoTest::wallThick[] = {"0.00080", "0.00080", "0.00080", "-0.00080", "0.00080",  "9.500"};
-const std::string LoadDetectorInfoTest::code[] = {"3", "1", "3", "3", "3",  "3"};
-const std::string LoadDetectorInfoTest::det_l2[] = {"1.5", "1.5", "1.5", "1.5", "1.5", "1.5"};
-const std::string LoadDetectorInfoTest::det_theta[] = {"30", "35", "40", "45", "50", "55"};
-const std::string LoadDetectorInfoTest::det_phi[] = {"-105", "-110", "-115", "-120", "-125", "-130"};
+//-------------------------------------------------------------------------------------------------------------------------
+// Performance test
+//-------------------------------------------------------------------------------------------------------------------------
+
+namespace
+{
+}
+
+class LoadDetectorInfoTestPerformance : public CxxTest::TestSuite
+{
+
+public:
+  LoadDetectorInfoTestPerformance()
+    : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"),
+      m_wsName("LoadDetectorInfoTestPerformance")
+  {
+  }
+
+  void setUp()
+  {
+    // 100,000 histograms
+    const int ndets(100000);
+    writeLargeTestDatFile(m_testfile, ndets);
+    // 1000 bins
+    makeTestWorkspace(100000, 1000, m_wsName); //Adds it to the ADS
+  }
+
+  void tearDown()
+  {
+    Poco::File(m_testfile).remove();
+    AnalysisDataService::Instance().remove(m_wsName);
+  }
+
+  void test_performance_on_large_data_set()
+  {
+    LoadDetectorInfo alg;
+    alg.initialize();
+    alg.setPropertyValue("Workspace", m_wsName);
+    alg.setPropertyValue("DataFilename", m_testfile);
+    alg.setPropertyValue("RelocateDets", "1");
+    alg.execute();
+  }
+
+private:
+  std::string m_testfile;
+  std::string m_wsName;
+
+};
+
 
 #endif /*LOADDETECTORINFOTEST_H_*/

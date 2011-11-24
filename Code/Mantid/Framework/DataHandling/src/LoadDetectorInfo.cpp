@@ -41,7 +41,7 @@ const LoadDetectorInfo::detectDatForm
 LoadDetectorInfo::LoadDetectorInfo() 
   : Algorithm(), m_workspace(), m_numHists(-1), m_monitors(),
     m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
-    m_FracCompl(0.0), m_moveDets(false), m_samplePos()
+    m_FracCompl(0.0), m_moveDets(false), m_samplePos(), m_baseInstrument()
 {
 }
 
@@ -89,6 +89,7 @@ void LoadDetectorInfo::exec()
   m_monitOffset = UNSETOFFSET;
   m_error = false;
   m_moveDets = getProperty("RelocateDets");
+  m_baseInstrument = m_workspace->getInstrument()->baseInstrument();
   if( m_moveDets )
   {
     Geometry::IObjComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
@@ -413,7 +414,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   Geometry::IDetector_sptr det;
   try
   {
-    det = boost::const_pointer_cast<IDetector>(m_workspace->getInstrument()->baseInstrument()->getDetector(params.detID));
+    det = boost::const_pointer_cast<IDetector>(m_baseInstrument->getDetector(params.detID));
   }
   catch( std::runtime_error &e)
   {
