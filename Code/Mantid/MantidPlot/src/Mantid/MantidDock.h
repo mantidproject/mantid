@@ -144,7 +144,7 @@ public:
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;
   Qt::SortOrder getSortOrder() const;
-
+  void logWarningMessage(const std::string&);
   void disableNodes(bool);
 
 private:

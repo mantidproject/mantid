@@ -55,7 +55,7 @@ void MantidMDCurve::init(Graph* g, bool, Graph::CurveType style)
   }
   if(ws->getNonIntegratedDimensions().size() != 1)
   {
-    std::string message = "This plot only applies to Workspaces with a single expanded dimension";
+    std::string message = "This plot only applies to MD Workspaces with a single expanded dimension";
     throw std::invalid_argument(message);
   }
 
