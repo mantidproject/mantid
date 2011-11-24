@@ -92,13 +92,13 @@ namespace Mantid
 
       /** @name Nearest neighbours */
       /// Build and populate the NearestNeighbours object
-      void buildNearestNeighbours() const;
+      void buildNearestNeighbours(const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a detector
-      std::map<specid_t, double> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0) const;
+      std::map<specid_t, double> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
-      std::map<specid_t, double> getNeighbours(specid_t spec, const double radius) const;
+      std::map<specid_t, double> getNeighbours(specid_t spec, const double radius, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using the direct number of nearest neighbours
-      std::map<specid_t, double> getNeighboursExact(specid_t spec, const int nNeighbours) const;
+      std::map<specid_t, double> getNeighboursExact(specid_t spec, const int nNeighbours, const bool ignoreMaskedDetectors=false) const;
       //@}
 
       /// Const access to the spectra-detector map
@@ -257,6 +257,8 @@ namespace Mantid
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
       typedef std::set< std::pair<size_t,double> > MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
+      // Causes the nearest neighbours map to be rebuilt.
+      void rebuildNearestNeighbours();
 
 
       // ---------------------------------- MDGeometry methods -------------------------------

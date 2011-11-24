@@ -71,7 +71,7 @@ namespace Mantid
     public:
       /// Constructor with an instrument and a spectra map
       NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-                        const ISpectraDetectorMap & spectraMap);
+                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false);
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
 
@@ -123,6 +123,8 @@ namespace Mantid
       boost::scoped_ptr<Kernel::V3D> m_scale;
       /// Cached radius value. used to avoid uncessary recalculations.
       mutable double m_radius;
+      /// Flag indicating that masked detectors should be ignored
+      bool m_bIgnoreMaskedDetectors;
     };
     
     /// Typedef for shared pointer to the NearestNeighbours class

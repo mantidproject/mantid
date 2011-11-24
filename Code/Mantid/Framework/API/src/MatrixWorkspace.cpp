@@ -308,8 +308,9 @@ namespace Mantid
     /**
      * Handles the building of the NearestNeighbours object, if it has not already been
      * populated for this parameter map.
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      */
-    void MatrixWorkspace::buildNearestNeighbours() const
+    void MatrixWorkspace::buildNearestNeighbours(const bool ignoreMaskedDetectors) const
     {
       if( !m_spectraMap )
       {
@@ -322,7 +323,7 @@ namespace Mantid
         boost::shared_ptr<const Instrument> inst = this->getInstrument();
         if ( inst )
         {
-          m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap));
+          m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap, ignoreMaskedDetectors));
         }
         else
         {
@@ -331,19 +332,31 @@ namespace Mantid
       }
     }
 
+    /*
+    Allow the NearestNeighbours list to be cleaned and rebuilt. Certain algorithms require this in order to exclude/include
+    detectors from previously being considered.
+    */
+    void MatrixWorkspace::rebuildNearestNeighbours()
+    {
+      /*m_nearestNeighbours should now be NULL. This will trigger rebuilding on subsequent first call to getNeighbours
+      ,which peforms a lazy evaluation on the nearest neighbours map */
+      m_nearestNeighbours.reset();
+    }
+
     //---------------------------------------------------------------------------------------
     /** Queries the NearestNeighbours object for the selected detector.
      * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
      *
      * @param comp :: pointer to the querying detector
      * @param radius :: distance from detector on which to filter results
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
-        buildNearestNeighbours();
+        buildNearestNeighbours(ignoreMaskedDetectors);
       }
       // Find the spectrum number
       std::vector<specid_t> spectra;
@@ -362,13 +375,14 @@ namespace Mantid
      *
      * @param spec :: spectrum number of the detector you are looking at
      * @param radius :: distance from detector on which to filter results
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const double radius) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const double radius, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap));
+        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, radius);
       return neighbours;
@@ -379,9 +393,10 @@ namespace Mantid
      *
      * @param spec :: spectrum number of the detector you are looking at
      * @param nNeighbours :: unsigned int, number of neighbours to include.
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
