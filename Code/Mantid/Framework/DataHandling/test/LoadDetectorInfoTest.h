@@ -93,11 +93,12 @@ namespace
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", ndets, nbins+1, nbins);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Mantid::MantidVecPtr xs, errors, data[ndets];
+    Mantid::MantidVecPtr xs, errors;
+    std::vector<Mantid::MantidVecPtr> data(ndets);
     xs.access().resize(nbins+1, 0.0);
     errors.access().resize(nbins, 1.0);
-    int detIDs[ndets];
-    int specNums[ndets];
+    std::vector<int> detIDs(ndets);
+    std::vector<int> specNums(ndets);
     for (int j = 0; j < ndets; ++j)
     {
       space2D->setX(j,xs);
@@ -123,7 +124,7 @@ namespace
 
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, ndets));
+    space->replaceSpectraMap(new SpectraDetectorMap(&specNums[0], &detIDs[0], ndets));
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(ads_name, space);
