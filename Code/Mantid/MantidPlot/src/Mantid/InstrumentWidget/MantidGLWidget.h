@@ -27,6 +27,9 @@ public:
   QColor currentBackgroundColor() const;
   void saveToFile(const QString & filename);
 
+signals:
+  void mouseOut();
+
 public slots:
   void enableLighting(bool);
   //void setWireframe(bool);
@@ -49,7 +52,6 @@ protected:
   void draw();
   void checkGLError(const QString& funName);
   void leaveEvent (QEvent*);
-  
 private:
   void setRenderingOptions();
   void setLightingModel(int);

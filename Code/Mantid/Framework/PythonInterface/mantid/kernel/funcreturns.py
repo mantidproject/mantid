@@ -230,7 +230,6 @@ def lhs_info(output_type='both'):
     # http://docs.python.org/library/inspect.html#the-interpreter-stack
     try:
         ret_vals = process_frame(frame)
-        print ret_vals
     finally:
         del frame
         

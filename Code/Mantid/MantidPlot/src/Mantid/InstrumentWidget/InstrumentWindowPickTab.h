@@ -16,6 +16,7 @@ class QTextEdit;
 class QComboBox;
 class QCheckBox;
 class QLabel;
+class QActionGroup;
 
 /**
   * Implements the Pick tab in InstrumentWindow
@@ -62,8 +63,10 @@ private:
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
   QAction *m_integrateTimeBins; ///< Sets summation over time bins (m_plotSum = false)
+  QActionGroup *m_summationType;
   QAction *m_logY;
   QAction *m_linearY;
+  QActionGroup *m_yScale;
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently displayed curves
 
