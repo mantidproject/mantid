@@ -134,6 +134,7 @@ public slots:
   void changeColorMapRange(double minValue, double maxValue);
   void setIntegrationRange(double,double);
   void setBinRange(double,double);
+  void setColorMapAutoscaling(bool);
 
   void setViewDirection(const QString&);
   void pickBackgroundColor();
@@ -152,6 +153,7 @@ signals:
 private slots:
   void block();
   void unblock();
+  void mouseLeftInstrumentDisplay();
 
 private:
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
@@ -194,7 +196,7 @@ private:
 
   bool m_blocked;     ///< Set to true to block access to instrument during algorithm executions
   QList<int> m_selectedDetectors;
-
+  bool m_instrumentDisplayContextMenuOn;
 
 private:
   virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);

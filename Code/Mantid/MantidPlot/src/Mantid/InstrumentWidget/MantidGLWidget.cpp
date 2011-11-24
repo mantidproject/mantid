@@ -381,11 +381,12 @@ void MantidGLWidget::refreshView()
   update();
 }
 
-void MantidGLWidget::leaveEvent (QEvent*)
+void MantidGLWidget::leaveEvent (QEvent* ev)
 {
   // Restore possible override cursor
   while(QApplication::overrideCursor())
   {
     QApplication::restoreOverrideCursor();
   }
+  emit mouseOut();
 }
