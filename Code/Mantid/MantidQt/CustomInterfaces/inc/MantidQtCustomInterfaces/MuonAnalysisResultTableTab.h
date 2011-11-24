@@ -75,11 +75,13 @@ private slots:
 private:
   void populateLogValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
-  
+
   std::string getFileName();
+
+  Ui::MuonAnalysis& m_uiForm;
   int m_numLogsAndParamsDisplayed;
   QMap<QString, QMap<QString, double> > m_tableValues;
-  Ui::MuonAnalysis& m_uiForm;
+  
 };
 
 }

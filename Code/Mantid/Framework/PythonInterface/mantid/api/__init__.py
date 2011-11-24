@@ -1,19 +1,24 @@
-"""Defines the api sub-package
 """
-import sys
+api
+===
 
-from kernel import dlopen
-flags = dlopen.setup_dlopen() # Ensure the library is open with the correct flags
+Defines Python objects that wrap the C++ API namespace.
+
+"""
+
+###############################################################################
+# The _api C extension depends on exports defined in the _kernel extension
+###############################################################################
+from ..kernel import dlopen as _dlopen
+flags = _dlopen.setup_dlopen() # Ensure the library is open with the correct flags
+from ..kernel import _kernel
 from _api import *
-dlopen.restore_flags(flags)
+_dlopen.restore_flags(flags)
 
-# Singleton objects
-framework_mgr = get_framework_mgr() # The first import of this starts the framework
+###############################################################################
+# Make the singleton objects available as named variables 
+###############################################################################
+framework_mgr = get_framework_mgr() # This starts the framework
 algorithm_mgr = get_algorithm_mgr()
 algorithm_factory = get_algorithm_factory() 
 analysis_data_svc = get_analysis_data_service()
-
-
-# Control what an import * does
-__all__ = dir(_api)
-__all__.extend(['framework_mgr','algorithm_mgr','algorithm_factory','analysis_data_svc'])
