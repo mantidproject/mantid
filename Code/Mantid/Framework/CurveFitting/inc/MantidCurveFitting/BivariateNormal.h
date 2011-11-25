@@ -36,27 +36,27 @@ namespace Mantid
     </UL>
     
     BivariateNormal attributes. All are double values 
-    <UL> 
+   <UL> 
        <LI>StartRow- The start row in the Rectangular Detector</LI>
        <LI>StartCol-The start col in the Rectangular Detector</LI>
-       <LI> NRows -The number of rows of data that will be fit. NOTE: The index, i,
-             of a cell at row,col is i= (row-StartRow)*NCols+(col_StartCol)</LI>
-       <LI> NCols- The number of columns of data that will be fit.NOTE: The index, i,
-             of a cell at row,col is i= (row-StartRow)*NCols+(col_StartCol)</LI>
-       <LI>SSIxx - Sum of squares of col values times intensity for each cell</LI>
-       <LI>SSIyy - Sum of squares of row values times intensity for each cell</LI>
-       <LI>SSIxy - Sum of row values times col values times intensity for each cell</LI>
-       <LI>SSxx - Sum of squares of col values for each cell</LI>
-       <LI>SSyy - Sum of squares of row values for each cell</LI>
-       <LI>SSxy - Sum of row times col values for each cell</LI>
-       <LI> SSIx -Sum of col values times intensity for each cell</LI>
-       <LI> SSIy -Sum of row values times intensity for each cell</LI>
-       <LI> SSx -Sum of col values for each cell</LI>
-       <LI> SSy -Sum of row values for each cell</LI>
-       <LI> Intensities  - Sum of the intensities for all the cells </LI>
+        <LI> NRows -The number of rows of data that will be fit. NOTE: The index, i in Data[0] of the workspace,
+             of a cell at row,col is i= (row-StartRow)*NCols+(col - StartCol)</LI>
+       <LI> NCols- The number of columns of data that will be fit.NOTE: The index, i in Data[0] of the workspace,
+             of a cell at row,col is i= (row-StartRow)*NCols+(col - StartCol)</LI>
+       <LI>SSIxx  = &Sigma<sub>cell</sub> (Intensity<sub>cell</sub>*column<sub>cell</sub><sup>2</sup>)</LI>
+       <LI>SSIyy = &Sigma<sub>cell</sub> (Intensity<sub>cell</sub>*row<sub>cell</sub><sup>2</sup>)</LI>
+       <LI>SSIxy = &Sigma<sub>cell</sub> (Intensity<sub>cell</sub>*column<sub>cell</sub>*row<sub>cell</sub>)</LI></LI>
+       <LI>SSxx  = &Sigma<sub>cell</sub> (column<sub>cell</sub><sup>2</sup>)
+       <LI>SSyy  = &Sigma<sub>cell</sub> (row<sub>cell</sub><sup>2</sup>)</LI>
+       <LI>SSxy  = &Sigma<sub>cell</sub> (column<sub>cell</sub>*row<sub>cell</sub>)</LI>
+       <LI> SSIx = &Sigma<sub>cell</sub> (Intensity<sub>cell</sub>*column<sub>cell</sub>)</LI>
+       <LI> SSIy = &Sigma<sub>cell</sub> (Intensity<sub>cell</sub>*row<sub>cell</sub>)</LI>
+       <LI> SSx= &Sigma<sub>cell</sub> (column<sub>cell</sub>)</LI>
+       <LI> SSy = &Sigma<sub>cell</sub> (row<sub>cell</sub>)</LI>
+       <LI> Intensities = &Sigma<sub>cell</sub> (Intensity<sub>cell</sub>)</LI>
+      
       
     </UL>
-
     @author Ruth Mikkelson, SNS ORNL
     @date 11/4/2011
 
@@ -100,28 +100,7 @@ namespace Mantid
       std::string name()const
           {return "BivariateNormal";}
 
-      //void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
-      //void setParameter(int , const double& value, bool explicitlySet = true);
 
-       /*void 	addPenalty  (double *out) const 
-       {
-             double out0=out[0];
-             IFitFunction::addPenalty( out);
-              double pen = out[0]-out0;
-              if( pen ==0)
-                   return;
-              if( BackConstraint->check()>0)
-               std::cout<<"Background Bad "<< BackConstraint->lower()<<","<<BackConstraint->upper()<<std::endl;
-             
-             if( MeanxConstraint->check()>0)
-               std::cout<<"Col OOB"<<MeanxConstraint->lower()<<","<<MeanxConstraint->upper()<<std::endl;
-             if( MeanyConstraint->check()>0)
-               std::cout<<"Row OOB"<<MeanyConstraint->lower()<<","<<MeanyConstraint->upper()<<std::endl;
-
-            if( IntensityConstraint->check()>0)
-              std::cout<<"Inten OOB"<<IntensityConstraint->lower()<<","<<IntensityConstraint->upper()<<std::endl;
-       }
-      */
       void 	functionMW  (double *out, const double *xValues, const size_t nData)const ;
           
     
@@ -159,17 +138,19 @@ namespace Mantid
       
       std::vector<std::string> AttNames; ///< List of attribute names
       
-      double SIxx,
-             SIyy,
-             SIxy,
-             Sxx,
-             Syy,
-             Sxy; //Var and CoVar calc for 0 background and means sample means
+      double mIx,///< =&Sigma<sub>cell</sub>(Intensity<sub>cell</sub>*column<sub>cell</sub>)/TotalIntensity.
+             mx, ///< =&Sigma<sub>cell</sub>(column<sub>cell</sub>)/Ncells.
+             mIy,///< =&Sigma<sub>cell</sub>(Intensity<sub>cell</sub>*row<sub>cell</sub>)/TotalIntensity.
+             my; ///< =&Sigma<sub>cell</sub>(row<sub>cell</sub>)/Ncells
+
+      double SIxx,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(column<sub>cell</sub>-mIx)<sup>2</sup>
+             SIyy,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(row<sub>cell</sub>-mIy)<sup>2</sup>
+             SIxy,///<=&Sigma<sub>cell</sub> Intensity<sub>cell</sub>*(column<sub>cell</sub>-mIx)*(row<sub>cell</sub>-mIy)
+             Sxx,///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mI)<sup>2</sup>
+             Syy,///<=&Sigma<sub>cell</sub> (row<sub>cell</sub>-my)<sup>2</sup>
+             Sxy;///<=&Sigma<sub>cell</sub> (column<sub>cell</sub>-mx)*(row<sub>cell</sub>-my)
+   
              
-      double mIx,
-             mx,
-             mIy,
-             my; //Means corresp to background = 0
              
       double* expVals; ///< Save common exponential values for each cell
       
