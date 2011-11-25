@@ -343,8 +343,7 @@ namespace Mantid
     {
       /*m_nearestNeighbours should now be NULL. This will trigger rebuilding on subsequent first call to getNeighbours
       ,which peforms a lazy evaluation on the nearest neighbours map */
-      INearestNeighbours* nullNeighbours = NULL;
-      m_nearestNeighbours.swap(boost::shared_ptr<INearestNeighbours>(nullNeighbours));
+      m_nearestNeighbours.reset();
     }
 
     //---------------------------------------------------------------------------------------
