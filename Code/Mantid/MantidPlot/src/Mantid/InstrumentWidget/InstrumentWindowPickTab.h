@@ -4,6 +4,9 @@
 #include "MantidGLWidget.h"
 #include "DetSelector.h"
 
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include <QFrame>
 
 class InstrumentWindow;
