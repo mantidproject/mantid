@@ -72,17 +72,15 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         except RuntimeError:
             pass
 
-    def test_function_call_raises_RuntimeError_if_num_of_ret_vals_doesnt_match_num_assigned_vars():
+    def test_function_call_raises_RuntimeError_if_num_of_ret_vals_doesnt_match_num_assigned_vars(self):
         try:
-            ws, ws2 = simpleapi.CreateWorkspace([1],[1],NSpec=1,UnitX='Wavelength')
-            raised_error = False
+            ws, ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
         except RuntimeError, exc:
             # Check the error is correct and it's not some random runtime error
-            if 'CreateWorkspace is trying to return 2 output(s) but you have provided 1 variable(s). These numbers must match.' == str(exc):
-                raised_error = True
+            if 'CreateWorkspace is trying to return 1 output(s) but you have provided 2 variable(s). These numbers must match.' == str(exc):
+                pass
             else:
-                raised_error = False
-        self.assertTrue(raised_error)
+                self.fail("Exception was raised but it did not have the correct message: '%s'" % str(exc))
         
     def _do_exec_time_props_test(self, runner):
         try:
@@ -91,10 +89,10 @@ If false, then the workspace gets converted to a Workspace2D histogram.
             self.fail("An error occurred when returning outputs declared at algorithm execution: '%s'" % str(exc))
         
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
-        self._do_exec_time_props_test(LoadRaw)
+        self._do_exec_time_props_test(simpleapi.LoadRaw)
         
     def test_Load_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
-        self._do_exec_time_props_test(Load)
+        self._do_exec_time_props_test(simpleapi.Load)
     
     def test_Load_call_with_just_filename_executes_correctly(self):
         try:

@@ -12,6 +12,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <Poco/Path.h>
 
@@ -55,8 +56,8 @@ namespace Mantid
       {
         std::string operator()(std::vector<unsigned int> run)
         {
-          if(run.size() != 1)
-            throw std::exception("An unexpected run number was found during parsing.");
+          //if(run.size() != 1)
+            //throw std::exception::exception("An unexpected run number was found during parsing.");
 
           return boost::lexical_cast<std::string>(run.at(0));
         }
@@ -73,7 +74,10 @@ namespace Mantid
        */
       struct parseRunRange
       {
-        VectOfUInt2StringMap & operator()(VectOfUInt2StringMap & parsedRuns, const std::string & runString)
+        std::map<std::vector<unsigned int>, std::string> & operator()(
+          std::map<std::vector<unsigned int>, 
+          std::string> & parsedRuns, 
+          const std::string & runString)
         {
           // Regex to separate non-added runs from the added runs.
           boost::regex regex("(" + 
@@ -101,7 +105,7 @@ namespace Mantid
           {
             // In this case the run parser will spit out a vector of vectors, each of the inner vectors 
             // containing only one run number.
-            std::vector<std::vector<unsigned int>> runUInts = UserStringParser().parse(runString);
+            std::vector<std::vector<unsigned int> > runUInts = UserStringParser().parse(runString);
 
             // Convert the unsigned ints into strings.
             std::vector<std::string> runStrings;
@@ -116,9 +120,9 @@ namespace Mantid
             // of the original trailing zeros entered by the user.
 
             // Add the newly parsed runs and the ws name to the map, and return it.
-            std::vector<std::string>::const_iterator s_it = runStrings.cbegin();
-            std::vector<std::vector<unsigned int>>::const_iterator vUI_it = runUInts.cbegin();
-            for( ; s_it != runStrings.cend(); ++s_it, ++vUI_it)
+            std::vector<std::string>::iterator s_it = runStrings.begin();
+            std::vector<std::vector<unsigned int> >::iterator vUI_it = runUInts.begin();
+            for( ; s_it != runStrings.end(); ++s_it, ++vUI_it)
             {
               parsedRuns.insert(
                 parsedRuns.end(), 
@@ -174,7 +178,7 @@ namespace Mantid
         // Do some further tokenising of the tokens where necessary, and parse into
         // a UIntVect2StringMap which maps vectors of unsigned int run numbers to 
         // the eventual workspace name of that vector of runs.
-        VectOfUInt2StringMap runUIntsToWsNameMap;
+        std::map<std::vector<unsigned int>, std::string> runUIntsToWsNameMap;
         runUIntsToWsNameMap = std::accumulate(
           tokens.begin(), tokens.end(),
           runUIntsToWsNameMap,
@@ -203,7 +207,7 @@ namespace Mantid
      *
      * @returns the map
      */
-    VectOfStrings2StringMap MultiFileNameParser::getFileNamesToWsNameMap() const
+    std::map<std::vector<std::string>, std::string> MultiFileNameParser::getFileNamesToWsNameMap() const
     {
       return m_fileNamesToWsNameMap;
     }
@@ -227,8 +231,8 @@ namespace Mantid
      */
     void MultiFileNameParser::split()
     {
-      if(m_multiFileName.empty())
-        throw std::exception("No file name to parse.");
+      //if(m_multiFileName.empty())
+      //  throw std::exception("No file name to parse.");
       
       Poco::Path fullPath(m_multiFileName);
       
@@ -240,9 +244,9 @@ namespace Mantid
       // not found since these are required.
       std::string baseName = fullPath.getBaseName();
       m_inst = getMatchingString("^" + INST + UNDERSCORE, baseName);
-      if(m_inst.empty()) throw std::exception("Cannot parse instrument name.");
+      //if(m_inst.empty()) throw std::exception("Cannot parse instrument name.");
       m_runs = getMatchingString(LIST + "$", baseName);
-      if(m_runs.empty()) throw std::exception("Cannot parse run numbers.");
+      //if(m_runs.empty()) throw std::exception("Cannot parse run numbers.");
       
       // Lop off what we've found and we're left with the directory.
       m_dir = m_multiFileName.substr(0, m_multiFileName.size() - (baseName.size() + m_ext.size()));
@@ -255,7 +259,8 @@ namespace Mantid
      *
      * @param pair - a std::pair consisting of a vector of run numbers and a ws name
      */
-    void MultiFileNameParser::populateMap(const VectOfUInt2StringPair & pair)
+    void MultiFileNameParser::populateMap(
+      const std::pair<std::vector<unsigned int>, std::string> & pair)
     {
       // Convert vector of run numbers to vector of filenames
       std::vector<unsigned int> runs = pair.first;

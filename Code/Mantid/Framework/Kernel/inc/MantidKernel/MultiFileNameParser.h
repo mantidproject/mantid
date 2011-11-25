@@ -10,6 +10,8 @@
 
 #include <vector>
 #include <string>
+#include <map>
+#include <utility>
 
 namespace Mantid
 {
@@ -52,9 +54,9 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-  typedef std::map<std::vector<unsigned int>, std::string> VectOfUInt2StringMap;
-  typedef std::pair<std::vector<unsigned int>, std::string> VectOfUInt2StringPair;
-  typedef std::map<std::vector<std::string>, std::string> VectOfStrings2StringMap;
+  // typedef std::map<std::vector<unsigned int>, std::string> VectOfUInt2StringMap;
+  // typedef std::pair<std::vector<unsigned int>, std::string> VectOfUInt2StringPair;
+  // typedef std::map<std::vector<std::string>, std::string> VectOfStrings2StringMap;
 
   class MANTID_KERNEL_DLL MultiFileNameParser
   {
@@ -67,7 +69,7 @@ namespace Kernel
     /// Parse the multiFileNameString.  Returns error if failed, "" if successful.
     std::string parse(const std::string & multiFileName);
     /// Returns the result of a call to parse.
-    VectOfStrings2StringMap getFileNamesToWsNameMap() const;
+    std::map<std::vector<std::string>, std::string> getFileNamesToWsNameMap() const;
 
     /// Regexs
     static const std::string INST;
@@ -93,7 +95,7 @@ namespace Kernel
     /// Does an initial split of the multiFileName string.
     void split();
     /// Appends run numbers and corresponding wsNames to final map.
-    void populateMap(const VectOfUInt2StringPair & pair);
+    void populateMap(const std::pair<std::vector<unsigned int>, std::string> & pair);
     /// Creates a file name from the given run and currently parsed info 
     /// about file type, etc.
     std::string createFileName(unsigned int run);
@@ -106,7 +108,7 @@ namespace Kernel
     std::string m_multiFileName;
     std::string m_dir, m_inst, m_runs, m_ext;
 
-    VectOfStrings2StringMap m_fileNamesToWsNameMap;
+    std::map<std::vector<std::string>, std::string> m_fileNamesToWsNameMap;
     UserStringParser m_parser;
   };
 }

@@ -141,7 +141,7 @@ def create_algorithm(algorithm, version, _algm_object):
         kwargs.update(extra_args)
         set_properties(algm, *args, **kwargs)
         algm.execute()
-        return gather_returns(__name__, lhs, algm)
+        return gather_returns(algorithm, lhs, algm)
         
     
     algorithm_wrapper.__name__ = algorithm

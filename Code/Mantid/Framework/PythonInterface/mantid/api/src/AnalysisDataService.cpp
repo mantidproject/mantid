@@ -118,6 +118,7 @@ void export_AnalysisDataService()
     .def("retrieve_as_data_item", &retrieveAsDataItem, "Retrieve the named object as data item. Raises an exception if the name does not exist")
     .def("retrieve", &retrieveUpcastedPtr, "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
+    .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
     .def("size", &AnalysisDataServiceImpl::size, "Returns the number of objects within the service")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
