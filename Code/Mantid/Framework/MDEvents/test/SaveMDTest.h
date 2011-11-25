@@ -97,8 +97,7 @@ public:
       do_test_UpdateFileBackEnd(ws, filename);
     else
     {
-      std::string fullPath = alg.getPropertyValue("Filename");
-      if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
+	  ws->getBoxController()->closeFile(true);
     }
 
   }
@@ -138,8 +137,9 @@ public:
 
     TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
     // Clean up file
-    std::string fullPath = alg.getPropertyValue("Filename");
-    if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
+	ws->getBoxController()->closeFile(true);
+    //std::string fullPath = alg.getPropertyValue("Filename");
+    //if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
   }
 
 

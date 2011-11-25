@@ -84,11 +84,7 @@ public:
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
     // Clean up file
-    if (!OutputFilename.empty())
-    {
-      std::string fullPath = alg.getPropertyValue("OutputFilename");
-      if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
-    }
+	out->getBoxController()->closeFile(true);
   }
 
 

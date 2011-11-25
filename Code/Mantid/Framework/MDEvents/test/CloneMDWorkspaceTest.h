@@ -86,12 +86,9 @@ public:
       std::string realFile = alg.getPropertyValue("Filename");
       TS_ASSERT( Poco::File( realFile ).exists() );
     }
-    // Clean up file of the original one
-    std::string oldFile = ws1->getBoxController()->getFilename();
-    if (!oldFile.empty() && Poco::File(oldFile).exists()) Poco::File(oldFile).remove();
-    // Clean up file of the cloned one
-    oldFile = ws2->getBoxController()->getFilename();
-    if (!oldFile.empty() && Poco::File(oldFile).exists()) Poco::File(oldFile).remove();
+    // Clean up files
+	ws1->getBoxController()->closeFile(true);
+	ws2->getBoxController()->closeFile(true);
 
 
     // Remove workspace from the data service.

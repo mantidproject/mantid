@@ -4,6 +4,7 @@
 #include "MantidAPI/BoxController.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <Poco/File.h>
 #include <Poco/DOM/Attr.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -146,13 +147,20 @@ namespace API
   //------------------------------------------------------------------------------------------------------
   /** Close the open file for the back-end, if any
    * Note: this does not save any data that might be, e.g., in the MRU.
+   * @param deleteFile :: if true, will delete the file. Default false.
    */
-  void BoxController::closeFile()
+  void BoxController::closeFile(bool deleteFile)
   {
     if (m_file)
     {
       m_file->close();
       m_file = NULL;
+    }
+	if (!m_filename.empty())
+    {
+      Poco::File file(m_filename);
+	  if (file.exists()) file.remove();
+	  m_filename = "";
     }
   }
 

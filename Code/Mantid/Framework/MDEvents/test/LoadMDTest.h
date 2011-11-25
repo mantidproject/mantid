@@ -278,10 +278,8 @@ public:
     // Remove workspace from the data service.
     if (deleteWorkspace)
     {
-      ws->getBoxController()->closeFile();
+      ws->getBoxController()->closeFile(true);
       AnalysisDataService::Instance().remove(outWSName);
-      Poco::File file(filename);
-      if (file.exists()) file.remove();
     }
   }
 
@@ -370,7 +368,7 @@ public:
     // Perform the full comparison of the second and 3rd loaded workspaces
     do_compare_MDEW(ws2, ws3);
 
-    ws2->getBoxController()->closeFile();
+    ws2->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
 
   }
@@ -470,9 +468,8 @@ public:
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
 
-    ws->getBoxController()->closeFile();
+    ws->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
 
   }
 
