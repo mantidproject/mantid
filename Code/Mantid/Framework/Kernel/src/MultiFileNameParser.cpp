@@ -120,9 +120,9 @@ namespace Mantid
             // of the original trailing zeros entered by the user.
 
             // Add the newly parsed runs and the ws name to the map, and return it.
-            std::vector<std::string>::const_iterator s_it = runStrings.cbegin();
-            std::vector<std::vector<unsigned int> >::const_iterator vUI_it = runUInts.cbegin();
-            for( ; s_it != runStrings.cend(); ++s_it, ++vUI_it)
+            std::vector<std::string>::iterator s_it = runStrings.begin();
+            std::vector<std::vector<unsigned int> >::iterator vUI_it = runUInts.begin();
+            for( ; s_it != runStrings.end(); ++s_it, ++vUI_it)
             {
               parsedRuns.insert(
                 parsedRuns.end(), 
