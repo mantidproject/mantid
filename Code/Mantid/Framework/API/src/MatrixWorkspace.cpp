@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -39,14 +40,16 @@ namespace Mantid
     const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
     /// Default constructor
-    MatrixWorkspace::MatrixWorkspace() : 
+    MatrixWorkspace::MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : 
       IMDWorkspace(), ExperimentInfo(),
       m_axes(), m_isInitialized(false),
       m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
       m_masks(), m_indexCalculator(),
+      m_nearestNeighboursFactory(nnFactory),
       m_nearestNeighbours()
-    {}
+    {
+    }
 
     /// Destructor
     // RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
@@ -323,7 +326,7 @@ namespace Mantid
         boost::shared_ptr<const Instrument> inst = this->getInstrument();
         if ( inst )
         {
-          m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap, ignoreMaskedDetectors));
+          m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(inst, *m_spectraMap, ignoreMaskedDetectors));
         }
         else
         {
@@ -340,7 +343,8 @@ namespace Mantid
     {
       /*m_nearestNeighbours should now be NULL. This will trigger rebuilding on subsequent first call to getNeighbours
       ,which peforms a lazy evaluation on the nearest neighbours map */
-      m_nearestNeighbours.reset();
+      INearestNeighbours* nullNeighbours = NULL;
+      m_nearestNeighbours.swap(boost::shared_ptr<INearestNeighbours>(nullNeighbours));
     }
 
     //---------------------------------------------------------------------------------------
@@ -382,7 +386,7 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, radius);
       return neighbours;
@@ -400,7 +404,7 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap));
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap));
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
       return neighbours;

@@ -16,7 +16,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
+#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -24,6 +24,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -34,6 +35,7 @@ namespace Mantid
   {
     class ParameterMap;
     class ISpectraDetectorMap;
+    class INearestNeighbours;
   }
   namespace API
   {
@@ -283,7 +285,7 @@ namespace Mantid
 
 
     protected:
-      MatrixWorkspace();
+      MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = new Mantid::Geometry::NearestNeighboursFactory);
 
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
       virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;
@@ -318,8 +320,11 @@ namespace Mantid
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
       MatrixWSIndexCalculator m_indexCalculator;
 
+      /// Scoped pointer to NearestNeighbours factory
+      boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory> m_nearestNeighboursFactory;
+
       /// Shared pointer to NearestNeighbours object
-      mutable boost::shared_ptr<Mantid::Geometry::NearestNeighbours> m_nearestNeighbours;
+      mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours> m_nearestNeighbours;
 
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
