@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/MatrixProperty.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
+	src/MultiFileNameParser.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
@@ -146,6 +147,7 @@ set ( INC_FILES
 	inc/MantidKernel/Memory.h
 	inc/MantidKernel/MersenneTwister.h
 	inc/MantidKernel/MultiThreaded.h
+	inc/MantidKernel/MultiFileNameParser.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -229,6 +231,7 @@ set ( TEST_FILES
 	test/MatrixTest.h
 	test/MemoryTest.h
 	test/MersenneTwisterTest.h
+	test/MultiFileNameParserTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
