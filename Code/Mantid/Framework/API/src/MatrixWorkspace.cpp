@@ -403,7 +403,7 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap));
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
       return neighbours;

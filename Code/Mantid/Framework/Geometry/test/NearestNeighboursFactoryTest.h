@@ -33,7 +33,7 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     NearestNeighboursFactory factory;
-    NearestNeighbours* nn;
+    NearestNeighbours* nn = NULL;
 
     TSM_ASSERT_THROWS_NOTHING("Create on Factory should not throw", nn = factory.create(instrument, *spectramap););
     TSM_ASSERT("Null object created", nn != NULL);
