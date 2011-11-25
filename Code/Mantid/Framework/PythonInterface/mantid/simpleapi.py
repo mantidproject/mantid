@@ -19,8 +19,9 @@
     and assign it to the rebinned variable
     
 """
-from kernel import Direction, DataItem, funcreturns
-from api import framework_mgr, analysis_data_svc, IWorkspaceProperty
+import kernel
+from kernel import funcreturns as _funcreturns
+import api
 
 def version():
     return "simpleapi - memory-based version"
@@ -43,7 +44,7 @@ def set_properties(alg_object, *args, **kwargs):
         alg_object.set_property(key, value)
         # Make sure we set the name of any In/Out properties as well
         # See if this can be done sensibly in WorkspaceProperty
-        if isinstance(value, DataItem):
+        if isinstance(value, kernel.DataItem):
             alg_object.set_property_value(key, str(value))
         
 def get_additional_args(lhs, algm_obj):
@@ -71,36 +72,45 @@ def get_additional_args(lhs, algm_obj):
     i = 0
     while len(ret_names) > 0 and i < nprops:
         p = output_props[i]
-        if isinstance(p,IWorkspaceProperty):
+        if isinstance(p,api.IWorkspaceProperty):
             extra_args[p.name] = ret_names[0]
             ret_names = ret_names[1:]
         i += 1
     return extra_args
     
-def gather_returns(lhs, algm_obj):
+def gather_returns(func_name, lhs, algm_obj, ignore=[]):
     """
         Gather the return values and ensure they are in the
         correct order as defined by the output properties and
         return them as a tuple. If their is a single return
         value it is returned on its own
         
+        @param func_name :: The name of the calling function
         @param lhs :: A 2-tuple that contains the number of variables supplied 
                on the lhs of the function call and the names of these
                variables
         @param algm_obj :: An executed algorithm object
+        @param ignore :: A list of property names to ignore when returning
     """
     # Gather the returns
     # The minor complication here is the workspace properties have their
-    # values stored in the ADS and not within the property
-    props = [ algm_obj.get_property(p) for p in algm_obj.output_properties() ]
+    # values stored in the ADS and not within the property if they are NOT
+    # child algorithms
+    if type(ignore) is str: ignore = [ignore]
     retvals = []
-    for p in props:
-        if isinstance(p, IWorkspaceProperty):
-            retvals.append(analysis_data_svc[p.value_as_str])
+    for name in algm_obj.output_properties():
+        if name in ignore: continue
+        prop = algm_obj.get_property(name)
+        if isinstance(prop, api.IWorkspaceProperty) and not algm_obj.is_child():
+            retvals.append(api.analysis_data_svc[prop.value_as_str])
         else:
-            retvals.append(p.value)
-
+            retvals.append(prop.value)
     nvals = len(retvals)
+    nlhs = lhs[0]
+    if nlhs > 1 and nvals != nlhs:
+        # There is a discrepancy in the number are unpacking variables
+        # Let's not have the more cryptic unpacking error raised
+        raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). These numbers must match." % (func_name, nvals, nlhs))
     if nvals > 1:
         return tuple(retvals) # Create a tuple
     elif nvals == 1:
@@ -125,13 +135,13 @@ def create_algorithm(algorithm, version, _algm_object):
         if "Version" in kwargs:
             _version = kwargs["Version"]
             del kwargs["Version"]
-        algm = framework_mgr.create_algorithm(algorithm, _version)
-        lhs = funcreturns.lhs_info()
+        algm = api.framework_mgr.create_algorithm(algorithm, _version)
+        lhs = _funcreturns.lhs_info()
         extra_args = get_additional_args(lhs, algm)
         kwargs.update(extra_args)
         set_properties(algm, *args, **kwargs)
         algm.execute()
-        return gather_returns(lhs, algm)
+        return gather_returns(__name__, lhs, algm)
         
     
     algorithm_wrapper.__name__ = algorithm
@@ -198,7 +208,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
             if item not in kwargs:
                 kwargs[item] = ""
             
-        algm = framework_mgr.create_algorithm(algorithm, _version)
+        algm = api.framework_mgr.create_algorithm(algorithm, _version)
         algm.setPropertiesDialog(*args, **kwargs)
         algm.execute()
         return algm
@@ -280,9 +290,9 @@ def Load(*args, **kwargs):
         raise RuntimeError('Load() takes only the filename as a positional argument. %d arguments found.' % len(args))
     
     # Create and execute
-    algm = framework_mgr.create_algorithm('Load')
+    algm = api.framework_mgr.create_algorithm('Load')
     algm.set_property('Filename', filename) # Must be set first
-    lhs = funcreturns.lhs_info()
+    lhs = _funcreturns.lhs_info()
     extra_args = get_additional_args(lhs, algm)
     kwargs.update(extra_args)
     # Check for any properties that aren't known and warn they will not be used
@@ -292,7 +302,7 @@ def Load(*args, **kwargs):
             del kwargs[key]
     set_properties(algm, **kwargs)
     algm.execute()
-    return gather_returns(lhs, algm)
+    return gather_returns('Load', lhs, algm, ignore='LoaderName')
     
 
 def LoadDialog(*args, **kwargs):
@@ -324,7 +334,7 @@ def LoadDialog(*args, **kwargs):
     if 'Enable' not in arguments: arguments['Enable']=''
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
-    algm = framework_mgr.create_algorithm('Load')
+    algm = api.framework_mgr.create_algorithm('Load')
     algm.setPropertiesDialog(**arguments)
     algm.execute()
 
