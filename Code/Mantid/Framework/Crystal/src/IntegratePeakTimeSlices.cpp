@@ -6,7 +6,22 @@ data on each time slice. This algorithm only works for peaks on a Rectangular
 Detector.  The rectangular area used for the fitting is calculated based on 
 the dQ parameter.  A good value for dQ is .1667/largest unit cell length.
 
+The table workspace is also a result. Each line contains information on the fit
+for each good time slice.  The column names( and information) in the table are:
+ Time, Channel, Background, Intensity,Mcol,Mrow,SScol,SSrow,SSrc,NCells,;
+ ChiSqrOverDOF,TotIntensity,BackgroundError,FitIntensityError,ISAWIntensity,
+ ISAWIntensityError,Start Row,End Row,Start Col,End Col
 
+The final Peak intensity is the sum of the IsawIntensity for each time slice.
+The error is the square root of the sum of squares of the IsawIntensityError values.
+
+The columns whose names are  Background, Intensity, Mcol, Mrow, SScol, SSrow, and SSrc
+are the parameters for the BivariateNormal curve fitting function.  
+
+This algorithm has been carefully tweaked to give good results for interior peaks only. 
+Peaks close to the edge of the detector may not give good results.
+
+This Algorithm is also used by the PeakIntegration algorithm when the Fit tag is selected.
 *WIKI*/
 /*
  * IntegratePeakTimeSlices.cpp
