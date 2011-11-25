@@ -94,6 +94,14 @@ namespace Mantid
       std::vector<std::string>::const_iterator it = searchPaths.begin();
       for (; it != searchPaths.end(); ++it)
       {
+// On windows globbing is note working properly with network drives 
+// for example a network drive containing a $ 
+// For this reason, and since windows is case insensitive anyway
+// a special case is made for windows
+#ifdef _WIN32
+          if (fName.find("*") != std::string::npos)
+          {
+#endif
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
@@ -102,6 +110,18 @@ namespace Mantid
           {
             return *files.begin();
           }
+#ifdef _WIN32
+          }
+          else
+          {
+            Poco::Path path(*it, fName);
+            Poco::File file(path);
+            if (file.exists())
+            {
+              return path.toString();
+            }
+          }
+#endif
       }
       return "";
     }

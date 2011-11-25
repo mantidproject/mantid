@@ -237,7 +237,7 @@ public:
   {
     // By default case insensitive is on
     std::string path = FileFinder::Instance().findRun("CSp78173.Raw");
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    TS_ASSERT(path.find("CSp78173.Raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
     std::string path2 = FileFinder::Instance().getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
