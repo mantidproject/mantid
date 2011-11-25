@@ -1,6 +1,7 @@
 #ifndef SmoothNeighboursTEST_H_
 #define SmoothNeighboursTEST_H_
 
+#include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include <cxxtest/TestSuite.h>
@@ -24,6 +25,7 @@ using namespace Mantid::Algorithms;
 
 class SmoothNeighboursTest : public CxxTest::TestSuite
 {
+
 public:
 
 
@@ -145,6 +147,7 @@ public:
     alg.setProperty("WeightedSum", false);
     alg.setProperty("ProvideRadius", false);
     alg.setProperty("NumberOfNeighbours", 8);
+    alg.setProperty("IgnoreMaskedDetectors", true);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 

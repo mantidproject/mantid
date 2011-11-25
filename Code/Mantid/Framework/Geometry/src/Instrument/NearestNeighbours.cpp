@@ -259,8 +259,8 @@ namespace Mantid
           std::vector<int> detIDs = spectraMap.getDetectors(spectrumNo);
           IDetector_const_sptr det = instrument->getDetectorG(detIDs);
           //Always ignore monitors and ignore masked detectors if requested.
-          bool doSkipMasked = m_bIgnoreMaskedDetectors && det->isMasked();
-          if( !det->isMonitor() || !doSkipMasked ) 
+          bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
+          if( !det->isMonitor() && !heedMasking ) 
           {
             spectra.insert(std::make_pair(spectrumNo, det));
           }

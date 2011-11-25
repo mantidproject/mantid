@@ -1024,6 +1024,8 @@ namespace Mantid
         {
         }
       }
+      //If masking has occured, the NearestNeighbours map will be out of date must be rebuilt.
+      this->rebuildNearestNeighbours();
     }
 
     //----------------------------------------------------------------------------------------------------

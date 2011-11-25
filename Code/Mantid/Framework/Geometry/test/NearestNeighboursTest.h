@@ -26,6 +26,23 @@ using Mantid::Kernel::V3D;
 //=====================================================================================
 class NearestNeighboursTest : public CxxTest::TestSuite
 {
+
+private:
+
+  /// Helper type giving access to protected methods. Makes testing of NN internals possible.
+  class ExposedNearestNeighbours : public Mantid::Geometry::NearestNeighbours
+  {
+  public:
+      ExposedNearestNeighbours(boost::shared_ptr<const Instrument> instrument,
+        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false) : NearestNeighbours(instrument, spectraMap, ignoreMasked){}
+
+      //Direct access to intermdiate spectra detectors
+      std::map<specid_t, IDetector_const_sptr> getSpectraDetectors()
+      {
+        return NearestNeighbours::getSpectraDetectors(m_instrument, m_spectraMap);
+      }
+  };
+
 public:
 
   void doTestWithNeighbourNumbers(int actualNeighboursNumber, int expectedNeighboursNumber)
@@ -149,6 +166,40 @@ public:
 
   }
 
+  void testIgnoreAndApplyMasking()
+  {
+    Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+
+    //Mask the first 5 detectors
+    for(size_t i = 1; i < 3; i++)
+    {
+      if ( const Geometry::ComponentID det = instrument->getDetector(spectramap->getDetectors(i)[0])->getComponentID() )
+      {
+        pmap->addBool(det,"masked",true);
+      }
+    }
+
+    // Parameterized instrument
+    Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    IDetector_const_sptr det = m_instrument->getDetector(spectramap->getDetectors(1)[0]);
+
+    // Create the NearestNeighbours object directly. Ignore any masking.
+    ExposedNearestNeighbours ignoreMaskedNN(m_instrument, *spectramap, true);
+    // Create the NearestNeighbours object directly. Account for any masking.
+    ExposedNearestNeighbours accountForMaskedNN(m_instrument, *spectramap, false);
+
+    size_t sizeWithoutMasking = ignoreMaskedNN.getSpectraDetectors().size(); 
+    size_t sizeWithMasking = accountForMaskedNN.getSpectraDetectors().size(); 
+
+    TSM_ASSERT_EQUALS("Without masking should get 18 spectra back", 18, sizeWithoutMasking); 
+    TSM_ASSERT("Must have less detectors available after applying masking", sizeWithoutMasking > sizeWithMasking); 
+  }
+
 };
 
 //=====================================================================================
@@ -209,7 +260,6 @@ public:
       nn.neighbours(1, true, 8.0);
     }
   }
-
 };
 
 

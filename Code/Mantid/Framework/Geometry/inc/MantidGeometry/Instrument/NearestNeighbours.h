@@ -58,7 +58,7 @@ namespace Mantid
     public:
       /// Constructor with an instrument and a spectra map
       NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false);
+                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=true);
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
 
@@ -68,12 +68,24 @@ namespace Mantid
       // Neighbouring spectra by 
       std::map<specid_t, double> neighbours(const specid_t spectrum, bool force, const int numberofneighbours=8) const;
 
+    protected:
+
+      /// Get the spectra associated with all in the instrument
+      std::map<specid_t, IDetector_const_sptr>
+        getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
+        const ISpectraDetectorMap & spectraMap);
+
+      /// A pointer the the instrument
+      boost::shared_ptr<const Instrument> m_instrument;
+      /// A reference to the spectra map
+      const ISpectraDetectorMap & m_spectraMap;
+
     private:
       /// typedef for Graph object used to hold the calculated information
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
         boost::property<boost::vertex_name_t, int64_t>,
         boost::property<boost::edge_name_t, double>
-        > Graph;
+      > Graph;
       /// Vertex descriptor object for Graph
       typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
       /// map object of int to Graph Vertex descriptor
@@ -84,16 +96,6 @@ namespace Mantid
       void build(const int noNeighbours);
       /// Query the graph for the default number of nearest neighbours to specified detector
       std::map<specid_t, double> defaultNeighbours(const specid_t spectrum) const;
-
-      /// Get the spectra associated with all in the instrument
-      std::map<specid_t, IDetector_const_sptr>
-        getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
-                            const ISpectraDetectorMap & spectraMap);
-
-      /// A pointer the the instrument
-      boost::shared_ptr<const Instrument> m_instrument;
-      /// A reference to the spectra map
-      const ISpectraDetectorMap & m_spectraMap;
       /// The current number of nearest neighbours
       int m_noNeighbours;
       /// The largest value of the distance to a nearest neighbour
