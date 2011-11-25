@@ -56,8 +56,8 @@ namespace Mantid
       {
         std::string operator()(std::vector<unsigned int> run)
         {
-          if(run.size() != 1)
-            throw std::exception::exception("An unexpected run number was found during parsing.");
+          //if(run.size() != 1)
+            //throw std::exception::exception("An unexpected run number was found during parsing.");
 
           return boost::lexical_cast<std::string>(run.at(0));
         }
@@ -105,7 +105,7 @@ namespace Mantid
           {
             // In this case the run parser will spit out a vector of vectors, each of the inner vectors 
             // containing only one run number.
-            std::vector<std::vector<unsigned int>> runUInts = UserStringParser().parse(runString);
+            std::vector<std::vector<unsigned int> > runUInts = UserStringParser().parse(runString);
 
             // Convert the unsigned ints into strings.
             std::vector<std::string> runStrings;
@@ -121,7 +121,7 @@ namespace Mantid
 
             // Add the newly parsed runs and the ws name to the map, and return it.
             std::vector<std::string>::const_iterator s_it = runStrings.cbegin();
-            std::vector<std::vector<unsigned int>>::const_iterator vUI_it = runUInts.cbegin();
+            std::vector<std::vector<unsigned int> >::const_iterator vUI_it = runUInts.cbegin();
             for( ; s_it != runStrings.cend(); ++s_it, ++vUI_it)
             {
               parsedRuns.insert(
@@ -231,8 +231,8 @@ namespace Mantid
      */
     void MultiFileNameParser::split()
     {
-      if(m_multiFileName.empty())
-        throw std::exception("No file name to parse.");
+      //if(m_multiFileName.empty())
+      //  throw std::exception("No file name to parse.");
       
       Poco::Path fullPath(m_multiFileName);
       
@@ -244,9 +244,9 @@ namespace Mantid
       // not found since these are required.
       std::string baseName = fullPath.getBaseName();
       m_inst = getMatchingString("^" + INST + UNDERSCORE, baseName);
-      if(m_inst.empty()) throw std::exception("Cannot parse instrument name.");
+      //if(m_inst.empty()) throw std::exception("Cannot parse instrument name.");
       m_runs = getMatchingString(LIST + "$", baseName);
-      if(m_runs.empty()) throw std::exception("Cannot parse run numbers.");
+      //if(m_runs.empty()) throw std::exception("Cannot parse run numbers.");
       
       // Lop off what we've found and we're left with the directory.
       m_dir = m_multiFileName.substr(0, m_multiFileName.size() - (baseName.size() + m_ext.size()));
