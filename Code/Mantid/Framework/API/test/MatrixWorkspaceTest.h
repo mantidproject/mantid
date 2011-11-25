@@ -439,13 +439,11 @@ public:
     MockNearestNeighboursFactory* factory = new MockNearestNeighboursFactory;
     EXPECT_CALL(*factory, create(_,_,_)).Times(1).WillOnce(Return(product));
 
-    //Scoped block to ensure factory and generated products die with workspace
-    {
-      WorkspaceTester wkspace(factory);
-      wkspace.initialize(1,4,3);
-      wkspace.getNeighboursExact(0, 1); //First call should construct nearest neighbours before calling ::neighbours
-      wkspace.getNeighboursExact(0, 1); //Second call should not construct nearest neighbours before calling ::neighbours
-    }
+    WorkspaceTester wkspace(factory);
+    wkspace.initialize(1,4,3);
+    wkspace.getNeighboursExact(0, 1); //First call should construct nearest neighbours before calling ::neighbours
+    wkspace.getNeighboursExact(0, 1); //Second call should not construct nearest neighbours before calling ::neighbours
+
   }
 
   void test_get_neighbours_radius()
@@ -460,13 +458,10 @@ public:
     MockNearestNeighboursFactory* factory = new MockNearestNeighboursFactory;
     EXPECT_CALL(*factory, create(_,_,_)).Times(1).WillOnce(Return(product));
 
-    //Scoped block to ensure factory and generated products die with workspace
-    {
-      WorkspaceTester wkspace(factory);
-      wkspace.initialize(1,4,3);
-      wkspace.getNeighbours(0, 1); //First call should construct nearest neighbours before calling ::neighbours
-      wkspace.getNeighbours(0, 1); //Second call should not construct nearest neighbours before calling ::neighbours
-    }
+    WorkspaceTester wkspace(factory);
+    wkspace.initialize(1,4,3);
+    wkspace.getNeighbours(0, 1); //First call should construct nearest neighbours before calling ::neighbours
+    wkspace.getNeighbours(0, 1); //Second call should not construct nearest neighbours before calling ::neighbours
   }
 
   void test_reset_neighbours()

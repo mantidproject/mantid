@@ -116,7 +116,9 @@ class MockNearestNeighboursFactory : public Mantid::Geometry::INearestNeighbours
 {
 public:
   MOCK_METHOD3(create, Mantid::Geometry::INearestNeighbours*(boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectraDetectorMap&, bool));
-  ~MockNearestNeighboursFactory(){}
+  virtual ~MockNearestNeighboursFactory()
+  {
+  }
 };
 
 //Helper typedef and type for mocking NearestNeighbour map usage.
