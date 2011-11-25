@@ -165,6 +165,8 @@ void export_algorithm()
     .def("is_executed", &IAlgorithm::isExecuted, "Returns true if the algorithm has been executed successfully, false otherwise")
     .def("set_child", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")
+    .def("is_child", &IAlgorithm::isChild, "Returns True if the algorithm has been marked to run as a child. If True then Output workspaces "
+        "are NOT stored in the Analysis Data Service but must be retrieved from the property.")
     .def("set_logging", &IAlgorithm::setLogging, "Toggle logging on/off.")
     ;
 }

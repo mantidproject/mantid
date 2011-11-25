@@ -1297,6 +1297,7 @@ Drop a workspace onto an exisiting md curve
 */
 void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve* originalCurve, MantidTreeWidget * tree)
 {
+  UNUSED_ARG(originalCurve);
   using namespace Mantid::API;
   QList<QString> allWsNames = tree->getSelectedWorkspaceNames();
 

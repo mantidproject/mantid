@@ -30,6 +30,7 @@ double InstrumentActor::m_tolerance = 0.00001;
  */
 InstrumentActor::InstrumentActor(const QString wsName): 
 m_workspace(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()))),
+m_autoscaling(true),
 m_maskedColor(100,100,100),
 m_failedColor(200,200,200),
 m_sampleActor(NULL)
@@ -219,6 +220,11 @@ void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
     m_WkspDataMin = m_DataMinValue;
     m_WkspDataMax = m_DataMaxValue;
   }
+  if (m_autoscaling)
+  {
+    m_DataMinScaleValue = m_DataMinValue;
+    m_DataMaxScaleValue = m_DataMaxValue;
+  }
   resetColors();
 }
 
@@ -239,7 +245,7 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
 
 void InstrumentActor::resetColors()
 {
-  QwtDoubleInterval qwtInterval(m_DataMinValue,m_DataMaxValue);
+  QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
   m_colors.resize(m_specIntegrs.size());
   for (size_t wi=0; wi < m_specIntegrs.size(); wi++)
   {
@@ -343,39 +349,42 @@ void InstrumentActor::saveSettings()
 
 void InstrumentActor::setMinValue(double vmin)
 {
-  if (vmin < m_WkspDataMin)
+  if (m_autoscaling) return;
+  if (vmin < m_DataMinValue)
   {
-    vmin = m_WkspDataMin;
+    vmin = m_DataMinValue;
   }
-  if (vmin > m_WkspDataMax) return;
-  m_DataMinValue = vmin;
+  if (vmin > m_DataMaxValue) return;
+  m_DataMinScaleValue = vmin;
   resetColors();
 }
 
 void InstrumentActor::setMaxValue(double vmax)
 {
-  if (vmax < m_WkspDataMin) return;
-  if (vmax > m_WkspDataMax)
+  if (m_autoscaling) return;
+  if (vmax < m_DataMinValue) return;
+  if (vmax > m_DataMaxValue)
   {
-    vmax = m_WkspDataMax;
+    vmax = m_DataMaxValue;
   }
-  m_DataMaxValue = vmax;
+  m_DataMaxScaleValue = vmax;
   resetColors();
 }
 
 void InstrumentActor::setMinMaxRange(double vmin, double vmax)
 {
-  if (vmin < m_WkspDataMin)
+  if (m_autoscaling) return;
+  if (vmin < m_DataMinValue)
   {
-    vmin = m_WkspDataMin;
+    vmin = m_DataMinValue;
   }
-  if (vmax > m_WkspDataMax)
+  if (vmax > m_DataMaxValue)
   {
-    vmax = m_WkspDataMax;
+    vmax = m_DataMaxValue;
   }
   if (vmin >= vmax) return;
-  m_DataMinValue = vmin;
-  m_DataMaxValue = vmax;
+  m_DataMinScaleValue = vmin;
+  m_DataMaxScaleValue = vmax;
   resetColors();
 }
 
@@ -384,6 +393,23 @@ bool InstrumentActor::wholeRange()const
   return m_BinMinValue == m_WkspBinMin && m_BinMaxValue == m_WkspBinMax;
 }
 
+/**
+ * Set autoscaling of the y axis. If autoscaling is on the minValue() and maxValue()
+ * return the actual min and max values in the data. If autoscaling is off
+ *  minValue() and maxValue() are fixed and do not change after changing the x integration range.
+ * @param on :: On or Off.
+ */
+void InstrumentActor::setAutoscaling(bool on)
+{
+  m_autoscaling = on;
+  if (on)
+  {
+    m_DataMinScaleValue = m_DataMinValue;
+    m_DataMaxScaleValue = m_DataMaxValue;
+    //setIntegrationRange(m_DataMinValue,m_DataMaxValue);
+    resetColors();
+  }
+}
 
 /**
   * Find a rotation from one orthonormal basis set (Xfrom,Yfrom,Zfrom) to

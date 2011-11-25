@@ -13,6 +13,7 @@ class PeakLabel;
 class PeakMarker2D;
 /**
   * Implements a simple widget for plotting a single curve.
+  * Allows to keep more than one curve.
   */
 class OneCurvePlot: public QwtPlot
 {
@@ -29,6 +30,9 @@ public:
   bool hasStored()const;
   QStringList getLabels()const;
   void removeCurve(const QString& label);
+  void recalcXAxisDivs();
+  void recalcYAxisDivs();
+  bool isYLogScale()const;
 public slots:
   void setXScale(double from, double to);
   void setYScale(double from, double to);

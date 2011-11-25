@@ -73,7 +73,7 @@ private slots:
   void createTable();
 
 private:
-  void populateLogValues(const QVector<QString>& fittedWsList);
+  void populateLogAndParamValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
 
   std::string getFileName();
