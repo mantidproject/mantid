@@ -1,9 +1,11 @@
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
+#include <boost/python/def.hpp>
 
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 #include "MantidPythonInterface/kernel/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/NumpyTypeHandler.h"
+#include "MantidKernel/MantidVersion.h"
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
@@ -12,6 +14,7 @@
 using namespace Mantid::PythonInterface;
 using PropertyMarshal::SingleValueTypeHandler;
 using PropertyMarshal::SequenceTypeHandler;
+using boost::python::def;
 
 // Forward declare
 @EXPORT_DECLARE@
@@ -22,6 +25,9 @@ BOOST_PYTHON_MODULE(_kernel)
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy
   _import_array();
+  
+  def("version_str", &Mantid::Kernel::MantidVersion::version, 
+      "Returns the Mantid version string in the form \"major.minor.patch\"");
   
   // Map builtin type objects to appropriate handler classes for properties
   PropertyMarshal::registerHandler(&PyInt_Type, new SingleValueTypeHandler<int>());
