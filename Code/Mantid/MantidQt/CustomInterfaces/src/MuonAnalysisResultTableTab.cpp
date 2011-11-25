@@ -162,7 +162,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 
   // populate the individual log values and fittings into their respective tables.
   populateFittings(fittedWsList);
-  populateLogValues(fittedWsList);
+  populateLogAndParamValues(fittedWsList);
 }
 
 /**
@@ -171,11 +171,10 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 * @params wsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateLogValues(const QVector<QString>& fittedWsList)
+void MuonAnalysisResultTableTab::populateLogAndParamValues(const QVector<QString>& fittedWsList)
 {
   // Clear the logs if not empty and then repopulate.
   QVector<QString> logsAndParamsToDisplay;
-  QVector<QString> newLogsAndParamsToDisplay;
   
   for (int i=0; i<fittedWsList.size(); i++)
   { 
@@ -194,8 +193,11 @@ void MuonAnalysisResultTableTab::populateLogValues(const QVector<QString>& fitte
       double value;
       double error;
       row >> key >> value >> error;
-      newLogsAndParamsToDisplay.push_back(QString::fromStdString(key));
-      newLogsAndParamsToDisplay.push_back(QString::fromStdString(key) + "Error");
+      if(i == 0)
+      {
+        logsAndParamsToDisplay.push_back(QString::fromStdString(key));
+        logsAndParamsToDisplay.push_back(QString::fromStdString(key) + "Error");
+      }
       allLogsAndParams[QString::fromStdString(key)] = value;
       allLogsAndParams[QString::fromStdString(key) + "Error"] = error;
     }
@@ -220,45 +222,51 @@ void MuonAnalysisResultTableTab::populateLogValues(const QVector<QString>& fitte
       if( tspd )//If it is then it must be num.series
       {
         allLogsAndParams[logFile] = tspd->nthValue(0);
-      if (i == 0)
-        newLogsAndParamsToDisplay.push_back(logFile);
+        if (i == 0)
+          logsAndParamsToDisplay.push_back(logFile);
+        else
+        {
+          bool reg(true);
+          for(int j=0; j<logsAndParamsToDisplay.size(); ++j)
+          {
+            //if log file already registered then don't register it again.
+            if (logsAndParamsToDisplay[j] == logFile)
+            {
+              reg = false;
+              break;
+            }
+          }
+          if (reg==true)
+          logsAndParamsToDisplay.push_back(logFile);
+        }
       }
     }
 
-    if(logsAndParamsToDisplay.size() == 0)
-      logsAndParamsToDisplay = newLogsAndParamsToDisplay;
-
-    // Ask Anders about intersection
-    //else
-    //{
-    //  int size(0);
-    //  if( logsAndParamsToDisplay.size() > newLogsAndParamsToDisplay.size() )
-    //    size = newLogsAndParamsToDisplay.size();
-    //  else
-    //    size = logsAndParamsToDisplay.size();
-
-    //  QVector<QString> output(size);
-
-    //  // Sort both vectors
-    //  std::sort(logsAndParamsToDisplay.begin(), logsAndParamsToDisplay.end());
-    //  std::sort(newLogsAndParamsToDisplay.begin(), newLogsAndParamsToDisplay.end());
-
-    //  // Find the intersection of both, plug it into "output", and then resize.
-    //  output.resize(
-    //    std::set_intersection( 
-    //    logsAndParamsToDisplay.begin(), logsAndParamsToDisplay.end(),
-    //    newLogsAndParamsToDisplay.begin(), newLogsAndParamsToDisplay.end(),
-    //    output.begin())
-    //    - output.begin());
-    //  // Need to find the intersection of the two lists.
-
-    //  logsAndParamsToDisplay.clear();
-    //  logsAndParamsToDisplay = output;
-    //}
     // Add all data collected from one workspace to another map. Will be used when creating table.
     m_tableValues[fittedWsList[i]] = allLogsAndParams;
 
   } // End loop over all workspace's log information and param information
+
+  QVector<int> toRemove;
+  for(int i=0; i<logsAndParamsToDisplay.size(); ++i)
+  {
+    QMap<QString,QMap<QString, double> >::Iterator itr; 
+    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    { 
+      QMap<QString, double> logParamsAndValues = itr.value();
+
+      if (!(logParamsAndValues.contains(logsAndParamsToDisplay[i])))
+      {      
+        toRemove.push_back(i);
+        break;
+      }
+    }      
+  }
+
+  for(int i=0; i<toRemove.size(); ++i)
+  {
+    logsAndParamsToDisplay.remove(toRemove[i]-i);
+  }
 
   if(logsAndParamsToDisplay.size() > m_uiForm.valueTable->rowCount())
   {
@@ -310,9 +318,15 @@ void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fitted
 */
 void MuonAnalysisResultTableTab::createTable()
 {  
+  if (m_tableValues.size() == 0)
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "No workspace found with suitable fitting.");
+    return;
+  }
+
   QVector<QString> wsSelected;
   QVector<QString> logParamSelected;
-  
+
   //Get the user selected workspaces with _parameters files associated with it
   for (int i = 0; i < m_tableValues.size(); i++)
   {
@@ -325,7 +339,7 @@ void MuonAnalysisResultTableTab::createTable()
   }
 
   // Get the user selected log file and parameters
-  for (size_t i = 0; i < m_numLogsAndParamsDisplayed; i++)
+  for (int i = 0; i < m_numLogsAndParamsDisplayed; i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,3));
     if (includeCell->isChecked())
@@ -338,45 +352,45 @@ void MuonAnalysisResultTableTab::createTable()
   if ((wsSelected.size() == 0) || logParamSelected.size() == 0)
   {
     QMessageBox::information(this, "Mantid - Muon Analysis", "Please select options from both tables.");
+    return;
   }
-  else
+
+  // Create the results table
+
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  table->addColumn("str","Run Number");
+  for(int i=0; i<logParamSelected.size(); ++i)
   {
-    // Create the results table
-
-    Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    table->addColumn("str","Workspace");
-    for(int i=0; i<logParamSelected.size(); ++i)
-    {
-      table->addColumn("double", logParamSelected[i].toStdString());
-    }
-
-    // Add data to table
-
-    QMap<QString,QMap<QString, double> >::Iterator itr; 
-    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
-    { 
-      for(int i=0; i<wsSelected.size(); ++i)
-      {
-        if (wsSelected[i] == itr.key())
-        {
-          Mantid::API::TableRow row = table->appendRow();
-          row << itr.key().toStdString();
-      
-          QMap<QString, double> logParamsAndValues = itr.value();
-
-          // Can't have blank data values
-          for(int j=0; j<logParamSelected.size(); ++j)
-          {
-            row << logParamsAndValues.find(logParamSelected[j]).value();
-          }
-        }
-      }  
-    }
-
-    // Save the table to the ADS
-
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+    table->addColumn("double", logParamSelected[i].toStdString());
   }
+
+  // Add data to table
+
+  QMap<QString,QMap<QString, double> >::Iterator itr; 
+  for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+  { 
+    for(int i=0; i<wsSelected.size(); ++i)
+    {
+      if (wsSelected[i] == itr.key())
+      {
+        Mantid::API::TableRow row = table->appendRow();
+        QString runNumber(itr.key().left(itr.key().find(';')));
+        row << runNumber.toStdString();
+      
+        QMap<QString, double> logParamsAndValues = itr.value();
+
+        // Can't have blank data values
+        for(int j=0; j<logParamSelected.size(); ++j)
+        {
+          row << logParamsAndValues.find(logParamSelected[j]).value();
+        }
+      }
+    }  
+  }
+
+  // Save the table to the ADS
+
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
 }
 
 
@@ -392,16 +406,21 @@ std::string MuonAnalysisResultTableTab::getFileName()
   
   if (Mantid::API::AnalysisDataService::Instance().doesExist(fileName))
   {
-    int versionNum(2); 
-    fileName += " #";
-    while(Mantid::API::AnalysisDataService::Instance().doesExist(fileName + boost::lexical_cast<std::string>(versionNum)))
+    int choice = QMessageBox::question(this, tr("MantidPlot - Overwrite Warning"), QString::fromStdString(fileName) +
+          tr("already exists. Do you want to replace it?"),
+          QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape);
+    if (choice == QMessageBox::No)
     {
-      versionNum += 1;
+      int versionNum(2); 
+      fileName += " #";
+      while(Mantid::API::AnalysisDataService::Instance().doesExist(fileName + boost::lexical_cast<std::string>(versionNum)))
+      {
+        versionNum += 1;
+      }
+      return (fileName + boost::lexical_cast<std::string>(versionNum));
     }
-    return (fileName + boost::lexical_cast<std::string>(versionNum));
   }
-  else
-    return fileName;
+  return fileName;
 }
 
 

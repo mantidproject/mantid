@@ -62,6 +62,7 @@
 
 #include "Mantid/MantidDock.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "Mantid/MantidMDCurve.h"
 
 #include <gsl/gsl_vector.h>
 
@@ -1265,39 +1266,92 @@ void MultiLayer::dragEnterEvent( QDragEnterEvent * event )
 void MultiLayer::dropEvent( QDropEvent * event )
 {
   MantidTreeWidget * tree = dynamic_cast<MantidTreeWidget*>(event->source());
-  if ( tree == NULL ) return; // (shouldn't happen)
-
-  // Ask the user which spectrum to plot
-  QMultiMap<QString,std::set<int> > toPlot = tree->chooseSpectrumFromSelected();
+  
   Graph *g = this->activeGraph();
   if (!g) return; // (shouldn't happen either)
   
-  bool errorBars;
-
   if(g->curves() > 0)
   {
-    MantidMatrixCurve * c = dynamic_cast<MantidMatrixCurve*>(g->curve(0));
-    // If this is Mantid curve, then see if it has error bars ...
-    if(NULL != c)
+    //Do some capability queries on the base curve.
+    MantidMatrixCurve * asMatrixCurve = dynamic_cast<MantidMatrixCurve*>(g->curve(0));
+    MantidMDCurve* asMDCurve = dynamic_cast<MantidMDCurve*>(g->curve(0));
+
+    if(NULL == asMatrixCurve && NULL != asMDCurve)
     {
-      errorBars = c->hasErrorBars();
+      //Treat as a MDCurve
+      dropOntoMDCurve(g, asMDCurve, tree);
     }
     else
     {
-      // Else we'll just have no error bars.
-      errorBars = false;
+      //Anything else we treat as a MantidMatrixCurve.
+      dropOntoMatrixCurve(g, asMatrixCurve, tree);
     }
+  }
+}
+
+/*
+Drop a workspace onto an exisiting md curve
+@param g : Graph object
+@param originalCurve : the original MantidMDCurve onto which the new workspace(s) are to be dropped
+@param tree : Mantid Tree widget
+*/
+void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve* originalCurve, MantidTreeWidget * tree)
+{
+  UNUSED_ARG(originalCurve);
+  using namespace Mantid::API;
+  QList<QString> allWsNames = tree->getSelectedWorkspaceNames();
+
+  // Loop through all selected workspaces create curves and put them onto the graph
+  for (int i=0; i<allWsNames.size(); i++)
+  {
+    //Capability query the candidate workspaces
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString());
+    IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+    //Only process IMDWorkspaces
+    if(imdWS)
+    {
+      QString currentName(imdWS->name().c_str());
+      try
+      {
+        new MantidMDCurve(currentName,g,true);
+      }
+      catch(std::invalid_argument& ex)
+      {
+        //Handle case when workspace does not have only one non-integrated dimension.
+        std::string message = ex.what();
+        tree->logWarningMessage(message);
+      }
+    }
+  }
+}
+
+/*
+Drop a workspace onto an exisiting matrix curve
+@param g : Graph object
+@param originalCurve : the original MantidMatrixCurve onto which the new workspace(s) are to be dropped
+@param tree : Mantid Tree widget
+*/
+void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve, MantidTreeWidget * tree)
+{
+  bool errorBars;
+  if(NULL != originalCurve)
+  {
+    errorBars = originalCurve->hasErrorBars();
   }
   else
   {
+    // Else we'll just have no error bars.
     errorBars = false;
   }
+  
+  if ( tree == NULL ) return; // (shouldn't happen)
+  QMultiMap<QString,std::set<int> > toPlot = tree->chooseSpectrumFromSelected();
 
   // Iterate through the selected workspaces adding a set of curves from each
   for(QMultiMap<QString,std::set<int> >::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     std::set<int>::iterator setIt = it.value().begin();
-    
+
     for( ; setIt != it.value().end(); setIt++)
     {
       try {

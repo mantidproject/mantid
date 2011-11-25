@@ -156,6 +156,16 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
 }
 
+/**
+Generate a warning message and use MantidUI to display it.
+@param message : message contents to display
+*/
+void MantidTreeWidget::logWarningMessage(const std::string& message)
+{
+  Poco::Message msg("MantidPlot",message,Poco::Message::PRIO_WARNING);
+  m_mantidUI->logMessage(msg);
+}
+
 /** Returns the name of the selected workspace
 *  (the first one if more than one is selected)
 */

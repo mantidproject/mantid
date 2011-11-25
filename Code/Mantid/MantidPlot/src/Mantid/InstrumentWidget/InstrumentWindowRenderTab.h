@@ -37,8 +37,13 @@ public:
   bool areAxesOn()const;
   void init();
   void updateSurfaceTypeControl(int);
+  void setupColorBar(const MantidColorMap&,double,double,double,bool);
+signals:
+  void rescaleColorMap();
+  void setAutoscaling(bool);
 public slots:
   void showAxes(bool on);
+  void setColorMapAutoscaling(bool);
 private slots:
   void changeColormap(const QString & filename = "");
   void showResetView(int);
@@ -57,6 +62,7 @@ private:
   QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;
   QCheckBox *m_flipCheckBox;
+  QCheckBox *m_autoscaling;
 
   QAction *m_colorMap;
   QAction *m_backgroundColor;

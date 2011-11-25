@@ -489,7 +489,25 @@ class TestCommands(unittest.TestCase):
         for i in range(len(res)):
             self.assertAlmostEqual(res[i], ref[i], 5, "result point %d: %g, found %g" % (i, ref[i], res[i]))
         
-    
+    def test_bck_transmission_beam_center(self):
+        HFIRSANS()
+        DataPath(TEST_DIR)
+        DirectBeamCenter("BioSANS_empty_cell.xml")
+        AppendDataFile("BioSANS_test_data.xml", "test_data")
+        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        DarkCurrent("BioSANS_dark_current.xml")
+        Background("BioSANS_test_data.xml")
+        SetTransmission(0.6,0.1)
+        SetBckTransmission(0.6,0.1)
+        BckTransmissionDirectBeamCenter("BioSANS_empty_cell.xml")
+        AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
+        Reduce1D()
+                
+        data = mtd["test_data_Iq"].dataY(0)
+        self.assertAlmostEqual(data[0], 0.0,10)
+        self.assertAlmostEqual(data[10], 0.0,10)
+        self.assertAlmostEqual(data[20], 0.0,10)
+        
 if __name__ == '__main__':
     unittest.main()
     
