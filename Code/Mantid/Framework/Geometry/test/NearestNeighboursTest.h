@@ -175,7 +175,7 @@ public:
     ParameterMap_sptr pmap(new ParameterMap());
 
     //Mask the first 5 detectors
-    for(size_t i = 1; i < 3; i++)
+    for(Mantid::specid_t i = 1; i < 3; i++)
     {
       if ( const Geometry::ComponentID det = instrument->getDetector(spectramap->getDetectors(i)[0])->getComponentID() )
       {
