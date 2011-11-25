@@ -73,6 +73,7 @@ class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObs
 
 public:
   enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, RENDERMODE_SIZE };
+  enum Tab{RENDER = 0, PICK, MASK, TREE};
 
   explicit InstrumentWindow(const QString& wsName, const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
   ~InstrumentWindow();
@@ -95,6 +96,8 @@ public:
   InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
+  void selectTab(Tab tab){selectTab(int(tab));}
+  Tab getTab()const;
 
 protected:
   /// Called just before a show event
@@ -103,6 +106,7 @@ protected:
   void finishHandle(const Mantid::API::IAlgorithm* alg);
   void dragEnterEvent( QDragEnterEvent* e );
   void dropEvent( QDropEvent* e );
+  bool eventFilter(QObject *obj, QEvent *ev);
 
 public slots:
   void tabChanged(int i);
@@ -130,6 +134,7 @@ public slots:
   void changeColorMapRange(double minValue, double maxValue);
   void setIntegrationRange(double,double);
   void setBinRange(double,double);
+  void setColorMapAutoscaling(bool);
 
   void setViewDirection(const QString&);
   void pickBackgroundColor();
@@ -148,6 +153,7 @@ signals:
 private slots:
   void block();
   void unblock();
+  void mouseLeftInstrumentDisplay();
 
 private:
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
@@ -190,7 +196,7 @@ private:
 
   bool m_blocked;     ///< Set to true to block access to instrument during algorithm executions
   QList<int> m_selectedDetectors;
-
+  bool m_instrumentDisplayContextMenuOn;
 
 private:
   virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);

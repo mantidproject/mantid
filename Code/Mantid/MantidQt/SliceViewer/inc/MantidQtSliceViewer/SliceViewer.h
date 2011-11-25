@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "QwtRasterDataMD.h"
@@ -20,7 +21,6 @@
 #include <qwt_raster_data.h>
 #include <qwt_scale_widget.h>
 #include <vector>
-#include "MantidKernel/VMD.h"
 
 namespace MantidQt
 {
@@ -61,14 +61,17 @@ public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void resetZoom();
   void showInfoAt(double, double);
-  void colorRangeFullSlot();
-  void colorRangeSliceSlot();
   void colorRangeChanged();
-  void btnDoLineToggled(bool);
   void zoomInSlot();
   void zoomOutSlot();
   void updateDisplaySlot(int index, double value);
   void loadColorMapSlot();
+  // Slots that will be automatically connected via QMetaObject.connectSlotsByName
+  void on_btnRangeFull_clicked();
+  void on_btnRangeSlice_clicked();
+  void on_btnDoLine_toggled(bool);
+  void on_btnClearLine_clicked();
+  void on_btnSnapToGrid_toggled(bool);
 
 
 private:

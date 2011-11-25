@@ -1736,7 +1736,7 @@ public:
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void setIsRunning(bool);
   MantidMatrix* getMantidMatrix(const QString &);
-  MultiLayer* plotBin(const QString&,int,bool = false);  
+  MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
   bool runAlgorithmAsync_PyCallback(const QString &);  	

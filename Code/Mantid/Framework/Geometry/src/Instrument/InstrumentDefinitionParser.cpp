@@ -220,9 +220,10 @@ namespace Geometry
 
       // In this loop only interested in types containing <combine-components-into-one-shape>
       NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
-      if ( pNL_type_combine_into_one_shape->length() == 0 )
-        continue;
+      const unsigned long nelements = pNL_type_combine_into_one_shape->length();
       pNL_type_combine_into_one_shape->release();
+      if ( nelements == 0 )
+        continue;
 
       // Each type in the IDF must be uniquely named, hence return error if type
       // has already been defined

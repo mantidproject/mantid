@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_UTILS_H_
     
 #include "MantidKernel/DllConfig.h"
+#include <cmath>
 
 namespace Mantid
 {
@@ -29,11 +30,23 @@ namespace Utils
    * portable in C++ (!)
    *
    * @param x :: floating point value to round
-   * @return closes integer (positive or negative)
+   * @return closest integer as a long (positive or negative)
    */
   inline long round(double x)
   {
     return long(x + (x<0?-0.5:+0.5));
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Custom rounding method for a double->double because none is
+   * portable in C++ (!)
+   *
+   * @param r :: floating point value to round
+   * @return closest integer as a double (positive or negative)
+   */
+  inline double rounddbl(double r)
+  {
+    return (r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
   }
 
 

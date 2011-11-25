@@ -16,8 +16,6 @@ namespace Mantid
       /**
       This namespace contains helper functions for classes that are overridden in Python
 
-      @author Martyn Gigg, Tessella plc
-
       Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
       This file is part of Mantid.
@@ -38,20 +36,8 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
       */
-
-      /** Checks whether the given object's type dictionary contains the named attribute.
-       * Usually boost::python::get_override is used for this check but if the 
-       * object's overridden function is declared on a superclass of the wrapped
-       * class then get_override always returns true, regardless of whether the
-       * method has been overridden in Python.
-       *
-       * An example is the algorithm hierachy. We export the IAlgorithm interface
-       * with the name method attach to it. If a class in Python does not
-       * override the name method then get_override still claims that the
-       * override exists because it has found the IAlgorithm one
-       */
+      /// Checks whether the given object's type dictionary contains the named attribute.
       bool DLLExport typeHasAttribute(PyObject * obj, const char * attr);
-
       /// An overload for the above taking a wrapper reference
       bool DLLExport typeHasAttribute(const boost::python::detail::wrapper_base & wrapper, const char * attr);
     }

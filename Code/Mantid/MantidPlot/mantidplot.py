@@ -17,16 +17,23 @@ from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 def workspace(name):
     return mtd[name]
 
-def plotSpectrum(source, indices, error_bars = False, style = -1):
+# Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
+def plot(source, *args, **kwargs):
+    if isinstance(source,WorkspaceProxy):
+        return plotSpectrum(source, *args, **kwargs)
+    else:
+        return qti.app.plot(source, *args, **kwargs)
+
+def plotSpectrum(source, indices, error_bars = False, type = -1):
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
     if len(workspace_names) > 0 and len(index_list) > 0:
-        return __tryPlot(workspace_names, index_list, error_bars, style)
+        return __tryPlot(workspace_names, index_list, error_bars, type)
     else:
         return None
 
-def plotBin(source, indices, error_bars = False):
-    return __doPlotting(source,indices,error_bars)
+def plotBin(source, indices, error_bars = False, type = 0):
+    return __doPlotting(source,indices,error_bars,type)
 
 # Legacy function
 plotTimeBin = plotBin
@@ -57,7 +64,7 @@ Layer.Top = qti.GraphOptions.Top
 
 def __getWorkspaceNames(source):
     ws_names = []
-    if isinstance(source, list):
+    if isinstance(source, list) or isinstance(source,tuple):
         for w in source:
             names = __getWorkspaceNames(w)
             for n in names:
@@ -87,7 +94,7 @@ def __getWorkspaceNames(source):
     
 def __getWorkspaceIndices(source):
     index_list = []
-    if isinstance(source,list):
+    if isinstance(source,list) or isinstance(source,tuple):
         for i in source:
             nums = __getWorkspaceIndices(i)
             for j in nums:
@@ -106,8 +113,8 @@ def __getWorkspaceIndices(source):
     return index_list
 
 # Try plotting, raising an error if no plot object is created
-def __tryPlot(workspace_names, indices, error_bars, style):
-    graph = qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars, style)
+def __tryPlot(workspace_names, indices, error_bars, type):
+    graph = qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars, type)
     if graph == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
@@ -115,42 +122,42 @@ def __tryPlot(workspace_names, indices, error_bars, style):
         
 
 # Refactored functions for common code
-def __doPlotting(source, indices, error_bars):
-    if isinstance(source, list):
-        return __PlotList(source, indices, error_bars)
+def __doPlotting(source, indices, error_bars,type):
+    if isinstance(source, list) or isinstance(source, tuple):
+        return __PlotList(source, indices, error_bars,type)
     elif isinstance(source, str) or isinstance(source, WorkspaceProxy):
-        return __PlotSingle(source, indices, error_bars)
+        return __PlotSingle(source, indices, error_bars,type)
     else:
         raise TypeError("Source is not a workspace name or a workspace variable")
     
-def __PlotSingle(workspace, indices, error_bars):
-    if isinstance(indices, list):
-        master_graph = __CallPlotFunction(workspace, indices[0], error_bars)
+def __PlotSingle(workspace, indices, error_bars,type):
+    if isinstance(indices, list) or isinstance(indices, tuple):
+        master_graph = __CallPlotFunction(workspace, indices[0], error_bars,type)
         for index in indices[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars))
+            mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
         return master_graph
     else:
-        return __CallPlotFunction(workspace, indices, error_bars)
+        return __CallPlotFunction(workspace, indices, error_bars,type)
     
-def __PlotList(workspace_list, indices, error_bars):
-    if isinstance(indices, list):
-        master_graph = __CallPlotFunction(workspace_list[0], indices[0], error_bars)
+def __PlotList(workspace_list, indices, error_bars,type):
+    if isinstance(indices, list) or isinstance(indices, tuple):
+        master_graph = __CallPlotFunction(workspace_list[0], indices[0], error_bars,type)
         start = 1
         for workspace in workspace_list:
             for index in indices[start:]:
-                mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars))
+                mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars,type))
                 start = 0
                 
         return master_graph
     else:
-        master_graph = __CallPlotFunction(workspace_list[0], indices, error_bars)
+        master_graph = __CallPlotFunction(workspace_list[0], indices, error_bars,type)
         for workspace in workspace_list[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, indices, error_bars))
+            mergePlots(master_graph, __CallPlotFunction(workspace, indices, error_bars,type))
         return master_graph
 
-def __CallPlotFunction(workspace, index, error_bars):
+def __CallPlotFunction(workspace, index, error_bars,type):
     if isinstance(workspace, str):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    return qti.app.mantidUI.plotBin(wkspname, index, error_bars)
+    return qti.app.mantidUI.plotBin(wkspname, index, error_bars,type)

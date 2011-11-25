@@ -136,7 +136,7 @@ void PDFFT::exec() {
 	g_log.information() << "Range of Q for F.T. : (" << qmin << ", " << qmax << ")\n";
 
 	// 4. Check datamax, datamin and do Fourier transform
-	const MantidVec& inputx = Sspace->dataX(0);
+	const MantidVec& inputx = Sspace->readX(0);
 	int sizesq = static_cast<int>(inputx.size());
 	double error;
 
@@ -191,8 +191,8 @@ void PDFFT::exec() {
 	// 3.2 Calculate QS(Q)
 	MatrixWorkspace_sptr QSspace = WorkspaceFactory::Instance().create(
 			"Workspace2D", 1, sizesq, sizesq);
-	const MantidVec& vecq = Sspace->dataX(0);
-	const MantidVec& vecs = Sspace->dataY(0);
+	const MantidVec& vecq = Sspace->readX(0);
+	const MantidVec& vecs = Sspace->readY(0);
 	// const MantidVec& vece = Sspace->dataE(0);
 	MantidVec& qsqq = QSspace->dataX(0);
 	MantidVec& qsqs = QSspace->dataY(0);
@@ -222,9 +222,9 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax, 
 
 	double gr = 0;
 
-	const MantidVec& vd = Sspace->dataX(0);
-	const MantidVec& vs = Sspace->dataY(0);
-	const MantidVec& ve = Sspace->dataE(0);
+	const MantidVec& vd = Sspace->readX(0);
+	const MantidVec& vs = Sspace->readY(0);
+	const MantidVec& ve = Sspace->readE(0);
 
 	double temp, d, s, deltad;
 	double error = 0;
@@ -254,9 +254,9 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax, 
 
 double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq) {
 
-	const MantidVec& vq = Sspace->dataX(0);
-	const MantidVec& vs = Sspace->dataY(0);
-	const MantidVec& ve = Sspace->dataE(0);
+	const MantidVec& vq = Sspace->readX(0);
+	const MantidVec& vs = Sspace->readY(0);
+	const MantidVec& ve = Sspace->readE(0);
 
 	double sinus, q, s, deltaq, fs, error;
 

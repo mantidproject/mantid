@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/MuonAnalysisFitDataTab.cpp
 	src/MuonAnalysisHelper.cpp
 	src/MuonAnalysisOptionTab.cpp
+	src/MuonAnalysisResultTableTab.cpp
 	src/ParameterisedLatticeView.cpp
 	src/QtWorkspaceMementoModel.cpp
 	src/SANSAddFiles.cpp
@@ -55,6 +56,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
+	inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -86,6 +88,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
+                inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h

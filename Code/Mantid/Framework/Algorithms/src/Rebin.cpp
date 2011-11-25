@@ -120,23 +120,11 @@ namespace Mantid
         rb_params = in_params;
 
       } else if (in_params.size() == 1){
-        // Input is only delta: construct
-        double xmin = std::numeric_limits<double>::max();
-        double xmax = -1.0 * xmin;
-        int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+        double xmin = 0.;
+        double xmax = 0.;
+        inputWS->getXMinMax(xmin, xmax);
 
-        double temp;
-        for (int workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
-        {
-          // Not event workspace, using the current min/max
-          temp = inputWS->dataX(workspaceIndex).front();
-          if (temp < xmin)
-            xmin = temp;
-          temp = inputWS->dataX(workspaceIndex).back();
-          if (temp > xmax)
-            xmax = temp;
-        }
-        g_log.information() << "Non-EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+        g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
 
         rb_params.push_back(xmin);
         rb_params.push_back(in_params[0]);

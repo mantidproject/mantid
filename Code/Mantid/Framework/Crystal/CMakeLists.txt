@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/SaveIsawUB.cpp
 	src/SavePeaksFile.cpp
 	src/SetGoniometer.cpp
+	src/SetUB.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -41,6 +42,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SetGoniometer.h
+	inc/MantidCrystal/SetUB.h
 )
 
 set ( TEST_FILES
@@ -61,6 +63,7 @@ set ( TEST_FILES
 	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
 	test/SetGoniometerTest.h
+	test/SetUBTest.h
 )
 
 if(UNITY_BUILD)

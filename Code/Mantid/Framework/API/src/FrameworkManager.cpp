@@ -106,7 +106,9 @@ void FrameworkManagerImpl::clearInstruments()
  * 
  *  @param algName :: The name of the algorithm required
  *  @param version :: The version of the algorithm
- *  @return A pointer to the created algorithm
+ *  @return A pointer to the created algorithm.
+ *          WARNING! DO NOT DELETE THIS POINTER, because it is owned
+ *          by a shared pointer in the AlgorithmManager.
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  */
@@ -123,6 +125,8 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, co
  *                         form "Property1=Value1;Property2=Value2;..."
  *  @param version :: The version of the algorithm
  *  @return A pointer to the created algorithm
+ *          WARNING! DO NOT DELETE THIS POINTER, because it is owned
+ *          by a shared pointer in the AlgorithmManager.
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  *  @throw std::invalid_argument Thrown if properties string is ill-formed
@@ -143,6 +147,8 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,con
  *                         form "Property1=Value1;Property2=Value2;..."
  *  @param version :: The version of the algorithm
  *  @return A pointer to the executed algorithm
+ *          WARNING! DO NOT DELETE THIS POINTER, because it is owned
+ *          by a shared pointer in the AlgorithmManager.
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  *  @throw std::invalid_argument Thrown if properties string is ill-formed

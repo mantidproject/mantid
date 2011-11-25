@@ -82,6 +82,10 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_flipCheckBox->hide();
   connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
 
+  m_autoscaling = new QCheckBox("Autoscaling",this);
+  m_autoscaling->setChecked(true);
+  connect(m_autoscaling,SIGNAL(toggled(bool)),this,SLOT(setColorMapAutoscaling(bool)));
+
   // layout
   renderControlsLayout->addWidget(m_renderMode);
   renderControlsLayout->addWidget(m_flipCheckBox);
@@ -89,7 +93,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
   renderControlsLayout->addWidget(m_colorMapWidget);
-
+  renderControlsLayout->addWidget(m_autoscaling);
 
 }
 
@@ -252,4 +256,30 @@ void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
   if (!surface) return;
   surface->setFlippedView(on);
   m_InstrumentDisplay->refreshView();
+}
+
+/**
+ * Reset the colorbar parameters.
+ * @param cmap :: A new Mantid color map.
+ * @param minValue :: A new minimum value.
+ * @param maxValue :: A new maximum value.
+ * @param minPositive :: A new minimum positive value for the log scale. 
+ */
+void InstrumentWindowRenderTab::setupColorBar(const MantidColorMap& cmap,double minValue,double maxValue,double minPositive,bool autoscaling)
+{
+  setMinValue(minValue,false);
+  setMaxValue(maxValue,false);
+  m_colorMapWidget->setMinPositiveValue(minPositive);
+  m_colorMapWidget->setupColorBarScaling(cmap);
+  m_autoscaling->blockSignals(true);
+  m_autoscaling->setChecked(autoscaling);
+  m_autoscaling->blockSignals(false);
+}
+
+/**
+ * Set on / off autoscaling of the color bar.
+ */
+void InstrumentWindowRenderTab::setColorMapAutoscaling(bool on)
+{
+  emit setAutoscaling(on);
 }

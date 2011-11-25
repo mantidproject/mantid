@@ -22,7 +22,7 @@ namespace MDEvents
 {
 
   /** Abstract Algorithm class that will be used by:
-   *    BinToMDHistoWorkspace and SliceMD
+   *    BinMD and SliceMD
    * and shares code for getting a slice from one workspace to another
     
     @author Janik Zikovsky

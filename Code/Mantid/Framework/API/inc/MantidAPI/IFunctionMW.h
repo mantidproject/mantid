@@ -141,6 +141,7 @@ public:
   virtual void function(double* out)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out);
+  void functionDeriv(API::FunctionDomain& domain, API::Jacobian& jacobian){API::IFunction::functionDeriv(domain,jacobian);}
 
   /* MatrixWorkspace specific methods */
 

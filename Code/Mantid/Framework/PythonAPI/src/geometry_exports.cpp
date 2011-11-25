@@ -269,7 +269,11 @@ namespace Mantid
       .def( "getU",( &OrientedLatticeWrapper::getU ) )
       .def( "setU", ( &OrientedLatticeWrapper::setU ) ) 
       .def( "getUB",( &OrientedLatticeWrapper::getUB ) )
-      .def( "setUB", ( &OrientedLatticeWrapper::setUB ) ) ;
+      .def( "setUB", ( &OrientedLatticeWrapper::setUB ) )
+      .def( "getuVector", (&Geometry::OrientedLattice::getuVector))
+      .def( "getvVector", (&Geometry::OrientedLattice::getvVector))
+      .def( "setUFromVectors", ( &OrientedLatticeWrapper::setUFromVectors ) )
+        ;
     }
     void export_geometry_namespace()
     {

@@ -129,6 +129,15 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                        double c,
                                        double alpha, double beta, double gamma);
 
+  /// Construct a sublist of the specified list of a,b,c directions, by
+  /// removing all directions that seem to be duplicates.
+  static void DiscardDuplicates( std::vector<Kernel::V3D>  & new_list,
+                                 std::vector<Kernel::V3D>  & directions,
+                           const std::vector<Kernel::V3D>  & q_vectors,
+                                 double                      required_tolerance,
+                                 double                      len_tol,
+                                 double                      ang_tol );
+
   /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
   static bool ValidIndex( const Kernel::V3D  & hkl,
                                 double         tolerance );
@@ -140,6 +149,13 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static int NumberIndexed( const Kernel::DblMatrix         & UB,
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
+
+  /// Calculate the number of Q vectors that map to an integer index in one
+  /// direction
+  static int NumberIndexed_1D( const Kernel::V3D               & direction,
+                               const std::vector<Kernel::V3D>  & q_vectors,
+                                     double                      tolerance   );
+
 
   /// Given a UB, get list of Miller indices for specifed Qs
   static int CalculateMillerIndices(

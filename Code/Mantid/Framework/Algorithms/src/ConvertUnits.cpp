@@ -512,6 +512,9 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 //        localOutputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 //        eventWS->getEventList(i).setTofs(tofs);
       }
+      // Clear unit memory
+      delete localFromUnit;
+      delete localOutputUnit;
 
     } catch (Exception::NotFoundError&) {
       // Get to here if exception thrown when calculating distance to detector

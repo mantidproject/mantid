@@ -88,8 +88,8 @@ namespace Algorithms
     }
 
     for (size_t i = 0; i < numspaces; i ++){
-      const MantidVec& ix = inputWorkspaces[i]->dataX(0);
-      const MantidVec& iy = inputWorkspaces[i]->dataY(0);
+      const MantidVec& ix = inputWorkspaces[i]->readX(0);
+      const MantidVec& iy = inputWorkspaces[i]->readY(0);
       if (ix.size() != iy.size()){
         if (ix.size() == iy.size()+1){
           g_log.error() << "Input Workspace (Indexed " << i << ") for BlendSq() must be Point Data, but not Histogram" << std::endl;
@@ -176,9 +176,9 @@ namespace Algorithms
 
 
   void BlendSq::rebinData(API::MatrixWorkspace_const_sptr sourcews, API::MatrixWorkspace_sptr targetws, double qmin, double qmax, double dq){
-    const MantidVec& sx = sourcews->dataX(0);
-    const MantidVec& sy = sourcews->dataY(0);
-    const MantidVec& se = sourcews->dataE(0);
+    const MantidVec& sx = sourcews->readX(0);
+    const MantidVec& sy = sourcews->readY(0);
+    const MantidVec& se = sourcews->readE(0);
 
     MantidVec& tx = targetws->dataX(0);
     MantidVec& ty = targetws->dataY(0);

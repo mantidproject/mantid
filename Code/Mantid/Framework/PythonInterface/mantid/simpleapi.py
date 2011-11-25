@@ -19,8 +19,8 @@
     and assign it to the rebinned variable
     
 """
-from api import algorithm_factory, algorithm_mgr
-
+from kernel import Direction, DataItem, funcreturns
+from api import framework_mgr, analysis_data_svc, IWorkspaceProperty
 
 def version():
     return "simpleapi - memory-based version"
@@ -28,18 +28,85 @@ def version():
 def set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm
-        @param alg_object An initialized algorithm object
+        @param alg_object An initialised algorithm object
         @param *args Positional arguments
         @param **kwargs Keyword arguments  
     """
-    prop_order = alg_object.get_property_order()
+    prop_order = alg_object.mandatory_properties()
     # add the args to the kw list so everything can be set in a single way
     for (key, arg) in zip(prop_order[:len(args)], args):
         kwargs[key] = arg
 
-    # set the properties of the algorithm
+    # Set the properties of the algorithm.
     for key in kwargs.keys():
-        alg_object.set_property(key, kwargs[key])
+        value = kwargs[key]
+        alg_object.set_property(key, value)
+        # Make sure we set the name of any In/Out properties as well
+        # See if this can be done sensibly in WorkspaceProperty
+        if isinstance(value, DataItem):
+            alg_object.set_property_value(key, str(value))
+        
+def get_additional_args(lhs, algm_obj):
+    """
+        Return the extra arguments that are to be passed to the algorithm
+        from the information in the lhs tuple. These are basically the names 
+        of output workspaces.
+        The algorithm properties are iterated over in the same order
+        they were created within the wrapper and for each output
+        workspace property an entry is added to the returned dictionary
+        that contains {PropertyName:lhs_name}.
+        
+        @param lhs :: A 2-tuple that contains the number of variables supplied 
+                      on the lhs of the function call and the names of these
+                      variables
+        @param algm_obj :: An initialised algorithm object
+        @returns A dictionary mapping property names to the values
+                 extracted from the lhs variables
+    """
+    ret_names = lhs[1]
+    extra_args = {}
+
+    output_props = [ algm_obj.get_property(p) for p in algm_obj.output_properties() ]
+    nprops = len(output_props)
+    i = 0
+    while len(ret_names) > 0 and i < nprops:
+        p = output_props[i]
+        if isinstance(p,IWorkspaceProperty):
+            extra_args[p.name] = ret_names[0]
+            ret_names = ret_names[1:]
+        i += 1
+    return extra_args
+    
+def gather_returns(lhs, algm_obj):
+    """
+        Gather the return values and ensure they are in the
+        correct order as defined by the output properties and
+        return them as a tuple. If their is a single return
+        value it is returned on its own
+        
+        @param lhs :: A 2-tuple that contains the number of variables supplied 
+               on the lhs of the function call and the names of these
+               variables
+        @param algm_obj :: An executed algorithm object
+    """
+    # Gather the returns
+    # The minor complication here is the workspace properties have their
+    # values stored in the ADS and not within the property
+    props = [ algm_obj.get_property(p) for p in algm_obj.output_properties() ]
+    retvals = []
+    for p in props:
+        if isinstance(p, IWorkspaceProperty):
+            retvals.append(analysis_data_svc[p.value_as_str])
+        else:
+            retvals.append(p.value)
+
+    nvals = len(retvals)
+    if nvals > 1:
+        return tuple(retvals) # Create a tuple
+    elif nvals == 1:
+        return retvals[0]
+    else:
+        return None
 
 def create_algorithm(algorithm, version, _algm_object):
     """
@@ -58,25 +125,32 @@ def create_algorithm(algorithm, version, _algm_object):
         if "Version" in kwargs:
             _version = kwargs["Version"]
             del kwargs["Version"]
-        algm = algorithm_mgr.create(algorithm, _version)
+        algm = framework_mgr.create_algorithm(algorithm, _version)
+        lhs = funcreturns.lhs_info()
+        extra_args = get_additional_args(lhs, algm)
+        kwargs.update(extra_args)
         set_properties(algm, *args, **kwargs)
         algm.execute()
+        return gather_returns(lhs, algm)
+        
     
     algorithm_wrapper.__name__ = algorithm
     
-    # This creates/initializes the algorithm once to make the documentation
-    algorithm_wrapper.__doc__ = _algm_object.create_doc_string()
+    # Construct the algorithm documentation
+    algorithm_wrapper.__doc__ = _algm_object.doc_string()
     
     # Dark magic to get the correct function signature
     # Calling help(...) on the wrapper function will produce a function 
     # signature along the lines of AlgorithmName(*args, **kwargs).
     # We will replace the name "args" by the list of properties, and
     # the name "kwargs" by "Version=1".
-    #   1- Get the algorithm properties and build a string to list them,
-    #      taking care of giving no default values to mandatory parameters
+    #   1 - Get the algorithm properties and build a string to list them,
+    #       taking care of giving no default values to mandatory parameters
+    #   2 - All output properties will be removed from the function
+    #       argument list
     
     arg_list = []
-    for p in _algm_object.get_property_order():
+    for p in _algm_object.mandatory_properties():
         prop = _algm_object.get_property(p)
         # Mandatory parameters are those for which the default value is not valid
         if len(str(prop.is_valid))>0:
@@ -124,7 +198,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
             if item not in kwargs:
                 kwargs[item] = ""
             
-        algm = algorithm_mgr.create(algorithm, _version)
+        algm = framework_mgr.create_algorithm(algorithm, _version)
         algm.setPropertiesDialog(*args, **kwargs)
         algm.execute()
         return algm
@@ -135,7 +209,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
     # Dark magic to get the correct function signature
     #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
-    for p in _algm_object.get_property_order():
+    for p in _algm_object.mandatory_properties():
         arg_list.append("%s=None" % p)
     arg_str = ', '.join(arg_list)
     signature = "\b%s" % arg_str
@@ -198,36 +272,28 @@ def Load(*args, **kwargs):
         except KeyError:
             raise RuntimeError('%s argument not supplied to Load function' % str(key))
     
-    if len(args) == 2:
+    if len(args) == 1:
         filename = args[0]
-        wkspace = args[1]
-    elif len(args) == 1:
-        if 'Filename' in kwargs:
-            wkspace = args[0]
-            filename = get_argument_value('Filename', kwargs)
-        elif 'OutputWorkspace' in kwargs:
-            filename = args[0]
-            wkspace = get_argument_value('OutputWorkspace', kwargs)
-        else:
-            raise RuntimeError('Cannot find "Filename" or "OutputWorkspace" in key word list. '
-                               'Cannot use single positional argument.')
     elif len(args) == 0:
         filename = get_argument_value('Filename', kwargs)
-        wkspace = get_argument_value('OutputWorkspace', kwargs)
     else:
-        raise RuntimeError('Load() takes at most 2 positional arguments, %d found.' % len(args))
+        raise RuntimeError('Load() takes only the filename as a positional argument. %d arguments found.' % len(args))
     
     # Create and execute
-    algm = algorithm_mgr.create('Load')
+    algm = framework_mgr.create_algorithm('Load')
     algm.set_property('Filename', filename) # Must be set first
-    algm.set_property('OutputWorkspace', wkspace)
-    for key, value in kwargs.iteritems():
-        try:
-            algm.set_property(key, value)
-        except RuntimeError:
-            mtd.sendWarningMessage("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
+    lhs = funcreturns.lhs_info()
+    extra_args = get_additional_args(lhs, algm)
+    kwargs.update(extra_args)
+    # Check for any properties that aren't known and warn they will not be used
+    for key in kwargs.keys():
+        if key not in algm:
+            print("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
+            del kwargs[key]
+    set_properties(algm, **kwargs)
     algm.execute()
-    return algm
+    return gather_returns(lhs, algm)
+    
 
 def LoadDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function
@@ -258,7 +324,7 @@ def LoadDialog(*args, **kwargs):
     if 'Enable' not in arguments: arguments['Enable']=''
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
-    algm = algorithm_mgr.create('Load')
+    algm = framework_mgr.create_algorithm('Load')
     algm.setPropertiesDialog(**arguments)
     algm.execute()
 
@@ -267,6 +333,8 @@ def translate():
         Loop through the algorithms and register a function call 
         for each of them
     """
+    from api import algorithm_factory, algorithm_mgr
+     
     algs = algorithm_factory.get_registered_algorithms(True)
     for name, versions in algs.iteritems():
         if name == "Load":

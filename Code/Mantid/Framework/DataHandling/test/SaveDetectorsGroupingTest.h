@@ -57,11 +57,14 @@ public:
     savegroup.execute();
     TS_ASSERT(savegroup.isExecuted());
 
+    // Retrieve the full path to file
+    std::string file1 = savegroup.getPropertyValue("OutputFile");
+
     // 4. Verify
     LoadDetectorsGroupingFile load2;
     load2.initialize();
 
-    TS_ASSERT(load2.setProperty("InputFile", "grouptemp.xml"));
+    TS_ASSERT(load2.setProperty("InputFile", file1));
     TS_ASSERT(load2.setProperty("OutputWorkspace", "Vulcan_Group2"));
 
     load2.execute();
@@ -75,7 +78,7 @@ public:
     TS_ASSERT_DELTA(gws2->dataY(7000)[0], 2.0, 1.0E-5);
 
     // 5. Clear
-    Poco::File file("grouptemp.xml");
+    Poco::File file(file1);
     file.remove(false);
 
   }

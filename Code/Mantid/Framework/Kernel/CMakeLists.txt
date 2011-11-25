@@ -216,6 +216,7 @@ set ( TEST_FILES
 	test/FloatingPointComparisonTest.h
 	test/FreeBlockTest.h
 	test/FunctionTaskTest.h
+	test/GlobTest.h
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
 	test/InterpolationTest.h
@@ -338,7 +339,7 @@ endif ()
 set ( PLUGINS "." )
 set ( QTPLUGINS "." )
 set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
-set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/VATES;${MANTID_ROOT}/instrument )
+set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )

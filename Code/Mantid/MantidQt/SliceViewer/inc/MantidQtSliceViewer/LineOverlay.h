@@ -52,13 +52,16 @@ namespace SliceViewer
       HandleA = 0,
       HandleB = 1,
       HandleWidthTop = 2,
-      HandleWidthBottom = 3
+      HandleWidthBottom = 3,
+      HandleCenter = 4 // Anywhere inside the center
     };
 
   public:
     LineOverlay(QwtPlot * parent);
     virtual ~LineOverlay();
     
+    void reset();
+
     void setPointA(QPointF pointA);
     void setPointB(QPointF pointB);
     void setWidth(double width);
@@ -67,8 +70,26 @@ namespace SliceViewer
     const QPointF & getPointB() const;
     double getWidth() const;
 
+    void setSnapX(double spacing);
+    void setSnapY(double spacing);
+    void setSnap(double spacing);
+    void setSnapEnabled(bool enabled);
+    void setSnapLength(double spacing);
+
+    ///@return the snap-to X interval
+    double getSnapX()
+    { return m_snapX; }
+
+    ///@return the snap-to X interval
+    double getSnapY()
+    { return m_snapY; }
+
+    ///@return true if the line is in creation mode (waiting for first click)
+    bool getCreationMode() const
+    { return m_creation; }
+
   signals:
-  /// Signal sent while the line is being dragged
+    /// Signal sent while the line is being dragged
     void lineChanging(QPointF, QPointF, double);
     /// Signal sent once the drag is completed
     void lineChanged(QPointF, QPointF, double);
@@ -76,6 +97,7 @@ namespace SliceViewer
   private:
     QPoint transform(QPointF coords) const;
     QPointF invTransform(QPoint pixels) const;
+    QPointF snap(QPointF original) const;
 
     QSize sizeHint() const;
     QSize size() const;
@@ -86,6 +108,8 @@ namespace SliceViewer
     void paintEvent(QPaintEvent *event);
 
     eHandleID mouseOverHandle(QPoint pos);
+    bool mouseOverCenter(QPoint pos);
+    void handleDrag(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
@@ -110,9 +134,22 @@ namespace SliceViewer
     eHandleID m_dragHandle;
     /// Start point (in plot coords) of the drag
     QPointF m_dragStart;
+    /// Original PointA at drag start
+    QPointF m_dragStart_PointA;
+    /// Original PointB at drag start
+    QPointF m_dragStart_PointB;
 
     /// Marker that the middle mouse button is pressed (panning)
     bool m_middleButton;
+
+    /// Is snap-to-grid enabled?
+    bool m_snapEnabled;
+    /// Snap to grid spacing in X
+    double m_snapX;
+    /// Grid spacing in Y
+    double m_snapY;
+    /// Snap to length of the line
+    double m_snapLength;
 
   };
 

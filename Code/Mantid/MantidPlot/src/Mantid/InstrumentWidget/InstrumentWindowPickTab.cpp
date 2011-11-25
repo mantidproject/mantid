@@ -22,6 +22,7 @@
 #include <QTextEdit>
 #include <QMenu>
 #include <QAction>
+#include <QActionGroup>
 #include <QLabel>
 #include <QMessageBox>
 #include <QDialog>
@@ -29,6 +30,7 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QLineEdit>
+#include <QSignalMapper>
 
 #include <numeric>
 #include <cfloat>
@@ -122,14 +124,31 @@ QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
   connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
   connect(m_plot,SIGNAL(clickedAt(double,double)),this,SLOT(addPeak(double,double)));
 
+  // Plot context menu actions
   m_sumDetectors = new QAction("Sum",this);
+  m_sumDetectors->setCheckable(true);
+  m_sumDetectors->setChecked(true);
   m_integrateTimeBins = new QAction("Integrate",this);
+  m_integrateTimeBins->setCheckable(true);
+  m_summationType = new QActionGroup(this);
+  m_summationType->addAction(m_sumDetectors);
+  m_summationType->addAction(m_integrateTimeBins);
   m_logY = new QAction("Y log scale",this);
   m_linearY = new QAction("Y linear scale",this);
+  m_yScale = new QActionGroup(this);
+  m_yScale->addAction(m_linearY);
+  m_yScale->addAction(m_logY);
+  m_logY->setCheckable(true);
+  m_linearY->setCheckable(true);
+  m_linearY->setChecked(true);
   connect(m_sumDetectors,SIGNAL(triggered()),this,SLOT(sumDetectors()));
   connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
   connect(m_logY,SIGNAL(triggered()),m_plot,SLOT(setYLogScale()));
   connect(m_linearY,SIGNAL(triggered()),m_plot,SLOT(setYLinearScale()));
+
+  // Instrument display context menu actions
+  m_storeCurve = new QAction("Store curve",this);
+  connect(m_storeCurve,SIGNAL(triggered()),this,SLOT(storeCurve()));
 
   CollapsibleStack* panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
@@ -284,13 +303,38 @@ void InstrumentWindowPickTab::plotContextMenu()
   
   if (m_selectionType > SingleDetectorSelection)
   {// only for multiple detector selectors
-    context.addAction(m_sumDetectors);
-    context.addAction(m_integrateTimeBins);
+    context.addActions(m_summationType->actions());
+    m_sumDetectors->setChecked(m_plotSum);
+    context.addSeparator();
+  }
+
+  if (m_plot->hasStored())
+  {
+    QMenu *removeCurves = new QMenu("Remove",this);
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+    QStringList labels = m_plot->getLabels();
+    foreach(QString label,labels)
+    {
+      QAction *remove = new QAction(label,removeCurves);
+      removeCurves->addAction(remove);
+      connect(remove,SIGNAL(triggered()),signalMapper,SLOT(map()));
+      signalMapper->setMapping(remove,label);
+    }
+    connect(signalMapper, SIGNAL(mapped(const QString &)),
+             this, SLOT(removeCurve(const QString &)));
+    context.addMenu(removeCurves);
   }
 
   QMenu* axes = new QMenu("Axes",this);
-  axes->addAction(m_logY);
-  axes->addAction(m_linearY);
+  axes->addActions(m_yScale->actions());
+  if (m_plot->isYLogScale())
+  {
+    m_logY->setChecked(true);
+  }
+  else
+  {
+    m_linearY->setChecked(true);
+  }
   context.addMenu(axes);
 
   context.exec(QCursor::pos());
@@ -357,7 +401,7 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
  */
 void InstrumentWindowPickTab::plotSingle(int detid)
 {
-  m_plot->clearLabels();
+  m_plot->clearPeakLabels();
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
   size_t wi;
@@ -385,6 +429,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   // set the data 
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
   m_plot->setYScale(*min_it,*max_it);
+  m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
   ProjectionSurface* surface = mInstrumentDisplay->getSurface();
@@ -393,7 +438,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
     QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
     foreach(PeakMarker2D* marker,markers)
     {
-      m_plot->addLabel(new PeakLabel(marker));
+      m_plot->addPeakLabel(new PeakLabel(marker));
       //std::cerr << marker->getLabel().toStdString() << std::endl;
     }
   }
@@ -412,6 +457,7 @@ void InstrumentWindowPickTab::plotTube(int detid)
   Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
+  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ")"; 
   if (parent && ass)
   {
     size_t imin,imax;
@@ -420,6 +466,7 @@ void InstrumentWindowPickTab::plotTube(int detid)
     const int n = ass->nelements();
     if (m_plotSum) // plot sums over detectors vs time bins
     {
+      label += " Sum";
       const Mantid::MantidVec& x = ws->readX(wi);
 
       m_plot->setXScale(x[imin],x[imax]);
@@ -447,9 +494,11 @@ void InstrumentWindowPickTab::plotTube(int detid)
       Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
       m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
       m_plot->setYScale(*min_it,*max_it);
+      m_plot->setLabel(label);
     }
     else // plot detector integrals vs detID
     {
+      label += " Integrals";
       std::vector<double> x;
       x.reserve(n);
       std::map<double,double> ymap;
@@ -486,6 +535,7 @@ void InstrumentWindowPickTab::plotTube(int detid)
         m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
         m_plot->setXScale(x.front(),x.back());
         m_plot->setYScale(ymin,ymax);
+        m_plot->setLabel(label);
       }
     }
   }
@@ -641,4 +691,35 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
     surface->setInteractionModePick();
   }
   mInstrumentDisplay->setMouseTracking(true);
+}
+
+/**
+ * Show context menu of mInstrumentDisplay
+ */
+void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
+{
+  if (m_plot->hasCurve())
+  {
+    QMenu context(this);
+    context.addAction(m_storeCurve);
+    context.exec(QCursor::pos());
+  }
+}
+
+/**
+ * Keep current curve permanently displayed on the plot.
+ */
+void InstrumentWindowPickTab::storeCurve()
+{
+  m_plot->store();
+}
+
+/**
+ * Remove a stored curve.
+ * @param label :: The label of the curve to remove
+ */
+void InstrumentWindowPickTab::removeCurve(const QString & label)
+{
+  m_plot->removeCurve(label);
+  m_plot->replot();
 }

@@ -52,7 +52,9 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   MdiSubWindow(label, app, name, f), WorkspaceObserver(),
   m_workspaceName(wsName),
   m_instrumentActor(NULL),
-  mViewChanged(false), m_blocked(false)
+  mViewChanged(false), 
+  m_blocked(false),
+  m_instrumentDisplayContextMenuOn(false)
 {
   m_surfaceType = FULL3D;
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
@@ -72,6 +74,8 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_InstrumentDisplay = new MantidGLWidget(this);
   controlPanelLayout->addWidget(m_InstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
+  m_InstrumentDisplay->installEventFilter(this);
+  connect(m_InstrumentDisplay,SIGNAL(mouseOut()),this,SLOT(mouseLeftInstrumentDisplay()));
 
   m_xIntegration = new XIntegrationControl(this);
   mainLayout->addWidget(m_xIntegration);
@@ -86,6 +90,8 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
 
   //Render Controls
   m_renderTab = new InstrumentWindowRenderTab(this);
+  connect(m_renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
+  connect(m_renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
   mControlsTab->addTab( m_renderTab, QString("Render"));
   
   // Pick controls
@@ -203,6 +209,14 @@ void InstrumentWindow::selectTab(int tab)
   mControlsTab->setCurrentIndex(tab);
 }
 
+/**
+ * Return the currently displayed tab.
+ */
+InstrumentWindow::Tab InstrumentWindow::getTab()const
+{
+  return (Tab)mControlsTab->currentIndex();
+}
+
 void InstrumentWindow::setSurfaceType(int type)
 {
   if (type < RENDERMODE_SIZE)
@@ -257,11 +271,18 @@ void InstrumentWindow::setSurfaceType(int type)
   update();
 }
 
+/**
+ * Update the colormap on the render tab.
+ */
 void InstrumentWindow::setupColorMap()
 {
-  m_renderTab->setMinValue(m_instrumentActor->minValue(),false);
-  m_renderTab->setMaxValue(m_instrumentActor->maxValue(),false);
-  m_renderTab->setupColorBarScaling(m_instrumentActor->getColorMap(),m_instrumentActor->minPositiveValue());
+  m_renderTab->setupColorBar(
+    m_instrumentActor->getColorMap(),
+    m_instrumentActor->minValue(),
+    m_instrumentActor->maxValue(),
+    m_instrumentActor->minPositiveValue(),
+    m_instrumentActor->autoscaling()
+  );
 }
 
 /**
@@ -754,6 +775,7 @@ void InstrumentWindow::changeScaleType(int type)
 
 void InstrumentWindow::changeColorMapMinValue(double minValue)
 {
+  m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMinValue(minValue);
   setupColorMap();
   m_InstrumentDisplay->refreshView();
@@ -762,6 +784,7 @@ void InstrumentWindow::changeColorMapMinValue(double minValue)
 /// Set the maximumu value of the colour map
 void InstrumentWindow::changeColorMapMaxValue(double maxValue)
 {
+  m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMaxValue(maxValue);
   setupColorMap();
   m_InstrumentDisplay->refreshView();
@@ -1062,4 +1085,50 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
     }
   }
   e->ignore();
+}
+
+/**
+ * Filter events directed to m_InstrumentDisplay and ContextMenuEvent in particular.
+ * @param obj :: Object which events will be filtered.
+ * @param ev :: An ingoing event.
+ */
+bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
+{
+  if (dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay &&
+    ev->type() == QEvent::ContextMenu)
+  {
+    switch(getTab())
+    {
+    case PICK:  m_instrumentDisplayContextMenuOn = true; 
+                m_pickTab->showInstrumentDisplayContextMenu(); 
+                m_instrumentDisplayContextMenuOn = false;
+                break;
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Set on / off autoscaling of the color map on the render tab.
+ * @param on :: On or Off.
+ */
+void InstrumentWindow::setColorMapAutoscaling(bool on)
+{
+  m_instrumentActor->setAutoscaling(on);
+  setupColorMap();
+  m_InstrumentDisplay->refreshView();
+  m_InstrumentDisplay->repaint();
+}
+
+/**
+ * Respond to mouse leaving the instrument display area.
+ */
+void InstrumentWindow::mouseLeftInstrumentDisplay()
+{
+  if (getTab() == PICK && !m_instrumentDisplayContextMenuOn)
+  {
+    // remove the curve from the miniplot
+    m_pickTab->updatePick(-1);
+  }
 }

@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 This algorithm searches the specified spectra in a workspace for peaks, returning a list of the found and successfully fitted peaks. The search algorithm is described in full in reference [1]. In summary: the second difference of each spectrum is computed and smoothed. This smoothed data is then searched for patterns consistent with the presence of a peak. The list of candidate peaks found is passed to a fitting routine and those that are successfully fitted are kept and returned in the output workspace (and logged at information level).
 
@@ -179,7 +179,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters, st
   for (int spec = start; spec < end; ++spec)
   {
 
-    const MantidVec& datax = inputWS->dataX(spec);
+    const MantidVec& datax = inputWS->readX(spec);
 
     for (it = peakCenters.begin(); it != peakCenters.end(); ++it)
     {

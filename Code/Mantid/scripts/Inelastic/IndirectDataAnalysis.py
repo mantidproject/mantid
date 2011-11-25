@@ -2,9 +2,7 @@ from mantidsimple import *
 from mantidplot import *
 from IndirectCommon import *
 
-import math
-import re
-import os.path
+import math, re, os.path
 
 def abscyl(inWS_n, outWS_n, efixed, sample, can):
     ConvertUnits(inWS_n, 'wavelength', 'Wavelength', 'Indirect', efixed)
@@ -260,24 +258,82 @@ def furyfitSeq(inputWS, func, startx, endx, save, plot):
     if ( plot != 'None' ):
         furyfitPlotSeq(wsname, plot)
 
-def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
+def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
+    verbOp = 'True'
+    if verbOp:
+        mtd.sendLogMessage('Starting MSDfit')
+    log_type = 'sample'
     output = []
-    for file in inputs:
+    DataX = []
+    DataY = []
+    DataE = []
+    np = 0
+    runs = sorted(inputs)
+    for file in runs:
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         LoadNexusProcessed(file, root)
-        outWS_n = root[:-3] + 'msd'
-        fit_alg = Linear(root, outWS_n, WorkspaceIndex=0, StartX=startX, 
-            EndX=endX)
-        output.append(outWS_n)
-        A0 = fit_alg.getPropertyValue("FitIntercept")
-        A1 = fit_alg.getPropertyValue("FitSlope")
+        inX = mtd[root].readX(0)
+        inY = mtd[root].readY(0)
+        inE = mtd[root].readE(0)
+        logy =[]
+        loge =[]
+        for i in range(0, len(inY)):
+            ly = math.log(inY[i])
+            logy.append(ly)
+            loge.append(math.log(inY[i]+inE[i])-ly)
+        lnWS = root[:-3] + 'lnI'
+        CreateWorkspace(lnWS, inX, logy, loge, 1)
+        log_name = root[0:8]+'_'+log_type
+        log_file = log_name+'.txt'
+        log_path = FileFinder.getFullPath(log_file)
+        if (log_path == ''):
+            mtd.sendLogMessage('Run : '+root[0:8] +' ; Temperature file not found')
+        else:			
+            mtd.sendLogMessage('Found '+log_path)
+            LoadLog(root,log_path)
+            run_logs = mtd[root].getRun()
+            tmp = run_logs[log_name].value
+            temp = tmp[len(tmp)-1]
+            mtd.sendLogMessage('Run : '+root[0:8] +' ; Temperature = '+str(temp))
+        outWS = root[:-3] + 'msd'
+        fit_alg = Linear(lnWS, outWS, WorkspaceIndex=0, StartX=startX, EndX=endX)
+        output.append(outWS)
+        A0 = fit_alg.getPropertyValue('FitIntercept')
+        A1 = fit_alg.getPropertyValue('FitSlope')
+        Cov00 = fit_alg.getPropertyValue('Cov00')
+        Cov11 = fit_alg.getPropertyValue('Cov11')
         title = 'Intercept: '+A0+' ; Slope: '+A1
+        er0 = math.sqrt(float(Cov00))
+        er1 = math.sqrt(float(Cov11))
+        fit = 'Intercept: '+A0+' +- '+str(er0)+' ; Slope: '+A1+' +- '+str(er1)
+        if verbOp:
+            mtd.sendLogMessage(fit)
+        if (log_path == ''):
+            DataX.append(int(root[3:8]))
+            xlabel = 'Run number'
+        else:
+            DataX.append(temp)
+            xlabel = 'Temperature (K)'
+        DataY.append(-float(A1)*3.0)
+        DataE.append(er1*3.0)
+        np += 1
         if Plot:
-            graph=plotSpectrum([root,outWS_n],0, 1)
+            graph=plotSpectrum([lnWS,outWS],0, 1)
             graph.activeLayer().setTitle(title)
-        if Save:
-            SaveNexusProcessed(outWS_n, outWS_n+'.nxs', Title=title)
+            graph.activeLayer().setAxisTitle(Layer.Bottom,'Q^2')
+            graph.activeLayer().setAxisTitle(Layer.Left,'ln(intensity)')
+    fitWS = root[0:8]+'_MsdFit'
+    DataX.append(2*DataX[np-1]-DataX[np-2])
+    CreateWorkspace(fitWS,DataX,DataY,DataE,1)
+    if Plot:
+        graph1=plotSpectrum(fitWS,0,1)
+        graph1.activeLayer().setAxisTitle(Layer.Bottom,xlabel)
+        graph1.activeLayer().setAxisTitle(Layer.Left,'<u2>')
+    if Save:
+        SaveNexusProcessed(fitWS, fitWS+'.nxs', Title=fitWS)
+    if verbOp:
+        mtd.sendLogMessage('Output file : '+fitWS)  
     return output
 
 def plotFury(inWS_n, spec):
@@ -307,22 +363,28 @@ def plotInput(inputfiles,spectra=[]):
 ## abscor (previously in SpencerAnalysis) #####################################
 ###############################################################################
 
-def CubicFit(inputWS, spec):
+def CubicFit(inputWS, spec, verbose=False):
     '''Uses the Mantid Fit Algorithm to fit a cubic function to the inputWS
     parameter. Returns a list containing the fitted parameter values.'''
     function = 'name=UserFunction, Formula=A0+A1*x+A2*x*x, A0=1, A1=0, A2=0'
     fit = Fit(inputWS, spec, Function=function)
-    return fit.getPropertyValue('Parameters')
+    Abs = fit.getPropertyValue('Parameters')
+    if verbose:
+        mtd.sendLogMessage('Group '+str(spec)+' of '+inputWS+' ; fit coefficients are : '+Abs)
+    return Abs
 
-def applyCorrections(inputWS, cannisterWS, corrections, efixed):
+def applyCorrections(inputWS, canWS, corr, verbose=False):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
-    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect',
-        EFixed=efixed)
-    if cannisterWS != '':
-        ConvertUnits(cannisterWS, cannisterWS, 'Wavelength', 'Indirect',
-            EFixed=efixed)
+    efixed = getEfixed(inputWS)                # Get efixed
+    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect', EFixed=efixed)
+    corrections = [corr[0]+'_1']
+    CorrectedWS = inputWS[0:-3] +'Corrected'
+    if canWS != '':
+        corrections = [corr[0]+'_1', corr[0]+'_2', corr[0]+'_3', corr[0]+'_4']
+        CorrectedWS = inputWS[0:-3] +'Correct_'+ canWS[3:8]
+        ConvertUnits(canWS, canWS, 'Wavelength', 'Indirect', EFixed=efixed)
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
     # that of the input (sample) workspace
@@ -330,69 +392,80 @@ def applyCorrections(inputWS, cannisterWS, corrections, efixed):
         if ( mtd[ws].getNumberHistograms() != nHist ):
             raise ValueError('Mismatch: num of spectra in '+ws+' and inputWS')
     # Workspaces that hold intermediate results
-    CorrectedWorkspace = getWSprefix(inputWS) + 'csam'
-    CorrectedSampleWorkspace = '__csamws'
-    CorrectedCanWorkspace = getWSprefix(cannisterWS) + 'ccan'
+    CorrectedSampleWS = '__csam'
+    CorrectedCanWS = '__ccan'
     for i in range(0, nHist): # Loop through each spectra in the inputWS
-        ExtractSingleSpectrum(inputWS, CorrectedSampleWorkspace, i)
+        ExtractSingleSpectrum(inputWS, CorrectedSampleWS, i)
         if ( len(corrections) == 1 ):
-            Ass = CubicFit(corrections[0], i)
-            PolynomialCorrection(CorrectedSampleWorkspace, 
-                CorrectedSampleWorkspace, Ass, 'Divide')
+            Ass = CubicFit(corrections[0], i, verbose)
+            PolynomialCorrection(CorrectedSampleWS, CorrectedSampleWS, Ass, 'Divide')
             if ( i == 0 ):
-                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
+                CloneWorkspace(CorrectedSampleWS, CorrectedWS)
             else:
-                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
+                ConjoinWorkspaces(CorrectedWS, CorrectedSampleWS)
         else:
-            ExtractSingleSpectrum(cannisterWS, CorrectedCanWorkspace, i)
-            Acc = CubicFit(corrections[3], i)
-            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
-                Acc, 'Divide')
-            Acsc = CubicFit(corrections[2], i)
-            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
-                Acsc, 'Multiply')
-            Minus(CorrectedSampleWorkspace, CorrectedCanWorkspace,
-                CorrectedSampleWorkspace)
-            Assc = CubicFit(corrections[1], i)
-            PolynomialCorrection(CorrectedSampleWorkspace, 
-                CorrectedSampleWorkspace, Assc, 'Divide')
+            ExtractSingleSpectrum(canWS, CorrectedCanWS, i)
+            Acc = CubicFit(corrections[3], i, verbose)
+            PolynomialCorrection(CorrectedCanWS, CorrectedCanWS, Acc, 'Divide')
+            Acsc = CubicFit(corrections[2], i, verbose)
+            PolynomialCorrection(CorrectedCanWS, CorrectedCanWS, Acsc, 'Multiply')
+            Minus(CorrectedSampleWS, CorrectedCanWS, CorrectedSampleWS)
+            Assc = CubicFit(corrections[1], i, verbose)
+            PolynomialCorrection(CorrectedSampleWS, CorrectedSampleWS, Assc, 'Divide')
             if ( i == 0 ):
-                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
+                CloneWorkspace(CorrectedSampleWS, CorrectedWS)
             else:
-                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
-    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace, 'DeltaE', 'Indirect',
-        EFixed=efixed)
-    if cannisterWS != '':
-        ConvertUnits(CorrectedCanWorkspace, CorrectedCanWorkspace, 'DeltaE',
-            'Indirect', EFixed=efixed)
+                ConjoinWorkspaces(CorrectedWS, CorrectedSampleWS)
+    ConvertUnits(inputWS, inputWS, 'DeltaE', 'Indirect', EFixed=efixed)
+    ConvertUnits(CorrectedWS, CorrectedWS, 'DeltaE', 'Indirect', EFixed=efixed)
+    if canWS != '':
+        mantid.deleteWorkspace(CorrectedCanWS)
+        ConvertUnits(canWS, canWS, 'DeltaE', 'Indirect', EFixed=efixed)
+    return CorrectedWS
                 
 def abscorFeeder(sample, container, geom, useCor):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
+    verbOp = True
+    Plot = True
+    workdir = mantid.getConfigProperty('defaultsave.directory')
     if useCor:
-        ## Files named: (ins)(runNo)_(geom)_(suffix)
-        ins = mtd[sample].getInstrument().getName()
-        ins = ConfigService().facility().instrument(ins).shortName().lower()
-        run = mtd[sample].getRun().getLogData('run_number').value
-        name = ins + run + '_' + geom + '_'
-        corrections = [loadNexus(name+'ass.nxs')]
-        if container != '': # if container is given we have 3 more corrections
-            corrections.append(loadNexus(name+'assc.nxs'))
-            corrections.append(loadNexus(name+'acsc.nxs'))
-            corrections.append(loadNexus(name+'acc.nxs'))
+        s_hist = mtd[sample].getNumberHistograms()       # no. of hist/groups in sam
+        if container != '':
+            c_hist = mtd[container].getNumberHistograms()
+            if s_hist != c_hist:	# check that no. groups are the same
+                error = 'Can histograms (' +str(c_hist) + ') not = Sample (' +str(s_hist) +')'	
+                exit(error)
+            else:
+                if verbOp:
+                    mtd.sendLogMessage('Correcting sample ' + sample + ' with ' + container)
+        else:
+            if verbOp:
+                mtd.sendLogMessage('Correcting sample ' + sample)
+        file = sample[:-3] + geom +'_Abs.nxs'
+        path = os.path.join(workdir, file)					# path name for nxs file
+        if verbOp:
+            mtd.sendLogMessage('Correction file :'+path)
+        corrections = [loadNexus(path)]
+        result = applyCorrections(sample, container, corrections, verbOp)
+        SaveNexusProcessed(result,os.path.join(workdir,result+'.nxs'))
+        plot_list = [result,sample]
+        if ( container != '' ):
+            plot_list.append(container)
+        if verbOp:
+            mtd.sendLogMessage('Output files created : '+workdir+result+'.nxs')
+        if Plot:
+           graph=plotSpectrum(plot_list,0)
     else:
         if ( container == '' ):
-            sys.exit("What do you want me to do?")
+            sys.exit('Invalid options - nothing to do!')
         else:
-            result = getWSprefix(sample) + 'bgd'
-            Minus(sample, container, result)
-            return
-    # Get efixed
-    efixed = getEfixed(sample)
-    # Fire off main routine
-    try:
-        applyCorrections(sample, container, corrections, efixed)
-    except ValueError:
-        print """Number of histograms in corrections workspaces do not match
-            the sample workspace."""
-        raise
+            result = sample[0:8] +'_Subtract_'+ container[3:8]
+            Minus(sample,container,result)
+            SaveNexusProcessed(result,os.path.join(workdir,result+'.nxs'))
+            if verbOp:
+	            mtd.sendLogMessage('Subtracting '+container+' from '+sample)
+	            mtd.sendLogMessage('Output file created : '+workdir+result+'.nxs')
+            if Plot:
+                graph=plotSpectrum([result,sample,container],0)
+    return

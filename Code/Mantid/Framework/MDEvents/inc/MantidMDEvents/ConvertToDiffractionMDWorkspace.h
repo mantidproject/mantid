@@ -54,6 +54,8 @@ namespace MDEvents
     MDEvents::MDEventWorkspace3Lean::sptr ws;
     /// Do we clear events on the input during loading?
     bool ClearInputWorkspace;
+    /// Are we appending?
+    bool Append;
     /// Perform LorentzCorrection on the fly.
     bool LorentzCorrection;
     /// Map of all the detectors in the instrument

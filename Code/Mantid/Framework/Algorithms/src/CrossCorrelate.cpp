@@ -91,7 +91,7 @@ void CrossCorrelate::exec()
       throw std::runtime_error("Must specify xmin < xmax");
 
    	// Now check if the range between x_min and x_max is valid
-   	const MantidVec& referenceX=inputWS->dataX(index_ref);
+    const MantidVec& referenceX=inputWS->readX(index_ref);
     MantidVec::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
    		throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
@@ -190,9 +190,9 @@ void CrossCorrelate::exec()
     out->dataX(i)=XX;
 
     // Get temp references
-    const MantidVec&  iX=inputWS->dataX(spec_index);
-    const MantidVec&  iY=inputWS->dataY(spec_index);
-		const MantidVec&  iE=inputWS->dataE(spec_index);
+    const MantidVec&  iX=inputWS->readX(spec_index);
+    const MantidVec&  iY=inputWS->readY(spec_index);
+    const MantidVec&  iE=inputWS->readE(spec_index);
 		// Copy Y,E data of spec(i) to temp vector
 		// Now rebin on the grid of reference spectrum
 	        std::vector<double> tempY(nY);

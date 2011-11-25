@@ -60,6 +60,8 @@ namespace Mantid
       static void setU(OrientedLattice& self,PyObject* p);
       /// setUB - 3x3 numpy array
       static void setUB(OrientedLattice& self,PyObject* p);
+      /// setUFromVectors - 2 numpy arrays of length3
+      static void setUFromVectors(OrientedLattice& self,PyObject* p1,PyObject* p2);
     private:
       /// Stored Python object
       PyObject *m_self;

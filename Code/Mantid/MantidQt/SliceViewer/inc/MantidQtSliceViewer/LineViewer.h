@@ -26,11 +26,15 @@ public:
     void setStart(Mantid::Kernel::VMD start);
     void setEnd(Mantid::Kernel::VMD end);
     void setWidth(Mantid::Kernel::VMD width);
+    void setPlanarWidth(double width);
     void setNumBins(size_t numBins);
     void setFreeDimensions(bool all, int dimX, int dimY);
 
     void showPreview();
     void showFull();
+
+    double getPlanarWidth() const;
+    Mantid::Kernel::VMD getWidth() const;
 
 private:
     void createDimensionWidgets();
@@ -48,6 +52,13 @@ public slots:
     void numBinsChanged();
     void adaptiveBinsChanged();
     void setFreeDimensions(size_t dimX, size_t dimY);
+
+signals:
+    /// Signal emitted when the planar width changes
+    void changedPlanarWidth(double);
+    /// Signal emitted when the start or end position has changed
+    void changedStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
+
 
 private:
     // -------------------------- Widgets ----------------------------

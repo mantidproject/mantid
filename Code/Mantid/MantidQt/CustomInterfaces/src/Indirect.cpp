@@ -1174,7 +1174,7 @@ void Indirect::plotRaw()
       "file = r'" + rawFile + "'\n"
       "name = op.splitext( op.split(file)[1] )[0]\n"
       "bgrange = " + bgrange + "\n"
-      "LoadRaw(file, name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
+      "Load(file, name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
       "if ( bgrange != [-1, -1] ):\n"
       "    #Remove background\n"
       "    FlatBackground(name, name+'_bg', bgrange[0], bgrange[1], Mode='Mean')\n"
@@ -1326,10 +1326,12 @@ void Indirect::calPlotRaw()
     
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
-
-  QString pyInput = "LoadRaw(r'" + filename + "', '" + wsname + "', SpectrumMin=" 
+  QString pyInput = "Load(r'" + filename + "', '" + wsname + "', SpectrumMin="
     + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
     + m_uiForm.leSpectraMax->text() + ")\n";
+
+  std::cout << "Indirect::calPlotRaw() calling: " << pyInput.toStdString() << std::endl;
+
   QString pyOutput = runPythonCode(pyInput);
     
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
@@ -1647,7 +1649,7 @@ void Indirect::slicePlotRaw()
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
-    QString pyInput = "LoadRaw(r'" + filename + "', '" + wsname + "', SpectrumMin=" 
+    QString pyInput = "Load(r'" + filename + "', '" + wsname + "', SpectrumMin="
       + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
       + m_uiForm.leSpectraMax->text() + ")\n";
     QString pyOutput = runPythonCode(pyInput);

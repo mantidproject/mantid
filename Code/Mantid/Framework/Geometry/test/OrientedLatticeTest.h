@@ -18,9 +18,10 @@ class OrientedLatticeTest : public CxxTest::TestSuite
 {
 public:
 
+  /// test constructors, access to some of the variables
   void test_Simple()
   {
-    // test constructors, access to some of the variables
+
     OrientedLattice u1,u2(3,4,5),u3(2,3,4,85.,95.,100),u4;
     u4=u2;
     TS_ASSERT_EQUALS(u1.a1(),1);
@@ -32,10 +33,10 @@ public:
     TS_ASSERT_DELTA(u2.a(),3,1e-10);
   }
 
+  /// test more advanced calculations
+  /// the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
   void test_Advanced()
   {
-    // test more advanced calculations
-    // the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
     DblMatrix newGstar(3,3);
     newGstar[0][0]=0.162546756312;
     newGstar[0][1]=0.00815256992072;
@@ -90,24 +91,22 @@ public:
 
 
 
-  /** @author Alex Buts */
+  /** @author Alex Buts, fixed by Andrei Savici */
   void testUnitRotation()
   {
     OrientedLattice theCell;
-    DblMatrix rot;
+    DblMatrix rot,expected(3,3);
     TSM_ASSERT_THROWS_NOTHING("The unit transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
     rot = theCell.getUB();
-
-    std::vector<double> Rot = rot.get_vector();
-    std::vector<double> rez(9,0);
-    rez[0]=1;
-    rez[4]=1;
-    rez[8]=1;
-    double err=0;
-    for(int i=0;i<9;i++){
-      err += (rez[i]-Rot[i])*(rez[i]-Rot[i]);
-    }
-    TSM_ASSERT_DELTA("This should produce proper permutation matrix defined as a vector",0,err,1.e-6);
+    /*this should give
+      / 0 1 0 \
+      | 0 0 1 |
+      \ 1 0 0 /
+      */
+    expected[0][1]=1.;
+    expected[1][2]=1.;
+    expected[2][0]=1.;
+    TSM_ASSERT("This should produce proper permutation matrix",rot.equals(expected,1e-8));
 
   }
 
@@ -121,47 +120,39 @@ public:
     rot = theCell.getUB();
   }
 
-  /** @author Alex Buts */
+  /** @author Alex Buts, fixed by Andrei Savici */
   void testPermutations()
   {
     OrientedLattice theCell;
-    DblMatrix rot;
+    DblMatrix rot,expected(3,3);
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(0,1,0),V3D(1,0,0)));
     rot = theCell.getUB();
-
-    std::vector<double> Rot = rot.get_vector();
-    std::vector<double> rez(9,0);
-    rez[1]=1;
-    rez[3]=1;
-    rez[8]=-1;
-    double err=0;
-    for(int i=0;i<9;i++){
-      err += (rez[i]-Rot[i])*(rez[i]-Rot[i]);
-    }
-    TSM_ASSERT_DELTA("This should produce proper permutation matrix defined as a vector",0,err,1.e-6);
+    /*this should give
+      / 1 0 0 \
+      | 0 0 -1 |
+      \ 0 1 0 /
+      */
+    expected[0][0]=1.;
+    expected[1][2]=-1.;
+    expected[2][1]=1.;
+    TSM_ASSERT("This should produce proper permutation matrix",rot.equals(expected,1e-8));
 
   }
 
-  /** @author Alex Buts */
+  /** @author Alex Buts fixed by Andrei Savici*/
   void testRotations2D()
   {
     OrientedLattice theCell;
     DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,1,0),V3D(1,-1,0)));
     rot = theCell.getUB();
-    V3D dir0(sqrt(2.),0,0);
-
-    std::vector<double> Rot = rot.get_vector();
-    double x = Rot[0]*dir0.X()+Rot[3]*dir0.Y()+Rot[6]*dir0.Z();
-    double y = Rot[1]*dir0.X()+Rot[4]*dir0.Y()+Rot[7]*dir0.Z();
-    double z = Rot[2]*dir0.X()+Rot[5]*dir0.Y()+Rot[8]*dir0.Z();
-
-    TSM_ASSERT_DELTA("X-coord shoud be 1",1,x,1.e-5);
-    TSM_ASSERT_DELTA("Y-coord shoud be 1",1,y,1.e-5);
-    TSM_ASSERT_DELTA("Z-coord shoud be 0",0,z,1.e-5);
+    V3D dir0(sqrt(2.),0,0),rez,expected(1,0,1);
+    rez=rot*dir0;
+    // should be (1,0,1)
+    TSM_ASSERT_EQUALS("vector should be (1,0,1)",rez,expected);
   }
 
-  /** @author Alex Buts */
+  /** @author Alex Buts fixed by Andrei Savici*/
   void testRotations3D()
   {
     OrientedLattice theCell;
@@ -172,21 +163,10 @@ public:
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(ort1,ort2));
     rot = theCell.getUB();
 
-    V3D dir(1,0,0);
-    V3D xx = ort1.cross_prod(ort2);
-    //double pp = xx.scalar_prod(dir); // dir should belong to ort1,ort2 plain
+    V3D dir(1,0,0),result,expected(sqrt(0.5),0,sqrt(0.5));
+    result=rot*dir;
+    TSM_ASSERT_EQUALS("vector should be (sqrt(0.5),0,sqrt(0.5))",result,expected);
 
-    double p1=dir.scalar_prod(ort1)/ort1.norm();
-    double p2=dir.scalar_prod(ort2)/ort2.norm();
-
-    std::vector<double> Rot = rot.get_vector();
-    double x = Rot[0]*dir.X()+Rot[3]*dir.Y()+Rot[6]*dir.Z();
-    double y = Rot[1]*dir.X()+Rot[4]*dir.Y()+Rot[7]*dir.Z();
-    double z = Rot[2]*dir.X()+Rot[5]*dir.Y()+Rot[8]*dir.Z();
-
-    TSM_ASSERT_DELTA("X-coord should be 1/sqrt(2)",p1,x,1.e-5);
-    TSM_ASSERT_DELTA("Y-coord shlule be 1/sqrt(2)",p2,y,1.e-5);
-    TSM_ASSERT_DELTA("Z-coord should be 0"  ,0, z,1.e-5);
   }
 
   /** @author Alex Buts */
@@ -209,7 +189,33 @@ public:
     TSM_ASSERT_DELTA("Z-coord should be specified correctly",-0.020536948488997286,z,1.e-5);
   }
 
+  ///Test consistency for setUFromVectors
+  void testconsistency()
+  {
+    OrientedLattice theCell(2,2,2,90,90,90);
+    V3D u(1,2,0), v(-2,1,0),expected1(0,0,1),expected2(1,0,0),res1,res2;
+    DblMatrix rot;
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(u,v));
+    rot = theCell.getUB();
+    res1=rot*u; res1.normalize();
+    res2=rot*v; res2.normalize();
+    TSM_ASSERT_EQUALS("Ub*u should be along the beam",res1,expected1);
+    TSM_ASSERT_EQUALS("Ub*v should be along the x direction",res2,expected2);
+  }
 
+  /// test getting u and v vectors
+  void testuvvectors()
+  {
+    OrientedLattice theCell(1,2,3,30,60,45);
+    DblMatrix rot;
+    TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,2,0),V3D(-1,1,0)));
+    rot = theCell.getUB();
+    V3D u=theCell.getuVector(),v=theCell.getvVector(),expected1(0,0,1),expected2(1,0,0),res1,res2;
+    res1=rot*u; res1.normalize();
+    res2=rot*v; res2.normalize();
+    TSM_ASSERT_EQUALS("Ub*u should be along the beam",res1,expected1);
+    TSM_ASSERT_EQUALS("Ub*v should be along the x direction",res2,expected2);
+  }
 
 };
 

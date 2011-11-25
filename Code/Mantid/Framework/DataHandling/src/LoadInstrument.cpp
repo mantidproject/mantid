@@ -161,7 +161,7 @@ namespace Mantid
         // Really create the instrument
         Progress * prog = new Progress(this, 0, 1, 100);
         m_instrument = parser.parseXML(prog);
-
+        delete prog;
         // Add to data service for later retrieval
         InstrumentDataService::Instance().add(instrumentNameMangled, m_instrument);
       }

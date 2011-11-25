@@ -1,93 +1,50 @@
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/CoordTransform.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/SlicingAlgorithm.h"
-
-using Mantid::API::IMDEventWorkspace_sptr;
-
+#include "MantidAPI/Algorithm.h"
+#include "MantidMDEvents/BinMD.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
-  namespace Geometry
-  {
-    //Forward declaration
-    class MDImplicitFunction;
-  }
 namespace MDEvents
 {
 
-  /** Take a MDEventWorkspace and bin it to a dense histogram
-   * in a MDHistoWorkspace. This is principally used for visualization.
-   * 
-   * The output workspace may have fewer
-   * dimensions than the input MDEventWorkspace.
-   *
-   * @author Janik Zikovsky
-   * @date 2011-03-29 11:28:06.048254
-   */
-  class DLLExport BinToMDHistoWorkspace  : public SlicingAlgorithm
+  /** Deprecated -> BinMD
+    
+    @date 2011-11-22
+
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+  */
+  class DLLExport BinToMDHistoWorkspace  : public BinMD, public API::DeprecatedAlgorithm
   {
   public:
     BinToMDHistoWorkspace();
-    ~BinToMDHistoWorkspace();
-
-    /// Algorithm's name for identification
-    virtual const std::string name() const { return "BinToMDHistoWorkspace";};
-    /// Algorithm's version for identification
-    virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDEvents";}
-
-  private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-    /// Initialise the properties
-    void init();
-    /// Run the algorithm
-    void exec();
-
-    /// Helper method
-    template<typename MDE, size_t nd>
-    void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
-    /// Helper method
-    template<typename MDE, size_t nd>
-    void binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
-    /// Method to bin a single MDBox
-    template<typename MDE, size_t nd>
-    void binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
-
-
-    /// The output MDHistoWorkspace
-    Mantid::MDEvents::MDHistoWorkspace_sptr outWS;
-    /// Progress reporting
-    Mantid::API::Progress * prog;
-    /// ImplicitFunction used
-    Mantid::Geometry::MDImplicitFunction * implicitFunction;
-
-    /// Cached values for speed up
-    size_t * indexMultiplier;
-    signal_t * signals;
-    signal_t * errors;
-
-
+    virtual ~BinToMDHistoWorkspace();
+    virtual const std::string name() const;
   };
 
 
-} // namespace Mantid
 } // namespace MDEvents
+} // namespace Mantid
 
 #endif  /* MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_ */

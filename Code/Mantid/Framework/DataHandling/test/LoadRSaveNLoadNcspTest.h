@@ -20,13 +20,11 @@
 #include <fstream>
 #include <Poco/Path.h>
 
-using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using namespace Mantid::NeXus;
 
 class LoadRSaveNLoadNcspTest : public CxxTest::TestSuite
 {

@@ -57,7 +57,7 @@
 #include <iostream>
 #include <sstream>
 #include "MantidAPI/IMDWorkspace.h"
-#include "Mantid/SliceViewer/SliceViewerWindow.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 
 
 using namespace std;
@@ -492,7 +492,7 @@ void MantidUI::importBoxDataTable()
     if (!ws) return;
     ITableWorkspace_sptr tabWs = ws->makeBoxTable(0,0);
     if (!tabWs) return;
-    std::string tableName = wsName.toStdString() + "_boxdata";
+    std::string tableName = wsName.toStdString() + std::string("_boxdata");
     AnalysisDataService::Instance().addOrReplace(tableName, tabWs);
     // Now show that table
     importWorkspace(QString::fromStdString(tableName), true, true);
@@ -556,6 +556,26 @@ void MantidUI::showMDPlot()
     ml->close();
     QApplication::restoreOverrideCursor();
   }
+}
+
+/*
+Generates a table workspace from a md workspace and pulls up
+a grid to display the results.
+*/
+void MantidUI::showListData()
+{
+  QString wsName = getSelectedWorkspaceName();
+  QString tableWsName = wsName + "_data_list_table";
+
+  Mantid::API::IAlgorithm_sptr queryWorkspace = this->createAlgorithm("QueryMDWorkspace");
+  queryWorkspace->initialize();
+  queryWorkspace->setPropertyValue("InputWorkspace", wsName.toStdString());
+  std::string sTableWorkspaceName=tableWsName.toStdString();
+  queryWorkspace->setPropertyValue("OutputWorkspace", sTableWorkspaceName);
+  queryWorkspace->setProperty("LimitRows", false);
+  queryWorkspace->execute();
+
+  importWorkspace(tableWsName);
 }
 
 void MantidUI::showVatesSimpleInterface()
@@ -636,7 +656,7 @@ void MantidUI::showSliceViewer()
     // Create the slice viewer MDI window
     SliceViewerWindow * w = new SliceViewerWindow(wsName, appWindow());
     // And add it
-    appWindow()->d_workspace->addSubWindow(w);
+    //appWindow()->d_workspace->addSubWindow(w);
     w->showNormal();
   }
 
@@ -2004,7 +2024,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
   return plotSpectraList(wsName, spec, false);
 }
 
-MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
+MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph::CurveType style)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   MantidMatrix* m = getMantidMatrix(wsName);
@@ -2035,9 +2055,8 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
     return ml;
   }
 
-  ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-  Graph *g = ml->activeGraph();
-  appWindow()->polishGraph(g,Graph::Line);
+  // TODO: Use the default style instead of a line if nothing is passed into this method
+  ml = appWindow()->multilayerPlot(t,t->colNames(),style);
   setUpBinGraph(ml,wsName, ws);
   ml->askOnCloseEvent(false);
   QApplication::restoreOverrideCursor();

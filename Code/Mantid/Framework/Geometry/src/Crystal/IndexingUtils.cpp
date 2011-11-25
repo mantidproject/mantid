@@ -1331,6 +1331,117 @@ V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
   return c_dir;
 }
 
+/**
+    Construct a sublist of the specified list of a,b,c directions, by removing
+   all directions that seem to be duplicates.  If several directions all have
+   the same length (within the specified length tolerance) and have the
+   same direction (within the specified angle tolerange) then only one of 
+   those directions will be recorded in the sublist.  The one that indexes
+   the most peaks, within the specified tolerance will be kept.
+ 
+   @param  new_list            This vector will be cleared and filled with the
+                               vectors from the directions list that are not
+                               duplicates of other vectors in the list.
+   @param  directions          Input list of possible a,b,c directions, listed
+                               in order of increasing vector norm.  This
+                               list will be cleared by this method.
+   @param  q_vectors           List of q_vectors that should be indexed
+   @param  required_tolerance  The tolerance for indexing
+   @param  len_tol             The tolerance on the relative difference in 
+                               length for two directions to be considered
+                               equal.  Eg. if relative differences must be
+                               less than 5% for two lengths to be considered
+                               the same, pass in .05 for the len_tol.
+   @param  ang_tol             The tolerance for the difference in directions,
+                               specified in degrees.
+
+ */
+void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
+                                       std::vector<V3D>  & directions,
+                                 const std::vector<V3D>  & q_vectors,
+                                       double              required_tolerance,
+                                       double              len_tol,
+                                       double              ang_tol )
+{
+  new_list.clear();
+  std::vector<V3D> temp;
+
+  V3D current_dir;
+  V3D next_dir;
+  V3D zero_vec(0,0,0);
+
+  double current_length;
+  double next_length;
+  double length_diff;
+  double angle; 
+  size_t dir_num = 0;
+  size_t check_index;
+  bool   new_dir;
+
+  while ( dir_num < directions.size() )     // put sequence of similar vectors
+  {                                         // in list temp
+    current_dir    = directions[ dir_num ];
+    current_length = current_dir.norm();
+    dir_num++;
+
+    if ( current_length > 0 )                // skip any zero vectors
+    {
+      temp.clear();
+      temp.push_back( current_dir );
+      check_index = dir_num;
+      new_dir     = false;
+      while ( check_index < directions.size() && !new_dir )
+      {
+        next_dir    = directions[ check_index ];
+        next_length = next_dir.norm();
+        if ( next_length > 0 )
+        {
+          length_diff = fabs( next_dir.norm() - current_length );
+          if ( ( length_diff/current_length ) < len_tol )  // continue scan
+          {
+            angle = current_dir.angle( next_dir ) * 180.0/PI;
+            if ( (angle < ang_tol) || (angle > 180.0-ang_tol) )
+            {
+              temp.push_back( next_dir );
+              directions[check_index] = zero_vec; // mark off this direction 
+            }                                     // since it was duplicate
+
+            check_index++;                    // keep checking all vectors with 
+          }                                   // essentially the same length   
+          else
+            new_dir = true;                   // we only know we have a new
+                                              // direction if the length is 
+                                              // different, since list is 
+        }                                     // sorted by length !
+        else
+          check_index++;                      // just move on
+      }
+                                              // now scan through temp list to
+      int max_indexed = 0;                    // find the one that indexes most
+      int num_indexed;
+      int max_i = -1;
+      for ( size_t i = 0; i < temp.size(); i++ )
+      {
+        num_indexed = NumberIndexed_1D( temp[i],
+                                        q_vectors,
+                                        required_tolerance );
+        if ( num_indexed > max_indexed )
+        {
+          max_indexed = num_indexed;
+          max_i = (int)i;
+        }
+      }
+
+      if ( max_indexed > 0 )               // don't bother to add any direction
+      {                                    // that doesn't index anything
+        new_list.push_back( temp[ max_i ] );
+      }
+    }
+  }
+
+  directions.clear();
+}
+
 
 /**
   Check whether or not the components of the specified vector are within
@@ -1455,6 +1566,50 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   {
     hkl = UB_inverse * q_vectors[i];
     if ( ValidIndex( hkl, tolerance ) )
+    {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+
+/**
+  Calculate the number of Q vectors that are mapped to a integer index
+  value by taking the dot product with the specified direction vector.  The 
+  direction vector represents a possible unit cell edge vector in real space.
+  The dot product must be within the specified tolerance of an integer, 
+  in order to count as indexed.
+  
+  @param direction    A V3D specifying a possible edge vector in real space.
+  @param q_vectors    std::vector of V3D objects that contains the list of 
+                      q_vectors that are indexed by the corresponding hkl
+                      vectors.
+  @param tolerance    The maximum allowed distance to an integer from the dot
+                      products of peaks with the specified direction.
+
+  @return A non-negative integer giving the number of q-vectors indexed in
+          one direction by the specified direction vector. 
+ */
+int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
+                                     const std::vector<V3D>  & q_vectors,
+                                           double              tolerance )
+{
+  if ( direction.norm() == 0 )
+    return 0;
+
+  double proj_value;
+  double error;
+  int    nearest_int;
+  int    count = 0;
+ 
+  for ( size_t i = 0; i < q_vectors.size(); i++ )
+  {
+    proj_value = direction.scalar_prod( q_vectors[i] );
+    nearest_int = round( proj_value );
+    error = fabs( proj_value - nearest_int );
+    if ( error <= tolerance )
     {
       count++;
     }

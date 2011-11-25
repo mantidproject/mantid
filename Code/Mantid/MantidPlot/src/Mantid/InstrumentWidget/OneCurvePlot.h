@@ -4,6 +4,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_item.h>
 #include <QList>
+#include <QStringList>
+#include <QMap>
 
 class QwtPlotCurve;
 class QwtPlotZoomer;
@@ -11,6 +13,7 @@ class PeakLabel;
 class PeakMarker2D;
 /**
   * Implements a simple widget for plotting a single curve.
+  * Allows to keep more than one curve.
   */
 class OneCurvePlot: public QwtPlot
 {
@@ -18,9 +21,18 @@ class OneCurvePlot: public QwtPlot
 public:
   OneCurvePlot(QWidget* parent);
   void setData(const double* x,const double* y,int dataSize);
+  void setLabel(const QString& label);
   void setYAxisLabelRotation(double degrees);
-  void addLabel(PeakLabel*);
-  void clearLabels();
+  void addPeakLabel(PeakLabel*);
+  void clearPeakLabels();
+  bool hasCurve()const;
+  void store();
+  bool hasStored()const;
+  QStringList getLabels()const;
+  void removeCurve(const QString& label);
+  void recalcXAxisDivs();
+  void recalcYAxisDivs();
+  bool isYLogScale()const;
 public slots:
   void setXScale(double from, double to);
   void setYScale(double from, double to);
@@ -38,10 +50,14 @@ protected:
   void mouseReleaseEvent(QMouseEvent*);
 private:
   QwtPlotCurve* m_curve;
+  QString m_label; ///< label to identify stored curve
   QwtPlotZoomer* m_zoomer; ///< does zooming
   int m_x0; ///< save x coord of last left mouse click
   int m_y0; ///< save y coord of last left mouse click
   QList<PeakLabel*> m_peakLabels;
+  QMap<QString,QwtPlotCurve*> m_stored; ///< stored curves
+  QList<QColor> m_colors; ///< colors for stored curves
+  int m_colorIndex;
 };
 
 class PeakLabel: public QwtPlotItem

@@ -52,7 +52,7 @@ public:
     //checking the level - this should be set to debug in the config file
     //therefore this should only return false for debug
     TS_ASSERT(log1.is(Poco::Message::PRIO_DEBUG) == false); //debug
-    TS_ASSERT(log1.is(Poco::Message::PRIO_INFORMATION)); //information
+    TS_ASSERT(log1.is(Poco::Message::PRIO_INFORMATION)==false); //information
     TS_ASSERT(log1.is(Poco::Message::PRIO_NOTICE)); //information
     TS_ASSERT(log1.is(Poco::Message::PRIO_WARNING)); //warning
     TS_ASSERT(log1.is(Poco::Message::PRIO_ERROR)); //error

@@ -30,6 +30,7 @@
 #include <vector>
 #include <qfiledialog.h>
 #include <limits>
+#include "MantidQtSliceViewer/SnapToGridDialog.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -91,9 +92,6 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
-  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(colorRangeFullSlot()));
-  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(colorRangeSliceSlot()));
-  QObject::connect(ui.btnDoLine, SIGNAL(toggled(bool)), this, SLOT(btnDoLineToggled(bool)));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -162,11 +160,11 @@ void SliceViewer::initMenus()
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Full range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(colorRangeFullSlot()));
+  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Slice range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(colorRangeSliceSlot()));
+  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
   m_menuColorOptions->addAction(action);
 
   // --------------- View Menu ----------------------------------------
@@ -332,9 +330,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
 
-
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
+
+  // Send out a signal
+  emit changedShownDim(m_dimX, m_dimY);
 }
 
 
@@ -372,7 +372,7 @@ void SliceViewer::loadColorMap(QString filename)
 
 //------------------------------------------------------------------------------------
 /// Slot for finding the data full range and updating the display
-void SliceViewer::colorRangeFullSlot()
+void SliceViewer::on_btnRangeFull_clicked()
 {
   this->findRangeFull();
   m_colorBar->setDataRange(m_colorRangeFull);
@@ -382,7 +382,7 @@ void SliceViewer::colorRangeFullSlot()
 
 //------------------------------------------------------------------------------------
 /// Slot for finding the current view/slice full range and updating the display
-void SliceViewer::colorRangeSliceSlot()
+void SliceViewer::on_btnRangeSlice_clicked()
 {
   this->findRangeSlice();
   m_colorBar->setViewRange(m_colorRangeSlice);
@@ -399,11 +399,59 @@ void SliceViewer::colorRangeChanged()
 
 //------------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
-void SliceViewer::btnDoLineToggled(bool checked)
+void SliceViewer::on_btnDoLine_toggled(bool checked)
 {
   m_lineOverlay->setVisible(checked);
+  if (checked)
+  {
+    QString text;
+    if (m_lineOverlay->getCreationMode())
+      text = "Click and drag to draw an integration line.\n"
+             "Hold Shift key to limit to 45 degree angles.";
+    else
+      text = "Drag the existing line with its handles,\n"
+             "or click the red X to delete it.";
+    // Show a tooltip near the button
+    QToolTip::showText( ui.btnDoLine->mapToGlobal(ui.btnDoLine->pos() ), text, this);
+  }
   emit showLineViewer(checked);
 }
+
+//------------------------------------------------------------------------------------
+/// Slot called to clear the line in the line overlay
+void SliceViewer::on_btnClearLine_clicked()
+{
+  m_lineOverlay->reset();
+  m_plot->update();
+}
+
+//------------------------------------------------------------------------------------
+/// Slot called when the snap to grid is checked
+void SliceViewer::on_btnSnapToGrid_toggled(bool checked)
+{
+  if (checked)
+  {
+    SnapToGridDialog * dlg = new SnapToGridDialog(this);
+    dlg->setSnap( m_lineOverlay->getSnapX(), m_lineOverlay->getSnapY() );
+    if (dlg->exec() == QDialog::Accepted)
+    {
+      m_lineOverlay->setSnapEnabled(true);
+      m_lineOverlay->setSnapX( dlg->getSnapX() );
+      m_lineOverlay->setSnapY( dlg->getSnapY() );
+    }
+    else
+    {
+      // Uncheck - the user clicked cancel
+      ui.btnSnapToGrid->setChecked(false);
+      m_lineOverlay->setSnapEnabled(false);
+    }
+  }
+  else
+  {
+    m_lineOverlay->setSnapEnabled(false);
+  }
+}
+
 
 //------------------------------------------------------------------------------------
 /// Slot for zooming into
@@ -692,10 +740,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Show the new slice. This finds m_dimX and Y
+  this->updateDisplay();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
-  // Show the new slice
-  this->updateDisplay();
 }
 
 

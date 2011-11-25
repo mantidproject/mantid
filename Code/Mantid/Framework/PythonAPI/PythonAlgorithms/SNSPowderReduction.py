@@ -134,8 +134,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
-        self.declareProperty("VanadiumFWHM", 7)
-        self.declareProperty("VanadiumSmoothParams", "20,2")
+        self.declareProperty("VanadiumFWHM", 10, Description="Default=10")
+        self.declareProperty("VanadiumSmoothParams", "20,2", Description="Default=20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
         self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")

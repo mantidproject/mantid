@@ -6,6 +6,7 @@
 #include <MantidKernel/System.h>
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 #include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
 
@@ -70,6 +71,17 @@ public:
     UB.setRow( 2, row_2 );
     return UB;
   }
+
+  /**
+    Comparator function for sorting list of 3D vectors based on their magnitude,
+   */
+  static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
+  {
+    double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
+    double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
+    return (mag_sq_1 < mag_sq_2);
+  }
+
 
 
   void test_Find_UB_given_lattice_parameters()
@@ -334,6 +346,55 @@ public:
   }
 
 
+  void test_DiscardDuplicates()
+  {
+    std::vector<V3D> new_list; 
+    std::vector<V3D> directions; 
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double required_tolerance  = 0.12;
+    double length_tol          = 0.05;
+    double angle_tol           = 3;
+
+    V3D v1 ( -2.5822200, 3.97345, -4.55145 );
+    V3D v1b( -2.6000000, 3.98000, -4.56000 );
+    V3D v1c( -2.8000000, 3.90000, -4.60000 );
+    V3D v2 ( -9.5952000, 0.73590,  1.34742 );
+    V3D v3 (  7.0129700, 3.23755, -5.89886 );
+    V3D v3b(  7.1129700, 3.53755, -5.99886 );
+    V3D v4 (  0.0844598, 9.26951,  3.41390 );
+    V3D v5 (  2.6666800, 5.29606,  7.96534 );
+    V3D v5b(  2.7666800, 5.29606,  7.96534 );
+    V3D v5c(  2.8666800, 5.39606,  8.06534 );
+    V3D v5d(  2.9666800, 5.49606,  8.16534 );
+
+    directions.push_back( v1 );
+    directions.push_back( v1b);
+    directions.push_back( v1c);
+    directions.push_back( v2 );
+    directions.push_back( v3 );
+    directions.push_back( v3b);
+    directions.push_back( v4 );
+    directions.push_back( v5 );
+    directions.push_back( v5b);
+    directions.push_back( v5c);
+    directions.push_back( v5d);
+
+    IndexingUtils::DiscardDuplicates( new_list,
+                                      directions,
+                                      q_vectors,
+                                      required_tolerance,
+                                      length_tol,
+                                      angle_tol );
+
+    TS_ASSERT_EQUALS( new_list.size(), 5 );
+    TS_ASSERT_DELTA ( new_list[0].norm(), 6.57053, 1e-4 );
+    TS_ASSERT_DELTA ( new_list[1].norm(), 9.71725, 1e-4 );
+    TS_ASSERT_DELTA ( new_list[2].norm(), 9.71905, 1e-4 );
+    TS_ASSERT_DELTA ( new_list[3].norm(), 9.87855, 1e-4 );
+    TS_ASSERT_DELTA ( new_list[4].norm(), 9.93006, 1e-4 );
+  }
+
+
   void test_ValidIndex()
   {
     V3D hkl(0,0,0);
@@ -395,35 +456,33 @@ public:
 
   void test_NumberIndexed()
   {
-    Matrix<double> UB(3,3,false);
+    std::vector<V3D> q_list = getNatroliteQs();
+    Matrix<double>   UB     = getNatroliteUB();
 
-    V3D row_values( -0.141251, 0.3042650, -0.147160 );
-    UB.setRow( 0, row_values );    
+    int num_indexed;
 
-    row_values( 0.120633,  0.0907082,  0.106323 );
-    UB.setRow( 1, row_values );    
+    num_indexed = IndexingUtils::NumberIndexed( UB, q_list, 0.05 );
+    TS_ASSERT_EQUALS( num_indexed, 10 )
+  }
 
-    row_values( 0.258332, -0.0062807, -0.261151 );
-    UB.setRow( 2, row_values );    
 
-    std::vector<V3D> q_list( 5 );
+  void test_NumberIndexed_1D()
+  {
+    std::vector<V3D> q_list = getNatroliteQs();
+    Matrix<double>   UB     = getNatroliteUB();
+    UB.Invert();
+    V3D direction( UB[0][0], UB[0][1], UB[0][2] );
+ 
+    int num_indexed; 
 
-    V3D qxyz( -1.02753, 0.47106, -0.25957 );
-    q_list[0] = qxyz;
+    num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.10 );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
 
-    qxyz( -2.05753, 0.93893, -0.51988 );
-    q_list[1] = qxyz;
+    num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.05 );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
 
-    qxyz( -2.19878, 1.05926, -0.27486 );
-    q_list[2] = qxyz;
-
-    qxyz( -2.63576, 1.39119, -0.53007 );
-    q_list[3] = qxyz;
-
-    qxyz( -1.75324, 1.02999, -0.52537 );
-    q_list[4] = qxyz;
-
-    TS_ASSERT_EQUALS( IndexingUtils::NumberIndexed( UB, q_list, 0.017 ), 4 );
+    num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.01 );
+    TS_ASSERT_EQUALS( num_indexed,  8 );
   }
 
 

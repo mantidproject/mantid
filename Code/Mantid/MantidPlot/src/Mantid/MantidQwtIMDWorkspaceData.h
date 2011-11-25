@@ -4,9 +4,9 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
 #include <QObject>
-#include "qwt_data.h"
+#include "MantidQwtWorkspaceData.h"
 
-class MantidQwtIMDWorkspaceData: public QObject, public QwtData
+class MantidQwtIMDWorkspaceData:  public QObject, public MantidQwtWorkspaceData
 {
   Q_OBJECT
 public:

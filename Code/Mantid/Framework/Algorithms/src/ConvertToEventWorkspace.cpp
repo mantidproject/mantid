@@ -98,9 +98,9 @@ namespace Algorithms
       size_t wi = size_t(iwi);
       // The input spectrum (a histogram)
       const ISpectrum * inSpec = inWS->getSpectrum(wi);
-      const MantidVec & X = inSpec->dataX();
-      const MantidVec & Y = inSpec->dataY();
-      const MantidVec & E = inSpec->dataE();
+      const MantidVec & X = inSpec->readX();
+      const MantidVec & Y = inSpec->readY();
+      const MantidVec & E = inSpec->readE();
       if (Y.size()+1 != X.size())
         throw std::runtime_error("Expected a histogram (X vector should be 1 longer than the Y vector)");
 

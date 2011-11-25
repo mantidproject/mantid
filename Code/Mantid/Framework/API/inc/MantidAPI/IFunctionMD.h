@@ -122,6 +122,7 @@ public:
 
   /* Overidden methods */
 
+  using IFitFunction::setWorkspace;
   virtual void setWorkspace(boost::shared_ptr<const Workspace>){}
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws, bool copyData);
   virtual void setSlicing(const std::string&){}
@@ -139,6 +140,7 @@ public:
   virtual void function(double* out)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out);
+  void functionDeriv(API::FunctionDomain& domain, API::Jacobian& jacobian){API::IFunction::functionDeriv(domain,jacobian);}
 
 protected:
 

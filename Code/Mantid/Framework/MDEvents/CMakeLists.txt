@@ -2,6 +2,7 @@
 set ( SRC_FILES
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
+	src/BinMD.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
@@ -30,6 +31,7 @@ set ( SRC_FILES
 	src/MDLeanEvent.cpp
 	src/MergeMD.cpp
 	src/OneStepMDEW.cpp
+	src/QueryMDWorkspace.cpp
 	src/SaveMD.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
@@ -48,6 +50,7 @@ set ( SRC_UNITY_IGNORE_FILES
 set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
+	inc/MantidMDEvents/BinMD.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
@@ -78,6 +81,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MergeMD.h
 	inc/MantidMDEvents/OneStepMDEW.h
+	inc/MantidMDEvents/QueryMDWorkspace.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
@@ -87,6 +91,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AffineMatrixParameterParserTest.h
 	test/AffineMatrixParameterTest.h
+	test/BinToMDHistoWorkspaceTest.h
 	test/BoxControllerSettingsAlgorithmTest.h
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
@@ -116,13 +121,14 @@ set ( TEST_FILES
 	test/MDLeanEventTest.h
 	test/MergeMDTest.h
 	test/OneStepMDEWTest.h
+	test/QueryMDWorkspaceTest.h
 	test/SaveMDTest.h
 	test/SliceMDTest.h
 	test/SlicingAlgorithmTest.h
 )
 
 set ( GMOCK_TEST_FILES
-	test/BinToMDHistoWorkspaceTest.h
+	test/BinMDTest.h
 )
 
 if(UNITY_BUILD)
