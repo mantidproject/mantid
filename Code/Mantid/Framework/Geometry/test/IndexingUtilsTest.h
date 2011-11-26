@@ -6,7 +6,6 @@
 #include <MantidKernel/System.h>
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
 #include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
 
@@ -71,17 +70,6 @@ public:
     UB.setRow( 2, row_2 );
     return UB;
   }
-
-  /**
-    Comparator function for sorting list of 3D vectors based on their magnitude,
-   */
-  static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
-  {
-    double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
-    double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
-    return (mag_sq_1 < mag_sq_2);
-  }
-
 
 
   void test_Find_UB_given_lattice_parameters()
@@ -282,6 +270,41 @@ public:
          TS_ASSERT_DELTA( vectors[i][j], vec[j], 1.e-5 );
        }
      }
+  }
+
+
+  void test_FFTScanFor_Directions()
+  {
+    double vectors[5][3] = { { -2.58222370, 3.97345330, -4.5514464 },
+                             { -9.59519700, 0.73589927,  1.3474168 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             {  0.08445961, 9.26951000,  3.4138980 },
+                             {  2.66668320, 5.29605670,  7.9653444 } };
+
+    std::vector<V3D> directions;
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double d_min = 6;
+    double d_max = 10;
+    double degrees_per_step = 1.0;
+    double required_tolerance = 0.12;
+
+    IndexingUtils::FFTScanFor_Directions( directions,
+                                          q_vectors,
+                                          d_min, d_max,
+                                          required_tolerance,
+                                          degrees_per_step );
+
+    TS_ASSERT_EQUALS( 5, directions.size() );
+
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       V3D vec = directions[i];
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( vectors[i][j], vec[j], 1.e-5 );
+       }
+     }
+
   }
 
 

@@ -1040,6 +1040,243 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
 
 
 /**
+   Get list of possible edge vectors for the real space unit cell.  This
+   method uses FFTs to find directions for which projections of the peaks
+   on those directions have repetitive patterns.  This list of directions found
+   will consist of vectors, V, for which V dot Q is essentially an integer for
+   the most Q vectors.  The difference between V dot Q and an integer must be
+   less than the required tolerance for it to count as an integer.
+    @param  directions          Vector that will be filled with the directions
+                                that may correspond to unit cell edges.
+    @param  q_vectors           Vector of new Vector3D objects that contains 
+                                the list of q_vectors that are to be indexed.
+    @param  min_d               Lower bound on shortest unit cell edge length.
+                                This does not have to be specified exactly but
+                                must be strictly less than the smallest edge
+                                length, in Angstroms.
+    @param  max_d               Upper bound on longest unit cell edge length.
+                                This does not have to be specified exactly but
+                                must be strictly more than the longest edge
+                                length in angstroms.
+    @param  required_tolerance  The maximum allowed deviation of Miller indices
+                                from integer values for a peak to be indexed.
+    @param  degrees_per_step    The number of degrees between directions that
+                                are checked while scanning for an initial 
+                                indexing of the peaks with lowest |Q|.
+ */
+
+size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
+                                       const std::vector<V3D>  & q_vectors,
+                                             double min_d,
+                                             double max_d,
+                                             double required_tolerance,
+                                             double degrees_per_step )
+{
+#define N_FFT_STEPS    512
+#define HALF_FFT_STEPS 256
+
+  double fit_error;
+  int    max_indexed = 0;
+
+                           // first, make hemisphere of possible directions 
+                           // with specified resolution.
+  int num_steps = round( 90.0 / degrees_per_step );
+  std::vector<V3D> full_list = MakeHemisphereDirections( num_steps );
+
+                           // find the maximum magnitude of Q to set range
+  double mag_Q;            // needed for FFT
+  double max_mag_Q = 0;
+  for ( size_t q_num = 1; q_num < q_vectors.size(); q_num++ )
+  {
+    mag_Q = q_vectors[ q_num ].norm();
+    if ( mag_Q > max_mag_Q )
+      max_mag_Q = mag_Q;
+  }
+
+  max_mag_Q *= 1.1f;      // allow for a little "headroom" for FFT range
+
+                          // apply the FFT to each of the directions, and
+                          // keep track of their maximum magnitude past DC
+  double  max_mag_fft;
+  std::vector<double> max_fft_val;
+  max_fft_val.resize( full_list.size() );
+
+  double projections[ N_FFT_STEPS ];
+  double magnitude_fft[ HALF_FFT_STEPS ];
+
+  double index_factor = N_FFT_STEPS / max_mag_Q;     // maps |proj Q| to index 
+
+  for ( size_t dir_num = 0; dir_num < full_list.size(); dir_num++ )
+  {
+    V3D current_dir = full_list[ dir_num ];
+    max_mag_fft = GetMagFFT( q_vectors, 
+                             current_dir,
+                             N_FFT_STEPS,
+                             projections,
+                             index_factor,
+                             magnitude_fft );
+
+    max_fft_val[ dir_num ] = max_mag_fft;
+  }
+                          // find the directions with the 500 largest
+                          // fft values, and place them in temp_dirs vector
+  int N_TO_TRY = 500;
+
+  std::vector<double> max_fft_copy;
+  max_fft_copy.resize( full_list.size() );
+  for ( size_t i = 0; i < max_fft_copy.size(); i++ )
+  {
+    max_fft_copy[i] = max_fft_val[i];
+  }
+
+  std::sort( max_fft_copy.begin(), max_fft_copy.end() );
+
+  size_t index = max_fft_copy.size() - 1;
+  max_mag_fft = max_fft_copy[ index ];
+
+  double threshold = max_mag_fft;
+  while ( ( index > max_fft_copy.size() - N_TO_TRY ) &&
+            threshold >= max_mag_fft / 2)
+  {
+    index--;
+    threshold = max_fft_copy[ index ];
+  }
+
+  std::vector<V3D> temp_dirs;
+  for ( size_t i = 0; i < max_fft_val.size(); i++ )
+  {
+    if ( max_fft_val[i] >= threshold )
+    {
+      temp_dirs.push_back( full_list[i] );
+    }
+  }
+                                  // now scan through temp_dirs and use the
+                                  // FFT to find the cell edge length that
+                                  // corresponds to the max_mag_fft.  Only keep
+                                  // directions with length nearly in bounds
+  V3D temp;
+  std::vector<V3D> temp_dirs_2;
+
+  for ( size_t i = 0; i < temp_dirs.size(); i++ )
+  {
+    max_mag_fft = GetMagFFT( q_vectors, 
+                             temp_dirs[i],
+                             N_FFT_STEPS,
+                             projections,
+                             index_factor,
+                             magnitude_fft );
+
+    double position = GetFirstMaxIndex(magnitude_fft, N_FFT_STEPS, threshold);
+    if ( position > 0 )
+    {
+      double q_val = max_mag_Q / position;
+      double d_val = 1 / q_val;
+      if ( d_val >= 0.8 * min_d && d_val <= 1.2 * max_d )
+      {
+        temp = temp_dirs[i] * d_val;
+        temp_dirs_2.push_back( temp );
+      }
+    }
+  }
+                                   // look at how many peaks were indexed
+                                   // for each of the initial directions
+  max_indexed = 0;
+  int num_indexed;
+  V3D current_dir;
+  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
+  {
+    current_dir = temp_dirs_2[ dir_num ];
+    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    if ( num_indexed > max_indexed )
+      max_indexed = num_indexed;
+  }
+
+                                    // only keep original directions that index
+                                    // at least 50% of max num indexed
+  temp_dirs.clear();
+  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
+  {
+    current_dir = temp_dirs_2[ dir_num ];
+    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    if ( num_indexed >= 0.50 * max_indexed )
+      temp_dirs.push_back( current_dir );
+  }
+                                   // refine directions and again find the 
+                                   // max number indexed, for the optimized
+                                   // directions
+  max_indexed = 0;
+  std::vector<int> index_vals;
+  std::vector<V3D> indexed_qs;
+  for ( size_t dir_num = 0; dir_num < temp_dirs.size(); dir_num++ )
+  {
+    num_indexed = GetIndexedPeaks_1D( temp_dirs[ dir_num ],
+                                      q_vectors,
+                                      required_tolerance,
+                                      index_vals,
+                                      indexed_qs,
+                                      fit_error  );
+    try
+    {
+      int count = 0;
+      while ( count < 5 )                // 5 iterations should be enough for
+      {                                  // the optimization to stabilize
+        num_indexed = 0;
+        Optimize_Direction( temp_dirs[dir_num], index_vals, indexed_qs );
+
+        num_indexed = GetIndexedPeaks_1D( temp_dirs[dir_num],
+                                          q_vectors,
+                                          required_tolerance,
+                                          index_vals,
+                                          indexed_qs,
+                                          fit_error  );
+        if ( num_indexed > max_indexed )
+          max_indexed = num_indexed;
+
+        count++;
+      }
+    }
+    catch ( ... )
+    {
+      // don't continue to refine if the direction fails to optimize properly
+    }
+  }
+                                     // discard those with length out of bounds
+  temp_dirs_2.clear();
+  for ( size_t i = 0; i < temp_dirs.size(); i++ )
+  {
+    current_dir = temp_dirs[i];
+    double length = current_dir.norm();
+    if ( length >= min_d && length <= max_d )
+      temp_dirs_2.push_back( current_dir );
+  }
+                                    // only keep directions that index at 
+                                    // least 75% of the max number of peaks
+  temp_dirs.clear();
+  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
+  {
+    current_dir = temp_dirs_2[ dir_num ];
+    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    if ( num_indexed > max_indexed * 0.75 )
+      temp_dirs.push_back( current_dir );
+  }
+
+  std::sort( temp_dirs.begin(), temp_dirs.end(), CompareMagnitude );
+
+                                      // discard duplicates:
+  double len_tol = 0.1;               // 10% tolerance for lengths
+  double ang_tol = 5.0;               // 5 degree tolerance for angles
+  DiscardDuplicates( directions,
+                     temp_dirs,
+                     q_vectors,
+                     required_tolerance,
+                     len_tol,
+                     ang_tol );
+
+  return max_indexed;
+}
+
+
+/**
  *  Fill an array with the magnitude of the FFT of the 
  *  projections of the specified q_vectors on the specified direction.
  *  The largest value in the magnitude FFT that occurs at index 5 or more
@@ -1400,7 +1637,9 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
           if ( ( length_diff/current_length ) < len_tol )  // continue scan
           {
             angle = current_dir.angle( next_dir ) * 180.0/PI;
-            if ( (angle < ang_tol) || (angle > 180.0-ang_tol) )
+            if ( (boost::math::isnan)(angle) )
+              angle = 0;
+            if ( (angle < ang_tol) || (angle > (180.0-ang_tol)) )
             {
               temp.push_back( next_dir );
               directions[check_index] = zero_vec; // mark off this direction 
