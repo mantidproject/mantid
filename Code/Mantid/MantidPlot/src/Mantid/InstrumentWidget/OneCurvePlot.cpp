@@ -439,6 +439,22 @@ bool OneCurvePlot::isYLogScale()const
   return dynamic_cast<const QwtLog10ScaleEngine*>(engine) != NULL;
 }
 
+/**
+ * Remove all displayable objects from the plot.
+ */
+void OneCurvePlot::clearAll()
+{
+  QMap<QString,QwtPlotCurve*>::const_iterator it = m_stored.begin();
+  for(;it!=m_stored.end();++it)
+  {
+    it.value()->detach();
+    delete it.value();
+  }
+  m_stored.clear();
+  clearPeakLabels();
+  clearCurve();
+}
+
 /* ---------------------------- PeakLabel --------------------------- */
 
 /**

@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -82,6 +83,8 @@ public:
 
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
+    // Clean up file
+	out->getBoxController()->closeFile(true);
   }
 
 
@@ -162,11 +165,14 @@ public:
     VMD baseY(-sin(angle), cos(angle), 0.0);
     VMD baseZ(0.0, 0.0, 1.0);
 
-    // Save to NXS file for testing
     AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
-    FrameworkManager::Instance().exec("SaveMD", 4,
-        "InputWorkspace", "SliceMDTest_ws",
-        "Filename", "SliceMDTest_ws_rotated.nxs");
+    if (false)
+    {
+      // Save to NXS file for debugging
+      IAlgorithm_sptr saver = FrameworkManager::Instance().exec("SaveMD", 4,
+          "InputWorkspace", "SliceMDTest_ws",
+          "Filename", "SliceMDTest_ws_rotated.nxs");
+    }
 
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
@@ -193,6 +199,7 @@ public:
     TS_ASSERT_EQUALS(out->getNPoints(), expected_numBins);
 
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
+
   }
 
 

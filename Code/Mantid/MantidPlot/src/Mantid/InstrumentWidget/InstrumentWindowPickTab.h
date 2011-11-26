@@ -4,10 +4,14 @@
 #include "MantidGLWidget.h"
 #include "DetSelector.h"
 
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include <QFrame>
 
 class InstrumentWindow;
 class Instrument3DWidget;
+class InstrumentActor;
 class CollapsiblePanel;
 class OneCurvePlot;
 
@@ -17,6 +21,7 @@ class QComboBox;
 class QCheckBox;
 class QLabel;
 class QActionGroup;
+class QSignalMapper;
 
 /**
   * Implements the Pick tab in InstrumentWindow
@@ -25,12 +30,15 @@ class InstrumentWindowPickTab: public QFrame
 {
   Q_OBJECT
 public:
-  
+  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,NUMBER_OF_UNITS};
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
   void init();
   void showInstrumentDisplayContextMenu();
+  TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
+public slots:
+  void setTubeXUnits(int units);
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -49,6 +57,16 @@ private:
   void plotTube(int detid);
   /// Calc indexes for min and max bin values defined in the instrument Actor
   void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax);
+  void plotTubeSums(
+    InstrumentActor* instrActor,
+    Mantid::Geometry::ICompAssembly_const_sptr ass,
+    Mantid::API::MatrixWorkspace_const_sptr ws,
+    int detid);
+  void plotTubeIntegrals(
+    InstrumentActor* instrActor,
+    Mantid::Geometry::ICompAssembly_const_sptr ass,
+    Mantid::API::MatrixWorkspace_const_sptr ws,
+    int detid);
 
   InstrumentWindow* m_instrWindow;
   MantidGLWidget *mInstrumentDisplay;
@@ -67,6 +85,9 @@ private:
   QAction *m_logY;
   QAction *m_linearY;
   QActionGroup *m_yScale;
+  QActionGroup* m_unitsGroup;
+  QAction *m_detidUnits,*m_lengthUnits,*m_phiUnits;
+  QSignalMapper *m_unitsMapper;
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently displayed curves
 
@@ -78,6 +99,7 @@ private:
   int m_emode;
   double m_efixed;
   double m_delta;
+  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
 };
 
 

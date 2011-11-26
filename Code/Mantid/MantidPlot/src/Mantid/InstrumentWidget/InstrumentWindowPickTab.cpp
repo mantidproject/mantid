@@ -106,7 +106,10 @@ double InputConvertUnitsParametersDialog::getDelta()const
 // --- InstrumentWindowPickTab --- //
 
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
-QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
+QFrame(instrWindow),
+m_instrWindow(instrWindow),
+m_currentDetID(-1),
+m_tubeXUnits(DETECTOR_ID)
 {
   mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   m_plotSum = true;
@@ -145,6 +148,30 @@ QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
   connect(m_integrateTimeBins,SIGNAL(triggered()),this,SLOT(integrateTimeBins()));
   connect(m_logY,SIGNAL(triggered()),m_plot,SLOT(setYLogScale()));
   connect(m_linearY,SIGNAL(triggered()),m_plot,SLOT(setYLinearScale()));
+
+  m_unitsMapper = new QSignalMapper(this);
+
+  m_detidUnits = new QAction("Detector ID",this);
+  m_detidUnits->setCheckable(true);
+  m_unitsMapper->setMapping(m_detidUnits,DETECTOR_ID);
+  connect(m_detidUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
+
+  m_lengthUnits = new QAction("Tube length",this);
+  m_lengthUnits->setCheckable(true);
+  m_unitsMapper->setMapping(m_lengthUnits,LENGTH);
+  connect(m_lengthUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
+
+  m_phiUnits = new QAction("Phi",this);
+  m_phiUnits->setCheckable(true);
+  m_unitsMapper->setMapping(m_phiUnits,PHI);
+  connect(m_phiUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
+
+  m_unitsGroup = new QActionGroup(this);
+  m_unitsGroup->addAction(m_detidUnits);
+  m_unitsGroup->addAction(m_lengthUnits);
+  m_unitsGroup->addAction(m_phiUnits);
+  connect(m_unitsMapper,SIGNAL(mapped(int)),this,SLOT(setTubeXUnits(int)));
+  //setTubeXUnits(DETECTOR_ID);
 
   // Instrument display context menu actions
   m_storeCurve = new QAction("Store curve",this);
@@ -287,6 +314,22 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     const double integrated = instrActor->getIntegratedCounts(detid);
     const QString counts = integrated == -1.0 ? "N/A" : QString::number(integrated);
     text += "Counts: " + counts + '\n';
+    QString xUnits;
+    if (m_selectionType > SingleDetectorSelection && !m_plotSum)
+    {
+      switch(m_tubeXUnits)
+      {
+      case DETECTOR_ID: xUnits = "Detector ID"; break;
+      case LENGTH: xUnits = "Length"; break;
+      case PHI: xUnits = "Phi"; break;
+      default: xUnits = "Detector ID";
+      }
+    }
+    else
+    {
+      xUnits = "Time of flight";
+    }
+    text += "X units: " + xUnits + '\n';
     m_selectionInfoDisplay->setText(text);
   }
   else
@@ -297,6 +340,9 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   }
 }
 
+/**
+ * Display the miniplot's context menu.
+ */
 void InstrumentWindowPickTab::plotContextMenu()
 {
   QMenu context(this);
@@ -334,6 +380,20 @@ void InstrumentWindowPickTab::plotContextMenu()
   else
   {
     m_linearY->setChecked(true);
+  }
+
+  // Tube x units menu options
+  if (m_selectionType > SingleDetectorSelection && !m_plotSum)
+  {
+    axes->addSeparator();
+    axes->addActions(m_unitsGroup->actions());
+    switch(m_tubeXUnits)
+    {
+    case DETECTOR_ID: m_detidUnits->setChecked(true); break;
+    case LENGTH: m_lengthUnits->setChecked(true); break;
+    case PHI: m_phiUnits->setChecked(true); break;
+    default: m_detidUnits->setChecked(true);
+    }
   }
   context.addMenu(axes);
 
@@ -444,104 +504,175 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   }
 }
 
+/**
+ * Plot data integrated either over the detectors in a tube or over time bins.
+ * If m_plotSum == true the miniplot displays the accumulated data in a tube against time of flight.
+ * If m_plotSum == false the miniplot displays the data integrated over the time bins. The values are
+ * plotted against the length of the tube, but the units on the x-axis can be one of the following:
+ *   DETECTOR_ID
+ *   LENGTH
+ *   PHI
+ * The units can be set with setTubeXUnits(...) method.
+ * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
+ *   with this id.
+ */
 void InstrumentWindowPickTab::plotTube(int detid)
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
+  if (parent && ass)
+  {
+    if (m_plotSum) // plot sums over detectors vs time bins
+    {
+      plotTubeSums(instrActor,ass,ws,detid);
+    }
+    else // plot detector integrals vs detID or a function of detector position in the tube
+    {
+      plotTubeIntegrals(instrActor,ass,ws,detid);
+    }
+  }
+  else
+  {
+    m_plot->clearCurve();
+  }
+}
+
+/**
+ * Plot the accumulated data in a tube against time of flight.
+ * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
+ *   with this id.
+ */
+void InstrumentWindowPickTab::plotTubeSums(
+    InstrumentActor* instrActor,
+    Mantid::Geometry::ICompAssembly_const_sptr ass,
+    Mantid::API::MatrixWorkspace_const_sptr ws,
+    int detid)
+{
   size_t wi;
   try {
     wi = instrActor->getWorkspaceIndex(detid);
   } catch (Mantid::Kernel::Exception::NotFoundError) {
     return; // Detector doesn't have a workspace index relating to it
   }
-  Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
-  Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
-  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ")"; 
-  if (parent && ass)
+  size_t imin,imax;
+  getBinMinMaxIndex(wi,imin,imax);
+  const int n = ass->nelements();
+  QString label = QString::fromStdString(ass->getName()) + " (" + QString::number(detid) + ") Sum"; 
+
+  const Mantid::MantidVec& x = ws->readX(wi);
+  m_plot->setXScale(x[imin],x[imax]);
+
+  std::vector<double> y(ws->blocksize());
+  //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
+  for(int i = 0; i < n; ++i)
   {
-    size_t imin,imax;
-    getBinMinMaxIndex(wi,imin,imax);
-
-    const int n = ass->nelements();
-    if (m_plotSum) // plot sums over detectors vs time bins
+    Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+    if (idet)
     {
-      label += " Sum";
-      const Mantid::MantidVec& x = ws->readX(wi);
-
-      m_plot->setXScale(x[imin],x[imax]);
-
-      std::vector<double> y(ws->blocksize());
-      //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
-      for(int i = 0; i < n; ++i)
-      {
-        Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-        if (idet)
-        {
-          try {
-            size_t index = instrActor->getWorkspaceIndex(idet->getID());
-            const Mantid::MantidVec& Y = ws->readY(index);
-            std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
-          } catch (Mantid::Kernel::Exception::NotFoundError) {
-            continue; // Detector doesn't have a workspace index relating to it
-          }
-        }
-      }
-      Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
-      Mantid::MantidVec::const_iterator y_end = y.begin() + imax;
-
-      Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
-      Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
-      m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
-      m_plot->setYScale(*min_it,*max_it);
-      m_plot->setLabel(label);
-    }
-    else // plot detector integrals vs detID
-    {
-      label += " Integrals";
-      std::vector<double> x;
-      x.reserve(n);
-      std::map<double,double> ymap;
-      for(int i = 0; i < n; ++i)
-      {
-        Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-        if (idet)
-        {
-          try {
-            const int id = idet->getID();
-            size_t index = instrActor->getWorkspaceIndex(id);
-            x.push_back(id);
-            const Mantid::MantidVec& Y = ws->readY(index);
-            double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
-            ymap[id] = sum;
-          } catch (Mantid::Kernel::Exception::NotFoundError) {
-            continue; // Detector doesn't have a workspace index relating to it
-          }
-        }
-      }
-      if (!x.empty())
-      {
-        std::sort(x.begin(),x.end());
-        std::vector<double> y(x.size());
-        double ymin =  DBL_MAX;
-        double ymax = -DBL_MAX;
-        for(size_t i = 0; i < x.size(); ++i)
-        {
-          const double val = ymap[x[i]];
-          y[i] = val;
-          if (val < ymin) ymin = val;
-          if (val > ymax) ymax = val;
-        }
-        m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
-        m_plot->setXScale(x.front(),x.back());
-        m_plot->setYScale(ymin,ymax);
-        m_plot->setLabel(label);
+      try {
+        size_t index = instrActor->getWorkspaceIndex(idet->getID());
+        const Mantid::MantidVec& Y = ws->readY(index);
+        std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
+      } catch (Mantid::Kernel::Exception::NotFoundError) {
+        continue; // Detector doesn't have a workspace index relating to it
       }
     }
   }
-  else
+  Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
+  Mantid::MantidVec::const_iterator y_end = y.begin() + imax;
+
+  Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
+  Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  m_plot->setYScale(*min_it,*max_it);
+  m_plot->setLabel(label);
+}
+
+/**
+ * Plot the data integrated over the time bins. The values are
+ * plotted against the length of the tube, but the units on the x-axis can be one of the following:
+ *   DETECTOR_ID
+ *   LENGTH
+ *   PHI
+ * The units can be set with setTubeXUnits(...) method.
+ * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
+ *   with this id.
+ */
+void InstrumentWindowPickTab::plotTubeIntegrals(
+    InstrumentActor* instrActor,
+    Mantid::Geometry::ICompAssembly_const_sptr ass,
+    Mantid::API::MatrixWorkspace_const_sptr ws,
+    int detid)
+{
+  // curve label: "tube_name (detid) Integrals"
+  // detid is included to distiguish tubes with the same name
+  QString label = QString::fromStdString(ass->getName()) + " (" + QString::number(detid) + ") Integrals"; 
+  size_t wi;
+  try {
+    wi = instrActor->getWorkspaceIndex(detid);
+  } catch (Mantid::Kernel::Exception::NotFoundError) {
+    return; // Detector doesn't have a workspace index relating to it
+  }
+  // imin and imax give the bin integration range
+  size_t imin,imax;
+  getBinMinMaxIndex(wi,imin,imax);
+
+  const int n = ass->nelements();
+  if (n == 0)
   {
-    m_plot->clearCurve();
+    // don't think it's ever possible but...
+    throw std::runtime_error("PickTab miniplot: empty instrument assembly");
+  }
+  // collect and sort xy pairs in xymap
+  std::map<double,double> xymap;
+  // get the first detector in the tube for lenth calculation
+  Mantid::Geometry::IDetector_sptr idet0 = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
+  for(int i = 0; i < n; ++i)
+  {
+    Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+    if (idet)
+    {
+      try {
+        const int id = idet->getID();
+        double xvalue = 0;
+        switch(m_tubeXUnits)
+        {
+        case LENGTH: xvalue = idet->getDistance(*idet0); break;
+        case PHI: xvalue = idet->getPhi(); break;
+        default: xvalue = static_cast<double>(id);
+        }
+        size_t index = instrActor->getWorkspaceIndex(id);
+        const Mantid::MantidVec& Y = ws->readY(index);
+        double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
+        xymap[xvalue] = sum;
+      } catch (Mantid::Kernel::Exception::NotFoundError) {
+        continue; // Detector doesn't have a workspace index relating to it
+      }
+    }
+  }
+  if (!xymap.empty())
+  {
+    // set the plot curve data
+    std::vector<double> x(xymap.size());
+    std::vector<double> y(xymap.size());
+    double ymin =  DBL_MAX;
+    double ymax = -DBL_MAX;
+    std::map<double,double>::const_iterator xy = xymap.begin();
+    for(size_t i = 0; xy != xymap.end(); ++xy,++i)
+    {
+      x[i] = xy->first;
+      const double val = xy->second;
+      y[i] = val;
+      if (val < ymin) ymin = val;
+      if (val > ymax) ymax = val;
+    }
+    m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+    m_plot->setXScale(x.front(),x.back());
+    m_plot->setYScale(ymin,ymax);
+    m_plot->setLabel(label);
   }
 }
 
@@ -721,5 +852,17 @@ void InstrumentWindowPickTab::storeCurve()
 void InstrumentWindowPickTab::removeCurve(const QString & label)
 {
   m_plot->removeCurve(label);
+  m_plot->replot();
+}
+
+/**
+ * Set the x units for the integrated tube plot.
+ * @param units :: The x units in terms of TubeXUnits.
+ */
+void InstrumentWindowPickTab::setTubeXUnits(int units)
+{
+  if (units < 0 || units >= NUMBER_OF_UNITS) return;
+  m_tubeXUnits = static_cast<TubeXUnits>(units);
+  m_plot->clearAll();
   m_plot->replot();
 }

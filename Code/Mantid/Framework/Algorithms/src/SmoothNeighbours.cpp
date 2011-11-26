@@ -100,6 +100,9 @@ void SmoothNeighbours::init()
     "Alternative to providing the radius. The default is 8.");
   setPropertySettings("NumberOfNeighbours", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
 
+  declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
+  setPropertySettings("IgnoreMaskedDetectors", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
+
   declareProperty("WeightedSum", true,
     "Adjust the weight of neighboring pixels when summing them, based on their distance.");
   setPropertySettings("WeightedSum", new EnabledWhenProperty(this, "ProvideRadius", IS_DEFAULT)); //Weighted sum needs the radius for the calculation.
@@ -269,6 +272,12 @@ void SmoothNeighbours::findNeighboursRectangular()
  */
 void SmoothNeighbours::findNeighboursUbiqutious()
 {
+  /*
+    This will cause the Workspace to rebuild the nearest neighbours map, so that we can pick-up any of the properties specified
+    for this algorithm in the constructor for the NearestNeighboursObject.
+  */
+  inWS->rebuildNearestNeighbours();
+
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
 
@@ -280,6 +289,8 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   //Get the use radius flag.
   bool useRadius = getProperty("ProvideRadius");
   int nNeighbours = getProperty("NumberOfNeighbours");
+  bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
+
   IDetector_const_sptr det;
   // Go through every input workspace pixel
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
@@ -289,6 +300,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     {
       det = inWS->getDetector(wi);
       if( det->isMonitor() ) continue; //skip monitor
+      if( det->isMasked() ) continue; //skip masked detectors
     }
     catch(Kernel::Exception::NotFoundError&)
     {
@@ -299,11 +311,11 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     std::map<specid_t, double> neighbSpectra;
     if(useRadius)
     {
-      neighbSpectra = inWS->getNeighbours(inSpec, Radius);
+      neighbSpectra = inWS->getNeighbours(inSpec, Radius, ignoreMaskedDetectors);
     }
     else
     {
-      neighbSpectra = inWS->getNeighboursExact(inSpec, nNeighbours);
+      neighbSpectra = inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors);
     }
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0

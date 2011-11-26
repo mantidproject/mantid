@@ -363,7 +363,7 @@ namespace API
     const std::string & getFilename() const
     { return m_filename; }
 
-    void closeFile();
+    void closeFile(bool deleteFile = false);
 
     //-----------------------------------------------------------------------------------
     /** Return the disk MRU for disk caching */

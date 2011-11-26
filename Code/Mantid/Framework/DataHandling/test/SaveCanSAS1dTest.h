@@ -68,8 +68,9 @@ public:
 
     group->add(m_workspace2);
   }
+
   //saving is required by all the following test so, if this test fails so will all the others!
-  void testExecute()
+  void setUp()
   {
     SaveCanSAS1D savealg;
 
@@ -81,6 +82,12 @@ public:
     TS_ASSERT( savealg.isExecuted() );
     //Get the full path to the file again
     m_filename = savealg.getPropertyValue("Filename");
+  }
+
+  void tearDown()
+  {
+    if (Poco::File(m_filename).exists())
+      Poco::File(m_filename).remove();
   }
 
   void testCanSAS1dXML()

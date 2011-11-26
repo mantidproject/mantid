@@ -34,7 +34,13 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
 ###############################################################################
 import kernel
 from kernel import *
+# Make the version string accessible in the standard way
+__version__ = version_str()
+
 import api 
 from api import *
 
+###############################################################################
+# Aliases 
+###############################################################################
 mtd = framework_mgr

@@ -86,6 +86,10 @@ public:
       std::string realFile = alg.getPropertyValue("Filename");
       TS_ASSERT( Poco::File( realFile ).exists() );
     }
+    // Clean up files
+	ws1->getBoxController()->closeFile(true);
+	ws2->getBoxController()->closeFile(true);
+
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");

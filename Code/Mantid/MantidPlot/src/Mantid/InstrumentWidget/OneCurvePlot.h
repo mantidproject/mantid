@@ -40,6 +40,7 @@ public slots:
   void recalcAxisDivs();
   void setYLogScale();
   void setYLinearScale();
+  void clearAll();
 signals:
   void showContextMenu();
   void clickedAt(double,double);

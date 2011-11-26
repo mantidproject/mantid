@@ -278,7 +278,7 @@ public:
     // Remove workspace from the data service.
     if (deleteWorkspace)
     {
-      ws->getBoxController()->closeFile();
+      ws->getBoxController()->closeFile(true);
       AnalysisDataService::Instance().remove(outWSName);
     }
   }
@@ -317,7 +317,7 @@ public:
     std::vector<MDLeanEvent<nd> > & events = box8->getEvents();
     // Add 10 to this signal
     signal_t newSignal = events[0].getSignal() + 10.0;
-    events[0].setSignal(newSignal);
+    events[0].setSignal( float(newSignal) );
     box8->releaseEvents();
 
 //    // Modify a third box by adding an event
@@ -368,7 +368,7 @@ public:
     // Perform the full comparison of the second and 3rd loaded workspaces
     do_compare_MDEW(ws2, ws3);
 
-    ws2->getBoxController()->closeFile();
+    ws2->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
 
   }
@@ -468,8 +468,9 @@ public:
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
 
-    ws->getBoxController()->closeFile();
+    ws->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
+
   }
 
 };

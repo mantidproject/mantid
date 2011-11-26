@@ -85,9 +85,12 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   mInteractionInfo = new QLabel();
   mainLayout->addWidget(mInteractionInfo);
 
-  // Load settings is called after mInstrumentDisplay is created but before m_renderTab
-  loadSettings();
-
+  QSettings settings;
+  settings.beginGroup("Mantid/InstrumentWindow");
+  
+  // Background colour
+  m_InstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
+  
   //Render Controls
   m_renderTab = new InstrumentWindowRenderTab(this);
   connect(m_renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
@@ -97,6 +100,10 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   // Pick controls
   m_pickTab = new InstrumentWindowPickTab(this);
   mControlsTab->addTab( m_pickTab, QString("Pick"));
+  // Miniplot tube x units
+  m_pickTab->setTubeXUnits(settings.value("TubeXUnits",0).toInt());
+
+  settings.endGroup();
 
   // Mask controls
   m_maskTab = new InstrumentWindowMaskTab(this);
@@ -647,21 +654,6 @@ void InstrumentWindow::setInfoText(const QString& text)
   mInteractionInfo->setText(text);
 }
 
-///**
-// * This method loads the setting from QSettings
-// */
-void InstrumentWindow::loadSettings()
-{
-  //Load Color
-  QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
-  
-  // Background colour
-  m_InstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
-  
-  settings.endGroup();
-}
-
 /**
  * Save properties of the window a persistent store
  */
@@ -670,6 +662,7 @@ void InstrumentWindow::saveSettings()
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
   settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
+  settings.setValue("TubeXUnits",m_pickTab->getTubeXUnits());
   settings.endGroup();
 }
 

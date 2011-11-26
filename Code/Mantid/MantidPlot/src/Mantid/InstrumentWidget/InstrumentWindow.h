@@ -157,8 +157,6 @@ private slots:
 
 private:
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
-
-  void loadSettings();
   void saveSettings();
 
   QString asString(const std::vector<int>& numbers) const;

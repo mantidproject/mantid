@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/Instrument/Goniometer.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/NearestNeighbours.cpp
+	src/Instrument/NearestNeighboursFactory.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
 	src/Instrument/OneToOneSpectraDetectorMap.cpp
@@ -103,8 +104,11 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+	inc/MantidGeometry/Instrument/INearestNeighbours.h
+	inc/MantidGeometry/Instrument/INearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/NearestNeighbours.h
+	inc/MantidGeometry/Instrument/NearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
 	inc/MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h
@@ -199,6 +203,7 @@ set ( TEST_FILES
 	test/MapSupportTest.h
 	test/MaterialTest.h
 	test/MathSupportTest.h
+	test/NearestNeighboursFactoryTest.h
 	test/NearestNeighboursTest.h
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
