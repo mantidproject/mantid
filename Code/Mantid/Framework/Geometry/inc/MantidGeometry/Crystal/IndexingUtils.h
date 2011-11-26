@@ -168,6 +168,13 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                const std::vector<Kernel::V3D>  & q_vectors,
                                      double                      tolerance   );
 
+  /// Calculate the number of Q vectors that map to integer indices
+  /// simutlaneously in three directions
+  static int NumberIndexed_3D( const Kernel::V3D               & a_dir,
+                               const Kernel::V3D               & b_dir,
+                               const Kernel::V3D               & c_dir, 
+                               const std::vector<Kernel::V3D>  & q_vectors,
+                                     double                      tolerance   );
 
   /// Given a UB, get list of Miller indices for specifed Qs
   static int CalculateMillerIndices(

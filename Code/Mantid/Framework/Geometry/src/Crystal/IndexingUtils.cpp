@@ -1859,6 +1859,54 @@ int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
 
 
 /**
+   Calculate the number of Q vectors for which the dot product with three
+   specified direction vectors is an integer triple, NOT equal to (0,0,0) to
+   within the specified tolerance.  This give the number of peaks that would 
+   be indexed by the UB matrix formed from the specified those three real 
+   space unit cell edge vectors.
+   NOTE: This method assumes that the three edge vectors are linearly 
+         independent and could be used to form a valid UB matrix.
+
+   @param a_dir        A Vector3D representing unit cell edge vector a
+   @param b_dir        A Vector3D representing unit cell edge vector b
+   @param c_dir        A Vector3D representing unit cell edge vector c
+   @param q_vectors    Vector of Vector3D objects that contains the list of 
+                       q_vectors that are indexed by the corresponding hkl
+                       vectors.
+   @param tolerance    The maximum allowed distance to an integer from the dot
+                       products of peaks with the specified direction.
+
+   @return A non-negative integer giving the number of peaks simultaneously
+           indexed in all three directions by the specified direction vectors. 
+ */
+int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
+                                     const V3D               & b_dir,
+                                     const V3D               & c_dir,
+                                     const std::vector<V3D>  & q_vectors,
+                                           double              tolerance )
+{
+  if ( a_dir.norm() == 0 || b_dir.norm() == 0 || c_dir.norm() == 0 )
+    return 0;
+
+  V3D hkl_vec;
+  int count = 0;
+
+  for ( size_t i = 0; i < q_vectors.size(); i++ )
+  {
+    hkl_vec[0] = a_dir.scalar_prod( q_vectors[i] );
+    hkl_vec[1] = b_dir.scalar_prod( q_vectors[i] );
+    hkl_vec[2] = c_dir.scalar_prod( q_vectors[i] );
+    if ( ValidIndex( hkl_vec, tolerance ) )
+    {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+
+/**
   Calculate the Miller Indices for each of the specified Q vectors, using the
   inverse of the specified UB matrix.  The Miller Indices will be set to 
   0, 0, 0 for any peak for which h, k or l differs from an intenger by more 

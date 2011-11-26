@@ -509,6 +509,31 @@ public:
   }
 
 
+  void test_NumberIndexed_3D()
+  {
+    std::vector<V3D> q_list = getNatroliteQs();
+    Matrix<double>   UB     = getNatroliteUB();
+    UB.Invert();
+    V3D a_dir( UB[0][0], UB[0][1], UB[0][2] );
+    V3D b_dir( UB[1][0], UB[1][1], UB[1][2] );
+    V3D c_dir( UB[2][0], UB[2][1], UB[2][2] );
+
+    int num_indexed;
+
+    num_indexed = IndexingUtils::NumberIndexed_3D( a_dir, b_dir, c_dir, 
+                                                   q_list, 0.10 );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    num_indexed = IndexingUtils::NumberIndexed_3D( a_dir, b_dir, c_dir, 
+                                                   q_list, 0.05 );
+    TS_ASSERT_EQUALS( num_indexed, 10 );
+
+    num_indexed = IndexingUtils::NumberIndexed_3D( a_dir, b_dir, c_dir, 
+                                                   q_list, 0.01 );
+    TS_ASSERT_EQUALS( num_indexed,  4 );
+  }
+
+
   void test_CalculateMillerIndices()
   {
     std::vector<V3D> q_vectors = getNatroliteQs();
