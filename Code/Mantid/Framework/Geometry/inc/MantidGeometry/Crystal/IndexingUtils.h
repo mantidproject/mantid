@@ -109,7 +109,6 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                        double required_tolerance,
                                        double degrees_per_step   );
 
-
   /// Get the magnitude of the FFT of the projections of the q_vectors on 
   /// the current direction vector.
   static double GetMagFFT( const std::vector<Kernel::V3D>  & q_vectors,
@@ -133,7 +132,13 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                        double                      min_d,
                                        double                      max_d );
 
-
+  /// Form a UB matrix by choosing three vectors from list of possible a,b,c
+  /// to maximize the number of peaks indexed and minimize cell volume.
+  static bool FormUB_From_abc_Vectors( Kernel::DblMatrix        & UB,
+                                 const std::vector<Kernel::V3D> & directions,
+                                 const std::vector<Kernel::V3D> & q_vectors,
+                                       double                     req_tolerance,
+                                       double                     min_vol );
 
   /// Get the vector in the direction of "c" given other unit cell information
   static Kernel::V3D Make_c_dir( const Kernel::V3D  & a_dir,

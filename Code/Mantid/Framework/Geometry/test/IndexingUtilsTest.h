@@ -304,7 +304,6 @@ public:
          TS_ASSERT_DELTA( vectors[i][j], vec[j], 1.e-5 );
        }
      }
-
   }
 
 
@@ -345,6 +344,96 @@ public:
         TS_ASSERT_DELTA( magnitude_fft[i], 0.0, 1e-5 );
       }
     }
+  }
+
+
+  void test_FormUB_From_abc_Vectors_with_min_angle()
+  {
+    Matrix<double> UB(3,3,false);
+    double UB_array[] = { -0.0177703, -0.0993001, 0.0155008,
+                           0.0585436, -0.0150158, 0.0839775,
+                          -0.158519,   0.0432281, 0.0645189 };
+
+    double vectors[5][3] = { { -2.58222370, 3.97345330, -4.5514464 },
+                             { -9.59519700, 0.73589927,  1.3474168 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             {  0.08445961, 9.26951000,  3.4138980 },
+                             {  2.66668320, 5.29605670,  7.9653444 } };
+
+    std::vector<V3D> directions;
+    for ( size_t i = 0; i < 5; i++ )
+      directions.push_back( V3D(vectors[i][0], vectors[i][1], vectors[i][2]));
+
+    double required_tolerance = 0.12;
+    size_t a_index = 0;
+    double min_d = 6;
+    double max_d = 10;
+
+    IndexingUtils::FormUB_From_abc_Vectors( UB,
+                                            directions,
+                                            a_index,
+                                            min_d,
+                                            max_d );
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    int num_indexed = IndexingUtils::NumberIndexed( UB, 
+                                                    q_vectors,
+                                                    required_tolerance );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    size_t index = 0;
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( UB[i][j], UB_array[index], 1.e-5 );
+         index++;
+       }
+     }
+  }
+
+
+  void test_FormUB_From_abc_Vectors_with_min_volume()
+  {
+    Matrix<double> UB(3,3,false);
+    double UB_array[] = { -0.0177703, -0.0993001, 0.0155008,
+                           0.0585436, -0.0150158, 0.0839775,
+                          -0.158519,   0.0432281, 0.0645189 };
+
+    double vectors[5][3] = { { -2.58222370, 3.97345330, -4.5514464 },
+                             { -9.59519700, 0.73589927,  1.3474168 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             {  0.08445961, 9.26951000,  3.4138980 },
+                             {  2.66668320, 5.29605670,  7.9653444 } };
+
+    std::vector<V3D> directions;
+    for ( size_t i = 0; i < 5; i++ )
+      directions.push_back( V3D(vectors[i][0], vectors[i][1], vectors[i][2]));
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double required_tolerance = 0.12;
+    double min_vol = 6.0 * 6.0 * 6.0 / 4.0;
+
+    IndexingUtils::FormUB_From_abc_Vectors( UB,
+                                            directions,
+                                            q_vectors,
+                                            required_tolerance,
+                                            min_vol );
+
+    int num_indexed = IndexingUtils::NumberIndexed( UB, 
+                                                    q_vectors, 
+                                                    required_tolerance );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    size_t index = 0;
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( UB[i][j], UB_array[index], 1.e-5 );
+         index++;
+       }
+     }
   }
 
 
