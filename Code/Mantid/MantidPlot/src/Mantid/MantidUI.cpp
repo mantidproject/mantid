@@ -653,11 +653,15 @@ void MantidUI::showSliceViewer()
       AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
   if (mdws)
   {
-    // Create the slice viewer MDI window
-    SliceViewerWindow * w = new SliceViewerWindow(wsName, appWindow());
+    // Create the slice viewer window
+	// Creates it with NULL parent so that it does not stay on top of the main window on Windows.
+    SliceViewerWindow * w = new SliceViewerWindow(wsName, NULL, "");
+	// Connect the MantidPlot close() event with the the window's close().
+	QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
+	// Pop up the window
+    w->show();
     // And add it
     //appWindow()->d_workspace->addSubWindow(w);
-    w->showNormal();
   }
 
 }
