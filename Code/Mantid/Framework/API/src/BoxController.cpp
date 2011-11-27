@@ -156,11 +156,11 @@ namespace API
       m_file->close();
       m_file = NULL;
     }
-	if (!m_filename.empty())
+    if (deleteFile && !m_filename.empty())
     {
       Poco::File file(m_filename);
-	  if (file.exists()) file.remove();
-	  m_filename = "";
+      if (file.exists()) file.remove();
+      m_filename = "";
     }
   }
 
