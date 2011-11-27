@@ -133,6 +133,7 @@ namespace MDEvents
 
         // Now transform to the output dimensions
         m_transform->apply(inCenter, outCenter);
+        //std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to " <<  VMD(nd,outCenter) << std::endl;
 
         // To build up the linear index
         size_t linearIndex = 0;

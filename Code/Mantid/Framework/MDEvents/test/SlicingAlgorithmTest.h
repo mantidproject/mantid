@@ -372,8 +372,66 @@ public:
     TS_ASSERT( !func->isPointContained(VMD(1.5, 0.5, 2)) );
     TS_ASSERT( !func->isPointContained(VMD(11.5, 1.5, 2)) );
     TS_ASSERT( !func->isPointContained(VMD(1.5, 11.5, 2)) );
-
   }
+
+
+  /** Build a set of basis vectors that is in left-handed coordinates,
+   * by flipping the Y basis vector
+   */
+  void test_createGeneralTransform_3D_to_3D_LeftHanded()
+  {
+    // Build the basis vectors, a left-handed coordinate system.
+    VMD baseX(1.0, 0.0, 0.0);
+    VMD baseY(0.0, -1., 0.0);
+    VMD baseZ(0.0, 0.0, 1.0);
+
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws3,
+            "OutX,m," + baseX.toString(",") + ",10.0, 5",
+            "OutY,m," + baseY.toString(",") + ",10.0, 5",
+            "OutZ,m," + baseZ.toString(",") + ",10.0, 5",
+            "", VMD(0,0,0));
+
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 3);
+    TS_ASSERT_EQUALS( alg->m_origin, VMD(0,0,0));
+    TS_ASSERT_EQUALS( alg->binDimensions.size(), 3);
+    TS_ASSERT_EQUALS( alg->m_bases[0], baseX);
+    TS_ASSERT_EQUALS( alg->m_bases[1], baseY);
+    TS_ASSERT_EQUALS( alg->m_bases[2], baseZ);
+
+    coord_t in[3] = {3.0, -1.0, 2.6};
+    coord_t out[3];  VMD outV;
+
+    // The "binning" transform
+    CoordTransform * trans = alg->m_transform;
+    TS_ASSERT(trans);
+    trans->apply(in, out);
+    TS_ASSERT_EQUALS( VMD(3,out), VMD(1.5, 0.5, 1.3) );
+
+    // The "real" transform from original
+    CoordTransform * transFrom = alg->m_transformFromOriginal;
+    TS_ASSERT(transFrom);
+    transFrom->apply(in, out);
+    TS_ASSERT_EQUALS( VMD(3,out), VMD(3.0, 1.0, 2.6) );
+
+    // The "reverse" transform
+    CoordTransform * transTo = alg->m_transformToOriginal;
+    TS_ASSERT(transTo);
+    transTo->apply(out, in);
+    TS_ASSERT_EQUALS( VMD(3,in), VMD(3.0, -1.0, 2.6) );
+
+    // The implicit function
+    MDImplicitFunction * func = alg->getImplicitFunctionForChunk(NULL, NULL);
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
+    TS_ASSERT(  func->isPointContained(VMD(1.5, -1.5, 2)) );
+    TS_ASSERT( !func->isPointContained(VMD(1.5, 1.5, 2)) );
+    TS_ASSERT(  func->isPointContained(VMD(5.5, -5.5, 4)) );
+    TS_ASSERT( !func->isPointContained(VMD(1.5, -1.5, -1)) );
+    TS_ASSERT( !func->isPointContained(VMD(1.5, -1.5, +11)) );
+  }
+
+
 
   void test_createGeneralTransform_4D_to_3D()
   {
@@ -387,7 +445,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
     TS_ASSERT(func);
     TS_ASSERT_EQUALS( func->getNumPlanes(), 6);
-    TS_ASSERT( func->isPointContained(  VMD(1.5, 1.5,  2, 234) ) );
+    TS_ASSERT(  func->isPointContained( VMD(1.5, 1.5,  2, 234) ) );
     TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5,  12, 234) ) );
     TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5,  0.5, 234) ) );
     TS_ASSERT( !func->isPointContained( VMD(0.5, 1.0,  2, 234) ) );
@@ -395,6 +453,44 @@ public:
     TS_ASSERT( !func->isPointContained( VMD(1.5, 0.5,  2, 234) ) );
     TS_ASSERT( !func->isPointContained( VMD(1.5, 11.5, 2, 234) ) );
   }
+
+  void test_createGeneralTransform_4D_to_4D()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0, 10.0, 5",  "OutY,m, 0,1,0,0, 10.0, 5",
+            "OutZ,m, 0,0,1,0, 10.0, 5",  "OutE,m, 0,0,0,1, 10.0, 5", VMD(1,1,1,1));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 4);
+
+    // The implicit function
+    MDImplicitFunction * func(NULL);
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 8);
+    TS_ASSERT(  func->isPointContained( VMD(1.5, 1.5, 1.5, 1.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5, 1.5,-1.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, 1.5, 1.5,11.5) ) );
+  }
+
+  /** 4D "left-handed" coordinate system
+   * obtained by flipping the Y basis vector.  */
+  void test_createGeneralTransform_4D_to_4D_LeftHanded()
+  {
+    SlicingAlgorithmImpl * alg =
+        do_createGeneralTransform(ws4, "OutX,m, 1,0,0,0, 10.0, 5",  "OutY,m, 0,-1,0,0, 10.0, 5",
+            "OutZ,m, 0,0,1,0, 10.0, 5",  "OutE,m, 0,0,0,1, 10.0, 5", VMD(1,1,1,1));
+    TS_ASSERT_EQUALS( alg->m_bases.size(), 4);
+
+    // The implicit function
+    MDImplicitFunction * func(NULL);
+    TS_ASSERT_THROWS_NOTHING( func = alg->getImplicitFunctionForChunk(NULL, NULL) );
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS( func->getNumPlanes(), 8);
+    TS_ASSERT(  func->isPointContained( VMD(1.5, -1.5, 1.5, 1.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, -1.5, 1.5,-1.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5, -1.5, 1.5,11.5) ) );
+    TS_ASSERT( !func->isPointContained( VMD(1.5,  1.5, 1.5, 1.5) ) );
+  }
+
 
   void test_createGeneralTransform_5D_to_3D()
   {
