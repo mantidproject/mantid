@@ -267,7 +267,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   @param  UB                  3x3 matrix that will be set to the UB matrix
   @param  q_vectors           std::vector of V3D objects that contains the 
                               list of q_vectors that are to be indexed
-                              NOTE: There must be at least 2 q_vectors.
+                              NOTE: There must be at least 3 q_vectors.
   @param  min_d               Lower bound on shortest unit cell edge length.
                               This does not have to be specified exactly but
                               must be strictly less than the smallest edge
@@ -320,7 +320,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
   if ( q_vectors.size() < 3 )
   {
-   throw std::invalid_argument("Two or more indexed peaks needed to find UB");
+   throw std::invalid_argument("Three or more indexed peaks needed to find UB");
   }
 
   if ( min_d >= max_d || min_d <= 0 )
@@ -419,7 +419,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   indexed_qs.reserve( q_vectors.size() );
 
   Matrix<double> temp_UB(3,3,false);
-  double         fit_error;
+  double         fit_error = 0;
   while ( num_initial < sorted_qs.size() )
   {
     num_initial = round(1.5 * (double)num_initial + 3);
@@ -433,7 +433,6 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
     GetIndexedPeaks( UB, some_qs, required_tolerance,
                      miller_ind, indexed_qs, fit_error );
-
     try
     {
       fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
@@ -458,6 +457,148 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     catch (...)
     {
       // failed to improve with all peaks, so return the UB we had 
+    }
+  }
+
+  return fit_error;
+}
+
+
+/** 
+    STATIC method Find_UB: This method will attempt to calculate the matrix 
+  that most nearly indexes the specified q_vectors, using FFTs to find 
+  patterns in projected Q-vectors, given only a range of possible unit cell
+  edge lengths. 
+    The resolution of the search through possible orientations is specified
+  by the degrees_per_step parameter.  One to two degrees per step is usually 
+  adequate.
+  NOTE: The execution time is O(n^3) where n is the number of degrees per
+  step, so decreasing the resolution to 0.5 degree per step will take 
+  about 8 times longer than using 1 degree per step.  It should not be 
+  necessary to decrease this value below 1 degree per step, and users will 
+  have to be VERY patient, if it is decreased much below 1 degree per step.
+    The specified q_vectors should correspond to a single crystal, for this
+  to work reliably.
+  
+  @param  UB                  3x3 matrix that will be set to the UB matrix
+  @param  q_vectors           std::vector of V3D objects that contains the 
+                              list of q_vectors that are to be indexed
+                              NOTE: There must be at least 4 q_vectors and it
+                              really should have at least 10 or more peaks 
+                              for this to work quite consistently.
+  @param  min_d               Lower bound on shortest unit cell edge length.
+                              This does not have to be specified exactly but
+                              must be strictly less than the smallest edge
+                              length, in Angstroms.
+  @param  max_d               Upper bound on longest unit cell edge length.
+                              This does not have to be specified exactly but
+                              must be strictly more than the longest edge
+                              length in angstroms.
+  @param  required_tolerance  The maximum allowed deviation of Miller indices
+                              from integer values for a peak to be indexed.
+  @param  degrees_per_step    The number of degrees between different
+                              orientations used during the initial scan.
+
+  @return  This will return the sum of the squares of the residual errors.
+  
+  @throws  std::invalid_argument exception if UB is not a 3X3 matrix, 
+                                 if there are not at least 3 q vectors, 
+                                 if min_d >= max_d or min_d <= 0,
+                                 if the required_tolerance or degrees_per_step
+                                 is <= 0,
+                                 if at least three possible a,b,c directions
+                                 were not found,
+                                 or if a valid UB matrix could not be formed 
+                                 from the a,b,c directions that were found.
+*/
+double IndexingUtils::Find_UB(       DblMatrix        & UB,
+                               const std::vector<V3D> & q_vectors,
+                                     double             min_d,
+                                     double             max_d,
+                                     double             required_tolerance,
+                                     double             degrees_per_step )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("UB matrix NULL or not 3X3");
+  }
+
+  if ( q_vectors.size() < 4 )
+  {
+   throw std::invalid_argument("Three or more indexed peaks needed to find UB");
+  }
+
+  if ( min_d >= max_d || min_d <= 0 )
+  {
+   throw std::invalid_argument("Need 0 < min_d < max_d");
+  }
+
+  if ( required_tolerance <= 0 )
+  {
+   throw std::invalid_argument("required_tolerance must be positive");
+  }
+
+  if ( degrees_per_step <= 0 )
+  {
+   throw std::invalid_argument("degrees_per_step must be positive");
+  }
+
+  std::vector<V3D> directions;
+
+                           // NOTE: we use a somewhat higher tolerance when 
+                           // finding individual directions since it is easier
+                           // to index one direction individually compared to
+                           // indexing three directions simultaneously.
+  size_t max_indexed = FFTScanFor_Directions( directions, q_vectors,
+                                              min_d, max_d,
+                                              0.75f * required_tolerance,
+                                              degrees_per_step );
+
+  if ( max_indexed <= 0 )
+  {
+   throw std::invalid_argument("Could not find any a,b,c vectors to index Qs");
+  }
+
+  if ( directions.size() < 3 )
+  {
+   throw std::invalid_argument("Could not find enough a,b,c vectors");
+  }
+
+  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+
+  double    min_vol = min_d * min_d * min_d / 4.0;
+
+  if ( !FormUB_From_abc_Vectors( UB, directions, q_vectors,
+                                 required_tolerance, min_vol ) )
+  {
+    throw std::invalid_argument("Could not form UB matrix from a,b,c vectors");
+  }
+
+  double fit_error = 0;
+  if ( q_vectors.size() >= 5 )                 // repeatedly refine UB
+  {
+    Matrix<double> temp_UB(3,3,false);
+    std::vector<V3D> miller_ind;
+    std::vector<V3D> indexed_qs;
+    miller_ind.reserve( q_vectors.size() );
+    indexed_qs.reserve( q_vectors.size() );
+
+    GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                     miller_ind, indexed_qs, fit_error );
+
+    for ( int counter = 0; counter < 4; counter++ )
+    {
+      try
+      {
+        fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+        UB = temp_UB;
+        GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                         miller_ind, indexed_qs, fit_error );
+      }
+      catch (std::exception & e)
+      {
+        // failed to improve with all peaks, so keep the UB we had 
+      }
     }
   }
 
