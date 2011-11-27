@@ -63,8 +63,8 @@ public:
     // Get the file
     outfile = alg.getPropertyValue("Filename");
     TS_ASSERT( Poco::File(outfile).exists() );
-//    if (Poco::File(outfile).exists())
-//      Poco::File(outfile).remove();
+    if (Poco::File(outfile).exists())
+      Poco::File(outfile).remove();
   }
 
   /// Test with an empty PeaksWorkspace

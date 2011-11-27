@@ -6,7 +6,6 @@
 #include <MantidKernel/System.h>
 #include <iostream>
 #include <iomanip>
-#include <algorithm>
 #include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
 
@@ -71,17 +70,6 @@ public:
     UB.setRow( 2, row_2 );
     return UB;
   }
-
-  /**
-    Comparator function for sorting list of 3D vectors based on their magnitude,
-   */
-  static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
-  {
-    double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
-    double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
-    return (mag_sq_1 < mag_sq_2);
-  }
-
 
 
   void test_Find_UB_given_lattice_parameters()
@@ -285,6 +273,40 @@ public:
   }
 
 
+  void test_FFTScanFor_Directions()
+  {
+    double vectors[5][3] = { { -2.58222370, 3.97345330, -4.5514464 },
+                             { -9.59519700, 0.73589927,  1.3474168 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             {  0.08445961, 9.26951000,  3.4138980 },
+                             {  2.66668320, 5.29605670,  7.9653444 } };
+
+    std::vector<V3D> directions;
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double d_min = 6;
+    double d_max = 10;
+    double degrees_per_step = 1.0;
+    double required_tolerance = 0.12;
+
+    IndexingUtils::FFTScanFor_Directions( directions,
+                                          q_vectors,
+                                          d_min, d_max,
+                                          required_tolerance,
+                                          degrees_per_step );
+
+    TS_ASSERT_EQUALS( 5, directions.size() );
+
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       V3D vec = directions[i];
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( vectors[i][j], vec[j], 1.e-5 );
+       }
+     }
+  }
+
+
   void test_GetMagFFT()
   {
 #define N_FFT_STEPS    256
@@ -322,6 +344,96 @@ public:
         TS_ASSERT_DELTA( magnitude_fft[i], 0.0, 1e-5 );
       }
     }
+  }
+
+
+  void test_FormUB_From_abc_Vectors_with_min_angle()
+  {
+    Matrix<double> UB(3,3,false);
+    double UB_array[] = { -0.0177703, -0.0993001, 0.0155008,
+                           0.0585436, -0.0150158, 0.0839775,
+                          -0.158519,   0.0432281, 0.0645189 };
+
+    double vectors[5][3] = { { -2.58222370, 3.97345330, -4.5514464 },
+                             { -9.59519700, 0.73589927,  1.3474168 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             {  0.08445961, 9.26951000,  3.4138980 },
+                             {  2.66668320, 5.29605670,  7.9653444 } };
+
+    std::vector<V3D> directions;
+    for ( size_t i = 0; i < 5; i++ )
+      directions.push_back( V3D(vectors[i][0], vectors[i][1], vectors[i][2]));
+
+    double required_tolerance = 0.12;
+    size_t a_index = 0;
+    double min_d = 6;
+    double max_d = 10;
+
+    IndexingUtils::FormUB_From_abc_Vectors( UB,
+                                            directions,
+                                            a_index,
+                                            min_d,
+                                            max_d );
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    int num_indexed = IndexingUtils::NumberIndexed( UB, 
+                                                    q_vectors,
+                                                    required_tolerance );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    size_t index = 0;
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( UB[i][j], UB_array[index], 1.e-5 );
+         index++;
+       }
+     }
+  }
+
+
+  void test_FormUB_From_abc_Vectors_with_min_volume()
+  {
+    Matrix<double> UB(3,3,false);
+    double UB_array[] = { -0.0177703, -0.0993001, 0.0155008,
+                           0.0585436, -0.0150158, 0.0839775,
+                          -0.158519,   0.0432281, 0.0645189 };
+
+    double vectors[5][3] = { { -2.58222370, 3.97345330, -4.5514464 },
+                             { -9.59519700, 0.73589927,  1.3474168 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             {  0.08445961, 9.26951000,  3.4138980 },
+                             {  2.66668320, 5.29605670,  7.9653444 } };
+
+    std::vector<V3D> directions;
+    for ( size_t i = 0; i < 5; i++ )
+      directions.push_back( V3D(vectors[i][0], vectors[i][1], vectors[i][2]));
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double required_tolerance = 0.12;
+    double min_vol = 6.0 * 6.0 * 6.0 / 4.0;
+
+    IndexingUtils::FormUB_From_abc_Vectors( UB,
+                                            directions,
+                                            q_vectors,
+                                            required_tolerance,
+                                            min_vol );
+
+    int num_indexed = IndexingUtils::NumberIndexed( UB, 
+                                                    q_vectors, 
+                                                    required_tolerance );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    size_t index = 0;
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( UB[i][j], UB_array[index], 1.e-5 );
+         index++;
+       }
+     }
   }
 
 
@@ -483,6 +595,31 @@ public:
 
     num_indexed = IndexingUtils::NumberIndexed_1D( direction, q_list, 0.01 );
     TS_ASSERT_EQUALS( num_indexed,  8 );
+  }
+
+
+  void test_NumberIndexed_3D()
+  {
+    std::vector<V3D> q_list = getNatroliteQs();
+    Matrix<double>   UB     = getNatroliteUB();
+    UB.Invert();
+    V3D a_dir( UB[0][0], UB[0][1], UB[0][2] );
+    V3D b_dir( UB[1][0], UB[1][1], UB[1][2] );
+    V3D c_dir( UB[2][0], UB[2][1], UB[2][2] );
+
+    int num_indexed;
+
+    num_indexed = IndexingUtils::NumberIndexed_3D( a_dir, b_dir, c_dir, 
+                                                   q_list, 0.10 );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    num_indexed = IndexingUtils::NumberIndexed_3D( a_dir, b_dir, c_dir, 
+                                                   q_list, 0.05 );
+    TS_ASSERT_EQUALS( num_indexed, 10 );
+
+    num_indexed = IndexingUtils::NumberIndexed_3D( a_dir, b_dir, c_dir, 
+                                                   q_list, 0.01 );
+    TS_ASSERT_EQUALS( num_indexed,  4 );
   }
 
 

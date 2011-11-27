@@ -724,37 +724,37 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
 
 
 /**
- *  The method uses two passes to scan across all possible directions and 
- *  orientations to find the direction and orientation for the unit cell
- *  that best fits the specified list of peaks.  
- *  On the first pass, only those sets of directions that index the 
- *  most peaks are kept.  On the second pass, the directions that minimize 
- *  the sum-squared deviations from integer indices are selected from that 
- *  smaller set of directions.  This method should be most useful if number 
- *  of peaks is on the order of 10-20, and most of the peaks belong to the 
- *  same crystallite.
- *  @param UB                 This will be set to the UB matrix that best
- *                            indexes the supplied list of q_vectors.
- *  @param q_vectors          List of locations of peaks in "Q".
- *  @param a                  Lattice parameter "a".
- *  @param b                  Lattice parameter "b".
- *  @param c                  Lattice parameter "c".
- *  @param alpha              Lattice parameter alpha.
- *  @param beta               Lattice parameter beta.
- *  @param gamma              Lattice parameter gamma.
- *  @param degrees_per_step   The number of degrees per step used when 
- *                            scanning through all possible directions and
- *                            orientations for the unit cell. NOTE: The
- *                            work required rises very rapidly as the number
- *                            of degrees per step decreases. A value of 1
- *                            degree leads to about 10 seconds of compute time.
- *                            while a value of 2 only requires a bit more than
- *                            1 sec.  The required time is O(n^3) where 
- *                            n = 1/degrees_per_step.
- *                             
- *  @param required_tolerance The maximum distance from an integer that the
- *                            calculated h,k,l values can have if a peak 
- *                            is to be considered indexed.
+    The method uses two passes to scan across all possible directions and 
+    orientations to find the direction and orientation for the unit cell
+    that best fits the specified list of peaks.  
+    On the first pass, only those sets of directions that index the 
+    most peaks are kept.  On the second pass, the directions that minimize 
+    the sum-squared deviations from integer indices are selected from that 
+    smaller set of directions.  This method should be most useful if number 
+    of peaks is on the order of 10-20, and most of the peaks belong to the 
+    same crystallite.
+    @param UB                 This will be set to the UB matrix that best
+                              indexes the supplied list of q_vectors.
+    @param q_vectors          List of locations of peaks in "Q".
+    @param a                  Lattice parameter "a".
+    @param b                  Lattice parameter "b".
+    @param c                  Lattice parameter "c".
+    @param alpha              Lattice parameter alpha.
+    @param beta               Lattice parameter beta.
+    @param gamma              Lattice parameter gamma.
+    @param degrees_per_step   The number of degrees per step used when 
+                              scanning through all possible directions and
+                              orientations for the unit cell. NOTE: The
+                              work required rises very rapidly as the number
+                              of degrees per step decreases. A value of 1
+                              degree leads to about 10 seconds of compute time.
+                              while a value of 2 only requires a bit more than
+                              1 sec.  The required time is O(n^3) where 
+                              n = 1/degrees_per_step.
+                               
+    @param required_tolerance The maximum distance from an integer that the
+                              calculated h,k,l values can have if a peak 
+                              is to be considered indexed.
  */
 double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
                                  const std::vector<V3D>  & q_vectors,
@@ -1040,27 +1040,264 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
 
 
 /**
- *  Fill an array with the magnitude of the FFT of the 
- *  projections of the specified q_vectors on the specified direction.
- *  The largest value in the magnitude FFT that occurs at index 5 or more
- *  is returned as the value of the function.
- *
- *  @param q_vectors     The list of Q vectors to project on the specified 
- *                       direction.
- *  @param current_dir   The direction the Q vectors will be projected on.
- *  @param N             The size of the projections[] array.  This MUST BE
- *                       a power of 2.  The magnitude_fft[] array must be 
- *                       half the size.
- *  @param projections   Array to hold the projections of the Q vectors.  This
- *                       must be long enough so that all projected values map
- *                       map to a valid index, after they are multiplied by the
- *                       index_factor.
- *  @param index_factor  Factor that when multiplied by a projected Q vector 
- *                       will give a valid index into the projections array.
- *  @param magnitude_fft Array that will be filled out with the magnitude of
- *                       the FFT of the projections.
- *  @return The largest value in the magnitude_fft, that is stored in position
- *          5 or more.
+   Get list of possible edge vectors for the real space unit cell.  This
+   method uses FFTs to find directions for which projections of the peaks
+   on those directions have repetitive patterns.  This list of directions found
+   will consist of vectors, V, for which V dot Q is essentially an integer for
+   the most Q vectors.  The difference between V dot Q and an integer must be
+   less than the required tolerance for it to count as an integer.
+    @param  directions          Vector that will be filled with the directions
+                                that may correspond to unit cell edges.
+    @param  q_vectors           Vector of new Vector3D objects that contains 
+                                the list of q_vectors that are to be indexed.
+    @param  min_d               Lower bound on shortest unit cell edge length.
+                                This does not have to be specified exactly but
+                                must be strictly less than the smallest edge
+                                length, in Angstroms.
+    @param  max_d               Upper bound on longest unit cell edge length.
+                                This does not have to be specified exactly but
+                                must be strictly more than the longest edge
+                                length in angstroms.
+    @param  required_tolerance  The maximum allowed deviation of Miller indices
+                                from integer values for a peak to be indexed.
+    @param  degrees_per_step    The number of degrees between directions that
+                                are checked while scanning for an initial 
+                                indexing of the peaks with lowest |Q|.
+ */
+
+size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
+                                       const std::vector<V3D>  & q_vectors,
+                                             double min_d,
+                                             double max_d,
+                                             double required_tolerance,
+                                             double degrees_per_step )
+{
+#define N_FFT_STEPS    512
+#define HALF_FFT_STEPS 256
+
+  double fit_error;
+  int    max_indexed = 0;
+
+                           // first, make hemisphere of possible directions 
+                           // with specified resolution.
+  int num_steps = round( 90.0 / degrees_per_step );
+  std::vector<V3D> full_list = MakeHemisphereDirections( num_steps );
+
+                           // find the maximum magnitude of Q to set range
+  double mag_Q;            // needed for FFT
+  double max_mag_Q = 0;
+  for ( size_t q_num = 1; q_num < q_vectors.size(); q_num++ )
+  {
+    mag_Q = q_vectors[ q_num ].norm();
+    if ( mag_Q > max_mag_Q )
+      max_mag_Q = mag_Q;
+  }
+
+  max_mag_Q *= 1.1f;      // allow for a little "headroom" for FFT range
+
+                          // apply the FFT to each of the directions, and
+                          // keep track of their maximum magnitude past DC
+  double  max_mag_fft;
+  std::vector<double> max_fft_val;
+  max_fft_val.resize( full_list.size() );
+
+  double projections[ N_FFT_STEPS ];
+  double magnitude_fft[ HALF_FFT_STEPS ];
+
+  double index_factor = N_FFT_STEPS / max_mag_Q;     // maps |proj Q| to index 
+
+  for ( size_t dir_num = 0; dir_num < full_list.size(); dir_num++ )
+  {
+    V3D current_dir = full_list[ dir_num ];
+    max_mag_fft = GetMagFFT( q_vectors, 
+                             current_dir,
+                             N_FFT_STEPS,
+                             projections,
+                             index_factor,
+                             magnitude_fft );
+
+    max_fft_val[ dir_num ] = max_mag_fft;
+  }
+                          // find the directions with the 500 largest
+                          // fft values, and place them in temp_dirs vector
+  int N_TO_TRY = 500;
+
+  std::vector<double> max_fft_copy;
+  max_fft_copy.resize( full_list.size() );
+  for ( size_t i = 0; i < max_fft_copy.size(); i++ )
+  {
+    max_fft_copy[i] = max_fft_val[i];
+  }
+
+  std::sort( max_fft_copy.begin(), max_fft_copy.end() );
+
+  size_t index = max_fft_copy.size() - 1;
+  max_mag_fft = max_fft_copy[ index ];
+
+  double threshold = max_mag_fft;
+  while ( ( index > max_fft_copy.size() - N_TO_TRY ) &&
+            threshold >= max_mag_fft / 2)
+  {
+    index--;
+    threshold = max_fft_copy[ index ];
+  }
+
+  std::vector<V3D> temp_dirs;
+  for ( size_t i = 0; i < max_fft_val.size(); i++ )
+  {
+    if ( max_fft_val[i] >= threshold )
+    {
+      temp_dirs.push_back( full_list[i] );
+    }
+  }
+                                  // now scan through temp_dirs and use the
+                                  // FFT to find the cell edge length that
+                                  // corresponds to the max_mag_fft.  Only keep
+                                  // directions with length nearly in bounds
+  V3D temp;
+  std::vector<V3D> temp_dirs_2;
+
+  for ( size_t i = 0; i < temp_dirs.size(); i++ )
+  {
+    max_mag_fft = GetMagFFT( q_vectors, 
+                             temp_dirs[i],
+                             N_FFT_STEPS,
+                             projections,
+                             index_factor,
+                             magnitude_fft );
+
+    double position = GetFirstMaxIndex(magnitude_fft, N_FFT_STEPS, threshold);
+    if ( position > 0 )
+    {
+      double q_val = max_mag_Q / position;
+      double d_val = 1 / q_val;
+      if ( d_val >= 0.8 * min_d && d_val <= 1.2 * max_d )
+      {
+        temp = temp_dirs[i] * d_val;
+        temp_dirs_2.push_back( temp );
+      }
+    }
+  }
+                                   // look at how many peaks were indexed
+                                   // for each of the initial directions
+  max_indexed = 0;
+  int num_indexed;
+  V3D current_dir;
+  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
+  {
+    current_dir = temp_dirs_2[ dir_num ];
+    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    if ( num_indexed > max_indexed )
+      max_indexed = num_indexed;
+  }
+
+                                    // only keep original directions that index
+                                    // at least 50% of max num indexed
+  temp_dirs.clear();
+  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
+  {
+    current_dir = temp_dirs_2[ dir_num ];
+    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    if ( num_indexed >= 0.50 * max_indexed )
+      temp_dirs.push_back( current_dir );
+  }
+                                   // refine directions and again find the 
+                                   // max number indexed, for the optimized
+                                   // directions
+  max_indexed = 0;
+  std::vector<int> index_vals;
+  std::vector<V3D> indexed_qs;
+  for ( size_t dir_num = 0; dir_num < temp_dirs.size(); dir_num++ )
+  {
+    num_indexed = GetIndexedPeaks_1D( temp_dirs[ dir_num ],
+                                      q_vectors,
+                                      required_tolerance,
+                                      index_vals,
+                                      indexed_qs,
+                                      fit_error  );
+    try
+    {
+      int count = 0;
+      while ( count < 5 )                // 5 iterations should be enough for
+      {                                  // the optimization to stabilize
+        num_indexed = 0;
+        Optimize_Direction( temp_dirs[dir_num], index_vals, indexed_qs );
+
+        num_indexed = GetIndexedPeaks_1D( temp_dirs[dir_num],
+                                          q_vectors,
+                                          required_tolerance,
+                                          index_vals,
+                                          indexed_qs,
+                                          fit_error  );
+        if ( num_indexed > max_indexed )
+          max_indexed = num_indexed;
+
+        count++;
+      }
+    }
+    catch ( ... )
+    {
+      // don't continue to refine if the direction fails to optimize properly
+    }
+  }
+                                     // discard those with length out of bounds
+  temp_dirs_2.clear();
+  for ( size_t i = 0; i < temp_dirs.size(); i++ )
+  {
+    current_dir = temp_dirs[i];
+    double length = current_dir.norm();
+    if ( length >= min_d && length <= max_d )
+      temp_dirs_2.push_back( current_dir );
+  }
+                                    // only keep directions that index at 
+                                    // least 75% of the max number of peaks
+  temp_dirs.clear();
+  for ( size_t dir_num = 0; dir_num < temp_dirs_2.size(); dir_num++ )
+  {
+    current_dir = temp_dirs_2[ dir_num ];
+    num_indexed = NumberIndexed_1D(current_dir, q_vectors, required_tolerance);
+    if ( num_indexed > max_indexed * 0.75 )
+      temp_dirs.push_back( current_dir );
+  }
+
+  std::sort( temp_dirs.begin(), temp_dirs.end(), CompareMagnitude );
+
+                                      // discard duplicates:
+  double len_tol = 0.1;               // 10% tolerance for lengths
+  double ang_tol = 5.0;               // 5 degree tolerance for angles
+  DiscardDuplicates( directions,
+                     temp_dirs,
+                     q_vectors,
+                     required_tolerance,
+                     len_tol,
+                     ang_tol );
+
+  return max_indexed;
+}
+
+
+/**
+    Fill an array with the magnitude of the FFT of the 
+    projections of the specified q_vectors on the specified direction.
+    The largest value in the magnitude FFT that occurs at index 5 or more
+    is returned as the value of the function.
+  
+    @param q_vectors     The list of Q vectors to project on the specified 
+                         direction.
+    @param current_dir   The direction the Q vectors will be projected on.
+    @param N             The size of the projections[] array.  This MUST BE
+                         a power of 2.  The magnitude_fft[] array must be 
+                         half the size.
+    @param projections   Array to hold the projections of the Q vectors.  This
+                         must be long enough so that all projected values map
+                         map to a valid index, after they are multiplied by the
+                         index_factor.
+    @param index_factor  Factor that when multiplied by a projected Q vector 
+                         will give a valid index into the projections array.
+    @param magnitude_fft Array that will be filled out with the magnitude of
+                         the FFT of the projections.
+    @return The largest value in the magnitude_fft, that is stored in position
+            5 or more.
  */
 double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
                                  const V3D              & current_dir,
@@ -1109,16 +1346,16 @@ double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
 
 
 /**
- * Scan the FFT array for the first maximum that exceeds
- * the specified threshold and is beyond the initial DC term/interval.
- * @param magnitude_fft   The array containing the magnitude of the 
- *                        FFT values.
- * @param N               The size of the FFT array.
- * @param threshold       The required threshold for the first peak.  This
- *                        must be positive.
- * @return The centroid (index) where the first maximum occurs, or -1
- *         if no point in the FFT (beyond the DC term) equals or exceeds 
- *         the required threshold.
+   Scan the FFT array for the first maximum that exceeds
+   the specified threshold and is beyond the initial DC term/interval.
+   @param magnitude_fft   The array containing the magnitude of the 
+                          FFT values.
+   @param N               The size of the FFT array.
+   @param threshold       The required threshold for the first peak.  This
+                          must be positive.
+   @return The centroid (index) where the first maximum occurs, or -1
+           if no point in the FFT (beyond the DC term) equals or exceeds 
+           the required threshold.
  */
 double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[], 
                                               size_t N,
@@ -1172,27 +1409,27 @@ double IndexingUtils::GetFirstMaxIndex( const double magnitude_fft[],
 
 
 /**
- *  Form a UB matrix from the given list of possible directions, using the
- *  direction at the specified index for the "a" direction.  The "b" and "c"
- *  directions are chosen so that 
- *   1) |a| < |b| < |c|, 
- *   2) the angle between the a, b, c, vectors is at least a minimum 
- *      angle based on min_d/max_d
- *   3) c is not in the same plane as a and b.
- *
- *  @param UB           The calculated UB matrix will be returned in this 
- *                      parameter
- *  @param directions   List of possible vectors for a, b, c.  This list MUST
- *                      be sorted in order of increasing magnitude.
- *  @param a_index      The index to use for the a vector.  The b and c 
- *                      vectors will be choosen from LATER positions in the
- *                      directions list.
- *  @param min_d        Minimum possible real space unit cell edge length.
- *  @param max_d        Maximum possible real space unit cell edge length.
- *
- *  @return true if a UB matrix was set, and false if it not possible to
- *          choose a,b,c (i.e. UB) from the list of directions, starting
- *          with the specified a_index.
+    Form a UB matrix from the given list of possible directions, using the
+    direction at the specified index for the "a" direction.  The "b" and "c"
+    directions are chosen so that 
+     1) |a| < |b| < |c|, 
+     2) the angle between the a, b, c, vectors is at least a minimum 
+        angle based on min_d/max_d
+     3) c is not in the same plane as a and b.
+  
+    @param UB           The calculated UB matrix will be returned in this 
+                        parameter
+    @param directions   List of possible vectors for a, b, c.  This list MUST
+                        be sorted in order of increasing magnitude.
+    @param a_index      The index to use for the a vector.  The b and c 
+                        vectors will be choosen from LATER positions in the
+                        directions list.
+    @param min_d        Minimum possible real space unit cell edge length.
+    @param max_d        Maximum possible real space unit cell edge length.
+  
+    @return true if a UB matrix was set, and false if it not possible to
+            choose a,b,c (i.e. UB) from the list of directions, starting
+            with the specified a_index.
  */
 bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                        const std::vector<V3D>  & directions,
@@ -1266,6 +1503,87 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
   }
 
   if ( ! c_found )
+  {
+    return false;
+  }
+                                     // now build the UB matrix from a,b,c
+  UB.setRow( 0, a_dir );
+  UB.setRow( 1, b_dir );
+  UB.setRow( 2, c_dir );
+  UB.Invert();
+
+  return true;
+}
+
+
+/**
+    Form a UB matrix from the given list of possible directions, using the
+    three directions that correspond to a unit cell with the smallest volume
+    (greater than or equal to the specified minimum volume) that indexes at
+    least 80% of the maximum number of peaks indexed by any set of three 
+    distinct vectors chosen from the list.
+  
+    @param UB            The calculated UB matrix will be returned in this 
+                         parameter
+    @param directions    List of possible vectors for a, b, c.  This list MUST
+                         be sorted in order of increasing magnitude.
+    @param q_vectors     The list of q_vectors that should be indexed 
+    @param req_tolerance The required tolerance on h,k,l to consider a peak
+                         to be indexed.
+    @param min_vol       The smallest possible unit cell volume.
+  
+    @return true if a UB matrix was set, and false if it not possible to
+            choose a,b,c (i.e. UB) from the list of directions, starting
+            with the specified a_index.
+ */
+bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
+                                       const std::vector<V3D>  & directions,
+                                       const std::vector<V3D>  & q_vectors,
+                                             double              req_tolerance,
+                                             double              min_vol )
+{
+   int    num_indexed = 0;
+   int    max_indexed = 0;
+   V3D    a_dir(0,0,0);
+   V3D    b_dir(0,0,0);
+   V3D    c_dir(0,0,0);
+   V3D    a_temp;
+   V3D    b_temp;
+   V3D    c_temp;
+   V3D    acrossb;
+   double vol;
+
+   for ( size_t i = 0; i < directions.size()-2; i++ )
+   {
+     a_temp = directions[i];
+     for ( size_t j = i+1; j < directions.size()-1; j++ )
+     {
+       b_temp = directions[j];
+       acrossb = a_temp.cross_prod( b_temp );
+       for ( size_t k = j+1; k < directions.size(); k++ )
+       {
+         c_temp = directions[k];
+         vol = fabs( acrossb.scalar_prod( c_temp ) );
+         if ( vol > min_vol )
+         {
+           num_indexed = NumberIndexed_3D( a_temp, b_temp, c_temp,
+                                           q_vectors, req_tolerance );
+
+           // Requiring 20% more indexed with longer edge lengths, favors 
+           // the smaller unit cells.
+           if ( num_indexed > 1.20 * max_indexed )
+           {
+             max_indexed = num_indexed;
+             a_dir = a_temp;
+             b_dir = b_temp;
+             c_dir = c_temp;
+           }
+         }
+       }
+     }
+  }
+
+  if ( max_indexed <= 0 )
   {
     return false;
   }
@@ -1400,7 +1718,9 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
           if ( ( length_diff/current_length ) < len_tol )  // continue scan
           {
             angle = current_dir.angle( next_dir ) * 180.0/PI;
-            if ( (angle < ang_tol) || (angle > 180.0-ang_tol) )
+            if ( (boost::math::isnan)(angle) )
+              angle = 0;
+            if ( (angle < ang_tol) || (angle > (180.0-ang_tol)) )
             {
               temp.push_back( next_dir );
               directions[check_index] = zero_vec; // mark off this direction 
@@ -1610,6 +1930,54 @@ int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
     nearest_int = round( proj_value );
     error = fabs( proj_value - nearest_int );
     if ( error <= tolerance )
+    {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+
+/**
+   Calculate the number of Q vectors for which the dot product with three
+   specified direction vectors is an integer triple, NOT equal to (0,0,0) to
+   within the specified tolerance.  This give the number of peaks that would 
+   be indexed by the UB matrix formed from the specified those three real 
+   space unit cell edge vectors.
+   NOTE: This method assumes that the three edge vectors are linearly 
+         independent and could be used to form a valid UB matrix.
+
+   @param a_dir        A Vector3D representing unit cell edge vector a
+   @param b_dir        A Vector3D representing unit cell edge vector b
+   @param c_dir        A Vector3D representing unit cell edge vector c
+   @param q_vectors    Vector of Vector3D objects that contains the list of 
+                       q_vectors that are indexed by the corresponding hkl
+                       vectors.
+   @param tolerance    The maximum allowed distance to an integer from the dot
+                       products of peaks with the specified direction.
+
+   @return A non-negative integer giving the number of peaks simultaneously
+           indexed in all three directions by the specified direction vectors. 
+ */
+int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
+                                     const V3D               & b_dir,
+                                     const V3D               & c_dir,
+                                     const std::vector<V3D>  & q_vectors,
+                                           double              tolerance )
+{
+  if ( a_dir.norm() == 0 || b_dir.norm() == 0 || c_dir.norm() == 0 )
+    return 0;
+
+  V3D hkl_vec;
+  int count = 0;
+
+  for ( size_t i = 0; i < q_vectors.size(); i++ )
+  {
+    hkl_vec[0] = a_dir.scalar_prod( q_vectors[i] );
+    hkl_vec[1] = b_dir.scalar_prod( q_vectors[i] );
+    hkl_vec[2] = c_dir.scalar_prod( q_vectors[i] );
+    if ( ValidIndex( hkl_vec, tolerance ) )
     {
       count++;
     }

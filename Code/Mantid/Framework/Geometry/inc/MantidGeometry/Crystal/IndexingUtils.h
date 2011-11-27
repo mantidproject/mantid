@@ -100,6 +100,15 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                     double required_tolerance,
                                     double degrees_per_step   );
 
+  /// Use FFT to get list of possible directions and lengths for real space 
+  /// unit cell
+  static size_t FFTScanFor_Directions( std::vector<Kernel::V3D>  & directions,
+                                 const std::vector<Kernel::V3D>  & q_vectors,
+                                       double min_d,
+                                       double max_d,
+                                       double required_tolerance,
+                                       double degrees_per_step   );
+
   /// Get the magnitude of the FFT of the projections of the q_vectors on 
   /// the current direction vector.
   static double GetMagFFT( const std::vector<Kernel::V3D>  & q_vectors,
@@ -122,6 +131,14 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                        size_t                      a_index,
                                        double                      min_d,
                                        double                      max_d );
+
+  /// Form a UB matrix by choosing three vectors from list of possible a,b,c
+  /// to maximize the number of peaks indexed and minimize cell volume.
+  static bool FormUB_From_abc_Vectors( Kernel::DblMatrix        & UB,
+                                 const std::vector<Kernel::V3D> & directions,
+                                 const std::vector<Kernel::V3D> & q_vectors,
+                                       double                     req_tolerance,
+                                       double                     min_vol );
 
   /// Get the vector in the direction of "c" given other unit cell information
   static Kernel::V3D Make_c_dir( const Kernel::V3D  & a_dir,
@@ -156,6 +173,13 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                const std::vector<Kernel::V3D>  & q_vectors,
                                      double                      tolerance   );
 
+  /// Calculate the number of Q vectors that map to integer indices
+  /// simutlaneously in three directions
+  static int NumberIndexed_3D( const Kernel::V3D               & a_dir,
+                               const Kernel::V3D               & b_dir,
+                               const Kernel::V3D               & c_dir, 
+                               const std::vector<Kernel::V3D>  & q_vectors,
+                                     double                      tolerance   );
 
   /// Given a UB, get list of Miller indices for specifed Qs
   static int CalculateMillerIndices(
@@ -172,7 +196,7 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                 double                     required_tolerance,
                                 std::vector<int>         & index_vals,
                                 std::vector<Kernel::V3D> & indexed_qs,
-                                double      & fit_error );
+                                double                   & fit_error );
 
   /// Get lists of indices and Qs for peaks indexed in three given directions
   static int GetIndexedPeaks_3D( 
