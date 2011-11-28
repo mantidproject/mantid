@@ -271,15 +271,7 @@ namespace Mantid
       std::string filename(hint);
       const std::string suffix = extractAllowedSuffix(filename);
 
-      std::pair < std::string, std::string > p;
-      try
-      {
-        p = toInstrumentAndNumber(filename);
-      }
-      catch(std::invalid_argument &)
-      {
-        return "";
-      }
+      std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
       std::string delimiter = facility.delimiter();
 
       filename = p.first;
