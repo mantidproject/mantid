@@ -16481,13 +16481,10 @@ void ApplicationWindow::closeGraph(const QString & wsName)
   {
     if (w->isA("MultiLayer"))
     {
-      MultiLayer *plot = (MultiLayer *)w;
+      if (w->objectName() == wsName)
       {
-        if (w->objectName() == wsName)
-        {
-          closeWindow(w);
-          break;
-        }
+        closeWindow(w);
+        break;
       }
     }
   }
