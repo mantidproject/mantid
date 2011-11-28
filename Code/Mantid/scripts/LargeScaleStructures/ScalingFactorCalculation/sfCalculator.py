@@ -515,12 +515,13 @@ if __name__ == '__main__':
 
                 cal1.run()
                 cal1.fit()
-#                recordSettings(a,b,error_a,error_b,name,cal1)
+                recordSettings(a,b,error_a,error_b,name,cal1)
 #                plotObject(cal1)
                 
                 if (i < (len(list_runs)-1) and
                          list_attenuator[i+1] == 2):
-                    list_objects.append(copy.deepcopy(cal1))
+                    list_objects.append(cal1)
+            
             
             if list_attenuator[i] == 2:
                 if (_first_2A):
@@ -547,12 +548,13 @@ if __name__ == '__main__':
 
                 new_cal2 = cal2 * list_objects[-1]
                 new_cal2.fit()
-#                recordSettings(a,b,error_a,error_b,name,new_cal2)
+                recordSettings(a,b,error_a,error_b,name,new_cal2)
                 plotObject(new_cal2)
 
                 if (i < (len(list_runs)-1) and
                          list_attenuator[i+1] == 3):
-                    list_objects.append(copy.deepcopy(new_cal2))
+                    list_objects.append(new_cal2)
+
 
             if list_attenuator[i] == 3: 
                 if (_first_3A):
@@ -578,12 +580,13 @@ if __name__ == '__main__':
                 cal3.run()
                 new_cal3 = cal3 * list_objects[-1]
                 new_cal3.fit()
-#                recordSettings(a,b,error_a,error_b,name,new_cal3)
+                recordSettings(a,b,error_a,error_b,name,new_cal3)
                 plotObject(new_cal3)
                 
                 if (i < (len(list_runs)-1) and 
                          list_attenuator[i+1] == 4):
-                    list_objects.append(copy.deepcopy(new_cal3))
+                    list_objects.append(new_cal3)
+
         
             if list_attenuator[i] == 4: 
                 if (_first_4A):
@@ -609,7 +612,7 @@ if __name__ == '__main__':
                 cal4.run()
                 new_cal4 = cal4 * list_objects[-1]
                 new_cal4.fit()
-#                recordSettings(a,b,error_a,error_b,name,new_cal4)
+                recordSettings(a,b,error_a,error_b,name,new_cal4)
                 plotObject(new_cal4)
                 
                 if (i < (len(list_runs)-1) and 
@@ -640,7 +643,7 @@ if __name__ == '__main__':
                 cal5.run()
                 new_cal5 = cal5 * list_objects[-1]
                 new_cal5.fit()
-#                recordSettings(a,b,error_a,error_b,name,new_cal5)
+                recordSettings(a,b,error_a,error_b,name,new_cal5)
                 plotObject(new_cal5)
 
                 if (i < (len(list_runs)-1) and 
@@ -671,12 +674,12 @@ if __name__ == '__main__':
                 cal6.run()
                 new_cal6 = cal6 * list_objects[-1]
                 new_cal6.fit()
-#                recordSettings(a,b,error_a,error_b,name,new_cal6)
+                recordSettings(a,b,error_a,error_b,name,new_cal6)
                 plotObject(new_cal6)
     
-#        #output the fitting parameters in an ascii
-#        output_file_name = '/home/j35/Desktop/SFcalculator.txt'
-#        outputFittingParameters(a,b,error_a,error_b,name,output_file_name)
+        #output the fitting parameters in an ascii
+        output_file_name = '/home/j35/Desktop/SFcalculator.txt'
+        outputFittingParameters(a,b,error_a,error_b,name,output_file_name)
 
     else:
         """
