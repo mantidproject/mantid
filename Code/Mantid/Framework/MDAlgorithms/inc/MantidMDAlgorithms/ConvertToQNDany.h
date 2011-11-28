@@ -49,7 +49,11 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
   class ConvertToQNDany;
+  // signature for an algorithm processing n-dimension event workspace
   typedef boost::function<void (ConvertToQNDany*, API::IMDEventWorkspace *const)> pMethod;
+  // signature for a fucntion, creating n-dimension workspace
+  //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToQNDany*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
+  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToQNDany*, size_t ,size_t ,size_t )> pWSCreator;
 
   enum Q_state{
        NoQ,
@@ -99,39 +103,38 @@ namespace MDAlgorithms
      /// the names of the log variables, which are used as dimensions
     std::vector<std::string> other_dim_names;
     Kernel::V3D u,v;
+    /// minimal and maximal values for the workspace dimensions:
+    std::vector<double>      dim_min,dim_max;
+    // the names for the MD workspace dimensions
+    std::vector<std::string> dim_names;
+    // the units for the MD workspace dimensions
+    std::vector<std::string> dim_units;
   protected: //for testing
    /** function returns the list of names, which can be treated as dimensions present in current matrix workspace */
    std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
    
-   /** function processes arguments entered by user and tries to establish which algorithm should be deployed;   */
-   std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims)const;
+   /** function processes arguments entered by user, calculates the number of dimensions and tries to establish which algorithm should be deployed;   */
+   std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims);
 
    /** function provides the linear representation for the transformation matrix, */
    std::vector<double> get_transf_matrix()const;
    //
    template<size_t nd,Q_state Q>
-   void process_QND(API::IMDEventWorkspace *const pOutWs);
+   void processQND(API::IMDEventWorkspace *const pOutWs);
+   //
+   template<size_t nd>
+   API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
+
 
    //  modQdE, // specific algorithm  -- 2D, powder
-    void process_ModQ_dE_();
-    //  modQND, // ModQND -- good for powders
-    void process_ModQ__ND();
-    //   modQdEND, // inelastic powders plus something
-    void process_ModQ_dE_ND();
-    //   Q3D,    // specific algorithm -- diffraction
-    void process_Q3D___();
-    //  Q3DdE,  // specific algorithn -- inelastic
-    void process_Q3D_dE_();
-    //  Q3DND,  // generic diffraction algorithm. 
-    void process_Q3D__ND();
-    //  Q3DdEND, // generic algorithn -- inelastic + other dependencies
-    void process_Q3D_dE_ND();
-    //
+    //void process_ModQ_dE_();
+   /// map to select an algorithm
     std::map<std::string, pMethod> alg_selector;
- };
+   /// map to select an workspace
+    std::map<size_t, pWSCreator> ws_creator;
 
- template<typename T>
- void Q_analysis(coord_t &Coord, double X) { }
+ };
+ 
 } // namespace Mantid
 } // namespace MDAlgorithms
 
