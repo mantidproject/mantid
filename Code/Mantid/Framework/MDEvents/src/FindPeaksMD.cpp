@@ -374,7 +374,7 @@ namespace MDEvents
     typedef std::pair<double, size_t> dens_box;
 
     // Map that will sort the boxes by increasing density. The key = density; value = box index.
-    typename std::multimap<double, size_t> sortedBoxes;
+    std::multimap<double, size_t> sortedBoxes;
 
     /// Arbitrary scaling factor for density to make more manageable numbers, especially for older file formats.
     signal_t densityScalingFactor = 1e-6;
@@ -417,8 +417,8 @@ namespace MDEvents
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
-    typename std::multimap<double, size_t>::reverse_iterator it2;
-    typename std::multimap<double, size_t>::reverse_iterator it2_end = sortedBoxes.rend();
+    std::multimap<double, size_t>::reverse_iterator it2;
+    std::multimap<double, size_t>::reverse_iterator it2_end = sortedBoxes.rend();
     for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++)
     {
       signal_t density = it2->first;
@@ -428,7 +428,7 @@ namespace MDEvents
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (typename std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
+      for (std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
       {
         VMD otherCenter = ws->getCenter(*it3);
 
@@ -465,7 +465,7 @@ namespace MDEvents
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (typename std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
+    for (std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
     {
       size_t index = *it3;
       // The center of the box = Q in the lab frame
