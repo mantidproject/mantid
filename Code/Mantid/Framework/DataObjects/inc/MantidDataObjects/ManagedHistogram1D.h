@@ -105,6 +105,13 @@ namespace DataObjects
     virtual MantidVec& dataE()
     { retrieveData(); m_dirty=true; return refE.access(); }
 
+    /// Returns the y data const
+    virtual const MantidVec& readY() const
+    { retrieveData(); return *refY; }
+    /// Returns the error data const
+    virtual const MantidVec& readE() const
+    { retrieveData(); return *refE; }
+
     // ------------ X data accessors -----------------------------
     virtual void setX(const MantidVec& X)
     { retrieveData(); refX.access()=X; m_dirty = true; }
@@ -120,6 +127,10 @@ namespace DataObjects
       return refX.access(); }
 
     virtual const MantidVec& dataX() const
+    { retrieveData();
+      return *refX; }
+
+    virtual const MantidVec& readX() const
     { retrieveData();
       return *refX; }
 
