@@ -66,6 +66,12 @@ else:
             # ldd produces a string that always has 4 columns. The full path
             # is in the 3rd column
             return out.split()[2]
+        # stdc++ has to be loaded first or exceptions don't get translated 
+        # properly across bounadries
+        # NeXus has to be loaded as well as there seems to be an issue with
+        # the thread-local storage not being initialized properly unles
+        # it is loaded before other libraries.
+        dlloader(get_libpath(os.path.join('libMantidKernel.so'), 'stdc++'))
         dlloader(get_libpath(os.path.join('libMantidKernel.so'), 'libNeXus'))
         dlloader(os.path.join(_bin, 'libMantidKernel.so'))
         dlloader(os.path.join(_bin, 'libMantidGeometry.so'))
