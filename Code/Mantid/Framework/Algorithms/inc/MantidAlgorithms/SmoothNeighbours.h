@@ -55,7 +55,7 @@ namespace Mantid
       FlatWeighting() : WeightingStrategy(){}
       virtual ~FlatWeighting(){};
       virtual double weightAt(int&, int&, int&, int&){return 1;}
-      double weightAt(double& distance){ return 1;}
+      double weightAt(double&){ return 1;}
     };
 
     /*
