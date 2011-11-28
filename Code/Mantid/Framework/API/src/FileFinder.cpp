@@ -271,8 +271,15 @@ namespace Mantid
       std::string filename(hint);
       const std::string suffix = extractAllowedSuffix(filename);
 
-      std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
-
+      std::pair < std::string, std::string > p;
+      try
+      {
+        p = toInstrumentAndNumber(filename);
+      }
+      catch(std::invalid_argument &)
+      {
+        return "";
+      }
       std::string delimiter = facility.delimiter();
 
       filename = p.first;
@@ -389,7 +396,7 @@ namespace Mantid
         {
           filename = makeFileName(filename, facility);
         }
-        catch(std::invalid_argument)
+        catch(std::invalid_argument&)
         {
           g_log.error() << "Could not find file '" << filename << "'\n";
         }
@@ -453,6 +460,7 @@ namespace Mantid
             {
               return "";
             }
+            if( path.empty() ) return "";
             Poco::Path pathPattern(path);
             if (ext->find("*") != std::string::npos)
             {
