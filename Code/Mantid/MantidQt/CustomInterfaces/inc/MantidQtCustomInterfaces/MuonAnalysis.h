@@ -11,6 +11,7 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
 #include <map>
 
 namespace MantidQt
@@ -315,6 +316,9 @@ private:
 
   /// time zero returned in ms
   QString timeZero();
+
+  /// Get the new plot name
+  QString getNewPlotName(const QString & cropWSfirstPart);
 
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
