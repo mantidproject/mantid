@@ -383,6 +383,7 @@ void MantidGLWidget::refreshView()
 
 void MantidGLWidget::leaveEvent (QEvent* ev)
 {
+  UNUSED_ARG(ev)
   // Restore possible override cursor
   while(QApplication::overrideCursor())
   {
