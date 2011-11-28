@@ -29,9 +29,9 @@ class SmoothNeighboursTest : public CxxTest::TestSuite
 public:
 
 
-  void do_test(EventType type, double * expectedY, bool PreserveEvents = true,
-      bool WeightedSum = true, double Radius = 0.0,
-      bool ConvertTo2D = false)
+  void do_test(EventType type, double * expectedY, std::string WeightedSum = "Linear",  bool PreserveEvents = true,
+      double Radius = 0.0,
+      bool ConvertTo2D = false, int numberOfNeighbours=8)
   {
     // Pixels will be spaced 0.008 apart
     EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
@@ -77,6 +77,7 @@ public:
     alg.setProperty("PreserveEvents", PreserveEvents);
     alg.setProperty("WeightedSum", WeightedSum);
     alg.setProperty("Radius", Radius);
+    alg.setProperty("NumberOfNeighbours", numberOfNeighbours);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -195,11 +196,12 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("OutputWorkspace", "testMW");
     alg.setProperty("PreserveEvents", false);
-    alg.setProperty("WeightedSum", false);
-    alg.setProperty("ProvideRadius", false);
+    alg.setProperty("WeightedSum", "Flat");
     alg.setProperty("NumberOfNeighbours", 8);
     alg.setProperty("IgnoreMaskedDetectors", true);
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    alg.setProperty("Radius", 1.2);
+    alg.setProperty("RadiusUnits", "NumberOfPixels");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_sptr outWS;
@@ -236,7 +238,7 @@ public:
   void test_event_dont_PreserveEvents()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, false);
+    do_test(TOF, expectedY, "Linear");
   }
 
 
@@ -249,35 +251,34 @@ public:
   void test_event_no_WeightedSum()
   {
     double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
-    do_test(TOF, expectedY, true /*PreserveEvents*/, false /*WeightedSum*/);
+    do_test(TOF, expectedY, "Flat",  true /*PreserveEvents*/);
   }
 
   void test_event_Radius_no_WeightedSum()
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, 3.0, 2, 2, 2, 2};
-    do_test(TOF, expectedY, true /*PreserveEvents*/, false /*WeightedSum*/, 0.009 /* Radius */);
+    do_test(TOF, expectedY, "Flat", true /*PreserveEvents*/, 0.009 /* Radius */);
   }
 
   void test_event_Radius_WeightedSum()
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
-    do_test(TOF, expectedY, true /*PreserveEvents*/, true /*WeightedSum*/, 0.009 /* Radius */);
+    do_test(TOF, expectedY, "Linear", true /*PreserveEvents*/, 0.009 /* Radius */);
   }
-
 
   void test_workspace2D()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, true /*WeightedSum*/,
+    do_test(TOF, expectedY, "Linear", false /*PreserveEvents*/,
         0.0 /* Radius*/, true /*Convert2D*/);
   }
 
   void test_workspace2D_no_WeightedSum()
   {
     double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, false /*WeightedSum*/,
+    do_test(TOF, expectedY, "Flat", false /*PreserveEvents*/, 
         0.0 /* Radius*/, true /*Convert2D*/);
   }
 
@@ -285,7 +286,7 @@ public:
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, 3.0, 2, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, false /*WeightedSum*/, 0.009 /* Radius */,
+    do_test(TOF, expectedY, "Flat", false /*PreserveEvents*/, 0.009 /* Radius */,
         true /*Convert2D*/);
   }
 
@@ -293,7 +294,7 @@ public:
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, true /*WeightedSum*/, 0.009 /* Radius */,
+    do_test(TOF, expectedY, "Linear", false /*PreserveEvents*/, 0.009 /* Radius */,
         true /*Convert2D*/);
   }
 
