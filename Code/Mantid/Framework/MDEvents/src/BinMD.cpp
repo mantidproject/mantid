@@ -526,6 +526,9 @@ namespace MDEvents
       CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
     }
 
+    // Copy the experiment infos to the output
+    outWS->copyExperimentInfos( *in_ws );
+
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
   }

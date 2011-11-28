@@ -24,13 +24,7 @@ namespace API
    * @param other :: other workspace to copy    */
   MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos & other)
   {
-    m_expInfos.clear();
-    // Do a deep copy of ExperimentInfo's
-    for (size_t i=0; i<other.m_expInfos.size(); i++)
-    {
-      ExperimentInfo_sptr copy(new ExperimentInfo(*other.m_expInfos[i]));
-      m_expInfos.push_back(copy);
-    }
+    this->copyExperimentInfos(other);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -100,6 +94,19 @@ namespace API
     return uint16_t(m_expInfos.size());
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Copy the experiment infos from another. Deep copy.
+   * @param other :: other workspace to copy    */
+  void MultipleExperimentInfos::copyExperimentInfos(const MultipleExperimentInfos & other)
+  {
+    m_expInfos.clear();
+    // Do a deep copy of ExperimentInfo's
+    for (size_t i=0; i<other.m_expInfos.size(); i++)
+    {
+      ExperimentInfo_sptr copy(new ExperimentInfo(*other.m_expInfos[i]));
+      m_expInfos.push_back(copy);
+    }
+  }
 
 
 

@@ -52,6 +52,8 @@ namespace API
 
     uint16_t getNumExperimentInfo() const;
 
+    void copyExperimentInfos(const MultipleExperimentInfos & other);
+
   private:
     /// Vector for each ExperimentInfo class
     std::vector<ExperimentInfo_sptr> m_expInfos;

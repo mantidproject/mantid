@@ -35,6 +35,7 @@ public:
   void test_copy_constructor()
   {
     MultipleExperimentInfos mei;
+    ExperimentInfo_sptr ei(new ExperimentInfo);
     TS_ASSERT_EQUALS( mei.addExperimentInfo(ei), 0);
     MultipleExperimentInfos copy(mei);
     TS_ASSERT_EQUALS( copy.getNumExperimentInfo(), 1);
