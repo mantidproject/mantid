@@ -7,11 +7,93 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
-namespace Algorithms
-{
+  namespace Algorithms
+  {
+    /*
+    Abstract weighting strategy, which can be applied to calculate individual 
+    weights for each pixel based upon disance from epicenter.
+    */
+    class DLLExport WeightingStrategy
+    {
+    public:
+      /// Constructor
+      WeightingStrategy(double& cutOff) : m_cutOff(cutOff){};
+      /// Constructor
+      WeightingStrategy() : m_cutOff(0){};
+      /// Destructor
+      virtual ~WeightingStrategy(){};
+      /**
+      Calculate the weight at distance from epicenter.
+      @param distance : absolute distance from epicenter
+      @return calculated weight
+      */
+      virtual double weightAt(double& distance) = 0;
+
+      /**
+      Calculate the weight at distance from epicenter.
+      @param adjX : The number of Y (vertical) adjacent pixels to average together
+      @param ix : current index x
+      @param adjY : The number of X (vertical) adjacent pixels to average together
+      @param iy : current index y
+      */
+      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy) = 0;
+    protected:
+      /// Cutoff member.
+      double m_cutOff;
+    };
+
+    /*
+    Flat (no weighting) strategy. Concrete WeightingStrategy
+    */
+    class DLLExport FlatWeighting : public WeightingStrategy
+    {
+    public:
+      FlatWeighting() : WeightingStrategy(){}
+      virtual ~FlatWeighting(){};
+      virtual double weightAt(int&, int&, int&, int&){return 1;}
+      double weightAt(double& distance){ return 1;}
+    };
+
+    /*
+    Linear weighting strategy.
+    */
+    class DLLExport LinearWeighting : public WeightingStrategy
+    {
+    public: 
+      LinearWeighting(double &cutOff) : WeightingStrategy(cutOff){}
+      virtual ~LinearWeighting(){};
+      double weightAt(double& distance)
+      {
+        return 1 - (distance/m_cutOff);
+      }
+      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy)
+      {
+        return static_cast<double>(adjX - std::abs(ix) + adjY - std::abs(iy) + 1);
+      }
+    };
+
+    /*
+    Null weighting strategy.
+    */
+    class DLLExport NullWeighting : public WeightingStrategy
+    {
+    public:
+      NullWeighting() : WeightingStrategy(){}
+      virtual ~NullWeighting(){};
+      double weightAt(double&)
+      {
+        throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
+      }
+      virtual double weightAt(int&, int&, int&, int&)
+      {
+        throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
+      }
+    };
+
   /** Smooth neighboring pixels.
 
     @authors Janik Zikovsky, Vickie Lynch, SNS
@@ -41,7 +123,7 @@ class DLLExport SmoothNeighbours : public API::Algorithm
 {
 public:
   /// Default constructor
-  SmoothNeighbours() : API::Algorithm() {};
+  SmoothNeighbours();
   /// Destructor
   virtual ~SmoothNeighbours() {};
   /// Algorithm's name for identification overriding a virtual method
@@ -64,6 +146,9 @@ private:
   void findNeighboursRectangular();
   void findNeighboursUbiqutious();
 
+  /// Sets the weighting stragegy.
+  void setWeightingStrategy(const std::string strategyName, double& cutOff);
+
   /// Pixels in the detector
   int XPixels;
   /// Pixels in the detector
@@ -78,7 +163,7 @@ private:
   /// Radius to search nearest neighbours
   double Radius;
   /// Weight the neighbours during summing
-  bool WeightedSum;
+  boost::scoped_ptr<WeightingStrategy> WeightedSum;
   /// PreserveEvents
   bool PreserveEvents;
 
