@@ -166,8 +166,8 @@ public:
       algP.setPropertyValue("OutputWorkspace", "aaa");
 
       TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
-       double intensity = algP.getProperty("Intensity");
-       double sigma = algP.getProperty("SigmaIntensity");
+//       double intensity = algP.getProperty("Intensity");
+//       double sigma = algP.getProperty("SigmaIntensity");
   //     TS_ASSERT_LESS_THAN(fabs(intensity - 59870.5), 100.0);
       //Not sure why this reduced the error so much in the test
    //   TS_ASSERT_LESS_THAN(fabs(sigma - 665.1), 1.0);
