@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
-#define MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_ 
+#ifndef MANTID_CRYSTAL_FIND_UB_USING_FFT_H_
+#define MANTID_CRYSTAL_FIND_UB_USING_FFT_H_ 
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
@@ -9,8 +9,8 @@ namespace Mantid
 {
 namespace Crystal
 {
-/** FindUBUsingMinMaxD : Algorithm to calculate a UB matrix, given bounds
-    on the lattice parameters and a list of peaks.
+/** FindUBUsingFFT : Algorithm to calculate a UB matrix using fast Fourier
+    transforms given a list of peaks and bounds on the lattice parameters.
     
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
@@ -37,15 +37,15 @@ namespace Crystal
     <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport FindUBUsingMinMaxD : public API::Algorithm
+  class DLLExport FindUBUsingFFT : public API::Algorithm
   {
   public:
-    FindUBUsingMinMaxD();
-    ~FindUBUsingMinMaxD();
+    FindUBUsingFFT();
+    ~FindUBUsingFFT();
     
     /// Algorithm's name for identification 
     virtual const std::string name() const 
-            { return "FindUBUsingMinMaxD";};
+            { return "FindUBUsingFFT";};
 
     /// Algorithm's version for identification 
     virtual int version() const 
@@ -74,4 +74,4 @@ namespace Crystal
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_ */
+#endif  /* MANTID_CRYSTAL_FIND_UB_USING_FFT_H_ */
