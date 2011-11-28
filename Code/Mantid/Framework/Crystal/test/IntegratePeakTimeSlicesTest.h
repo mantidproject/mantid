@@ -166,10 +166,11 @@ public:
       algP.setPropertyValue("OutputWorkspace", "aaa");
 
       TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
-
-      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getIntensity() - 59870.5), 100.0);
+       double intensity = algP.getProperty("Intensity");
+       double sigma = algP.getProperty("SigmaIntensity");
+       TS_ASSERT_LESS_THAN(fabs(intensity - 59870.5), 100.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 665.1), 1.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma - 665.1), 1.0);
      // TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 76.04), 1.0);
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Time", 0) - 19250), 20);
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Background", 1) - 1.523), .2);
