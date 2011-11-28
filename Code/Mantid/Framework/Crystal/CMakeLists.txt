@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
+	src/FindUBUsingFFT.cpp
 	src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadIsawPeaks.cpp
@@ -29,6 +30,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
+	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadIsawPeaks.h
@@ -51,6 +53,7 @@ set ( TEST_FILES
 	test/FindUBUsingIndexedPeaksTest.h
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h
+	test/FindUBUsingFFTTest.h
 	test/IndexPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h
