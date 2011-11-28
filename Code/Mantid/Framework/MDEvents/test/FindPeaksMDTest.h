@@ -72,7 +72,8 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks, bool AppendPeaks = false)
+  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks, bool AppendPeaks = false,
+      bool histo = false)
   {
     // Name of the output workspace.
     std::string outWSName("peaksFound");
@@ -84,6 +85,20 @@ public:
     addPeak(500, -5,-5,5, 0.2);
     // This peak will be rejected as non-physical
     addPeak(500, -5,-5,-5, 0.2);
+
+    // Convert to a MDHistoWorkspace on option
+    if (histo)
+    {
+      FrameworkManager::Instance().exec("BinMD", 14,
+          "AxisAligned", "1",
+          "AlignedDimX", "Q_lab_x,-10,10,100",
+          "AlignedDimY", "Q_lab_y,-10,10,100",
+          "AlignedDimZ", "Q_lab_z,-10,10,100",
+          "IterateEvents", "1",
+          "InputWorkspace", "MDEWS"
+          "OutputWorkspace", "MDEWS"
+          );
+    }
   
     FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -143,6 +158,18 @@ public:
     do_test(true, 100, 3);
   }
 
+  /** Run normally */
+  void test_exec()
+  {
+    do_test(true, 100, 3);
+  }
+
+  /** Run normally, but limit to 1 peak */
+  void test_exec_withMaxPeaks()
+  {
+    do_test(true, 1, 1);
+  }
+
   /** Run twice and append to the peaks workspace*/
   void test_exec_AppendPeaks()
   {
@@ -150,16 +177,18 @@ public:
     do_test(true, 100, 6, true /* Append */ );
   }
 
-  void test_exec()
+
+  /** Run on MDHistoWorkspace */
+  void test_exec_histo()
   {
-    do_test(true, 100, 3);
+    do_test(true, 100, 3, false, true /*histo conversion*/);
   }
 
-  void test_exec_withMaxPeaks()
+  /** Run on MDHistoWorkspace, but limit to 1 peak */
+  void test_exec_histo_withMaxPeaks()
   {
-    do_test(true, 1, 1);
+    do_test(true, 1, 1, false, true /*histo conversion*/);
   }
-
 
 };
 
