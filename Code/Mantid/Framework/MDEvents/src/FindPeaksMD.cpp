@@ -1,7 +1,8 @@
 /*WIKI* 
 
 
-This algorithm is used to find single-crystal peaks in a multi-dimensional workspace. It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW.
+This algorithm is used to find single-crystal peaks in a multi-dimensional workspace.
+It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW.
 
 The algorithm proceeds in this way:
 * Sorts all the boxes in the workspace by decreasing order of signal density (total weighted event sum divided by box volume).
@@ -11,16 +12,17 @@ The algorithm proceeds in this way:
 ** We look through all the peaks that have already been found. If the box is too close to an existing peak, it is rejected. This distance is PeakDistanceThreshold.
 * This is repeated until we find up to MaxPeaks peaks.
 
-Each peak created is placed in the output [[PeaksWorkspace]].
-
+Each peak created is placed in the output [[PeaksWorkspace]], which can be a new workspace or replace the old one.
 
 *WIKI*/
-#include "MantidMDEvents/FindPeaksMD.h"
-#include "MantidKernel/System.h"
+
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/FindPeaksMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include <vector>
+#include "MantidMDEvents/MDHistoWorkspace.h"
 #include <map>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -55,8 +57,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void FindPeaksMD::initDocs()
   {
-    this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace.");
-    this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace.");
+    this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.");
+    this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -64,8 +66,8 @@ namespace MDEvents
    */
   void FindPeaksMD::init()
   {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
-        "An input MDEventWorkspace with at least 3 dimensions.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace","",Direction::Input),
+        "An input MDEventWorkspace or MDHistoWorkspace with at least 3 dimensions.");
 
     declareProperty(new PropertyWithValue<double>("PeakDistanceThreshold", 0.1, Direction::Input),
         "Threshold distance for rejecting peaks that are found to be too close from each other.\n"
@@ -330,6 +332,17 @@ namespace MDEvents
 
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Find peaks in the given MDHistoWorkspace
+   *
+   * @param ws :: MDHistoWorkspace
+   */
+  void FindPeaksMD::findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws)
+  {
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -343,7 +356,9 @@ namespace MDEvents
       peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
 
     // The MDEventWorkspace as input
-    IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
+    IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
+    MDHistoWorkspace_sptr inMDHW = boost::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
+    IMDEventWorkspace_sptr inMDEW = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
 
     // Other parameters
     double PeakDistanceThreshold = getProperty("PeakDistanceThreshold");
@@ -352,7 +367,17 @@ namespace MDEvents
     DensityThresholdFactor = getProperty("DensityThresholdFactor");
     MaxPeaks = getProperty("MaxPeaks");
 
-    CALL_MDEVENT_FUNCTION3(this->findPeaks, inWS);
+    // Execute the proper algo based on the type of workspace
+    if (inMDHW)
+      this->findPeaksHisto(inMDHW);
+    else if (inMDEW)
+    {
+      CALL_MDEVENT_FUNCTION3(this->findPeaks, inMDEW);
+    }
+    else
+    {
+      throw std::runtime_error("This algorithm can only find peaks on a MDHistoWorkspace or a MDEventWorkspace; it does not work on a regular MatrixWorkspace.");
+    }
 
     delete prog;
 

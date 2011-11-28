@@ -18,6 +18,14 @@ namespace API
   IMDHistoWorkspace::IMDHistoWorkspace()
   {
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy Constructor
+   */
+  IMDHistoWorkspace::IMDHistoWorkspace(const IMDHistoWorkspace & other)
+  : MultipleExperimentInfos(other)
+  {
+  }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -25,7 +33,6 @@ namespace API
   IMDHistoWorkspace::~IMDHistoWorkspace()
   {
   }
-  
 
 
 } // namespace Mantid

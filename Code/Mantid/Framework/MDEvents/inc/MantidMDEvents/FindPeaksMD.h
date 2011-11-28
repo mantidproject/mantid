@@ -7,6 +7,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 namespace Mantid
 {
@@ -41,6 +42,8 @@ namespace MDEvents
 
     template<typename MDE, size_t nd>
     void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    void findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
 
     /// Output PeaksWorkspace
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
