@@ -238,18 +238,31 @@ namespace DataObjects
   {
 	  // This is not fully implemented. Currently a partial save.
 	  int pNum = getNumberPeaks();
-	  //std::vector<Peak>& myPeaks = getPeaks();
-      std::vector<Peak> my1Peaks = peaks;
-	  // Peak myPeak = getPeak(0);
-	  Peak my1Peak = peaks[0];
-	  int cNum = columnCount();
-	  int rNum = rowCount();
-	  API::Column_const_sptr col = getColumn(0);
-	  std::vector<std::string> cNames = columnNames;
-	        file->makeGroup("detector", "NXdetector", 1);
-		//	file->writeData("Column_names", columnNames ); // This is not resolved by linker
-		//	file->writeData("column names",cNames); // This is not resolved by linker.
-		//	file->writeData( "Column_1", col ); // This is not resolved by linker.
+
+//	  //std::vector<Peak>& myPeaks = getPeaks();
+//      std::vector<Peak> my1Peaks = peaks;
+//	  // Peak myPeak = getPeak(0);
+//	  Peak my1Peak = peaks[0];
+//	  int cNum = columnCount();
+//	  int rNum = rowCount();
+//	  API::Column_const_sptr col = getColumn(0);
+//	  std::vector<std::string> cNames = columnNames;
+//  file->writeData("Column_names", columnNames ); // This is not resolved by linker
+//  file->writeData("column names",cNames); // This is not resolved by linker.
+//  file->writeData( "Column_1", col ); // This is not resolved by linker.
+
+    std::vector<int> detectorID;
+    std::vector<dpuble> H;
+	  for (size_t i=0; i < peaks.size(); i++)
+	  {
+	    Peak & p = peaks[i];
+      detectorID.push_back( p.m_DetectorID );
+      H.push_back( p.m_H );
+      // etc.
+	  }
+    file->writeData("detector_id", detectorIDs);
+    file->writeData("H", H);
+    // etc.
   }
 }
 }
