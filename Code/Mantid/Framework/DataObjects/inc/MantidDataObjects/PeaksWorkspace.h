@@ -247,6 +247,11 @@ namespace DataObjects
 
     // ====================================== End ITableWorkspace Methods ==================================
 
+	// --- Nexus Methods ---
+    // Save to Nexus
+    void PeaksWorkspace::saveNexus(::NeXus::File * file ) const;
+
+
   };
 
 
@@ -255,6 +260,8 @@ namespace DataObjects
 
   /// Typedef for a shared pointer to a const peaks workspace.
   typedef boost::shared_ptr<const PeaksWorkspace> PeaksWorkspace_const_sptr;
+
+
 
 }
 }

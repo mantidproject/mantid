@@ -37,6 +37,7 @@ None
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusFileIO.h"
@@ -209,6 +210,8 @@ namespace DataHandling
 
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
     ITableWorkspace_const_sptr tableWorkspace = boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
+	PeaksWorkspace_const_sptr peaksWorkspace = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
+	if(peaksWorkspace) g_log.debug("We have a peaks workspace");
     // check if inputWorkspace is something we know how to save
     if (!matrixWorkspace && !tableWorkspace) {
 		g_log.debug() << "Workspace "  << m_title << " not saved because it is not of a type we can presently save.\n";
@@ -281,11 +284,19 @@ namespace DataHandling
       }
 
     }  // finish matrix workspace specifics 
-    
-    if (tableWorkspace)
+
+	// peaks workspace specifics
+	if (peaksWorkspace)
+	{
+		g_log.information("Peaks Workspace saving to Nexus would be done");
+		int pNum = peaksWorkspace->getNumberPeaks();
+		peaksWorkspace->saveNexus( cppFile );
+		
+	} // finish peaks workspace specifics
+    else if (tableWorkspace) // Table workspace specifics 
     {
-      nexusFile->writeNexusTableWorkspace(tableWorkspace,"table_workspace");
-    }
+        nexusFile->writeNexusTableWorkspace(tableWorkspace,"table_workspace");
+    }  // finish table workspace specifics
  
     nexusFile->writeNexusProcessedProcess(inputWorkspace);
     nexusFile->closeNexusFile();

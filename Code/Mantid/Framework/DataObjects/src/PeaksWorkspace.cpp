@@ -2,6 +2,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -232,6 +234,23 @@ namespace DataObjects
     return columns[index];
   }
 
+  void PeaksWorkspace::saveNexus(::NeXus::File * file ) const
+  {
+	  // This is not fully implemented. Currently a partial save.
+	  int pNum = getNumberPeaks();
+	  //std::vector<Peak>& myPeaks = getPeaks();
+      std::vector<Peak> my1Peaks = peaks;
+	  // Peak myPeak = getPeak(0);
+	  Peak my1Peak = peaks[0];
+	  int cNum = columnCount();
+	  int rNum = rowCount();
+	  API::Column_const_sptr col = getColumn(0);
+	  std::vector<std::string> cNames = columnNames;
+	        file->makeGroup("detector", "NXdetector", 1);
+		//	file->writeData("Column_names", columnNames ); // This is not resolved by linker
+		//	file->writeData("column names",cNames); // This is not resolved by linker.
+		//	file->writeData( "Column_1", col ); // This is not resolved by linker.
+  }
 }
 }
 
