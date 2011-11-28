@@ -98,7 +98,6 @@ void LineViewer::createDimensionWidgets()
   {
     m_dimensionLabel[d]->setText( QString::fromStdString(m_ws->getDimension( size_t(d))->getName() ) );
   }
-
 }
 
 

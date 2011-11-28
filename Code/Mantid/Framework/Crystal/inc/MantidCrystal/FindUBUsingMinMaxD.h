@@ -9,8 +9,8 @@ namespace Mantid
 {
 namespace Crystal
 {
-/** FindUBUsingMinMaxD : Algorithm to calculate a UB matrix,
-    given lattice parameters and a list of peaks
+/** FindUBUsingMinMaxD : Algorithm to calculate a UB matrix, given bounds
+    on the lattice parameters and a list of peaks.
     
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17

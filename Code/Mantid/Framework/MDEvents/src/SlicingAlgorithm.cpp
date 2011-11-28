@@ -505,12 +505,16 @@ namespace MDEvents
     {
       // 6 planes defined by 3 basis vectors (general to non-orthogonal basis vectors)
       VMD xyNormal = x.cross_prod(y);
+      // Flip the normal if the input bases were NOT right-handed.
+      if (!MDPlane(xyNormal, o1).isPointBounded(insidePoint)) xyNormal *= -1.0;
       func->addPlane( MDPlane(xyNormal,        o1) );
       func->addPlane( MDPlane(xyNormal * -1.0, o2) );
       VMD xzNormal = z.cross_prod(x);
+      if (!MDPlane(xzNormal, o1).isPointBounded(insidePoint)) xzNormal *= -1.0;
       func->addPlane( MDPlane(xzNormal,        o1) );
       func->addPlane( MDPlane(xzNormal * -1.0, o2) );
       VMD yzNormal = y.cross_prod(z);
+      if (!MDPlane(yzNormal, o1).isPointBounded(insidePoint)) yzNormal *= -1.0;
       func->addPlane( MDPlane(yzNormal,        o1) );
       func->addPlane( MDPlane(yzNormal * -1.0, o2) );
     }

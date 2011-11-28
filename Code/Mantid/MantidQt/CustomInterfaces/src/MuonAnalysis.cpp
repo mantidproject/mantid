@@ -63,11 +63,11 @@ namespace CustomInterfaces
 {
   DECLARE_SUBWINDOW(MuonAnalysis);
 
+using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
-using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // Initialize the logger
@@ -1328,6 +1328,7 @@ void MuonAnalysis::updateFrontAndCombo()
 
 /**
  * Return the group-number for the group in a row. Return -1 if 
+
  * invalid group in row
  *
  * @param row :: A row in the group table
@@ -1542,22 +1543,11 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     std::size_t extPos = workspaceGroupName.find(".");
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
-
-    // decide on name for workspace to be plotted
-    QString cropWS;
+    
     QString cropWSfirstPart = QString(workspaceGroupName.c_str()) + "; Group="
       + groupName + "";
-
-    // check if this workspace already exist to avoid replotting an existing workspace
-    int plotNum = 1;
-    while (1==1)
-    {
-      cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
-      if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
-        plotNum++;
-      else
-        break;
-    }
+    // decide on name for workspace to be plotted
+    QString cropWS(getNewPlotName(cropWSfirstPart));
 
     // create the plot workspace
     createPlotWS(workspaceGroupName,cropWS.toStdString());
@@ -1689,21 +1679,10 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     if ( extPos!=std::string::npos)
       workspaceGroupName = workspaceGroupName.substr(0,extPos);
 
-    // decide on name for workspace to be plotted
-    QString cropWS;
     QString cropWSfirstPart = QString(workspaceGroupName.c_str()) + "; Group="
       + pairName + "";
-
-    // check if this workspace already exist to avoid replotting an existing workspace
-    int plotNum = 1;
-    while (1==1)
-    {
-      cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
-      if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
-        plotNum++;
-      else
-        break;
-    }
+    // decide on name for workspace to be plotted
+    QString cropWS(getNewPlotName(cropWSfirstPart));
 
     // create the plot workspace
     createPlotWS(workspaceGroupName,cropWS.toStdString());
@@ -1793,6 +1772,33 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }  
+}
+
+QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
+{
+  // check if this workspace already exist to avoid replotting an existing workspace
+  QString cropWS("");
+  int plotNum = 1;
+  while (1==1)
+  {
+    cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
+    if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
+    {
+      if(m_uiForm.overwritePlots->isChecked())
+      {
+        emit closeGraph(cropWS);
+        AnalysisDataService::Instance().remove(cropWS.toStdString());
+        break;
+      }
+      else
+        plotNum++;
+    }
+    else
+    {
+      break;
+    }
+  }
+  return cropWS;
 }
 
 /**

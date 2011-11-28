@@ -72,6 +72,52 @@ public:
   }
 
 
+  static void ShowLatticeParameters( Matrix<double> UB )
+  {
+    Matrix<double> UB_inv(3,3,false);
+    UB_inv = UB;
+    UB_inv.Invert();
+    V3D a_dir( UB_inv[0][0], UB_inv[0][1], UB_inv[0][2] );
+    V3D b_dir( UB_inv[1][0], UB_inv[1][1], UB_inv[1][2] );
+    V3D c_dir( UB_inv[2][0], UB_inv[2][1], UB_inv[2][2] );
+    double alpha = b_dir.angle( c_dir ) * 180 / PI;
+    double beta  = c_dir.angle( a_dir ) * 180 / PI;
+    double gamma = a_dir.angle( b_dir ) * 180 / PI;
+    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "a = " << a_dir << "   " << a_dir.norm() << std::endl;
+    std::cout << "b = " << b_dir << "   " << b_dir.norm() << std::endl;
+    std::cout << "c = " << c_dir << "   " << c_dir.norm() << std::endl;
+    std::cout << "alpha = " << alpha << std::endl;
+    std::cout << "beta  = " << beta  << std::endl;
+    std::cout << "gamma = " << gamma << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
+  }
+
+
+  static void ShowIndexingStats( Matrix<double>   UB, 
+                                 std::vector<V3D> q_vectors, 
+                                 double           required_tolerance )
+  {
+    std::vector<V3D> miller_indices;
+    std::vector<V3D> indexed_qs;
+    double ave_error;
+    IndexingUtils::GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                                    miller_indices, indexed_qs, ave_error );
+
+    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "UB = " << UB << std::endl;
+    std::cout << "num indexed  = " << indexed_qs.size() << std::endl;
+    std::cout << "error = " << ave_error << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "Indexed Qs" << std::endl;
+    for ( size_t i = 0; i < indexed_qs.size(); i++ )
+       std::cout << "Q = " << indexed_qs[i]
+                 << " HKL = " << miller_indices[i] << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
+  }
+
+
   void test_Find_UB_given_lattice_parameters()
   {
     Matrix<double> UB(3,3,false);
@@ -105,6 +151,10 @@ public:
                                              num_initial,
                                              degrees_per_step );
 
+//      std::cout << std::endl << "USING LATTICE PARAMETERS" << std::endl;
+//      ShowIndexingStats( UB, q_vectors, required_tolerance );
+//      ShowLatticeParameters( UB );
+
       TS_ASSERT_DELTA( error, 0.00671575, 1e-5 );
 
       std::vector<double> UB_returned = UB.get_vector();
@@ -134,7 +184,7 @@ public:
     double d_min =  6;
     double d_max = 10;
     double required_tolerance = 0.08;
-    int    num_initial        = 12;
+    int    num_initial        = 8;
     double degrees_per_step   = 1; 
                                            // test both default case(-1) and
                                            // case with specified base index(4)
@@ -153,6 +203,11 @@ public:
       int num_indexed = IndexingUtils::NumberIndexed( UB,
                                                       q_vectors,
                                                       required_tolerance );
+
+//      std::cout << std::endl << "USING MIN-MAX-D" << std::endl;
+//      ShowIndexingStats( UB, q_vectors, required_tolerance );
+//      ShowLatticeParameters( UB );
+
       TS_ASSERT_EQUALS( num_indexed, 12 );
 
       TS_ASSERT_DELTA( error, 0.000111616, 1e-5 );
@@ -162,6 +217,48 @@ public:
       {
         TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
       }
+    }
+  }
+
+
+  void test_Find_UB_using_FFT()
+  {
+    Matrix<double> UB(3,3,false);
+
+    double correct_UB[] = { -0.0177661, -0.0992964, 0.0155078,
+                             0.0585369, -0.0150210, 0.0839671,
+                            -0.1585160,  0.0432269, 0.0645173 };
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+
+    double d_min =  6;
+    double d_max = 10;
+    double required_tolerance = 0.08;
+    double degrees_per_step   = 1;
+
+    double error = IndexingUtils::Find_UB( UB,
+                                           q_vectors,
+                                           d_min,
+                                           d_max,
+                                           required_tolerance,
+                                           degrees_per_step );
+
+    int num_indexed = IndexingUtils::NumberIndexed( UB,
+                                                    q_vectors,
+                                                    required_tolerance );
+
+//  std::cout << std::endl << "USING FFT" << std::endl;
+//  ShowIndexingStats( UB, q_vectors, required_tolerance );
+//  ShowLatticeParameters( UB );
+
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    TS_ASSERT_DELTA( error, 0.0102, 1e-3 );
+
+    std::vector<double> UB_returned = UB.get_vector();
+    for ( size_t i = 0; i < 9; i++ )
+    {
+      TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
     }
   }
 

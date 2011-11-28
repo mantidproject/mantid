@@ -272,12 +272,14 @@ public:
   * @param binsX : # of bins in the output
   * @param expected_signal :: how many events in each resulting bin
   * @param expected_numBins :: how many points/bins in the output
+  * @param FlipYBasis :: flip the Y basis vector
   */
   void do_test_transform(int binsX, int binsY, int binsZ,
       double expected_signal,
       size_t expected_numBins,
       bool IterateEvents,
-      bool ForceOrthogonal)
+      bool ForceOrthogonal,
+      bool FlipYBasis = false)
   {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -310,6 +312,12 @@ public:
     double angle = 0.1;
     VMD baseX(cos(angle), sin(angle), 0.0);
     VMD baseY(-sin(angle), cos(angle), 0.0);
+    if (FlipYBasis)
+    {
+      baseY = baseY * -1.;
+      // Adjust origin to be at the upper left corner of the square
+      origin = origin + VMD(-sin(angle), cos(angle), 0) * 10.0;
+    }
     VMD baseZ(0.0, 0.0, 1.0);
     // Make a bad (i.e. non-orthogonal) input, to get it fixed.
     if (ForceOrthogonal)
@@ -406,6 +414,15 @@ public:
     do_test_transform(5, 10, 2,
         10*1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/,
         true /* Do force orthogonal */ );
+  }
+
+  /** Change the handedness of the basis vectors by flipping the Y vector */
+  void test_exec_with_transform_flipping_Y_basis()
+  {
+    do_test_transform(10, 10, 10,
+        1.0 /*signal*/, 1000 /*# of bins*/, true /*IterateEvents*/,
+        false /* Dont force orthogonal */,
+        true /* Flip sign of Y basis vector*/);
   }
 
 };
