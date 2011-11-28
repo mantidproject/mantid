@@ -48,11 +48,69 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data = {}
             self.use_dspace = False
             self._use_vnoise = False
+            self._focusPos = None
+            self.iparmFile = None
             if self.filename is None:
                 return
             handle = file(filename, 'r')
-            for line in handle.readlines():
+            lines = handle.readlines()
+            handle.close()
+
+            # create the focus positions
+            (lines, self._focusPos) = self._generateFocusPos(lines)
+            if len(lines) == 0:
+                self.filename = None
+                return
+
+            # get the rest of the characterization information
+            for line in lines:
                 self._addData(line)
+
+        def _generateFocusPos(self, lines):
+            if not lines[0].startswith("Instrument parameter file:"):
+                return (lines, None)
+
+            result = {}
+
+            # get name of parameter file
+            temp = lines[0]
+            temp.replace("Instrument parameter file:", "")
+            self.iparmFile = temp.strip()
+            lines = lines[1:] # delete this line
+
+            # get the spectra into a buffer
+            spectrainfo = []
+            for line in lines:
+                if line.startswith("L1"):
+                    break
+                spectrainfo.append(line)
+            numSpectra = len(spectrainfo)
+
+            result['PrimaryFlightPath'] = lines[numSpectra].split()[1]
+
+            # delete the rest of the focus position info
+            lines = lines[numSpectra+1:]
+
+            # parse the focus positions
+            specids = []
+            l2 = []
+            polar = []
+            azimuthal = []
+            for spec in spectrainfo:
+                temp = spec.split()
+                specids.append(int(temp[0]))
+                l2.append(float(temp[1]))
+                polar.append(float(temp[2]))
+                azimuthal.append(0.)
+
+            # assign to the correct place
+            result['SpectrumIDs'] = specids
+            result['L2'] = l2
+            result['Polar'] = polar
+            result['Azimuthal'] = azimuthal
+
+            return (lines, result)
+
         def _addData(self, line):
             if line.startswith('#') or len(line.strip()) <= 0:
                 if "d_min" in line and "d_max" in line:
@@ -88,13 +146,7 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 return self.PDInfo(None)
         def getFocusPos(self):
-            result = {}
-            result['PrimaryFlightPath'] = 19.5
-            result['SpectrumIDs'] = [1,2,3,4,5,6]
-            result['L2'] = [2,2,2,2,2,2]
-            result['Polar'] = [15,31,67,122,154,7]
-            result['Azimuthal'] = [0,0,0,0,0,0]
-            return result
+            return self._focusPos
 
     def category(self):
         return "Diffraction"
