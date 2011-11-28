@@ -68,7 +68,3 @@ class MatrixWorkspaceTest(unittest.TestCase):
                 self.assertEquals(e_np[i][j], workspace.read_e(i)[j])
             # Extra X boundary
             self.assertEquals(x_np[i][blocksize], workspace.read_x(i)[blocksize])
-
-        #expectedX = np.array([3500.0,3587.5,3677.1875,3769.125,3863.343750])
-        #expectedY = np.array([3500.0,3587.5,3677.1875,3769.125,3863.343750])
-        #expectedY = np.array([3500.0,3587.5,3677.1875,3769.125,3863.343750])

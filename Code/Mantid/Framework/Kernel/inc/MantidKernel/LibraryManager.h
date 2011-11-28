@@ -62,6 +62,8 @@ namespace Mantid
 
       /// Load a given library
       bool loadLibrary(const std::string & filepath);
+      /// Returns true if the library is to be loaded
+      bool skip(const std::string & filename);
       ///Storage for the LibraryWrappers.
       std::map< const std::string, boost::shared_ptr<Mantid::Kernel::LibraryWrapper> > OpenLibs;
 

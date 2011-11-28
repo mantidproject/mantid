@@ -5,7 +5,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <sstream>
-#include <napi.h>
 #include <stdlib.h>
 #ifdef _WIN32
 #include <io.h>

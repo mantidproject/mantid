@@ -3,220 +3,86 @@
 #include <qpainter.h>
 #include <qwt_symbol.h>
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
 
-using namespace Mantid::API;
-using namespace MantidQt::API;
-
 /**
- *  @param name :: The curve's name - shown in the legend
- *  @param wsName :: The workspace name.
- *  @param g :: The Graph widget which will display the curve
- *  @param index :: The index of the spectrum or bin in the workspace
- *  @param err :: True if the errors are to be plotted
- *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
- *  @throw std::invalid_argument if the index is out of range for the given workspace
- */
-MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,int index,bool err,bool distr)
-  :PlotCurve(name), 
-  WorkspaceObserver(),
-  m_drawErrorBars(err),
-  m_drawAllErrorBars(false),
-  m_wsName(wsName),
-  m_index(index)
-{
-  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-              AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
-
-  if ( !ws || index >= static_cast<int>(ws->getNumberHistograms()) )
-  {
-    std::stringstream ss;
-    ss << index << " is an invalid spectrum index for workspace " << ws->getName()
-       << " - not plotted";
-    throw std::invalid_argument(ss.str());
-  }
-
-  init(ws,g,index,distr);
-  observeDelete();
-  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
-  observeAfterReplace();
-  observeADSClear();
-}
-
-/**
- *  @param wsName :: The workspace name.
- *  @param g :: The Graph widget which will display the curve
- *  @param index :: The index of the spectrum or bin in the workspace
- *  @param err :: True if the errors are to be plotted
- *  @throw std::invalid_argument if the index is out of range for the given workspace
- */
-MantidCurve::MantidCurve(const QString& wsName,Graph* g,int index,bool err,bool distr)
-  :PlotCurve(), 
-  WorkspaceObserver(), 
-  m_drawErrorBars(err),
-  m_drawAllErrorBars(false),
-  m_wsName(wsName),
-  m_index(index)
-{
-  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-              AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
-
-  if ( !ws || index >= static_cast<int>(ws->getNumberHistograms()) )
-  {
-    std::stringstream ss;
-    ss << index << " is an invalid spectrum index for workspace " << ws->getName()
-       << " - not plotted";
-    throw std::invalid_argument(ss.str());
-  }
-  // If there's only one spectrum in the workspace, title is simply workspace name
-  if (ws->getNumberHistograms() == 1) this->setTitle(wsName);
-  else this->setTitle(createCurveName(ws,wsName,index));
-  init(ws,g,index,distr);
-  observeDelete();
-  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
-  observeAfterReplace();
-  observeADSClear();
-}
-
-MantidCurve::MantidCurve(const MantidCurve& c)
-  :PlotCurve(createCopyName(c.title().text())),
-  WorkspaceObserver(),
-  m_drawErrorBars(c.m_drawErrorBars),
-  m_drawAllErrorBars(c.m_drawAllErrorBars),
-  m_wsName(c.m_wsName),
-  m_index(c.m_index),
-  m_xUnits(c.m_xUnits),
-  m_yUnits(c.m_yUnits)
-{
-  setData(c.data());
-  observeDelete();
-  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
-  observeAfterReplace();
-  observeADSClear();
-}
-
-/**
- *  @param workspace :: The source workspace for the curve's data
- *  @param g :: The Graph widget which will display the curve
- *  @param index :: The index of the spectrum or bin in the workspace
- */
-void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index,bool distr)
-{
-  //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
-  const bool log = g->isLog(QwtPlot::yLeft);
-  MantidQwtData data(workspace,index, log,distr);
-  setData(data);
-  Mantid::API::Axis* ax = workspace->getAxis(0);
-  if (ax->unit())
-  {
-    m_xUnits = ax->unit();
-  }
-  else
-  {
-    m_xUnits.reset(new Mantid::Kernel::Units::Empty());
-  }
-
-  Mantid::API::Axis* ay = workspace->getAxis(1);
-  if (ay->unit())
-  {
-    m_yUnits = ay->unit();
-  }
-  else
-  {
-    m_yUnits.reset(new Mantid::Kernel::Units::Empty());
-  }
-  int lineWidth = 1;
-  MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
-  if (ml && ml->applicationWindow()->applyCurveStyleToMantid)
-  {
-    QwtPlotCurve::CurveStyle qwtStyle;
-    // Get the symbol size from the user preferences and create solid black circle symbol
-    // of that size for use if the preferred plot style is scatter or line+symbol
-    const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
-    const QwtSymbol symbol(QwtSymbol::Ellipse,QBrush(Qt::black),QPen(),QSize(symbolSize,symbolSize));
-    switch(ml->applicationWindow()->defaultCurveStyle)
-    {
-    case Graph::Line :
-      qwtStyle = QwtPlotCurve::Lines;
-      break;
-    case Graph::Scatter:
-      qwtStyle = QwtPlotCurve::NoCurve;
-      this->setSymbol(symbol);
-      break;
-    case Graph::LineSymbols :
-      qwtStyle = QwtPlotCurve::Lines;
-      this->setSymbol(symbol);
-      break;
-    case 15:
-      qwtStyle = QwtPlotCurve::Steps;
-      break;  // should be Graph::HorizontalSteps but it doesn't work
-    default:
-      qwtStyle = QwtPlotCurve::Lines;
-      break;
-    }
-    setStyle(qwtStyle);
-    lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
-  }
-  else if (workspace->isHistogramData() && !workspace->isDistribution())
-  {
-    setStyle(QwtPlotCurve::Steps);
-    setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
-  }
-  else
-    setStyle(QwtPlotCurve::Lines);
-  if (g)
-  {
-    g->insertCurve(this,lineWidth);
-  }
-  connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
-}
-
-
-MantidCurve::~MantidCurve()
+Constructor
+@param wsName : Name of the workspace
+@param err : flag indicating that errors should be used.
+*/
+MantidCurve::MantidCurve(const QString& wsName, bool err) : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false)
 {
 }
 
 /**
- * Clone the curve for the use by a particular Graph
- */
-PlotCurve* MantidCurve::clone(const Graph* g)const
+Constructor
+@param wsName : Name of the workspace
+@param err : flag indicating that all error bars should be used.
+@param allError : flag indicating that all error bars should be plotted.
+*/
+MantidCurve::MantidCurve(const QString& wsName, bool err, bool allError) : PlotCurve(wsName), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(allError)
 {
-  MantidCurve* mc = new MantidCurve(*this);
-  if (g)
+}
+
+/**
+Constructor 
+@param err : flag indicating that errors should be used.
+*/
+MantidCurve::MantidCurve(bool err) : PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err), m_drawAllErrorBars(false)
+{
+}
+
+/**
+Helper method to apply a chosen style.
+@param style : The chosen graph type style
+@parm ml : pointer to multilayer object
+@param linewidth: ref to linewidth, which may be internally adjusted
+*/
+void MantidCurve::applyStyleChoice(Graph::CurveType style, MultiLayer* ml, int& lineWidth)
+{
+
+  if ( style == Graph::Unspecified )
+    style = static_cast<Graph::CurveType>(ml->applicationWindow()->defaultCurveStyle);
+
+  QwtPlotCurve::CurveStyle qwtStyle;
+  const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
+  const QwtSymbol symbol(QwtSymbol::Ellipse, QBrush(Qt::black),QPen(),QSize(symbolSize,symbolSize));
+  switch(style)
   {
-    mc->setDrawAsDistribution(g->isDistribution());
+  case Graph::Line :
+    qwtStyle = QwtPlotCurve::Lines;
+    break;
+  case Graph::Scatter:
+    qwtStyle = QwtPlotCurve::NoCurve;
+    this->setSymbol(symbol);
+    break;
+  case Graph::LineSymbols :
+    qwtStyle = QwtPlotCurve::Lines;
+    this->setSymbol(symbol);
+    break;
+  case 15:
+    qwtStyle = QwtPlotCurve::Steps;
+    break;  // should be Graph::HorizontalSteps but it doesn't work
+  default:
+    qwtStyle = QwtPlotCurve::Lines;
+    break;
   }
-  return mc;
+  setStyle(qwtStyle);
+  lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
 }
 
-void MantidCurve::loadData()
-{
-  // This should only be called for waterfall plots
-  // Calculate the offsets...
-  computeWaterfallOffsets();
-  MantidQwtData * data = mantidData();
-  // ...and apply them
-  data->applyOffsets(d_x_offset,d_y_offset);
-  invalidateBoundingRect();
-}
-
-void MantidCurve::setData(const QwtData &data)
-{
-  if (!dynamic_cast<const MantidQwtData*>(&data)) 
-    throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
-  PlotCurve::setData(data);
-}
-
+/**
+Rebuild the bounding rectangle. Uses the mantidData (QwtMantidWorkspaceData) object to do so.
+*/
 QwtDoubleRect MantidCurve::boundingRect() const
 {
   if (m_boundingRect.isNull())
   {
-    const MantidQwtData* data = mantidData();
+    const QwtData* data = mantidData();
     if (data->size() == 0) return QwtDoubleRect(0,0,1,1);
     double y_min = std::numeric_limits<double>::infinity();
     double y_max = -y_min;
@@ -234,66 +100,33 @@ QwtDoubleRect MantidCurve::boundingRect() const
   return m_boundingRect;
 }
 
-void MantidCurve::draw(QPainter *p, 
-          const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-          const QRect &rect) const
+/**
+Slot for axis scale changed. Invalidate and rebuild the bounding rectangle.
+@param axis: axis index.
+@param toLog: true if switching to a log value
+*/
+void MantidCurve::axisScaleChanged(int axis, bool toLog)
 {
-  PlotCurve::draw(p,xMap,yMap,rect);
-
-  if (m_drawErrorBars)// drawing error bars
+  if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
   {
-    const MantidQwtData* d = dynamic_cast<const MantidQwtData*>(&data());
-    if (!d)
-      throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
-    int xi0 = 0;
-    p->setPen(pen());
-    const int dx = 3;
-    const int dx2 = 2*dx;
-    int x1 = static_cast<int>(floor(xMap.p1()));
-    int x2 = static_cast<int>(floor(xMap.p2()));
-    for (int i = 0; i < static_cast<int>(d->esize()); i++)
-    {
-      const int xi = xMap.transform(d->ex(i));
-      if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
-      {
-        const double Y = y(i);
-        const double E = d->e(i);
-        const int ei1 = yMap.transform(Y - E);
-        const int ei2 = yMap.transform(Y + E);
-
-        // This call can crash MantidPlot if the error is zero,
-        //   so protect against this (line of zero length anyway)
-        if (E) p->drawLine(xi,ei1,xi,ei2);
-        p->drawLine(xi-dx,ei1,xi+dx,ei1);
-        p->drawLine(xi-dx,ei2,xi+dx,ei2);
-
-        xi0 = xi;
-      }
-    }
+    mantidData()->setLogScale(toLog);
+    // force boundingRect calculation at this moment
+    invalidateBoundingRect();
+    boundingRect();
+    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
   }
 }
+
+/// Destructor
+MantidCurve::~MantidCurve()
+{
+}
+
 
 void MantidCurve::itemChanged()
 {
-  MantidQwtData* d = dynamic_cast<MantidQwtData*>(&data());
-  if (d && d->m_isHistogram)
-  {
-    if (style() == Steps) d->m_binCentres = false;
-    else
-      d->m_binCentres = true;
-  }
+  //Forward request onwards
   PlotCurve::itemChanged();
-}
-
-/** Create the name for a curve from the following input:
- *  @param wsName :: The workspace name
- *  @param index ::  The spectra (bin) index
- */
-QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
-                                     const QString& wsName,int index)
-{
-  QString name = wsName + "-" + QString::fromStdString(ws->getAxis(1)->label(index));
-  return name;
 }
 
 /** Create the name for a curve which is a copy of another curve.
@@ -309,236 +142,36 @@ QString MantidCurve::createCopyName(const QString& curveName)
   return curveName.mid(0,i)+" (copy"+QString::number(k+1)+")";
 }
 
-/**  Resets the data if wsName is the name of this workspace
- *  @param wsName :: The name of a workspace which data has been changed in the data service.
- */
-void MantidCurve::dataReset(const QString& wsName)
-{
-  if (m_wsName != wsName) return;
-  const std::string wsNameStd = wsName.toStdString();
-  Mantid::API::MatrixWorkspace_sptr mws;
-  try
-  {
-    Mantid::API::Workspace_sptr base =  Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
-    mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
-  }
-  catch(std::runtime_error&)
-  {
-    Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
-        << " could not be found - plotted curve(s) deleted\n";
-    mws = Mantid::API::MatrixWorkspace_sptr();
-  }
 
-  if (!mws) return;
-  const MantidQwtData * new_mantidData(NULL);
-  try {
-    new_mantidData = mantidData()->copy(mws);
-    setData(*new_mantidData);
-    if (mws->isHistogramData())
+void MantidCurve::doDraw(QPainter *p, 
+          const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+          const QRect&, MantidQwtWorkspaceData const * const d) const
+{
+  int xi0 = 0;
+  p->setPen(pen());
+  const int dx = 3;
+  const int dx2 = 2*dx;
+  int x1 = static_cast<int>(floor(xMap.p1()));
+  int x2 = static_cast<int>(floor(xMap.p2()));
+  for (int i = 0; i < static_cast<int>(d->esize()); i++)
+  {
+    const int xi = xMap.transform(d->ex(i));
+    if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
     {
-      setStyle(QwtPlotCurve::Steps);
-      setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
+      const double Y = y(i);
+      const double E = d->e(i);
+      const int ei1 = yMap.transform(Y - E);
+      const int ei2 = yMap.transform(Y + E);
+
+      // This call can crash MantidPlot if the error is zero,
+      //   so protect against this (line of zero length anyway)
+      if (E) p->drawLine(xi,ei1,xi,ei2);
+      p->drawLine(xi-dx,ei1,xi+dx,ei1);
+      p->drawLine(xi-dx,ei2,xi+dx,ei2);
+
+      xi0 = xi;
     }
-    else
-    {
-      setStyle(QwtPlotCurve::Lines);
-    }
-    // Queue this plot to be updated once all MantidQwtData objects for this workspace have been
-    emit dataUpdated();
-  } catch(std::range_error) {
-    // Get here if the new workspace has fewer spectra and the plotted one no longer exists
-    Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
-        << " now has fewer spectra - plotted curve(s) deleted\n";
-    deleteHandle(wsNameStd,mws);
-  }
-  delete new_mantidData;
-}
-
-void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
-{
-  (void) ws;
-
-  invalidateBoundingRect();
-  emit resetData(QString::fromStdString(wsName));
-}
-/* This method saves the curve details to a string.
- * Useful for loading/saving mantid project.
-*/
-QString MantidCurve::saveToString()
-{
-	QString s;
-	s="MantidCurve\t"+m_wsName+"\tsp\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
-	return s;
-}
-
-/// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
-int MantidCurve::workspaceIndex()const
-{
-  if (dynamic_cast<const MantidQwtData*>(mantidData()) != 0)
-  {
-    return m_index;
-  }
-  return -1;
-}
-
-MantidQwtData* MantidCurve::mantidData()
-{
-  MantidQwtData* d = dynamic_cast<MantidQwtData*>(&data());
-  return d;
-}
-
-const MantidQwtData* MantidCurve::mantidData()const
-{
-  const MantidQwtData* d = dynamic_cast<const MantidQwtData*>(&data());
-  return d;
-}
-
-void MantidCurve::axisScaleChanged(int axis, bool toLog)
-{
-  if (axis == QwtPlot::yLeft || axis == QwtPlot::yRight)
-  {
-    mantidData()->setLogScale(toLog);
-    // force boundingRect calculation at this moment
-    invalidateBoundingRect();
-    boundingRect();
-    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
   }
 }
 
-/// Enables/disables drawing as distribution, ie dividing each y-value by the bin width.
-bool MantidCurve::setDrawAsDistribution(bool on)
-{
-  return mantidData()->setAsDistribution(on);
-}
 
-/// Returns whether the curve is plotted as a distribution
-bool MantidCurve::isDistribution() const
-{
-  return mantidData()->m_isDistribution;
-}
-
-/// Returns whether the curve has error bars
-bool MantidCurve::hasErrorBars() const
-{
-  return m_drawErrorBars;
-}
-
-//==========================================
-//
-//  MantdQwtData methods
-//
-//==========================================
-
-/// Constructor
-MantidQwtData::MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
-: QObject(),
-m_workspace(workspace),
-m_spec(specIndex),
-m_X(workspace->readX(specIndex)),
-m_Y(workspace->readY(specIndex)),
-m_E(workspace->readE(specIndex)),
-m_isHistogram(workspace->isHistogramData()),
-m_binCentres(false),
-m_logScale(logScale),
-m_minPositive(0),
-m_isDistribution(distr)
-{}
-
-/// Copy constructor
-MantidQwtData::MantidQwtData(const MantidQwtData& data)
-: QObject(),
-m_workspace(data.m_workspace),
-m_spec(data.m_spec),
-m_X(data.m_workspace->readX(data.m_spec)),
-m_Y(data.m_workspace->readY(data.m_spec)),
-m_E(data.m_workspace->readE(data.m_spec)),
-m_isHistogram(m_workspace->isHistogramData()),
-m_binCentres(data.m_binCentres),
-m_logScale(data.m_logScale),
-m_minPositive(0),
-m_isDistribution(data.m_isDistribution)
-{}
-
-/** Size of the data set
- */
-size_t MantidQwtData::size() const
-{
-  if (m_binCentres || !m_isHistogram)
-  {
-    return m_Y.size();
-  }
-
-  return m_X.size();
-}
-
-/**
-Return the x value of data point i
-@param i :: Index
-@return x X value of data point i
-*/
-double MantidQwtData::x(size_t i) const
-{
-  return m_binCentres ? (m_X[i] + m_X[i+1])/2 : m_X[i];
-}
-
-/**
-Return the y value of data point i
-@param i :: Index
-@return y Y value of data point i
-*/
-double MantidQwtData::y(size_t i) const
-{
-  double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
-  if (m_isDistribution)
-  {
-    tmp /= (m_X[i+1] - m_X[i]);
-  }
-  if (m_logScale && tmp <= 0.)
-  {
-    tmp = m_minPositive;
-  }
-
-  return tmp;
-}
-
-double MantidQwtData::ex(size_t i) const
-{
-  return m_isHistogram ? (m_X[i] + m_X[i+1])/2 : m_X[i];
-}
-
-double MantidQwtData::e(size_t i) const
-{
-  return m_E[i];
-}
-
-size_t MantidQwtData::esize() const
-{
-  return m_E.size();
-}
-
-bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
-{
-  return workspace.get() == m_workspace.get();
-}
-
-void MantidQwtData::setLogScale(bool on)
-{
-  m_logScale = on;
-}
-
-void MantidQwtData::saveLowestPositiveValue(const double v)
-{
-  if (v > 0) m_minPositive = v;
-}
-
-void MantidQwtData::applyOffsets(const double xOffset, const double yOffset)
-{
-  std::transform(m_workspace->readX(m_spec).begin(),m_workspace->readX(m_spec).end(),m_X.begin(),std::bind2nd(std::plus<double>(),xOffset));
-  std::transform(m_workspace->readY(m_spec).begin(),m_workspace->readY(m_spec).end(),m_Y.begin(),std::bind2nd(std::plus<double>(),yOffset));
-}
-
-bool MantidQwtData::setAsDistribution(bool on)
-{
-  m_isDistribution = on && m_isHistogram;
-  return m_isDistribution;
-}

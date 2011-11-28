@@ -124,8 +124,12 @@ public:
 
   /* Overidden methods */
 
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData = true);
+  using IFitFunction::setWorkspace;
+  virtual void setWorkspace(boost::shared_ptr<const Workspace>){}
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws,bool copyData);
+  virtual void setSlicing(const std::string& slicing);
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const;
+  virtual void function(FunctionDomain& )const{}
 
   /// Returns the size of the fitted data (number of double values returned by the function)
   virtual size_t dataSize()const;
@@ -137,6 +141,7 @@ public:
   virtual void function(double* out)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out);
+  void functionDeriv(API::FunctionDomain& domain, API::Jacobian& jacobian){API::IFunction::functionDeriv(domain,jacobian);}
 
   /* MatrixWorkspace specific methods */
 

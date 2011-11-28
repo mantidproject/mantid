@@ -30,12 +30,23 @@
 #define MdiSubWindow_H
 
 #include <QMdiSubWindow>
+#include <QDockWidget>
 
 class QEvent;
 class QCloseEvent;
 class QString;
 class Folder;
 class ApplicationWindow;
+
+// Experimental, Janik Zikovsky, Nov 17 2011. Floatable MDI windows
+//#define MDISUBWINDOW_FLOATABLE 0
+#undef MDISUBWINDOW_FLOATABLE
+#ifndef MDISUBWINDOW_FLOATABLE
+/// Define the parent class of MdiSubWindow to make it easier to change
+  typedef QMdiSubWindow MdiSubWindowParent_t;
+#else
+  typedef QDockWidget MdiSubWindowParent_t;
+#endif
 
 /**
  * \brief Base class of all MDI client windows.
@@ -48,7 +59,7 @@ class ApplicationWindow;
  *
  * \sa Folder, ApplicationWindow
  */
-class MdiSubWindow: public QMdiSubWindow
+class MdiSubWindow: public MdiSubWindowParent_t
 {
 	Q_OBJECT
 

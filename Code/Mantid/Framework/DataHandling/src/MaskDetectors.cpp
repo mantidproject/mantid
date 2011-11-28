@@ -172,7 +172,11 @@ void MaskDetectors::exec()
     //Also clear the MRU for event workspaces.
     eventWS->clearMRU();
   }
-
+  /*
+  This rebuild request call, gives the workspace the opportunity to rebuild the nearest neighbours map
+  and therfore pick up any detectors newly masked with this algorithm.
+  */
+  WS->rebuildNearestNeighbours();
 }
 
 /**

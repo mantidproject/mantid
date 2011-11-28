@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept> 
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid
 {
@@ -155,7 +156,12 @@ int RectangularDetector::ypixels() const
 double RectangularDetector::xstep() const
 {
   if (m_isParametrized)
-    return m_rectBase->m_xstep;
+  {
+    double scaling = 1.0;
+    if( m_map->contains(m_rectBase, "scalex") )
+      scaling = m_map->get(m_rectBase, "scalex")->value<double>();
+    return m_rectBase->m_xstep * scaling;
+  }
   else
     return this->m_xstep;
 }
@@ -166,7 +172,12 @@ double RectangularDetector::xstep() const
 double RectangularDetector::ystep() const
 {
   if (m_isParametrized)
-    return m_rectBase->m_ystep;
+  {
+    double scaling = 1.0;
+    if( m_map->contains(m_rectBase, "scaley") )
+      scaling = m_map->get(m_rectBase, "scaley")->value<double>();
+    return m_rectBase->m_ystep * scaling;
+  }
   else
     return this->m_ystep;
 }
@@ -176,7 +187,12 @@ double RectangularDetector::ystep() const
 double RectangularDetector::xstart() const
 {
   if (m_isParametrized)
-    return m_rectBase->m_xstart;
+  {
+    double scaling = 1.0;
+    if( m_map->contains(m_rectBase, "scalex") )
+      scaling = m_map->get(m_rectBase, "scalex")->value<double>();
+    return m_rectBase->m_xstart * scaling;
+  }
   else
     return this->m_xstart;
 }
@@ -187,7 +203,12 @@ double RectangularDetector::xstart() const
 double RectangularDetector::ystart() const
 {
   if (m_isParametrized)
-    return m_rectBase->m_ystart;
+  {
+    double scaling = 1.0;
+    if( m_map->contains(m_rectBase, "scaley") )
+      scaling = m_map->get(m_rectBase, "scaley")->value<double>();
+    return m_rectBase->m_ystart * scaling;
+  }
   else
     return this->m_ystart;
 }
@@ -197,7 +218,12 @@ double RectangularDetector::ystart() const
 double RectangularDetector::xsize() const
 {
   if (m_isParametrized)
-    return m_rectBase->m_xsize;
+  {
+    double scaling = 1.0;
+    if( m_map->contains(m_rectBase, "scalex") )
+      scaling = m_map->get(m_rectBase, "scalex")->value<double>();
+    return m_rectBase->m_xsize * scaling;
+  }
   else
     return this->m_xsize;
 }
@@ -208,9 +234,54 @@ double RectangularDetector::xsize() const
 double RectangularDetector::ysize() const
 {
   if (m_isParametrized)
-    return m_rectBase->m_ysize;
+  {
+    double scaling = 1.0;
+    if( m_map->contains(m_rectBase, "scaley") )
+      scaling = m_map->get(m_rectBase, "scaley")->value<double>();
+    return m_rectBase->m_ysize * scaling;
+  }
   else
     return this->m_ysize;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idstart
+int RectangularDetector::idstart() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idstart;
+  else
+    return this->m_idstart;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idfillbyfirst_y
+bool RectangularDetector::idfillbyfirst_y() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idfillbyfirst_y;
+  else
+    return this->m_idfillbyfirst_y;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idstepbyrow
+int RectangularDetector::idstepbyrow() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idstepbyrow;
+  else
+    return this->m_idstepbyrow;
+}
+
+//-------------------------------------------------------------------------------------------------
+/// Returns the idstep
+int RectangularDetector::idstep() const
+{
+  if (m_isParametrized)
+    return m_rectBase->m_idstep;
+  else
+    return this->m_idstep;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -224,7 +295,15 @@ double RectangularDetector::ysize() const
 V3D RectangularDetector::getRelativePosAtXY(int x, int y) const
 {
   if (m_isParametrized)
-    return m_rectBase->getRelativePosAtXY(x,y);
+  {
+    double scalex = 1.0;
+    if( m_map->contains(m_rectBase, "scalex") )
+      scalex = m_map->get(m_rectBase, "scalex")->value<double>();
+    double scaley = 1.0;
+    if( m_map->contains(m_rectBase, "scaley") )
+      scaley = m_map->get(m_rectBase, "scaley")->value<double>();
+    return  m_rectBase->getRelativePosAtXY(x,y) * V3D(scalex, scaley, 1.0);
+  }
   else
     return V3D( m_xstart + m_xstep * x, m_ystart + m_ystep * y, 0);
 }
@@ -321,13 +400,14 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
         maxDetId=id;
       }
       //Create the detector from the given id & shape and with xColumn as the parent.
-      Detector* detector = new Detector(oss.str(), id, shape, xColumn);
+      RectangularDetectorPixel* detector = new RectangularDetectorPixel(oss.str(), id, shape, xColumn,
+          this, size_t(iy), size_t(ix));
 
       //Calculate the x,y position
       double x = xstart + ix * xstep;
       double y = ystart + iy * ystep;
       V3D pos(x,y,0);
-      //Translate (relative to parent)
+      //Translate (relative to parent). This gives the un-parametrized position.
       detector->translate(pos);
 
       //Add it to the x-colum

@@ -443,24 +443,32 @@ void LoadTOFRawNexus::exec()
 
   // Load the logs
   prog->doReport("Loading DAS logs");
+  g_log.debug() << "Loading DAS logs" << std::endl;
   LoadEventNexus::runLoadNexusLogs(filename, WS, pulseTimes, this);
 
   // Load the instrument
   prog->report("Loading instrument");
+  g_log.debug() << "Loading instrument" << std::endl;
   LoadEventNexus::runLoadInstrument(filename, WS, entry_name, this);
 
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
+  g_log.debug() << "Loading metadata" << std::endl;
   try
-  { LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+  {
+      LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
   }
   catch (std::exception & e)
-  { g_log.warning() << "Error while loading meta data: " << e.what() << std::endl; }
+  {
+      g_log.warning() << "Error while loading meta data: " << e.what() << std::endl;
+  }
 
   // Set the spectrum number/detector ID at each spectrum. This is consistent with LoadEventNexus for non-ISIS files.
   prog->report("Building Spectra Mapping");
+  g_log.debug() << "Building Spectra Mapping" << std::endl;
   WS->rebuildSpectraMapping(false);
   // And map ID to WI
+  g_log.debug() << "Mapping ID to WI" << std::endl;
   id_to_wi = WS->getDetectorIDToWorkspaceIndexMap(false);
 
   // Load each bank sequentially
@@ -470,6 +478,7 @@ void LoadTOFRawNexus::exec()
 //    PARALLEL_START_INTERUPT_REGION
     std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
+    g_log.debug() << "Loading bank " << bankName << std::endl;
     loadBank(filename, entry_name, bankName, WS);
 //    PARALLEL_END_INTERUPT_REGION
   }
@@ -486,6 +495,7 @@ void LoadTOFRawNexus::exec()
   WS->setYUnit("Counts");
 
   // Method that will eventually go away.
+  g_log.debug() << "generateSpectraMap()" << std::endl;
   WS->generateSpectraMap();
 
   // Set to the output

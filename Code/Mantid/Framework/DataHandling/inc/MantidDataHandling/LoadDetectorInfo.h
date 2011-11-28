@@ -100,6 +100,8 @@ private:
   bool m_moveDets;
   /// Store the sample position as we may need it repeatedly
   Kernel::V3D m_samplePos;
+  /// Store a pointer to the base instrument to avoid creating a new parameterized each time
+  Geometry::Instrument_const_sptr m_baseInstrument;
 
   // Implement abstract Algorithm methods
   void init();

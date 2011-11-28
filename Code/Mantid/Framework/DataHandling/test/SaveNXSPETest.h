@@ -6,20 +6,17 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-//#include "MantidAPI/FrameworkManager.h"
-//#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <Poco/File.h>
-//#include <boost/lexical_cast.hpp>
-//#include <fstream>
-//#include <numeric>
 
-using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using Mantid::Kernel::UnitFactory;
+using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::Instrument;
+using Mantid::Geometry::IDetector_const_sptr;
+
 
 static const double MASK_FLAG=-1e30;   // values here need to match what is in the SaveNXSPE.h file
 static const double MASK_ERROR=0.0;
@@ -103,7 +100,7 @@ public:
 
     // throws file not exist from subalgorithm
       saver->setRethrows(true);
-      TS_ASSERT_THROWS( saver->execute(),Kernel::Exception::FileError);
+      TS_ASSERT_THROWS( saver->execute(),Mantid::Kernel::Exception::FileError);
   
       TS_ASSERT( Poco::File(outputFile).exists() );
 
@@ -147,8 +144,8 @@ private:
     // all the Y values in this new workspace are set to DEFAU_Y, which currently = 2
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
     inputWS = setUpWorkspace(input, inputWS);
-    API::Axis * axisOne = inputWS->getAxis(1);
-    API::NumericAxis *newAxisOne = new NumericAxis(axisOne->length());
+    Axis * axisOne = inputWS->getAxis(1);
+    NumericAxis *newAxisOne = new NumericAxis(axisOne->length());
     for(size_t i = 0; i < axisOne->length(); ++i)
     {
       newAxisOne->setValue(i, axisOne->operator()((i)));
@@ -187,12 +184,11 @@ private:
     inputWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, NHIST));
 
     // mask the detector
-    Geometry::ParameterMap* m_Pmap = &(inputWS->instrumentParameters());
+    ParameterMap* m_Pmap = &(inputWS->instrumentParameters());
     boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    const Geometry::Detector* toMask =
-      dynamic_cast<const Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
+    IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
     TS_ASSERT(toMask);
-    m_Pmap->addBool(toMask, "masked", true);
+    m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
     inputWS->isDistribution(true);

@@ -259,19 +259,13 @@ void RemoveLowResTOF::getTminData(const bool isEvent)
     return;
   }
 
-  m_Tmin = std::numeric_limits<double>::max();
   if (isEvent)
   {
-    m_Tmin = m_inputEvWS->getTofMin();
+    m_Tmin = m_inputEvWS->getEventXMin();
   }
   else
   {
-    for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
-    {
-      temp = m_inputWS->dataX(workspaceIndex).front();
-      if (temp < m_Tmin)
-          m_Tmin = temp;
-    }
+    m_Tmin = m_inputWS->getXMin();
   }
   g_log.information() << "Tmin = " << m_Tmin << " microseconds\n";
   if (m_Tmin < 0.)

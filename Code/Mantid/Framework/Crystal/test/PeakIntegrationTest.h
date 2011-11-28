@@ -190,12 +190,12 @@ public:
     alg.setProperty("InPeaksWorkspace", "TOPAZ");
     alg.setProperty("OutPeaksWorkspace", "TOPAZ");
     alg.setProperty("FitSlices", slices);
-    alg.setProperty("XMin", -6);
-    alg.setProperty("XMax", 6);
-    alg.setProperty("YMin", -6);
-    alg.setProperty("YMax", 6);
-    alg.setProperty("TOFBinMin", -10);
-    alg.setProperty("TOFBinMax", 10);
+    alg.setProperty("XMin", -7);
+    alg.setProperty("XMax", 7);
+    alg.setProperty("YMin", -7);
+    alg.setProperty("YMax", 7);
+    alg.setProperty("TOFBinMin", -3);
+    alg.setProperty("TOFBinMax", 3);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 
@@ -207,11 +207,11 @@ public:
     IPeak &peak = ws->getPeak(0);
 
     double intensity =peak.getIntensity();
-    TS_ASSERT_DELTA(intensity,2770, 200.0);
-
+    TS_ASSERT_DELTA(intensity,3263, 600.0);
+  
     double sigIntensity =peak.getSigmaIntensity();
-    TS_ASSERT_DELTA( sigIntensity,100.0, 70.0);
-
+    TS_ASSERT_DELTA( sigIntensity,132.0, 50.0);
+  
     AnalysisDataService::Instance().remove("TOPAZ");
 
   }

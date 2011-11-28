@@ -69,13 +69,13 @@ namespace Mantid
         typedef std::forward_iterator_tag iterator_category;
 
       public:
+        const_iterator(){}
         const_iterator(IteratorProxy *itr_proxy)
           : m_proxy(itr_proxy) {}
         const_iterator(const const_iterator & other)
         {
           this->operator=(other);
         }
-        ~const_iterator() { delete m_proxy; }
         const_iterator& operator=(const const_iterator& rhs) 
         {
           if( &rhs != this )
@@ -149,6 +149,19 @@ namespace Mantid
       /// End
       virtual const_iterator cend() const = 0;
       //@}
+
+      /// begin method to make type more like a STL container. required so that this type can be used with gmock printers.
+      const_iterator begin() const
+      {
+        return cbegin();
+      }
+
+      /// end method to make type more like a STL container. required so that this type can be used with gmock printers.
+      const_iterator end() const
+      {
+        return cend();
+      }
+
     };
 
     /**

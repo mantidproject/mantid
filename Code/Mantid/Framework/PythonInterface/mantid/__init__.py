@@ -1,27 +1,46 @@
-"""Defines the Python interface to the Mantid framework
 """
-import sys
-import os
+Mantid
+======
 
-########################################################
-# Path settings
-########################################################
-# Ensure the sub modules can see each other
-_moduledir = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(_moduledir)
+http://www.mantidproject.org
 
+The Mantid project provides a platform that supports high-performance computing 
+on neutron and muon data. The framework provides a set of common services, 
+algorithms and data objects that are:
+
+    - Instrument or technique independent;
+    - Supported on multiple target platforms (Windows, Linux, Mac OS X);
+    - Easily extensible by Instruments Scientists/Users;
+    - Open source and freely redistributable to visiting scientists;
+    - Provides functionalities for Scripting, Visualization, Data transformation, 
+      Implementing Algorithms, Virtual Instrument Geometry. 
+
+"""
+
+###############################################################################
+# Try to be smarter when finding Mantid framework libraries
+###############################################################################
 # Peek to see if a Mantid.properties file is in the parent directory,
 # if so assume that it is the required Mantid bin directory containing
 # the Mantid libraries and ignore any MANTIDPATH that has been set
-_bindir = os.path.dirname(_moduledir)
-if os.path.exists(os.path.join(_bindir, 'Mantid.properties')):
-    os.environ['MANTIDPATH'] = _bindir
+import os as _os
+_moduledir = _os.path.abspath(_os.path.dirname(__file__))
+_bindir = _os.path.dirname(_moduledir)
+if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
+    _os.environ['MANTIDPATH'] = _bindir
 
-########################################################
-# Mantid imports
-########################################################
-# Mantid imports
-from api import framework_mgr
+###############################################################################
+# Make most  things accessible from mantid namespace 
+###############################################################################
+import kernel
+from kernel import *
+# Make the version string accessible in the standard way
+__version__ = version_str()
 
-# Start Mantid (mtd for old times sake)
+import api 
+from api import *
+
+###############################################################################
+# Aliases 
+###############################################################################
 mtd = framework_mgr

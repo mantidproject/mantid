@@ -254,7 +254,7 @@ void AlignDetectors::exec()
 
       // Make sure reference to input X vector is obtained after output one because in the case
       // where the input & output workspaces are the same, it might move if the vectors were shared.
-      const MantidVec& xIn = inSpec->dataX();
+      const MantidVec& xIn = inSpec->readX();
       std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
       // Copy the Y&E data
       outputWS->dataY(i) = inSpec->dataY();
@@ -318,7 +318,7 @@ void AlignDetectors::execEvent()
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
-  PARALLEL_FOR2(inputWS,outputWS)
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
@@ -340,6 +340,7 @@ void AlignDetectors::execEvent()
         <<  outputWS->getTofMin() << " d_max " << outputWS->getTofMax();
     throw std::runtime_error(msg.str());
   }
+  outputWS->clearMRU();
 }
 
 

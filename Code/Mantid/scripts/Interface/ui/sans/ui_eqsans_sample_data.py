@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_sample_data.ui'
 #
-# Created: Thu Sep 15 17:21:11 2011
+# Created: Wed Nov 16 13:57:36 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -435,8 +435,7 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "Scattering data file", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_thickness_label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
@@ -444,12 +443,12 @@ class Ui_Frame(object):
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_label.setText(QtGui.QApplication.translate("Frame", "Sample direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_label.setText(QtGui.QApplication.translate("Frame", "Empty direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.empty_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.empty_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
@@ -467,8 +466,7 @@ class Ui_Frame(object):
         self.background_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply a background subtraction.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_chk.setText(QtGui.QApplication.translate("Frame", "Background data file", None, QtGui.QApplication.UnicodeUTF8))
         self.background_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_browse.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.transmission_grpbox.setTitle(QtGui.QApplication.translate("Frame", "Transmission", None, QtGui.QApplication.UnicodeUTF8))
@@ -480,12 +478,12 @@ class Ui_Frame(object):
         self.bck_dtransmission_edit.setToolTip(QtGui.QApplication.translate("Frame", "Uncertainty on the background transmission.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_label.setText(QtGui.QApplication.translate("Frame", "Sample direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.bck_sample_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_sample_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_label.setText(QtGui.QApplication.translate("Frame", "Empty direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.bck_empty_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_empty_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))

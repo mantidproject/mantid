@@ -119,7 +119,7 @@ namespace CurveFitting
     prog.report("Setting workspace");
     API::Workspace_sptr ws = getProperty("InputWorkspace");
     std::string input = getProperty("Input");
-    m_function->setWorkspace(ws,input);
+    m_function->setWorkspace(ws,input,true);
 
     prog.report("Setting minimizer");
     // force initial parameters to satisfy constraints of function

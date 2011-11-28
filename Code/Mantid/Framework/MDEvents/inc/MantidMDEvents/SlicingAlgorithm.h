@@ -22,7 +22,7 @@ namespace MDEvents
 {
 
   /** Abstract Algorithm class that will be used by:
-   *    BinToMDHistoWorkspace and SliceMD
+   *    BinMD and SliceMD
    * and shares code for getting a slice from one workspace to another
     
     @author Janik Zikovsky
@@ -54,6 +54,10 @@ namespace MDEvents
     SlicingAlgorithm();
     ~SlicingAlgorithm();
     
+    ///@return a string with the character that identifies each dimension in order (XYZT)
+    static std::string getDimensionChars()
+    { return "XYZT"; }
+
   protected:
     
     /// Initialise the properties

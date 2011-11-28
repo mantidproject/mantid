@@ -16,6 +16,7 @@ import time
 import platform
 import re
 import os
+import traceback
 
 class BaseScriptElement(object):
     """
@@ -396,11 +397,16 @@ class BaseReductionScripter(object):
                     if item.state() is not None:
                         item.state().update()
             except:
+                trace = traceback.format_exc()
                 # Update scripter [Duplicated code because we can't use 'finally' on python 2.4]
                 for item in self._observers:
                     if item.state() is not None:
-                        item.state().update()
-                raise
+                        # Things might be broken, so update what we can
+                        try:
+                            item.state().update()
+                        except:
+                            pass
+                raise RuntimeError, trace
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 

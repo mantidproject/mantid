@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 
 
 namespace Mantid
@@ -35,10 +36,11 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IMDHistoWorkspace : public IMDWorkspace
+  class DLLExport IMDHistoWorkspace : public IMDWorkspace, public MultipleExperimentInfos
   {
   public:
     IMDHistoWorkspace();
+    IMDHistoWorkspace(const IMDHistoWorkspace & other);
     virtual ~IMDHistoWorkspace();
 
     /// See the MDHistoWorkspace definition for descriptions of these

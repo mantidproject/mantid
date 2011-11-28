@@ -60,14 +60,16 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SmoothNeighbours)
 
+SmoothNeighbours::SmoothNeighbours() : API::Algorithm() , WeightedSum(new NullWeighting)
+{
+}
+
 /// Sets documentation strings for this algorithm
 void SmoothNeighbours::initDocs()
 {
   this->setWikiSummary("Perform a moving-average smoothing by summing spectra of nearest neighbours over the face of detectors.");
   this->setOptionalMessage("Perform a moving-average smoothing by summing spectra of nearest neighbours over the face of detectors.");
 }
-
-
 
 /** Initialisation method.
  *
@@ -100,9 +102,20 @@ void SmoothNeighbours::init()
     "Alternative to providing the radius. The default is 8.");
   setPropertySettings("NumberOfNeighbours", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
 
+  declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
+  setPropertySettings("IgnoreMaskedDetectors", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
+
   declareProperty("WeightedSum", true,
     "Adjust the weight of neighboring pixels when summing them, based on their distance.");
-  setPropertySettings("WeightedSum", new EnabledWhenProperty(this, "ProvideRadius", IS_DEFAULT)); //Weighted sum needs the radius for the calculation.
+
+  //std::vector<std::string> propOptions;
+  //  propOptions.push_back("Flat");
+  //  propOptions.push_back("Linear");
+  //  declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
+  //    "What sort of Weighting scheme to use?\n"
+  //    "  Flat: Effectively no-weighting, all weights are 1.\n"
+  //    "  Linear: Linear weighting 1 - r/R from origin."
+  //     );
   
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
@@ -220,12 +233,8 @@ void SmoothNeighbours::findNeighboursRectangular()
           for (int ix=-AdjX; ix <= AdjX; ix++)
             for (int iy=-AdjY; iy <= AdjY; iy++)
             {
-              // Default to unity weight
-              double smweight = 1.0;
-
               //Weights for corners=1; higher for center and adjacent pixels
-              if (WeightedSum)
-                smweight = static_cast<double>(AdjX - std::abs(ix) + AdjY - std::abs(iy) + 1);
+              double smweight = WeightedSum->weightAt(AdjX, ix, AdjY, iy);
 
               //Find the pixel ID at that XY position on the rectangular detector
               if(j+ix >= det->xpixels() || j+ix < 0) continue;
@@ -269,6 +278,12 @@ void SmoothNeighbours::findNeighboursRectangular()
  */
 void SmoothNeighbours::findNeighboursUbiqutious()
 {
+  /*
+    This will cause the Workspace to rebuild the nearest neighbours map, so that we can pick-up any of the properties specified
+    for this algorithm in the constructor for the NearestNeighboursObject.
+  */
+  inWS->rebuildNearestNeighbours();
+
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
 
@@ -280,6 +295,8 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   //Get the use radius flag.
   bool useRadius = getProperty("ProvideRadius");
   int nNeighbours = getProperty("NumberOfNeighbours");
+  bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
+
   IDetector_const_sptr det;
   // Go through every input workspace pixel
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
@@ -289,6 +306,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     {
       det = inWS->getDetector(wi);
       if( det->isMonitor() ) continue; //skip monitor
+      if( det->isMasked() ) continue; //skip masked detectors
     }
     catch(Kernel::Exception::NotFoundError&)
     {
@@ -299,11 +317,11 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     std::map<specid_t, double> neighbSpectra;
     if(useRadius)
     {
-      neighbSpectra = inWS->getNeighbours(inSpec, Radius);
+      neighbSpectra = inWS->getNeighbours(inSpec, Radius, ignoreMaskedDetectors);
     }
     else
     {
-      neighbSpectra = inWS->getNeighboursExact(inSpec, nNeighbours);
+      neighbSpectra = inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors);
     }
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0
@@ -312,21 +330,16 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     // Neighbours and weights list
     double totalWeight = 0;
     std::vector< weightedNeighbour > neighbours;
-//    std::cout << neighbSpectra.size() << " neighbours to " << wi << ": ";
 
     // Convert from spectrum numbers to workspace indices
     for (std::map<specid_t, double>::iterator it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it)
     {
       specid_t spec = it->first;
-      double r = it->second;
-//      std::cout << spec << " at " << r << ",";
 
-      // Default weight of 1, or do a linear weighting scheme with center = 1.0 and edges = 0.0
-      double weight = 1.0;
-      if (WeightedSum)
-        weight = 1.0 - (r / Radius);
+      //Use the weighting strategy to calculate the weight.
+      double weight = WeightedSum->weightAt(it->second); 
 
-      if (weight > 0)
+      if (weight > 0) 
       {
         // Find the corresponding workspace index
         spec2index_map::iterator mapIt = spec2index->find(spec);
@@ -353,6 +366,25 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   delete spec2index;
 }
 
+/**
+Attempts to reset the Weight based on the strategyName provided. Note that if these conditional 
+statements fail to override the existing WeightedSum member, it should stay as a NullWeighting, which
+will throw during usage.
+*/
+void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, double& cutOff)
+{
+  if(strategyName == "Flat")
+  {
+    boost::scoped_ptr<WeightingStrategy> flatStrategy(new FlatWeighting);
+    WeightedSum.swap(flatStrategy);
+  }
+  else if(strategyName == "Linear")
+  {
+    boost::scoped_ptr<WeightingStrategy> flatStrategy(new LinearWeighting(cutOff));
+    WeightedSum.swap(flatStrategy);
+  }
+}
+
 
 //--------------------------------------------------------------------------------------------
 /** Executes the algorithm
@@ -362,7 +394,22 @@ void SmoothNeighbours::exec()
 {
   // Retrieve the optional properties
   Radius = getProperty("Radius");
-  WeightedSum = getProperty("WeightedSum");
+  // Set the weighting strategy
+
+  /*
+  --The following snippet is not going to be required when weighted sum becomes an option rather than a boolean.--
+  */
+  std::string strategy = "Flat";
+  bool b = getProperty("WeightedSum");
+  if(b)
+  {
+    strategy = "Linear";
+  }
+  /*
+  --End snippet.--
+  */
+  setWeightingStrategy(strategy, Radius);
+
   AdjX = getProperty("AdjX");
   AdjY = getProperty("AdjY");
   Edge = getProperty("ZeroEdgePixels");

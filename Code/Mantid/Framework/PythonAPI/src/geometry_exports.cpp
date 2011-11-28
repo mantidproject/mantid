@@ -263,13 +263,17 @@ namespace Mantid
       .def( "getG",( &OrientedLatticeWrapper::getG ) )
       .def( "getGstar",( &OrientedLatticeWrapper::getGstar ) )
       .def( "getB",( &OrientedLatticeWrapper::getB ) )
-      .def( "recalculateFromGstar", ( &OrientedLatticeWrapper::recalculateFromGstar ) ) 
+//      .def( "recalculateFromGstar", ( &OrientedLatticeWrapper::recalculateFromGstar ) )
 // new functions speific to oriented lattice
       .def( init< Geometry::UnitCell >(( arg("uc") )) )  
       .def( "getU",( &OrientedLatticeWrapper::getU ) )
       .def( "setU", ( &OrientedLatticeWrapper::setU ) ) 
       .def( "getUB",( &OrientedLatticeWrapper::getUB ) )
-      .def( "setUB", ( &OrientedLatticeWrapper::setUB ) ) ;
+      .def( "setUB", ( &OrientedLatticeWrapper::setUB ) )
+      .def( "getuVector", (&Geometry::OrientedLattice::getuVector))
+      .def( "getvVector", (&Geometry::OrientedLattice::getvVector))
+      .def( "setUFromVectors", ( &OrientedLatticeWrapper::setUFromVectors ) )
+        ;
     }
     void export_geometry_namespace()
     {

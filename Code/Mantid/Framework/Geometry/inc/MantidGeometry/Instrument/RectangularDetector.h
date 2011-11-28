@@ -46,6 +46,8 @@ namespace Geometry
 
 class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly, public IObjComponent
 {
+  friend class RectangularDetectorPixel;
+
 public:
   ///String description of the type of component
   virtual std::string type() const { return "RectangularDetector";}
@@ -90,6 +92,11 @@ public:
   double xsize() const;
   ///Size in Y of the detector
   double ysize() const;
+ 
+  int idstart() const;
+  bool idfillbyfirst_y() const;
+  int idstepbyrow() const;
+  int idstep() const;
 
   Kernel::V3D getRelativePosAtXY(int x, int y) const;
   void getTextureSize(int & xsize, int & ysize) const;

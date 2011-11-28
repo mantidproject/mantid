@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Thu Sep 15 17:21:10 2011
+# Created: Wed Nov 16 13:57:35 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -262,8 +262,7 @@ class Ui_Frame(object):
         self.background_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply a background subtraction.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_chk.setText(QtGui.QApplication.translate("Frame", "Background data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.background_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_browse.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters from Data File (for information only)", None, QtGui.QApplication.UnicodeUTF8))
@@ -284,8 +283,7 @@ class Ui_Frame(object):
         self.calculate_trans_chk.setText(QtGui.QApplication.translate("Frame", "Calculate background transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_label.setText(QtGui.QApplication.translate("Frame", "Dark current for transmission:", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.trans_dark_current_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
-        self.trans_dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.trans_dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_direct_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to use the direct beam method for transmission calculation.", None, QtGui.QApplication.UnicodeUTF8))

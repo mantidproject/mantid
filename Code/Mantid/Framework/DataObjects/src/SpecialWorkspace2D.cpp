@@ -343,9 +343,9 @@ namespace DataObjects
     for (size_t ispec = 0; ispec < this->getNumberHistograms(); ispec++){
 
       // 1.1 Check size
-      const MantidVec& inx = sourcews->dataX(ispec);
-      const MantidVec& iny = sourcews->dataY(ispec);
-      const MantidVec& ine = sourcews->dataE(ispec);
+      const MantidVec& inx = sourcews->readX(ispec);
+      const MantidVec& iny = sourcews->readY(ispec);
+      const MantidVec& ine = sourcews->readE(ispec);
 
       MantidVec& outx = this->dataX(ispec);
       MantidVec& outy = this->dataY(ispec);

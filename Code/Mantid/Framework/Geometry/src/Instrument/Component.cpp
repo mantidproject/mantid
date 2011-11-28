@@ -300,7 +300,7 @@ namespace Geometry
   /** Gets the position relative to the parent
    * @returns A vector of the relative position
    */
-  const V3D & Component::getRelativePos() const
+  const V3D Component::getRelativePos() const
   {
     if( m_isParametrized )
     {
@@ -342,12 +342,12 @@ namespace Geometry
       const IComponent * baseParent = m_base->m_parent;
       if ( !baseParent )
       {
-        return getRelativePos();
+        return this->getRelativePos();
       }
       else
       {
         // Avoid instantiation of parent shared pointer if we can
-        V3D absPos = getRelativePos();
+        V3D absPos = this->getRelativePos();
         //get the parent rotation, try to get it from the cache first to avoid instantiaing the class
         Quat parentRot;
         V3D parentPos;

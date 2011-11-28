@@ -19,6 +19,8 @@
 #include <cctype>
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
+
 namespace Mantid
 {
   namespace API
@@ -44,10 +46,23 @@ namespace Mantid
 
       // determine from Mantid property how sensitive Mantid should be
       std::string casesensitive = Mantid::Kernel::ConfigService::Instance().getString("filefinder.casesensitive");
-      if ( casesensitive == "Off" )
+      if ( boost::iequals("Off",casesensitive) )
         globOption = Poco::Glob::GLOB_CASELESS;
       else
         globOption = Poco::Glob::GLOB_DEFAULT;
+    }
+
+
+    /**
+     * Option to set if file finder should be case sensitive
+     * @param case :: If true then set to case sensitive
+     */
+    void FileFinderImpl::setCaseSensitive(const bool cs) 
+    {
+      if ( cs )
+        globOption = Poco::Glob::GLOB_DEFAULT;
+      else
+        globOption = Poco::Glob::GLOB_CASELESS;
     }
 
     /**
@@ -79,8 +94,14 @@ namespace Mantid
       std::vector<std::string>::const_iterator it = searchPaths.begin();
       for (; it != searchPaths.end(); ++it)
       {
-        if (fName.find("*") != std::string::npos)
-        {
+// On windows globbing is note working properly with network drives 
+// for example a network drive containing a $ 
+// For this reason, and since windows is case insensitive anyway
+// a special case is made for windows
+#ifdef _WIN32
+          if (fName.find("*") != std::string::npos)
+          {
+#endif
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
@@ -89,16 +110,18 @@ namespace Mantid
           {
             return *files.begin();
           }
-        }
-        else
-        {
-          Poco::Path path(*it, fName);
-          Poco::File file(path);
-          if (file.exists())
-          {
-            return path.toString();
+#ifdef _WIN32
           }
-        }
+          else
+          {
+            Poco::Path path(*it, fName);
+            Poco::File file(path);
+            if (file.exists())
+            {
+              return path.toString();
+            }
+          }
+#endif
       }
       return "";
     }
@@ -249,7 +272,6 @@ namespace Mantid
       const std::string suffix = extractAllowedSuffix(filename);
 
       std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
-
       std::string delimiter = facility.delimiter();
 
       filename = p.first;
@@ -366,7 +388,7 @@ namespace Mantid
         {
           filename = makeFileName(filename, facility);
         }
-        catch(std::invalid_argument)
+        catch(std::invalid_argument&)
         {
           g_log.error() << "Could not find file '" << filename << "'\n";
         }
@@ -430,6 +452,7 @@ namespace Mantid
             {
               return "";
             }
+            if( path.empty() ) return "";
             Poco::Path pathPattern(path);
             if (ext->find("*") != std::string::npos)
             {

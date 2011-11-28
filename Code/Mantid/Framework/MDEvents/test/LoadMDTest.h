@@ -49,6 +49,9 @@ public:
     }
   }
 
+
+
+  //=================================================================================================================
   /** Compare two MDEventWorkspaces
    *
    * @param ws :: workspace to check
@@ -86,7 +89,7 @@ public:
       IMDBox<MDE,nd>* box1 = boxes[j];
       IMDBox<MDE,nd>* box2 = boxes1[j];
 
-//      std::cout << "ID: " << box1->getId() << std::endl;
+      //std::cout << "ID: " << box1->getId() << std::endl;
       TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
       TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
       TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
@@ -165,6 +168,7 @@ public:
 
 
 
+  //=================================================================================================================
   template <size_t nd>
   void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, double memory=0, bool BoxStructureOnly = false)
   {
@@ -274,7 +278,7 @@ public:
     // Remove workspace from the data service.
     if (deleteWorkspace)
     {
-      ws->getBoxController()->closeFile();
+      ws->getBoxController()->closeFile(true);
       AnalysisDataService::Instance().remove(outWSName);
     }
   }
@@ -295,7 +299,7 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
-    // Now there are 2002 boxes
+    // Now there are 54 boxes
     box->splitContents(12);
 
     // And add an ExperimentInfo thingie
@@ -304,25 +308,29 @@ public:
     iws->addExperimentInfo(ei);
 
     // Add one event using addEvent(). The event will need to be written out to disk too.
-    MDLeanEvent<nd> ev(1.0, 2.3);
+    MDLeanEvent<nd> ev(1.0, 1.0);
     for (size_t d=0; d<nd; d++) ev.setCenter(d, 0.5);
     box->addEvent(ev);
 
     // Modify a different box by accessing the events
     MDBox<MDLeanEvent<nd>,nd> * box8 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(8));
     std::vector<MDLeanEvent<nd> > & events = box8->getEvents();
-    events[0].setSignal(10.0);
+    // Add 10 to this signal
+    signal_t newSignal = events[0].getSignal() + 10.0;
+    events[0].setSignal( float(newSignal) );
+    box8->releaseEvents();
 
-    // Modify a third box by accessing the events AND adding an event
-    MDBox<MDLeanEvent<nd>,nd> * box17 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(17));
-    std::vector<MDLeanEvent<nd> > & events17 = box17->getEvents();
-    box->addEvent( events17[0] ); // Copy the event so that it ends up in the same box
-    events17[0].setSignal(100.0);
+//    // Modify a third box by adding an event
+//    MDBox<MDLeanEvent<nd>,nd> * box17 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(17));
+//    std::vector<MDLeanEvent<nd> > & events17 = box17->getEvents();
+//    MDLeanEvent<nd> ev_new(1.0, 1.0);
+//    box->addEvent( ev_new );
+//    box17->releaseEvents();
 
     ws2->refreshCache();
 
     // There are now 2 more events
-    TS_ASSERT_EQUALS( ws2->getNPoints(), 10002 );
+    TS_ASSERT_EQUALS( ws2->getNPoints(), 10001 );
 
     // There are some new boxes that are not cached to disk at this point.
     // Save it again.
@@ -360,11 +368,13 @@ public:
     // Perform the full comparison of the second and 3rd loaded workspaces
     do_compare_MDEW(ws2, ws3);
 
-    ws2->getBoxController()->closeFile();
+    ws2->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
 
   }
 
+
+  //=================================================================================================================
 
   /// Load directly to memory
   void test_exec_1D()
@@ -417,6 +427,9 @@ public:
 
 
 
+
+  //=================================================================================================================
+
   void testMetaDataOnly()
   {
     //------ Start by creating the file ----------------------------------------------
@@ -455,8 +468,9 @@ public:
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
 
-    ws->getBoxController()->closeFile();
+    ws->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
+
   }
 
 };

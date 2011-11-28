@@ -1,5 +1,8 @@
 /*WIKI* 
 
+This moves an instrument component, e.g. a bank or a pixel.
+You can either specify an absolute position or a relative position.
+The relative position will be applied to the current position, so applying this twice will move the detector twice.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -20,7 +23,7 @@ DECLARE_ALGORITHM(MoveInstrumentComponent)
 /// Sets documentation strings for this algorithm
 void MoveInstrumentComponent::initDocs()
 {
-  this->setWikiSummary(" Moves an instrument component to a new position. ");
+  this->setWikiSummary("Moves an instrument component to a new position.");
   this->setOptionalMessage("Moves an instrument component to a new position.");
 }
 
@@ -37,13 +40,20 @@ MoveInstrumentComponent::MoveInstrumentComponent()
 void MoveInstrumentComponent::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("ComponentName","");
-  declareProperty("DetectorID",-1);
-  declareProperty("X",0.0);
-  declareProperty("Y",0.0);
-  declareProperty("Z",0.0);
-  declareProperty("RelativePosition",true);
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+      "The name of the workspace for which the new instrument configuration will have an effect. Any other workspaces stored in the analysis data service will be unaffected.");
+  declareProperty("ComponentName","",
+      "The name of the component to move. Component names are defined in the instrument definition files.");
+  declareProperty("DetectorID",-1,
+      "The ID of the detector to move. If both the component name and the detector ID are set the latter will be used.");
+  declareProperty("X",0.0,
+      "The x-part of the new location vector.");
+  declareProperty("Y",0.0,
+      "The y-part of the new location vector.");
+  declareProperty("Z",0.0,
+      "The z-part of the new location vector.");
+  declareProperty("RelativePosition",true,
+      "The property defining how the (X,Y,Z) vector should be interpreted. If true it is a vector relative to the initial component's position. Otherwise it is a new position in the absolute co-ordinates.");
 }
 
 /** Executes the algorithm. 

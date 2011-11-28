@@ -3,5 +3,8 @@
         <file>view-fullscreen.png</file>
         <file>color-pallette.png</file>
         <file>color-pallette-part.png</file>
+        <file>stock-tool-pencil-16.png</file>
+        <file>cross.png</file>
+        <file>grid.png</file>
     </qresource>
 </RCC>

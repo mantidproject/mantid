@@ -11,6 +11,7 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
 #include <map>
 
 namespace MantidQt
@@ -22,6 +23,7 @@ namespace Muon
 {
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
+  class MuonAnalysisResultTableTab;
 }
 
 
@@ -315,6 +317,9 @@ private:
   /// time zero returned in ms
   QString timeZero();
 
+  /// Get the new plot name
+  QString getNewPlotName(const QString & cropWSfirstPart);
+
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
 
@@ -352,6 +357,8 @@ private:
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab* m_fitDataTab;
+  /// handles result table tab work
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

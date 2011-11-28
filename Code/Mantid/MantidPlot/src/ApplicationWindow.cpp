@@ -120,7 +120,7 @@
 #include "PlotToolInterface.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidTable.h"
-#include "Mantid/MantidCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
 #include "ContourLinesEditor.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/RemoveErrorsDialog.h"
@@ -1346,7 +1346,7 @@ void ApplicationWindow::plotMenuAboutToShow()
   reloadCustomActions();
 }
 
-void ApplicationWindow::customMenu(QMdiSubWindow* w)
+void ApplicationWindow::customMenu(MdiSubWindow* w)
 {
   menuBar()->clear();
   menuBar()->insertItem(tr("&File"), fileMenu);
@@ -1596,7 +1596,7 @@ void ApplicationWindow::customColumnActions()
     actionSwapColumns->setEnabled(true);
 }
 
-void ApplicationWindow::customToolBars(QMdiSubWindow* w)
+void ApplicationWindow::customToolBars(MdiSubWindow* w)
 {
   disableToolbars();
   if (!w)
@@ -3351,8 +3351,8 @@ void ApplicationWindow::windowActivated(QMdiSubWindow *w)
   if( d_active_window && d_active_window == qti_subwin ) return;
 
   d_active_window = qti_subwin;
-  customToolBars(w);
-  customMenu(w);
+  customToolBars(qti_subwin);
+  customMenu(qti_subwin);
 
   if (d_opening_file) return;
 
@@ -8283,7 +8283,9 @@ void ApplicationWindow::resizeWindow()
   if (!w)
     return;
 
-  d_workspace->setActiveSubWindow(w);
+#ifndef MDISUBWINDOW_FLOATABLE
+  d_workspace->setActiveSubWindow(w); //JZ
+#endif
 
   ImageDialog *id = new ImageDialog(this);
   id->setAttribute(Qt::WA_DeleteOnClose);
@@ -8312,7 +8314,9 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
     return;
 
   w->setNormal();
-  d_workspace->setActiveSubWindow(w);
+#ifndef MDISUBWINDOW_FLOATABLE
+  d_workspace->setActiveSubWindow(w); //JZ
+#endif
 
   updateWindowLists(w);
   emit modified();
@@ -8832,7 +8836,9 @@ void ApplicationWindow::windowsMenuActivated( int id )
       hiddenWindows->takeAt(hiddenWindows->indexOf(w));
       setListView(w->objectName(), tr("Normal"));
     }
-    d_workspace->setActiveSubWindow(w);
+#ifndef MDISUBWINDOW_FLOATABLE
+    d_workspace->setActiveSubWindow(w); //JZ
+#endif
   }
 }
 
@@ -10024,7 +10030,7 @@ void ApplicationWindow::pickFloorStyle( QAction* action )
   emit modified();
 }
 
-void ApplicationWindow::custom3DActions(QMdiSubWindow *w)
+void ApplicationWindow::custom3DActions(MdiSubWindow *w)
 {
   if (w && w->isA("Graph3D"))
   {
@@ -10899,7 +10905,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          new MantidCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+          new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);
@@ -15210,7 +15216,9 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force)
 
   if (active_window){
     d_active_window = active_window;
-    d_workspace->setActiveSubWindow(active_window);
+#ifndef MDISUBWINDOW_FLOATABLE
+    d_workspace->setActiveSubWindow(active_window);  //JZ
+#endif
     customMenu(active_window);
     customToolBars(active_window);
     if (active_window_state == MdiSubWindow::Minimized)
@@ -16386,6 +16394,8 @@ else
         SLOT(runPythonScript(const QString&)));
     // Re-emits the signal caught from the muon analysis
     connect(user_interface, SIGNAL(setAsPlotType(const QString &)), this, SLOT(setPlotType(const QString &)));
+    // Closes the active graph
+    connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
     //If the fitting is requested then run the peak picker tool in runConnectFitting
     connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
         SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
@@ -16464,6 +16474,21 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
   } 
 }
 
+void ApplicationWindow::closeGraph(const QString & wsName)
+{
+  QList<MdiSubWindow *> windows = windowsList();
+  foreach (MdiSubWindow *w, windows) 
+  {
+    if (w->isA("MultiLayer"))
+    {
+      if (w->objectName() == wsName)
+      {
+        closeWindow(w);
+        break;
+      }
+    }
+  }
+}
 
 void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 {

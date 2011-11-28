@@ -1874,7 +1874,11 @@ void FitPropertyBrowser::addTieToFunction()
   for(size_t i=0;i<m_compositeFunction->nParams();i++)
   {
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
-    Mantid::API::IFitFunction* fun = ref.getFunction();
+    Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(ref.getFunction());
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but func function of another type");
+    }
     // Pick out parameters with the same name as the one we're tying from
     if ( fun->parameterName(static_cast<int>(ref.getIndex())) == parName )
     {
@@ -2343,7 +2347,7 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFitFunction* f)const
         //}
         QString slice = "WorkspaceIndex="+QString::number(workspaceIndex())+
           ",StartX="+QString::number(startX())+",EndX="+QString::number(endX());
-        f->setWorkspace(ws,slice.toStdString());
+        f->setWorkspace(ws,slice.toStdString(),true);
       }
     }
     catch(...){}
@@ -2685,6 +2689,15 @@ void FitPropertyBrowser::updatePPTool(const QString & wsName)
 }
 
 /**
+* Returns the list of workspace names the fit property browser is working on
+*/
+QStringList FitPropertyBrowser::getWorkspaceNames()
+{
+  return m_workspaceNames;
+}
+
+
+/**
  * Call MultifitSetupDialog to populate MultiBG function.
  */
 void FitPropertyBrowser::setupMultifit()
@@ -2700,7 +2713,11 @@ void FitPropertyBrowser::setupMultifit()
       Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
     if (mws)
     {
-      Mantid::API::IFitFunction* fun = m_compositeFunction->getFunction(0);
+      Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(m_compositeFunction->getFunction(0));
+      if (!fun)
+      {
+        throw std::runtime_error("IFitFunction expected but func function of another type");
+      }
       QString fun1Ini = QString::fromStdString(*fun);
       QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace="+wsName+",WSParam=(WorkspaceIndex=0);";
       QString tieStr;
@@ -2738,7 +2755,11 @@ void FitPropertyBrowser::processMultiBGResults()
 
   // check if member functions are the same
   QStringList parNames;
-  Mantid::API::IFitFunction* fun0 = compositeFunction()->getFunction(0);
+  Mantid::API::IFitFunction* fun0 = dynamic_cast<Mantid::API::IFitFunction*>(compositeFunction()->getFunction(0));
+  if (!fun0)
+  {
+    throw std::runtime_error("IFitFunction expected but func function of another type");
+  }
   for(size_t i = 0; i < fun0->nParams(); ++i)
   {
     parNames << QString::fromStdString(fun0->parameterName(i));
@@ -2746,7 +2767,11 @@ void FitPropertyBrowser::processMultiBGResults()
 
   for(size_t i = 1; i < compositeFunction()->nFunctions(); ++i)
   {
-    Mantid::API::IFitFunction* fun = compositeFunction()->getFunction(i);
+    Mantid::API::IFitFunction* fun = dynamic_cast<Mantid::API::IFitFunction*>(compositeFunction()->getFunction(i));
+    if (!fun)
+    {
+      throw std::runtime_error("IFitFunction expected but func function of another type");
+    }
     for(size_t j = 0; j < fun->nParams(); ++j)
     {
       if (parNames.indexOf(QString::fromStdString(fun->parameterName(j))) < 0)

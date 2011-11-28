@@ -16,7 +16,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
+#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -24,6 +24,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -34,6 +35,7 @@ namespace Mantid
   {
     class ParameterMap;
     class ISpectraDetectorMap;
+    class INearestNeighbours;
   }
   namespace API
   {
@@ -92,13 +94,13 @@ namespace Mantid
 
       /** @name Nearest neighbours */
       /// Build and populate the NearestNeighbours object
-      void buildNearestNeighbours() const;
+      void buildNearestNeighbours(const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a detector
-      std::map<specid_t, double> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0) const;
+      std::map<specid_t, double> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
-      std::map<specid_t, double> getNeighbours(specid_t spec, const double radius) const;
+      std::map<specid_t, double> getNeighbours(specid_t spec, const double radius, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using the direct number of nearest neighbours
-      std::map<specid_t, double> getNeighboursExact(specid_t spec, const int nNeighbours) const;
+      std::map<specid_t, double> getNeighboursExact(specid_t spec, const int nNeighbours, const bool ignoreMaskedDetectors=false) const;
       //@}
 
       /// Const access to the spectra-detector map
@@ -187,6 +189,10 @@ namespace Mantid
       /// Returns the error const
       virtual const MantidVec& dataDx(const std::size_t index) const { return getSpectrum(index)->dataDx(); }
 
+      virtual double getXMin() const;
+      virtual double getXMax() const;
+      virtual void getXMinMax(double &xmin, double &xmax) const;
+
       /// Returns a pointer to the x data
       virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { return getSpectrum(index)->ptrX(); }
 
@@ -253,6 +259,8 @@ namespace Mantid
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
       typedef std::set< std::pair<size_t,double> > MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
+      // Causes the nearest neighbours map to be rebuilt.
+      void rebuildNearestNeighbours();
 
 
       // ---------------------------------- MDGeometry methods -------------------------------
@@ -277,7 +285,7 @@ namespace Mantid
 
 
     protected:
-      MatrixWorkspace();
+      MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = new Mantid::Geometry::NearestNeighboursFactory);
 
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
       virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;
@@ -312,8 +320,11 @@ namespace Mantid
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
       MatrixWSIndexCalculator m_indexCalculator;
 
+      /// Scoped pointer to NearestNeighbours factory
+      boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory> m_nearestNeighboursFactory;
+
       /// Shared pointer to NearestNeighbours object
-      mutable boost::shared_ptr<Mantid::Geometry::NearestNeighbours> m_nearestNeighbours;
+      mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours> m_nearestNeighbours;
 
       /// Static reference to the logger class
       static Kernel::Logger& g_log;

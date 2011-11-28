@@ -62,6 +62,7 @@ set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
 
 set ( PY_FILES
   __init__.py
+  simpleapi.py
 )
 
 # CMake would not let this hang off the PythonInterface target because
@@ -80,7 +81,8 @@ foreach ( PY_FILE ${PY_FILES} )
   set ( PYTHON_PKGROOT_INSTALL_FILES ${PYTHON_PKGROOT_INSTALL_FILES} ${OUTPUT_DIR}/${PY_FILE} )
 endforeach ( PY_FILE )
 
-add_custom_target ( PythonModuleFiles DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} )
+add_custom_target ( PythonModuleFiles DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} SOURCES ${PY_FILES} )
+set_property ( TARGET PythonModuleFiles PROPERTY FOLDER "MantidFramework/Python" )
 
 ####################################################################################
 # Sub modules 

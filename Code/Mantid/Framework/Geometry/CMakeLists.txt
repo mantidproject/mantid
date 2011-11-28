@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/Instrument/Goniometer.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/NearestNeighbours.cpp
+	src/Instrument/NearestNeighboursFactory.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
 	src/Instrument/OneToOneSpectraDetectorMap.cpp
@@ -21,6 +22,7 @@ set ( SRC_FILES
 	src/Instrument/Parameter.cpp
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
+	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/XMLlogfile.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
@@ -102,8 +104,11 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+	inc/MantidGeometry/Instrument/INearestNeighbours.h
+	inc/MantidGeometry/Instrument/INearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/NearestNeighbours.h
+	inc/MantidGeometry/Instrument/NearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
 	inc/MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h
@@ -112,6 +117,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ParameterFactory.h
 	inc/MantidGeometry/Instrument/ParameterMap.h
 	inc/MantidGeometry/Instrument/RectangularDetector.h
+	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/XMLlogfile.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
@@ -197,23 +203,25 @@ set ( TEST_FILES
 	test/MapSupportTest.h
 	test/MaterialTest.h
 	test/MathSupportTest.h
+	test/NearestNeighboursFactoryTest.h
 	test/NearestNeighboursTest.h
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h
 	test/OneToOneSpectraDetectorMapTest.h
 	test/OrientedLatticeTest.h
-	test/ParameterMapTest.h
 	test/ParCompAssemblyTest.h
 	test/ParComponentFactoryTest.h
 	test/ParDetectorTest.h
 	test/ParInstrumentTest.h
 	test/ParObjCompAssemblyTest.h
 	test/ParObjComponentTest.h
+	test/ParameterMapTest.h
 	test/ParametrizedComponentTest.h
 	test/PlaneTest.h
 	test/PolygonEdgeTest.h
 	test/QuadrilateralTest.h
+	test/RectangularDetectorPixelTest.h
 	test/RectangularDetectorTest.h
 	test/ReflectionConditionTest.h
 	test/RotCounterTest.h

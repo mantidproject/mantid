@@ -811,7 +811,7 @@ public slots:
   void pickPlotStyle( QAction* action );
   void pickCoordSystem( QAction* action);
   void pickFloorStyle( QAction* action);
-  void custom3DActions(QMdiSubWindow *w);
+  void custom3DActions(MdiSubWindow *w);
   void custom3DGrids(int grids);
   //@}
 
@@ -1053,9 +1053,9 @@ private:
   void disableActions();
   void customColumnActions();
   void disableToolbars();
-  void customToolBars(QMdiSubWindow* w);
+  void customToolBars(MdiSubWindow* w);
   void customMultilayerToolButtons(MultiLayer* w);
-  void customMenu(QMdiSubWindow* w);
+  void customMenu(MdiSubWindow* w);
   void windowActivated(QMdiSubWindow *w);
   //@}
 
@@ -1131,6 +1131,9 @@ private:
 
   /// Run the peakPickerTool for the new plot and delete it for the old plot if there was one.
   void runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot);
+
+  /// Delete a plot with a given workspace name
+  void closeGraph(const QString & wsName);
 
   // TODO: a lot of this stuff should be private
 public:

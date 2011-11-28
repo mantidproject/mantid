@@ -121,11 +121,10 @@ namespace Geometry
       double dstar(double h,double k, double l) const; 
       double d(const Kernel::V3D & hkl) const;
       double dstar(const Kernel::V3D & hkl) const;
-      Kernel::V3D hklFromQ(Kernel::V3D Q) const;
       double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
       double volume()const;
       double recVolume() const; 
-      void recalculateFromGstar(Kernel::Matrix<double>& NewGstar);
+      virtual void recalculateFromGstar(Kernel::Matrix<double>& NewGstar);
 
     private:        
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)

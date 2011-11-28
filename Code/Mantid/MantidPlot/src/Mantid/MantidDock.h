@@ -120,7 +120,7 @@ private:
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
   *m_showSliceViewer,
-  *m_colorFill, *m_showLogs, *m_showHist,
+  *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed;
@@ -144,7 +144,7 @@ public:
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;
   Qt::SortOrder getSortOrder() const;
-
+  void logWarningMessage(const std::string&);
   void disableNodes(bool);
 
 private:

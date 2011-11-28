@@ -109,6 +109,11 @@ namespace WorkspaceCreationHelper
   // create workspace which should be result of homering (transform to energy in inelastic)
   Mantid::API::MatrixWorkspace_sptr createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels=100, size_t numBins=20, bool has_oriented_lattice=true);
 
+  // Create a workspace with all components needed for inelastic analysis;
+  Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(const std::vector<double> &L2, const std::vector<double> &ploar, const std::vector<double> &azimutal,
+                                                               size_t numBins=4,double Emin=-10,double Emax=10,double Ei=11);
+  
+
 };
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

@@ -54,6 +54,11 @@ namespace Geometry
       const Kernel::DblMatrix& getUB() const;
       void setU(Kernel::DblMatrix& newU);
       void setUB(Kernel::DblMatrix& newUB);
+      //get u and v vectors for Horace/Mslice
+      Kernel::V3D getuVector();
+      Kernel::V3D getvVector();
+
+      Mantid::Kernel::V3D hklFromQ(Mantid::Kernel::V3D Q) const;
 
       Kernel::DblMatrix setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
 
@@ -63,6 +68,11 @@ namespace Geometry
     private:
       Kernel::DblMatrix U;
       Kernel::DblMatrix UB;
+
+      /** Make recalculateFromGstar private. */
+      void recalculateFromGstar(Kernel::DblMatrix& NewGstar)
+      { UnitCell::recalculateFromGstar(NewGstar); }
+
   };
 } // namespace Mantid
 } // namespace Geometry

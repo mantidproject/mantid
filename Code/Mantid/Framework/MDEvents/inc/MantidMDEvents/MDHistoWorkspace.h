@@ -23,10 +23,11 @@ namespace MDEvents
   /** MDHistoWorkspace:
   *
   * An implementation of IMDWorkspace that contains a (normally dense) histogram
-  * representation in up to 4 dimensions.
+  * representation in multiple dimensions.
   *
   * This will be the result of a slice or rebin of another workspace, e.g. a
-  * MDEventWorkspace.
+  * MDEventWorkspace. Typically it has 3 or 4 dimensions, but there is no
+  * real limit to it.
   *
   * This will be used by ParaView e.g. for visualization.
   *
@@ -156,28 +157,28 @@ namespace MDEvents
     }
 
 
-    /// Get the error (squared) of the signal at the specified index.
+    /// Get the error of the signal at the specified index.
     signal_t getErrorAt(size_t index) const
     {
-      return m_errorsSquared[index];
+      return std::sqrt(m_errorsSquared[index]);
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
     signal_t getErrorAt(size_t index1, size_t index2) const
     {
-      return m_errorsSquared[index1 + indexMultiplier[0]*index2];
+      return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0]*index2]);
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
     signal_t getErrorAt(size_t index1, size_t index2, size_t index3) const
     {
-      return m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3];
+      return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3]);
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
     signal_t getErrorAt(size_t index1, size_t index2, size_t index3, size_t index4) const
     {
-      return m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
+      return std::sqrt(m_errorsSquared[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4]);
     }
 
 
@@ -238,7 +239,7 @@ namespace MDEvents
     /// Get the error of the signal at the specified index, normalized by cell volume
     signal_t getErrorNormalizedAt(size_t index) const
     {
-      return m_errorsSquared[index] * m_inverseVolume;
+      return std::sqrt(m_errorsSquared[index]) * m_inverseVolume;
     }
 
     /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume

@@ -260,7 +260,7 @@ namespace Algorithms
           g_log.error() << g_log.error() << "Spectrum ID " << specids[i] << " does not exist!  Skip setting detector parameters to this spectrum" << std::endl;
           continue;
         } else {
-          g_log.notice() << "Raw: Spectrum " << specids[i] << ": # Detectors =  " << spectrum->getDetectorIDs().size() << std::endl;
+          g_log.notice() << "Raw: Spectrum " << spectrum->getSpectrumNo() << ": # Detectors =  " << spectrum->getDetectorIDs().size() << std::endl;
         }
 
         spectrum->clearDetectorIDs();

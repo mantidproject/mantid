@@ -3,10 +3,10 @@ import unittest
 from mantid.api import Algorithm, algorithm_mgr, register_algorithm
 
 class TestPyAlgDefaultAttrs(Algorithm):
-    def init_(self):
+    def PyInit(self):
         pass
     
-    def exec_(self):
+    def PyExec(self):
         pass
 
 class TestPyAlgOverriddenAttrs(Algorithm):
@@ -20,16 +20,22 @@ class TestPyAlgOverriddenAttrs(Algorithm):
     def category(self):
         return "BestAlgorithms"
     
-    def init_(self):
+    def PyInit(self):
         pass
     
-    def exec_(self):
+    def PyExec(self):
         pass
 
-register_algorithm(TestPyAlgDefaultAttrs)
-register_algorithm(TestPyAlgOverriddenAttrs)
 
 class PythonAlgorithmTest(unittest.TestCase):
+        
+    _registered = None
+    
+    def setUp(self):
+        if self.__class__._registered is None:
+            self.__class__._registered = True
+            register_algorithm(TestPyAlgDefaultAttrs)
+            register_algorithm(TestPyAlgOverriddenAttrs)
         
     def raisesNothing(self, callable, *args): # unittest does not have this for some reason
         try:
@@ -40,6 +46,8 @@ class PythonAlgorithmTest(unittest.TestCase):
     def test_alg_with_default_attrs(self):
         self.raisesNothing(algorithm_mgr.create_unmanaged, "TestPyAlgDefaultAttrs")
         alg = algorithm_mgr.create_unmanaged("TestPyAlgDefaultAttrs")
+        self.raisesNothing(alg.initialize)
+       
         self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
         self.assertEquals(alg.version(), 1)
         self.assertEquals(alg.category(), "PythonAlgorithms")

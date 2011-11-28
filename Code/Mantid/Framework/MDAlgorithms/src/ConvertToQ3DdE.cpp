@@ -106,12 +106,14 @@ ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const
     det_loc.det_dir.resize(nHist);
     det_loc.det_id.resize(nHist);
      // Loop over the spectra
+   const Geometry::ISpectraDetectorMap & spm = inputWS->spectraMap();
    size_t ic(0);
    for (size_t i = 0; i < nHist; i++){
 
      Geometry::IDetector_const_sptr spDet;
      try{
-        spDet= inputWS->getDetector(i);
+        size_t detID = spm.ndet(specid_t(i));
+        spDet= inputWS->getDetector(detID);
      }catch(Kernel::Exception::NotFoundError &){
         continue;
      }
@@ -292,14 +294,7 @@ void ConvertToQ3DdE::exec(){
 
  
 
-    // Initalize the matrix to 3x3 identity
-    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
-    // Set the matrix based on UB etc.
-    Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
-    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
-    // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
-    mat = gon * ub;
-    std::vector<double> rotMat = mat.get_vector();
+    std::vector<double> rotMat = get_transf_matrix(inWS2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
 
     const size_t numSpec  = inWS2D->getNumberHistograms();
     const size_t specSize = inWS2D->blocksize();    
@@ -381,220 +376,29 @@ void ConvertToQ3DdE::exec(){
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
-//
-//
-//    // ------------------- Cache values that are common for all ---------------------------
-//    // Extract some parameters global to the instrument
-//    in_ws->getInstrument()->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
-//    beamline_norm = beamline.norm();
-//    beamDir = beamline / beamline.norm();
-//
-//    //To get all the detector ID's
-//    in_ws->getInstrument()->getDetectors(allDetectors);
-//
-//    size_t totalCost = in_ws->getNumberEvents();
-//    prog = new Progress(this, 0, 1.0, totalCost);
-////    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
-////    if (DODEBUG) prog->setNotifyStep(1);
-//
-//    // Create the thread pool that will run all of these.
-//    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
-//    ThreadPool tp(ts);
-//
-//    if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
-//
-//    for (size_t wi=0; wi < in_ws->getNumberHistograms(); wi++)
-//    {
-//      // Equivalent of: this->convertEventList(wi);
-//      EventList & el = in_ws->getEventList(wi);
-//
-//      // We want to bind to the right templated function, so we have to know the type of TofEvent contained in the EventList.
-//      boost::function<void ()> func;
-//      switch (el.getEventType())
-//      {
-//      case TOF:
-//        func = boost::bind(&ConvertToQ3DdE::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
-//        break;
-//      case WEIGHTED:
-//        func = boost::bind(&ConvertToQ3DdE::convertEventList<WeightedEvent>, &*this, static_cast<int>(wi));
-//        break;
-//      case WEIGHTED_NOTIME:
-//        func = boost::bind(&ConvertToQ3DdE::convertEventList<WeightedEventNoTime>, &*this, static_cast<int>(wi));
-//        break;
-//      default:
-//        throw std::runtime_error("EventList had an unexpected data type!");
-//      }
-//
-//      // Give this task to the scheduler
-//      double cost = double(el.getNumberEvents());
-//      ts->push( new FunctionTask( func, cost) );
-//
-//      // Keep a running total of how many events we've added
-//      eventsAdded += el.getNumberEvents();
-//      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
-//      {
-//        if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events.\n";
-//        // Do all the adding tasks
-//        tp.joinAll();
-//        if (DODEBUG) std::cout << cputim << ": Performing the addition of these events.\n";
-//
-//        // Now do all the splitting tasks
-//        ws->splitAllIfNeeded(ts);
-//        if (ts->size() > 0)
-//          prog->doReport("Splitting Boxes");
-//        tp.joinAll();
-//
-//        // Count the new # of boxes.
-//        lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-//        if (DODEBUG) std::cout << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
-//        eventsAdded = 0;
-//      }
-//    }
-//
-//    if (DODEBUG) std::cout << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";
-//
-//    tp.joinAll();
-//    if (DODEBUG) std::cout << cputim << ": Performing the FINAL addition of these events.\n";
-//
-//    // Do a final splitting of everything
-//    ws->splitAllIfNeeded(ts);
-//    tp.joinAll();
-//    if (DODEBUG) std::cout << cputim << ": Performing the FINAL splitting of boxes. There are now " << ws->getBoxController()->getTotalNumMDBoxes() <<" boxes\n";
-//
-//
-//    // Recount totals at the end.
-//    cputim.reset();
-//    ws->refreshCache();
-//    if (DODEBUG) std::cout << cputim << ": Performing the refreshCache().\n";
-//
-//    //TODO: Centroid in parallel, maybe?
-//    ws->getBox()->refreshCentroid(NULL);
-//    if (DODEBUG) std::cout << cputim << ": Performing the refreshCentroid().\n";
-//
-//
-//    if (DODEBUG)
-//    {
-//      std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << cputimtotal << " in total.\n";
-//      std::vector<std::string> stats = ws->getBoxControllerStats();
-//      for (size_t i=0; i<stats.size(); ++i)
-//        std::cout << stats[i] << "\n";
-//      std::cout << std::endl;
-//    }
-//
-//
-  }
+ }
+/**Function to generate transformation matrix converting momentums expressed inially in physical coordinate system into 
+ * crystall cartezian coordinate system e.g. the orthogonal system adjacent to the crystall sell. 
+ * See the chapter IV of Mantid UB matrix documentation by A.T.Savici. 
+ */
+std::vector<double>
+ConvertToQ3DdE::get_transf_matrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u, const Kernel::V3D &v)const
+{
+    
+    // Set the matrix based on UB etc.
+    Geometry::OrientedLattice Latt = inWS2D->sample().getOrientedLattice();
 
- ////----------------------------------------------------------------------------------------------
- // /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
- //  *
- //  * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
- //  * @param workspaceIndex :: index into the workspace
- //  */
- // template <class T>
- // void ConvertToQ3DdE::convertEventList(int workspaceIndex)
- // {
- //   EventList & el = in_ws->getEventList(workspaceIndex);
- //   size_t numEvents = el.getNumberEvents();
+    // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
+    Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
 
- //   // Get the position of the detector there.
- //   std::set<detid_t>& detectors = el.getDetectorIDs();
- //   if (detectors.size() > 0)
- //   {
- //     // The 3D MDEvents that will be added into the MDEventWorkspce
- //     std::vector<MDE> out_events;
- //     out_events.reserve( el.getNumberEvents() );
+    Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
+    umat.Invert();
 
- //     // Get the detector (might be a detectorGroup for multiple detectors)
- //     IDetector_const_sptr det = in_ws->getDetector(workspaceIndex);
-
- //     // Vector between the sample and the detector
- //     V3D detPos = det->getPos() - samplePos;
-
- //     // Neutron's total travelled distance
- //     double distance = detPos.norm() + l1;
-
- //     // Detector direction normalized to 1
- //     V3D detDir = detPos / detPos.norm();
-
- //     // The direction of momentum transfer in the inelastic convention ki-kf
- //     //  = input beam direction (normalized to 1) - output beam direction (normalized to 1)
- //     V3D Q_dir_lab_frame = beamDir - detDir;
-
- //     // Multiply by the rotation matrix to convert to Q in the sample frame (take out goniometer rotation)
- //     // (or to HKL, if that's what the matrix is)
- //     V3D Q_dir = mat * Q_dir_lab_frame;
-
- //     // For speed we extract the components.
- //     double Q_dir_x = Q_dir.X();
- //     double Q_dir_y = Q_dir.Y();
- //     double Q_dir_z = Q_dir.Z();
-
- //     // For lorentz correction, calculate  sin(theta))^2
- //     double sin_theta_squared = 0;
- //     if (LorentzCorrection)
- //     {
- //       // Scattering angle = angle between neutron beam direction and the detector (scattering) direction
- //       double theta = detDir.angle(beamDir);
- //       sin_theta_squared = sin(theta);
- //       sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
- //     }
-
- //     /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
- //      * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h) * 1e-10; */
- //     const double wavenumber_in_angstrom_times_tof_in_microsec =
- //         (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h);
-
- //     //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
- //     //std::cout << Q_dir.norm() << " Qdir norm" << std::endl;
-
- //     // This little dance makes the getting vector of events more general (since you can't overload by return type).
- //     typename std::vector<T> * events_ptr;
- //     getEventsFrom(el, events_ptr);
- //     typename std::vector<T> & events = *events_ptr;
-
- //     // Iterators to start/end
- //     typename std::vector<T>::iterator it = events.begin();
- //     typename std::vector<T>::iterator it_end = events.end();
-
- //     for (; it != it_end; it++)
- //     {
- //       // Get the wavenumber in ang^-1 using the previously calculated constant.
- //       double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
-
- //       // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
- //       coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
-
- //       if (LorentzCorrection)
- //       {
- //         //double lambda = 1.0/wavenumber;
- //         // (sin(theta))^2 / wavelength^4
- //         float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
- //         // Push the MDLeanEvent but correct the weight.
- //         out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
- //       }
- //       else
- //       {
- //         // Push the MDLeanEvent with the same weight
- //         out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
- //       }
- //     }
-
- //     // Clear out the EventList to save memory
- //     if (ClearInputWorkspace)
- //     {
- //       // Track how much memory you cleared
- //       size_t memoryCleared = el.getMemorySize();
- //       // Clear it now
- //       el.clear();
- //       // For Linux with tcmalloc, make sure memory goes back, if you've cleared 200 Megs
- //       MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, (size_t)2e8);
- //     }
-
- //     // Add them to the MDEW
- //     ws->addEvents(out_events);
- //   }
- //   prog->reportIncrement(numEvents, "Adding Events");
- // }
+  // Obtain the transformation matrix:
+    Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI);
+    std::vector<double> rotMat = mat.get_vector();
+    return rotMat;
+}
 
 
 

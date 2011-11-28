@@ -36,6 +36,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
@@ -133,6 +134,7 @@ namespace DataHandling
     //Get some stuff from the input workspace
     Instrument_const_sptr inst = inputW->getInstrument();
     std::string instname = inst->getName();
+    Geometry::Instrument_sptr instrument(new Geometry::Instrument(instname));
 
     // set-up minimizer
 
@@ -202,6 +204,19 @@ namespace DataHandling
 
     while(std::getline(input, line)) 
     {
+      if(line[0] == '7')
+      {
+        double mL1, mT0;
+        std::stringstream(line) >> count >> mL1 >> mT0;
+        // Convert from cm to m
+        center(0.0, 0.0, -0.01 * mL1,"moderator", inname);
+        //mT0 and time of flight are both in microsec
+        IAlgorithm_sptr alg1 = createSubAlgorithm("ChangeBinOffset");
+        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty("Offset", mT0);
+        alg1->executeAsSubAlg();
+      }
+
       if(line[0] != '5') continue;
 
       std::stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd
@@ -219,10 +234,6 @@ namespace DataHandling
           if (id==10)break;
         }
       }
-      // Convert from cm to m
-      x = x * 0.01;
-      y = y * 0.01;
-      z = z * 0.01;
       boost::shared_ptr<RectangularDetector> det;
       std::ostringstream Detbank;
       Detbank <<"bank"<<id;
@@ -232,6 +243,18 @@ namespace DataHandling
       det = detList[idnum];
       if (det)
       {
+        IAlgorithm_sptr alg1 = createSubAlgorithm("ResizeRectangularDetector");
+        alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+        alg1->setProperty("ComponentName", det->getName());
+        // Convert from cm to m
+        alg1->setProperty("ScaleX", 0.01*width/det->xsize());
+        alg1->setProperty("ScaleY", 0.01*height/det->ysize());
+        alg1->executeAsSubAlg();
+
+        // Convert from cm to m
+        x *= 0.01;
+        y *= 0.01;
+        z *= 0.01;
         detname = det->getName();
         center(x, y, z, detname, inname);
 
@@ -273,7 +296,6 @@ namespace DataHandling
         if (parent)
         {
             Quat rot0 = parent->getRelativeRot();
-                std::cout <<rot0<<"\n";
             rot0.inverse();
             Rot = Rot * rot0;
         }
@@ -281,7 +303,6 @@ namespace DataHandling
         if (grandparent)
         {
             Quat rot0 = grandparent->getRelativeRot();
-            std::cout <<rot0<<"\n";
             rot0.inverse();
             Rot = Rot * rot0;
         }
@@ -291,7 +312,6 @@ namespace DataHandling
 
         // Set or overwrite "rot" instrument parameter.
         pmap.addQuat(comp.get(),"rot",Rot);
-        std::cout <<Rot<<"\n";
 
       } 
     } 

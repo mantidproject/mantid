@@ -96,26 +96,11 @@ namespace { // anonymous namespace begin
     bool isEvent = false;
     if (isEvent)
     {
-      tmin = eventWksp->getTofMin();
-      tmax = eventWksp->getTofMax();
-      return;
+      eventWksp->getEventXMinMax(tmin, tmax);
     }
-
-    int numberOfSpectra = static_cast<int>(wksp->getNumberHistograms());
-    tmin = std::numeric_limits<double>::max();
-    tmax = -1. * tmin;
-    double temp;
-    for (int workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
+    else
     {
-      // get the minimum value
-      temp = wksp->dataX(workspaceIndex).front();
-      if (temp < tmin)
-        tmin = temp;
-
-      // get the maximum value
-      temp = wksp->dataX(workspaceIndex).back();
-      if (temp > tmax)
-        tmax = temp;
+      wksp->getXMinMax(tmin, tmax);
     }
   }
  } // anonymous namespace end

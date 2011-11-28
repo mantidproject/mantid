@@ -48,11 +48,69 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data = {}
             self.use_dspace = False
             self._use_vnoise = False
+            self._focusPos = None
+            self.iparmFile = None
             if self.filename is None:
                 return
             handle = file(filename, 'r')
-            for line in handle.readlines():
+            lines = handle.readlines()
+            handle.close()
+
+            # create the focus positions
+            (lines, self._focusPos) = self._generateFocusPos(lines)
+            if len(lines) == 0:
+                self.filename = None
+                return
+
+            # get the rest of the characterization information
+            for line in lines:
                 self._addData(line)
+
+        def _generateFocusPos(self, lines):
+            if not lines[0].startswith("Instrument parameter file:"):
+                return (lines, None)
+
+            result = {}
+
+            # get name of parameter file
+            temp = lines[0]
+            temp.replace("Instrument parameter file:", "")
+            self.iparmFile = temp.strip()
+            lines = lines[1:] # delete this line
+
+            # get the spectra into a buffer
+            spectrainfo = []
+            for line in lines:
+                if line.startswith("L1"):
+                    break
+                spectrainfo.append(line)
+            numSpectra = len(spectrainfo)
+
+            result['PrimaryFlightPath'] = lines[numSpectra].split()[1]
+
+            # delete the rest of the focus position info
+            lines = lines[numSpectra+1:]
+
+            # parse the focus positions
+            specids = []
+            l2 = []
+            polar = []
+            azimuthal = []
+            for spec in spectrainfo:
+                temp = spec.split()
+                specids.append(int(temp[0]))
+                l2.append(float(temp[1]))
+                polar.append(float(temp[2]))
+                azimuthal.append(0.)
+
+            # assign to the correct place
+            result['SpectrumIDs'] = specids
+            result['L2'] = l2
+            result['Polar'] = polar
+            result['Azimuthal'] = azimuthal
+
+            return (lines, result)
+
         def _addData(self, line):
             if line.startswith('#') or len(line.strip()) <= 0:
                 if "d_min" in line and "d_max" in line:
@@ -87,6 +145,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 return self._data[frequency][wavelength]
             else:
                 return self.PDInfo(None)
+        def getFocusPos(self):
+            return self._focusPos
 
     def category(self):
         return "Diffraction"
@@ -134,8 +194,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
                              Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
-        self.declareProperty("VanadiumFWHM", 7)
-        self.declareProperty("VanadiumSmoothParams", "20,2")
+        self.declareProperty("VanadiumFWHM", 10, Description="Default=10")
+        self.declareProperty("VanadiumSmoothParams", "20,2", Description="Default=20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof']
         self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")
@@ -355,11 +415,16 @@ class SNSPowderReduction(PythonAlgorithm):
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         if not "histo" in self.getProperty("Extension"):
             SortEvents(InputWorkspace=wksp)
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group")
-        if not "histo" in self.getProperty("Extension"):
+        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
+                             PreserveEvents=preserveEvents)
+        if not "histo" in self.getProperty("Extension") and preserveEvents:
             SortEvents(InputWorkspace=wksp)
-        if not preserveEvents:
-            ConvertToMatrixWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp)
+
+        focusPos = self._config.getFocusPos()
+        self.log().notice("FOCUS:" + str(focusPos))
+        if not focusPos is None:
+            EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
+
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns

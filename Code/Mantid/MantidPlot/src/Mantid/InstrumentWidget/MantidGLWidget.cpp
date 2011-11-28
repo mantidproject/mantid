@@ -198,6 +198,7 @@ void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
     //}
 
   //}
+  std::cerr << "Context menu\n";
 }
 
 /**
@@ -380,11 +381,13 @@ void MantidGLWidget::refreshView()
   update();
 }
 
-void MantidGLWidget::leaveEvent (QEvent*)
+void MantidGLWidget::leaveEvent (QEvent* ev)
 {
+  UNUSED_ARG(ev)
   // Restore possible override cursor
   while(QApplication::overrideCursor())
   {
     QApplication::restoreOverrideCursor();
   }
+  emit mouseOut();
 }

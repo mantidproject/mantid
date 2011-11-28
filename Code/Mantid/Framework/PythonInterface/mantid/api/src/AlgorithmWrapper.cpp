@@ -81,38 +81,36 @@ namespace Mantid
 
     /**
      * Private init for this algorithm. Expected to be
-     * overridden in the subclass by a function named
-     * init_
+     * overridden in the subclass by a function named PyInit
      */
     void AlgorithmWrapper::init()
     {
-      if( boost::python::override fn = this->get_override("init_") )
+      if( boost::python::override fn = this->get_override("PyInit") )
       {
         fn();
       }
       else
       {
         std::ostringstream os;
-        os << "Python algorithm '" << this->name() << "' does not define the init_ function, cannot initialize.";
+        os << "Python algorithm '" << this->name() << "' does not define the PyInit function, cannot initialize.";
         throw std::runtime_error(os.str());
       }
     }
 
     /**
      * Private exec for this algorithm. Expected to be
-     * overridden in the subclass by a function named
-     * "exec_"
+     * overridden in the subclass by a function named PyExec"
      */
     void AlgorithmWrapper::exec()
     {
-      if( boost::python::override fn = this->get_override("init_") )
+      if( boost::python::override fn = this->get_override("PyExec") )
       {
         fn();
       }
       else
       {
         std::ostringstream os;
-        os << "Python algorithm '" << this->name() << "' does not define the exec_ function, cannot execute.";
+        os << "Python algorithm '" << this->name() << "' does not define the PyExec function, cannot execute.";
         throw std::runtime_error(os.str());
       }
     }

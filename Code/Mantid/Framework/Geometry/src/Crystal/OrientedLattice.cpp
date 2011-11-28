@@ -94,6 +94,8 @@ namespace Geometry
     return UB;
   }
 
+  /** Sets the U matrix
+    @param newU :: the new U matrix*/
   void OrientedLattice::setU(DblMatrix& newU)
   {
     if (newU.isRotation()==true)
@@ -104,6 +106,8 @@ namespace Geometry
     else throw std::invalid_argument("U is not a proper rotation");
   }
 
+  /** Sets the UB matrix and recalculates lattice parameters
+    @param newUB :: the new UB matrix*/
   void OrientedLattice::setUB(DblMatrix& newUB)
   {
     if (UB.determinant()>0)
@@ -120,43 +124,86 @@ namespace Geometry
   }
 
 
+  /** Calculate the hkl corresponding to a given Q-vector
+   * @param Q :: Q-vector in $AA^-1 in the sample frame
+   * @return a V3D with H,K,L
+   */
+  V3D OrientedLattice::hklFromQ(V3D Q) const
+  {
+    DblMatrix UBinv = this->getUB();
+    UBinv.Invert();
+    V3D out = UBinv*Q; //transform back to HKL
+    return out;
+  }
 
- /** Set the U rotation matrix, used to transform a vector expressed in the
-   *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)"
-   *  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
+
+  /** gets a vector along beam direction when goniometers are at 0. Note, this vector is not unique, but
+    all vectors can be obtaineb by multiplying with a scalar
+    @return u :: V3D vector along beam direction*/
+    Kernel::V3D OrientedLattice::getuVector()
+    {
+      V3D z(0,0,1);
+      DblMatrix UBinv=UB;
+      UBinv.Invert();
+      return UBinv*z;
+    }
+
+  /** gets a vector in the horizontal plane, perpendicular to the beam direction when
+    goniometers are at 0. Note, this vector is not unique, but all vectors can be obtaineb by multiplying with a scalar
+    @return v :: V3D vector perpendicular to the beam direction, in the horizontal plane*/
+    Kernel::V3D OrientedLattice::getvVector()
+    {
+      V3D x(1,0,0);
+      DblMatrix UBinv=UB;
+      UBinv.Invert();
+      return UBinv*x;
+    }
+
+ /**  Set the U rotation matrix, to provide the transformation, which translate an 
+   *  arbitrary vector V expressed in RLU (hkl) 
+   *  into another coordinate system defined by vectors u and v, expressed in RLU (hkl) 
    *  Author: Alex Buts
-   *  @param u :: vector of ?
-   *  @param v :: vector of ?
+   *  @param u :: first vector of new coordinate system (in hkl units)
+   *  @param v :: second vector of the new coordinate system 
    *  @return the U matrix calculated
+   *  The transformation from old coordinate system to new coordinate system is performed by 
+   *  the whole UB matrix
    **/
   DblMatrix OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
   {
-    //get  B-matrix of Busing and Levy
-    DblMatrix B = this->getB();
-
-    // get orthogonal system, adjacent to the unit cell;
-    V3D e1 = B*u;
-    e1.normalize();
-    V3D V  = B*v;
-    V3D e3  =e1.cross_prod(V);
-    e3.normalize();
-    double norm2 = e3.norm2();
-    if(norm2<FLT_EPSILON){
-      throw(std::invalid_argument(" two parallel vectors do not define the projection plane"));
-    }
-
-    V3D e2= e3.cross_prod(e1);
-
-    DblMatrix Transf(3,3);
-    Transf.setColumn(0,e1);
-    Transf.setColumn(1,e2);
-    Transf.setColumn(2,e3);
-    // some det may be -1
-    double det = Transf.determinant();
-    Transf /=det;
-
-    this->setU(Transf);
-    return Transf;
+    DblMatrix BMatrix=this->getB();
+    V3D buVec,bvVec,bwVec;
+    buVec=BMatrix*u;
+    bvVec=BMatrix*v;
+    //try to make an orthonormal system
+    if (buVec.norm2()<1e-10) throw std::invalid_argument("|B.u|~0");
+    if (bvVec.norm2()<1e-10) throw std::invalid_argument("|B.v|~0");
+    buVec.normalize(); // 1st unit vector, along Bu
+    bwVec=buVec.cross_prod(bvVec);
+    if (bwVec.normalize()<1e-5) throw std::invalid_argument("u and v are parallel"); // 3rd unit vector, perpendicular to Bu,Bv
+    bvVec=bwVec.cross_prod(buVec); // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
+    DblMatrix tau(3,3),lab(3,3),U(3,3);
+    /*lab      = U tau
+    / 0 1 0 \     /bu[0] bv[0] bw[0]\
+    | 0 0 1 | = U |bu[1] bv[1] bw[1]|
+    \ 1 0 0 /     \bu[2] bv[2] bw[2]/
+    */
+    lab[0][1]=1.;
+    lab[1][2]=1.;
+    lab[2][0]=1.;
+    tau[0][0]=buVec[0];
+    tau[0][1]=bvVec[0];
+    tau[0][2]=bwVec[0];
+    tau[1][0]=buVec[1];
+    tau[1][1]=bvVec[1];
+    tau[1][2]=bwVec[1];
+    tau[2][0]=buVec[2];
+    tau[2][1]=bvVec[2];
+    tau[2][2]=bwVec[2];
+    tau.Invert();
+    U=lab*tau;
+    this->setU(U);
+    return U;
   }
 
 

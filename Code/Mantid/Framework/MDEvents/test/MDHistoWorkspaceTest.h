@@ -2,6 +2,8 @@
 #define MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -13,8 +15,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
@@ -46,7 +47,7 @@ public:
     for (size_t i=0; i < ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA( ws->getSignalAt(i), expectedSignal, 1e-5 );
-      TS_ASSERT_DELTA( ws->getErrorAt(i), expectedErrorSquared, 1e-5 );
+      TS_ASSERT_DELTA( ws->getErrorAt(i), std::sqrt(expectedErrorSquared), 1e-5 );
     }
   }
 
@@ -84,8 +85,8 @@ public:
     TS_ASSERT_DELTA( ws.getSignalNormalizedAt(5), 2.3456 / 256.0, 1e-5); // Cell volume is 256
 
     ws.setErrorSquaredAt(5,1.234);
-    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
-    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(5), 1.234 / 256.0, 1e-5); // Cell volume is 256
+    TS_ASSERT_DELTA( ws.getErrorAt(5), sqrt(1.234), 1e-5);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(5), sqrt(1.234) / 256.0, 1e-5); // Cell volume is 256
 
     std::vector<signal_t> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5*5*5);
@@ -103,18 +104,18 @@ public:
     TS_ASSERT_DELTA( ws.getSignalAt(1,2), 1.0+2*5.0, 1e-4);
     TS_ASSERT_DELTA( ws.getSignalAt(1,2,3), 1.0+2*5.0+3*25.0, 1e-4);
     TS_ASSERT_DELTA( ws.getSignalAt(1,2,3,4), 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorAt(1), 1.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorAt(1,2), 1.0+2*5.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorAt(1,2,3), 1.0+2*5.0+3*25.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorAt(1,2,3,4), 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1), sqrt(1.0), 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1,2), sqrt(1.0+2*5.0), 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1,2,3), sqrt(1.0+2*5.0+3*25.0), 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1,2,3,4), sqrt(1.0+2*5.0+3*25.0+4*125.0), 1e-4);
     TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1)*256.0, 1.0, 1e-4);
     TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1,2)*256.0, 1.0+2*5.0, 1e-4);
     TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1,2,3)*256.0, 1.0+2*5.0+3*25.0, 1e-4);
     TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1,2,3,4)*256.0, 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1)*256.0, 1.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2)*256.0, 1.0+2*5.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2,3)*256.0, 1.0+2*5.0+3*25.0, 1e-4);
-    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2,3,4)*256.0, 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1)*256.0, sqrt(1.0), 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2)*256.0, sqrt(1.0+2*5.0), 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2,3)*256.0, sqrt(1.0+2*5.0+3*25.0), 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2,3,4)*256.0, sqrt(1.0+2*5.0+3*25.0+4*125.0), 1e-4);
   }
 
 
@@ -140,7 +141,7 @@ public:
     TS_ASSERT_DELTA( ws.getSignalAt(5), 2.3456, 1e-5);
 
     ws.setErrorSquaredAt(5,1.234);
-    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
+    TS_ASSERT_DELTA( ws.getErrorAt(5), sqrt(1.234), 1e-5);
 
     std::vector<signal_t> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5);
@@ -168,7 +169,7 @@ public:
     TS_ASSERT_DELTA( ws.getSignalAt(5), 2.3456, 1e-5);
 
     ws.setErrorSquaredAt(5,1.234);
-    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
+    TS_ASSERT_DELTA( ws.getErrorAt(5), sqrt(1.234), 1e-5);
 
     std::vector<signal_t> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 3*3*3*3*3*3*3);
@@ -180,9 +181,11 @@ public:
   void test_copy_constructor()
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    a->addExperimentInfo( ExperimentInfo_sptr(new ExperimentInfo()) );
     MDHistoWorkspace_sptr b( new MDHistoWorkspace(*a));
     TS_ASSERT_EQUALS( b->getNumDims(), a->getNumDims() );
     TS_ASSERT_EQUALS( b->getNPoints(), a->getNPoints() );
+    TS_ASSERT_EQUALS( b->getNumExperimentInfo(), a->getNumExperimentInfo() );
     checkWorkspace(b, 1.23, 3.234);
   }
 

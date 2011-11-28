@@ -19,6 +19,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
+using namespace testing;
 
 
 // Declare into the factory.
@@ -425,6 +426,104 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws->saveSpectraMapNexus(th.file, spec); );
 
   }
+
+  void test_get_neighbours_exact()
+  {
+    //Create a nearest neighbours product, which can be returned.
+    SpectrumDistanceMap map;
+    MockNearestNeighbours* product = new MockNearestNeighbours;
+    EXPECT_CALL(*product, neighbours(_,_,_)).WillRepeatedly(Return(map));
+    EXPECT_CALL(*product, die()).Times(1); //Created once and destroyed once!
+    
+    //Create a factory, for generating the nearest neighbour products
+    MockNearestNeighboursFactory* factory = new MockNearestNeighboursFactory;
+    EXPECT_CALL(*factory, create(_,_,_)).Times(1).WillOnce(Return(product));
+
+    WorkspaceTester wkspace(factory);
+    wkspace.initialize(1,4,3);
+    wkspace.getNeighboursExact(0, 1); //First call should construct nearest neighbours before calling ::neighbours
+    wkspace.getNeighboursExact(0, 1); //Second call should not construct nearest neighbours before calling ::neighbours
+
+  }
+
+  void test_get_neighbours_radius()
+  {
+    //Create a nearest neighbours product, which can be returned.
+    SpectrumDistanceMap map;
+    MockNearestNeighbours* product = new MockNearestNeighbours;
+    EXPECT_CALL(*product, neighbours(_,_)).WillRepeatedly(Return(map));
+    EXPECT_CALL(*product, die()).Times(1); //Created once and destroyed once!
+    
+    //Create a factory, for generating the nearest neighbour products
+    MockNearestNeighboursFactory* factory = new MockNearestNeighboursFactory;
+    EXPECT_CALL(*factory, create(_,_,_)).Times(1).WillOnce(Return(product));
+
+    WorkspaceTester wkspace(factory);
+    wkspace.initialize(1,4,3);
+    wkspace.getNeighbours(0, 1); //First call should construct nearest neighbours before calling ::neighbours
+    wkspace.getNeighbours(0, 1); //Second call should not construct nearest neighbours before calling ::neighbours
+  }
+
+  void test_reset_neighbours()
+  {
+    //Create a nearest neighbours product, which can be returned.
+    SpectrumDistanceMap map;
+    MockNearestNeighbours* product = new MockNearestNeighbours;
+    EXPECT_CALL(*product, neighbours(_,_)).WillRepeatedly(Return(map));
+    EXPECT_CALL(*product, die()).Times(1); //Should be explicitly called upon reset.
+
+    //Create a factory, for generating the nearest neighbour products
+    MockNearestNeighboursFactory* factory = new MockNearestNeighboursFactory;
+    EXPECT_CALL(*factory, create(_,_,_)).Times(1).WillOnce(Return(product));
+
+    WorkspaceTester wkspace(factory);
+    wkspace.initialize(1,4,3);
+    wkspace.getNeighbours(0, 1); //First call should construct nearest neighbours before calling ::neighbours
+    wkspace.rebuildNearestNeighbours(); //should cause die.
+
+    TSM_ASSERT("Nearest neigbhbours Factory has not been used as expected", Mock::VerifyAndClearExpectations(factory));
+    TSM_ASSERT("Nearest neigbhbours Product has not been used as expected", Mock::VerifyAndClearExpectations(product));
+  }
+
+  void test_rebuld_after_reset_neighbours()
+  {
+    SpectrumDistanceMap mapA, mapB, mapC;
+
+    MockNearestNeighbours* productA = new MockNearestNeighbours;
+    EXPECT_CALL(*productA, neighbours(_,_)).WillRepeatedly(Return(mapA));
+    EXPECT_CALL(*productA, die()).Times(1); 
+
+    MockNearestNeighbours* productB = new MockNearestNeighbours;
+    EXPECT_CALL(*productB, neighbours(_,_)).WillRepeatedly(Return(mapB));
+    EXPECT_CALL(*productB, die()).Times(1); 
+
+    MockNearestNeighbours* productC = new MockNearestNeighbours;
+    EXPECT_CALL(*productC, neighbours(_,_)).WillRepeatedly(Return(mapC));
+    EXPECT_CALL(*productC, die()).Times(1); 
+
+    //Create a factory, for generating the nearest neighbour products
+    MockNearestNeighboursFactory* factory = new MockNearestNeighboursFactory;
+    EXPECT_CALL(*factory, create(_,_,_)).Times(3)
+    .WillOnce(Return(productA))
+    .WillOnce(Return(productB))
+    .WillOnce(Return(productC));
+
+    WorkspaceTester wkspace(factory);
+    wkspace.initialize(1,4,3);
+    wkspace.getNeighbours(0, 1); //First call should construct nearest neighbours before calling ::neighbours
+    wkspace.rebuildNearestNeighbours(); //should cause die.
+    wkspace.getNeighbours(0, 1); //should cause creation for radius type call
+    wkspace.rebuildNearestNeighbours(); //should cause die.
+    wkspace.getNeighbours(0, 1); //should cause creation for number of neighbours type call
+    wkspace.rebuildNearestNeighbours(); //should cause die. allows expectations to be checked, otherwise die called on nn destruction!
+
+    TSM_ASSERT("Nearest neigbhbours Factory has not been used as expected", Mock::VerifyAndClearExpectations(factory));
+    TSM_ASSERT("Nearest neigbhbours ProductA has not been used as expected", Mock::VerifyAndClearExpectations(productA));
+    TSM_ASSERT("Nearest neigbhbours ProductB has not been used as expected", Mock::VerifyAndClearExpectations(productB));
+    TSM_ASSERT("Nearest neigbhbours ProductC has not been used as expected", Mock::VerifyAndClearExpectations(productC));
+  }
+
+
 
 
 private:

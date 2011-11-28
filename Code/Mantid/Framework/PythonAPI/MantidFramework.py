@@ -34,31 +34,54 @@ if os.name == 'nt':
     from MantidPythonAPI import *
     from MantidPythonAPI import _binary_op, _equals_op
 else:
-    # 
-    # To enable symbol sharing across extension modules (i.e. loaded dynamic libraries)
-    # calls to dlopen by Python must also use the RTLD_GLOBAL flag. If the default
-    # dlopen flags are used then the Singleton instance symbols will be multiply 
-    # defined across libraries and multiple intances Singleton instances can be created
-    #
-    saved_dlopenflags = sys.getdlopenflags()
     if platform.system() == "Linux":
-        try:
-            import DLFCN as dynload
-        except:
-            # Try older module
-            try:
-                import dl as dynload
-            except:
-                # If neither is available then this platform is unsupported
-                print "Both the DLFCN and dl modules are unavailable."
-                print "Cannot run Mantid from stand-alone Python on this platform."
-                sys.exit(1)
+        # 
+        # The libMantidPythonAPI module is essentially statically linked
+        # to boost python. However, we need to ensure the Mantid libraries
+        # are loaded with the the RTLD_GLOBAL flag so that the singleton
+        # symbols are shared across the boundaries.
+        # 
+        # We also need to coexist with the new-style interface meaning that
+        # the boost python registry must be kept private in each api
+        # so that multiple converters are not defined. This means that 
+        # we cannot just pass the RTLD_GLOBAL flag here as this will 
+        # cause the registry to be shared with the new api if it is 
+        # loaded on top of this one. The only solution is to cherry
+        # pick the modules that are loaded with the RTLD symbol.
+        #
+        # Another nice issue is that the dl module is broken on 64-bit
+        # systems for Python 2.4 and ctypes doesn't exist there yet!
+        # All in all this meant a small custom module calling dlopen
+        # ourselves was the easiest way 
+        import libdlopen
+        dlloader = libdlopen.loadlibrary
+        import subprocess
 
-        sys.setdlopenflags(dynload.RTLD_NOW | dynload.RTLD_GLOBAL)
+        _bin = os.path.abspath(os.path.dirname(__file__))
+        def get_libpath(mainlib, dependency):
+            cmd = 'ldd %s | grep %s' % (mainlib, dependency)
+            subp = subprocess.Popen(cmd,stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT,shell=True)
+            out = subp.communicate()[0]
+            # ldd produces a string that always has 4 columns. The full path
+            # is in the 3rd column
+            return out.split()[2]
+        # stdc++ has to be loaded first or exceptions don't get translated 
+        # properly across bounadries
+        # NeXus has to be loaded as well as there seems to be an issue with
+        # the thread-local storage not being initialized properly unles
+        # it is loaded before other libraries.
+        ldpath = os.environ.get("LD_LIBRARY_PATH", "")
+        ldpath += ":" + _bin
+        os.environ["LD_LIBRARY_PATH"] = ldpath
+        dlloader(get_libpath(os.path.join(_bin,'libMantidKernel.so'), 'stdc++'))
+        dlloader(get_libpath(os.path.join(_bin,'libMantidKernel.so'), 'libNeXus'))
+        dlloader(os.path.join(_bin, 'libMantidKernel.so'))
+        dlloader(os.path.join(_bin, 'libMantidGeometry.so'))
+        dlloader(os.path.join(_bin, 'libMantidAPI.so'))
 
     from libMantidPythonAPI import *
     from libMantidPythonAPI import _binary_op, _equals_op
-    sys.setdlopenflags(saved_dlopenflags)
 # --- End of library load ---
 
 

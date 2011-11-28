@@ -313,11 +313,17 @@ void MdViewerWidget::setParaViewComponentsForView()
                    this->ui.timeControlWidget,
                    SLOT(updateAnimationControls(double, double, int)));
 
-  // Set the connections for the rotation center buttons
+  // Set the connections for the rotation center button
   QObject::connect(this->ui.resetCenterToDataButton,
                    SIGNAL(clicked()),
                    this->currentView,
                    SLOT(onResetCenterToData()));
+
+  // Set the connection for the parallel projection button
+  QObject::connect(this->ui.parallelProjButton,
+                   SIGNAL(toggled(bool)),
+                   this->currentView,
+                   SLOT(onParallelProjection(bool)));
 }
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
@@ -351,13 +357,16 @@ void MdViewerWidget::renderAndFinalSetup()
 
 void MdViewerWidget::checkForUpdates()
 {
-  vtkSMProxy *proxy = pqActiveObjects::instance().activeSource()->getProxy();
+  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
+  vtkSMProxy *proxy = src->getProxy();
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->resetDisplay();
-    //this->currentView->getView()->resetCamera();
     this->currentView->onAutoScale();
+    this->currentView->setAxisScales();
+    pqActiveObjects::instance().setActiveSource(src);
     this->currentView->setTimeSteps(true);
+    this->currentView->resetCamera();
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {

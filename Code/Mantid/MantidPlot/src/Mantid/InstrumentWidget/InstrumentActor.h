@@ -76,12 +76,17 @@ public:
 
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
+
   const MantidColorMap & getColorMap() const;
   void loadColorMap(const QString& ,bool reset_colors = true);
   void changeScaleType(int);
+  QString getCurrentColorMap()const{return m_currentColorMap;}
+  void setAutoscaling(bool);
+  bool autoscaling()const{return m_autoscaling;}
+
   void setIntegrationRange(const double& xmin,const double& xmax);
-  double minValue()const{return m_DataMinValue;}
-  double maxValue()const{return m_DataMaxValue;}
+  double minValue()const{return m_DataMinScaleValue;}
+  double maxValue()const{return m_DataMaxScaleValue;}
   void setMinValue(double value);
   void setMaxValue(double value);
   void setMinMaxRange(double vmin, double vmax);
@@ -98,7 +103,6 @@ public:
   double getIntegratedCounts(Mantid::detid_t id)const;
   void update();
   void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
-  QString getCurrentColorMap()const{return m_currentColorMap;}
   static void BasisRotation(const Mantid::Kernel::V3D& Xfrom,
                   const Mantid::Kernel::V3D& Yfrom,
                   const Mantid::Kernel::V3D& Zfrom,
@@ -121,11 +125,13 @@ protected:
   /// integrated spectra
   std::vector<double> m_specIntegrs;
   /// The workspace data and bin range limits
-  double m_WkspDataMin, m_WkspDataMax,m_WkspDataPositiveMin;
-  double m_WkspBinMin, m_WkspBinMax;
+  double m_WkspDataMin, m_WkspDataMax,m_WkspDataPositiveMin; ///< min and max over whole workspace
+  double m_WkspBinMin, m_WkspBinMax;                         ///< min and max over whole workspace
   /// The user requested data and bin ranges
-  double m_DataMinValue, m_DataMaxValue;
+  double m_DataMinValue, m_DataMaxValue;                     ///< min and max for current bin (x integration) range
+  double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
   double m_BinMinValue, m_BinMaxValue;
+  bool m_autoscaling;
   boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
   boost::scoped_ptr<const Mantid::detid2index_map> m_id2wi_map;
   mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors

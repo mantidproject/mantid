@@ -120,24 +120,11 @@ namespace Mantid
         rb_params = in_params;
 
       } else if (in_params.size() == 1){
-        // Input is only delta: construct
-        double xmin, xmax;
+        double xmin = 0.;
+        double xmax = 0.;
+        inputWS->getXMinMax(xmin, xmax);
 
-        // a) Check if it is EventWorkspace
-        DataObjects::EventWorkspace_const_sptr inEventWS = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
-        if (!inEventWS){
-          // Not event workspace, using the current min/max
-          const MantidVec& datax = inputWS->dataX(0);
-          xmin = datax[0];
-          xmax = datax[datax.size()-1];
-          g_log.notice() << "Non-EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
-
-        } else {
-          xmin = inEventWS->getTofMin();
-          xmax = inEventWS->getTofMax();
-          g_log.notice() << "EventWorkspace.  Using the current min and max as default " << xmin << ", " << xmax << std::endl;
-
-        } // ENDIF
+        g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
 
         rb_params.push_back(xmin);
         rb_params.push_back(in_params[0]);

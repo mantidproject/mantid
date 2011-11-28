@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "LorentzianTest.h"
+#include "MantidAPI/Jacobian.h"
 #include <cmath>
 
 namespace Mantid

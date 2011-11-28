@@ -235,9 +235,11 @@ namespace PythonAPI
   void export_logger()
   {
     class_<Kernel::Logger, boost::noncopyable>("MantidLogger", no_init)
-      .def("notice", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::notice)
-      .def("information", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::information)
-      .def("error", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::error)
+            .def("notice", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::notice)
+            .def("information", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::information)
+            .def("error", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::error)
+            .def("warning", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::warning)
+            .def("debug", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::debug)
       ;
   }
 

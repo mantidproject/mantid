@@ -15,6 +15,8 @@ set ( SRC_FILES
 	src/kernel_exports.cpp
 )
 
+set ( BOOST_SRC src/boostpython.cpp )
+
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( INC_FILES
@@ -60,11 +62,7 @@ endif(UNITY_BUILD)
 ###########################################################################
 # Add local dependencies
 ###########################################################################
-
-set ( Boost_LIBRARIES ) # Empty out the variable after previous use
-set ( Boost_USE_DEBUG_PYTHON TRUE )
-find_package ( Boost REQUIRED python )
-add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
+add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB -DBOOST_PYTHON_STATIC_LIB -DBOOST_PYTHON_SOURCE )
 
 find_package ( Numpy REQUIRED )
 include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
@@ -90,7 +88,13 @@ endforeach ( PYFILE )
 # Create the target for this directory
 ###########################################################################
 
-add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES})
+add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set ( DLOPEN_SRC src/dlopen.cpp )
+  add_library ( dlopen ${DLOPEN_SRC} )
+  add_dependencies( PythonAPI dlopen )
+endif()
+
 # Set the name of the generated library
 set_target_properties ( PythonAPI PROPERTIES OUTPUT_NAME MantidPythonAPI )
 # Add to the 'Framework' group in VS
@@ -176,9 +180,9 @@ endif ()
 # to ensure that the stdc++ library appears as early in the link list as possible so that it
 # is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${PYTHON_LIBRARIES}  )
 else ()
-  set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS ${MANTIDLIBS} ${PYTHON_LIBRARIES}  )
 endif ()
 
 ###########################################################################
@@ -242,6 +246,9 @@ endif ()
 ###########################################################################
 
 install ( TARGETS PythonAPI DESTINATION ${BIN_DIR} )
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  install ( TARGETS dlopen DESTINATION ${BIN_DIR} )
+endif ()
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
                                       PATTERN ".svn" EXCLUDE PATTERN "*.pyc" EXCLUDE )

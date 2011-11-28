@@ -20,10 +20,11 @@ namespace Mantid
      * Constructor
      * @param instrument :: A shared pointer to Instrument object
      * @param spectraMap :: A reference to the spectra-detector mapping
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored.
      */
     NearestNeighbours::NearestNeighbours(Instrument_const_sptr instrument,
-                                         const ISpectraDetectorMap & spectraMap) : 
-      m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0)
+                                         const ISpectraDetectorMap & spectraMap, bool ignoreMaskedDetectors) : 
+      m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0), m_bIgnoreMaskedDetectors(ignoreMaskedDetectors)
     {
       this->build(m_noNeighbours);
     }
@@ -257,7 +258,9 @@ namespace Mantid
         {
           std::vector<int> detIDs = spectraMap.getDetectors(spectrumNo);
           IDetector_const_sptr det = instrument->getDetectorG(detIDs);
-          if( !det->isMonitor() ) 
+          //Always ignore monitors and ignore masked detectors if requested.
+          bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
+          if( !det->isMonitor() && !heedMasking ) 
           {
             spectra.insert(std::make_pair(spectrumNo, det));
           }

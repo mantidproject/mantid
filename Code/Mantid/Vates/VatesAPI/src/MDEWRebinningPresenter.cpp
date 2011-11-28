@@ -15,7 +15,7 @@
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDEvents/BinMD.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/VMD.h"
 #include <vtkDataSet.h>
@@ -260,7 +260,7 @@ namespace Mantid
         Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
         sourceGeometry.execute();
 
-        Mantid::MDEvents::BinToMDHistoWorkspace hist_alg;
+        Mantid::MDEvents::BinMD hist_alg;
         hist_alg.initialize();
 
         hist_alg.setPropertyValue("InputWorkspace", wsName);

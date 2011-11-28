@@ -156,6 +156,16 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
 }
 
+/**
+Generate a warning message and use MantidUI to display it.
+@param message : message contents to display
+*/
+void MantidTreeWidget::logWarningMessage(const std::string& message)
+{
+  Poco::Message msg("MantidPlot",message,Poco::Message::PRIO_WARNING);
+  m_mantidUI->logMessage(msg);
+}
+
 /** Returns the name of the selected workspace
 *  (the first one if more than one is selected)
 */
@@ -281,6 +291,12 @@ void MantidDockWidget::createWorkspaceMenuActions()
 
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
   connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI, SLOT(showVatesSimpleInterface()));
+
+  m_showMDPlot = new QAction(tr("Plot MD"), this);
+  connect(m_showMDPlot, SIGNAL(activated()), m_mantidUI, SLOT(showMDPlot()));
+
+  m_showListData = new QAction(tr("List Data"), this);
+  connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
   connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSliceViewer()));
@@ -861,6 +877,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);  // Algorithm history
+  menu->addAction(m_showListData); // Show data in table
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const
@@ -868,6 +885,8 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   (void) WS;
   menu->addAction(m_showHist); // Algorithm history
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
+  menu->addAction(m_showMDPlot); // A plot of intensity vs bins
+  menu->addAction(m_showListData); // Show data in table
 }
 
 
@@ -1461,7 +1480,15 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
-  QList<QString> wsNames = this->getSelectedWorkspaceNames();
+  QList<QString> allWsNames = this->getSelectedWorkspaceNames();
+  QList<QString> wsNames;
+
+  for (int i=0; i<allWsNames.size(); i++)
+  {
+    if (AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString())->id() != "TableWorkspace")
+      wsNames.append(allWsNames[i]);
+  }
+
   QList<QString>::const_iterator it = wsNames.constBegin();
 
   // Check to see if all workspaces have a *single* histogram ...

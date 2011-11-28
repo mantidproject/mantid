@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
@@ -32,14 +33,22 @@ namespace API
   
   Kernel::Logger& IFunctionMW::g_log = Kernel::Logger::get("IFunctionMW");
 
+  void IFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,bool)
+  {
+    m_workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    if (!m_workspace)
+    {
+      throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
+    }
+  }
   /** Set the workspace
     * @param ws :: A shared pointer to a workspace. Must be a MatrixWorkspace.
     * @param slicing :: A string identifying the data to be fitted. Format for IFunctionMW:
     *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
   */
-  void IFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool)
+  void IFunctionMW::setSlicing(const std::string& slicing)
   {
-    if (!ws) 
+    if (!m_workspace) 
     {// unset workspace
       m_workspace.reset();
       m_workspaceIndex = 0;
@@ -54,7 +63,7 @@ namespace API
 
     try
     {
-      MatrixWorkspace_const_sptr mws = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+      MatrixWorkspace_const_sptr mws = m_workspace;
       if (!mws)
       {
         throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
@@ -239,6 +248,8 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   m_xValues.reset(new double[m_dataSize]);
   m_weights.reset(new double[m_dataSize]);
 
+  bool negativeError = false;
+
   for (size_t i = 0; i < m_dataSize; ++i)
   {
     if (isHist)
@@ -249,11 +260,22 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
     {
       m_xValues[i] = x[xMin + i];
     }
-    if (e[xMin + i] <= 0.0)
+    if (e[xMin + i] == 0.0)
+    {
       m_weights[i] = 1.0;
+
+    }
+    else if(e[xMin + i] < 0.0)
+    {
+      negativeError = true;
+      m_weights[i] = 1./fabs(e[xMin + i]);   //1.0;
+    }
     else
       m_weights[i] = 1./e[xMin + i];
   }
+
+  if ( negativeError )
+    g_log.warning() << "Negative error values found! These are set to absolute value\n";
 
   if (m_workspace->hasMaskedBins(wi))
   {

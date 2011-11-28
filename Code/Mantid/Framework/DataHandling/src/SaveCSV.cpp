@@ -164,7 +164,7 @@ void SaveCSV::exec()
     
     // Add first x-axis line to output file
     {
-      const MantidVec& xValue = localworkspace->dataX(0);
+      const MantidVec& xValue = localworkspace->readX(0);
 
       outCSV_File << "A";
 
@@ -183,8 +183,8 @@ void SaveCSV::exec()
 
       if (i > 0)
       {
-        const MantidVec& xValue = localworkspace->dataX(i);
-        const MantidVec& xValuePrevious = localworkspace->dataX(i-1);
+        const MantidVec& xValue = localworkspace->readX(i);
+        const MantidVec& xValuePrevious = localworkspace->readX(i-1);
 
         if (xValue != xValuePrevious)
         {

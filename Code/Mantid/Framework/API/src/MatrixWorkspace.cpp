@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -39,14 +40,16 @@ namespace Mantid
     const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
     /// Default constructor
-    MatrixWorkspace::MatrixWorkspace() : 
+    MatrixWorkspace::MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : 
       IMDWorkspace(), ExperimentInfo(),
       m_axes(), m_isInitialized(false),
       m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
       m_masks(), m_indexCalculator(),
+      m_nearestNeighboursFactory(nnFactory),
       m_nearestNeighbours()
-    {}
+    {
+    }
 
     /// Destructor
     // RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
@@ -308,8 +311,9 @@ namespace Mantid
     /**
      * Handles the building of the NearestNeighbours object, if it has not already been
      * populated for this parameter map.
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      */
-    void MatrixWorkspace::buildNearestNeighbours() const
+    void MatrixWorkspace::buildNearestNeighbours(const bool ignoreMaskedDetectors) const
     {
       if( !m_spectraMap )
       {
@@ -322,7 +326,7 @@ namespace Mantid
         boost::shared_ptr<const Instrument> inst = this->getInstrument();
         if ( inst )
         {
-          m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap));
+          m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(inst, *m_spectraMap, ignoreMaskedDetectors));
         }
         else
         {
@@ -331,19 +335,31 @@ namespace Mantid
       }
     }
 
+    /*
+    Allow the NearestNeighbours list to be cleaned and rebuilt. Certain algorithms require this in order to exclude/include
+    detectors from previously being considered.
+    */
+    void MatrixWorkspace::rebuildNearestNeighbours()
+    {
+      /*m_nearestNeighbours should now be NULL. This will trigger rebuilding on subsequent first call to getNeighbours
+      ,which peforms a lazy evaluation on the nearest neighbours map */
+      m_nearestNeighbours.reset();
+    }
+
     //---------------------------------------------------------------------------------------
     /** Queries the NearestNeighbours object for the selected detector.
      * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
      *
      * @param comp :: pointer to the querying detector
      * @param radius :: distance from detector on which to filter results
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
-        buildNearestNeighbours();
+        buildNearestNeighbours(ignoreMaskedDetectors);
       }
       // Find the spectrum number
       std::vector<specid_t> spectra;
@@ -362,13 +378,14 @@ namespace Mantid
      *
      * @param spec :: spectrum number of the detector you are looking at
      * @param radius :: distance from detector on which to filter results
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const double radius) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const double radius, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap));
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, radius);
       return neighbours;
@@ -379,13 +396,14 @@ namespace Mantid
      *
      * @param spec :: spectrum number of the detector you are looking at
      * @param nNeighbours :: unsigned int, number of neighbours to include.
+     * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours) const
+    std::map<specid_t, double> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(new NearestNeighbours(this->getInstrument(), *m_spectraMap));
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
       std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
       return neighbours;
@@ -652,6 +670,53 @@ namespace Mantid
       } // for each detector ID in the list
     }
 
+    double MatrixWorkspace::getXMin() const
+    {
+      double xmin;
+      double xmax;
+      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      return xmin;
+    }
+
+    double MatrixWorkspace::getXMax() const
+    {
+      double xmin;
+      double xmax;
+      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      return xmax;
+    }
+
+    namespace {
+      bool isANumber(const double d)
+      {
+        return d == d && fabs(d) != std::numeric_limits<double>::infinity();
+      }
+    }
+
+    void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const
+    {
+      // set to crazy values to start
+      xmin = std::numeric_limits<double>::max();
+      xmax = -1.0 * xmin;
+      size_t numberOfSpectra = this->getNumberHistograms();
+
+      // determine the data range
+      double xfront;
+      double xback;
+      for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
+      {
+        const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
+        xfront = dataX.front();
+        xback = dataX.back();
+        if (isANumber(xfront) && isANumber(xback))
+        {
+          if (xfront < xmin)
+            xmin = xfront;
+          if (xback > xmax)
+            xmax = xback;
+        }
+      }
+    }
 
     //---------------------------------------------------------------------------------------
     /** Integrate all the spectra in the matrix workspace within the range given.
@@ -959,6 +1024,8 @@ namespace Mantid
         {
         }
       }
+      //If masking has occured, the NearestNeighbours map will be out of date must be rebuilt.
+      this->rebuildNearestNeighbours();
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -1138,7 +1205,7 @@ namespace Mantid
       {
         throw std::out_of_range("MatrixWorkspace::binIndexOf - Index out of range.");
       }
-      const MantidVec & xValues = this->dataX(index);
+      const MantidVec & xValues = this->readX(index);
       // Lower bound will test if the value is greater than the last but we need to see if X is valid at the start
       if( xValue < xValues.front() )
       {

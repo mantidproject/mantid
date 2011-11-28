@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/MatrixProperty.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
+	src/MultiFileNameParser.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
@@ -146,6 +147,7 @@ set ( INC_FILES
 	inc/MantidKernel/Memory.h
 	inc/MantidKernel/MersenneTwister.h
 	inc/MantidKernel/MultiThreaded.h
+	inc/MantidKernel/MultiFileNameParser.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -214,6 +216,7 @@ set ( TEST_FILES
 	test/FloatingPointComparisonTest.h
 	test/FreeBlockTest.h
 	test/FunctionTaskTest.h
+	test/GlobTest.h
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
 	test/InterpolationTest.h
@@ -229,6 +232,7 @@ set ( TEST_FILES
 	test/MatrixTest.h
 	test/MemoryTest.h
 	test/MersenneTwisterTest.h
+	test/MultiFileNameParserTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
@@ -335,7 +339,7 @@ endif ()
 set ( PLUGINS "." )
 set ( QTPLUGINS "." )
 set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
-set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/VATES;${MANTID_ROOT}/instrument )
+set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )

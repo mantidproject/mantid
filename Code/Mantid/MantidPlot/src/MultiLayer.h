@@ -42,6 +42,9 @@ class QLabel;
 class LayerButton;
 class SelectionMoveResizer;
 class LegendWidget;
+class MantidTreeWidget;
+class MantidMDCurve;
+class MantidMatrixCurve;
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -195,6 +198,12 @@ signals:
     void enableTextEditor(Graph *);
 
 private:
+
+  /// Handle dropping of additional curves onto a MantidMDCurve.
+  void dropOntoMDCurve(Graph *g, MantidMDCurve* originalCurve, MantidTreeWidget * tree);
+  /// Handle dropping of additional curves onto a MantidMatrixCurve
+  void dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve, MantidTreeWidget * tree);
+
 	//! \name Event Handlers
 	//@{
 	void wheelEvent(QWheelEvent *);

@@ -124,6 +124,11 @@ void SplatterPlotView::checkView()
   }
 }
 
+void SplatterPlotView::resetCamera()
+{
+  this->view->resetCamera();
+}
+
 }
 }
 }

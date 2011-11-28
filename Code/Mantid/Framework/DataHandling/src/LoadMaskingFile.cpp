@@ -200,6 +200,9 @@ namespace DataHandling
       g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i] << ", " << pairdetids_up[i] << "!" << std::endl;
     }
 
+    // 4. Clear
+    delete indexmap;
+
     return;
   }
 

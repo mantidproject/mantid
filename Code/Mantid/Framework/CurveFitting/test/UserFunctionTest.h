@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/UserFunction.h"
+#include "MantidAPI/Jacobian.h"
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;

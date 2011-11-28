@@ -17,9 +17,9 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         ( name, ext ) = os.path.splitext(filename)
         try:
             if ( SpecMin == -1 ) and ( SpecMax == -1 ):
-                LoadRaw(file, name+Suffix, LoadLogFiles=False)
+                Load(file, name+Suffix, LoadLogFiles=False)
             else:
-                LoadRaw(file, name+Suffix, SpectrumMin=SpecMin, 
+                Load(file, name+Suffix, SpectrumMin=SpecMin, 
                     SpectrumMax=SpecMax, LoadLogFiles=False)
             workspaces.append(name+Suffix)
         except ValueError, message:
@@ -97,9 +97,9 @@ def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=False,
         (direct, filename) = os.path.split(file)
         (root, ext) = os.path.splitext(filename)
         if spec == [0, 0]:
-            LoadRaw(file, root, LoadLogFiles=False)
+            Load(file, root, LoadLogFiles=False)
         else:
-            LoadRaw(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1],
+            Load(file, root, SpectrumMin=spec[0], SpectrumMax=spec[1],
                 LoadLogFiles=False)
         nhist = mtd[root].getNumberHistograms()
         if calib != '':

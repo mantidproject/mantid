@@ -35,8 +35,10 @@ MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<
 
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
-  if(m_spectra) generateSpectraIdIntervals();
-
+  if(m_spectra)
+  {
+    generateSpectraIdIntervals();
+  }
   // Set up UI.
   init();
 }
@@ -152,8 +154,6 @@ void MantidWSIndexDialog::init()
   initWorkspaceBox();
   initButtons();
   setLayout(m_outer);
-
-  //setFocus(Qt::PopupFocusReason);
 }
 
 void MantidWSIndexDialog::initWorkspaceBox()
@@ -163,13 +163,11 @@ void MantidWSIndexDialog::initWorkspaceBox()
   m_wsField = new QLineEdit();
 
   m_wsField->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
-  //m_wsField->setPlaceholderText(tr("E.g. \"3-5,10-17,20\" would work for indices 1-30"));
   m_wsBox->add(m_wsMessage);
   m_wsBox->add(m_wsField);
   m_outer->addItem(m_wsBox);
 
   connect(m_wsField, SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
-  //connect(m_wsField, SIGNAL(returnPressed()), this, SLOT(plot()));
 }
 
 void MantidWSIndexDialog::initSpectraBox()
@@ -180,14 +178,12 @@ void MantidWSIndexDialog::initSpectraBox()
   m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
-  //m_spectraField->setPlaceholderText(tr("E.g. \"3-5,10-17,20\" would work for IDs 1-30"));
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
   m_spectraBox->add(m_orMessage);
   if(m_spectra) m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField, SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
-  //connect(m_spectraField, SIGNAL(returnPressed()), this, SLOT(plot()));
 }
 
 void MantidWSIndexDialog::initButtons()
@@ -224,7 +220,8 @@ void MantidWSIndexDialog::checkForSpectraAxes()
     bool hasSpectra = false;
     for(int i = 0; i < ws->axes(); i++)
     {
-      if(ws->getAxis(i)->isSpectra()) hasSpectra = true;
+      if(ws->getAxis(i)->isSpectra()) 
+        hasSpectra = true;
     }
     if(hasSpectra == false)
     {
@@ -246,12 +243,8 @@ void MantidWSIndexDialog::generateWsIndexIntervals()
   {
     Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
     if ( NULL == ws ) continue;
-    Mantid::index2spec_map * index2spec = ws->getWorkspaceIndexToSpectrumMap();
-
-    Mantid::index2spec_map::const_iterator end = index2spec->end();
-    end--;
-
-    const int endWs = static_cast<int> (end->first);
+    
+    const int endWs = static_cast<int>(ws->getNumberHistograms() - 1);//= static_cast<int> (end->first);
 
     Interval interval(0,endWs);
     // If no interval has been added yet, just add it ...

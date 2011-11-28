@@ -246,7 +246,7 @@ void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const si
  * @param f :: A pointer to the function to add
  * @return The index of the new function which will be 0 for the resolution and 1 for the model
  */
-size_t Convolution::addFunction(IFitFunction* f)
+size_t Convolution::addFunction(IFunction* f)
 {
   if (nFunctions() == 0)
   {
@@ -262,7 +262,11 @@ size_t Convolution::addFunction(IFitFunction* f)
   }
   else
   {
-    IFitFunction* f1 = getFunction(1);
+    IFitFunction* f1 = dynamic_cast<IFitFunction*>(getFunction(1));
+    if (!f1)
+    {
+      throw std::runtime_error("IFitFunction expected but function of another type found");
+    }
     CompositeFunctionMW* cf = dynamic_cast<CompositeFunctionMW*>(f1);
     if (cf == 0)
     {
@@ -295,8 +299,12 @@ std::string Convolution::asString()const
   }
   std::ostringstream ostr;
   ostr<<"composite=Convolution;";
-  IFitFunction* res = getFunction(0);
-  IFitFunction* fun = getFunction(1);
+  IFitFunction* res = dynamic_cast<IFitFunction*>(getFunction(0));
+  IFitFunction* fun = dynamic_cast<IFitFunction*>(getFunction(1));
+  if (!res || !fun)
+  {
+    throw std::runtime_error("IFitFunction expected but function of another type found");
+  }
   bool isCompRes = dynamic_cast<CompositeFunctionMW*>(res) != 0;
   bool isCompFun = dynamic_cast<CompositeFunctionMW*>(fun) != 0;
 

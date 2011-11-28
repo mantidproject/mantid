@@ -37,6 +37,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="browse_button">
+       <property name="toolTip">
+        <string>Click to browse.</string>
+       </property>
        <property name="text">
         <string>Browse</string>
        </property>
@@ -44,6 +47,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="refresh_button">
+       <property name="toolTip">
+        <string>Click to refresh.</string>
+       </property>
        <property name="text">
         <string>Refresh</string>
        </property>

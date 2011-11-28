@@ -19,12 +19,11 @@
 #include <Poco/Path.h>
 
 using Mantid::DataHandling::GroupDetectors2;
-using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
-using namespace Mantid::NeXus;
+using Mantid::detid_t;
 
 class GroupDetectors2Test : public CxxTest::TestSuite
 {

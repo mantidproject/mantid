@@ -54,12 +54,14 @@ namespace Mantid
       static PyObject * getU(OrientedLattice& self);
       /// Return the UnitCell UB matrix
       static PyObject * getUB(OrientedLattice& self);
-      /// Recalculate unit cell parameters from G* - 3x3 numpy array U is set to unity
-      static void recalculateFromGstar(OrientedLattice& self,PyObject* p);
+//      /// Recalculate unit cell parameters from G* - 3x3 numpy array U is set to unity
+//      static void recalculateFromGstar(OrientedLattice& self,PyObject* p);
       /// Set U - 3x3 numpy array
       static void setU(OrientedLattice& self,PyObject* p);
       /// setUB - 3x3 numpy array
       static void setUB(OrientedLattice& self,PyObject* p);
+      /// setUFromVectors - 2 numpy arrays of length3
+      static void setUFromVectors(OrientedLattice& self,PyObject* p1,PyObject* p2);
     private:
       /// Stored Python object
       PyObject *m_self;

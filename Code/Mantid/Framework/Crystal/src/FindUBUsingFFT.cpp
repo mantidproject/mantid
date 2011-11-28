@@ -1,0 +1,166 @@
+/*WIKI* 
+
+
+Given a set of peaks, and given a range of possible a,b,c values, this algorithm will attempt to find a UB matrix, that fits the data.  
+The algorithm projects the peaks on many possible direction vectors and calculates a Fast Fourier Transform of the projections to identify regular patterns in the collection of peaks.  
+Based on the calcuated FFTs, a list of directions corresponding to possible real space unit cell edge vectors is formed.  
+The directions and lengths of the vectors in this list are optimized (using a least squares approach) to index the maximum number of peaks, after which the list is sorted in order of increasing length and duplicate vectors are removed from the list.
+
+The algorithm then chooses three of the remaining vectors with the shortest lengths that are linearly independent, form a unit cell with at least a minimum volume and for which the corresponding UB matrix indexes at least 80% of the maximum number of indexed using any set of three vectors chosen from the list.
+
+A UB matrix is formed using these three vectors and the resulting UB matrix is again optimized using a least squares method. 
+If the specified peaks are accurate and belong to a single crystal, this method should produce some UB matrix that indexes the peaks. However, other software will usually be needed to adjust this UB to match a desired conventional cell.
+While this algorithm will occasionally work for as few as four peaks, it works quite consistently with at least ten peaks, and in general works best with a larger number of peaks.
+
+
+*WIKI*/
+#include "MantidCrystal/FindUBUsingFFT.h"
+#include "MantidKernel/System.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include <cstdio>
+
+namespace Mantid
+{
+namespace Crystal
+{
+  Kernel::Logger& FindUBUsingFFT::g_log = 
+                        Kernel::Logger::get("FindUBUsingFFT");
+
+  // Register the algorithm into the AlgorithmFactory
+  DECLARE_ALGORITHM(FindUBUsingFFT)
+
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
+  using namespace Mantid::DataObjects;
+  using namespace Mantid::Geometry;
+
+  //--------------------------------------------------------------------------
+  /** Constructor
+   */
+  FindUBUsingFFT::FindUBUsingFFT()
+  {
+  }
+    
+  //--------------------------------------------------------------------------
+  /** Destructor
+   */
+  FindUBUsingFFT::~FindUBUsingFFT()
+  {
+  }
+  
+  //--------------------------------------------------------------------------
+  /// Sets documentation strings for this algorithm
+  void FindUBUsingFFT::initDocs()
+  {
+    std::string summary("Calculate the UB matrix from a peaks workspace, ");
+    summary += "given estimates of the min and max real space unit cell ";
+    summary += "edge lengths.";
+    this->setWikiSummary( summary );
+
+    std::string message("Calculate the UB matrix from a peaks workspace, ");
+    message += "given min(a,b,c) and max(a,b,c).";
+    this->setOptionalMessage( message );
+  }
+
+  //--------------------------------------------------------------------------
+  /** Initialize the algorithm's properties.
+   */
+  void FindUBUsingFFT::init()
+  {
+    this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+          "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
+
+    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    mustBePositive->setLower(0.0);
+
+    BoundedValidator<int> *atLeast3Int = new BoundedValidator<int>();
+    atLeast3Int->setLower(3);
+
+    // use negative values, force user to input all parameters
+    this->declareProperty(new PropertyWithValue<double>( "MinD",-1.0,
+          mustBePositive->clone(),Direction::Input),
+          "Lower Bound on Lattice Parameters a, b, c");
+
+    this->declareProperty(new PropertyWithValue<double>( "MaxD",-1.0,
+          mustBePositive->clone(),Direction::Input),
+          "Upper Bound on Lattice Parameters a, b, c");
+
+    this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
+         mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");
+  }
+
+  //--------------------------------------------------------------------------
+  /** Execute the algorithm.
+   */
+  void FindUBUsingFFT::exec()
+  {
+    double min_d       = this->getProperty("MinD");
+    double max_d       = this->getProperty("MaxD");
+    double tolerance   = this->getProperty("Tolerance");
+                                          
+    double degrees_per_step =  1;
+
+    PeaksWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+
+    if (!ws) throw std::runtime_error("Could not read the peaks workspace");
+
+    std::vector<Peak> &peaks = ws->getPeaks();
+    size_t n_peaks = ws->getNumberPeaks();
+
+    std::vector<V3D>  q_vectors;
+    q_vectors.reserve( n_peaks );
+    for ( size_t i = 0; i < n_peaks; i++ )
+      q_vectors.push_back( peaks[i].getQSampleFrame() );
+
+    Matrix<double> UB(3,3,false);
+    double error = IndexingUtils::Find_UB( UB, q_vectors, 
+                                           min_d, max_d,
+                                           tolerance, 
+                                           degrees_per_step );
+
+    std::cout << "Error = " << error << std::endl;
+    std::cout << "UB = " << UB << std::endl;
+
+    if ( ! IndexingUtils::CheckUB( UB ) ) // UB not found correctly
+    {
+      g_log.notice( std::string(
+         "Found Invalid UB...peaks used might not be linearly independent") );
+      g_log.notice( std::string(
+         "UB NOT SAVED.") );
+    }
+    else                                  // tell user how many would be indexed
+    {                                     // and save the UB in the sample 
+      char logInfo[200];
+      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
+      sprintf( logInfo, 
+               std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),    
+               num_indexed, n_peaks, tolerance);
+      g_log.notice( std::string(logInfo) );
+
+      OrientedLattice o_lattice;
+      o_lattice.setUB( UB );
+      double calc_a = o_lattice.a();
+      double calc_b = o_lattice.b();
+      double calc_c = o_lattice.c();
+      double calc_alpha = o_lattice.alpha();
+      double calc_beta  = o_lattice.beta();
+      double calc_gamma = o_lattice.gamma();
+                                       // Show the modified lattice parameters
+      sprintf( logInfo, 
+               std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+               calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
+      g_log.notice( std::string(logInfo) );
+
+      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+    }
+  }
+
+
+} // namespace Mantid
+} // namespace Crystal
+

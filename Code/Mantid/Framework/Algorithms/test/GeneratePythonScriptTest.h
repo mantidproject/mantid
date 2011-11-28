@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -19,13 +20,6 @@ using namespace Mantid::API;
 class GeneratePythonScriptTest : public CxxTest::TestSuite
 {
 public:
-    // This pair of boilerplate methods prevent the suite being created statically
-    // This means the constructor isn't called when running other tests
-    // TODO - Needed?
-    static GeneratePythonScriptTest *createSuite() { return new GeneratePythonScriptTest(); }
-    static void destroySuite( GeneratePythonScriptTest *suite ) { delete suite; }
-
-
     void test_Init()
     {
         GeneratePythonScript alg;
@@ -115,6 +109,8 @@ public:
 
         // Remove workspace from the data service.
         // AnalysisDataService::Instance().remove(outWSName);
+		file.close();
+        if (Poco::File(filename).exists()) Poco::File(filename).remove();
     }
 };
 

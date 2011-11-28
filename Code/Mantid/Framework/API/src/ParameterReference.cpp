@@ -11,13 +11,13 @@ ParameterReference::ParameterReference() : m_function(NULL), m_index(0)
 {}
 
 /// Constructor
-ParameterReference::ParameterReference(IFitFunction* fun, std::size_t index)
+ParameterReference::ParameterReference(IFunction* fun, std::size_t index)
 {
   reset(fun,index);
 }
 
 /// Return pointer to the function
-IFitFunction* ParameterReference::getFunction() const
+IFunction* ParameterReference::getFunction() const
 {
   return m_function;
 }
@@ -29,9 +29,9 @@ std::size_t ParameterReference::getIndex() const
 }
 
 /// Reset the reference
-void ParameterReference::reset(IFitFunction* fun, size_t index)
+void ParameterReference::reset(IFunction* fun, size_t index)
 {
-  IFitFunction* fLocal = fun;
+  IFunction* fLocal = fun;
   size_t iLocal = index;
   CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
   while (cf)

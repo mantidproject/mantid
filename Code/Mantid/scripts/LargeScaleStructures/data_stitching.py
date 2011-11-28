@@ -53,9 +53,13 @@ class DataSet(object):
         self._last_applied_scale = 1.0
         self._skip_last = 0
         self._skip_first = 0
+        self._npts = None
         
     def __str__(self):
         return self._ws_name
+    
+    def get_number_of_points(self):
+        return self._npts
     
     def get_scaled_ws(self):
         """
@@ -147,6 +151,7 @@ class DataSet(object):
             if update_range:
                 self._xmin = min(mtd[self._ws_name].readX(0))
                 self._xmax = max(mtd[self._ws_name].readX(0))
+            self._npts = len(mtd[self._ws_name].readY(0))
             self._last_applied_scale = 1.0
         
     def integrate(self, xmin=None, xmax=None):

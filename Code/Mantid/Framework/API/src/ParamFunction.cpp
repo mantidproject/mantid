@@ -569,7 +569,7 @@ size_t ParamFunction::getParameterIndex(const ParameterReference& ref)const
  * @param ref :: The reference
  * @return A ParamFunction containing parameter pointed to by ref
  */
-IFitFunction* ParamFunction::getContainingFunction(const ParameterReference& ref)const
+IFunction* ParamFunction::getContainingFunction(const ParameterReference& ref)const
 {
   if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
@@ -582,7 +582,7 @@ IFitFunction* ParamFunction::getContainingFunction(const ParameterReference& ref
  * @param fun :: The ParamFunction
  * @return A ParamFunction containing fun
  */
-IFitFunction* ParamFunction::getContainingFunction(const IFitFunction* fun)
+IFunction* ParamFunction::getContainingFunction(const IFunction* fun)
 {
   if (fun == this)
   {
