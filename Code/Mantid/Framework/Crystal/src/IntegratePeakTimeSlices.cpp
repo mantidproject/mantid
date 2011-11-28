@@ -176,9 +176,9 @@ namespace Mantid
 
       declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
 
-      declareProperty("Intensity", 0.0, "Peak Integrated Intensity");
+      declareProperty("Intensity", 0.0, "Peak Integrated Intensity", Direction::Output);
 
-      declareProperty("SigmaIntensity", 0.0, "Peak Integrated Intensity Error");
+      declareProperty("SigmaIntensity", 0.0, "Peak Integrated Intensity Error", Direction::Output);
 
     }
 
@@ -936,6 +936,7 @@ namespace Mantid
 
           double intensity = histogram[chan];
           double variance = histoerrs[chan] * histoerrs[chan];
+          
           T+=intensity;
           yvalB.push_back(intensity);
           errB.push_back(1);
@@ -1111,11 +1112,13 @@ namespace Mantid
                                                                 const double TotVariance,
                                                                 const int ncells)
     {
-      UNUSED_ARG(ChiSqOverDOF)
-
-      double Variance = TotVariance + (backError * backError * TotVariance / ncells) * ncells * ncells
+     
+      double B = TotVariance / ncells;
+      if( B < ChiSqOverDOF)
+         B = ChiSqOverDOF;
+      double Variance = TotVariance + (backError * backError * B) * ncells * ncells
           + background * ncells;
-
+       
       return sqrt(Variance);
 
     }
@@ -1169,6 +1172,7 @@ namespace Mantid
       //cout<<"ISAWIntensity parts="<<","<<AttributeValues[IIntensities]<<","<<params[Ibk]<<","<<ncells <<endl;
       TabWS->getRef<double> (std::string("ISAWIntensityError"), TableRow) = CalculateIsawIntegrateError(
           params[Ibk], errs[Ibk], chisq, AttributeValues[IVariance], ncells);
+      
       TabWS->getRef<double> (std::string("Time"), TableRow) = time;
 
       TabWS->getRef<double> (std::string("Start Row"), TableRow) = AttributeValues[IStartRow];
