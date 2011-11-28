@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -43,6 +44,8 @@ namespace MDEvents
     void exec();
 
     void readExperimentInfo(Mantid::API::ExperimentInfo_sptr ei, Mantid::API::IMDWorkspace_sptr ws);
+
+    void addPeak(Mantid::Kernel::V3D Q, double binCount);
 
     template<typename MDE, size_t nd>
     void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
