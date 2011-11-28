@@ -71,8 +71,11 @@ else:
         # NeXus has to be loaded as well as there seems to be an issue with
         # the thread-local storage not being initialized properly unles
         # it is loaded before other libraries.
-        dlloader(get_libpath(os.path.join('libMantidKernel.so'), 'stdc++'))
-        dlloader(get_libpath(os.path.join('libMantidKernel.so'), 'libNeXus'))
+        ldpath = os.environ.get("LD_LIBRARY_PATH", "")
+        ldpath += ":" + _bin
+        os.environ["LD_LIBRARY_PATH"] = ldpath
+        dlloader(get_libpath(os.path.join(_bin,'libMantidKernel.so'), 'stdc++'))
+        dlloader(get_libpath(os.path.join(_bin,'libMantidKernel.so'), 'libNeXus'))
         dlloader(os.path.join(_bin, 'libMantidKernel.so'))
         dlloader(os.path.join(_bin, 'libMantidGeometry.so'))
         dlloader(os.path.join(_bin, 'libMantidAPI.so'))
