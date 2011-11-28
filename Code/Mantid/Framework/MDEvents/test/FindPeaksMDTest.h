@@ -95,7 +95,7 @@ public:
           "AlignedDimY", "Q_lab_y,-10,10,100",
           "AlignedDimZ", "Q_lab_z,-10,10,100",
           "IterateEvents", "1",
-          "InputWorkspace", "MDEWS"
+          "InputWorkspace", "MDEWS",
           "OutputWorkspace", "MDEWS"
           );
     }
@@ -125,22 +125,22 @@ public:
     if (AppendPeaks) return;
 
     // The order of the peaks found is a little random because it depends on the way the boxes were sorted...
-    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.11);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.11);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.11);
     TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(),  12345);
     // Bin count = density of the box / 1e6
-    TS_ASSERT_DELTA( ws->getPeak(0).getBinCount(),  0.213623, 0.001);
+    TS_ASSERT_DELTA( ws->getPeak(0).getBinCount(),  (histo ? 0.0102 : 0.213623), 0.001);
 
     if (MaxPeaks > 1)
     {
-      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.11);
 
-      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.11);
     }
 
     if (deleteWS)
