@@ -2,12 +2,14 @@
 #define MANTID_MDEVENTS_FINDPEAKSMD_H_
     
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -40,10 +42,13 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    void readExperimentInfo(Mantid::API::ExperimentInfo_sptr ei, Mantid::API::IMDWorkspace_sptr ws);
+
     template<typename MDE, size_t nd>
     void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
     void findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
+
 
     /// Output PeaksWorkspace
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
@@ -59,6 +64,22 @@ namespace MDEvents
 
     /// Progress reporter.
     Mantid::API::Progress * prog;
+
+
+    /** Enum describing which type of dimensions in the MDEventWorkspace */
+    enum eDimensionType
+    {
+      HKL, QLAB, QSAMPLE
+    };
+
+    /// Instrument
+    Mantid::Geometry::Instrument_const_sptr inst;
+    /// Run number of the peaks
+    int runNumber;
+    /// Dimension type
+    eDimensionType dimType;
+    /// Goniometer matrix
+    Mantid::Kernel::Matrix<double> goniometer;
   };
 
 

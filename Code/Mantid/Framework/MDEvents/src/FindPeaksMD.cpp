@@ -93,11 +93,44 @@ namespace MDEvents
 
   }
 
-  /** Enum describing which type of dimensions in the MDEventWorkspace */
-  enum eDimensionType
+  //----------------------------------------------------------------------------------------------
+  /** Extract needed data from the workspace's experiment info */
+  void FindPeaksMD::readExperimentInfo(ExperimentInfo_sptr ei, IMDWorkspace_sptr ws)
   {
-    HKL, QLAB, QSAMPLE
-  };
+    // Instrument associated with workspace
+    inst = ei->getInstrument();
+    // Find the run number
+    runNumber = ei->getRunNumber();
+
+    // Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
+    std::string dim0 = ws->getDimension(0)->getName();
+    if (dim0 == "H")
+    {
+      dimType = HKL;
+      throw std::runtime_error("Cannot find peaks in a workspace that is already in HKL space.");
+    }
+    else if (dim0 == "Q_lab_x")
+    {
+      dimType = QLAB;
+    }
+    else if (dim0 == "Q_sample_x")
+      dimType = QSAMPLE;
+    else
+      throw std::runtime_error("Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
+
+    // Find the goniometer rotation matrix
+    goniometer = Mantid::Kernel::Matrix<double>(3,3, true); // Default IDENTITY matrix
+    try
+    {
+      goniometer = ei->mutableRun().getGoniometerMatrix();
+    }
+    catch (std::exception & e)
+    {
+      g_log.warning() << "Error finding goniometer matrix. It will not be set in the peaks found." << std::endl;
+      g_log.warning() << e.what() << std::endl;
+    }
+
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Integrate the peaks of the workspace using parameters saved in the algorithm class
@@ -119,43 +152,9 @@ namespace MDEvents
 
     if (ws->getNumExperimentInfo() == 0)
       throw std::runtime_error("No instrument was found in the MDEventWorkspace. Cannot find peaks.");
-
     // TODO: Do we need to pick a different instrument info?
     ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
-    // Instrument associated with workspace
-    Geometry::Instrument_const_sptr inst = ei->getInstrument();
-    // Find the run number
-    int runNumber = ei->getRunNumber();
-
-    // Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
-    eDimensionType dimType;
-
-    std::string dim0 = ws->getDimension(0)->getName();
-    if (dim0 == "H")
-    {
-      dimType = HKL;
-      throw std::runtime_error("Cannot find peaks in a workspace that is already in HKL space.");
-    }
-    else if (dim0 == "Q_lab_x")
-    {
-      dimType = QLAB;
-    }
-    else if (dim0 == "Q_sample_x")
-      dimType = QSAMPLE;
-    else
-      throw std::runtime_error("Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
-
-    // Find the goniometer rotation matrix
-    Mantid::Kernel::Matrix<double> goniometer(3,3, true); // Default IDENTITY matrix
-    try
-    {
-      goniometer = ei->mutableRun().getGoniometerMatrix();
-    }
-    catch (std::exception & e)
-    {
-      g_log.warning() << "Error finding goniometer matrix. It will not be set in the peaks found." << std::endl;
-      g_log.warning() << e.what() << std::endl;
-    }
+    this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
     /// Arbitrary scaling factor for density to make more manageable numbers, especially for older file formats.
     signal_t densityScalingFactor = 1e-6;
@@ -181,7 +180,7 @@ namespace MDEvents
 
 
 
-    // TODO: Here keep only the boxes > e.g. 3 * mean.
+    // This pair is the <density, ptr to the box>
     typedef std::pair<double, boxPtr> dens_box;
 
     // Map that will sort the boxes by increasing density. The key = density; value = box *.
@@ -340,6 +339,14 @@ namespace MDEvents
    */
   void FindPeaksMD::findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws)
   {
+    if (ws->getNumDims() < 3)
+      throw std::invalid_argument("Workspace must have at least 3 dimensions.");
+
+    if (ws->getNumExperimentInfo() == 0)
+      throw std::runtime_error("No instrument was found in the workspace. Cannot find peaks.");
+    ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
+    this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+
   }
 
 
