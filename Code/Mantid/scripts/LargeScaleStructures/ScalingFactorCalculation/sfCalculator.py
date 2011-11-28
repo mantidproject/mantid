@@ -99,9 +99,9 @@ class sfCalculator():
         
         #calculate y_axis of numerator/denominator
 #        self._x_axis_ratio = self._x_axis
-        self.y_axis_ratio = self.y_axis_numerator/self.y_axis_denominator
-        self.y_axis_error_ratio = ((self.y_axis_error_numerator/self.y_axis_numerator)**2 +
-                                    (self.y_axis_error_denominator/self.y_axis_denominator)**2)
+        self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
+        self.y_axis_error_ratio = ((self.y_axis_error_numerator / self.y_axis_numerator) ** 2 + 
+                                    (self.y_axis_error_denominator / self.y_axis_denominator) ** 2)
         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
         self.y_axis_error_ratio *= self.y_axis_ratio
         
@@ -125,24 +125,24 @@ class sfCalculator():
             self.back_pixel_max = self.d_back_pixel_max
         
         nexus_file_numerator = file
-        LoadEventNexus(Filename=nexus_file_numerator, 
+        LoadEventNexus(Filename=nexus_file_numerator,
                        OutputWorkspace='EventDataWks')
         mt1 = mtd['EventDataWks']
         proton_charge = self._getProtonCharge(mt1)
-        rebin(InputWorkspace='EventDataWks', 
-              OutputWorkspace='HistoDataWks', 
+        rebin(InputWorkspace='EventDataWks',
+              OutputWorkspace='HistoDataWks',
               Params=self.rebin_parameters)
         mt2 = mtd['HistoDataWks']
         x_axis = mt2.readX(0)[:]
         self.x_axis = x_axis
         
-        self._createIntegratedWorkspace(InputWorkspace=mt2, 
+        self._createIntegratedWorkspace(InputWorkspace=mt2,
                                         OutputWorkspace='IntegratedDataWks',
-                                        proton_charge=proton_charge, 
-                                        from_pixel=self.x_pixel_min, 
+                                        proton_charge=proton_charge,
+                                        from_pixel=self.x_pixel_min,
                                         to_pixel=self.x_pixel_max)
 
-        Transpose(InputWorkspace='IntegratedDataWks', 
+        Transpose(InputWorkspace='IntegratedDataWks',
                   OutputWorkspace='TransposeIntegratedDataWks')
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
@@ -153,7 +153,7 @@ class sfCalculator():
         Transpose(InputWorkspace='TransposeHistoFlatDataWks',
                   OutputWorkspace='DataWks')
         mt3 = mtd['DataWks']        
-        self._calculateFinalAxis(Workspace=mt3, 
+        self._calculateFinalAxis(Workspace=mt3,
                            bNumerator=bNumerator)
 
         #cleanup workspaces
@@ -177,7 +177,7 @@ class sfCalculator():
         counts_vs_tof_error = zeros(len(x_axis))
         for x in range(self.alpha_pixel_nbr):
             counts_vs_tof += mt.readY(x)[:]
-            counts_vs_tof_error += mt.readE(x)[:]**2
+            counts_vs_tof_error += mt.readE(x)[:] ** 2
         counts_vs_tof_error = sqrt(counts_vs_tof_error)
         index_tof_min = self._getIndex(self.tof_min, x_axis)
         index_tof_max = self._getIndex(self.tof_max, x_axis)
@@ -192,10 +192,10 @@ class sfCalculator():
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
 
     def _createIntegratedWorkspace(self,
-                                   InputWorkspace=None, 
+                                   InputWorkspace=None,
                                    OutputWorkspace=None,
-                                   proton_charge=None, 
-                                   from_pixel=0, 
+                                   proton_charge=None,
+                                   from_pixel=0,
                                    to_pixel=303):
         """
         This creates the integrated workspace over the second pixel range (beta_pixel_nbr here) and
@@ -221,10 +221,10 @@ class sfCalculator():
         #normalization by proton charge
         y_axis /= (proton_charge * 1e-12)
 
-        CreateWorkspace(OutputWorkspace, 
-                        DataX=x_axis, 
-                        DataY=y_axis, 
-                        DataE=y_error_axis, 
+        CreateWorkspace(OutputWorkspace,
+                        DataX=x_axis,
+                        DataY=y_axis,
+                        DataE=y_error_axis,
                        Nspec=self.alpha_pixel_nbr)
 #        mt3 = mtd[OutputWorkspace]
 #        return mt3 
@@ -258,8 +258,8 @@ class sfCalculator():
         
         product.x_axis_ratio = self.x_axis_ratio
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
-        product.y_axis_error_ratio = sqrt((other.y_axis_ratio*self.y_axis_error_ratio)**2 +
-                                          (other.y_axis_error_ratio*self.y_axis_ratio)**2)
+        product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
+                                          (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
         return copy.deepcopy(product)
     
     def fit(self):
@@ -267,19 +267,19 @@ class sfCalculator():
         This is going to fit the counts_vs_tof with a linear expression and return the a and
         b coefficients (y=a+bx)
         """
-        CreateWorkspace('DataToFit', 
-                        DataX=self.x_axis_ratio, 
+        CreateWorkspace('DataToFit',
+                        DataX=self.x_axis_ratio,
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
                         Nspec=1)
         Fit(InputWorkspace='DataToFit',
-            Function="name=UserFunction, Formula=a+b*x, a=1, b=2", 
+            Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
             Output='Res')
         res = mtd['Res_Parameters']
-        self.a = res.getDouble("Value",0)
-        self.b = res.getDouble("Value",1)
-        self.error_a = res.getDouble("Error",0)
-        self.error_b = res.getDouble("Error",1)            
+        self.a = res.getDouble("Value", 0)
+        self.b = res.getDouble("Value", 1)
+        self.error_a = res.getDouble("Error", 0)
+        self.error_b = res.getDouble("Error", 1)            
 
 def plotObject(instance):
     
@@ -289,18 +289,18 @@ def plotObject(instance):
 #    print 'b: ' + str(instance.b[-1])    
     
     figure()
-    errorbar(instance.x_axis_ratio, 
-             instance.y_axis_ratio, 
-             instance.y_axis_error_ratio, 
-             marker='s', 
+    errorbar(instance.x_axis_ratio,
+             instance.y_axis_ratio,
+             instance.y_axis_error_ratio,
+             marker='s',
              mfc='red',
              linestyle='',
              label='Exp. data')
     
     if (instance.a is not None):
-        x=linspace(10000,22000,100)
+        x = linspace(10000, 22000, 100)
         _label = "%.3f + x*%.2e" % (instance.a, instance.b)
-        plot(x,instance.a+instance.b*x, label=_label)
+        plot(x, instance.a + instance.b * x, label=_label)
     
     xlabel("TOF (microsS)")
     ylabel("Ratio")
@@ -309,7 +309,7 @@ def plotObject(instance):
     show()
     legend()
 
-def recordSettings(a,b,error_a,error_b,name,instance):
+def recordSettings(a, b, error_a, error_b, name, instance):
     """
     This function will record the various fitting parameters and the 
     name of the ratio
@@ -320,20 +320,22 @@ def recordSettings(a,b,error_a,error_b,name,instance):
     error_b.append(instance.error_b)
     name.append(instance.numerator + '/' + instance.denominator)
 
-def outputFittingParameters(a,b,a_error,b_error,name,output_file_name):
+def outputFittingParameters(a, b, a_error, b_error, S1H, S2H, output_file_name):
     """
     Create an ascii file of the various fittings parameters
     y=a+bx
-    1st column: name of numerator/denominator
-    2nd column: a
-    3rd column: b
-    4th column: error_a
-    5th column: error_b
+    1st column: S1H value
+    2nd column: S2H value
+    3rd column: a
+    4th column: b
+    5th column: error_a
+    6th column: error_b
     """
-    _content = ['#y=a+bx\n','#numerator/denominator a b error_a error_b\n','#\n']
+    _content = ['#y=a+bx\n', '#\n',
+                '#S1H S2H a b error_a error_b\n', '#\n']
     sz = len(a)
     for i in range(sz):
-        _line = name[i] + ' '
+        _line = str(S1H[i]) + ' ' + str(S2H[i]) + ' '
         _line += str(a[i]) + ' '
         _line += str(b[i]) + ' '
         _line += str(error_a[i]) + ' '
@@ -377,18 +379,18 @@ def getS1h(mt=None):
         returns the height and units of the slit #1 
     """
     if mt != None:
-        _h,units = getSh(mt,'s1t','s1b') 
-        return _h,units
-    return None,''
+        _h, units = getSh(mt, 's1t', 's1b') 
+        return _h, units
+    return None, ''
     
 def getS2h(mt=None):
     """    
         returns the height and units of the slit #2 
     """
     if mt != None:
-        _h,units = getSh(mt,'s2t','s2b') 
-        return _h,units
-    return None,None
+        _h, units = getSh(mt, 's2t', 's2b') 
+        return _h, units
+    return None, None
 
 def getSlitsValue(full_list_runs, S1H, S2H):
     """
@@ -397,7 +399,7 @@ def getSlitsValue(full_list_runs, S1H, S2H):
     _nbr_files = len(full_list_runs)
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
-        LoadEventNexus(Filename=_full_file_name, 
+        LoadEventNexus(Filename=_full_file_name,
                        OutputWorkspace='tmpWks')
         mt1 = mtd['tmpWks']
         _s1h_value, _s1h_units = getS1h(mt1)
@@ -420,8 +422,8 @@ def isRunsSorted(list_runs, S1H, S2H):
         _left = list(sTotal)[i]
         _right = sorted_sTotal[i]
         
-        _left_formated = "%2.1f" %_left
-        _right_formated = "%2.1f" %_right
+        _left_formated = "%2.1f" % _left
+        _right_formated = "%2.1f" % _right
         if (_left_formated != _right_formated):
             return False
     
@@ -429,23 +431,29 @@ def isRunsSorted(list_runs, S1H, S2H):
 
 if __name__ == '__main__':
     
-    #Input from user
-    list_runs = ['55889','55890','55891','55892','55893','55894','55895','55896','55897','55898','55899','55900','55901','55902']
-    list_attenuator = [0,1,1,1,1,1,1,2,2,2,3,3,4,4]
+    """
+    In this current version, the program will automatically calculates
+    the scaling function for up to and included 6 attenuators. 
+    """
     
-    list_peak_back = zeros((len(list_runs),4))   #[peak_min, peak_max, back_min, back_max]
-    list_peak_back[9,] = [128,136,120,145]
-    list_peak_back[11,] = [125,140,115,150]
-    list_peak_back[10,] = [128,136,120,145]
-    list_peak_back[13,] = [120,145,105,155]
-    list_peak_back[12,] = [125,140,115,150]
+    
+    #Input from user
+    list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', '55895', '55896', '55897', '55898', '55899', '55900', '55901', '55902']
+    list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
+    
+    list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
+    list_peak_back[9, ] = [128, 136, 120, 145]
+    list_peak_back[11, ] = [125, 140, 115, 150]
+    list_peak_back[10, ] = [128, 136, 120, 145]
+    list_peak_back[13, ] = [120, 145, 105, 155]
+    list_peak_back[12, ] = [125, 140, 115, 150]
     
     nexus_path = '/mnt/hgfs/j35/'
     pre = 'REF_L_'
     nexus_path_pre = nexus_path + pre
     post = '_event.nxs'
     
-    for (offset,item) in enumerate(list_runs):
+    for (offset, item) in enumerate(list_runs):
         list_runs[offset] = nexus_path_pre + list_runs[offset] + post
 
     #####
@@ -453,20 +461,23 @@ if __name__ == '__main__':
     #####
     
     #retrieve the S1H and S2H val/units for each NeXus    
-    S1H={}
-    S2H={}
+    S1H = {}
+    S2H = {}
     getSlitsValue(list_runs, S1H, S2H)
- 
+  
     #make sure the file are sorted from smaller to bigger openning
     if isRunsSorted(list_runs, S1H, S2H):
         
         #initialize record fitting parameters arrays
-        a=[]
-        b=[]
-        error_a=[]
-        error_b=[]
-        name=[]
+        a = []
+        b = []
+        error_a = []
+        error_b = []
+        name = []
         _previous_cal = None
+
+        finalS1H = []
+        finalS2H = []
 
         _first_1A = True
         _first_2A = True
@@ -501,25 +512,25 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_1A
             
-                cal1 = sfCalculator(numerator=list_runs[index_numerator], 
+                cal1 = sfCalculator(numerator=list_runs[index_numerator],
                                    denominator=list_runs[index_denominator])
                 
-                cal1.setNumerator(minPeak=list_peak_back[index_numerator,0], 
-                                  maxPeak=list_peak_back[index_numerator,1],
-                                  minBack=list_peak_back[index_numerator,2],
-                                  maxBack=list_peak_back[index_numerator,3])
-                cal1.setDenominator(minPeak=list_peak_back[index_denominator,0], 
-                                    maxPeak=list_peak_back[index_denominator,1],
-                                    minBack=list_peak_back[index_denominator,2],
-                                    maxBack=list_peak_back[index_denominator,3])                
+                cal1.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+                                  maxPeak=list_peak_back[index_numerator, 1],
+                                  minBack=list_peak_back[index_numerator, 2],
+                                  maxBack=list_peak_back[index_numerator, 3])
+                cal1.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+                                    maxPeak=list_peak_back[index_denominator, 1],
+                                    minBack=list_peak_back[index_denominator, 2],
+                                    maxBack=list_peak_back[index_denominator, 3])                
 
                 cal1.run()
                 cal1.fit()
-                recordSettings(a,b,error_a,error_b,name,cal1)
+                recordSettings(a, b, error_a, error_b, name, cal1)
 #                plotObject(cal1)
-                
-                if (i < (len(list_runs)-1) and
-                         list_attenuator[i+1] == 2):
+                                
+                if (i < (len(list_runs) - 1) and
+                         list_attenuator[i + 1] == 2):
                     list_objects.append(cal1)
             
             
@@ -532,27 +543,27 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_2A
                     
-                cal2 = sfCalculator(numerator=list_runs[index_numerator], 
+                cal2 = sfCalculator(numerator=list_runs[index_numerator],
                                    denominator=list_runs[index_denominator])
 
-                cal2.setNumerator(minPeak=list_peak_back[index_numerator,0], 
-                                  maxPeak=list_peak_back[index_numerator,1],
-                                  minBack=list_peak_back[index_numerator,2],
-                                  maxBack=list_peak_back[index_numerator,3])
-                cal2.setDenominator(minPeak=list_peak_back[index_denominator,0], 
-                                    maxPeak=list_peak_back[index_denominator,1],
-                                    minBack=list_peak_back[index_denominator,2],
-                                    maxBack=list_peak_back[index_denominator,3])                
+                cal2.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+                                  maxPeak=list_peak_back[index_numerator, 1],
+                                  minBack=list_peak_back[index_numerator, 2],
+                                  maxBack=list_peak_back[index_numerator, 3])
+                cal2.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+                                    maxPeak=list_peak_back[index_denominator, 1],
+                                    minBack=list_peak_back[index_denominator, 2],
+                                    maxBack=list_peak_back[index_denominator, 3])                
 
                 cal2.run()
 
                 new_cal2 = cal2 * list_objects[-1]
                 new_cal2.fit()
-                recordSettings(a,b,error_a,error_b,name,new_cal2)
-                plotObject(new_cal2)
+                recordSettings(a, b, error_a, error_b, name, new_cal2)
+#                plotObject(new_cal2)
 
-                if (i < (len(list_runs)-1) and
-                         list_attenuator[i+1] == 3):
+                if (i < (len(list_runs) - 1) and
+                         list_attenuator[i + 1] == 3):
                     list_objects.append(new_cal2)
 
 
@@ -565,26 +576,26 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_3A
                     
-                cal3 = sfCalculator(numerator=list_runs[index_numerator], 
+                cal3 = sfCalculator(numerator=list_runs[index_numerator],
                                    denominator=list_runs[index_denominator])
 
-                cal3.setNumerator(minPeak=list_peak_back[index_numerator,0], 
-                                  maxPeak=list_peak_back[index_numerator,1],
-                                  minBack=list_peak_back[index_numerator,2],
-                                  maxBack=list_peak_back[index_numerator,3])
-                cal3.setDenominator(minPeak=list_peak_back[index_denominator,0], 
-                                    maxPeak=list_peak_back[index_denominator,1],
-                                    minBack=list_peak_back[index_denominator,2],
-                                    maxBack=list_peak_back[index_denominator,3])                
+                cal3.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+                                  maxPeak=list_peak_back[index_numerator, 1],
+                                  minBack=list_peak_back[index_numerator, 2],
+                                  maxBack=list_peak_back[index_numerator, 3])
+                cal3.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+                                    maxPeak=list_peak_back[index_denominator, 1],
+                                    minBack=list_peak_back[index_denominator, 2],
+                                    maxBack=list_peak_back[index_denominator, 3])                
 
                 cal3.run()
                 new_cal3 = cal3 * list_objects[-1]
                 new_cal3.fit()
-                recordSettings(a,b,error_a,error_b,name,new_cal3)
-                plotObject(new_cal3)
+                recordSettings(a, b, error_a, error_b, name, new_cal3)
+#                plotObject(new_cal3)
                 
-                if (i < (len(list_runs)-1) and 
-                         list_attenuator[i+1] == 4):
+                if (i < (len(list_runs) - 1) and 
+                         list_attenuator[i + 1] == 4):
                     list_objects.append(new_cal3)
 
         
@@ -597,26 +608,26 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_4A
                     
-                cal4 = sfCalculator(numerator=list_runs[index_numerator], 
+                cal4 = sfCalculator(numerator=list_runs[index_numerator],
                                    denominator=list_runs[index_denominator])
 
-                cal4.setNumerator(minPeak=list_peak_back[index_numerator,0], 
-                                  maxPeak=list_peak_back[index_numerator,1],
-                                  minBack=list_peak_back[index_numerator,2],
-                                  maxBack=list_peak_back[index_numerator,3])
-                cal4.setDenominator(minPeak=list_peak_back[index_denominator,0], 
-                                    maxPeak=list_peak_back[index_denominator,1],
-                                    minBack=list_peak_back[index_denominator,2],
-                                    maxBack=list_peak_back[index_denominator,3])                
+                cal4.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+                                  maxPeak=list_peak_back[index_numerator, 1],
+                                  minBack=list_peak_back[index_numerator, 2],
+                                  maxBack=list_peak_back[index_numerator, 3])
+                cal4.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+                                    maxPeak=list_peak_back[index_denominator, 1],
+                                    minBack=list_peak_back[index_denominator, 2],
+                                    maxBack=list_peak_back[index_denominator, 3])                
 
                 cal4.run()
                 new_cal4 = cal4 * list_objects[-1]
                 new_cal4.fit()
-                recordSettings(a,b,error_a,error_b,name,new_cal4)
-                plotObject(new_cal4)
+                recordSettings(a, b, error_a, error_b, name, new_cal4)
+#                plotObject(new_cal4)
                 
-                if (i < (len(list_runs)-1) and 
-                         list_attenuator[i+1] == 5):
+                if (i < (len(list_runs) - 1) and 
+                         list_attenuator[i + 1] == 5):
                     list_objects.append(new_cal4)
                 
             if list_attenuator[i] == 5: 
@@ -628,26 +639,26 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_5A
                     
-                cal5 = sfCalculator(numerator=list_runs[index_numerator], 
+                cal5 = sfCalculator(numerator=list_runs[index_numerator],
                                    denominator=list_runs[index_denominator])
 
-                cal5.setNumerator(minPeak=list_peak_back[index_numerator,0], 
-                                  maxPeak=list_peak_back[index_numerator,1],
-                                  minBack=list_peak_back[index_numerator,2],
-                                  maxBack=list_peak_back[index_numerator,3])
-                cal5.setDenominator(minPeak=list_peak_back[index_denominator,0], 
-                                    maxPeak=list_peak_back[index_denominator,1],
-                                    minBack=list_peak_back[index_denominator,2],
-                                    maxBack=list_peak_back[index_denominator,3])                
+                cal5.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+                                  maxPeak=list_peak_back[index_numerator, 1],
+                                  minBack=list_peak_back[index_numerator, 2],
+                                  maxBack=list_peak_back[index_numerator, 3])
+                cal5.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+                                    maxPeak=list_peak_back[index_denominator, 1],
+                                    minBack=list_peak_back[index_denominator, 2],
+                                    maxBack=list_peak_back[index_denominator, 3])                
                                 
                 cal5.run()
                 new_cal5 = cal5 * list_objects[-1]
                 new_cal5.fit()
-                recordSettings(a,b,error_a,error_b,name,new_cal5)
-                plotObject(new_cal5)
+                recordSettings(a, b, error_a, error_b, name, new_cal5)
+#                plotObject(new_cal5)
 
-                if (i < (len(list_runs)-1) and 
-                         list_attenuator[i+1] == 6):
+                if (i < (len(list_runs) - 1) and 
+                         list_attenuator[i + 1] == 6):
                     list_objects.append(new_cal5)
         
             if list_attenuator[i] == 6: 
@@ -659,27 +670,33 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_6A
                     
-                cal6 = sfCalculator(numerator=list_runs[index_numerator], 
+                cal6 = sfCalculator(numerator=list_runs[index_numerator],
                                    denominator=list_runs[index_denominator])
 
-                cal6.setNumerator(minPeak=list_peak_back[index_numerator,0], 
-                                  maxPeak=list_peak_back[index_numerator,1],
-                                  minBack=list_peak_back[index_numerator,2],
-                                  maxBack=list_peak_back[index_numerator,3])
-                cal6.setDenominator(minPeak=list_peak_back[index_denominator,0], 
-                                    maxPeak=list_peak_back[index_denominator,1],
-                                    minBack=list_peak_back[index_denominator,2],
-                                    maxBack=list_peak_back[index_denominator,3])                
+                cal6.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+                                  maxPeak=list_peak_back[index_numerator, 1],
+                                  minBack=list_peak_back[index_numerator, 2],
+                                  maxBack=list_peak_back[index_numerator, 3])
+                cal6.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+                                    maxPeak=list_peak_back[index_denominator, 1],
+                                    minBack=list_peak_back[index_denominator, 2],
+                                    maxBack=list_peak_back[index_denominator, 3])                
 
                 cal6.run()
                 new_cal6 = cal6 * list_objects[-1]
                 new_cal6.fit()
-                recordSettings(a,b,error_a,error_b,name,new_cal6)
-                plotObject(new_cal6)
+                recordSettings(a, b, error_a, error_b, name, new_cal6)
+#                plotObject(new_cal6)
     
+            #record S1H and S2H
+            finalS1H.append(S1H[index_numerator])
+            finalS2H.append(S2H[index_numerator])
+
+
+        
         #output the fitting parameters in an ascii
         output_file_name = '/home/j35/Desktop/SFcalculator.txt'
-        outputFittingParameters(a,b,error_a,error_b,name,output_file_name)
+        outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file_name)
 
     else:
         """
