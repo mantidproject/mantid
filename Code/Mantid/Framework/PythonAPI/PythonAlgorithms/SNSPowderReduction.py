@@ -431,6 +431,7 @@ class SNSPowderReduction(PythonAlgorithm):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if normByCurrent:
             NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+            wksp.getRun()['gsas_monitor'] = 1
 
         return wksp
 
