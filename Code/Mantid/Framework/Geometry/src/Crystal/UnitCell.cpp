@@ -370,16 +370,6 @@ namespace Geometry
   }
 
 
-  /** Calculate the hkl corresponding to a given Q-vector
-   * @param Q :: Q-vector in $AA^-1 in the sample frame
-   * @return a V3D with H,K,L
-   */
-  V3D UnitCell::hklFromQ(V3D Q) const
-  {
-    V3D out = Binv*Q; //transform back to HKL
-    return out;
-  }
-
   /// Calculate the angle in degrees or radians between two reciprocal vectors (h1,k1,l1) and (h2,k2,l2)
     double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit) const
   {
