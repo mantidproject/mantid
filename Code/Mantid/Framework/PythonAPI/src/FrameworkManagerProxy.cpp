@@ -41,6 +41,7 @@ FrameworkManagerProxy::FrameworkManagerProxy()
     m_algupdate_observer(*this, &FrameworkManagerProxy::handleAlgorithmFactoryUpdate)
 {
   API::FrameworkManager::Instance();
+
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
