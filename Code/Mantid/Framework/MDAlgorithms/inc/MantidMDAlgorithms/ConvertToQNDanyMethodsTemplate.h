@@ -8,7 +8,7 @@ template<size_t nd,Q_state Q>
 void ConvertToQNDany::process_QND(API::IMDEventWorkspace *const piWS)
 {
 
-    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const>(piWS);
+    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
     if(!pWs){
         g_log.error()<<"ConvertToQNDany: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
