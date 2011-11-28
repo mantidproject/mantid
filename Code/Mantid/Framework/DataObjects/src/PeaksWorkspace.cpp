@@ -256,8 +256,8 @@ namespace DataObjects
 	  for (size_t i=0; i < peaks.size(); i++)
 	  {
 	    Peak p = peaks[i];
-      detectorID.push_back( p.m_DetectorID );  //Protected member of Peak.h not accessible here
-      H.push_back( p.m_H );                    //Protected member of Peak.h not accessible here
+      detectorID.push_back( p.getDetectorID() );  
+      H.push_back( p.getH() );                    
       // etc.
 	  }
     file->writeData("detector_id", detectorID); 
