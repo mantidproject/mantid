@@ -52,7 +52,7 @@ public:
   virtual std::string name()const {return m_function->name();}
   /// Set the workspace. Make 
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) {}
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) { UNUSED_ARG(ws) }
   /// Get the workspace
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const {return m_function->getWorkspace();}
 
@@ -65,7 +65,10 @@ public:
 
   /// Function you want to fit to. 
   /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(FunctionDomain& domain)const {throw Kernel::Exception::NotImplementedError("TempFunction not implemented.");}
+  virtual void function(FunctionDomain& domain)const {
+    UNUSED_ARG(domain)
+    throw Kernel::Exception::NotImplementedError("TempFunction not implemented.");
+  }
 
   /// Set i-th parameter
   virtual void setParameter(size_t i, const double& value, bool explicitlySet = true) {m_function->setParameter(i,value,explicitlySet);}
