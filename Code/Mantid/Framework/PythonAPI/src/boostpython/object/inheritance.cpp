@@ -10,7 +10,8 @@
 #endif 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/reverse_graph.hpp>
-#if BOOST_VERSION >=103800
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 103800
   #include <boost/property_map/property_map.hpp>
 #else
   #include <boost/property_map.hpp>
