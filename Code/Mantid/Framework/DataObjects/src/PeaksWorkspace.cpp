@@ -252,15 +252,15 @@ namespace DataObjects
 //  file->writeData( "Column_1", col ); // This is not resolved by linker.
 
     std::vector<int> detectorID;
-    std::vector<dpuble> H;
+    std::vector<double> H;
 	  for (size_t i=0; i < peaks.size(); i++)
 	  {
-	    Peak & p = peaks[i];
-      detectorID.push_back( p.m_DetectorID );
-      H.push_back( p.m_H );
+	    Peak p = peaks[i];
+      detectorID.push_back( p.m_DetectorID );  //Protected member of Peak.h not accessible here
+      H.push_back( p.m_H );                    //Protected member of Peak.h not accessible here
       // etc.
 	  }
-    file->writeData("detector_id", detectorIDs);
+    file->writeData("detector_id", detectorID); 
     file->writeData("H", H);
     // etc.
   }
