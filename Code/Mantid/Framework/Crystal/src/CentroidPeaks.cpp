@@ -97,13 +97,8 @@ namespace Crystal
       std::string bankName = peak.getBankName();
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
-
-      if (parent->type().compare("RectangularDetector") != 0)
-      {
-
-        std::cout<<"   getPanel C type="<<parent->type()<<std::endl;
-                throw std::runtime_error("Improper Peak Argument");
-      }
+      if (!parent) continue;
+      if (parent->type().compare("RectangularDetector") != 0) continue;
       boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
                 const RectangularDetector>(parent);
       double intensity = 0.0;
@@ -121,14 +116,14 @@ namespace Crystal
       int chanstart = std::max(0,chan-PeakRadius);
       int chanend = std::min(static_cast<int>(X.size()),chan+PeakRadius);
       double rowcentroid = 0.0;
-      int roinWStart = std::max(0,row-PeakRadius);
+      int rowstart = std::max(0,row-PeakRadius);
       int rowend = std::min(RDet->ypixels()-1,row+PeakRadius);
       double colcentroid = 0.0;
       int colstart = std::max(0,col-PeakRadius);
       int colend = std::min(RDet->xpixels()-1,col+PeakRadius);
       for (int ichan=chanstart; ichan<=chanend; ++ichan)
       {
-        for (int irow=roinWStart; irow<=rowend; ++irow)
+        for (int irow=rowstart; irow<=rowend; ++irow)
         {
           for (int icol=colstart; icol<=colend; ++icol)
           {
@@ -192,12 +187,8 @@ namespace Crystal
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
 
-      if (parent->type().compare("RectangularDetector") != 0)
-      {
-
-        std::cout<<"   getPanel C type="<<parent->type()<<std::endl;
-                throw std::runtime_error("Improper Peak Argument");
-      }
+      if (!parent) continue;
+      if (parent->type().compare("RectangularDetector") != 0) continue;
       boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
                 const RectangularDetector>(parent);
       int Edge = getProperty("EdgePixels");
@@ -226,7 +217,6 @@ namespace Crystal
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
-
     /// Radius to use around peaks
     int PeakRadius = getProperty("PeakRadius");
 
@@ -244,51 +234,52 @@ namespace Crystal
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
 
-      if (parent->type().compare("RectangularDetector") != 0)
-      {
-
-        std::cout<<"   getPanel C type="<<parent->type()<<std::endl;
-                throw std::runtime_error("Improper Peak Argument");
-      }
+      if (!parent) continue;
+      if (parent->type().compare("RectangularDetector") != 0) continue;
       boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
                 const RectangularDetector>(parent);
+
       double intensity = 0.0;
-      double chancentroid = 0.0;
+      double tofcentroid = 0.0;
       boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
       Mantid::detid2index_map::iterator it;
       it = (*wi_to_detid_map).find(pixel->getID());
-      size_t workspaceIndex = (it->second);
 
-      Mantid::MantidVec X = inWS->readX(workspaceIndex);
-      Mantid::MantidVec histogram = inWS->readY(workspaceIndex);
-
-      int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
-      int chanstart = std::max(0,chan-PeakRadius);
-      int chanend = std::min(static_cast<int>(X.size()),chan+PeakRadius);
+      double tofstart = TOFPeakd*std::pow(1.004,-PeakRadius);
+      double tofend = TOFPeakd*std::pow(1.004,PeakRadius);
       double rowcentroid = 0.0;
-      int roinWStart = std::max(0,row-PeakRadius);
+      int rowstart = std::max(0,row-PeakRadius);
       int rowend = std::min(RDet->ypixels()-1,row+PeakRadius);
       double colcentroid = 0.0;
       int colstart = std::max(0,col-PeakRadius);
       int colend = std::min(RDet->xpixels()-1,col+PeakRadius);
-      for (int ichan=chanstart; ichan<=chanend; ++ichan)
+      for (int irow=rowstart; irow<=rowend; ++irow)
       {
-        for (int irow=roinWStart; irow<=rowend; ++irow)
+        for (int icol=colstart; icol<=colend; ++icol)
         {
-          for (int icol=colstart; icol<=colend; ++icol)
+          boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, irow);
+          Mantid::detid2index_map::iterator it;
+          it = (*wi_to_detid_map).find(pixel->getID());
+          size_t workspaceIndex = (it->second);
+          EventList el = eventW->getEventList(workspaceIndex);
+          el.switchTo(WEIGHTED_NOTIME);
+          std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
+
+          std::vector<WeightedEventNoTime>::iterator itev;
+          std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
+
+          // Check for events in tof range
+          for (itev = events.begin(); itev != itev_end; itev++)
           {
-            boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, irow);
-            Mantid::detid2index_map::iterator it;
-            it = (*wi_to_detid_map).find(pixel->getID());
-            size_t workspaceIndex = (it->second);
-    
-            Mantid::MantidVec X = inWS->readX(workspaceIndex);
-            Mantid::MantidVec histogram = inWS->readY(workspaceIndex);
-    
-            intensity += histogram[ichan];
-            rowcentroid += irow*histogram[ichan];
-            colcentroid += icol*histogram[ichan];
-            chancentroid += ichan*histogram[ichan];
+            double tof = itev->tof();
+            if( tof > tofstart && tof < tofend)
+            {
+              double weight = itev->weight();
+              intensity += weight;
+              rowcentroid += irow*weight;
+              colcentroid += icol*weight;
+              tofcentroid += tof*weight;
+            }
           }
         }
       }
@@ -299,19 +290,12 @@ namespace Crystal
       col = std::max(0,col);
       pixel = RDet->getAtXY(col, row);
       peak.setDetectorID(pixel->getID());
+
     // Set wavelength to change tof for peak object
-      it = (*wi_to_detid_map).find(pixel->getID());
-      workspaceIndex = (it->second);
-
-      X = inWS->readX(workspaceIndex);
-      histogram = inWS->readY(workspaceIndex);
-
-      chan = int(chancentroid/intensity);
-      chan = std::max(0,chan);
-      chan = std::min(static_cast<int>(X.size()),chan);
+      double tof = tofcentroid/intensity;
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
-      timeflight.push_back(X[chan]);
+      timeflight.push_back(tof);
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
@@ -320,7 +304,7 @@ namespace Crystal
       timeflight.clear();
 
       peak.setWavelength(lambda);
-      peak.setBinCount(histogram[chan]);
+      peak.setBinCount(intensity);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -336,12 +320,8 @@ namespace Crystal
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
 
-      if (parent->type().compare("RectangularDetector") != 0)
-      {
-
-        std::cout<<"   getPanel C type="<<parent->type()<<std::endl;
-                throw std::runtime_error("Improper Peak Argument");
-      }
+      if (!parent) continue;
+      if (parent->type().compare("RectangularDetector") != 0) continue;
       boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
                 const RectangularDetector>(parent);
       int Edge = getProperty("EdgePixels");

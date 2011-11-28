@@ -1096,6 +1096,8 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
                 m_pickTab->showInstrumentDisplayContextMenu(); 
                 m_instrumentDisplayContextMenuOn = false;
                 break;
+    default:
+      break;
     }
     return true;
   }

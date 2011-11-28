@@ -27,6 +27,7 @@
   #pragma GCC diagnostic ignored "-Wunused-parameter"
   #pragma GCC diagnostic ignored "-Wtype-limits"
   #pragma GCC diagnostic ignored "-Wunused-value"
+  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
 #include "boostpython/converter/arg_to_python_base.cpp"

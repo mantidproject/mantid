@@ -45,10 +45,13 @@ namespace Crystal
     void integrate();
     void integrateEvent();
 
+
     /// Input 2D Workspace
     API::MatrixWorkspace_sptr inWS;
     DataObjects::EventWorkspace_sptr eventW;
     Mantid::detid2index_map * wi_to_detid_map;
+
+
 
   };
 
