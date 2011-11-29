@@ -429,11 +429,7 @@ ConvertToQNDany::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t 
         }  
 }
 
-#undef NOQ
-#undef MODQ
-#undef Q3D_
 
-#define NOQ
 template void ConvertToQNDany::processQND<2,NoQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<3,NoQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<4,NoQ>(API::IMDEventWorkspace *const);
@@ -441,8 +437,7 @@ template void ConvertToQNDany::processQND<5,NoQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<6,NoQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<7,NoQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<8,NoQ>(API::IMDEventWorkspace *const);
-#undef  NOQ
-#define MODQ
+
 template void ConvertToQNDany::processQND<2,modQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<3,modQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<4,modQ>(API::IMDEventWorkspace *const);
@@ -450,15 +445,14 @@ template void ConvertToQNDany::processQND<5,modQ>(API::IMDEventWorkspace *const)
 template void ConvertToQNDany::processQND<6,modQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<7,modQ>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<8,modQ>(API::IMDEventWorkspace *const);
-#undef  MODQ
-#define Q3D_
+
 template void ConvertToQNDany::processQND<3,Q3D>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<4,Q3D>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<5,Q3D>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<6,Q3D>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<7,Q3D>(API::IMDEventWorkspace *const);
 template void ConvertToQNDany::processQND<8,Q3D>(API::IMDEventWorkspace *const);
-#undef  Q3D_
+
 template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<2>(size_t ,size_t ,size_t );
 template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<3>(size_t ,size_t ,size_t );
 template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<4>(size_t ,size_t ,size_t );

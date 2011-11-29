@@ -136,15 +136,16 @@ namespace MDAlgorithms
    /// map to select an workspace
     std::map<size_t, pWSCreator> ws_creator;
   private: 
-    /// template defines common interface to common part of the algorithm, where all variables needed within the loop calculated outside of the loop
+    /// template defines common interface to common part of the algorithm, where all variables
+   ///  needed within the loop calculated outside of the loop. In addition it caluclates the property-dependant coordinates 
     template<Q_state Q>
-    void calc_generic_variables(std::vector<coord_t> &Coord, size_t nd){}
-    /// template generalizes the code to calculate generic Y-variables within external loop. 
+    void calc_generic_variables(std::vector<coord_t> &, size_t ){}
+    /// template generalizes the code to calculate Y-variables within the external loop. 
     template<Q_state Q>
-    void calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){}
+    void calculate_y_coordinate(std::vector<coord_t> &,size_t ){}
     /// template generalizes the code to calculate all remaining variables within the inner loop
     template<Q_state Q>
-    bool calculate_ND_coordinates(const MantidVec& ,size_t ,size_t ,std::vector<coord_t> &Coord){return false;}
+    bool calculate_ND_coordinates(const MantidVec& ,size_t ,size_t ,std::vector<coord_t> &){return false;}
    /// generig template to convert to any Dimensions workspace;
     template<size_t nd,Q_state Q>
     void processQND(API::IMDEventWorkspace *const pOutWs);    
