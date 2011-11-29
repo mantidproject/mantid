@@ -218,8 +218,9 @@ void DiffractionFocussing2::exec()
       outSpec->clearDetectorIDs();
     }
   
-    const MantidVec& Mask = groupWS->readY(i);
-    if ( Mask[0] > 0.5 ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+    // Add the detectors for this spectrum to the output workspace's spectra-detector map
+    Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(i));
+    if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
   
     // Get the references to Y and E output and rebin
     MantidVec& Yout=outSpec->dataY();
@@ -437,8 +438,8 @@ void DiffractionFocussing2::execEvent()
         // Check for masking. TODO: Most of the pointer checks are redundant
         if (checkForMask)
         {
-          const MantidVec& Mask = groupWS->readY(wi);
-          if ( Mask[0] < 0.5 ) continue;
+          Geometry::IDetector_const_sptr det = m_eventW->getDetector(static_cast<size_t>(wi));
+          if ( det->isMasked() ) continue;
         }
         const int group = groupAtWorkspaceIndex[wi];
         if (group == 1)
@@ -471,8 +472,8 @@ void DiffractionFocussing2::execEvent()
     {
       if (checkForMask)
       {
-        const MantidVec& Mask = groupWS->readY(wi);
-        if ( Mask[0] < 0.5 ) continue;
+        Geometry::IDetector_const_sptr det = m_eventW->getDetector(static_cast<size_t>(wi));
+        if ( det->isMasked() ) continue;
       }
       //i is the workspace index (of the input)
       const int group = groupAtWorkspaceIndex[wi];
