@@ -423,9 +423,8 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const 
       throw std::invalid_argument("Neither a Matrix Workspace or an EventWorkpace provided to SmoothNeighbours.");
     }
 
-    // Get the first available detector
-    index2detid_map* map = inWS->getWorkspaceIndexToDetectorIDMap();
-    IDetector_const_sptr firstDet = instrument->getDetector(map->at(0));
+    // Get the first idetector from the workspace index 0.
+    IDetector_const_sptr firstDet = inWS->getDetector(0);
     // Find the bounding box of that detector
     BoundingBox bbox;
     firstDet->getBoundingBox(bbox);
