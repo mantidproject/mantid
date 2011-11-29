@@ -122,7 +122,9 @@ inline void ConvertToQNDany::calc_generic_variables<NoQ>(std::vector<coord_t> &C
 }
 template<> 
 void ConvertToQNDany::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
-         throw(Kernel::Exception::NotImplementedError("not yet implemented"));
+    UNUSED_ARG(Coord);
+    UNUSED_ARG(nd);
+    throw(Kernel::Exception::NotImplementedError("not yet implemented"));
 }
 
 template<> 
@@ -141,6 +143,7 @@ inline void ConvertToQNDany::calc_generic_variables<Q3D>(std::vector<coord_t> &C
 template<>
 void ConvertToQNDany::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
 {
+        UNUSED_ARG(i);
         Coord[1]                  = pYAxis->operator()(i);
 }
 
