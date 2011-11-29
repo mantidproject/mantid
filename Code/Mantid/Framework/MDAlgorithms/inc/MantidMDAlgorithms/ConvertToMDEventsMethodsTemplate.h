@@ -149,8 +149,9 @@ void ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,
 
 template<>
 bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-           Coord[0]    = 0.5*( X[j]+ X[j+1]);
-           return true;
+        UNUSED_ARG(i);
+        Coord[0]    = 0.5*( X[j]+ X[j+1]);
+        return true;
 }
 
 template<>
