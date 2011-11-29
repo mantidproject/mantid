@@ -49,7 +49,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
           Coord[i]=run_property->firstValue();
         }  
 // get the Y axis; 
-       API::NumericAxis *pYAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(1));
+       API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
        if(!pYAxis ){ // the cast should be verified earlier; just in case here:
          throw(std::invalid_argument("Input workspace has to have Y-axis"));
        }
