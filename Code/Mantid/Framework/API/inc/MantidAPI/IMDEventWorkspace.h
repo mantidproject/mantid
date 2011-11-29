@@ -6,6 +6,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -28,12 +29,12 @@ namespace API
    * @date Dec 3, 2010
    *
    * */
-  class MANTID_API_DLL IMDEventWorkspace  : public API::IMDWorkspace
+  class MANTID_API_DLL IMDEventWorkspace  : public API::IMDWorkspace, public API::MultipleExperimentInfos
   {
   public:
     IMDEventWorkspace();
     IMDEventWorkspace(const IMDEventWorkspace & other);
-	virtual ~IMDEventWorkspace() {}
+    virtual ~IMDEventWorkspace() {}
 
     /// Perform initialization after dimensions (and others) have been set.
     virtual void initialize() = 0;
@@ -56,29 +57,14 @@ namespace API
     /// Set the number of bins in each dimension to something corresponding to the estimated resolution of the finest binning
     virtual void estimateResolution() = 0;
 
+    /// Split all boxes that exceed the split threshold.
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;
-
-
-    ExperimentInfo_sptr getExperimentInfo(const uint16_t runIndex);
-
-    ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
-
-    uint16_t addExperimentInfo(ExperimentInfo_sptr ei);
-
-    void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
-
-    uint16_t getNumExperimentInfo() const;
-
 
     bool fileNeedsUpdating() const;
 
     void setFileNeedsUpdating(bool value);
 
-
   protected:
-    /// Vector for each ExperimentInfo class
-    std::vector<ExperimentInfo_sptr> m_expInfos;
-
     /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
     bool m_fileNeedsUpdating;
 

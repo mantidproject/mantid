@@ -141,11 +141,16 @@ namespace Mantid
         int XPeak = int(col+0.5);
         int YPeak = int(row+0.5);
         double TOFPeakd = peak.getTOF();
+        std::string bankName = peak.getBankName();
+
+        boost::shared_ptr<const IComponent> parent = inputW->getInstrument()->getComponentByName(bankName);
+        if (!parent) continue;
+        if (parent->type().compare("RectangularDetector") != 0) continue;
   
         int TOFPeak=0, TOFmin=0, TOFmax=0;
         if (slices)
         {
-          TOFmax = fitneighbours(i, peak.getBankName(), XPeak, YPeak, i, qspan);
+          TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan);
           MantidVec& X = outputW->dataX(i);
           TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
         }

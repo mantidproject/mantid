@@ -16394,6 +16394,8 @@ else
         SLOT(runPythonScript(const QString&)));
     // Re-emits the signal caught from the muon analysis
     connect(user_interface, SIGNAL(setAsPlotType(const QString &)), this, SLOT(setPlotType(const QString &)));
+    // Closes the active graph
+    connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
     //If the fitting is requested then run the peak picker tool in runConnectFitting
     connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
         SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
@@ -16472,6 +16474,21 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
   } 
 }
 
+void ApplicationWindow::closeGraph(const QString & wsName)
+{
+  QList<MdiSubWindow *> windows = windowsList();
+  foreach (MdiSubWindow *w, windows) 
+  {
+    if (w->isA("MultiLayer"))
+    {
+      if (w->objectName() == wsName)
+      {
+        closeWindow(w);
+        break;
+      }
+    }
+  }
+}
 
 void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 {

@@ -2,6 +2,7 @@
 
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Path.h>
@@ -63,6 +64,7 @@ namespace Mantid
           }
           else
           {
+            if( skip(item.toString()) ) continue;
             if( loadLibrary(item.toString()) ) 
             {
               ++libCount;
@@ -81,6 +83,38 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // Private members
     //-------------------------------------------------------------------------
+    /**
+     * Returns true if the name contains one of the strings given in the
+     * 'plugins.exclude' variable. Each string from the variable is
+     * searched for with the filename so an exact match is not necessary. This
+     * avoids having to specify prefixes and suffixes for different platforms,
+     * i.e. 'plugins.exclude = MantidKernel' will exclude libMantidKernel.so
+     * @param filename :: A string giving the filename/file path
+     * @return True if the library should be skipped
+     */
+    bool LibraryManagerImpl::skip(const std::string & filename)
+    {
+      static std::set<std::string> excludes;
+      static bool initialized(false);
+      if( !initialized )
+      {
+        std::string excludeStr = ConfigService::Instance().getString("plugins.exclude");
+        boost::split(excludes, excludeStr, boost::is_any_of(":;"), boost::token_compress_on);
+        initialized = true;
+      }
+      bool skipme(false);
+      for( std::set<std::string>::const_iterator itr = excludes.begin(); itr != excludes.end();
+          ++itr)
+      {
+        if( filename.find(*itr) != std::string::npos)
+        {
+          skipme = true;
+          break;
+        }
+      }
+      return skipme;
+    }
+
     /** 
     * Load a library
     * @param filepath :: The full path to a library as a string

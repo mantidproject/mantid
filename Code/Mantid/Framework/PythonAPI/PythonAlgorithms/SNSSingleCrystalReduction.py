@@ -41,7 +41,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
         self.declareProperty("EdgePixels", 24, Description="Number of edge pixels to ignore.  Default is 24")
-        self.declareFileProperty("IsawUBFile", "", FileAction.OptionalLoad, ['.mat'], Description="Isaw style file of UB matrix.")
+        self.declareListProperty("LatticeParameters", [4.785,4.785,12.91,90.0,90.0,120.0],
+                             Description="a,b,c,alpha,beta,gamma (Default is Sapphire Lattice Parameters)")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl', 'nxs']
         self.declareProperty("SaveAs", "hkl", ListValidator(outfiletypes))
@@ -166,14 +167,14 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             mtd.releaseFreeMemory()
             peaksWS = mtd['Peaks']
             # Find the UB matrix using the peaks and known lattice parameters
-            FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=10.3522,b=6.0768,c=4.7276,
-                            alpha=90,beta=90,gamma=90, NumInitial=5, Tolerance=0.12)
+            FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                            alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=5, Tolerance=0.12)
             # Add index to HKL             
             IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.12')
             # Refine the UB matrix using only the peaks
-            FindUBUsingIndexedPeaks(PeaksWorkspace=peaksWS)
+            #FindUBUsingIndexedPeaks(PeaksWorkspace=peaksWS)
             # Reindex HKL             
-            IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.10')
+            #IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.10')
             # Copy the UB matrix back to the original workspace
             CopySample(InputWorkspace=peaksWS,OutputWorkspace=wksp,
                             CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
@@ -230,7 +231,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self._vanradius = self.getProperty("VanadiumRadius")
         self._powlam = self.getProperty("PowerLambda")
         self._edge = self.getProperty("EdgePixels")
-        self._ubfile = self.getProperty("IsawUBFile")
+        self._lattice = self.getProperty("LatticeParameters")
         self._DetCalfile = self.getProperty("IsawDetCalFile")
         self._append = self.getProperty("AppendHKLFile")
     

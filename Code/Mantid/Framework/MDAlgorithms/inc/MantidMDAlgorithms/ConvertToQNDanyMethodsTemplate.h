@@ -18,7 +18,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
     pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
 
 
-    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const>(piWS);
+    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
     if(!pWs){
         g_log.error()<<"ConvertToQNDany: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());

@@ -72,20 +72,6 @@ public:
     delete ew3;
   }
 
-  void test_IMDEventWorkspace_setExperimentInfos()
-  {
-    IMDEventWorkspace * ew3 = new MDEventWorkspace<MDLeanEvent<3>, 3>();
-    TS_ASSERT_EQUALS( ew3->getNumExperimentInfo(), 0);
-    ExperimentInfo_sptr ei(new ExperimentInfo);
-    TS_ASSERT_EQUALS( ew3->addExperimentInfo(ei), 0);
-    TS_ASSERT_EQUALS( ew3->getNumExperimentInfo(), 1);
-    TS_ASSERT_EQUALS( ew3->getExperimentInfo(0), ei);
-    TS_ASSERT_THROWS_ANYTHING( ew3->getExperimentInfo(1) );
-    ExperimentInfo_sptr ei2(new ExperimentInfo);
-    ew3->setExperimentInfo(0, ei2);
-    TS_ASSERT_EQUALS( ew3->getExperimentInfo(0), ei2);
-  }
-
   void test_copy_constructor()
   {
     MDEventWorkspace<MDLeanEvent<3>, 3> ew3;

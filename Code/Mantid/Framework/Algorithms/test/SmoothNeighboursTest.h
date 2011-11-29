@@ -111,6 +111,57 @@ public:
     AnalysisDataService::Instance().remove("testEW");
   }
 
+  /*
+  * Test the Weighting strategies start.
+  */
+
+  void testNullWeightingStrategyAtRadiusThrows()
+  {
+    NullWeighting strategy;
+    double distance = 0;
+    TSM_ASSERT_THROWS("NullWeighting should always throw in usage", strategy.weightAt(distance), std::runtime_error);
+  }
+
+  void testNullWeightingStrategyRectangularThrows()
+  {
+    NullWeighting strategy;
+    int AdjX, AdjY, ix, iy;
+    TSM_ASSERT_THROWS("NullWeighting should always throw in usage",strategy.weightAt(AdjX, AdjY, ix, iy), std::runtime_error);
+  }
+
+  void testFlatWeightingStrategyAtRadius()
+  {
+    FlatWeighting strategy;
+    double distanceA = 0;
+    double distanceB = 1000;
+    TSM_ASSERT_EQUALS("FlatWeighting Should be distance insensitive", 1, strategy.weightAt(distanceA));
+    TSM_ASSERT_EQUALS("FlatWeighting Should be distance insensitive", 1, strategy.weightAt(distanceB));
+  }
+
+  void testFlatWeightingStrategyRectangular()
+  {
+    FlatWeighting strategy;
+    int adjX, adjY, ix, iy;
+    TSM_ASSERT_EQUALS("FlatWeighting Should be 1", 1, strategy.weightAt(adjX, ix, adjY, iy));
+  }
+
+  void testLinearWeightingAtRadius()
+  {
+    double cutOff = 2;
+    LinearWeighting strategy(cutOff);
+
+    double distance = 0;
+    TSM_ASSERT_EQUALS("LinearWeighting should give full weighting at origin", 1, strategy.weightAt(distance));
+    distance = 1;
+    TSM_ASSERT_EQUALS("LinearWeighting should give 0.5 weighting at 1/2 radius", 0.5, strategy.weightAt(distance));
+    distance = cutOff; //2
+    TSM_ASSERT_EQUALS("LinearWeighting should give zero weighting at cutoff", 0, strategy.weightAt(distance));
+  }
+
+  /*
+  * End test weighting strategies.
+  */
+
   void testWithUnsignedNumberOfNeighbours()
   {
     SmoothNeighbours alg;

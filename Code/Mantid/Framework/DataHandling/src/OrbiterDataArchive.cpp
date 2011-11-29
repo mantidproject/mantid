@@ -5,6 +5,7 @@
 #include "MantidDataHandling/OrbiterDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 
+#include <Poco/File.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
@@ -90,13 +91,26 @@ namespace Mantid
       //Look for spaces, and split on them.
       std::vector<std::string> filenames;
       boost::split(filenames, wsResult, boost::is_any_of(" "));
-      // For now just take the first result
-      result = filenames[0];
 
       // Debug statement to print returned filename(s)
       for (std::size_t i = 0; i < filenames.size(); ++i) {
-    	  g_log.debug() << "Filename[" << i << "] = \'" << filenames[i] << "\'\n";
-	  }
+        g_log.debug() << "Filename[" << i << "] = \'" << filenames[i] << "\' ";
+        if (!(filenames[i].empty()))
+        {
+          Poco::File temp(filenames[i]);
+          if (temp.exists())
+          {
+            if (result.empty())
+              result = filenames[i];
+            g_log.debug() << "exists";
+          }
+          else
+          {
+            g_log.debug() << "does not exist";
+          }
+        }
+        g_log.debug() << "\n";
+      }
       g_log.debug() << "Returning Filename = \'" << result << "\'\n";
 
       return result;

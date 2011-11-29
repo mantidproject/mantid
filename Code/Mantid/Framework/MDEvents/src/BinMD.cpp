@@ -511,7 +511,7 @@ namespace MDEvents
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");
-    if (!m_axisAligned)
+    if (!m_axisAligned && !IterateEvents)
     {
       g_log.notice() << "Algorithm does not currently support IterateEvents=False if AxisAligned=False. Setting IterateEvents=True." << std::endl;
       IterateEvents = true;
@@ -525,6 +525,9 @@ namespace MDEvents
     {
       CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
     }
+
+    // Copy the experiment infos to the output
+    outWS->copyExperimentInfos( *in_ws );
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));

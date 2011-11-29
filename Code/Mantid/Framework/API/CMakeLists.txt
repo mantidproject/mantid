@@ -33,7 +33,6 @@ set ( SRC_FILES
 	src/IEventWorkspace.cpp
 	src/IFitFunction.cpp
 	src/IFunction.cpp
-	src/TempFunction.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/IMDEventWorkspace.cpp
@@ -56,6 +55,7 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MemoryManager.cpp
+	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NumericAxis.cpp
 	src/PairedGroupAlgorithm.cpp
@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/SpectraAxis.cpp
 	src/SpectraDetectorMap.cpp
 	src/TableRow.cpp
+	src/TempFunction.cpp
 	src/TextAxis.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
@@ -125,7 +126,6 @@ set ( INC_FILES
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionFactory.h
-	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -138,7 +138,6 @@ set ( INC_FILES
 	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFitFunction.h
 	inc/MantidAPI/IFunction.h
-	inc/MantidAPI/TempFunction.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -161,6 +160,7 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/InstrumentDataService.h
+	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
@@ -168,6 +168,7 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MemoryManager.h
+	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/PairedGroupAlgorithm.h
@@ -185,6 +186,7 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
+	inc/MantidAPI/TempFunction.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
@@ -229,6 +231,7 @@ set ( TEST_FILES
 	test/MDGeometryTest.h
 	test/MatrixWorkspaceTest.h
 	test/MemoryManagerTest.h
+	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
 	test/NumericAxisTest.h
 	test/ParameterReferenceTest.h

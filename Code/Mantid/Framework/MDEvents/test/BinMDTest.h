@@ -115,6 +115,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
+    in_ws->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo));
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
@@ -155,12 +156,14 @@ public:
         TS_ASSERT( boost::math::isnan( out->getSignalAt(i) ) ); //The implicit function should have ensured that no bins were present.
       }
     }
-    // chck basis vectors
+    // check basis vectors
     TS_ASSERT_EQUALS( out->getBasisVector(0), expectBasisX);
     if (out->getNumDims() > 1) { TS_ASSERT_EQUALS( out->getBasisVector(1), expectBasisY); }
     if (out->getNumDims() > 2) { TS_ASSERT_EQUALS( out->getBasisVector(2), expectBasisZ); }
     const CoordTransform * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
+    // Experiment Infos were copied
+    TS_ASSERT_EQUALS( out->getNumExperimentInfo(), in_ws->getNumExperimentInfo());
 
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
