@@ -15,14 +15,14 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertToQ3DdE.h"
-//#include <boost/function>
+
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
-/** ConvertToDiffractionMDWorkspace :
+/** ConvertToMDEvents :
    *  Transfrom a workspace into MD workspace with components defined by user. 
    *
    * Gateway for number of subalgorithms, some are very important, some are questionable 
@@ -104,7 +104,8 @@ namespace MDAlgorithms
     static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
      /// the names of the log variables, which are used as dimensions
     std::vector<std::string> other_dim_names;
-    Kernel::V3D u,v;
+    /// the 
+    
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
     // the names for the MD workspace dimensions
@@ -121,39 +122,71 @@ namespace MDAlgorithms
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates */
    void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
-   /** function provides the linear representation for the transformation matrix, */
-   std::vector<double> get_transf_matrix()const;
+   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to hkl coordinate system */
+   std::vector<double> get_transf_matrix(const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
  
-   //
-   template<size_t nd>
-   API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
-
-
-   //  modQdE, // specific algorithm  -- 2D, powder
-    //void process_ModQ_dE_();
-   /// map to select an algorithm
+   //void process_ModQ_dE_();
+   /// map to select an algorithm as function of the key, which describes it
     std::map<std::string, pMethod> alg_selector;
-   /// map to select an workspace
+   /// map to select an workspace, as function of the dimensions number
     std::map<size_t, pWSCreator> ws_creator;
   private: 
-    /// template defines common interface to common part of the algorithm, where all variables
-   ///  needed within the loop calculated outside of the loop. In addition it caluclates the property-dependant coordinates 
+
+    /**Template defines common interface to common part of the algorithm, where all variables
+     * needed within the loop calculated outside of the loop. 
+     * In addition it caluclates the property-dependant coordinates 
+     *
+     * @param n_ws_variabes -- subalgorithm specific number of variables, calculated from the workspace data
+     *
+     * @return Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
+    */
     template<Q_state Q>
-    void calc_generic_variables(std::vector<coord_t> &, size_t ){}
-    /// template generalizes the code to calculate Y-variables within the external loop. 
+    void calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
+    UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);}
+
+   
+    /** template generalizes the code to calculate Y-variables within the external loop of processQND workspace
+     * @param X    -- vector of X workspace values
+     * @param i    -- index of external loop, identifying current y-coordinate
+     * 
+     * @return Coord -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.    */
     template<Q_state Q>
-    void calculate_y_coordinate(std::vector<coord_t> &,size_t ){}
-    /// template generalizes the code to calculate all remaining variables within the inner loop
+    void calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
+    UNUSED_ARG(Coord); UNUSED_ARG(i);}
+
+    /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
+     * @param X    -- vector of X workspace values
+     * @param i    -- index of external loop, identifying generic y-coordinate
+     * @param j    -- index of internal loop, identifying generic x-coordinate
+     * 
+     * @return Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector   */
     template<Q_state Q>
-    bool calculate_ND_coordinates(const MantidVec& ,size_t ,size_t ,std::vector<coord_t> &){return false;}
-   /// generig template to convert to any Dimensions workspace;
+    bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+        UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);
+        return false;}
+
+   /** generic template to convert to any Dimensions workspace;
+    * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
+    */
     template<size_t nd,Q_state Q>
     void processQND(API::IMDEventWorkspace *const pOutWs);    
     // the variables used for exchange data between different specific parts of the generic ND algorithm:
+    // pointer to Y axis of MD workspace
     API::NumericAxis *pYAxis;
+    // the energy of the incident neutrons
     double Ei;
+    // the wavevector of incident neutrons
     double ki;
+    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    /** template to build empty MDevent workspace with box controller and other palavra
+     * @param split_into       -- the number of the bin the grid is split into
+     * @param split_threshold  -- 
+     * @param split_maxDepth   -- maximal depth of the split tree;
+    */
+    template<size_t nd>
+    API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
+
  };
  
 } // namespace Mantid

@@ -36,7 +36,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     std::vector<coord_t> Coord(nd);
 
     calc_generic_variables<Q>(Coord,nd);
-    
+    //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(numSpec); ++i)
     {
  
@@ -46,7 +46,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         int32_t det_id            = det_loc.det_id[i];
 
         calculate_y_coordinate<Q>(Coord,i);
-    //=> START INTERNAL LOOP OVER THE "TIME"
+        //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
         {
             // drop emtpy events
@@ -81,7 +81,6 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 }
 
 /// helper function to create empty MDEventWorkspace with nd dimensions 
-
 template<size_t nd>
 API::IMDEventWorkspace_sptr
 ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth)
@@ -109,7 +108,7 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       return ws;
 }
 
-
+// PROCESS GENERIG VARIABLES AS FUNCTION OF ALGORITHM
 template<> 
 inline void ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
     // workspace defines 2 properties
@@ -120,13 +119,14 @@ inline void ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> 
             throw(std::invalid_argument("Input workspace has to have Y-axis"));
           }
 }
+//
 template<> 
 void ConvertToMDEvents::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
     UNUSED_ARG(Coord);
     UNUSED_ARG(nd);
     throw(Kernel::Exception::NotImplementedError("not yet implemented"));
 }
-
+//
 template<> 
 inline void ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
    // INELASTIC:
@@ -139,21 +139,21 @@ inline void ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> 
     rotMat = this->get_transf_matrix();
 }
 
-
+// PROCESS Y VARIABLE AS FUNCTION OF SUBALGORITHM
 template<>
 void ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
 {
         UNUSED_ARG(i);
         Coord[1]                  = pYAxis->operator()(i);
 }
-
+// PROCESS X - VARIABLE AS FUNCTION OF SUBALGORITHM
 template<>
 bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(i);
         Coord[0]    = 0.5*( X[j]+ X[j+1]);
         return true;
 }
-
+//
 template<>
 bool ConvertToMDEvents::calculate_ND_coordinates<Q3D>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
 

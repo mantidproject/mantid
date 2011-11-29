@@ -1,5 +1,8 @@
 /*WIKI* 
-
+    Transfrom a workspace into MD workspace with components defined by user. 
+   
+    Gateway for number of subalgorithms, some are very important, some are questionable 
+    Intended to cover wide range of cases; 
 
 *WIKI*/
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
@@ -34,7 +37,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-//using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
@@ -247,7 +249,7 @@ void ConvertToMDEvents::exec(){
     return;
    
 }
- /** function processes input arguments and tries to istablish what algorithm should be deployed; 
+ /** function processes the input arguments and tries to istablish what algorithm should be deployed; 
     *
     * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
     * @param Q_dim_requested     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
@@ -392,16 +394,14 @@ ConvertToMDEvents::get_dimension_names(const std::vector<std::string> &default_p
  
 */
 std::vector<double> 
-ConvertToMDEvents::get_transf_matrix()const
+ConvertToMDEvents::get_transf_matrix(const Kernel::V3D &u, const Kernel::V3D &v)const
 {
     
-    // Initalize the matrix to 3x3 identity
-    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
     Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
     // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
-    mat = gon * ub;
+    Kernel::Matrix<double>  mat = gon * ub;
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
@@ -429,40 +429,11 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
         }  
 }
 
-
-template void ConvertToMDEvents::processQND<2,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<3,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<4,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<5,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<6,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<7,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<8,NoQ>(API::IMDEventWorkspace *const);
-
-template void ConvertToMDEvents::processQND<2,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<3,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<4,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<5,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<6,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<7,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<8,modQ>(API::IMDEventWorkspace *const);
-
-template void ConvertToMDEvents::processQND<3,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<4,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<5,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<6,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<7,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<8,Q3D>(API::IMDEventWorkspace *const);
-
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<2>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<3>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<4>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<5>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<6>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<7>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<8>(size_t ,size_t ,size_t );
-
+// TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
+//
 //----------------------------------------------------------------------------------------------
-/** Constructor
+/** Constructor 
+ *  needs to pick up all known algorithms. 
 */
 ConvertToMDEvents::ConvertToMDEvents():
  Q_ID_possible(3)
@@ -471,7 +442,7 @@ ConvertToMDEvents::ConvertToMDEvents():
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      
-#define NOQ   
+// NoQ
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToMDEvents::processQND<2,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND3",&ConvertToMDEvents::processQND<3,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND4",&ConvertToMDEvents::processQND<4,NoQ>));
@@ -479,9 +450,8 @@ ConvertToMDEvents::ConvertToMDEvents():
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND6",&ConvertToMDEvents::processQND<6,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND7",&ConvertToMDEvents::processQND<7,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND8",&ConvertToMDEvents::processQND<8,NoQ>));
-#undef NOQ
-    //
-#define MODQ
+
+// MOD Q
     alg_selector.insert(std::pair<std::string,pMethod>("modQND2",&ConvertToMDEvents::processQND<2,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND3",&ConvertToMDEvents::processQND<3,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND4",&ConvertToMDEvents::processQND<4,modQ>));
@@ -489,17 +459,15 @@ ConvertToMDEvents::ConvertToMDEvents():
     alg_selector.insert(std::pair<std::string,pMethod>("modQND6",&ConvertToMDEvents::processQND<6,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToMDEvents::processQND<7,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToMDEvents::processQND<8,modQ>));
-#undef MODQ
-    //
-#define Q3D_
+// Q3D
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToMDEvents::processQND<3,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToMDEvents::processQND<4,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToMDEvents::processQND<5,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToMDEvents::processQND<6,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToMDEvents::processQND<7,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToMDEvents::processQND<8,Q3D>));
-#undef Q3D_
 
+// Workspaces:
     ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
     ws_creator.insert(std::pair<size_t,pWSCreator>(3,&ConvertToMDEvents::createEmptyEventWS<3>));
     ws_creator.insert(std::pair<size_t,pWSCreator>(4,&ConvertToMDEvents::createEmptyEventWS<4>));
