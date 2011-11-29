@@ -151,7 +151,6 @@ public:
     IntegratePeakTimeSlices algP;
     wsPtr->setName("InputWorkspace");
     pks->setName("PeaksWorkspace");
-
     try
     {
       algP.initialize();
@@ -162,24 +161,41 @@ public:
 
       algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
       algP.setPropertyValue("OutputWorkspace", "aaa");
+
       algP.execute();
+
       algP.setPropertyValue("OutputWorkspace", "aaa");
 
-      TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
-//       double intensity = algP.getProperty("Intensity");
-//       double sigma = algP.getProperty("SigmaIntensity");
-  //     TS_ASSERT_LESS_THAN(fabs(intensity - 59870.5), 100.0);
-      //Not sure why this reduced the error so much in the test
-   //   TS_ASSERT_LESS_THAN(fabs(sigma - 665.1), 1.0);
-     // TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 76.04), 1.0);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Time", 0) - 19250), 20);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Background", 1) - 1.523), .2);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11136.3), 20);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  169), 5);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 321.3), 1.5);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 3987), 10);
+   
+       double intensity = algP.getProperty("Intensity");
+       double sigma = algP.getProperty("SigmaIntensity");
+       TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
+  
 
-   /* 
+       TS_ASSERT_LESS_THAN(fabs(intensity - 59870.5), 100.0);
+      //Not sure why this reduced the error so much in the test
+      TS_ASSERT_LESS_THAN(fabs(sigma - 665.1), 1.0);
+
+      TS_ASSERT_EQUALS( Twk->rowCount(), 7);
+      
+      if( Twk->rowCount() <5)
+          return;
+
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
+    
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.523), .2);  
+   
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11136.3), 20);
+      
+   
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  169), 5);  
+    
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 321.3), 1.5);  
+    
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 3987), 10);
+      
+  
+   /*
        std::vector<std::string> names = Twk->getColumnNames();
       std::cout<<"Intensitty="<<pks->getPeak(0).getIntensity()<<"   sigma="<<pks->getPeak(0).getSigmaIntensity()<<std::endl;
        for( int i=0; i<Twk->columnCount();i++)
