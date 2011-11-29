@@ -85,7 +85,6 @@ void DiffractionFocussing2::cleanup()
   //Clear maps and vectors to free up memory.
   udet2group.clear();
   groupAtWorkspaceIndex.clear();
-  std::vector<int>().swap(groupAtWorkspaceIndex);
   group2xvector.clear();
   group2wgtvector.clear();
 }
@@ -110,12 +109,12 @@ void DiffractionFocussing2::exec()
     throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace!");
 
   // Get the input workspace
-  m_matrixInputW = getProperty("InputWorkspace");
-  nPoints = static_cast<int>(m_matrixInputW->blocksize());
-  nHist = static_cast<int>(m_matrixInputW->getNumberHistograms());
+  matrixInputW = getProperty("InputWorkspace");
+  nPoints = static_cast<int>(matrixInputW->blocksize());
+  nHist = static_cast<int>(matrixInputW->getNumberHistograms());
 
   // Validate UnitID (spacing)
-  Axis* axis = m_matrixInputW->getAxis(0);
+  Axis* axis = matrixInputW->getAxis(0);
   std::string unitid = axis->unit()->unitID();
   if (unitid != "dSpacing" && unitid != "MomentumTransfer"){
     g_log.error() << "UnitID " << unitid << " is not a supported spacing" << std::endl;
@@ -127,7 +126,7 @@ void DiffractionFocussing2::exec()
   {
     progress(0.01, "Reading grouping file");
     IAlgorithm_sptr childAlg = createSubAlgorithm("CreateGroupingWorkspace");
-    childAlg->setProperty("InputWorkspace", m_matrixInputW);
+    childAlg->setProperty("InputWorkspace", matrixInputW);
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsSubAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
@@ -144,29 +143,17 @@ void DiffractionFocussing2::exec()
   // It also initializes the groupAtWorkspaceIndex[] array.
   determineRebinParameters();
 
-  // determine event workspace min/max tof
-  double eventXMin = 0.;
-  double eventXMax = 0.;
-
-  m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_matrixInputW );
-  if (m_eventW != NULL)
+  eventW = boost::dynamic_pointer_cast<EventWorkspace>( matrixInputW );
+  if ((getProperty("PreserveEvents")) && (eventW != NULL))
   {
-    if (getProperty("PreserveEvents"))
-    {
-      //Input workspace is an event workspace. Use the other exec method
-      this->execEvent();
-      this->cleanup();
-      return;
-    }
-    else
-    {
-      // get the full d-spacing range
-      m_matrixInputW->getXMinMax(eventXMin, eventXMax);
-    }
+    //Input workspace is an event workspace. Use the other exec method
+    this->execEvent();
+    this->cleanup();
+    return;
   }
 
   //No problem? Then it is a normal Workspace2D
-  API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(m_matrixInputW,nGroups,nPoints+1,nPoints);
+  API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(matrixInputW,nGroups,nPoints+1,nPoints);
 
 
   // Now the real work
@@ -178,12 +165,14 @@ void DiffractionFocussing2::exec()
   
   Progress * prog;
   prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
+  PARALLEL_FOR1(matrixInputW)
   for (int64_t i=0;i<nHist;i++)
   {
+    PARALLEL_START_INTERUPT_REGION
     prog->report();
 
     // This is the input spectrum
-    const ISpectrum * inSpec = m_matrixInputW->getSpectrum(i);
+    const ISpectrum * inSpec = matrixInputW->getSpectrum(i);
 
     //Check whether this spectra is in a valid group
     const int group=groupAtWorkspaceIndex[i];
@@ -191,17 +180,17 @@ void DiffractionFocussing2::exec()
     if (group<=0) // Not in a group
       continue;
     //Get reference to its old X,Y,and E.
-    const MantidVec& Xin=inSpec->readX();
-    const MantidVec& Yin=inSpec->readY();
-    const MantidVec& Ein=inSpec->readE();
+    const MantidVec& Xin=inSpec->dataX();
+    const MantidVec& Yin=inSpec->dataY();
+    const MantidVec& Ein=inSpec->dataE();
     // Get the group
     group2vectormap::iterator it=group2xvector.find(group);
     group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
     const MantidVec& Xout = *((*it).second);
-
+ 
     // Workspace index in the output
     const size_t outWI = static_cast<size_t>(dif);
-
+ 
     // Assign the new X axis only once (i.e when this group is encountered the first time)
     if (flags[dif])
     {
@@ -215,17 +204,19 @@ void DiffractionFocussing2::exec()
       outSpec->setSpectrumNo(group);
       outSpec->clearDetectorIDs();
     }
-
-    // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(i));
-    if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-
+  
+    const MantidVec& Mask = groupWS->readY(i);
+    if ( Mask[0] > 0.5 ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+  
     // Get the references to Y and E output and rebin
     MantidVec& Yout=outSpec->dataY();
     MantidVec& Eout=outSpec->dataE();
     try
     {
-      VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
+      PARALLEL_CRITICAL( DiffractionFocussing2_JoinGroups )
+      {
+        VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
+      }
     }catch(...)
     {
       // Should never happen because Xout is constructed to envelop all of the Xin vectors
@@ -237,12 +228,12 @@ void DiffractionFocussing2::exec()
     // Get a reference to the summed weights vector for this group
     MantidVec& groupWgt = *group2wgtvector[group];
     // Check for masked bins in this spectrum
-    if ( m_matrixInputW->hasMaskedBins(i) )
+    if ( matrixInputW->hasMaskedBins(i) )
     {
       MantidVec weight_bins,weights;
       weight_bins.push_back(Xin.front());
       // If there are masked bins, get a reference to the list of them
-      const API::MatrixWorkspace::MaskList& mask = m_matrixInputW->maskedBins(i);
+      const API::MatrixWorkspace::MaskList& mask = matrixInputW->maskedBins(i);
       // Now iterate over the list, adjusting the weights for the affected bins
       for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
       {
@@ -277,21 +268,14 @@ void DiffractionFocussing2::exec()
     }
     else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
     {
-      if (eventXMin > 0. && eventXMax > 0)
-      {
-        limits[0] = eventXMin;
-        limits[1] = eventXMax;
-      }
-      else
-      {
-        limits[0] = Xin.front();
-        limits[1] = Xin.back();
-      }
-
+      limits[0] = Xin.front();
+      limits[1] = Xin.back();
       // Rebin the weights - note that this is a distribution
       VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Now propagate the errors.
   // Pointer to sqrt function
@@ -300,8 +284,10 @@ void DiffractionFocussing2::exec()
   
   group2vectormap::const_iterator wit = group2wgtvector.begin();
 
-  for (int64_t i=0; i < nGroups; ++i,++wit)
+  PARALLEL_FOR1(out)
+  for (int64_t i=0; i < nGroups; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     const MantidVec& Xout = out->readX(i);
     // Calculate the bin widths
     std::vector<double> widths(Xout.size());
@@ -325,9 +311,12 @@ void DiffractionFocussing2::exec()
     const int groupSize = static_cast<int>(std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first));
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
+    ++wit;
 
     prog->report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   
   // For backwards-compatibility
   out->generateSpectraMap();
@@ -352,14 +341,14 @@ void DiffractionFocussing2::execEvent()
   out = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace",1,2,1) );
   //Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out, true);
+  API::WorkspaceFactory::Instance().initializeFromParent(matrixInputW, out, true);
 
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
   if (inPlace)
     g_log.debug("Focussing EventWorkspace in-place.");
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
-  Geometry::Instrument_const_sptr instrument = m_eventW->getInstrument();
+  Geometry::Instrument_const_sptr instrument = eventW->getInstrument();
   Geometry::IObjComponent_const_sptr source;
   Geometry::IObjComponent_const_sptr sample;
   if (instrument != NULL)
@@ -372,7 +361,7 @@ void DiffractionFocussing2::execEvent()
   prog = new Progress(this,0.2,0.35,nHist);
 
   bool checkForMask = (instrument != NULL) && (source != NULL) && (sample != NULL);
-  EventType eventWtype = m_eventW->getEventType();
+  EventType eventWtype = eventW->getEventType();
 
   if (nGroups == 1)
   {
@@ -380,7 +369,7 @@ void DiffractionFocussing2::execEvent()
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
     groupEL.switchTo(eventWtype);
-    groupEL.reserve(m_eventW->getNumberEvents()); // does this slow it all down?
+    groupEL.reserve(eventW->getNumberEvents()); // does this slow it all down?
 
     // Only one group, spec # is = 1
     groupEL.setSpectrumNo(1);
@@ -427,14 +416,14 @@ void DiffractionFocussing2::execEvent()
         // Check for masking. TODO: Most of the pointer checks are redundant
         if (checkForMask)
         {
-          Geometry::IDetector_const_sptr det = m_eventW->getDetector(static_cast<size_t>(wi));
-          if ( det->isMasked() ) continue;
+          const MantidVec& Mask = groupWS->readY(wi);
+          if ( Mask[0] < 0.5 ) continue;
         }
         const int group = groupAtWorkspaceIndex[wi];
         if (group == 1)
         {
           // Accumulate the chunk
-          chunkEL += m_eventW->getEventList(wi);
+          chunkEL += eventW->getEventList(wi);
         }
       }
 
@@ -461,14 +450,14 @@ void DiffractionFocussing2::execEvent()
     {
       if (checkForMask)
       {
-        Geometry::IDetector_const_sptr det = m_eventW->getDetector(static_cast<size_t>(wi));
-        if ( det->isMasked() ) continue;
+        const MantidVec& Mask = groupWS->readY(wi);
+        if ( Mask[0] < 0.5 ) continue;
       }
       //i is the workspace index (of the input)
       const int group = groupAtWorkspaceIndex[wi];
       if (group < 1 || group > nGroups) // Not in a group, or invalid group #
         continue;
-      size_required[group] += m_eventW->getEventList(wi).getNumberEvents();
+      size_required[group] += eventW->getEventList(wi).getNumberEvents();
       // Also record a list of workspace indices
       ws_indices[group].push_back(wi);
       prog->reportIncrement(1, "Pre-counting");
@@ -486,7 +475,7 @@ void DiffractionFocussing2::execEvent()
 
     // ----------- Focus ---------------
     delete prog; prog = new Progress(this,0.40,0.9,nHist);
-    PARALLEL_FOR1(m_eventW)
+    PARALLEL_FOR1(eventW)
     for (int group=1; group<nGroups+1; group++)
     {
       PARALLEL_START_INTERUPT_REGION
@@ -496,14 +485,14 @@ void DiffractionFocussing2::execEvent()
         int wi = indices[i];
 
         //In workspace index group-1, put what was in the OLD workspace index wi
-        out->getOrAddEventList(group-1) += m_eventW->getEventList(wi);
+        out->getOrAddEventList(group-1) += eventW->getEventList(wi);
 
         prog->reportIncrement(1, "Appending Lists");
 
         // When focussing in place, you can clear out old memory from the input one!
         if (inPlace)
         {
-          m_eventW->getEventList(wi).clear();
+          eventW->getEventList(wi).clear();
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         }
       }
@@ -558,12 +547,10 @@ void DiffractionFocussing2::execEvent()
 int DiffractionFocussing2::validateSpectrumInGroup(size_t wi)
 {
   // Get the spectra to detector map
-  //const std::set<detid_t> & dets
-  //    = ((MatrixWorkspace_const_sptr)m_matrixInputW)->getSpectrum(wi)->getDetectorIDs();
-  const std::set<detid_t> & dets = m_matrixInputW->getSpectrum(wi)->getDetectorIDs();
+  const std::set<detid_t> & dets = matrixInputW->getSpectrum(wi)->getDetectorIDs();
   if (dets.empty()) // Not in group
   {
-    g_log.debug() << wi << " <- this workspace index is empty!\n";
+//    std::cout << spectrum_number << " <- this spectrum is empty!\n";
     return -1;
   }
 
@@ -628,7 +615,7 @@ void DiffractionFocussing2::determineRebinParameters()
     }
     const double min = ((*gpit).second).first;
     const double max = ((*gpit).second).second;
-    const MantidVec& X = m_matrixInputW->readX(i);
+    const MantidVec& X = matrixInputW->readX(i);
     if (X.front() < (min)) //New Xmin found
       ((*gpit).second).first = X.front();
     if (X.back() > (max)) //New Xmax found
