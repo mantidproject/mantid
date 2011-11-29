@@ -222,7 +222,6 @@ void ConvertToQNDany::exec(){
    
     
 
- 
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
     if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
      dim_min.assign(n_activated_dimensions,-1);
@@ -470,12 +469,12 @@ ConvertToQNDany::ConvertToQNDany():
     alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToQNDany::processQND<7,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToQNDany::processQND<8,modQ>));
     //
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToQNDany::processQND<3,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToQNDany::processQND<4,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToQNDany::processQND<5,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToQNDany::processQND<6,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToQNDany::processQND<7,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToQNDany::processQND<8,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToQNDany::processQND<3,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToQNDany::processQND<4,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToQNDany::processQND<5,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToQNDany::processQND<6,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToQNDany::processQND<7,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToQNDany::processQND<8,Q3D>));
 
 
     ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToQNDany::createEmptyEventWS<2>));

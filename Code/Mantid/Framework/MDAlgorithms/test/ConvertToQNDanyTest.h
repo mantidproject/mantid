@@ -229,7 +229,8 @@ void testExecQ3D()
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
      
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
-   
+
+    pAlg->setRethrows(false);
     pAlg->execute();
     TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
  

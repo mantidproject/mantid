@@ -12,6 +12,11 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
     size_t SPLIT_LEVEL(1024);
     // counder for the number of events
     size_t n_added_events(0);
+    // amount of work
+    const size_t numSpec  = inWS2D->getNumberHistograms();
+    // progress reporter
+    pProg = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.0,numSpec));
+
 
     MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const>(piWS);
     if(!pWs){
@@ -25,8 +30,6 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
     API::ExperimentInfo_sptr ExperimentInfo(inWS2D->cloneExperimentInfo());
     uint16_t runIndex = pWs->addExperimentInfo(ExperimentInfo);
     
-   //
-    const size_t numSpec  = inWS2D->getNumberHistograms();
     const size_t specSize = inWS2D->blocksize();    
     std::vector<coord_t> Coord(nd);
     size_t n_ws_properties(0);
@@ -39,7 +42,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
         n_ws_properties = 2;
         for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i]));  
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i-n_ws_properties]));  
           if(!run_property){
              g_log.error()<<" property: "<<this->other_dim_names[i]<<" is not a time series (run) property\n";
           }
@@ -79,7 +82,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
           if(n_added_events>SPLIT_LEVEL){
                 pWs->splitAllIfNeeded(NULL);
                 n_added_events=0;
-                prog->report(i);
+                pProg->report(i);
           }
           //tp.joinAll();        
        } // end detectors loop;
@@ -90,7 +93,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
          n_added_events=0;
         }
         pWs->refreshCache();
-        prog->report();          
+        pProg->report();          
         break;
     }
 //------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +111,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
         n_ws_properties = 4;
         for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i]));  
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i-n_ws_properties]));  
           if(!run_property){
              g_log.error()<<" property: "<<this->other_dim_names[i]<<" is not a time series (run) property\n";
           }
@@ -161,7 +164,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
           if(n_added_events>SPLIT_LEVEL){
                 pWs->splitAllIfNeeded(NULL);
                 n_added_events=0;
-                prog->report(i);
+                pProg->report(i);
           }
           //tp.joinAll();        
        } // end detectors loop;
@@ -172,7 +175,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
          n_added_events=0;
         }
         pWs->refreshCache();
-        prog->report();          
+        pProg->report();          
         break;
     }   
 //------------------------------------------------------------------------------------------------------------------------------------------------------

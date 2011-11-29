@@ -79,8 +79,8 @@ namespace MDAlgorithms
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
 
-      /// Progress reporter (shared)
-    Kernel::ProgressBase * prog;
+      /// Progress reporter 
+    std::auto_ptr<API::Progress> pProg;
  
   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
