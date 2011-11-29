@@ -354,12 +354,11 @@ def Load(*args, **kwargs):
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
-            print("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
+            mantid.logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()
     return gather_returns('Load', lhs, algm, ignore='LoaderName')
-    
 
 def LoadDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function
