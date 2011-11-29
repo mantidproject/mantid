@@ -406,7 +406,32 @@ ConvertToQNDany::get_transf_matrix()const
     return rotMat;
 }
 
+/** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates for 
+    the particular workspace.
 
+    @param Coord             -- vector of coordinates for current multidimensional event
+    @param nd                -- number of event's dimensions
+    @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
+                                workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
+                                -- 2 for elastic and 3 for inelastic mode. Number of these properties is determined by the deployed algorithm
+                                The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
+                                obtained from dimensions placed after them. */
+void 
+ConvertToQNDany::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
+{
+     for(size_t i=n_ws_properties;i<nd;i++){
+         //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i-n_ws_properties]));  
+          if(!run_property){
+             g_log.error()<<" property: "<<this->other_dim_names[i]<<" is not a time series (run) property\n";
+          }
+          Coord[i]=run_property->firstValue();
+        }  
+}
+
+#undef NOQ
+#undef MODQ
+#undef Q3D_
 
 #define NOQ
 template void ConvertToQNDany::processQND<2,NoQ>(API::IMDEventWorkspace *const);
@@ -452,7 +477,7 @@ ConvertToQNDany::ConvertToQNDany():
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      
-   
+#define NOQ   
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToQNDany::processQND<2,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND3",&ConvertToQNDany::processQND<3,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND4",&ConvertToQNDany::processQND<4,NoQ>));
@@ -460,7 +485,9 @@ ConvertToQNDany::ConvertToQNDany():
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND6",&ConvertToQNDany::processQND<6,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND7",&ConvertToQNDany::processQND<7,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND8",&ConvertToQNDany::processQND<8,NoQ>));
+#undef NOQ
     //
+#define MODQ
     alg_selector.insert(std::pair<std::string,pMethod>("modQND2",&ConvertToQNDany::processQND<2,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND3",&ConvertToQNDany::processQND<3,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND4",&ConvertToQNDany::processQND<4,modQ>));
@@ -468,14 +495,16 @@ ConvertToQNDany::ConvertToQNDany():
     alg_selector.insert(std::pair<std::string,pMethod>("modQND6",&ConvertToQNDany::processQND<6,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToQNDany::processQND<7,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToQNDany::processQND<8,modQ>));
+#undef MODQ
     //
+#define Q3D_
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToQNDany::processQND<3,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToQNDany::processQND<4,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToQNDany::processQND<5,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToQNDany::processQND<6,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToQNDany::processQND<7,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToQNDany::processQND<8,Q3D>));
-
+#undef Q3D_
 
     ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToQNDany::createEmptyEventWS<2>));
     ws_creator.insert(std::pair<size_t,pWSCreator>(3,&ConvertToQNDany::createEmptyEventWS<3>));
