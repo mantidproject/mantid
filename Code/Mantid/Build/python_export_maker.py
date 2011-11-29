@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 """Creates a simple template for exporting a class to Python
 """
 import optparse
