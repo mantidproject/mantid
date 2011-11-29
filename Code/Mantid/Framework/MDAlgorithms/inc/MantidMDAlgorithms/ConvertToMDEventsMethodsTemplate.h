@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/ConvertToQNDany.h"
+#include "MantidMDAlgorithms/ConvertToMDEvents.h"
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -8,7 +8,7 @@ namespace MDAlgorithms
 //-----------------------------------------------
 template<size_t nd,Q_state Q>
 void 
-ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
+ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 {
     // service variable used for efficient filling of the MD event WS  -> should be moved to configuration;
     size_t SPLIT_LEVEL(1024);
@@ -22,7 +22,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
 
     MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
     if(!pWs){
-        g_log.error()<<"ConvertToQNDany: can not cast input worspace pointer into pointer to proper target workspace\n"; 
+        g_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
     }
 
@@ -84,7 +84,7 @@ ConvertToQNDany::processQND(API::IMDEventWorkspace *const piWS)
 
 template<size_t nd>
 API::IMDEventWorkspace_sptr
-ConvertToQNDany::createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth)
+ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth)
 {
 
        boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
@@ -111,7 +111,7 @@ ConvertToQNDany::createEmptyEventWS(size_t split_into,size_t split_threshold,siz
 
 
 template<> 
-inline void ConvertToQNDany::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
+inline void ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
     // workspace defines 2 properties
          fillAddProperties(Coord,nd,2);
       // get the Y axis; 
@@ -121,14 +121,14 @@ inline void ConvertToQNDany::calc_generic_variables<NoQ>(std::vector<coord_t> &C
           }
 }
 template<> 
-void ConvertToQNDany::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
+void ConvertToMDEvents::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
     UNUSED_ARG(Coord);
     UNUSED_ARG(nd);
     throw(Kernel::Exception::NotImplementedError("not yet implemented"));
 }
 
 template<> 
-inline void ConvertToQNDany::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
+inline void ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
    // INELASTIC:
     // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
     fillAddProperties(Coord,nd,4);
@@ -141,20 +141,20 @@ inline void ConvertToQNDany::calc_generic_variables<Q3D>(std::vector<coord_t> &C
 
 
 template<>
-void ConvertToQNDany::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
+void ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
 {
         UNUSED_ARG(i);
         Coord[1]                  = pYAxis->operator()(i);
 }
 
 template<>
-bool ConvertToQNDany::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
            Coord[0]    = 0.5*( X[j]+ X[j+1]);
            return true;
 }
 
 template<>
-bool ConvertToQNDany::calculate_ND_coordinates<Q3D>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+bool ConvertToMDEvents::calculate_ND_coordinates<Q3D>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
 
           coord_t E_tr = 0.5*( X[j]+ X[j+1]);
           Coord[3]    = E_tr;

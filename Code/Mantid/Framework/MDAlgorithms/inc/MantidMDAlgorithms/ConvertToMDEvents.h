@@ -1,5 +1,5 @@
-#ifndef MANTID_MD_CONVERT2_Q_ND_ANY
-#define MANTID_MD_CONVERT2_Q_ND_ANY
+#ifndef MANTID_MD_CONVERT2_MDEVENTS
+#define MANTID_MD_CONVERT2_MDEVENTS
     
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
@@ -50,12 +50,12 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class ConvertToQNDany;
+  class ConvertToMDEvents;
   // signature for an algorithm processing n-dimension event workspace
-  typedef boost::function<void (ConvertToQNDany*, API::IMDEventWorkspace *const)> pMethod;
+  typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
   // signature for a fucntion, creating n-dimension workspace
-  //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToQNDany*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
-  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToQNDany*, size_t ,size_t ,size_t )> pWSCreator;
+  //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
+  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, size_t ,size_t ,size_t )> pWSCreator;
 
   enum Q_state{
        NoQ,
@@ -63,14 +63,14 @@ namespace MDAlgorithms
        Q3D
    };
 //
-  class DLLExport ConvertToQNDany  : public API::Algorithm
+  class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
   public:
-    ConvertToQNDany();
-    ~ConvertToQNDany();
+    ConvertToMDEvents();
+    ~ConvertToMDEvents();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "ConvertToQNDany";};
+    virtual const std::string name() const { return "ConvertToMDEvents";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
