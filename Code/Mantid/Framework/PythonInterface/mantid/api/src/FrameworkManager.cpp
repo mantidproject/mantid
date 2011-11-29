@@ -9,6 +9,7 @@
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/args.hpp>
+#include <boost/python/converter/shared_ptr_to_python.hpp>
 
 using Mantid::API::FrameworkManagerImpl;
 using Mantid::API::FrameworkManager;
@@ -35,21 +36,28 @@ namespace
    * @param name :: The name of the algorithm to create
    * @param version :: The version of the algorithm to create (default = -1 = highest version)
    */
-  IAlgorithm_sptr createAlgorithm(boost::python::object self, const std::string & name, const int version = -1)
+  PyObject * createAlgorithm(boost::python::object self, const std::string & name, const int version = -1)
   {
     UNUSED_ARG(self);
     IAlgorithm_sptr alg;
+    int async(0);
     if( Mantid::PythonInterface::PyEnvironment::isInCallStack("PyExec") )
     {
       alg = AlgorithmManager::Instance().createUnmanaged(name, version);
       alg->initialize();
+      async = 0;
     }
     else
     {
       alg = AlgorithmManager::Instance().create(name, version); // This will be initialized already
+      async = 1;
     }
     alg->setRethrows(true);
-    return alg;
+
+    PyObject * wrapped = converter::shared_ptr_to_python(alg);
+    // Add an atribute to indicate asynchronous execution
+    PyObject_SetAttrString(wrapped, "__async__", PyBool_FromLong(async));
+    return wrapped;
   }
 
   //------------------------------------------------------------------------------------------------------
