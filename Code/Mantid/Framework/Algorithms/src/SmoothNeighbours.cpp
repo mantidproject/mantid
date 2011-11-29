@@ -17,8 +17,7 @@ For each pixel in each detector, the AdjX*AdjY neighboring spectra are summed to
 
 === WeightedSum parameter ===
 
-* For All Instruments: A weight of 1.0 is given to the center pixel. Other pixels are given the weight <math>w = 1 - r/Radius</math>, so pixels near the edge are given a weight of ~ 0.
-* For Rectangular Detectors: Parabolic weights are applied to each added eventlist with the largest weights near the center.
+* A weighting strategy can be applied to control how the weights are calculated. Options are either linear or flat or parabolic.
 * Weights are summed and scaled so that they add up to 1.
 
 === For EventWorkspaces ===
@@ -32,6 +31,16 @@ This increases the memory used by a factor of 9.
 You can use PreserveEvents = false to avoid the memory issues with an EventWorkspace input.
 Please note that the algorithm '''does not check''' that the bin X boundaries match.
 
+== Neighbour Searching ==
+
+If the radius is set to 0, the instrument is treated as though it has rectangular detectors. AdjX and AdjY can then be used to control the number of neighbours independently in x and y. Otherwise
+the algorithm will fetch neigbours using the intesection of those inside the radius cut-off and those less than the NumberOfNeighbours specified. For example with NumberOfNeighbours=24 and a 
+Radius=1.2 (with RadiusUnit=NumberOfPixels) only 8 nearest neighbours at most will be returned. If NumberOfNeighbours=24 and Radius=2, a maxium of 24 nearest neighbours will be found.
+
+== Ignore Masks ==
+
+The algorithm will ignore masked detectors if this flag is set.
+
 *WIKI*/
 
 
@@ -44,6 +53,7 @@ Please note that the algorithm '''does not check''' that the bin X boundaries ma
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/algorithm/string.hpp>
 
@@ -51,6 +61,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using std::map;
 
 namespace Mantid
 {
@@ -83,7 +94,14 @@ void SmoothNeighbours::init()
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );
 
-  declareProperty("ProvideRadius", true, "Provide the radius for the search. Otherwise will need to specify number of neighbours");
+  std::vector<std::string> radiusPropOptions;
+  radiusPropOptions.push_back("Meters");
+    radiusPropOptions.push_back("NumberOfPixels");
+    declareProperty("RadiusUnits", "Meters",new ListValidator(radiusPropOptions),
+      "Units used to specify the radius?\n"
+      "  Meters : Radius is in meters.\n"
+      "  NumberOfPixels : Radius is in terms of the number of pixels."
+       );
 
   //Unsigned double
   BoundedValidator<double> *mustBePositiveDouble = new BoundedValidator<double>();
@@ -91,32 +109,28 @@ void SmoothNeighbours::init()
 
   //Unsigned int.
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-  mustBePositive->setLower(0);
+  mustBePositive->setLower(0); 
 
   declareProperty("Radius", 0.0, mustBePositiveDouble,
     "The radius around a pixel to look for nearest neighbours to average. \n"
     "If 0, will use the AdjX and AdjY parameters for rectangular detectors instead." );
-  setPropertySettings("Radius", new EnabledWhenProperty(this, "ProvideRadius", IS_DEFAULT));
 
   declareProperty("NumberOfNeighbours", 8, mustBePositive->clone(), "Number of nearest neighbouring pixels.\n"
     "Alternative to providing the radius. The default is 8.");
-  setPropertySettings("NumberOfNeighbours", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
 
   declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
-  setPropertySettings("IgnoreMaskedDetectors", new EnabledWhenProperty(this, "ProvideRadius", IS_NOT_DEFAULT));
 
-  declareProperty("WeightedSum", true,
-    "Adjust the weight of neighboring pixels when summing them, based on their distance.");
+  std::vector<std::string> propOptions;
+    propOptions.push_back("Flat");
+    propOptions.push_back("Linear");
+    propOptions.push_back("Parabolic");
+    declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
+      "What sort of Weighting scheme to use?\n"
+      "  Flat: Effectively no-weighting, all weights are 1.\n"
+      "  Linear: Linear weighting 1 - r/R from origin.\n"
+      "  Parabolic : WARNING. Can only use for rectangular detectors and when Radius is zero."
+       );
 
-  //std::vector<std::string> propOptions;
-  //  propOptions.push_back("Flat");
-  //  propOptions.push_back("Linear");
-  //  declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
-  //    "What sort of Weighting scheme to use?\n"
-  //    "  Flat: Effectively no-weighting, all weights are 1.\n"
-  //    "  Linear: Linear weighting 1 - r/R from origin."
-  //     );
-  
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
 
@@ -292,10 +306,12 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
-  //Get the use radius flag.
-  bool useRadius = getProperty("ProvideRadius");
+
   int nNeighbours = getProperty("NumberOfNeighbours");
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
+
+  //Cull by radius
+  RadiusFilter radiusFilter(Radius);
 
   IDetector_const_sptr det;
   // Go through every input workspace pixel
@@ -314,15 +330,13 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     }
 
     specid_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
-    std::map<specid_t, double> neighbSpectra;
-    if(useRadius)
-    {
-      neighbSpectra = inWS->getNeighbours(inSpec, Radius, ignoreMaskedDetectors);
-    }
-    else
-    {
-      neighbSpectra = inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors);
-    }
+
+    //Step one - Get the number of specified neighbours
+    SpectraDistanceMap insideGrid  = inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors); 
+
+    //Step two - Filter the results by the radius cut off.
+    SpectraDistanceMap neighbSpectra = radiusFilter.apply(insideGrid);
+    
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0
     neighbSpectra[inSpec] = 0.0;
@@ -370,6 +384,8 @@ void SmoothNeighbours::findNeighboursUbiqutious()
 Attempts to reset the Weight based on the strategyName provided. Note that if these conditional 
 statements fail to override the existing WeightedSum member, it should stay as a NullWeighting, which
 will throw during usage.
+@param strategyName : The name of the weighting strategy to use
+@param cutOff : The cutoff distance
 */
 void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, double& cutOff)
 {
@@ -380,9 +396,63 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
   }
   else if(strategyName == "Linear")
   {
-    boost::scoped_ptr<WeightingStrategy> flatStrategy(new LinearWeighting(cutOff));
-    WeightedSum.swap(flatStrategy);
+    boost::scoped_ptr<WeightingStrategy> linearStrategy(new LinearWeighting(cutOff));
+    WeightedSum.swap(linearStrategy);
   }
+  else if(strategyName == "Parabolic")
+  {
+    boost::scoped_ptr<WeightingStrategy>  parabolicStrategy(new ParabolicWeighting);
+    WeightedSum.swap(parabolicStrategy);
+  }
+}
+
+/**
+Translate the radius into meters.
+@param radiusUnits : The name of the radius units
+@param enteredUnits : The numerical value of the radius in whatever units have been specified
+@param inWS : The input workspace
+*/
+double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const double& enteredRadius, Mantid::API::MatrixWorkspace_const_sptr ws)
+{
+  double translatedRadius = 0;
+  if(radiusUnits == "Meters")
+  {
+    // Nothing more to do.
+    translatedRadius = enteredRadius; 
+  }
+  else if(radiusUnits == "NumberOfPixels")
+  {
+    // Fetch the instrument.
+    Instrument_const_sptr instrument;
+    EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
+    MatrixWorkspace_sptr wsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS);
+    if(wsEvent)
+    {
+      instrument = boost::dynamic_pointer_cast<EventWorkspace>(inWS)->getInstrument();
+    }
+    else if(wsMatrix)
+    {
+      instrument = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)->getInstrument();
+    }
+    else
+    {
+      throw std::invalid_argument("Neither a Matrix Workspace or an EventWorkpace provided to SmoothNeighbours.");
+    }
+
+    // Get the first idetector from the workspace index 0.
+    IDetector_const_sptr firstDet = inWS->getDetector(0);
+    // Find the bounding box of that detector
+    BoundingBox bbox;
+    firstDet->getBoundingBox(bbox);
+    // Multiply (meters/pixels) by number of pixels, note that enteredRadius takes on meaning of the number of pixels.
+    translatedRadius = bbox.width().norm() * enteredRadius;
+  }
+  else
+  {
+    std::string message = "SmoothNeighbours::translateToMeters, Unknown Unit: " + radiusUnits;
+    throw std::invalid_argument(message);
+  }
+  return translatedRadius;
 }
 
 
@@ -392,38 +462,30 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
  */
 void SmoothNeighbours::exec()
 {
-  // Retrieve the optional properties
-  Radius = getProperty("Radius");
-  // Set the weighting strategy
+  // Get the input workspace
+  inWS = getProperty("InputWorkspace");
 
-  /*
-  --The following snippet is not going to be required when weighted sum becomes an option rather than a boolean.--
-  */
-  std::string strategy = "Flat";
-  bool b = getProperty("WeightedSum");
-  if(b)
-  {
-    strategy = "Linear";
-  }
-  /*
-  --End snippet.--
-  */
-  setWeightingStrategy(strategy, Radius);
+  // Retrieve the optional properties
+  double enteredRadius = getProperty("Radius");
+
+  // Use the unit type to translate the entered radius into meters.
+  Radius = translateToMeters(getProperty("RadiusUnits"), enteredRadius, inWS);
+
+  std::string strategy  = getProperty("WeightedSum");
 
   AdjX = getProperty("AdjX");
   AdjY = getProperty("AdjY");
   Edge = getProperty("ZeroEdgePixels");
   PreserveEvents = getProperty("PreserveEvents");
-
-  // Get the input workspace
-  inWS = getProperty("InputWorkspace");
   
+  setWeightingStrategy(strategy, Radius);
+
   // Progress reporting, first for the sorting
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Collect the neighbours with either method.
-  bool useRadius = getProperty("ProvideRadius");
-  if (Radius <= 0.0 && useRadius)
+
+  if (Radius <= 0.0)
     findNeighboursRectangular();
   else
     findNeighboursUbiqutious();
@@ -439,7 +501,6 @@ void SmoothNeighbours::exec()
     this->execEvent(wsEvent);
   else
     throw std::runtime_error("This algorithm requires a Workspace2D or EventWorkspace as its input.");
-
 }
 
 

@@ -343,7 +343,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                     normalized = False
 
                 #Remove data at edges of rectangular detectors
-                SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
+                SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, Radius=0,WeightedSum='Flat',
                     AdjX=0, AdjY=0, ZeroEdgePixels=self._edge)
                 #Anvred corrections converts from TOF to Wavelength now.
                 if self._radius > 0:
