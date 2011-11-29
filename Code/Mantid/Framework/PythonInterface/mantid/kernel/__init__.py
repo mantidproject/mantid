@@ -13,3 +13,9 @@ import dlopen as _dlopen
 flags = _dlopen.setup_dlopen() # Ensure the library is open with the correct flags
 from _kernel import *
 dlopen.restore_flags(flags)
+
+###############################################################################
+# Set up a general Python logger. Others can be created as they are required
+# if a user wishes to be more specific
+###############################################################################
+logger = Logger.get("Python")
