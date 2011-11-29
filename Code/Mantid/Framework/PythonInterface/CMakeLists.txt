@@ -65,6 +65,7 @@ set ( TEST_PY_FILES
   test/python/FrameworkManagerTest.py
   test/python/IEventWorkspaceTest.py
   test/python/ImportModuleTest.py
+  test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmTest.py

@@ -2151,7 +2151,7 @@ void FitPropertyBrowser::clearAllPlots()
 *
 * @param plotDetails :: The name of the workspace plot to be customised and the axis label seperated by a '.'
 */
-void FitPropertyBrowser::customisation(const QString& plotDetails)
+void FitPropertyBrowser::customisation(QStringList& plotDetails)
 {
   if (m_customFittings)
     emit customiseGraph(plotDetails);

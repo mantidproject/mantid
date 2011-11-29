@@ -187,7 +187,6 @@ set ( INC_FILES
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
-	inc/MantidKernel/ValidatorSignalChange.h	
 	inc/MantidKernel/ValidatorAnyList.h
 )
 
@@ -264,7 +263,6 @@ set ( TEST_FILES
 	test/V2DTest.h
 	test/V3DTest.h
 	test/VMDTest.h
-	test/ValidatorSignalChangeTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
 	test/ValidatorAnyListTest.h

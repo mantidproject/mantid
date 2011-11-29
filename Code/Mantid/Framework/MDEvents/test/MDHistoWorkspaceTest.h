@@ -2,6 +2,8 @@
 #define MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -13,8 +15,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
@@ -180,9 +181,11 @@ public:
   void test_copy_constructor()
   {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    a->addExperimentInfo( ExperimentInfo_sptr(new ExperimentInfo()) );
     MDHistoWorkspace_sptr b( new MDHistoWorkspace(*a));
     TS_ASSERT_EQUALS( b->getNumDims(), a->getNumDims() );
     TS_ASSERT_EQUALS( b->getNPoints(), a->getNPoints() );
+    TS_ASSERT_EQUALS( b->getNumExperimentInfo(), a->getNumExperimentInfo() );
     checkWorkspace(b, 1.23, 3.234);
   }
 

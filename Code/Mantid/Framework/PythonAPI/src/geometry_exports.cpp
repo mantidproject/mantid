@@ -263,7 +263,7 @@ namespace Mantid
       .def( "getG",( &OrientedLatticeWrapper::getG ) )
       .def( "getGstar",( &OrientedLatticeWrapper::getGstar ) )
       .def( "getB",( &OrientedLatticeWrapper::getB ) )
-      .def( "recalculateFromGstar", ( &OrientedLatticeWrapper::recalculateFromGstar ) ) 
+//      .def( "recalculateFromGstar", ( &OrientedLatticeWrapper::recalculateFromGstar ) )
 // new functions speific to oriented lattice
       .def( init< Geometry::UnitCell >(( arg("uc") )) )  
       .def( "getU",( &OrientedLatticeWrapper::getU ) )

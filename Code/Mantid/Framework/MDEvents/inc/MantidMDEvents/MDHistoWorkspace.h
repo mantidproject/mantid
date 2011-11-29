@@ -23,10 +23,11 @@ namespace MDEvents
   /** MDHistoWorkspace:
   *
   * An implementation of IMDWorkspace that contains a (normally dense) histogram
-  * representation in up to 4 dimensions.
+  * representation in multiple dimensions.
   *
   * This will be the result of a slice or rebin of another workspace, e.g. a
-  * MDEventWorkspace.
+  * MDEventWorkspace. Typically it has 3 or 4 dimensions, but there is no
+  * real limit to it.
   *
   * This will be used by ParaView e.g. for visualization.
   *

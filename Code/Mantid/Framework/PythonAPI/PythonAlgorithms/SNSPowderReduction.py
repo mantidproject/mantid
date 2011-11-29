@@ -74,7 +74,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # get name of parameter file
             temp = lines[0]
-            temp.replace("Instrument parameter file:", "")
+            temp = temp.replace("Instrument parameter file:", "")
             self.iparmFile = temp.strip()
             lines = lines[1:] # delete this line
 
@@ -424,12 +424,14 @@ class SNSPowderReduction(PythonAlgorithm):
         self.log().notice("FOCUS:" + str(focusPos))
         if not focusPos is None:
             EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
+            wksp.getRun()['iparm_file'] = self._config.iparmFile
 
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if normByCurrent:
             NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+            wksp.getRun()['gsas_monitor'] = 1
 
         return wksp
 
