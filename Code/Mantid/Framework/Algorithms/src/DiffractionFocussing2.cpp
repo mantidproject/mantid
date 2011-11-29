@@ -218,10 +218,6 @@ void DiffractionFocussing2::exec()
       outSpec->clearDetectorIDs();
     }
   
-    // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(i));
-    if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-  
     // Get the references to Y and E output and rebin
     MantidVec& Yout=outSpec->dataY();
     MantidVec& Eout=outSpec->dataE();
@@ -229,6 +225,10 @@ void DiffractionFocussing2::exec()
     {
       PARALLEL_CRITICAL( DiffractionFocussing2_JoinGroups )
       {
+        // Add the detectors for this spectrum to the output workspace's spectra-detector map
+        Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(i));
+        if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+  
         VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
       }
     }catch(...)
