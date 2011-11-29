@@ -112,7 +112,7 @@ signals:
   void runAsPythonScript(const QString& code);
 
   /// Change the plot style/color
-  void setAsPlotType(const QString & plotDetails);
+  void setAsPlotType(const QStringList & plotDetails);
 
   ///Mantid log message recieved
   void logMessageReceived(const QString & msg);
@@ -140,7 +140,7 @@ protected:
   QLabel* newValidator(QWidget *parent);
 
   /// Change the plot style/color
-  void changePlotType(const QString & plotDetails);
+  void changePlotType(const QStringList & plotDetails);
 
 private:
   // This is so that it can set the name

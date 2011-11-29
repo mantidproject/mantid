@@ -1,12 +1,14 @@
-#ifndef MANTID_MD_CONVERT2_Q_ND_ANY
-#define MANTID_MD_CONVERT2_Q_ND_ANY
+#ifndef MANTID_MD_CONVERT2_MDEVENTS
+#define MANTID_MD_CONVERT2_MDEVENTS
     
 #include "MantidKernel/System.h"
+#include "MantidKernel/Exception.h"
 #include "MantidAPI/Algorithm.h" 
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
@@ -48,8 +50,12 @@ namespace MDAlgorithms
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class ConvertToQNDany;
-  typedef boost::function<void (ConvertToQNDany*, API::IMDEventWorkspace *const)> pMethod;
+  class ConvertToMDEvents;
+  // signature for an algorithm processing n-dimension event workspace
+  typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
+  // signature for a fucntion, creating n-dimension workspace
+  //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
+  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, size_t ,size_t ,size_t )> pWSCreator;
 
   enum Q_state{
        NoQ,
@@ -57,14 +63,14 @@ namespace MDAlgorithms
        Q3D
    };
 //
-  class DLLExport ConvertToQNDany  : public API::Algorithm
+  class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
   public:
-    ConvertToQNDany();
-    ~ConvertToQNDany();
+    ConvertToMDEvents();
+    ~ConvertToMDEvents();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "ConvertToQNDany";};
+    virtual const std::string name() const { return "ConvertToMDEvents";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -75,8 +81,8 @@ namespace MDAlgorithms
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
 
-      /// Progress reporter (shared)
-    Kernel::ProgressBase * prog;
+      /// Progress reporter 
+    std::auto_ptr<API::Progress> pProg;
  
   /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
@@ -99,39 +105,57 @@ namespace MDAlgorithms
      /// the names of the log variables, which are used as dimensions
     std::vector<std::string> other_dim_names;
     Kernel::V3D u,v;
+    /// minimal and maximal values for the workspace dimensions:
+    std::vector<double>      dim_min,dim_max;
+    // the names for the MD workspace dimensions
+    std::vector<std::string> dim_names;
+    // the units for the MD workspace dimensions
+    std::vector<std::string> dim_units;
   protected: //for testing
    /** function returns the list of names, which can be treated as dimensions present in current matrix workspace */
    std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
    
-   /** function processes arguments entered by user and tries to establish which algorithm should be deployed;   */
-   std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims)const;
+   /** function processes arguments entered by user, calculates the number of dimensions and tries to establish which algorithm should be deployed;   */
+   std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims);
+
+   /** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates */
+   void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
    /** function provides the linear representation for the transformation matrix, */
    std::vector<double> get_transf_matrix()const;
+ 
    //
-   template<size_t nd,Q_state Q>
-   void process_QND(API::IMDEventWorkspace *const pOutWs);
+   template<size_t nd>
+   API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
+
 
    //  modQdE, // specific algorithm  -- 2D, powder
-    void process_ModQ_dE_();
-    //  modQND, // ModQND -- good for powders
-    void process_ModQ__ND();
-    //   modQdEND, // inelastic powders plus something
-    void process_ModQ_dE_ND();
-    //   Q3D,    // specific algorithm -- diffraction
-    void process_Q3D___();
-    //  Q3DdE,  // specific algorithn -- inelastic
-    void process_Q3D_dE_();
-    //  Q3DND,  // generic diffraction algorithm. 
-    void process_Q3D__ND();
-    //  Q3DdEND, // generic algorithn -- inelastic + other dependencies
-    void process_Q3D_dE_ND();
-    //
+    //void process_ModQ_dE_();
+   /// map to select an algorithm
     std::map<std::string, pMethod> alg_selector;
+   /// map to select an workspace
+    std::map<size_t, pWSCreator> ws_creator;
+  private: 
+    /// template defines common interface to common part of the algorithm, where all variables
+   ///  needed within the loop calculated outside of the loop. In addition it caluclates the property-dependant coordinates 
+    template<Q_state Q>
+    void calc_generic_variables(std::vector<coord_t> &, size_t ){}
+    /// template generalizes the code to calculate Y-variables within the external loop. 
+    template<Q_state Q>
+    void calculate_y_coordinate(std::vector<coord_t> &,size_t ){}
+    /// template generalizes the code to calculate all remaining variables within the inner loop
+    template<Q_state Q>
+    bool calculate_ND_coordinates(const MantidVec& ,size_t ,size_t ,std::vector<coord_t> &){return false;}
+   /// generig template to convert to any Dimensions workspace;
+    template<size_t nd,Q_state Q>
+    void processQND(API::IMDEventWorkspace *const pOutWs);    
+    // the variables used for exchange data between different specific parts of the generic ND algorithm:
+    API::NumericAxis *pYAxis;
+    double Ei;
+    double ki;
+    std::vector<double> rotMat;
  };
-
- template<typename T>
- void Q_analysis(coord_t &Coord, double X) { }
+ 
 } // namespace Mantid
 } // namespace MDAlgorithms
 

@@ -9,7 +9,7 @@ set ( SRC_FILES
 	src/CompositeImplicitFunction.cpp
 	src/CompositeImplicitFunctionParser.cpp
 	src/ConvertToQ3DdE.cpp
-	src/ConvertToQNDany.cpp
+	src/ConvertToMDEvents.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
@@ -50,8 +50,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
-	inc/MantidMDAlgorithms/ConvertToQNDanyMethodsTemplate.h
-	inc/MantidMDAlgorithms/ConvertToQNDany.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsMethodsTemplate.h
+	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -89,7 +89,7 @@ set ( TEST_FILES
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
 	test/ConvertToQ3DdETest.h
-	test/ConvertToQNDanyTest.h
+	test/ConvertToMDEventsTest.h
 	test/DivideMDTest.h
 	test/EqualToMDTest.h
 	test/ExponentialMDTest.h

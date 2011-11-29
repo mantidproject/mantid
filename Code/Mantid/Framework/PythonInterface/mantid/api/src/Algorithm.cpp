@@ -146,7 +146,6 @@ namespace
 
 }
 
-
 void export_algorithm()
 {
   register_ptr_to_python<IAlgorithm_sptr>();

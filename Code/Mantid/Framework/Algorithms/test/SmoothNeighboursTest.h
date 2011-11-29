@@ -29,9 +29,9 @@ class SmoothNeighboursTest : public CxxTest::TestSuite
 public:
 
 
-  void do_test(EventType type, double * expectedY, bool PreserveEvents = true,
-      bool WeightedSum = true, double Radius = 0.0,
-      bool ConvertTo2D = false)
+  void do_test(EventType type, double * expectedY, std::string WeightedSum = "Parabolic",  bool PreserveEvents = true,
+      double Radius = 0.0,
+      bool ConvertTo2D = false, int numberOfNeighbours=8)
   {
     // Pixels will be spaced 0.008 apart
     EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
@@ -77,6 +77,7 @@ public:
     alg.setProperty("PreserveEvents", PreserveEvents);
     alg.setProperty("WeightedSum", WeightedSum);
     alg.setProperty("Radius", Radius);
+    alg.setProperty("NumberOfNeighbours", numberOfNeighbours);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -125,8 +126,11 @@ public:
   void testNullWeightingStrategyRectangularThrows()
   {
     NullWeighting strategy;
-    int AdjX, AdjY, ix, iy;
-    TSM_ASSERT_THROWS("NullWeighting should always throw in usage",strategy.weightAt(AdjX, AdjY, ix, iy), std::runtime_error);
+    int adjX = 0;
+    int adjY = 0;
+    int ix = 0;
+    int iy = 0;
+    TSM_ASSERT_THROWS("NullWeighting should always throw in usage", strategy.weightAt(adjX, adjY, ix, iy), std::runtime_error);
   }
 
   void testFlatWeightingStrategyAtRadius()
@@ -141,7 +145,10 @@ public:
   void testFlatWeightingStrategyRectangular()
   {
     FlatWeighting strategy;
-    int adjX, adjY, ix, iy;
+    int adjX = 0;
+    int adjY = 0;
+    int ix = 0;
+    int iy = 0;
     TSM_ASSERT_EQUALS("FlatWeighting Should be 1", 1, strategy.weightAt(adjX, ix, adjY, iy));
   }
 
@@ -158,8 +165,83 @@ public:
     TSM_ASSERT_EQUALS("LinearWeighting should give zero weighting at cutoff", 0, strategy.weightAt(distance));
   }
 
+  void testLinearWeightingRectangular()
+  {
+    double cutOff = 0; //Doesn't matter what the cut off is.
+    LinearWeighting strategy(cutOff);
+
+    int adjX = 2;
+    int adjY = 2; 
+
+    int ix = 2; int iy = 2;
+    TSM_ASSERT_EQUALS("Top-Right not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = 2;
+    TSM_ASSERT_EQUALS("Top-Left not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Right not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Left not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 0; iy = 0;
+    TSM_ASSERT_EQUALS("Center not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 1; iy = 1;
+    TSM_ASSERT_EQUALS("Half radius not calculated properly", 0.5, strategy.weightAt(adjX, ix, adjY, iy));
+  }
+
+  void testParabolicWeightingThrows()
+  {
+    ParabolicWeighting strategy;
+    double distance = 0;
+    TSM_ASSERT_THROWS("Should not be able to use the ParabolicWeighting like this.", strategy.weightAt(distance), std::runtime_error);
+  }
+
+  void testParabolicWeightingRectangular()
+  {
+    ParabolicWeighting strategy;
+
+    int adjX = 2;
+    int adjY = 2; 
+
+    int ix = 2; int iy = 2;
+    TSM_ASSERT_EQUALS("Top-Right not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = 2;
+    TSM_ASSERT_EQUALS("Top-Left not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Right not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Left not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 0; iy = 0;
+    TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(adjX, ix, adjY, iy));
+  }
+
   /*
   * End test weighting strategies.
+  */
+
+  /*
+  * Start test Radius Filter.
+  */
+  void testRadiusThrowsIfNegativeCutoff()
+  {
+    TS_ASSERT_THROWS(RadiusFilter(-1), std::invalid_argument);
+  }
+
+  void testRadiusFiltering()
+  {
+    SpectraDistanceMap input;
+    input[0] = 1;
+    input[1] = 2;
+    input[3] = 3;
+
+    RadiusFilter filter(2);
+    SpectraDistanceMap product = filter.apply(input);
+
+    TSM_ASSERT_EQUALS("Should have kept all but one of the inputs", 2, product.size());
+    TS_ASSERT_EQUALS(1, input[0]);
+    TS_ASSERT_EQUALS(2, input[1]);
+  }
+
+  /*
+  * End test radius filter
   */
 
   void testWithUnsignedNumberOfNeighbours()
@@ -195,11 +277,12 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("OutputWorkspace", "testMW");
     alg.setProperty("PreserveEvents", false);
-    alg.setProperty("WeightedSum", false);
-    alg.setProperty("ProvideRadius", false);
+    alg.setProperty("WeightedSum", "Flat");
     alg.setProperty("NumberOfNeighbours", 8);
     alg.setProperty("IgnoreMaskedDetectors", true);
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    alg.setProperty("Radius", 1.2);
+    alg.setProperty("RadiusUnits", "NumberOfPixels");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_sptr outWS;
@@ -236,7 +319,7 @@ public:
   void test_event_dont_PreserveEvents()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, false);
+    do_test(TOF, expectedY, "Parabolic");
   }
 
 
@@ -249,35 +332,34 @@ public:
   void test_event_no_WeightedSum()
   {
     double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
-    do_test(TOF, expectedY, true /*PreserveEvents*/, false /*WeightedSum*/);
+    do_test(TOF, expectedY, "Flat",  true /*PreserveEvents*/);
   }
 
   void test_event_Radius_no_WeightedSum()
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, 3.0, 2, 2, 2, 2};
-    do_test(TOF, expectedY, true /*PreserveEvents*/, false /*WeightedSum*/, 0.009 /* Radius */);
+    do_test(TOF, expectedY, "Flat", true /*PreserveEvents*/, 0.009 /* Radius */);
   }
 
   void test_event_Radius_WeightedSum()
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
-    do_test(TOF, expectedY, true /*PreserveEvents*/, true /*WeightedSum*/, 0.009 /* Radius */);
+    do_test(TOF, expectedY, "Linear", true /*PreserveEvents*/, 0.009 /* Radius */);
   }
-
 
   void test_workspace2D()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, true /*WeightedSum*/,
+    do_test(TOF, expectedY, "Parabolic", false /*PreserveEvents*/,
         0.0 /* Radius*/, true /*Convert2D*/);
   }
 
   void test_workspace2D_no_WeightedSum()
   {
     double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, false /*WeightedSum*/,
+    do_test(TOF, expectedY, "Flat", false /*PreserveEvents*/, 
         0.0 /* Radius*/, true /*Convert2D*/);
   }
 
@@ -285,7 +367,7 @@ public:
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, 3.0, 2, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, false /*WeightedSum*/, 0.009 /* Radius */,
+    do_test(TOF, expectedY, "Flat", false /*PreserveEvents*/, 0.009 /* Radius */,
         true /*Convert2D*/);
   }
 
@@ -293,7 +375,7 @@ public:
   {
     // Note: something seems off in the nearest neighbour calc for this fake instrument. It only finds the neighbours in a column
     double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
-    do_test(TOF, expectedY, false /*PreserveEvents*/, true /*WeightedSum*/, 0.009 /* Radius */,
+    do_test(TOF, expectedY, "Linear", false /*PreserveEvents*/, 0.009 /* Radius */,
         true /*Convert2D*/);
   }
 

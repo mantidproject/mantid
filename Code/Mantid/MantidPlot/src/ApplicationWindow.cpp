@@ -16393,7 +16393,7 @@ else
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
         SLOT(runPythonScript(const QString&)));
     // Re-emits the signal caught from the muon analysis
-    connect(user_interface, SIGNAL(setAsPlotType(const QString &)), this, SLOT(setPlotType(const QString &)));
+    connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
     // Closes the active graph
     connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
     //If the fitting is requested then run the peak picker tool in runConnectFitting
@@ -16483,7 +16483,10 @@ void ApplicationWindow::closeGraph(const QString & wsName)
     {
       if (w->objectName() == wsName)
       {
-        closeWindow(w);
+        MultiLayer *plot = (MultiLayer *)w;
+        //closeWindow(w);
+        plot->close();
+        //w->close();
         break;
       }
     }
@@ -16521,23 +16524,21 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 * Makes sure that it is dealing with a graph and then tells the plotDialog class 
 * to change the plot style
 *
-* @params plotDetails :: This includes all details of the plot [fitType, curveNum, wsName, axisLabel, color]
+* @params plotDetails :: This includes all details of the plot [wsName, axisLabel, connectType, plotType, Errors, Color]
 */
-void ApplicationWindow::setPlotType(const QString & plotDetails)
+void ApplicationWindow::setPlotType(const QStringList & plotDetails)
 {
-  QStringList plotDetailsList("");
-  int plotType(0);
+  int connectType(0);
 
-  if (plotDetails.contains(".") == false)
+  if (plotDetails.size() == 0)
   {
     QMessageBox::information(this, "Mantid - Error", "Plot type or curve index is missing. Please contact a Mantid team member.");
   }
   else
   {
-    plotDetailsList = plotDetails.split('.');
-    if (plotDetailsList.size() >= 3)
+    if (plotDetails.size() > 4)
     {
-      plotType = plotDetailsList[0].toInt();
+      connectType = plotDetails[2].toInt();
 
       QList<MdiSubWindow *> windows = windowsList();
       foreach (MdiSubWindow *w, windows) 
@@ -16547,7 +16548,7 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
           MultiLayer *plot = (MultiLayer *)w;
           {
             // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetailsList[2])
+            if (w->objectName() == plotDetails[0])
             {
               PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this);
               pd->setMultiLayer(plot);
@@ -16556,23 +16557,35 @@ void ApplicationWindow::setPlotType(const QString & plotDetails)
               {
                 int curveNum(-1);
 
-                if (plotDetailsList[1] == "Data")
+                if (plotDetails[3] == "Data")
                 {
-                  curveNum = g->curveIndex(plotDetailsList[2]); //workspaceName
+                  curveNum = g->curveIndex(plotDetails[0]); //workspaceName
+                  if (plotDetails[4] == "AllErrors") // if all errors, display all errors
+                  {
+                    QwtPlotCurve *temp = g->curve(curveNum);
+                    MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
+                    curve->setErrorBars(true, true);
+                  }
+                  else // be clever with plotting errors
+                  {
+                    QwtPlotCurve *temp = g->curve(curveNum);
+                    MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
+                    curve->setErrorBars(true, true);
+                  }
                 }
-                else if (plotDetailsList[1] == "Fit")
+                else if (plotDetails[3] == "Fit")
                 {
-                  curveNum = g->curveIndex(plotDetailsList[2] + "-" + plotDetailsList[3] + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff")
+                  curveNum = g->curveIndex(plotDetails[0] + "-" + plotDetails[1] + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff")
                 }
                 if (curveNum > -1) // If one of the curves has been changed 
                 {
                   // line(0) scatter(1) line+symbol(2)
-                  if (plotType >= 0 && plotType <= 2)
+                  if (connectType >= 0 && connectType <= 2)
                   {
-                    if (plotDetailsList.size() > 4)
-                      pd->setPlotType(plotType, curveNum, plotDetailsList[4]);
+                    if (plotDetails.size() > 5)
+                      pd->setPlotType(connectType, curveNum, plotDetails[5]);
                     else
-                      pd->setPlotType(plotType, curveNum);            
+                      pd->setPlotType(connectType, curveNum);            
                   }
                   g->activateGraph();
                 }

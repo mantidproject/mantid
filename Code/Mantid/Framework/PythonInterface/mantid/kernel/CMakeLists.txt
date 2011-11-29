@@ -5,6 +5,7 @@
 set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
 set ( EXPORT_FILES
+  src/ConfigService.cpp
   src/DataItem.cpp
   src/IPropertyManager.cpp
   src/Property.cpp
@@ -13,6 +14,7 @@ set ( EXPORT_FILES
   src/Quat.cpp
   src/V3D.cpp
   src/StlContainers.cpp
+  src/Logger.cpp
 )  
 
 set ( SRC_FILES

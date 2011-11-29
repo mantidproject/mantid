@@ -74,11 +74,12 @@ else:
         ldpath = os.environ.get("LD_LIBRARY_PATH", "")
         ldpath += ":" + _bin
         os.environ["LD_LIBRARY_PATH"] = ldpath
-        dlloader(get_libpath(os.path.join(_bin,'libMantidKernel.so'), 'stdc++'))
-        dlloader(get_libpath(os.path.join(_bin,'libMantidKernel.so'), 'libNeXus'))
-        dlloader(os.path.join(_bin, 'libMantidKernel.so'))
-        dlloader(os.path.join(_bin, 'libMantidGeometry.so'))
-        dlloader(os.path.join(_bin, 'libMantidAPI.so'))
+        pythonlib = os.path.join(_bin,'libMantidPythonAPI.so')
+        dlloader(get_libpath(pythonlib, 'stdc++'))
+        dlloader(get_libpath(pythonlib, 'libNeXus'))
+        dlloader(get_libpath(pythonlib, 'libMantidKernel'))
+        dlloader(get_libpath(pythonlib, 'libMantidGeometry'))
+        dlloader(get_libpath(pythonlib, 'libMantidAPI'))
 
     from libMantidPythonAPI import *
     from libMantidPythonAPI import _binary_op, _equals_op

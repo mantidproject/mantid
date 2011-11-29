@@ -392,7 +392,6 @@ ConvertToQ3DdE::get_transf_matrix(API::MatrixWorkspace_sptr inWS2D,const Kernel:
     Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
 
     Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
-    umat.Invert();
 
   // Obtain the transformation matrix:
     Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI);

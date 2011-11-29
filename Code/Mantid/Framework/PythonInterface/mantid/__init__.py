@@ -18,6 +18,16 @@ algorithms and data objects that are:
 """
 
 ###############################################################################
+# GUI - Do this as early as possible
+###############################################################################
+# Flag indicating whether the GUI layer is loaded. 
+try:
+    import qti
+    __gui__ = True
+except ImportError:
+    __gui__ = False
+
+###############################################################################
 # Try to be smarter when finding Mantid framework libraries
 ###############################################################################
 # Peek to see if a Mantid.properties file is in the parent directory,
@@ -39,6 +49,7 @@ __version__ = version_str()
 
 import api 
 from api import *
+
 
 ###############################################################################
 # Aliases 
