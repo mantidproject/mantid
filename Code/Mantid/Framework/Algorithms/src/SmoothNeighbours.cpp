@@ -17,8 +17,7 @@ For each pixel in each detector, the AdjX*AdjY neighboring spectra are summed to
 
 === WeightedSum parameter ===
 
-* For All Instruments: A weight of 1.0 is given to the center pixel. Other pixels are given the weight <math>w = 1 - r/Radius</math>, so pixels near the edge are given a weight of ~ 0.
-* For Rectangular Detectors: Parabolic weights are applied to each added eventlist with the largest weights near the center.
+* A weighting strategy can be applied to control how the weights are calculated. Options are either linear or flat or parabolic.
 * Weights are summed and scaled so that they add up to 1.
 
 === For EventWorkspaces ===
@@ -31,6 +30,16 @@ This increases the memory used by a factor of 9.
 
 You can use PreserveEvents = false to avoid the memory issues with an EventWorkspace input.
 Please note that the algorithm '''does not check''' that the bin X boundaries match.
+
+== Neighbour Searching ==
+
+If the radius is set to 0, the instrument is treated as though it has rectangular detectors. AdjX and AdjY can then be used to control the number of neighbours independently in x and y. Otherwise
+the algorithm will fetch neigbours using the intesection of those inside the radius cut-off and those less than the NumberOfNeighbours specified. For example with NumberOfNeighbours=24 and a 
+Radius=1.2 (with RadiusUnit=NumberOfPixels) only 8 nearest neighbours at most will be returned. If NumberOfNeighbours=24 and Radius=2, a maxium of 24 nearest neighbours will be found.
+
+== Ignore Masks ==
+
+The algorithm will ignore masked detectors if this flag is set.
 
 *WIKI*/
 
@@ -114,10 +123,12 @@ void SmoothNeighbours::init()
   std::vector<std::string> propOptions;
     propOptions.push_back("Flat");
     propOptions.push_back("Linear");
+    propOptions.push_back("Parabolic");
     declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
       "What sort of Weighting scheme to use?\n"
       "  Flat: Effectively no-weighting, all weights are 1.\n"
-      "  Linear: Linear weighting 1 - r/R from origin."
+      "  Linear: Linear weighting 1 - r/R from origin.\n"
+      "  Parabolic : WARNING. Can only use for rectangular detectors and when Radius is zero."
        );
 
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
@@ -385,8 +396,13 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
   }
   else if(strategyName == "Linear")
   {
-    boost::scoped_ptr<WeightingStrategy> flatStrategy(new LinearWeighting(cutOff));
-    WeightedSum.swap(flatStrategy);
+    boost::scoped_ptr<WeightingStrategy> linearStrategy(new LinearWeighting(cutOff));
+    WeightedSum.swap(linearStrategy);
+  }
+  else if(strategyName == "Parabolic")
+  {
+    boost::scoped_ptr<WeightingStrategy>  parabolicStrategy(new ParabolicWeighting);
+    WeightedSum.swap(parabolicStrategy);
   }
 }
 
@@ -457,12 +473,12 @@ void SmoothNeighbours::exec()
 
   std::string strategy  = getProperty("WeightedSum");
 
-  setWeightingStrategy(strategy, Radius);
-
   AdjX = getProperty("AdjX");
   AdjY = getProperty("AdjY");
   Edge = getProperty("ZeroEdgePixels");
   PreserveEvents = getProperty("PreserveEvents");
+  
+  setWeightingStrategy(strategy, Radius);
 
   // Progress reporting, first for the sorting
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());

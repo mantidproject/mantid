@@ -29,7 +29,7 @@ class SmoothNeighboursTest : public CxxTest::TestSuite
 public:
 
 
-  void do_test(EventType type, double * expectedY, std::string WeightedSum = "Linear",  bool PreserveEvents = true,
+  void do_test(EventType type, double * expectedY, std::string WeightedSum = "Parabolic",  bool PreserveEvents = true,
       double Radius = 0.0,
       bool ConvertTo2D = false, int numberOfNeighbours=8)
   {
@@ -126,8 +126,11 @@ public:
   void testNullWeightingStrategyRectangularThrows()
   {
     NullWeighting strategy;
-    int AdjX, AdjY, ix, iy;
-    TSM_ASSERT_THROWS("NullWeighting should always throw in usage",strategy.weightAt(AdjX, AdjY, ix, iy), std::runtime_error);
+    int adjX = 0;
+    int adjY = 0;
+    int ix = 0;
+    int iy = 0;
+    TSM_ASSERT_THROWS("NullWeighting should always throw in usage", strategy.weightAt(adjX, adjY, ix, iy), std::runtime_error);
   }
 
   void testFlatWeightingStrategyAtRadius()
@@ -142,7 +145,10 @@ public:
   void testFlatWeightingStrategyRectangular()
   {
     FlatWeighting strategy;
-    int adjX, adjY, ix, iy;
+    int adjX = 0;
+    int adjY = 0;
+    int ix = 0;
+    int iy = 0;
     TSM_ASSERT_EQUALS("FlatWeighting Should be 1", 1, strategy.weightAt(adjX, ix, adjY, iy));
   }
 
@@ -157,6 +163,54 @@ public:
     TSM_ASSERT_EQUALS("LinearWeighting should give 0.5 weighting at 1/2 radius", 0.5, strategy.weightAt(distance));
     distance = cutOff; //2
     TSM_ASSERT_EQUALS("LinearWeighting should give zero weighting at cutoff", 0, strategy.weightAt(distance));
+  }
+
+  void testLinearWeightingRectangular()
+  {
+    double cutOff = 0; //Doesn't matter what the cut off is.
+    LinearWeighting strategy(cutOff);
+
+    int adjX = 2;
+    int adjY = 2; 
+
+    int ix = 2; int iy = 2;
+    TSM_ASSERT_EQUALS("Top-Right not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = 2;
+    TSM_ASSERT_EQUALS("Top-Left not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Right not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Left not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 0; iy = 0;
+    TSM_ASSERT_EQUALS("Center not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 1; iy = 1;
+    TSM_ASSERT_EQUALS("Half radius not calculated properly", 0.5, strategy.weightAt(adjX, ix, adjY, iy));
+  }
+
+  void testParabolicWeightingThrows()
+  {
+    ParabolicWeighting strategy;
+    double distance = 0;
+    TSM_ASSERT_THROWS("Should not be able to use the ParabolicWeighting like this.", strategy.weightAt(distance), std::runtime_error);
+  }
+
+  void testParabolicWeightingRectangular()
+  {
+    ParabolicWeighting strategy;
+
+    int adjX = 2;
+    int adjY = 2; 
+
+    int ix = 2; int iy = 2;
+    TSM_ASSERT_EQUALS("Top-Right not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = 2;
+    TSM_ASSERT_EQUALS("Top-Left not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Right not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = -2; iy = -2;
+    TSM_ASSERT_EQUALS("Bottom-Left not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
+    ix = 0; iy = 0;
+    TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(adjX, ix, adjY, iy));
   }
 
   /*
@@ -265,7 +319,7 @@ public:
   void test_event_dont_PreserveEvents()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, "Linear");
+    do_test(TOF, expectedY, "Parabolic");
   }
 
 
@@ -298,7 +352,7 @@ public:
   void test_workspace2D()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, "Linear", false /*PreserveEvents*/,
+    do_test(TOF, expectedY, "Parabolic", false /*PreserveEvents*/,
         0.0 /* Radius*/, true /*Convert2D*/);
   }
 

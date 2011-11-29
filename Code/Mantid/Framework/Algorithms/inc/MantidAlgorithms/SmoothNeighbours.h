@@ -65,7 +65,7 @@ namespace Mantid
     {
     public:
       /// Constructor
-      WeightingStrategy(double& cutOff) : m_cutOff(cutOff){};
+      WeightingStrategy(const double& cutOff) : m_cutOff(cutOff){};
       /// Constructor
       WeightingStrategy() : m_cutOff(0){};
       /// Destructor
@@ -75,7 +75,7 @@ namespace Mantid
       @param distance : absolute distance from epicenter
       @return calculated weight
       */
-      virtual double weightAt(double& distance) = 0;
+      virtual double weightAt(const double& distance) = 0;
 
       /**
       Calculate the weight at distance from epicenter.
@@ -84,7 +84,7 @@ namespace Mantid
       @param adjY : The number of X (vertical) adjacent pixels to average together
       @param iy : current index y
       */
-      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy) = 0;
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy) = 0;
     protected:
       /// Cutoff member.
       double m_cutOff;
@@ -98,8 +98,8 @@ namespace Mantid
     public:
       FlatWeighting() : WeightingStrategy(){}
       virtual ~FlatWeighting(){};
-      virtual double weightAt(int&, int&, int&, int&){return 1;}
-      double weightAt(double&){ return 1;}
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy){return 1;}
+      double weightAt(const double&){ return 1;}
     };
 
     /*
@@ -108,13 +108,33 @@ namespace Mantid
     class DLLExport LinearWeighting : public WeightingStrategy
     {
     public: 
-      LinearWeighting(double &cutOff) : WeightingStrategy(cutOff){}
-      virtual ~LinearWeighting(){};
-      double weightAt(double& distance)
+      LinearWeighting(const double &cutOff) : WeightingStrategy(cutOff){}
+      virtual ~LinearWeighting(){}
+      double weightAt(const double& distance)
       {
         return 1 - (distance/m_cutOff);
       }
-      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy)
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
+      {
+        double result = 1 - (std::sqrt(ix*ix + iy*iy)/std::sqrt(adjX*adjX + adjY*adjY));
+        return result;
+      }
+    };
+
+    /*
+    Parabolic weighting strategy.
+    */
+    class DLLExport ParabolicWeighting : public WeightingStrategy
+    {
+    public: 
+      ParabolicWeighting() : WeightingStrategy(){}
+      virtual ~ParabolicWeighting(){}
+      double weightAt(const double& distance)
+      {
+        //Should never get here, but we'll ensure failure anyway!
+        throw std::runtime_error("Parabolic weighting cannot be calculated based on a radius cut-off alone.");
+      }
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
       {
         return static_cast<double>(adjX - std::abs(ix) + adjY - std::abs(iy) + 1);
       }
@@ -128,11 +148,11 @@ namespace Mantid
     public:
       NullWeighting() : WeightingStrategy(){}
       virtual ~NullWeighting(){};
-      double weightAt(double&)
+      double weightAt(const double&)
       {
         throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
       }
-      virtual double weightAt(int&, int&, int&, int&)
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
       {
         throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
       }
