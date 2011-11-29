@@ -163,6 +163,33 @@ public:
   * End test weighting strategies.
   */
 
+  /*
+  * Start test Radius Filter.
+  */
+  void testRadiusThrowsIfNegativeCutoff()
+  {
+    TS_ASSERT_THROWS(RadiusFilter(-1), std::invalid_argument);
+  }
+
+  void testRadiusFiltering()
+  {
+    SpectraDistanceMap input;
+    input[0] = 1;
+    input[1] = 2;
+    input[3] = 3;
+
+    RadiusFilter filter(2);
+    SpectraDistanceMap product = filter.apply(input);
+
+    TSM_ASSERT_EQUALS("Should have kept all but one of the inputs", 2, product.size());
+    TS_ASSERT_EQUALS(1, input[0]);
+    TS_ASSERT_EQUALS(2, input[1]);
+  }
+
+  /*
+  * End test radius filter
+  */
+
   void testWithUnsignedNumberOfNeighbours()
   {
     SmoothNeighbours alg;

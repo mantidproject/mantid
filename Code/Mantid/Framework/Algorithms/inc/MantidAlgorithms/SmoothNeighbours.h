@@ -13,6 +13,50 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    typedef std::map<specid_t, double>  SpectraDistanceMap;
+   
+    /*
+    Filters spectra detector list by radius.
+    */
+    class DLLExport RadiusFilter
+    {
+    public:
+      /**
+      Constructor
+      @cutoff : radius cutoff for filtering
+      */
+      RadiusFilter(double cutoff) : m_cutoff(cutoff)
+      {
+        if(cutoff < 0)
+        {
+          throw std::invalid_argument("RadiusFilter - Cannot have a negative cutoff.");
+        }
+      }
+      /**
+      Apply the filtering based on radius.
+      @param unfiltered : unfiltered spectra-distance map.
+      @return filtered spectra-distance map.
+      */
+      SpectraDistanceMap apply(const SpectraDistanceMap& unfiltered) const
+      {
+        SpectraDistanceMap::const_iterator it = unfiltered.cbegin();
+        SpectraDistanceMap neighbSpectra;
+        while(it != unfiltered.end())
+        {
+          //Strip out spectra that don't meet the radius criteria.
+          if(it->second <= m_cutoff)
+          {
+            neighbSpectra.insert(std::make_pair(it->first, it->second));
+          }
+          it++;
+        }
+        return neighbSpectra;
+      }
+    private:
+      /// Radius cutoff.
+      double m_cutoff;
+    };
+
     /*
     Abstract weighting strategy, which can be applied to calculate individual 
     weights for each pixel based upon disance from epicenter.

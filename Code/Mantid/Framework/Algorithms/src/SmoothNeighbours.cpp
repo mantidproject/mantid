@@ -299,6 +299,9 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   int nNeighbours = getProperty("NumberOfNeighbours");
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
 
+  //Cull by radius
+  RadiusFilter radiusFilter(Radius);
+
   IDetector_const_sptr det;
   // Go through every input workspace pixel
   for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
@@ -316,21 +319,12 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     }
 
     specid_t inSpec = inWS->getSpectrum(wi)->getSpectrumNo();
-    typedef std::map<specid_t, double>  SpectraDistanceMap;
 
-    //Get the number of specified neighbours
+    //Step one - Get the number of specified neighbours
     SpectraDistanceMap insideGrid  = inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors); 
-    SpectraDistanceMap::iterator it = insideGrid.begin();
-    SpectraDistanceMap neighbSpectra;
-    while(it != insideGrid.end())
-    {
-      //Strip out spectra that don't meet the radius criteria.
-      if(it->second <= Radius)
-      {
-        neighbSpectra.insert(std::make_pair(it->first, it->second));
-      }
-      it++;
-    }
+
+    //Step two - Filter the results by the radius cut off.
+    SpectraDistanceMap neighbSpectra = radiusFilter.apply(insideGrid);
     
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0
