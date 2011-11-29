@@ -37,9 +37,9 @@ namespace Mantid
       @param unfiltered : unfiltered spectra-distance map.
       @return filtered spectra-distance map.
       */
-      SpectraDistanceMap apply(const SpectraDistanceMap& unfiltered) const
+      SpectraDistanceMap apply(SpectraDistanceMap& unfiltered) const
       {
-        SpectraDistanceMap::const_iterator it = unfiltered.cbegin();
+        SpectraDistanceMap::iterator it = unfiltered.begin();
         SpectraDistanceMap neighbSpectra;
         while(it != unfiltered.end())
         {
@@ -98,7 +98,7 @@ namespace Mantid
     public:
       FlatWeighting() : WeightingStrategy(){}
       virtual ~FlatWeighting(){};
-      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy){return 1;}
+      virtual double weightAt(const double&,const double&, const double&, const double&){return 1;}
       double weightAt(const double&){ return 1;}
     };
 
@@ -129,7 +129,7 @@ namespace Mantid
     public: 
       ParabolicWeighting() : WeightingStrategy(){}
       virtual ~ParabolicWeighting(){}
-      double weightAt(const double& distance)
+      double weightAt(const double&)
       {
         //Should never get here, but we'll ensure failure anyway!
         throw std::runtime_error("Parabolic weighting cannot be calculated based on a radius cut-off alone.");
@@ -152,7 +152,7 @@ namespace Mantid
       {
         throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
       }
-      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
+      virtual double weightAt(const double&,const double&, const double&, const double&)
       {
         throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
       }
