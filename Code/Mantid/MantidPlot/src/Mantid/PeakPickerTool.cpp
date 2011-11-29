@@ -556,7 +556,10 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   }
 
   //customise the plot
-  m_fitPropertyBrowser->customisation(workspaceName()+ "." + axisLabel);  
+  QStringList plotDetails;
+  plotDetails.push_back(workspaceName());
+  plotDetails.push_back(axisLabel);
+  m_fitPropertyBrowser->customisation(plotDetails);
 
   graph()->replot();
 }
@@ -874,7 +877,11 @@ void PeakPickerTool::plotGuess()
   plotFitFunction(h);
   h->hasPlot() = true;
   QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
-  m_fitPropertyBrowser->customisation(m_wsName + "." + axisLabel);
+  QStringList plotDetails;
+  plotDetails.push_back(m_wsName);
+  plotDetails.push_back(axisLabel);
+
+  m_fitPropertyBrowser->customisation(plotDetails);
   d_graph->replot();
 }
 
@@ -884,7 +891,11 @@ void PeakPickerTool::plotCurrentGuess()
   plotFitFunction(h);
   h->hasPlot() = true;
   QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
-  m_fitPropertyBrowser->customisation(m_wsName + "." + axisLabel);
+  QStringList plotDetails;
+  plotDetails.push_back(m_wsName);
+  plotDetails.push_back(axisLabel);
+
+  m_fitPropertyBrowser->customisation(plotDetails);
   d_graph->replot();
 }
 

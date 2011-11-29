@@ -1071,7 +1071,6 @@ void MantidDockWidget::saveToProgram(const QString & name)
         //For each one found split it up and assign the parameter
         for (int i = 0; i<saveParameters.size(); i++)
         {
-          //would string array be better to use here ? //////////////////////////////////////////
           QStringList sPNameAndDetail = saveParameters[i].split('=');
           std::string saveParameterName = sPNameAndDetail[0].trimmed().toStdString();
           std::string saveParameterDetail = sPNameAndDetail[1].trimmed().toStdString();

@@ -159,10 +159,10 @@ private slots:
   void assignPeakPickerTool(const QString &);
 
   /// Change the fit style and color
-  void changeFitPlotType(const QString &);
+  void changeFitPlotType(QStringList &);
 
   /// Change the data style and color
-  void changeDataPlotType(const QString &);
+  void changeDataPlotType(QStringList &);
 
   void groupFittedWorkspaces(QString);
 
