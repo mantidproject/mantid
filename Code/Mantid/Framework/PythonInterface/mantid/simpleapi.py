@@ -19,34 +19,15 @@
     and assign it to the rebinned variable
     
 """
+import mantid
 import kernel
 from kernel import funcreturns as _funcreturns
 import api
 
+
 def version():
     return "simpleapi - memory-based version"
 
-def set_properties(alg_object, *args, **kwargs):
-    """
-        Set all of the properties of the algorithm
-        @param alg_object An initialised algorithm object
-        @param *args Positional arguments
-        @param **kwargs Keyword arguments  
-    """
-    prop_order = alg_object.mandatory_properties()
-    # add the args to the kw list so everything can be set in a single way
-    for (key, arg) in zip(prop_order[:len(args)], args):
-        kwargs[key] = arg
-
-    # Set the properties of the algorithm.
-    for key in kwargs.keys():
-        value = kwargs[key]
-        alg_object.set_property(key, value)
-        # Make sure we set the name of any In/Out properties as well
-        # See if this can be done sensibly in WorkspaceProperty
-        if isinstance(value, kernel.DataItem):
-            alg_object.set_property_value(key, str(value))
-        
 def get_additional_args(lhs, algm_obj):
     """
         Return the extra arguments that are to be passed to the algorithm
@@ -118,6 +99,30 @@ def gather_returns(func_name, lhs, algm_obj, ignore=[]):
     else:
         return None
 
+def _set_properties(alg_object, *args, **kwargs):
+    """
+        Set all of the properties of the algorithm
+        @param alg_object An initialised algorithm object
+        @param *args Positional arguments
+        @param **kwargs Keyword arguments  
+    """
+    prop_order = alg_object.mandatory_properties()
+    # add the args to the kw list so everything can be set in a single way
+    for (key, arg) in zip(prop_order[:len(args)], args):
+        kwargs[key] = arg
+
+    # Set the properties of the algorithm.
+    for key in kwargs.keys():
+        value = kwargs[key]
+        alg_object.set_property(key, value)
+        # For data items setting by explicit value
+        # doesn't set the string name of the, i.e. workspace
+        # name on the property. This causes problems for
+        # properties that then try and 
+        # set a property by name
+        if isinstance(value, kernel.DataItem):
+            alg_object.set_property_value(key, str(value))
+
 def create_algorithm(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm.
@@ -139,7 +144,7 @@ def create_algorithm(algorithm, version, _algm_object):
         lhs = _funcreturns.lhs_info()
         extra_args = get_additional_args(lhs, algm)
         kwargs.update(extra_args)
-        set_properties(algm, *args, **kwargs)
+        _set_properties(algm, *args, **kwargs)
         algm.execute()
         return gather_returns(algorithm, lhs, algm)
         
@@ -190,7 +195,59 @@ def create_algorithm(algorithm, version, _algm_object):
         alias = alias.strip()
         if len(alias)>0:
             globals()[alias] = algorithm_wrapper
+            
+def _set_properties_dialog(algm_object, *args, **kwargs):
+    """
+    Set the properties all in one go assuming that you are preparing for a
+    dialog box call. If the dialog is cancelled do a sys.exit, otherwise 
+    return the algorithm ready to execute.
+    """
+    if not mantid.__gui__:
+        raise RuntimeError("Can only display properties dialog in gui mode")
+    # generic setup
+    enabled_list = [s.lstrip(' ') for s in kwargs.get("Enable", "").split(',')]
+    del kwargs["Enable"] # no longer needed
+    disabled_list = [s.lstrip(' ') for s in kwargs.get("Disable", "").split(',')]
+    del kwargs["Disable"] # no longer needed
+    message = kwargs.get("Message", "")
+    del kwargs["Message"]
+    presets = '|'
     
+    #-------------------------------------------------------------------------------
+    def make_str(value):
+        """Make a string out of a value such that the Mantid properties can understand it
+        """
+        import numpy
+        
+        if isinstance(value, numpy.ndarray):
+            value = list(value) # Temp until more complete solution available (#2340)
+        if isinstance(value, list) or \
+           isinstance(value, kernel.std_vector_dbl) or \
+           isinstance(value, kernel.std_vector_int) or \
+           isinstance(value, kernel.std_vector_long) or \
+           isinstance(value, kernel.std_vector_size_t):
+            return str(value).lstrip('[').rstrip(']')
+        elif isinstance(value, tuple):
+            return str(value).lstrip('(').rstrip(')')
+        elif isinstance(value, bool):
+            if value:
+                return '1'
+            else:
+                return '0'
+        else:
+            return str(value)
+    # configure everything for the dialog
+    for name in kwargs.keys():
+        value = kwargs[name]
+        if value is not None:
+            presets += name + '=' + make_str(value) + '|'
+
+    # finally run the configured dialog
+    import qti
+    dialog =  qti.app.mantidUI.createPropertyInputDialog(algm_object.name(), presets, message, enabled_list, disabled_list)
+    if dialog == False:
+        sys.exit('Information: Script execution cancelled')
+
 def create_algorithm_dialog(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm dialog.
@@ -199,7 +256,6 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
         @param _algm_object :: the created algorithm object.
     """
     def algorithm_wrapper(*args, **kwargs):
-        raise RuntimeError("Dialog functions not implemented yet")
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
@@ -209,7 +265,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
                 kwargs[item] = ""
             
         algm = api.framework_mgr.create_algorithm(algorithm, _version)
-        algm.setPropertiesDialog(*args, **kwargs)
+        _set_properties_dialog(algm, *args, **kwargs)
         algm.execute()
         return algm
     
@@ -300,7 +356,7 @@ def Load(*args, **kwargs):
         if key not in algm:
             print("You've passed a property (%s) to Load() that doesn't apply to this filetype."% key)
             del kwargs[key]
-    set_properties(algm, **kwargs)
+    _set_properties(algm, **kwargs)
     algm.execute()
     return gather_returns('Load', lhs, algm, ignore='LoaderName')
     
@@ -314,7 +370,6 @@ def LoadDialog(*args, **kwargs):
       - Disable :: A CSV list of properties to keep enabled in the dialog
       - Message :: An optional message string
     """
-    raise RuntimeError("Load Dialog function not implemented yet")
     arguments = {}
     filename = None
     wkspace = None
@@ -334,9 +389,11 @@ def LoadDialog(*args, **kwargs):
     if 'Enable' not in arguments: arguments['Enable']=''
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
+    
     algm = api.framework_mgr.create_algorithm('Load')
-    algm.setPropertiesDialog(**arguments)
+    _set_properties_dialog(algm,**arguments)
     algm.execute()
+    return algm
 
 def translate():
     """
@@ -353,7 +410,7 @@ def translate():
         _algm_object = algorithm_mgr.create_unmanaged(name, max(versions))
         _algm_object.initialize()
         create_algorithm(name, max(versions), _algm_object)
-        #create_algorithm_dialog(name, max(versions), _algm_object)
+        create_algorithm_dialog(name, max(versions), _algm_object)
             
 # Create the algorithm functions on import
 translate()
