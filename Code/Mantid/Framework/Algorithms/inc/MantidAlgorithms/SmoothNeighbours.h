@@ -213,7 +213,7 @@ private:
   /// Sets the weighting stragegy.
   void setWeightingStrategy(const std::string strategyName, double& cutOff);
   /// Translate the entered radius into meters.
-  double translateToMeters(const std::string radiusUnits, const double& enteredRadius, Mantid::API::MatrixWorkspace_const_sptr ws);
+  double translateToMeters(const std::string radiusUnits, const double& enteredRadius);
 
   /// Pixels in the detector
   int XPixels;
