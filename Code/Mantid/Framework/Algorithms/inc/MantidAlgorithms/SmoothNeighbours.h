@@ -13,6 +13,50 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    typedef std::map<specid_t, double>  SpectraDistanceMap;
+   
+    /*
+    Filters spectra detector list by radius.
+    */
+    class DLLExport RadiusFilter
+    {
+    public:
+      /**
+      Constructor
+      @cutoff : radius cutoff for filtering
+      */
+      RadiusFilter(double cutoff) : m_cutoff(cutoff)
+      {
+        if(cutoff < 0)
+        {
+          throw std::invalid_argument("RadiusFilter - Cannot have a negative cutoff.");
+        }
+      }
+      /**
+      Apply the filtering based on radius.
+      @param unfiltered : unfiltered spectra-distance map.
+      @return filtered spectra-distance map.
+      */
+      SpectraDistanceMap apply(SpectraDistanceMap& unfiltered) const
+      {
+        SpectraDistanceMap::iterator it = unfiltered.begin();
+        SpectraDistanceMap neighbSpectra;
+        while(it != unfiltered.end())
+        {
+          //Strip out spectra that don't meet the radius criteria.
+          if(it->second <= m_cutoff)
+          {
+            neighbSpectra.insert(std::make_pair(it->first, it->second));
+          }
+          it++;
+        }
+        return neighbSpectra;
+      }
+    private:
+      /// Radius cutoff.
+      double m_cutoff;
+    };
+
     /*
     Abstract weighting strategy, which can be applied to calculate individual 
     weights for each pixel based upon disance from epicenter.
@@ -21,7 +65,7 @@ namespace Mantid
     {
     public:
       /// Constructor
-      WeightingStrategy(double& cutOff) : m_cutOff(cutOff){};
+      WeightingStrategy(const double& cutOff) : m_cutOff(cutOff){};
       /// Constructor
       WeightingStrategy() : m_cutOff(0){};
       /// Destructor
@@ -31,7 +75,7 @@ namespace Mantid
       @param distance : absolute distance from epicenter
       @return calculated weight
       */
-      virtual double weightAt(double& distance) = 0;
+      virtual double weightAt(const double& distance) = 0;
 
       /**
       Calculate the weight at distance from epicenter.
@@ -40,7 +84,7 @@ namespace Mantid
       @param adjY : The number of X (vertical) adjacent pixels to average together
       @param iy : current index y
       */
-      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy) = 0;
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy) = 0;
     protected:
       /// Cutoff member.
       double m_cutOff;
@@ -54,8 +98,8 @@ namespace Mantid
     public:
       FlatWeighting() : WeightingStrategy(){}
       virtual ~FlatWeighting(){};
-      virtual double weightAt(int&, int&, int&, int&){return 1;}
-      double weightAt(double&){ return 1;}
+      virtual double weightAt(const double&,const double&, const double&, const double&){return 1;}
+      double weightAt(const double&){ return 1;}
     };
 
     /*
@@ -64,13 +108,33 @@ namespace Mantid
     class DLLExport LinearWeighting : public WeightingStrategy
     {
     public: 
-      LinearWeighting(double &cutOff) : WeightingStrategy(cutOff){}
-      virtual ~LinearWeighting(){};
-      double weightAt(double& distance)
+      LinearWeighting(const double &cutOff) : WeightingStrategy(cutOff){}
+      virtual ~LinearWeighting(){}
+      double weightAt(const double& distance)
       {
         return 1 - (distance/m_cutOff);
       }
-      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy)
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
+      {
+        double result = 1 - (std::sqrt(ix*ix + iy*iy)/std::sqrt(adjX*adjX + adjY*adjY));
+        return result;
+      }
+    };
+
+    /*
+    Parabolic weighting strategy.
+    */
+    class DLLExport ParabolicWeighting : public WeightingStrategy
+    {
+    public: 
+      ParabolicWeighting() : WeightingStrategy(){}
+      virtual ~ParabolicWeighting(){}
+      double weightAt(const double&)
+      {
+        //Should never get here, but we'll ensure failure anyway!
+        throw std::runtime_error("Parabolic weighting cannot be calculated based on a radius cut-off alone.");
+      }
+      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
       {
         return static_cast<double>(adjX - std::abs(ix) + adjY - std::abs(iy) + 1);
       }
@@ -84,11 +148,11 @@ namespace Mantid
     public:
       NullWeighting() : WeightingStrategy(){}
       virtual ~NullWeighting(){};
-      double weightAt(double&)
+      double weightAt(const double&)
       {
         throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
       }
-      virtual double weightAt(int&, int&, int&, int&)
+      virtual double weightAt(const double&,const double&, const double&, const double&)
       {
         throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
       }
@@ -148,6 +212,8 @@ private:
 
   /// Sets the weighting stragegy.
   void setWeightingStrategy(const std::string strategyName, double& cutOff);
+  /// Translate the entered radius into meters.
+  double translateToMeters(const std::string radiusUnits, const double& enteredRadius);
 
   /// Pixels in the detector
   int XPixels;

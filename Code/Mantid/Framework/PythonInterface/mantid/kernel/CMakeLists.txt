@@ -13,6 +13,7 @@ set ( EXPORT_FILES
   src/Quat.cpp
   src/V3D.cpp
   src/StlContainers.cpp
+  src/Logger.cpp
 )  
 
 set ( SRC_FILES

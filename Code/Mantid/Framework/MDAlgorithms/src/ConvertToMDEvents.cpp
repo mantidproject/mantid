@@ -2,7 +2,7 @@
 
 
 *WIKI*/
-#include "MantidMDAlgorithms/ConvertToQNDany.h"
+#include "MantidMDAlgorithms/ConvertToMDEvents.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -24,7 +24,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDAlgorithms/ConvertToQNDanyMethodsTemplate.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsMethodsTemplate.h"
 
 #include <algorithm>
 #include <float.h>
@@ -45,16 +45,16 @@ namespace MDAlgorithms
 
 
 // logger for loading workspaces  
-   Kernel::Logger& ConvertToQNDany::convert_log =Kernel::Logger::get("MD-Algorithms");
+   Kernel::Logger& ConvertToMDEvents::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused it the algorithm runs for more once;
-preprocessed_detectors ConvertToQNDany::det_loc;
+preprocessed_detectors ConvertToMDEvents::det_loc;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertToQNDany)
+DECLARE_ALGORITHM(ConvertToMDEvents)
   
 /// Sets documentation strings for this algorithm
-void ConvertToQNDany::initDocs()
+void ConvertToMDEvents::initDocs()
 {
     this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
@@ -64,7 +64,7 @@ void ConvertToQNDany::initDocs()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConvertToQNDany::~ConvertToQNDany()
+ConvertToMDEvents::~ConvertToMDEvents()
 {}
 
 
@@ -74,7 +74,7 @@ const double rad2deg = 180.0 / M_PI;
 /** Initialize the algorithm's properties.
  */
 void 
-ConvertToQNDany::init()
+ConvertToMDEvents::init()
 {
       CompositeWorkspaceValidator<> *ws_valid = new CompositeWorkspaceValidator<>;
       ws_valid->add(new HistogramValidator<>);
@@ -124,7 +124,7 @@ ConvertToQNDany::init()
 }
 
 void 
-ConvertToQNDany::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
+ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
     for(size_t i=0; i<min.size();i++){
         if(max[i]<=min[i]){
             convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
@@ -135,7 +135,7 @@ ConvertToQNDany::check_max_morethen_min(const std::vector<double> &min,const std
  
 /// helper function to preprocess the detectors directions
 void 
-ConvertToQNDany::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
+ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
 {
 
     const size_t nHist = inputWS->getNumberHistograms();
@@ -181,7 +181,7 @@ ConvertToQNDany::process_detectors_positions(const DataObjects::Workspace2D_cons
 }
   //----------------------------------------------------------------------------------------------
   /* Execute the algorithm.   */
-void ConvertToQNDany::exec(){
+void ConvertToMDEvents::exec(){
     // -------- Input workspace 
     MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
     if(!inMatrixWS){
@@ -256,7 +256,7 @@ void ConvertToQNDany::exec(){
     * @return the_algID       -- the string, identifying one of the known algorithms; if unknown, should fail. 
 */
 std::string
-ConvertToQNDany::identify_the_alg(const std::vector<std::string> &dim_names_availible, const std::string &Q_dim_requested, const std::vector<std::string> &dim_requested, size_t &nDims)
+ConvertToMDEvents::identify_the_alg(const std::vector<std::string> &dim_names_availible, const std::string &Q_dim_requested, const std::vector<std::string> &dim_requested, size_t &nDims)
 {
     std::string the_algID;
     std::string Q_mode("Unknown");
@@ -356,7 +356,7 @@ ConvertToQNDany::identify_the_alg(const std::vector<std::string> &dim_names_avai
 }
 
 std::vector<std::string > 
-ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_prop,MatrixWorkspace_const_sptr inMatrixWS)const{
+ConvertToMDEvents::get_dimension_names(const std::vector<std::string> &default_prop,MatrixWorkspace_const_sptr inMatrixWS)const{
     // number of properties we always want to have, it is Q3D, |Q| and some property form workspace;
     // if workspace unit is the energy transfer, it is a special property;
     size_t n_common_properties = default_prop.size();
@@ -392,7 +392,7 @@ ConvertToQNDany::get_dimension_names(const std::vector<std::string> &default_pro
  
 */
 std::vector<double> 
-ConvertToQNDany::get_transf_matrix()const
+ConvertToMDEvents::get_transf_matrix()const
 {
     
     // Initalize the matrix to 3x3 identity
@@ -406,84 +406,107 @@ ConvertToQNDany::get_transf_matrix()const
     return rotMat;
 }
 
+/** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates for 
+    the particular workspace.
+
+    @param Coord             -- vector of coordinates for current multidimensional event
+    @param nd                -- number of event's dimensions
+    @param n_ws_properties   -- number of dimensions, provided by the workspace itself. E.g., processed inelastic matrix
+                                workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
+                                -- 2 for elastic and 3 for inelastic mode. Number of these properties is determined by the deployed algorithm
+                                The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
+                                obtained from dimensions placed after them. */
+void 
+ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
+{
+     for(size_t i=n_ws_properties;i<nd;i++){
+         //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i-n_ws_properties]));  
+          if(!run_property){
+             g_log.error()<<" property: "<<this->other_dim_names[i]<<" is not a time series (run) property\n";
+          }
+          Coord[i]=run_property->firstValue();
+        }  
+}
 
 
-#define NOQ
-template void ConvertToQNDany::processQND<2,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<3,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<4,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<5,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<6,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<7,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<8,NoQ>(API::IMDEventWorkspace *const);
-#undef  NOQ
-#define MODQ
-template void ConvertToQNDany::processQND<2,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<3,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<4,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<5,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<6,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<7,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<8,modQ>(API::IMDEventWorkspace *const);
-#undef  MODQ
-#define Q3D_
-template void ConvertToQNDany::processQND<3,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<4,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<5,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<6,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<7,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToQNDany::processQND<8,Q3D>(API::IMDEventWorkspace *const);
-#undef  Q3D_
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<2>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<3>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<4>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<5>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<6>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<7>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToQNDany::createEmptyEventWS<8>(size_t ,size_t ,size_t );
+template void ConvertToMDEvents::processQND<2,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<3,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<4,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<5,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<6,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<7,NoQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<8,NoQ>(API::IMDEventWorkspace *const);
+
+template void ConvertToMDEvents::processQND<2,modQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<3,modQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<4,modQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<5,modQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<6,modQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<7,modQ>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<8,modQ>(API::IMDEventWorkspace *const);
+
+template void ConvertToMDEvents::processQND<3,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<4,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<5,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<6,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<7,Q3D>(API::IMDEventWorkspace *const);
+template void ConvertToMDEvents::processQND<8,Q3D>(API::IMDEventWorkspace *const);
+
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<2>(size_t ,size_t ,size_t );
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<3>(size_t ,size_t ,size_t );
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<4>(size_t ,size_t ,size_t );
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<5>(size_t ,size_t ,size_t );
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<6>(size_t ,size_t ,size_t );
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<7>(size_t ,size_t ,size_t );
+template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<8>(size_t ,size_t ,size_t );
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-ConvertToQNDany::ConvertToQNDany():
+ConvertToMDEvents::ConvertToMDEvents():
  Q_ID_possible(3)
 {
     Q_ID_possible[0]="|Q|";
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      
-   
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToQNDany::processQND<2,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND3",&ConvertToQNDany::processQND<3,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND4",&ConvertToQNDany::processQND<4,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND5",&ConvertToQNDany::processQND<5,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND6",&ConvertToQNDany::processQND<6,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND7",&ConvertToQNDany::processQND<7,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND8",&ConvertToQNDany::processQND<8,NoQ>));
+#define NOQ   
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToMDEvents::processQND<2,NoQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND3",&ConvertToMDEvents::processQND<3,NoQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND4",&ConvertToMDEvents::processQND<4,NoQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND5",&ConvertToMDEvents::processQND<5,NoQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND6",&ConvertToMDEvents::processQND<6,NoQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND7",&ConvertToMDEvents::processQND<7,NoQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("NoQND8",&ConvertToMDEvents::processQND<8,NoQ>));
+#undef NOQ
     //
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND2",&ConvertToQNDany::processQND<2,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND3",&ConvertToQNDany::processQND<3,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND4",&ConvertToQNDany::processQND<4,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND5",&ConvertToQNDany::processQND<5,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND6",&ConvertToQNDany::processQND<6,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToQNDany::processQND<7,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToQNDany::processQND<8,modQ>));
+#define MODQ
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND2",&ConvertToMDEvents::processQND<2,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND3",&ConvertToMDEvents::processQND<3,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND4",&ConvertToMDEvents::processQND<4,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND5",&ConvertToMDEvents::processQND<5,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND6",&ConvertToMDEvents::processQND<6,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToMDEvents::processQND<7,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToMDEvents::processQND<8,modQ>));
+#undef MODQ
     //
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToQNDany::processQND<3,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToQNDany::processQND<4,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToQNDany::processQND<5,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToQNDany::processQND<6,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToQNDany::processQND<7,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToQNDany::processQND<8,Q3D>));
+#define Q3D_
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToMDEvents::processQND<3,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToMDEvents::processQND<4,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToMDEvents::processQND<5,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToMDEvents::processQND<6,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToMDEvents::processQND<7,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToMDEvents::processQND<8,Q3D>));
+#undef Q3D_
 
-
-    ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToQNDany::createEmptyEventWS<2>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(3,&ConvertToQNDany::createEmptyEventWS<3>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(4,&ConvertToQNDany::createEmptyEventWS<4>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(5,&ConvertToQNDany::createEmptyEventWS<5>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(6,&ConvertToQNDany::createEmptyEventWS<6>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(7,&ConvertToQNDany::createEmptyEventWS<7>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(8,&ConvertToQNDany::createEmptyEventWS<8>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(3,&ConvertToMDEvents::createEmptyEventWS<3>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(4,&ConvertToMDEvents::createEmptyEventWS<4>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(5,&ConvertToMDEvents::createEmptyEventWS<5>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(6,&ConvertToMDEvents::createEmptyEventWS<6>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(7,&ConvertToMDEvents::createEmptyEventWS<7>));
+    ws_creator.insert(std::pair<size_t,pWSCreator>(8,&ConvertToMDEvents::createEmptyEventWS<8>));
 }
 
 //

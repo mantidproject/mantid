@@ -4,7 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDAlgorithms/ConvertToQNDany.h"
+#include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -18,7 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDEvents;
-class Convert2AnyTestHelper: public ConvertToQNDany
+class Convert2AnyTestHelper: public ConvertToMDEvents
 {
 public:
     Convert2AnyTestHelper(){};
@@ -26,11 +26,11 @@ public:
     std::vector<std::string> get_dimension_names(MatrixWorkspace_const_sptr inMatrixWS){      
        std::vector<std::string> default_properties(1);
         default_properties[0]="DeltaE";
-       return ConvertToQNDany::get_dimension_names(default_properties,inMatrixWS);
+       return ConvertToMDEvents::get_dimension_names(default_properties,inMatrixWS);
     }
 
    std::string identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &QOption,const std::vector<std::string> &dim_selected,size_t &nDims)
-   { return   ConvertToQNDany::identify_the_alg( dim_names_availible,QOption,dim_selected,nDims);
+   { return   ConvertToMDEvents::identify_the_alg( dim_names_availible,QOption,dim_selected,nDims);
    }
 
    void run_algo(const std::string &algo_id){   
@@ -55,12 +55,12 @@ std::vector<std::string> dim_availible()
     return data_names_in_WS;
 }
 //
-class ConvertToQNDanyTest : public CxxTest::TestSuite
+class ConvertToMDEventsTest : public CxxTest::TestSuite
 {
  std::auto_ptr<Convert2AnyTestHelper> pAlg;
 public:
-static ConvertToQNDanyTest *createSuite() { return new ConvertToQNDanyTest(); }
-static void destroySuite(ConvertToQNDanyTest * suite) { delete suite; }    
+static ConvertToMDEventsTest *createSuite() { return new ConvertToMDEventsTest(); }
+static void destroySuite(ConvertToMDEventsTest * suite) { delete suite; }    
 
 void testInit(){
 
@@ -237,7 +237,7 @@ void testExecQ3D()
 }
 
 
-ConvertToQNDanyTest(){
+ConvertToMDEventsTest(){
      pAlg = std::auto_ptr<Convert2AnyTestHelper>(new Convert2AnyTestHelper());
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     // rotate the crystal by twenty degrees back;

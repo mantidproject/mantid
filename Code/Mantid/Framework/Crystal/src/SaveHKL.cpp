@@ -98,7 +98,7 @@ namespace Crystal
 
     // Sequence and run number
     int seqNum = 1;
-    int runcount = 1;
+    int firstrun = peaks[0].getRunNumber();
 
     std::fstream out;
     bool append = getProperty("AppendFile");
@@ -106,12 +106,11 @@ namespace Crystal
     {
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
       long pos = out.tellp();
-      out.seekp (pos - 135);
-      out >> runcount;
+      out.seekp (50);
+      out >> firstrun;
       out.seekp (pos - 110);
       out >> seqNum;
       out.seekp (pos - 73);
-      runcount ++;
       seqNum ++;
     }
     else
@@ -195,6 +194,7 @@ namespace Crystal
             //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
             //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
             // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+            if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) continue;
             out <<  std::setw( 4 ) << Utils::round(-p.getH())
                 <<  std::setw( 4 ) << Utils::round(-p.getK())
                 <<  std::setw( 4 ) << Utils::round(-p.getL());
@@ -203,7 +203,7 @@ namespace Crystal
 
             out << " " << std::setw( 7 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
 
-            out << std::setw( 4 ) << runcount;
+            out << std::setw( 4 ) << run - firstrun + 1;
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
 

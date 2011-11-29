@@ -44,7 +44,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareListProperty("LatticeParameters", [4.785,4.785,12.91,90.0,90.0,120.0],
                              Description="a,b,c,alpha,beta,gamma (Default is Sapphire Lattice Parameters)")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
-        outfiletypes = ['', 'hkl', 'nxs']
+        outfiletypes = ['', 'hkl']
         self.declareProperty("SaveAs", "hkl", ListValidator(outfiletypes))
         self.declareFileProperty("OutputFile", "", FileAction.OptionalLoad, outfiletypes,  Description="Name of output file to write/append.")
         self.declareProperty("AppendHKLFile", False, Description="Append existing hkl file")
@@ -76,7 +76,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         return wksp
 
     def _loadNeXusData(self, filename, name, bank, extension, **kwargs):
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=0, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, BankName=bank, SingleBankPixelsOnly=1, FilterByTofMin=self._binning[0], FilterByTofMax=self._binning[2], LoadMonitors=True, MonitorsAsEvents=True, **kwargs)
         wksp = alg['OutputWorkspace']
         LoadIsawDetCal(InputWorkspace=wksp,Filename=self._DetCalfile)
         #Normalise by sum of counts in upstream monitor
@@ -162,19 +162,21 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             ConvertToDiffractionMDWorkspace(InputWorkspace=wksp,OutputWorkspace='MD2',LorentzCorrection=0,
                     SplitInto=2,SplitThreshold=150)
             wkspMD = mtd['MD2']
-            FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=500,OutputWorkspace='Peaks')
+            # Find the UB matrix using the peaks and known lattice parameters
+            try:
+                FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=10,OutputWorkspace='Peaks')
+                peaksWS = mtd['Peaks']
+                FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                            alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=3, Tolerance=0.15)
+            except:
+                FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=5,OutputWorkspace='Peaks')
+                peaksWS = mtd['Peaks']
+                FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                        alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=3, Tolerance=0.15)
             mtd.deleteWorkspace('MD2')
             mtd.releaseFreeMemory()
-            peaksWS = mtd['Peaks']
-            # Find the UB matrix using the peaks and known lattice parameters
-            FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
-                            alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=5, Tolerance=0.12)
             # Add index to HKL             
-            IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.12')
-            # Refine the UB matrix using only the peaks
-            #FindUBUsingIndexedPeaks(PeaksWorkspace=peaksWS)
-            # Reindex HKL             
-            #IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.10')
+            IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.15')
             # Copy the UB matrix back to the original workspace
             CopySample(InputWorkspace=peaksWS,OutputWorkspace=wksp,
                             CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
@@ -183,17 +185,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             hklfile = self._outFile
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
                 Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
-        if "nxs" in self._outTypes:
-            nxsfile = str(wksp) + ".nxs"
-    
-            if not os.path.isfile(nxsfile):
-                nxsfile = str(wksp) + "_histo.nxs"
-                if not os.path.isfile(nxsfile):
-                    name = str(wksp)
-                    name = name.split('_')[1] # remove the instrument name
-                    nxsfile = self._findData(int(name), "_histo.nxs")
-            self.log().information(nxsfile)
-            SaveToSNSHistogramNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=self._outFile, Compress=True)
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
@@ -343,37 +334,26 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                     normalized = False
 
                 #Remove data at edges of rectangular detectors
-                SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, 
+                SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, Radius=0,WeightedSum='Flat',
                     AdjX=0, AdjY=0, ZeroEdgePixels=self._edge)
                 #Anvred corrections converts from TOF to Wavelength now.
                 if self._radius > 0:
                     AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
                         LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,PowerLambda=self._powlam)
 
-                if bank is "bank17":
-                    samRunstr = str(samRun)
-                    RenameWorkspace(InputWorkspace=samRun,OutputWorkspace=samRunstr+"_total")
-                    samRunT = mtd[samRunstr+"_total"]
-                else:
-                    samRunT += samRun
+                # write out the files
+                # scale data so fitting routines do not run out of memory
+                samMon /= 1e8
+                samRun /= samMon
+                samRun = self._bin(samRun)
+                ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
+                mtd.releaseFreeMemory()
+                self._save(samRun, normalized)
+                #Append next run to hkl file
+                self._append = True
+                if self._outTypes is not '':
                     mtd.deleteWorkspace(str(samRun))
-                    mtd.releaseFreeMemory()
-
-            # write out the files
-            RenameWorkspace(InputWorkspace=samRunT,OutputWorkspace=samRunstr)
-            samRun = mtd[samRunstr]
-            # scale data so fitting routines do not run out of memory
-            samMon /= 1e8
-            samRun /= samMon
-            samRun = self._bin(samRun)
-            ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
-            mtd.releaseFreeMemory()
-            self._save(samRun, normalized)
-            #Append next run to hkl file
-            self._append = True
-            if self._outTypes is not '':
-                mtd.deleteWorkspace(str(samRun))
-            mtd.deleteWorkspace('samMon')
-            mtd.releaseFreeMemory()
+                mtd.deleteWorkspace('samMon')
+                mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())

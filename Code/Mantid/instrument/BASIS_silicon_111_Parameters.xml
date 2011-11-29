@@ -36,9 +36,15 @@
 	<value val="138000" />
 </parameter>
 
-<component-link name="silicon">
-<parameter name="Efixed"> <value val="1.845" /> </parameter>
-</component-link>
+  <component-link name="bank1">
+    <parameter name="Efixed"> <value val="2.082" /> </parameter>
+  </component-link>
+  
+  <component-link name="bank2">
+    <parameter name="Efixed"> <value val="2.082" /> </parameter>
+  </component-link>
+  
+  
 
 <parameter name="analyser" type="string">
   <value val="silicon" />
