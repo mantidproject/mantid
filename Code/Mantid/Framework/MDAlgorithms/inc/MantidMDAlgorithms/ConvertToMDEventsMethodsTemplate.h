@@ -54,9 +54,9 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 
            if(!calculate_ND_coordinates<Q>(X,i,j,Coord))continue;
             //  ADD RESULTING EVENTS TO THE WORKSPACE
-           float ErrSq = float(Error[j]*Error[j]);
-           pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
-           n_added_events++;
+            float ErrSq = float(Error[j]*Error[j]);
+            pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
+            n_added_events++;
         } // end spectra loop
 
          // This splits up all the boxes according to split thresholds and sizes.

@@ -190,52 +190,81 @@ void ConvertToMDEvents::exec(){
         g_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
     }
     inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
+    // ------- Is there any output workspace?
+    // shared pointer to target workspace
+    API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
 
-    // Identify what dimension names we can obtain from the input workspace;
-    std::vector<std::string> dim_names_availible;
-    // assume that |Q| and QxQyQz availible from any workspace?
-    std::vector<std::string> wsNames(2);
-    wsNames[0]="|Q|";
-    wsNames[1]="QxQyQz";
-
-// get the X axis
-    NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
-    if(!pXAxis )
-    {
-        convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inWS2D->getName()<<std::endl;
-        throw(std::invalid_argument("Input workspace has to have X-axis"));
+    bool create_new_ws(false);
+    if(!spws){
+        create_new_ws = true;
     }
-    std::string Dim1Name = pXAxis->unit()->unitID();
-    wsNames.push_back(Dim1Name);
-    //
-    dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
+    // string -Key to identify the algorithm
+    std::string algo_id;
 
 
-    // get dim_names requested by user:
-    std::vector<std::string> dim_requested;
-    //a) by Q selector:
-    std::string Q_dim_requested       = getProperty("QDimensions");  
-    //b) by other dim property;
-     other_dim_names                  = getProperty("OtherDimensions");
+
+    // if new workspace is created, its properties are determened by user input
+    if (create_new_ws){
+
+        // Identify what dimension names we can obtain from the input workspace;
+        std::vector<std::string> dim_names_availible;
+        // assume that |Q| and QxQyQz availible from any workspace? -- wrong!!!!
+        std::vector<std::string> wsNames(2);
+        wsNames[0]="|Q|";
+        wsNames[1]="QxQyQz";
+
+    // get the X axis
+        NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
+        if(!pXAxis )
+        {
+            convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inWS2D->getName()<<std::endl;
+            throw(std::invalid_argument("Input workspace has to have X-axis"));
+        }
+        std::string Dim1Name = pXAxis->unit()->unitID();
+        wsNames.push_back(Dim1Name);
+        //
+        dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
 
 
-   // Identify the algorithm to deploy and idemtify/set the dimension names to use
-    std::string algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
-   
+        // get dim_names requested by user:
+        std::vector<std::string> dim_requested;
+        //a) by Q selector:
+        std::string Q_dim_requested     = getProperty("QDimensions");  
+        //b) by other dim property;
+        other_dim_names                 = getProperty("OtherDimensions");
+
+        // Identify the algorithm to deploy and idemtify/set the dimension names to use
+        algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
+
+        // set the min and max values for the dimensions from the input porperties
+        dim_min = getProperty("MinValues");
+        dim_max = getProperty("MaxValues");
+        // verify that the number min/max values is equivalent to the number of dimensions defined by properties
+        if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions){
+            g_log.error()<<" number of specified min dimension values:"<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
+                           " and total number of target dimensions"<<n_activated_dimensions<<" are not consistent\n";
+            throw(std::invalid_argument("wrong number of dimension limits"));
+        }
+
+    }else{ 
+    // the output dimensions will be determined by the dimensions of the target workspace
+          dim_min.assign(n_activated_dimensions,-1);
+          dim_max.assign(n_activated_dimensions,1);
+    }
     
 
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
     if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
-     dim_min.assign(n_activated_dimensions,-1);
-     dim_max.assign(n_activated_dimensions,1);
-
-    // create the event workspace with proper numner of dimensions and specified box controller parameters;
-     API::IMDEventWorkspace_sptr spws = ws_creator[n_activated_dimensions](this,5,10,20);
-     if(!spws){
-        g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
-        throw(std::invalid_argument("can not create target workspace"));
-
-     } 
+      
+   
+     if(create_new_ws){
+        // create the event workspace with proper numner of dimensions and specified box controller parameters;
+        spws = ws_creator[n_activated_dimensions](this,5,10,20);
+        if(!spws){
+            g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
+            throw(std::invalid_argument("can not create target workspace"));
+         } 
+     }
 
     // call selected algorithm
     pMethod algo =  alg_selector[algo_id];

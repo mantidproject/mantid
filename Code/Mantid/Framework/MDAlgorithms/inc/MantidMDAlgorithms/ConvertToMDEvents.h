@@ -74,7 +74,7 @@ namespace MDAlgorithms
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "Inelastic;MDAlgorithms";}  
+    virtual const std::string category() const { return "MDAlgorithms";}  
   private:
     void init();
     void exec();
@@ -181,7 +181,7 @@ namespace MDAlgorithms
     std::vector<double> rotMat;
     /** template to build empty MDevent workspace with box controller and other palavra
      * @param split_into       -- the number of the bin the grid is split into
-     * @param split_threshold  -- 
+     * @param split_threshold  -- number of events in an intermediate cell?
      * @param split_maxDepth   -- maximal depth of the split tree;
     */
     template<size_t nd>

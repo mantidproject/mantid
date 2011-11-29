@@ -215,13 +215,19 @@ void testAlgoSelector7()
 }
 
 
-void testExecSelection()
+void testExecModQ()
 {
     
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
+    pAlg->setPropertyValue("QDimensions","|Q|");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
+    //TODO: wrong -- q should generate 2 dimensions -- currently 1
+    pAlg->setPropertyValue("MinValues","-10,0,-10");
+    pAlg->setPropertyValue("MaxValues"," 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS(pAlg->execute(),Kernel::Exception::NotImplementedError);
+    AnalysisDataService::Instance().remove("OutputWorkspace");
+
 }
 void testExecQ3D()
 {
@@ -229,6 +235,9 @@ void testExecQ3D()
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
      
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
+    pAlg->setPropertyValue("MinValues","-10,-10,-10,0,-10");
+    pAlg->setPropertyValue("MaxValues"," 10, 10,10,20,40");
+
 
     pAlg->setRethrows(false);
     pAlg->execute();
