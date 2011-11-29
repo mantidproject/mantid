@@ -41,6 +41,17 @@ import api
 from api import *
 
 ###############################################################################
+# GUI
+###############################################################################
+# Flag indicating that whether the GUI layer is loaded. 
+# We need a better way of handling this
+try:
+    import qti
+    __gui__ = True
+except ImportError:
+    __gui__ = False
+
+###############################################################################
 # Aliases 
 ###############################################################################
 mtd = framework_mgr
