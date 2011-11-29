@@ -429,6 +429,35 @@ def isRunsSorted(list_runs, S1H, S2H):
     
     return True
 
+
+def calculateAndFit(numerator='',
+                    denominator='',
+                    list_peak_back_numerator=None,
+                    list_peak_back_denominator=None,
+                    list_objects=[]):                                       
+
+    cal1 = sfCalculator(numerator=numerator, denominator=denominator)
+                
+    cal1.setNumerator(minPeak=list_peak_back_numerator[0],
+                      maxPeak=list_peak_back_numerator[1],
+                      minBack=list_peak_back_numerator[2],
+                      maxBack=list_peak_back_numerator[3])
+                
+    cal1.setDenominator(minPeak=list_peak_back_denominator[0],
+                        maxPeak=list_peak_back_denominator[1],
+                        minBack=list_peak_back_denominator[2],
+                        maxBack=list_peak_back_denominator[3])                
+
+    cal1.run()
+    
+    if (list_objects != [] and list_objects[-1] is not None):
+        new_cal1 = cal1 * list_objects[-1]
+        new_cal1.fit()
+        return new_cal1
+    else:
+        cal1.fit()
+        return cal1
+
 if __name__ == '__main__':
     
     """
@@ -503,7 +532,7 @@ if __name__ == '__main__':
             if list_attenuator[i] == 0:
                 continue
 
-            if list_attenuator[i] == 1: #skip first 1 attenuator
+            elif list_attenuator[i] == 1: #skip first 1 attenuator
                 if (_first_1A):
                     _first_1A = False
                     _index_first_1A = i
@@ -512,29 +541,21 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_1A
             
-                cal1 = sfCalculator(numerator=list_runs[index_numerator],
-                                   denominator=list_runs[index_denominator])
+                cal1 = calculateAndFit(numerator=list_runs[index_numerator],
+                                       denominator=list_runs[index_denominator],
+                                       list_peak_back_numerator=list_peak_back[index_numerator,],
+                                       list_peak_back_denominator=list_peak_back[index_denominator,],
+                                       list_objects=list_objects)                                       
                 
-                cal1.setNumerator(minPeak=list_peak_back[index_numerator, 0],
-                                  maxPeak=list_peak_back[index_numerator, 1],
-                                  minBack=list_peak_back[index_numerator, 2],
-                                  maxBack=list_peak_back[index_numerator, 3])
-                cal1.setDenominator(minPeak=list_peak_back[index_denominator, 0],
-                                    maxPeak=list_peak_back[index_denominator, 1],
-                                    minBack=list_peak_back[index_denominator, 2],
-                                    maxBack=list_peak_back[index_denominator, 3])                
-
-                cal1.run()
-                cal1.fit()
                 recordSettings(a, b, error_a, error_b, name, cal1)
-#                plotObject(cal1)
+                plotObject(cal1)
                                 
                 if (i < (len(list_runs) - 1) and
                          list_attenuator[i + 1] == 2):
                     list_objects.append(cal1)
             
             
-            if list_attenuator[i] == 2:
+            elif list_attenuator[i] == 2:
                 if (_first_2A):
                     _first_2A = False
                     _index_first_2A = i
@@ -543,31 +564,37 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_2A
                     
-                cal2 = sfCalculator(numerator=list_runs[index_numerator],
-                                   denominator=list_runs[index_denominator])
+                new_cal2 = calculateAndFit(numerator=list_runs[index_numerator],
+                                       denominator=list_runs[index_denominator],
+                                       list_peak_back_numerator=list_peak_back[index_numerator,],
+                                       list_peak_back_denominator=list_peak_back[index_denominator,],
+                                       list_objects=list_objects)                                       
 
-                cal2.setNumerator(minPeak=list_peak_back[index_numerator, 0],
-                                  maxPeak=list_peak_back[index_numerator, 1],
-                                  minBack=list_peak_back[index_numerator, 2],
-                                  maxBack=list_peak_back[index_numerator, 3])
-                cal2.setDenominator(minPeak=list_peak_back[index_denominator, 0],
-                                    maxPeak=list_peak_back[index_denominator, 1],
-                                    minBack=list_peak_back[index_denominator, 2],
-                                    maxBack=list_peak_back[index_denominator, 3])                
-
-                cal2.run()
-
-                new_cal2 = cal2 * list_objects[-1]
-                new_cal2.fit()
+#                cal2 = sfCalculator(numerator=list_runs[index_numerator],
+#                                   denominator=list_runs[index_denominator])
+#
+#                cal2.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+#                                  maxPeak=list_peak_back[index_numerator, 1],
+#                                  minBack=list_peak_back[index_numerator, 2],
+#                                  maxBack=list_peak_back[index_numerator, 3])
+#                cal2.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+#                                    maxPeak=list_peak_back[index_denominator, 1],
+#                                    minBack=list_peak_back[index_denominator, 2],
+#                                    maxBack=list_peak_back[index_denominator, 3])                
+#
+#                cal2.run()
+#
+#                new_cal2 = cal2 * list_objects[-1]
+#                new_cal2.fit()
                 recordSettings(a, b, error_a, error_b, name, new_cal2)
-#                plotObject(new_cal2)
+                plotObject(new_cal2)
 
                 if (i < (len(list_runs) - 1) and
                          list_attenuator[i + 1] == 3):
                     list_objects.append(new_cal2)
 
 
-            if list_attenuator[i] == 3: 
+            elif list_attenuator[i] == 3: 
                 if (_first_3A):
                     _first_3A = False
                     _index_first_3A = i
@@ -576,30 +603,36 @@ if __name__ == '__main__':
                     index_numerator = i
                     index_denominator = _index_first_3A
                     
-                cal3 = sfCalculator(numerator=list_runs[index_numerator],
-                                   denominator=list_runs[index_denominator])
-
-                cal3.setNumerator(minPeak=list_peak_back[index_numerator, 0],
-                                  maxPeak=list_peak_back[index_numerator, 1],
-                                  minBack=list_peak_back[index_numerator, 2],
-                                  maxBack=list_peak_back[index_numerator, 3])
-                cal3.setDenominator(minPeak=list_peak_back[index_denominator, 0],
-                                    maxPeak=list_peak_back[index_denominator, 1],
-                                    minBack=list_peak_back[index_denominator, 2],
-                                    maxBack=list_peak_back[index_denominator, 3])                
-
-                cal3.run()
-                new_cal3 = cal3 * list_objects[-1]
-                new_cal3.fit()
+                new_cal3 = calculateAndFit(numerator=list_runs[index_numerator],
+                                       denominator=list_runs[index_denominator],
+                                       list_peak_back_numerator=list_peak_back[index_numerator,],
+                                       list_peak_back_denominator=list_peak_back[index_denominator,],
+                                       list_objects=list_objects)               
+               
+#                cal3 = sfCalculator(numerator=list_runs[index_numerator],
+#                                   denominator=list_runs[index_denominator])
+#
+#                cal3.setNumerator(minPeak=list_peak_back[index_numerator, 0],
+#                                  maxPeak=list_peak_back[index_numerator, 1],
+#                                  minBack=list_peak_back[index_numerator, 2],
+#                                  maxBack=list_peak_back[index_numerator, 3])
+#                cal3.setDenominator(minPeak=list_peak_back[index_denominator, 0],
+#                                    maxPeak=list_peak_back[index_denominator, 1],
+#                                    minBack=list_peak_back[index_denominator, 2],
+#                                    maxBack=list_peak_back[index_denominator, 3])                
+#
+#                cal3.run()
+#                new_cal3 = cal3 * list_objects[-1]
+#                new_cal3.fit()
                 recordSettings(a, b, error_a, error_b, name, new_cal3)
-#                plotObject(new_cal3)
+                plotObject(new_cal3)
                 
                 if (i < (len(list_runs) - 1) and 
                          list_attenuator[i + 1] == 4):
                     list_objects.append(new_cal3)
 
         
-            if list_attenuator[i] == 4: 
+            elif list_attenuator[i] == 4: 
                 if (_first_4A):
                     _first_4A = False
                     _index_first_4A = i
@@ -630,7 +663,7 @@ if __name__ == '__main__':
                          list_attenuator[i + 1] == 5):
                     list_objects.append(new_cal4)
                 
-            if list_attenuator[i] == 5: 
+            elif list_attenuator[i] == 5: 
                 if (_first_5A):
                     _first_5A = False
                     _index_first_5A = i
@@ -661,7 +694,7 @@ if __name__ == '__main__':
                          list_attenuator[i + 1] == 6):
                     list_objects.append(new_cal5)
         
-            if list_attenuator[i] == 6: 
+            elif list_attenuator[i] == 6: 
                 if (_first_6A):
                     _first_6A = False
                     _index_first_6A = i
