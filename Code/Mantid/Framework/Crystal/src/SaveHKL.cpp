@@ -106,7 +106,7 @@ namespace Crystal
     {
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
       long pos = out.tellp();
-      out.seekp (pos - 115);
+      out.seekp (50);
       out >> firstrun;
       out.seekp (pos - 110);
       out >> seqNum;
