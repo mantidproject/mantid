@@ -48,6 +48,9 @@ ThreeSliceView::~ThreeSliceView()
 void ThreeSliceView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  // Active source disappers in only this view, so set it from the
+  // internal source before destroying view.
+  pqActiveObjects::instance().setActiveSource(this->origSrc);
   this->destroyFilter(builder, QString("Slice"));
   builder->destroy(this->mainView);
   builder->destroy(this->xView);
