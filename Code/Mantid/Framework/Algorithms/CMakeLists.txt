@@ -165,6 +165,7 @@ set ( SRC_FILES
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/WeightedMean.cpp
+	src/WeightingStrategy.cpp
 	src/XDataConverter.cpp
 )
 
@@ -336,6 +337,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/WeightedMean.h
+	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
 
@@ -487,6 +489,7 @@ set ( TEST_FILES
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
 	test/WeightedMeanTest.h
+	test/WeightingStrategyTest.h
 	test/WorkspaceCreationHelperTest.h
 	test/WorkspaceGroupTest.h
 )
