@@ -10,8 +10,6 @@
 #include "MantidAlgorithms/WeightingStrategy.h"
 
 using namespace Mantid;
-using namespace Mantid::Algorithms;
-using namespace Mantid::API;
 
 class WeightingStrategyTest : public CxxTest::TestSuite
 {
