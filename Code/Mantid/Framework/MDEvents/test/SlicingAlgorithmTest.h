@@ -63,7 +63,7 @@ public:
 
   void test_initSlicingProps()
   {
-    SlicingAlgorithmImpl alg; alg.in_ws = ws;
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws;
     TSM_ASSERT_THROWS_NOTHING("Can init properties", alg.initSlicingProps());
   }
 
@@ -72,7 +72,7 @@ public:
   // ==============================================================================================
   void test_makeAlignedDimensionFromString_failures()
   {
-    SlicingAlgorithmImpl alg; alg.in_ws = ws;
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws;
     TSM_ASSERT_THROWS_ANYTHING("Blank string", alg.makeAlignedDimensionFromString(""));
     TSM_ASSERT_THROWS_ANYTHING("Blank name", alg.makeAlignedDimensionFromString(", 1.0, 9.0, 10"));
     TSM_ASSERT_THROWS_ANYTHING("Min > max", alg.makeAlignedDimensionFromString("Axis0, 11.0, 9.0, 10"));
@@ -81,7 +81,7 @@ public:
 
   void test_makeAlignedDimensionFromString()
   {
-    SlicingAlgorithmImpl alg; alg.in_ws = ws;
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws;
     TSM_ASSERT_THROWS_NOTHING("", alg.makeAlignedDimensionFromString("Axis2, 1.0, 9.0, 10"));
     TS_ASSERT_EQUALS( alg.dimensionToBinFrom.size(), 1);
     TS_ASSERT_EQUALS( alg.binDimensions.size(), 1);
@@ -98,7 +98,7 @@ public:
   SlicingAlgorithmImpl * do_createAlignedTransform(std::string name1, std::string name2, std::string name3, std::string name4)
   {
     SlicingAlgorithmImpl * alg = new SlicingAlgorithmImpl();
-    alg->in_ws = ws;
+    alg->m_inWS = ws;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "1"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AlignedDimX", name1));
@@ -261,7 +261,7 @@ public:
 
   void test_makeBasisVectorFromString_failures()
   {
-    SlicingAlgorithmImpl alg; alg.in_ws = ws;
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws;
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
     TSM_ASSERT_THROWS_ANYTHING("Blank name", alg.makeBasisVectorFromString(",units,1,2,3, 10.0, 5"));
     TSM_ASSERT_THROWS_ANYTHING("Too many dims", alg.makeBasisVectorFromString("name,units,1,2,3,4, 10.0, 5"));
@@ -275,7 +275,7 @@ public:
 
   void test_makeBasisVectorFromString()
   {
-    SlicingAlgorithmImpl alg; alg.in_ws = ws;
+    SlicingAlgorithmImpl alg; alg.m_inWS = ws;
     TS_ASSERT_EQUALS(alg.m_bases.size(), 0);
     TSM_ASSERT_THROWS_NOTHING("", alg.makeBasisVectorFromString(" name, units  , 1,2,3, 10.0, 5"));
     TS_ASSERT_EQUALS(alg.m_bases.size(), 1);
@@ -297,7 +297,7 @@ public:
       VMD origin, bool ForceOrthogonal=false)
   {
     SlicingAlgorithmImpl * alg = new SlicingAlgorithmImpl();
-    alg->in_ws = inWS;
+    alg->m_inWS = inWS;
     alg->initSlicingProps();
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("AxisAligned", "0"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BasisVectorX", name1));

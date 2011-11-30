@@ -6,6 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include "MantidKernel/VectorHelper.h"
+#include "MantidMDEvents/CoordTransformAligned.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -245,18 +246,48 @@ namespace MDEvents
       return formattedXMLString;
   }
 
-//  //----------------------------------------------------------------------------------------------
-//  /** Set the transformation to be a simple rotation.
-//   *
-//   * @param translationVector :: fixed-size array of the translation vector, of size inD
-//   * @throw runtime_error if inD != outD
-//   */
-//  TCT
-//  void CoordTransformAffine::setRotation(const coord_t * translationVector)
-//  {
-//    if (inD != outD) throw std::runtime_error("Translation required inD == outD.");
-//  }
 
+  //----------------------------------------------------------------------------------------------
+  /** Combine two transformations into a single affine transformations
+   *
+   * @param first :: CoordTransformAffine or CoordTransformAligned transform.
+   * @param second :: CoordTransformAffine or CoordTransformAligned transform.
+   * @return pointer to a new CoordTransformAffine combining both
+   * @throw std::runtime_error if one of the inputs is not CoordTransformAffine or CoordTransformAligned
+   */
+  CoordTransformAffine * CoordTransformAffine::combineTransformations(CoordTransform * first, CoordTransform * second)
+  {
+    if (!first || !second)
+      throw std::runtime_error("CoordTransformAffine::combineTransformations(): Null input provided.");
+    if (second->getInD() != first->getOutD())
+      throw std::runtime_error("CoordTransformAffine::combineTransformations(): The # of output dimensions of first must be the same as the # of input dimensions of second.");
+    // Convert both inputs to affine matrices, if needed
+    CoordTransformAffine * firstAff = dynamic_cast<CoordTransformAffine *>(first);
+    if (!firstAff)
+    {
+      CoordTransformAligned * firstAl = dynamic_cast<CoordTransformAligned *>(first);
+      if (!firstAl)
+        throw std::runtime_error("CoordTransformAffine::combineTransformations(): first transform must be either CoordTransformAffine or CoordTransformAligned.");
+      firstAff = new CoordTransformAffine(firstAl->getInD(), firstAl->getOutD());
+      firstAff->setMatrix( firstAl->makeAffineMatrix() );
+    }
+    CoordTransformAffine * secondAff = dynamic_cast<CoordTransformAffine *>(second);
+    if (!secondAff)
+    {
+      CoordTransformAligned * secondAl = dynamic_cast<CoordTransformAligned *>(second);
+      if (!secondAl)
+        throw std::runtime_error("CoordTransformAffine::combineTransformations(): second transform must be either CoordTransformAffine or CoordTransformAligned.");
+      secondAff = new CoordTransformAffine(secondAl->getInD(), secondAl->getOutD());
+      secondAff->setMatrix( secondAl->makeAffineMatrix() );
+    }
+    // Initialize the affine matrix
+    CoordTransformAffine * out = new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
+    // Multiply the two matrices together
+    Matrix<coord_t> outMat = secondAff->getMatrix() * firstAff->getMatrix();
+    // Set in the output
+    out->setMatrix(outMat);
+    return out;
+  }
 
 
 

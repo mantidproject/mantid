@@ -40,6 +40,9 @@ namespace API
     /// @return the number of output dimensions
     size_t getOutD() const
     { return outD; };
+//
+//    /// Compound the transformation by appending another one after this one.
+//    virtual void compound(CoordTransform * other) = 0;
 
   protected:
     /// Input number of dimensions

@@ -44,6 +44,8 @@ namespace MDEvents
 
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const;
 
+    static CoordTransformAffine * combineTransformations(CoordTransform * first, CoordTransform * second);
+
   protected:
     /** Affine Matrix to perform the transformation. The matrix has inD+1 columns, outD+1 rows.
      * By using an affine, translations and rotations (or other linear transforms) can be

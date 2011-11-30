@@ -557,6 +557,15 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
     ws_item->addChild(sub_data_item);
   }
 
+  // A line describing that this workspace is binned from another
+  if (workspace->hasOriginalWorkspace())
+  {
+    std::string text = "Binned from '" + workspace->getOriginalWorkspace()->getName() + "'";
+    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString( text )), m_tree);
+    sub_data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(sub_data_item);
+    ws_item->addChild(sub_data_item);
+  }
 }
 
 

@@ -487,7 +487,7 @@ namespace MDEvents
   void BinMD::exec()
   {
     // Input MDEventWorkspace
-    in_ws = getProperty("InputWorkspace");
+    m_inWS = getProperty("InputWorkspace");
     // Look at properties, create either axis-aligned or general transform.
     this->createTransform();
 
@@ -508,6 +508,7 @@ namespace MDEvents
     for (size_t i=0; i<m_bases.size(); i++)
       outWS->setBasisVector(i, m_bases[i]);
     outWS->setOrigin( this->m_origin );
+    outWS->setOriginalWorkspace(m_inWS);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");
@@ -519,15 +520,16 @@ namespace MDEvents
 
     if (IterateEvents)
     {
-      CALL_MDEVENT_FUNCTION(this->binByIterating, in_ws);
+      CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
     }
     else
     {
-      CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
+      CALL_MDEVENT_FUNCTION(this->do_centerpointBin, m_inWS);
     }
 
     // Copy the experiment infos to the output
-    outWS->copyExperimentInfos( *in_ws );
+    IMDEventWorkspace_sptr inEWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
+    outWS->copyExperimentInfos( *inEWS );
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));

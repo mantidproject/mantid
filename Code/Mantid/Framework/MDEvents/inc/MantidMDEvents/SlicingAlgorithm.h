@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/Strings.h"
@@ -75,7 +76,7 @@ namespace MDEvents
     Mantid::Geometry::MDImplicitFunction * getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax);
 
     /// Input workspace
-    Mantid::API::IMDEventWorkspace_sptr in_ws;
+    Mantid::API::IMDWorkspace_sptr m_inWS;
 
     /// Bin dimensions to actually use
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;

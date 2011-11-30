@@ -106,7 +106,7 @@ namespace MDEvents
     int numBins = 0;
     std::vector<std::string> strs;
     boost::split(strs, str, boost::is_any_of(","));
-    if (strs.size() != this->in_ws->getNumDims() + 4)
+    if (strs.size() != this->m_inWS->getNumDims() + 4)
       throw std::invalid_argument("Wrong number of values (expected 4 + # of input dimensions) in the dimensions string: " + str);
     // Extract the arguments
     name = Strings::strip(strs[0]);
@@ -127,8 +127,8 @@ namespace MDEvents
     double scaling = double(numBins) / length;
 
     // Create the basis vector with the right # of dimensions
-    VMD basis(this->in_ws->getNumDims());
-    for (size_t d=0; d<this->in_ws->getNumDims(); d++)
+    VMD basis(this->m_inWS->getNumDims());
+    for (size_t d=0; d<this->m_inWS->getNumDims(); d++)
       Strings::convert(strs[d+2], basis[d]);
     basis.normalize();
 
@@ -149,7 +149,7 @@ namespace MDEvents
   void SlicingAlgorithm::createGeneralTransform()
   {
     // Number of input dimensions
-    size_t inD = in_ws->getNumDims();
+    size_t inD = m_inWS->getNumDims();
 
     // Create the dimensions based on the strings from the user
     std::string dimChars = "XYZT";
@@ -275,8 +275,8 @@ namespace MDEvents
       // Find the named axis in the input workspace
       try
       {
-        size_t dim_index = in_ws->getDimensionIndexByName(name);
-        IMDDimension_const_sptr inputDim = in_ws->getDimension(dim_index);
+        size_t dim_index = m_inWS->getDimensionIndexByName(name);
+        IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
         units = inputDim->getUnits();
         // Add the index from which we're binning to the vector
         this->dimensionToBinFrom.push_back(dim_index);
@@ -312,7 +312,7 @@ namespace MDEvents
     }
 
     // Number of input dimension
-    size_t inD = in_ws->getNumDims();
+    size_t inD = m_inWS->getNumDims();
     // Validate
     if (numDims == 0)
       throw std::runtime_error("No output dimensions specified.");
@@ -346,7 +346,7 @@ namespace MDEvents
     }
 
     // Transform for binning
-    m_transform = new CoordTransformAligned(in_ws->getNumDims(), outD,
+    m_transform = new CoordTransformAligned(m_inWS->getNumDims(), outD,
         dimensionToBinFrom, origin, scaling);
 
     // Transformation original->binned. There is not offset or scaling!
@@ -374,10 +374,20 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Read the algorithm properties and creates the appropriate transforms
-   * for slicing the MDEventWorkspace
+   * for slicing the MDEventWorkspace.
+   *
+   * NOTE: The m_inWS member must be set first.
+   * If the workspace is based on another, e.g. result from BinMD,
+   * m_inWS will be modified to be the original workspace and the transformations
+   * will be altered to match.
+   *
+   * The m_transform, m_transformFromOriginal and m_transformToOriginal transforms will be set.
    */
   void SlicingAlgorithm::createTransform()
   {
+    if (!m_inWS)
+      throw std::runtime_error("SlicingAlgorithm::createTransform(): input MDWorkspace must be set first!");
+
     // Is the transformation aligned with axes?
     m_axisAligned = getProperty("AxisAligned");
 
@@ -388,6 +398,13 @@ namespace MDEvents
     else
       this->createGeneralTransform();
 
+    if (m_inWS->hasOriginalWorkspace())
+    {
+      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
+      if (origWS->getNumDims() != m_inWS->getNumDims())
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
+//      m_transformToOriginal->
+    }
   }
 
 
@@ -411,7 +428,7 @@ namespace MDEvents
    */
   MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax)
   {
-    size_t nd = in_ws->getNumDims();
+    size_t nd = m_inWS->getNumDims();
 
     // General implicit function
     MDImplicitFunction * func = new MDImplicitFunction;
@@ -582,7 +599,7 @@ namespace MDEvents
    */
   MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(size_t * chunkMin, size_t * chunkMax)
   {
-    size_t nd = in_ws->getNumDims();
+    size_t nd = m_inWS->getNumDims();
     if (m_axisAligned)
     {
       std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified

@@ -1,5 +1,29 @@
 /*WIKI* 
-Algorithm that can take a slice out of an original MDEventWorkspace while preserving all the events contained therein.
+Algorithm that can take a slice out of an original [[MDEventWorkspace]] while preserving all the events contained therein.
+
+It uses the same parameters as [[BinMD]] to determine a transformation to make from input->output workspace.
+The difference is that [[BinMD]] sums events in a regular grid whereas SliceMD moves the events into the output workspace,
+which boxes itself.
+
+=== Axis-Aligned Slice ===
+
+Events outside the range of the slice are dropped. The new output
+MDEventWorkspace's dimensions only extend as far as the limit specified.
+
+=== Non-Axis-Aligned Slice ===
+
+The coordinates of each event are transformed according to the new basis vectors,
+and placed in the output MDEventWorkspace. The dimensions of the output workspace
+are along the basis vectors specified.
+
+=== Splitting Parameters ===
+
+Instead of specifying a "Number of bins", as in [[BinMD]], you specify the "SplitInto" parameter for each dimension.
+For instance, if you want the output workspace to split in 2x2x2, you would specify a number of "bins" of 2.
+
+For 1D slices, it may make sense to specify a SplitInto parameter of 1 in every other dimension - that way, boxes
+will only be split along the 1D direction.
+
 *WIKI*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -287,12 +311,12 @@ namespace MDEvents
   void SliceMD::exec()
   {
     // Input MDEventWorkspace
-    in_ws = getProperty("InputWorkspace");
+    m_inWS = getProperty("InputWorkspace");
 
     // Run through the properties to create the transform you need
     createTransform();
 
-    CALL_MDEVENT_FUNCTION(this->doExec, in_ws);
+    CALL_MDEVENT_FUNCTION(this->doExec, m_inWS);
   }
 
 
