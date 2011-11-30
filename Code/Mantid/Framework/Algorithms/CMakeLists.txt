@@ -107,7 +107,6 @@ set ( SRC_FILES
 	src/MuonAsymmetryCalc.cpp
 	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
-	src/NormaliseByVanadium.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
@@ -279,7 +278,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MuonAsymmetryCalc.h
 	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
-	inc/MantidAlgorithms/NormaliseByVanadium.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
@@ -438,7 +436,6 @@ set ( TEST_FILES
 	test/MuonAsymmetryCalcTest.h
 	test/MuonRemoveExpDecayTest.h
 	test/NormaliseByCurrentTest.h
-	test/NormaliseByVanadiumTest.h
 	test/NormaliseToMonitorTest.h
 	test/OneMinusExponentialCorTest.h
 	test/PDFFTTest.h
