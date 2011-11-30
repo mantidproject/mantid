@@ -32,7 +32,7 @@ public:
   
   void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile=true)
   {
-	AnalysisDataService::Instance().clear();
+    AnalysisDataService::Instance().clear();
     // Make two input workspaces
     MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
     MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);

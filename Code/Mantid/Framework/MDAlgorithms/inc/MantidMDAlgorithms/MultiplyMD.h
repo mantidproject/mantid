@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -61,6 +62,8 @@ namespace MDAlgorithms
     /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
     void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 
+    template<typename MDE, size_t nd>
+    void execEventScalar(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
   };
 

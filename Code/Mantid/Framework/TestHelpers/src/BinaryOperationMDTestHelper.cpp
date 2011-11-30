@@ -76,6 +76,7 @@ namespace BinaryOperationMDTestHelper
     }
   }
 
+
 } // (end namespace)
 
 
