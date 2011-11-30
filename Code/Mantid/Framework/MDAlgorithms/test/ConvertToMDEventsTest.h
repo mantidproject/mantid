@@ -4,6 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -22,27 +23,28 @@ class Convert2AnyTestHelper: public ConvertToMDEvents
 {
 public:
     Convert2AnyTestHelper(){};
-   
-    std::vector<std::string> get_dimension_names(MatrixWorkspace_const_sptr inMatrixWS){      
-       std::vector<std::string> default_properties(1);
-        default_properties[0]="DeltaE";
-       return ConvertToMDEvents::get_dimension_names(default_properties,inMatrixWS);
+   // private (PROTECTED) methods, exposed for testing:
+     void getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &ws_dimensions,std::vector<std::string> &ws_units)const{
+        return ConvertToMDEvents::getDimensionNamesFromWSMatrix(inMatrixWS,ws_dimensions,ws_units);
+    }
+    std::vector<std::string> get_dimension_names(MatrixWorkspace_const_sptr inMatrixWS){           
+       return ConvertToMDEvents::getDimensionNames(inMatrixWS);
     }
 
    std::string identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &QOption,const std::vector<std::string> &dim_selected,size_t &nDims)
    { return   ConvertToMDEvents::identify_the_alg( dim_names_availible,QOption,dim_selected,nDims);
    }
 
-   void run_algo(const std::string &algo_id){   
-   // call selected algorithm
-        pMethod algo =  alg_selector[algo_id];
-        if(algo){
-   //         algo(this);
-        }else{
-            g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
-            throw(std::invalid_argument("undefined subalgoritm requested "));
-        }      
-   }
+   //void run_algo(const std::string &algo_id){   
+   //// call selected algorithm
+   //     pMethod algo =  alg_selector[algo_id];
+   //     if(algo){
+   ////         algo(this);
+   //     }else{
+   //         g_log.error()<<"requested undefined subalgorithm :"<<algo_id<<std::endl;
+   //         throw(std::invalid_argument("undefined subalgoritm requested "));
+   //     }      
+   //}
 };
 // helper function to provide list of names to test:
 std::vector<std::string> dim_availible()
@@ -69,10 +71,57 @@ void testInit(){
 
     TSM_ASSERT_EQUALS("algortithm should have 7 propeties",7,(size_t)(pAlg->getProperties().size()));
 }
+// --> GET DIMENSIONS FROM WS MATRIX:
+void testGetWSDimNamesWsNoAxisThrows(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+    ws2D->replaceAxis(0,new API::TextAxis(3));
+    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_units;
+    TS_ASSERT_THROWS(pAlg->getDimensionNamesFromWSMatrix(ws2D,dim_names,dim_units),std::invalid_argument);
+}
+void testGetWSDimNamesFine(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+
+    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_units;
+    TS_ASSERT_THROWS_NOTHING(pAlg->getDimensionNamesFromWSMatrix(ws2D,dim_names,dim_units));
+
+    TSM_ASSERT_EQUALS("Inelastic workspace can produce 3 dimension types",3,dim_names.size());
+    TSM_ASSERT_EQUALS("Simpe Inelastic workspace has units along X axis only: ",1,dim_units.size());
+    TSM_ASSERT_EQUALS("Inelastic workspace units are DeltaE only","DeltaE",dim_units[0]);
+
+}
+void testGetWSDimNames2AxisNoQ(){
+    Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
+
+    API::NumericAxis *pAx = new API::NumericAxis(3);
+    pAx->title() = "Dim1";
+    pAx->setUnit("dSpacing");
+    ws2D->replaceAxis(0,pAx);
+
+    pAx = new API::NumericAxis(3);
+    pAx->title() = "Dim2";
+    pAx->setUnit("QSquared");
+    ws2D->replaceAxis(1,pAx);
+
+    std::vector<std::string> dim_names;
+    std::vector<std::string> dim_units;
+    TS_ASSERT_THROWS_NOTHING(pAlg->getDimensionNamesFromWSMatrix(ws2D,dim_names,dim_units));
+
+    TS_ASSERT_EQUALS(2,dim_names.size());
+    TS_ASSERT_EQUALS("Dim1",dim_names[0]);
+    TS_ASSERT_EQUALS("Dim2",dim_names[1]);
+
+    TS_ASSERT_EQUALS(2,dim_units.size());
+    TS_ASSERT_EQUALS("dSpacing",dim_units[0]);
+    TS_ASSERT_EQUALS("QSquared",dim_units[1]);
+
+}
+// --> GET ALL DIMENSION NAMES:
 void testGetDimNames(){
     // get ws from the DS    
     Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
-    // check the privat function
+    // check the private function
     std::vector<std::string> dim_names = pAlg->get_dimension_names(ws2D);
 
    TSM_ASSERT_EQUALS("the algorithm for this workpace can choose from 5 properties",5,dim_names.size());

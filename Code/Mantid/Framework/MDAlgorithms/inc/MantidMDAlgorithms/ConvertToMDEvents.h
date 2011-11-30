@@ -57,6 +57,7 @@ namespace MDAlgorithms
   //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
   typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, size_t ,size_t ,size_t )> pWSCreator;
 
+  // known sates for algorithms, caluclating Q-values
   enum Q_state{
        NoQ,
        modQ,
@@ -81,7 +82,7 @@ namespace MDAlgorithms
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
 
-      /// Progress reporter 
+    /// Progress reporter 
     std::auto_ptr<API::Progress> pProg;
  
   /// logger -> to provide logging, for MD dataset file operations
@@ -92,9 +93,7 @@ namespace MDAlgorithms
    void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
      /// the variable which describes the number of the dimensions, currently used by algorithm. Changes in input properties can change this number;
    size_t n_activated_dimensions;
-   /// this variable describes default possible ID-s for Q-dimensions
-   std::vector<std::string> Q_ID_possible;
- 
+  
    /// pointer to input workspace;
    Mantid::DataObjects::Workspace2D_sptr inWS2D;
    // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
@@ -103,18 +102,20 @@ namespace MDAlgorithms
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
     static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
      /// the names of the log variables, which are used as dimensions
-    std::vector<std::string> other_dim_names;
+//    std::vector<std::string> other_dim_names;
     /// the 
     
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
-    // the names for the MD workspace dimensions
+    // the names for the target workspace dimensions and properties of input MD workspace
     std::vector<std::string> dim_names;
-    // the units for the MD workspace dimensions
+    // the units of target workspace dimensions and properties of input MD workspace dimensions
     std::vector<std::string> dim_units;
   protected: //for testing
    /** function returns the list of names, which can be treated as dimensions present in current matrix workspace */
-   std::vector<std::string > get_dimension_names(const std::vector<std::string> &default_prop,API::MatrixWorkspace_const_sptr inMatrixWS)const;
+   std::vector<std::string > getDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS)const;
+   /** The function to identify the target dimensions and target uints which can be obtained from workspace dimensions   */
+   void getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &ws_dimensions,std::vector<std::string> &ws_units)const;
    
    /** function processes arguments entered by user, calculates the number of dimensions and tries to establish which algorithm should be deployed;   */
    std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims);
@@ -139,27 +140,30 @@ namespace MDAlgorithms
      * @param n_ws_variabes -- subalgorithm specific number of variables, calculated from the workspace data
      *
      * @return Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
+     * @return true         -- if all Coord are within the range requested by algorithm. false otherwise
     */
     template<Q_state Q>
-    void calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
-    UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);}
+    bool calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
+    UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);return false;}
 
    
     /** template generalizes the code to calculate Y-variables within the external loop of processQND workspace
      * @param X    -- vector of X workspace values
      * @param i    -- index of external loop, identifying current y-coordinate
      * 
-     * @return Coord -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.    */
+     * @return Coord -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.    
+     * @return true         -- if all Coord are within the range requested by algorithm. false otherwise   */
     template<Q_state Q>
-    void calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
-    UNUSED_ARG(Coord); UNUSED_ARG(i);}
+    bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
+    UNUSED_ARG(Coord); UNUSED_ARG(i);return false;}
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
      * @param X    -- vector of X workspace values
      * @param i    -- index of external loop, identifying generic y-coordinate
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
-     * @return Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector   */
+     * @return Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector   
+     * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   */
     template<Q_state Q>
     bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);
@@ -170,6 +174,7 @@ namespace MDAlgorithms
     */
     template<size_t nd,Q_state Q>
     void processQND(API::IMDEventWorkspace *const pOutWs);    
+    //--------------------------------------------------------------------------------------------------
     // the variables used for exchange data between different specific parts of the generic ND algorithm:
     // pointer to Y axis of MD workspace
     API::NumericAxis *pYAxis;
@@ -179,6 +184,7 @@ namespace MDAlgorithms
     double ki;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    //---------------------------------------------------------------------------------------------------
     /** template to build empty MDevent workspace with box controller and other palavra
      * @param split_into       -- the number of the bin the grid is split into
      * @param split_threshold  -- number of events in an intermediate cell?

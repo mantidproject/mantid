@@ -22,7 +22,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 
     MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
     if(!pWs){
-        g_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
+        convert_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
     }
 
@@ -35,7 +35,8 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     const size_t specSize = inWS2D->blocksize();    
     std::vector<coord_t> Coord(nd);
 
-    calc_generic_variables<Q>(Coord,nd);
+
+    if(!calc_generic_variables<Q>(Coord,nd))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(numSpec); ++i)
     {
@@ -45,14 +46,15 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         const MantidVec& Error    = inWS2D->readE(i);
         int32_t det_id            = det_loc.det_id[i];
 
-        calculate_y_coordinate<Q>(Coord,i);
+        if(!calculate_y_coordinate<Q>(Coord,i))continue;   // skip y outsize of the range;
+
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
         {
             // drop emtpy events
            if(Signal[j]<FLT_EPSILON)continue;
 
-           if(!calculate_ND_coordinates<Q>(X,i,j,Coord))continue;
+           if(!calculate_ND_coordinates<Q>(X,i,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
             pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
@@ -110,47 +112,59 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
 
 // PROCESS GENERIG VARIABLES AS FUNCTION OF ALGORITHM
 template<> 
-inline void ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
+bool ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
     // workspace defines 2 properties
          fillAddProperties(Coord,nd,2);
+         for(size_t i=2;i<nd;i++){
+            if(Coord[i]<dim_min[i]||Coord[i]>=dim_max[i])return false;
+         }
       // get the Y axis; 
          pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
          if(!pYAxis ){ // the cast should be verified earlier; just in case here:
             throw(std::invalid_argument("Input workspace has to have Y-axis"));
           }
+         return true;
 }
 //
 template<> 
-void ConvertToMDEvents::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
+bool ConvertToMDEvents::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
     UNUSED_ARG(Coord);
     UNUSED_ARG(nd);
     throw(Kernel::Exception::NotImplementedError("not yet implemented"));
 }
 //
 template<> 
-inline void ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
+bool ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
    // INELASTIC:
     // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
     fillAddProperties(Coord,nd,4);
+    for(size_t i=4;i<nd;i++){
+            if(Coord[i]<dim_min[i]||Coord[i]>=dim_max[i])return false;
+    }
+    // energy 
     Ei  =  boost::lexical_cast<double>(inWS2D->run().getProperty("Ei")->value());
     // the wave vector of input neutrons;
     ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
     // 
     rotMat = this->get_transf_matrix();
+    return true;
 }
 
 // PROCESS Y VARIABLE AS FUNCTION OF SUBALGORITHM
 template<>
-void ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
+bool ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
 {
         UNUSED_ARG(i);
         Coord[1]                  = pYAxis->operator()(i);
+        if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
+        return true;
 }
 // PROCESS X - VARIABLE AS FUNCTION OF SUBALGORITHM
 template<>
 bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(i);
         Coord[0]    = 0.5*( X[j]+ X[j+1]);
+        if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
         return true;
 }
 //

@@ -91,6 +91,12 @@ ConvertToMDEvents::init()
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
 
+     
+     /// this variable describes default possible ID-s for Q-dimensions
+     std::vector<std::string> Q_ID_possible(3);
+     Q_ID_possible[0]="|Q|";
+     Q_ID_possible[1]="QxQyQz";    
+     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      declareProperty("QDimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
                               "You can select mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
 
@@ -203,33 +209,15 @@ void ConvertToMDEvents::exec(){
 
     // if new workspace is created, its properties are determened by the user's input
     if (create_new_ws){
-
-        // Identify what dimension names we can obtain from the input workspace;
-        std::vector<std::string> dim_names_availible;
-        // assume that |Q| and QxQyQz availible from any workspace? -- wrong!!!!
-        std::vector<std::string> wsNames(2);
-        wsNames[0]="|Q|";
-        wsNames[1]="QxQyQz";
-
-    // get the X axis of input workspace
-        NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
-        if(!pXAxis )
-        {
-            convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inWS2D->getName()<<std::endl;
-            throw(std::invalid_argument("Input workspace has to have X-axis"));
-        }
-        std::string Dim1Name = pXAxis->unit()->unitID();
-        wsNames.push_back(Dim1Name);
-        // what dimension names can be obtained from 
-        dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
-
+        // what dimension names can be obtained from the input workspace
+        std::vector<std::string> dim_names_availible = this->getDimensionNames(inWS2D);
 
         // get dim_names requested by user:
         std::vector<std::string> dim_requested;
         //a) by Q selector:
-        std::string Q_dim_requested     = getProperty("QDimensions");  
+        std::string Q_dim_requested              = getProperty("QDimensions");  
         //b) by other dim property;
-        other_dim_names                 = getProperty("OtherDimensions");
+        std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
 
         // Identify the algorithm to deploy and idemtify/set the dimension names to use
         algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
@@ -386,33 +374,81 @@ ConvertToMDEvents::identify_the_alg(const std::vector<std::string> &dim_names_av
 
 }
 
-std::vector<std::string > 
-ConvertToMDEvents::get_dimension_names(const std::vector<std::string> &default_prop,MatrixWorkspace_const_sptr inMatrixWS)const{
-    // number of properties we always want to have, it is Q3D, |Q| and some property form workspace;
-    // if workspace unit is the energy transfer, it is a special property;
-    size_t n_common_properties = default_prop.size();
+/** The function to identify the target dimensions and target uints which can be obtained from workspace dimensions 
+  *
+  *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
+  *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.
+  *  If additional algorithms can be generated through algorithm template, this function shluld be modified accordingly
+  *
+  * @param inMatrixWS -- const pointer to const matrix workspace, which provides information about availible axis
+  *
+  * @returns ws_dim_names -- the vector of string, with each string identify the dimensios, can be produced by some algorithm
+  * @returns ws_units     -- the units present in the input workspace 
+ */
+void
+ConvertToMDEvents::getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &ws_dim_names,std::vector<std::string> &ws_units)const
+{      
 
+      ws_dim_names.clear();
+      ws_units.clear();
+
+    // get the X axis of input workspace, it has to be there; if not axis throws invalid index
+       API::NumericAxis *pXAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(0));
+       if(!pXAxis ){
+            convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inMatrixWS->getName()<<std::endl;
+            throw(std::invalid_argument("Input workspace has to have X-axis"));
+       }
+
+       std::string Dim1Unit   = pXAxis->unit()->unitID();
+       if(Dim1Unit.compare("Empty")==0){
+           ws_units.push_back(""); //?
+       }else{
+            ws_units.push_back(Dim1Unit);
+       }
+      //  |Q| and QxQyQz availible if Dim1 is DeltaE;
+       if(Dim1Unit.compare("DeltaE")==0){ // this will probably invoke inelastic algorithms 
+            ws_dim_names.push_back("|Q|");
+            ws_dim_names.push_back("QxQyQz");
+            // and DelteE can be a dimension       
+            ws_dim_names.push_back("DeltaE");
+       }else if(Dim1Unit.compare("Energy")==0){  // this will probably invoke elastic 
+            ws_dim_names.push_back("|Q|");
+            ws_dim_names.push_back("QxQyQz");
+            // and energy can be dimension ? not sure about this. 
+            ws_dim_names.push_back("Energy");
+       }else{  // we can only use what is along the workspace axis name
+           ws_dim_names.push_back(pXAxis->title());
+       }
+
+       // Detector's ID is the usual variable along  Y-axis, but if anything else is there, this can be additional dimension;
+       API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
+       if(pYAxis){
+           std::string Dim2Unit = pYAxis->unit()->unitID();
+           ws_dim_names.push_back(pYAxis->title());
+           ws_units.push_back(Dim2Unit);
+       }
+    
+}
+
+std::vector<std::string > 
+ConvertToMDEvents::getDimensionNames(MatrixWorkspace_const_sptr inMatrixWS)const{
+    // get properties, which can be derived from workspace
+    // e.g  Q3D, |Q| and something along workspace axis ;
+    std::vector<std::string> prop_names;
+    std::vector<std::string> ws_units;
+    getDimensionNamesFromWSMatrix(inMatrixWS,prop_names,ws_units);
+
+
+    // get dimension names from properties
+    // TODO: this should be only special processed properties, not all of them, as it is at the moment
     const std::vector< Kernel::Property * > run_properties =  inMatrixWS->run().getProperties();  
 
-    std::vector<std::string> prop_names(default_prop.begin(),default_prop.end());
-    prop_names.resize(n_common_properties+run_properties.size());
-    
- // inelastic workspaces need special treatment, their own subalgorithms and have additional dimension
-   // let's identify if it is inelastic ws
-    Kernel::Unit_const_sptr unit = inMatrixWS->getAxis(0)->unit();
-    if (unit){
-        std::string ws_property_name = unit->unitID();
-        std::vector<std::string >::iterator it;
-        it = find (prop_names.begin(), prop_names.end(), "DeltaE"); // can not fail, DeltaE is in the list of the properties;
-        *it          = ws_property_name;
-    }else{
-        convert_log.error()<<" input workspace has to have units\n";
-        throw(std::invalid_argument(" input worspace has to have units"));
-    }
+    size_t n_ws_properties = prop_names.size();
+    prop_names.resize(n_ws_properties+run_properties.size());    
 
-    // extract all properties, which can be treated as dimension names;
+    // extract names for all properties, which can be treated as dimension names;
     for(size_t i=0;i<run_properties.size();i++){
-        prop_names[n_common_properties+i]=run_properties[i]->name();
+        prop_names[n_ws_properties+i]=run_properties[i]->name();
     }
     return prop_names;
 }
@@ -451,26 +487,27 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->other_dim_names[i-n_ws_properties]));  
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->dim_names[i-n_ws_properties]));  
           if(!run_property){
-             g_log.error()<<" property: "<<this->other_dim_names[i]<<" is not a time series (run) property\n";
+             g_log.error()<<" property: "<<this->dim_names[i]<<" is not a time series (run) property\n";
           }
           Coord[i]=run_property->firstValue();
         }  
 }
 
 // TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
-//
+//e.g.
+// template<> void ConvertToMDEvents::processQND<2,modQ>( API::IMDEventWorkspace *const)
+// {
+//   User specific code for target 2D workspace, processed to obtain modQ
+// }
 //----------------------------------------------------------------------------------------------
 /** Constructor 
  *  needs to pick up all known algorithms. 
 */
-ConvertToMDEvents::ConvertToMDEvents():
- Q_ID_possible(3)
+ConvertToMDEvents::ConvertToMDEvents()
 {
-    Q_ID_possible[0]="|Q|";
-    Q_ID_possible[1]="QxQyQz";    
-    Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
+   
      
 // NoQ
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToMDEvents::processQND<2,NoQ>));
