@@ -189,6 +189,7 @@ endif()
 # GUI testing via Squish
 find_package ( Squish )
 if ( SQUISH_FOUND )
+  include( SquishAddTestSuite )
   enable_testing()
   message ( STATUS "Found Squish for GUI testing" )
 else()
