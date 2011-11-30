@@ -230,7 +230,7 @@ void DiffractionFocussing2::exec()
 
   // loop over groups
   delete prog;
-  prog = new API::Progress(this, 0.25, 0.95, totalHistProcess + nGroups);
+  prog = new API::Progress(this, 0.25, 0.95, static_cast<int>(totalHistProcess) + nGroups);
   PARALLEL_FOR1(m_matrixInputW)
   for (size_t outWorkspaceIndex = 0; outWorkspaceIndex < valid_groups.size(); outWorkspaceIndex++)
   {
