@@ -127,7 +127,7 @@ void DiffractionFocussing2::exec()
   {
     progress(0.01, "Reading grouping file");
     IAlgorithm_sptr childAlg = createSubAlgorithm("CreateGroupingWorkspace");
-    childAlg->setProperty("InputWorkspace", m_matrixInputW);
+    childAlg->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsSubAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
@@ -148,7 +148,7 @@ void DiffractionFocussing2::exec()
   double eventXMin = 0.;
   double eventXMax = 0.;
 
-  m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_matrixInputW );
+  m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>( m_matrixInputW );
   if (m_eventW != NULL)
   {
     if (getProperty("PreserveEvents"))
@@ -503,7 +503,7 @@ void DiffractionFocussing2::execEvent()
         // When focussing in place, you can clear out old memory from the input one!
         if (inPlace)
         {
-          m_eventW->getEventList(wi).clear();
+          boost::const_pointer_cast<EventWorkspace>(m_eventW)->getEventList(wi).clear();
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
         }
       }
