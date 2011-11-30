@@ -2,10 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindSXPeaks.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/Peak.h"
+
+using namespace Mantid::DataObjects;
 
 
 namespace Mantid
@@ -51,11 +55,11 @@ namespace Mantid
           "End spectrum number  (default FindSXPeaks)");
       declareProperty("SignalBackground",10.0);
       declareProperty("Resolution",0.01);
-      declareProperty(new WorkspaceProperty<API::IPeaksWorkspace>("PeaksList","",Direction::Output),
+      declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksList","",Direction::Output),
           "The name of the PeaksWorkspace in which to store the list of peaks found" );
 
-      // Set up the columns for the TableWorkspace holding the peak information
-      m_peaks = WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
+      // Create the output peaks workspace
+      m_peaks.reset(new PeaksWorkspace);
     }
 
     /** Executes the algorithm
@@ -202,14 +206,20 @@ namespace Mantid
       {
         finalv[i].reduce();
 
-
-        IPeak* peak = m_peaks->createPeak(finalv[i].getQ());
-        peak->setIntensity(finalv[i]._intensity);
-
-        m_peaks->addPeak(*peak);
-
-        delete peak;
-        ;
+        try
+        {
+          IPeak* peak = m_peaks->createPeak(finalv[i].getQ());
+          if (peak)
+          {
+            peak->setIntensity(finalv[i]._intensity);
+            m_peaks->addPeak(*peak);
+            delete peak;
+          }
+        }
+        catch (std::exception & e)
+        {
+          g_log.error() << e.what() << std::endl;
+        }
       }
 
 

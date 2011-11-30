@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 
 namespace Mantid
@@ -78,11 +79,19 @@ struct DLLExport SXPeak
 //	Mantid::Geometry::V3D getQ() const
 
 	{
-		double Qx=sin(_th2)*cos(_phi);
-		double Qy=sin(_th2)*sin(_phi);
-		double Qz=cos(_th2)-1.0;
-		double knorm=mN*(_Ltot)/(hbar*_t*1e-6)/1e10;
-		return Mantid::Kernel::V3D(Qx*knorm,Qy*knorm,Qz*knorm);
+		double Qx= -sin(_th2)*cos(_phi);
+		double Qy= -sin(_th2)*sin(_phi);
+		double Qz= 1.0 - cos(_th2);
+		// Neutron velocity vi ( speed in m/s )
+		double vi = _Ltot / (_t*1e-6);
+    // wavelength = h / mv
+    double wi = PhysicalConstants::h / (PhysicalConstants::NeutronMass * vi);
+    // in angstroms
+    wi *= 1e10;
+    //wavevector=1/wavelength
+    double wvi=1.0/wi;
+    // Scale the scattered direction by the wavevector
+		return Mantid::Kernel::V3D(Qx*wvi,Qy*wvi,Qz*wvi);
 	}
 	SXPeak& operator+=(const SXPeak& rhs)
 	{
@@ -151,7 +160,7 @@ private:
   /// The spectrum to finish the integration at
   int m_MaxSpec;
   // The peaks workspace that contains the peaks information.
-  API::IPeaksWorkspace_sptr m_peaks;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_peaks;
 
 };
 
