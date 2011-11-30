@@ -470,7 +470,11 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
 
     AnalysisDataService::Instance().remove(outWSName);
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    try
+    {  if (Poco::File(filename).exists()) Poco::File(filename).remove(); }
+    catch (...)
+    { /* ignore windows error */ }
+
 
   }
 
