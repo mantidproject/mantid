@@ -1469,7 +1469,7 @@ void FitPropertyBrowser::fit()
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
-{
+{  
   // Emit a signal to show that the fitting has completed. (workspaceName that the fit has been done against is sent as a parameter)
   emit fittingDone(QString::fromStdString(alg->getProperty("InputWorkspace")));
 
@@ -2160,7 +2160,7 @@ void FitPropertyBrowser::clearAllPlots()
 *
 * @param plotDetails :: The name of the workspace plot to be customised and the axis label seperated by a '.'
 */
-void FitPropertyBrowser::customisation(QStringList& plotDetails)
+void FitPropertyBrowser::customisation(const QStringList& plotDetails)
 {
   if (m_customFittings)
     emit customiseGraph(plotDetails);
