@@ -54,7 +54,7 @@ void ExtractFFTSpectrum::exec()
     childFFT->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     childFFT->setProperty<int>("Real", i);
     childFFT->execute();
-    MatrixWorkspace_sptr fftTemp = childFFT->getProperty("OutputWorkspace");
+    MatrixWorkspace_const_sptr fftTemp = childFFT->getProperty("OutputWorkspace");
 
     outputWS->dataE(i) = fftTemp->readE(fftPart);
     outputWS->dataY(i) = fftTemp->readY(fftPart);
