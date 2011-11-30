@@ -188,7 +188,7 @@ void DiffractionFocussing2::exec()
   //ISpectrum * outSpec = NULL;
   Progress * prog;
   //prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
-  prog = new API::Progress(this,0.2,0.35,nHist);
+  prog = new API::Progress(this,0.2,0.25,nHist);
   std::cout << "10:" << timer << std::endl; // REMOVE
 
   bool checkForMask = false;
@@ -245,54 +245,43 @@ void DiffractionFocussing2::exec()
       valid_groups.push_back(static_cast<int>(i));
     }
   }
-
+  std::cout << "20:" << timer << std::endl; // REMOVE
 
 
   // loop over groups
   delete prog;
-  prog = new API::Progress(this, 0.35, 0.9, nGroups);
-  for (int outWorkspaceIndex = 0; outWorkspaceIndex < valid_groups.size(); outWorkspaceIndex++)
+  prog = new API::Progress(this, 0.25, 0.95, nGroups);
+  for (size_t outWorkspaceIndex = 0; outWorkspaceIndex < valid_groups.size(); outWorkspaceIndex++)
   {
     int group = valid_groups[outWorkspaceIndex];
-    std::cout << "20: outWorkspaceIndex=" << outWorkspaceIndex << ", group=" << group << ", nGroups=" << nGroups
-              << ", group2xvector.size()=" << group2xvector.size() << std::endl; // REMOVE
-    std::cout << "   " << group2xvector.begin()->first << std::endl; // REMOVE
+
     // Get the group
     group2vectormap::iterator it=group2xvector.find(group);
-    std::cout << "20a1: " << (it == group2xvector.end()) << " " << (it == group2xvector.begin()) << " true=" << true << std::endl; // REMOVE
     group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
-    std::cout << "20a2: " << dif << std::endl; // REMOVE
     const MantidVec& Xout = *((*it).second);
-    std::cout << "20a3: " << std::endl; // REMOVE
 
     // Assign the new X axis only once (i.e when this group is encountered the first time)
     out->dataX(static_cast<int64_t>(dif))=Xout;
     flags[dif]=false;
-    std::cout << "20b: " << std::endl; // REMOVE
 
     // This is the output spectrum
     ISpectrum * outSpec = out->getSpectrum(outWorkspaceIndex);
-    std::cout << "20c: " << std::endl; // REMOVE
 
     // Also set the spectrum number to the group number
     outSpec->setSpectrumNo(group);
     outSpec->clearDetectorIDs();
-    std::cout << "20d: " << std::endl; // REMOVE
 
     // Get the references to Y and E output and rebin
     MantidVec& Yout=outSpec->dataY();
     MantidVec& Eout=outSpec->dataE();
-    std::cout << "20e: " << std::endl; // REMOVE
 
     // Initialize the group's weight vector here too
     //MantidVec& groupWgt = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
     MantidVec groupWgt(nPoints,0.0);
-    std::cout << "20f: " << std::endl; // REMOVE
 
     // loop through the contributing histograms
     std::vector<size_t> indices = ws_indices[group];
     const size_t groupSize = indices.size();
-    std::cout << "21: " << std::endl; // REMOVE
     for (size_t i=0; i<groupSize; i++)
     {
       size_t inWorkspaceIndex = indices[i];
@@ -390,172 +379,21 @@ void DiffractionFocussing2::exec()
     // Now multiply by the number of spectra in the group
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
+
+    prog->report();
   } // end of loop for groups
-  /*
-  for (int64_t i=0;i<nHist;i++)
-  {
-    prog->report();
-
-    // This is the input spectrum
-    const ISpectrum * inSpec = m_matrixInputW->getSpectrum(i);
-
-    //Check whether this spectra is in a valid group
-    const int group=groupAtWorkspaceIndex[i];
-    //std::cout << "Wi " << i << " is at group " << group << "\n";
-    if (group<=0) // Not in a group
-      continue;
-    //Get reference to its old X,Y,and E.
-    const MantidVec& Xin=inSpec->readX();
-    const MantidVec& Yin=inSpec->readY();
-    const MantidVec& Ein=inSpec->readE();
-    // Get the group
-    group2vectormap::iterator it=group2xvector.find(group);
-    group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
-    const MantidVec& Xout = *((*it).second);
-
-    // Workspace index in the output
-    const size_t outWI = static_cast<size_t>(dif);
-
-    // Assign the new X axis only once (i.e when this group is encountered the first time)
-    if (flags[dif])
-    {
-      out->dataX(static_cast<int64_t>(dif))=Xout;
-      flags[dif]=false;
-      // Initialize the group's weight vector here too
-      group2wgtvector[group] = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
-      // This is the output spectrum
-      outSpec = out->getSpectrum(outWI);
-      // Also set the spectrum number to the group number
-      outSpec->setSpectrumNo(group);
-      outSpec->clearDetectorIDs();
-    }
-
-    // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(i));
-    if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
-
-    // Get the references to Y and E output and rebin
-    MantidVec& Yout=outSpec->dataY();
-    MantidVec& Eout=outSpec->dataE();
-    try
-    {
-      VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
-    }catch(...)
-    {
-      // Should never happen because Xout is constructed to envelop all of the Xin vectors
-      std::ostringstream mess;
-      mess << "Error in rebinning process for spectrum:" << i;
-      throw std::runtime_error(mess.str());
-    }
-    
-    // Get a reference to the summed weights vector for this group
-    MantidVec& groupWgt = *group2wgtvector[group];
-    // Check for masked bins in this spectrum
-    if ( m_matrixInputW->hasMaskedBins(i) )
-    {
-      MantidVec weight_bins,weights;
-      weight_bins.push_back(Xin.front());
-      // If there are masked bins, get a reference to the list of them
-      const API::MatrixWorkspace::MaskList& mask = m_matrixInputW->maskedBins(i);
-      // Now iterate over the list, adjusting the weights for the affected bins
-      for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
-      {
-        const double currentX = Xin[(*it).first];
-        // Add an intermediate bin with full weight if masked bins aren't consecutive
-        if (weight_bins.back() != currentX) 
-        {
-          weights.push_back(1.0);
-          weight_bins.push_back(currentX);
-        }
-        // The weight for this masked bin is 1 - the degree to which this bin is masked
-        weights.push_back(1.0-(*it).second);
-        weight_bins.push_back(Xin[(*it).first + 1]);
-      }
-      // Add on a final bin with full weight if masking doesn't go up to the end
-      if (weight_bins.back() != Xin.back()) 
-      {
-        weights.push_back(1.0);
-        weight_bins.push_back(Xin.back());
-      }
-      
-      // Create a temporary vector for the rebinned angles
-      //MantidVec weightsTemp(groupWgt.size(),0.0);
-      //MantidVec zeroesTemp(groupWgt.size(),0.0);
-      // Create a zero vector for the errors because we don't care about them here
-      const MantidVec zeroes(weights.size(),0.0);
-      // Rebin the weights - note that this is a distribution
-      //VectorHelper::rebin(weight_bins,weights,zeroes,Xout,weightsTemp,zeroesTemp,true);
-      VectorHelper::rebin(weight_bins,weights,zeroes,Xout,groupWgt,EOutDummy,true,true);
-      // Add weights for this spectrum to the output weights vector
-      //std::transform(groupWgt.begin(),groupWgt.end(),weightsTemp.begin(),groupWgt.begin(),std::plus<double>());
-    }
-    else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
-    {
-      if (eventXMin > 0. && eventXMax > 0.)
-      {
-        limits[0] = eventXMin;
-        limits[1] = eventXMax;
-      }
-      else
-      {
-        limits[0] = Xin.front();
-        limits[1] = Xin.back();
-      }
-
-      // Rebin the weights - note that this is a distribution
-      VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
-    }
-  }
-  std::cout << "20:" << timer << std::endl; // REMOVE
-  // ----------------------------------------------- REMOVE
-
-  // Now propagate the errors.
-  // Pointer to sqrt function
-  typedef double (*uf)(double);
-  uf rs=std::sqrt;
-  std::cout << "21:" << timer << std::endl; // REMOVE
-
-  group2vectormap::const_iterator wit = group2wgtvector.begin();
-  std::cout << "22:" << timer << std::endl; // REMOVE
-
-  for (int64_t i=0; i < nGroups; ++i,++wit)
-  {
-    const MantidVec& Xout = out->readX(i);
-    // Calculate the bin widths
-    std::vector<double> widths(Xout.size());
-    std::adjacent_difference(Xout.begin(),Xout.end(),widths.begin());
-
-    MantidVec& Yout=out->dataY(i);
-    MantidVec& Eout=out->dataE(i);
-    // Take the square root of the errors
-    std::transform(Eout.begin(),Eout.end(),Eout.begin(),rs);
-
-    // Multiply the data and errors by the bin widths because the rebin function, when used
-    // in the fashion above for the weights, doesn't put it back in
-    std::transform(Yout.begin(),Yout.end(),widths.begin()+1,Yout.begin(),std::multiplies<double>());
-    std::transform(Eout.begin(),Eout.end(),widths.begin()+1,Eout.begin(),std::multiplies<double>());
-
-    // Now need to normalise the data (and errors) by the weights
-    const MantidVec& wgt = *(*wit).second;
-    std::transform(Yout.begin(),Yout.end(),wgt.begin(),Yout.begin(),std::divides<double>());
-    std::transform(Eout.begin(),Eout.end(),wgt.begin(),Eout.begin(),std::divides<double>());
-    // Now multiply by the number of spectra in the group
-    const int groupSize = static_cast<int>(std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first));
-    std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
-    std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
-
-    prog->report();
-  }
-  */
   std::cout << "23:" << timer << std::endl; // REMOVE
+
+  delete prog;
+  progress(0.95, "Generating spectra map");
 
   // For backwards-compatibility
   out->generateSpectraMap();
+  prog->report();
 
   setProperty("OutputWorkspace",out);
   std::cout << "24:" << timer << std::endl; // REMOVE
 
-  delete prog;
   this->cleanup();
 }
 
