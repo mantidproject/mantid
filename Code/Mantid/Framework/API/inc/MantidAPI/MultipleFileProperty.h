@@ -10,12 +10,8 @@ namespace Mantid
 namespace API
 {
 
-  /** A property to allow a user to select multiple
-   * files to load.
+  /** A property to allow a user to select multiple files to load.
     
-    @author Janik Zikovsky
-    @date 2011-08-17
-
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -52,6 +48,9 @@ namespace API
     /// @return the vector of suggested extensions. For use in GUIs showing files.
     const std::set<std::string> & getExts() const
     { return m_exts; }
+
+    // Unhide the PropertyWithValue assignment operator
+    using Kernel::ArrayProperty<std::string>::operator=;
 
   private:
     /// Suggested extensions
