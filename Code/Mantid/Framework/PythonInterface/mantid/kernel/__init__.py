@@ -15,6 +15,11 @@ from _kernel import *
 dlopen.restore_flags(flags)
 
 ###############################################################################
+# Make the singleton objects available as named variables 
+###############################################################################
+config = get_config_service()
+
+###############################################################################
 # Set up a general Python logger. Others can be created as they are required
 # if a user wishes to be more specific
 ###############################################################################

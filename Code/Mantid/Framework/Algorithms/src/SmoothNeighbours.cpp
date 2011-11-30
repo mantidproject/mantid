@@ -410,9 +410,8 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
 Translate the radius into meters.
 @param radiusUnits : The name of the radius units
 @param enteredUnits : The numerical value of the radius in whatever units have been specified
-@param inWS : The input workspace
 */
-double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const double& enteredRadius, Mantid::API::MatrixWorkspace_const_sptr ws)
+double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const double& enteredRadius)
 {
   double translatedRadius = 0;
   if(radiusUnits == "Meters")
@@ -469,7 +468,7 @@ void SmoothNeighbours::exec()
   double enteredRadius = getProperty("Radius");
 
   // Use the unit type to translate the entered radius into meters.
-  Radius = translateToMeters(getProperty("RadiusUnits"), enteredRadius, inWS);
+  Radius = translateToMeters(getProperty("RadiusUnits"), enteredRadius);
 
   std::string strategy  = getProperty("WeightedSum");
 
