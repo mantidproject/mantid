@@ -158,13 +158,13 @@ class sfCalculator():
                            bNumerator=bNumerator)
 
         #cleanup workspaces
-#        mtd.deleteWorkspace('EventDataWks')
-#        mtd.deleteWorkspace('HistoDataWks')
-#        mtd.deleteWorkspace('IntegratedDataWks')
-#        mtd.deleteWorkspace('TransposeIntegratedDataWks')
-#        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
-#        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
-#        mtd.deleteWorkspace('DataWks')
+        mtd.deleteWorkspace('EventDataWks')
+        mtd.deleteWorkspace('HistoDataWks')
+        mtd.deleteWorkspace('IntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
+        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
+        mtd.deleteWorkspace('DataWks')
         
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
@@ -264,7 +264,7 @@ class sfCalculator():
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
         product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
                                           (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
-        return copy.deepcopy(product)
+        return product
     
     def fit(self):
         """
