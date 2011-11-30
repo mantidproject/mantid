@@ -102,6 +102,8 @@ private:
     Mantid::Kernel::VMD m_end;
     /// Width in each dimension (some will be ignored)
     Mantid::Kernel::VMD m_width;
+    /// Width in the in-plane, perpendicular-to-line direction
+    double m_planeWidth;
 
 
     /// Number of bins (for regular spacing)
