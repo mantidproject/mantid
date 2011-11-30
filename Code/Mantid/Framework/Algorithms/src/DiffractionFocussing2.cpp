@@ -303,7 +303,7 @@ void DiffractionFocussing2::exec()
       const MantidVec& Yin=inSpec->readY();
       const MantidVec& Ein=inSpec->readE();
 
-//      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
       try
       {
         VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
