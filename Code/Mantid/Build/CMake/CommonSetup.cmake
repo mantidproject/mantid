@@ -189,6 +189,8 @@ endif()
 # GUI testing via Squish
 find_package ( Squish )
 if ( SQUISH_FOUND )
+  # CMAKE_MODULE_PATH gets polluted when ParaView is present
+  set( MANTID_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} )
   include( SquishAddTestSuite )
   enable_testing()
   message ( STATUS "Found Squish for GUI testing" )

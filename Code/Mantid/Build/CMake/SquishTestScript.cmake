@@ -29,19 +29,20 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 message(STATUS "squish_server_executable='${squish_server_executable}'")
 message(STATUS "squish_client_executable='${squish_client_executable}'")
 message(STATUS "squish_test_suite='${squish_test_suite}'")
-message(STATUS "squist_results='${squish_results}'")
+message(STATUS "squish_results_dir='${squish_results_dir}'")
+message(STATUS "squish_results_file='${squish_results_file}'")
 
 # run the test
 if (WIN32)
   execute_process(
-    COMMAND ${CMAKE_ROOT}/Modules/SquishRunTestSuite.bat ${squish_server_executable} ${squish_client_executable} ${squish_test_suite} ${squish_results}
+    COMMAND ${mantid_cmake_modules}/SquishRunTestSuite.bat ${squish_server_executable} ${squish_client_executable} ${squish_test_suite} ${squish_results_dir} ${squish_results_file}
     RESULT_VARIABLE test_rv
     )
 endif (WIN32)
 
 if (UNIX)
   execute_process(
-    COMMAND ${CMAKE_ROOT}/Modules/SquishRunTestSuite.sh ${squish_server_executable} ${squish_client_executable} ${squish_test_suite} ${squish_results}
+    COMMAND  ${mantid_cmake_modules}/SquishRunTestSuite.sh ${squish_server_executable} ${squish_client_executable} ${squish_test_suite} ${squish_results_dir} ${squish_results_file}
     RESULT_VARIABLE test_rv
     )
 endif (UNIX)
