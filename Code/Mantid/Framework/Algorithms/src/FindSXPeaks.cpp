@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/IPeak.h"
 
 
 namespace Mantid
@@ -50,16 +51,11 @@ void FindSXPeaks::init()
       "End spectrum number  (default FindSXPeaks)");
   declareProperty("SignalBackground",10.0);
   declareProperty("Resolution",0.01);
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
-      "The name of the TableWorkspace in which to store the list of peaks found" );
+  declareProperty(new WorkspaceProperty<API::IPeaksWorkspace>("PeaksList","",Direction::Output),
+      "The name of the PeaksWorkspace in which to store the list of peaks found" );
 
     // Set up the columns for the TableWorkspace holding the peak information
-   m_peaks = WorkspaceFactory::Instance().createTable("TableWorkspace");
-   m_peaks->addColumn("double","Qx");
-   m_peaks->addColumn("double","Qy");
-   m_peaks->addColumn("double","Qz");
-   m_peaks->addColumn("double","Intensity");
-   m_peaks->addColumn("int","NPixels");
+  m_peaks = WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
 }
 
 /** Executes the algorithm
@@ -78,7 +74,7 @@ void FindSXPeaks::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  const int numberOfSpectra = localworkspace->getNumberHistograms();
+  size_t numberOfSpectra = localworkspace->getNumberHistograms();
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
@@ -198,13 +194,22 @@ void FindSXPeaks::reducePeakList(const peakvector& pcv)
 			finalv.push_back(pcv[i]);
 		found=false;
 	}
+  //Fetch the input workspace and copy the instrument accross. Cannot generate peaks without doing this first.
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  m_peaks->setInstrument(localworkspace->getInstrument());
+
 	for (std::size_t i=0;i<finalv.size();i++)
 	{
 		finalv[i].reduce();
-		Mantid::API::TableRow trow = m_peaks->appendRow();
-		Mantid::Kernel::V3D Q=finalv[i].getQ();
-		//Mantid::Geometry::V3D Q=finalv[i].getQ();
-		        trow << Q[0] << Q[1] << Q[2] << finalv[i]._intensity << static_cast<int>(finalv[i]._spectral.size()) ;
+
+    
+    IPeak* peak = m_peaks->createPeak(finalv[i].getQ());
+    peak->setIntensity(finalv[i]._intensity);
+
+    m_peaks->addPeak(*peak);
+
+    delete peak;
+;
 	}
 
 

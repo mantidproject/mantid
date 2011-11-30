@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 
 namespace Mantid
@@ -150,8 +150,8 @@ private:
   int m_MinSpec;
   /// The spectrum to finish the integration at
   int m_MaxSpec;
-  // The table workspace that contains the peaks information.
-  API::ITableWorkspace_sptr m_peaks;
+  // The peaks workspace that contains the peaks information.
+  API::IPeaksWorkspace_sptr m_peaks;
 
 };
 
