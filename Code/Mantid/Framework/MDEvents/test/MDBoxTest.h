@@ -956,7 +956,7 @@ public:
     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1003.6, 1e-3);
 
     file->close();
-    //do_deleteNexusFile();
+    do_deleteNexusFile();
   }
 
 

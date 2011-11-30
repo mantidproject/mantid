@@ -84,17 +84,7 @@ public:
 
       // Close the file so you can delete it. Otherwise the following test gets confused.
       if (deleteFile)
-      {
-        try
-        {
-          file->close();
-          Poco::File(bc->getFilename()).remove();
-        }
-        catch (...)
-        {
-          std::cout << "Error deleting file\n";
-        }
-      }
+        ws->getBoxController()->closeFile(true);
     }
   }
   
