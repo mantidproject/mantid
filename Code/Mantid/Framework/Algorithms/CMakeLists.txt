@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/AlignDetectorInTOF.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
+	src/CalMuonDeadTime.cpp
 	src/AnyShapeAbsorption.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
@@ -177,6 +178,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AlignDetectorInTOF.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
+	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
@@ -347,6 +349,7 @@ set ( TEST_FILES
 	test/AlignDetectorInTOFTest.h
 	test/AlignDetectorsTest.h
 	test/AlphaCalcTest.h
+	test/CalMuonDeadTimeTest.h
 	test/AnyShapeAbsorptionTest.h
 	test/ApplyDetailedBalanceTest.h
 	test/ApplyTransmissionCorrectionTest.h
