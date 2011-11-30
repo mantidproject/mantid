@@ -48,7 +48,7 @@ public:
 
   void test_nexus()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("OrientedLatticeTest.nxs");
     DblMatrix U(3,3,true);
     OrientedLattice u(1,2,3, 90, 89, 88);

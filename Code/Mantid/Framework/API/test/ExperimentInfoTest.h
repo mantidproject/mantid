@@ -238,7 +238,7 @@ public:
 
   void test_nexus()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("ExperimentInfoTest1.nxs");
     ExperimentInfo ws;
     boost::shared_ptr<Instrument> inst1(new Instrument());
@@ -263,7 +263,7 @@ public:
 
   void test_nexus_empty_instrument()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("ExperimentInfoTest2.nxs");
     ExperimentInfo ws;
     boost::shared_ptr<Instrument> inst1(new Instrument());
