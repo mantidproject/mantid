@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/scoped_ptr.hpp>
@@ -55,107 +56,6 @@ namespace Mantid
     private:
       /// Radius cutoff.
       double m_cutoff;
-    };
-
-    /*
-    Abstract weighting strategy, which can be applied to calculate individual 
-    weights for each pixel based upon disance from epicenter.
-    */
-    class DLLExport WeightingStrategy
-    {
-    public:
-      /// Constructor
-      WeightingStrategy(const double& cutOff) : m_cutOff(cutOff){};
-      /// Constructor
-      WeightingStrategy() : m_cutOff(0){};
-      /// Destructor
-      virtual ~WeightingStrategy(){};
-      /**
-      Calculate the weight at distance from epicenter.
-      @param distance : absolute distance from epicenter
-      @return calculated weight
-      */
-      virtual double weightAt(const double& distance) = 0;
-
-      /**
-      Calculate the weight at distance from epicenter.
-      @param adjX : The number of Y (vertical) adjacent pixels to average together
-      @param ix : current index x
-      @param adjY : The number of X (vertical) adjacent pixels to average together
-      @param iy : current index y
-      */
-      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy) = 0;
-    protected:
-      /// Cutoff member.
-      double m_cutOff;
-    };
-
-    /*
-    Flat (no weighting) strategy. Concrete WeightingStrategy
-    */
-    class DLLExport FlatWeighting : public WeightingStrategy
-    {
-    public:
-      FlatWeighting() : WeightingStrategy(){}
-      virtual ~FlatWeighting(){};
-      virtual double weightAt(const double&,const double&, const double&, const double&){return 1;}
-      double weightAt(const double&){ return 1;}
-    };
-
-    /*
-    Linear weighting strategy.
-    */
-    class DLLExport LinearWeighting : public WeightingStrategy
-    {
-    public: 
-      LinearWeighting(const double &cutOff) : WeightingStrategy(cutOff){}
-      virtual ~LinearWeighting(){}
-      double weightAt(const double& distance)
-      {
-        return 1 - (distance/m_cutOff);
-      }
-      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
-      {
-        double result = 1 - (std::sqrt(ix*ix + iy*iy)/std::sqrt(adjX*adjX + adjY*adjY));
-        return result;
-      }
-    };
-
-    /*
-    Parabolic weighting strategy.
-    */
-    class DLLExport ParabolicWeighting : public WeightingStrategy
-    {
-    public: 
-      ParabolicWeighting() : WeightingStrategy(){}
-      virtual ~ParabolicWeighting(){}
-      double weightAt(const double&)
-      {
-        //Should never get here, but we'll ensure failure anyway!
-        throw std::runtime_error("Parabolic weighting cannot be calculated based on a radius cut-off alone.");
-      }
-      virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
-      {
-        return static_cast<double>(adjX - std::abs(ix) + adjY - std::abs(iy) + 1);
-      }
-    };
-
-    /*
-    Null weighting strategy.
-    */
-    class DLLExport NullWeighting : public WeightingStrategy
-    {
-    public:
-      NullWeighting() : WeightingStrategy(){}
-      virtual ~NullWeighting(){};
-      double weightAt(const double&)
-      {
-        throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
-      }
-      virtual double weightAt(const double&,const double&, const double&, const double&)
-      {
-        throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
-      }
     };
 
   /** Smooth neighboring pixels.

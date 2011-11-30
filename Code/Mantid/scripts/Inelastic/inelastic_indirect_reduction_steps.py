@@ -46,8 +46,10 @@ class LoadData(ReductionStep):
         wsname = ''
 
         for file in self._data_files:
-            print file
-            Load(file, file, LoadLogFiles=False)
+            mtd.sendLogMessage("Loading file %s" % file)
+
+            loader_handle = Load(file, file, LoadLogFiles=False)
+            loader_name = loader_handle.getPropertyValue("LoaderName")
 
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
@@ -68,14 +70,21 @@ class LoadData(ReductionStep):
             else:
                 workspaces = [file]
 
+
+            mtd.sendDebugMessage('self._monitor_index = ' + str(self._monitor_index))
+
             for ws in workspaces:
-                ## Extract Monitor Spectrum
-                ExtractSingleSpectrum(ws, ws+'_mon', self._monitor_index)
-                ## Crop the workspace to remove uninteresting detectors
-                CropWorkspace(ws, ws, 
-                    StartWorkspaceIndex=self._detector_range_start,
-                    EndWorkspaceIndex=self._detector_range_end)
-                    
+                if (loader_name.endswith('Nexus')):
+                    LoadNexusMonitors(file, ws+'_mon')
+                else:
+                    ## Extract Monitor Spectrum
+                    ExtractSingleSpectrum(ws, ws+'_mon', self._monitor_index)
+                    ## Crop the workspace to remove uninteresting detectors
+                    CropWorkspace(ws, ws,
+                        StartWorkspaceIndex=self._detector_range_start,
+                        EndWorkspaceIndex=self._detector_range_end)
+
+
             try:
                 msk = mtd[workspaces[0]].getInstrument().getStringParameter(
                     'Workflow.Masking')[0]

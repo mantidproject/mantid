@@ -1,5 +1,8 @@
 /*WIKI* 
-
+    Transfrom a workspace into MD workspace with components defined by user. 
+   
+    Gateway for number of subalgorithms, some are very important, some are questionable 
+    Intended to cover wide range of cases; 
 
 *WIKI*/
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
@@ -34,7 +37,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-//using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
@@ -188,52 +190,81 @@ void ConvertToMDEvents::exec(){
         g_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
     }
     inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
-
-    // Identify what dimension names we can obtain from the input workspace;
-    std::vector<std::string> dim_names_availible;
-    // assume that |Q| and QxQyQz availible from any workspace?
-    std::vector<std::string> wsNames(2);
-    wsNames[0]="|Q|";
-    wsNames[1]="QxQyQz";
-
-// get the X axis
-    NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
-    if(!pXAxis )
-    {
-        convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inWS2D->getName()<<std::endl;
-        throw(std::invalid_argument("Input workspace has to have X-axis"));
+    // ------- Is there any output workspace?
+    // shared pointer to target workspace
+    API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
+    bool create_new_ws(false);
+    if(!spws){
+        create_new_ws = true;
     }
-    std::string Dim1Name = pXAxis->unit()->unitID();
-    wsNames.push_back(Dim1Name);
-    //
-    dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
+    // string -Key to identify the algorithm
+    std::string algo_id;
 
 
-    // get dim_names requested by user:
-    std::vector<std::string> dim_requested;
-    //a) by Q selector:
-    std::string Q_dim_requested       = getProperty("QDimensions");  
-    //b) by other dim property;
-     other_dim_names                  = getProperty("OtherDimensions");
+    // if new workspace is created, its properties are determened by the user's input
+    if (create_new_ws){
+
+        // Identify what dimension names we can obtain from the input workspace;
+        std::vector<std::string> dim_names_availible;
+        // assume that |Q| and QxQyQz availible from any workspace? -- wrong!!!!
+        std::vector<std::string> wsNames(2);
+        wsNames[0]="|Q|";
+        wsNames[1]="QxQyQz";
+
+    // get the X axis of input workspace
+        NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
+        if(!pXAxis )
+        {
+            convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inWS2D->getName()<<std::endl;
+            throw(std::invalid_argument("Input workspace has to have X-axis"));
+        }
+        std::string Dim1Name = pXAxis->unit()->unitID();
+        wsNames.push_back(Dim1Name);
+        // what dimension names can be obtained from 
+        dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
 
 
-   // Identify the algorithm to deploy and idemtify/set the dimension names to use
-    std::string algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
-   
+        // get dim_names requested by user:
+        std::vector<std::string> dim_requested;
+        //a) by Q selector:
+        std::string Q_dim_requested     = getProperty("QDimensions");  
+        //b) by other dim property;
+        other_dim_names                 = getProperty("OtherDimensions");
+
+        // Identify the algorithm to deploy and idemtify/set the dimension names to use
+        algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
+
+        // set the min and max values for the dimensions from the input porperties
+        dim_min = getProperty("MinValues");
+        dim_max = getProperty("MaxValues");
+        // verify that the number min/max values is equivalent to the number of dimensions defined by properties
+        if(dim_min.size()!=dim_max.size()||dim_min.size()!=n_activated_dimensions){
+            g_log.error()<<" number of specified min dimension values:"<<dim_min.size()<<", number of max values: "<<dim_max.size()<<
+                           " and total number of target dimensions"<<n_activated_dimensions<<" are not consistent\n";
+            throw(std::invalid_argument("wrong number of dimension limits"));
+        }
+
+   // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
+   // user input is mainly ignored
+    }else{ 
+
+          dim_min.assign(n_activated_dimensions,-1);
+          dim_max.assign(n_activated_dimensions,1);
+    }
     
 
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
     if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
-     dim_min.assign(n_activated_dimensions,-1);
-     dim_max.assign(n_activated_dimensions,1);
-
-    // create the event workspace with proper numner of dimensions and specified box controller parameters;
-     API::IMDEventWorkspace_sptr spws = ws_creator[n_activated_dimensions](this,5,10,20);
-     if(!spws){
-        g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
-        throw(std::invalid_argument("can not create target workspace"));
-
-     } 
+      
+   
+     if(create_new_ws){
+        // create the event workspace with proper numner of dimensions and specified box controller parameters;
+        spws = ws_creator[n_activated_dimensions](this,5,10,20);
+        if(!spws){
+            g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
+            throw(std::invalid_argument("can not create target workspace"));
+         } 
+     }
 
     // call selected algorithm
     pMethod algo =  alg_selector[algo_id];
@@ -247,7 +278,7 @@ void ConvertToMDEvents::exec(){
     return;
    
 }
- /** function processes input arguments and tries to istablish what algorithm should be deployed; 
+ /** function processes the input arguments and tries to establish what algorithm should be deployed; 
     *
     * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
     * @param Q_dim_requested     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
@@ -392,16 +423,15 @@ ConvertToMDEvents::get_dimension_names(const std::vector<std::string> &default_p
  
 */
 std::vector<double> 
-ConvertToMDEvents::get_transf_matrix()const
+ConvertToMDEvents::get_transf_matrix(const Kernel::V3D &u, const Kernel::V3D &v)const
 {
-    
-    // Initalize the matrix to 3x3 identity
-    Kernel::Matrix<double> mat = Kernel::Matrix<double>(3,3, true);
+    // for now. need to be used
+    UNUSED_ARG(u); UNUSED_ARG(v);   
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
     Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
     // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
-    mat = gon * ub;
+    Kernel::Matrix<double>  mat = gon * ub;
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
@@ -429,40 +459,11 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
         }  
 }
 
-
-template void ConvertToMDEvents::processQND<2,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<3,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<4,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<5,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<6,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<7,NoQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<8,NoQ>(API::IMDEventWorkspace *const);
-
-template void ConvertToMDEvents::processQND<2,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<3,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<4,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<5,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<6,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<7,modQ>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<8,modQ>(API::IMDEventWorkspace *const);
-
-template void ConvertToMDEvents::processQND<3,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<4,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<5,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<6,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<7,Q3D>(API::IMDEventWorkspace *const);
-template void ConvertToMDEvents::processQND<8,Q3D>(API::IMDEventWorkspace *const);
-
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<2>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<3>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<4>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<5>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<6>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<7>(size_t ,size_t ,size_t );
-template   API::IMDEventWorkspace_sptr  ConvertToMDEvents::createEmptyEventWS<8>(size_t ,size_t ,size_t );
-
+// TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
+//
 //----------------------------------------------------------------------------------------------
-/** Constructor
+/** Constructor 
+ *  needs to pick up all known algorithms. 
 */
 ConvertToMDEvents::ConvertToMDEvents():
  Q_ID_possible(3)
@@ -471,7 +472,7 @@ ConvertToMDEvents::ConvertToMDEvents():
     Q_ID_possible[1]="QxQyQz";    
     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
      
-#define NOQ   
+// NoQ
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToMDEvents::processQND<2,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND3",&ConvertToMDEvents::processQND<3,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND4",&ConvertToMDEvents::processQND<4,NoQ>));
@@ -479,9 +480,8 @@ ConvertToMDEvents::ConvertToMDEvents():
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND6",&ConvertToMDEvents::processQND<6,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND7",&ConvertToMDEvents::processQND<7,NoQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("NoQND8",&ConvertToMDEvents::processQND<8,NoQ>));
-#undef NOQ
-    //
-#define MODQ
+
+// MOD Q
     alg_selector.insert(std::pair<std::string,pMethod>("modQND2",&ConvertToMDEvents::processQND<2,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND3",&ConvertToMDEvents::processQND<3,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND4",&ConvertToMDEvents::processQND<4,modQ>));
@@ -489,17 +489,15 @@ ConvertToMDEvents::ConvertToMDEvents():
     alg_selector.insert(std::pair<std::string,pMethod>("modQND6",&ConvertToMDEvents::processQND<6,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToMDEvents::processQND<7,modQ>));
     alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToMDEvents::processQND<8,modQ>));
-#undef MODQ
-    //
-#define Q3D_
+// Q3D
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToMDEvents::processQND<3,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToMDEvents::processQND<4,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToMDEvents::processQND<5,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToMDEvents::processQND<6,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToMDEvents::processQND<7,Q3D>));
     alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToMDEvents::processQND<8,Q3D>));
-#undef Q3D_
 
+// Workspaces:
     ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
     ws_creator.insert(std::pair<size_t,pWSCreator>(3,&ConvertToMDEvents::createEmptyEventWS<3>));
     ws_creator.insert(std::pair<size_t,pWSCreator>(4,&ConvertToMDEvents::createEmptyEventWS<4>));

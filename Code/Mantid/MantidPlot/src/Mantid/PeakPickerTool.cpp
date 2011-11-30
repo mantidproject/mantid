@@ -543,8 +543,8 @@ void PeakPickerTool::functionRemoved()
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
   QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
-  m_curveFitName = workspaceName()+"-"+axisLabel+QString("-Calc");
-  m_curveDifName = workspaceName()+"-"+axisLabel+QString("-Diff");
+  m_curveFitName = workspaceName()+"_"+QString("Worksapce-Calc");
+  m_curveDifName = workspaceName()+"_"+QString("Workspace-Diff");
 
   graph()->removeCurve(m_curveFitName);
   graph()->removeCurve(m_curveDifName);
@@ -559,8 +559,9 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   QStringList plotDetails;
   plotDetails.push_back(workspaceName());
   plotDetails.push_back(axisLabel);
-  m_fitPropertyBrowser->customisation(plotDetails);
 
+  m_fitPropertyBrowser->customisation(plotDetails);  
+  
   graph()->replot();
 }
 
@@ -876,13 +877,15 @@ void PeakPickerTool::plotGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
+  
+  d_graph->replot();
+
   QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
   QStringList plotDetails;
   plotDetails.push_back(m_wsName);
   plotDetails.push_back(axisLabel);
 
   m_fitPropertyBrowser->customisation(plotDetails);
-  d_graph->replot();
 }
 
 void PeakPickerTool::plotCurrentGuess()
@@ -890,13 +893,15 @@ void PeakPickerTool::plotCurrentGuess()
   MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
+  
+  d_graph->replot();
+
   QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
   QStringList plotDetails;
   plotDetails.push_back(m_wsName);
   plotDetails.push_back(axisLabel);
 
-  m_fitPropertyBrowser->customisation(plotDetails);
-  d_graph->replot();
+  m_fitPropertyBrowser->customisation(plotDetails);  
 }
 
 /**

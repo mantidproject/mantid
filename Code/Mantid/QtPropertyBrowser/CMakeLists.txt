@@ -139,6 +139,9 @@ endif ( WIN32 )
 # warning that crops up a lot in this package
 if ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" )
   add_definitions ( -wd1125 )
+# Also make sure the equivalent gcc warning is turned off
+elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU" )
+  add_definitions ( -Wno-overloaded-virtual )
 endif ()
 
 ###########################################################################

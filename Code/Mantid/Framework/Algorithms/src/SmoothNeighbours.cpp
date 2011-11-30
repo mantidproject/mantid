@@ -31,13 +31,13 @@ This increases the memory used by a factor of 9.
 You can use PreserveEvents = false to avoid the memory issues with an EventWorkspace input.
 Please note that the algorithm '''does not check''' that the bin X boundaries match.
 
-== Neighbour Searching ==
+=== Neighbour Searching ===
 
 If the radius is set to 0, the instrument is treated as though it has rectangular detectors. AdjX and AdjY can then be used to control the number of neighbours independently in x and y. Otherwise
 the algorithm will fetch neigbours using the intesection of those inside the radius cut-off and those less than the NumberOfNeighbours specified. For example with NumberOfNeighbours=24 and a 
 Radius=1.2 (with RadiusUnit=NumberOfPixels) only 8 nearest neighbours at most will be returned. If NumberOfNeighbours=24 and Radius=2, a maxium of 24 nearest neighbours will be found.
 
-== Ignore Masks ==
+=== Ignore Masks ===
 
 The algorithm will ignore masked detectors if this flag is set.
 
