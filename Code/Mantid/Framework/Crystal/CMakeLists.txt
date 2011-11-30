@@ -56,6 +56,7 @@ set ( TEST_FILES
 	test/FindUBUsingMinMaxDTest.h
 	test/FindUBUsingFFTTest.h
 	test/IndexPeaksTest.h
+        test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h
 	test/MaskPeaksWorkspaceTest.h

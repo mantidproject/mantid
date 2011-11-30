@@ -2,8 +2,6 @@ from MantidFramework import *
 from mantidsimple import *
 from numpy import zeros
 from pylab import *
-import time
-import copy
 
 class sfCalculator():      
     
@@ -20,7 +18,7 @@ class sfCalculator():
 
     #turn on or off the plots
     bPlot = False
-    bFittingPlot = True
+    bFittingPlot = False
     
     #size of detector
     alpha_pixel_nbr = 256 
@@ -160,13 +158,13 @@ class sfCalculator():
                            bNumerator=bNumerator)
 
         #cleanup workspaces
-#        mtd.deleteWorkspace('EventDataWks')
-#        mtd.deleteWorkspace('HistoDataWks')
-#        mtd.deleteWorkspace('IntegratedDataWks')
-#        mtd.deleteWorkspace('TransposeIntegratedDataWks')
-#        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
-#        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
-#        mtd.deleteWorkspace('DataWks')
+        mtd.deleteWorkspace('EventDataWks')
+        mtd.deleteWorkspace('HistoDataWks')
+        mtd.deleteWorkspace('IntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
+        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
+        mtd.deleteWorkspace('DataWks')
         
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
@@ -266,7 +264,7 @@ class sfCalculator():
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
         product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
                                           (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
-        return copy.deepcopy(product)
+        return product
     
     def fit(self):
         """
@@ -413,7 +411,8 @@ def getSlitsValue(full_list_runs, S1H, S2H):
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
         LoadEventNexus(Filename=_full_file_name,
-                       OutputWorkspace='tmpWks')
+                       OutputWorkspace='tmpWks',
+                       MetaDataOnly='1')
         mt1 = mtd['tmpWks']
         _s1h_value, _s1h_units = getS1h(mt1)
         _s2h_value, _s2h_units = getS2h(mt1)
@@ -502,10 +501,30 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
                      '55895', '55896', '55897', '55898', '55899', '55900', 
                      '55901', '55902']
         list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
+
+        nexus_path = '/mnt/hgfs/j35/'
+        pre = 'REF_L_'
+        nexus_path_pre = nexus_path + pre
+        post = '_event.nxs'
+    
+        for (offset, item) in enumerate(list_runs):
+            list_runs[offset] = nexus_path_pre + list_runs[offset] + post
+
     else:
-        #ex: string_runs="55889:0, 55890:1, 55891:1, 55892:1, 55893:1, 
-        # 55894:1, 55895:1, 55896:2, 55897:2, 55898:2, 55899:3, 55900:3, 
-        # 55901:4, 55902:4"
+        #ex: string_runs="/mnt/hgfs/j35/REF_L_55889_event.nxs:0, 
+        # /mnt/hgfs/j35/REF_L_55890_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55891_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55892_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55893_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55894_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55895_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55896_event.nxs:2, 
+        # /mnt/hgfs/j35/REF_L_55897_event.nxs:2, 
+        # /mnt/hgfs/j35/REF_L_55898_event.nxs:2, 
+        # /mnt/hgfs/j35/REF_L_55899_event.nxs:3, 
+        # /mnt/hgfs/j35/REF_L_55900_event.nxs:3, 
+        # /mnt/hgfs/j35/REF_L_55901_event.nxs:4, 
+        # /mnt/hgfs/j35/REF_L_55902_event.nxs:4"
         dico = createIndividualList(string_runs)
         list_runs = dico['list_runs']
         list_attenuator = dico['list_attenuator']
@@ -518,14 +537,6 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
         list_peak_back[13, ] = [120, 145, 105, 155]
         list_peak_back[12, ] = [125, 140, 115, 150]
     
-    nexus_path = '/mnt/hgfs/j35/'
-    pre = 'REF_L_'
-    nexus_path_pre = nexus_path + pre
-    post = '_event.nxs'
-    
-    for (offset, item) in enumerate(list_runs):
-        list_runs[offset] = nexus_path_pre + list_runs[offset] + post
-
     #####
     #Input file should be as it is here !
     #####
@@ -587,7 +598,7 @@ def calculate(string_runs=None, list_peak_back=None, output_file=None):
                                        list_objects=list_objects)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
-                plotObject(cal)
+#                plotObject(cal)
                                 
                 if (i < (len(list_runs) - 1) and
                          list_attenuator[i + 1] == (_attenuator+1)):

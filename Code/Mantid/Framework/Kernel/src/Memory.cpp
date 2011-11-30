@@ -151,11 +151,16 @@ bool read_mem_info(size_t & sys_avail, size_t & sys_total)
     else if (tag == "Cached:")
     {
       ++values_found;
-      sys_avail += (8*value/10);
+      sys_avail += value;
+    }
+    else if (tag == "Buffers:")
+    {
+        ++values_found;
+        sys_avail += value;
     }
     else
       continue;
-    if (values_found == 3)
+    if (values_found == 4)
     {
       file.close();
       return true;
@@ -187,7 +192,8 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
    *
    * As usual things are more complex on Linux. I think we need to take into account
    * the value of Cached as well since, especially if the system has been running for a long time,
-   * MemFree will seem a lot smaller than it should be.
+   * MemFree will seem a lot smaller than it should be. To be completely correct we also need to
+   * add the value of the "Buffers" as well.
    *
    * The only way I can see as to get acces to the Cached value is from the /proc/meminfo file
    * so if this is not successful I'll fall back to using the sysconf method and forget the cache
@@ -204,7 +210,7 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
   const int unusedReserved = mallinfo().fordblks/1024;
-  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n"; // TODO uncomment
+  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   sys_avail += unusedReserved;
 #elif __APPLE__
   // Get the total RAM of the system
@@ -225,7 +231,7 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
   mach_msg_type_number_t count;
   count = sizeof(vm_statistics) / sizeof(natural_t);
   err = host_statistics(port, HOST_VM_INFO, (host_info_t)&vmStats, &count);
-  if (err) g_log.warning("Unable to obtain memory statistics");
+  if (err) g_log.warning("Unable to obtain memory statistics for this Mac.");
   sys_avail = pageSize * ( vmStats.free_count + vmStats.inactive_count ) / 1024;
 
   // Now add in reserved but unused memory as reported by malloc
@@ -245,6 +251,9 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
     sys_total = static_cast<size_t>(memStatus.ullTotalVirtual/1024);
   }
 #endif
+
+  g_log.debug() << "Memory: " << sys_avail << " (free), " << sys_total << " (total).\n";
+
 }
 
 /**
