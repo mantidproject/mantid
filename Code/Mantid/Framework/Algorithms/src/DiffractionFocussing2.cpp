@@ -10,6 +10,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Axis.h"
 #include <cfloat>
@@ -21,6 +22,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using std::vector;
 
 namespace Mantid
 {
@@ -121,7 +123,6 @@ void DiffractionFocussing2::exec()
     g_log.error() << "UnitID " << unitid << " is not a supported spacing" << std::endl;
     throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
-
   // --- Do we need to read the grouping workspace? ----
   if (groupingFileName != "")
   {
@@ -161,6 +162,7 @@ void DiffractionFocussing2::exec()
     else
     {
       // get the full d-spacing range
+      m_eventW->sortAll(DataObjects::TOF_SORT, NULL);
       m_matrixInputW->getXMinMax(eventXMin, eventXMax);
     }
   }
@@ -174,141 +176,178 @@ void DiffractionFocussing2::exec()
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
 
   // The output spectrum, will be set at the first group
-  ISpectrum * outSpec = NULL;
-  
   Progress * prog;
-  prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
-  for (int64_t i=0;i<nHist;i++)
+  prog = new API::Progress(this,0.2,0.25,nHist);
+
+  bool checkForMask = false;
+  { // get rid of these objects quickly
+    Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
+    if (instrument != NULL)
+    {
+      checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+    }
+  }
+
+  vector< vector<size_t> > ws_indices(nGroups+1);
+  for (size_t wi=0;wi<static_cast<size_t>(nHist);wi++)
   {
-    prog->report();
-
-    // This is the input spectrum
-    const ISpectrum * inSpec = m_matrixInputW->getSpectrum(i);
-
-    //Check whether this spectra is in a valid group
-    const int group=groupAtWorkspaceIndex[i];
-    //std::cout << "Wi " << i << " is at group " << group << "\n";
-    if (group<=0) // Not in a group
+    //i is the workspace index (of the input)
+    const int group = groupAtWorkspaceIndex[wi];
+    if (group < 1) // Not in a group, or invalid group #
       continue;
-    //Get reference to its old X,Y,and E.
-    const MantidVec& Xin=inSpec->readX();
-    const MantidVec& Yin=inSpec->readY();
-    const MantidVec& Ein=inSpec->readE();
+
+    // check for masking
+    if (checkForMask)
+    {
+      Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(wi));
+      if ( (det == NULL) || (det->isMasked()) ) continue;
+    }
+
+    if (ws_indices.size() < static_cast<size_t>(group+1))
+    {
+      ws_indices.resize(group + 1);
+    }
+    // Also record a list of workspace indices
+    ws_indices[group].push_back(wi);
+    prog->reportIncrement(1, "Pre-counting");
+  }
+
+  // Pointer to sqrt function
+  typedef double (*uf)(double);
+  uf rs=std::sqrt;
+
+  // initialize a vector of the valid group numbers
+  vector<int> valid_groups;
+  size_t totalHistProcess = 0;
+  for (size_t i = 0; i < ws_indices.size(); i++)
+  {
+    if (!(ws_indices[i].empty()))
+    {
+      valid_groups.push_back(static_cast<int>(i));
+      totalHistProcess += ws_indices[i].size();
+    }
+  }
+
+  // loop over groups
+  delete prog;
+  prog = new API::Progress(this, 0.25, 0.95, static_cast<int>(totalHistProcess) + nGroups);
+  PARALLEL_FOR1(m_matrixInputW)
+  for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(valid_groups.size()); outWorkspaceIndex++)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    int group = valid_groups[outWorkspaceIndex];
+
     // Get the group
     group2vectormap::iterator it=group2xvector.find(group);
     group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
     const MantidVec& Xout = *((*it).second);
 
-    // Workspace index in the output
-    const size_t outWI = static_cast<size_t>(dif);
-
     // Assign the new X axis only once (i.e when this group is encountered the first time)
-    if (flags[dif])
-    {
-      out->dataX(static_cast<int64_t>(dif))=Xout;
-      flags[dif]=false;
-      // Initialize the group's weight vector here too
-      group2wgtvector[group] = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
-      // This is the output spectrum
-      outSpec = out->getSpectrum(outWI);
-      // Also set the spectrum number to the group number
-      outSpec->setSpectrumNo(group);
-      outSpec->clearDetectorIDs();
-    }
+    out->dataX(static_cast<int64_t>(dif))=Xout;
+    flags[dif]=false;
 
-    // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(i));
-    if ( !det->isMasked() ) outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+    // This is the output spectrum
+    ISpectrum * outSpec = out->getSpectrum(outWorkspaceIndex);
+
+    // Also set the spectrum number to the group number
+    outSpec->setSpectrumNo(group);
+    outSpec->clearDetectorIDs();
 
     // Get the references to Y and E output and rebin
     MantidVec& Yout=outSpec->dataY();
     MantidVec& Eout=outSpec->dataE();
-    try
+
+    // Initialize the group's weight vector here too
+    //MantidVec& groupWgt = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
+    MantidVec groupWgt(nPoints,0.0);
+
+    // loop through the contributing histograms
+    std::vector<size_t> indices = ws_indices[group];
+    const size_t groupSize = indices.size();
+    for (size_t i=0; i<groupSize; i++)
     {
-      VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
-    }catch(...)
-    {
-      // Should never happen because Xout is constructed to envelop all of the Xin vectors
-      std::ostringstream mess;
-      mess << "Error in rebinning process for spectrum:" << i;
-      throw std::runtime_error(mess.str());
-    }
-    
-    // Get a reference to the summed weights vector for this group
-    MantidVec& groupWgt = *group2wgtvector[group];
-    // Check for masked bins in this spectrum
-    if ( m_matrixInputW->hasMaskedBins(i) )
-    {
-      MantidVec weight_bins,weights;
-      weight_bins.push_back(Xin.front());
-      // If there are masked bins, get a reference to the list of them
-      const API::MatrixWorkspace::MaskList& mask = m_matrixInputW->maskedBins(i);
-      // Now iterate over the list, adjusting the weights for the affected bins
-      for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+      size_t inWorkspaceIndex = indices[i];
+      // This is the input spectrum
+      const ISpectrum * inSpec = m_matrixInputW->getSpectrum(inWorkspaceIndex);
+      //Get reference to its old X,Y,and E.
+      const MantidVec& Xin=inSpec->readX();
+      const MantidVec& Yin=inSpec->readY();
+      const MantidVec& Ein=inSpec->readE();
+
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+      try
       {
-        const double currentX = Xin[(*it).first];
-        // Add an intermediate bin with full weight if masked bins aren't consecutive
-        if (weight_bins.back() != currentX) 
+        VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
+      }catch(...)
+      {
+        // Should never happen because Xout is constructed to envelop all of the Xin vectors
+        std::ostringstream mess;
+        mess << "Error in rebinning process for spectrum:" << inWorkspaceIndex;
+        throw std::runtime_error(mess.str());
+      }
+
+      // Check for masked bins in this spectrum
+      if ( m_matrixInputW->hasMaskedBins(i) )
+      {
+        MantidVec weight_bins,weights;
+        weight_bins.push_back(Xin.front());
+        // If there are masked bins, get a reference to the list of them
+        const API::MatrixWorkspace::MaskList& mask = m_matrixInputW->maskedBins(i);
+        // Now iterate over the list, adjusting the weights for the affected bins
+        for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+        {
+          const double currentX = Xin[(*it).first];
+          // Add an intermediate bin with full weight if masked bins aren't consecutive
+          if (weight_bins.back() != currentX)
+          {
+            weights.push_back(1.0);
+            weight_bins.push_back(currentX);
+          }
+          // The weight for this masked bin is 1 - the degree to which this bin is masked
+          weights.push_back(1.0-(*it).second);
+          weight_bins.push_back(Xin[(*it).first + 1]);
+        }
+        // Add on a final bin with full weight if masking doesn't go up to the end
+        if (weight_bins.back() != Xin.back())
         {
           weights.push_back(1.0);
-          weight_bins.push_back(currentX);
+          weight_bins.push_back(Xin.back());
         }
-        // The weight for this masked bin is 1 - the degree to which this bin is masked
-        weights.push_back(1.0-(*it).second);
-        weight_bins.push_back(Xin[(*it).first + 1]);
-      }
-      // Add on a final bin with full weight if masking doesn't go up to the end
-      if (weight_bins.back() != Xin.back()) 
-      {
-        weights.push_back(1.0);
-        weight_bins.push_back(Xin.back());
-      }
-      
-      // Create a temporary vector for the rebinned angles
-      //MantidVec weightsTemp(groupWgt.size(),0.0);
-      //MantidVec zeroesTemp(groupWgt.size(),0.0);
-      // Create a zero vector for the errors because we don't care about them here
-      const MantidVec zeroes(weights.size(),0.0);
-      // Rebin the weights - note that this is a distribution
-      //VectorHelper::rebin(weight_bins,weights,zeroes,Xout,weightsTemp,zeroesTemp,true);
-      VectorHelper::rebin(weight_bins,weights,zeroes,Xout,groupWgt,EOutDummy,true,true);
-      // Add weights for this spectrum to the output weights vector
-      //std::transform(groupWgt.begin(),groupWgt.end(),weightsTemp.begin(),groupWgt.begin(),std::plus<double>());
-    }
-    else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
-    {
-      if (eventXMin > 0. && eventXMax > 0)
-      {
-        limits[0] = eventXMin;
-        limits[1] = eventXMax;
-      }
-      else
-      {
-        limits[0] = Xin.front();
-        limits[1] = Xin.back();
-      }
 
-      // Rebin the weights - note that this is a distribution
-      VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
-    }
-  }
+        // Create a temporary vector for the rebinned angles
+        //MantidVec weightsTemp(groupWgt.size(),0.0);
+        //MantidVec zeroesTemp(groupWgt.size(),0.0);
+        // Create a zero vector for the errors because we don't care about them here
+        const MantidVec zeroes(weights.size(),0.0);
+        // Rebin the weights - note that this is a distribution
+        //VectorHelper::rebin(weight_bins,weights,zeroes,Xout,weightsTemp,zeroesTemp,true);
+        VectorHelper::rebin(weight_bins,weights,zeroes,Xout,groupWgt,EOutDummy,true,true);
+        // Add weights for this spectrum to the output weights vector
+        //std::transform(groupWgt.begin(),groupWgt.end(),weightsTemp.begin(),groupWgt.begin(),std::plus<double>());
+      }
+      else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
+      {
+        if (eventXMin > 0. && eventXMax > 0.)
+        {
+          limits[0] = eventXMin;
+          limits[1] = eventXMax;
+        }
+        else
+        {
+          limits[0] = Xin.front();
+          limits[1] = Xin.back();
+        }
 
-  // Now propagate the errors.
-  // Pointer to sqrt function
-  typedef double (*uf)(double);
-  uf rs=std::sqrt;
-  
-  group2vectormap::const_iterator wit = group2wgtvector.begin();
+        // Rebin the weights - note that this is a distribution
+        VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
+      }
+      prog->report();
+    } // end of loop for input spectra
 
-  for (int64_t i=0; i < nGroups; ++i,++wit)
-  {
-    const MantidVec& Xout = out->readX(i);
     // Calculate the bin widths
     std::vector<double> widths(Xout.size());
     std::adjacent_difference(Xout.begin(),Xout.end(),widths.begin());
 
-    MantidVec& Yout=out->dataY(i);
-    MantidVec& Eout=out->dataE(i);
     // Take the square root of the errors
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),rs);
 
@@ -318,23 +357,25 @@ void DiffractionFocussing2::exec()
     std::transform(Eout.begin(),Eout.end(),widths.begin()+1,Eout.begin(),std::multiplies<double>());
 
     // Now need to normalise the data (and errors) by the weights
-    const MantidVec& wgt = *(*wit).second;
-    std::transform(Yout.begin(),Yout.end(),wgt.begin(),Yout.begin(),std::divides<double>());
-    std::transform(Eout.begin(),Eout.end(),wgt.begin(),Eout.begin(),std::divides<double>());
+    std::transform(Yout.begin(),Yout.end(),groupWgt.begin(),Yout.begin(),std::divides<double>());
+    std::transform(Eout.begin(),Eout.end(),groupWgt.begin(),Eout.begin(),std::divides<double>());
     // Now multiply by the number of spectra in the group
-    const int groupSize = static_cast<int>(std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first));
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
 
     prog->report();
-  }
-  
+    PARALLEL_END_INTERUPT_REGION
+  } // end of loop for groups
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  delete prog;
+  progress(0.95, "Generating spectra map");
+
   // For backwards-compatibility
   out->generateSpectraMap();
 
   setProperty("OutputWorkspace",out);
 
-  delete prog;
   this->cleanup();
 }
 
@@ -616,7 +657,7 @@ void DiffractionFocussing2::determineRebinParameters()
 
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
-    const int group = validateSpectrumInGroup(size_t(i));
+    const int group = validateSpectrumInGroup(static_cast<size_t>(i));
     groupAtWorkspaceIndex[i] = group;
     if (group == -1)
       continue;
@@ -629,10 +670,12 @@ void DiffractionFocussing2::determineRebinParameters()
     const double min = ((*gpit).second).first;
     const double max = ((*gpit).second).second;
     const MantidVec& X = m_matrixInputW->readX(i);
-    if (X.front() < (min)) //New Xmin found
-      ((*gpit).second).first = X.front();
-    if (X.back() > (max)) //New Xmax found
-      ((*gpit).second).second = X.back();
+    double temp = X.front();
+    if (temp < (min)) //New Xmin found
+      ((*gpit).second).first = temp;
+    temp = X.back();
+    if (temp > (max)) //New Xmax found
+      ((*gpit).second).second = temp;
   }
 
   nGroups=group2minmax.size(); // Number of unique groups
