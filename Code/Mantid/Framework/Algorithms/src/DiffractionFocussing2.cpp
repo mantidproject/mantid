@@ -232,7 +232,7 @@ void DiffractionFocussing2::exec()
   delete prog;
   prog = new API::Progress(this, 0.25, 0.95, static_cast<int>(totalHistProcess) + nGroups);
   PARALLEL_FOR1(m_matrixInputW)
-  for (size_t outWorkspaceIndex = 0; outWorkspaceIndex < valid_groups.size(); outWorkspaceIndex++)
+  for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(valid_groups.size()); outWorkspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
     int group = valid_groups[outWorkspaceIndex];
