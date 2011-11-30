@@ -193,7 +193,6 @@ void ConvertToMDEvents::exec(){
     // ------- Is there any output workspace?
     // shared pointer to target workspace
     API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
-
     bool create_new_ws(false);
     if(!spws){
         create_new_ws = true;
@@ -202,8 +201,7 @@ void ConvertToMDEvents::exec(){
     std::string algo_id;
 
 
-
-    // if new workspace is created, its properties are determened by user input
+    // if new workspace is created, its properties are determened by the user's input
     if (create_new_ws){
 
         // Identify what dimension names we can obtain from the input workspace;
@@ -213,7 +211,7 @@ void ConvertToMDEvents::exec(){
         wsNames[0]="|Q|";
         wsNames[1]="QxQyQz";
 
-    // get the X axis
+    // get the X axis of input workspace
         NumericAxis *pXAxis = dynamic_cast<NumericAxis *>(inWS2D->getAxis(0));
         if(!pXAxis )
         {
@@ -222,7 +220,7 @@ void ConvertToMDEvents::exec(){
         }
         std::string Dim1Name = pXAxis->unit()->unitID();
         wsNames.push_back(Dim1Name);
-        //
+        // what dimension names can be obtained from 
         dim_names_availible = this->get_dimension_names(wsNames,inWS2D);
 
 
@@ -246,8 +244,10 @@ void ConvertToMDEvents::exec(){
             throw(std::invalid_argument("wrong number of dimension limits"));
         }
 
+   // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
+   // user input is mainly ignored
     }else{ 
-    // the output dimensions will be determined by the dimensions of the target workspace
+
           dim_min.assign(n_activated_dimensions,-1);
           dim_max.assign(n_activated_dimensions,1);
     }
@@ -278,7 +278,7 @@ void ConvertToMDEvents::exec(){
     return;
    
 }
- /** function processes the input arguments and tries to istablish what algorithm should be deployed; 
+ /** function processes the input arguments and tries to establish what algorithm should be deployed; 
     *
     * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
     * @param Q_dim_requested     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
@@ -425,7 +425,8 @@ ConvertToMDEvents::get_dimension_names(const std::vector<std::string> &default_p
 std::vector<double> 
 ConvertToMDEvents::get_transf_matrix(const Kernel::V3D &u, const Kernel::V3D &v)const
 {
-    
+    // for now. need to be used
+    UNUSED_ARG(u); UNUSED_ARG(v);   
     // Set the matrix based on UB etc.
     Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
     Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
