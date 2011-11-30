@@ -78,7 +78,7 @@ namespace MDEvents
    */
   void SliceMD::init()
   {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace","",Direction::Input), "An input MDWorkspace.");
 
     // Properties for specifying the slice to perform.
     this->initSlicingProps();

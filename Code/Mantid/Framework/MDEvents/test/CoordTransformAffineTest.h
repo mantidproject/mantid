@@ -141,6 +141,7 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   /** Test a case of a rotation 0.1 radians around +Z,
    * and a projection into the XY plane */
   void test_buildOrthogonal()
@@ -176,7 +177,8 @@ public:
     ct.apply(in2, out);
     compare(2, out, exp2);
 
-    // Checks for failure to build
+    // Checks for failure to build  //-----------------------------------------------------------------------------------------------
+
     bases.push_back( VMD(1,2,3) );
     TSM_ASSERT_THROWS_ANYTHING( "Too many bases throws", ct.buildOrthogonal(origin, bases, scale) );
     bases.resize(2);
@@ -185,6 +187,7 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   /** Test a case of a rotation 0.1 radians around +Z,
    * and a projection into the XY plane,
    * and scaling in the output dimensions */
@@ -222,6 +225,7 @@ public:
     TSM_ASSERT_THROWS_ANYTHING( "Mismatch in scaling vector", ct.buildOrthogonal(origin, bases, scale) );
   }
 
+  //-----------------------------------------------------------------------------------------------
   /// Validate Inputs
   void test_combineTransformations_failures()
   {
@@ -242,6 +246,7 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Combine two simple translations */
   void test_combineTransformations_translations()
   {
     coord_t in[2] = {1.5, 2.5};
@@ -324,7 +329,7 @@ public:
 
 
 
-
+  //-----------------------------------------------------------------------------------------------
   void testSerialization()
   {
     using Mantid::Kernel::V3D;
