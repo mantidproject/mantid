@@ -101,7 +101,6 @@ void DiffractionFocussing2::cleanup()
  */
 void DiffractionFocussing2::exec()
 {
-  Kernel::CPUTimer timer; // REMOVE
   // retrieve the properties
   std::string groupingFileName=getProperty("GroupingFileName");
   groupWS = getProperty("GroupingWorkspace");
@@ -124,7 +123,6 @@ void DiffractionFocussing2::exec()
     g_log.error() << "UnitID " << unitid << " is not a supported spacing" << std::endl;
     throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
-  std::cout << "02:" << timer << std::endl; // REMOVE
   // --- Do we need to read the grouping workspace? ----
   if (groupingFileName != "")
   {
@@ -135,7 +133,6 @@ void DiffractionFocussing2::exec()
     childAlg->executeAsSubAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
   }
-  std::cout << "03:" << timer << std::endl; // REMOVE
 
   // Fill the map
   progress(0.2, "Determine Rebin Params");
@@ -143,12 +140,10 @@ void DiffractionFocussing2::exec()
   // std::cout << "(1) nGroups " << nGroups << "\n";
   groupWS->makeDetectorIDToGroupMap(udet2group, nGroups);
   // std::cout << "(2) nGroups " << nGroups << "\n";
-  std::cout << "04:" << timer << std::endl; // REMOVE
 
   //This finds the rebin parameters (used in both versions)
   // It also initializes the groupAtWorkspaceIndex[] array.
   determineRebinParameters();
-  std::cout << "05:" << timer << std::endl; // REMOVE
 
   // determine event workspace min/max tof
   double eventXMin = 0.;
@@ -171,25 +166,18 @@ void DiffractionFocussing2::exec()
       m_matrixInputW->getXMinMax(eventXMin, eventXMax);
     }
   }
-  std::cout << "07:" << timer << std::endl; // REMOVE
 
   //No problem? Then it is a normal Workspace2D
   API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(m_matrixInputW,nGroups,nPoints+1,nPoints);
-  std::cout << "08:" << timer << std::endl; // REMOVE
 
 
   // Now the real work
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
-  std::cout << "09:" << timer << std::endl; // REMOVE
 
-  // ----------------------------------------------- REMOVE
   // The output spectrum, will be set at the first group
-  //ISpectrum * outSpec = NULL;
   Progress * prog;
-  //prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
   prog = new API::Progress(this,0.2,0.25,nHist);
-  std::cout << "10:" << timer << std::endl; // REMOVE
 
   bool checkForMask = false;
   { // get rid of these objects quickly
@@ -199,28 +187,21 @@ void DiffractionFocussing2::exec()
       checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
     }
   }
-  std::cout << "11:" << timer << std::endl; // REMOVE
 
   vector< vector<size_t> > ws_indices(nGroups+1);
   for (size_t wi=0;wi<static_cast<size_t>(nHist);wi++)
   {
-    //std::cout << "12:" << wi << std::endl; // REMOVE
     //i is the workspace index (of the input)
     const int group = groupAtWorkspaceIndex[wi];
-    //std::cout << "13:" << group << std::endl; // REMOVE
-    if (group < 1)// || group > nGroups) // Not in a group, or invalid group #
+    if (group < 1) // Not in a group, or invalid group #
       continue;
 
-    //std::cout << "14:" << std::endl; // REMOVE
     // check for masking
     if (checkForMask)
     {
-      //std::cout << "15:" << std::endl; // REMOVE
       Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(wi));
-      //std::cout << "16:" << det->getID() << std::endl; // REMOVE
       if ( (det == NULL) || (det->isMasked()) ) continue;
     }
-    //std::cout << "17: " << ws_indices.size() << std::endl; // REMOVE
 
     if (ws_indices.size() < static_cast<size_t>(group+1))
     {
@@ -230,7 +211,6 @@ void DiffractionFocussing2::exec()
     ws_indices[group].push_back(wi);
     prog->reportIncrement(1, "Pre-counting");
   }
-  std::cout << "19:" << timer << std::endl; // REMOVE
 
   // Pointer to sqrt function
   typedef double (*uf)(double);
@@ -238,21 +218,23 @@ void DiffractionFocussing2::exec()
 
   // initialize a vector of the valid group numbers
   vector<int> valid_groups;
+  size_t totalHistProcess = 0;
   for (size_t i = 0; i < ws_indices.size(); i++)
   {
     if (!(ws_indices[i].empty()))
     {
       valid_groups.push_back(static_cast<int>(i));
+      totalHistProcess += ws_indices[i].size();
     }
   }
-  std::cout << "20:" << timer << std::endl; // REMOVE
-
 
   // loop over groups
   delete prog;
-  prog = new API::Progress(this, 0.25, 0.95, nGroups);
+  prog = new API::Progress(this, 0.25, 0.95, totalHistProcess + nGroups);
+  PARALLEL_FOR1(m_matrixInputW)
   for (size_t outWorkspaceIndex = 0; outWorkspaceIndex < valid_groups.size(); outWorkspaceIndex++)
   {
+    PARALLEL_START_INTERUPT_REGION
     int group = valid_groups[outWorkspaceIndex];
 
     // Get the group
@@ -359,6 +341,7 @@ void DiffractionFocussing2::exec()
         // Rebin the weights - note that this is a distribution
         VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
       }
+      prog->report();
     } // end of loop for input spectra
 
     // Calculate the bin widths
@@ -381,18 +364,17 @@ void DiffractionFocussing2::exec()
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
 
     prog->report();
+    PARALLEL_END_INTERUPT_REGION
   } // end of loop for groups
-  std::cout << "23:" << timer << std::endl; // REMOVE
+  PARALLEL_CHECK_INTERUPT_REGION
 
   delete prog;
   progress(0.95, "Generating spectra map");
 
   // For backwards-compatibility
   out->generateSpectraMap();
-  prog->report();
 
   setProperty("OutputWorkspace",out);
-  std::cout << "24:" << timer << std::endl; // REMOVE
 
   this->cleanup();
 }
@@ -679,12 +661,10 @@ void DiffractionFocussing2::determineRebinParameters()
     groupAtWorkspaceIndex[i] = group;
     if (group == -1)
       continue;
-    std::cout << "spectrum " << i << " is in group " << group << std::endl; // REMOVE
     gpit = group2minmax.find(group);
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end())
     {
-      std::cout << "creating group " << group << std::endl; // REMOVE
       gpit = group2minmax.insert(std::make_pair(group,std::make_pair(1.0e14,-1.0e14))).first;
     }
     const double min = ((*gpit).second).first;
@@ -706,7 +686,6 @@ void DiffractionFocussing2::determineRebinParameters()
   //Iterator over all groups to create the new X vectors
   for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++)
   {
-    std::cout << "group: " << gpit->first << std::endl; // REMOVE
     Xmin = ((*gpit).second).first;
     Xmax = ((*gpit).second).second;
 
@@ -735,7 +714,6 @@ void DiffractionFocussing2::determineRebinParameters()
       (*xnew)[j] = Xmin * (1.0 + step);
       Xmin = (*xnew)[j];
     }
-    std::cout << "adding information for group " << (*gpit).first << " " << xnew->size() << " elements" << std::endl; // REMOVE
     group2xvector[(*gpit).first] = xnew; //Register this vector in the map
   }
   // Not needed anymore
