@@ -5,6 +5,7 @@
 set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
 set ( EXPORT_FILES
+  src/ConfigService.cpp
   src/DataItem.cpp
   src/IPropertyManager.cpp
   src/Property.cpp

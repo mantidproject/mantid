@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/AlignDetectorInTOF.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
+	src/CalMuonDeadTime.cpp
 	src/AnyShapeAbsorption.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
@@ -107,7 +108,6 @@ set ( SRC_FILES
 	src/MuonAsymmetryCalc.cpp
 	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
-	src/NormaliseByVanadium.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
@@ -166,6 +166,7 @@ set ( SRC_FILES
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/WeightedMean.cpp
+	src/WeightingStrategy.cpp
 	src/XDataConverter.cpp
 )
 
@@ -177,6 +178,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AlignDetectorInTOF.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
+	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
@@ -279,7 +281,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MuonAsymmetryCalc.h
 	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
-	inc/MantidAlgorithms/NormaliseByVanadium.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
@@ -338,6 +339,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/WeightedMean.h
+	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
 
@@ -347,6 +349,7 @@ set ( TEST_FILES
 	test/AlignDetectorInTOFTest.h
 	test/AlignDetectorsTest.h
 	test/AlphaCalcTest.h
+	test/CalMuonDeadTimeTest.h
 	test/AnyShapeAbsorptionTest.h
 	test/ApplyDetailedBalanceTest.h
 	test/ApplyTransmissionCorrectionTest.h
@@ -438,7 +441,6 @@ set ( TEST_FILES
 	test/MuonAsymmetryCalcTest.h
 	test/MuonRemoveExpDecayTest.h
 	test/NormaliseByCurrentTest.h
-	test/NormaliseByVanadiumTest.h
 	test/NormaliseToMonitorTest.h
 	test/OneMinusExponentialCorTest.h
 	test/PDFFTTest.h
@@ -490,6 +492,7 @@ set ( TEST_FILES
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
 	test/WeightedMeanTest.h
+	test/WeightingStrategyTest.h
 	test/WorkspaceCreationHelperTest.h
 	test/WorkspaceGroupTest.h
 )

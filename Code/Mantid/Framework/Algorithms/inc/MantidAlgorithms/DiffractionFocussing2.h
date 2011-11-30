@@ -14,7 +14,6 @@
 #include <map>
 #else
 #include <tr1/unordered_map>
-#include "MantidDataObjects/GroupingWorkspace.h"
 #endif
 
 namespace Mantid
@@ -109,14 +108,14 @@ private:
   void determineRebinParameters();
   int validateSpectrumInGroup(size_t wi);
   
-  /// Shared pointer to a mutable input workspace
-  API::MatrixWorkspace_sptr m_matrixInputW;
+  /// Shared pointer to the input workspace
+  API::MatrixWorkspace_const_sptr m_matrixInputW;
 
   /// Grouping workspace with groups to build
   Mantid::DataObjects::GroupingWorkspace_sptr groupWS;
 
   /// Shared pointer to the event workspace
-  DataObjects::EventWorkspace_sptr m_eventW;
+  DataObjects::EventWorkspace_const_sptr m_eventW;
 
 
   // This map does not need to be ordered, just a lookup for udet

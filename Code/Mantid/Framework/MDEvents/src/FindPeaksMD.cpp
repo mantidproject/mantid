@@ -1,7 +1,7 @@
 /*WIKI* 
 
 
-This algorithm is used to find single-crystal peaks in a multi-dimensional workspace.
+This algorithm is used to find single-crystal peaks in a multi-dimensional workspace ([[MDEventWorkspace]] or [[MDHistoWorkspace]]).
 It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW.
 
 The algorithm proceeds in this way:
@@ -13,6 +13,10 @@ The algorithm proceeds in this way:
 * This is repeated until we find up to MaxPeaks peaks.
 
 Each peak created is placed in the output [[PeaksWorkspace]], which can be a new workspace or replace the old one.
+
+This algorithm works on a [[MDHistoWorkspace]] resulting from the [[BinMD]] algorithm also.
+It works in the same way, except that the center of each bin is used since the centroid is not accessible.
+It may give better results on [[Workspace2D]]'s that were converted to [[MDWorkspace]]s.
 
 *WIKI*/
 

@@ -16539,7 +16539,6 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
     if (plotDetails.size() > 4)
     {
       connectType = plotDetails[2].toInt();
-
       QList<MdiSubWindow *> windows = windowsList();
       foreach (MdiSubWindow *w, windows) 
       {
@@ -16575,7 +16574,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                 }
                 else if (plotDetails[3] == "Fit")
                 {
-                  curveNum = g->curveIndex(plotDetails[0] + "-" + plotDetails[1] + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Diff")
+                  curveNum = g->curveIndex(plotDetails[0] + "_" + "Workspace" + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Calc")
                 }
                 if (curveNum > -1) // If one of the curves has been changed 
                 {

@@ -460,7 +460,8 @@ class SNSPowderReduction(PythonAlgorithm):
     def _save(self, wksp, info, normalized):
         filename = os.path.join(self._outDir, str(wksp))
         if "gsas" in self._outTypes:
-            SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG")
+            SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, 
+                    MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
             SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
 

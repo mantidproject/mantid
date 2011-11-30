@@ -411,7 +411,7 @@ public:
 
   void test_nexus_spectraMap()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("MatrixWorkspaceTest.nxs");
     MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 50);
     std::vector<int> spec;
