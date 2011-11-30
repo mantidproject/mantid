@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidKernel/System.h"
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
+#include <stdexcept>
+#include <cmath>
 
 namespace Mantid
 {
