@@ -88,9 +88,6 @@ public:
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;
 
-  /// Overriden virtual method
-  void itemChanged();
-
   /// saves the MantidMatrixCurve details to project file.
   QString saveToString();
 

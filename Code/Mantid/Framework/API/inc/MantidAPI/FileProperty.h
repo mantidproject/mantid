@@ -47,7 +47,7 @@ public:
                const std::string & ext, unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
-  virtual FileProperty* clone() { return new FileProperty(*this); }
+  Kernel::Property* clone() { return new FileProperty(*this); }
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;
@@ -63,9 +63,6 @@ public:
   virtual std::string setValue(const boost::shared_ptr<Kernel::DataItem>);
   /// Returns the main file extension that's used 
   std::string getDefaultExt() const {return m_defaultExt;}
-
-  // Unhide the PropertyWithValue assignment operator
-  using Kernel::PropertyWithValue<std::string>::operator=;
 
  private:
   void setUp(const std::string & defExt);
@@ -85,9 +82,6 @@ public:
   std::string m_defaultExt;
   /// Is this property for run files?
   bool m_runFileProp;
-
-  /// Private, unimplemented copy assignment operator
-  FileProperty& operator=( const FileProperty& right );
 };
 
 }

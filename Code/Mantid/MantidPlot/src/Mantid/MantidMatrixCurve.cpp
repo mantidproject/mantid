@@ -198,19 +198,6 @@ void MantidMatrixCurve::draw(QPainter *p,
   }
 }
 
-void MantidMatrixCurve::itemChanged()
-{
-  MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
-  if (d && d->m_isHistogram)
-  {
-    if (style() == Steps) d->m_binCentres = false;
-    else
-      d->m_binCentres = true;
-  }
-  PlotCurve::itemChanged();
-}
-
-
 /** Create the name for a curve from the following input:
  *  @param wsName :: The workspace name
  *  @param index ::  The spectra (bin) index

@@ -152,6 +152,21 @@ void SliceViewer::initMenus()
 {
   QAction * action;
 
+  // --------------- Color options Menu ----------------------------------------
+  m_menuColorOptions = new QMenu("&ColorMap", this);
+
+  action = new QAction(QPixmap(), "&Load Colormap", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "&Full range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "&Slice range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
+  m_menuColorOptions->addAction(action);
+
   // --------------- View Menu ----------------------------------------
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
@@ -168,37 +183,10 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
   m_menuView->addAction(action);
 
-  // --------------- Color options Menu ----------------------------------------
-  m_menuColorOptions = new QMenu("&ColorMap", this);
-
-  action = new QAction(QPixmap(), "&Load Colormap", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
-  m_menuColorOptions->addAction(action);
-
-  action = new QAction(QPixmap(), "&Full range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
-  m_menuColorOptions->addAction(action);
-
-  action = new QAction(QPixmap(), "&Slice range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
-  m_menuColorOptions->addAction(action);
-
-  // --------------- Help Menu ----------------------------------------
-  m_menuHelp = new QMenu("&Help", this);
-  action = new QAction(QPixmap(), "&Slice Viewer Help (browser)", this);
-  action->setShortcut(Qt::Key_F1);
-  connect(action, SIGNAL(triggered()), this, SLOT(helpSliceViewer()));
-  m_menuHelp->addAction(action);
-
-  action = new QAction(QPixmap(), "&Line Viewer Help (browser)", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(helpLineViewer()));
-  m_menuHelp->addAction(action);
-
   // ---------------------- Build the menu bar -------------------------
   QMenuBar * bar = new QMenuBar(this, "Main Menu Bar");
   bar->addMenu( m_menuView );
   bar->addMenu( m_menuColorOptions );
-  bar->addMenu( m_menuHelp );
   ui.verticalLayout->insertWidget(0, bar );
 }
 
@@ -476,20 +464,6 @@ void SliceViewer::zoomInSlot()
 void SliceViewer::zoomOutSlot()
 {
   this->zoomBy(1.0 / 1.1);
-}
-
-/// Slot for opening help page
-void SliceViewer::helpSliceViewer()
-{
-  QString helpPage = "MantidPlot:_SliceViewer";
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
-}
-
-/// Slot for opening help page
-void SliceViewer::helpLineViewer()
-{
-  QString helpPage = "MantidPlot:_LineViewer";
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 //------------------------------------------------------------------------------------

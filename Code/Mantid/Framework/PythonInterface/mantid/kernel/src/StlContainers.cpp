@@ -10,5 +10,5 @@ void exportStlContainers()
   std_vector_exporter<std::size_t>::wrap("std_vector_size_t");
   std_vector_exporter<double>::wrap("std_vector_dbl");
   std_vector_exporter<bool>::wrap("std_vector_bool");
-  std_vector_exporter<std::string>::wrap("std_vector_str");
+  std_vector_exporter<std::string>::wrap("cpp_list_str");
 }

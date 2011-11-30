@@ -66,8 +66,6 @@ public slots:
   void zoomOutSlot();
   void updateDisplaySlot(int index, double value);
   void loadColorMapSlot();
-  void helpSliceViewer();
-  void helpLineViewer();
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnRangeFull_clicked();
   void on_btnRangeSlice_clicked();
@@ -156,7 +154,8 @@ private:
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp;
+  QMenu * m_menuColorOptions;
+  QMenu * m_menuView;
 
   /// Cached double for infinity
   double m_inf;

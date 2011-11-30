@@ -85,10 +85,6 @@ namespace Mantid
         * @return do not remember masked property values
         */
         virtual bool remember() const { return false; };
-
-        // Unhide the PropertyWithValue assignment operator
-        using Kernel::PropertyWithValue<TYPE>::operator=;
-
 		private:
 
 			/** This method creates masked value for a property

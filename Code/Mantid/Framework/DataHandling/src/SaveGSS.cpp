@@ -72,7 +72,6 @@ namespace Mantid
       declareProperty("Format", RALF, new Kernel::ListValidator(formats), "GSAS format to save as");
       declareProperty("MultiplyByBinWidth", true,
           "Multiply the intensity (Y) by the bin width; default TRUE.");
-      declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");
     }
 
     /**
@@ -273,17 +272,17 @@ namespace Mantid
         Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
     }
 
-    void writeValue(std::ostream &os, const Run& runinfo, const std::string& name, const std::string& defValue="UNKNOWN")
+    void writeValue(std::ostream &os, const Run& runinfo, const std::string& name)
     {
       if (!runinfo.hasProperty(name))
       {
-        os << defValue;
+        os << "UNKNOWN";
         return;
       }
       Kernel::Property* prop = runinfo.getProperty(name);
       if (prop == NULL)
       {
-        os << defValue;
+        os << "UNKNOWN";
         return;
       }
       Kernel::TimeSeriesProperty<double> *log =
@@ -319,30 +318,6 @@ namespace Mantid
         os << " Wavelength: ";
         writeValue(os, runinfo, "LambdaRequest");
         os << "\n";
-      }
-
-      if (this->getProperty("ExtendedHeader"))
-      {
-      // the instrument parameter file
-      os << "Instrument parameter file: ";
-      writeValue(os, runinfo, "iparm_file", "");
-      os << "\n";
-
-      // write out the gsas monitor counts
-      os << "Monitor: ";
-      if (runinfo.hasProperty("gsas_monitor"))
-      {
-        writeValue(os, runinfo, "gsas_monitor");
-      }
-      else
-      {
-        writeValue(os, runinfo, "gd_prtn_chrg", "1");
-      }
-      os << "\n";
-      }
-
-      if (format.compare(SLOG) == 0)
-      {
         os << "# "; // make the next line a comment
       }
       os << workspace->getTitle() << "\n";
