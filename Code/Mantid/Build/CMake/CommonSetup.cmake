@@ -186,6 +186,15 @@ else()
   message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )
 endif()
 
+# GUI testing via Squish
+find_package ( Squish )
+if ( SQUISH_FOUND )
+  enable_testing()
+  message ( STATUS "Found Squish for GUI testing" )
+else()
+  message ( STATUS "Could not find Squish - GUI testing not available" )
+endif()
+
 ###########################################################################
 # Set a flag to indicate that this script has been called
 ###########################################################################
