@@ -123,3 +123,7 @@ If false, then the workspace gets converted to a Workspace2D histogram.
             msg = str(exc)
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
+                
+
+if __name__ == '__main__':
+    unittest.main()

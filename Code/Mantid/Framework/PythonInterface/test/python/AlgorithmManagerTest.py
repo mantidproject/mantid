@@ -60,4 +60,6 @@ class AlgorithmManagerTest(unittest.TestCase):
         except ValueError:
             error = True
         self.assertTrue(error)
-        
+
+if __name__ == '__main__':
+    unittest.main()        

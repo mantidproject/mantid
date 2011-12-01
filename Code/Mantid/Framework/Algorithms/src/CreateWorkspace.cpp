@@ -81,6 +81,8 @@ void CreateWorkspace::init()
   declareProperty("YUnitLabel", "", "Label for Y Axis");
 
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
+
+  declareProperty("ParentWorkspace", "", "Name of a parent workspace.");
 }
 
 /// Exec function
@@ -98,6 +100,7 @@ void CreateWorkspace::exec()
   const std::string xUnit = getProperty("UnitX");
   const std::string vUnit = getProperty("VerticalAxisUnit");
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
+  std::string parentWorkspace = getPropertyValue("ParentWorkspace");
 
   if ( ( vUnit != "SpectraNumber" ) && ( static_cast<int>(vAxis.size()) != nSpec ) )
   {
@@ -142,8 +145,32 @@ void CreateWorkspace::exec()
     throw std::runtime_error("DataE (if provided) must be the same size as DataY");
   }
 
+  MatrixWorkspace_sptr parentWS;
+  if (!parentWorkspace.empty())
+  {
+    try
+    {
+      parentWS = boost::dynamic_pointer_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(parentWorkspace) );
+    }
+    catch(...)
+    {
+      g_log.warning("Parent workspace not found");
+      // ignore parent workspace
+    }
+  }
+
   // Create the OutputWorkspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
+  MatrixWorkspace_sptr outputWS;
+  if (parentWS)
+  {
+    // if parent is defined use it to initialise the workspace
+    outputWS = WorkspaceFactory::Instance().create(parentWS, nSpec, xSize, ySize);
+  }
+  else
+  {
+    // otherwise create a blank workspace
+    outputWS = WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
+  }
 
   Progress progress(this,0,1,nSpec);
 
@@ -202,7 +229,7 @@ void CreateWorkspace::exec()
       }
     }
     else
-    {
+    { 
       NumericAxis* const newAxis = new NumericAxis(vAxis.size());
       newAxis->unit() = UnitFactory::Instance().create(vUnit);
       outputWS->replaceAxis(1, newAxis);
@@ -224,10 +251,16 @@ void CreateWorkspace::exec()
   outputWS->isDistribution(getProperty("Distribution"));
 
   // Set Y Unit label
-  outputWS->setYUnitLabel(getProperty("YUnitLabel"));
+  if (!parentWS || !getPropertyValue("YUnitLabel").empty())
+  {
+    outputWS->setYUnitLabel(getProperty("YUnitLabel"));
+  }
 
   // Set Workspace Title
-  outputWS->setTitle(getProperty("WorkspaceTitle"));
+  if (!parentWS || !getPropertyValue("WorkspaceTitle").empty())
+  {
+    outputWS->setTitle(getProperty("WorkspaceTitle"));
+  }
 
   // Set OutputWorkspace property
   setProperty("OutputWorkspace", outputWS);

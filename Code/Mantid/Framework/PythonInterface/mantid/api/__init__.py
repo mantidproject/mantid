@@ -25,6 +25,16 @@ algorithm_factory = get_algorithm_factory()
 analysis_data_svc = get_analysis_data_service()
 
 ###############################################################################
+# Starting the FrameworkManager loads the C++ plugin libraries
+# we need to load in the Python plugins as well
+###############################################################################
+import mantid.kernel.plugins as _plugins
+# Algorithms
+from mantid.kernel import config as _cfg
+# Disabled for the time being as all algorithms are of the old kind
+#_plugins.load(_cfg['pythonalgorithm.directories']) 
+
+###############################################################################
 # When in GUI mode we want to be picky about algorithm execution as we
 # currently can't run the scripts in a separate thread:
 #
