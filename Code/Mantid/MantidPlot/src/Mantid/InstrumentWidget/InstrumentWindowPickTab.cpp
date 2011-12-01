@@ -10,8 +10,11 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -37,6 +40,18 @@
 #include <cmath>
 #include <algorithm>
 
+/// to be used in std::transform
+struct Sqrt
+{
+  double operator()(double x)
+  {
+    return sqrt(x);
+  }
+};
+
+/**
+ * Dialog for converting x-values to time of flight needed for peak selection.
+ */
 class InputConvertUnitsParametersDialog : public QDialog
 {
 public:
@@ -105,6 +120,10 @@ double InputConvertUnitsParametersDialog::getDelta()const
 
 // --- InstrumentWindowPickTab --- //
 
+/**
+ * Constructor.
+ * @param instrWindow :: Parent InstrumentWindow.
+ */
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),
 m_instrWindow(instrWindow),
@@ -171,11 +190,12 @@ m_tubeXUnits(DETECTOR_ID)
   m_unitsGroup->addAction(m_lengthUnits);
   m_unitsGroup->addAction(m_phiUnits);
   connect(m_unitsMapper,SIGNAL(mapped(int)),this,SLOT(setTubeXUnits(int)));
-  //setTubeXUnits(DETECTOR_ID);
 
   // Instrument display context menu actions
   m_storeCurve = new QAction("Store curve",this);
   connect(m_storeCurve,SIGNAL(triggered()),this,SLOT(storeCurve()));
+  m_savePlotToWorkspace = new QAction("Save plot to workspace",this);
+  connect(m_savePlotToWorkspace,SIGNAL(triggered()),this,SLOT(savePlotToWorkspace()));
 
   CollapsibleStack* panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
@@ -229,6 +249,9 @@ m_tubeXUnits(DETECTOR_ID)
   setPlotCaption();
 }
 
+/**
+ * Initialise the tab.
+ */
 void InstrumentWindowPickTab::init()
 {
   m_emode = -1;
@@ -242,6 +265,10 @@ bool InstrumentWindowPickTab::canUpdateTouchedDetector()const
   return ! m_peak->isChecked();
 }
 
+/**
+ * Update the miniplot for a selected detector.
+ * @param detid :: ID of detector to use to update the plot.
+ */
 void InstrumentWindowPickTab::updatePlot(int detid)
 {
   if (m_instrWindow->blocked())
@@ -250,8 +277,7 @@ void InstrumentWindowPickTab::updatePlot(int detid)
     return;
   }
   if (m_plotPanel->isCollapsed()) return;
-  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+
   if (detid >= 0)
   {
     if (m_one->isChecked() || m_peak->isChecked())
@@ -271,6 +297,10 @@ void InstrumentWindowPickTab::updatePlot(int detid)
   m_plot->replot();
 }
 
+/**
+ * Update the info window with information for a selected detector.
+ * @param detid :: ID of the selected detector.
+ */
 void InstrumentWindowPickTab::updateSelectionInfo(int detid)
 {
   if (m_instrWindow->blocked()) 
@@ -356,6 +386,7 @@ void InstrumentWindowPickTab::plotContextMenu()
 
   if (m_plot->hasStored())
   {
+    // the remove menu
     QMenu *removeCurves = new QMenu("Remove",this);
     QSignalMapper *signalMapper = new QSignalMapper(this);
     QStringList labels = m_plot->getLabels();
@@ -371,6 +402,7 @@ void InstrumentWindowPickTab::plotContextMenu()
     context.addMenu(removeCurves);
   }
 
+  // the axes menu
   QMenu* axes = new QMenu("Axes",this);
   axes->addActions(m_yScale->actions());
   if (m_plot->isYLogScale())
@@ -397,9 +429,19 @@ void InstrumentWindowPickTab::plotContextMenu()
   }
   context.addMenu(axes);
 
+  // save plot to workspace
+  if (m_plot->hasStored() || m_plot->hasCurve())
+  {
+    context.addAction(m_savePlotToWorkspace);
+  }
+
+  // show menu
   context.exec(QCursor::pos());
 }
 
+/**
+ * Update the plot caption. The captions shows the selection type.
+ */
 void InstrumentWindowPickTab::setPlotCaption()
 {
   QString caption;
@@ -418,24 +460,44 @@ void InstrumentWindowPickTab::setPlotCaption()
   m_plotPanel->setCaption(caption);
 }
 
+/**
+ * Switch to the detectors summing regime.
+ */
 void InstrumentWindowPickTab::sumDetectors()
 {
   m_plotSum = true;
+  m_plot->clearAll();
+  m_plot->replot();
   setPlotCaption();
 }
 
+/**
+ * Switch to the time bin integration regime.
+ */
 void InstrumentWindowPickTab::integrateTimeBins()
 {
   m_plotSum = false;
+  m_plot->clearAll();
+  m_plot->replot();
   setPlotCaption();
 }
 
+/**
+ * Update the tab to display info for a new detector.
+ * @param detid :: ID of the new detector.
+ */
 void InstrumentWindowPickTab::updatePick(int detid)
 {
   updateSelectionInfo(detid); // Also calls updatePlot
   m_currentDetID = detid;
 }
 
+/**
+ * Find the offsets in the spectrum's x vector of the bounds of integration.
+ * @param wi :: The works[ace index of the spectrum.
+ * @param imin :: Index of the lower bound: x_min == readX(wi)[imin]
+ * @param imax :: Index of the upper bound: x_max == readX(wi)[imax]
+ */
 void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax)
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
@@ -461,34 +523,13 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
  */
 void InstrumentWindowPickTab::plotSingle(int detid)
 {
+
+  std::vector<double> x,y;
+  prepareDataForSinglePlot(detid,x,y);
+
   m_plot->clearPeakLabels();
-  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  size_t wi;
-  try {
-    wi = instrActor->getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
-  // get the data
-  const Mantid::MantidVec& x = ws->readX(wi);
-  const Mantid::MantidVec& y = ws->readY(wi);
-
-  // find min and max for x
-  size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
-
-  Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
-  Mantid::MantidVec::const_iterator y_end = y.begin() + imax;
-
-  m_plot->setXScale(x[imin],x[imax]);
-
-  // fins min and max for y
-  Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
-  Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
   // set the data 
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
-  m_plot->setYScale(*min_it,*max_it);
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
@@ -499,7 +540,6 @@ void InstrumentWindowPickTab::plotSingle(int detid)
     foreach(PeakMarker2D* marker,markers)
     {
       m_plot->addPeakLabel(new PeakLabel(marker));
-      //std::cerr << marker->getLabel().toStdString() << std::endl;
     }
   }
 }
@@ -527,11 +567,11 @@ void InstrumentWindowPickTab::plotTube(int detid)
   {
     if (m_plotSum) // plot sums over detectors vs time bins
     {
-      plotTubeSums(instrActor,ass,ws,detid);
+      plotTubeSums(detid);
     }
     else // plot detector integrals vs detID or a function of detector position in the tube
     {
-      plotTubeIntegrals(instrActor,ass,ws,detid);
+      plotTubeIntegrals(detid);
     }
   }
   else
@@ -545,49 +585,15 @@ void InstrumentWindowPickTab::plotTube(int detid)
  * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
  *   with this id.
  */
-void InstrumentWindowPickTab::plotTubeSums(
-    InstrumentActor* instrActor,
-    Mantid::Geometry::ICompAssembly_const_sptr ass,
-    Mantid::API::MatrixWorkspace_const_sptr ws,
-    int detid)
+void InstrumentWindowPickTab::plotTubeSums(int detid)
 {
-  size_t wi;
-  try {
-    wi = instrActor->getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
-  size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
-  const int n = ass->nelements();
-  QString label = QString::fromStdString(ass->getName()) + " (" + QString::number(detid) + ") Sum"; 
-
-  const Mantid::MantidVec& x = ws->readX(wi);
-  m_plot->setXScale(x[imin],x[imax]);
-
-  std::vector<double> y(ws->blocksize());
-  //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
-  for(int i = 0; i < n; ++i)
-  {
-    Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-    if (idet)
-    {
-      try {
-        size_t index = instrActor->getWorkspaceIndex(idet->getID());
-        const Mantid::MantidVec& Y = ws->readY(index);
-        std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
-        continue; // Detector doesn't have a workspace index relating to it
-      }
-    }
-  }
-  Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
-  Mantid::MantidVec::const_iterator y_end = y.begin() + imax;
-
-  Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
-  Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
+  std::vector<double> x,y;
+  prepareDataForSumsPlot(detid,x,y);
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Sum"; 
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
-  m_plot->setYScale(*min_it,*max_it);
   m_plot->setLabel(label);
 }
 
@@ -601,81 +607,24 @@ void InstrumentWindowPickTab::plotTubeSums(
  * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
  *   with this id.
  */
-void InstrumentWindowPickTab::plotTubeIntegrals(
-    InstrumentActor* instrActor,
-    Mantid::Geometry::ICompAssembly_const_sptr ass,
-    Mantid::API::MatrixWorkspace_const_sptr ws,
-    int detid)
+void InstrumentWindowPickTab::plotTubeIntegrals(int detid)
 {
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
-  QString label = QString::fromStdString(ass->getName()) + " (" + QString::number(detid) + ") Integrals"; 
-  size_t wi;
-  try {
-    wi = instrActor->getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
-    return; // Detector doesn't have a workspace index relating to it
-  }
-  // imin and imax give the bin integration range
-  size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
-
-  const int n = ass->nelements();
-  if (n == 0)
-  {
-    // don't think it's ever possible but...
-    throw std::runtime_error("PickTab miniplot: empty instrument assembly");
-  }
-  // collect and sort xy pairs in xymap
-  std::map<double,double> xymap;
-  // get the first detector in the tube for lenth calculation
-  Mantid::Geometry::IDetector_sptr idet0 = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
-  for(int i = 0; i < n; ++i)
-  {
-    Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-    if (idet)
-    {
-      try {
-        const int id = idet->getID();
-        double xvalue = 0;
-        switch(m_tubeXUnits)
-        {
-        case LENGTH: xvalue = idet->getDistance(*idet0); break;
-        case PHI: xvalue = idet->getPhi(); break;
-        default: xvalue = static_cast<double>(id);
-        }
-        size_t index = instrActor->getWorkspaceIndex(id);
-        const Mantid::MantidVec& Y = ws->readY(index);
-        double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
-        xymap[xvalue] = sum;
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
-        continue; // Detector doesn't have a workspace index relating to it
-      }
-    }
-  }
-  if (!xymap.empty())
-  {
-    // set the plot curve data
-    std::vector<double> x(xymap.size());
-    std::vector<double> y(xymap.size());
-    double ymin =  DBL_MAX;
-    double ymax = -DBL_MAX;
-    std::map<double,double>::const_iterator xy = xymap.begin();
-    for(size_t i = 0; xy != xymap.end(); ++xy,++i)
-    {
-      x[i] = xy->first;
-      const double val = xy->second;
-      y[i] = val;
-      if (val < ymin) ymin = val;
-      if (val > ymax) ymax = val;
-    }
-    m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
-    m_plot->setXScale(x.front(),x.back());
-    m_plot->setYScale(ymin,ymax);
-    m_plot->setLabel(label);
-  }
+  QString label = QString::fromStdString(parent->getName()) + " (" + QString::number(detid) + ") Integrals"; 
+  label += "/" + getTubeXUnitsName(m_tubeXUnits);
+  std::vector<double> x,y;
+  prepareDataForIntegralsPlot(detid,x,y);
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
+  m_plot->setLabel(label);
 }
 
+/**
+ * Set the selection type according to which tool button is checked.
+ */
 void InstrumentWindowPickTab::setSelectionType()
 {
   if (m_one->isChecked())
@@ -698,8 +647,9 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Peak;
     m_activeTool->setText("Tool: Single crystal peak selection");
   }
+  m_plot->clearAll();
+  m_plot->replot();
   setPlotCaption();
-  //mInstrumentDisplay->setSelectionType(m_selectionType);
 }
 
 /**
@@ -814,6 +764,9 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
 }
 
+/**
+ * Respond to the show event.
+ */
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
 {
   ProjectionSurface* surface = mInstrumentDisplay->getSurface();
@@ -829,10 +782,17 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
  */
 void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
 {
+  QMenu context(this);
   if (m_plot->hasCurve())
   {
-    QMenu context(this);
     context.addAction(m_storeCurve);
+  }
+  if (m_plot->hasStored() || m_plot->hasCurve())
+  {
+    context.addAction(m_savePlotToWorkspace);
+  }
+  if ( !context.isEmpty() )
+  {
     context.exec(QCursor::pos());
   }
 }
@@ -863,6 +823,393 @@ void InstrumentWindowPickTab::setTubeXUnits(int units)
 {
   if (units < 0 || units >= NUMBER_OF_UNITS) return;
   m_tubeXUnits = static_cast<TubeXUnits>(units);
+  m_plot->clearAll();
+  m_plot->replot();
+}
+
+/**
+ * Prepare data for plotting a spectrum of a single detector.
+ * @param detid :: ID of the detector to be plotted.
+ * @param x :: Vector of x coordinates (output)
+ * @param y :: Vector of y coordinates (output)
+ * @param err :: Optional pointer to a vector of errors (output)
+ */
+void InstrumentWindowPickTab::prepareDataForSinglePlot(
+  int detid,
+  std::vector<double>&x,
+  std::vector<double>&y,
+  std::vector<double>* err)
+{
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  size_t wi;
+  try {
+    wi = instrActor->getWorkspaceIndex(detid);
+  } catch (Mantid::Kernel::Exception::NotFoundError) {
+    return; // Detector doesn't have a workspace index relating to it
+  }
+  // get the data
+  const Mantid::MantidVec& X = ws->readX(wi);
+  const Mantid::MantidVec& Y = ws->readY(wi);
+  const Mantid::MantidVec& E = ws->readE(wi);
+
+  // find min and max for x
+  size_t imin,imax;
+  getBinMinMaxIndex(wi,imin,imax);
+
+  x.assign(X.begin() + imin,X.begin() + imax);
+  y.assign(Y.begin() + imin,Y.begin() + imax);
+  if ( ws->isHistogramData() )
+  {
+    // calculate the bin centres
+    std::transform(x.begin(),x.end(),X.begin() + imin + 1,x.begin(),std::plus<double>());
+    std::transform(x.begin(),x.end(),x.begin(),std::bind2nd(std::divides<double>(),2.0));
+  }
+
+  if (err)
+  {
+    err->assign(E.begin() + imin,E.begin() + imax);
+  }
+}
+
+/**
+ * Prepare data for plotting accumulated data in a tube against time of flight.
+ * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
+ *   with this id.
+ * @param x :: Vector of x coordinates (output)
+ * @param y :: Vector of y coordinates (output)
+ * @param err :: Optional pointer to a vector of errors (output)
+ */
+void InstrumentWindowPickTab::prepareDataForSumsPlot(
+  int detid,
+  std::vector<double>&x,
+  std::vector<double>&y,
+  std::vector<double>* err)
+{
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
+  size_t wi;
+  try {
+    wi = instrActor->getWorkspaceIndex(detid);
+  } catch (Mantid::Kernel::Exception::NotFoundError) {
+    return; // Detector doesn't have a workspace index relating to it
+  }
+  size_t imin,imax;
+  getBinMinMaxIndex(wi,imin,imax);
+
+  const Mantid::MantidVec& X = ws->readX(wi);
+  x.assign(X.begin() + imin, X.begin() + imax);
+  if ( ws->isHistogramData() )
+  {
+    // calculate the bin centres
+    std::transform(x.begin(),x.end(),X.begin() + imin + 1,x.begin(),std::plus<double>());
+    std::transform(x.begin(),x.end(),x.begin(),std::bind2nd(std::divides<double>(),2.0));
+  }
+  y.resize(x.size(),0);
+  if (err)
+  {
+    err->resize(x.size(),0);
+  }
+
+  const int n = ass->nelements();
+  for(int i = 0; i < n; ++i)
+  {
+    Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+    if (idet)
+    {
+      try {
+        size_t index = instrActor->getWorkspaceIndex(idet->getID());
+        const Mantid::MantidVec& Y = ws->readY(index);
+        std::transform(y.begin(),y.end(),Y.begin() + imin,y.begin(),std::plus<double>());
+        if (err)
+        {
+          const Mantid::MantidVec& E = ws->readE(index);
+          std::vector<double> tmp;
+          tmp.assign(E.begin() + imin,E.begin() + imax);
+          std::transform(tmp.begin(),tmp.end(),tmp.begin(),tmp.begin(),std::multiplies<double>());
+          std::transform(err->begin(),err->end(),tmp.begin(),err->begin(),std::plus<double>());
+        }
+      } catch (Mantid::Kernel::Exception::NotFoundError) {
+        continue; // Detector doesn't have a workspace index relating to it
+      }
+    }
+  }
+
+  if (err)
+  {
+    std::transform(err->begin(),err->end(),err->begin(),Sqrt());
+  }
+}
+
+/**
+ * Prepare data for plotting the data integrated over the time bins. The values are
+ * plotted against the length of the tube, but the units on the x-axis can be one of the following:
+ *   DETECTOR_ID
+ *   LENGTH
+ *   PHI
+ * The units can be set with setTubeXUnits(...) method.
+ * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
+ *   with this id.
+ * @param x :: Vector of x coordinates (output)
+ * @param y :: Vector of y coordinates (output)
+ * @param err :: Optional pointer to a vector of errors (output)
+ */
+void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
+  int detid,
+  std::vector<double>&x,
+  std::vector<double>&y,
+  std::vector<double>* err)
+{
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
+  size_t wi;
+  try {
+    wi = instrActor->getWorkspaceIndex(detid);
+  } catch (Mantid::Kernel::Exception::NotFoundError) {
+    return; // Detector doesn't have a workspace index relating to it
+  }
+  // imin and imax give the bin integration range
+  size_t imin,imax;
+  getBinMinMaxIndex(wi,imin,imax);
+
+  const int n = ass->nelements();
+  if (n == 0)
+  {
+    // don't think it's ever possible but...
+    throw std::runtime_error("PickTab miniplot: empty instrument assembly");
+  }
+  // collect and sort xy pairs in xymap
+  std::map<double,double> xymap,errmap;
+  // get the first detector in the tube for lenth calculation
+  Mantid::Geometry::IDetector_sptr idet0 = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
+  for(int i = 0; i < n; ++i)
+  {
+    Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+    if (idet)
+    {
+      try {
+        const int id = idet->getID();
+        double xvalue = 0;
+        switch(m_tubeXUnits)
+        {
+        case LENGTH: xvalue = idet->getDistance(*idet0); break;
+        case PHI: xvalue = idet->getPhi(); break;
+        default: xvalue = static_cast<double>(id);
+        }
+        size_t index = instrActor->getWorkspaceIndex(id);
+        const Mantid::MantidVec& Y = ws->readY(index);
+        double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
+        xymap[xvalue] = sum;
+        if (err)
+        {
+          const Mantid::MantidVec& E = ws->readE(index);
+          std::vector<double> tmp(imax - imin);
+          // take squares of the errors
+          std::transform(E.begin() + imin,E.begin() + imax,E.begin() + imin,tmp.begin(),std::multiplies<double>());
+          // sum them
+          double sum = std::accumulate(tmp.begin(),tmp.end(),0);
+          // take sqrt
+          errmap[xvalue] = sqrt(sum);
+        }
+      } catch (Mantid::Kernel::Exception::NotFoundError) {
+        continue; // Detector doesn't have a workspace index relating to it
+      }
+    }
+  }
+  if (!xymap.empty())
+  {
+    // set the plot curve data
+    x.resize(xymap.size());
+    y.resize(xymap.size());
+    std::map<double,double>::const_iterator xy = xymap.begin();
+    for(size_t i = 0; xy != xymap.end(); ++xy,++i)
+    {
+      x[i] = xy->first;
+      y[i] = xy->second;
+    }
+    if (err)
+    {
+      err->resize(errmap.size());
+      std::map<double,double>::const_iterator e = errmap.begin();
+      for(size_t i = 0; e != errmap.end(); ++e,++i)
+      {
+        (*err)[i] = e->second;
+      }
+    }
+  }
+  else
+  {
+    x.clear();
+    y.clear();
+    if (err)
+    {
+      err->clear();
+    }
+  }
+}
+
+/**
+ * Return value of TubeXUnits for its symbolic name.
+ * @param name :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
+ */
+InstrumentWindowPickTab::TubeXUnits InstrumentWindowPickTab::getTubeXUnits(const QString& name) const
+{
+  QString caseless_name = name.toUpper();
+  if (caseless_name == "LENGTH")
+  {
+    return LENGTH;
+  }
+  if (caseless_name == "PHI")
+  {
+    return PHI;
+  }
+  return DETECTOR_ID;
+}
+
+/**
+ * Return symbolic name of a TubeXUnit.
+ * @param unit :: One of TubeXUnits.
+ * @return :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
+ */
+QString InstrumentWindowPickTab::getTubeXUnitsName(InstrumentWindowPickTab::TubeXUnits unit) const
+{
+  switch(unit)
+  {
+  case LENGTH: return "Length";
+  case PHI: return "Phi";
+  default: return "Detector_ID";
+  }
+  return "Detector_ID";
+}
+
+
+/**
+ * Save data plotted on the miniplot into a MatrixWorkspace.
+ */
+void InstrumentWindowPickTab::savePlotToWorkspace()
+{
+  if (!m_plot->hasCurve() && !m_plot->hasStored())
+  {
+    // nothing to save
+    return;
+  }
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr parentWorkspace = instrActor->getWorkspace();
+  // interpret curve labels and reconstruct the data to be saved
+  QStringList labels = m_plot->getLabels();
+  if (m_plot->hasCurve())
+  {
+    labels << m_plot->label();
+  }
+  std::vector<double> X,Y,E;
+  size_t nbins = 0;
+  // to keep det ids for spectrum-detector mapping in the output workspace
+  std::vector<Mantid::detid_t> detids;
+  // unit id for x vector in the created workspace
+  std::string unitX;
+  foreach(QString label,labels)
+  {
+    std::vector<double> x,y,e;
+    // split the label to get the detector id and selection type 
+    QStringList parts = label.split(QRegExp("[()]"));
+    if (parts.size() == 3)
+    {
+      int detid = parts[1].toInt();
+      QString SumOrIntegral = parts[2].trimmed();
+      if (SumOrIntegral == "Sum")
+      {
+        prepareDataForSumsPlot(detid,x,y,&e);
+        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+      }
+      else
+      {
+        prepareDataForIntegralsPlot(detid,x,y,&e);
+        unitX = SumOrIntegral.split('/')[1].toStdString();
+      }
+    }
+    else if (parts.size() == 1)
+    {
+      // second word is detector id
+      int detid = parts[0].split(QRegExp("\\s+"))[1].toInt();
+      prepareDataForSinglePlot(detid,x,y,&e);
+      unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+      // save det ids for the output workspace
+      detids.push_back(static_cast<Mantid::detid_t>(detid));
+    }
+    else
+    {
+      continue;
+    }
+    if (!x.empty() && x.size() == y.size())
+    {
+      if (nbins > 0 && x.size() != nbins)
+      {
+        QMessageBox::critical(this,"MantidPlot - Error","Curves have different sizes.");
+        return;
+      }
+      else
+      {
+        nbins = x.size();
+      }
+      X.insert(X.end(),x.begin(),x.end());
+      Y.insert(Y.end(),y.begin(),y.end());
+      E.insert(E.end(),e.begin(),e.end());
+    }
+  }
+  // call CreateWorkspace algorithm. Created worksapce will have name "Curves"
+  if (!X.empty())
+  {
+    E.resize(X.size(),1.0);
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace",-1);
+    alg->initialize();
+    alg->setPropertyValue("OutputWorkspace","Curves");
+    alg->setProperty("DataX",X);
+    alg->setProperty("DataY",Y);
+    alg->setProperty("DataE",E);
+    alg->setProperty("NSpec",static_cast<int>(X.size()/nbins));
+    alg->setProperty("UnitX",unitX);
+    alg->setPropertyValue("ParentWorkspace",parentWorkspace->name());
+    alg->execute();
+
+    if (!detids.empty())
+    {
+      // set up spectra - detector mapping
+      Mantid::API::MatrixWorkspace_sptr ws = 
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
+      if (!ws)
+      {
+        throw std::runtime_error("Failed to create Curves workspace");
+      }
+
+      if (detids.size() == ws->getNumberHistograms())
+      {
+        size_t i = 0;
+        for(std::vector<Mantid::detid_t>::const_iterator id = detids.begin(); id != detids.end(); ++id,++i)
+        {
+          Mantid::API::ISpectrum * spec = ws->getSpectrum(i);
+          if (!spec)
+          {
+            throw std::runtime_error("Spectrum not found");
+          }
+          spec->setDetectorID(*id);
+        }
+      }
+      
+    } // !detids.empty()
+  }
+}
+
+/**
+ * Do something when the time bin integraion range has changed.
+ */
+void InstrumentWindowPickTab::changedIntegrationRange(double,double)
+{
   m_plot->clearAll();
   m_plot->replot();
 }
