@@ -284,6 +284,7 @@ namespace MDEvents
     CoordTransformAffine * out = new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
     // Multiply the two matrices together
     Matrix<coord_t> outMat = secondAff->getMatrix() * firstAff->getMatrix();
+    std::cout << "Creating combined matrix " << outMat << std::endl;
     // Set in the output
     out->setMatrix(outMat);
     return out;

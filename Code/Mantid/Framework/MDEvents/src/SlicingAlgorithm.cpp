@@ -349,7 +349,7 @@ namespace MDEvents
     m_transform = new CoordTransformAligned(m_inWS->getNumDims(), outD,
         dimensionToBinFrom, origin, scaling);
 
-    // Transformation original->binned. There is not offset or scaling!
+    // Transformation original->binned. There is no offset or scaling!
     std::vector<double> unitScaling(outD, 1.0);
     std::vector<double> zeroOrigin(outD, 0.0);
     m_transformFromOriginal = new CoordTransformAligned(inD, outD,
@@ -424,6 +424,14 @@ namespace MDEvents
       m_transformFromOriginal = fromOrig;
       m_transformToOriginal = toOrig;
       m_transform = binningTransform;
+
+      coord_t in[2] = {0,0};
+      coord_t out[2] = {0,0};
+      m_transform->apply(in, out);
+      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) << std::endl;
+      in[0] = 10; in[1] = 10;
+      m_transform->apply(in, out);
+      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) << std::endl;
 
       // Replace the input workspace
       m_inWS = origWS;

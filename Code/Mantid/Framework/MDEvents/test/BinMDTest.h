@@ -263,6 +263,12 @@ public:
 
 
 
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW with axis-aligned */
+  void test_exec_aligned_then_nonAligned()
+  {
+    //TODO!
+  }
+
 
 
 
@@ -427,6 +433,132 @@ public:
         false /* Dont force orthogonal */,
         true /* Flip sign of Y basis vector*/);
   }
+
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, not axis-aligned */
+  void test_exec_nonAligned_then_nonAligned()
+  {
+    // ---- Start with empty MDEW ----
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
+        "Dimensions", "2",
+        "Extents", "-10,10,-10,10",
+        "Names", "x,y",
+        "Units", "m,m",
+        "SplitInto", "4",
+        "SplitThreshold", "100",
+        "MaxRecursionDepth", "20",
+        "OutputWorkspace", "mdew");
+    // Give fake uniform data
+    FrameworkManager::Instance().exec("FakeMDEventData", 6,
+        "InputWorkspace", "mdew",
+        "UniformParams", "1000",
+        "RandomSeed", "1234");
+
+    // Bin aligned to original
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    // Bin with some rotation (10 degrees)
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 0.98, 0.17, 20.0, 10",
+        "BasisVectorY", "ry,m, -.17, 0.98, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+    // Bin the binned output with the opposite rotation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "binned1",
+        "OutputWorkspace", "binned2",
+        "AxisAligned", "0",
+        "BasisVectorX", "rrx,m, 0.98, -.17, 20.0, 10",
+        "BasisVectorY", "rry,m, 0.17, 0.98, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    MDHistoWorkspace_sptr binned0 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned0"));
+    MDHistoWorkspace_sptr binned2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned2"));
+    TS_ASSERT_EQUALS( binned2->getOriginalWorkspace()->getName(), "mdew");
+    TS_ASSERT(binned2);
+    size_t numErrors = 0;
+    for (size_t i=0; i < binned0->getNPoints(); i++)
+    {
+      double diff = abs(binned0->getSignalAt(i) - binned2->getSignalAt(i));
+      if (diff > 1e-6) numErrors++;
+      TS_ASSERT_DELTA( binned0->getSignalAt(i), binned2->getSignalAt(i), 1e-5);
+    }
+    TS_ASSERT_EQUALS( numErrors, 0);
+  }
+
+
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, not axis-aligned */
+  void test_exec_nonAligned_then_nonAligned_noRotation()
+  {
+    // ---- Start with empty MDEW ----
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
+        "Dimensions", "2",
+        "Extents", "-10,10,-10,10",
+        "Names", "x,y",
+        "Units", "m,m",
+        "SplitInto", "4",
+        "SplitThreshold", "100",
+        "MaxRecursionDepth", "20",
+        "OutputWorkspace", "mdew");
+    // Give fake uniform data
+    FrameworkManager::Instance().exec("FakeMDEventData", 6,
+        "InputWorkspace", "mdew",
+        "UniformParams", "1000",
+        "RandomSeed", "1234");
+
+    // Bin aligned to original
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    // Bin with a translation. -10,-10 in MDEW becomes 0,0 in binned1
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+    // Bin the binned output with the opposite rotation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "binned1",
+        "OutputWorkspace", "binned2",
+        "AxisAligned", "0",
+        "BasisVectorX", "rrx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "rry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "0, 0");
+
+    MDHistoWorkspace_sptr binned0 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned0"));
+    MDHistoWorkspace_sptr binned2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve("binned2"));
+    TS_ASSERT_EQUALS( binned2->getOriginalWorkspace()->getName(), "mdew");
+    TS_ASSERT(binned2);
+    size_t numErrors = 0;
+    for (size_t i=0; i < binned0->getNPoints(); i++)
+    {
+      double diff = abs(binned0->getSignalAt(i) - binned2->getSignalAt(i));
+      if (diff > 1e-6) numErrors++;
+      TS_ASSERT_DELTA( binned0->getSignalAt(i), binned2->getSignalAt(i), 1e-5);
+    }
+    TS_ASSERT_EQUALS( numErrors, 0);
+  }
+
 
 };
 
