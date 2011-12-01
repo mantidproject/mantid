@@ -182,9 +182,9 @@ private:
   /// The value in X to finish the search at
   double m_MaxRange;
   /// The spectrum to start the integration from
-  int m_MinSpec;
+  size_t m_MinSpec;
   /// The spectrum to finish the integration at
-  int m_MaxSpec;
+  size_t m_MaxSpec;
   // The peaks workspace that contains the peaks information.
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaks;
 

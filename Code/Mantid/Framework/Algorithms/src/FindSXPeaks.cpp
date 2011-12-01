@@ -69,8 +69,10 @@ namespace Mantid
     void FindSXPeaks::exec()
     {
       // Try and retrieve the optional properties
-      m_MinRange = getProperty("RangeLower");
-      m_MaxRange = getProperty("RangeUpper");
+      int minRange = getProperty("RangeLower");
+      int maxRange = getProperty("RangeUpper");
+      m_MinRange = minRange;
+      m_MaxRange = maxRange;
       m_MinSpec = getProperty("StartWorkspaceIndex");
       m_MaxSpec = getProperty("EndWorkspaceIndex");
       double SB=getProperty("SignalBackground");
