@@ -1,0 +1,63 @@
+import unittest
+import os
+import shutil
+import sys
+
+import mantid.kernel.plugins as plugins
+from mantid import algorithm_factory, algorithm_mgr
+
+__TESTALG__ = \
+"""from mantid import Algorithm, register_algorithm
+
+class TestPyAlg(Algorithm):
+
+    def PyInit(self):
+        pass
+    
+    def PyExec(self):
+        pass
+        
+register_algorithm(TestPyAlg)
+"""
+
+class PythonPluginsTest(unittest.TestCase):
+    
+    def setUp(self):
+        # Make a test directory and test plugin
+        self._testdir = os.path.join(os.getcwd(), 'PythonPluginsTest_TmpDir')
+        try:
+            os.mkdir(self._testdir)
+        except OSError:
+            pass # Already exists, maybe it was not removed when a test failed?
+        filename = os.path.join(self._testdir, 'TestPyAlg.py')
+        if not os.path.exists(filename):
+            plugin = file(filename, 'w')
+            plugin.write(__TESTALG__)
+            plugin.close()
+                
+    def tearDown(self):
+        try:
+            shutil.rmtree(self._testdir)
+        except shutil.Error:
+            pass
+            
+    def test_loading_python_algorithm_increases_registered_algs_by_one(self):
+        loaded = plugins.load(self._testdir)
+        self.assertTrue(len(loaded) > 0)
+        expected_name = 'TestPyAlg'
+        # Has the name appear in the module dictionary
+        self.assertTrue(expected_name in sys.modules)     
+        # Do we have the registered algorithm
+        algs = algorithm_factory.get_registered_algorithms(True)
+        self.assertTrue(expected_name in algs)
+        # Can it be created?
+        try:
+            test_alg = algorithm_mgr.create_unmanaged(expected_name)
+            self.assertEquals(expected_name, test_alg.name())
+            self.assertEquals(1, test_alg.version())
+        except RuntimeError, exc:
+            self.fail("Failed to create plugin algorithm from the manager: '%s' " %s)
+        
+
+if __name__ == '__main__':
+    unittest.main()

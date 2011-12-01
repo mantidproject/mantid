@@ -11,3 +11,7 @@ class FilePropertyTest(unittest.TestCase):
         prop = alg.get_property("Filename")
         self.assertEquals(type(prop), FileProperty)
         self.assertTrue('value' in dir(prop)) # Do we have a value method
+
+        
+if __name__ == '__main__':
+    unittest.main()

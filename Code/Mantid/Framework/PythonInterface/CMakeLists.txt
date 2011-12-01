@@ -68,6 +68,7 @@ set ( TEST_PY_FILES
   test/python/ImportModuleTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
+  test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmTest.py
   test/python/SimpleAPITest.py

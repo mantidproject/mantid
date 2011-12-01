@@ -12,3 +12,6 @@ class WorkspaceTest(unittest.TestCase):
         except RuntimeError: # For some reason self.assertRaises doesn't catch this
             error = True
         self.assertTrue(error, True)
+
+if __name__ == '__main__':
+    unittest.main()
