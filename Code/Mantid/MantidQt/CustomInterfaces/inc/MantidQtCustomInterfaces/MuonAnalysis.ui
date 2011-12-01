@@ -58,7 +58,7 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="techniques">
+              <property name="techniques" stdset="0">
                <stringlist>
                 <string>Muon spectroscopy</string>
                </stringlist>
@@ -89,16 +89,16 @@
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_15">
                 <item>
-                 <widget class="QLabel" name="First_Good_Data_label">
+                 <widget class="QLabel" name="Time_Zero_label">
                   <property name="text">
-                   <string>First Good Data</string>
+                   <string>Time Zero</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="Time_Zero_label">
+                 <widget class="QLabel" name="First_Good_Data_label">
                   <property name="text">
-                   <string>Time Zero</string>
+                   <string>First Good Data</string>
                   </property>
                  </widget>
                 </item>
@@ -308,7 +308,7 @@
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="fileInputLayout">
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" native="true">
               <property name="findRunFiles" stdset="0">
                <bool>true</bool>
               </property>
