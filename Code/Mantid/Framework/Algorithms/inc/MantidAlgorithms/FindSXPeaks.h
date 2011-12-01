@@ -140,16 +140,17 @@ struct DLLExport SXPeak
   }
   
 private:
-  double _intensity;
-  Mantid::detid_t _detectorId;
-  static double mN;
-	static double hbar;
+
   double _t;
   double _th2;
   double _phi;
-	int npixels;
-	std::vector<int> _spectral;
+  double _intensity;
+  std::vector<int> _spectral;
 	double _Ltot;
+  Mantid::detid_t _detectorId;
+  int npixels; 
+  static double mN;
+	static double hbar;
 };
 
 typedef std::vector<SXPeak> peakvector;
