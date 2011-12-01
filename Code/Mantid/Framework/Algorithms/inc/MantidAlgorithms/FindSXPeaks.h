@@ -141,7 +141,7 @@ struct DLLExport SXPeak
   
 private:
   double _intensity;
-  const Mantid::detid_t _detectorId;
+  Mantid::detid_t _detectorId;
   static double mN;
 	static double hbar;
   double _t;
