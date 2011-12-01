@@ -212,10 +212,6 @@ void DiffractionFocussing2::exec()
     prog->reportIncrement(1, "Pre-counting");
   }
 
-  // Pointer to sqrt function
-  typedef double (*uf)(double);
-  uf rs=std::sqrt;
-
   // initialize a vector of the valid group numbers
   vector<int> valid_groups;
   size_t totalHistProcess = 0;
@@ -349,7 +345,8 @@ void DiffractionFocussing2::exec()
     std::adjacent_difference(Xout.begin(),Xout.end(),widths.begin());
 
     // Take the square root of the errors
-    std::transform(Eout.begin(),Eout.end(),Eout.begin(),rs);
+    std::transform(Eout.begin(),Eout.end(),Eout.begin(),
+                   static_cast<double (*)(double)>(std::sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin function, when used
     // in the fashion above for the weights, doesn't put it back in
@@ -653,8 +650,9 @@ void DiffractionFocussing2::determineRebinParameters()
   group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;
 
-  groupAtWorkspaceIndex.resize(nHist);
+  const double BIGGEST = std::numeric_limits<double>::max();
 
+  groupAtWorkspaceIndex.resize(nHist);
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
     const int group = validateSpectrumInGroup(static_cast<size_t>(i));
@@ -665,17 +663,17 @@ void DiffractionFocussing2::determineRebinParameters()
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end())
     {
-      gpit = group2minmax.insert(std::make_pair(group,std::make_pair(1.0e14,-1.0e14))).first;
+      gpit = group2minmax.insert(std::make_pair(group,std::make_pair(BIGGEST,-1.*BIGGEST))).first;
     }
-    const double min = ((*gpit).second).first;
-    const double max = ((*gpit).second).second;
+    const double min = (gpit->second).first;
+    const double max = (gpit->second).second;
     const MantidVec& X = m_matrixInputW->readX(i);
     double temp = X.front();
     if (temp < (min)) //New Xmin found
-      ((*gpit).second).first = temp;
+      (gpit->second).first = temp;
     temp = X.back();
     if (temp > (max)) //New Xmax found
-      ((*gpit).second).second = temp;
+      (gpit->second).second = temp;
   }
 
   nGroups=group2minmax.size(); // Number of unique groups
@@ -686,8 +684,8 @@ void DiffractionFocussing2::determineRebinParameters()
   //Iterator over all groups to create the new X vectors
   for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++)
   {
-    Xmin = ((*gpit).second).first;
-    Xmax = ((*gpit).second).second;
+    Xmin = (gpit->second).first;
+    Xmax = (gpit->second).second;
 
     //Make sure that Xmin is not 0 - since it is not possible to do log binning from 0.0.
     if (Xmin <= 0) Xmin = Xmax / nPoints;
@@ -695,14 +693,14 @@ void DiffractionFocussing2::determineRebinParameters()
 
     if (Xmax < Xmin) // Should never happen
     {
-      mess << "Fail to determine X boundaries for group:" << (*gpit).first << "\n";
+      mess << "Fail to determine X boundaries for group:" << gpit->first << "\n";
       mess << "The boundaries are (Xmin,Xmax):" << Xmin << " " << Xmax;
       throw std::runtime_error(mess.str());
     }
     //This log step size will give the right # of points
     step = (log(Xmax) - log(Xmin)) / nPoints;
-    mess << "Found Group:" << ((*gpit).first) << "(Xmin,Xmax,log step):" << ((*gpit).second).first
-        << "," << ((*gpit).second).second << "," << step;
+    mess << "Found Group:" << gpit->first << "(Xmin,Xmax,log step):" << (gpit->second).first
+        << "," << (gpit->second).second << "," << step;
     //g_log.information(mess.str());
     mess.str("");
 
@@ -714,7 +712,7 @@ void DiffractionFocussing2::determineRebinParameters()
       (*xnew)[j] = Xmin * (1.0 + step);
       Xmin = (*xnew)[j];
     }
-    group2xvector[(*gpit).first] = xnew; //Register this vector in the map
+    group2xvector[gpit->first] = xnew; //Register this vector in the map
   }
   // Not needed anymore
   udet2group.clear();
