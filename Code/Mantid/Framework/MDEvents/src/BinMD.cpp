@@ -1,12 +1,57 @@
 /*WIKI* 
 
-This algorithm performs dense binning of the events in multiple dimensions of an input [[MDEventWorkspace]] and places them into a dense MDHistoWorkspace with 1-4 dimensions.
+This algorithm performs dense binning of the events in multiple dimensions of an input
+[[MDEventWorkspace]] and places them into a dense MDHistoWorkspace with 1-4 dimensions.
 
-The input MDEventWorkspace may have more dimensions than the number of output dimensions. The names of the dimensions in the DimX, etc. parameters are used to find the corresponding dimensions that will be created in the output.
+The input MDEventWorkspace may have more dimensions than the number of output dimensions.
+The names of the dimensions in the DimX, etc. parameters are used to find the corresponding
+dimensions that will be created in the output.
 
-An ImplicitFunction can be defined using the ImplicitFunctionXML parameter; any points NOT belonging inside of the ImplicitFunction will be set as NaN (not-a-number). 
+An ImplicitFunction can be defined using the ImplicitFunctionXML parameter;
+any points NOT belonging inside of the ImplicitFunction will be set as NaN (not-a-number).
 
-As of now, binning is only performed along axes perpendicular to the dimensions defined in the MDEventWorkspace.
+=== Axis-Aligned Binning ===
+
+This is binning where the output axes are aligned with the original workspace.
+Specify each of the AlignedDimX, etc. parameters with these values, separated by commas:
+* First, the name of the dimension in the original workspace
+* Next, the start and end position along that dimension
+* Finally, the number of bins to use in that dimensions.
+
+If you specify fewer output dimensions, then events in the remaining dimensions will be integrated.
+
+=== Non-Axis Aligned Binning ===
+
+This allows rebinning to a new arbitrary space. You must specify up to 4 basis vectors
+with these parameters, separated by commas: 'name, units, x,y,z,.., length, number_of_bins':
+* Name: of the new dimension
+* Units: string giving the units
+* x, y, z, etc.: a vector, matching the number of dimensions, giving the direction of the basis vector
+* Length: the length, along the basis vector direction, to take along the input dimension
+* number_of_bins: separate Length into this many bins.
+
+You must also specify a point for the origin.
+This point (in the input space) corresponds to 0,0,0 in the output space.
+
+Finally, the ForceOrthogonal parameter will modify your basis vectors
+if needed to make them orthogonal to each other. Only works in 3 dimensions!
+
+=== Binning a MDHistoWorkspace ===
+
+It is possible to rebin a [[MDHistoWorkspace]].
+Each MDHistoWorkspace holds a reference to the [[MDEventWorkspace]] that created it,
+as well as the coordinate transformation that was used.
+
+In this case, the rebinning is actually performed on the original MDEventWorkspace,
+after suitably transforming the basis vectors.
+
+Only the non-axis aligned binning method can be performed on a MDHistoWorkspace!
+Of course, your basis vectors can be aligned with the dimensions, which is equivalent.
+
+
+[[Category:Algorithms]]
+[[Category:MDEvents]]
+{{AlgorithmLinks|BinMD}}
 
 *WIKI*/
 

@@ -411,6 +411,8 @@ namespace MDEvents
   {
     if (!m_inWS)
       throw std::runtime_error("SlicingAlgorithm::createTransform(): input MDWorkspace must be set first!");
+    if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_inWS))
+      throw std::runtime_error(this->name() + " cannot be run on a MatrixWorkspace!");
 
     // Is the transformation aligned with axes?
     m_axisAligned = getProperty("AxisAligned");

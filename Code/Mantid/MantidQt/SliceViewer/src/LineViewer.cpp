@@ -206,12 +206,6 @@ void LineViewer::apply()
 
   // BinMD fails on MDHisto.
   IMDHistoWorkspace_sptr mdhws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws);
-//  if (mdhws)
-//  {
-//    this->showPreview();
-//    m_plot->setTitle("Integrating MDHistoWorkspaces not yet supported - coming soon!");
-//    return;
-//  }
 
   std::string outWsName = m_ws->getName() + "_line" ;
   bool adaptive = ui.chkAdaptiveBins->isChecked();
@@ -300,6 +294,14 @@ void LineViewer::apply()
     m_sliceWS = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outWsName));
     this->showFull();
   }
+  else
+  {
+    // Unspecified error in algorithm
+    this->showPreview();
+    m_plot->setTitle("Error integrating workspace - see log.");
+  }
+
+
 }
 
 // ==============================================================================================
