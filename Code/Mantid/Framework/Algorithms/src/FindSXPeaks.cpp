@@ -69,12 +69,13 @@ namespace Mantid
     void FindSXPeaks::exec()
     {
       // Try and retrieve the optional properties
-      int minRange = getProperty("RangeLower");
-      int maxRange = getProperty("RangeUpper");
-      m_MinRange = minRange;
-      m_MaxRange = maxRange;
-      m_MinSpec = getProperty("StartWorkspaceIndex");
-      m_MaxSpec = getProperty("EndWorkspaceIndex");
+      m_MinRange = getProperty("RangeLower");
+      m_MaxRange = getProperty("RangeUpper");
+
+      int minSpec = getProperty("StartWorkspaceIndex");
+      int maxSpec = getProperty("EndWorkspaceIndex");
+      m_MinSpec = minSpec;
+      m_MaxSpec = maxSpec;
       double SB=getProperty("SignalBackground");
 
       // Get the input workspace
@@ -119,7 +120,7 @@ namespace Mantid
       peakvector entries;
       //PARALLEL_FOR1(localworkspace)
       // Loop over spectra
-      for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+      for (int i = static_cast<int>(m_MinSpec); i <= static_cast<int>(m_MaxSpec); ++i)
       {
         //PARALLEL_START_INTERUPT_REGION
         // Retrieve the spectrum into a vector
