@@ -33,6 +33,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -589,7 +590,10 @@ void MantidUI::showVatesSimpleInterface()
     IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(
                                  AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 
-    if (!mdews && !pws)
+    IMDHistoWorkspace_sptr mdhist = boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+
+    if (!mdews && !pws && !mdhist)
     {
       return;
     }
@@ -599,7 +603,10 @@ void MantidUI::showVatesSimpleInterface()
     {
       wsType = MantidQt::API::VatesViewerInterface::PEAKS;
     }
-
+    if (mdhist)
+    {
+      wsType = MantidQt::API::VatesViewerInterface::MDHW;
+    }
 
     if (m_vatesSubWindow)
     {

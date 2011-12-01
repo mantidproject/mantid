@@ -63,7 +63,7 @@ public:
   virtual void setupPluginMode();
 
   /// Enum to track the workspace type
-  enum WorkspaceType { MDEW, PEAKS };
+  enum WorkspaceType { MDEW, PEAKS, MDHW };
 };
 
 }
