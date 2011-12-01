@@ -78,6 +78,9 @@ namespace MDEvents
     /// Input workspace
     Mantid::API::IMDWorkspace_sptr m_inWS;
 
+    /// Original (MDEventWorkspace) that inWS was based on. Used during basis vector constructor
+    Mantid::API::IMDWorkspace_sptr m_originalWS;
+
     /// Bin dimensions to actually use
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
 

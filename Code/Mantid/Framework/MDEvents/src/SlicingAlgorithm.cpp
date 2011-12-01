@@ -123,14 +123,31 @@ namespace MDEvents
     Strings::convert(strs[ strs.size()-2 ], length);
     min = 0.0;
     max = length;
-    // Scaling factor, to convert from units in the inDim to the output BIN number
-    double scaling = double(numBins) / length;
 
     // Create the basis vector with the right # of dimensions
     VMD basis(this->m_inWS->getNumDims());
     for (size_t d=0; d<this->m_inWS->getNumDims(); d++)
       Strings::convert(strs[d+2], basis[d]);
     basis.normalize();
+
+    // Now, convert the basis vector to the coordinates of the ORIGNAL ws, if any
+    if (m_originalWS)
+    {
+      // Turn basis vector into two points
+      VMD basis0(this->m_inWS->getNumDims());
+      VMD basis1 = basis * length;
+      // Convert the points to the original coordinates (from inWS to originalWS)
+      CoordTransform * toOrig = m_inWS->getTransformToOriginal();
+      VMD origBasis0 = toOrig->applyVMD(basis0);
+      VMD origBasis1 = toOrig->applyVMD(basis1);
+      // New basis vector, now in the original workspace
+      basis = origBasis1 - origBasis0;
+      // New length of the vector (in original space).
+      length = basis.normalize();
+    }
+
+    // Scaling factor, to convert from units in the inDim to the output BIN number
+    double scaling = double(numBins) / length;
 
     // Create the output dimension
     MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, min, max, numBins));
@@ -193,6 +210,13 @@ namespace MDEvents
       throw std::invalid_argument("The number of dimensions in the Origin parameter is not consistent with the number of dimensions in the input workspace.");
     m_origin = origin;
 
+    // Now, convert the original vector to the coordinates of the ORIGNAL ws, if any
+    if (m_originalWS)
+    {
+      CoordTransform * toOrig = m_inWS->getTransformToOriginal();
+      m_origin = toOrig->applyVMD(m_origin);
+    }
+
     // Validate
     if (outD > inD)
       throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
@@ -201,13 +225,13 @@ namespace MDEvents
 
     // Create the CoordTransformAffine with these basis vectors
     CoordTransformAffine * ct = new CoordTransformAffine(inD, outD);
-    ct->buildOrthogonal(origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
+    ct->buildOrthogonal(m_origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
     this->m_transform = ct;
 
     // Transformation original->binned
     std::vector<double> unitScaling(outD, 1.0);
     CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, outD);
-    ctFrom->buildOrthogonal(origin, this->m_bases, VMD(unitScaling) );
+    ctFrom->buildOrthogonal(m_origin, this->m_bases, VMD(unitScaling) );
     m_transformFromOriginal = ctFrom;
 
     // Validate
@@ -391,6 +415,20 @@ namespace MDEvents
     // Is the transformation aligned with axes?
     m_axisAligned = getProperty("AxisAligned");
 
+    // Refer to the original workspace. Make sure that is possible
+    m_originalWS = m_inWS->getOriginalWorkspace();
+    if (m_originalWS)
+    {
+      if (m_axisAligned)
+        throw std::runtime_error("Cannot perform axis-aligned binning on a MDHistoWorkspace. Please use non-axis aligned binning.");
+      if (m_originalWS->getNumDims() != m_inWS->getNumDims())
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
+      if (!m_inWS->getTransformToOriginal())
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation. There is no transformation saved from "
+            + m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
+      g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << m_originalWS->getName() << "'" << std::endl;
+    }
+
     // Create the coordinate transformation
     m_transform = NULL;
     if (m_axisAligned)
@@ -398,44 +436,53 @@ namespace MDEvents
     else
       this->createGeneralTransform();
 
-    if (m_inWS->hasOriginalWorkspace())
+    // Finalize, for binnign MDHistoWorkspace
+    if (m_originalWS)
     {
-      // A was transformed to B
-      // Now we transform B to C
-      // So we come up with the A -> C transformation
-
-      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
-      g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << origWS->getName() << "'" << std::endl;
-
-      if (origWS->getNumDims() != m_inWS->getNumDims())
-        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
-
-      // A->C transformation
-      CoordTransform * fromOrig = CoordTransformAffine::combineTransformations( m_inWS->getTransformFromOriginal(), m_transformFromOriginal );
-      // C->A transformation
-      CoordTransform * toOrig = CoordTransformAffine::combineTransformations( m_transformToOriginal, m_inWS->getTransformToOriginal() );
-      // A->C binning transformation
-      CoordTransform * binningTransform = CoordTransformAffine::combineTransformations( m_inWS->getTransformFromOriginal(), m_transform );
-
-      // Replace the transforms
-      delete m_transformFromOriginal;
-      delete m_transformToOriginal;
-      delete m_transform;
-      m_transformFromOriginal = fromOrig;
-      m_transformToOriginal = toOrig;
-      m_transform = binningTransform;
-
-      coord_t in[2] = {0,0};
-      coord_t out[2] = {0,0};
-      m_transform->apply(in, out);
-      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) << std::endl;
-      in[0] = 10; in[1] = 10;
-      m_transform->apply(in, out);
-      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) << std::endl;
-
       // Replace the input workspace
-      m_inWS = origWS;
+      m_inWS = m_originalWS;
     }
+
+
+//
+//    if (m_inWS->hasOriginalWorkspace())
+//    {
+//      // A was transformed to B
+//      // Now we transform B to C
+//      // So we come up with the A -> C transformation
+//
+//      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
+//      g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << origWS->getName() << "'" << std::endl;
+//
+//      if (origWS->getNumDims() != m_inWS->getNumDims())
+//        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
+//
+//      // A->C transformation
+//      CoordTransform * fromOrig = CoordTransformAffine::combineTransformations( m_inWS->getTransformFromOriginal(), m_transformFromOriginal );
+//      // C->A transformation
+//      CoordTransform * toOrig = CoordTransformAffine::combineTransformations( m_transformToOriginal, m_inWS->getTransformToOriginal() );
+//      // A->C binning transformation
+//      CoordTransform * binningTransform = CoordTransformAffine::combineTransformations( m_inWS->getTransformFromOriginal(), m_transform );
+//
+//      // Replace the transforms
+//      delete m_transformFromOriginal;
+//      delete m_transformToOriginal;
+//      delete m_transform;
+//      m_transformFromOriginal = fromOrig;
+//      m_transformToOriginal = toOrig;
+//      m_transform = binningTransform;
+//
+//      coord_t in[2] = {0,0};
+//      coord_t out[2] = {0,0};
+//      m_transform->apply(in, out);
+//      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) << std::endl;
+//      in[0] = 10; in[1] = 10;
+//      m_transform->apply(in, out);
+//      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) << std::endl;
+//
+//      // Replace the input workspace
+//      m_inWS = origWS;
+//    }
   }
 
 
@@ -494,11 +541,6 @@ namespace MDEvents
     // Create a Z vector by doing the cross-product of X and Y
     if (boxDim==2 && nd == 3)
     { z = x.cross_prod(y); z.normalize(); }
-
-//    std::cout << "x " << x << std::endl;
-//    std::cout << "y " << y << std::endl;
-//    std::cout << "z " << z << std::endl;
-//    std::cout << "t " << t << std::endl;
 
     // Point that is sure to be inside the volume of interest
     VMD insidePoint = (o1 + o2) / 2.0;      VMD normal = bases[0];

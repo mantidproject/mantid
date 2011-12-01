@@ -1,17 +1,18 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_
 
+#include "MantidAPI/CoordTransform.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidMDEvents/CoordTransformDistance.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
-#include "MantidAPI/CoordTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -99,6 +100,21 @@ public:
     ct.addTranslation(translation);
     ct.apply(in, out);
     compare(2, out, expected);
+  }
+
+  /** apply() method with VMD */
+  void test_apply_VMD()
+  {
+    coord_t translation[2] = {2.0, 3.0};
+    CoordTransformAffine ct(2,2);
+    ct.addTranslation(translation);
+    // Transform a VMD
+    VMD in(1.5,2.5);
+    VMD out = ct.applyVMD(in);
+    TS_ASSERT_DELTA( out[0], 3.5, 1e-5 );
+    TS_ASSERT_DELTA( out[1], 5.5, 1e-5 );
+    // Wrong number of dimensions?
+    TSM_ASSERT_THROWS_ANYTHING( "Check for the right # of dimensions", ct.applyVMD(VMD(1.0, 2.0, 3.0)) );
   }
 
   /** Test rotation in isolation */
