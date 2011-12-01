@@ -57,10 +57,21 @@ namespace Algorithms
 
 struct DLLExport SXPeak
 {
-	static double mN;
-	static double hbar;
-	SXPeak(double t, double th2, double phi,double intensity,const std::vector<int>& spectral,double Ltot):_t(t),_th2(th2),_phi(phi),_intensity(intensity),_Ltot(Ltot)
+ public:
+  SXPeak(double t, double th2, double phi,double intensity,const std::vector<int>& spectral,double Ltot, Mantid::detid_t detectorId):_t(t),_th2(th2),_phi(phi),_intensity(intensity),_Ltot(Ltot), _detectorId(detectorId)
 	{
+    if(intensity < 0)
+    {
+      throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
+    }
+    if(spectral.size() == 0)
+    {
+      throw std::invalid_argument("SXPeak: Cannot have zero sized spectral list");
+    }
+    if(Ltot < 0)
+    {
+      throw std::invalid_argument("SXPeak: Cannot have detector distance < 0");
+    }
 		npixels=1;
 		_spectral.resize(spectral.size());
 		std::copy(spectral.begin(),spectral.end(),_spectral.begin());
@@ -76,8 +87,6 @@ struct DLLExport SXPeak
 		return true;
 	}
 	Mantid::Kernel::V3D getQ() const
-//	Mantid::Geometry::V3D getQ() const
-
 	{
 		double Qx= -sin(_th2)*cos(_phi);
 		double Qy= -sin(_th2)*sin(_phi);
@@ -121,7 +130,23 @@ struct DLLExport SXPeak
 		std::copy(rhs._spectral.begin(),rhs._spectral.end(),std::ostream_iterator<int>(os,","));
 		return os;
 	}
-	double _t, _th2,_phi,_intensity;
+  const double& getIntensity() const
+  {
+    return _intensity;
+  }
+  const Mantid::detid_t& getDetectorId() const
+  {
+    return _detectorId;
+  }
+  
+private:
+  double _intensity;
+  const Mantid::detid_t _detectorId;
+  static double mN;
+	static double hbar;
+  double _t;
+  double _th2;
+  double _phi;
 	int npixels;
 	std::vector<int> _spectral;
 	double _Ltot;

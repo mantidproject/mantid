@@ -418,6 +418,7 @@ set ( TEST_FILES
 	test/FindDeadDetectorsTest.h
 	test/FindDetectorsOutsideLimitsTest.h
 	test/FindPeaksTest.h
+    test/FindSXPeaksTest.h
 	test/FlatBackgroundTest.h
 	test/FlatPlateAbsorptionTest.h
 	test/GeneratePythonScriptTest.h

@@ -55,7 +55,7 @@ namespace Mantid
           "End spectrum number  (default FindSXPeaks)");
       declareProperty("SignalBackground",10.0);
       declareProperty("Resolution",0.01);
-      declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksList","",Direction::Output),
+      declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
           "The name of the PeaksWorkspace in which to store the list of peaks found" );
 
       // Create the output peaks workspace
@@ -77,6 +77,9 @@ namespace Mantid
 
       // Get the input workspace
       MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+
+      //copy the instrument accross. Cannot generate peaks without doing this first.
+      m_peaks->setInstrument(localworkspace->getInstrument());
 
       size_t numberOfSpectra = localworkspace->getNumberHistograms();
 
@@ -147,33 +150,33 @@ namespace Mantid
         // t.o.f. of the peak
         double tof=0.5*(*(X.begin()+d)+*(X.begin()+d+1));
 
-        //	Geometry::IDetector_sptr det=localworkspace->getDetector(i);
         Geometry::IDetector_const_sptr det=localworkspace->getDetector(static_cast<size_t>(i));
-        //Geometry::DetectorGroup_const_sptr det=localworkspace->getDetector(static_cast<size_t>(i))
-        //IDetector_sptr det=localworkspace->getDetector(static_cast<size_t>(i));
 
         double phi=det->getPhi();
-        //
+  
         if (phi<0)
+        {
           phi+=2.0*M_PI;
-        //
-        // double th2=det->getTwoTheta(Mantid::Geometry::V3D(0,0,0),Mantid::Geometry::V3D(0,0,1));
+        }
+
         double th2=det->getTwoTheta(Mantid::Kernel::V3D(0,0,0),Mantid::Kernel::V3D(0,0,1));
 
         std::vector<int> specs;
         specs.push_back(i);
-        // Mantid::Geometry::V3D L2=det->getPos();
+
         Mantid::Kernel::V3D L2=det->getPos();
         L2-=sample;
-        std::cout << "r,th,phi,t: " << L2.norm() << "," << th2*180/M_PI << "," << phi*180/M_PI << "," << tof << "\n";
-        entries.push_back(SXPeak(tof,th2,phi,*maxY,specs,l1+L2.norm()));
+        //std::cout << "r,th,phi,t: " << L2.norm() << "," << th2*180/M_PI << "," << phi*180/M_PI << "," << tof << "\n";
+        entries.push_back(SXPeak(tof,th2,phi,*maxY,specs,l1+L2.norm(),det->getID()));
         progress.report();
         //PARALLEL_END_INTERUPT_REGION
       }
       //PARALLEL_CHECK_INTERUPT_REGION
+
       // Now reduce the list with duplicate entries
       reducePeakList(entries);
-      setProperty("PeaksList",m_peaks);
+
+      setProperty("OutputWorkspace",m_peaks);
       progress.report();
       return;
     }
@@ -198,20 +201,17 @@ namespace Mantid
           finalv.push_back(pcv[i]);
         found=false;
       }
-      //Fetch the input workspace and copy the instrument accross. Cannot generate peaks without doing this first.
-      MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-      m_peaks->setInstrument(localworkspace->getInstrument());
 
       for (std::size_t i=0;i<finalv.size();i++)
       {
         finalv[i].reduce();
-
         try
         {
           IPeak* peak = m_peaks->createPeak(finalv[i].getQ());
           if (peak)
           {
-            peak->setIntensity(finalv[i]._intensity);
+            peak->setIntensity(finalv[i].getIntensity());
+            peak->setDetectorID(finalv[i].getDetectorId());
             m_peaks->addPeak(*peak);
             delete peak;
           }
@@ -221,9 +221,6 @@ namespace Mantid
           g_log.error() << e.what() << std::endl;
         }
       }
-
-
     }
-
   } // namespace Algorithms
 } // namespace Mantid
