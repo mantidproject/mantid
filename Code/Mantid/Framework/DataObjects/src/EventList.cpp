@@ -1737,8 +1737,9 @@ namespace DataObjects
         tof = itev->tof();
         while (bin < x_size-1)
         {
-          //Within range?
-          if ((tof >= X[bin]) && (tof < X[bin+1]))
+          //Within range? Since both events and X are sorted, they are going to have
+          // tof >= X[bin] because the previous event was.
+          if (tof < X[bin+1])
           {
             //Add up the weight (convert to double before adding, to preserve precision)
             Y[bin] += double(itev->m_weight);
