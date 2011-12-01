@@ -11,7 +11,8 @@
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
+#include "MantidVatesAPI/TimeStepToTimeStep.h"
+#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -89,7 +90,6 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     //get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
     {
       // usually only one actual step requested
@@ -97,9 +97,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     }
 
     FilterUpdateProgressAction<vtkMDHWSource> updateHandler(this);
-    vtkMDEWHexahedronFactory* hexahedronFactory = new vtkMDEWHexahedronFactory(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal");
-    hexahedronFactory->setTime(m_time);
-    vtkDataSet* product = m_presenter->execute(hexahedronFactory, updateHandler);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> *factory = new vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep>(ThresholdRange_scptr(new IgnoreZerosThresholdRange()), "signal", m_time);
+    vtkDataSet* product = m_presenter->execute(factory, updateHandler);
 
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkBox* box = vtkBox::New();
