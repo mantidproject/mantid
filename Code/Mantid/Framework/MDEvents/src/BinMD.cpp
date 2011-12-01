@@ -48,11 +48,6 @@ after suitably transforming the basis vectors.
 Only the non-axis aligned binning method can be performed on a MDHistoWorkspace!
 Of course, your basis vectors can be aligned with the dimensions, which is equivalent.
 
-
-[[Category:Algorithms]]
-[[Category:MDEvents]]
-{{AlgorithmLinks|BinMD}}
-
 *WIKI*/
 
 #include "MantidAPI/ImplicitFunctionFactory.h"

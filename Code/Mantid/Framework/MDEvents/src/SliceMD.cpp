@@ -24,6 +24,20 @@ For instance, if you want the output workspace to split in 2x2x2, you would spec
 For 1D slices, it may make sense to specify a SplitInto parameter of 1 in every other dimension - that way, boxes
 will only be split along the 1D direction.
 
+=== Slicing a MDHistoWorkspace ===
+
+It is possible to slice a [[MDHistoWorkspace]].
+Each MDHistoWorkspace holds a reference to the [[MDEventWorkspace]] that created it,
+as well as the coordinate transformation that was used.
+
+In this case, the algorithm is executed on the original MDEventWorkspace, in the
+proper coordinates. Perhaps surprisingly, the output of SliceMD on a MDHistoWorkspace is a
+MDEventWorkspace!
+
+Only the non-axis aligned slice method can be performed on a MDHistoWorkspace!
+Of course, your basis vectors can be aligned with the dimensions, which is equivalent.
+
+
 *WIKI*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
