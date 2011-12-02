@@ -589,12 +589,12 @@ void PlotDialog::initLayerGeometryPage()
 
     QGroupBox *gb2 = new QGroupBox(tr("Size"));
     boxLayerWidth = new QSpinBox();
-	boxLayerWidth->setRange(0, 2000);
-	boxLayerWidth->setSuffix(tr(" pixels"));
+    boxLayerWidth->setRange(0, 2000);
+    boxLayerWidth->setSuffix(tr(" pixels"));
 
-	boxLayerHeight = new QSpinBox();
-	boxLayerHeight->setRange(0, 2000);
-	boxLayerHeight->setSuffix(tr(" pixels"));
+    boxLayerHeight = new QSpinBox();
+    boxLayerHeight->setRange(0, 2000);
+    boxLayerHeight->setSuffix(tr(" pixels"));
 
     QGridLayout *gl2 = new QGridLayout(gb2);
     gl2->addWidget(new QLabel( tr("width= ")), 0, 0);
@@ -603,15 +603,15 @@ void PlotDialog::initLayerGeometryPage()
     gl2->addWidget(new QLabel(tr("height= ")), 2, 0);
     gl2->addWidget(boxLayerHeight, 2, 1);
 
-	keepRatioBox = new QCheckBox(tr("Keep aspect ratio"));
-	keepRatioBox->setChecked(true);
+    keepRatioBox = new QCheckBox(tr("Keep aspect ratio"));
+    keepRatioBox->setChecked(true);
     gl2->addWidget(keepRatioBox, 3, 1);
 
     gl2->setRowStretch(4, 1);
 
     QBoxLayout *bl1 = new QBoxLayout (QBoxLayout::LeftToRight);
     bl1->addWidget(gb1);
-	  bl1->addWidget(gb2);
+    bl1->addWidget(gb2);
 
     keepRatioOnResizeBox = new QCheckBox(tr("Keep aspect ratio on window resize"));
     QBoxLayout *bl2 = new QBoxLayout (QBoxLayout::LeftToRight);

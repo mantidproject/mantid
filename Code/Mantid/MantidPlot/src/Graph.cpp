@@ -5029,7 +5029,7 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   for (int i=0; i < QwtPlot::axisCnt; i++)
   {updatedaxis.push_back(0);  }
 
-  enableFixedAspectRatio(true);
+  enableFixedAspectRatio(multiLayer()->applicationWindow()->fixedAspectRatio2DPlots);
 
   return d_spectrogram;
 }
