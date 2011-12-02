@@ -1,3 +1,15 @@
+/*WIKI* 
+
+Detector-space, single crystal peak finding. Finds peaks by searching through each spectra and looking for high intensity bins. If a bin has high intensity it is a candidate for a peak.
+
+Notable points:
+
+* The highest intensity bin is taken to be the peak, so only finds one peak per spectra
+* Peaks that are not above the background are culled. The background is calculated as the average of the start and end intensity multiplied by the provided SignalBackground parameter.
+* Calculated Qlab follows the Busy, Levy 1967 convention.
+
+*WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -30,8 +42,8 @@ namespace Mantid
     /// Set the documentation strings
     void FindSXPeaks::initDocs()
     {
-      this->setWikiSummary("Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all FindSXPeaksima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
-      this->setOptionalMessage("Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all FindSXPeaksima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
+      this->setWikiSummary("Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D spectrum. This is used in particular for single crystal as a quick way to find strong peaks.");
+      this->setOptionalMessage("Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D spectrum. This is used in particular for single crystal as a quick way to find strong peaks.");
     }
 
     /** Initialisation method.
@@ -53,8 +65,8 @@ namespace Mantid
       // pointer to each property.
       declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
           "End spectrum number  (default FindSXPeaks)");
-      declareProperty("SignalBackground",10.0);
-      declareProperty("Resolution",0.01);
+      declareProperty("SignalBackground",10.0, "Multiplication factor for the signal background");
+      declareProperty("Resolution",0.01,"Tolerance needed to avoid peak duplication in number of pixels");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
           "The name of the PeaksWorkspace in which to store the list of peaks found" );
 
