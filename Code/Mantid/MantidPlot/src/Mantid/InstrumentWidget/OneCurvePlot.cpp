@@ -212,7 +212,7 @@ void OneCurvePlot::setData(const double* x,const double* y,int dataSize)
   setXScale(x[0],x[dataSize-1]);
   double from = y[0];
   double to = from;
-  for(size_t i = 0; i < dataSize; ++i)
+  for(int i = 0; i < dataSize; ++i)
   {
     const double& yy = y[i];
     if (yy < from) from = yy;

@@ -173,8 +173,13 @@ namespace Mantid
         }
         catch(Mantid::Kernel::Exception::NotFoundError&)
         {
-          continue;
+          // Catch if no detector. Next line tests whether this happened - test placed
+          // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+          // in an openmp block.
         }
+        // If no detector found, skip onto the next spectrum
+        if ( !det ) continue;
+
         double phi=det->getPhi();
         if (phi<0)
         {

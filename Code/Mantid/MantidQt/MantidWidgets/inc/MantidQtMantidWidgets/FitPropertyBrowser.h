@@ -264,8 +264,6 @@ private slots:
   void doubleChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
-  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_removed(const QString &);
   void currentItemChanged(QtBrowserItem*);
   void addTie();
   void addTieToFunction();

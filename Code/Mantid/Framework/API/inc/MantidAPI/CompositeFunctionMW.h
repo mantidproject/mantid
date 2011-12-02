@@ -54,7 +54,7 @@ public:
 
               /* Overriden methods */
 
-  using IFunction::setWorkspace;
+  using IFunctionMW::setWorkspace;
   void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData = true);
   /// Set the workspace
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t spec, double startX = 0.0, double endX = 0.0);

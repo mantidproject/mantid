@@ -447,7 +447,7 @@ public:
     size_t numErrors = 0;
     for (size_t i=0; i < binned1->getNPoints(); i++)
     {
-      double diff = abs(binned1->getSignalAt(i) - binned2->getSignalAt(i));
+      double diff = std::abs(binned1->getSignalAt(i) - binned2->getSignalAt(i));
       if (diff > 1e-6) numErrors++;
       TS_ASSERT_DELTA( binned1->getSignalAt(i), binned2->getSignalAt(i), 1e-5);
     }

@@ -54,9 +54,9 @@ public:
 
               /* Overriden methods */
 
-  using IFunction::setWorkspace;
-  using IFunction::function;
-  using IFunction::functionDeriv;
+  using IFunctionMD::setWorkspace;
+  using IFunctionMD::function;
+  using IFunctionMD::functionDeriv;
   /// Set the workspace
   void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing, bool copyData = true);
   /// Returns the function's name
