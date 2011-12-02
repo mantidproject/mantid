@@ -530,16 +530,6 @@ namespace Mantid
       std::string dur = root.getString("run/duration");
       runDetails.addProperty("dur", dur);
       runDetails.addProperty("durunits", 1);
-
-	  // Get number of good frames
-	  NXEntry runInstrumentBeam = root.openEntry("run/instrument/beam");
-      NXInfo infoGoodTotalFrames = runInstrumentBeam.getDataSetInfo("frames_good");
-      if (infoGoodTotalFrames.stat != NX_ERROR)
-      {
-        int dum = root.getInt("run/instrument/beam/frames_good");
-        runDetails.addProperty("goodfrm", dum);
-      }
-
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)

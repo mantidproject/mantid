@@ -426,32 +426,6 @@ namespace Mantid
       std::string stop_time = root.getString("run/end_time");
       runDetails.addProperty("run_end", stop_time);
 
-
-	  NXEntry runRun = root.openEntry("run/run");
-
-      NXInfo infoGoodTotalFrames = runRun.getDataSetInfo("good_total_frames");
-      if (infoGoodTotalFrames.stat != NX_ERROR)
-      {
-        int dum = root.getInt("run/run/good_total_frames");
-        runDetails.addProperty("goodfrm", dum);
-      }
-
-	  NXInfo infoNumberPeriods = runRun.getDataSetInfo("number_periods");
-      if (infoNumberPeriods.stat != NX_ERROR)
-      {
-        int dum = root.getInt("run/run/number_periods");
-        runDetails.addProperty("nperiods", dum);
-      }
-
-	  {  // Duration taken to be stop_time minus stat_time
-	    DateAndTime start(start_time);
-	    DateAndTime end(stop_time);
-		double duration_in_secs = DateAndTime::seconds_from_duration( end - start);
-		runDetails.addProperty("dur_secs",duration_in_secs);
-	  }
-
-
-
     }
 
   } // namespace DataHandling
