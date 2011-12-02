@@ -124,16 +124,23 @@ void EQSANSQ2D::exec()
     rebinAlg->setProperty("PreserveEvents", false);
     rebinAlg->executeAsSubAlg();
 
-    IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .5, .7);
+    IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .5, .65);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
     qxyAlg->executeAsSubAlg();
 
+    MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");
+    IAlgorithm_sptr replaceAlg = createSubAlgorithm("ReplaceSpecialValues", .65, 0.7);
+    replaceAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qxy_output);
+    replaceAlg->setProperty<double>("NaNValue", 0.0);
+    replaceAlg->setProperty<double>("NaNError", 0.0);
+    replaceAlg->executeAsSubAlg();
+
     std::string outputWSName_frame = outputWSName+"_frame1_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1", outputWSName_frame, Direction::Output));
-    MatrixWorkspace_sptr result = qxyAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
 
     // Frame 2
@@ -145,30 +152,44 @@ void EQSANSQ2D::exec()
     rebinAlg->setProperty("PreserveEvents", false);
     rebinAlg->executeAsSubAlg();
 
-    qxyAlg = createSubAlgorithm("Qxy", .8, 1.0);
+    qxyAlg = createSubAlgorithm("Qxy", .8, 0.95);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
     qxyAlg->executeAsSubAlg();
 
+    qxy_output = qxyAlg->getProperty("OutputWorkspace");
+    replaceAlg = createSubAlgorithm("ReplaceSpecialValues", .95, 1.0);
+    replaceAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qxy_output);
+    replaceAlg->setProperty<double>("NaNValue", 0.0);
+    replaceAlg->setProperty<double>("NaNError", 0.0);
+    replaceAlg->executeAsSubAlg();
+
     outputWSName_frame = outputWSName+"_frame2_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame2", outputWSName_frame, Direction::Output));
-    result = qxyAlg->getProperty("OutputWorkspace");
+    result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame2", result);
     setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   } else {
     // When not in frame skipping mode, simply run Qxy
-    IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .3, 1.0);
+    IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .3, 0.9);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
     qxyAlg->executeAsSubAlg();
 
+    MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");
+    IAlgorithm_sptr replaceAlg = createSubAlgorithm("ReplaceSpecialValues", .9, 1.0);
+    replaceAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qxy_output);
+    replaceAlg->setProperty<double>("NaNValue", 0.0);
+    replaceAlg->setProperty<double>("NaNError", 0.0);
+    replaceAlg->executeAsSubAlg();
+
     outputWSName += "_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1", outputWSName, Direction::Output));
-    MatrixWorkspace_sptr result = qxyAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
     setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   }

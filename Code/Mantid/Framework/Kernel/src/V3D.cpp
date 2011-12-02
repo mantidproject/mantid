@@ -785,7 +785,7 @@ operator>>(std::istream& IX,V3D& A)
     @return Current state of stream
   */
 {
-  A.read(IX);
+  A.readPrinted(IX);
   return IX;
 }
 

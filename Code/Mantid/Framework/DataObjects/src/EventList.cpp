@@ -1308,27 +1308,38 @@ namespace DataObjects
     mru->ensureEnoughBuffersY(thread);
 
     //Is the data in the mrulist?
-    MantidVecWithMarker * data;
-    data = mru->findY(thread, this->m_specNo);
+    MantidVecWithMarker * yData;
+    yData = mru->findY(thread, this->m_specNo);
 
-    if (data == NULL)
+    if (yData == NULL)
     {
       //Create the MRU object
-      data = new MantidVecWithMarker(this->m_specNo);
+      yData = new MantidVecWithMarker(this->m_specNo);
+
+      // prepare to update the uncertainties
+      mru->ensureEnoughBuffersE(thread);
+      MantidVecWithMarker * eData = new MantidVecWithMarker(this->m_specNo);
+
+      // see if E should be calculated;
+      bool skipErrors = (eventType == TOF);
 
       //Set the Y data in it
-      MantidVec E_ignored;
-      this->generateHistogram( *refX, data->m_data, E_ignored, true);
+      this->generateHistogram( *refX, yData->m_data, eData->m_data, skipErrors);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * oldData;
-      oldData = mru->insertY(thread, data);
+      MantidVecWithMarker * yOldData = mru->insertY(thread, yData);
+      if (!skipErrors)
+      {
+        MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
+        if (eOldData)
+          delete eOldData;
+      }
 
       //And clear up the memory of the old one, if it is dropping out.
-      if (oldData)
-        delete oldData;
+      if (yOldData)
+        delete yOldData;
     }
-    return data->m_data;
+    return yData->m_data;
   }
 
   /** Look in the MRU to see if the E histogram has been generated before.
@@ -1345,27 +1356,32 @@ namespace DataObjects
     mru->ensureEnoughBuffersE(thread);
 
     //Is the data in the mrulist?
-    MantidVecWithMarker * data;
-    data = mru->findE(thread, this->m_specNo);
+    MantidVecWithMarker * eData;
+    eData = mru->findE(thread, this->m_specNo);
 
-    if (data == NULL)
+    if (eData == NULL)
     {
       //Create the MRU object
-      data = new MantidVecWithMarker(this->m_specNo);
+      eData = new MantidVecWithMarker(this->m_specNo);
+
+      // prepare to update the uncertainties
+      mru->ensureEnoughBuffersY(thread);
+      MantidVecWithMarker * yData = new MantidVecWithMarker(this->m_specNo);
 
       //Now use that to get E -- Y values are generated from another function
-      MantidVec Y;
-      this->generateHistogram(*refX, Y, data->m_data);
+      this->generateHistogram(*refX, yData->m_data, eData->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * oldData;
-      oldData = mru->insertE(thread, data);
+      MantidVecWithMarker * yOldData = mru->insertY(thread, yData);
+      MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
 
       //And clear up the memory of the old one, if it is dropping out.
-      if (oldData)
-        delete oldData;
+      if (yOldData)
+        delete yOldData;
+      if (eOldData)
+        delete eOldData;
     }
-    return data->m_data;
+    return eData->m_data;
   }
 
 
@@ -1721,8 +1737,9 @@ namespace DataObjects
         tof = itev->tof();
         while (bin < x_size-1)
         {
-          //Within range?
-          if ((tof >= X[bin]) && (tof < X[bin+1]))
+          //Within range? Since both events and X are sorted, they are going to have
+          // tof >= X[bin] because the previous event was.
+          if (tof < X[bin+1])
           {
             //Add up the weight (convert to double before adding, to preserve precision)
             Y[bin] += double(itev->m_weight);
@@ -1736,9 +1753,8 @@ namespace DataObjects
     } // end if (there are any events to histogram)
 
     // Now do the sqrt of all errors
-    typedef double (*uf)(double);
-    uf dblSqrt = std::sqrt;
-    std::transform(E.begin(), E.end(), E.begin(), dblSqrt);
+    std::transform(E.begin(), E.end(), E.begin(),
+                   static_cast<double (*)(double)>(std::sqrt));
   }
 
 
@@ -1877,9 +1893,8 @@ namespace DataObjects
     E.resize(Y.size(), 0);
 
     // windows can get confused about std::sqrt
-    typedef double (*uf)(double);
-    uf dblSqrt = std::sqrt;
-    std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+    std::transform(Y.begin(), Y.end(), E.begin(),
+                   static_cast<double (*)(double)>(std::sqrt));
 
   }
 

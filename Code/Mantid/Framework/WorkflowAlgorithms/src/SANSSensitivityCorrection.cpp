@@ -287,11 +287,11 @@ void SANSSensitivityCorrection::exec()
   progress.report(3, "Loaded flood field");
 
   // Divide sample data by detector efficiency
-  IAlgorithm_sptr minusAlg = createSubAlgorithm("Divide", 0.6, 0.7);
-  minusAlg->setProperty("LHSWorkspace", inputWS);
-  minusAlg->setProperty("RHSWorkspace", floodWS);
-  minusAlg->executeAsSubAlg();
-  MatrixWorkspace_sptr outputWS = minusAlg->getProperty("OutputWorkspace");
+  IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide", 0.6, 0.7);
+  divideAlg->setProperty("LHSWorkspace", inputWS);
+  divideAlg->setProperty("RHSWorkspace", floodWS);
+  divideAlg->executeAsSubAlg();
+  MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
   // Copy over the efficiency's masked pixels to the reduced workspace
   IAlgorithm_sptr getMaskAlg = createSubAlgorithm("GetMaskedDetectors", 0.7, 0.75);

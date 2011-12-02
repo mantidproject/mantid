@@ -14,3 +14,6 @@ class AlgorithmFactoryTest(unittest.TestCase):
         # 3 versions of LoadRaw
         self.assertEquals( len(all_algs['LoadRaw']), 3 )
         self.assertEquals( all_algs['LoadRaw'], [1,2,3] )
+
+if __name__ == '__main__':
+    unittest.main()

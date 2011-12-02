@@ -1,6 +1,7 @@
 #include "MantidMDEvents/CoordTransformAligned.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Matrix.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -100,6 +101,36 @@ namespace MDEvents
       outVector[out] = (x-m_origin[out]) * m_scaling[out];
     }
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an equivalent affine transformation matrix out of the
+   * parameters of this axis-aligned transformation.
+   *
+   * The output can be used to merge CoordTransforms together.
+   *
+   * @return An affine matrix matrix with inD+1 columns, outD+1 rows.
+   */
+  Mantid::Kernel::Matrix<coord_t> CoordTransformAligned::makeAffineMatrix() const
+  {
+    // Zeroed-out affine matrix
+    Matrix<coord_t> mat(outD+1, inD+1);
+    // Bottom-right corner of the matrix is always 1.
+    mat[outD][inD] = 1.0;
+    // For each output dimension
+    for (size_t out = 0; out < outD; ++out)
+    {
+      // The ROW is the out dimension.
+      size_t row = out;
+      // The COLUMN is the input dimension
+      size_t col = m_dimensionToBinFrom[out];
+      // So place the scaling factor at that spot
+      mat[row][col] = m_scaling[out];
+      // And place the origin (translation amount) at the last column
+      mat[row][inD] = -m_origin[out] * m_scaling[out];
+    }
+    return mat;
+  }
+
 
 
   //----------------------------------------------------------------------------------------------

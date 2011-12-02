@@ -557,6 +557,15 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
     ws_item->addChild(sub_data_item);
   }
 
+  // A line describing that this workspace is binned from another
+  if (workspace->hasOriginalWorkspace())
+  {
+    std::string text = "Binned from '" + workspace->getOriginalWorkspace()->getName() + "'";
+    MantidTreeWidgetItem* sub_data_item = new MantidTreeWidgetItem(QStringList(QString::fromStdString( text )), m_tree);
+    sub_data_item->setFlags(Qt::NoItemFlags);
+    excludeItemFromSort(sub_data_item);
+    ws_item->addChild(sub_data_item);
+  }
 }
 
 
@@ -884,6 +893,13 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 {
   (void) WS;
   menu->addAction(m_showHist); // Algorithm history
+  /*
+  menu->addAction(m_showVatesGui); // Show the Vates simple interface
+  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  {
+    m_showVatesGui->setEnabled(false);
+  }
+  */
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showMDPlot); // A plot of intensity vs bins
   menu->addAction(m_showListData); // Show data in table
@@ -1071,7 +1087,6 @@ void MantidDockWidget::saveToProgram(const QString & name)
         //For each one found split it up and assign the parameter
         for (int i = 0; i<saveParameters.size(); i++)
         {
-          //would string array be better to use here ? //////////////////////////////////////////
           QStringList sPNameAndDetail = saveParameters[i].split('=');
           std::string saveParameterName = sPNameAndDetail[0].trimmed().toStdString();
           std::string saveParameterDetail = sPNameAndDetail[1].trimmed().toStdString();

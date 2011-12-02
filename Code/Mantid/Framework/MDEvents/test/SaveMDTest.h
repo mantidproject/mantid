@@ -97,7 +97,8 @@ public:
       do_test_UpdateFileBackEnd(ws, filename);
     else
     {
-	  ws->getBoxController()->closeFile(true);
+      ws->getBoxController()->closeFile(true);
+      if (Poco::File(this_filename).exists()) Poco::File(this_filename).remove();
     }
 
   }

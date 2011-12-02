@@ -35,6 +35,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/IPeak.h"
+#include <math.h>
 
 #include <map>
 using namespace Mantid;
@@ -126,7 +127,7 @@ public:
           val += 1.4;
 
           dataY.access().push_back(val);
-          dataE.access().push_back(1.0);
+          dataE.access().push_back(sqrt(val));
           if ((val - 1.4) > MaxPeakIntensity * .1)
           {
             double Q = calcQ(bankR, instP, row, col, 1000.0 + chan * 50);
@@ -150,7 +151,6 @@ public:
     IntegratePeakTimeSlices algP;
     wsPtr->setName("InputWorkspace");
     pks->setName("PeaksWorkspace");
-
     try
     {
       algP.initialize();
@@ -161,23 +161,42 @@ public:
 
       algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
       algP.setPropertyValue("OutputWorkspace", "aaa");
+
       algP.execute();
+
       algP.setPropertyValue("OutputWorkspace", "aaa");
 
-      TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
+   
+       double intensity = algP.getProperty("Intensity");
+       double sigma = algP.getProperty("SigmaIntensity");
+       TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
+  
 
-      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getIntensity() - 59923.5), 100.0);
+       TS_ASSERT_LESS_THAN(fabs(intensity - 59870.5), 100.0);
       //Not sure why this reduced the error so much in the test
-      //TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 380.71), 1.0);
-      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 76.04), 1.0);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Time", 0) - 19250), 20);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Background", 1) - 1.4), .2);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11157.3), 20);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  225), 5);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 258.275), 1.5);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4065), 10);
+      TS_ASSERT_LESS_THAN(fabs(sigma - 665.1), 1.0);
 
-      /*   std::vector<std::string> names = Twk->getColumnNames();
+      TS_ASSERT_EQUALS( Twk->rowCount(), 7);
+      
+      if( Twk->rowCount() <5)
+          return;
+
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
+    
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) - 1.523), .2);  
+   
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11136.3), 20);
+      
+   
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  169), 5);  
+    
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 321.3), 1.5);  
+    
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 3987), 10);
+      
+  
+   /*
+       std::vector<std::string> names = Twk->getColumnNames();
       std::cout<<"Intensitty="<<pks->getPeak(0).getIntensity()<<"   sigma="<<pks->getPeak(0).getSigmaIntensity()<<std::endl;
        for( int i=0; i<Twk->columnCount();i++)
        {
@@ -187,28 +206,28 @@ public:
        std::cout<<std::endl;
 
        }
-
-        Intensitty=59923.5   sigma=380.71
+  
+  Intensitty=59870.7   sigma=665.098
            Time       19250       19350       19450       19550       19650       19750       19850
         Channel          12          13          14          15          16          17          18
-     Background     1.42022     1.44054      1.4735     1.48123      1.4735     1.44054     1.42022
-      Intensity     3720.21      7440.3     11157.3     14880.4     11157.3      7440.3     3720.21
-           Mcol          17          17          17          17          17          17          17
-           Mrow          12          12          12          12          12          12          12
-          SScol     3.98085     3.98281     3.97949     3.98244     3.97949     3.98281     3.98085
-          SSrow     3.98219     3.98214     3.98291     3.98211     3.98291     3.98214     3.98219
-           SSrc           0           0 0.000267033           0 0.000267033           0           0
-         NCells         225         225         210         225         210         225         225
-  ChiSqrOverDOF       26.77      106.92     258.275     427.785     258.275      106.92       26.77
-   TotIntensity        4065        7815       11544       15315       11544        7815        4065
-BackgroundError     0.39112    0.781681     1.27035     1.56355     1.27035    0.781681     0.39112
-FitIntensityError     41.4984     82.9473      130.21      165.91      130.21     82.9473     41.4984
-  ISAWIntensity     3745.45     7490.88     11234.6     14981.7     11234.6     7490.88     3745.45
-ISAWIntensityError     98.0362     134.863      164.32     187.991      164.32     134.863     98.0362
-      Start Row           5           5           5           5           5           5           5
-        End Row          19          19          18          19          18          19          19
-      Start Col          10          10          10          10          10          10          10
-        End Col          24          24          24          24          24          24          24
+     Background     1.42777     1.52378      1.5442     1.59245      1.5442     1.52378     1.42777
+      Intensity     3728.05        7427     11136.6     14848.6     11136.6        7427     3728.05
+           Mcol     17.0001          17          17          17          17          17     17.0001
+           Mrow     12.0001     12.0001          12          12          12     12.0001     12.0001
+          SScol     3.98569     3.97392     3.97892     3.97874     3.97892     3.97392     3.98569
+          SSrow     3.98622     3.97946     3.97847      3.9784     3.97847     3.97946     3.98622
+           SSrc -0.00115238 5.38493e-05 0.000837369 0.000628028 0.000837369 5.38493e-05 -0.00115238
+         NCells         169         156         169         169         169         156         169
+  ChiSqrOverDOF     35.7813     155.375     321.268     571.226     321.268     155.375     35.7813
+   TotIntensity      3986.6      7718.4     11486.6     15236.6     11486.6      7718.4      3986.6
+BackgroundError    0.547322     1.20823     1.64171     2.18909     1.64171     1.20823    0.547322
+FitIntensityError     50.3565     106.679     150.909     201.222     150.909     106.679     50.3565
+  ISAWIntensity     3745.31     7480.69     11225.6     14967.5     11225.6     7480.69     3745.31
+ISAWIntensityError     113.065     208.524     297.868      390.35     297.868     208.524     113.065
+      Start Row           5           6           6           6           6           6           5
+        End Row          17          17          18          18          18          17          17
+      Start Col          10          11          11          11          11          11          10
+        End Col          22          23          23          23          23          23          22
 
        */
     } catch (char * s)

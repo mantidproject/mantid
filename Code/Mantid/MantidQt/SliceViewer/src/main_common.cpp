@@ -74,7 +74,7 @@ static void addPeak(size_t num, double x, double y, double z, double radius)
 
 //-------------------------------------------------------------------------------
 /** Make a demo data set for testing */
-IMDEventWorkspace_sptr makeDemoData()
+IMDWorkspace_sptr makeDemoData(bool binned = false)
 {
   // Create a fake workspace
   size_t numBins;
@@ -98,5 +98,29 @@ IMDEventWorkspace_sptr makeDemoData()
 //  addPeak(12000,0,0,0, 0.03);
   IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>( AnalysisDataService::Instance().retrieve("mdew") );
   mdew->splitAllIfNeeded(NULL);
-  return mdew;
+  if (binned)
+  {
+    // Bin aligned to original
+//    FrameworkManager::Instance().exec("BinMD", 12,
+//        "InputWorkspace", "mdew",
+//        "OutputWorkspace", "binned",
+//        "AxisAligned", "1",
+//        "AlignedDimX", "h, -10, 10, 100",
+//        "AlignedDimY", "k, -10, 10, 100",
+//        "AlignedDimZ", "l, -10, 10, 100"
+//        );
+    FrameworkManager::Instance().exec("BinMD", 16,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx, m, 1.0, 0.0, 0.0, 20.0, 100",
+        "BasisVectorY", "ry, m, 0.0, 1.0, 0.0, 20.0, 100",
+        "BasisVectorZ", "ry, m, 0.0, 0.0, 1.0, 20.0, 100",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10, -10");
+
+    return boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve("binned") );
+  }
+  else
+    return boost::dynamic_pointer_cast<IMDWorkspace>(mdew);
 }

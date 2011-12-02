@@ -58,6 +58,8 @@ namespace Geometry
       Kernel::V3D getuVector();
       Kernel::V3D getvVector();
 
+      Mantid::Kernel::V3D hklFromQ(Mantid::Kernel::V3D Q) const;
+
       Kernel::DblMatrix setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
@@ -66,6 +68,11 @@ namespace Geometry
     private:
       Kernel::DblMatrix U;
       Kernel::DblMatrix UB;
+
+      /** Make recalculateFromGstar private. */
+      void recalculateFromGstar(Kernel::DblMatrix& NewGstar)
+      { UnitCell::recalculateFromGstar(NewGstar); }
+
   };
 } // namespace Mantid
 } // namespace Geometry

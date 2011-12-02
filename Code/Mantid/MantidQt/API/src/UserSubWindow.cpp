@@ -218,7 +218,7 @@ QLabel* UserSubWindow::newValidator(QWidget *parent)
 * @params plotDetails :: This includes all details of the plot including type, 
 * curve number, workspace and color
 */
-void UserSubWindow::changePlotType(const QString& plotDetails)
+void UserSubWindow::changePlotType(const QStringList& plotDetails)
 {
   emit setAsPlotType(plotDetails);
 }

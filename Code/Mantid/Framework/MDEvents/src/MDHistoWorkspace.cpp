@@ -49,9 +49,10 @@ namespace MDEvents
    * @param other :: MDHistoWorkspace to copy from.
    */
   MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace & other)
+  : IMDHistoWorkspace(other)
   {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
-    for (size_t d=0; d< other.getNumDims(); d++)
+    for (size_t d=0; d < other.getNumDims(); d++)
     {
       // Copy the dimension
       MDHistoDimension_sptr dim(new MDHistoDimension( other.getDimension(0).get() ) );

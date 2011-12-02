@@ -167,7 +167,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   controlPanelLayout->setSizes(sizes);
   controlPanelLayout->setStretchFactor(0,0);
   controlPanelLayout->setStretchFactor(1,1);
-
+  
   resize(windowWidth,650);
 
   tabChanged(0);
@@ -810,6 +810,10 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
   setupColorMap();
   m_InstrumentDisplay->refreshView();
   m_InstrumentDisplay->repaint();
+  if (getTab() == PICK)
+  {
+    m_pickTab->changedIntegrationRange(xmin,xmax);
+  }
 }
 
 /**
@@ -1096,6 +1100,8 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
                 m_pickTab->showInstrumentDisplayContextMenu(); 
                 m_instrumentDisplayContextMenuOn = false;
                 break;
+    default:
+      break;
     }
     return true;
   }

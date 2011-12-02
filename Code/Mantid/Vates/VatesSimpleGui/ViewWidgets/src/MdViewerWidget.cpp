@@ -339,6 +339,10 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
   {
     sourcePlugin = "Peaks Source";
   }
+  else if (VatesViewerInterface::MDHW == wstype)
+  {
+    sourcePlugin = "MDHW Source";
+  }
   else
   {
     sourcePlugin = "MDEW Source";

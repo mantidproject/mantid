@@ -183,8 +183,8 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.fitBrowser,SIGNAL(changeFitPlotStyle(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
 
   // Detect if the graph should be customised and call the two functions that change the different curves on the graph.
-  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QString &)), this, SLOT(changeDataPlotType(const QString &)));
-  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
+  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeDataPlotType(const QStringList &)));
+  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeFitPlotType(const QStringList &)));
 
   // Detect when the fit has finished and group the workspaces that have been created as a result.
   connect(m_uiForm.fitBrowser,SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
@@ -1650,11 +1650,24 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
+    QStringList plotDetails;
     QString plotType("");
     plotType.setNum(m_uiForm.connectPlotType->currentIndex());
 
-    changePlotType(plotType + ".1." + titleLabel);
-    
+    plotDetails.push_back(titleLabel);
+    plotDetails.push_back("");
+    plotDetails.push_back(plotType);
+    plotDetails.push_back("Data");
+    if(m_uiForm.allErrors->isChecked())
+    {
+      plotDetails.push_back("AllErrors");
+    }
+    else
+    {
+      plotDetails.push_back("CleverErrors");
+    }
+    changePlotType(plotDetails);
+
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
   }  
@@ -1764,10 +1777,23 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
+    QStringList plotDetails;
     QString plotType("");
     plotType.setNum(m_uiForm.connectPlotType->currentIndex());
 
-    changePlotType(plotType + ".Data." + titleLabel);
+    plotDetails.push_back(titleLabel);
+    plotDetails.push_back("");
+    plotDetails.push_back(plotType);
+    plotDetails.push_back("Data");
+    if(m_uiForm.allErrors->isChecked())
+    {
+      plotDetails.push_back("AllErrors");
+    }
+    else
+    {
+      plotDetails.push_back("CleverErrors");
+    }
+    changePlotType(plotDetails);
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
@@ -2858,31 +2884,57 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 /**
 * Set up the string that will contain all the data needed for changing a fit.
-* [fitType, curveNum, wsName, axisLabel, color]
+* [wsName, axisLabel, connectType, plotType, Errors, Color]
 *
 * @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeFitPlotType(const QString & plotDetails)
+void MuonAnalysis::changeFitPlotType(const QStringList & plotDetails)
 {
-  // First part indicates 
+  QStringList fitPlotDetails(plotDetails);
   QString fitType("");
   fitType.setNum(m_uiForm.connectFitType->currentIndex());
-  changePlotType(fitType + ".Fit." + plotDetails + "." + "Orange");
+
+  fitPlotDetails.push_back(fitType);
+  fitPlotDetails.push_back("Fit");
+  if(m_uiForm.allErrors->isChecked())
+  {
+    fitPlotDetails.push_back("AllErrors");
+  }
+  else
+  {
+    fitPlotDetails.push_back("CleverErrors");
+  }
+  fitPlotDetails.push_back("Orange");
+
+  changePlotType(fitPlotDetails);
 }
 
 
 /**
 * Set up the string that will contain all the data needed for changing the data.
-* [fitType, curveNum, wsName, axisLabel, color]
+* [wsName, axisLabel, connectType, plotType, Errors, Color]
 *
 * @params plotDetails :: The workspace name of the plot to be created and axis label. 
 */
-void MuonAnalysis::changeDataPlotType(const QString & plotDetails)
+void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 {
-  // First part indicates 
+  QStringList dataPlotDetails(plotDetails);
   QString fitType("");
   fitType.setNum(m_uiForm.connectPlotType->currentIndex());
-  changePlotType(fitType + ".Data." + plotDetails + "." + "Black");
+
+  dataPlotDetails.push_back(fitType);
+  dataPlotDetails.push_back("Data");
+  if(m_uiForm.allErrors->isChecked())
+  {
+    dataPlotDetails.push_back("AllErrors");
+  }
+  else
+  {
+    dataPlotDetails.push_back("CleverErrors");
+  }
+  dataPlotDetails.push_back("Black");
+
+  changePlotType(dataPlotDetails);
 }
 
 /**

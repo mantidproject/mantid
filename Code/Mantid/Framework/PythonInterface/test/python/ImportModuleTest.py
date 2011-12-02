@@ -8,3 +8,10 @@ class ImportModuleTest(unittest.TestCase):
         attrs = dir(mantid)
         self.assertTrue('api' in attrs)
         self.assertTrue('kernel' in attrs)
+    
+    def test_on_import_gui_flag_is_set_to_false_here(self):
+        import mantid
+        self.assertEquals(False, mantid.__gui__)
+        
+if __name__ == '__main__':
+    unittest.main()

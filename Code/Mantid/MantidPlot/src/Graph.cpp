@@ -3312,6 +3312,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
   guessUniqueCurveLayout(colorIndex, symbolIndex);
   if (lineWidth < 0) lineWidth = widthLine;
   c->setPen(QPen(ColorBox::color(colorIndex), lineWidth));
+  QwtSymbol symbol = c->symbol();
+  symbol.setPen(c->pen());
+  symbol.setBrush(QBrush(ColorBox::color(colorIndex)));
+  c->setSymbol(symbol);
 
   addLegendItem();
   connect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));

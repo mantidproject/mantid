@@ -123,6 +123,20 @@ namespace Geometry
     else throw std::invalid_argument("determinant of UB is not greater than 0");
   }
 
+
+  /** Calculate the hkl corresponding to a given Q-vector
+   * @param Q :: Q-vector in $AA^-1 in the sample frame
+   * @return a V3D with H,K,L
+   */
+  V3D OrientedLattice::hklFromQ(V3D Q) const
+  {
+    DblMatrix UBinv = this->getUB();
+    UBinv.Invert();
+    V3D out = UBinv*Q; //transform back to HKL
+    return out;
+  }
+
+
   /** gets a vector along beam direction when goniometers are at 0. Note, this vector is not unique, but
     all vectors can be obtaineb by multiplying with a scalar
     @return u :: V3D vector along beam direction*/

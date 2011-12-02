@@ -5,6 +5,7 @@
 #include "MantidAPI/CoordTransform.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -39,6 +40,23 @@ namespace API
   {
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Apply the transformation to an input vector (as a VMD type).
+   * This wraps the apply(in,out) method (and will be slower!)
+   *
+   * @param inputVector :: an inD-length vector
+   * @return the output vector as VMD
+   */
+  Mantid::Kernel::VMD CoordTransform::applyVMD(const Mantid::Kernel::VMD & inputVector) const
+  {
+    if (inputVector.getNumDims() != inD)
+      throw std::runtime_error("CoordTransform::apply(): inputVector has the wrong number of coordinates!");
+    coord_t * outArray = new coord_t[outD];
+    this->apply(inputVector.getBareArray(), outArray);
+    VMD out(outD, outArray);
+    delete [] outArray;
+    return out;
+  }
 
 
 

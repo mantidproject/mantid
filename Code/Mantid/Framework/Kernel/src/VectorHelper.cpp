@@ -255,30 +255,35 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
   }
   
   double frac, fracE;
-  double width, overlap;
-  
+  double oneOverWidth, overlap;
+  double temp, xold_of_iold, xold_of_iold_p_1;
+
   //loop over old vector from starting point calculated above
   for ( ; iold<size_yold; ++iold )
   {
+    xold_of_iold_p_1 = xold[iold+1]; // cache for speed
     // If current old bin is fully enclosed by new bin, just unload the counts
-    if ( xold[iold+1] <= xnew[inew+1] )
+    if ( xold_of_iold_p_1 <= xnew[inew+1] )
     {
       ynew[inew] += yold[iold];
-      enew[inew] += std::pow(eold[iold], 2);
+      temp = eold[iold];
+      enew[inew] += temp*temp;
       // If the upper bin boundaries were equal, then increment inew
-      if ( xold[iold+1] == xnew[inew+1] ) inew++;
+      if ( xold_of_iold_p_1 == xnew[inew+1] ) inew++;
     }
     else
     {
+      xold_of_iold = xold[iold]; // cache for speed
       // This is the counts per unit X in current old bin
-      width = (xold[iold+1] - xold[iold]);
-      frac = yold[iold] / width;
-      fracE = std::pow(eold[iold], 2) / width;
+      oneOverWidth = 1. / (xold_of_iold_p_1 - xold_of_iold); // cache 1/width to speed things up
+      frac = yold[iold] * oneOverWidth;
+      temp = eold[iold];
+      fracE = temp * temp * oneOverWidth;
     
       // Now loop over bins in new vector overlapping with current 'old' bin
-      while ( inew<size_ynew && xnew[inew+1] <= xold[iold+1] )
+      while ( inew<size_ynew && xnew[inew+1] <= xold_of_iold_p_1 )
       {
-        overlap = xnew[inew+1] - std::max(xnew[inew],xold[iold]);
+        overlap = xnew[inew+1] - std::max(xnew[inew],xold_of_iold);
         ynew[inew] += frac * overlap;
         enew[inew] += fracE * overlap;
         ++inew;
@@ -288,7 +293,7 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
       if (inew==size_ynew) break;
       
       // Unload the rest of the current old bin into the current new bin
-      overlap = xold[iold+1] - xnew[inew];
+      overlap = xold_of_iold_p_1 - xnew[inew];
       ynew[inew] += frac * overlap;
       enew[inew] += fracE * overlap;
     }

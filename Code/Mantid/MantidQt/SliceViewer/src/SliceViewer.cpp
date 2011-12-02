@@ -152,21 +152,6 @@ void SliceViewer::initMenus()
 {
   QAction * action;
 
-  // --------------- Color options Menu ----------------------------------------
-  m_menuColorOptions = new QMenu("&ColorMap", this);
-
-  action = new QAction(QPixmap(), "&Load Colormap", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
-  m_menuColorOptions->addAction(action);
-
-  action = new QAction(QPixmap(), "&Full range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
-  m_menuColorOptions->addAction(action);
-
-  action = new QAction(QPixmap(), "&Slice range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
-  m_menuColorOptions->addAction(action);
-
   // --------------- View Menu ----------------------------------------
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
@@ -183,10 +168,37 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
   m_menuView->addAction(action);
 
+  // --------------- Color options Menu ----------------------------------------
+  m_menuColorOptions = new QMenu("&ColorMap", this);
+
+  action = new QAction(QPixmap(), "&Load Colormap", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "&Full range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "&Slice range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
+  m_menuColorOptions->addAction(action);
+
+  // --------------- Help Menu ----------------------------------------
+  m_menuHelp = new QMenu("&Help", this);
+  action = new QAction(QPixmap(), "&Slice Viewer Help (browser)", this);
+  action->setShortcut(Qt::Key_F1);
+  connect(action, SIGNAL(triggered()), this, SLOT(helpSliceViewer()));
+  m_menuHelp->addAction(action);
+
+  action = new QAction(QPixmap(), "&Line Viewer Help (browser)", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(helpLineViewer()));
+  m_menuHelp->addAction(action);
+
   // ---------------------- Build the menu bar -------------------------
   QMenuBar * bar = new QMenuBar(this, "Main Menu Bar");
   bar->addMenu( m_menuView );
   bar->addMenu( m_menuColorOptions );
+  bar->addMenu( m_menuHelp );
   ui.verticalLayout->insertWidget(0, bar );
 }
 
@@ -333,6 +345,19 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
 
+  // For showing the original coordinates
+  ui.frmMouseInfo->setVisible(false);
+  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  if (origWS)
+  {
+    CoordTransform * toOrig = m_ws->getTransformToOriginal();
+    if (toOrig)
+    {
+      ui.frmMouseInfo->setVisible(true);
+      ui.lblOriginalWorkspace->setText(QString::fromStdString("in '" + origWS->getName() + "'") );
+    }
+  }
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -464,6 +489,20 @@ void SliceViewer::zoomInSlot()
 void SliceViewer::zoomOutSlot()
 {
   this->zoomBy(1.0 / 1.1);
+}
+
+/// Slot for opening help page
+void SliceViewer::helpSliceViewer()
+{
+  QString helpPage = "MantidPlot:_SliceViewer";
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
+}
+
+/// Slot for opening help page
+void SliceViewer::helpLineViewer()
+{
+  QString helpPage = "MantidPlot:_LineViewer";
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 //------------------------------------------------------------------------------------
@@ -634,8 +673,14 @@ void SliceViewer::findRangeSlice()
 
 
 //------------------------------------------------------------------------------------
+/** Slot to show the mouse info at the mouse position
+ *
+ * @param x :: position of the mouse in plot coords
+ * @param y :: position of the mouse in plot coords
+ */
 void SliceViewer::showInfoAt(double x, double y)
 {
+  // Show the coordinates in the viewed workspace
   if (!m_ws) return;
   VMD coords(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
@@ -646,6 +691,30 @@ void SliceViewer::showInfoAt(double x, double y)
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
+
+  // Now show the coords in the original workspace
+  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  if (origWS)
+  {
+    CoordTransform * toOrig = m_ws->getTransformToOriginal();
+    if (toOrig)
+    {
+      // Transform the coordinates
+      VMD orig = toOrig->applyVMD(coords);
+
+      QString text;
+      for (size_t d=0; d<origWS->getNumDims(); d++)
+      {
+        text += QString::fromStdString( origWS->getDimension(d)->getName() );
+        text += ": ";
+        text += (orig[d] < 0) ? "-" : " ";
+        text += QString::number(fabs(orig[d]), 'g', 3).leftJustified(8, ' ');
+        if (d != origWS->getNumDims()-1)
+          text += " ";
+      }
+      ui.lblOriginalCoord->setText(text);
+    }
+  }
 }
 
 //------------------------------------------------------------------------------------

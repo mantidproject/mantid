@@ -366,7 +366,7 @@ namespace
       static PyTypeObject const* get_pytype() { return &PyFloat_Type;}
   };
 
-  unaryfunc py_unicode_as_string_unaryfunc = PyUnicode_AsUTF8String;
+  //unaryfunc py_unicode_as_string_unaryfunc = PyUnicode_AsUTF8String;
 
   // A SlotPolicy for extracting C++ strings from Python objects.
   struct string_rvalue_from_python

@@ -148,7 +148,7 @@ namespace Mantid
       int64_t m_spec_max;
 
       // C++ interface to the NXS file
-      ::NeXus::File * cppFile;
+      ::NeXus::File * m_cppFile;
     };
 	/// to sort the algorithmhistory vector
 	bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1, Mantid::NeXus::NXClassInfo elem2);

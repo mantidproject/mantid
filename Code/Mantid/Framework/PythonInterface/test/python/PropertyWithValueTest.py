@@ -98,3 +98,5 @@ class PropertyWithValueTest(unittest.TestCase):
     def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
         self._do_vector_int_numpy_test('WorkspaceIndexList')
 
+if __name__ == '__main__':
+    unittest.main()

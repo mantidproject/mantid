@@ -72,7 +72,8 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks, bool AppendPeaks = false)
+  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks, bool AppendPeaks = false,
+      bool histo = false)
   {
     // Name of the output workspace.
     std::string outWSName("peaksFound");
@@ -84,6 +85,20 @@ public:
     addPeak(500, -5,-5,5, 0.2);
     // This peak will be rejected as non-physical
     addPeak(500, -5,-5,-5, 0.2);
+
+    // Convert to a MDHistoWorkspace on option
+    if (histo)
+    {
+      FrameworkManager::Instance().exec("BinMD", 14,
+          "AxisAligned", "1",
+          "AlignedDimX", "Q_lab_x,-10,10,100",
+          "AlignedDimY", "Q_lab_y,-10,10,100",
+          "AlignedDimZ", "Q_lab_z,-10,10,100",
+          "IterateEvents", "1",
+          "InputWorkspace", "MDEWS",
+          "OutputWorkspace", "MDEWS"
+          );
+    }
   
     FindPeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -110,22 +125,22 @@ public:
     if (AppendPeaks) return;
 
     // The order of the peaks found is a little random because it depends on the way the boxes were sorted...
-    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.11);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.11);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.11);
     TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(),  12345);
     // Bin count = density of the box / 1e6
-    TS_ASSERT_DELTA( ws->getPeak(0).getBinCount(),  0.213623, 0.001);
+    TS_ASSERT_DELTA( ws->getPeak(0).getBinCount(),  (histo ? 0.0102 : 0.213623), 0.001);
 
     if (MaxPeaks > 1)
     {
-      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.11);
 
-      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.1);
-      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.11);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.11);
     }
 
     if (deleteWS)
@@ -143,6 +158,18 @@ public:
     do_test(true, 100, 3);
   }
 
+  /** Run normally */
+  void test_exec()
+  {
+    do_test(true, 100, 3);
+  }
+
+  /** Run normally, but limit to 1 peak */
+  void test_exec_withMaxPeaks()
+  {
+    do_test(true, 1, 1);
+  }
+
   /** Run twice and append to the peaks workspace*/
   void test_exec_AppendPeaks()
   {
@@ -150,16 +177,18 @@ public:
     do_test(true, 100, 6, true /* Append */ );
   }
 
-  void test_exec()
+
+  /** Run on MDHistoWorkspace */
+  void test_exec_histo()
   {
-    do_test(true, 100, 3);
+    do_test(true, 100, 3, false, true /*histo conversion*/);
   }
 
-  void test_exec_withMaxPeaks()
+  /** Run on MDHistoWorkspace, but limit to 1 peak */
+  void test_exec_histo_withMaxPeaks()
   {
-    do_test(true, 1, 1);
+    do_test(true, 1, 1, false, true /*histo conversion*/);
   }
-
 
 };
 

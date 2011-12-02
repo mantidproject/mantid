@@ -8,10 +8,13 @@
 #include <iomanip>
 
 #include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class CoordTransformAlignedTest : public CxxTest::TestSuite
 {
@@ -56,6 +59,26 @@ public:
     coord_t scaling[3] = {1, 2, 3};
     CoordTransformAligned ct(4,3, dimToBinFrom, origin, scaling);
 
+    coord_t input[4] = {16, 11, 11111111 /*ignored*/, 6};
+    coord_t output[3] = {0,0,0};
+    ct.apply(input, output);
+    TS_ASSERT_DELTA( output[0], 1.0, 1e-6 );
+    TS_ASSERT_DELTA( output[1], 2.0, 1e-6 );
+    TS_ASSERT_DELTA( output[2], 3.0, 1e-6 );
+  }
+
+  /// Turn the aligned transform into an affine transform
+  void test_makeAffineMatrix()
+  {
+    size_t dimToBinFrom[3] = {3, 1, 0};
+    coord_t origin[3] = {5, 10, 15};
+    coord_t scaling[3] = {1, 2, 3};
+    CoordTransformAligned cto(4,3, dimToBinFrom, origin, scaling);
+
+    Matrix<coord_t> mat = cto.makeAffineMatrix();
+    CoordTransformAffine ct(4,3);
+    ct.setMatrix(mat);
+    // Test in the same way
     coord_t input[4] = {16, 11, 11111111 /*ignored*/, 6};
     coord_t output[3] = {0,0,0};
     ct.apply(input, output);

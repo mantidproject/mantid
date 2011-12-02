@@ -24,7 +24,8 @@ class QActionGroup;
 class QSignalMapper;
 
 /**
-  * Implements the Pick tab in InstrumentWindow
+  * Implements the Pick tab in InstrumentWindow. Allows to pick a detector
+  * or a tube and display the data in it and some info.
   */
 class InstrumentWindowPickTab: public QFrame
 {
@@ -39,6 +40,7 @@ public:
   TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
 public slots:
   void setTubeXUnits(int units);
+  void changedIntegrationRange(double,double);
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -48,6 +50,7 @@ private slots:
   void addPeak(double,double);
   void storeCurve();
   void removeCurve(const QString &);
+  void savePlotToWorkspace();
 private:
   void showEvent (QShowEvent *);
   void updatePlot(int detid);
@@ -57,16 +60,26 @@ private:
   void plotTube(int detid);
   /// Calc indexes for min and max bin values defined in the instrument Actor
   void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax);
-  void plotTubeSums(
-    InstrumentActor* instrActor,
-    Mantid::Geometry::ICompAssembly_const_sptr ass,
-    Mantid::API::MatrixWorkspace_const_sptr ws,
-    int detid);
-  void plotTubeIntegrals(
-    InstrumentActor* instrActor,
-    Mantid::Geometry::ICompAssembly_const_sptr ass,
-    Mantid::API::MatrixWorkspace_const_sptr ws,
-    int detid);
+  void plotTubeSums(int detid);
+  void plotTubeIntegrals(int detid);
+  void prepareDataForSinglePlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void prepareDataForSumsPlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+  void prepareDataForIntegralsPlot(
+    int detid,
+    std::vector<double>&x,
+    std::vector<double>&y,
+    std::vector<double>* err = NULL);
+    TubeXUnits getTubeXUnits(const QString& name) const;
+    QString getTubeXUnitsName(TubeXUnits unit) const;
+
 
   InstrumentWindow* m_instrWindow;
   MantidGLWidget *mInstrumentDisplay;
@@ -80,7 +93,7 @@ private:
   bool m_plotSum; 
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
-  QAction *m_integrateTimeBins; ///< Sets summation over time bins (m_plotSum = false)
+  QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum = false)
   QActionGroup *m_summationType;
   QAction *m_logY;
   QAction *m_linearY;
@@ -90,6 +103,7 @@ private:
   QSignalMapper *m_unitsMapper;
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently displayed curves
+  QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a MatrixWorkspace
 
   CollapsiblePanel* m_plotPanel;
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information

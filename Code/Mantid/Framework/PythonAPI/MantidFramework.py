@@ -66,10 +66,20 @@ else:
             # ldd produces a string that always has 4 columns. The full path
             # is in the 3rd column
             return out.split()[2]
-        dlloader(get_libpath(os.path.join('libMantidKernel.so'), 'libNeXus'))
-        dlloader(os.path.join(_bin, 'libMantidKernel.so'))
-        dlloader(os.path.join(_bin, 'libMantidGeometry.so'))
-        dlloader(os.path.join(_bin, 'libMantidAPI.so'))
+        # stdc++ has to be loaded first or exceptions don't get translated 
+        # properly across bounadries
+        # NeXus has to be loaded as well as there seems to be an issue with
+        # the thread-local storage not being initialized properly unles
+        # it is loaded before other libraries.
+        ldpath = os.environ.get("LD_LIBRARY_PATH", "")
+        ldpath += ":" + _bin
+        os.environ["LD_LIBRARY_PATH"] = ldpath
+        pythonlib = os.path.join(_bin,'libMantidPythonAPI.so')
+        dlloader(get_libpath(pythonlib, 'stdc++'))
+        dlloader(get_libpath(pythonlib, 'libNeXus'))
+        dlloader(get_libpath(pythonlib, 'libMantidKernel'))
+        dlloader(get_libpath(pythonlib, 'libMantidGeometry'))
+        dlloader(get_libpath(pythonlib, 'libMantidAPI'))
 
     from libMantidPythonAPI import *
     from libMantidPythonAPI import _binary_op, _equals_op

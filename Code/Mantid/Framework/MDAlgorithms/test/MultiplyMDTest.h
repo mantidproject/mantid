@@ -48,10 +48,36 @@ public:
     TS_ASSERT_DELTA( out->getSignalAt(0), 6.0, 1e-5);
   }
 
-  void test_event_fails()
+  void test_event_event_or_histo_fails()
   {
-    BinaryOperationMDTestHelper::doTest("MultiplyMD", "event_A", "scalar", "out", false /*fails*/);
-    BinaryOperationMDTestHelper::doTest("MultiplyMD", "scalar", "event_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("MultiplyMD", "event_A", "histo_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("MultiplyMD", "histo_A", "event_A", "out", false /*fails*/);
+    BinaryOperationMDTestHelper::doTest("MultiplyMD", "event_A", "event_A", "out", false /*fails*/);
+  }
+
+
+  /** Get a MDEventWorkspace and check that all events have the given signal/error */
+  void checkMDEWSignal(std::string wsName, signal_t expectedSignal, signal_t expectedError)
+  {
+    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    TS_ASSERT(ws); if (!ws) return;
+    IMDIterator* it = ws->createIterator(NULL);
+    do
+    {
+      TS_ASSERT_EQUALS( it->getNumEvents(), 1);
+      TS_ASSERT_DELTA( it->getInnerSignal(0), expectedSignal, 1e-5);
+      TS_ASSERT_DELTA( it->getInnerError(0), expectedError, 1e-5);
+    }
+    while (it->next());
+  }
+
+  /// Multiply events by a scalar
+  void test_event_scalar()
+  {
+    BinaryOperationMDTestHelper::doTest("MultiplyMD", "event_A", "scalar", "out");
+    checkMDEWSignal("out", 3.0, sqrt(12.0));
+    BinaryOperationMDTestHelper::doTest("MultiplyMD", "scalar", "event_A", "out");
+    checkMDEWSignal("out", 3.0, sqrt(12.0));
   }
 
 };

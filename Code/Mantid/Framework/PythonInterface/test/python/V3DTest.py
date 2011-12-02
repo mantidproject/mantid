@@ -68,3 +68,7 @@ class V3DTest(unittest.TestCase):
     def test_norm2(self):
         p = V3D(1.0,-5.0,8.0);
         self.assertAlmostEquals(p.norm2(), 90.0)
+
+        
+if __name__ == '__main__':
+    unittest.main()

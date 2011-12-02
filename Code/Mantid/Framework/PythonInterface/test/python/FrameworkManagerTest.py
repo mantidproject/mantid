@@ -17,18 +17,22 @@ class FrameworkManagerTest(unittest.TestCase):
         self.assertRaisesNothing(framework_mgr.clear_algorithms)
         self.assertRaisesNothing(framework_mgr.clear_instruments)
         
-    def test_create_algorithm_produces_managed_alg_outside_PyExec(self):
+    def _is_managed_test(self, alg, version):
+        self.assertTrue(alg.is_initialized())
+        self.assertTrue(alg.version(), version)
+        self.assertTrue(isinstance(alg, AlgorithmProxy))
+        self.assertTrue(hasattr(alg, '__async__'))
+        self.assertTrue(alg.__async__)
+        
+    def test_create_algorithm_produces_managed_alg_outside_PyExec_with_async_attr_and_is_true(self):
         alg = framework_mgr.create_algorithm("Rebin")
-        self.assertTrue(alg.is_initialized())
-        self.assertTrue(isinstance(alg, AlgorithmProxy))
+        self._is_managed_test(alg, 1)
         
-    def test_create_algorithm_with_version_produces_managed_alg_outside_PyExec(self):
+    def test_create_algorithm_with_version_produces_managed_alg_outside_PyExec_with_async_and_is_true(self):
         alg = framework_mgr.create_algorithm("LoadRaw", 2)
-        self.assertTrue(alg.version(), 2)
-        self.assertTrue(alg.is_initialized())
-        self.assertTrue(isinstance(alg, AlgorithmProxy))
+        self._is_managed_test(alg, 2)
         
-    def test_create_algorithm_produces_unmanaged_inside_PyExec(self):
+    def test_create_algorithm_produces_unmanaged_inside_PyExec_with_async_and_is_false(self):
         # A small test class to have a PyExec method call the 
         # algorithm creation
         class TestAlg(object):
@@ -39,6 +43,11 @@ class FrameworkManagerTest(unittest.TestCase):
                 alg = framework_mgr.create_algorithm("Rebin")
                 self._test_obj.assertTrue(alg.is_initialized())
                 self._test_obj.assertFalse(isinstance(alg, AlgorithmProxy))
+                self._test_obj.assertTrue(hasattr(alg, '__async__'))
+                self._test_obj.assertFalse(alg.__async__)
         
         top_level = TestAlg(self)
         top_level.PyExec()
+        
+if __name__ == '__main__':
+    unittest.main()

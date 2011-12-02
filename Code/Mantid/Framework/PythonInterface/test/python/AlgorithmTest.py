@@ -41,3 +41,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.get_property('NSpec').name, 'NSpec')
         ws = alg.get_property('OutputWorkspace').value
         self.assertTrue(ws.get_memory_size() > 0.0 )
+        
+if __name__ == '__main__':
+    unittest.main()
+    

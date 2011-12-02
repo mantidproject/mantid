@@ -64,6 +64,7 @@ namespace MDEvents
     
     std::string toXMLString() const;
     void apply(const coord_t * inputVector, coord_t * outVector) const;
+    Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const;
 
   protected:
     /// For each dimension in the output, index in the input workspace of which dimension it is

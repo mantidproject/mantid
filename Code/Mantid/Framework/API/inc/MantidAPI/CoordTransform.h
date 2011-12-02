@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VMD.h"
 
 namespace Mantid
 {
@@ -33,6 +34,9 @@ namespace API
     virtual std::string toXMLString() const = 0;
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const = 0;
 
+    /// Wrapper for VMD
+    Mantid::Kernel::VMD applyVMD(const Mantid::Kernel::VMD & inputVector) const;
+
     /// @return the number of input dimensions
     size_t getInD() const
     { return inD; };
@@ -40,6 +44,9 @@ namespace API
     /// @return the number of output dimensions
     size_t getOutD() const
     { return outD; };
+//
+//    /// Compound the transformation by appending another one after this one.
+//    virtual void compound(CoordTransform * other) = 0;
 
   protected:
     /// Input number of dimensions

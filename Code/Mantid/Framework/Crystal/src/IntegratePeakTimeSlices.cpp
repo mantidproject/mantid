@@ -176,9 +176,9 @@ namespace Mantid
 
       declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
 
-      declareProperty("Intensity", 0.0, "Peak Integrated Intensity");
+      declareProperty("Intensity", 0.0, "Peak Integrated Intensity", Direction::Output);
 
-      declareProperty("SigmaIntensity", 0.0, "Peak Integrated Intensity Error");
+      declareProperty("SigmaIntensity", 0.0, "Peak Integrated Intensity Error", Direction::Output);
 
     }
 
@@ -261,9 +261,56 @@ namespace Mantid
         Mantid::MantidVec X = inpWkSpace->dataX(specNum);
         int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(specNum), Chan);
 
-        dChan = max<int> (dChan, 5);
+        dChan = max<int> (dChan, 3);
+      
+        boost::shared_ptr<const RectangularDetector> panel = getPanel(peak);
 
-        sprintf(logInfo, std::string("   dRow = %5.3f  dChan = %d \n").c_str(), dRow, dChan);
+        int MaxChan = -1;
+        double MaxCounts = -1;
+        double Centy = Row0;
+        double Centx = Col0;
+        bool done = false;
+        for( int dir =1 ; dir >-2; dir -=2)
+        for( int t= 0; t < dChan && !done; t++)
+          if( dir < 0 &&  t==0 )
+           {
+             Centy = Row0;
+             Centx = Col0;
+             done = false;
+            }
+           else if( Chan+dir*t <0 || Chan+dir*t >= (int)X.size())
+              done = true;
+           else
+           { 
+              std::vector<int> Attr= CalculateStart_and_NRowsCols( Centy,
+                                                                   Centx,
+                                                                    (int)(.5+dRow),
+                                                                   (int)(.5+dRow),
+                                                                   nPanelRows,
+                                                                   nPanelCols);
+             
+              MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
+                         std::string("Workspace2D"), 2, Attr[2] * Attr[3] + 1, Attr[2] * Attr[3]);
+
+              SetUpData1(Data, inpWkSpace, panel, Chan+dir*t, Attr, wi_to_detid_map, g_log);
+              
+              if( AttributeValues[IIntensities] > MaxCounts)
+              {
+                 MaxCounts = AttributeValues[IIntensities];
+                 MaxChan = Chan+dir*t;
+               }
+               if( AttributeValues[IIntensities] >0)
+               {
+                  Centx = AttributeValues[ ISSIx]/AttributeValues[IIntensities];
+                  Centy = AttributeValues[ ISSIy]/AttributeValues[IIntensities];
+                }else
+                   done = true;
+              
+           }
+        
+        Chan = max<int>( Chan , MaxChan );
+
+        sprintf(logInfo, std::string("   Start/largest Channel = %d \n").c_str(), dRow, dChan);
         g_log.debug(std::string(logInfo));
 
         if (dRow < 2 || dChan < 3)
@@ -274,7 +321,7 @@ namespace Mantid
 
         InitializeColumnNamesInTableWorkspace(TabWS);
 
-        boost::shared_ptr<const RectangularDetector> panel = getPanel(peak);
+        
 
         IAlgorithm_sptr fit_alg;
 
@@ -283,16 +330,20 @@ namespace Mantid
 
         Mantid::API::Progress prog(this, 0.0, 100.0, (int) dChan);
 
+        RectWidth = RectHeight = -1;
+   
         for (int dir = 1; dir >= -1; dir -= 2)
         {
           bool done = false;
 
-          for (int chan = 0; chan < dChan / 2 && !done; chan++)
+          for (int chan = 0; chan < dChan  && !done; chan++)
             if (dir < 0 && chan == 0)
             {
               lastRow = Row0;
               lastCol = Col0;
             }
+            else if( Chan+dir*chan <0 || Chan+dir*chan >= (int)X.size())
+               done = true;
             else
             {
 
@@ -307,11 +358,17 @@ namespace Mantid
 
               time = (X[xchan] + X[topIndex]) / 2.0;
 
+              int Pixelx = 2*(int)dRow;
+              int Pixely = 2*(int)dRow;
+              if( RectWidth >0 && RectHeight >0)
+              {
+                 Pixelx = (int)(.5+RectWidth);
+                 Pixely = (int)(.5+RectHeight);
+              }
               std::vector<int> Attr = CalculateStart_and_NRowsCols(  lastRow,
                                                                      lastCol,
-                                                                     2 * (int) dRow,
-                                                     // use Rectwidth/Height if valid.
-                                                                     2 * (int) dRow,
+                                                                     Pixely,
+                                                                     Pixelx,            
                                                                      nPanelRows,
                                                                      nPanelCols);
 
@@ -323,14 +380,9 @@ namespace Mantid
               sprintf(logInfo, string(
                               " A:chan= %d  time=%7.2f  startRow=%d  startCol= %d  Nrows=%d  Ncols=%d\n").c_str(),
                                  xchan, time, Attr[0], Attr[1], Attr[2], Attr[3]);
-                           g_log.debug(std::string(logInfo));
+              g_log.debug(std::string(logInfo));
 
               SetUpData(Data, inpWkSpace, panel, xchan, Attr);
-
-              sprintf(logInfo, string(
-                 "   chan= %d  time=%7.2f  startRow=%d  startCol= %d  Nrows=%d  Ncols=%d\n").c_str(),
-                    xchan, time, Attr[0], Attr[1], Attr[2], Attr[3]);
-              g_log.debug(std::string(logInfo));
 
               ncells = (int) (Attr[INRows] * Attr[INCol]);
 
@@ -588,14 +640,14 @@ namespace Mantid
 
       if (X[0] > X[1])
         sgn = -1;
-
+      
       if (sgn * (X[0] - time) >= 0)
         return 0;
 
       if (sgn * (time - X[X.size() - 1]) >= 0)
         return (int) X.size() - 1;
 
-      for (size_t i = 0; i < X.size() - (size_t) 1; i++)
+      for (size_t i = 0; i < (size_t)X.size() - (size_t) 1; i++)
       {
         if (sgn * (time - X[i]) >= 0 && sgn * (X[i + (size_t) 1] - time) >= 0)
           return (int) i;
@@ -618,7 +670,7 @@ namespace Mantid
       double time = peak.getTOF();
       double dtime = dQ / Q * time;
       int chanCenter = find(X, time);
-
+       
       Centerchan = chanCenter;
       int chanLeft = find(X, time - dtime);
       int chanRight = find(X, time + dtime);
@@ -629,6 +681,7 @@ namespace Mantid
         dchan = abs(chanRight - chanCenter);
 
       dchan = max<int> (3,  dchan );
+
       return  dchan + 5;//heuristic should be a lot more
     }
 
@@ -671,7 +724,6 @@ namespace Mantid
                                                                        const int nPanelCols
                                                                       )
     {
-
       std::vector<int> Res;
 
       double StartRow = CentRow - (int) (dRow / 2);
@@ -798,22 +850,32 @@ namespace Mantid
                                              const int                                       chan,
                                              std::vector<int>                               & Attr)
     {
-      //TODO, Check RectWidth and RectHeight
-      //  if( positive use that. Redo Attr
-      //  Otherwise run SetUpData1 once, find means and std devs.  Run again( fix Attr) using new center and 2.3* the stdev's
-      //  Also, can set RectWidth and RectHeight to non -1 values so all other slices use the original width and heights
-      //
+      
 
       SetUpData1(Data, inpWkSpace, panel, chan, Attr, wi_to_detid_map, g_log);
 
       int nPanelRows = (panel->ypixels());
       int nPanelCols = (panel->xpixels());
-      int NewNRows= max<int>( 15,(int) (4.71* sqrt(ParameterValues[IVYY])+.5));
-      int NewNCols = max<int>(15,(int)( 4.71*  sqrt(ParameterValues[IVXX])+.5));
+
+      int NewNRows= 2*max<int>( 5,(int) (3* sqrt(ParameterValues[IVYY])+.5));
+      int NewNCols = 2*max<int>(5,(int)( 3*sqrt(ParameterValues[IVXX])+.5));
+      NewNRows = min<int>(2*30,NewNRows);
+      NewNCols = min<int>(2*30,NewNCols);
+
+      if( RectWidth > 0 && RectHeight > 0)
+      {
+         NewNRows = (int)(.5+RectHeight);
+         NewNCols = (int)(.5+RectWidth);
+       } else
+       {
+          RectWidth = NewNCols;
+          RectHeight = NewNRows;
+       }     
+
       vector<int> Attr1 =CalculateStart_and_NRowsCols(  ParameterValues[IYMEAN ],
                                                         ParameterValues[IXMEAN],
-                                                         NewNRows,
-                                                          NewNCols,
+                                                        NewNRows,
+                                                        NewNCols,
                                                         nPanelRows,
                                                         nPanelCols);
 
@@ -837,7 +899,7 @@ namespace Mantid
     {
       UNUSED_ARG(g_log);
       boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
-
+      
       std::vector<double> StatBase;
       for (int i = 0; i < NAttributes + 2; i++)
         StatBase.push_back(0);
@@ -861,6 +923,7 @@ namespace Mantid
 
       double TotBoundaryIntensities = 0;
       int nBoundaryCells = 0;
+      double T=0;
       for (int row = Attr[0]; row < Attr[0] + Attr[2]; row++)
         for (int col = Attr[1]; col < Attr[1] + Attr[3]; col++)
         {
@@ -877,7 +940,8 @@ namespace Mantid
 
           double intensity = histogram[chan];
           double variance = histoerrs[chan] * histoerrs[chan];
-
+          
+          T+=intensity;
           yvalB.push_back(intensity);
           errB.push_back(1);
 
@@ -895,7 +959,7 @@ namespace Mantid
             nBoundaryCells++;
           }
         }
-
+      
       ws->setData(0, yvals, errs);
       StatBase[IStartRow] = Attr[0];
       StatBase[IStartCol] = Attr[1];
@@ -1052,11 +1116,13 @@ namespace Mantid
                                                                 const double TotVariance,
                                                                 const int ncells)
     {
-      UNUSED_ARG(ChiSqOverDOF)
-
-      double Variance = TotVariance + (backError * backError * TotVariance / ncells) * ncells * ncells
+     
+      double B = TotVariance / ncells;
+      if( B < ChiSqOverDOF)
+         B = ChiSqOverDOF;
+      double Variance = TotVariance + (backError * backError * B) * ncells * ncells
           + background * ncells;
-
+       
       return sqrt(Variance);
 
     }
@@ -1110,6 +1176,7 @@ namespace Mantid
       //cout<<"ISAWIntensity parts="<<","<<AttributeValues[IIntensities]<<","<<params[Ibk]<<","<<ncells <<endl;
       TabWS->getRef<double> (std::string("ISAWIntensityError"), TableRow) = CalculateIsawIntegrateError(
           params[Ibk], errs[Ibk], chisq, AttributeValues[IVariance], ncells);
+      
       TabWS->getRef<double> (std::string("Time"), TableRow) = time;
 
       TabWS->getRef<double> (std::string("Start Row"), TableRow) = AttributeValues[IStartRow];

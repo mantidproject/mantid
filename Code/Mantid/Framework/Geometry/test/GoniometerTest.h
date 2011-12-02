@@ -172,7 +172,7 @@ public:
   /** Save and load to NXS file */
   void test_nexus()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("GoniometerTest.nxs");
 
     Goniometer G;

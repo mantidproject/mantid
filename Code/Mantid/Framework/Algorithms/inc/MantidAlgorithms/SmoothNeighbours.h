@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/scoped_ptr.hpp>
@@ -13,85 +14,48 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    typedef std::map<specid_t, double>  SpectraDistanceMap;
+   
     /*
-    Abstract weighting strategy, which can be applied to calculate individual 
-    weights for each pixel based upon disance from epicenter.
+    Filters spectra detector list by radius.
     */
-    class DLLExport WeightingStrategy
+    class DLLExport RadiusFilter
     {
     public:
-      /// Constructor
-      WeightingStrategy(double& cutOff) : m_cutOff(cutOff){};
-      /// Constructor
-      WeightingStrategy() : m_cutOff(0){};
-      /// Destructor
-      virtual ~WeightingStrategy(){};
       /**
-      Calculate the weight at distance from epicenter.
-      @param distance : absolute distance from epicenter
-      @return calculated weight
+      Constructor
+      @cutoff : radius cutoff for filtering
       */
-      virtual double weightAt(double& distance) = 0;
-
+      RadiusFilter(double cutoff) : m_cutoff(cutoff)
+      {
+        if(cutoff < 0)
+        {
+          throw std::invalid_argument("RadiusFilter - Cannot have a negative cutoff.");
+        }
+      }
       /**
-      Calculate the weight at distance from epicenter.
-      @param adjX : The number of Y (vertical) adjacent pixels to average together
-      @param ix : current index x
-      @param adjY : The number of X (vertical) adjacent pixels to average together
-      @param iy : current index y
+      Apply the filtering based on radius.
+      @param unfiltered : unfiltered spectra-distance map.
+      @return filtered spectra-distance map.
       */
-      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy) = 0;
-    protected:
-      /// Cutoff member.
-      double m_cutOff;
-    };
-
-    /*
-    Flat (no weighting) strategy. Concrete WeightingStrategy
-    */
-    class DLLExport FlatWeighting : public WeightingStrategy
-    {
-    public:
-      FlatWeighting() : WeightingStrategy(){}
-      virtual ~FlatWeighting(){};
-      virtual double weightAt(int&, int&, int&, int&){return 1;}
-      double weightAt(double&){ return 1;}
-    };
-
-    /*
-    Linear weighting strategy.
-    */
-    class DLLExport LinearWeighting : public WeightingStrategy
-    {
-    public: 
-      LinearWeighting(double &cutOff) : WeightingStrategy(cutOff){}
-      virtual ~LinearWeighting(){};
-      double weightAt(double& distance)
+      SpectraDistanceMap apply(SpectraDistanceMap& unfiltered) const
       {
-        return 1 - (distance/m_cutOff);
+        SpectraDistanceMap::iterator it = unfiltered.begin();
+        SpectraDistanceMap neighbSpectra;
+        while(it != unfiltered.end())
+        {
+          //Strip out spectra that don't meet the radius criteria.
+          if(it->second <= m_cutoff)
+          {
+            neighbSpectra.insert(std::make_pair(it->first, it->second));
+          }
+          it++;
+        }
+        return neighbSpectra;
       }
-      virtual double weightAt(int& adjX, int& ix, int& adjY, int& iy)
-      {
-        return static_cast<double>(adjX - std::abs(ix) + adjY - std::abs(iy) + 1);
-      }
-    };
-
-    /*
-    Null weighting strategy.
-    */
-    class DLLExport NullWeighting : public WeightingStrategy
-    {
-    public:
-      NullWeighting() : WeightingStrategy(){}
-      virtual ~NullWeighting(){};
-      double weightAt(double&)
-      {
-        throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
-      }
-      virtual double weightAt(int&, int&, int&, int&)
-      {
-        throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
-      }
+    private:
+      /// Radius cutoff.
+      double m_cutoff;
     };
 
   /** Smooth neighboring pixels.
@@ -148,6 +112,8 @@ private:
 
   /// Sets the weighting stragegy.
   void setWeightingStrategy(const std::string strategyName, double& cutOff);
+  /// Translate the entered radius into meters.
+  double translateToMeters(const std::string radiusUnits, const double& enteredRadius);
 
   /// Pixels in the detector
   int XPixels;

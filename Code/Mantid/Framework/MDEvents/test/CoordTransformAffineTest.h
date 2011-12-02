@@ -1,10 +1,14 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMAFFINETEST_H_
 
+#include "MantidAPI/CoordTransform.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -13,6 +17,7 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
+using Mantid::API::CoordTransform;
 
 class CoordTransformAffineTest : public CxxTest::TestSuite
 {
@@ -97,6 +102,21 @@ public:
     compare(2, out, expected);
   }
 
+  /** apply() method with VMD */
+  void test_apply_VMD()
+  {
+    coord_t translation[2] = {2.0, 3.0};
+    CoordTransformAffine ct(2,2);
+    ct.addTranslation(translation);
+    // Transform a VMD
+    VMD in(1.5,2.5);
+    VMD out = ct.applyVMD(in);
+    TS_ASSERT_DELTA( out[0], 3.5, 1e-5 );
+    TS_ASSERT_DELTA( out[1], 5.5, 1e-5 );
+    // Wrong number of dimensions?
+    TSM_ASSERT_THROWS_ANYTHING( "Check for the right # of dimensions", ct.applyVMD(VMD(1.0, 2.0, 3.0)) );
+  }
+
   /** Test rotation in isolation */
   void test_rotation()
   {
@@ -137,6 +157,7 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   /** Test a case of a rotation 0.1 radians around +Z,
    * and a projection into the XY plane */
   void test_buildOrthogonal()
@@ -172,7 +193,8 @@ public:
     ct.apply(in2, out);
     compare(2, out, exp2);
 
-    // Checks for failure to build
+    // Checks for failure to build  //-----------------------------------------------------------------------------------------------
+
     bases.push_back( VMD(1,2,3) );
     TSM_ASSERT_THROWS_ANYTHING( "Too many bases throws", ct.buildOrthogonal(origin, bases, scale) );
     bases.resize(2);
@@ -181,6 +203,7 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   /** Test a case of a rotation 0.1 radians around +Z,
    * and a projection into the XY plane,
    * and scaling in the output dimensions */
@@ -218,8 +241,111 @@ public:
     TSM_ASSERT_THROWS_ANYTHING( "Mismatch in scaling vector", ct.buildOrthogonal(origin, bases, scale) );
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /// Validate Inputs
+  void test_combineTransformations_failures()
+  {
+    CoordTransformAffine ct33(3,3);
+    CoordTransformAffine ct43(4,3);
+    CoordTransformAffine ct32(3,2);
+    CoordTransformAffine ct42(4,2);
+    TSM_ASSERT_THROWS_ANYTHING("Null input fails.", CoordTransformAffine::combineTransformations(NULL, NULL) );
+    TSM_ASSERT_THROWS_ANYTHING("Null input fails.", CoordTransformAffine::combineTransformations(NULL, &ct43) );
+    TSM_ASSERT_THROWS_ANYTHING("Incompatible # of dimensions", CoordTransformAffine::combineTransformations(&ct42, &ct32) );
+    TSM_ASSERT_THROWS_ANYTHING("Incompatible # of dimensions", CoordTransformAffine::combineTransformations(&ct32, &ct43) );
+    TSM_ASSERT_THROWS_NOTHING("Compatible # of dimensions", CoordTransformAffine::combineTransformations(&ct43, &ct32) );
+    coord_t center[3] = {1,2,3};
+    bool bools[3] = {true, true, true};
+    CoordTransformDistance ctd(3, center, bools);
+    TSM_ASSERT_THROWS_ANYTHING("Only aligned or affine inputs", CoordTransformAffine::combineTransformations(&ct33, &ctd) );
+    TSM_ASSERT_THROWS_ANYTHING("Only aligned or affine inputs", CoordTransformAffine::combineTransformations(&ctd, &ct33) );
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Combine two simple translations */
+  void test_combineTransformations_translations()
+  {
+    coord_t in[2] = {1.5, 2.5};
+    coord_t out[2];
+    coord_t translation1[2] = {2.0, 3.0};
+    coord_t translation2[2] = {5.0, 9.0};
+    coord_t expected[2] = {8.5, 14.5};
+    CoordTransformAffine ct1(2,2);
+    ct1.addTranslation(translation1);
+    CoordTransformAffine ct2(2,2);
+    ct2.addTranslation(translation2);
+    // Combine them
+    CoordTransformAffine * combined = CoordTransformAffine::combineTransformations(&ct1, &ct2);
+    combined->apply(in, out);
+    compare(2, out, expected);
+  }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /// Combine two 2D transforms, compare the result
+  void do_test_combined(CoordTransform * ct1, CoordTransform * ct2)
+  {
+    coord_t in[2] = {1.5, 2.5};
+    coord_t out1[2];
+    coord_t out2[2];
+    coord_t out_combined[2];
+
+    // First, apply the transform individually
+    ct1->apply(in, out1);
+    ct2->apply(out1, out2);
+
+    // Combine them
+    CoordTransformAffine * combined = CoordTransformAffine::combineTransformations(ct1, ct2);
+    combined->apply(in, out_combined);
+
+    // Applying the combined one = same as each one in sequence
+    compare(2, out_combined, out2);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /// Combine two complex affine transforms
+  void test_combineTransformations_affine_affine()
+  {
+    CoordTransformAffine ct1(2, 2);
+    double angle = 0.1;
+    std::vector<VMD> bases1;
+    bases1.push_back( VMD(cos(angle), sin(angle)) );
+    bases1.push_back( VMD(-sin(angle), cos(angle)) );
+    ct1.buildOrthogonal( VMD(3.0, 4.0), bases1, VMD(5.5, -6.7) );
+
+    CoordTransformAffine ct2(2, 2);
+    angle = +0.34;
+    std::vector<VMD> bases2;
+    bases2.push_back( VMD(cos(angle), sin(angle)) );
+    bases2.push_back( VMD(-sin(angle), cos(angle)) );
+    ct2.buildOrthogonal( VMD(8.0, -9.0), bases2, VMD(0.34, 12.5) );
+    // And test
+    do_test_combined( &ct1, &ct2);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /// Combine affine + aligned
+  void test_combineTransformations_affine_aligned()
+  {
+    CoordTransformAffine ct1(2, 2);
+    double angle = 0.1;
+    std::vector<VMD> bases1;
+    bases1.push_back( VMD(cos(angle), sin(angle)) );
+    bases1.push_back( VMD(-sin(angle), cos(angle)) );
+    ct1.buildOrthogonal( VMD(3.0, 4.0), bases1, VMD(5.5, -6.7) );
+
+    size_t dimensionToBinFrom[2] = {1, 0};
+    coord_t origin[2] = {-12.34, +34.56};
+    coord_t scaling[2] = {-3.4, +2.3};
+    CoordTransformAligned ct2(2, 2, dimensionToBinFrom, origin, scaling);
+
+    // And test
+    do_test_combined( &ct1, &ct2);
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
   void testSerialization()
   {
     using Mantid::Kernel::V3D;
