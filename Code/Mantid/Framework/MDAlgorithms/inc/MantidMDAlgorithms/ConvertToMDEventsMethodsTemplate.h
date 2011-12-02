@@ -6,7 +6,7 @@ namespace MDAlgorithms
 
 
 //-----------------------------------------------
-template<size_t nd,Q_state Q>
+template<size_t nd,Q_state Q, AnalMode MODE>
 void 
 ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 {
@@ -36,7 +36,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     std::vector<coord_t> Coord(nd);
 
 
-    if(!calc_generic_variables<Q>(Coord,nd))return; // if any property dimension is outside of the data range requested
+    if(!calc_generic_variables<Q,MODE>(Coord,nd))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(numSpec); ++i)
     {
@@ -46,7 +46,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         const MantidVec& Error    = inWS2D->readE(i);
         int32_t det_id            = det_loc.det_id[i];
 
-        if(!calculate_y_coordinate<Q>(Coord,i))continue;   // skip y outsize of the range;
+        if(!calculate_y_coordinate<Q,MODE>(Coord,i))continue;   // skip y outsize of the range;
 
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
@@ -54,7 +54,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
             // drop emtpy events
            if(Signal[j]<FLT_EPSILON)continue;
 
-           if(!calculate_ND_coordinates<Q>(X,i,j,Coord))continue; // skip ND outside the range
+           if(!calculate_ND_coordinates<Q,MODE>(X,i,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
             pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
@@ -112,7 +112,8 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
 
 // PROCESS GENERIG VARIABLES AS FUNCTION OF ALGORITHM
 template<> 
-bool ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
+inline bool ConvertToMDEvents::calc_generic_variables<NoQ,ANY_Mode>(std::vector<coord_t> &Coord, size_t nd)
+{
     // workspace defines 2 properties
          fillAddProperties(Coord,nd,2);
          for(size_t i=2;i<nd;i++){
@@ -125,17 +126,16 @@ bool ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord,
           }
          return true;
 }
-//
+
 template<> 
-bool ConvertToMDEvents::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
+inline bool ConvertToMDEvents::calc_generic_variables<modQ, ANY_Mode>(std::vector<coord_t> &Coord, size_t nd){
     UNUSED_ARG(Coord);
     UNUSED_ARG(nd);
     throw(Kernel::Exception::NotImplementedError("not yet implemented"));
 }
 //
 template<> 
-bool ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
-   // INELASTIC:
+inline bool ConvertToMDEvents::calc_generic_variables<Q3D,ANY_Mode>(std::vector<coord_t> &Coord, size_t nd){   
     // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
     fillAddProperties(Coord,nd,4);
     for(size_t i=4;i<nd;i++){
@@ -152,7 +152,7 @@ bool ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord,
 
 // PROCESS Y VARIABLE AS FUNCTION OF SUBALGORITHM
 template<>
-bool ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
+inline bool ConvertToMDEvents::calculate_y_coordinate<NoQ,ANY_Mode>(std::vector<coord_t> &Coord,size_t i)
 {
         UNUSED_ARG(i);
         Coord[1]                  = pYAxis->operator()(i);
@@ -161,7 +161,7 @@ bool ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,
 }
 // PROCESS X - VARIABLE AS FUNCTION OF SUBALGORITHM
 template<>
-bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+inline bool ConvertToMDEvents::calculate_ND_coordinates<NoQ,ANY_Mode>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(i);
         Coord[0]    = 0.5*( X[j]+ X[j+1]);
         if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
@@ -169,7 +169,7 @@ bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t 
 }
 //
 template<>
-bool ConvertToMDEvents::calculate_ND_coordinates<Q3D>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+inline bool ConvertToMDEvents::calculate_ND_coordinates<Q3D,Direct>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
 
           coord_t E_tr = 0.5*( X[j]+ X[j+1]);
           Coord[3]    = E_tr;
@@ -191,6 +191,30 @@ bool ConvertToMDEvents::calculate_ND_coordinates<Q3D>(const MantidVec& X,size_t 
 
          return true;
 }
+template<>
+inline bool ConvertToMDEvents::calculate_ND_coordinates<Q3D,Indir>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+
+          coord_t E_tr = 0.5*( X[j]+ X[j+1]);
+          Coord[3]    = E_tr;
+          if(Coord[3]<dim_min[3]||Coord[3]>=dim_max[3])return false;
+
+
+          double k_tr = sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+   
+          double  ex = det_loc.det_dir[i].X();
+          double  ey = det_loc.det_dir[i].Y();
+          double  ez = det_loc.det_dir[i].Z();
+          double  qx  =  -ex*k_tr;                
+          double  qy  =  -ey*k_tr;
+          double  qz  = ki - ez*k_tr;
+
+         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
+         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
+         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<dim_min[2]||Coord[2]>=dim_max[2])return false;
+
+         return true;
+}
+
 
 
 } // endNamespace MDAlgorithms

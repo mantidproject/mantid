@@ -92,13 +92,13 @@ ConvertToMDEvents::init()
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
 
      
-     /// this variable describes default possible ID-s for Q-dimensions
-     std::vector<std::string> Q_ID_possible(3);
-     Q_ID_possible[0]="|Q|";
-     Q_ID_possible[1]="QxQyQz";    
-     Q_ID_possible[2]="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
-     declareProperty("QDimensions",Q_ID_possible[0],new ListValidator(Q_ID_possible),
-                              "You can select mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
+     /// this variable describes default possible ID-s for Q-dimensions   
+     declareProperty("QDimensions",Q_modes[modQ],new ListValidator(Q_modes),
+                              "You can to trsansfer sourcs workspace dimensions into target worskpace or process mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
+
+     /// this variable describes implemented modes for energy transfer analysis
+     declareProperty("dEAnalysisMode",dE_modes[Elastic],new ListValidator(dE_modes),
+                              "You can to trsansfer sourcs workspace dimensions into target worskpace or process mod(Q) (1 dimension) or QxQyQz (3 dimensions) in Q space",Direction::InOut);        
 
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
@@ -205,22 +205,24 @@ void ConvertToMDEvents::exec(){
     }
     // string -Key to identify the algorithm
     std::string algo_id;
-
+    std::vector<std::string> ws_dim_names,ws_dim_units;
 
     // if new workspace is created, its properties are determened by the user's input
     if (create_new_ws){
         // what dimension names can be obtained from the input workspace
-        std::vector<std::string> dim_names_availible = this->getDimensionNames(inWS2D);
+        std::vector<std::string> dim_names_availible = this->getDimensionNames(inWS2D,ws_dim_names,ws_dim_units);
 
         // get dim_names requested by user:
         std::vector<std::string> dim_requested;
         //a) by Q selector:
-        std::string Q_dim_requested              = getProperty("QDimensions");  
-        //b) by other dim property;
+        std::string Q_mod_req                    = getProperty("QDimensions");  
+        //b) the energy exchange mode
+        std::string dE_mod_req                   = getProperty("dEAnalysisMode");
+        //c) by other dim property;
         std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
 
-        // Identify the algorithm to deploy and idemtify/set the dimension names to use
-        algo_id = identify_the_alg(dim_names_availible, Q_dim_requested,other_dim_names,n_activated_dimensions);
+        // Identify the algorithm to deploy and identify/set the dimension names to use
+//        algo_id = identifyTheAlg(dim_names_availible,ws_dim_names,ws_dim_units,Q_mod_req,dE_mod_req,other_dim_names,n_activated_dimensions);
 
         // set the min and max values for the dimensions from the input porperties
         dim_min = getProperty("MinValues");
@@ -266,113 +268,192 @@ void ConvertToMDEvents::exec(){
     return;
    
 }
- /** function processes the input arguments and tries to establish what algorithm should be deployed; 
-    *
-    * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
-    * @param Q_dim_requested     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
-    * @param dim_selected        -- vector of other dimension names requested by the algorithm
-    *
-    * @return the_algID       -- the string, identifying one of the known algorithms; if unknown, should fail. 
-*/
-std::string
-ConvertToMDEvents::identify_the_alg(const std::vector<std::string> &dim_names_availible, const std::string &Q_dim_requested, const std::vector<std::string> &dim_requested, size_t &nDims)
+ 
+std::string 
+ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
+                                     std::vector<std::string> &out_dim_names)
 {
-    std::string the_algID;
-    std::string Q_mode("Unknown");
-    std::string dE_mode("Unknown");
-    std::string ND_mode("Unknown");
+    // dimension names present in input workspace
+    std::vector<std::string> ws_dim_names;
+    // units IS-s the input workspace dimensions have
+    std::vector<std::string> ws_dim_units;
+    std::string the_WSalgID;   
+    getDimensionNamesFromWSMatrix(inMatrixWS,ws_dim_names,ws_dim_units);
 
-    std::vector<std::string> Q_Dim_names;
-    //TODO: add direct./indirect;
-    int nQ_dims(0),ndE_dims(0),nAdd_dims(0);
+    std::string Q_MODE_ID("Unknown");
+    std::string DE_MODE_ID("Unknown");
 
-    nDims = 0;
-    // verify if everything requested is availible in logs:
-    for(size_t i=0;i<dim_requested.size();i++){
-        if(std::find(dim_names_availible.begin(),dim_names_availible.end(),dim_requested[i])==dim_names_availible.end()){
-            g_log.error()<<" The dimension: "<<dim_requested[i]<<" requested but can not be found in the list of availible parameters & data\n";
-            throw(std::invalid_argument(" the data for availible dimension are not among the input data"));
-        }
-    }
+    int nQ_dims(0),ndE_dims(0);
+   
     // Q_mode (one of 3 possible)  
-    if(Q_dim_requested.empty())
+    if(Q_mode_req.compare(Q_modes[NoQ])==0)
     { 
-        nQ_dims=0;
-        Q_mode="NoQ";
+        nQ_dims      = int(ws_dim_names.size());
+        Q_MODE_ID    = Q_modes[NoQ];
+        out_dim_names= ws_dim_names;
+
     }
-    if(Q_dim_requested.compare("|Q|")==0)
-    {
-        nQ_dims=1;
-        Q_mode="modQ";
-        Q_Dim_names.resize(1);
-        Q_Dim_names[0]="|Q|";
+    if(Q_mode_req.compare(Q_modes[modQ])==0) // At the moment we assume that |Q| make sense for inelastic only,      
+    {  // so the only one variable is availible form the workspace. 
+        nQ_dims=1;      
+        out_dim_names.resize(1);
+        out_dim_names[0]="|Q|";
+        Q_MODE_ID = Q_modes[modQ];
     }
-    if((Q_dim_requested.compare("QxQyQz")==0))
+    if((Q_mode_req.compare(Q_modes[Q3D])==0))
     {
        nQ_dims=3;
-       Q_mode="Q3D";
-       Q_Dim_names.resize(3);
-       Q_Dim_names[0]="Q_h";
-       Q_Dim_names[1]="Q_k";
-       Q_Dim_names[2]="Q_l";
+       out_dim_names.resize(3);
+       out_dim_names[0]="Q_h";
+       out_dim_names[1]="Q_k";
+       out_dim_names[2]="Q_l";
+       Q_MODE_ID = Q_modes[Q3D];
 
     }
 
-   // Elastic/inelastic -- should introduce additional switch;
-    nAdd_dims=(int)dim_requested.size();
-    if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){
-        ndE_dims   =1;
-        nAdd_dims -=1;
-        dE_mode   ="dE";
-        Q_Dim_names.resize(Q_Dim_names.size()+1);
-        Q_Dim_names[Q_Dim_names.size()-1]="DeltaE";
-    }else{
-        ndE_dims   =0;
-        dE_mode   ="";
+    DE_MODE_ID= dE_mode_req;
+    // no_Q mode can only compartible with no_dE mode
+    if((Q_MODE_ID.compare(Q_modes[NoQ])==0)){
+        DE_MODE_ID = dE_modes[ANY_Mode];
     }
-    std::vector<std::string> Add_dims(nAdd_dims);
-    //ND mode;
-    if(nAdd_dims>0){
-        ND_mode = "ND";
-        if(!dE_mode.empty()){    // copy all dimensions names except DeltaE;
-            size_t ic(0);
-            for(size_t i=0;i<dim_requested.size();i++){
-                if(dim_requested[i]!="DeltaE"){
-                    Add_dims[ic]=dim_requested[i];
-                    ic++;
-                }
-            }
-        }else{ //   // copy all dimensions names 
-            Add_dims.assign(dim_requested.begin(),dim_requested.end());
+    // inelastic modes have one additional dimension and need special units on X-axis
+    if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
+        ndE_dims = 1;
+
+        if(!((ws_dim_units[0].compare("DeltaE")==0)||(ws_dim_units[0].compare("Energy_inWavenumber")==0))){
+            convert_log.error()<<" inelastic conversion request X-axis to be expressed in energy transfer-related units\n";
+            throw(std::invalid_argument("inelastic conversion request X-axis in energy-transfer related units"));
         }
+        out_dim_names.push_back(ws_dim_units[0]);
     }else{
-        ND_mode = "";
+        ndE_dims = 0;
     }
+    // elastic mode needs special units along on X-axis
+    if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
+        if(!((ws_dim_units[0].compare("TOF")==0)||(ws_dim_units[0].compare("Wavelength")==0)||
+             (ws_dim_units[0].compare("Energy")==0)||(ws_dim_units[0].compare("Energy_inWavenumber")==0)))
+        {
+            convert_log.error()<<" Elastic conversion request X-axis to be expressed in energy(TOF) related units\n";
+            throw(std::invalid_argument("Elastic conversion request X-axis in energy-transfer related units"));
+        }
 
- 
-    nDims      = nQ_dims+ndE_dims+nAdd_dims;
-    if(nDims<2||nQ_dims<0||ndE_dims<0||nAdd_dims<0){
-        g_log.error()<<" Requested: "<<nQ_dims<<" Q-dimensions, "<<ndE_dims<<" dE dimesions and "<<nAdd_dims<<" additional dimesnions not supported\n";
-        throw(std::invalid_argument("wrong or unsupported number of dimensions"));
     }
-    the_algID  = Q_mode+dE_mode+ND_mode+boost::lexical_cast<std::string>(nDims);
+    the_WSalgID = Q_MODE_ID+DE_MODE_ID;
 
-    if(the_algID.find("Unknown")!=std::string::npos){
-        g_log.error()<<" Algorithm with ID: "<<the_algID<<" do not recognized\n";
-        throw(std::invalid_argument("wrong or unsupported algorithm ID"));
-    }
-    // put Q-dimension names to target dimensions
-    this->dim_names.assign(Q_Dim_names.begin(),Q_Dim_names.end());
-    std::vector<std::string>::const_iterator it=Add_dims.begin();
-    // push Add-dimension names to target dimensions
-    for(;it!=Add_dims.end();it++){   dim_names.push_back(*it);
-    }
-    //TODO: make dim units equal to the dimension names (For the time being?)
-    this->dim_units.assign(this->dim_names.begin(),this->dim_names.end());
-
-    return the_algID;
+    return the_WSalgID;
 
 }
+/** function processes the input arguments and tries to establish what algorithm should be deployed; 
+    *
+    * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
+    * @param ws_dim_names
+    * @param ws_dim_units
+
+    * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
+    * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
+    * @param dim_requested  -- vector of other dimension names requested by the algorithm
+    *
+    * @return the_algID       -- the string, identifying one of the known algorithms; if unknown, should fail. 
+    * @initiates:             -- dim_names and dim_units of the target workspace;
+*/
+//std::string 
+//ConvertToMDEvents::identifyTheAlg(const std::vector<std::string> &dim_names_availible,const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
+//                                  const std::string &Q_mode_req, const std::string &dE_mode_req,std::vector<std::string> &dim_requested,size_t &nDims)
+//{
+//    std::string the_algID;
+//    std::vector<std::string> Q_Dim_names;
+//
+//    int nQ_dims(0),ndE_dims(0),nAdd_dims(0);
+//
+//    nDims = 0;
+//    // verify if everything requested is availible in logs:
+//    for(size_t i=0;i<dim_requested.size();i++){
+//        if(std::find(dim_names_availible.begin(),dim_names_availible.end(),dim_requested[i])==dim_names_availible.end()){
+//            g_log.error()<<" The dimension: "<<dim_requested[i]<<" requested but can not be found in the list of availible parameters & data\n";
+//            throw(std::invalid_argument(" the data for availible dimension are not among the input data"));
+//        }
+//    }
+//    // Q_mode (one of 3 possible)  
+//    if(Q_mode_req.compare(Q_modes[NoQ]))
+//    { 
+//        nQ_dims=0;
+//        Q_mode=knownQ_modes[NoQ];
+//    }
+//    if(Q_mode_req.compare(knownQ_modes[modQ])==0)
+//    {
+//        nQ_dims=1;
+//        Q_mode=knownQ_modes[modQ];
+//        Q_Dim_names.resize(1);
+//        Q_Dim_names[0]="|Q|";
+//    }
+//    if((Q_mode_req.compare("QxQyQz")==0))
+//    {
+//       nQ_dims=3;
+//       Q_mode=knownQ_modes[Q3D];
+//       Q_Dim_names.resize(3);
+//       Q_Dim_names[0]="Q_h";
+//       Q_Dim_names[1]="Q_k";
+//       Q_Dim_names[2]="Q_l";
+//
+//    }
+//
+//    if(dE_mode_req.
+//
+//   // Elastic/inelastic -- should introduce additional switch;
+//    nAdd_dims=(int)dim_requested.size();
+//    if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){
+//        ndE_dims   =1;
+//        nAdd_dims -=1;
+//        dE_mode   ="dE";
+//        Q_Dim_names.resize(Q_Dim_names.size()+1);
+//        Q_Dim_names[Q_Dim_names.size()-1]="DeltaE";
+//    }else{
+//        ndE_dims   =0;
+//        dE_mode   ="";
+//    }
+//    std::vector<std::string> Add_dims(nAdd_dims);
+//    //ND mode;
+//    if(nAdd_dims>0){
+//        ND_mode = "ND";
+//        if(!dE_mode.empty()){    // copy all dimensions names except DeltaE;
+//            size_t ic(0);
+//            for(size_t i=0;i<dim_requested.size();i++){
+//                if(dim_requested[i]!="DeltaE"){
+//                    Add_dims[ic]=dim_requested[i];
+//                    ic++;
+//                }
+//            }
+//        }else{ //   // copy all dimensions names 
+//            Add_dims.assign(dim_requested.begin(),dim_requested.end());
+//        }
+//    }else{
+//        ND_mode = "";
+//    }
+//
+// 
+//    nDims      = nQ_dims+ndE_dims+nAdd_dims;
+//    if(nDims<2||nQ_dims<0||ndE_dims<0||nAdd_dims<0){
+//        g_log.error()<<" Requested: "<<nQ_dims<<" Q-dimensions, "<<ndE_dims<<" dE dimesions and "<<nAdd_dims<<" additional dimesnions not supported\n";
+//        throw(std::invalid_argument("wrong or unsupported number of dimensions"));
+//    }
+//    the_algID  = Q_mode+dE_mode+ND_mode+boost::lexical_cast<std::string>(nDims);
+//
+//    if(the_algID.find("Unknown")!=std::string::npos){
+//        g_log.error()<<" Algorithm with ID: "<<the_algID<<" do not recognized\n";
+//        throw(std::invalid_argument("wrong or unsupported algorithm ID"));
+//    }
+//    // put Q-dimension names to target dimensions
+//    this->dim_names.assign(Q_Dim_names.begin(),Q_Dim_names.end());
+//    std::vector<std::string>::const_iterator it=Add_dims.begin();
+//    // push Add-dimension names to target dimensions
+//    for(;it!=Add_dims.end();it++){   dim_names.push_back(*it);
+//    }
+//    //TODO: make dim units equal to the dimension names (For the time being?)
+//    this->dim_units.assign(this->dim_names.begin(),this->dim_names.end());
+//
+//    return the_algID;
+//
+//}
 
 /** The function to identify the target dimensions and target uints which can be obtained from workspace dimensions 
   *
@@ -429,15 +510,24 @@ ConvertToMDEvents::getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr
        }
     
 }
-
+/** function returns the list of names, which can be treated as dimensions present in current matrix workspace 
+ * These dimensions consist of two components: The first one comes from workspace axis and the second one -- from workspace properties. 
+ *
+ * An algorithm takes the workspase data with its dimensions, transforms these into another set of connected dimensions (depending on algorithm) 
+ * (e.g. inelastic takes detector positions and energy transfer and transformm this into 4 coordinates namely 3-momentums and energy transfer)
+ * and usually adds data, containing in properties as orthogonal dimensions
+ * @param inMatrixWS -- shared pointer to input workspace for analysis
+ * 
+ * @returns ws_dim_names -- the ID-s for the dimension names, which can be obtained from the workspace
+ * @returns ws_units     -- the units for the current workspace dimensions
+*/
 std::vector<std::string > 
-ConvertToMDEvents::getDimensionNames(MatrixWorkspace_const_sptr inMatrixWS)const{
+ConvertToMDEvents::getDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string>& ws_dim_names, std::vector<std::string> &ws_units)const{
     // get properties, which can be derived from workspace
     // e.g  Q3D, |Q| and something along workspace axis ;
     std::vector<std::string> prop_names;
-    std::vector<std::string> ws_units;
-    getDimensionNamesFromWSMatrix(inMatrixWS,prop_names,ws_units);
-
+    getDimensionNamesFromWSMatrix(inMatrixWS,ws_dim_names,ws_units);
+    prop_names = ws_dim_names;
 
     // get dimension names from properties
     // TODO: this should be only special processed properties, not all of them, as it is at the moment
@@ -505,34 +595,75 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 /** Constructor 
  *  needs to pick up all known algorithms. 
 */
-ConvertToMDEvents::ConvertToMDEvents()
+ConvertToMDEvents::ConvertToMDEvents():
+Q_modes(3),
+dE_modes(4)
 {
-   
+     Q_modes[modQ]="|Q|";
+     Q_modes[Q3D] ="QxQyQz";    
+     Q_modes[NoQ] ="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
+     dE_modes[ANY_Mode]  = "";
+     dE_modes[Direct]    = "Direct";
+     dE_modes[Indir]     = "Indirect";
+     dE_modes[Elastic]   = "Elastic";
+
+  
      
-// NoQ
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND2",&ConvertToMDEvents::processQND<2,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND3",&ConvertToMDEvents::processQND<3,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND4",&ConvertToMDEvents::processQND<4,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND5",&ConvertToMDEvents::processQND<5,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND6",&ConvertToMDEvents::processQND<6,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND7",&ConvertToMDEvents::processQND<7,NoQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("NoQND8",&ConvertToMDEvents::processQND<8,NoQ>));
+// NoQ --> any Analysis mode will do as it does not depend on it
+    alg_selector.insert(std::pair<std::string,pMethod>("ND2",&ConvertToMDEvents::processQND<2,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3",&ConvertToMDEvents::processQND<3,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4",&ConvertToMDEvents::processQND<4,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5",&ConvertToMDEvents::processQND<5,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6",&ConvertToMDEvents::processQND<6,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7",&ConvertToMDEvents::processQND<7,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8",&ConvertToMDEvents::processQND<8,NoQ,ANY_Mode>));
 
 // MOD Q
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND2",&ConvertToMDEvents::processQND<2,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND3",&ConvertToMDEvents::processQND<3,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND4",&ConvertToMDEvents::processQND<4,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND5",&ConvertToMDEvents::processQND<5,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND6",&ConvertToMDEvents::processQND<6,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND7",&ConvertToMDEvents::processQND<7,modQ>));
-    alg_selector.insert(std::pair<std::string,pMethod>("modQND8",&ConvertToMDEvents::processQND<8,modQ>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir2",&ConvertToMDEvents::processQND<2,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir3",&ConvertToMDEvents::processQND<3,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir4",&ConvertToMDEvents::processQND<4,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir5",&ConvertToMDEvents::processQND<5,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir6",&ConvertToMDEvents::processQND<6,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir7",&ConvertToMDEvents::processQND<7,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDDir8",&ConvertToMDEvents::processQND<8,modQ,Direct>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir2",&ConvertToMDEvents::processQND<2,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir3",&ConvertToMDEvents::processQND<3,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir4",&ConvertToMDEvents::processQND<4,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir5",&ConvertToMDEvents::processQND<5,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir6",&ConvertToMDEvents::processQND<6,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir7",&ConvertToMDEvents::processQND<7,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDInDir8",&ConvertToMDEvents::processQND<8,modQ,Indir>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast2",&ConvertToMDEvents::processQND<2,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast3",&ConvertToMDEvents::processQND<3,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast4",&ConvertToMDEvents::processQND<4,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast5",&ConvertToMDEvents::processQND<5,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast6",&ConvertToMDEvents::processQND<6,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast7",&ConvertToMDEvents::processQND<7,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("modQNDElast8",&ConvertToMDEvents::processQND<8,modQ,Elastic>));
+
 // Q3D
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND3",&ConvertToMDEvents::processQND<3,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND4",&ConvertToMDEvents::processQND<4,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND5",&ConvertToMDEvents::processQND<5,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND6",&ConvertToMDEvents::processQND<6,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND7",&ConvertToMDEvents::processQND<7,Q3D>));
-    alg_selector.insert(std::pair<std::string,pMethod>("Q3DND8",&ConvertToMDEvents::processQND<8,Q3D>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDDir3",&ConvertToMDEvents::processQND<3,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDDir4",&ConvertToMDEvents::processQND<4,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDDir5",&ConvertToMDEvents::processQND<5,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDDir6",&ConvertToMDEvents::processQND<6,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDDir7",&ConvertToMDEvents::processQND<7,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDDir8",&ConvertToMDEvents::processQND<8,Q3D,Direct>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDInDir3",&ConvertToMDEvents::processQND<3,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDInDir4",&ConvertToMDEvents::processQND<4,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDInDir5",&ConvertToMDEvents::processQND<5,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDInDir6",&ConvertToMDEvents::processQND<6,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDInDir7",&ConvertToMDEvents::processQND<7,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDInDir8",&ConvertToMDEvents::processQND<8,Q3D,Indir>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDElast3",&ConvertToMDEvents::processQND<3,Q3D,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDElast4",&ConvertToMDEvents::processQND<4,Q3D,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDElast5",&ConvertToMDEvents::processQND<5,Q3D,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDElast6",&ConvertToMDEvents::processQND<6,Q3D,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDElast7",&ConvertToMDEvents::processQND<7,Q3D,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("Q3DNDElast8",&ConvertToMDEvents::processQND<8,Q3D,Elastic>));
 
 // Workspaces:
     ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));

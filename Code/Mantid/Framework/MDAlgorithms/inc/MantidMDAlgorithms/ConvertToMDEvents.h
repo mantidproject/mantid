@@ -63,6 +63,13 @@ namespace MDAlgorithms
        modQ,
        Q3D
    };
+  // known analysis modes:
+  enum AnalMode{  
+      ANY_Mode, // couples with NoQ, means just copying existing
+      Direct, // Direct inelastic analysis mode
+      Indir,  // InDirect inelastic analysis mode
+      Elastic
+  };
 //
   class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
@@ -113,12 +120,13 @@ namespace MDAlgorithms
     std::vector<std::string> dim_units;
   protected: //for testing
    /** function returns the list of names, which can be treated as dimensions present in current matrix workspace */
-   std::vector<std::string > getDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS)const;
+   std::vector<std::string > getDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string>& ws_dim_names, std::vector<std::string> &ws_units)const;
    /** The function to identify the target dimensions and target uints which can be obtained from workspace dimensions   */
    void getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &ws_dimensions,std::vector<std::string> &ws_units)const;
    
-   /** function processes arguments entered by user, calculates the number of dimensions and tries to establish which algorithm should be deployed;   */
-   std::string identify_the_alg(const std::vector<std::string> &dim_names_availible,const std::string &Q_dim_requested, const std::vector<std::string> &other_dim_selected,size_t &nDims);
+   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS matrix as function of the input artuments and WS format */
+   std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
+                                 std::vector<std::string> &out_dim_names);
 
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates */
    void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
@@ -141,10 +149,13 @@ namespace MDAlgorithms
      *
      * @return Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
      * @return true         -- if all Coord are within the range requested by algorithm. false otherwise
+     *
+     * has to be specialized
     */
-    template<Q_state Q>
-    bool calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
-    UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);return false;}
+    template<Q_state Q,AnalMode MODE>
+    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
+        UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);throw(Kernel::Exception::NotImplementedError(""));
+        return false;}
 
    
     /** template generalizes the code to calculate Y-variables within the external loop of processQND workspace
@@ -152,10 +163,13 @@ namespace MDAlgorithms
      * @param i    -- index of external loop, identifying current y-coordinate
      * 
      * @return Coord -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.    
-     * @return true         -- if all Coord are within the range requested by algorithm. false otherwise   */
-    template<Q_state Q>
-    bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
-    UNUSED_ARG(Coord); UNUSED_ARG(i);return false;}
+     * @return true         -- if all Coord are within the range requested by algorithm. false otherwise   
+     * 
+     *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
+     */
+    template<Q_state Q,AnalMode MODE>
+    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
+    return true;}
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
      * @param X    -- vector of X workspace values
@@ -163,16 +177,19 @@ namespace MDAlgorithms
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
      * @return Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector   
-     * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   */
-    template<Q_state Q>
-    bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-        UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);
+     * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
+     *
+     * has to be specialized
+     */
+    template<Q_state Q, AnalMode MODE>
+    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+        UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
 
    /** generic template to convert to any Dimensions workspace;
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
-    template<size_t nd,Q_state Q>
+    template<size_t nd,Q_state Q, AnalMode MODE>
     void processQND(API::IMDEventWorkspace *const pOutWs);    
     //--------------------------------------------------------------------------------------------------
     // the variables used for exchange data between different specific parts of the generic ND algorithm:
@@ -192,6 +209,8 @@ namespace MDAlgorithms
     */
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
+    // 
+    std::vector<std::string> Q_modes,dE_modes;
 
  };
  
