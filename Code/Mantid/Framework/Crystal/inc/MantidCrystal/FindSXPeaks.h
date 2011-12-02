@@ -28,7 +28,7 @@ struct DLLExport SXPeak
   @param Ltot : detector-sample absolute distance
   @param detectorId : id of the contributing detector
   */
-  explicit SXPeak(double t, double th2, double phi,double intensity,const std::vector<int>& spectral,double Ltot, Mantid::detid_t detectorId):_t(t),_th2(th2),_phi(phi),_intensity(intensity),_Ltot(Ltot), _detectorId(detectorId)
+  SXPeak(double t, double th2, double phi,double intensity,const std::vector<int>& spectral,double Ltot, Mantid::detid_t detectorId):_t(t),_th2(th2),_phi(phi),_intensity(intensity),_Ltot(Ltot), _detectorId(detectorId)
 	{
     //Sanity checks
     if(intensity < 0)
