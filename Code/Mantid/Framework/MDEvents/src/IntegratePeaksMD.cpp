@@ -162,12 +162,18 @@ namespace MDEvents
         ws->getBox()->integrateSphere(sphere, BackgroundRadius*BackgroundRadius, bgSignal, bgErrorSquared);
 
         // Evaluate the signal inside "BackgroundStartRadius"
-        signal_t interiorSignal = signal;
-        signal_t interiorErrorSquared = errorSquared;
+        signal_t interiorSignal = 0;
+        signal_t interiorErrorSquared = 0;
 
         // Integrate this 3rd radius, if needed
         if (BackgroundStartRadius != PeakRadius)
           ws->getBox()->integrateSphere(sphere, BackgroundStartRadius*BackgroundStartRadius, interiorSignal, interiorErrorSquared);
+        else
+        {
+          // PeakRadius == BackgroundStartRadius, so use the previous value
+          interiorSignal = signal;
+          interiorErrorSquared = errorSquared;
+        }
 
         // Subtract the peak part to get the intensity in the shell (BackgroundStartRadius < r < BackgroundRadius)
         bgSignal -= interiorSignal;
