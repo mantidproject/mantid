@@ -423,6 +423,17 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
   return boost::static_pointer_cast<API::Workspace>(workspace);
 }
 
+//-------------------------------------------------------------------------------------------------
+/**
+ * Load peaks
+ */
+API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
+{
+	// We don't do anything yet, except ensure it builds
+	API::IPeaksWorkspace_sptr workspace;
+	return boost::static_pointer_cast<API::Workspace>(workspace);
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -444,6 +455,12 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   {
     return loadTableEntry(mtd_entry);
   }  
+
+  if (mtd_entry.containsGroup("peaks_workspace"))
+  {
+    return loadPeaksEntry(mtd_entry); 
+  }  
+
 
   bool isEvent = false;
   std::string group_name = "workspace";

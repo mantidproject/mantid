@@ -278,7 +278,8 @@ namespace DataObjects
 	  }
 
 	// Start Peaks Workspace
-    file->makeGroup("peaks workspace", "NXentry", true);  
+    // file->makeGroup("peaks_workspace", "NXentry", true);  // For when peaksWorkspace can be loaded
+	file->makeGroup("table_workspace","NXentry",true);  // We currently save it as table workspace
 
     // Detectors column
 	file->writeData("column_1", detectorID);
