@@ -46,7 +46,8 @@ public:
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
-      std::string OutputWorkspace = "IntegratePeaksMDTest_peaks")
+      std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
+      double BackgroundStartRadius = 0.0)
   {
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -55,6 +56,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundRadius", BackgroundRadius ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundStartRadius", BackgroundStartRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDTest_peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
@@ -210,7 +212,48 @@ public:
   }
 
 
+  //-------------------------------------------------------------------------------
+  /// Integrate background between start/end background radius
+  void test_exec_shellBackground()
+  {
+    createMDEW();
+    /* Create 3 overlapping shells so that density goes like this:
+     * r < 1 : density 1.0
+     * 1 < r < 2 : density 1/2
+     * 2 < r < 3 : density 1/3
+     */
+    addPeak(1000, 0.,0.,0., 1.0);
+    addPeak(1000 * 4, 0.,0.,0., 2.0); // 8 times the volume / 4 times the counts = 1/2 density
+    addPeak(1000 * 9, 0.,0.,0., 3.0); // 27 times the volume / 9 times the counts = 1/3 density
 
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
+    TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMDTest_peaks",peakWS);
+
+    // First, a check with no background
+    doRun(1.0, 0.0, "IntegratePeaksMDTest_peaks", 0.0);
+    // approx. + 500 + 333 counts due to 2 backgrounds
+    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
+    TSM_ASSERT_DELTA( "Simple sqrt() error", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0), 2);
+
+    // Set background from 2.0 to 3.0.
+    // So the 1/2 density background remains, we subtract the 1/3 density = about 1500 counts
+    doRun(1.0, 3.0, "IntegratePeaksMDTest_peaks", 2.0);
+    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
+    // Error is larger, since it is error of peak + error of background
+    TSM_ASSERT_DELTA( "Error has increased", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0 + 333.0), 2);
+
+    // Now do the same without the background start radius
+    // So we subtract both densities = a lower count
+    doRun(1.0, 3.0);
+    TSM_ASSERT_LESS_THAN( "Peak intensity is lower if you do not include the spacer shell (higher background)",
+                          peakWS->getPeak(0).getIntensity(), 1500);
+
+
+  }
 
 };
 
