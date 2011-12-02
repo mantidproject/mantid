@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/FindSXPeaks.h"
+#include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -14,7 +14,7 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
-  namespace Algorithms
+  namespace Crystal
   {
 
 

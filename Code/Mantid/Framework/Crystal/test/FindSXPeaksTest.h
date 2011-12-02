@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/FindSXPeaks.h"
+#include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/IPeak.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
+using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 
 class FindSXPeaksTest : public CxxTest::TestSuite

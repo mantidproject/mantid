@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
+    src/FindSXPeaks.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
@@ -27,6 +28,7 @@ set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
+    inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
@@ -51,6 +53,7 @@ set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/CalculateUMatrixTest.h
 	test/CentroidPeaksTest.h
+    test/FindSXPeaksTest.h
 	test/FindUBUsingIndexedPeaksTest.h
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h

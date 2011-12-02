@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace Crystal
 {
 
 struct DLLExport SXPeak
