@@ -141,6 +141,7 @@ namespace Mantid
 
         // Find the range [min,max]
         MantidVec::const_iterator lowit, highit;
+
         if (m_MinRange == EMPTY_DBL()) lowit=X.begin();
         else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
 

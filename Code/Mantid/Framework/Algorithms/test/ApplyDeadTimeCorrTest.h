@@ -108,8 +108,8 @@ public:
 
     double deadValue(20.567);
 
-    // Smaller row count than file (expect to fail)
-    for (int i=0; i<10; ++i)
+    // Bigger row count than file (expect to fail)
+    for (int i=0; i<64; ++i)
     {
       Mantid::API::TableRow row = tw->appendRow();
       row << i+1 << deadValue;
@@ -129,6 +129,60 @@ public:
 
     AnalysisDataService::Instance().remove("EMU6473");
     AnalysisDataService::Instance().remove("DeadTimeTable");
+  }
+
+   void testSelectedSpectrum()
+  {
+    loader.initialize();
+    loader.setPropertyValue("Filename", "emu00006473.nxs");
+    loader.setPropertyValue("OutputWorkspace", "EMU6473");
+    TS_ASSERT_THROWS_NOTHING( loader.execute() );
+    TS_ASSERT_EQUALS(loader.isExecuted(),true);
+
+    MatrixWorkspace_sptr inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("EMU6473"));
+
+    boost::shared_ptr<ITableWorkspace>tw(new Mantid::DataObjects::TableWorkspace);
+    
+    tw->addColumn("int","Spectrum Number");
+    tw->addColumn("double","DeadTime Value");
+
+    // Add data to table
+
+    double deadValue(20.567);
+
+    //Spectrum: 3,6,9,12,15,18,21 .....
+    for (int i=0; i<7; ++i)
+    {
+      Mantid::API::TableRow row = tw->appendRow();
+      row << (i+1)*3 << deadValue;
+    }
+
+    //.... Index will therefore be 2,5,8,11,14,17,20
+
+    AnalysisDataService::Instance().add("DeadTimeTable",tw);
+
+    TS_ASSERT_THROWS_NOTHING( applyDeadTime.setProperty("InputWorkspace", "EMU6473") );
+    TS_ASSERT_THROWS_NOTHING( applyDeadTime.setProperty("DeadTimeTable", "DeadTimeTable") );
+    TS_ASSERT_THROWS_NOTHING( applyDeadTime.setProperty("OutputWorkspace", "AppliedTest") );
+
+    TS_ASSERT_THROWS_NOTHING( applyDeadTime.execute() );
+    TS_ASSERT( applyDeadTime.isExecuted() );
+
+    MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("AppliedTest") );
+
+    TS_ASSERT_EQUALS( outputWs->dataY(0)[0], inputWs->dataY(0)[0]);
+    TS_ASSERT_EQUALS( outputWs->dataY(14)[40], inputWs->dataY(14)[40]/( 1-inputWs->dataY(14)[40]*( deadValue/( inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) ) ) );
+    TS_ASSERT_EQUALS( outputWs->dataY(31)[20], inputWs->dataY(31)[20]);
+
+    //Should be the same (no dead time associated with it)
+    TS_ASSERT_DELTA( 36.0, outputWs->dataY(12)[2], 0.0001 );
+
+    //Should be new value (dead time applied based on spectrum number)
+    TS_ASSERT_DELTA( -0.000777946, outputWs->dataY(20)[14], 0.00000001 );
+
+    AnalysisDataService::Instance().remove("EMU6473");
+    AnalysisDataService::Instance().remove("DeadTimeTable");
+    AnalysisDataService::Instance().remove("AppliedTest");
   }
 
 private:

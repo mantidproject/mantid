@@ -10,23 +10,12 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /**Muon algorithm for calculating the detector efficiency between two groups of detectors.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> ForwardSpectra - The spectra numbers of the forward group </LI>
-    <LI> BackwardSpectra - The spectra numbers of the backward group </LI>
-    <LI> FirstGoodValue - First good value </LI>
-    <LI> LastGoodValue - Last good value </LI>
-    <LI> Alpha (output) </LI>
-    </UL>
-
+    /**Algorithm for calculating Muon dead times.
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 21/09/2010
+    @date 1/12/2011
 
-    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 

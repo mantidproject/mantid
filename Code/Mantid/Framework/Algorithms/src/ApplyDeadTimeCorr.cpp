@@ -55,7 +55,7 @@ namespace Algorithms
     API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
     API::ITableWorkspace_sptr deadTimeTable = getProperty("DeadTimeTable");
 
-    if (deadTimeTable->rowCount() == static_cast<int>(inputWs->getNumberHistograms()))
+    if (!(deadTimeTable->rowCount() > static_cast<int>(inputWs->getNumberHistograms() ) ) )
     {
       // Duplicate the input workspace. Only need to change Y values based on dead time corrections
       IAlgorithm_sptr duplicate = createSubAlgorithm("CloneWorkspace");
@@ -68,30 +68,39 @@ namespace Algorithms
       // Presumed to be the same for all data
       double timeBinWidth(inputWs->dataX(0)[1] - inputWs->dataX(0)[0]); 
 
+     
       if (timeBinWidth != 0)
-      {
-        // Apply Dead Time
-        for(size_t i=0; i<inputWs->getNumberHistograms(); ++i)
+      { 
+        try
         {
-          API::TableRow deadTimeRow = deadTimeTable->getRow(static_cast<int>(i));
-          for(size_t j=0; j<inputWs->blocksize(); ++j)
+          // Apply Dead Time
+          for (int i=0; i<deadTimeTable->rowCount(); ++i)
           {
-            double temp(1 - inputWs->dataY(i)[j] * (deadTimeRow.Double(1)/timeBinWidth));
-            if (temp != 0)
-            {
-              outputWs->dataY(i)[j] = inputWs->dataY(i)[j] / temp;
-            }
-            else
-            {
-              g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width is currently (" << temp << "). Can't divide by this amount." << std::endl;
+            API::TableRow deadTimeRow = deadTimeTable->getRow(i);
+            size_t index = static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(static_cast<int>(deadTimeRow.Int(0) ) ) );
 
-              throw std::invalid_argument("Can't divide by 0");
+            for(size_t j=0; j<inputWs->blocksize(); ++j)
+            {
+              double temp(1 - inputWs->dataY(index)[j] * (deadTimeRow.Double(1)/timeBinWidth));
+              if (temp != 0)
+              {
+                outputWs->dataY(index)[j] = inputWs->dataY(index)[j] / temp;
+              }
+              else
+              {
+                g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width is currently (" << temp << "). Can't divide by this amount." << std::endl;
+
+                throw std::invalid_argument("Can't divide by 0");
+              }
             }
           }
+
+          setProperty("OutputWorkspace", outputWs);
         }
-
-        setProperty("OutputWorkspace", outputWs);
-
+        catch(std::runtime_error& ex)
+        {
+          throw std::invalid_argument("Invalid argument for algorithm.");
+        }
       }
       else
       {
@@ -102,10 +111,10 @@ namespace Algorithms
     }
     else
     {
-      g_log.error() << "Row count(" << deadTimeTable->rowCount() << ") of Dead time table and Number of Histograms(" 
-        << inputWs->getNumberHistograms() << ") did not match." << std::endl;
+      g_log.error() << "Row count(" << deadTimeTable->rowCount() << ") of Dead time table is bigger than the Number of Histograms(" 
+        << inputWs->getNumberHistograms() << ")." << std::endl;
 
-      throw std::invalid_argument("Row count and Number of Histograms did not match");
+      throw std::invalid_argument("Row count was bigger than the Number of Histograms.");
     }
   }
 
