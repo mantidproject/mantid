@@ -44,6 +44,8 @@ if (UNIX)
   execute_process(
     COMMAND  ${mantid_cmake_modules}/SquishRunTestSuite.sh ${squish_server_executable} ${squish_client_executable} ${squish_test_suite} ${squish_results_dir} ${squish_results_file}
     RESULT_VARIABLE test_rv
+    OUTPUT_FILE "testout.log"
+    ERROR_FILE "testerr.log"
     )
 endif (UNIX)
 
@@ -52,5 +54,6 @@ if(NOT "${test_rv}" STREQUAL "0")
   message(FATAL_ERROR "Error running Squish test")
 endif(NOT "${test_rv}" STREQUAL "0")
 
-
+file(READ ${squish_results_file} error_log)
+message(STATUS ${error_log})
 
