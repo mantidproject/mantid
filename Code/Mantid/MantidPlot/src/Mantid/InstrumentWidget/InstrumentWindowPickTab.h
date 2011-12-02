@@ -38,6 +38,7 @@ public:
   void init();
   void showInstrumentDisplayContextMenu();
   TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
+  void mouseLeftInstrmentDisplay();
 public slots:
   void setTubeXUnits(int units);
   void changedIntegrationRange(double,double);
