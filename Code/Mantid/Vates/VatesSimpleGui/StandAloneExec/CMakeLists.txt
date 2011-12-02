@@ -39,4 +39,9 @@ VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
 )
 
+if( SQUISH_FOUND )
+  squish_add_test_suite( StandAloneVsiSquishTests
+                         ${CMAKE_CURRENT_SOURCE_DIR}/test/suite_VatesSimpleGui )
+endif()
+
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )
