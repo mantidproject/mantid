@@ -14,11 +14,23 @@ namespace Mantid
 namespace Crystal
 {
 
+/// Type to represent identified Single Crystal Peaks.
 struct DLLExport SXPeak
 {
  public:
-  SXPeak(double t, double th2, double phi,double intensity,const std::vector<int>& spectral,double Ltot, Mantid::detid_t detectorId):_t(t),_th2(th2),_phi(phi),_intensity(intensity),_Ltot(Ltot), _detectorId(detectorId)
+  /**
+  Constructor
+  @param t : tof
+  @param t2 : 2 * theta angle
+  @param phi : psi angle
+  @param intensity : peak intensity
+  @param specral : contributing spectra
+  @param Ltot : detector-sample absolute distance
+  @param detectorId : id of the contributing detector
+  */
+  explicit SXPeak(double t, double th2, double phi,double intensity,const std::vector<int>& spectral,double Ltot, Mantid::detid_t detectorId):_t(t),_th2(th2),_phi(phi),_intensity(intensity),_Ltot(Ltot), _detectorId(detectorId)
 	{
+    //Sanity checks
     if(intensity < 0)
     {
       throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
@@ -35,6 +47,11 @@ struct DLLExport SXPeak
 		_spectral.resize(spectral.size());
 		std::copy(spectral.begin(),spectral.end(),_spectral.begin());
 	}
+  /**
+  Object comparision
+  @param rhs : other SXPeak
+  @param tolerance : tolerance 
+  */
 	bool compare(const SXPeak& rhs, double tolerance) const
 	{
 		if (std::abs(_t/npixels-rhs._t/rhs.npixels)>tolerance*_t/npixels)
@@ -45,6 +62,11 @@ struct DLLExport SXPeak
 			return false;
 		return true;
 	}
+
+  /**
+  Getter for LabQ
+  @return q vector
+  */
 	Mantid::Kernel::V3D getQ() const
 	{
 		double Qx= -sin(_th2)*cos(_phi);
@@ -61,6 +83,10 @@ struct DLLExport SXPeak
     // Scale the scattered direction by the wavevector
 		return Mantid::Kernel::V3D(Qx*wvi,Qy*wvi,Qz*wvi);
 	}
+  /**
+  Operator addition overload
+  @param rhs : Right hand slide peak for addition.
+  */
 	SXPeak& operator+=(const SXPeak& rhs)
 	{
 		_t+=rhs._t;
@@ -73,6 +99,7 @@ struct DLLExport SXPeak
 			_spectral.push_back(rhs._spectral[i]);
 		return *this;
 	}
+  ///Normalise by number of pixels
 	void reduce()
 	{
 		_t/=npixels;
@@ -82,6 +109,7 @@ struct DLLExport SXPeak
 		_Ltot/=npixels;
 		npixels=1;
 	}
+
 	friend std::ostream& operator<<(std::ostream& os,const SXPeak& rhs)
 	{
 		os << rhs._t << "," << rhs._th2 << "," << rhs._phi << "," << rhs._intensity << "\n";
@@ -89,24 +117,37 @@ struct DLLExport SXPeak
 		std::copy(rhs._spectral.begin(),rhs._spectral.end(),std::ostream_iterator<int>(os,","));
 		return os;
 	}
+  /**
+  Getter for the intensity.
+  */
   const double& getIntensity() const
   {
     return _intensity;
   }
+  /**
+  Getter for the detector id.
+  */
   const Mantid::detid_t& getDetectorId() const
   {
     return _detectorId;
   }
   
 private:
-
+  /// TOF
   double _t;
+  /// 2 * theta
   double _th2;
+  /// PSI angle
   double _phi;
+  /// Measured intensity of SXPeak
   double _intensity;
+  /// Contributing spectra
   std::vector<int> _spectral;
+  /// Detector-sample distance
 	double _Ltot;
+  /// Detector id
   Mantid::detid_t _detectorId;
+  /// Number of contributing pixels
   int npixels; 
   static double mN;
 	static double hbar;

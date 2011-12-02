@@ -88,6 +88,20 @@ public:
     //QSpace is also a getter, but is tested more thouroughly below.
   }
 
+  void testInvalidIndexRanges()
+  {
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+
+    FindSXPeaks alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.setProperty("StartWorkspaceIndex", 3);
+    alg.setProperty("EndWorkspaceIndex", 2);
+    TSM_ASSERT_THROWS("Cannot have start index > end index", alg.execute(), std::invalid_argument);
+  }
+
   void testFindNoPeaks()
   {
     //creates a workspace where all y-values are 2

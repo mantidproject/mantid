@@ -28,8 +28,6 @@ namespace Mantid
 {
   namespace Crystal
   {
-
-
     double SXPeak::mN=1.67492729e-27;
     double SXPeak::hbar=1.054571628e-34;
 
@@ -104,6 +102,10 @@ namespace Mantid
         g_log.warning("StartSpectrum out of range! Set to 0.");
         m_MinSpec = 0;
       }
+      if ( m_MinSpec > m_MaxSpec )
+      {
+        throw std::invalid_argument("Cannot have StartWorkspaceIndex > EndWorkspaceIndex");
+      }
       if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
       if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
       {
@@ -119,12 +121,8 @@ namespace Mantid
       Progress progress(this,0,1,(m_MaxSpec-m_MinSpec+1));
 
       // Calculate the primary flight path.
-      //Mantid::Geometry::
-      //Mantid::Kernel::
       Kernel::V3D sample=localworkspace->getInstrument()->getSample()->getPos();
-      // Mantid::Geometry::V3D sample=localworkspace->getInstrument()->getSample()->getPos();
       Kernel::V3D L1=sample-localworkspace->getInstrument()->getSource()->getPos();
-      //  Mantid::Geometry::V3D L1=sample-localworkspace->getInstrument()->getSource()->getPos();
 
       double l1=L1.norm();
       //
@@ -184,8 +182,7 @@ namespace Mantid
 
         double th2=det->getTwoTheta(Mantid::Kernel::V3D(0,0,0),Mantid::Kernel::V3D(0,0,1));
 
-        std::vector<int> specs;
-        specs.push_back(i);
+        std::vector<int> specs(1, i);
 
         Mantid::Kernel::V3D L2=det->getPos();
         L2-=sample;
@@ -210,6 +207,11 @@ namespace Mantid
       return;
     }
 
+    /**
+    Reduce the peak list by removing duplicates
+    then convert SXPeaks objects to PeakObjects and add them to the output workspace
+    @param pcv : current peak list containing potential duplicates
+    */
     void FindSXPeaks::reducePeakList(const peakvector& pcv)
     {
       double resol=getProperty("Resolution");
