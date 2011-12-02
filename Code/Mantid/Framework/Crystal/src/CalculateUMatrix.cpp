@@ -189,6 +189,9 @@ namespace Crystal
     ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
     if (!ws) throw std::runtime_error("Problems reading the peaks workspace");
 
+    size_t nIndexedpeaks=0;
+    bool found2nc=false;
+    V3D old(0,0,0);
     Matrix<double> Hi(4,4),Si(4,4),HS(4,4),zero(4,4);
     for (int i=0;i<ws->getNumberPeaks();i++)
     {
@@ -198,6 +201,18 @@ namespace Crystal
       L=p.getL();
       if(H*H+K*K+L*L>0)
       {
+        nIndexedpeaks++;
+        if (!found2nc)
+        {
+          if (nIndexedpeaks==1)
+          {
+            old=V3D(H,K,L);
+          }
+          else
+          {
+            if (!old.coLinear(V3D(0,0,0),V3D(H,K,L))) found2nc=true;
+          }
+        }
         V3D Qhkl=B*V3D(H,K,L);
         Hi[0][0]=0.;        Hi[0][1]=-Qhkl.X(); Hi[0][2]=-Qhkl.Y(); Hi[0][3]=-Qhkl.Z();
         Hi[1][0]=Qhkl.X();  Hi[1][1]=0.;        Hi[1][2]=Qhkl.Z();  Hi[1][3]=-Qhkl.Y();
@@ -213,8 +228,9 @@ namespace Crystal
         HS+=(Hi*Si);
       }
     }
-    //check if HS is 0
-    if (HS==zero) throw std::invalid_argument("The peaks workspace is not indexed or something really bad happened");
+    //check if enough peaks are indexed or if HS is 0
+    if ((nIndexedpeaks<2) || (found2nc==false)) throw std::invalid_argument("Less then two non-colinear peaks indexed");
+    if (HS==zero) throw std::invalid_argument("Something really bad happened");
 
     Matrix<double> Eval;
     Matrix<double> Diag;
