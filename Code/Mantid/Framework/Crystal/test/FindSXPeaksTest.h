@@ -196,9 +196,17 @@ public:
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found three peaks!", 3, result->rowCount());
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40, result->getPeak(0).getIntensity());
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, result->getPeak(1).getIntensity());
-    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45, result->getPeak(2).getIntensity());
+
+    std::vector<double> results(3);
+    results[0] = result->getPeak(0).getIntensity();
+    results[1] = result->getPeak(1).getIntensity();
+    results[2] = result->getPeak(2).getIntensity();
+    std::sort (results.begin(), results.end(), std::less<double>() );
+
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40, results[0]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45, results[1]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, results[2]);
+    
   }
 
   void testUseWorkspaceRangeCropping()
