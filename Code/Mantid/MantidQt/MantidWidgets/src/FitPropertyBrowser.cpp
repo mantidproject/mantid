@@ -927,7 +927,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
       if (mws)
       {
         size_t wi = static_cast<size_t>(workspaceIndex());
-        if (wi < mws->getNumberHistograms())
+        if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty())
         {
           setStartX(mws->readX(wi).front());
           setEndX(mws->readX(wi).back());
