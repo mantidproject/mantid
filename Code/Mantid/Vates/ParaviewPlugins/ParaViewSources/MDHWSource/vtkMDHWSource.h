@@ -47,7 +47,6 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);
-  void SetDepth(int depth);
 
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
