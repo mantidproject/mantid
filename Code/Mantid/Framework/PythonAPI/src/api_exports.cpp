@@ -28,6 +28,7 @@
 //Poco
 #include <Poco/ActiveResult.h>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeak.h"
 
 namespace Mantid
 {
@@ -85,6 +86,7 @@ using namespace boost::python;
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
+      .def("_getRawIPeaksWorkspacePointer", &FrameworkManagerProxy::retrieveIPeaksWorkspace)
       .def("_getRawIMDWorkspacePointer", &FrameworkManagerProxy::retrieveIMDWorkspace)
       .def("_getRawIMDHistoWorkspacePointer", &FrameworkManagerProxy::retrieveIMDHistoWorkspace)
       .def("_getRawIMDEventWorkspacePointer", &FrameworkManagerProxy::retrieveIMDEventWorkspace)
@@ -408,6 +410,65 @@ using namespace boost::python;
         ;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  void export_IPeaksWorkspace()
+  {
+    register_ptr_to_python<API::IPeaksWorkspace_sptr>();
+
+    // IPeaksWorkspace class
+    class_< IPeaksWorkspace, bases<API::Workspace>, boost::noncopyable >("IPeaksWorkspace", no_init)
+            .def("getNumberPeaks", &IPeaksWorkspace::getNumberPeaks)
+            .def("addPeak", &IPeaksWorkspace::addPeak)
+            .def("removePeak", &IPeaksWorkspace::removePeak)
+            .def("getPeak", &IPeaksWorkspace::getPeakPtr, return_internal_reference<>() )
+        ;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  void export_IPeak()
+  {
+    register_ptr_to_python<IPeak*>();
+
+    class_<IPeak, boost::noncopyable>("IPeak", no_init)
+          .def("getDetectorID", &IPeak::getDetectorID)
+          .def("setDetectorID", &IPeak::setDetectorID)
+          .def("getRunNumber", &IPeak::getRunNumber)
+          .def("setRunNumber", &IPeak::setRunNumber)
+          .def("getH", &IPeak::getH)
+          .def("getK", &IPeak::getK)
+          .def("getL", &IPeak::getL)
+          .def("setH", &IPeak::setH)
+          .def("setK", &IPeak::setK)
+          .def("setL", &IPeak::setL)
+          .def("getQLabFrame", &IPeak::getQLabFrame)
+          .def("getQSampleFrame", &IPeak::getQSampleFrame)
+          .def("setQLabFrame", &IPeak::setQLabFrame)
+          .def("setQSampleFrame", &IPeak::setQSampleFrame)
+          .def("setWavelength", &IPeak::setWavelength)
+          .def("getWavelength", &IPeak::getWavelength)
+          .def("getScattering", &IPeak::getScattering)
+          .def("getDSpacing", &IPeak::getDSpacing)
+          .def("getTOF", &IPeak::getTOF)
+          .def("getInitialEnergy", &IPeak::getInitialEnergy)
+          .def("getFinalEnergy", &IPeak::getFinalEnergy)
+          .def("setInitialEnergy", &IPeak::setInitialEnergy)
+          .def("setFinalEnergy", &IPeak::setFinalEnergy)
+          .def("getIntensity", &IPeak::getIntensity)
+          .def("getSigmaIntensity", &IPeak::getSigmaIntensity)
+          .def("setIntensity", &IPeak::setIntensity)
+          .def("setSigmaIntensity", &IPeak::setSigmaIntensity)
+          .def("getBinCount", &IPeak::getBinCount)
+          .def("setBinCount", &IPeak::setBinCount)
+//          .def("getBankName", &IPeak::getBankName, return_value_policy< copy_const_reference >())
+          .def("getRow", &IPeak::getRow)
+          .def("getCol", &IPeak::getCol)
+          .def("getDetPos", &IPeak::getDetPos)
+          .def("getL1", &IPeak::getL1)
+          .def("getL2", &IPeak::getL2)
+          ;
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   void export_eventworkspace()
@@ -605,8 +666,7 @@ using namespace boost::python;
   {
     class_< IWorkspaceProperty, boost::noncopyable>("IWorkspaceProperty", no_init)
       ;
-
-    // WorkspaceGroups of various types
+    // Workspaces of various types
     class_< WorkspaceProperty<Workspace>, bases<Kernel::Property, API::IWorkspaceProperty>, boost::noncopyable>("WorkspaceProperty", no_init)
       ;
     class_< WorkspaceProperty<WorkspaceGroup>, bases<Kernel::Property, API::IWorkspaceProperty>, boost::noncopyable>("WorkspaceGroupProperty", no_init)
@@ -699,6 +759,8 @@ using namespace boost::python;
     export_IMDWorkspace();
     export_IMDHistoWorkspace();
     export_IMDEventWorkspace();
+    export_IPeaksWorkspace();
+    export_IPeak();
     export_BoxController();
     export_tableworkspace();
     export_workspacegroup();

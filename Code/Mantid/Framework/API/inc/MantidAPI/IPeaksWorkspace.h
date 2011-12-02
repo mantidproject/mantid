@@ -86,6 +86,14 @@ namespace API
     virtual IPeak & getPeak(const int peakNum) = 0;
 
     //---------------------------------------------------------------------------------------------
+    /** Return a pointer to the Peak
+     * @param peakNum :: index of the peak to get.
+     * @return a pointer to a Peak object.
+     */
+    IPeak * getPeakPtr(const int peakNum)
+    { return &this->getPeak(peakNum); }
+
+    //---------------------------------------------------------------------------------------------
     /** Create an instance of a Peak
      * @param QLabFrame :: Q of the center of the peak, in reciprocal space
      * @param detectorDistance :: distance between the sample and the detector.
