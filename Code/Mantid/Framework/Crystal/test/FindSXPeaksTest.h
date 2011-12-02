@@ -10,40 +10,42 @@ using namespace Mantid::API;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 
+// Helper method to overwrite spectra.
+void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace, const Mantid::MantidVec& Yvalues)
+{
+  Mantid::MantidVec& Y = workspace->dataY(histo);
+  for(size_t i = 0; i < Y.size(); i++)
+  {
+    Y[i] = Yvalues[i];
+  }
+}
+
+// Helper method to make what will be recognised as a single peak.
+void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin, Workspace2D_sptr workspace)
+{
+  size_t nBins = workspace->readY(0).size();
+  Mantid::MantidVec peaksInY(nBins);
+
+  for(size_t i = 0; i < nBins; i++)
+  {
+    if(i == at_bin)
+    {
+      peaksInY[i] = peak_intensity; // overwrite with special value
+    }
+    else
+    {
+      peaksInY[i] = workspace->readY(histo)[i];
+    }
+  }
+  overWriteSpectraY(histo, workspace, peaksInY);
+}
+
+
+//=====================================================================================
+// Functional tests
+//=====================================================================================
 class FindSXPeaksTest : public CxxTest::TestSuite
 {
-
-private:
-
-  // Helper method to make what will be recognised as a single peak.
-  void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin, Workspace2D_sptr workspace)
-  {
-    size_t nBins = workspace->readY(0).size();
-    Mantid::MantidVec peaksInY(nBins);
-
-    for(size_t i = 0; i < nBins; i++)
-    {
-      if(i == at_bin)
-      {
-        peaksInY[i] = peak_intensity; // overwrite with special value
-      }
-      else
-      {
-        peaksInY[i] = workspace->readY(histo)[i];
-      }
-    }
-    overWriteSpectraY(histo, workspace, peaksInY);
-  }
-
-  // Helper method to overwrite spectra.
-  void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace, const Mantid::MantidVec& Yvalues)
-  {
-    Mantid::MantidVec& Y = workspace->dataY(histo);
-    for(size_t i = 0; i < workspace->getNumberHistograms(); i++)
-    {
-      Y[i] = Yvalues[i];
-    }
-  }
 
 public:
 
@@ -80,7 +82,7 @@ public:
     std::vector<int> spectra(1, 1); 
     double detectorDistance = 3; 
     SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2);
-  
+
     TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1, peak.getIntensity());
     TSM_ASSERT_EQUALS("Detector Id getter is not wired-up correctly", 2, peak.getDetectorId());
     //QSpace is also a getter, but is tested more thouroughly below.
@@ -117,7 +119,7 @@ public:
     TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-    TSM_ASSERT_EQUALS("Nothing above background in input workspace, should have found no peaks!", 1, result->rowCount());
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40, result->getPeak(0).getIntensity());
   }
 
@@ -198,7 +200,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "found_peaks");
-    
+
     double rangeLower = 2;
     double rangeUpper = 8;
     alg.setProperty("RangeLower", rangeLower);
@@ -214,7 +216,7 @@ public:
   {
     //creates a workspace where all y-values are 2
     Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    
+
     //Make two peaks with none in the middle of the workspace (by nhistos).
     makeOnePeak(1, 40, 5, workspace);
     makeOnePeak(9, 40, 5, workspace);
@@ -228,17 +230,52 @@ public:
     int endIndex = 4;
     alg.setProperty("StartWorkspaceIndex", startIndex);
     alg.setProperty("EndWorkspaceIndex", endIndex);
-    
+
     alg.execute();
     TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0, result->rowCount());
   }
+};
 
+//=====================================================================================
+// Performance tests
+//=====================================================================================
+class FindSXPeaksTestPerformance : public CxxTest::TestSuite
+{
+private:
+  int m_nHistograms;
+  Workspace2D_sptr m_workspace2D;
+public:
 
+  FindSXPeaksTestPerformance() : m_nHistograms(5000)
+  {
+  }
 
+  void setUp()
+  {
+    m_workspace2D = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(m_nHistograms, 10); 
+    //Make 99 well separated peaks
+    for(int i = 1; i < m_nHistograms; i+=5)
+    {
+      makeOnePeak(i, 40, 5, m_workspace2D);
+    }
+  }
 
+  void testSXPeakFinding()
+  {
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_workspace2D);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    std::cout << "Number of Peaks Found: " << result->rowCount() << std::endl;
+    TSM_ASSERT("Should have found many peaks!", 0 < result->rowCount());
+  }
 
 };
 
