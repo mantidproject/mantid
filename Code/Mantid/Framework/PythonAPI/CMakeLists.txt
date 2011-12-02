@@ -47,6 +47,7 @@ set ( TEST_PY_FILES
 	test/MDHistoWorkspaceTest.py
 	test/NumpyTest.py
 	test/MatrixWorkspaceTest.py
+	test/IPeaksWorkspaceTest.py
 	test/SettingsTest.py
 	test/SANSWorkflowTest.py
 	test/SANSMaskCommandsTest.py
