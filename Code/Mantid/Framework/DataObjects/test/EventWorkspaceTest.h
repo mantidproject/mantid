@@ -234,19 +234,25 @@ public:
 
 
   //------------------------------------------------------------------------------
-  void test_constructor_not_settingx()
+  void test_constructor_setting_default_x()
   {
-    //Do the workspace, but don't set x
+    //Do the workspace, but don't set x explicity
     ew = createEventWorkspace(1, 0);
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS( ew->blocksize(), 0);
-    TS_ASSERT_EQUALS( ew->size(), 0);
+    TS_ASSERT_EQUALS( ew->blocksize(), 1);
+    TS_ASSERT_EQUALS( ew->size(), 500);
 
-    //Didn't set X? well all the histograms are size 0
+    //Didn't set X? well all the histograms show a single bin
     const EventList el(ew->getEventList(1));
-    TS_ASSERT_EQUALS( el.constDataX().size(), 0);
-    TS_ASSERT_EQUALS( el.makeDataY()->size(), 0);
-    TS_ASSERT_EQUALS( el.makeDataE()->size(), 0);
+    TS_ASSERT_EQUALS( el.constDataX().size(), 2);
+    TS_ASSERT_EQUALS( el.constDataX()[0], 0.0);
+    TS_ASSERT_EQUALS( el.constDataX()[1], std::numeric_limits<double>::min());
+    MantidVec* Y = el.makeDataY();
+    TS_ASSERT_EQUALS( Y->size(), 1);
+    TS_ASSERT_EQUALS( (*Y)[0], 0.0);
+    MantidVec* E = el.makeDataE();
+    TS_ASSERT_EQUALS( E->size(), 1);
+    TS_ASSERT_EQUALS( (*E)[0], 0.0);
   }
 
   void test_maskWorkspaceIndex()
