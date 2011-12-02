@@ -35,8 +35,12 @@ namespace API
 
   void IFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,bool)
   {
-    m_workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
-    if (!m_workspace)
+    MatrixWorkspace_const_sptr matrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    if (matrix)
+    {
+      m_workspace = boost::weak_ptr<const MatrixWorkspace>(matrix);
+    }
+    else
     {
       throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
     }
@@ -48,9 +52,9 @@ namespace API
   */
   void IFunctionMW::setSlicing(const std::string& slicing)
   {
-    if (!m_workspace) 
+    MatrixWorkspace_const_sptr mws = this->getMatrixWorkspace();
+    if (!mws) 
     {// unset workspace
-      m_workspace.reset();
       m_workspaceIndex = 0;
       m_xMinIndex = 0;
       m_xMaxIndex = 0;
@@ -63,12 +67,6 @@ namespace API
 
     try
     {
-      MatrixWorkspace_const_sptr mws = m_workspace;
-      if (!mws)
-      {
-        throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
-      }
-
       size_t index = mws->getNumberHistograms();
       double startX = 0;
       double endX = 0;
@@ -127,7 +125,7 @@ namespace API
   /// Get the workspace
   boost::shared_ptr<const API::Workspace> IFunctionMW::getWorkspace()const
   {
-    return m_workspace;
+    return getMatrixWorkspace();
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
@@ -194,21 +192,21 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 {
   m_workspaceIndex = wi;
 
-  m_workspace = workspace;
+  m_workspace = boost::weak_ptr<const MatrixWorkspace>(workspace);
   if (!workspace) return; // unset the workspace
 
-  size_t n = m_workspace->blocksize(); // length of each Y vector
+  size_t n = workspace->blocksize(); // length of each Y vector
   size_t xMin = 0;
   size_t xMax = 0;
 
-  if (wi >= m_workspace->getNumberHistograms())
+  if (wi >= workspace->getNumberHistograms())
   {
     throw std::range_error("Workspace index out of range");
   }
 
-  const MantidVec& x = m_workspace->readX(wi);
-  const MantidVec& y = m_workspace->readY(wi);
-  const MantidVec& e = m_workspace->readE(wi);
+  const MantidVec& x = workspace->readX(wi);
+  const MantidVec& y = workspace->readY(wi);
+  const MantidVec& e = workspace->readE(wi);
   bool isHist = x.size() > y.size();
 
   if (startX >= endX)
@@ -277,9 +275,9 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
   if ( negativeError )
     g_log.warning() << "Negative error values found! These are set to absolute value\n";
 
-  if (m_workspace->hasMaskedBins(wi))
+  if (workspace->hasMaskedBins(wi))
   {
-    const MatrixWorkspace::MaskList& mlist = m_workspace->maskedBins(wi);
+    const MatrixWorkspace::MaskList& mlist = workspace->maskedBins(wi);
     MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
     for(;it!=mlist.end();++it)
     {
@@ -292,21 +290,21 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
     // check if parameter are specified in instrument definition file
 
-    const Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
+    const Geometry::ParameterMap& paramMap = workspace->instrumentParameters();
 
 
     Geometry::IDetector_const_sptr det;
-    size_t numDetectors = m_workspace->getSpectrum(wi)->getDetectorIDs().size() ;
+    size_t numDetectors = workspace->getSpectrum(wi)->getDetectorIDs().size() ;
     if (numDetectors > 1)
     {
       // If several detectors are on this workspace index, just use the ID of the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector and not the group. Ask Roman.
-      Instrument_const_sptr inst = m_workspace->getInstrument();
-      det = inst->getDetector( *m_workspace->getSpectrum(wi)->getDetectorIDs().begin() );
+      Instrument_const_sptr inst = workspace->getInstrument();
+      det = inst->getDetector( *workspace->getSpectrum(wi)->getDetectorIDs().begin() );
     }
     else
       // Get the detector (single) at this workspace index
-      det = m_workspace->getDetector(wi);;
+      det = workspace->getDetector(wi);;
 
     for (size_t i = 0; i < nParams(); i++)
     {
@@ -352,7 +350,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
               // if unit specified convert centre value to unit required by formula or look-up-table
               if (centreUnit)
-                centreValue = convertValue(centreValue, centreUnit, m_workspace, wi);
+                centreValue = convertValue(centreValue, centreUnit, workspace, wi);
 
               double paramValue = fitParam.getValue(centreValue);
 
@@ -362,7 +360,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
               {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit();  // from table
-                paramValue /= convertValue(1.0, resultUnit, m_workspace, wi);
+                paramValue /= convertValue(1.0, resultUnit, workspace, wi);
               }
               else
               {
@@ -382,7 +380,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
                       std::stringstream readDouble;
                       Kernel::Unit_sptr unt = Kernel::UnitFactory::Instance().create(allUnitStr[iUnit]);
                       readDouble << 1.0 / 
-                        convertValue(1.0, unt, m_workspace, wi);
+                        convertValue(1.0, unt, workspace, wi);
                       resultUnitStr.replace(found, len, readDouble.str());
                     }
                   }  // end for
