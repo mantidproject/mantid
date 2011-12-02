@@ -278,7 +278,7 @@ namespace DataObjects
 	  }
 
 	// Start Peaks Workspace
-    file->makeGroup("peaks workspace", "NXentry", true);  
+    file->makeGroup("table_workspace", "NXentry", true);  
 
     // Detectors column
 	file->writeData("column_1", detectorID);
