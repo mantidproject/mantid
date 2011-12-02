@@ -9,12 +9,6 @@
          information_only="1">
         <SimpleStringInformationHelper /> 
        </StringVectorProperty>
-	   <IntVectorProperty
-         name="Recursion Depth"
-         command="SetDepth"
-         number_of_elements="1"
-         default_values="1000">
-       </IntVectorProperty>
 	   <StringVectorProperty
          name="Mantid Workspace Name"
          command="SetWsName"

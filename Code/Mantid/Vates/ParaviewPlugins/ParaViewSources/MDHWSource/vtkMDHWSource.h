@@ -73,9 +73,6 @@ private:
   /// Name of the workspace.
   std::string m_wsName;
 
-  /// Recursion depth.
-  size_t m_depth;
-
   /// Time.
   double m_time;
 

@@ -8,7 +8,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
-#include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
+#include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
@@ -22,7 +22,7 @@ vtkCxxRevisionMacro(vtkMDHWSource, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkMDHWSource);
 
 /// Constructor
-vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL)
+vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_time(0), m_presenter(NULL)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -32,20 +32,6 @@ vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_pres
 vtkMDHWSource::~vtkMDHWSource()
 {
   delete m_presenter;
-}
-
-/*
- Setter for the recursion depth
- @param depth : recursion depth to use
-*/
-void vtkMDHWSource::SetDepth(int depth)
-{
-  size_t temp = depth;
-  if(m_depth != temp)
-  {
-   this->m_depth = temp;
-   this->Modified();
-  }
 }
 
 /*
@@ -124,7 +110,7 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
 {
   if(m_presenter == NULL && !m_wsName.empty())
   {
-    m_presenter = new MDEWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
+    m_presenter = new MDHWInMemoryLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWSource>(this), new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>, m_wsName);
     if(!m_presenter->canReadFile())
     {
       vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
@@ -168,7 +154,7 @@ Getter for the recursion depth.
 */
 size_t vtkMDHWSource::getRecursionDepth() const
 {
-  return this->m_depth;
+  return 0;
 }
 
 /*

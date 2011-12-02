@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Exception.h"
 
@@ -50,6 +51,7 @@ namespace Mantid
       //Templated assembled types.
       template class ADSWorkspaceProvider<Mantid::API::IMDWorkspace>;
       template class ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>;
+      template class ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>;
 
   }
 }
