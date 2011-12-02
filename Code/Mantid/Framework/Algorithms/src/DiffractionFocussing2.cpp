@@ -167,27 +167,17 @@ void DiffractionFocussing2::exec()
     }
   }
 
-  //No problem? Then it is a normal Workspace2D
+  //No problem! It is a normal Workspace2D
   API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(m_matrixInputW,nGroups,nPoints+1,nPoints);
 
-
   // Now the real work
-  std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
 
   // The output spectrum, will be set at the first group
   Progress * prog;
   prog = new API::Progress(this,0.2,0.25,nHist);
 
-  bool checkForMask = false;
-  { // get rid of these objects quickly
-    Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
-    if (instrument != NULL)
-    {
-      checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
-    }
-  }
-
+  // determine the workspace indices for each group
   vector< vector<size_t> > ws_indices(nGroups+1);
   for (size_t wi=0;wi<static_cast<size_t>(nHist);wi++)
   {
@@ -196,17 +186,12 @@ void DiffractionFocussing2::exec()
     if (group < 1) // Not in a group, or invalid group #
       continue;
 
-    // check for masking
-    if (checkForMask)
-    {
-      Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(wi));
-      if ( (det == NULL) || (det->isMasked()) ) continue;
-    }
-
+    // resize the ws_indices if it is not big enough
     if (ws_indices.size() < static_cast<size_t>(group+1))
     {
       ws_indices.resize(group + 1);
     }
+
     // Also record a list of workspace indices
     ws_indices[group].push_back(wi);
     prog->reportIncrement(1, "Pre-counting");
@@ -240,7 +225,6 @@ void DiffractionFocussing2::exec()
 
     // Assign the new X axis only once (i.e when this group is encountered the first time)
     out->dataX(static_cast<int64_t>(dif))=Xout;
-    flags[dif]=false;
 
     // This is the output spectrum
     ISpectrum * outSpec = out->getSpectrum(outWorkspaceIndex);
@@ -652,13 +636,32 @@ void DiffractionFocussing2::determineRebinParameters()
 
   const double BIGGEST = std::numeric_limits<double>::max();
 
+  // whether or not to bother checking for a mask
+  bool checkForMask = false;
+  { // get rid of these objects quickly
+    Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
+    if (instrument != NULL)
+    {
+      checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
+    }
+  }
+
   groupAtWorkspaceIndex.resize(nHist);
-  for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
+  for (int wi = 0; wi < nHist; wi++) //  Iterate over all histograms to find X boundaries for each group
   {
-    const int group = validateSpectrumInGroup(static_cast<size_t>(i));
-    groupAtWorkspaceIndex[i] = group;
+    const int group = validateSpectrumInGroup(static_cast<size_t>(wi));
+    groupAtWorkspaceIndex[wi] = group;
     if (group == -1)
       continue;
+    if (checkForMask)
+    {
+      Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(wi));
+      if ( (det == NULL) || (det->isMasked()) )
+      {
+        groupAtWorkspaceIndex[wi] = -1;
+        continue;
+      }
+    }
     gpit = group2minmax.find(group);
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end())
@@ -667,7 +670,7 @@ void DiffractionFocussing2::determineRebinParameters()
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    const MantidVec& X = m_matrixInputW->readX(i);
+    const MantidVec& X = m_matrixInputW->readX(wi);
     double temp = X.front();
     if (temp < (min)) //New Xmin found
       (gpit->second).first = temp;
