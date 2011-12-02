@@ -1,194 +1,232 @@
 //TODO: Rewrite away from the old MDWorkspace. There are no MDPoint's or MDCell's anymore
 
-//#ifndef QUADENBACKGROUNDTEST_H_
-//#define QUADENBACKGROUNDTEST_H_
+#ifndef QUADENBACKGROUNDTEST_H_
+#define QUADENBACKGROUNDTEST_H_
 //
-//#include <cxxtest/TestSuite.h>
+#include <cxxtest/TestSuite.h>
 //
-//#include "MantidMDAlgorithms/QuadEnBackground.h"
-//#include "MantidAPI/CompositeFunction.h"
-//#include "MantidCurveFitting/GenericFit.h"
-//#include "MantidKernel/UnitFactory.h"
-//#include "MantidAPI/AnalysisDataService.h"
-//#include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidAPI/Algorithm.h"
-//#include "MantidDataObjects/Workspace2D.h"
-//#include "MantidDataObjects/TableWorkspace.h"
-//#include "MantidAPI/TableRow.h"
-//#include "MantidKernel/Exception.h"
-//#include "MantidAPI/FunctionFactory.h"
+#include "MantidMDAlgorithms/QuadEnBackground.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/GenericFit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidKernel/Exception.h"
+#include "MantidAPI/FunctionFactory.h"
+// from MDHistoWorkspaceTest
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+//#include <boost/math/special_functions/fpclassify.hpp>
+//#include <iomanip>
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 //
-//#include <iostream>
-//#include <boost/scoped_ptr.hpp>
-//#include "MantidAPI/AnalysisDataService.h"
-//#include "MantidGeometry/MDGeometry/MDPoint.h"
-//#include "MantidGeometry/MDGeometry/MDCell.h"
-//#include "MantidAPI/IMDWorkspace.h"
-//#include "MantidAPI/IMDIterator.h"
-//#include "MantidGeometry/Instrument/Detector.h"
-//#include "MantidGeometry/Instrument.h"
-//#include "MantidMDAlgorithms/QuadEnBackground.h"
+#include <iostream>
+#include <boost/scoped_ptr.hpp>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument.h"
 //
-//#include <math.h>
-//#include <cmath>
+#include <math.h>
+#include <cmath>
 //
-//using namespace Mantid::Kernel;
-//using namespace Mantid::API;
-//using namespace Mantid::CurveFitting;
-//using namespace Mantid::DataObjects;
-//using namespace Mantid::MDAlgorithms;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 //
-//typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 //// Implement an IMDWorkspace for testing
 //
-////
-//namespace Mantid
-//{
-//    namespace API
-//    {
-//        // trivial iterator assumes that just have 4 MDCells by default
-//        class DLLExport IMDIterator1 : public IMDIterator
-//        {
-//        public:
-//            virtual size_t getDataSize() const { return 0; }
-//            virtual double getCoordinate(int i) const { return 0.0;}
-//            virtual bool next() { m_pnt++; return m_pnt<m_pntMax;}
-//            virtual size_t getPointer() const {return m_pnt; }
-//
-//            IMDIterator1() { m_pnt=0; m_pntMax=4;};
-//            IMDIterator1(size_t pntMax) { m_pnt=0; m_pntMax=pntMax;};
-//            ~IMDIterator1() {};
-//
-//        private:
-//            size_t m_pnt;
-//            size_t m_pntMax;
-//
-//        };
-//
-//    }
-//}
+namespace Mantid
+{
+    namespace API
+    {
+        // trivial iterator assumes that just have 4 MDCells by default
+        class DLLExport IMDIterator1 : public IMDIterator
+        {
+        public:
+        	/// Number of data points (old MDCells) Not needed
+        	virtual size_t getDataSize() const {return m_pntMax;};
+        	/// Jump to the index^th cell. Not needed.
+            virtual void jumpTo(size_t index) {m_pnt=index;};
+            /// Advance to the next cell. If the current cell is the last one in the workspace
+            /// do nothing and return false.
+            virtual bool next() { if(m_pnt<m_pntMax-1) {m_pnt++;return true;}; return false;}
+            // not needed for this test
+            virtual bool next(size_t skip) { if(m_pnt+skip<m_pntMax-1) {m_pnt+=skip;return true;}; return false;}
+            /// Returns the normalized signal for this box - TODO
+            virtual signal_t getNormalizedSignal() {return m_pnt;};
+            // TODO
+            virtual signal_t getNormalizedError() {return m_pnt;};
+            // not needed
+            virtual coord_t * getVertexesArray() {return NULL;};
+            // not needed
+            virtual Mantid::Kernel::VMD getCenter() {return NULL;}
+            // needed TODO
+            virtual size_t getNumEvents() {return 0;}
+            //
+            virtual uint16_t getInnerRunIndex(size_t index) {return 0;}
+            //
+            virtual int32_t getInnerDetectorID(size_t index) {return 0;}
+            // needed TODO
+            virtual coord_t getInnerPosition(size_t index, size_t dimension) {return 0;}
+            //
+            virtual signal_t getInnerSignal(size_t index) {return 0.;}
+            virtual signal_t getInnnerError(size_t index) {return 0.;}
+            //
+            /*
+            virtual size_t getDataSize() const { return 0; }
+            virtual double getCoordinate(int i) const { return 0.0;}
+            virtual bool next() { m_pnt++; return m_pnt<m_pntMax;}
+            virtual size_t getPointer() const {return m_pnt; }
+            */
+
+            IMDIterator1() { m_pnt=0; m_pntMax=4;};
+            IMDIterator1(size_t pntMax) { m_pnt=0; m_pntMax=pntMax;};
+            ~IMDIterator1() {};
+
+        private:
+            size_t m_pnt;
+            size_t m_pntMax;
+
+        };
+
+    }
+}
 //
 //// Add a concrete IMDDimension class
-//namespace Mantid
-//{
-//    namespace Geometry
-//    {
-//        class DLLExport TestQIMDDimension : public IMDDimension
-//        {
-//        public:
-//          virtual std::string getName() const { return("TestX"); }
-//          virtual std::string getUnits() const { return("TestUnits"); }
-//          virtual std::string getDimensionId() const { return("TestX"); }
-//          virtual bool getIsIntegrated() const {return(0);}
-//          virtual double getMaximum() const {return(1.0);}
-//          virtual double getMinimum() const {return(0.0);}
-//          virtual size_t getNBins() const {return(m_cells);}
-//          virtual std::string toXMLString() const { return "";}
-//          virtual double getX(size_t ind)const {throw std::runtime_error("Not Implemented");}
-//
-//            TestQIMDDimension() {
-//            m_cells=0;
-//            };
-//            TestQIMDDimension(int cells) {
-//            m_cells=cells;
-//            };
-//            ~TestQIMDDimension() {};
-//        private:
-//            int m_cells;
-//        };
-//    }
-//}
+namespace Mantid
+{
+    namespace Geometry
+    {
+        class DLLExport TestQIMDDimension : public IMDDimension
+        {
+        public:
+          virtual std::string getName() const { return("TestX"); }
+          virtual std::string getUnits() const { return("TestUnits"); }
+          virtual std::string getDimensionId() const { return("TestX"); }
+          virtual bool getIsIntegrated() const {return(0);}
+          virtual double getMaximum() const {return(1.0);}
+          virtual double getMinimum() const {return(0.0);}
+          virtual size_t getNBins() const {return(m_cells);}
+          virtual std::string toXMLString() const { return "";}
+          virtual double getX(size_t ind)const {throw std::runtime_error("Not Implemented");}
+
+            TestQIMDDimension() {
+            m_cells=0;
+            };
+            TestQIMDDimension(int cells) {
+            m_cells=cells;
+            };
+            ~TestQIMDDimension() {};
+        private:
+            int m_cells;
+        };
+    }
+}
 //
 //// Minimal IMDWorkspace class
-//class DLLExport TestQCut : public IMDWorkspace
-//{
-//private:
-//    int m_points;
-//    size_t m_cells;
-//    boost::shared_ptr<const Mantid::Geometry::IMDDimension> m_xDim;
-//    std::vector<Mantid::Geometry::MDCell> m_mdcells;
-//
-//public:
-//
-//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
-//    {
-//        //return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(new Mantid::Geometry::TestIMDDimension(3));
-//        return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(m_xDim);
-//    }
-//
-//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//
-//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//
-//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//
-//    virtual uint64_t getNPoints() const
-//    {
-//        return m_points;
-//    }
-//
-//    virtual size_t getNDimensions() const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//
-//    virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
-//    {
-//        //throw std::runtime_error("Not implemented");
-//        // assume that cut is one dimensional and can use idex as dim1Increment
-//        // assume also that getPoint is really the same as getCell in that the information
-//        // is about the cell
-//        return(m_mdcells.at(index));
-//    }
-//
-//    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
-//    {
-//        return(m_mdcells.at(dim1Increment));
-//    };
-//
-//    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const
-//    {
-//        // only one dimension in this mock up
-//        return m_xDim;
-//    }
-//
-//    /// return ID specifying the workspace kind
-//    virtual const std::string id() const {return "TestIMDDWorkspace";}
-//    /// return number of dimensions in MD workspace
-//    virtual size_t getNumDims()const{return 4;}
-//    virtual size_t getMemorySize() const {return 0;};
-//
-//    virtual std::string getGeometryXML() const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//    virtual IMDIterator* createIterator() const {return new IMDIterator1();}
-//
-//    TestQCut()
-//    {
-//        m_points=0;
-//        m_cells=0;
-//    }
-//
-//    TestQCut(std::vector<Mantid::Geometry::MDCell> pContribCells ) :
-//    m_mdcells(pContribCells)
-//    {
-//        m_cells=pContribCells.size();
-//        m_points=0;
-//        m_xDim=boost::shared_ptr<const Mantid::Geometry::IMDDimension>(new Mantid::Geometry::TestQIMDDimension(m_cells));
-//    }
-//    ~TestQCut() {};
-//
-//};
+class DLLExport TestQCut : public IMDWorkspace
+{
+private:
+    int m_points;
+    size_t m_cells;
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> m_xDim;
+    std::vector<Mantid::Geometry::MDCell> m_mdcells;
+
+public:
+
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
+    {
+        //return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(new Mantid::Geometry::TestIMDDimension(3));
+        return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(m_xDim);
+    }
+
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+    virtual uint64_t getNPoints() const
+    {
+        return m_points;
+    }
+
+    virtual size_t getNDimensions() const
+    {
+        throw std::runtime_error("Not implemented");
+    }
+
+    virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
+    {
+        //throw std::runtime_error("Not implemented");
+        // assume that cut is one dimensional and can use idex as dim1Increment
+        // assume also that getPoint is really the same as getCell in that the information
+        // is about the cell
+        return(m_mdcells.at(index));
+    }
+
+    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
+    {
+        return(m_mdcells.at(dim1Increment));
+    };
+
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionNamed(std::string id) const
+    {
+        // only one dimension in this mock up
+        return m_xDim;
+    }
+
+    /// return ID specifying the workspace kind
+    virtual const std::string id() const {return "TestIMDDWorkspace";}
+    /// return number of dimensions in MD workspace
+    virtual size_t getNumDims()const{return 4;}
+    virtual size_t getMemorySize() const {return 0;};
+
+    virtual std::string getGeometryXML() const
+    {
+        throw std::runtime_error("Not implemented");
+    }
+    virtual IMDIterator* createIterator() const {return new IMDIterator1();}
+
+    TestQCut()
+    {
+        m_points=0;
+        m_cells=0;
+    }
+
+    TestQCut(std::vector<Mantid::Geometry::MDCell> pContribCells ) :
+    m_mdcells(pContribCells)
+    {
+        m_cells=pContribCells.size();
+        m_points=0;
+        m_xDim=boost::shared_ptr<const Mantid::Geometry::IMDDimension>(new Mantid::Geometry::TestQIMDDimension(m_cells));
+    }
+    ~TestQCut() {};
+
+};
 //
 //class QuadEnBackgroundTest : public CxxTest::TestSuite
 //{

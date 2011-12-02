@@ -34,10 +34,11 @@ namespace Mantid
             double bgSignal = 0.;
             double eps=0.;
 
-            // Go once over each event
+            // Go once over each event - Note Events in this context must be detectors NOT
+            // "events" in the more general sense.
             for (size_t i=0; i < it.getNumEvents(); i++)
             {
-              // 4th coordinate = energy
+              // assuming 4th coordinate = energy
               eps = it.getInnerPosition(i, 3);
               bgSignal += constant+eps*(linear+eps*quadratic);
             }
@@ -52,7 +53,8 @@ namespace Mantid
 //                //int run=points[i]->getRunId(); // testing
 //                bgSignal+=constant+eps*(linear+eps*quadratic);
 //            }
-            return bgSignal;
+            // return normalized background
+            return bgSignal/it.getNumEvents();
         }
     }
 }
