@@ -130,11 +130,13 @@ namespace Mantid
       //
 
       peakvector entries;
-      //PARALLEL_FOR1(localworkspace)
-      // Loop over spectra
+      //Reserve 1000 peaks to make later push_back fast for first 1000 peaks, but unlikely to have more than this.
+      entries.reserve(1000);
+      //Count the peaks so that we can resize the peakvector at the end.
+      PARALLEL_FOR1(localworkspace)
       for (int i = static_cast<int>(m_MinSpec); i <= static_cast<int>(m_MaxSpec); ++i)
       {
-        //PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         // Retrieve the spectrum into a vector
         const MantidVec& X = localworkspace->readX(i);
         const MantidVec& Y = localworkspace->readY(i);
@@ -165,10 +167,16 @@ namespace Mantid
         // t.o.f. of the peak
         double tof=0.5*(*(X.begin()+d)+*(X.begin()+d+1));
 
-        Geometry::IDetector_const_sptr det=localworkspace->getDetector(static_cast<size_t>(i));
-
+        Geometry::IDetector_const_sptr det;
+        try
+        {
+          det=localworkspace->getDetector(static_cast<size_t>(i));
+        }
+        catch(Mantid::Kernel::Exception::NotFoundError&)
+        {
+          continue;
+        }
         double phi=det->getPhi();
-  
         if (phi<0)
         {
           phi+=2.0*M_PI;
@@ -182,11 +190,17 @@ namespace Mantid
         Mantid::Kernel::V3D L2=det->getPos();
         L2-=sample;
         //std::cout << "r,th,phi,t: " << L2.norm() << "," << th2*180/M_PI << "," << phi*180/M_PI << "," << tof << "\n";
-        entries.push_back(SXPeak(tof,th2,phi,*maxY,specs,l1+L2.norm(),det->getID()));
+        
+        SXPeak peak(tof,th2,phi,*maxY,specs,l1+L2.norm(),det->getID());
+        PARALLEL_CRITICAL(entries)
+        {
+          entries.push_back(peak);
+        }
         progress.report();
-        //PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-      //PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
+
 
       // Now reduce the list with duplicate entries
       reducePeakList(entries);
