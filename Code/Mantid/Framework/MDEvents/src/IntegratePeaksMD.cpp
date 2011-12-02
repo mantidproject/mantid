@@ -5,10 +5,10 @@ as well as a PeaksWorkspace containing single-crystal peak locations.
 
 * A sphere of radius '''PeakRadius''' is integrated around the center of each peak.
 * If '''BackgroundRadius''' is specified, then a shell, with radius r where '''BackgroundStartRadius''' < r < '''BackgroundRadius''', is integrated.
- * '''BackgroundStartRadius''' allows you to give some space between the peak and the background area.
- * '''BackgroundStartRadius''' = '''PeakRadius''' if not specified.
+** '''BackgroundStartRadius''' allows you to give some space between the peak and the background area.
+** '''BackgroundStartRadius''' = '''PeakRadius''' if not specified.
 
-The OutputWorkspace will contain a copy of thei input PeaksWorkspace, with the integrated intensity and error found being filled in.
+The OutputWorkspace will contain a copy of the input PeaksWorkspace, with the integrated intensity and error found being filled in.
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
