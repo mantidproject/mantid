@@ -139,70 +139,25 @@ namespace MDAlgorithms
     std::map<std::string, pMethod> alg_selector;
    /// map to select an workspace, as function of the dimensions number
     std::map<size_t, pWSCreator> ws_creator;
+
+  template<Q_state Q, AnalMode MODE> 
+  friend struct coord_transformer;
+
   private: 
-
-    /**Template defines common interface to common part of the algorithm, where all variables
-     * needed within the loop calculated outside of the loop. 
-     * In addition it caluclates the property-dependant coordinates 
-     *
-     * @param n_ws_variabes -- subalgorithm specific number of variables, calculated from the workspace data
-     *
-     * @return Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
-     * @return true         -- if all Coord are within the range requested by algorithm. false otherwise
-     *
-     * has to be specialized
-    */
-    template<Q_state Q,AnalMode MODE>
-    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
-        UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);throw(Kernel::Exception::NotImplementedError(""));
-        return false;}
-
-   
-    /** template generalizes the code to calculate Y-variables within the external loop of processQND workspace
-     * @param X    -- vector of X workspace values
-     * @param i    -- index of external loop, identifying current y-coordinate
-     * 
-     * @return Coord -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.    
-     * @return true         -- if all Coord are within the range requested by algorithm. false otherwise   
-     * 
-     *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
-     */
-    template<Q_state Q,AnalMode MODE>
-    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
-    return true;}
-
-    /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
-     * @param X    -- vector of X workspace values
-     * @param i    -- index of external loop, identifying generic y-coordinate
-     * @param j    -- index of internal loop, identifying generic x-coordinate
-     * 
-     * @return Coord --Subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector   
-     * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
-     *
-     * has to be specialized
-     */
-    template<Q_state Q, AnalMode MODE>
-    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-        UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
-        return false;}
-    //--------------------------------------------------------------------------------------------------
-    // the variables used for exchange data between different specific parts of the generic ND algorithm:
-    // pointer to Y axis of MD workspace
-    API::NumericAxis *pYAxis;
+    //---------------------------------------------------------------------------------------------------
     // the energy of the incident neutrons
     double Ei;
     // the wavevector of incident neutrons
     double ki;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
-    //---------------------------------------------------------------------------------------------------
+   //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
     template<size_t nd,Q_state Q, AnalMode MODE>
-    void processQND(API::IMDEventWorkspace *const pOutWs){
+    void processQND(API::IMDEventWorkspace *const pOutWs);
 
-    }
     /** template to build empty MDevent workspace with box controller and other palavra
      * @param split_into       -- the number of the bin the grid is split into
      * @param split_threshold  -- number of events in an intermediate cell?
@@ -214,6 +169,8 @@ namespace MDAlgorithms
     std::vector<std::string> Q_modes,dE_modes;
     std::vector<std::string> known_elastic_units;
     std::vector<std::string> known_inelastic_units;
+
+
 
 
  };
