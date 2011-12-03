@@ -109,8 +109,10 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       ws->splitBox();
       return ws;
 }
-
-// PROCESS GENERIG VARIABLES AS FUNCTION OF ALGORITHM
+//----------------------------------------------------------------------------------------------------------------------
+// SPECIALIZATIONS:
+//----------------------------------------------------------------------------------------------------------------------
+// NoQ,ANY_Mode 
 template<> 
 inline bool ConvertToMDEvents::calc_generic_variables<NoQ,ANY_Mode>(std::vector<coord_t> &Coord, size_t nd)
 {
@@ -126,6 +128,23 @@ inline bool ConvertToMDEvents::calc_generic_variables<NoQ,ANY_Mode>(std::vector<
           }
          return true;
 }
+template<>
+inline bool ConvertToMDEvents::calculate_y_coordinate<NoQ,ANY_Mode>(std::vector<coord_t> &Coord,size_t i)
+{
+        UNUSED_ARG(i);
+        Coord[1]                  = pYAxis->operator()(i);
+        if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
+        return true;
+}
+template<>
+inline bool ConvertToMDEvents::calculate_ND_coordinates<NoQ,ANY_Mode>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+        UNUSED_ARG(i);
+        Coord[0]    = 0.5*( X[j]+ X[j+1]);
+        if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
+        return true;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
 
 template<> 
 inline bool ConvertToMDEvents::calc_generic_variables<modQ, ANY_Mode>(std::vector<coord_t> &Coord, size_t nd){
@@ -151,22 +170,9 @@ inline bool ConvertToMDEvents::calc_generic_variables<Q3D,ANY_Mode>(std::vector<
 }
 
 // PROCESS Y VARIABLE AS FUNCTION OF SUBALGORITHM
-template<>
-inline bool ConvertToMDEvents::calculate_y_coordinate<NoQ,ANY_Mode>(std::vector<coord_t> &Coord,size_t i)
-{
-        UNUSED_ARG(i);
-        Coord[1]                  = pYAxis->operator()(i);
-        if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
-        return true;
-}
+
 // PROCESS X - VARIABLE AS FUNCTION OF SUBALGORITHM
-template<>
-inline bool ConvertToMDEvents::calculate_ND_coordinates<NoQ,ANY_Mode>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-        UNUSED_ARG(i);
-        Coord[0]    = 0.5*( X[j]+ X[j+1]);
-        if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
-        return true;
-}
+
 //
 template<>
 inline bool ConvertToMDEvents::calculate_ND_coordinates<Q3D,Direct>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){

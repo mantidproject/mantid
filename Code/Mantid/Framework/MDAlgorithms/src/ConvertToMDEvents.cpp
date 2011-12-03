@@ -630,54 +630,54 @@ known_inelastic_units(2)
   
      
 // NoQ --> any Analysis mode will do as it does not depend on it
-    alg_holder.insert(std::pair<std::string,IConvertor *>("ND2"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],new Convertor<NoQ,ANY_Mode>());
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<3,NoQ,ANY_Mode>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<4,NoQ,ANY_Mode>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<5,NoQ,ANY_Mode>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<6,NoQ,ANY_Mode>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<7,NoQ,ANY_Mode>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<8,NoQ,ANY_Mode>));
-//
-//// MOD Q
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND2"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<2,modQ,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<3,modQ,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<4,modQ,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<5,modQ,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<6,modQ,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<7,modQ,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<8,modQ,Direct>));
-//
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND2"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<2,modQ,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<3,modQ,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<4,modQ,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<5,modQ,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<6,modQ,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<7,modQ,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<8,modQ,Indir>));
-//
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND2"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<2,modQ,Elastic>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<3,modQ,Elastic>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<4,modQ,Elastic>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<5,modQ,Elastic>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<6,modQ,Elastic>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<7,modQ,Elastic>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<8,modQ,Elastic>));
-//
-//// Q3D
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<3,Q3D,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<4,Q3D,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<5,Q3D,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<6,Q3D,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<7,Q3D,Direct>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<8,Q3D,Direct>));
-//
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<3,Q3D,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<4,Q3D,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<5,Q3D,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<6,Q3D,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<7,Q3D,Indir>));
-//    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<8,Q3D,Indir>));
-//
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<2,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<3,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<4,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<5,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<6,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<7,NoQ,ANY_Mode>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[ANY_Mode]+dE_modes[ANY_Mode],&ConvertToMDEvents::processQND<8,NoQ,ANY_Mode>));
+
+// MOD Q
+    alg_selector.insert(std::pair<std::string,pMethod>("ND2"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<2,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<3,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<4,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<5,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<6,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<7,modQ,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[modQ]+dE_modes[Direct],&ConvertToMDEvents::processQND<8,modQ,Direct>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("ND2"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<2,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<3,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<4,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<5,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<6,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<7,modQ,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[modQ]+dE_modes[Indir],&ConvertToMDEvents::processQND<8,modQ,Indir>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("ND2"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<2,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<3,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<4,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<5,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<6,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<7,modQ,Elastic>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[modQ]+dE_modes[Elastic],&ConvertToMDEvents::processQND<8,modQ,Elastic>));
+
+// Q3D
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<3,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<4,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<5,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<6,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<7,Q3D,Direct>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[Q3D]+dE_modes[Direct],&ConvertToMDEvents::processQND<8,Q3D,Direct>));
+
+    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<3,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<4,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<5,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND6"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<6,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND7"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<7,Q3D,Indir>));
+    alg_selector.insert(std::pair<std::string,pMethod>("ND8"+Q_modes[Q3D]+dE_modes[Indir],&ConvertToMDEvents::processQND<8,Q3D,Indir>));
+
 //    alg_selector.insert(std::pair<std::string,pMethod>("ND3"+Q_modes[Q3D]+dE_modes[Elastic],&ConvertToMDEvents::processQND<3,Q3D,Elastic>));
 //    alg_selector.insert(std::pair<std::string,pMethod>("ND4"+Q_modes[Q3D]+dE_modes[Elastic],&ConvertToMDEvents::processQND<4,Q3D,Elastic>));
 //    alg_selector.insert(std::pair<std::string,pMethod>("ND5"+Q_modes[Q3D]+dE_modes[Elastic],&ConvertToMDEvents::processQND<5,Q3D,Elastic>));

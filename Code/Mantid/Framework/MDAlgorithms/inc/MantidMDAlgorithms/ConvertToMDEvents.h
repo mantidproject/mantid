@@ -185,12 +185,6 @@ namespace MDAlgorithms
     inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
-
-   /** generic template to convert to any Dimensions workspace;
-    * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
-    */
-    template<size_t nd,Q_state Q, AnalMode MODE>
-    void processQND(API::IMDEventWorkspace *const pOutWs);    
     //--------------------------------------------------------------------------------------------------
     // the variables used for exchange data between different specific parts of the generic ND algorithm:
     // pointer to Y axis of MD workspace
@@ -202,6 +196,13 @@ namespace MDAlgorithms
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
     //---------------------------------------------------------------------------------------------------
+   /** generic template to convert to any Dimensions workspace;
+    * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
+    */
+    template<size_t nd,Q_state Q, AnalMode MODE>
+    void processQND(API::IMDEventWorkspace *const pOutWs){
+
+    }
     /** template to build empty MDevent workspace with box controller and other palavra
      * @param split_into       -- the number of the bin the grid is split into
      * @param split_threshold  -- number of events in an intermediate cell?
