@@ -144,13 +144,6 @@ namespace MDAlgorithms
   friend struct coord_transformer;
 
   private: 
-    //---------------------------------------------------------------------------------------------------
-    // the energy of the incident neutrons
-    double Ei;
-    // the wavevector of incident neutrons
-    double ki;
-    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
-    std::vector<double> rotMat;
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events

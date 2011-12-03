@@ -140,7 +140,7 @@ struct coord_transformer
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
     inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
-    return true;}
+        UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
      * @param X    -- vector of X workspace values
@@ -182,15 +182,13 @@ struct coord_transformer<NoQ,MODE>
 
     inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i)
     {
-        UNUSED_ARG(i);
         Coord[1]                  = pYAxis->operator()(i);
         if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
         return true;
     }
 
     inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-        UNUSED_ARG(i);
-        Coord[0]    = 0.5*( X[j]+ X[j+1]);
+         Coord[0]    = 0.5*( X[j]+ X[j+1]);
         if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
         return true;
     }
@@ -207,80 +205,96 @@ private:
 ////----------------------------------------------------------------------------------------------------------------------
 //
 //template<> 
-//inline bool ConvertToMDEvents::calc_generic_variables<modQ, ANY_Mode>(std::vector<coord_t> &Coord, size_t nd){
-//    UNUSED_ARG(Coord);
-//    UNUSED_ARG(nd);
-//    throw(Kernel::Exception::NotImplementedError("not yet implemented"));
-//}
-////
-//template<> 
-//inline bool ConvertToMDEvents::calc_generic_variables<Q3D,ANY_Mode>(std::vector<coord_t> &Coord, size_t nd){   
-//    // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
-//    fillAddProperties(Coord,nd,4);
-//    for(size_t i=4;i<nd;i++){
-//            if(Coord[i]<dim_min[i]||Coord[i]>=dim_max[i])return false;
-//    }
-//    // energy 
-//    Ei  =  boost::lexical_cast<double>(inWS2D->run().getProperty("Ei")->value());
-//    // the wave vector of input neutrons;
-//    ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
-//    // 
-//    rotMat = this->get_transf_matrix();
-//    return true;
-//}
-//
-//// PROCESS Y VARIABLE AS FUNCTION OF SUBALGORITHM
-//
-//// PROCESS X - VARIABLE AS FUNCTION OF SUBALGORITHM
-//
-////
-//template<>
-//inline bool ConvertToMDEvents::calculate_ND_coordinates<Q3D,Direct>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-//
-//          coord_t E_tr = 0.5*( X[j]+ X[j+1]);
-//          Coord[3]    = E_tr;
-//          if(Coord[3]<dim_min[3]||Coord[3]>=dim_max[3])return false;
-//
-//
-//          double k_tr = sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-//   
-//          double  ex = det_loc.det_dir[i].X();
-//          double  ey = det_loc.det_dir[i].Y();
-//          double  ez = det_loc.det_dir[i].Z();
-//          double  qx  =  -ex*k_tr;                
-//          double  qy  =  -ey*k_tr;
-//          double  qz  = ki - ez*k_tr;
-//
-//         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
-//         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
-//         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<dim_min[2]||Coord[2]>=dim_max[2])return false;
-//
-//         return true;
-//}
-//template<>
-//inline bool ConvertToMDEvents::calculate_ND_coordinates<Q3D,Indir>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-//
-//          coord_t E_tr = 0.5*( X[j]+ X[j+1]);
-//          Coord[3]    = E_tr;
-//          if(Coord[3]<dim_min[3]||Coord[3]>=dim_max[3])return false;
-//
-//
-//          double k_tr = sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-//   
-//          double  ex = det_loc.det_dir[i].X();
-//          double  ey = det_loc.det_dir[i].Y();
-//          double  ez = det_loc.det_dir[i].Z();
-//          double  qx  =  -ex*k_tr;                
-//          double  qy  =  -ey*k_tr;
-//          double  qz  = ki - ez*k_tr;
-//
-//         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
-//         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
-//         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<dim_min[2]||Coord[2]>=dim_max[2])return false;
-//
-//         return true;
-//}
-//
+// modQ,ANY_Mode 
+template<AnalMode MODE> 
+struct coord_transformer<modQ,MODE>
+{
+    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd){
+        UNUSED_ARG(Coord);
+        UNUSED_ARG(nd);
+        throw(Kernel::Exception::NotImplementedError("not yet implemented"));
+    }
+    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i)
+     {UNUSED_ARG(Coord); UNUSED_ARG(i); return false;}
+
+      inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+          UNUSED_ARG(i);UNUSED_ARG(j);UNUSED_ARG(X);UNUSED_ARG(Coord);
+          return false;
+     }
+
+    coord_transformer(ConvertToMDEvents *pConv) {}
+};
+//------------------------------------------------------------------------------------------------------------------------------
+// Q3D any mode 
+template<AnalMode MODE>
+inline double k_trans(double Ei, double E_tr){
+    throw(Kernel::Exceptions::NotImplementedError("Generic K_tr not implemented"));
+}
+template<>
+inline double k_trans<Direct>(double Ei, double E_tr){
+    return sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+}
+template<>
+inline double k_trans<Indir>(double Ei, double E_tr){
+    return sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+}
+
+template<AnalMode MODE> 
+struct coord_transformer<Q3D,MODE>
+{
+    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd)
+    {
+        // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
+        pHost->fillAddProperties(Coord,nd,4);
+        for(size_t i=4;i<nd;i++){
+            if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
+         }
+        // energy 
+         Ei  =  boost::lexical_cast<double>(pHost->inWS2D->run().getProperty("Ei")->value());
+         // the wave vector of incident neutrons;
+         ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
+         // 
+        rotMat = pHost->get_transf_matrix();
+        return true;
+    }
+    //
+    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
+              UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
+
+    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+
+          coord_t E_tr = 0.5*( X[j]+ X[j+1]);
+          Coord[3]    = E_tr;
+          if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
+
+
+          double k_tr = k_trans<MODE>(Ei,E_tr);
+   
+          double  ex = pHost->det_loc.det_dir[i].X();
+          double  ey = pHost->det_loc.det_dir[i].Y();
+          double  ez = pHost->det_loc.det_dir[i].Z();
+          double  qx  =  -ex*k_tr;                
+          double  qy  =  -ey*k_tr;
+          double  qz  = ki - ez*k_tr;
+
+         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
+         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
+         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<pHost->dim_min[2]||Coord[2]>=pHost->dim_max[2])return false;
+
+         return true;
+    }
+
+    coord_transformer(ConvertToMDEvents *pConv):pHost(pConv){}
+private:
+    ConvertToMDEvents *pHost;
+    // the energy of the incident neutrons
+    double Ei;
+    // the wavevector of incident neutrons
+    double ki;
+    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
+    std::vector<double> rotMat;
+
+};
 
 
 } // endNamespace MDAlgorithms
