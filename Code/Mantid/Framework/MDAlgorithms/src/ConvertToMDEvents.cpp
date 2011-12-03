@@ -68,8 +68,18 @@ void ConvertToMDEvents::initDocs()
  */
 ConvertToMDEvents::~ConvertToMDEvents()
 {}
-
-
+/** function checks if the candidate belongs to the group and returns its number in the group or -1 if the candidate is not a group member */
+int is_member(const std::vector<std::string> &group,const std::string &candidate)
+{
+    int num(-1);
+    for(size_t i=0;i<group.size();i++){
+        if(candidate.compare(group[i])==0){
+            num = int(i);
+            return num;
+        }
+    }
+    return num;
+}
 //
 const double rad2deg = 180.0 / M_PI;
 //----------------------------------------------------------------------------------------------
@@ -320,7 +330,8 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
         ndE_dims = 1;
 
-        if(!((ws_dim_units[0].compare("DeltaE")==0)||(ws_dim_units[0].compare("Energy_inWavenumber")==0))){
+
+        if(is_member(known_inelastic_units,ws_dim_units[0])<0){
             convert_log.error()<<" inelastic conversion request X-axis to be expressed in energy transfer-related units\n";
             throw(std::invalid_argument("inelastic conversion request X-axis in energy-transfer related units"));
         }
@@ -330,8 +341,7 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     }
     // elastic mode needs special units along on X-axis
     if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
-        if(!((ws_dim_units[0].compare("TOF")==0)||(ws_dim_units[0].compare("Wavelength")==0)||
-             (ws_dim_units[0].compare("Energy")==0)||(ws_dim_units[0].compare("Energy_inWavenumber")==0)))
+        if(is_member(known_elastic_units,ws_dim_units[0])<0)
         {
             convert_log.error()<<" Elastic conversion request X-axis to be expressed in energy(TOF) related units\n";
             throw(std::invalid_argument("Elastic conversion request X-axis in energy-transfer related units"));
@@ -597,7 +607,9 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 */
 ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(3),
-dE_modes(4)
+dE_modes(4),
+known_elastic_units(4),
+known_inelastic_units(2)
 {
      Q_modes[modQ]="|Q|";
      Q_modes[Q3D] ="QxQyQz";    
@@ -606,6 +618,14 @@ dE_modes(4)
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
      dE_modes[Elastic]   = "Elastic";
+     // list of know units an invoked elastic algorithm should understand
+     known_elastic_units[0]="TOF";
+     known_elastic_units[1]="Wavelength";
+     known_elastic_units[2]="Energy";
+     known_elastic_units[3]="Energy_inWavenumber";
+     // list of know units an invoked elastic algorithm should understand
+      known_inelastic_units[0]="DeltaE";
+      known_inelastic_units[1]="Energy_inWavenumber";
 
   
      

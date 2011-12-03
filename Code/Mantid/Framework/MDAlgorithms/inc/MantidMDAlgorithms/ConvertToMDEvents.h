@@ -211,6 +211,9 @@ namespace MDAlgorithms
     API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
     // 
     std::vector<std::string> Q_modes,dE_modes;
+    std::vector<std::string> known_elastic_units;
+    std::vector<std::string> known_inelastic_units;
+
 
  };
  
