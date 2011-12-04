@@ -180,7 +180,9 @@ void DiffractionFocussing2::exec()
   // loop over groups
   Progress * prog;
   prog = new API::Progress(this, 0.2, 0.95, static_cast<int>(totalHistProcess) + nGroups);
-  PARALLEL_FOR1(m_matrixInputW)
+#ifndef __APPLE__
+  PARALLEL_FOR2(m_matrixInputW, out)
+#endif
   for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(m_validGroups.size()); outWorkspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
