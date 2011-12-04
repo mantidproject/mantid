@@ -70,6 +70,12 @@ namespace MDAlgorithms
       Indir,  // InDirect inelastic analysis mode
       Elastic
   };
+  // enum describes if there is need to convert workspace units
+  enum CnvrtUnits
+  {
+      ConvertNo,  // no, input workspace has the same units as output workspace
+      ConvertYes // yes, the input workspace has different units from the requested and the conversion is possible
+  };
 //
   class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
@@ -140,16 +146,21 @@ namespace MDAlgorithms
    /// map to select an workspace, as function of the dimensions number
     std::map<size_t, pWSCreator> ws_creator;
 
-  template<Q_state Q, AnalMode MODE> 
-  friend struct coord_transformer;
-
+ 
   private: 
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
     * @param pOutWs -- pointer to initated target workspace, which should accomodate new events
     */
-    template<size_t nd,Q_state Q, AnalMode MODE>
+    template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
     void processQND(API::IMDEventWorkspace *const pOutWs);
+    /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
+    /// presumably will be completely inlined
+     template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+     friend struct coord_transformer;
+     /// helper class to orginize metaloop on number of dimensions
+     template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
+     friend class LOOP_ND;
 
     /** template to build empty MDevent workspace with box controller and other palavra
      * @param split_into       -- the number of the bin the grid is split into
@@ -158,11 +169,22 @@ namespace MDAlgorithms
     */
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
-    // 
-    std::vector<std::string> Q_modes,dE_modes;
-    std::vector<std::string> known_elastic_units;
-    std::vector<std::string> known_inelastic_units;
 
+    // known momentum analysis modes;
+    std::vector<std::string> Q_modes;
+    // known energy transfer modes
+    std::vector<std::string> dE_modes;
+    // conversion modes
+    std::vector<std::string> Conv;
+    // the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
+    std::string  native_elastic_unitID;
+    // the list of known elastic units.
+    std::vector<std::string> known_elastic_units;
+
+    // the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
+    std::string  native_inelastic_unitID;
+    // the list of known inelastic units.
+    std::vector<std::string> known_inelastic_units;
 
 
 

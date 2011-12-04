@@ -5,7 +5,7 @@ namespace MDAlgorithms
 {
 
 //-----------------------------------------------
-template<size_t nd,Q_state Q, AnalMode MODE>
+template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
 void 
 ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 {
@@ -24,7 +24,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         convert_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
     }
-    coord_transformer<Q,MODE> trn(this); 
+    coord_transformer<Q,MODE,CONV> trn(this); 
     // one of the dimensions has to be X-ws dimension -> need to add check for that;
 
     // copy experiment info into target workspace
@@ -110,7 +110,7 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
 }
      
 ///
-template<Q_state Q,AnalMode MODE>
+template<Q_state Q,AnalMode MODE,CnvrtUnits CONV>
 struct coord_transformer
       {
       coord_transformer(ConvertToMDEvents *){}
@@ -139,7 +139,7 @@ struct coord_transformer
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
-    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
+    inline bool calculate_y_coordinatee(std::vector<coord_t> &Coord,size_t i){
         UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
@@ -152,7 +152,7 @@ struct coord_transformer
      *
      * has to be specialized
      */
-    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+    inline bool calculate_ND_coordinatese(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
 }; // end coordTransformer structure:
@@ -162,8 +162,8 @@ struct coord_transformer
 // SPECIALIZATIONS:
 //----------------------------------------------------------------------------------------------------------------------
 // NoQ,ANY_Mode 
-template<AnalMode MODE> 
-struct coord_transformer<NoQ,MODE>
+template<AnalMode MODE,CnvrtUnits CONV> 
+struct coord_transformer<NoQ,MODE,CONV>
 {
     inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd)    
     {
@@ -204,10 +204,9 @@ private:
 //
 ////----------------------------------------------------------------------------------------------------------------------
 //
-//template<> 
 // modQ,ANY_Mode 
-template<AnalMode MODE> 
-struct coord_transformer<modQ,MODE>
+template<AnalMode MODE,CnvrtUnits CONV> 
+struct coord_transformer<modQ,MODE,CONV>
 {
     inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd){
         UNUSED_ARG(Coord);
@@ -228,7 +227,7 @@ struct coord_transformer<modQ,MODE>
 // Q3D any mode 
 template<AnalMode MODE>
 inline double k_trans(double Ei, double E_tr){
-    throw(Kernel::Exceptions::NotImplementedError("Generic K_tr not implemented"));
+    throw(Kernel::Exception::NotImplementedError("Generic K_tr not implemented"));
 }
 template<>
 inline double k_trans<Direct>(double Ei, double E_tr){
@@ -239,8 +238,40 @@ inline double k_trans<Indir>(double Ei, double E_tr){
     return sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 }
 
-template<AnalMode MODE> 
-struct coord_transformer<Q3D,MODE>
+    // DO CONVERSION
+// procedure which converts/ non-converts units
+ template<CnvrtUnits CONV>
+ inline coord_t get_x_converted(double X1, double X2, const double factor,const double power)
+ {
+     UNUSED_ARG(factor);UNUSED_ARG(power);
+     return (coord_t)(0.5*(X1+X2));
+ }
+ template<>
+ inline coord_t get_x_converted<ConvertYes>(double X1,double X2,const double factor,const double power)
+ {
+     double Xm=0.5*(X1+X2);
+     return Xm=(coord_t)(factor*std::pow(Xm,power));
+ }
+
+ template<AnalMode MODE>
+ inline void prepare_conversion(Kernel::Unit *const pThisUnit,double &factor,double &power) 
+{
+    if(!pThisUnit->quickConversion("DeltaE",factor,power)){
+          throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
+    }
+
+}
+template<>
+inline void prepare_conversion<Elastic>(Kernel::Unit *const pThisUnit,double &factor,double &power)
+{
+   if(!pThisUnit->quickConversion("Wavelength",factor,power)){
+        throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
+   }
+
+}
+
+template<AnalMode MODE,CnvrtUnits CONV> 
+struct coord_transformer<Q3D,MODE,CONV>
 {
     inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd)
     {
@@ -255,6 +286,10 @@ struct coord_transformer<Q3D,MODE>
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // 
         rotMat = pHost->get_transf_matrix();
+        if(CONV==ConvertYes){
+              const Kernel::Unit_sptr pThisUnit=pHost->inWS2D->getAxis(0)->unit();
+               prepare_conversion<MODE>(pThisUnit.get(),factor,power);
+        }
         return true;
     }
     //
@@ -263,7 +298,7 @@ struct coord_transformer<Q3D,MODE>
 
     inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
 
-          coord_t E_tr = 0.5*( X[j]+ X[j+1]);
+          coord_t E_tr = get_x_converted<CONV>(X[j],X[j+1],factor,power);
           Coord[3]    = E_tr;
           if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
 
@@ -293,6 +328,9 @@ private:
     double ki;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    // variables for units conversion:
+    double factor, power;
+
 
 };
 
