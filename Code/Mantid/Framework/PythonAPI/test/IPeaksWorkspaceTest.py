@@ -23,6 +23,14 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         # Try a few IPeak get/setters. Not everything.
         p.setH(234)
         self.assertEqual(p.getH(), 234)
+        p.setHKL(5,6,7)
+        self.assertEqual(p.getH(), 5)
+        self.assertEqual(p.getK(), 6)
+        self.assertEqual(p.getL(), 7)
+        
+        hkl = p.getHKL()
+        assert hkl == V3D(5,6,7)
+        
         p.setIntensity(456)
         p.setSigmaIntensity(789)
         self.assertEqual(p.getIntensity(), 456)
