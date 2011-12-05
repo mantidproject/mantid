@@ -14,7 +14,7 @@ PyObject * loadLibrary(PyObject *, PyObject * args)
   void* handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL);
   if (!handle)
   {
-    PyErr_SetString(PyExc_RuntimeError, "Failed to import library");
+    PyErr_SetString(PyExc_RuntimeError, dlerror());
     return NULL;
   }
   Py_INCREF(Py_None);
@@ -38,11 +38,3 @@ extern "C"  void initlibdlopen()
   if (m == NULL) return;
 }
 
-//void init_module_libdlopen();
-
-
-//BOOST_PYTHON_MODULE(dlopen)
-//{
-//
-//  boost::python::def("loadlibrary", &loadLibrary);
-//}
