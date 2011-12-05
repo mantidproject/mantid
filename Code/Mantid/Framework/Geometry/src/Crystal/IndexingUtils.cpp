@@ -1728,6 +1728,12 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
   {
     return false;
   }
+                                     // force a,b,c to be right handed
+  acrossb = a_dir.cross_prod( b_dir ); 
+  if ( acrossb.scalar_prod( c_dir ) < 0 )
+  {
+    c_dir = c_dir * (-1.0);
+  } 
                                      // now build the UB matrix from a,b,c
   UB.setRow( 0, a_dir );
   UB.setRow( 1, b_dir );

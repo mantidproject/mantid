@@ -100,6 +100,8 @@ private:
   void exec();
   void cleanup();
 
+  std::size_t setupGroupToWSIndices();
+
   // For events
   void execEvent();
 
@@ -116,7 +118,6 @@ private:
 
   /// Shared pointer to the event workspace
   DataObjects::EventWorkspace_const_sptr m_eventW;
-
 
   // This map does not need to be ordered, just a lookup for udet
   /// typedef for the storage of the UDET-group mapping
@@ -139,6 +140,10 @@ private:
   int nHist;
   /// Number of points in the 2D workspace
   int nPoints;
+  /// Mapping of group number to vector of inputworkspace indices.
+  std::vector< std::vector<std::size_t> > m_wsIndices;
+  /// List of valid group numbers
+  std::vector<int> m_validGroups;
 
 };
 

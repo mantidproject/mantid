@@ -31,13 +31,13 @@ This increases the memory used by a factor of 9.
 You can use PreserveEvents = false to avoid the memory issues with an EventWorkspace input.
 Please note that the algorithm '''does not check''' that the bin X boundaries match.
 
-== Neighbour Searching ==
+=== Neighbour Searching ===
 
 If the radius is set to 0, the instrument is treated as though it has rectangular detectors. AdjX and AdjY can then be used to control the number of neighbours independently in x and y. Otherwise
 the algorithm will fetch neigbours using the intesection of those inside the radius cut-off and those less than the NumberOfNeighbours specified. For example with NumberOfNeighbours=24 and a 
 Radius=1.2 (with RadiusUnit=NumberOfPixels) only 8 nearest neighbours at most will be returned. If NumberOfNeighbours=24 and Radius=2, a maxium of 24 nearest neighbours will be found.
 
-== Ignore Masks ==
+=== Ignore Masks ===
 
 The algorithm will ignore masked detectors if this flag is set.
 
@@ -544,6 +544,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
     {
       size_t inWI = it->first;
       double weight = it->second;
+      double weightSquared = weight * weight;
 
       const MantidVec & inY = ws->readY(inWI);
       const MantidVec & inE = ws->readE(inWI);
@@ -553,11 +554,12 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       {
         // Add the weighted signal
         outY[i] += inY[i] * weight;
-        // Square the error, scale by weight, then add
+        // Square the error, scale by weight (which you have to square too), then add in quadrature
         double errorSquared = inE[i];
         errorSquared *= errorSquared;
-        errorSquared *= weight;
+        errorSquared *= weightSquared;
         outE[i] += errorSquared;
+        // Copy the X values as well
         outX[i] = inX[i];
       }
       if(ws->isHistogramData())
@@ -566,7 +568,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       }
     } //(each neighbour)
 
-    // Now un-square the error
+    // Now un-square the error, since we summed it in quadrature
     for (size_t i=0; i<YLength; i++)
       outE[i] = sqrt(outE[i]);
 

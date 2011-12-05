@@ -201,7 +201,7 @@ public:
   void updatePPTool(const QString& name);
 
   /// Emits a signal to customise the plot it is associated with
-  void customisation(QStringList& plotDetails);
+  void customisation(const QStringList& plotDetails);
 
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
@@ -244,7 +244,7 @@ signals:
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
   void removeFitCurves();
 
-  void customiseGraph(QStringList&);
+  void customiseGraph(const QStringList&);
 
   void executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*);
   void multifitFinished();
@@ -264,8 +264,6 @@ private slots:
   void doubleChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
-  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_removed(const QString &);
   void currentItemChanged(QtBrowserItem*);
   void addTie();
   void addTieToFunction();

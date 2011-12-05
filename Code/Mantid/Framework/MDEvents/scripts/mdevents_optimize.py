@@ -11,7 +11,7 @@ memory use, building time, and dense histogram binning times.
 from pylab import *
 import os
 import sys
-sys.path.append("/home/8oz/Code/Mantid/Code/Mantid/bin")
+sys.path.append(os.getenv("HOME") + "/Code/Mantid/Code/rel/bin")
 from MantidFramework import mtd
 mtd.initialise()
 from mantidsimple import *
@@ -39,19 +39,10 @@ results = []
 
 # Initial loading
 print "Loading the source event nexus file..."
-LoadEventNexus(Filename="/home/8oz/data/TOPAZ_2511_event.nxs",OutputWorkspace="topaz",SingleBankPixelsOnly="0",Precount="1")
+LoadEventNexus(Filename=os.getenv("HOME") + "/data/TOPAZ_2511_event.nxs",OutputWorkspace="topaz",SingleBankPixelsOnly="0",Precount="1")
 
-SplitInto_list = [2,3,4,5,6,8,7,8,9,10,12,15,20,30]
-SplitThresholdBase_list = [10, 20, 50, 100, 200, 500, 1000]
-
-SplitInto_list = [4,5]
-SplitThresholdBase_list = [10, 20]
-
-SplitInto_list = [2,3,4,5,6,8,10,12,15]
-SplitThresholdBase_list = [10, 20, 50, 100]
-
-SplitInto_list = [1]
-SplitThresholdBase_list = [10, 20, 50, 100]
+SplitInto_list = [2,3,4,5,6,8,7,8,9,10,11,12]
+SplitThresholdBase_list = [10, 20, 50, 100, 200]
 
 for SplitInto in SplitInto_list:
     for SplitThresholdBase in SplitThresholdBase_list:
@@ -89,18 +80,18 @@ for SplitInto in SplitInto_list:
 
         start = time.time()
         bin_str = "-6.0, 6.0, 100"
-        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDimX="Q_lab_x,%s" % bin_str, AlignedDimY="Q_lab_y,%s" % bin_str, AlignedDimZ="Q_lab_z,%s" % bin_str)
         print time.time()-start, " secs to bin medium: %s." % bin_str
         par.MediumBinTime = time.time()-start
 
         bin_str = "-1.0, 1.0, 200"
-        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDimX="Q_lab_x,%s" % bin_str, AlignedDimY="Q_lab_y,%s" % bin_str, AlignedDimZ="Q_lab_z,%s" % bin_str)
         print time.time()-start, " secs to bin fine, close up: %s." % bin_str
         par.FineBinTime = time.time()-start
     
         start = time.time()
         bin_str = "-6.0, 6.0, 20"
-        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
+        alg = BinMD(InputWorkspace="mdew", OutputWorkspace="mdhisto", AlignedDimX="Q_lab_x,%s" % bin_str, AlignedDimY="Q_lab_y,%s" % bin_str, AlignedDimZ="Q_lab_z,%s" % bin_str)
         print time.time()-start, " secs to bin coarse: %s." % bin_str
         par.CoarseBinTime = time.time()-start
         

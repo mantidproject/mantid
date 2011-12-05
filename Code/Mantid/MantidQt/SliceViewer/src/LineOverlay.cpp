@@ -428,6 +428,8 @@ namespace SliceViewer
     {
       // TODO: Custom mouse cursor?
       this->setCursor(Qt::PointingHandCursor);
+      // Pass-through event to underlying widget, so that it shows the mouse position
+      event->ignore();
       return;
     }
 
@@ -458,15 +460,13 @@ namespace SliceViewer
 
         default:
           this->setCursor(Qt::CrossCursor);
-          // Pass-through event to underlying widget if not over a marker
-          event->ignore();
           break;
         }
       }
-      else
-        // Don't change mouse cursor if dragging the underlying control
-        event->ignore();
     }
+    // In all cases, we pass-through the event to underlying widget,
+    // so that it shows the mouse position.
+    event->ignore();
   }
 
   //-----------------------------------------------------------------------------------------------

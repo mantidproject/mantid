@@ -278,6 +278,8 @@ namespace Mantid
              Centx = Col0;
              done = false;
             }
+           else if( Chan+dir*t <0 || Chan+dir*t >= (int)X.size())
+              done = true;
            else
            { 
               std::vector<int> Attr= CalculateStart_and_NRowsCols( Centy,
@@ -340,6 +342,8 @@ namespace Mantid
               lastRow = Row0;
               lastCol = Col0;
             }
+            else if( Chan+dir*chan <0 || Chan+dir*chan >= (int)X.size())
+               done = true;
             else
             {
 
@@ -643,7 +647,7 @@ namespace Mantid
       if (sgn * (time - X[X.size() - 1]) >= 0)
         return (int) X.size() - 1;
 
-      for (size_t i = 0; i < X.size() - (size_t) 1; i++)
+      for (size_t i = 0; i < (size_t)X.size() - (size_t) 1; i++)
       {
         if (sgn * (time - X[i]) >= 0 && sgn * (X[i + (size_t) 1] - time) >= 0)
           return (int) i;

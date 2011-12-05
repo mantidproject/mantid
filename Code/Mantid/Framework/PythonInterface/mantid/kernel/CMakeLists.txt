@@ -45,6 +45,7 @@ set ( PY_FILES
   __init__.py
   dlopen.py
   funcreturns.py
+  plugins.py
 )
 
 #############################################################################################
@@ -73,7 +74,7 @@ endforeach ( PYFILE )
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonKernelModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonKernelModule ${SRC_FILES} ${BOOST_PYTHON_SRC} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies

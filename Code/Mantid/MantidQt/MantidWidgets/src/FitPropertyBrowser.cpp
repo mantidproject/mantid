@@ -927,7 +927,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
       if (mws)
       {
         size_t wi = static_cast<size_t>(workspaceIndex());
-        if (wi < mws->getNumberHistograms())
+        if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty())
         {
           setStartX(mws->readX(wi).front());
           setEndX(mws->readX(wi).back());
@@ -1469,7 +1469,7 @@ void FitPropertyBrowser::fit()
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
-{
+{  
   // Emit a signal to show that the fitting has completed. (workspaceName that the fit has been done against is sent as a parameter)
   emit fittingDone(QString::fromStdString(alg->getProperty("InputWorkspace")));
 
@@ -1518,44 +1518,6 @@ void FitPropertyBrowser::populateWorkspaceNames()
     }
   }
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
-}
-
-void FitPropertyBrowser::workspace_added(const QString &wsName, Mantid::API::Workspace_sptr ws)
-{
-  if ( !isWorkspaceValid(ws) ) return;
-  QStringList oldWorkspaces = m_workspaceNames;
-  QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(wsName);
-  if (i < 0)
-  {
-    m_workspaceNames.append(wsName);
-    m_workspaceNames.sort();
-  }
-  m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
-  i = m_workspaceNames.indexOf(oldName);
-  if (i >= 0)
-  {
-    m_enumManager->setValue(m_workspace,i);
-  }
-  getHandler()->updateWorkspaces(oldWorkspaces);
-}
-
-void FitPropertyBrowser::workspace_removed(const QString &wsName)
-{
-  QStringList oldWorkspaces = m_workspaceNames;
-  QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(wsName);
-  if (i >= 0)
-  {
-    m_workspaceNames.removeAt(i);
-  }
-  m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
-  i = m_workspaceNames.indexOf(oldName);
-  if (i >= 0)
-  {
-    m_enumManager->setValue(m_workspace,i);
-  }
-  getHandler()->updateWorkspaces(oldWorkspaces);
 }
 
 void FitPropertyBrowser::init()
@@ -2160,7 +2122,7 @@ void FitPropertyBrowser::clearAllPlots()
 *
 * @param plotDetails :: The name of the workspace plot to be customised and the axis label seperated by a '.'
 */
-void FitPropertyBrowser::customisation(QStringList& plotDetails)
+void FitPropertyBrowser::customisation(const QStringList& plotDetails)
 {
   if (m_customFittings)
     emit customiseGraph(plotDetails);
@@ -2341,19 +2303,6 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFitFunction* f)const
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
       if (ws)
       {
-        //int xMin=-1,xMax;
-        //double sX = startX();
-        //double eX = endX();
-        //const Mantid::MantidVec& X = ws->readX(workspaceIndex());
-        //for(xMax = 0;xMax < ws->blocksize(); ++xMax)
-        //{
-        //  if (X[xMax] < sX) continue;
-        //  else if (xMin < 0)
-        //  {
-        //    xMin = xMax;
-        //  }
-        //  if (X[xMax] > eX) break;
-        //}
         QString slice = "WorkspaceIndex="+QString::number(workspaceIndex())+
           ",StartX="+QString::number(startX())+",EndX="+QString::number(endX());
         f->setWorkspace(ws,slice.toStdString(),true);

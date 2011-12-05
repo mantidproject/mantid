@@ -157,19 +157,47 @@ public:
 
   void testDoCheckForOverlap()
   {
-    MatrixWorkspace_sptr ws1, ws2, out;
+    MatrixWorkspace_sptr ws1, ws2;
     int numPixels = 10;
     int numBins = 20;
     ws1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins);
+    const std::string ws1_name = "ConjoinWorkspaces_testDoCheckForOverlap";
+    AnalysisDataService::Instance().add(ws1_name, ws1);
     ws2 = WorkspaceCreationHelper::CreateEventWorkspace(5, numBins);
 
     conj = new ConjoinWorkspaces();
     conj->initialize();
-    TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace1",ws1) );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1",ws1_name) );
     TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace2",ws2) );
     TS_ASSERT_THROWS_NOTHING( conj->setProperty("CheckOverlapping",true) );
-    conj->execute();
+    TS_ASSERT_THROWS_NOTHING(conj->execute());
+    // Falls over as they overlap
     TS_ASSERT( !conj->isExecuted() );
+
+    // Adjust second workspace
+    Mantid::specid_t start = ws1->getSpectrum(numPixels - 1)->getSpectrumNo() + 10;
+    for( int i = 0; i < 5; ++i)
+    {
+      Mantid::API::ISpectrum *spec = ws2->getSpectrum(i);
+      spec->setSpectrumNo(start + i);
+      spec->clearDetectorIDs();
+      spec->addDetectorID(start + i);
+    }
+
+    TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace2",ws2) );
+    TS_ASSERT_THROWS_NOTHING(conj->execute());
+    TS_ASSERT( conj->isExecuted() );
+
+    // Test output
+    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1_name));
+    TS_ASSERT(output);
+    // Check the first spectrum has the correct ID
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 15 );
+    TS_ASSERT_EQUALS( output->getSpectrum(0)->getSpectrumNo(), ws1->getSpectrum(0)->getSpectrumNo() );
+    // and the joining point
+    TS_ASSERT_EQUALS( output->getSpectrum(10)->getSpectrumNo(), start);
+
+    AnalysisDataService::Instance().remove(ws1_name);
     delete conj;
   }
 

@@ -140,13 +140,15 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
       // note if a version of convertValue was added which allows a double* as first argument
       // then could avoid copying above plus only have to resize m_wavelength when 
       // its size smaller than nData
-      if ( m_workspace != 0 )
+      API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
+      if ( mws )
       {
-        Instrument_const_sptr instrument = m_workspace->getInstrument();
+        API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
+        Instrument_const_sptr instrument = mws->getInstrument();
         Geometry::IObjComponent_const_sptr sample = instrument->getSample();
         if (sample != NULL)
         {
-	        convertValue(m_waveLength, wavelength, m_workspace, m_workspaceIndex);
+          convertValue(m_waveLength, wavelength, mws, m_workspaceIndex);
         }
         else
         {

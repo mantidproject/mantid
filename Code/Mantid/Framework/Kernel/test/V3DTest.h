@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <ostream>
+#include <sstream>
 #include <vector>
 
 #include "MantidKernel/V3D.h"
@@ -419,6 +420,22 @@ public:
     TS_ASSERT( out[0] == V3D(1,0,0) );
     TS_ASSERT( out[1] == V3D(0,-1,0) );
     TS_ASSERT( out[2] == V3D(0,0,-1) );
+  }
+
+  void test_to_ostream()
+  {
+    V3D a(1,2,3);
+    std::ostringstream ostr;
+    ostr << a;
+    TS_ASSERT_EQUALS( ostr.str(), "[1,2,3]");
+  }
+
+  void test_from_istream()
+  {
+    V3D a;
+    std::istringstream istr("[4,5,6]");
+    istr >> a;
+    TS_ASSERT_EQUALS( a, V3D(4,5,6) );
   }
 
 };

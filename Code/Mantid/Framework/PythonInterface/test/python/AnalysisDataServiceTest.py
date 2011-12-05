@@ -72,4 +72,6 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertTrue(succeeded, "DataItem handle should be valid and allow function calls")
         analysis_data_svc.remove(wsname)
         self.assertRaises(RuntimeError, ws_handle.id)
-        
+
+if __name__ == '__main__':
+    unittest.main()

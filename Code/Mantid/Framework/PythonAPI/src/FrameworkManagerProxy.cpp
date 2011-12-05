@@ -17,8 +17,11 @@
 #include <stdexcept>
 #include <vector>
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 using Mantid::API::AlgorithmManager;
+using Mantid::API::IPeaksWorkspace;
+using Mantid::API::IPeaksWorkspace_sptr;
 
 namespace Mantid
 {
@@ -297,41 +300,19 @@ boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWor
   }
 }
 
-///** Return pointer to PeaksWorkspace
-// * @param wsName :: The name of the workspace to retrieve.
-// * @return Shared pointer to workspace.
-// * @throw runtime_error if not of the right type
-// */
-//boost::shared_ptr<DataObjects::PeaksWorkspace> FrameworkManagerProxy::retrievePeaksWorkspace(const std::string& wsName)
-//{
-//  DataObjects::PeaksWorkspace_sptr event = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(retrieveWorkspace(wsName));
-//  if (event != NULL)
-//  {
-//    return event;
-//  }
-//  else
-//  {
-//    throw std::runtime_error("\"" + wsName + "\" is not an peaks workspace. ");
-//  }
-//}
-//
-///** Return pointer to EventWorkspace
-// * @param wsName :: The name of the workspace to retrieve.
-// * @return Shared pointer to workspace.
-// * @throw runtime_error if not of the right type
-// */
-//boost::shared_ptr<DataObjects::EventWorkspace> FrameworkManagerProxy::retrieveEventWorkspace(const std::string& wsName)
-//{
-//  DataObjects::EventWorkspace_sptr event = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(retrieveWorkspace(wsName));
-//  if (event != NULL)
-//  {
-//    return event;
-//  }
-//  else
-//  {
-//    throw std::runtime_error("\"" + wsName + "\" is not an event workspace. ");
-//  }
-//}
+/** Return pointer to IPeaksWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<IPeaksWorkspace> FrameworkManagerProxy::retrieveIPeaksWorkspace(const std::string& wsName)
+{
+  IPeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<IPeaksWorkspace>(retrieveWorkspace(wsName));
+  if (ws != NULL)
+    return ws;
+  else
+    throw std::runtime_error("\"" + wsName + "\" is not a peaks workspace. ");
+}
 
 /** Return pointer to IMDWorkspace
  * @param wsName :: The name of the workspace to retrieve.

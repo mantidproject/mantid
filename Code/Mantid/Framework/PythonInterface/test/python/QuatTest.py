@@ -64,3 +64,6 @@ class QuatTest(unittest.TestCase):
         p = Quat(45., V3D(0,0,1))
         p.rotate(v);
         self.assertEquals(v, V3D(a, a, 0))
+
+if __name__ == '__main__':
+    unittest.main()

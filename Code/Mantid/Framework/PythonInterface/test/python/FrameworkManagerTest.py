@@ -48,3 +48,6 @@ class FrameworkManagerTest(unittest.TestCase):
         
         top_level = TestAlg(self)
         top_level.PyExec()
+        
+if __name__ == '__main__':
+    unittest.main()

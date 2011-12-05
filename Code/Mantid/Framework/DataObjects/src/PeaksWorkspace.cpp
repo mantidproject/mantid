@@ -2,6 +2,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -231,6 +233,7 @@ namespace DataObjects
     if (index >= static_cast<int>(columns.size())) throw std::invalid_argument("PeaksWorkspace::getColumn() called with invalid index.");
     return columns[index];
   }
+
 
 }
 }

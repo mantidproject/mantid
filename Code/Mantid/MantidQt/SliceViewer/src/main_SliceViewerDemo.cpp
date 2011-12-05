@@ -47,7 +47,7 @@ int main( int argc, char ** argv )
   app.setApplicationName("SliceViewer widget demo");
   QMainWindow * mainWin = new QMainWindow();
 
-  IMDEventWorkspace_sptr mdew = makeDemoData();
+  IMDWorkspace_sptr mdew = makeDemoData(true);
 
   QFrame * frame = new QFrame(mainWin);
   mainWin->setCentralWidget(frame);

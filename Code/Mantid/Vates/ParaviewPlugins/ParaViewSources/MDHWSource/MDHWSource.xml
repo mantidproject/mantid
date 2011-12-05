@@ -1,0 +1,36 @@
+<ServerManagerConfiguration>
+  <!-- Begin MDEWSource -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="MDHW Source" class="vtkMDHWSource">
+	    <StringVectorProperty
+         name="WorkspaceTypeName"
+         command="GetWorkspaceTypeName"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+	   <StringVectorProperty
+         name="Mantid Workspace Name"
+         command="SetWsName"
+         number_of_elements="1"
+         information_only="0">
+       </StringVectorProperty>
+	   <StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+       <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+      </DoubleVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End MDHWSource -->
+</ServerManagerConfiguration>

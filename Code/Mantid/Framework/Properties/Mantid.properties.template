@@ -26,7 +26,7 @@ mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 plugins.directory = @PLUGINS@
 
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
-plugins.exclude = MantidPythonAPI
+plugins.exclude = MantidPythonAPI;dlopen
 
 # Where to find Mantid Qt plugin libraries
 mantidqt.plugins.directory = @QTPLUGINS@

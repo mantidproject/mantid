@@ -167,7 +167,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   controlPanelLayout->setSizes(sizes);
   controlPanelLayout->setStretchFactor(0,0);
   controlPanelLayout->setStretchFactor(1,1);
-
+  
   resize(windowWidth,650);
 
   tabChanged(0);
@@ -666,13 +666,25 @@ void InstrumentWindow::saveSettings()
   settings.endGroup();
 }
 
-/// Closes the window if the associated workspace is deleted
-void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace>)
+/** 
+ * Closes the window if the associated workspace is deleted.
+ * @param ws_name :: Name of the deleted workspace.
+ * @param ws :: Pointer to the workspace to be deleted
+ */
+void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   if (ws_name == m_workspaceName.toStdString())
   {
     askOnCloseEvent(false);
     close();
+    return;
+  }
+  Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+  if (pws)
+  {
+    m_InstrumentDisplay->getSurface()->peaksWorkspaceDeleted(pws);
+    m_InstrumentDisplay->repaint();
+    return;
   }
 }
 
@@ -810,6 +822,10 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
   setupColorMap();
   m_InstrumentDisplay->refreshView();
   m_InstrumentDisplay->repaint();
+  if (getTab() == PICK)
+  {
+    m_pickTab->changedIntegrationRange(xmin,xmax);
+  }
 }
 
 /**
@@ -1124,6 +1140,6 @@ void InstrumentWindow::mouseLeftInstrumentDisplay()
   if (getTab() == PICK && !m_instrumentDisplayContextMenuOn)
   {
     // remove the curve from the miniplot
-    m_pickTab->updatePick(-1);
+    m_pickTab->mouseLeftInstrmentDisplay();
   }
 }

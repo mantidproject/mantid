@@ -59,4 +59,5 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")
 
-        
+if __name__ == '__main__':
+    unittest.main()

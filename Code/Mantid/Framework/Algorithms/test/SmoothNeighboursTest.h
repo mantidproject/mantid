@@ -113,111 +113,6 @@ public:
   }
 
   /*
-  * Test the Weighting strategies start.
-  */
-
-  void testNullWeightingStrategyAtRadiusThrows()
-  {
-    NullWeighting strategy;
-    double distance = 0;
-    TSM_ASSERT_THROWS("NullWeighting should always throw in usage", strategy.weightAt(distance), std::runtime_error);
-  }
-
-  void testNullWeightingStrategyRectangularThrows()
-  {
-    NullWeighting strategy;
-    int adjX = 0;
-    int adjY = 0;
-    int ix = 0;
-    int iy = 0;
-    TSM_ASSERT_THROWS("NullWeighting should always throw in usage", strategy.weightAt(adjX, adjY, ix, iy), std::runtime_error);
-  }
-
-  void testFlatWeightingStrategyAtRadius()
-  {
-    FlatWeighting strategy;
-    double distanceA = 0;
-    double distanceB = 1000;
-    TSM_ASSERT_EQUALS("FlatWeighting Should be distance insensitive", 1, strategy.weightAt(distanceA));
-    TSM_ASSERT_EQUALS("FlatWeighting Should be distance insensitive", 1, strategy.weightAt(distanceB));
-  }
-
-  void testFlatWeightingStrategyRectangular()
-  {
-    FlatWeighting strategy;
-    int adjX = 0;
-    int adjY = 0;
-    int ix = 0;
-    int iy = 0;
-    TSM_ASSERT_EQUALS("FlatWeighting Should be 1", 1, strategy.weightAt(adjX, ix, adjY, iy));
-  }
-
-  void testLinearWeightingAtRadius()
-  {
-    double cutOff = 2;
-    LinearWeighting strategy(cutOff);
-
-    double distance = 0;
-    TSM_ASSERT_EQUALS("LinearWeighting should give full weighting at origin", 1, strategy.weightAt(distance));
-    distance = 1;
-    TSM_ASSERT_EQUALS("LinearWeighting should give 0.5 weighting at 1/2 radius", 0.5, strategy.weightAt(distance));
-    distance = cutOff; //2
-    TSM_ASSERT_EQUALS("LinearWeighting should give zero weighting at cutoff", 0, strategy.weightAt(distance));
-  }
-
-  void testLinearWeightingRectangular()
-  {
-    double cutOff = 0; //Doesn't matter what the cut off is.
-    LinearWeighting strategy(cutOff);
-
-    int adjX = 2;
-    int adjY = 2; 
-
-    int ix = 2; int iy = 2;
-    TSM_ASSERT_EQUALS("Top-Right not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = -2; iy = 2;
-    TSM_ASSERT_EQUALS("Top-Left not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = 2; iy = -2;
-    TSM_ASSERT_EQUALS("Bottom-Right not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = -2; iy = -2;
-    TSM_ASSERT_EQUALS("Bottom-Left not calculated properly", 0, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = 0; iy = 0;
-    TSM_ASSERT_EQUALS("Center not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = 1; iy = 1;
-    TSM_ASSERT_EQUALS("Half radius not calculated properly", 0.5, strategy.weightAt(adjX, ix, adjY, iy));
-  }
-
-  void testParabolicWeightingThrows()
-  {
-    ParabolicWeighting strategy;
-    double distance = 0;
-    TSM_ASSERT_THROWS("Should not be able to use the ParabolicWeighting like this.", strategy.weightAt(distance), std::runtime_error);
-  }
-
-  void testParabolicWeightingRectangular()
-  {
-    ParabolicWeighting strategy;
-
-    int adjX = 2;
-    int adjY = 2; 
-
-    int ix = 2; int iy = 2;
-    TSM_ASSERT_EQUALS("Top-Right not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = -2; iy = 2;
-    TSM_ASSERT_EQUALS("Top-Left not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = 2; iy = -2;
-    TSM_ASSERT_EQUALS("Bottom-Right not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = -2; iy = -2;
-    TSM_ASSERT_EQUALS("Bottom-Left not calculated properly", 1, strategy.weightAt(adjX, ix, adjY, iy));
-    ix = 0; iy = 0;
-    TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(adjX, ix, adjY, iy));
-  }
-
-  /*
-  * End test weighting strategies.
-  */
-
-  /*
   * Start test Radius Filter.
   */
   void testRadiusThrowsIfNegativeCutoff()
@@ -292,15 +187,19 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
     TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
 
-    //Check that the workspaces are identical, including x and y values.
-    CheckWorkspacesMatch* checkAlg = new CheckWorkspacesMatch;
-    checkAlg->initialize();
-    checkAlg->setProperty("Workspace1", inWS);
-    checkAlg->setProperty("Workspace2", outWS);
-    checkAlg->setProperty("Tolerance", 0.001);
-    checkAlg->execute();
-    std::string result = checkAlg->getProperty("Result");
-    TS_ASSERT_EQUALS("Success!", result);
+    // Compare the workspaces
+    for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
+    {
+      for (size_t j=0; j < inWS->readX(0).size(); j++)
+        { TS_ASSERT_DELTA( inWS->readX(wi)[j],  outWS->readX(wi)[j], 1e-5); }
+      // Y is the same
+      for (size_t j=0; j < inWS->readY(0).size(); j++)
+        { TS_ASSERT_DELTA( inWS->readY(wi)[j],  outWS->readY(wi)[j], 1e-5); }
+      // Error has decreased due to adding step (improved statistics)
+      // Therefore the output WS has lower errors than input:
+      for (size_t j=0; j < inWS->readE(0).size(); j++)
+        { TS_ASSERT_LESS_THAN( outWS->readE(wi)[j],  inWS->readE(wi)[j] );  }
+    }
 
   }
 

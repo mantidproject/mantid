@@ -140,4 +140,7 @@ Thumbs.db
 # Folder config file
 Desktop.ini
 
+# PyCharm IDE
+.idea/
+
 /Code/Mantid/Build/CMake/OutputBinaryTo.cmake

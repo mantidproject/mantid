@@ -29,3 +29,6 @@ class IEventWorkspaceTest(unittest.TestCase):
         except:
             error_raised = True
         self.assertFalse(error_raised)
+        
+if __name__ == '__main__':
+    unittest.main()

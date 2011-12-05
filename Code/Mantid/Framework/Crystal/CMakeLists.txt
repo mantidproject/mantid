@@ -2,10 +2,11 @@ set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
+	src/FindSXPeaks.cpp
+	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
-	src/FindUBUsingFFT.cpp
 	src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadIsawPeaks.cpp
@@ -13,6 +14,7 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/PeakIntegration.cpp
+	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
 	src/SaveHKL.cpp
 	src/SaveIsawPeaks.cpp
@@ -27,10 +29,11 @@ set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
+	inc/MantidCrystal/FindSXPeaks.h
+	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
-	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadIsawPeaks.h
@@ -38,6 +41,7 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/PeakIntegration.h
+	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SaveHKL.h
 	inc/MantidCrystal/SaveIsawPeaks.h
@@ -51,16 +55,19 @@ set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/CalculateUMatrixTest.h
 	test/CentroidPeaksTest.h
+	test/FindSXPeaksTest.h
+	test/FindUBUsingFFTTest.h
 	test/FindUBUsingIndexedPeaksTest.h
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h
-	test/FindUBUsingFFTTest.h
 	test/IndexPeaksTest.h
+	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h
 	test/MaskPeaksWorkspaceTest.h
 	test/NormaliseVanadiumTest.h
 	test/PeakIntegrationTest.h
+	test/PeakIntensityVsRadiusTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
 	test/SaveIsawUBTest.h

@@ -345,6 +345,19 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Don't reset axes next time
   m_firstWorkspaceOpen = true;
 
+  // For showing the original coordinates
+  ui.frmMouseInfo->setVisible(false);
+  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  if (origWS)
+  {
+    CoordTransform * toOrig = m_ws->getTransformToOriginal();
+    if (toOrig)
+    {
+      ui.frmMouseInfo->setVisible(true);
+      ui.lblOriginalWorkspace->setText(QString::fromStdString("in '" + origWS->getName() + "'") );
+    }
+  }
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -660,8 +673,14 @@ void SliceViewer::findRangeSlice()
 
 
 //------------------------------------------------------------------------------------
+/** Slot to show the mouse info at the mouse position
+ *
+ * @param x :: position of the mouse in plot coords
+ * @param y :: position of the mouse in plot coords
+ */
 void SliceViewer::showInfoAt(double x, double y)
 {
+  // Show the coordinates in the viewed workspace
   if (!m_ws) return;
   VMD coords(m_ws->getNumDims());
   for (size_t d=0; d<m_ws->getNumDims(); d++)
@@ -672,6 +691,30 @@ void SliceViewer::showInfoAt(double x, double y)
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
   ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
+
+  // Now show the coords in the original workspace
+  IMDWorkspace_sptr origWS = m_ws->getOriginalWorkspace();
+  if (origWS)
+  {
+    CoordTransform * toOrig = m_ws->getTransformToOriginal();
+    if (toOrig)
+    {
+      // Transform the coordinates
+      VMD orig = toOrig->applyVMD(coords);
+
+      QString text;
+      for (size_t d=0; d<origWS->getNumDims(); d++)
+      {
+        text += QString::fromStdString( origWS->getDimension(d)->getName() );
+        text += ": ";
+        text += (orig[d] < 0) ? "-" : " ";
+        text += QString::number(fabs(orig[d]), 'g', 3).leftJustified(8, ' ');
+        if (d != origWS->getNumDims()-1)
+          text += " ";
+      }
+      ui.lblOriginalCoord->setText(text);
+    }
+  }
 }
 
 //------------------------------------------------------------------------------------

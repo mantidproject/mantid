@@ -68,3 +68,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
                 self.assertEquals(e_np[i][j], workspace.read_e(i)[j])
             # Extra X boundary
             self.assertEquals(x_np[i][blocksize], workspace.read_x(i)[blocksize])
+
+if __name__ == '__main__':
+    unittest.main()
+            

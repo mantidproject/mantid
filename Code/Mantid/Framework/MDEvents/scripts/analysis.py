@@ -107,11 +107,11 @@ def do_analysis(file_list, type):
         f.close()
     
     if type == 1:
-        plot_results_vs_other(results, "SplitInto", "MakeTime", "SplitThreshold")
-        plot_results_vs_other(results, "SplitInto", "MemoryUsed", "SplitThreshold")
-        plot_results_vs_other(results, "SplitInto", "CoarseBinTime", "SplitThreshold")
-        plot_results_vs_other(results, "SplitInto", "MediumBinTime", "SplitThreshold")
-        plot_results_vs_other(results, "SplitInto", "FineBinTime", "SplitThreshold")
+        plot_results_vs_other(results, "SplitInto", "MakeTime", "SplitThresholdBase")
+        plot_results_vs_other(results, "SplitInto", "MemoryUsed", "SplitThresholdBase")
+        plot_results_vs_other(results, "SplitInto", "CoarseBinTime", "SplitThresholdBase")
+        plot_results_vs_other(results, "SplitInto", "MediumBinTime", "SplitThresholdBase")
+        plot_results_vs_other(results, "SplitInto", "FineBinTime", "SplitThresholdBase")
         
     elif type == 2:
         plot_results_with_slope(results, "NumberEvents", "MakeTime", x_scale=1e-9)
@@ -141,7 +141,7 @@ if __name__=="__main__":
 #                        help='Force overwriting existing files. Use with caution!')
 #    args = parser.parse_args()
 
-    file_list = ["optimize_results.dat"]
-    do_analysis(file_list, 3)
+    file_list = ["optimize_results1.dat"]
+    do_analysis(file_list, 1)
     
 

@@ -419,8 +419,8 @@ using namespace DataObjects;
     if ( !tableworkspace && !peakworkspace )
       return((status==NX_ERROR)?3:0);
 
-    if ( !tableworkspace )
-      return((status==NX_ERROR)?3:0);
+//    if ( !tableworkspace )
+//      return((status==NX_ERROR)?3:0);
 
     //write data entry
     status=NXmakegroup(fileID,group_name,"NXdata");

@@ -1296,7 +1296,9 @@ public:
     }
     x.back() = 0.1 * static_cast<double>(y.size());
 
-    TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
+    // Failing to explicitly construct a string here from the char* leads to the
+    //   setWorkspace(Workspace_sptr, bool) overload getting called!!!
+    TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,std::string("WorkspaceIndex=3,StartX=0.2,EndX = 0.8")));
     TS_ASSERT_EQUALS(mfun->dataSize(),8);
     TS_ASSERT_EQUALS(mfun->getData(),&y[2]);
   }

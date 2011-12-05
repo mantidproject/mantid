@@ -47,6 +47,7 @@ set ( TEST_PY_FILES
 	test/MDHistoWorkspaceTest.py
 	test/NumpyTest.py
 	test/MatrixWorkspaceTest.py
+	test/IPeaksWorkspaceTest.py
 	test/SettingsTest.py
 	test/SANSWorkflowTest.py
 	test/SANSMaskCommandsTest.py
@@ -89,9 +90,14 @@ endforeach ( PYFILE )
 ###########################################################################
 
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+if ( UNIX )
   set ( DLOPEN_SRC src/dlopen.cpp )
   add_library ( dlopen ${DLOPEN_SRC} )
+if ( APPLE )
+  # and in .so on the Mac
+  set_target_properties ( dlopen PROPERTIES SUFFIX .so )
+  target_link_libraries ( dlopen ${PYTHON_LIBRARIES} )
+endif()
   add_dependencies( PythonAPI dlopen )
 endif()
 
@@ -246,7 +252,7 @@ endif ()
 ###########################################################################
 
 install ( TARGETS PythonAPI DESTINATION ${BIN_DIR} )
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+if ( UNIX )
   install ( TARGETS dlopen DESTINATION ${BIN_DIR} )
 endif ()
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )

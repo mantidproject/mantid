@@ -106,7 +106,7 @@ namespace MDEvents
     int numBins = 0;
     std::vector<std::string> strs;
     boost::split(strs, str, boost::is_any_of(","));
-    if (strs.size() != this->in_ws->getNumDims() + 4)
+    if (strs.size() != this->m_inWS->getNumDims() + 4)
       throw std::invalid_argument("Wrong number of values (expected 4 + # of input dimensions) in the dimensions string: " + str);
     // Extract the arguments
     name = Strings::strip(strs[0]);
@@ -123,14 +123,31 @@ namespace MDEvents
     Strings::convert(strs[ strs.size()-2 ], length);
     min = 0.0;
     max = length;
-    // Scaling factor, to convert from units in the inDim to the output BIN number
-    double scaling = double(numBins) / length;
 
     // Create the basis vector with the right # of dimensions
-    VMD basis(this->in_ws->getNumDims());
-    for (size_t d=0; d<this->in_ws->getNumDims(); d++)
+    VMD basis(this->m_inWS->getNumDims());
+    for (size_t d=0; d<this->m_inWS->getNumDims(); d++)
       Strings::convert(strs[d+2], basis[d]);
     basis.normalize();
+
+    // Now, convert the basis vector to the coordinates of the ORIGNAL ws, if any
+    if (m_originalWS)
+    {
+      // Turn basis vector into two points
+      VMD basis0(this->m_inWS->getNumDims());
+      VMD basis1 = basis * length;
+      // Convert the points to the original coordinates (from inWS to originalWS)
+      CoordTransform * toOrig = m_inWS->getTransformToOriginal();
+      VMD origBasis0 = toOrig->applyVMD(basis0);
+      VMD origBasis1 = toOrig->applyVMD(basis1);
+      // New basis vector, now in the original workspace
+      basis = origBasis1 - origBasis0;
+      // New length of the vector (in original space).
+      length = basis.normalize();
+    }
+
+    // Scaling factor, to convert from units in the inDim to the output BIN number
+    double scaling = double(numBins) / length;
 
     // Create the output dimension
     MDHistoDimension_sptr out(new MDHistoDimension(name, id, units, min, max, numBins));
@@ -149,7 +166,7 @@ namespace MDEvents
   void SlicingAlgorithm::createGeneralTransform()
   {
     // Number of input dimensions
-    size_t inD = in_ws->getNumDims();
+    size_t inD = m_inWS->getNumDims();
 
     // Create the dimensions based on the strings from the user
     std::string dimChars = "XYZT";
@@ -193,6 +210,13 @@ namespace MDEvents
       throw std::invalid_argument("The number of dimensions in the Origin parameter is not consistent with the number of dimensions in the input workspace.");
     m_origin = origin;
 
+    // Now, convert the original vector to the coordinates of the ORIGNAL ws, if any
+    if (m_originalWS)
+    {
+      CoordTransform * toOrig = m_inWS->getTransformToOriginal();
+      m_origin = toOrig->applyVMD(m_origin);
+    }
+
     // Validate
     if (outD > inD)
       throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
@@ -201,13 +225,13 @@ namespace MDEvents
 
     // Create the CoordTransformAffine with these basis vectors
     CoordTransformAffine * ct = new CoordTransformAffine(inD, outD);
-    ct->buildOrthogonal(origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
+    ct->buildOrthogonal(m_origin, this->m_bases, VMD(this->m_scaling) ); // note the scaling makes the coordinate correspond to a bin index
     this->m_transform = ct;
 
     // Transformation original->binned
     std::vector<double> unitScaling(outD, 1.0);
     CoordTransformAffine * ctFrom = new CoordTransformAffine(inD, outD);
-    ctFrom->buildOrthogonal(origin, this->m_bases, VMD(unitScaling) );
+    ctFrom->buildOrthogonal(m_origin, this->m_bases, VMD(unitScaling) );
     m_transformFromOriginal = ctFrom;
 
     // Validate
@@ -275,8 +299,8 @@ namespace MDEvents
       // Find the named axis in the input workspace
       try
       {
-        size_t dim_index = in_ws->getDimensionIndexByName(name);
-        IMDDimension_const_sptr inputDim = in_ws->getDimension(dim_index);
+        size_t dim_index = m_inWS->getDimensionIndexByName(name);
+        IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
         units = inputDim->getUnits();
         // Add the index from which we're binning to the vector
         this->dimensionToBinFrom.push_back(dim_index);
@@ -312,7 +336,7 @@ namespace MDEvents
     }
 
     // Number of input dimension
-    size_t inD = in_ws->getNumDims();
+    size_t inD = m_inWS->getNumDims();
     // Validate
     if (numDims == 0)
       throw std::runtime_error("No output dimensions specified.");
@@ -346,10 +370,10 @@ namespace MDEvents
     }
 
     // Transform for binning
-    m_transform = new CoordTransformAligned(in_ws->getNumDims(), outD,
+    m_transform = new CoordTransformAligned(m_inWS->getNumDims(), outD,
         dimensionToBinFrom, origin, scaling);
 
-    // Transformation original->binned. There is not offset or scaling!
+    // Transformation original->binned. There is no offset or scaling!
     std::vector<double> unitScaling(outD, 1.0);
     std::vector<double> zeroOrigin(outD, 0.0);
     m_transformFromOriginal = new CoordTransformAligned(inD, outD,
@@ -374,12 +398,38 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Read the algorithm properties and creates the appropriate transforms
-   * for slicing the MDEventWorkspace
+   * for slicing the MDEventWorkspace.
+   *
+   * NOTE: The m_inWS member must be set first.
+   * If the workspace is based on another, e.g. result from BinMD,
+   * m_inWS will be modified to be the original workspace and the transformations
+   * will be altered to match.
+   *
+   * The m_transform, m_transformFromOriginal and m_transformToOriginal transforms will be set.
    */
   void SlicingAlgorithm::createTransform()
   {
+    if (!m_inWS)
+      throw std::runtime_error("SlicingAlgorithm::createTransform(): input MDWorkspace must be set first!");
+    if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_inWS))
+      throw std::runtime_error(this->name() + " cannot be run on a MatrixWorkspace!");
+
     // Is the transformation aligned with axes?
     m_axisAligned = getProperty("AxisAligned");
+
+    // Refer to the original workspace. Make sure that is possible
+    m_originalWS = m_inWS->getOriginalWorkspace();
+    if (m_originalWS)
+    {
+      if (m_axisAligned)
+        throw std::runtime_error("Cannot perform axis-aligned binning on a MDHistoWorkspace. Please use non-axis aligned binning.");
+      if (m_originalWS->getNumDims() != m_inWS->getNumDims())
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
+      if (!m_inWS->getTransformToOriginal())
+        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation. There is no transformation saved from "
+            + m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
+      g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << m_originalWS->getName() << "'" << std::endl;
+    }
 
     // Create the coordinate transformation
     m_transform = NULL;
@@ -388,6 +438,53 @@ namespace MDEvents
     else
       this->createGeneralTransform();
 
+    // Finalize, for binnign MDHistoWorkspace
+    if (m_originalWS)
+    {
+      // Replace the input workspace
+      m_inWS = m_originalWS;
+    }
+
+
+//
+//    if (m_inWS->hasOriginalWorkspace())
+//    {
+//      // A was transformed to B
+//      // Now we transform B to C
+//      // So we come up with the A -> C transformation
+//
+//      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
+//      g_log.notice() << "Performing " << this->name() << " on the original workspace, '" << origWS->getName() << "'" << std::endl;
+//
+//      if (origWS->getNumDims() != m_inWS->getNumDims())
+//        throw std::runtime_error("SlicingAlgorithm::createTransform(): Cannot propagate a transformation if the number of dimensions has changed.");
+//
+//      // A->C transformation
+//      CoordTransform * fromOrig = CoordTransformAffine::combineTransformations( m_inWS->getTransformFromOriginal(), m_transformFromOriginal );
+//      // C->A transformation
+//      CoordTransform * toOrig = CoordTransformAffine::combineTransformations( m_transformToOriginal, m_inWS->getTransformToOriginal() );
+//      // A->C binning transformation
+//      CoordTransform * binningTransform = CoordTransformAffine::combineTransformations( m_inWS->getTransformFromOriginal(), m_transform );
+//
+//      // Replace the transforms
+//      delete m_transformFromOriginal;
+//      delete m_transformToOriginal;
+//      delete m_transform;
+//      m_transformFromOriginal = fromOrig;
+//      m_transformToOriginal = toOrig;
+//      m_transform = binningTransform;
+//
+//      coord_t in[2] = {0,0};
+//      coord_t out[2] = {0,0};
+//      m_transform->apply(in, out);
+//      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) << std::endl;
+//      in[0] = 10; in[1] = 10;
+//      m_transform->apply(in, out);
+//      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) << std::endl;
+//
+//      // Replace the input workspace
+//      m_inWS = origWS;
+//    }
   }
 
 
@@ -411,7 +508,7 @@ namespace MDEvents
    */
   MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax)
   {
-    size_t nd = in_ws->getNumDims();
+    size_t nd = m_inWS->getNumDims();
 
     // General implicit function
     MDImplicitFunction * func = new MDImplicitFunction;
@@ -446,11 +543,6 @@ namespace MDEvents
     // Create a Z vector by doing the cross-product of X and Y
     if (boxDim==2 && nd == 3)
     { z = x.cross_prod(y); z.normalize(); }
-
-//    std::cout << "x " << x << std::endl;
-//    std::cout << "y " << y << std::endl;
-//    std::cout << "z " << z << std::endl;
-//    std::cout << "t " << t << std::endl;
 
     // Point that is sure to be inside the volume of interest
     VMD insidePoint = (o1 + o2) / 2.0;      VMD normal = bases[0];
@@ -582,7 +674,7 @@ namespace MDEvents
    */
   MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(size_t * chunkMin, size_t * chunkMax)
   {
-    size_t nd = in_ws->getNumDims();
+    size_t nd = m_inWS->getNumDims();
     if (m_axisAligned)
     {
       std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified

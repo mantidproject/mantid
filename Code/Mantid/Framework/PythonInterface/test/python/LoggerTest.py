@@ -11,4 +11,7 @@ class LoggerTest(unittest.TestCase):
         for att in attrs:
             if not hasattr(logger, att):
                 self.fail("Logger object does not have the required attribute '%s'" % att)
-    
+
+                
+if __name__ == '__main__':
+    unittest.main()

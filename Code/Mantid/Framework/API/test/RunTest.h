@@ -168,7 +168,7 @@ public:
   /** Save and load to NXS file */
   void test_nexus()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("RunTest.nxs");
 
     Run run1;
@@ -211,7 +211,7 @@ public:
   /** Check for loading the old way of saving proton_charge */
   void test_legacy_nexus()
   {
-    NexusTestHelper th(false);
+    NexusTestHelper th(true);
     th.createFile("RunTest.nxs");
     th.file->makeGroup("sample", "NXsample", 1);
     th.file->writeData("proton_charge", 1.234);

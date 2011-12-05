@@ -525,3 +525,20 @@ QList<PeakMarker2D*> ProjectionSurface::getMarkersWithID(int detID)const
   }
   return out;
 }
+
+/**
+ * Remove an overlay if its peaks workspace is deleted.
+ * @param ws :: Shared pointer to the deleted peaks workspace.
+ */
+void ProjectionSurface::peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws)
+{
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+    if (m_peakShapes[i]->getPeaksWorkspace() == ws)
+    {
+      delete m_peakShapes[i];
+      m_peakShapes.removeAt(i);
+      break;
+    }
+  }
+}

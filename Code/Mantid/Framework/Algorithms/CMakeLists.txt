@@ -7,11 +7,13 @@ set ( SRC_FILES
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
+	src/ApplyDeadTimeCorr.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/BlendSq.cpp
+	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
@@ -107,7 +109,6 @@ set ( SRC_FILES
 	src/MuonAsymmetryCalc.cpp
 	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
-	src/NormaliseByVanadium.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
@@ -143,6 +144,7 @@ set ( SRC_FILES
 	src/ScaleX.cpp
 	src/SetUncertaintiesToZero.cpp
 	src/ShiftLogTime.cpp
+	src/SignalOverError.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
@@ -166,6 +168,7 @@ set ( SRC_FILES
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/WeightedMean.cpp
+	src/WeightingStrategy.cpp
 	src/XDataConverter.cpp
 )
 
@@ -178,11 +181,13 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
+	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BlendSq.h
+	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -279,7 +284,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MuonAsymmetryCalc.h
 	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
-	inc/MantidAlgorithms/NormaliseByVanadium.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
@@ -315,6 +319,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
 	inc/MantidAlgorithms/ShiftLogTime.h
+	inc/MantidAlgorithms/SignalOverError.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
@@ -338,6 +343,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/WeightedMean.h
+	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
 
@@ -348,11 +354,13 @@ set ( TEST_FILES
 	test/AlignDetectorsTest.h
 	test/AlphaCalcTest.h
 	test/AnyShapeAbsorptionTest.h
+	test/ApplyDeadTimeCorrTest.h
 	test/ApplyDetailedBalanceTest.h
 	test/ApplyTransmissionCorrectionTest.h
 	test/BinaryOperateMasksTest.h
 	test/BinaryOperationTest.h
 	test/BlendSqTest.h
+	test/CalMuonDeadTimeTest.h
 	test/CalculateEfficiencyTest.h
 	test/CalculateTransmissionBeamSpreaderTest.h
 	test/CalculateTransmissionTest.h
@@ -438,7 +446,6 @@ set ( TEST_FILES
 	test/MuonAsymmetryCalcTest.h
 	test/MuonRemoveExpDecayTest.h
 	test/NormaliseByCurrentTest.h
-	test/NormaliseByVanadiumTest.h
 	test/NormaliseToMonitorTest.h
 	test/OneMinusExponentialCorTest.h
 	test/PDFFTTest.h
@@ -470,6 +477,7 @@ set ( TEST_FILES
 	test/ScaleTest.h
 	test/ScaleXTest.h
 	test/ShiftLogTimeTest.h
+	test/SignalOverErrorTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQW2Test.h
@@ -490,6 +498,7 @@ set ( TEST_FILES
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
 	test/WeightedMeanTest.h
+	test/WeightingStrategyTest.h
 	test/WorkspaceCreationHelperTest.h
 	test/WorkspaceGroupTest.h
 )

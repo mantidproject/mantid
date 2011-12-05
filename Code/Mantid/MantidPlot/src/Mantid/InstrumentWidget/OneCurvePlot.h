@@ -20,8 +20,10 @@ class OneCurvePlot: public QwtPlot
   Q_OBJECT
 public:
   OneCurvePlot(QWidget* parent);
+  ~OneCurvePlot();
   void setData(const double* x,const double* y,int dataSize);
   void setLabel(const QString& label);
+  QString label()const{return m_label;}
   void setYAxisLabelRotation(double degrees);
   void addPeakLabel(PeakLabel*);
   void clearPeakLabels();

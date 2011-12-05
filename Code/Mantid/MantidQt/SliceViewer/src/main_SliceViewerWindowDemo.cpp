@@ -9,6 +9,7 @@
 #include "qmainwindow.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 /** Demo application for quickly testing the SliceViewerWindow GUI.
  *
@@ -29,7 +30,7 @@ int main( int argc, char ** argv )
 {
   QApplication app(argc, argv);
   app.setApplicationName("SliceViewerWindow demo");
-  IMDEventWorkspace_sptr mdew = makeDemoData();
+  IMDWorkspace_sptr mdew = makeDemoData();
 
   SliceViewerWindow * mainWin = new SliceViewerWindow("mdew", NULL);
   //mainWin->getSlicer()->getLineOverlay()->setSnap(0.5);

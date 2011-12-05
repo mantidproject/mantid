@@ -20,7 +20,9 @@ namespace SliceViewer
 
 LineViewer::LineViewer(QWidget *parent)
  : QWidget(parent),
-   m_numBins(100)
+   m_planeWidth(0),
+   m_numBins(100),
+   m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1)
 {
 	ui.setupUi(this);
 
@@ -48,6 +50,7 @@ LineViewer::LineViewer(QWidget *parent)
   QObject::connect(ui.btnApply, SIGNAL(clicked()), this, SLOT(apply()));
   QObject::connect(ui.chkAdaptiveBins, SIGNAL(  stateChanged(int)), this, SLOT(adaptiveBinsChanged()));
   QObject::connect(ui.spinNumBins, SIGNAL(valueChanged(int)), this, SLOT(numBinsChanged()));
+  QObject::connect(ui.textPlaneWidth, SIGNAL(textEdited(QString)), this, SLOT(widthTextEdited()));
 
 }
 
@@ -138,11 +141,11 @@ void LineViewer::updateFreeDimensions()
       QObject::connect(m_startText[d], SIGNAL(textEdited(QString)), this, SLOT(startLinkedToEndText()));
     }
   }
-  // But enable the width setting on the free X dimension
   if (!m_allDimsFree)
   {
-    m_widthText[m_freeDimX]->setVisible(true);
-    m_widthText[m_freeDimX]->setToolTip("Integration width perpendicular to the line, along the chosen plane.");
+    std::string s = "(in " + m_ws->getDimension(m_freeDimX)->getName() + "-" +  m_ws->getDimension(m_freeDimY)->getName()
+        + " plane)";
+    ui.lblPlaneWidth->setText(QString::fromStdString(s));
   }
 
 }
@@ -157,6 +160,7 @@ void LineViewer::updateStartEnd()
     m_endText[d]->setText(QString::number(m_end[d]));
     m_widthText[d]->setText(QString::number(m_width[d]));
   }
+  ui.textPlaneWidth->setText(QString::number(m_planeWidth));
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -169,9 +173,9 @@ void LineViewer::readTextboxes()
   VMD end = m_start;
   VMD width = m_width;
   bool allOk = true;
+  bool ok;
   for (int d=0; d<int(m_ws->getNumDims()); d++)
   {
-    bool ok;
     start[d] = m_startText[d]->text().toDouble(&ok);
     allOk = allOk && ok;
 
@@ -181,11 +185,16 @@ void LineViewer::readTextboxes()
     width[d] = m_widthText[d]->text().toDouble(&ok);
     allOk = allOk && ok;
   }
+  // Now the planar width
+  double tempPlaneWidth = ui.textPlaneWidth->text().toDouble(&ok);
+  allOk = allOk && ok;
+
   // Only continue if all values typed were valid numbers.
   if (!allOk) return;
   m_start = start;
   m_end = end;
   m_width = width;
+  m_planeWidth = tempPlaneWidth;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -197,12 +206,6 @@ void LineViewer::apply()
 
   // BinMD fails on MDHisto.
   IMDHistoWorkspace_sptr mdhws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws);
-  if (mdhws)
-  {
-    this->showPreview();
-    m_plot->setTitle("Integrating MDHistoWorkspaces not yet supported - coming soon!");
-    return;
-  }
 
   std::string outWsName = m_ws->getName() + "_line" ;
   bool adaptive = ui.chkAdaptiveBins->isChecked();
@@ -291,6 +294,14 @@ void LineViewer::apply()
     m_sliceWS = boost::dynamic_pointer_cast<IMDWorkspace>(AnalysisDataService::Instance().retrieve(outWsName));
     this->showFull();
   }
+  else
+  {
+    // Unspecified error in algorithm
+    this->showPreview();
+    m_plot->setTitle("Error integrating workspace - see log.");
+  }
+
+
 }
 
 // ==============================================================================================
@@ -360,13 +371,10 @@ void LineViewer::adaptiveBinsChanged()
 /** @return the width in the plane, or the width in dimension 0 if not restricted to a plane */
 double LineViewer::getPlanarWidth() const
 {
-  if (m_allDimsFree)
-    return m_width[0];
-  else
-    return m_width[m_freeDimX];
+  return m_planeWidth;
 }
 
-/// @return the full width vector in each dimensions
+/// @return the full width vector in each dimensions. The values in the X-Y dimensions should be ignored
 Mantid::Kernel::VMD LineViewer::getWidth() const
 {
   return m_width;
@@ -438,8 +446,8 @@ void LineViewer::setPlanarWidth(double width)
       if (m_width[d] == oldPlanarWidth)
         m_width[d] = width;
     }
-    // And always set the one
-    m_width[m_freeDimX] = width;
+    // And always set the planar one
+    m_planeWidth = width;
   }
   updateStartEnd();
 }

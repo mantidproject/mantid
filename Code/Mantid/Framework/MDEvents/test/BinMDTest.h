@@ -428,6 +428,192 @@ public:
         true /* Flip sign of Y basis vector*/);
   }
 
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Check that two MDHistos have the same values .
+   *
+   * @param binned1Name :: original, binned direct from MDEW
+   * @param binned2Name :: binned from a MDHisto
+   * @param origWS :: both should have this as its originalWorkspace
+   */
+  void do_compare_histo(std::string binned1Name, std::string binned2Name, std::string origWS)
+  {
+    MDHistoWorkspace_sptr binned1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned1Name));
+    MDHistoWorkspace_sptr binned2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(binned2Name));
+    TS_ASSERT_EQUALS( binned1->getOriginalWorkspace()->getName(), origWS);
+    TS_ASSERT_EQUALS( binned2->getOriginalWorkspace()->getName(), origWS);
+    TS_ASSERT(binned2);
+    size_t numErrors = 0;
+    for (size_t i=0; i < binned1->getNPoints(); i++)
+    {
+      double diff = std::abs(binned1->getSignalAt(i) - binned2->getSignalAt(i));
+      if (diff > 1e-6) numErrors++;
+      TS_ASSERT_DELTA( binned1->getSignalAt(i), binned2->getSignalAt(i), 1e-5);
+    }
+    TS_ASSERT_EQUALS( numErrors, 0);
+  }
+
+  /** Common setup for double-binning tests */
+  void do_prepare_comparison()
+  {
+    AnalysisDataService::Instance().remove("mdew");
+    AnalysisDataService::Instance().remove("binned0");
+    AnalysisDataService::Instance().remove("binned1");
+    AnalysisDataService::Instance().remove("binned2");
+
+    // ---- Start with empty MDEW ----
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
+        "Dimensions", "2",
+        "Extents", "-10,10,-10,10",
+        "Names", "x,y",
+        "Units", "m,m",
+        "SplitInto", "4",
+        "SplitThreshold", "100",
+        "MaxRecursionDepth", "20",
+        "OutputWorkspace", "mdew");
+
+    // Give fake uniform data
+    FrameworkManager::Instance().exec("FakeMDEventData", 6,
+        "InputWorkspace", "mdew",
+        "UniformParams", "1000",
+        "RandomSeed", "1234");
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, axis-aligned */
+  void test_exec_Aligned_then_nonAligned()
+  {
+    do_prepare_comparison();
+    // Bin aligned to original. Coordinates remain the same
+    FrameworkManager::Instance().exec("BinMD", 10,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "1",
+        "AlignedDimX", "x, -10, 10, 10",
+        "AlignedDimY", "y, -10, 10, 10");
+
+    // Bin, non-axis-aligned, with translation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "binned0",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    do_compare_histo("binned0", "binned1", "mdew");
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, not axis-aligned */
+  void test_exec_nonAligned_then_nonAligned_rotation()
+  {
+    do_prepare_comparison();
+
+    // Bin NOT aligned to original, with translation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    // Bin with some rotation (10 degrees)
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 0.98, 0.17, 20.0, 10",
+        "BasisVectorY", "ry,m, -.17, 0.98, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+    // Bin the binned output with the opposite rotation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "binned1",
+        "OutputWorkspace", "binned2",
+        "AxisAligned", "0",
+        "BasisVectorX", "rrx,m, 0.98, -.17, 20.0, 10",
+        "BasisVectorY", "rry,m, 0.17, 0.98, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "0, 0");
+    // Check they are the same
+    do_compare_histo("binned0", "binned2", "mdew");
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Bin a MDHistoWorkspace that was itself binned from a MDEW, not axis-aligned, with translation */
+  void test_exec_nonAligned_then_nonAligned_translation()
+  {
+    do_prepare_comparison();
+
+    // Bin aligned to original
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    // Bin with a translation. -10,-10 in MDEW becomes 0,0 in binned1
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    // Bin the binned output with the opposite translation
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "binned1",
+        "OutputWorkspace", "binned2",
+        "AxisAligned", "0",
+        "BasisVectorX", "rrx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "rry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "0, 0");
+
+    // Check they are the same
+    do_compare_histo("binned0", "binned2", "mdew");
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Can't do Axis-Aligned on a MDHisto because the transformation gets too annoying. */
+  void test_exec_Aligned_onMDHisto_fails()
+  {
+    do_prepare_comparison();
+
+    // Bin NOT aligned to original, translated. Coordinates change.
+    FrameworkManager::Instance().exec("BinMD", 14,
+        "InputWorkspace", "mdew",
+        "OutputWorkspace", "binned0",
+        "AxisAligned", "0",
+        "BasisVectorX", "rx,m, 1.0, 0.0, 20.0, 10",
+        "BasisVectorY", "ry,m, 0.0, 1.0, 20.0, 10",
+        "ForceOrthogonal", "1",
+        "Origin", "-10, -10");
+
+    // Bin aligned to binned0. This is not allowed!
+    IAlgorithm_sptr alg = FrameworkManager::Instance().exec("BinMD", 10,
+        "InputWorkspace", "binned0",
+        "OutputWorkspace", "binned1",
+        "AxisAligned", "1",
+        "AlignedDimX", "rx, 0, 20, 10",
+        "AlignedDimY", "ry, 0, 20, 10");
+    TS_ASSERT( !alg->isExecuted() );
+  }
+
+
 };
 
 

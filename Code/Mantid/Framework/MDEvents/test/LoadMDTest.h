@@ -280,6 +280,7 @@ public:
     {
       ws->getBoxController()->closeFile(true);
       AnalysisDataService::Instance().remove(outWSName);
+      if (Poco::File(filename).exists()) Poco::File(filename).remove();
     }
   }
 
@@ -468,8 +469,12 @@ public:
     TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
 
-    ws->getBoxController()->closeFile(true);
     AnalysisDataService::Instance().remove(outWSName);
+    try
+    {  if (Poco::File(filename).exists()) Poco::File(filename).remove(); }
+    catch (...)
+    { /* ignore windows error */ }
+
 
   }
 

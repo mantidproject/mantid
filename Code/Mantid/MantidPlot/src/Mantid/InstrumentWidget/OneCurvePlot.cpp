@@ -36,6 +36,14 @@ QwtPlot(parent),m_curve(NULL)
 }
 
 /**
+ * Destructor.
+ */
+OneCurvePlot::~OneCurvePlot()
+{
+  clearAll();
+}
+
+/**
   * Set the scale of the horizontal axis
   * @param from :: Minimum value
   * @param to :: Maximum value
@@ -201,6 +209,16 @@ void OneCurvePlot::setData(const double* x,const double* y,int dataSize)
   }
 
   m_curve->setData(x,y,dataSize);
+  setXScale(x[0],x[dataSize-1]);
+  double from = y[0];
+  double to = from;
+  for(int i = 0; i < dataSize; ++i)
+  {
+    const double& yy = y[i];
+    if (yy < from) from = yy;
+    if (yy > to) to = yy;
+  }
+  setYScale(from,to);
 }
 
 /**
@@ -225,13 +243,13 @@ void OneCurvePlot::clearCurve()
   // if there are stored curves rescale axes to make them fully visible
   if (hasStored())
   {
-    const QwtScaleDiv *divX = axisScaleDiv(QwtPlot::xBottom);
-    double xmin = divX->lBound();
-    double xmax = divX->hBound();
-    const QwtScaleDiv *divY = axisScaleDiv(QwtPlot::yLeft);
-    double ymin = divY->lBound();
-    double ymax = divY->hBound();
     QMap<QString,QwtPlotCurve*>::const_iterator curve = m_stored.begin();
+    QwtDoubleRect br = (**curve).boundingRect();
+    double xmin = br.left();
+    double xmax = br.right();
+    double ymin = br.top();
+    double ymax = br.bottom();
+    ++curve;
     for(;curve!=m_stored.end();++curve)
     {
       QwtDoubleRect br = (**curve).boundingRect();
@@ -427,6 +445,7 @@ void OneCurvePlot::removeCurve(const QString& label)
   {
     it.value()->detach();
     m_stored.erase(it);
+    delete it.value();
   }
 }
 
@@ -453,6 +472,7 @@ void OneCurvePlot::clearAll()
   m_stored.clear();
   clearPeakLabels();
   clearCurve();
+  m_colorIndex = 0;
 }
 
 /* ---------------------------- PeakLabel --------------------------- */

@@ -190,7 +190,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   connect (scalePicker,SIGNAL(clicked()),this,SLOT(activateGraph()));
   connect (scalePicker,SIGNAL(clicked()),this,SLOT(deselectMarker()));
   connect (scalePicker,SIGNAL(axisDblClicked(int)),this,SIGNAL(axisDblClicked(int)));
-  connect (scalePicker, SIGNAL(axisTitleDblClicked()), this, SLOT(enableTextEditor()));
+  connect (scalePicker,SIGNAL(axisTitleDblClicked()), this, SLOT(enableTextEditor()));
   connect (scalePicker,SIGNAL(axisTitleRightClicked()),this,SLOT(showAxisTitleMenu()));
   connect (scalePicker,SIGNAL(axisRightClicked(int)),this,SLOT(showAxisContextMenu(int)));
 
@@ -3312,6 +3312,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
   guessUniqueCurveLayout(colorIndex, symbolIndex);
   if (lineWidth < 0) lineWidth = widthLine;
   c->setPen(QPen(ColorBox::color(colorIndex), lineWidth));
+  QwtSymbol symbol = c->symbol();
+  symbol.setPen(c->pen());
+  symbol.setBrush(QBrush(ColorBox::color(colorIndex)));
+  c->setSymbol(symbol);
 
   addLegendItem();
   connect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
@@ -5025,7 +5029,7 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   for (int i=0; i < QwtPlot::axisCnt; i++)
   {updatedaxis.push_back(0);  }
 
-  enableFixedAspectRatio(true);
+  enableFixedAspectRatio(multiLayer()->applicationWindow()->fixedAspectRatio2DPlots);
 
   return d_spectrogram;
 }

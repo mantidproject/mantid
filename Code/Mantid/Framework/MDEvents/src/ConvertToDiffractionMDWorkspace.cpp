@@ -197,7 +197,7 @@ namespace MDEvents
         {
           //double lambda = 1.0/wavenumber;
           // (sin(theta))^2 / wavelength^4
-          float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
+          float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber );
           // Push the MDLeanEvent but correct the weight.
           out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
         }

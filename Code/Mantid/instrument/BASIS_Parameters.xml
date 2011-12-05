@@ -7,7 +7,16 @@
     <value val="indirect"/>
 </parameter>
 
-<!-- These properties are neceessary for use in the Indirect CTE interface. -->
+
+<!-- Moderator Tzero/LambdaZero Parameters  -->
+<parameter name="Moderator.TimeZero.Gradient">
+    <value val="11.967"/>
+</parameter>
+<parameter name="Moderator.TimeZero.Intercept">
+    <value val="-5.0"/>
+</parameter>
+
+<!-- These properties are necessary for use in the Indirect CTE interface. -->
 
 <parameter name="analysers" type="string">
     <value val="silicon" />

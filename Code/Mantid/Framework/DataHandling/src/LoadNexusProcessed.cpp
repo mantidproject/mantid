@@ -80,7 +80,7 @@ using Geometry::Instrument_const_sptr;
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
     m_axis1vals(), m_list(false), m_interval(false),
-    m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
+    m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),m_cppFile(NULL)
 {
   NXMDisableErrorReporting();
 }
@@ -88,6 +88,7 @@ LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed()
 {
+  delete m_cppFile;
 }
 
 /** Initialisation method.
@@ -144,7 +145,7 @@ void LoadNexusProcessed::exec()
   NXRoot root(getPropertyValue("Filename"));
 
   // "Open" the same file but with the C++ interface
-  cppFile = new ::NeXus::File(root.m_fileID);
+  m_cppFile = new ::NeXus::File(root.m_fileID);
 
   //Find out how many first level entries there are
   int64_t nperiods = static_cast<int64_t>(root.groups().size());
@@ -706,11 +707,11 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   progress(progressStart+0.05*progressRange,"Reading the sample details...");
 
   // Hop to the right point
-  cppFile->openPath(mtd_entry.path());
+  m_cppFile->openPath(mtd_entry.path());
   try
   {
     // This loads logs, sample, and instrument.
-    local_workspace->loadExperimentInfoNexus(cppFile, parameterStr);
+    local_workspace->loadExperimentInfoNexus(m_cppFile, parameterStr);
   }
   catch (std::exception & e)
   {

@@ -2,15 +2,14 @@ from MantidFramework import *
 from mantidsimple import *
 from numpy import zeros
 from pylab import *
-import time
-import copy
 
 class sfCalculator():      
     
     tof_min = 10000  #microS
     tof_max = 21600  #microS
 
-    #range of x pixel to use in the X integration (we found out that there is a frame effect that introduces noise)
+    #range of x pixel to use in the X integration (we found out that there 
+    #is a frame effect that introduces noise)
     x_pixel_min = 90
     x_pixel_max = 190
 
@@ -19,7 +18,7 @@ class sfCalculator():
 
     #turn on or off the plots
     bPlot = False
-    bFittingPlot = True
+    bFittingPlot = False
     
     #size of detector
     alpha_pixel_nbr = 256 
@@ -100,8 +99,10 @@ class sfCalculator():
         #calculate y_axis of numerator/denominator
 #        self._x_axis_ratio = self._x_axis
         self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
-        self.y_axis_error_ratio = ((self.y_axis_error_numerator / self.y_axis_numerator) ** 2 + 
-                                    (self.y_axis_error_denominator / self.y_axis_denominator) ** 2)
+        self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
+                                    self.y_axis_numerator) ** 2 + 
+                                    (self.y_axis_error_denominator / 
+                                     self.y_axis_denominator) ** 2)
         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
         self.y_axis_error_ratio *= self.y_axis_ratio
         
@@ -157,17 +158,18 @@ class sfCalculator():
                            bNumerator=bNumerator)
 
         #cleanup workspaces
-#        mtd.deleteWorkspace('EventDataWks')
-#        mtd.deleteWorkspace('HistoDataWks')
-#        mtd.deleteWorkspace('IntegratedDataWks')
-#        mtd.deleteWorkspace('TransposeIntegratedDataWks')
-#        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
-#        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
-#        mtd.deleteWorkspace('DataWks')
+        mtd.deleteWorkspace('EventDataWks')
+        mtd.deleteWorkspace('HistoDataWks')
+        mtd.deleteWorkspace('IntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks')
+        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
+        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
+        mtd.deleteWorkspace('DataWks')
         
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
-        this calculates the final y_axis and y_axis_error of numerator and denominator
+        this calculates the final y_axis and y_axis_error of numerator 
+        and denominator
         """
         mt = Workspace
         x_axis = mt.readX(0)[:]
@@ -198,7 +200,8 @@ class sfCalculator():
                                    from_pixel=0,
                                    to_pixel=303):
         """
-        This creates the integrated workspace over the second pixel range (beta_pixel_nbr here) and
+        This creates the integrated workspace over the second pixel range 
+        (beta_pixel_nbr here) and
         returns the new workspace handle
         """
         x_axis = InputWorkspace.readX(0)[:]
@@ -215,7 +218,8 @@ class sfCalculator():
 
         y_axis = y_axis.flatten()
         y_error_axis = sqrt(y_error_axis)
-        #plot_y_error_axis = _y_error_axis #for output testing only    -> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
+        #plot_y_error_axis = _y_error_axis #for output testing only    
+        #-> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
         y_error_axis = y_error_axis.flatten()
 
         #normalization by proton charge
@@ -260,7 +264,7 @@ class sfCalculator():
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
         product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
                                           (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
-        return copy.deepcopy(product)
+        return product
     
     def fit(self):
         """
@@ -320,7 +324,7 @@ def recordSettings(a, b, error_a, error_b, name, instance):
     error_b.append(instance.error_b)
     name.append(instance.numerator + '/' + instance.denominator)
 
-def outputFittingParameters(a, b, a_error, b_error, S1H, S2H, output_file_name):
+def outputFittingParameters(a, b, error_a, error_b, S1H, S2H, output_file_name):
     """
     Create an ascii file of the various fittings parameters
     y=a+bx
@@ -346,23 +350,30 @@ def outputFittingParameters(a, b, a_error, b_error, S1H, S2H, output_file_name):
     f.writelines(_content)
     f.close()
 
-def createInputDictionary(list_files):
+def createIndividualList(string_list_files):
     """
-    Using the list_files, will produce a dictionary of the run number and number of attenuator
+    Using the list_files, will produce a dictionary of the run 
+    number and number of attenuator
     ex:
         list_files = "1000:0, 1001:1, 1002:1, 1003:2"
         return {1000:0, 1001:1, 1002:2, 1003:2}
     """
-    if (list_files == ''):
+    if (string_list_files == ''):
         return None
-    first_split = list_files.split(',')
-    _input_dico = {}
+    first_split = string_list_files.split(',')
+
+    list_runs = []
+    list_attenuator= []
+
     _nbr_files = len(first_split)
     for i in range(_nbr_files):
         _second_split = first_split[i].split(':')
-        _input_dico[_second_split[0]] = _second_split[1]
-    return _input_dico
-
+        list_runs.append(_second_split[0].strip())
+        list_attenuator.append(int(_second_split[1].strip()))
+    
+    return {'list_runs':list_runs,
+            'list_attenuator':list_attenuator}
+    
 def getSh(mt, top_tag, bottom_tag):
     """
         returns the height and units of the given slit#
@@ -400,7 +411,8 @@ def getSlitsValue(full_list_runs, S1H, S2H):
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
         LoadEventNexus(Filename=_full_file_name,
-                       OutputWorkspace='tmpWks')
+                       OutputWorkspace='tmpWks',
+                       MetaDataOnly='1')
         mt1 = mtd['tmpWks']
         _s1h_value, _s1h_units = getS1h(mt1)
         _s2h_value, _s2h_units = getS2h(mt1)
@@ -458,32 +470,73 @@ def calculateAndFit(numerator='',
         cal1.fit()
         return cal1
 
-if __name__ == '__main__':
-    
+#if __name__ == '__main__':
+def calculate(string_runs=None, list_peak_back=None, output_file=None):  
     """
     In this current version, the program will automatically calculates
-    the scaling function for up to and included 6 attenuators. 
-    """
+    the scaling function for up to, and included, 6 attenuators.
+    A output file will then be produced with the following format:
+        S1H  S2H    a   b   error_a    error_b
+        ....
+        where y=a+bx
+        x axis is in microS
+        
+        The string runs has to be specified this way:
+        string_runs = "run#1:nbr_attenuator, run#2:nbr_attenuator...."
+        
+        the list_peak_back is specified this way:
+        list_peak_back = 
+            [[peak_min_run1, peak_max_run1, back_min_run1, back_max_run1],
+             [peak_min_run2, peak_max_run2, back_min_run2, back_max_run2],
+             [...]]
+             
+        output_file = full path to output file name (folder must exist)
+        
+    """    
     
-    #Input from user
-    list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', '55895', '55896', '55897', '55898', '55899', '55900', '55901', '55902']
-    list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-    
-    list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
-    list_peak_back[9, ] = [128, 136, 120, 145]
-    list_peak_back[11, ] = [125, 140, 115, 150]
-    list_peak_back[10, ] = [128, 136, 120, 145]
-    list_peak_back[13, ] = [120, 145, 105, 155]
-    list_peak_back[12, ] = [125, 140, 115, 150]
-    
-    nexus_path = '/mnt/hgfs/j35/'
-    pre = 'REF_L_'
-    nexus_path_pre = nexus_path + pre
-    post = '_event.nxs'
-    
-    for (offset, item) in enumerate(list_runs):
-        list_runs[offset] = nexus_path_pre + list_runs[offset] + post
+    #use default string files if not provided
+    if (string_runs is None):
+        #Input from user
+        list_runs = ['55889', '55890', '55891', '55892', '55893', '55894', 
+                     '55895', '55896', '55897', '55898', '55899', '55900', 
+                     '55901', '55902']
+        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
 
+        nexus_path = '/mnt/hgfs/j35/'
+        pre = 'REF_L_'
+        nexus_path_pre = nexus_path + pre
+        post = '_event.nxs'
+    
+        for (offset, item) in enumerate(list_runs):
+            list_runs[offset] = nexus_path_pre + list_runs[offset] + post
+
+    else:
+        #ex: string_runs="/mnt/hgfs/j35/REF_L_55889_event.nxs:0, 
+        # /mnt/hgfs/j35/REF_L_55890_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55891_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55892_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55893_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55894_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55895_event.nxs:1, 
+        # /mnt/hgfs/j35/REF_L_55896_event.nxs:2, 
+        # /mnt/hgfs/j35/REF_L_55897_event.nxs:2, 
+        # /mnt/hgfs/j35/REF_L_55898_event.nxs:2, 
+        # /mnt/hgfs/j35/REF_L_55899_event.nxs:3, 
+        # /mnt/hgfs/j35/REF_L_55900_event.nxs:3, 
+        # /mnt/hgfs/j35/REF_L_55901_event.nxs:4, 
+        # /mnt/hgfs/j35/REF_L_55902_event.nxs:4"
+        dico = createIndividualList(string_runs)
+        list_runs = dico['list_runs']
+        list_attenuator = dico['list_attenuator']
+
+    if (list_peak_back is None):
+        list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
+        list_peak_back[9, ] = [128, 136, 120, 145]
+        list_peak_back[11, ] = [125, 140, 115, 150]
+        list_peak_back[10, ] = [128, 136, 120, 145]
+        list_peak_back[13, ] = [120, 145, 105, 155]
+        list_peak_back[12, ] = [125, 140, 115, 150]
+    
     #####
     #Input file should be as it is here !
     #####
@@ -531,7 +584,7 @@ if __name__ == '__main__':
                 continue
             else:
                 if _first_A[_attenuator] is True:
-                    _first_A[_attenuator]= False
+                    _first_A[_attenuator] = False
                     _index_first_A[_attenuator] = i
                     continue
                 else:
@@ -545,7 +598,7 @@ if __name__ == '__main__':
                                        list_objects=list_objects)                                       
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
-                plotObject(cal)
+#                plotObject(cal)
                                 
                 if (i < (len(list_runs) - 1) and
                          list_attenuator[i + 1] == (_attenuator+1)):
@@ -555,11 +608,11 @@ if __name__ == '__main__':
             finalS1H.append(S1H[index_numerator])
             finalS2H.append(S2H[index_numerator])
 
-
-        
         #output the fitting parameters in an ascii
-        output_file_name = '/home/j35/Desktop/SFcalculator.txt'
-        outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file_name)
+        if (output_file is None):
+            output_file = '/home/j35/Desktop/SFcalculator.txt'
+        
+        outputFittingParameters(a, b, error_a, error_b, finalS1H, finalS2H, output_file)
 
     else:
         """
