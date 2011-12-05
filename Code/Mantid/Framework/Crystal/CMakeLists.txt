@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/FindSXPeaks.cpp
+    src/FindSXUBUsingLatticeParameters.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
@@ -30,6 +31,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
+    inc/MantidCrystal/FindSXUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
@@ -56,6 +58,7 @@ set ( TEST_FILES
 	test/CalculateUMatrixTest.h
 	test/CentroidPeaksTest.h
 	test/FindSXPeaksTest.h
+    test/FindSXUBUsingLatticeParametersTest.h
 	test/FindUBUsingFFTTest.h
 	test/FindUBUsingIndexedPeaksTest.h
 	test/FindUBUsingLatticeParametersTest.h
