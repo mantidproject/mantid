@@ -32,6 +32,20 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         pws.removePeak(0)
         self.assertEqual(pws.getNumberPeaks(), 0)
         
+        # Create a new peak at some Q in the lab frame
+        qlab = V3D(1,2,3)
+        p = pws.createPeak(qlab, 1.54)
+        self.assertAlmostEquals( p.getQLabFrame().getX(), 1.0, 3)
+        
+        # Now try to add the peak back
+        pws.addPeak(p)
+        self.assertEqual(pws.getNumberPeaks(), 1)
+        
+        # Check that it is what we added to it
+        p = pws.getPeak(0)
+        self.assertAlmostEquals( p.getQLabFrame().getX(), 1.0, 3)
+                
+        
 if __name__ == '__main__':
     unittest.main()
 
