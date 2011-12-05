@@ -190,7 +190,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   connect (scalePicker,SIGNAL(clicked()),this,SLOT(activateGraph()));
   connect (scalePicker,SIGNAL(clicked()),this,SLOT(deselectMarker()));
   connect (scalePicker,SIGNAL(axisDblClicked(int)),this,SIGNAL(axisDblClicked(int)));
-  connect (scalePicker, SIGNAL(axisTitleDblClicked()), this, SLOT(enableTextEditor()));
+  connect (scalePicker,SIGNAL(axisTitleDblClicked()), this, SLOT(enableTextEditor()));
   connect (scalePicker,SIGNAL(axisTitleRightClicked()),this,SLOT(showAxisTitleMenu()));
   connect (scalePicker,SIGNAL(axisRightClicked(int)),this,SLOT(showAxisContextMenu(int)));
 
