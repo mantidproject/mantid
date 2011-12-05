@@ -80,6 +80,9 @@ namespace MDAlgorithms
       ConvFromTOF  //  units are the TOF 
   };
 //
+  template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+  struct coord_transformer;
+  
   class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
   public:
