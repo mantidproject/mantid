@@ -11,7 +11,7 @@ memory use, building time, and dense histogram binning times.
 from pylab import *
 import os
 import sys
-sys.path.append(os.getenv("HOME") + "/Code/Mantid/Code/dbg/bin")
+sys.path.append(os.getenv("HOME") + "/Code/Mantid/Code/rel/bin")
 from MantidFramework import mtd
 mtd.initialise()
 from mantidsimple import *
