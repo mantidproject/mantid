@@ -23,6 +23,7 @@ Another way to use this algorithm is to use [[CreatePeaksWorkspace]] to create a
 Use python or the GUI to enter the desired HKLs. If these are fraction (e.g. magnetic peaks) then make sure RoundHKL=False.
 
 *WIKI*/
+
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
