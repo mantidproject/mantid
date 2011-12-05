@@ -56,7 +56,8 @@ namespace MDAlgorithms
   // signature for a fucntion, creating n-dimension workspace
   //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
   typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, size_t ,size_t ,size_t )> pWSCreator;
-
+  // vectors of strings are here everywhere
+  typedef  std::vector<std::string> Strings;
   // known sates for algorithms, caluclating Q-values
   enum Q_state{
        NoQ,
@@ -73,8 +74,10 @@ namespace MDAlgorithms
   // enum describes if there is need to convert workspace units
   enum CnvrtUnits
   {
-      ConvertNo,  // no, input workspace has the same units as output workspace
-      ConvertYes // yes, the input workspace has different units from the requested and the conversion is possible
+      ConvertNo,   // no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
+      ConvertFast, // the input workspace has different units from the requested and fast conversion is possible
+      ConvByTOF,   // conversion possible via TOF
+      ConvFromTOF  //  units are the TOF 
   };
 //
   class DLLExport ConvertToMDEvents  : public API::Algorithm
@@ -121,19 +124,26 @@ namespace MDAlgorithms
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
     // the names for the target workspace dimensions and properties of input MD workspace
-    std::vector<std::string> dim_names;
+    std::vector<std::string> targ_dim_names;
     // the units of target workspace dimensions and properties of input MD workspace dimensions
-    std::vector<std::string> dim_units;
+    std::vector<std::string> targ_dim_units;
   protected: //for testing
-   /** function returns the list of names, which can be treated as dimensions present in current matrix workspace */
-   std::vector<std::string > getDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string>& ws_dim_names, std::vector<std::string> &ws_units)const;
-   /** The function to identify the target dimensions and target uints which can be obtained from workspace dimensions   */
-   void getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &ws_dimensions,std::vector<std::string> &ws_units)const;
-   
-   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS matrix as function of the input artuments and WS format */
+   /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
+  void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const;
+     
+   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS matrix as function of the input artuments and the WS format */
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                 std::vector<std::string> &out_dim_names);
+                                 std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units);
 
+   // Parts of the identifyMatrixAlg, separated for unit testing:
+   std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
+   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names, 
+                                 Strings &out_dim_units, int &ndE_dims,std::string &natural_units);
+   std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_names,const Strings &ws_dim_units);
+
+   /** identifies conversion subalgorithm to run on a workspace */
+   std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
+                              const std::vector<std::string> &other_dim_names,std::vector<std::string> &targ_dim_names,std::vector<std::string> &targ_dim_units);
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates */
    void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
@@ -170,21 +180,19 @@ namespace MDAlgorithms
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
 
-    // known momentum analysis modes;
+    // known momentum analysis modes ID-s;
     std::vector<std::string> Q_modes;
-    // known energy transfer modes
+    // known energy transfer modes ID-s
     std::vector<std::string> dE_modes;
-    // conversion modes
-    std::vector<std::string> Conv;
-    // the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
-    std::string  native_elastic_unitID;
-    // the list of known elastic units.
-    std::vector<std::string> known_elastic_units;
+    // known conversion modes ID-s
+    std::vector<std::string> ConvModes;
 
+    // the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
+    std::string  native_elastic_unitID_Cryst;
+    std::string  native_elastic_unitID_Powder;
     // the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
     std::string  native_inelastic_unitID;
-    // the list of known inelastic units.
-    std::vector<std::string> known_inelastic_units;
+ 
 
 
 

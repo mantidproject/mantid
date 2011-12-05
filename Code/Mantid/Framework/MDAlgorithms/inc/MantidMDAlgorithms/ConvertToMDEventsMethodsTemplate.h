@@ -93,7 +93,7 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->dim_names[d], this->dim_names[d], this->dim_units[d], dim_min[d], dim_min[d], 10);
+        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], dim_min[d], dim_min[d], 10);
         ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
       }
       ws->initialize();
@@ -247,7 +247,7 @@ inline double k_trans<Indir>(double Ei, double E_tr){
      return (coord_t)(0.5*(X1+X2));
  }
  template<>
- inline coord_t get_x_converted<ConvertYes>(double X1,double X2,const double factor,const double power)
+ inline coord_t get_x_converted<ConvertFast>(double X1,double X2,const double factor,const double power)
  {
      double Xm=0.5*(X1+X2);
      return Xm=(coord_t)(factor*std::pow(Xm,power));
@@ -286,7 +286,7 @@ struct coord_transformer<Q3D,MODE,CONV>
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // 
         rotMat = pHost->get_transf_matrix();
-        if(CONV==ConvertYes){
+        if(CONV==ConvertFast){
               const Kernel::Unit_sptr pThisUnit=pHost->inWS2D->getAxis(0)->unit();
                prepare_conversion<MODE>(pThisUnit.get(),factor,power);
         }

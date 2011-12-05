@@ -5,28 +5,30 @@
     Intended to cover wide range of cases; 
 
 *WIKI*/
+
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
-
 #include "MantidKernel/PhysicalConstants.h"
-
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ProgressText.h"
-#include "MantidAPI/Progress.h"
-
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/UnitFactory.h"
+//
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceValidators.h"
+//
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
+//
+#include "MantidDataObjects/Workspace2D.h"
+//
 #include "MantidMDAlgorithms/ConvertToMDEventsMethodsTemplate.h"
 
 #include <algorithm>
@@ -62,7 +64,6 @@ void ConvertToMDEvents::initDocs()
     this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
 }
 
-    
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
@@ -215,24 +216,20 @@ void ConvertToMDEvents::exec(){
     }
     // string -Key to identify the algorithm
     std::string algo_id;
-    std::vector<std::string> ws_dim_names,ws_dim_units;
+  
 
     // if new workspace is created, its properties are determened by the user's input
     if (create_new_ws){
-        // what dimension names can be obtained from the input workspace
-        std::vector<std::string> dim_names_availible = this->getDimensionNames(inWS2D,ws_dim_names,ws_dim_units);
-
-        // get dim_names requested by user:
-        std::vector<std::string> dim_requested;
-        //a) by Q selector:
+        // what dimension names requested by the user by:
+       //a) Q selector:
         std::string Q_mod_req                    = getProperty("QDimensions");  
         //b) the energy exchange mode
         std::string dE_mod_req                   = getProperty("dEAnalysisMode");
-        //c) by other dim property;
+        //c) other dim property;
         std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
 
         // Identify the algorithm to deploy and identify/set the dimension names to use
-//        algo_id = identifyTheAlg(dim_names_availible,ws_dim_names,ws_dim_units,Q_mod_req,dE_mod_req,other_dim_names,n_activated_dimensions);
+        algo_id = identifyTheAlg(inWS2D,Q_mod_req,dE_mod_req,other_dim_names,targ_dim_names,targ_dim_units);
 
         // set the min and max values for the dimensions from the input porperties
         dim_min = getProperty("MinValues");
@@ -278,279 +275,297 @@ void ConvertToMDEvents::exec(){
     return;
    
 }
- 
-std::string 
-ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                     std::vector<std::string> &out_dim_names)
-{
-    // dimension names present in input workspace
-    std::vector<std::string> ws_dim_names;
-    // units IS-s the input workspace dimensions have
-    std::vector<std::string> ws_dim_units;
-    std::string the_WSalgID;   
-    getDimensionNamesFromWSMatrix(inMatrixWS,ws_dim_names,ws_dim_units);
-
-    std::string Q_MODE_ID("Unknown");
-    std::string DE_MODE_ID("Unknown");
-
-    int nQ_dims(0),ndE_dims(0);
-   
-    // Q_mode (one of 3 possible)  
-    if(Q_mode_req.compare(Q_modes[NoQ])==0)
-    { 
-        nQ_dims      = int(ws_dim_names.size());
-        Q_MODE_ID    = Q_modes[NoQ];
-        out_dim_names= ws_dim_names;
-
-    }
-    if(Q_mode_req.compare(Q_modes[modQ])==0) // At the moment we assume that |Q| make sense for inelastic only,      
-    {  // so the only one variable is availible form the workspace. 
-        nQ_dims=1;      
-        out_dim_names.resize(1);
-        out_dim_names[0]="|Q|";
-        Q_MODE_ID = Q_modes[modQ];
-    }
-    if((Q_mode_req.compare(Q_modes[Q3D])==0))
-    {
-       nQ_dims=3;
-       out_dim_names.resize(3);
-       out_dim_names[0]="Q_h";
-       out_dim_names[1]="Q_k";
-       out_dim_names[2]="Q_l";
-       Q_MODE_ID = Q_modes[Q3D];
-
-    }
-
-    DE_MODE_ID= dE_mode_req;
-    // no_Q mode can only compartible with no_dE mode
-    if((Q_MODE_ID.compare(Q_modes[NoQ])==0)){
-        DE_MODE_ID = dE_modes[ANY_Mode];
-    }
-    // inelastic modes have one additional dimension and need special units on X-axis
-    if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
-        ndE_dims = 1;
 
 
-        if(is_member(known_inelastic_units,ws_dim_units[0])<0){
-            convert_log.error()<<" inelastic conversion request X-axis to be expressed in energy transfer-related units\n";
-            throw(std::invalid_argument("inelastic conversion request X-axis in energy-transfer related units"));
-        }
-        out_dim_names.push_back(ws_dim_units[0]);
-    }else{
-        ndE_dims = 0;
-    }
-    // elastic mode needs special units along on X-axis
-    if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
-        if(is_member(known_elastic_units,ws_dim_units[0])<0)
-        {
-            convert_log.error()<<" Elastic conversion request X-axis to be expressed in energy(TOF) related units\n";
-            throw(std::invalid_argument("Elastic conversion request X-axis in energy-transfer related units"));
-        }
-
-    }
-    the_WSalgID = Q_MODE_ID+DE_MODE_ID;
-
-    return the_WSalgID;
-
-}
-/** function processes the input arguments and tries to establish what algorithm should be deployed; 
-    *
-    * @param dim_names_availible -- array of the names of the dimension (includeing default dimensiton) which can be obtained from input workspace
-    * @param ws_dim_names
-    * @param ws_dim_units
-
-    * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
-    * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-    * @param dim_requested  -- vector of other dimension names requested by the algorithm
-    *
-    * @return the_algID       -- the string, identifying one of the known algorithms; if unknown, should fail. 
-    * @initiates:             -- dim_names and dim_units of the target workspace;
-*/
-//std::string 
-//ConvertToMDEvents::identifyTheAlg(const std::vector<std::string> &dim_names_availible,const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
-//                                  const std::string &Q_mode_req, const std::string &dE_mode_req,std::vector<std::string> &dim_requested,size_t &nDims)
-//{
-//    std::string the_algID;
-//    std::vector<std::string> Q_Dim_names;
-//
-//    int nQ_dims(0),ndE_dims(0),nAdd_dims(0);
-//
-//    nDims = 0;
-//    // verify if everything requested is availible in logs:
-//    for(size_t i=0;i<dim_requested.size();i++){
-//        if(std::find(dim_names_availible.begin(),dim_names_availible.end(),dim_requested[i])==dim_names_availible.end()){
-//            g_log.error()<<" The dimension: "<<dim_requested[i]<<" requested but can not be found in the list of availible parameters & data\n";
-//            throw(std::invalid_argument(" the data for availible dimension are not among the input data"));
-//        }
-//    }
-//    // Q_mode (one of 3 possible)  
-//    if(Q_mode_req.compare(Q_modes[NoQ]))
-//    { 
-//        nQ_dims=0;
-//        Q_mode=knownQ_modes[NoQ];
-//    }
-//    if(Q_mode_req.compare(knownQ_modes[modQ])==0)
-//    {
-//        nQ_dims=1;
-//        Q_mode=knownQ_modes[modQ];
-//        Q_Dim_names.resize(1);
-//        Q_Dim_names[0]="|Q|";
-//    }
-//    if((Q_mode_req.compare("QxQyQz")==0))
-//    {
-//       nQ_dims=3;
-//       Q_mode=knownQ_modes[Q3D];
-//       Q_Dim_names.resize(3);
-//       Q_Dim_names[0]="Q_h";
-//       Q_Dim_names[1]="Q_k";
-//       Q_Dim_names[2]="Q_l";
-//
-//    }
-//
-//    if(dE_mode_req.
-//
-//   // Elastic/inelastic -- should introduce additional switch;
-//    nAdd_dims=(int)dim_requested.size();
-//    if(std::find(dim_requested.begin(),dim_requested.end(),"DeltaE")!=dim_requested.end()){
-//        ndE_dims   =1;
-//        nAdd_dims -=1;
-//        dE_mode   ="dE";
-//        Q_Dim_names.resize(Q_Dim_names.size()+1);
-//        Q_Dim_names[Q_Dim_names.size()-1]="DeltaE";
-//    }else{
-//        ndE_dims   =0;
-//        dE_mode   ="";
-//    }
-//    std::vector<std::string> Add_dims(nAdd_dims);
-//    //ND mode;
-//    if(nAdd_dims>0){
-//        ND_mode = "ND";
-//        if(!dE_mode.empty()){    // copy all dimensions names except DeltaE;
-//            size_t ic(0);
-//            for(size_t i=0;i<dim_requested.size();i++){
-//                if(dim_requested[i]!="DeltaE"){
-//                    Add_dims[ic]=dim_requested[i];
-//                    ic++;
-//                }
-//            }
-//        }else{ //   // copy all dimensions names 
-//            Add_dims.assign(dim_requested.begin(),dim_requested.end());
-//        }
-//    }else{
-//        ND_mode = "";
-//    }
-//
-// 
-//    nDims      = nQ_dims+ndE_dims+nAdd_dims;
-//    if(nDims<2||nQ_dims<0||ndE_dims<0||nAdd_dims<0){
-//        g_log.error()<<" Requested: "<<nQ_dims<<" Q-dimensions, "<<ndE_dims<<" dE dimesions and "<<nAdd_dims<<" additional dimesnions not supported\n";
-//        throw(std::invalid_argument("wrong or unsupported number of dimensions"));
-//    }
-//    the_algID  = Q_mode+dE_mode+ND_mode+boost::lexical_cast<std::string>(nDims);
-//
-//    if(the_algID.find("Unknown")!=std::string::npos){
-//        g_log.error()<<" Algorithm with ID: "<<the_algID<<" do not recognized\n";
-//        throw(std::invalid_argument("wrong or unsupported algorithm ID"));
-//    }
-//    // put Q-dimension names to target dimensions
-//    this->dim_names.assign(Q_Dim_names.begin(),Q_Dim_names.end());
-//    std::vector<std::string>::const_iterator it=Add_dims.begin();
-//    // push Add-dimension names to target dimensions
-//    for(;it!=Add_dims.end();it++){   dim_names.push_back(*it);
-//    }
-//    //TODO: make dim units equal to the dimension names (For the time being?)
-//    this->dim_units.assign(this->dim_names.begin(),this->dim_names.end());
-//
-//    return the_algID;
-//
-//}
-
-/** The function to identify the target dimensions and target uints which can be obtained from workspace dimensions 
-  *
+/**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
   *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.
   *  If additional algorithms can be generated through algorithm template, this function shluld be modified accordingly
   *
   * @param inMatrixWS -- const pointer to const matrix workspace, which provides information about availible axis
   *
-  * @returns ws_dim_names -- the vector of string, with each string identify the dimensios, can be produced by some algorithm
-  * @returns ws_units     -- the units present in the input workspace 
- */
-void
-ConvertToMDEvents::getDimensionNamesFromWSMatrix(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &ws_dim_names,std::vector<std::string> &ws_units)const
-{      
+  * @returns out_dim_names -- the vector of strings, with each string identify the dimensions names, derived from current workspace by the algorithm
+*/
+std::string 
+ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
+                                     std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units)
+{
 
-      ws_dim_names.clear();
-      ws_units.clear();
+    // dimension names present in input workspace
+    std::vector<std::string> ws_dim_names;
+    // units IS-s the input workspace dimensions have
+    std::vector<std::string> ws_dim_units;
 
-    // get the X axis of input workspace, it has to be there; if not axis throws invalid index
-       API::NumericAxis *pXAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(0));
-       if(!pXAxis ){
-            convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inMatrixWS->getName()<<std::endl;
-            throw(std::invalid_argument("Input workspace has to have X-axis"));
-       }
+    // Describes the units (different for different dE mode), which the selected sub algorihm expects to work with. 
+    // If other units have been identified in input workspace, those have to be converted into 
+    std::string natural_units;
 
-       std::string Dim1Unit   = pXAxis->unit()->unitID();
-       if(Dim1Unit.compare("Empty")==0){
-           ws_units.push_back(""); //?
-       }else{
-            ws_units.push_back(Dim1Unit);
-       }
-      //  |Q| and QxQyQz availible if Dim1 is DeltaE;
-       if(Dim1Unit.compare("DeltaE")==0){ // this will probably invoke inelastic algorithms 
-            ws_dim_names.push_back("|Q|");
-            ws_dim_names.push_back("QxQyQz");
-            // and DelteE can be a dimension       
-            ws_dim_names.push_back("DeltaE");
-       }else if(Dim1Unit.compare("Energy")==0){  // this will probably invoke elastic 
-            ws_dim_names.push_back("|Q|");
-            ws_dim_names.push_back("QxQyQz");
-            // and energy can be dimension ? not sure about this. 
-            ws_dim_names.push_back("Energy");
-       }else{  // we can only use what is along the workspace axis name
-           ws_dim_names.push_back(pXAxis->title());
-       }
+    // result: AlgorithmID 
+    std::string the_WSalgID;   
+ 
+   // get the X axis of input workspace, it has to be there; if not axis throws invalid index
+    API::NumericAxis *pXAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(0));
+    if(!pXAxis ){
+        convert_log.error()<<"Can not retrieve X axis from the source workspace: "<<inMatrixWS->getName()<<std::endl;
+        throw(std::invalid_argument("Input workspace has to have X-axis"));
+    }else{
+        std::string Dim1Unit   = pXAxis->unit()->unitID();
+        ws_dim_names.push_back(pXAxis->title());
+        ws_dim_units.push_back(Dim1Unit);
+    }
+    // get optional Y axis which can be used in NoQ-kind of algorithms
+    API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
+    if(pYAxis){
+        std::string Dim2Unit = pYAxis->unit()->unitID();
+        ws_dim_names.push_back(pYAxis->title());
+        ws_dim_units.push_back(Dim2Unit);
+    }          
 
-       // Detector's ID is the usual variable along  Y-axis, but if anything else is there, this can be additional dimension;
-       API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
-       if(pYAxis){
-           std::string Dim2Unit = pYAxis->unit()->unitID();
-           ws_dim_names.push_back(pYAxis->title());
-           ws_units.push_back(Dim2Unit);
-       }
-    
+
+    std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID;
+    int nQ_dims(0),ndE_dims(0);
+
+    // identify Q_mode
+    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);
+    // identify dE mode    
+    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
+    // identify conversion mode;
+    CONV_MODE_ID=parseConvMode(Q_MODE_ID,natural_units,ws_dim_names,ws_dim_units);
+
+    the_WSalgID = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
+
+    return the_WSalgID;
+
 }
-/** function returns the list of names, which can be treated as dimensions present in current matrix workspace 
- * These dimensions consist of two components: The first one comes from workspace axis and the second one -- from workspace properties. 
+/** Identify the Unit conversion mode, deployed by the subalgorith 
+  * 
+  *@param Q_MODE_ID     -- the momentum conversion mode. Unit conversion depends on it
+  *@param natural_units -- units, expected by the subalgorithm from input workspace. All other untis have to be transformed into these. 
+  *@param ws_dim_names  -- vector of input workspace dimensions names 
+  *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
+*/
+std::string
+ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_names,const Strings &ws_dim_units)
+{
+    std::string CONV_MODE_ID("Unknown");
+    // IDENTIFY UNITS CONVERSION MODE
+    // get all known units:
+    Strings AllKnownUnits= Kernel::UnitFactory::Instance().getKeys();
+    // check if unit conversion is possible at all:
+    if(Q_MODE_ID.compare(Q_modes[NoQ])!=0){
+        if(is_member(AllKnownUnits,ws_dim_units[0])<0){
+            convert_log.error() <<" Unknown unit"<<ws_dim_units[0]<<" along X-axis provided for conversion\n";
+            throw(std::invalid_argument("ConvertToMDEvents needs to known units conversion"));
+        }  
+    }
+    // are the existing units already what is needed, so no conversion?    
+    if(ws_dim_units[0].compare(natural_units)==0){
+        CONV_MODE_ID = ConvModes[ConvertNo];
+    }else{
+        // is a quick conversion availible?
+        double factor,power;
+        const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create(ws_dim_units[0]);
+        if(pThisUnit->quickConversion(natural_units,factor,power)){
+            CONV_MODE_ID = ConvModes[ConvertFast];
+        }else{
+            if(ws_dim_units[0].compare("TOF")==0){ // may be it is TOF?
+                CONV_MODE_ID = ConvModes[ConvFromTOF];
+            }else{                                 // convert via TOF
+                CONV_MODE_ID = ConvModes[ConvByTOF];
+            }
+        }
+    } 
+
+    return CONV_MODE_ID;
+}
+
+/** Identify the Energy conversion mode requested by user 
+  * 
+  *@param Q_MODE_ID     -- the momentum conversion mode. Energy conversion depends on it
+  *@param dE_mode_req   -- What conversion algorithm user wants to deploy (direct/indirect elastic)
+  *@param ws_dim_names  -- vector of input workspace dimensions names 
+  *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
+  *
+  *@returns out_dim_names -- vector of names for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  *@returns out_dim_units -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  *@returns ndE_dims      -- number of additional dimensions, if inelastic, it would be one dimension more.
+  *@returns natural_units -- name of the units, the algorithm expects to work with. 
+*/
+std::string 
+ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, 
+                               int &ndE_dims,std::string &natural_units)
+{
+    std::string DE_MODE_ID= dE_mode_req;
+    // no_Q mode can only be compartible with no_dE mode
+    if((Q_MODE_ID.compare(Q_modes[NoQ])==0)){
+        DE_MODE_ID = dE_modes[ANY_Mode];
+      // no-Q mode -- no conversion, so natural units are the one, already used by the workspace
+        natural_units=ws_dim_units[0];
+    }
+    // inelastic modes have one additional dimension and need special units on X-axis
+    if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
+        ndE_dims = 1;
+        out_dim_names.push_back("DeltaE");
+        out_dim_units.push_back("DeltaE");
+        // natural units defined in subalgorithm doing the conversion and their ID has to be defined correctly in class constructor
+        natural_units = native_inelastic_unitID;
+    }else{
+        ndE_dims = 0;
+    }
+
+    if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
+        natural_units = native_elastic_unitID_Cryst;
+        if (Q_MODE_ID.compare(Q_modes[modQ])==0){
+            natural_units = native_elastic_unitID_Powder;
+        }
+
+    }
+    return DE_MODE_ID;
+
+}
+/** Identify the Momentud conversion mode requested by user
+  * 
+  *@param Q_mode_req    -- What conversion algorithm user wants to deploy (Q3d, modQ, no Q)
+  *@param ws_dim_names  -- vector of input workspace dimensions names 
+  *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
+  *
+  *@returns out_dim_names -- vector of dimension names for momentuns in target workspace 
+  *@returns out_dim_units -- vector of units for target workspace
+  *@returns nQ_dims       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied. 
+*/
+std::string 
+ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQ_dims)
+{
+     std::string Q_MODE_ID("Unknown");
+    // Q_mode (one of 3 possible)  
+    if(Q_mode_req.compare(Q_modes[NoQ])==0)
+    { 
+        nQ_dims      = int(ws_dim_names.size());
+        Q_MODE_ID    = Q_modes[NoQ];
+        out_dim_names= ws_dim_names;
+        out_dim_units= ws_dim_units;
+    }
+    if(Q_mode_req.compare(Q_modes[modQ])==0) // At the moment we assume that |Q| make sense for inelastic only,      
+    {  // so the only one variable is availible form the workspace. 
+        nQ_dims=1;      
+        out_dim_names.resize(1);
+        out_dim_units.resize(1);
+        out_dim_names[0] = "|Q|";
+        out_dim_units[0] = native_elastic_unitID_Powder;
+        Q_MODE_ID = Q_modes[modQ];
+
+    }
+    if((Q_mode_req.compare(Q_modes[Q3D])==0))
+    {
+       nQ_dims=3;
+       out_dim_names.resize(3);       
+       out_dim_names[0]="Q_h";
+       out_dim_names[1]="Q_k";
+       out_dim_names[2]="Q_l";
+       Q_MODE_ID = Q_modes[Q3D];
+       out_dim_units.assign(3,native_elastic_unitID_Cryst);
+
+    }
+    return Q_MODE_ID;
+}
+
+
+
+/** function processes the input arguments and tries to establish what algorithm should be deployed; 
+    *
+    * @param inWS2D         -- input 2D workspace
+    * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
+    * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
+    * @param dim_requested  -- vector of other dimension names requested by the algorithm
+    *
+    * @return the_algID             -- the string, identifying one of the known algorithms; if unknown, should fail. 
+    * @return: dim_names_requested  -- dimension names for the target workspace
+    * @return: dim_uinits_requested -- dimension units for the target workspace
+*/
+std::string 
+ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const std::string &Q_mode_req, 
+                                 const std::string &dE_mode_req,const std::vector<std::string> &other_dim_names,
+                                 std::vector<std::string> &dim_names_requested,std::vector<std::string> &dim_units_requested)
+{
+
+   std::vector<std::string> ws_dim_names,ws_dim_units;
+   std::string the_algID;
+
+   // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
+   the_algID = identifyMatrixAlg(inWS2D, Q_mode_req, dE_mode_req,ws_dim_names,ws_dim_units);
+   if(the_algID.find("Unknown")!=std::string::npos){
+       convert_log.error()<<" Input parameters indentify uncomplete algorithm ID: "<<the_algID<<std::endl;
+       throw(std::logic_error("can not parse input parameters propertly"));
+   }
+
+   // retrieve additional dimension names and dimension units, which can be derived from the workspace properties;
+   std::vector<std::string> all_add_dim_names,all_add_dim_units;
+   this->getAddDimensionNames(inWS2D,all_add_dim_names,all_add_dim_units);
+
+   // check if additional dimension names can satisfy the user requests:
+   std::vector<std::string> add_dim_names,add_dim_units;
+   for(size_t i=0;i<other_dim_names.size();i++){
+       int n_dim=is_member(all_add_dim_names,other_dim_names[i]);
+       if(n_dim<0){
+           convert_log.error()<<" Dimension :"<<other_dim_names[i]<<" requested but can not be derived from the input workspace\n";
+           throw(std::invalid_argument(" Undefined dimension"));
+       }
+       add_dim_names.push_back(all_add_dim_names[n_dim]);
+       add_dim_units.push_back(all_add_dim_units[n_dim]);
+   }
+   // assign output:
+
+   dim_names_requested = ws_dim_names;
+   dim_units_requested = ws_dim_units;
+   // add additional dimensions (from properties)
+   dim_names_requested.insert(dim_names_requested.end(),add_dim_names.begin(),add_dim_names.end());
+   dim_units_requested.insert(dim_units_requested.end(),add_dim_units.begin(),add_dim_units.end());
+
+   size_t nDims      = dim_names_requested.size();
+
+   // Sanity checks:
+    if(nDims<3&&(the_algID.find(Q_modes[Q3D])!=std::string::npos)){
+        g_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
+        throw(std::logic_error("can not parse input parameters propertly"));
+    }
+    if(nDims>8){
+        g_log.error()<<"Can not currently produce more then 8 dimesnions, requested: "<<nDims<<std::endl;
+        throw(std::invalid_argument(" Too many dimensions requested "));
+    }
+    //TODO: temporary, we will redefine the algorithm ID not do depend on dimension number in a future
+    the_algID  = the_algID+boost::lexical_cast<std::string>(nDims);
+
+    return the_algID;
+
+}
+
+/** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace 
  *
- * An algorithm takes the workspase data with its dimensions, transforms these into another set of connected dimensions (depending on algorithm) 
- * (e.g. inelastic takes detector positions and energy transfer and transformm this into 4 coordinates namely 3-momentums and energy transfer)
- * and usually adds data, containing in properties as orthogonal dimensions
  * @param inMatrixWS -- shared pointer to input workspace for analysis
  * 
- * @returns ws_dim_names -- the ID-s for the dimension names, which can be obtained from the workspace
- * @returns ws_units     -- the units for the current workspace dimensions
+ * @returns add_dim_names -- the ID-s for the dimension names, which can be obtained from the workspace
+ * @returns add_dim_unit  -- the Units ID-s (if any) existing dimensions
 */
-std::vector<std::string > 
-ConvertToMDEvents::getDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string>& ws_dim_names, std::vector<std::string> &ws_units)const{
-    // get properties, which can be derived from workspace
-    // e.g  Q3D, |Q| and something along workspace axis ;
-    std::vector<std::string> prop_names;
-    getDimensionNamesFromWSMatrix(inMatrixWS,ws_dim_names,ws_units);
-    prop_names = ws_dim_names;
-
+void
+ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const
+{   
     // get dimension names from properties
     // TODO: this should be only special processed properties, not all of them, as it is at the moment
     const std::vector< Kernel::Property * > run_properties =  inMatrixWS->run().getProperties();  
 
-    size_t n_ws_properties = prop_names.size();
-    prop_names.resize(n_ws_properties+run_properties.size());    
+    add_dim_names.resize(run_properties.size());    
+    add_dim_units.resize(run_properties.size());
 
     // extract names for all properties, which can be treated as dimension names;
     for(size_t i=0;i<run_properties.size();i++){
-        prop_names[n_ws_properties+i]=run_properties[i]->name();
+        add_dim_names[i]=run_properties[i]->name();
+        std::string UnitID = run_properties[i]->units();
+        if(UnitID.empty()||(UnitID.compare("Empty")==0)){ // it is questionable if we want to have unit ID equal to the dimension name and not empty
+            UnitID =add_dim_names[i];
+        }
+        add_dim_units[i]=UnitID;
     }
-    return prop_names;
+
 }
 
 
@@ -587,9 +602,9 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->dim_names[i-n_ws_properties]));  
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->targ_dim_names[i-n_ws_properties]));  
           if(!run_property){
-             g_log.error()<<" property: "<<this->dim_names[i]<<" is not a time series (run) property\n";
+             g_log.error()<<" property: "<<this->targ_dim_names[i]<<" is not a time series (run) property\n";
           }
           Coord[i]=run_property->firstValue();
         }  
@@ -602,9 +617,8 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 //   User specific code for target 2D workspace, processed to obtain modQ
 // }
 //----------------------------------------------------------------------------------------------
-/** Constructor 
- *  needs to pick up all known algorithms. 
-*/
+// AUTOINSTANSIATION OF EXISTING CODE:
+// Templated loop over some templated arguments
 template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
 class LOOP_ND{
   public:
@@ -612,28 +626,37 @@ class LOOP_ND{
             LOOP_ND< i-1 , Q, MODE,CONV>::EXEC(pH);
             std::stringstream num;
             num << "ND" << i;
-            pH->alg_selector.insert(std::pair<std::string,pMethod>("ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->Conv[CONV]+num.str(),
-                                    &ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
+            std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
     }
 };
 template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
 class LOOP_ND<2,Q,MODE,CONV>{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){
+            
             std::stringstream num;
             num << "ND" << 2;
-            pH->alg_selector.insert(std::pair<std::string,pMethod>("ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->Conv[CONV]+num.str(),
+            std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
+#ifdef _DEBUG
+            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+#endif
+
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                                    &ConvertToMDEvents::processQND<2,Q,MODE,CONV>));
     }
 };
-
+/** Constructor 
+ *  needs to pick up all known algorithms. 
+*/
 
 ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(3),
 dE_modes(4),
-Conv(2),
-known_elastic_units(4),
-known_inelastic_units(2)
+ConvModes(4)
 {
      Q_modes[modQ]="|Q|";
      Q_modes[Q3D] ="QxQyQz";    
@@ -642,37 +665,34 @@ known_inelastic_units(2)
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
      dE_modes[Elastic]   = "Elastic";
-     //
-     Conv[ConvertYes]="Conv";
-     Conv[ConvertNo]="NoCnv";
-     // list of know units an invoked elastic algorithm should understand
-     known_elastic_units[0]="TOF";
-     known_elastic_units[1]="Wavelength";
-     known_elastic_units[2]="Energy";
-     known_elastic_units[3]="Energy_inWavenumber";
-     // list of known units an invoked elastic algorithm should understand
-     known_inelastic_units[0]="DeltaE";
-     known_inelastic_units[1]="DeltaE_inWavenumber";
+     // possible unit conversion modes
+     ConvModes[ConvertNo]  ="CnvNo";
+     ConvModes[ConvertFast]="CnvFast";
+     ConvModes[ConvByTOF]  ="CnvByTOF";
+     ConvModes[ConvFromTOF]="CnvFromTOF";
 
-     native_inelastic_unitID="DeltaE";
-     native_elastic_unitID  ="Wavelength";
+     native_inelastic_unitID     ="DeltaE";
+     native_elastic_unitID_Powder="dSpacing";
+     native_elastic_unitID_Cryst ="MomentumTransfer"; // Why it is transfer? Hope it is just a momentum
 
 // NoQ --> any Analysis mode will do as it does not depend on it
     LOOP_ND<8,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
 // MOD Q
+//      ConvByTOF,   // conversion possible via TOF
+//      ConvFromTOF 
     LOOP_ND<8,modQ,Direct,ConvertNo>::EXEC(this);
     LOOP_ND<8,modQ,Indir,ConvertNo>::EXEC(this);
     LOOP_ND<8,modQ,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<8,modQ,Direct,ConvertYes>::EXEC(this);
-    LOOP_ND<8,modQ,Indir,ConvertYes>::EXEC(this);
-    LOOP_ND<8,modQ,Elastic,ConvertYes>::EXEC(this);
+    LOOP_ND<8,modQ,Direct,ConvertFast>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvertFast>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvertFast>::EXEC(this);
 // Q3D
     LOOP_ND<8,Q3D,Direct,ConvertNo>::EXEC(this);
     LOOP_ND<8,Q3D,Indir,ConvertNo>::EXEC(this);
     LOOP_ND<8,Q3D,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<8,Q3D,Direct,ConvertYes>::EXEC(this);
-    LOOP_ND<8,Q3D,Indir,ConvertYes>::EXEC(this);
-    LOOP_ND<8,Q3D,Elastic,ConvertYes>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
 
 
     // Workspaces:
