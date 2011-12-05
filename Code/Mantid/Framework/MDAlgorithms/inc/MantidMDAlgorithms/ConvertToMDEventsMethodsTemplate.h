@@ -188,7 +188,8 @@ struct coord_transformer<NoQ,MODE,CONV>
     }
 
     inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-         Coord[0]    = 0.5*( X[j]+ X[j+1]);
+        UNUSED_ARG(i);
+        Coord[0]    = 0.5*( X[j]+ X[j+1]);
         if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
         return true;
     }
@@ -221,12 +222,13 @@ struct coord_transformer<modQ,MODE,CONV>
           return false;
      }
 
-    coord_transformer(ConvertToMDEvents *pConv) {}
+    coord_transformer(ConvertToMDEvents *) {}
 };
 //------------------------------------------------------------------------------------------------------------------------------
 // Q3D any mode 
 template<AnalMode MODE>
 inline double k_trans(double Ei, double E_tr){
+    UNUSED_ARG(Ei);UNUSED_ARG(E_tr);
     throw(Kernel::Exception::NotImplementedError("Generic K_tr not implemented"));
 }
 template<>
