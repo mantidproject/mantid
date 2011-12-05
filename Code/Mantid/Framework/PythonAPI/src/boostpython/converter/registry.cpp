@@ -9,6 +9,19 @@
 #include <set>
 #include <stdexcept>
 
+/**
+ * Mantid - In order to ensure that the registries of the two
+ * Python interfaces are separate on Linux & Mac we need to
+ * explicitly mark the symbols hidden. This is the default
+ * on Windows so is unnecessary.
+ */
+#if defined(__APPLE__) || defined(__GNUC__)
+  #define DLL_LOCAL __attribute__ ((visibility ("hidden")))
+#else
+  #define DLL_LOCAL
+#endif
+
+
 #if defined(__APPLE__) && defined(__MACH__) && defined(__GNUC__) \
  && __GNUC__ == 3 && __GNUC_MINOR__ <= 4 && !defined(__APPLE_CC__)
 # define BOOST_PYTHON_CONVERTER_REGISTRY_APPLE_MACH_WORKAROUND
@@ -116,7 +129,7 @@ namespace // <unnamed>
   typedef std::set<entry> registry_t;
   
 #ifndef BOOST_PYTHON_CONVERTER_REGISTRY_APPLE_MACH_WORKAROUND
-  registry_t& entries()
+  DLL_LOCAL registry_t& entries()
   {
       static registry_t registry;
 
@@ -159,7 +172,7 @@ namespace // <unnamed>
     return true;
   }
 
-  registry_t& entries()
+  DLL_LOCAL registry_t& entries()
   {
 # ifndef BOOST_PYTHON_SUPPRESS_REGISTRY_INITIALIZATION
       if (!static_builtin_converters_initialized())
