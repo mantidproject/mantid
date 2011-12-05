@@ -18,6 +18,9 @@ namespace Mantid{
   namespace Geometry{
     class IDetector;
   }
+  namespace API{
+    class IPeaksWorkspace;
+  }
 }
 
 class GLColor;
@@ -112,6 +115,7 @@ public:
 
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
   //PeakOverlay& getPeakOverlay(){return m_peakShapes;}
+  void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
 
 signals:
 

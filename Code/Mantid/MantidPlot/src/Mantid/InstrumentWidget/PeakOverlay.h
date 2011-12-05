@@ -56,6 +56,8 @@ public:
   int getNumberPeaks()const;
   Mantid::API::IPeak& getPeak(int);
   PeakMarker2D::Style getNextDefaultStyle()const;
+  /// Return PeaksWorkspace associated with this overlay.
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {return m_peaksWorkspace;}
 
 private:
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map

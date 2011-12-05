@@ -107,6 +107,14 @@ namespace DataObjects
     for (size_t i=0; i < m_noVectors; i++)
       data[i] = new EventList(mru, specid_t(i));
 
+    // Set each X vector to have one bin of 0 & extremely close to zero
+    MantidVecPtr xVals;
+    MantidVec & x = xVals.access();
+    x.resize(2,0.0);
+    // Move the rhs very,very slightly just incase something doesn't like them being the same
+    x[1] = std::numeric_limits<double>::min();
+    this->setAllX(xVals);
+
     //Create axes.
     m_axes.resize(2);
     //I'm not sure what the heck this first axis is supposed to be; copying from Workspace2D

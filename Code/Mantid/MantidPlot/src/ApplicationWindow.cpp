@@ -648,7 +648,8 @@ void ApplicationWindow::initGlobalConstants()
   autoscale2DPlots = true;
   autoScaleFonts = true;
   autoResizeLayers = true;
-  antialiasing2DPlots = false; 	//Mantid
+  antialiasing2DPlots = false; //Mantid
+  fixedAspectRatio2DPlots = false; //Mantid
   d_scale_plots_on_print = false;
   d_print_cropmarks = false;
 
@@ -2768,6 +2769,7 @@ void ApplicationWindow::setPreferences(Graph* g)
   g->setAutoscaleFonts(autoScaleFonts);
   g->setIgnoreResizeEvents(!autoResizeLayers);
   g->setAntialiasing(antialiasing2DPlots);
+  g->enableFixedAspectRatio(fixedAspectRatio2DPlots);
 
 }
 
@@ -3717,29 +3719,34 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 }
 
 void ApplicationWindow::setGraphDefaultSettings(bool autoscale, bool scaleFonts,
-    bool resizeLayers, bool antialiasing)
+    bool resizeLayers, bool antialiasing, bool fixedAspectRatio)
 {
   if (autoscale2DPlots == autoscale &&
       autoScaleFonts == scaleFonts &&
       autoResizeLayers != resizeLayers &&
-      antialiasing2DPlots == antialiasing)
+      antialiasing2DPlots == antialiasing &&
+      fixedAspectRatio2DPlots == fixedAspectRatio)
     return;
 
   autoscale2DPlots = autoscale;
   autoScaleFonts = scaleFonts;
   autoResizeLayers = !resizeLayers;
   antialiasing2DPlots = antialiasing;
+  fixedAspectRatio2DPlots = fixedAspectRatio;
 
   QList<MdiSubWindow *> windows = windowsList();
   foreach(MdiSubWindow *w, windows){
-    if (w->isA("MultiLayer")){
+    if (w->isA("MultiLayer"))
+    {
       QList<Graph *> layers = ((MultiLayer*)w)->layersList();
-      foreach(Graph *g, layers){
+      foreach(Graph *g, layers)
+      {
         g->enableAutoscaling(autoscale2DPlots);
         g->updateScale();
         g->setIgnoreResizeEvents(!autoResizeLayers);
         g->setAutoscaleFonts(autoScaleFonts);
         g->setAntialiasing(antialiasing2DPlots);
+        g->enableFixedAspectRatio(fixedAspectRatio2DPlots);
       }
     }
   }
@@ -4842,6 +4849,7 @@ void ApplicationWindow::readSettings()
   autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
   autoResizeLayers = settings.value("/AutoResizeLayers", true).toBool();
   antialiasing2DPlots = settings.value("/Antialiasing", false).toBool(); //Mantid
+  fixedAspectRatio2DPlots = settings.value("/FixedAspectRatio2DPlots", false).toBool(); //Mantid
   d_scale_plots_on_print = settings.value("/ScaleLayersOnPrint", false).toBool();
   d_print_cropmarks = settings.value("/PrintCropmarks", false).toBool();
 
@@ -5180,6 +5188,8 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/AutoScaleFonts", autoScaleFonts);
   settings.setValue("/AutoResizeLayers", autoResizeLayers);
   settings.setValue("/Antialiasing", antialiasing2DPlots);
+  settings.setValue("/FixedAspectRatio2DPlots", fixedAspectRatio2DPlots);
+
   settings.setValue("/ScaleLayersOnPrint", d_scale_plots_on_print);
   settings.setValue("/PrintCropmarks", d_print_cropmarks);
 

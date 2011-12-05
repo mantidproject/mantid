@@ -249,7 +249,6 @@ namespace DataObjects
 
 	// --- Nexus Methods ---
     // Save to Nexus
-    void PeaksWorkspace::saveNexus(::NeXus::File * file ) const;
 
 
   };

@@ -1227,66 +1227,73 @@ void ConfigDialog::initCurveFittingTab()
 
 void ConfigDialog::initOptionsPage()
 {
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+  ApplicationWindow *app = (ApplicationWindow *)parentWidget();
 
   plotOptions = new QWidget();
 
-	QVBoxLayout * optionsTabLayout = new QVBoxLayout( plotOptions );
-	optionsTabLayout->setSpacing(5);
+  QVBoxLayout * optionsTabLayout = new QVBoxLayout( plotOptions );
+  optionsTabLayout->setSpacing(5);
 
-	QGroupBox * groupBoxOptions = new QGroupBox();
-	optionsTabLayout->addWidget( groupBoxOptions );
+  QGroupBox * groupBoxOptions = new QGroupBox();
+  optionsTabLayout->addWidget( groupBoxOptions );
 
-	QGridLayout * optionsLayout = new QGridLayout( groupBoxOptions );
+  QGridLayout * optionsLayout = new QGridLayout( groupBoxOptions );
 
-	boxAutoscaling = new QCheckBox();
-	boxAutoscaling->setChecked(app->autoscale2DPlots);
-	optionsLayout->addWidget( boxAutoscaling, 0, 0 );
+  boxAutoscaling = new QCheckBox();
+  boxAutoscaling->setChecked(app->autoscale2DPlots);
+  optionsLayout->addWidget( boxAutoscaling, 0, 0 );
 
-	boxScaleFonts = new QCheckBox();
-	boxScaleFonts->setChecked(app->autoScaleFonts);
-	optionsLayout->addWidget( boxScaleFonts, 0, 1 );
+  boxScaleFonts = new QCheckBox();
+  boxScaleFonts->setChecked(app->autoScaleFonts);
+  optionsLayout->addWidget( boxScaleFonts, 0, 1 );
 
-	boxTitle = new QCheckBox();
-	boxTitle->setChecked(app->titleOn);
-	optionsLayout->addWidget( boxTitle, 1, 0 );
+  boxTitle = new QCheckBox();
+  boxTitle->setChecked(app->titleOn);
+  optionsLayout->addWidget( boxTitle, 1, 0 );
 
-	boxAntialiasing = new QCheckBox();
-	boxAntialiasing->setChecked(app->antialiasing2DPlots);
-	optionsLayout->addWidget( boxAntialiasing, 1, 1 );
+  boxAntialiasing = new QCheckBox();
+  boxAntialiasing->setChecked(app->antialiasing2DPlots);
+  optionsLayout->addWidget( boxAntialiasing, 1, 1 );
 
-	boxFrame = new QCheckBox();
-	boxFrame->setChecked(app->canvasFrameWidth > 0);
-	optionsLayout->addWidget( boxFrame, 2, 0 );
+  boxAspectRatio  = new QCheckBox();
+  boxAspectRatio->setChecked(app->fixedAspectRatio2DPlots);
+  optionsLayout->addWidget( boxAspectRatio, 2, 1);
+  #if QWT_VERSION < 0x050200
+    boxAspectRatio->setChecked(false);
+    boxAspectRatio->setVisible(true);
+  #endif
+  boxFrame = new QCheckBox();
+  boxFrame->setChecked(app->canvasFrameWidth > 0);
+  optionsLayout->addWidget( boxFrame, 2, 0 );
 
-	labelFrameWidth = new QLabel();
-	optionsLayout->addWidget( labelFrameWidth, 3, 0 );
-	boxFrameWidth= new QSpinBox();
-	optionsLayout->addWidget( boxFrameWidth, 3, 1 );
-	boxFrameWidth->setRange(1, 100);
-	boxFrameWidth->setValue(app->canvasFrameWidth);
-	if (!app->canvasFrameWidth)
-	{
-		labelFrameWidth->hide();
-		boxFrameWidth->hide();
-	}
+  labelFrameWidth = new QLabel();
+  optionsLayout->addWidget( labelFrameWidth, 3, 0 );
+  boxFrameWidth= new QSpinBox();
+  optionsLayout->addWidget( boxFrameWidth, 3, 1 );
+  boxFrameWidth->setRange(1, 100);
+  boxFrameWidth->setValue(app->canvasFrameWidth);
+  if (!app->canvasFrameWidth)
+  {
+    labelFrameWidth->hide();
+    boxFrameWidth->hide();
+  }
 
-	lblMargin = new QLabel();
-	optionsLayout->addWidget( lblMargin, 4, 0 );
-	boxMargin= new QSpinBox();
-	boxMargin->setRange(0, 1000);
-	boxMargin->setSingleStep(5);
-	boxMargin->setValue(app->defaultPlotMargin);
-	optionsLayout->addWidget( boxMargin, 4, 1 );
+  lblMargin = new QLabel();
+  optionsLayout->addWidget( lblMargin, 4, 0 );
+  boxMargin= new QSpinBox();
+  boxMargin->setRange(0, 1000);
+  boxMargin->setSingleStep(5);
+  boxMargin->setValue(app->defaultPlotMargin);
+  optionsLayout->addWidget( boxMargin, 4, 1 );
 
-	optionsLayout->setRowStretch( 7, 1 );
+  optionsLayout->setRowStretch( 7, 1 );
 
-	boxResize = new QCheckBox();
-	boxResize->setChecked(!app->autoResizeLayers);
-	if(boxResize->isChecked())
-		boxScaleFonts->setEnabled(false);
+  boxResize = new QCheckBox();
+  boxResize->setChecked(!app->autoResizeLayers);
+  if(boxResize->isChecked())
+    boxScaleFonts->setEnabled(false);
 
-	optionsTabLayout->addWidget( boxResize );
+  optionsTabLayout->addWidget( boxResize );
 
   boxLabelsEditing = new QCheckBox();
   boxLabelsEditing->setChecked(!app->d_in_place_editing);
@@ -1659,6 +1666,7 @@ void ConfigDialog::languageChange()
 	boxScaleFonts->setText(tr("Scale &Fonts"));
 	boxAutoscaling->setText(tr("Auto&scaling"));
 	boxAntialiasing->setText(tr("Antia&liasing"));
+  boxAspectRatio->setText(tr("Fixed aspect ratio on window resize"));
 
 	boxMajTicks->clear();
 	boxMajTicks->addItem(tr("None"));
@@ -1905,7 +1913,7 @@ void ConfigDialog::apply()
 	app->axesLineWidth = boxLineWidth->value();
 	app->defaultPlotMargin = boxMargin->value();
 	app->setGraphDefaultSettings(boxAutoscaling->isChecked(),boxScaleFonts->isChecked(),
-								boxResize->isChecked(), boxAntialiasing->isChecked());
+								boxResize->isChecked(), boxAntialiasing->isChecked(), boxAspectRatio->isChecked());
 	// 2D plots page: curves tab
 	app->defaultCurveStyle = curveStyle();
 	app->defaultCurveLineWidth = boxCurveLineWidth->value();

@@ -47,7 +47,6 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);
-  void SetDepth(int depth);
 
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
@@ -72,9 +71,6 @@ private:
   
   /// Name of the workspace.
   std::string m_wsName;
-
-  /// Recursion depth.
-  size_t m_depth;
 
   /// Time.
   double m_time;

@@ -1213,3 +1213,15 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
   m_plot->clearAll();
   m_plot->replot();
 }
+
+/**
+ * Clears the miniplot if mouse leaves the instrument display and Peak selection isn't on.
+ */
+void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
+{
+  if (m_selectionType != Peak)
+  {
+    updatePick(-1);
+  }
+}
+

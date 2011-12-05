@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/weak_ptr.hpp>
+
 namespace Mantid
 {
 
@@ -148,7 +150,11 @@ public:
   /// Set the workspace
   virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX = 0.0, double endX = 0.0);
   /// Get the workspace
-  virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace()const{return m_workspace;}
+  virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace() const 
+  {
+    if(m_workspace.expired()) return boost::shared_ptr<const API::MatrixWorkspace>();
+    else return m_workspace.lock();
+  }
   /// Get workspace index
   virtual size_t getWorkspaceIndex()const{return m_workspaceIndex;}
 
@@ -184,8 +190,6 @@ protected:
   /// Calculate numerical derivatives
   void calNumericalDeriv(Jacobian* out, const double* xValues, const size_t& nData);
 
-  /// Shared pointer to the workspace
-  boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
   /// Spectrum index
   size_t m_workspaceIndex;
   /// Lower bin index
@@ -209,6 +213,11 @@ protected:
 
   /// Making a friend
   friend class CurveFitting::Fit;
+
+private:
+    /// Weak pointer to the workspace. Use the getMatrixWorkspace function above
+  boost::weak_ptr<const API::MatrixWorkspace> m_workspace;
+
 
 };
 

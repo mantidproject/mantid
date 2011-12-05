@@ -7,7 +7,7 @@
     <value val="indirect"/>
 </parameter>
 
-<!-- These properties are neceessary for use in the Indirect CTE interface. -->
+<!-- These properties are necessary for use in the Indirect CTE interface. -->
 
 <parameter name="analysers" type="string">
     <value val="silicon" />

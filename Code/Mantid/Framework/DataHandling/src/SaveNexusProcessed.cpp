@@ -289,8 +289,8 @@ namespace DataHandling
 	if (peaksWorkspace)
 	{
 		g_log.information("Peaks Workspace saving to Nexus would be done");
-		int pNum = peaksWorkspace->getNumberPeaks();
-		peaksWorkspace->saveNexus( cppFile );
+//		int pNum = peaksWorkspace->getNumberPeaks();
+//		peaksWorkspace->saveNexus( cppFile );
 		
 	} // finish peaks workspace specifics
     else if (tableWorkspace) // Table workspace specifics 

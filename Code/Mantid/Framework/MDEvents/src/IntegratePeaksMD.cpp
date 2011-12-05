@@ -1,12 +1,14 @@
 /*WIKI* 
 
+This algorithm takes two input workspaces: a MDEventWorkspace containing the events in multi-dimensional space,
+as well as a PeaksWorkspace containing single-crystal peak locations.
 
+* A sphere of radius '''PeakRadius''' is integrated around the center of each peak.
+* If '''BackgroundRadius''' is specified, then a shell, with radius r where '''BackgroundStartRadius''' < r < '''BackgroundRadius''', is integrated.
+** '''BackgroundStartRadius''' allows you to give some space between the peak and the background area.
+** '''BackgroundStartRadius''' = '''PeakRadius''' if not specified.
 
-This algorithm takes two input workspaces: a MDEventWorkspace containing the events in multi-dimensional space, as well as a PeaksWorkspace containing single-crystal peak locations.
-
-The PeaksWorkspace will be modified with the integrated intensity and error found beingfilled in.
-
-
+The OutputWorkspace will contain a copy of the input PeaksWorkspace, with the integrated intensity and error found being filled in.
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -73,9 +75,13 @@ namespace MDEvents
         "Fixed radius around each peak position in which to integrate.");
 
     declareProperty(new PropertyWithValue<double>("BackgroundRadius",0.0,Direction::Input),
-        "Radius to use to evaluate the background of the peak.\n"
-        "The signal density around the peak (PeakRadius < r < BackgroundRadius) is used to estimate the background under the peak.\n"
+        "End radius to use to evaluate the background of the peak.\n"
+        "The signal density around the peak (BackgroundStartRadius < r < BackgroundRadius) is used to estimate the background under the peak.\n"
         "If smaller than PeakRadius, no background measurement is done." );
+
+    declareProperty(new PropertyWithValue<double>("BackgroundStartRadius",0.0,Direction::Input),
+        "Start radius to use to evaluate the background of the peak.\n"
+        "If smaller than PeakRadius, then we assume BackgroundStartRadius = PeakRadius." );
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
         "A PeaksWorkspace containing the peaks to integrate.");
@@ -110,8 +116,12 @@ namespace MDEvents
 
     /// Radius to use around peaks
     double PeakRadius = getProperty("PeakRadius");
-    /// Background radius
+    /// Background (end) radius
     double BackgroundRadius = getProperty("BackgroundRadius");
+    /// Start radius of the background
+    double BackgroundStartRadius = getProperty("BackgroundStartRadius");
+    if (BackgroundStartRadius < PeakRadius)
+      BackgroundStartRadius = PeakRadius;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
@@ -148,17 +158,37 @@ namespace MDEvents
       signal_t bgErrorSquared = 0;
       if (BackgroundRadius > PeakRadius)
       {
+        // Get the total signal inside "BackgroundRadius"
         ws->getBox()->integrateSphere(sphere, BackgroundRadius*BackgroundRadius, bgSignal, bgErrorSquared);
-        // Subtract the peak part to get the intensity in the shell (PeakRadius < r < BackgroundRadius)
-        bgSignal -= signal;
-        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
-        bgErrorSquared -= errorSquared;
 
+        // Evaluate the signal inside "BackgroundStartRadius"
+        signal_t interiorSignal = 0;
+        signal_t interiorErrorSquared = 0;
+
+        // Integrate this 3rd radius, if needed
+        if (BackgroundStartRadius != PeakRadius)
+          ws->getBox()->integrateSphere(sphere, BackgroundStartRadius*BackgroundStartRadius, interiorSignal, interiorErrorSquared);
+        else
+        {
+          // PeakRadius == BackgroundStartRadius, so use the previous value
+          interiorSignal = signal;
+          interiorErrorSquared = errorSquared;
+        }
+
+        // Subtract the peak part to get the intensity in the shell (BackgroundStartRadius < r < BackgroundRadius)
+        bgSignal -= interiorSignal;
+        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
+        bgErrorSquared -= interiorErrorSquared;
+
+        // Relative volume of peak vs the BackgroundRadius sphere
         double ratio = (PeakRadius / BackgroundRadius);
-        // Relative volume of peak vs the background
         double peakVolume = ratio * ratio * ratio;
-        // Volume of the bg shell
-        double bgVolume = 1.0 - ratio * ratio * ratio;
+
+        // Relative volume of the interior of the shell vs overall background
+        double interiorRatio = (BackgroundStartRadius / BackgroundRadius);
+        // Volume of the bg shell, relative to the volume of the BackgroundRadius sphere
+        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+
         // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
         double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;

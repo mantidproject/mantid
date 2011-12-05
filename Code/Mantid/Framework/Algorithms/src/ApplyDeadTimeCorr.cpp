@@ -18,7 +18,6 @@ Apply deadtime correction to each spectra of a workspace.
 #include <iostream>
 #include <cmath>
 
-
 using std::string;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -43,7 +42,7 @@ namespace Algorithms
       Direction::Input), "Name of the Dead Time Table");
     
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-      "The name of the output workspace containing corrected counts");  
+      "The name of the output workspace containing corrected counts");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -57,56 +56,70 @@ namespace Algorithms
 
     if (!(deadTimeTable->rowCount() > static_cast<int>(inputWs->getNumberHistograms() ) ) )
     {
-      // Duplicate the input workspace. Only need to change Y values based on dead time corrections
-      IAlgorithm_sptr duplicate = createSubAlgorithm("CloneWorkspace");
-      duplicate->initialize();
-      duplicate->setProperty<Workspace_sptr>("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
-      duplicate->execute();
-      Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      // Get number of good frames from Run object. This also serves as
+      // a test to see if valid input workspace has been provided
 
-      // Presumed to be the same for all data
-      double timeBinWidth(inputWs->dataX(0)[1] - inputWs->dataX(0)[0]); 
+      double numGoodFrames = 1.0;
+      const API::Run & run = inputWs->run();
+      if ( run.hasProperty("goodfrm") )
+      {
+        numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
+        // Duplicate the input workspace. Only need to change Y values based on dead time corrections
+        IAlgorithm_sptr duplicate = createSubAlgorithm("CloneWorkspace");
+        duplicate->initialize();
+        duplicate->setProperty<Workspace_sptr>("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
+        duplicate->execute();
+        Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
+        MatrixWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+        // Presumed to be the same for all data
+        double timeBinWidth(inputWs->dataX(0)[1] - inputWs->dataX(0)[0]);
      
-      if (timeBinWidth != 0)
-      { 
-        try
+        if (timeBinWidth != 0)
         {
-          // Apply Dead Time
-          for (int i=0; i<deadTimeTable->rowCount(); ++i)
+          try
           {
-            API::TableRow deadTimeRow = deadTimeTable->getRow(i);
-            size_t index = static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(static_cast<int>(deadTimeRow.Int(0) ) ) );
-
-            for(size_t j=0; j<inputWs->blocksize(); ++j)
+            // Apply Dead Time
+            for (int i=0; i<deadTimeTable->rowCount(); ++i)
             {
-              double temp(1 - inputWs->dataY(index)[j] * (deadTimeRow.Double(1)/timeBinWidth));
-              if (temp != 0)
-              {
-                outputWs->dataY(index)[j] = inputWs->dataY(index)[j] / temp;
-              }
-              else
-              {
-                g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width is currently (" << temp << "). Can't divide by this amount." << std::endl;
+              API::TableRow deadTimeRow = deadTimeTable->getRow(i);
+              size_t index = static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(static_cast<int>(deadTimeRow.Int(0) ) ) );
 
-                throw std::invalid_argument("Can't divide by 0");
+              for(size_t j=0; j<inputWs->blocksize(); ++j)
+              {
+                double temp(1 - inputWs->dataY(index)[j] * (deadTimeRow.Double(1)/ (timeBinWidth * numGoodFrames) ) );
+                if (temp != 0)
+                {
+                  outputWs->dataY(index)[j] = inputWs->dataY(index)[j] / temp;
+                }
+                else
+                {
+                  g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width is currently (" << temp << "). Can't divide by this amount." << std::endl;
+
+                  throw std::invalid_argument("Can't divide by 0");
+                }
               }
             }
-          }
 
-          setProperty("OutputWorkspace", outputWs);
+            setProperty("OutputWorkspace", outputWs);
+          }
+          catch(std::runtime_error& ex)
+          {
+            throw std::invalid_argument("Invalid argument for algorithm.");
+          }
         }
-        catch(std::runtime_error& ex)
+        else
         {
-          throw std::invalid_argument("Invalid argument for algorithm.");
+          g_log.error() << "The time bin width is currently (" << timeBinWidth << "). Can't divide by this amount." << std::endl;
+
+          throw std::invalid_argument("Can't divide by 0");
         }
       }
       else
       {
-        g_log.error() << "The time bin width is currently (" << timeBinWidth << "). Can't divide by this amount." << std::endl;
-
-        throw std::invalid_argument("Can't divide by 0");
+        g_log.error() << "To calculate Muon deadtime requires that goodfrm (number of good frames) "
+                      << "is stored in InputWorkspace Run object\n";
       }
     }
     else

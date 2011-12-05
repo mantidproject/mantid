@@ -1274,6 +1274,11 @@ class MantidPyFramework(FrameworkManager):
 #            pass
                 
         try:
+            return self._getRawIPeaksWorkspacePointer(name)
+        except RuntimeError:
+            pass
+                
+        try:
             return self._getRawIEventWorkspacePointer(name)
         except RuntimeError:
             pass

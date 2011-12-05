@@ -433,7 +433,7 @@ public slots:
   //! \name Graphs
   //@{
   void setPreferences(Graph* g);
-  void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing);
+  void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing, bool fixedAspectRatio);
   void setLegendDefaultSettings(int frame, const QFont& font,
     const QColor& textCol, const QColor& backgroundCol);
   void setArrowDefaultSettings(double lineWidth,  const QColor& c, Qt::PenStyle style,
@@ -1225,7 +1225,7 @@ public:
   bool smooth3DMesh, autoScaleFonts, autoResizeLayers, askForSupport, autoSearchUpdates;
   bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D, confirmClosePlot3D,confirmCloseInstrWindow;
   bool confirmCloseFolder, confirmCloseNotes;
-  bool titleOn, autoSave, drawBackbones, allAxesOn, autoscale2DPlots, antialiasing2DPlots;
+  bool titleOn, autoSave, drawBackbones, allAxesOn, autoscale2DPlots, antialiasing2DPlots, fixedAspectRatio2DPlots;
   QString xaxisScale, yaxisScale, zaxisScale;
 
   int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, axesLineWidth, canvasFrameWidth;
