@@ -91,6 +91,7 @@ set ( SRC_FILES
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
 	src/He3TubeEfficiency.cpp
+	src/IDLRebin.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/Integration.cpp
@@ -267,6 +268,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
 	inc/MantidAlgorithms/He3TubeEfficiency.h
+	inc/MantidAlgorithms/IDLRebin.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/Integration.h
@@ -432,6 +434,7 @@ set ( TEST_FILES
 	test/GroupWorkspacesTest.h
 	test/HRPDSlabCanAbsorptionTest.h
 	test/He3TubeEfficiencyTest.h
+	test/IDLRebinTest.h
 	test/IQTransformTest.h
 	test/IdentifyNoisyDetectorsTest.h
 	test/IntegrationTest.h
