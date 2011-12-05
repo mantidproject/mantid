@@ -140,9 +140,9 @@ namespace MDAlgorithms
 
    // Parts of the identifyMatrixAlg, separated for unit testing:
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
-   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names, 
+   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names, 
                                  Strings &out_dim_units, int &ndE_dims,std::string &natural_units);
-   std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_names,const Strings &ws_dim_units);
+   std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_units);
 
    /** identifies conversion subalgorithm to run on a workspace */
    std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,

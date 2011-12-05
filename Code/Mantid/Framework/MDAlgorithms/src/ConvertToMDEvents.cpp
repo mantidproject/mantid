@@ -328,9 +328,9 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     // identify Q_mode
     Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);
     // identify dE mode    
-    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
+    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
     // identify conversion mode;
-    CONV_MODE_ID=parseConvMode(Q_MODE_ID,natural_units,ws_dim_names,ws_dim_units);
+    CONV_MODE_ID=parseConvMode(Q_MODE_ID,natural_units,ws_dim_units);
 
     the_WSalgID = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
 
@@ -345,7 +345,7 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
   *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
 */
 std::string
-ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_names,const Strings &ws_dim_units)
+ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_units)
 {
     std::string CONV_MODE_ID("Unknown");
     // IDENTIFY UNITS CONVERSION MODE
@@ -392,7 +392,7 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
   *@returns natural_units -- name of the units, the algorithm expects to work with. 
 */
 std::string 
-ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, 
+ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, 
                                int &ndE_dims,std::string &natural_units)
 {
     std::string DE_MODE_ID= dE_mode_req;

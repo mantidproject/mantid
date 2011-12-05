@@ -46,11 +46,11 @@ public:
       return ConvertToMDEvents::parseQMode(Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims);
     }
     //
-    std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
+    std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const std::vector<std::string> &ws_dim_units,
                             std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units, 
                                int &ndE_dims,std::string &natural_units)
    {
-       return ConvertToMDEvents::parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
+       return ConvertToMDEvents::parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
     
    }
 
@@ -96,6 +96,12 @@ void testInit(){
     TS_ASSERT( pAlg->isInitialized() )
 
     TSM_ASSERT_EQUALS("algortithm should have 8 propeties",8,(size_t)(pAlg->getProperties().size()));
+}
+void testParseQMode_NoQ()
+{
+    std::string MODE;
+    //MODE=pAlg->parseQMode("",const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
+
 }
 // --> GET DIMENSIONS FROM WS MATRIX:
 void testNeedsNumericAxis(){
