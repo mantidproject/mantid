@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
 	src/LoadEventPreNexus.cpp
+	src/LoadEventPreNexus2.cpp
 	src/LoadGSS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
@@ -129,6 +130,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
+	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
