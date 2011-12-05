@@ -53,7 +53,9 @@ public:
        return ConvertToMDEvents::parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
     
    }
-
+   std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const std::vector<std::string> &ws_dim_units){
+       return ConvertToMDEvents::parseConvMode(Q_MODE_ID,natural_units,ws_dim_units);
+   }
 
 
    //std::string identify_requested_alg(const std::vector<std::string> &dim_names_availible, const std::string &QOption,const std::vector<std::string> &dim_selected,size_t &nDims)
@@ -97,12 +99,199 @@ void testInit(){
 
     TSM_ASSERT_EQUALS("algortithm should have 8 propeties",8,(size_t)(pAlg->getProperties().size()));
 }
-void testParseQMode_NoQ()
+// TEST QMode
+void testParseQMode_WrongThrows()
 {
-    std::string MODE;
-    //MODE=pAlg->parseQMode("",const std::vector<std::string> &ws_dim_names,const std::vector<std::string> &ws_dim_units,
+     std::vector<std::string> ws_dim_names;
+     std::vector<std::string> ws_dim_units;
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int nQ_dims;    
+     TS_ASSERT_THROWS(pAlg->parseQMode("WrongMode",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims),std::invalid_argument);
 
 }
+void testParseQMode_NoQ()
+{
+     std::vector<std::string> ws_dim_names(2,"A");
+     std::vector<std::string> ws_dim_units(2,"UnA");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int nQ_dims;
+     std::string MODE;
+     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_EQUALS(2,nQ_dims);
+     TS_ASSERT_EQUALS("",MODE);
+     TS_ASSERT_EQUALS(ws_dim_names[0],out_dim_names[0]);
+     TS_ASSERT_EQUALS(ws_dim_names[1],out_dim_names[1]);
+     TS_ASSERT_EQUALS(ws_dim_units[0],out_dim_units[0]);
+     TS_ASSERT_EQUALS(ws_dim_units[1],out_dim_units[1]);
+}
+void testParseQMode_modQ()
+{
+     std::vector<std::string> ws_dim_names(2,"A");
+     std::vector<std::string> ws_dim_units(2,"UnA");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int nQ_dims;
+     std::string MODE;
+     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("|Q|",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_EQUALS(1,nQ_dims);
+     TS_ASSERT_EQUALS("|Q|",MODE);
+     TS_ASSERT_EQUALS("|Q|",out_dim_names[0]);
+     TS_ASSERT_EQUALS("dSpacing",out_dim_units[0]);
+}
+void testParseQMode_Q3D()
+{
+     std::vector<std::string> ws_dim_names(2,"A");
+     std::vector<std::string> ws_dim_units(2,"UnA");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int nQ_dims;
+     std::string MODE;
+     TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QxQyQz",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
+     TS_ASSERT_EQUALS(3,nQ_dims);
+     TS_ASSERT_EQUALS("QxQyQz",MODE);
+     TS_ASSERT_EQUALS("Q_h",out_dim_names[0]);
+     TS_ASSERT_EQUALS("Q_k",out_dim_names[1]);
+     TS_ASSERT_EQUALS("Q_l",out_dim_names[2]);
+     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[0]);
+     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[1]);
+     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[2]);
+}
+// TEST dE mode
+void testParseDEMode_WrongThrows()
+{
+
+     std::vector<std::string> ws_dim_units;
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int ndE_dims;    
+     std::string natural_units;
+
+     TS_ASSERT_THROWS(pAlg->parseDEMode("SOMEQMODE","WrongMode",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units),std::invalid_argument);
+}
+void testParseDEMode_NoQ()
+{
+     std::vector<std::string> ws_dim_units(1,"some");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int ndE_dims;    
+     std::string natural_units;
+     std::string EID;
+
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_EQUALS(0,ndE_dims);
+     TS_ASSERT_EQUALS("",EID);
+     TS_ASSERT(out_dim_names.empty());
+     TS_ASSERT(out_dim_units.empty());
+     TS_ASSERT_EQUALS(ws_dim_units[0],natural_units);
+}
+void testParseDEMode_InelasticDirect()
+{
+     std::vector<std::string> ws_dim_units(1,"some");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int ndE_dims;    
+     std::string natural_units;
+     std::string EID;
+
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Direct",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_EQUALS(1,ndE_dims);
+     TS_ASSERT_EQUALS("Direct",EID);
+     TS_ASSERT_EQUALS("DeltaE",out_dim_names[0]);
+     TS_ASSERT_EQUALS("DeltaE",out_dim_units[0]);
+     TS_ASSERT_EQUALS("DeltaE",natural_units);
+}
+void testParseDEMode_InelasticInDir()
+{
+     std::vector<std::string> ws_dim_units(1,"some");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int ndE_dims;    
+     std::string natural_units;
+     std::string EID;
+
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Indirect",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_EQUALS(1,ndE_dims);
+     TS_ASSERT_EQUALS("Indirect",EID);
+     TS_ASSERT_EQUALS("DeltaE",out_dim_names[0]);
+     TS_ASSERT_EQUALS("DeltaE",out_dim_units[0]);
+     TS_ASSERT_EQUALS("DeltaE",natural_units);
+}
+void testParseDEMode_Elastic()
+{
+     std::vector<std::string> ws_dim_units(1,"some");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int ndE_dims;    
+     std::string natural_units;
+     std::string EID;
+
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_EQUALS(0,ndE_dims);
+     TS_ASSERT_EQUALS("Elastic",EID);
+     TS_ASSERT(out_dim_names.empty());
+     TS_ASSERT(out_dim_units.empty());
+     TS_ASSERT_EQUALS("MomentumTransfer",natural_units);
+}
+void testParseDEMode_ElasticPowd()
+{
+     std::vector<std::string> ws_dim_units(1,"some");
+     std::vector<std::string> out_dim_names,out_dim_units;
+     int ndE_dims;    
+     std::string natural_units;
+     std::string EID;
+
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("|Q|","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_EQUALS(0,ndE_dims);
+     TS_ASSERT_EQUALS("Elastic",EID);
+     TS_ASSERT(out_dim_names.empty());
+     TS_ASSERT(out_dim_units.empty());
+     TS_ASSERT_EQUALS("dSpacing",natural_units);
+}
+// TEST ConvertMode
+void testParseConv_NonConvertUnitThrows()
+{
+     std::vector<std::string> ws_dim_units(1,"wrong");
+     std::string natural_units;
+
+     TS_ASSERT_THROWS(pAlg->parseConvMode("AnyConversionMode",natural_units,ws_dim_units),std::invalid_argument);
+}
+void testParseConv_NoQ()
+{
+     std::vector<std::string> ws_dim_units(1,"Any");
+     std::string CONV_ID;
+    
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("","AnyUnits",ws_dim_units));
+     TS_ASSERT_EQUALS("CnvNo",CONV_ID);
+}
+void testParseConv_NaturalNoQ()
+{
+     std::vector<std::string> ws_dim_units(1,"dSpacing");
+     std::string CONV_ID;
+    
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("","dSpacing",ws_dim_units));
+     TS_ASSERT_EQUALS("CnvNo",CONV_ID);
+}
+void testParseConv_QuickConvertsion()
+{
+     std::vector<std::string> ws_dim_units(1,"dSpacing");
+     std::string CONV_ID;
+    
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("AnyMode","MomentumTransfer",ws_dim_units));
+     TS_ASSERT_EQUALS("CnvFast",CONV_ID);
+}
+void testParseConv_FromTOF()
+{
+     std::vector<std::string> ws_dim_units(1,"TOF");
+     std::string CONV_ID;
+    
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("AnyMode","MomentumTransfer",ws_dim_units));
+     TS_ASSERT_EQUALS("CnvFromTOF",CONV_ID);
+}
+void testParseConv_ByTOF()
+{
+     std::vector<std::string> ws_dim_units(1,"DeltaE");
+     std::string CONV_ID;
+    
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("AnyMode","Wavelength",ws_dim_units));
+     TS_ASSERT_EQUALS("CnvByTOF",CONV_ID);
+}
+
+
+
+
 // --> GET DIMENSIONS FROM WS MATRIX:
 void testNeedsNumericAxis(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);

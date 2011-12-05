@@ -357,6 +357,9 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
             convert_log.error() <<" Unknown unit"<<ws_dim_units[0]<<" along X-axis provided for conversion\n";
             throw(std::invalid_argument("ConvertToMDEvents needs to known units conversion"));
         }  
+    }else{ // NoQ mode -- no conversion
+        CONV_MODE_ID =ConvModes[ConvertNo];
+        return CONV_MODE_ID;
     }
     // are the existing units already what is needed, so no conversion?    
     if(ws_dim_units[0].compare(natural_units)==0){
@@ -395,6 +398,12 @@ std::string
 ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, 
                                int &ndE_dims,std::string &natural_units)
 {
+    if(is_member(dE_modes,dE_mode_req)<0){
+         convert_log.error()<<" dE-mode: "<<dE_mode_req<<" not recognized\n";
+         throw(std::invalid_argument(" Non-existing dE-mode"));
+    }
+    ndE_dims = 0;
+
     std::string DE_MODE_ID= dE_mode_req;
     // no_Q mode can only be compartible with no_dE mode
     if((Q_MODE_ID.compare(Q_modes[NoQ])==0)){
@@ -409,8 +418,6 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
         out_dim_units.push_back("DeltaE");
         // natural units defined in subalgorithm doing the conversion and their ID has to be defined correctly in class constructor
         natural_units = native_inelastic_unitID;
-    }else{
-        ndE_dims = 0;
     }
 
     if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
@@ -436,7 +443,11 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
 std::string 
 ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQ_dims)
 {
-     std::string Q_MODE_ID("Unknown");
+    std::string Q_MODE_ID("Unknown");
+    if(is_member(Q_modes,Q_mode_req)<0){
+         convert_log.error()<<" Q-mode: "<<Q_mode_req<<" not recognized\n";
+         throw(std::invalid_argument(" Non-existing Q-mode"));
+    }
     // Q_mode (one of 3 possible)  
     if(Q_mode_req.compare(Q_modes[NoQ])==0)
     { 
@@ -468,8 +479,6 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     }
     return Q_MODE_ID;
 }
-
-
 
 /** function processes the input arguments and tries to establish what algorithm should be deployed; 
     *
