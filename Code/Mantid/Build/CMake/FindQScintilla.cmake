@@ -17,8 +17,10 @@ ENDIF(NOT QT4_FOUND)
 SET(QSCINTILLA_FOUND "NO")
 
 IF(QT4_FOUND)
-    FIND_PATH(QSCINTILLA_INCLUDE_DIR Qsci/qsciglobal.h
-                 "${QT_INCLUDE_DIR}"
+    FIND_PATH(QSCINTILLA_INCLUDE_DIR 
+        NAMES qsciglobal.h
+        PATHS ${QT_INCLUDE_DIR}
+        PATH_SUFFIXES "Qsci"	
     )
 
     SET(QSCINTILLA_NAMES ${QSCINTILLA_NAMES} qscintilla2 libqscintilla2)
