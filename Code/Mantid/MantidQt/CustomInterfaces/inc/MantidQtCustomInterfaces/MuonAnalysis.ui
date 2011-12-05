@@ -58,7 +58,7 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="techniques" stdset="0">
+              <property name="techniques">
                <stringlist>
                 <string>Muon spectroscopy</string>
                </stringlist>
@@ -308,7 +308,7 @@
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="fileInputLayout">
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" native="true">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles">
               <property name="findRunFiles" stdset="0">
                <bool>true</bool>
               </property>
@@ -1378,7 +1378,7 @@
                <string>Overwrite Plots</string>
               </property>
               <property name="checked">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -1395,15 +1395,51 @@
               </property>
              </spacer>
             </item>
-            <item row="1" column="0">
+            <item row="2" column="0">
              <widget class="QCheckBox" name="allErrors">
               <property name="text">
-               <string>All Errors</string>
+               <string>Show All Errors</string>
               </property>
               <property name="checked">
                <bool>true</bool>
               </property>
              </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="updatePlots">
+              <property name="text">
+               <string>Auto-Update Plots</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <spacer name="horizontalSpacer_24">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="2">
+             <spacer name="horizontalSpacer_25">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>

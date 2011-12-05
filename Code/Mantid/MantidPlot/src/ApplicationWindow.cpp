@@ -16494,9 +16494,8 @@ void ApplicationWindow::closeGraph(const QString & wsName)
       if (w->objectName() == wsName)
       {
         MultiLayer *plot = (MultiLayer *)w;
-        //closeWindow(w);
-        plot->close();
-        //w->close();
+        plot->setconfirmcloseFlag(false);
+        closeWindow(w);
         break;
       }
     }
