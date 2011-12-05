@@ -222,6 +222,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 terms = line.split()
                 mdict[bank]["zero"] = float(terms[1])
                 mdict[bank]["dtt1"] = float(terms[2])
+                mdict[bank]["dtt2"] = 0.0
     
             elif line.startswith("D2TOT"):
                 # Dtt1t       Dtt2t    x-cross    Width   Zerot
@@ -238,7 +239,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 mdict[bank]["zerot"] = float(terms[1])
                 mdict[bank]["dtt1t"] = float(terms[2])
                 mdict[bank]["dtt2t"] = float(terms[3])
-                mdict[bank]["x-corss"] = float(terms[4])
+                mdict[bank]["x-cross"] = float(terms[4])
                 mdict[bank]["width"] = float(terms[5])
     
             elif line.startswith("TWOTH"):
@@ -341,15 +342,21 @@ class ConvertInstrumentFile(PythonAlgorithm):
         galpha = np.zeros(90)       # delta(alpha)
         gbeta  = np.zeros(90)       # delta(beta)
         gpkX   = np.zeros(90)       # n ratio b/w thermal and epithermal neutron
-        twosintheta = pardict["twotheta"]
-        mX = pardict["x-cross"]
-        mXb = pardict["width"]
-        instC = pardict["dtt1"] - (4*(pardict["alph0"]+pardict["alph1"])) 
+        try:
+            twosintheta = pardict["twotheta"]
+            mX = pardict["x-cross"]
+            mXb = pardict["width"]
+            instC = pardict["dtt1"] - (4*(pardict["alph0"]+pardict["alph1"])) 
+        except KeyError:
+            print "Cannot Find Key twotheta/x-cross/width/dtt1/alph0/alph1!"
+            print "Keys are: "
+            print pardict.keys()
        
-        if 0: 
-            #apparently this is not used by prm code 
+        if 1: 
+            # latest version from Jason
             ddstep = ((1.05*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90  
         else: 
+            # used in the older prm file
             ddstep = ((1.00*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90
 
         # 2. Calcualte alph, beta table
