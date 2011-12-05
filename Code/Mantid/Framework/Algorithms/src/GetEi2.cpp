@@ -269,7 +269,18 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
   childAlg->executeAsSubAlg();
-  return childAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr monitors = childAlg->getProperty("OutputWorkspace");
+  if( boost::dynamic_pointer_cast<API::IEventWorkspace>(m_input_ws) )
+  {
+    // Convert to a MatrixWorkspace representation
+    childAlg = createSubAlgorithm("ConvertToMatrixWorkspace");
+    childAlg->setProperty("InputWorkspace", monitors);
+    childAlg->setProperty("OutputWorkspace", monitors);
+    childAlg->executeAsSubAlg();
+    monitors = childAlg->getProperty("OutputWorkspace");
+  }
+
+  return monitors;
 }
 
 /**
