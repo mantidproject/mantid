@@ -54,7 +54,7 @@ SortDialog::SortDialog( QWidget* parent, Qt::WFlags fl )
 
 	topLayout->addWidget( new QLabel( tr("Order")), 1, 0 );
 	boxOrder = new QComboBox();
-    boxOrder->addItem(tr("Ascending"));
+	boxOrder->addItem(tr("Ascending"));
 	boxOrder->addItem(tr("Descending"));
 	topLayout->addWidget(boxOrder, 1, 1 );
 
@@ -64,19 +64,19 @@ SortDialog::SortDialog( QWidget* parent, Qt::WFlags fl )
 	topLayout->setRowStretch(3, 1);
 
 	buttonOk = new QPushButton(tr("&Sort"));
-    buttonOk->setDefault( true );
+	buttonOk->setDefault( true );
 	hl->addWidget(buttonOk);
 
-    buttonCancel = new QPushButton(tr("&Close"));
+	buttonCancel = new QPushButton(tr("&Close"));
 	hl->addWidget(buttonCancel);
 
 	QVBoxLayout * mainlayout = new QVBoxLayout(this);
-    mainlayout->addWidget(groupBox1);
+	mainlayout->addWidget(groupBox1);
 	mainlayout->addLayout(hl);
 
-    connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-    connect( boxType, SIGNAL( activated(int) ), this, SLOT(changeType(int)));
+	connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+	connect( boxType, SIGNAL( activated(int) ), this, SLOT(changeType(int)));
 }
 
 void SortDialog::accept()
