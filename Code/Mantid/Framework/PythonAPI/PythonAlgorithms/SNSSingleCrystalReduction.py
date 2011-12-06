@@ -273,6 +273,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             vanRun = None
     
+        savemat = None
         Banks = ["bank17","bank18","bank26","bank27","bank36","bank37","bank38","bank39","bank46","bank47","bank48","bank49","bank57","bank58"]
 
         for samRun in samRuns:
@@ -335,23 +336,30 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 mtd.releaseFreeMemory()
             peaksWS = mtd['Peaks']
             try:
-                FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
-                            alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=4, Tolerance=0.01)
+                if savemat is not None:
+                    LoadIsawUB(InputWorkspace=peaksWS, Filename=savemat)
+                else:
+                    FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                                alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=4, Tolerance=0.01)
                 # Add index to HKL             
                 IndexPeaks(PeaksWorkspace=peaksWS, Tolerance=0.01)
-                SaveIsawUB(InputWorkspace=peaksWS, Filename="lsint"+str(samRunnum)+".mat")
                 CalculateUMatrix(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
                     alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5])
             except:
-                FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
-                            alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=4, Tolerance=0.05)
+                if savemat is not None:
+                    LoadIsawUB(InputWorkspace=peaksWS, Filename=savemat)
+                else:
+                    FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                                alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=4, Tolerance=0.05)
                 # Add index to HKL             
                 IndexPeaks(PeaksWorkspace=peaksWS, Tolerance=0.05)
                 SaveIsawUB(InputWorkspace=peaksWS, Filename="lsint"+str(samRunnum)+".mat")
                 CalculateUMatrix(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
                     alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5])
             IndexPeaks(PeaksWorkspace=peaksWS,Tolerance=0.5)
-            SaveIsawUB(InputWorkspace=peaksWS, Filename="lsintFFT"+str(samRunnum)+".mat")
+            SaveIsawUB(InputWorkspace=peaksWS, Filename="lsintUB"+str(samRunnum)+".mat")
+            if savemat is None:
+		savemat = "lsintUB"+str(samRunnum)+".mat"
             SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
                 Filename=self._outFile, AppendFile=self._append,InputWorkspace=peaksWS)
             self._append = True
