@@ -49,11 +49,20 @@ public:
     AnalysisDataService::Instance().remove("peaks");
   }
 
-  void doTest(int nPixels, std::string peakIndexes, double a, double b, double c, double alpha, double beta, double gamma, double dTolerance=0.01)
+  void doTest(int nPixels, std::string peakIndexes, double a, double b, double c, double alpha, double beta, double gamma, std::string searchExtents="-20,20,-20,20,-20,20", double dTolerance=0.01)
   {
     
     //Take a copy of the original peaks workspace.
     PeaksWorkspace_sptr local = m_masterPeaks->clone();
+    //Clear the copies hkl values with some invalid values so that we'll know if we fail.
+    for(int i = 0; i < nPixels; i++)
+    {
+      IPeak& peak = local->getPeak(i);
+      peak.setH(0); 
+      peak.setK(0);
+      peak.setL(0);
+    }
+
     AnalysisDataService::Instance().addOrReplace("PeaksWS", local);
 
     FindSXUBUsingLatticeParameters alg;
@@ -69,6 +78,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("gamma", gamma) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeakIndices",peakIndexes) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("dTolerance", dTolerance) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("SearchExtents", searchExtents));
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
@@ -110,43 +120,43 @@ public:
 
   void test_exec()
   {
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0);
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateA()
   {
-    //a increased to 15
-    doTest(6, "1, 2, 3, 4, 5, 6", 15.00, 19.247, 8.606, 90.0, 105.071, 90.0);
+    //a increased
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.2, 19.247, 8.606, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateB()
   {
-    //b increased to 20
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 20.00, 8.606, 90.0, 105.071, 90.0);
+    //b increased
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.3, 8.606, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateC()
   {
-    //c increased to 9
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 9.00, 90.0, 105.071, 90.0);
+    //c increased
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.65, 90.0, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateAlpha()
   {
-    //Alpha decreased to 89
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 89.0, 105.071, 90.0);
+    //Alpha decreased
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 89.8, 105.071, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateBeta()
   {
-    //Beta increased to 108
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 108.00, 90.0);
+    //Beta increased 
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.1, 90.0, "-20,20,0,20,-20,20");
   }
 
   void test_perturbateGamma()
   {
-    //Gamma decreased to 88
-    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 88.0);
+    //Gamma decreased
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 89.8, "-20,20,0,20,-20,20");
   }
 
 

@@ -14,23 +14,8 @@ namespace Mantid
 {
 namespace Crystal
 {
-/** Takes a 2D workspace as input and find the FindSXUBUsingLatticeParametersimum in each 1D spectrum.
-    The algorithm creates a new 1D workspace containing all FindSXUBUsingLatticeParametersima as well as their X boundaries
-    and error. This is used in particular for single crystal as a quick way to find strong peaks.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    </UL>
-
-    Optional Properties (assume that you count from zero):
-    <UL>
-    <LI> Range_lower - The X value to search from (default 0)</LI>
-    <LI> Range_upper - The X value to search to (default FindSXUBUsingLatticeParameters)</LI>
-    <LI> StartSpectrum - Start spectrum number (default 0)</LI>
-    <LI> EndSpectrum - End spectrum number  (default FindSXUBUsingLatticeParameters)</LI>
-    </UL>
+/** Peak indexing algorithm, which works by assigning multiple possible HKL values to each peak and then culling these options
+    by comparison with neighbouring peaks.
 
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 11/08/2009
@@ -102,7 +87,7 @@ public:
 	}
 	double getdSpacing() const
 	{
-		return 2*M_PI/_Q.norm();
+		return 1/_Q.norm();
 	}
 	void addHKL(int h, int k, int l)
 	{
@@ -118,6 +103,10 @@ public:
     V3D result = V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
     return result;
   }
+  int candidateHKLSize() const
+  {
+    return _hkls.size();
+  }
 	void delHKL(int h, int k, int l)
 	{
 		std::set<index>::const_iterator it=std::find(_hkls.begin(),_hkls.end(),index(h,k,l));
@@ -130,8 +119,6 @@ public:
 	}
 	double angle(const PeakCandidate& rhs)
 	{
-    //Mantid::Kernel::V3D angle = rhs.getQ();
-    //return angle.angle(this->getQ());
     return rhs._Q.angle(_Q);
 	}
 	void setIndex(const std::set<index>& s)
@@ -139,12 +126,15 @@ public:
 		_hkls.clear();
 		_hkls=s;
 	}
-	void setFirst()
-	{
-		std::set<index>::iterator it=_hkls.begin(); //Take the first possiblity
-		it++;
-		_hkls.erase(it,_hkls.end()); //Erase all others!
-	}
+  void setFirst()
+  {
+    if(_hkls.size() > 0)
+    {
+      std::set<index>::iterator it=_hkls.begin(); //Take the first possiblity
+      it++;
+      _hkls.erase(it,_hkls.end()); //Erase all others!
+    }
+  }
 	void clean(PeakCandidate& rhs,const Mantid::Geometry::UnitCell& uc, double tolerance)
 	{
 		double measured_angle=this->angle(rhs);
@@ -167,10 +157,6 @@ public:
 		}
 		setIndex(s1);
 		rhs.setIndex(s2);
-	}
-	void select(int h, int k, int l)
-	{
-
 	}
 	friend std::ostream& operator<<(std::ostream& os,const PeakCandidate& rhs)
 	{
@@ -200,8 +186,9 @@ public:
 private:
 
   //Helper method to cull potential hkls off each peak.
-  void cullHKLs(int npeaks, std::vector<PeakCandidate>& peaksCandidates, Mantid::Geometry::UnitCell& unitcell);
-
+  void cullHKLs(std::vector<PeakCandidate>& peaksCandidates, Mantid::Geometry::UnitCell& unitcell);
+  //Helper method used to check that not all peaks are colinear.
+  void validateNotColinear(std::vector<PeakCandidate>& peakCandidates) const;
   void initDocs();
   // Overridden Algorithm methods
   void init();
