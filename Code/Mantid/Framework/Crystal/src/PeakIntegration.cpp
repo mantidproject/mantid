@@ -96,8 +96,16 @@ namespace Mantid
       bool IC = getProperty("IkedaCarpenterTOF");
       if (slices)
       {
-        OrientedLattice latt = inputW->mutableSample().getOrientedLattice();
-        qspan = 1./std::max(latt.a(), std::max(latt.b(),latt.c()))/6.;
+        if (peaksW->mutableSample().hasOrientedLattice())
+        {
+          OrientedLattice latt = peaksW->mutableSample().getOrientedLattice();
+          qspan = 1./std::max(latt.a(), std::max(latt.b(),latt.c()))/6.;
+        }
+        else
+        {
+          qspan = 0.03;
+        }
+        
       }
 
       //To get the workspace index from the detector ID
@@ -117,12 +125,20 @@ namespace Mantid
       API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
       int MinPeaks = -1;
       int MaxPeaks = -1;
+      size_t Numberwi = inputW->getNumberHistograms();
       int NumberPeaks = peaksW->getNumberPeaks();
       for (int i = 0; i<NumberPeaks; i++)
       {
         Peak & peak = peaksW->getPeaks()[i];
-        if(MinPeaks == -1 && peak.getRunNumber() == inputW->getRunNumber()) MinPeaks = i;
-        if(peak.getRunNumber() == inputW->getRunNumber()) MaxPeaks = i;
+        int pixelID = peak.getDetectorID();
+
+        // Find the workspace index for this detector ID
+        if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+        {
+          size_t wi = (*pixel_to_wi)[pixelID];
+        if(MinPeaks == -1 && peak.getRunNumber() == inputW->getRunNumber() && wi < Numberwi) MinPeaks = i;
+        if(peak.getRunNumber() == inputW->getRunNumber() && wi < Numberwi) MaxPeaks = i;
+        }
       }
 
       Progress prog(this, MinPeaks, 1.0, MaxPeaks);
@@ -316,8 +332,6 @@ namespace Mantid
       inputW = getProperty("InputWorkspace");
       if (inputW->readY(0).size() <= 1)
         throw std::runtime_error("Must Rebin data with more than 1 bin");
-      if (!inputW->mutableSample().hasOrientedLattice() && getProperty("FitSlices"))
-        throw std::runtime_error("Must load UB matrix in input workspace");
       Xmin = getProperty("XMin");
       Xmax = getProperty("XMax");
       Ymin = getProperty("YMin");
