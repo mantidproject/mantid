@@ -102,7 +102,7 @@ public:
 	}
 	double getdSpacing() const
 	{
-		return 1/_Q.norm();
+		return 2*M_PI/_Q.norm();
 	}
 	void addHKL(int h, int k, int l)
 	{
@@ -132,7 +132,7 @@ public:
 	{
     //Mantid::Kernel::V3D angle = rhs.getQ();
     //return angle.angle(this->getQ());
-    return _Q.angle(rhs._Q);
+    return rhs._Q.angle(_Q);
 	}
 	void setIndex(const std::set<index>& s)
 	{
@@ -198,6 +198,10 @@ public:
   virtual const std::string category() const { return "Diffraction";}
 
 private:
+
+  //Helper method to cull potential hkls off each peak.
+  void cullHKLs(int npeaks, std::vector<PeakCandidate>& peaksCandidates, Mantid::Geometry::UnitCell& unitcell);
+
   void initDocs();
   // Overridden Algorithm methods
   void init();

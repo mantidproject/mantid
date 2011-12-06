@@ -5,14 +5,15 @@
 #include "MantidAPI/ITableWorkspace.h";
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
-//#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FindSXUBUsingLatticeParameters.h"
-//#include "MantidAPI/IPeak.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidAPI/IPeak.h"
 #include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
-
+using namespace Mantid::DataObjects;
 
 
 //=====================================================================================
@@ -23,50 +24,133 @@ class FindSXUBUsingLatticeParameterTest : public CxxTest::TestSuite
 
 private:
 
+  //Master copy of existing peaks workspace
+  Mantid::DataObjects::PeaksWorkspace_sptr m_masterPeaks;
+
 public:
 
-  void testX()
+  FindSXUBUsingLatticeParameterTest()
   {
-    try
-    {
-      ITableWorkspace_sptr ws = Mantid::API::WorkspaceFactory::Instance().createTable();
-      ws->addColumn("double","Qx");
-      ws->addColumn("double","Qy");
-      ws->addColumn("double","Qz");
-
-      ws->setRowCount(10); //Ten Rows for each peak.
-
-      TableRow row = ws->getRow(0);
-      int rowIndex = 0;
-     // row << 0.219654<<0.0108024<<1.11382;
-      row = ws->getRow(rowIndex++);
-      row << 0.486429<<-0.100521<<0.322103;
-      row = ws->getRow(rowIndex++);
-      row << 0.635444<<-0.103101<<0.624199;
-      row = ws->getRow(rowIndex++);
-      row << 0.330549<<-0.0835759<<1.3411;
-      //row = ws->getRow(rowIndex++);
-      //row << 0.148992<<0.00117305<<0.302677;
-      //row = ws->getRow(rowIndex++);
-      //row << 0.450068<<-0.00456059<<0.24572;
-      row = ws->getRow(rowIndex++);
-      row << 0.180382<<-0.0824794<<1.04059;
-
-      FindSXUBUsingLatticeParameters alg;
-      alg.setRethrows(true);
-      alg.initialize();
-      alg.setProperty("PeaksTable", ws);
-      alg.setPropertyValue("UnitCell", "10.02, 11.852, 3.38, 90, 90, 90");
-      alg.setProperty("PeakIndices", "1, 2, 3, 4, 5, 6, 7");
-      alg.setProperty("dTolerance", 0.01);
-      alg.execute();
-      TS_ASSERT(alg.isExecuted());
-    }
-    catch(std::exception& ex)
-    {
-      std::string msg = ex.what();
-    }
+    //Load an existing peaks workspace. This workspace already has HKL values.
+    std::string WSName("peaks");
+    LoadIsawPeaks loader;
+    TS_ASSERT_THROWS_NOTHING( loader.initialize() );
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("OutputWorkspace", WSName);
+    //Execute and fetch the workspace
+    loader.execute();
+    m_masterPeaks  = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(WSName) );
   }
+
+  ~FindSXUBUsingLatticeParameterTest()
+  {
+    AnalysisDataService::Instance().remove("peaks");
+  }
+
+  void doTest(int nPixels, std::string peakIndexes, double a, double b, double c, double alpha, double beta, double gamma, double dTolerance=0.01)
+  {
+    
+    //Take a copy of the original peaks workspace.
+    PeaksWorkspace_sptr local = m_masterPeaks->clone();
+    AnalysisDataService::Instance().addOrReplace("PeaksWS", local);
+
+    FindSXUBUsingLatticeParameters alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "PeaksWS") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("a", a) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("b", b) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("c", c) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("alpha", alpha) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("beta", beta) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("gamma", gamma) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeakIndices",peakIndexes) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("dTolerance", dTolerance) );
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    //This particular input workspace already has HKL values, so we check that those calculated are the same as the original.
+    for(int i = 0; i < nPixels; i++)
+    {
+      IPeak& peakMaster = m_masterPeaks->getPeak(i);
+      IPeak& peakModified = local->getPeak(i);
+      TSM_ASSERT_EQUALS("Wrong H value", peakMaster.getH(), peakModified.getH() );
+      TSM_ASSERT_EQUALS("Wrong K value", peakMaster.getK(), peakModified.getK() );
+      TSM_ASSERT_EQUALS("Wrong L value", peakMaster.getL(), peakModified.getL() );
+    }
+
+    //Clean-up
+    AnalysisDataService::Instance().remove("PeaksWS");
+  }
+
+  void test_lessThanTwoPeaksThrows()
+  {
+    TS_ASSERT_THROWS(doTest(1, "1", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0), std::runtime_error);
+  }
+
+  void test_colinearPeaksThrows()
+  {
+    PeaksWorkspace_sptr temp = m_masterPeaks->clone();
+
+    for(int i = 0; i < m_masterPeaks->getNumberPeaks(); i++)
+    {
+      IPeak& peak = m_masterPeaks->getPeak(i);
+      Mantid::Kernel::V3D v(1, 0, 0);
+      peak.setQSampleFrame(v); // Overwrite all Q samples to be co-linear.
+    }
+
+    TS_ASSERT_THROWS(doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0), std::runtime_error);
+
+    //Restore master. peaks workspace.
+    m_masterPeaks = temp;
+  }
+
+  void test_exec()
+  {
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0);
+  }
+
+  void test_perturbateA()
+  {
+    //a increased to 15
+    doTest(6, "1, 2, 3, 4, 5, 6", 15.00, 19.247, 8.606, 90.0, 105.071, 90.0);
+  }
+
+  void test_perturbateB()
+  {
+    //b increased to 20
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 20.00, 8.606, 90.0, 105.071, 90.0);
+  }
+
+  void test_perturbateC()
+  {
+    //c increased to 9
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 9.00, 90.0, 105.071, 90.0);
+  }
+
+  void test_perturbateAlpha()
+  {
+    //Alpha decreased to 89
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 89.0, 105.071, 90.0);
+  }
+
+  void test_perturbateBeta()
+  {
+    //Beta increased to 108
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 108.00, 90.0);
+  }
+
+  void test_perturbateGamma()
+  {
+    //Gamma decreased to 88
+    doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 88.0);
+  }
+
+
+
 };
 
 #endif
