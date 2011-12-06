@@ -55,7 +55,7 @@ else:
     dlloader = libdlopen.loadlibrary
     import subprocess
     
-    _bin = os.path.abspath(os.path.dirname(__file__))
+    _bin = os.environ['MANTIDPATH']
     def get_libpath(mainlib, dependency):
         if platform.system() == 'Linux':
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)
@@ -74,9 +74,12 @@ else:
     # NeXus has to be loaded as well as there seems to be an issue with
     # the thread-local storage not being initialized properly unles
     # it is loaded before other libraries.
-    ldpath = os.environ.get("LD_LIBRARY_PATH", "")
+    library_var = "LD_LIBRARY_PATH"
+    if platform.system() == 'Darwin':
+        library_var = 'DY' + library_var
+    ldpath = os.environ.get(library_var, "")
     ldpath += ":" + _bin
-    os.environ["LD_LIBRARY_PATH"] = ldpath
+    os.environ[library_var] = ldpath
     pythonlib = os.path.join(_bin,'libMantidPythonAPI.so')
     dlloader(get_libpath(pythonlib, 'stdc++'))
     dlloader(get_libpath(pythonlib, 'libNeXus'))
