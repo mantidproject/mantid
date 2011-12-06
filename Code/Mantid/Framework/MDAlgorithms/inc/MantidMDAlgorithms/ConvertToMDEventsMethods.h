@@ -1,9 +1,16 @@
+#ifndef H_CONVERT_TO_MDEVENTS_METHODS
+#define H_CONVERT_TO_MDEVENTS_METHODS
+
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+// predefenition of the class, which does all coordinate transformation
+template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+struct COORD_TRANSFORMER;
+
 
 //-----------------------------------------------
 template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
@@ -114,3 +121,5 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
 
 } // endNamespace MDAlgorithms
 } // endNamespace Mantid
+
+#endif

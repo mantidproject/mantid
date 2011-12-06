@@ -6,9 +6,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-// predefine the host class:
-//template<Q_state Q,AnalMode MODE,CnvrtUnits CONV>
-//struct COORD_TRANSFORMER;
+
 
 // DO UNITS CONVERSION -- generally does almost nothing
 // procedure which converts/ non-converts units
@@ -16,7 +14,7 @@ template<CnvrtUnits CONV,Q_state Q,AnalMode MODE>
 struct UNITS_CONVERSION
 { 
     /// set up all variables necessary for units conversion at the beginning of the loop
-    inline void     setUpConversion(COORD_TRANSFORMER<Q,MODE,CONV> *){};
+    inline void     setUpConversion(ConvertToMDEvents const *const){};
     /// update all variables in the loop over spectra
     inline void     updateConversion(uint64_t){};
     /// convert current X variable
@@ -29,10 +27,10 @@ template<Q_state Q,AnalMode MODE>
 struct UNITS_CONVERSION<ConvertFast,Q,MODE>
 {
 
-    void setUpConversion(COORD_TRANSFORMER<Q,MODE,ConvertFast> *pCoordTransf)
+    void setUpConversion(ConvertToMDEvents const *const pHost)
     {       
-       const Kernel::Unit_sptr pThisUnit= pCoordTransf->getAxisUnits();
-       std::string native_units         = pCoordTransf->getNativeUnitsID();
+       const Kernel::Unit_sptr pThisUnit= ConvertToMDEvents::getAxisUnits(pHost);
+       std::string native_units         = ConvertToMDEvents::getNativeUnitsID(pHost);
 
        if(!pThisUnit->quickConversion(native_units,factor,power)){
            throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
@@ -58,25 +56,25 @@ template<Q_state Q,AnalMode MODE>
 struct UNITS_CONVERSION<ConvFromTOF,Q,MODE>
 {
 
-    void setUpConversion(COORD_TRANSFORMER<Q,MODE,ConvFromTOF> *pCoordTransf)
+    void setUpConversion(ConvertToMDEvents const *const pHost)
     {       
        // check if axis units are TOF
-       const Kernel::Unit_sptr pThisUnit= pCoordTransf->getAxisUnits();
+       const Kernel::Unit_sptr pThisUnit= ConvertToMDEvents::getAxisUnits(pHost);
        if(std::string("TOF").compare(pThisUnit->unitID())!=0){
            throw(std::logic_error(" it whould be only TOF here"));
        }
        // get units class, requested by subalgorithm
-       std::string native_units       = pCoordTransf->getNativeUnitsID();
+       std::string native_units       = ConvertToMDEvents::getNativeUnitsID(pHost);
        Kernel::Unit_sptr pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }
        // get detectors positions and other data needed for units conversion:
-       const preprocessed_detectors det = pCoordTransf->getPrepDetectors();
+       const preprocessed_detectors det = ConvertToMDEvents::getPrepDetectors(pHost);
        pTwoTheta = &(det.TwoTheta[0]);
        pL2       = &(det.L2[0]);
        L1        =  det.L1;
-       efix      =  pCoordTransf->getEi();
+       efix      =  ConvertToMDEvents::getEi(pHost);
     };
     inline void updateConversion(uint64_t i)
     {
@@ -106,28 +104,28 @@ template<Q_state Q,AnalMode MODE>
 struct UNITS_CONVERSION<ConvByTOF,Q,MODE>
 {
 
-    void setUpConversion(COORD_TRANSFORMER<Q,MODE,ConvByTOF> *pCoordTransf)
+    void setUpConversion(ConvertToMDEvents const *const pHost)
     {       
 
-       pSourceWSUnit= pCoordTransf->getAxisUnits();
+       pSourceWSUnit= ConvertToMDEvents::getAxisUnits(pHost);
        if(!pSourceWSUnit){
            throw(std::logic_error(" can not retrieve source workspace units from the input workspacee"));
        }
 
        // get units class, requested by subalgorithm
-       std::string native_units       = pCoordTransf->getNativeUnitsID();
+       std::string native_units       = ConvertToMDEvents::getNativeUnitsID(pHost);
        Kernel::Unit_sptr pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
        }
 
        // get detectors positions and other data needed for units conversion:
-       const preprocessed_detectors det = pCoordTransf->getPrepDetectors();
+       const preprocessed_detectors det = ConvertToMDEvents::getPrepDetectors(pHost);
        pTwoTheta = &(det.TwoTheta[0]);
        pL2       = &(det.L2[0]);
        L1        =  det.L1;
        // get efix
-       efix      =  pCoordTransf->getEi();
+       efix      =  ConvertToMDEvents::getEi(pHost);
     };
 
     inline void updateConversion(uint64_t i)

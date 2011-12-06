@@ -95,6 +95,12 @@ namespace MDAlgorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}  
+
+// helper functions: To assist with units conversion
+    static std::string          getNativeUnitsID(ConvertToMDEvents const *const pHost){ return pHost->natural_units;}
+    static Kernel::Unit_sptr    getAxisUnits(ConvertToMDEvents const *const pHost){return pHost->inWS2D->getAxis(0)->unit();}
+    static preprocessed_detectors & getPrepDetectors(ConvertToMDEvents const *const pHost);
+    static  double              getEi(ConvertToMDEvents const *const pHost){return (boost::lexical_cast<double>(pHost->inWS2D->run().getProperty("Ei")->value())); }
   private:
     void init();
     void exec();

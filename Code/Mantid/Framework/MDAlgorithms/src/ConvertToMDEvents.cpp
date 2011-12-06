@@ -29,7 +29,9 @@
 //
 #include "MantidDataObjects/Workspace2D.h"
 //
-#include "MantidMDAlgorithms/ConvertToMDEventsMethodsTemplate.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsMethods.h"
 
 #include <algorithm>
 #include <float.h>
@@ -57,7 +59,12 @@ preprocessed_detectors ConvertToMDEvents::det_loc;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDEvents)
   
-/// Sets documentation strings for this algorithm
+preprocessed_detectors & 
+ConvertToMDEvents::getPrepDetectors(ConvertToMDEvents const *const pHost)
+{   UNUSED_ARG(pHost);
+        return ConvertToMDEvents::det_loc;
+}
+// Sets documentation strings for this algorithm
 void ConvertToMDEvents::initDocs()
 {
     this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
@@ -268,7 +275,7 @@ void ConvertToMDEvents::exec(){
    // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
    // user input is mainly ignored
     }else{ 
-
+         throw(Kernel::Exception::NotImplementedError("Not Yet Implemented"));
           dim_min.assign(n_activated_dimensions,-1);
           dim_max.assign(n_activated_dimensions,1);
     }
@@ -279,7 +286,7 @@ void ConvertToMDEvents::exec(){
       
    
      if(create_new_ws){
-        // create the event workspace with proper numner of dimensions and specified box controller parameters;
+        // create the event workspace with proper number of dimensions and specified box controller parameters;
         spws = ws_creator[n_activated_dimensions](this,5,10,20);
         if(!spws){
             g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
@@ -347,7 +354,7 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     int nQ_dims(0),ndE_dims(0);
 
     // identify Q_mode
-    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);
+    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);  
     // identify dE mode    
     DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
     // identify conversion mode;
@@ -493,9 +500,9 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     {
        nQ_dims=3;
        out_dim_names.resize(3);       
-       out_dim_names[0]="Q_h";
-       out_dim_names[1]="Q_k";
-       out_dim_names[2]="Q_l";
+       out_dim_names[0]="Q_x";
+       out_dim_names[1]="Q_y";
+       out_dim_names[2]="Q_z";
        Q_MODE_ID = Q_modes[Q3D];
        out_dim_units.assign(3,native_elastic_unitID_Cryst);
 
@@ -694,7 +701,6 @@ class LOOP_ND<2,Q,MODE,CONV>{
 /** Constructor 
  *  needs to pick up all known algorithms. 
 */
-
 ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(3),
 dE_modes(4),
@@ -718,30 +724,38 @@ ConvModes(4)
      native_elastic_unitID_Powder="dSpacing"; // |Q| mode
      native_elastic_unitID_Cryst ="MomentumTransfer"; // Why it is a transfer? Hope it is just a momentum
 
-// NoQ --> any Analysis mode will do as it does not depend on it
+// NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
     LOOP_ND<8,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
+    LOOP_ND<8,NoQ,ANY_Mode,ConvertFast>::EXEC(this);
+    LOOP_ND<8,NoQ,ANY_Mode,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,NoQ,ANY_Mode,ConvByTOF>::EXEC(this);
 // MOD Q
-//      ConvByTOF,   // conversion possible via TOF
-//      ConvFromTOF 
-//    LOOP_ND<8,modQ,Direct,ConvertNo>::EXEC(this);
-//    LOOP_ND<8,modQ,Indir,ConvertNo>::EXEC(this);
-//    LOOP_ND<8,modQ,Elastic,ConvertNo>::EXEC(this);
-//    LOOP_ND<8,modQ,Direct,ConvertFast>::EXEC(this);
-//    LOOP_ND<8,modQ,Indir,ConvertFast>::EXEC(this);
-//    LOOP_ND<8,modQ,Elastic,ConvertFast>::EXEC(this);
-//// Q3D
-//    LOOP_ND<8,Q3D,Direct,ConvertNo>::EXEC(this);
-//    LOOP_ND<8,Q3D,Indir,ConvertNo>::EXEC(this);
-//    LOOP_ND<8,Q3D,Elastic,ConvertNo>::EXEC(this);
-//    LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
-//    LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
-//    LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
-//    LOOP_ND<8,Q3D,Direct,ConvFromTOF>::EXEC(this);
-//    LOOP_ND<8,Q3D,Indir,ConvFromTOF>::EXEC(this);
-//    LOOP_ND<8,Q3D,Elastic,ConvFromTOF>::EXEC(this);
-//    LOOP_ND<8,Q3D,Direct,ConvByTOF>::EXEC(this);
-//    LOOP_ND<8,Q3D,Indir,ConvByTOF>::EXEC(this);
-//    LOOP_ND<8,Q3D,Elastic,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Direct,ConvertNo>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvertNo>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvertNo>::EXEC(this);
+    LOOP_ND<8,modQ,Direct,ConvertFast>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvertFast>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvertFast>::EXEC(this);
+    LOOP_ND<8,modQ,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvByTOF>::EXEC(this);
+
+ // Q3D
+    LOOP_ND<8,Q3D,Direct,ConvertNo>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvertNo>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvertNo>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvByTOF>::EXEC(this);
 
 
     // Workspaces:
