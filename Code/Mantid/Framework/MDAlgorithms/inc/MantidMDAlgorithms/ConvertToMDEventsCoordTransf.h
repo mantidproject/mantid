@@ -206,6 +206,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV>
     }
 
     inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+        UNUSED_ARG(i);
          // convert X-data into energy transfer (if necessary)
           coord_t E_tr = UnitsConvertor.getXConverted(X,j);
           Coord[3]    = E_tr;
@@ -258,7 +259,9 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV>
         rotMat = pHost->get_transf_matrix();
         //
         UnitsConvertor.setUpConversion(this->pHost); 
-      
+        // get pointer to the positions of the detectors
+        pDet = &(ConvertToMDEvents::getPrepDetectors(pHost).det_dir[0]);
+    
         return true;
     }
     //
@@ -266,10 +269,10 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV>
     {
           UNUSED_ARG(Coord); 
           UnitsConvertor.updateConversion(i);
-          double  ex = pHost->det_loc.det_dir[i].X();
-          double  ey = pHost->det_loc.det_dir[i].Y();
-          double  ez = pHost->det_loc.det_dir[i].Z();
 
+          ex = (pDet+i)->X();
+          ey = (pDet+i)->Y();
+          ez = (pDet+i)->Z();
           return true;
     }
 
@@ -295,6 +298,8 @@ private:
     double ex,ey,ez;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    // pointer to the beginning of the array with 
+    Kernel::V3D *pDet;
     //
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
