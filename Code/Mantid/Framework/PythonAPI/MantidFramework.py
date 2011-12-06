@@ -55,7 +55,15 @@ else:
     dlloader = libdlopen.loadlibrary
     import subprocess
     
-    _bin = os.environ['MANTIDPATH']
+    _bin = os.path.abspath(os.path.dirname(__file__))
+    pythonlib = os.path.join(_bin,'libMantidPythonAPI.so')
+    if not os.path.exists(pythonlib):
+        _bin = os.environ['MANTIDPATH']
+        pythonlib = os.path.join(_bin,'libMantidPythonAPI.so')
+        if not os.path.exists(pythonlib):
+            raise RuntimeError('Unable to find libMantidPythonAPI, cannot continue')
+    
+    os.environ['MANTIDPATH']
     def get_libpath(mainlib, dependency):
         if platform.system() == 'Linux':
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)
@@ -80,7 +88,6 @@ else:
     ldpath = os.environ.get(library_var, "")
     ldpath += ":" + _bin
     os.environ[library_var] = ldpath
-    pythonlib = os.path.join(_bin,'libMantidPythonAPI.so')
     dlloader(get_libpath(pythonlib, 'stdc++'))
     dlloader(get_libpath(pythonlib, 'libNeXus'))
     dlloader(get_libpath(pythonlib, 'libMantidKernel'))
