@@ -168,7 +168,7 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
   //
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
-  if ((!source) || (!sample == NULL )) {
+  if ((!source) || (!sample)) {
     convert_log.error()<<" Instrument is not fully defined. Can not identify source or sample\n";
     throw Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
   }
