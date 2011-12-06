@@ -10,20 +10,6 @@
 #
 # Based on the SQUISH_ADD_TEST macro
 #
-
-#=============================================================================
-# Copyright 2008-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
-
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 message(STATUS "squish_server_executable='${squish_server_executable}'")
@@ -44,8 +30,6 @@ if (UNIX)
   execute_process(
     COMMAND  ${mantid_cmake_modules}/SquishRunTestSuite.sh ${squish_server_executable} ${squish_client_executable} ${squish_test_suite} ${squish_results_dir} ${squish_results_file}
     RESULT_VARIABLE test_rv
-    OUTPUT_FILE "testout.log"
-    ERROR_FILE "testerr.log"
     )
 endif (UNIX)
 
