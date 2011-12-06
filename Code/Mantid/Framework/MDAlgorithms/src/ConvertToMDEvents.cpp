@@ -156,11 +156,31 @@ ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const s
 void 
 ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
 {
+  // 
+  Instrument_const_sptr instrument = inputWS->getInstrument();
+  //
+  IObjComponent_const_sptr source = instrument->getSource();
+  IObjComponent_const_sptr sample = instrument->getSample();
+  if ((!source) || (!sample == NULL )) {
+    convert_log.error()<<" Instrument is not fully defined. Can not identify source or sample\n";
+    throw Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
+  }
 
-    const size_t nHist = inputWS->getNumberHistograms();
+  // L1
+  try{
+    det_loc.L1 = source->getDistance(*sample);
+    convert_log.debug() << "Source-sample distance: " << det_loc.L1 << std::endl;
+  }catch (Exception::NotFoundError &)  {
+    convert_log.error("Unable to calculate source-sample distance");
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
+  }
+  //
+  const size_t nHist = inputWS->getNumberHistograms();
 
     det_loc.det_dir.resize(nHist);
     det_loc.det_id.resize(nHist);
+    det_loc.L2.resize(nHist);
+    det_loc.TwoTheta.resize(nHist);
      // Loop over the spectra
    size_t ic(0);
    for (size_t i = 0; i < nHist; i++){
@@ -176,9 +196,11 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
     if (spDet->isMonitor())continue;   
 
      det_loc.det_id[ic] = spDet->getID();
-    // dist     =  spDet->getDistance(*sample);
-     double polar    =  inputWS->detectorTwoTheta(spDet);
-     double azim     =  spDet->getPhi();    
+     det_loc.L2[ic]     = spDet->getDistance(*sample);
+
+     double polar        =  inputWS->detectorTwoTheta(spDet);
+     det_loc.TwoTheta[ic]=  polar;
+     double azim         =  spDet->getPhi();    
 
      double sPhi=sin(polar);
      double ez = cos(polar);
@@ -195,6 +217,8 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
    if(ic<nHist){
        det_loc.det_dir.resize(ic);
        det_loc.det_id.resize(ic);
+       det_loc.L2.resize(ic);
+       det_loc.TwoTheta.resize(ic);
    }
 
 }
@@ -296,10 +320,7 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     // units IS-s the input workspace dimensions have
     std::vector<std::string> ws_dim_units;
 
-    // Describes the units (different for different dE mode), which the selected sub algorihm expects to work with. 
-    // If other units have been identified in input workspace, those have to be converted into 
-    std::string natural_units;
-
+  
     // result: AlgorithmID 
     std::string the_WSalgID;   
  
@@ -427,6 +448,8 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
         }
 
     }
+    
+
     return DE_MODE_ID;
 
 }
@@ -534,14 +557,25 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
 
    // Sanity checks:
     if(nDims<3&&(the_algID.find(Q_modes[Q3D])!=std::string::npos)){
-        g_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
+        convert_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
         throw(std::logic_error("can not parse input parameters propertly"));
     }
+    // we have currenlty instanciated only 8 input dimensions. See algorithm constructor to change that. 
     if(nDims>8){
-        g_log.error()<<"Can not currently produce more then 8 dimesnions, requested: "<<nDims<<std::endl;
+        convert_log.error()<<"Can not currently produce more then 8 dimesnions, requested: "<<nDims<<std::endl;
         throw(std::invalid_argument(" Too many dimensions requested "));
     }
-    //TODO: temporary, we will redefine the algorithm ID not do depend on dimension number in a future
+
+    // any inelastic mode or unit conversion involing TOF needs Ei to be among the input workspace properties
+    if((the_algID.find(dE_modes[Direct])!=std::string::npos)||(the_algID.find(dE_modes[Indir])!=std::string::npos)||(the_algID.find("TOD")!=std::string::npos))
+    {        
+        if(!inWS2D->run().hasProperty("Ei")){
+            convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
+            throw(std::invalid_argument(" Needs Input energy to be present "));
+        }
+    }
+
+    //TODO: temporary, we will redefine the algorithm ID not to depend on dimension number in a future
     the_algID  = the_algID+boost::lexical_cast<std::string>(nDims);
 
     return the_algID;
@@ -549,7 +583,8 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
 }
 
 /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace 
- *
+ * TODO: Currenly logically wrong (at least for inelastic)  Specific processed properties have to be introudced
+ * 
  * @param inMatrixWS -- shared pointer to input workspace for analysis
  * 
  * @returns add_dim_names -- the ID-s for the dimension names, which can be obtained from the workspace
@@ -679,10 +714,11 @@ ConvModes(4)
      ConvModes[ConvertFast]="CnvFast";
      ConvModes[ConvByTOF]  ="CnvByTOF";
      ConvModes[ConvFromTOF]="CnvFromTOF";
-
+     // The conversion subalgorithm expects workspaces in these units; 
+     // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
      native_inelastic_unitID     ="DeltaE";
-     native_elastic_unitID_Powder="dSpacing";
-     native_elastic_unitID_Cryst ="MomentumTransfer"; // Why it is transfer? Hope it is just a momentum
+     native_elastic_unitID_Powder="dSpacing"; // |Q| mode
+     native_elastic_unitID_Cryst ="MomentumTransfer"; // Why it is a transfer? Hope it is just a momentum
 
 // NoQ --> any Analysis mode will do as it does not depend on it
     LOOP_ND<8,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
@@ -702,6 +738,12 @@ ConvModes(4)
     LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
     LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
     LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvByTOF>::EXEC(this);
 
 
     // Workspaces:

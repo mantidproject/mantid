@@ -289,9 +289,6 @@ void testParseConv_ByTOF()
      TS_ASSERT_EQUALS("CnvByTOF",CONV_ID);
 }
 
-
-
-
 // --> GET DIMENSIONS FROM WS MATRIX:
 void testNeedsNumericAxis(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);

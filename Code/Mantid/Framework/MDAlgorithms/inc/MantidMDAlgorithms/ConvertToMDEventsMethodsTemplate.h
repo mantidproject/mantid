@@ -24,7 +24,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         convert_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
     }
-    coord_transformer<Q,MODE,CONV> trn(this); 
+    coordTransformer<Q,MODE,CONV> trn(this); 
     // one of the dimensions has to be X-ws dimension -> need to add check for that;
 
     // copy experiment info into target workspace
@@ -35,7 +35,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     std::vector<coord_t> Coord(nd);
 
 
-    if(!trn.calc_generic_variables(Coord,nd))return; // if any property dimension is outside of the data range requested
+    if(!trn.calcGenericVariables(Coord,nd))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(numSpec); ++i)
     {
@@ -45,7 +45,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         const MantidVec& Error    = inWS2D->readE(i);
         int32_t det_id            = det_loc.det_id[i];
 
-        if(!trn.calculate_y_coordinate(Coord,i))continue;   // skip y outsize of the range;
+        if(!trn.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
 
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
@@ -111,9 +111,9 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
      
 ///
 template<Q_state Q,AnalMode MODE,CnvrtUnits CONV>
-struct coord_transformer
+struct coordTransformer
       {
-      coord_transformer(ConvertToMDEvents *){}
+      coordTransformer(ConvertToMDEvents *){}
     /**Template defines common interface to common part of the algorithm, where all variables
      * needed within the loop calculated outside of the loop. 
      * In addition it caluclates the property-dependant coordinates 
@@ -125,7 +125,7 @@ struct coord_transformer
      *
      * has to be specialized
     */
-    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
+    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes){
         UNUSED_ARG(Coord); UNUSED_ARG(n_ws_variabes);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
 
@@ -139,7 +139,7 @@ struct coord_transformer
      * 
      *  some default implementations possible (e.g mode Q3D,ragged  Any_Mode( Direct, indirect,elastic), 
      */
-    inline bool calculate_y_coordinatee(std::vector<coord_t> &Coord,size_t i){
+    inline bool calcYDepCoordinatese(std::vector<coord_t> &Coord,uint64_t i){
         UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
 
     /** template generalizes the code to calculate all remaining coordinates, defined within the inner loop
@@ -161,11 +161,11 @@ struct coord_transformer
 //----------------------------------------------------------------------------------------------------------------------
 // SPECIALIZATIONS:
 //----------------------------------------------------------------------------------------------------------------------
-// NoQ,ANY_Mode 
+// NoQ,ANY_Mode -- no units conversion 
 template<AnalMode MODE,CnvrtUnits CONV> 
-struct coord_transformer<NoQ,MODE,CONV>
+struct coordTransformer<NoQ,MODE,CONV>
 {
-    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd)    
+    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)    
     {
     // workspace defines 2 properties
          pHost->fillAddProperties(Coord,nd,2);
@@ -180,7 +180,7 @@ struct coord_transformer<NoQ,MODE,CONV>
          return true;
     }
 
-    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
     {
         Coord[1]                  = pYAxis->operator()(i);
         if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
@@ -193,7 +193,7 @@ struct coord_transformer<NoQ,MODE,CONV>
         if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
         return true;
     }
-    coord_transformer(ConvertToMDEvents *pConv):pHost(pConv)
+    coordTransformer(ConvertToMDEvents *pConv):pHost(pConv)
     {}
 private:
    // the variables used for exchange data between different specific parts of the generic ND algorithm:
@@ -207,22 +207,22 @@ private:
 //
 // modQ,ANY_Mode 
 template<AnalMode MODE,CnvrtUnits CONV> 
-struct coord_transformer<modQ,MODE,CONV>
+struct coordTransformer<modQ,MODE,CONV>
 {
-    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd){
+    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd){
         UNUSED_ARG(Coord);
         UNUSED_ARG(nd);
         throw(Kernel::Exception::NotImplementedError("not yet implemented"));
     }
-    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i)
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i)
      {UNUSED_ARG(Coord); UNUSED_ARG(i); return false;}
 
-      inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+      inline bool calculate_ND_coordinates(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord){
           UNUSED_ARG(i);UNUSED_ARG(j);UNUSED_ARG(X);UNUSED_ARG(Coord);
           return false;
      }
 
-    coord_transformer(ConvertToMDEvents *) {}
+    coordTransformer(ConvertToMDEvents *) {}
 };
 //------------------------------------------------------------------------------------------------------------------------------
 // Q3D any mode 
@@ -240,42 +240,23 @@ inline double k_trans<Indir>(double Ei, double E_tr){
     return sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 }
 
-    // DO CONVERSION
+// DO UNITS CONVERSION -- generally does almost nothing
 // procedure which converts/ non-converts units
- template<CnvrtUnits CONV>
- inline coord_t get_x_converted(double X1, double X2, const double factor,const double power)
- {
-     UNUSED_ARG(factor);UNUSED_ARG(power);
-     return (coord_t)(0.5*(X1+X2));
- }
- template<>
- inline coord_t get_x_converted<ConvertFast>(double X1,double X2,const double factor,const double power)
- {
-     double Xm=0.5*(X1+X2);
-     return Xm=(coord_t)(factor*std::pow(Xm,power));
- }
-
- template<AnalMode MODE>
- inline void prepare_conversion(Kernel::Unit *const pThisUnit,double &factor,double &power) 
+template<CnvrtUnits CONV,Q_state Q,AnalMode MODE> 
+struct UnitConversion
 {
-    if(!pThisUnit->quickConversion("DeltaE",factor,power)){
-          throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
-    }
+    UnitConversion(){};
+    inline void     setUpConversion(coordTransformer<Q,MODE,CONV> *){};
+    inline void     updateConversion(uint64_t){};
+    inline coord_t  get_x_converted(const MantidVec& X,size_t j)const{return coord_t(0.5*(X[j]+X[j+1]));}
 
-}
-template<>
-inline void prepare_conversion<Elastic>(Kernel::Unit *const pThisUnit,double &factor,double &power)
-{
-   if(!pThisUnit->quickConversion("Wavelength",factor,power)){
-        throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
-   }
+};
 
-}
-
+//==========================================================================
 template<AnalMode MODE,CnvrtUnits CONV> 
-struct coord_transformer<Q3D,MODE,CONV>
+struct coordTransformer<Q3D,MODE,CONV>
 {
-    inline bool calc_generic_variables(std::vector<coord_t> &Coord, size_t nd)
+    inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
         // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
         pHost->fillAddProperties(Coord,nd,4);
@@ -288,19 +269,19 @@ struct coord_transformer<Q3D,MODE,CONV>
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // 
         rotMat = pHost->get_transf_matrix();
-        if(CONV==ConvertFast){
-              const Kernel::Unit_sptr pThisUnit=pHost->inWS2D->getAxis(0)->unit();
-               prepare_conversion<MODE>(pThisUnit.get(),factor,power);
-        }
+        UnitsConvertor.setUpConversion(this); 
+      
         return true;
     }
     //
-    inline bool calculate_y_coordinate(std::vector<coord_t> &Coord,size_t i){
-              UNUSED_ARG(Coord); UNUSED_ARG(i);  return true;}
+    inline bool calcYDepCoordinates(std::vector<coord_t> &Coord,uint64_t i){
+              UNUSED_ARG(Coord); 
+              UnitsConvertor.updateConversion(i);
+              return true;}
 
     inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
 
-          coord_t E_tr = get_x_converted<CONV>(X[j],X[j+1],factor,power);
+          coord_t E_tr = UnitsConvertor.get_x_converted(X,j);
           Coord[3]    = E_tr;
           if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
 
@@ -320,19 +301,164 @@ struct coord_transformer<Q3D,MODE,CONV>
 
          return true;
     }
-
-    coord_transformer(ConvertToMDEvents *pConv):pHost(pConv){}
+    // constructor;
+    coordTransformer(ConvertToMDEvents *pConv):pHost(pConv){}
+    // helper functions: To assist with units conversion
+    std::string              getNativeUnitsID()const{ return pHost->natural_units;}
+    Kernel::Unit_sptr        getAxisUnits()const{return pHost->inWS2D->getAxis(0)->unit();}
+    preprocessed_detectors & getPrepDetectors()const{return pHost->det_loc;}
+    double             getEi()const{return (boost::lexical_cast<double>(pHost->inWS2D->run().getProperty("Ei")->value())); }
 private:
-    ConvertToMDEvents *pHost;
+
     // the energy of the incident neutrons
     double Ei;
     // the wavevector of incident neutrons
     double ki;
     // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
     std::vector<double> rotMat;
+    //
+    ConvertToMDEvents *pHost;
+    // class that performs untis conversion;
+    UnitConversion<CONV,Q3D,MODE> UnitsConvertor ;
+};
+
+// Fast conversion:
+template<Q_state Q,AnalMode MODE>
+struct UnitConversion<ConvertFast,Q,MODE>
+{
+
+    void setUpConversion(coordTransformer<Q,MODE,ConvertFast> *pCoordTransf)
+    {       
+       const Kernel::Unit_sptr pThisUnit= pCoordTransf->getAxisUnits();
+       std::string native_units         = pCoordTransf->getNativeUnitsID();
+
+       if(!pThisUnit->quickConversion(native_units,factor,power)){
+           throw(std::logic_error(" should be able to convert units and catch case of non-conversions much earlier"));
+       }
+      
+    };
+    // does nothing
+    inline void    updateConversion(const uint64_t ){}
+    // 
+    inline coord_t  get_x_converted(const MantidVec& X,size_t j)const{
+        coord_t X0=coord_t(0.5*(X[j]+X[j+1]));
+        return factor*std::pow(X0,power);
+    }
+private:
     // variables for units conversion:
     double factor, power;
 
+};
+
+// Convert from TOF:
+template<Q_state Q,AnalMode MODE>
+struct UnitConversion<ConvFromTOF,Q,MODE>
+{
+
+    void setUpConversion(coordTransformer<Q,MODE,ConvFromTOF> *pCoordTransf)
+    {       
+       // check if axis units are TOF
+       const Kernel::Unit_sptr pThisUnit= pCoordTransf->getAxisUnits();
+       if(std::string("TOF").compare(pThisUnit->unitID())!=0){
+           throw(std::logic_error(" it whould be only TOF here"));
+       }
+       // get units class, requested by subalgorithm
+       std::string native_units       = pCoordTransf->getNativeUnitsID();
+       Kernel::Unit_sptr pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
+       if(!pWSUnit){
+           throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
+       }
+       // get detectors positions and other data needed for units conversion:
+       const preprocessed_detectors det = pCoordTransf->getPrepDetectors();
+       pTwoTheta = &(det.TwoTheta[0]);
+       pL2       = &(det.L2[0]);
+       L1        =  det.L1;
+       efix      =  pCoordTransf->getEi();
+    };
+    inline void updateConversion(uint64_t i)
+    {
+        double delta;
+        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],MODE,efix,delta);
+    }
+    inline coord_t  get_x_converted(const MantidVec& X,size_t j)const{
+        double X0=(0.5*(X[j]+X[j+1]));        
+        return (coord_t)pWSUnit->singleFromTOF(X0);
+    }
+private:
+    // variables for units conversion:
+
+    // Make local copies of the units. This allows running the loop in parallel
+    //      Unit * localFromUnit = fromUnit->clone();
+    //  Unit * localOutputUnit = outputUnit->clone();
+      Kernel::Unit_sptr pWSUnit;
+      // Convert the input unit to time-of-flight
+      //localFromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      // Convert from time-of-flight to the desired unit
+      //localOutputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+
+      double L1,efix;
+      double const *pTwoTheta;
+      double const *pL2;
+
+};
+
+// Convert from TOF:
+template<Q_state Q,AnalMode MODE>
+struct UnitConversion<ConvByTOF,Q,MODE>
+{
+
+    void setUpConversion(coordTransformer<Q,MODE,ConvByTOF> *pCoordTransf)
+    {       
+
+       pSourceWSUnit= pCoordTransf->getAxisUnits();
+       if(!pSourceWSUnit){
+           throw(std::logic_error(" can not retrieve source workspace units from the input workspacee"));
+       }
+
+       // get units class, requested by subalgorithm
+       std::string native_units       = pCoordTransf->getNativeUnitsID();
+       Kernel::Unit_sptr pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
+       if(!pWSUnit){
+           throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
+       }
+
+       // get detectors positions and other data needed for units conversion:
+       const preprocessed_detectors det = pCoordTransf->getPrepDetectors();
+       pTwoTheta = &(det.TwoTheta[0]);
+       pL2       = &(det.L2[0]);
+       L1        =  det.L1;
+       // get efix
+       efix      =  pCoordTransf->getEi();
+    };
+
+    inline void updateConversion(uint64_t i)
+    {
+        double delta;
+        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],MODE,efix,delta);
+        pSourceWSUnit->initialize(L1,pL2[i],pTwoTheta[i],MODE,efix,delta);
+    }
+    inline coord_t  get_x_converted(const MantidVec& X,size_t j)const{
+        double X0=(0.5*(X[j]+X[j+1]));  
+        double TOF  = pSourceWSUnit->singleToTOF(X0);
+        return (coord_t)pWSUnit->singleFromTOF(TOF);
+    }
+private:
+    // variables for units conversion:
+
+      Kernel::Unit_sptr pWSUnit;
+      Kernel::Unit_sptr pSourceWSUnit;
+    // Make local copies of the units. This allows running the loop in parallel
+    //      Unit * localFromUnit = fromUnit->clone();
+    //  Unit * localOutputUnit = outputUnit->clone();
+      
+      // Convert the input unit to time-of-flight
+      //localFromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      // Convert from time-of-flight to the desired unit
+      //localOutputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+
+      double L1,efix;
+      double const *pTwoTheta;
+      double const *pL2;
 
 };
 

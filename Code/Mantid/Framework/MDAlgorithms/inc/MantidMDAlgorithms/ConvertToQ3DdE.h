@@ -48,9 +48,12 @@ namespace MDAlgorithms
       in a very common situation when the physical instrument does not change in all runs, contributed into MD workspace
    */
   struct preprocessed_detectors{
+    double L1;
     Kernel::V3D   minDetPosition;    // minimal and
     Kernel::V3D   maxDetPosition;    // maxinal position for the detectors
     std::vector<Kernel::V3D>  det_dir; // unit vector pointing from the sample to the detector;
+    std::vector<double>       L2;
+    std::vector<double>       TwoTheta;
     std::vector<int32_t>      det_id;   // the detector ID;
     //
     bool is_defined(void)const{return det_dir.size()>0;}

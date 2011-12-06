@@ -64,12 +64,12 @@ namespace MDAlgorithms
        modQ,
        Q3D
    };
-  // known analysis modes:
+  // known analysis modes, arranged according to emodes 
   enum AnalMode{  
-      ANY_Mode, // couples with NoQ, means just copying existing
-      Direct, // Direct inelastic analysis mode
-      Indir,  // InDirect inelastic analysis mode
-      Elastic
+      Elastic, //       int emode = 0;
+      Direct, // emode=1; Direct inelastic analysis mode
+      Indir,  // emode=2; InDirect inelastic analysis mode
+      ANY_Mode // couples with NoQ, means just copying existing
   };
   // enum describes if there is need to convert workspace units
   enum CnvrtUnits
@@ -79,9 +79,9 @@ namespace MDAlgorithms
       ConvByTOF,   // conversion possible via TOF
       ConvFromTOF  //  units are the TOF 
   };
-//
+// predefenition 
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
-  struct coord_transformer;
+  struct coordTransformer;
   
   class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
@@ -170,7 +170,7 @@ namespace MDAlgorithms
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
-     friend struct coord_transformer;
+     friend struct coordTransformer;
      /// helper class to orginize metaloop on number of dimensions
      template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
      friend class LOOP_ND;
@@ -195,7 +195,11 @@ namespace MDAlgorithms
     std::string  native_elastic_unitID_Powder;
     // the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
     std::string  native_inelastic_unitID;
- 
+
+    // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
+    // Any other input workspace units have to be converted into these:
+    std::string natural_units;
+
 
 
 
