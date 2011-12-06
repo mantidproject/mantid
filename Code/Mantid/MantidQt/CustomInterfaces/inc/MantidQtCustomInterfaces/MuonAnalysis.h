@@ -291,9 +291,6 @@ private:
   /// List of current group names 
   std::vector<std::string> m_groupNames;
 
-  /// Boolean to show whether the gui is being updated
-  bool m_updating;
-
   /// name for file to temperary store grouping
   std::string m_groupingTempFilename;
 
@@ -349,6 +346,9 @@ private:
 
   /// group defaults are saved to
   QString m_settingsGroup;
+
+  /// Boolean to show whether the gui is being updated
+  bool m_updating;
 
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
