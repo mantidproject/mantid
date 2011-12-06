@@ -2449,7 +2449,7 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
       }
       else
       {
-        if ( boost::lexical_cast<int>(values[i].c_str()) > nDet )
+        if ( (boost::lexical_cast<int>(values[i].c_str()) > nDet) || (boost::lexical_cast<int>(values[i].c_str()) < 1) )
         {
           complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
             + values[i] + ".";
