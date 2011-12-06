@@ -159,6 +159,7 @@ void SliceViewer::initMenus()
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/view-fullscreen.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
@@ -184,13 +185,13 @@ void SliceViewer::initMenus()
 
   action = new QAction(QPixmap(), "&Full range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
-  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-palette.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Slice range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
   action->setIconVisibleInMenu(true);
-  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-palette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
   // --------------- Help Menu ----------------------------------------
