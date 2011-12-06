@@ -95,8 +95,9 @@ if ( UNIX )
   add_library ( dlopen ${DLOPEN_SRC} )
 if ( APPLE )
   # and in .so on the Mac
+  # Need to remove OpenMP
+  set ( CMAKE_C_FLAGS -m64 )
   set_target_properties ( dlopen PROPERTIES SUFFIX .so )
-  set_target_properties ( dlopen PROPERTIES COMPILE_FLAGS -m64 )
   target_link_libraries ( dlopen ${PYTHON_LIBRARIES} )
 endif()
   add_dependencies( PythonAPI dlopen )
