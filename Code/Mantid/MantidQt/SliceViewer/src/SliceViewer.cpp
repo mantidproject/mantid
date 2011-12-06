@@ -37,6 +37,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using MantidQt::API::SyncedCheckboxes;
 
 namespace MantidQt
 {
@@ -197,17 +198,18 @@ void SliceViewer::initMenus()
 
   // --------------- Line Menu ----------------------------------------
   m_menuLine = new QMenu("&Line", this);
+
+  // Line mode menu, synced to the button
   action = new QAction(QPixmap(), "&Line Mode", this);
-  action->setCheckable(true);
-  action->setChecked(false);
   action->setShortcut(Qt::Key_L + Qt::ControlModifier);
-  connect(action, SIGNAL(toggled(bool)), this, SLOT(on_btnDoLine_toggled(bool)));
+  m_syncLineMode = new SyncedCheckboxes(action, ui.btnDoLine, false);
+  connect(m_syncLineMode, SIGNAL(toggled(bool)), this, SLOT(LineMode_toggled(bool)));
   m_menuLine->addAction(action);
 
+  // Snap-to-grid, synced to the button
   action = new QAction(QPixmap(), "&Snap to Grid", this);
-  action->setCheckable(true);
-  action->setChecked(false);
-  connect(action, SIGNAL(toggled(bool)), this, SLOT(on_btnSnapToGrid_toggled(bool)));
+  m_syncSnapToGrid = new SyncedCheckboxes(action, ui.btnSnapToGrid, false);
+  connect(m_syncSnapToGrid, SIGNAL(toggled(bool)), this, SLOT(SnapToGrid_toggled(bool)));
   m_menuLine->addAction(action);
 
 
@@ -459,7 +461,7 @@ void SliceViewer::colorRangeChanged()
 
 //------------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
-void SliceViewer::on_btnDoLine_toggled(bool checked)
+void SliceViewer::LineMode_toggled(bool checked)
 {
   m_lineOverlay->setVisible(checked);
   if (checked)
@@ -487,7 +489,7 @@ void SliceViewer::on_btnClearLine_clicked()
 
 //------------------------------------------------------------------------------------
 /// Slot called when the snap to grid is checked
-void SliceViewer::on_btnSnapToGrid_toggled(bool checked)
+void SliceViewer::SnapToGrid_toggled(bool checked)
 {
   if (checked)
   {
