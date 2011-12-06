@@ -7,16 +7,21 @@
 #include "MantidKernel/VMD.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
+#include "MantidQtSliceViewer/LineOverlay.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include "qmainwindow.h"
 #include "qmenubar.h"
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
+#include <limits>
+#include <qfiledialog.h>
 #include <qmenu.h>
 #include <QtGui/qaction.h>
 #include <qwt_color_map.h>
+#include <qwt_picker_machine.h>
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_picker.h>
@@ -25,13 +30,9 @@
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
-#include <qwt_picker_machine.h>
 #include <sstream>
 #include <vector>
-#include <qfiledialog.h>
-#include <limits>
-#include "MantidQtSliceViewer/SnapToGridDialog.h"
-#include "qmainwindow.h"
+#include "../inc/MantidQtSliceViewer/XYLimitsDialog.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -160,12 +161,16 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
   m_menuView->addAction(action);
 
-  action = new QAction(QPixmap(), "Zoom In", this);
+  action = new QAction(QPixmap(), "&Set X/Y View Size", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(setXYLimits()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Zoom &In", this);
   action->setShortcut(Qt::Key_Plus + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(zoomInSlot()));
   m_menuView->addAction(action);
 
-  action = new QAction(QPixmap(), "Zoom Out", this);
+  action = new QAction(QPixmap(), "Zoom &Out", this);
   action->setShortcut(Qt::Key_Minus + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
   m_menuView->addAction(action);
@@ -226,7 +231,6 @@ void SliceViewer::initMenus()
     bar = parentWindow->menuBar();
   else
   {
-    std::cout << "No parent!\n";
     // Widget is not in a QMainWindow. Make a menu bar
     bar = new QMenuBar(this, "Main Menu Bar");
     ui.verticalLayout->insertWidget(0, bar );
@@ -543,7 +547,7 @@ void SliceViewer::helpLineViewer()
 }
 
 //------------------------------------------------------------------------------------
-/// Reset the zoom view to full axes. This can be called manually with a button
+/// SLOT to reset the zoom view to full axes. This can be called manually with a button
 void SliceViewer::resetZoom()
 {
   // Reset the 2 axes to full scale
@@ -551,6 +555,28 @@ void SliceViewer::resetZoom()
   resetAxis(m_spect->yAxis(), m_Y );
   // Make sure the view updates
   m_plot->replot();
+}
+
+//------------------------------------------------------------------------------------
+/// SLOT to open a dialog to set the XY limits
+void SliceViewer::setXYLimits()
+{
+  // Initialize the dialog with the current values
+  XYLimitsDialog * dlg = new XYLimitsDialog(this);
+  dlg->setXDim(m_X);
+  dlg->setYDim(m_Y);
+  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
+  dlg->setLimits(xint.minValue(), xint.maxValue(), yint.minValue(), yint.maxValue());
+  // Show the dialog
+  if (dlg->exec() == QDialog::Accepted)
+  {
+    // Set the limits in X and Y
+    m_plot->setAxisScale( m_spect->xAxis(), dlg->getXMin(), dlg->getXMax());
+    m_plot->setAxisScale( m_spect->yAxis(), dlg->getYMin(), dlg->getYMax());
+    // Make sure the view updates
+    m_plot->replot();
+  }
 }
 
 //------------------------------------------------------------------------------------

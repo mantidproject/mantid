@@ -61,6 +61,7 @@ signals:
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void resetZoom();
+  void setXYLimits();
   void showInfoAt(double, double);
   void colorRangeChanged();
   void zoomInSlot();
