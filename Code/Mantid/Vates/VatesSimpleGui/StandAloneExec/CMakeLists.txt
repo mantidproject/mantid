@@ -29,6 +29,10 @@ qt4_wrap_cpp( MOC_SRCS
   inc/VsgMainWindow.h
 )
 
+set( TEST_SUITES
+    test/suite_StandAloneVsi
+)
+
 add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
 target_link_libraries( ${PROJECT_NAME}
@@ -40,8 +44,7 @@ VatesSimpleGuiViewWidgets
 )
 
 if( SQUISH_FOUND )
-  squish_add_test_suite( StandAloneVsiSquishTests
-                         ${CMAKE_CURRENT_SOURCE_DIR}/test/suite_VatesSimpleGui )
+  squish_add_test_suite( ${TEST_SUITES} )
 endif()
 
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )
