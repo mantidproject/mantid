@@ -11,6 +11,7 @@
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
 #include <iomanip>
@@ -32,7 +33,6 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
-#include "../inc/MantidQtSliceViewer/XYLimitsDialog.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -184,10 +184,13 @@ void SliceViewer::initMenus()
 
   action = new QAction(QPixmap(), "&Full range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-palette.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Slice range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
+  action->setIconVisibleInMenu(true);
+  { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-palette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
   // --------------- Help Menu ----------------------------------------
