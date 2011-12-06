@@ -29,7 +29,9 @@
 //
 #include "MantidDataObjects/Workspace2D.h"
 //
-#include "MantidMDAlgorithms/ConvertToMDEventsMethodsTemplate.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsMethods.h"
 
 #include <algorithm>
 #include <float.h>
@@ -57,7 +59,12 @@ preprocessed_detectors ConvertToMDEvents::det_loc;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDEvents)
   
-/// Sets documentation strings for this algorithm
+preprocessed_detectors & 
+ConvertToMDEvents::getPrepDetectors(ConvertToMDEvents const *const pHost)
+{   UNUSED_ARG(pHost);
+        return ConvertToMDEvents::det_loc;
+}
+// Sets documentation strings for this algorithm
 void ConvertToMDEvents::initDocs()
 {
     this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
@@ -156,11 +163,31 @@ ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const s
 void 
 ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
 {
+  // 
+  Instrument_const_sptr instrument = inputWS->getInstrument();
+  //
+  IObjComponent_const_sptr source = instrument->getSource();
+  IObjComponent_const_sptr sample = instrument->getSample();
+  if ((!source) || (!sample)) {
+    convert_log.error()<<" Instrument is not fully defined. Can not identify source or sample\n";
+    throw Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
+  }
 
-    const size_t nHist = inputWS->getNumberHistograms();
+  // L1
+  try{
+    det_loc.L1 = source->getDistance(*sample);
+    convert_log.debug() << "Source-sample distance: " << det_loc.L1 << std::endl;
+  }catch (Exception::NotFoundError &)  {
+    convert_log.error("Unable to calculate source-sample distance");
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
+  }
+  //
+  const size_t nHist = inputWS->getNumberHistograms();
 
     det_loc.det_dir.resize(nHist);
     det_loc.det_id.resize(nHist);
+    det_loc.L2.resize(nHist);
+    det_loc.TwoTheta.resize(nHist);
      // Loop over the spectra
    size_t ic(0);
    for (size_t i = 0; i < nHist; i++){
@@ -176,9 +203,11 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
     if (spDet->isMonitor())continue;   
 
      det_loc.det_id[ic] = spDet->getID();
-    // dist     =  spDet->getDistance(*sample);
-     double polar    =  inputWS->detectorTwoTheta(spDet);
-     double azim     =  spDet->getPhi();    
+     det_loc.L2[ic]     = spDet->getDistance(*sample);
+
+     double polar        =  inputWS->detectorTwoTheta(spDet);
+     det_loc.TwoTheta[ic]=  polar;
+     double azim         =  spDet->getPhi();    
 
      double sPhi=sin(polar);
      double ez = cos(polar);
@@ -195,6 +224,8 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
    if(ic<nHist){
        det_loc.det_dir.resize(ic);
        det_loc.det_id.resize(ic);
+       det_loc.L2.resize(ic);
+       det_loc.TwoTheta.resize(ic);
    }
 
 }
@@ -244,7 +275,7 @@ void ConvertToMDEvents::exec(){
    // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
    // user input is mainly ignored
     }else{ 
-
+         throw(Kernel::Exception::NotImplementedError("Not Yet Implemented"));
           dim_min.assign(n_activated_dimensions,-1);
           dim_max.assign(n_activated_dimensions,1);
     }
@@ -255,7 +286,7 @@ void ConvertToMDEvents::exec(){
       
    
      if(create_new_ws){
-        // create the event workspace with proper numner of dimensions and specified box controller parameters;
+        // create the event workspace with proper number of dimensions and specified box controller parameters;
         spws = ws_creator[n_activated_dimensions](this,5,10,20);
         if(!spws){
             g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
@@ -296,10 +327,7 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     // units IS-s the input workspace dimensions have
     std::vector<std::string> ws_dim_units;
 
-    // Describes the units (different for different dE mode), which the selected sub algorihm expects to work with. 
-    // If other units have been identified in input workspace, those have to be converted into 
-    std::string natural_units;
-
+  
     // result: AlgorithmID 
     std::string the_WSalgID;   
  
@@ -326,7 +354,7 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     int nQ_dims(0),ndE_dims(0);
 
     // identify Q_mode
-    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);
+    Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);  
     // identify dE mode    
     DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
     // identify conversion mode;
@@ -427,6 +455,8 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
         }
 
     }
+    
+
     return DE_MODE_ID;
 
 }
@@ -470,9 +500,9 @@ ConvertToMDEvents::parseQMode(const std::string &Q_mode_req,const Strings &ws_di
     {
        nQ_dims=3;
        out_dim_names.resize(3);       
-       out_dim_names[0]="Q_h";
-       out_dim_names[1]="Q_k";
-       out_dim_names[2]="Q_l";
+       out_dim_names[0]="Q_x";
+       out_dim_names[1]="Q_y";
+       out_dim_names[2]="Q_z";
        Q_MODE_ID = Q_modes[Q3D];
        out_dim_units.assign(3,native_elastic_unitID_Cryst);
 
@@ -534,14 +564,25 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
 
    // Sanity checks:
     if(nDims<3&&(the_algID.find(Q_modes[Q3D])!=std::string::npos)){
-        g_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
+        convert_log.error()<<"Algorithm with ID:"<<the_algID<<" should produce at least 3 dimensions and it requested to provie just:"<<nDims<<" dims \n";
         throw(std::logic_error("can not parse input parameters propertly"));
     }
+    // we have currenlty instanciated only 8 input dimensions. See algorithm constructor to change that. 
     if(nDims>8){
-        g_log.error()<<"Can not currently produce more then 8 dimesnions, requested: "<<nDims<<std::endl;
+        convert_log.error()<<"Can not currently produce more then 8 dimesnions, requested: "<<nDims<<std::endl;
         throw(std::invalid_argument(" Too many dimensions requested "));
     }
-    //TODO: temporary, we will redefine the algorithm ID not do depend on dimension number in a future
+
+    // any inelastic mode or unit conversion involing TOF needs Ei to be among the input workspace properties
+    if((the_algID.find(dE_modes[Direct])!=std::string::npos)||(the_algID.find(dE_modes[Indir])!=std::string::npos)||(the_algID.find("TOD")!=std::string::npos))
+    {        
+        if(!inWS2D->run().hasProperty("Ei")){
+            convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
+            throw(std::invalid_argument(" Needs Input energy to be present "));
+        }
+    }
+
+    //TODO: temporary, we will redefine the algorithm ID not to depend on dimension number in a future
     the_algID  = the_algID+boost::lexical_cast<std::string>(nDims);
 
     return the_algID;
@@ -549,7 +590,8 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
 }
 
 /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace 
- *
+ * TODO: Currenly logically wrong (at least for inelastic)  Specific processed properties have to be introudced
+ * 
  * @param inMatrixWS -- shared pointer to input workspace for analysis
  * 
  * @returns add_dim_names -- the ID-s for the dimension names, which can be obtained from the workspace
@@ -578,9 +620,7 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
 }
 
 
-
 /** The matrix to convert 
- 
 */
 std::vector<double> 
 ConvertToMDEvents::get_transf_matrix(const Kernel::V3D &u, const Kernel::V3D &v)const
@@ -661,7 +701,6 @@ class LOOP_ND<2,Q,MODE,CONV>{
 /** Constructor 
  *  needs to pick up all known algorithms. 
 */
-
 ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(3),
 dE_modes(4),
@@ -679,29 +718,44 @@ ConvModes(4)
      ConvModes[ConvertFast]="CnvFast";
      ConvModes[ConvByTOF]  ="CnvByTOF";
      ConvModes[ConvFromTOF]="CnvFromTOF";
-
+     // The conversion subalgorithm expects workspaces in these units; 
+     // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
      native_inelastic_unitID     ="DeltaE";
-     native_elastic_unitID_Powder="dSpacing";
-     native_elastic_unitID_Cryst ="MomentumTransfer"; // Why it is transfer? Hope it is just a momentum
+     native_elastic_unitID_Powder="dSpacing"; // |Q| mode
+     native_elastic_unitID_Cryst ="MomentumTransfer"; // Why it is a transfer? Hope it is just a momentum
 
-// NoQ --> any Analysis mode will do as it does not depend on it
+// NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
     LOOP_ND<8,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
+    LOOP_ND<8,NoQ,ANY_Mode,ConvertFast>::EXEC(this);
+    LOOP_ND<8,NoQ,ANY_Mode,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,NoQ,ANY_Mode,ConvByTOF>::EXEC(this);
 // MOD Q
-//      ConvByTOF,   // conversion possible via TOF
-//      ConvFromTOF 
     LOOP_ND<8,modQ,Direct,ConvertNo>::EXEC(this);
     LOOP_ND<8,modQ,Indir,ConvertNo>::EXEC(this);
     LOOP_ND<8,modQ,Elastic,ConvertNo>::EXEC(this);
     LOOP_ND<8,modQ,Direct,ConvertFast>::EXEC(this);
     LOOP_ND<8,modQ,Indir,ConvertFast>::EXEC(this);
     LOOP_ND<8,modQ,Elastic,ConvertFast>::EXEC(this);
-// Q3D
+    LOOP_ND<8,modQ,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,modQ,Elastic,ConvByTOF>::EXEC(this);
+
+ // Q3D
     LOOP_ND<8,Q3D,Direct,ConvertNo>::EXEC(this);
     LOOP_ND<8,Q3D,Indir,ConvertNo>::EXEC(this);
     LOOP_ND<8,Q3D,Elastic,ConvertNo>::EXEC(this);
     LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
     LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
     LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvFromTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Direct,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Indir,ConvByTOF>::EXEC(this);
+    LOOP_ND<8,Q3D,Elastic,ConvByTOF>::EXEC(this);
 
 
     // Workspaces:
