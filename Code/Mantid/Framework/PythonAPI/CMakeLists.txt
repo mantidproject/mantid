@@ -91,11 +91,12 @@ endforeach ( PYFILE )
 
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
 if ( UNIX )
-  set ( DLOPEN_SRC src/dlopen.cpp )
+  set ( DLOPEN_SRC src/dlopen.c )
   add_library ( dlopen ${DLOPEN_SRC} )
 if ( APPLE )
   # and in .so on the Mac
   set_target_properties ( dlopen PROPERTIES SUFFIX .so )
+  set_target_properties ( dlopen PROPERTIES COMPILE_FLAGS -m64 )
   target_link_libraries ( dlopen ${PYTHON_LIBRARIES} )
 endif()
   add_dependencies( PythonAPI dlopen )
