@@ -116,6 +116,8 @@ public:
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
   //PeakOverlay& getPeakOverlay(){return m_peakShapes;}
   void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
+  void clearPeakOverlays();
+  bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}
 
 signals:
 

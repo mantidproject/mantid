@@ -542,3 +542,15 @@ void ProjectionSurface::peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPe
     }
   }
 }
+
+/**
+ * Remove all peak overlays.
+ */
+void ProjectionSurface::clearPeakOverlays()
+{
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+      delete m_peakShapes[i];
+  }
+  m_peakShapes.clear();
+}

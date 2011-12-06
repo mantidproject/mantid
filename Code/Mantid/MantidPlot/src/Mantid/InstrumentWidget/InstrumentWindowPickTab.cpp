@@ -778,11 +778,11 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
 }
 
 /**
- * Show context menu of mInstrumentDisplay
+ * Add pick tab specific actions to mInstrumentDisplay context menu.
  */
-void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
+void InstrumentWindowPickTab::setInstrumentDisplayContextMenu(QMenu& context)
 {
-  QMenu context(this);
+  //QMenu context(this);
   if (m_plot->hasCurve())
   {
     context.addAction(m_storeCurve);
@@ -790,10 +790,6 @@ void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
   if (m_plot->hasStored() || m_plot->hasCurve())
   {
     context.addAction(m_savePlotToWorkspace);
-  }
-  if ( !context.isEmpty() )
-  {
-    context.exec(QCursor::pos());
   }
 }
 
