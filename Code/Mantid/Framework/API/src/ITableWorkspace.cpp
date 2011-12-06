@@ -22,6 +22,22 @@ void ITableWorkspace::modified()
     new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(),tws));
 }
 
+
+
+/** Overridable method to custom-sort the workspace
+ *
+ * @param criteria : a vector with a list of pairs: column name, bool;
+ *        where bool = true for ascending, false for descending sort.
+ *        The peaks are sorted by the first criterion first, then the 2nd if equal, etc.
+ * @throw std::runtime_error unless overridden
+ */
+void ITableWorkspace::sort(std::vector< std::pair<std::string, bool> > & criteria)
+{
+  UNUSED_ARG(criteria);
+  throw std::runtime_error("This type of ITableWorkspace (" + this->id() + ") has not implemented sort() yet customSort() returns true. Please contact the developers.");
+}
+
+
 } // namespace API
 } // Namespace Mantid
 

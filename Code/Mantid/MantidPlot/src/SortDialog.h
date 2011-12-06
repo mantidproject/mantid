@@ -37,26 +37,26 @@ class QComboBox;
 //! Sorting options dialog
 class SortDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    SortDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-    void insertColumnsList(const QStringList& cols);
+  SortDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  void insertColumnsList(const QStringList& cols);
 
 private slots:
-	void accept();
-	void changeType(int index);
+  void accept();
+  void changeType(int index);
 
 signals:
-	void sort(int, int, const QString&);
+  void sort(int, int, const QString&);
 
 private:
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-	QPushButton* buttonHelp;
-	QComboBox* boxType;
-	QComboBox* boxOrder;
-	QComboBox *columnsList;
+  QPushButton* buttonOk;
+  QPushButton* buttonCancel;
+  QPushButton* buttonHelp;
+  QComboBox* boxType;
+  QComboBox* boxOrder;
+  QComboBox *columnsList;
 };
 
 #endif
