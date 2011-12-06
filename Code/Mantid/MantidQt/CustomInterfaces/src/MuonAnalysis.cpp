@@ -79,7 +79,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(""), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/")
+  m_tabNumber(0), m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false)
 {
 }
 
@@ -174,23 +174,25 @@ void MuonAnalysis::initLayout()
   loadFittings();
 
   // Detected a workspace change and therefore the peak picker tool needs to be reassigned.
-  connect(m_uiForm.fitBrowser,SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
+  connect(m_uiForm.fitBrowser, SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
 
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 
   // Detect when fitting has started, change the plot style to the one specified in plot details tab.
-  connect(m_uiForm.fitBrowser,SIGNAL(changeFitPlotStyle(const QString &)), this, SLOT(changeFitPlotType(const QString &)));
+  connect(m_uiForm.fitBrowser, SIGNAL(changeFitPlotStyle(const QStringList &)), this, SLOT(changeFitPlotType(const QStringList &)));
 
   // Detect if the graph should be customised and call the two functions that change the different curves on the graph.
-  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeDataPlotType(const QStringList &)));
-  connect(m_uiForm.fitBrowser,SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeFitPlotType(const QStringList &)));
+  connect(m_uiForm.fitBrowser, SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeDataPlotType(const QStringList &)));
+  connect(m_uiForm.fitBrowser, SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeFitPlotType(const QStringList &)));
 
   // Detect when the fit has finished and group the workspaces that have been created as a result.
-  connect(m_uiForm.fitBrowser,SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
+  connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
 
   // Detect when the fit has finished and group the workspaces that have been created as a result.
-  connect(m_uiForm.fitBrowser,SIGNAL(beforeFitting(const QtBoolPropertyManager*)), this, SLOT(beforeDoFit(const QtBoolPropertyManager*)));
+  connect(m_uiForm.fitBrowser, SIGNAL(beforeFitting(const QtBoolPropertyManager*)), this, SLOT(beforeDoFit(const QtBoolPropertyManager*)));
+
+  connectAutoUpdate();
 
   // Muon scientists never fits peaks, hence they want the following parameter
   // set to a high number
@@ -1031,6 +1033,8 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
  */
 void MuonAnalysis::inputFileChanged(const QString& filename)
 {
+  m_updating = true;
+
   Poco::File l_path( filename.toStdString() );
 
   // and check if file is from a recognised instrument and update instrument combo box
@@ -1191,6 +1195,8 @@ void MuonAnalysis::inputFileChanged(const QString& filename)
   // straight away plot the data
   if (m_uiForm.frontPlotButton->isEnabled() )
     runFrontPlotButton();
+
+  m_updating = false;
 }
 
 
@@ -1237,6 +1243,9 @@ void MuonAnalysis::guessAlphaClicked()
     else
       m_uiForm.pairTable->setItem(m_pairTableRowInFocus,3, new QTableWidgetItem(pyOutput));
   }
+
+  // See if auto-update is on and if so update the plot
+  groupTabUpdatePair();
 }
 
 /**
@@ -1531,6 +1540,8 @@ void MuonAnalysis::makeRaw(const std::string & wsName)
  */
 void MuonAnalysis::plotGroup(const std::string& plotType)
 {
+  m_updating = true;
+
   int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
   if ( groupNum >= 0 )
   {
@@ -1670,7 +1681,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
-  }  
+  }
+  m_updating = false;
 }
 
 /**
@@ -1678,6 +1690,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
+  m_updating = true;
+
   int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
   if ( pairNum >= 0 )
   {
@@ -1797,7 +1811,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
-  }  
+  }
+  
+  m_updating = false;
 }
 
 QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
@@ -2970,6 +2986,69 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
           + "',OutputWorkspace='" + groupName + "')\n";
       runPythonCode( groupStr ).trimmed();
     }
+  }
+}
+
+
+void MuonAnalysis::connectAutoUpdate()
+{
+  // Home tab Auto Updates
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+
+  // Grouping tab Auto Updates
+  // Group Table
+  connect(m_uiForm.groupTable, SIGNAL(cellChanged(int,int)), this, SLOT(groupTabUpdateGroup()));
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdateGroup()));
+  // Pair Table (Guess Alpha button attached in another function)
+  connect(m_uiForm.pairTable, SIGNAL(cellChanged(int,int)), this, SLOT(groupTabUpdatePair()));
+  connect(m_uiForm.pairTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdatePair()));
+
+  // Settings tab Auto Updates
+  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.allErrors, SIGNAL(clicked()), this, SLOT(settingsTabUpdatePlot()));
+}
+
+void MuonAnalysis::homeTabUpdatePlot()
+{
+  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 0) )
+  {
+    runFrontPlotButton();
+  }
+}
+
+void MuonAnalysis::groupTabUpdateGroup()
+{
+  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 1) )
+  {
+    runGroupTablePlotButton();
+  }
+}
+
+void MuonAnalysis::groupTabUpdatePair()
+{
+  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 1) )
+  {
+    runPairTablePlotButton();
+  }
+}
+
+void MuonAnalysis::settingsTabUpdatePlot()
+{
+  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 2) )
+  {
+    runFrontPlotButton();
   }
 }
 

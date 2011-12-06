@@ -16578,7 +16578,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                   {
                     QwtPlotCurve *temp = g->curve(curveNum);
                     MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
-                    curve->setErrorBars(true, true);
+                    curve->setErrorBars(true, false);
                   }
                 }
                 else if (plotDetails[3] == "Fit")
