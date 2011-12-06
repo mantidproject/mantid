@@ -1,4 +1,5 @@
 #include "../inc/MantidQtSliceViewer/XYLimitsDialog.h"
+#include <QIntValidator>
 
 XYLimitsDialog::XYLimitsDialog(QWidget *parent)
     : QDialog(parent)
