@@ -124,7 +124,7 @@ DECLARE_ALGORITHM(IDLRebin)
    */
   size_t IDLRebin::locateEventInBin(double eventtof, std::vector<double> tofs){
 
-    size_t searchlimit = size_t(log(double(tofs.size()))/log(2))+3;
+    size_t searchlimit = size_t(std::log(double(tofs.size()))/std::log(2))+3;
 
     // g_log.notice() << "Search count limit = " << searchlimit << std::endl;
 
