@@ -22,20 +22,27 @@ public:
 signals:
   void needToClose();
   void needToUpdate();
+
 public slots:
   void deleteRows(int startRow, int endRow);
   void cellEdited(int,int col);
+
 protected slots:
   void closeTable();
   void fillTable();
   void fillTableTransposed();
+
 protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+
 private:
+  /// ITableWorkspace being displayed
   Mantid::API::ITableWorkspace_sptr m_ws;
+  /// Name of the TableWorkspace being displayed
   const std::string m_wsName;
-  bool m_transposed; ///< Show the table workspace transposed
+  /// Show the table workspace transposed
+  bool m_transposed;
 
 };
 
