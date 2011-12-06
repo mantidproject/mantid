@@ -79,9 +79,9 @@ namespace MDAlgorithms
       ConvByTOF,   // conversion possible via TOF
       ConvFromTOF  //  units are the TOF 
   };
-// predefenition 
+// predefenition of the class, which does all coordinate transformation
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
-  struct coordTransformer;
+  struct COORD_TRANSFORMER;
   
   class DLLExport ConvertToMDEvents  : public API::Algorithm
   {
@@ -170,7 +170,7 @@ namespace MDAlgorithms
     /// shalow class which is invoked from processQND procedure and describes the transformation from workspace coordinates to target coordinates
     /// presumably will be completely inlined
      template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
-     friend struct coordTransformer;
+     friend struct COORD_TRANSFORMER;
      /// helper class to orginize metaloop on number of dimensions
      template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
      friend class LOOP_ND;

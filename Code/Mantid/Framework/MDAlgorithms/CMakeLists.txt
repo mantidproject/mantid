@@ -51,6 +51,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsMethodsTemplate.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransfTemplate.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConvTemplate.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h

@@ -613,9 +613,7 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
 }
 
 
-
 /** The matrix to convert 
- 
 */
 std::vector<double> 
 ConvertToMDEvents::get_transf_matrix(const Kernel::V3D &u, const Kernel::V3D &v)const
@@ -725,25 +723,25 @@ ConvModes(4)
 // MOD Q
 //      ConvByTOF,   // conversion possible via TOF
 //      ConvFromTOF 
-    LOOP_ND<8,modQ,Direct,ConvertNo>::EXEC(this);
-    LOOP_ND<8,modQ,Indir,ConvertNo>::EXEC(this);
-    LOOP_ND<8,modQ,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<8,modQ,Direct,ConvertFast>::EXEC(this);
-    LOOP_ND<8,modQ,Indir,ConvertFast>::EXEC(this);
-    LOOP_ND<8,modQ,Elastic,ConvertFast>::EXEC(this);
-// Q3D
-    LOOP_ND<8,Q3D,Direct,ConvertNo>::EXEC(this);
-    LOOP_ND<8,Q3D,Indir,ConvertNo>::EXEC(this);
-    LOOP_ND<8,Q3D,Elastic,ConvertNo>::EXEC(this);
-    LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
-    LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
-    LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
-    LOOP_ND<8,Q3D,Direct,ConvFromTOF>::EXEC(this);
-    LOOP_ND<8,Q3D,Indir,ConvFromTOF>::EXEC(this);
-    LOOP_ND<8,Q3D,Elastic,ConvFromTOF>::EXEC(this);
-    LOOP_ND<8,Q3D,Direct,ConvByTOF>::EXEC(this);
-    LOOP_ND<8,Q3D,Indir,ConvByTOF>::EXEC(this);
-    LOOP_ND<8,Q3D,Elastic,ConvByTOF>::EXEC(this);
+//    LOOP_ND<8,modQ,Direct,ConvertNo>::EXEC(this);
+//    LOOP_ND<8,modQ,Indir,ConvertNo>::EXEC(this);
+//    LOOP_ND<8,modQ,Elastic,ConvertNo>::EXEC(this);
+//    LOOP_ND<8,modQ,Direct,ConvertFast>::EXEC(this);
+//    LOOP_ND<8,modQ,Indir,ConvertFast>::EXEC(this);
+//    LOOP_ND<8,modQ,Elastic,ConvertFast>::EXEC(this);
+//// Q3D
+//    LOOP_ND<8,Q3D,Direct,ConvertNo>::EXEC(this);
+//    LOOP_ND<8,Q3D,Indir,ConvertNo>::EXEC(this);
+//    LOOP_ND<8,Q3D,Elastic,ConvertNo>::EXEC(this);
+//    LOOP_ND<8,Q3D,Direct,ConvertFast>::EXEC(this);
+//    LOOP_ND<8,Q3D,Indir,ConvertFast>::EXEC(this);
+//    LOOP_ND<8,Q3D,Elastic,ConvertFast>::EXEC(this);
+//    LOOP_ND<8,Q3D,Direct,ConvFromTOF>::EXEC(this);
+//    LOOP_ND<8,Q3D,Indir,ConvFromTOF>::EXEC(this);
+//    LOOP_ND<8,Q3D,Elastic,ConvFromTOF>::EXEC(this);
+//    LOOP_ND<8,Q3D,Direct,ConvByTOF>::EXEC(this);
+//    LOOP_ND<8,Q3D,Indir,ConvByTOF>::EXEC(this);
+//    LOOP_ND<8,Q3D,Elastic,ConvByTOF>::EXEC(this);
 
 
     // Workspaces:
