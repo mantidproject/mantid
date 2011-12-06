@@ -156,7 +156,7 @@ private:
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp;
+  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine;
 
   /// Cached double for infinity
   double m_inf;

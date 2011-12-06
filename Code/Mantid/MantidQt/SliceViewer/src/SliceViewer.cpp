@@ -31,6 +31,7 @@
 #include <qfiledialog.h>
 #include <limits>
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include "qmainwindow.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -194,12 +195,46 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(helpLineViewer()));
   m_menuHelp->addAction(action);
 
+  // --------------- Line Menu ----------------------------------------
+  m_menuLine = new QMenu("&Line", this);
+  action = new QAction(QPixmap(), "&Line Mode", this);
+  action->setCheckable(true);
+  action->setChecked(false);
+  action->setShortcut(Qt::Key_L + Qt::ControlModifier);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(on_btnDoLine_toggled(bool)));
+  m_menuLine->addAction(action);
+
+  action = new QAction(QPixmap(), "&Snap to Grid", this);
+  action->setCheckable(true);
+  action->setChecked(false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(on_btnSnapToGrid_toggled(bool)));
+  m_menuLine->addAction(action);
+
+
   // ---------------------- Build the menu bar -------------------------
-  QMenuBar * bar = new QMenuBar(this, "Main Menu Bar");
+
+  // Find the top-level parent
+  QWidget * widget = this;
+  while (widget && widget->parentWidget()) widget = widget->parentWidget() ;
+  QMainWindow * parentWindow = dynamic_cast<QMainWindow *>(widget);
+
+  QMenuBar * bar;
+  if (parentWindow)
+    // Use the QMainWindow menu bar
+    bar = parentWindow->menuBar();
+  else
+  {
+    std::cout << "No parent!\n";
+    // Widget is not in a QMainWindow. Make a menu bar
+    bar = new QMenuBar(this, "Main Menu Bar");
+    ui.verticalLayout->insertWidget(0, bar );
+  }
+
+  // Add all the needed menus
   bar->addMenu( m_menuView );
   bar->addMenu( m_menuColorOptions );
+  bar->addMenu( m_menuLine );
   bar->addMenu( m_menuHelp );
-  ui.verticalLayout->insertWidget(0, bar );
 }
 
 //------------------------------------------------------------------------------------
