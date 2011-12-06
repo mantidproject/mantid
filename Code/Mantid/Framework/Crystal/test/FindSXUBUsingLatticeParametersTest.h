@@ -23,56 +23,50 @@ class FindSXUBUsingLatticeParameterTest : public CxxTest::TestSuite
 
 private:
 
-   public:
-   
-   void testX()
-   {
-     try
-     {
-     ITableWorkspace_sptr ws = Mantid::API::WorkspaceFactory::Instance().createTable();
-     ws->addColumn("double","Qx");
-     ws->addColumn("double","Qy");
-     ws->addColumn("double","Qz");
+public:
 
-     
-     
+  void testX()
+  {
+    try
+    {
+      ITableWorkspace_sptr ws = Mantid::API::WorkspaceFactory::Instance().createTable();
+      ws->addColumn("double","Qx");
+      ws->addColumn("double","Qy");
+      ws->addColumn("double","Qz");
 
-     ws->setRowCount(10); //Ten Rows for each peak.
+      ws->setRowCount(10); //Ten Rows for each peak.
 
-     TableRow row = ws->getRow(0);
-     int rowIndex = 0;
-     row << M_PI * 2 / 3.186 << 0.0 << 0.0; // 1,1,1
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /1.933 << 0.0 << 0.0; // 2,2,0
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /1.669 << 0.0 << 0.0; // 3,1,1
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /1.361 << 0.0 << 0.0; // 4,0,0
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /1.238 << 0.0 << 0.0; // 3,3,1
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /1.110 << 0.0 << 0.0; // 4,2,2
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /1.046 << 0.0 << 0.0; // 3,3,3
-     row = ws->getRow(rowIndex++);
-     row << M_PI * 2 /0.935 << 0.0 << 0.0; // 4,4,0
+      TableRow row = ws->getRow(0);
+      int rowIndex = 0;
+     // row << 0.219654<<0.0108024<<1.11382;
+      row = ws->getRow(rowIndex++);
+      row << 0.486429<<-0.100521<<0.322103;
+      row = ws->getRow(rowIndex++);
+      row << 0.635444<<-0.103101<<0.624199;
+      row = ws->getRow(rowIndex++);
+      row << 0.330549<<-0.0835759<<1.3411;
+      //row = ws->getRow(rowIndex++);
+      //row << 0.148992<<0.00117305<<0.302677;
+      //row = ws->getRow(rowIndex++);
+      //row << 0.450068<<-0.00456059<<0.24572;
+      row = ws->getRow(rowIndex++);
+      row << 0.180382<<-0.0824794<<1.04059;
 
-
-     FindSXUBUsingLatticeParameters alg;
-     alg.setRethrows(true);
-     alg.initialize();
-     alg.setProperty("PeaksTable", ws);
-     alg.setPropertyValue("UnitCell", "5.43, 5.43, 5.43, 90, 90, 90");
-     alg.setProperty("PeakIndices", "3, 4, 5, 6, 7");
-     alg.setProperty("dTolerance", 0.01);
-     alg.execute();
-     TS_ASSERT(alg.isExecuted());
-     }
-     catch(std::exception& ex)
-     {
-       std::string msg = ex.what();
-     }
-   }
+      FindSXUBUsingLatticeParameters alg;
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("PeaksTable", ws);
+      alg.setPropertyValue("UnitCell", "10.02, 11.852, 3.38, 90, 90, 90");
+      alg.setProperty("PeakIndices", "1, 2, 3, 4, 5, 6, 7");
+      alg.setProperty("dTolerance", 0.01);
+      alg.execute();
+      TS_ASSERT(alg.isExecuted());
+    }
+    catch(std::exception& ex)
+    {
+      std::string msg = ex.what();
+    }
+  }
 };
 
 #endif

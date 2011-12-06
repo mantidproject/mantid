@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <boost/tuple/tuple.hpp>
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidKernel/V3D.h"
 #include <set>
 
 namespace Mantid
@@ -100,12 +102,22 @@ public:
 	}
 	double getdSpacing() const
 	{
-		return 2*M_PI/_Q.norm();
+		return 1/_Q.norm();
 	}
 	void addHKL(int h, int k, int l)
 	{
 		_hkls.insert(index(h,k,l));
 	}
+  Mantid::Kernel::V3D getHKL() const
+  {
+    using namespace Mantid::Kernel;
+    if(_hkls.size() != 1)
+    {
+      throw std::logic_error("Expecting a single HKL value for each peak. Refinement incomplete.");
+    }
+    V3D result = V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
+    return result;
+  }
 	void delHKL(int h, int k, int l)
 	{
 		std::set<index>::const_iterator it=std::find(_hkls.begin(),_hkls.end(),index(h,k,l));
@@ -118,7 +130,9 @@ public:
 	}
 	double angle(const PeakCandidate& rhs)
 	{
-		return _Q.angle(rhs.getQ());
+    //Mantid::Kernel::V3D angle = rhs.getQ();
+    //return angle.angle(this->getQ());
+    return _Q.angle(rhs._Q);
 	}
 	void setIndex(const std::set<index>& s)
 	{

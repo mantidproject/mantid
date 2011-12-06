@@ -6,6 +6,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Column.h"
+#include "MantidAPI/IPeak.h"
 
 namespace Mantid
 {
@@ -37,6 +39,10 @@ void FindSXUBUsingLatticeParameters::init()
   declareProperty(new ArrayProperty<int> ("PeakIndices"),
        "Index of the peaks in the table workspace to be used");
   declareProperty("dTolerance",0.01,"Tolerance for peak positions in d-spacing");
+
+  //TODO
+  //this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  //        "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
 
 }
 
@@ -90,6 +96,12 @@ void FindSXUBUsingLatticeParameters::exec()
 		peaks.push_back(PeakCandidate(qx,qy,qz));
 	}
 
+
+
+ // Mantid::API::IPeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
+ 
+
+
 	// Find two non-colinear peaks
 	bool all_collinear=true;
 
@@ -106,8 +118,10 @@ void FindSXUBUsingLatticeParameters::exec()
 		}
 	}
 	// Throw if all collinear
-	//if (all_collinear)
-	//	throw std::runtime_error("Angles between all pairs of peaks are too small");
+	if (all_collinear)
+  {
+		throw std::runtime_error("Angles between all pairs of peaks are too small");
+  }
 	//
 	double dtol= getProperty("dTolerance");
 
@@ -139,8 +153,10 @@ void FindSXUBUsingLatticeParameters::exec()
 		for (std::size_t q=0;q<npeaks;q++)
 		{
 			if (p==q) //Don't do a self comparison
+      {
 				continue;
-			peaks[p].clean(peaks[q],unitcell,0.5*M_PI/180.0);// Half a degree tolerance
+      }
+			peaks[p].clean(peaks[q],unitcell,2*M_PI/180.0);// Half a degree tolerance
 		}
 	}
 
@@ -151,7 +167,9 @@ void FindSXUBUsingLatticeParameters::exec()
 		for (std::size_t q=0;q<npeaks;q++)
 		{
 			if (p==q) //Don't do a self comparison
+      {
 				continue;
+      }
 			peaks[p].clean(peaks[q],unitcell,0.5*M_PI/180.0);// Half a degree tolerance should be configurable
 		}
 	}
@@ -161,7 +179,9 @@ void FindSXUBUsingLatticeParameters::exec()
 			for (std::size_t q=0;q<npeaks;q++)
 			{
 				if (p==q) //Don't do a self comparison
+        {
 					continue;
+        }
 				peaks[p].clean(peaks[q],unitcell,0.5*M_PI/180.0);// Half a degree tolerance
 			}
 		}
@@ -169,6 +189,33 @@ void FindSXUBUsingLatticeParameters::exec()
     //Now we can index the input peaks workspace
     //Now we can create a ub matrix!
 
+    
+    //std::vector<Peak> &peaks = ws->getPeaks();
+    //size_t n_peaks = ws->getNumberPeaks();
+
+    //std::vector<V3D>  q_vectors;
+    //for ( size_t i = 0; i < n_peaks; i++ )
+    //  q_vectors.push_back( peaks[i].getQSampleFrame() );
+
+    //IPeaksWorkspace* input;
+    //Column_sptr col_h = input->getColumn("h");
+    //Column_sptr col_k = input->getColumn("k");
+    //Column_sptr col_l = input->getColumn("l");
+    //for(double i = 0; i < peaks.size(); i++)
+    //{
+    //  try
+    //  {
+    //  const V3D hkl = peaks[i].getHKL();
+    //  col_h->cell<double>(i) = hkl[0];
+    //  col_k->cell<double>(i) = hkl[1];
+    //  col_l->cell<double>(i) = hkl[2];
+    //  }
+    //  catch(std::logic_error&)
+    //  {
+    //    continue;
+    //  }
+    //}
+    
 	//
 	std::cout << "New list \n";
 	for (std::size_t p=0;p<npeaks;p++)
