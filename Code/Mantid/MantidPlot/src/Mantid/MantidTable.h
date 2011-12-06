@@ -36,6 +36,10 @@ protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  // Reimplemented methods for custom sorting of TableWorkspaces
+  virtual void sortColumn(int col, int order);
+  virtual void sortColumns(const QStringList& cols, int type = 0, int order = 0, const QString& leadCol = QString());
+
 private:
   /// ITableWorkspace being displayed
   Mantid::API::ITableWorkspace_sptr m_ws;
