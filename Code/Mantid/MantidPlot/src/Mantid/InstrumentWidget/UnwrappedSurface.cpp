@@ -204,18 +204,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   glViewport(0, 0, vwidth, vheight);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  if (m_flippedView) // flipped view - towards the source
-  {
-    glOrtho(m_viewRect.right(),m_viewRect.left(),
-      m_viewRect.bottom(),m_viewRect.top(),
-      -10,10);
-  }
-  else // normal view - from the source
-  {
-    glOrtho(m_viewRect.left(),m_viewRect.right(),
-      m_viewRect.bottom(),m_viewRect.top(),
-      -10,10);
-  }
+  glOrtho(m_viewRect.left(),m_viewRect.right(),
+    m_viewRect.bottom(),m_viewRect.top(),
+    -10,10);
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface"))
   {
     OpenGLError::log() << "glOrtho arguments:\n";
@@ -697,4 +688,16 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
   peakShapes.deselectAll();
   m_startPeakShapes = false;
   QApplication::restoreOverrideCursor();
+}
+
+/**
+ * Toggle between flipped and straight view.
+ */
+void UnwrappedSurface::setFlippedView(bool on)
+{
+  m_flippedView = on;
+  qreal left = m_viewRect.left();
+  qreal right = m_viewRect.right();
+  m_viewRect.setLeft(right);
+  m_viewRect.setRight(left);
 }

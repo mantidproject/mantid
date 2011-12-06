@@ -7,16 +7,21 @@
 #include "MantidKernel/VMD.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
+#include "MantidQtSliceViewer/LineOverlay.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include "qmainwindow.h"
 #include "qmenubar.h"
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
+#include <limits>
+#include <qfiledialog.h>
 #include <qmenu.h>
 #include <QtGui/qaction.h>
 #include <qwt_color_map.h>
+#include <qwt_picker_machine.h>
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_picker.h>
@@ -25,17 +30,15 @@
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
-#include <qwt_picker_machine.h>
 #include <sstream>
 #include <vector>
-#include <qfiledialog.h>
-#include <limits>
-#include "MantidQtSliceViewer/SnapToGridDialog.h"
+#include "../inc/MantidQtSliceViewer/XYLimitsDialog.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using MantidQt::API::SyncedCheckboxes;
 
 namespace MantidQt
 {
@@ -158,12 +161,16 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
   m_menuView->addAction(action);
 
-  action = new QAction(QPixmap(), "Zoom In", this);
+  action = new QAction(QPixmap(), "&Set X/Y View Size", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(setXYLimits()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Zoom &In", this);
   action->setShortcut(Qt::Key_Plus + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(zoomInSlot()));
   m_menuView->addAction(action);
 
-  action = new QAction(QPixmap(), "Zoom Out", this);
+  action = new QAction(QPixmap(), "Zoom &Out", this);
   action->setShortcut(Qt::Key_Minus + Qt::ControlModifier);
   connect(action, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
   m_menuView->addAction(action);
@@ -194,12 +201,46 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(helpLineViewer()));
   m_menuHelp->addAction(action);
 
+  // --------------- Line Menu ----------------------------------------
+  m_menuLine = new QMenu("&Line", this);
+
+  // Line mode menu, synced to the button
+  action = new QAction(QPixmap(), "&Line Mode", this);
+  action->setShortcut(Qt::Key_L + Qt::ControlModifier);
+  m_syncLineMode = new SyncedCheckboxes(action, ui.btnDoLine, false);
+  connect(m_syncLineMode, SIGNAL(toggled(bool)), this, SLOT(LineMode_toggled(bool)));
+  m_menuLine->addAction(action);
+
+  // Snap-to-grid, synced to the button
+  action = new QAction(QPixmap(), "&Snap to Grid", this);
+  m_syncSnapToGrid = new SyncedCheckboxes(action, ui.btnSnapToGrid, false);
+  connect(m_syncSnapToGrid, SIGNAL(toggled(bool)), this, SLOT(SnapToGrid_toggled(bool)));
+  m_menuLine->addAction(action);
+
+
   // ---------------------- Build the menu bar -------------------------
-  QMenuBar * bar = new QMenuBar(this, "Main Menu Bar");
+
+  // Find the top-level parent
+  QWidget * widget = this;
+  while (widget && widget->parentWidget()) widget = widget->parentWidget() ;
+  QMainWindow * parentWindow = dynamic_cast<QMainWindow *>(widget);
+
+  QMenuBar * bar;
+  if (parentWindow)
+    // Use the QMainWindow menu bar
+    bar = parentWindow->menuBar();
+  else
+  {
+    // Widget is not in a QMainWindow. Make a menu bar
+    bar = new QMenuBar(this, "Main Menu Bar");
+    ui.verticalLayout->insertWidget(0, bar );
+  }
+
+  // Add all the needed menus
   bar->addMenu( m_menuView );
   bar->addMenu( m_menuColorOptions );
+  bar->addMenu( m_menuLine );
   bar->addMenu( m_menuHelp );
-  ui.verticalLayout->insertWidget(0, bar );
 }
 
 //------------------------------------------------------------------------------------
@@ -424,7 +465,7 @@ void SliceViewer::colorRangeChanged()
 
 //------------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
-void SliceViewer::on_btnDoLine_toggled(bool checked)
+void SliceViewer::LineMode_toggled(bool checked)
 {
   m_lineOverlay->setVisible(checked);
   if (checked)
@@ -452,7 +493,7 @@ void SliceViewer::on_btnClearLine_clicked()
 
 //------------------------------------------------------------------------------------
 /// Slot called when the snap to grid is checked
-void SliceViewer::on_btnSnapToGrid_toggled(bool checked)
+void SliceViewer::SnapToGrid_toggled(bool checked)
 {
   if (checked)
   {
@@ -506,7 +547,7 @@ void SliceViewer::helpLineViewer()
 }
 
 //------------------------------------------------------------------------------------
-/// Reset the zoom view to full axes. This can be called manually with a button
+/// SLOT to reset the zoom view to full axes. This can be called manually with a button
 void SliceViewer::resetZoom()
 {
   // Reset the 2 axes to full scale
@@ -514,6 +555,28 @@ void SliceViewer::resetZoom()
   resetAxis(m_spect->yAxis(), m_Y );
   // Make sure the view updates
   m_plot->replot();
+}
+
+//------------------------------------------------------------------------------------
+/// SLOT to open a dialog to set the XY limits
+void SliceViewer::setXYLimits()
+{
+  // Initialize the dialog with the current values
+  XYLimitsDialog * dlg = new XYLimitsDialog(this);
+  dlg->setXDim(m_X);
+  dlg->setYDim(m_Y);
+  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
+  dlg->setLimits(xint.minValue(), xint.maxValue(), yint.minValue(), yint.maxValue());
+  // Show the dialog
+  if (dlg->exec() == QDialog::Accepted)
+  {
+    // Set the limits in X and Y
+    m_plot->setAxisScale( m_spect->xAxis(), dlg->getXMin(), dlg->getXMax());
+    m_plot->setAxisScale( m_spect->yAxis(), dlg->getYMin(), dlg->getYMax());
+    // Make sure the view updates
+    m_plot->replot();
+  }
 }
 
 //------------------------------------------------------------------------------------

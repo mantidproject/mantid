@@ -20,7 +20,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def PyInit(self):
         instruments = ["TOPAZ"]
-        self.declareProperty("Instrument", "PG3",
+        self.declareProperty("Instrument", "TOPAZ",
                              Validator=ListValidator(instruments))
         self.declareListProperty("SampleNumbers", [0], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
@@ -41,7 +41,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("MaximumWavelength", 3.5, Description="Maximum Wavelength.  Default is 3.5")
         self.declareProperty("ScaleFactor", 0.01, Description="Multiply FSQ and sig(FSQ) by ScaleFactor.  Default is 0.01")
         self.declareProperty("EdgePixels", 24, Description="Number of edge pixels to ignore.  Default is 24")
-        self.declareListProperty("LatticeParameters", [4.785,4.785,12.91,90.0,90.0,120.0],
+        self.declareListProperty("LatticeParameters", [4.7582,4.7582,12.9972,90.0,90.0,120.0],
                              Description="a,b,c,alpha,beta,gamma (Default is Sapphire Lattice Parameters)")
         self.declareFileProperty("IsawDetCalFile", "", FileAction.OptionalLoad, ['.DetCal'], Description="Isaw style file of location of detectors.")
         outfiletypes = ['', 'hkl']
@@ -160,31 +160,15 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _save(self, wksp, normalized):
         if "hkl" in self._outTypes:
             ConvertToDiffractionMDWorkspace(InputWorkspace=wksp,OutputWorkspace='MD2',LorentzCorrection=0,
-                    SplitInto=2,SplitThreshold=150)
+                    SplitInto=2,SplitThreshold=10)
             wkspMD = mtd['MD2']
             # Find the UB matrix using the peaks and known lattice parameters
-            try:
-                FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=10,OutputWorkspace='Peaks')
-                peaksWS = mtd['Peaks']
-                FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
-                            alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=3, Tolerance=0.15)
-            except:
-                FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=5,OutputWorkspace='Peaks')
-                peaksWS = mtd['Peaks']
-                FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
-                        alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=3, Tolerance=0.15)
+            FindPeaksMD(InputWorkspace=wkspMD,MaxPeaks=10,OutputWorkspace='Peaks',AppendPeaks=True)
+            peaksWS = mtd['Peaks']
             mtd.deleteWorkspace('MD2')
             mtd.releaseFreeMemory()
-            # Add index to HKL             
-            IndexPeaks(PeaksWorkspace=peaksWS, Tolerance='0.15')
-            # Copy the UB matrix back to the original workspace
-            CopySample(InputWorkspace=peaksWS,OutputWorkspace=wksp,
-                            CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
             CentroidPeaks(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,EdgePixels=self._edge,OutPeaksWorkspace=peaksWS)
             PeakIntegration(InputWorkspace=wksp,InPeaksWorkspace=peaksWS,OutPeaksWorkspace=peaksWS)
-            hklfile = self._outFile
-            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
-                Filename=hklfile, AppendFile=self._append,InputWorkspace=peaksWS)
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
@@ -289,6 +273,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             vanRun = None
     
+        savemat = None
         Banks = ["bank17","bank18","bank26","bank27","bank36","bank37","bank38","bank39","bank46","bank47","bank48","bank49","bank57","bank58"]
 
         for samRun in samRuns:
@@ -333,9 +318,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 else:
                     normalized = False
 
-                #Remove data at edges of rectangular detectors
-                SmoothNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun, Radius=0,WeightedSum='Flat',
-                    AdjX=0, AdjY=0, ZeroEdgePixels=self._edge)
                 #Anvred corrections converts from TOF to Wavelength now.
                 if self._radius > 0:
                     AnvredCorrection(InputWorkspace=samRun,OutputWorkspace=samRun,PreserveEvents=1,
@@ -346,14 +328,41 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 samMon /= 1e8
                 samRun /= samMon
                 samRun = self._bin(samRun)
-                ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
                 mtd.releaseFreeMemory()
                 self._save(samRun, normalized)
-                #Append next run to hkl file
-                self._append = True
                 if self._outTypes is not '':
                     mtd.deleteWorkspace(str(samRun))
                 mtd.deleteWorkspace('samMon')
                 mtd.releaseFreeMemory()
+            peaksWS = mtd['Peaks']
+            try:
+                if savemat is not None:
+                    LoadIsawUB(InputWorkspace=peaksWS, Filename=savemat)
+                else:
+                    FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                                alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=4, Tolerance=0.01)
+                # Add index to HKL             
+                IndexPeaks(PeaksWorkspace=peaksWS, Tolerance=0.01)
+                CalculateUMatrix(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                    alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5])
+            except:
+                if savemat is not None:
+                    LoadIsawUB(InputWorkspace=peaksWS, Filename=savemat)
+                else:
+                    FindUBUsingLatticeParameters(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                                alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5], NumInitial=4, Tolerance=0.05)
+                # Add index to HKL             
+                IndexPeaks(PeaksWorkspace=peaksWS, Tolerance=0.05)
+                SaveIsawUB(InputWorkspace=peaksWS, Filename="lsint"+str(samRunnum)+".mat")
+                CalculateUMatrix(PeaksWorkspace=peaksWS,a=self._lattice[0],b=self._lattice[1],c=self._lattice[2],
+                    alpha=self._lattice[3],beta=self._lattice[4],gamma=self._lattice[5])
+            IndexPeaks(PeaksWorkspace=peaksWS,Tolerance=0.5)
+            SaveIsawUB(InputWorkspace=peaksWS, Filename="lsintUB"+str(samRunnum)+".mat")
+            if savemat is None:
+		savemat = "lsintUB"+str(samRunnum)+".mat"
+            SaveHKL(LinearScatteringCoef=self._amu,LinearAbsorptionCoef=self._smu,Radius=self._radius,ScalePeaks=self._scale,
+                Filename=self._outFile, AppendFile=self._append,InputWorkspace=peaksWS)
+            self._append = True
+            mtd.deleteWorkspace(str(peaksWS))
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())

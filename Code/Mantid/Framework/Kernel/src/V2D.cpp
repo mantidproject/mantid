@@ -165,7 +165,14 @@ namespace Mantid
      */
     double V2D::angle(const V2D &other) const
     {
-      return std::acos(this->scalar_prod(other)/this->norm()/other.norm());
+      double ratio = this->scalar_prod(other) / (this->norm() * other.norm());
+  
+      if ( ratio >= 1.0 )        // NOTE: Due to rounding errors, if "other"
+        return 0.0;              //       is nearly the same as "this" or
+      else if ( ratio <= -1.0 )  //       as "-this", ratio can be slightly
+        return M_PI;             //       more than 1 in absolute value. 
+                                 //       That causes acos() to return NaN.
+      return acos( ratio );
     }
 
     //--------------------------------------------------------------------------

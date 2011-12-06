@@ -400,12 +400,27 @@ class HandleMonitor(ReductionStep):
 
         for ws in workspaces:
             monitor = ws+'_mon'
+            self._rebin_monitor(ws)
             if self._need_to_unwrap(ws):
                 self._unwrap_monitor(ws)
             else:
                 ConvertUnits(monitor, monitor, 'Wavelength')
             self._monitor_efficiency(monitor)
             self._scale_monitor(monitor)
+
+    def _rebin_monitor(self, ws):
+        """For some instruments (e.g. BASIS) the monitor binning is too
+	fine and needs to be rebinned. This is controlled
+        by the 'Workflow.Monitor.RebinStep' parameter set on the 
+        instrument.  If no parameter is present, no rebinning will occur.
+        """
+        try:
+            stepsize = mtd[ws].getInstrument().getNumberParameter(
+                'Workflow.Monitor.RebinStep')[0]
+        except IndexError:
+            print "Monitor is not being rebinned."
+        else:
+            Rebin(ws+'_mon', ws+'_mon', stepsize)
 
     def _need_to_unwrap(self, ws):
         try:

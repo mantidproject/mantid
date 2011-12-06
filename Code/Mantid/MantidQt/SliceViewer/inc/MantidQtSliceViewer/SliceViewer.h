@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
@@ -60,6 +61,7 @@ signals:
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void resetZoom();
+  void setXYLimits();
   void showInfoAt(double, double);
   void colorRangeChanged();
   void zoomInSlot();
@@ -71,9 +73,11 @@ public slots:
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
   void on_btnRangeFull_clicked();
   void on_btnRangeSlice_clicked();
-  void on_btnDoLine_toggled(bool);
   void on_btnClearLine_clicked();
-  void on_btnSnapToGrid_toggled(bool);
+
+  // Synced checkboxes
+  void LineMode_toggled(bool);
+  void SnapToGrid_toggled(bool);
 
 
 private:
@@ -156,7 +160,10 @@ private:
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp;
+  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine;
+
+  /// Synced menu/buttons
+  MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid;
 
   /// Cached double for infinity
   double m_inf;

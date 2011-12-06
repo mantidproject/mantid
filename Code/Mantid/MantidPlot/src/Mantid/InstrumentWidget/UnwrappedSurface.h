@@ -73,7 +73,7 @@ public:
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   virtual QString getInfoText()const;
   virtual QRectF getSurfaceBounds()const;
-  void setFlippedView(bool on){m_flippedView = on;}
+  void setFlippedView(bool on);
   bool isFlippedView() const {return m_flippedView;}
 
 protected:

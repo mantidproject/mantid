@@ -1,9 +1,10 @@
-#include <boost/python/detail/wrap_python.hpp>
+#include <Python.h>
 #include <dlfcn.h>
 
 
-PyObject * loadLibrary(PyObject *, PyObject * args)
+PyObject * loadLibrary(PyObject *self, PyObject * args)
 {
+  (void)self;
   const char *filename;
   if (!PyArg_ParseTuple(args, "s", &filename))
   {
@@ -30,7 +31,7 @@ static PyMethodDef dlopen_methods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
-extern "C"  void initlibdlopen()
+void initlibdlopen()
 {
   PyObject *m;
 

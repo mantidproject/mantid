@@ -1,53 +1,60 @@
-set ( SRC_FILES src/AlgorithmDialog.cpp
-                src/AlgorithmInputHistory.cpp
-                src/GenericDialog.cpp
-                src/InterfaceFactory.cpp
-                src/InterfaceManager.cpp
-                src/ManageUserDirectories.cpp
-                src/MantidColorMap.cpp
-                src/MantidDialog.cpp
-                src/MantidWidget.cpp
-                src/PythonRunner.cpp
-                src/UserSubWindow.cpp
-                src/VatesViewerInterface.cpp
-                src/WorkspaceObserver.cpp
+set ( SRC_FILES
+	src/AlgorithmDialog.cpp
+	src/AlgorithmInputHistory.cpp
+	src/GenericDialog.cpp
+	src/InterfaceFactory.cpp
+	src/InterfaceManager.cpp
+	src/ManageUserDirectories.cpp
+	src/MantidColorMap.cpp
+	src/MantidDialog.cpp
+	src/MantidWidget.cpp
+	src/PythonRunner.cpp
+	src/SyncedCheckboxes.cpp
+	src/UserSubWindow.cpp
+	src/VatesViewerInterface.cpp
+	src/WorkspaceObserver.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set ( INC_FILES inc/MantidQtAPI/AlgorithmDialog.h
-                inc/MantidQtAPI/AlgorithmInputHistory.h
-                inc/MantidQtAPI/DllOption.h
-                inc/MantidQtAPI/FileDialogHandler.h
-                inc/MantidQtAPI/GenericDialog.h
-                inc/MantidQtAPI/InterfaceFactory.h
-                inc/MantidQtAPI/InterfaceManager.h
-                inc/MantidQtAPI/ManageUserDirectories.h
-                inc/MantidQtAPI/MantidColorMap.h
-                inc/MantidQtAPI/GraphOptions.h
-                inc/MantidQtAPI/MantidDialog.h
-                inc/MantidQtAPI/MantidWidget.h
-                inc/MantidQtAPI/PythonRunner.h
-                inc/MantidQtAPI/UserSubWindow.h
-                inc/MantidQtAPI/VatesViewerInterface.h
-                inc/MantidQtAPI/WorkspaceObserver.h
+set ( INC_FILES
+	inc/MantidQtAPI/AlgorithmDialog.h
+	inc/MantidQtAPI/AlgorithmInputHistory.h
+	inc/MantidQtAPI/DllOption.h
+	inc/MantidQtAPI/FileDialogHandler.h
+	inc/MantidQtAPI/GenericDialog.h
+	inc/MantidQtAPI/GraphOptions.h
+	inc/MantidQtAPI/InterfaceFactory.h
+	inc/MantidQtAPI/InterfaceManager.h
+	inc/MantidQtAPI/ManageUserDirectories.h
+	inc/MantidQtAPI/MantidColorMap.h
+	inc/MantidQtAPI/MantidDialog.h
+	inc/MantidQtAPI/MantidWidget.h
+	inc/MantidQtAPI/PythonRunner.h
+	inc/MantidQtAPI/SyncedCheckboxes.h
+	inc/MantidQtAPI/UserSubWindow.h
+	inc/MantidQtAPI/VatesViewerInterface.h
+	inc/MantidQtAPI/WorkspaceObserver.h
 )
 
-set ( MOC_FILES inc/MantidQtAPI/AlgorithmDialog.h 
-                inc/MantidQtAPI/GenericDialog.h
-                inc/MantidQtAPI/ManageUserDirectories.h
-                inc/MantidQtAPI/MantidDialog.h
-                inc/MantidQtAPI/MantidWidget.h
-                inc/MantidQtAPI/PythonRunner.h
-                inc/MantidQtAPI/UserSubWindow.h
-                inc/MantidQtAPI/VatesViewerInterface.h
-                inc/MantidQtAPI/WorkspaceObserver.h
+set ( MOC_FILES
+	inc/MantidQtAPI/AlgorithmDialog.h 
+	inc/MantidQtAPI/GenericDialog.h
+	inc/MantidQtAPI/ManageUserDirectories.h
+	inc/MantidQtAPI/MantidDialog.h
+	inc/MantidQtAPI/MantidWidget.h
+	inc/MantidQtAPI/PythonRunner.h
+	inc/MantidQtAPI/SyncedCheckboxes.h
+	inc/MantidQtAPI/UserSubWindow.h
+	inc/MantidQtAPI/VatesViewerInterface.h
+	inc/MantidQtAPI/WorkspaceObserver.h
 )
 
-set ( UI_FILES inc/MantidQtAPI/ManageUserDirectories.ui 
+set ( UI_FILES 
+	inc/MantidQtAPI/ManageUserDirectories.ui 
 )
 
 set( TEST_FILES
-               test/MantidColorMapTest.h
+   test/MantidColorMapTest.h
 )
 
 include_directories ( inc )
@@ -90,3 +97,7 @@ endif ()
 ###########################################################################
 
 install ( TARGETS MantidQtAPI DESTINATION ${LIB_DIR} )
+
+set ( TEST_FILES
+	test/SyncedCheckboxesTest.h
+)

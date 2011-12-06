@@ -22,6 +22,8 @@ class QCheckBox;
 class QLabel;
 class QActionGroup;
 class QSignalMapper;
+class QMenu;
+
 
 /**
   * Implements the Pick tab in InstrumentWindow. Allows to pick a detector
@@ -36,7 +38,7 @@ public:
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
   void init();
-  void showInstrumentDisplayContextMenu();
+  void setInstrumentDisplayContextMenu(QMenu& context);
   TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
   void mouseLeftInstrmentDisplay();
 public slots:
