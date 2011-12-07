@@ -223,7 +223,7 @@ namespace Mantid
       prog.report(); //4th progress report.
 
       //Now we can index the input/output peaks workspace
-      for(size_t i = 0; i < npeaks; i++)
+      for(int i = 0; i < int(npeaks); i++)
       {
         IPeak& peak = ws->getPeak(i);
         try
