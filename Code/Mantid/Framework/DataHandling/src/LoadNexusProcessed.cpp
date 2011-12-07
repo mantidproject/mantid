@@ -673,7 +673,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   if (mtd_entry.containsGroup("table_workspace"))
   {
     return loadTableEntry(mtd_entry);
+  } 
+
+  if (mtd_entry.containsGroup("peaks_workspace"))
+  {
+    return loadPeaksEntry(mtd_entry);
   }  
+
 
   bool isEvent = false;
   std::string group_name = "workspace";
