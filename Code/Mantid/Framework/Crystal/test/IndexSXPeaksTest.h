@@ -1,5 +1,5 @@
-#ifndef FIND_SX_UB_USING_LATTICE_PARAMETERS_TEST_H
-#define FIND_SX_UB_USING_LATTICE_PARAMETERS_TEST_H
+#ifndef INDEX_SX_PEAKS_TEST_H_
+#define INDEX_SX_PEAKS_TEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/ITableWorkspace.h";
@@ -19,7 +19,7 @@ using namespace Mantid::DataObjects;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class FindSXUBUsingLatticeParameterTest : public CxxTest::TestSuite
+class IndexSXPeaksTest : public CxxTest::TestSuite
 {
 
 private:
@@ -29,10 +29,10 @@ private:
 
 public:
 
-  FindSXUBUsingLatticeParameterTest()
+  IndexSXPeaksTest()
   {
     //Load an existing peaks workspace. This workspace already has HKL values.
-    std::string WSName("peaks");
+    std::string WSName("master_peaks");
     LoadIsawPeaks loader;
     TS_ASSERT_THROWS_NOTHING( loader.initialize() );
     TS_ASSERT( loader.isInitialized() );
@@ -44,9 +44,9 @@ public:
         AnalysisDataService::Instance().retrieve(WSName) );
   }
 
-  ~FindSXUBUsingLatticeParameterTest()
+  ~IndexSXPeaksTest()
   {
-    AnalysisDataService::Instance().remove("peaks");
+    AnalysisDataService::Instance().remove("master_peaks");
   }
 
   void doTest(int nPixels, std::string peakIndexes, double a, double b, double c, double alpha, double beta, double gamma, std::string searchExtents="-20,20,-20,20,-20,20", double dTolerance=0.01)
@@ -65,7 +65,7 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("PeaksWS", local);
 
-    FindSXUBUsingLatticeParameters alg;
+    IndexSXPeaks alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -158,8 +158,6 @@ public:
     //Gamma decreased
     doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 89.8, "-20,20,0,20,-20,20");
   }
-
-
 
 };
 

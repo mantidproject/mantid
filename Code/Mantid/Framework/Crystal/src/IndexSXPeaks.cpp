@@ -1,3 +1,14 @@
+/*WIKI* 
+
+Given a PeaksWorkspace and a set of lattice parameters, attempts to tag each peak with a HKL value
+by comparing d-spacings between potential hkl matches and the peaks as well as angles between Q vectors.
+
+==Usage Notes==
+This algorithm does not generate a UB Matrix, it will only index peaks. Run CalculateUBMatrix algorithm after executing this algorithm in order
+to attach a UB Matrix onto the sample. The CopySample algorithm will allow this UB Matrix to be transfered between workspaces.
+
+*WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,13 +28,13 @@ namespace Mantid
   {
 
     // Register the class into the algorithm factory
-    DECLARE_ALGORITHM(FindSXUBUsingLatticeParameters)
+    DECLARE_ALGORITHM(IndexSXPeaks)
 
     using namespace Kernel;
     using namespace API;
 
     /// Set the documentation strings
-    void FindSXUBUsingLatticeParameters::initDocs()
+    void IndexSXPeaks::initDocs()
     {
       this->setWikiSummary("Takes a PeaksWorkspace and a B-Matrix and determines the hkl values corresponding to each peak and a UB matrix for the sample. Sets results on input workspace.");
       this->setOptionalMessage("Takes a PeaksWorkspace and a B-Matrix and determines the hkl values corresponding to each peak and a UB matrix for the sample. Sets results on input workspace.");
@@ -32,7 +43,7 @@ namespace Mantid
     /** Initialisation method.
     *
     */
-    void FindSXUBUsingLatticeParameters::init()
+    void IndexSXPeaks::init()
     {
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0.0);
@@ -80,7 +91,7 @@ namespace Mantid
     Culling method to direct the removal of hkl values off peaks where they cannot sit.
     @peakCandidates : Potential peaks containing sets of possible hkl values.
     */
-    void FindSXUBUsingLatticeParameters::cullHKLs(std::vector<PeakCandidate>& peakCandidates, Mantid::Geometry::UnitCell& unitcell)
+    void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate>& peakCandidates, Mantid::Geometry::UnitCell& unitcell)
     {
       int npeaks = peakCandidates.size();
       for (std::size_t p=0;p<npeaks;p++)
@@ -101,7 +112,7 @@ namespace Mantid
     @param PeakCandidates : Potential peaks
     @throws runtime_error if all colinear peaks have been provided
     */
-    void FindSXUBUsingLatticeParameters::validateNotColinear(std::vector<PeakCandidate>& peakCandidates) const
+    void IndexSXPeaks::validateNotColinear(std::vector<PeakCandidate>& peakCandidates) const
     {
       // Find two non-colinear peaks
       bool all_collinear=true;
@@ -129,7 +140,7 @@ namespace Mantid
     *
     *  @throw runtime_error Thrown if algorithm cannot execute
     */
-    void FindSXUBUsingLatticeParameters::exec()
+    void IndexSXPeaks::exec()
     {
       using namespace Mantid::DataObjects;
       const std::vector<int> peakindices = getProperty("PeakIndices");

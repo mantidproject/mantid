@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_FindSXUBUsingLatticeParameters_H_
-#define MANTID_ALGORITHMS_FindSXUBUsingLatticeParameters_H_
+#ifndef MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
+#define MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -169,15 +169,15 @@ private:
 	std::set<index> _hkls;
 };
 
-class DLLExport FindSXUBUsingLatticeParameters : public API::Algorithm
+class DLLExport IndexSXPeaks : public API::Algorithm
 {
 public:
   /// Default constructor
-  FindSXUBUsingLatticeParameters() : API::Algorithm() {};
+  IndexSXPeaks() : API::Algorithm() {};
   /// Destructor
-  virtual ~FindSXUBUsingLatticeParameters() {};
+  virtual ~IndexSXPeaks() {};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindSXUBUsingLatticeParameters";}
+  virtual const std::string name() const { return "IndexSXPeaks";}
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
@@ -201,4 +201,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_FindSXUBUsingLatticeParameters_H_*/
+#endif /*MANTID_ALGORITHMS_IndexSXPeaks_H_*/
