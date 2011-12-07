@@ -296,7 +296,12 @@ namespace Mantid
         }
         else
         {//some points are two close to the edge of the data
-          throw std::invalid_argument("At least one x-value to intepolate to is outside the range of the original data");
+
+          throw std::invalid_argument(std::string("At least one x-value to interpolate to is outside the range of the original data.\n")
+             + "original data range: " + boost::lexical_cast<std::string>(xOld[0]) + " to "
+             +  boost::lexical_cast<std::string>(xOld[xOld.size()-1]) + "\n"
+             + "range to try to interpolate to " + boost::lexical_cast<std::string>(xNew[0]) + " to "
+             + boost::lexical_cast<std::string>(xNew[xNew.size()-1]));
         }
       }
 

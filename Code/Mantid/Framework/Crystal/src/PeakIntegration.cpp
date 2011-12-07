@@ -332,6 +332,17 @@ namespace Mantid
       inputW = getProperty("InputWorkspace");
       if (inputW->readY(0).size() <= 1)
         throw std::runtime_error("Must Rebin data with more than 1 bin");
+      //Check if detectors are RectangularDetectors
+      Instrument_const_sptr inst = inputW->getInstrument();
+      boost::shared_ptr<RectangularDetector> det;
+      for (int i=0; i < inst->nelements(); i++)
+      {
+        det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+        if (det) break;
+      }
+      if (!det)
+        throw std::runtime_error("PeakIntegration only works for instruments with Rectangular Detectors.");
+
       Xmin = getProperty("XMin");
       Xmax = getProperty("XMax");
       Ymin = getProperty("YMin");
