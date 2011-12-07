@@ -53,6 +53,7 @@ namespace Mantid
       std::vector<std::string> propOptions;
       propOptions.push_back("X Value");
       propOptions.push_back("Pulse Time");
+      propOptions.push_back("Pulse Time + TOF");
       declareProperty("SortBy", "X Value",new ListValidator(propOptions),
         "How to sort the events:\n"
         "  X Value: the x-position of the event in each pixel (typically Time of Flight).\n"
@@ -70,7 +71,7 @@ namespace Mantid
       // Get the input workspace
       EventWorkspace_sptr eventW = getProperty("InputWorkspace");
       //And other properties
-      bool sortByTof = (getPropertyValue("SortBy") == "X Value");
+      std::string sortoption = getPropertyValue("SortBy");
 
       //------- EventWorkspace ---------------------------
       const size_t histnumber = eventW->getNumberHistograms();
@@ -79,7 +80,10 @@ namespace Mantid
       Progress prog(this,0.0,1.0, histnumber);
 
       DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
-      if (!sortByTof) sortType = DataObjects::PULSETIME_SORT;
+      if (sortoption == "Pulse Time")
+        sortType = DataObjects::PULSETIME_SORT;
+      else if (sortoption == "Pulse Time + TOF")
+        sortType = DataObjects::PULSETIMETOF_SORT;
 
       //This runs the SortEvents algorithm in parallel
       eventW->sortAll(sortType, &prog);

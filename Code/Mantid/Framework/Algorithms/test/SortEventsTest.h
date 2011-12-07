@@ -92,6 +92,42 @@ public:
   }
 
 
+  void testSortByPulseTimeTOF()
+  {
+    std::string wsName("test_inEvent4");
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    AnalysisDataService::Instance().add(wsName, test_in);
+
+    SortEvents sort;
+    sort.initialize();
+    sort.setPropertyValue("InputWorkspace",wsName);
+    sort.setPropertyValue("SortBy", "Pulse Time + TOF");
+    TS_ASSERT(sort.execute());
+    TS_ASSERT(sort.isExecuted());
+
+    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    TS_ASSERT_EQUALS( ve.size(), NUMBINS);
+    for (size_t i=0; i<ve.size()-1; i++){
+      bool less = true;
+      if (ve[i].pulseTime() > ve[i+1].pulseTime()){
+        less = false;
+      }
+      else if ( (ve[i].pulseTime()==ve[i+1].pulseTime()) && (ve[i].tof()>=ve[i+1].tof()) ){
+        less = false;
+      }
+      if (!less){
+        std::cout << "Event " << i << "  is later than Event " << i+1 << std::endl;
+        std::cout << "Event " << i << ": " << ve[i].pulseTime() << " + " << ve[i].tof() << std::endl;
+      }
+      TS_ASSERT(less);
+    }
+
+    AnalysisDataService::Instance().remove(wsName);
+
+  }
+
+
 };
 
 
