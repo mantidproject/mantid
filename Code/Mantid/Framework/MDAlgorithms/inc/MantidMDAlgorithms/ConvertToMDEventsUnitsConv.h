@@ -36,7 +36,7 @@ template<CnvrtUnits CONV>
 struct UNITS_CONVERSION
 { 
     /** Set up all variables necessary for units conversion at the beginning of the conversion loop
-     * @param pHost   -- pointer to the Mantid lgorithm, which calls this function to obtain the variables, 
+     * @param pHost   -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
      *                   relevant to the units conversion
     */
     inline void     setUpConversion(ConvertToMDEvents const * const pHost ){UNUSED_ARG(pHost);}

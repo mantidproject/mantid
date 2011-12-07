@@ -162,15 +162,14 @@ namespace MDAlgorithms
    void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to hkl coordinate system */
-   std::vector<double> get_transf_matrix(const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
+   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
  
-   //void process_ModQ_dE_();
+
    /// map to select an algorithm as function of the key, which describes it
     std::map<std::string, pMethod> alg_selector;
    /// map to select an workspace, as function of the dimensions number
     std::map<size_t, pWSCreator> ws_creator;
 
- 
   private: 
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
@@ -212,9 +211,10 @@ namespace MDAlgorithms
     // the variable describing energy transformation mode. (0 -- elastic, 1-- direct; 2 -- indirect)
     // assigned by 
     int emode;
-
-
-
+    //
+    std::vector<double> getTransfMatrix()const{return rotMatrix;}
+    // 
+    std::vector<double> rotMatrix;  // should it be the Quat?
 
  };
  

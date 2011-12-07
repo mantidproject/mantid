@@ -17,6 +17,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 //
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -66,9 +67,14 @@ void ConvertToMDEvents::initDocs()
     this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, then events are added to it.");
 }
-//
+/** Static function to obtain the natural units for input workspace. 
+  *  Natural units are the units, which subalgorithm is working with without any initial transformation.
+  *
+  *@param pHost the pointer to the 
+*/
 std::string          
-ConvertToMDEvents::getNativeUnitsID(ConvertToMDEvents const *const pHost){
+ConvertToMDEvents::getNativeUnitsID(ConvertToMDEvents const *const pHost)
+{
     if(pHost->subalgorithm_units.empty()){
         convert_log.error()<<" getNativeUnitsID: requested undefined subalgorithm units, the subalgorithm is probably not yet defined itself\n";
         throw(std::logic_error(" should not be able to call this function when subalgorithm is undefined"));
@@ -191,12 +197,10 @@ ConvertToMDEvents::init()
          " Values higher then the specified by the array will be ignored\n"
         " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
 
-    // // this property is mainly for subalgorithms to set-up as they have to identify 
-    //declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
-    //    "Store the part of the detectors transfromation into reciprocal space to save/reuse it later;");
-    //// // this property is mainly for subalgorithms to set-up as they have to identify 
-    ////declareProperty(new ArrayProperty<double>("u"), "first base vecotor");
-    ////declareProperty(new ArrayProperty<double>("v"), "second base vecotors");  
+
+    
+    declareProperty(new ArrayProperty<double>("u","1,0,0",new ArrayLengthValidator<double>(3)), "first  base vector (in hkl) defining fractional coordinate system for neutron diffraction");
+    declareProperty(new ArrayProperty<double>("v","0,1,0",new ArrayLengthValidator<double>(3)), "second base vector (in hkl) defining fractional coordinate system for neutron diffraction");  
 
 }
 
@@ -298,9 +302,17 @@ void ConvertToMDEvents::exec(){
     if(!spws){
         create_new_ws = true;
     }
+
+    std::vector<double> ut = getProperty("u");
+    std::vector<double> vt = getProperty("v");
+    Kernel::V3D u(ut[0],ut[1],ut[2]),v(vt[0],vt[1],vt[2]);
+
+    // set up target coordinate system
+    this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
+
+
     // string -Key to identify the algorithm
     std::string algo_id;
-  
 
     // if new workspace is created, its properties are determened by the user's input
     if (create_new_ws){
@@ -680,18 +692,21 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
 }
 
 
-/** The matrix to convert 
-*/
-std::vector<double> 
-ConvertToMDEvents::get_transf_matrix(const Kernel::V3D &u, const Kernel::V3D &v)const
+/** The matrix to convert neutron momentums into the fractional coordinate system   */
+std::vector<double>
+ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u, const Kernel::V3D &v)const
 {
-    // for now. need to be used
-    UNUSED_ARG(u); UNUSED_ARG(v);   
+  
     // Set the matrix based on UB etc.
-    Kernel::Matrix<double> ub = inWS2D->sample().getOrientedLattice().getUB();
+    Geometry::OrientedLattice Latt = inWS2D->sample().getOrientedLattice();
+
+    // thansform the lattice above into the notional coordinate system related to projection vectors u,v;
+    Kernel::Matrix<double> umat = Latt.setUFromVectors(u,v);
+
     Kernel::Matrix<double> gon =inWS2D->run().getGoniometer().getR();
-    // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
-    Kernel::Matrix<double>  mat = gon * ub;
+
+  // Obtain the transformation matrix:
+    Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI)?;
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
@@ -746,7 +761,7 @@ class LOOP_ND{
             LOOP_ND< i-1 , Q, MODE,CONV>::EXEC(pH);
             std::stringstream num;
             num << "ND" << i;
-            std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
+            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
     }
 };
@@ -757,7 +772,7 @@ class LOOP_ND<2,Q,MODE,CONV>{
             
             std::stringstream num;
             num << "ND" << 2;
-            std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
+            std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
 #ifdef _DEBUG
             std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
 #endif

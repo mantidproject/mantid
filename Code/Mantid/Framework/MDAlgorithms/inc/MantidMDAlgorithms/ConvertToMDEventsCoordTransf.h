@@ -183,7 +183,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV>
          // the wave vector of incident neutrons;
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // get transformation matrix (needed for CrystalAsPoder mode)
-         rotMat = pHost->get_transf_matrix();
+         rotMat = pHost->getTransfMatrix();
          // 
          CONV_UNITS_FROM.setUpConversion(this->pHost); 
 
@@ -258,7 +258,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV>
             if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
          }
          // get transformation matrix (needed for CrystalAsPoder mode)
-         rotMat = pHost->get_transf_matrix();
+         rotMat = pHost->getTransfMatrix();
          // 
          CONV_UNITS_FROM.setUpConversion(this->pHost); 
          // get pointer to the positions of the detectors
@@ -333,7 +333,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV>
          // the wave vector of incident neutrons;
          ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
          // 
-         rotMat = pHost->get_transf_matrix();
+         rotMat = pHost->getTransfMatrix();
          CONV_UNITS_FROM.setUpConversion(this->pHost); 
 
         // get pointer to the positions of the detectors
@@ -403,7 +403,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV>
             if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
          }
          // 
-        rotMat = pHost->get_transf_matrix();
+        rotMat = pHost->getTransfMatrix();
         //
         CONV_UNITS_FROM.setUpConversion(this->pHost); 
         // get pointer to the positions of the detectors
