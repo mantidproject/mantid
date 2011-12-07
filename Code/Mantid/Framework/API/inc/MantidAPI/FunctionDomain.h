@@ -7,6 +7,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
 
+#include <vector>
+
 namespace Mantid
 {
 namespace API
