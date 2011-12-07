@@ -482,9 +482,7 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
     if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
         natural_units = native_elastic_unitID;
         emode    = 0;
-    }
-    
-
+    }    
     return DE_MODE_ID;
 
 }
@@ -679,11 +677,22 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inWS2D->run().getProperty(this->targ_dim_names[i-n_ws_properties]));  
-          if(!run_property){
-             g_log.error()<<" property: "<<this->targ_dim_names[i]<<" is not a time series (run) property\n";
+         Kernel::Property *pProperty = (inWS2D->run().getProperty(this->targ_dim_names[i-n_ws_properties]));
+          Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
+          if(run_property){
+                Coord[i]=run_property->firstValue();
+          }else{
+              // e.g Ei can be a property and dimenson
+              Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
+              if(!proc_property){
+                 convert_log.error()<<" property: "<<this->targ_dim_names[i]<<" is neither a time series (run) property nor a property with double value\n";
+                 throw(std::invalid_argument(" can not interpret property, used as dimension"));
+              }
+              Coord[i]  = *(proc_property)();
           }
-          Coord[i]=run_property->firstValue();
+
+
+
      }
 }
 
