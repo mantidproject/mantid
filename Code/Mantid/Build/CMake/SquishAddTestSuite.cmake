@@ -11,7 +11,7 @@ macro( SQUISH_ADD_TEST_SUITE )
     string( REGEX REPLACE "/" "" _test_suite ${_test_suite} )
     string( REGEX REPLACE "suite_" "" _test_suite ${_test_suite} )
     set( testName ${_test_suite}SquishTests )
-    message( STATUS "Creating Squish test ${testName}" )
+    #message( STATUS "Creating Squish test ${testName}" )
     set( resultFile "${CMAKE_BINARY_DIR}/bin/Testing/TEST-${testName}.xml" )
     add_test(${testName}
              ${CMAKE_COMMAND}
