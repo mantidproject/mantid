@@ -157,7 +157,15 @@ namespace Mantid
         MantidVec::difference_type distmax=std::distance(X.begin(),highit);
 
         // Find the max element
-        MantidVec::const_iterator maxY=std::max_element(Y.begin()+distmin,Y.begin()+distmax);
+        MantidVec::const_iterator maxY;
+        if(Y.size() > 1)
+        {
+          maxY=std::max_element(Y.begin()+distmin,Y.begin()+distmax);
+        }
+        else
+        {
+          maxY = Y.begin();
+        }
         double intensity=(*maxY);
         double background=0.5*(1.0+Y.front()+Y.back());
         if (intensity<SB*background) // This is not a peak.

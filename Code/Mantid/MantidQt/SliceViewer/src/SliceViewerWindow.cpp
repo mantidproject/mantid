@@ -21,7 +21,11 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, QWidget *app , const
    WorkspaceObserver()
 {
   bool isMainWindow = dynamic_cast<QMainWindow*>(this);
-//  bool isMdi = dynamic_cast<QMdiSubWindow*>(this);
+
+  // Set the window icon
+  QIcon icon;
+  icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+  this->setWindowIcon(icon);
 
   // Get the workspace
   m_wsName = wsName.toStdString();

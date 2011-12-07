@@ -206,6 +206,16 @@ namespace Mantid
         g_log.error("Improper Input Workspace");
         throw;
       }
+      //Check if detectors are RectangularDetectors
+      Instrument_const_sptr inst = inpWkSpace->getInstrument();
+      boost::shared_ptr<RectangularDetector> det;
+      for (int i=0; i < inst->nelements(); i++)
+      {
+        det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+        if (det) break;
+      }
+      if (!det)
+        throw std::runtime_error("PeakIntegration only works for instruments with Rectangular Detectors.");
 
       PeaksWorkspace_sptr peaksW;
       peaksW = getProperty("Peaks");

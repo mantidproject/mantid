@@ -184,6 +184,61 @@ namespace Mantid
       throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
     }
 
+    //-------------------------------------------------------------------------
+    // Gaussian Weighting Implementations
+    //-------------------------------------------------------------------------
+
+    GaussianWeighting1D::GaussianWeighting1D(double cutOff, double sigma) : WeightingStrategy(cutOff)
+    {
+      if(cutOff < 0)
+      {
+        throw std::invalid_argument("GassianWeighting expects unsigned cutOff input");
+      }
+      if(sigma < 0)
+      {
+        throw std::invalid_argument("GassianWeighting expects unsigned standard deviation input");
+      }
+
+      init(sigma);
+    }
+
+    GaussianWeighting1D::GaussianWeighting1D(double sigma) : WeightingStrategy(0)
+    {
+      if(sigma < 0)
+      {
+        throw std::invalid_argument("GassianWeighting expects unsigned standard deviation input");
+      }
+
+      init(sigma);
+    }
+
+    void GaussianWeighting1D::init(const double sigma)
+    {
+      m_coeff = 1/((std::sqrt(2 *  M_PI)) * sigma);
+      m_twiceSigmaSquared = 2 * sigma * sigma;
+    }
+
+    GaussianWeighting1D::~GaussianWeighting1D()
+    {
+    }
+
+    double GaussianWeighting1D::weightAt(const double& distance)
+    {
+      double normalisedDistance = distance/m_cutOff;
+      return calculateGaussian(normalisedDistance*normalisedDistance);
+    }
+
+    double GaussianWeighting1D::weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
+    {
+      double normalisedDistanceSq = (ix*ix + iy*iy) / (adjX*adjX + adjY*adjY);
+      return calculateGaussian(normalisedDistanceSq);
+    }
+
+    double GaussianWeighting1D::calculateGaussian(const double normalisedDistanceSq)
+    {
+      return m_coeff * std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
+    }
+
 
   } // namespace Mantid
 } // namespace Algorithms

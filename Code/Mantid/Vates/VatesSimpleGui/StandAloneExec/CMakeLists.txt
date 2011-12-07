@@ -29,6 +29,10 @@ qt4_wrap_cpp( MOC_SRCS
   inc/VsgMainWindow.h
 )
 
+set( TEST_SUITES
+    test/suite_StandAloneVsi
+)
+
 add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
 target_link_libraries( ${PROJECT_NAME}
@@ -38,5 +42,15 @@ ${MANTID_SUBPROJECT_LIBS}
 VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
 )
+
+if( SQUISH_FOUND )
+  squish_add_test_suite( ${TEST_SUITES} )
+  set( auto_test_dir ${CMAKE_SOURCE_DIR} )
+  string( REGEX REPLACE "Code/Mantid" "Test/AutoTestData" auto_test_dir ${auto_test_dir} )
+  squish_suite_envvars( ${TEST_SUITES}
+    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/bin/${PVPLUGINS_DIR}
+    MANTID_AUTOTEST_DATA ${auto_test_dir}
+  )
+endif()
 
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )

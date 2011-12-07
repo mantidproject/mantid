@@ -28,7 +28,7 @@ namespace DataObjects
 
 
 /// How the event list is sorted.
-enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
+enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT};
 
 //==========================================================================================
 /** @class Mantid::DataObjects::EventList
@@ -165,6 +165,7 @@ public:
   inline void addEventQuickly(const TofEvent &event)
   {
     this->events.push_back(event);
+    this->order = UNSORTED;
   }
 
   // --------------------------------------------------------------------------
@@ -174,6 +175,7 @@ public:
   inline void addEventQuickly(const WeightedEvent &event)
   {
     this->weightedEvents.push_back(event);
+    this->order = UNSORTED;
   }
 
   // --------------------------------------------------------------------------
@@ -183,15 +185,14 @@ public:
   inline void addEventQuickly(const WeightedEventNoTime &event)
   {
     this->weightedEventsNoTime.push_back(event);
+    this->order = UNSORTED;
   }
-
-
 
   Mantid::API::EventType getEventType() const;
 
   void switchTo(Mantid::API::EventType newType);
 
-//  bool hasWeights() const;
+  //  bool hasWeights() const;
 
   WeightedEvent getEvent(size_t event_number);
 
@@ -227,6 +228,7 @@ public:
   void sortTof4() const;
 
   void sortPulseTime() const;
+  void sortPulseTimeTOF() const;
 
   bool isSortedByTof() const;
 

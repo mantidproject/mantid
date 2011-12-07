@@ -182,6 +182,15 @@ public:
     return getRow(rowCount()-1);
   }
 
+  /** Does this type of TableWorkspace need a custom sorting call (e.g. PeaksWorkspace)
+   * @return true if the workspace needs custom sorting calls */
+  virtual bool customSort() const
+  { return false; }
+
+  /// Overridable method to custom-sort the workspace
+  virtual void sort(std::vector< std::pair<std::string, bool> > & criteria);
+
+
   /// Access the column with name \c name trough a ColumnVector object
   TableColumnHelper getVector(const std::string& name)
   {

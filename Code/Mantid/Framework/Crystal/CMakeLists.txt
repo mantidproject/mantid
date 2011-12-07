@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadIsawPeaks.cpp
+    src/IndexSXPeaks.cpp
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
@@ -35,6 +36,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/IndexPeaks.h
+    inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadIsawPeaks.h
 	inc/MantidCrystal/LoadIsawUB.h
@@ -61,6 +63,7 @@ set ( TEST_FILES
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h
 	test/IndexPeaksTest.h
+    test/IndexSXPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h

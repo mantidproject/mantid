@@ -121,7 +121,7 @@ void DiffractionFocussing2::exec()
   // Validate UnitID (spacing)
   Axis* axis = m_matrixInputW->getAxis(0);
   std::string unitid = axis->unit()->unitID();
-  if (unitid != "dSpacing" && unitid != "MomentumTransfer"){
+  if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF"){
     g_log.error() << "UnitID " << unitid << " is not a supported spacing" << std::endl;
     throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }

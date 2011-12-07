@@ -113,6 +113,26 @@ namespace Algorithms
       virtual double weightAt(const double&,const double&, const double&, const double&);
     };
 
+    /*
+    Gaussian Strategy
+    */
+    class DLLExport GaussianWeighting1D : public WeightingStrategy
+    {
+    public:
+      GaussianWeighting1D(double cutOff, double sigma);
+      GaussianWeighting1D(double sigma);
+      virtual ~GaussianWeighting1D();
+      virtual double weightAt(const double &);
+      virtual double weightAt(const double&,const double&, const double&, const double&);
+    private:
+      void init(const double sigma);
+      double calculateGaussian(const double normalisedDistanceSq);
+      double m_coeff;
+      double m_twiceSigmaSquared;
+    };
+
+
+
 
 } // namespace Algorithms
 } // namespace Mantid

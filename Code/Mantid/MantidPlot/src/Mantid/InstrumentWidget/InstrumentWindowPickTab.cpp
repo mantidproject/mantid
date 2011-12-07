@@ -26,6 +26,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QActionGroup>
+#include <QWidgetAction>
 #include <QLabel>
 #include <QMessageBox>
 #include <QDialog>
@@ -34,6 +35,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QSignalMapper>
+#include <QPixmap>
 
 #include <numeric>
 #include <cfloat>
@@ -392,7 +394,10 @@ void InstrumentWindowPickTab::plotContextMenu()
     QStringList labels = m_plot->getLabels();
     foreach(QString label,labels)
     {
-      QAction *remove = new QAction(label,removeCurves);
+      QColor c = m_plot->getCurveColor(label);
+      QPixmap pixmap(16,2);
+      pixmap.fill(c);
+      QAction *remove = new QAction(QIcon(pixmap),label,removeCurves);
       removeCurves->addAction(remove);
       connect(remove,SIGNAL(triggered()),signalMapper,SLOT(map()));
       signalMapper->setMapping(remove,label);

@@ -3,6 +3,7 @@
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include <functional>
 #include <limits>
 #include <math.h>
@@ -21,7 +22,6 @@ namespace DataObjects
   using Kernel::Exception::NotImplementedError;
   using Kernel::DateAndTime;
   using namespace Mantid::API;
-
 
   //==========================================================================
   /// --------------------- TofEvent Comparators ----------------------------------
@@ -45,6 +45,21 @@ namespace DataObjects
     return (e1.pulseTime() < e2.pulseTime());
   }
 
+  /** Compare two events' FRAME id, return true if e1 should be before e2.
+  * @param e1 :: first event
+  * @param e2 :: second event
+  *  */
+  bool compareEventPulseTimeTOF(const TofEvent& e1, const TofEvent& e2){
+
+    if (e1.pulseTime() < e2.pulseTime()){
+      return true;
+    }
+    else if ( (e1.pulseTime() == e2.pulseTime()) && (e1.m_tof < e2.m_tof) ){
+      return true;
+    }
+
+    return false;
+  }
 
 
 
@@ -750,6 +765,9 @@ namespace DataObjects
     {
       this->sortPulseTime();
     }
+    else if (order == PULSETIMETOF_SORT){
+      this->sortPulseTimeTOF();
+    }
     else
     {
       throw runtime_error("Invalid sort type in EventList::sort(EventSortType)");
@@ -1079,6 +1097,35 @@ namespace DataObjects
     }
     //Save the order to avoid unnecessary re-sorting.
     this->order = PULSETIME_SORT;
+  }
+
+  /*
+   * Sort events by pulse time + TOF
+   * (the absolute time)
+   */
+  void EventList::sortPulseTimeTOF() const
+  {
+    if (this->order == PULSETIMETOF_SORT){
+      // already ordered.
+      return;
+    }
+
+    switch (eventType)
+    {
+    case TOF:
+      std::sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+      break;
+    case WEIGHTED:
+      std::sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+      break;
+    case WEIGHTED_NOTIME:
+      // Do nothing; there is no time to sort
+      break;
+    }
+
+    // Save
+    this->order = PULSETIMETOF_SORT;
+
   }
 
   // --------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidKernel/Exception.h"
 
 #ifdef _WIN32
@@ -17,7 +17,7 @@ namespace Mantid
 {
 namespace API
 {
-/** This is a temporari helper class to aid transition from IFitFunction to IFunction.
+/** This is a temporary helper class to aid transition from IFitFunction to IFunction.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 17/11/2011
@@ -46,7 +46,7 @@ class MANTID_API_DLL TempFunction: public virtual IFunction
 {
 public:
   /// Constructor
-  TempFunction(IFitFunction* function);
+  TempFunction(IFunctionMW* function);
 
   /// Returns the function's name
   virtual std::string name()const {return m_function->name();}
@@ -54,7 +54,7 @@ public:
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) { UNUSED_ARG(ws) }
   /// Get the workspace
-  virtual boost::shared_ptr<const API::Workspace> getWorkspace()const {return m_function->getWorkspace();}
+  //virtual boost::shared_ptr<const API::Workspace> getWorkspace()const {return m_function->getWorkspace();}
 
   /// The categories the Fit function belong to.
   /// Categories must be listed as a comma separated list.
@@ -63,12 +63,8 @@ public:
   /// "Muon\\Custom" 
   virtual const std::string category() const { return m_function->category();}
 
-  /// Function you want to fit to. 
-  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-  virtual void function(FunctionDomain& domain)const {
-    UNUSED_ARG(domain)
-    throw Kernel::Exception::NotImplementedError("TempFunction not implemented.");
-  }
+  virtual void function(FunctionDomain& domain)const;
+  virtual void functionDeriv(FunctionDomain& domain, Jacobian& jacobian);
 
   /// Set i-th parameter
   virtual void setParameter(size_t i, const double& value, bool explicitlySet = true) {m_function->setParameter(i,value,explicitlySet);}
@@ -151,7 +147,23 @@ protected:
   virtual void addTie(ParameterTie* tie) {m_function->addTie(tie);}
 
   /// Pointer to underlying IFitFunction
-  IFitFunction* m_function;
+  IFunctionMW* m_function;
+};
+
+/**
+ * The domain for 1D functions.
+ */
+class MANTID_API_DLL FunctionDomain1D: public FunctionDomain
+{
+public:
+  FunctionDomain1D(double start, double end, size_t n);
+  FunctionDomain1D(const std::vector<double>& xvalues);
+  /// get an x value
+  /// @param i :: Index
+  double getX(size_t i) const {return m_X.at(i);}
+protected:
+  std::vector<double> m_X; ///< vector of function arguments
+  friend class TempFunction;
 };
 
 

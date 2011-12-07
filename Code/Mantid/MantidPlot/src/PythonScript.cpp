@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : PythonScript.cpp
-	Project              : QtiPlot
+  File                 : PythonScript.cpp
+  Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2006 by Knut Franke
-	Email (use @ for *)  : knut.franke*gmx.de
-	Description          : Execute Python code from within QtiPlot
+  Copyright            : (C) 2006 by Knut Franke
+  Email (use @ for *)  : knut.franke*gmx.de
+  Description          : Execute Python code from within QtiPlot
 
  ***************************************************************************/
 
@@ -54,10 +54,10 @@ namespace
   {
     // If we are in the main code and this is a line number event
     if( ROOT_CODE_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
-	&& what == PyTrace_LINE )
-      {
-	CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
-      }
+      && what == PyTrace_LINE )
+    {
+      CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
+    }
     // I don't care about the return value
     return 0;
   }
@@ -68,12 +68,15 @@ namespace
  * Constructor
  */
 PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
-			   const QString &name, bool interactive, bool reportProgress)
-  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(NULL), 
+         const QString &name, bool interactive, bool reportProgress)
+  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(env->localDict()), 
     stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
 {
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
+
+  setContext(Context);
+  updatePath(Name, true);
 }
 
 /**
@@ -83,7 +86,6 @@ PythonScript::~PythonScript()
 {
   this->disconnect();
   updatePath(Name, false);
-  Py_DECREF(localDict);
   Py_XDECREF(PyCode);
 }
 
@@ -101,45 +103,45 @@ bool PythonScript::compile(bool for_eval)
     {
       // A bit of a hack, but we need either IndexError or len() from __builtins__.
       PyDict_SetItemString(localDict, "__builtins__",
-			   PyDict_GetItemString(env()->globalDict(), "__builtins__"));
+         PyDict_GetItemString(env()->globalDict(), "__builtins__"));
       PyObject *ret = PyRun_String(
-				   "def col(c,*arg):\n"
-				   "\ttry: return self.cell(c,arg[0])\n"
-				   "\texcept(IndexError): return self.cell(c,i)\n"
-				   "def cell(c,r):\n"
-				   "\treturn self.cell(c,r)\n"
-				   "def tablecol(t,c):\n"
-				   "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
-				   "def _meth_table_col_(t,c):\n"
-				   "\treturn t.cell(c,i)\n"
-				   "self.__class__.col = _meth_table_col_",
-				   Py_file_input, localDict, localDict);
+           "def col(c,*arg):\n"
+           "\ttry: return self.cell(c,arg[0])\n"
+           "\texcept(IndexError): return self.cell(c,i)\n"
+           "def cell(c,r):\n"
+           "\treturn self.cell(c,r)\n"
+           "def tablecol(t,c):\n"
+           "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
+           "def _meth_table_col_(t,c):\n"
+           "\treturn t.cell(c,i)\n"
+           "self.__class__.col = _meth_table_col_",
+           Py_file_input, localDict, localDict);
       if (ret)
-	Py_DECREF(ret);
+  Py_DECREF(ret);
       else
-	PyErr_Print();
+  PyErr_Print();
     } 
     else if(Context->inherits("Matrix")) 
     {
       // A bit of a hack, but we need either IndexError or len() from __builtins__.
       PyDict_SetItemString(localDict, "__builtins__",
-			   PyDict_GetItemString(env()->globalDict(), "__builtins__"));
+         PyDict_GetItemString(env()->globalDict(), "__builtins__"));
       PyObject *ret = PyRun_String(
-				   "def cell(*arg):\n"
-				   "\ttry: return self.cell(arg[0],arg[1])\n"
-				   "\texcept(IndexError): return self.cell(i,j)\n",
-				   Py_file_input, localDict, localDict);
+           "def cell(*arg):\n"
+           "\ttry: return self.cell(arg[0],arg[1])\n"
+           "\texcept(IndexError): return self.cell(i,j)\n",
+           Py_file_input, localDict, localDict);
       if (ret)
-	Py_DECREF(ret);
+  Py_DECREF(ret);
       else
-	PyErr_Print();
+  PyErr_Print();
     }
   }
   bool success(false);
   Py_XDECREF(PyCode);
   // Simplest case: Code is a single expression
   PyCode = Py_CompileString(Code, Name, Py_file_input);
-	
+  
   if( PyCode )
   {
     success = true;
@@ -184,7 +186,7 @@ bool PythonScript::compile(bool for_eval)
     PyCode = Py_CompileString(Code, Name, Py_file_input);
     success = (PyCode != NULL);
   }
-	
+  
   if(!success )
   {
     compiled = compileErr;
@@ -198,7 +200,7 @@ bool PythonScript::compile(bool for_eval)
 }
 
 QVariant PythonScript::eval()
-{	
+{  
   if (!isFunction) compiled = notCompiled;
   if (compiled != isCompiled && !compile(true))
     return QVariant();
@@ -214,7 +216,7 @@ QVariant PythonScript::eval()
   endStdoutRedirect();
   if (!pyret){
     if (PyErr_ExceptionMatches(PyExc_ValueError) ||
-	PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){				
+  PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){        
       PyErr_Clear(); // silently ignore errors
       return  QVariant("");
     } else {
@@ -251,11 +253,11 @@ QVariant PythonScript::eval()
       PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
       Py_DECREF(pystring);
       if (asUTF8) {
-	qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
-	Py_DECREF(asUTF8);
+  qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
+  Py_DECREF(asUTF8);
       } else if ((pystring = PyObject_Str(pyret))) {
-	qret = QVariant(QString(PyString_AS_STRING(pystring)));
-	Py_DECREF(pystring);
+  qret = QVariant(QString(PyString_AS_STRING(pystring)));
+  Py_DECREF(pystring);
       }
     }
   }
@@ -263,13 +265,13 @@ QVariant PythonScript::eval()
   Py_DECREF(pyret);
   if (PyErr_Occurred()){
     if (PyErr_ExceptionMatches(PyExc_ValueError) ||
-	PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){
+  PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){
       PyErr_Clear(); // silently ignore errors
       return  QVariant("");
-	} else {
+  } else {
       emit_error(constructErrorMsg(), 0);
-	return QVariant();
-	  }
+  return QVariant();
+    }
   } else
     return qret;
 }
@@ -282,8 +284,6 @@ bool PythonScript::exec()
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
    PyGILState_STATE state = PyGILState_Ensure();
 
-  // Make sure we are initialized. Only does something the first time
-  initialize();
   env()->setIsRunning(true);
 
   if (isFunction) compiled = notCompiled;
@@ -342,21 +342,6 @@ bool PythonScript::exec()
 }
 
 /**
- * A call-once initialize function to grab hold of a copy of the __main__ dictionary
- */
-void PythonScript::initialize()
-{
-  if( m_isInitialized ) return;
-
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  setQObject(Context, "self");
-  updatePath(Name, true);
-
-  m_isInitialized = true;
-}
-
-/**
  * Update the current environment with the script's path
  */
 void PythonScript::updatePath(const QString & filename, bool append)
@@ -402,7 +387,7 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
     else
     {
 
-      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
+      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
     }
   }
   // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
@@ -564,14 +549,14 @@ QString PythonScript::constructErrorMsg()
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
-	if (localDict) // Avoid segfault for un-initialized object
-	{
-		if (!PyDict_Contains(localDict, PyString_FromString(name)))
-			compiled = notCompiled;
-		return env()->setQObject(val, name, localDict);
-	}
-	else
-		return false;
+  if (localDict) // Avoid segfault for un-initialized object
+  {
+    if (!PyDict_Contains(localDict, PyString_FromString(name)))
+      compiled = notCompiled;
+    return env()->setQObject(val, name, localDict);
+  }
+  else
+    return false;
 }
 
 bool PythonScript::setInt(int val, const char *name)

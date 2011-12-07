@@ -52,16 +52,16 @@ bool PeakHKL::add(PeakMarker2D* marker,const QRectF& trect)
 * @param painter :: QPainter to draw with
 * @param transform :: Current transform
 */
-void PeakHKL::draw(QPainter& painter)
+void PeakHKL::draw(QPainter& painter,int prec)
 {
   QString label;
-  if (nh) label = QString::number(h) + " ";
+  if (nh) label = QString::number(h,'g',prec) + " ";
   else
     label = "h ";
-  if (nk) label += QString::number(k) + " ";
+  if (nk) label += QString::number(k,'g',prec) + " ";
   else
     label += "k ";
-  if (nl) label += QString::number(l);
+  if (nl) label += QString::number(l,'g',prec);
   else
     label += "l";
   painter.drawText(rect.bottomLeft(),label);
@@ -79,7 +79,8 @@ void PeakHKL::print()const
 PeakOverlay::PeakOverlay(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws):
 Shape2DCollection(),
 m_peaksWorkspace(pws),
-m_currentDefaultStyle(0)
+m_currentDefaultStyle(0),
+m_precision(6)
 {
   if (g_defaultStyles.isEmpty())
   {
@@ -161,7 +162,7 @@ void PeakOverlay::draw(QPainter& painter) const
   for(int i = 0; i < m_labels.size(); ++i)
   {
     PeakHKL& hkl = m_labels[i];
-    hkl.draw(painter);
+    hkl.draw(painter,m_precision);
     //hkl.print();
   }
 }

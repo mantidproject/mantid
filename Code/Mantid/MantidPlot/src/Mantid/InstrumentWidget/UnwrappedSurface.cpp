@@ -657,6 +657,7 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
     return;
   }
   m_peakShapes.append(new PeakOverlay(pws));
+  m_peakShapes[0]->setPrecision(m_peakLabelPrecision);
   m_startPeakShapes = true;
 }
 

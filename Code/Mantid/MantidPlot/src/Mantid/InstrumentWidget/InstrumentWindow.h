@@ -145,6 +145,7 @@ public slots:
   void setWireframe(bool);
 
   void clearPeakOverlays();
+  void setPeakLabelPrecision(int n);
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);

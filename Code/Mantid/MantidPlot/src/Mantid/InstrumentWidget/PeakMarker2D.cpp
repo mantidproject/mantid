@@ -114,7 +114,7 @@ void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak)
   m_h = peak.getH();
   m_k = peak.getK();
   m_l = peak.getL();
-  m_label = QString("%1 %2 %3").arg(QString::number(m_h),QString::number(m_k),QString::number(m_l));
+  m_label = QString("%1 %2 %3").arg(QString::number(m_h,'g',2),QString::number(m_k,'g',2),QString::number(m_l,'g',2));
   m_detID = peak.getDetectorID();
   m_tof = peak.getTOF();
 }

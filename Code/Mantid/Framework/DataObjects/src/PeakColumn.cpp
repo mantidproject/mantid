@@ -111,7 +111,14 @@ namespace DataObjects
   /** @return true if the column is read-only */
   bool PeakColumn::getReadOnly() const
   {
+    if (
+        (m_name == "h") || (m_name == "k") || (m_name == "l") ||
+        (m_name == "RunNumber")
+      )
       return false;
+    else
+      // Default to true for most columns
+      return true;
   }
 
 
