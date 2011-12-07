@@ -1,12 +1,40 @@
-#ifndef  H_CONVERT_TO_MDEVENTS_COORD
-#define  H_CONVERT_TO_MDEVENTS_COORD
+#ifndef  H_CONVERT_TO_MDEVENTS_COORD_TRANSF
+#define  H_CONVERT_TO_MDEVENTS_COORD_TRANSF
+//
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h"
-
+//
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+/** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
+  * data into multidimensional events 
+   *
+   * @date 11-10-2011
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+
+
 
 
 ///
@@ -115,7 +143,7 @@ private:
      // pointer to MD workspace convertor
      ConvertToMDEvents *pHost;
      // class which would convert units
-     UNITS_CONVERSION<CONV,NoQ,MODE> UnitsConvertor;
+     UNITS_CONVERSION<CONV> UnitsConvertor;
 };
 //
 ////----------------------------------------------------------------------------------------------------------------------
@@ -152,6 +180,9 @@ private:
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
     API::NumericAxis *pYAxis;
+     // class which would convert units
+     UNITS_CONVERSION<CONV> UnitsConvertor;
+
 };
 //------------------------------------------------------------------------------------------------------------------------------
 // Q3D any mode 
@@ -241,7 +272,7 @@ private:
     //
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
-    UNITS_CONVERSION<CONV,Q3D,MODE> UnitsConvertor;
+    UNITS_CONVERSION<CONV> UnitsConvertor;
 };
 
 // Elastic
@@ -303,7 +334,7 @@ private:
     //
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
-    UNITS_CONVERSION<CONV,Q3D,Elastic> UnitsConvertor;
+    UNITS_CONVERSION<CONV> UnitsConvertor;
 };
 
 

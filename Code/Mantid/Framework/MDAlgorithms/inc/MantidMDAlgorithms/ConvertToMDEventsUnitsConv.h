@@ -1,30 +1,58 @@
 #ifndef H_CONVERT_TO_MDEVENTS_UNITS
 #define H_CONVERT_TO_MDEVENTS_UNITS
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
+/** Set of internal classes used by ConvertToMDEvents algorithm and responsible for Units conversion
+   *
+   * @date 11-10-2011
 
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+        This file is part of Mantid.
+
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+// DO UNITS CONVERSION --
 
-
-// DO UNITS CONVERSION -- generally does almost nothing
-// procedure which converts/ non-converts units
-template<CnvrtUnits CONV,Q_state Q,AnalMode MODE> 
+//  general procedure does nothing (non-converts units)
+template<CnvrtUnits CONV> 
 struct UNITS_CONVERSION
 { 
-    /// set up all variables necessary for units conversion at the beginning of the loop
-    inline void     setUpConversion(ConvertToMDEvents const *const){};
-    /// update all variables in the loop over spectra
-    inline void     updateConversion(uint64_t){};
-    /// convert current X variable
-    inline coord_t  getXConverted(const MantidVec& X,size_t j)const{return coord_t(0.5*(X[j]+X[j+1]));}
+    /** Set up all variables necessary for units conversion at the beginning of the conversion loop
+     * @param pHost   -- pointer to the Mantid lgorithm, which calls this function to obtain the variables, 
+     *                   relevant to the units conversion
+    */
+    inline void     setUpConversion(ConvertToMDEvents const * const pHost ){UNUSED_ARG(pHost);}
+    /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
+    inline void     updateConversion(uint64_t i){};
+    /// Convert current X variable into the units requested;
+    inline coord_t  getXConverted(const MantidVec& X,size_t j)const
+    {
+        return coord_t(0.5*(X[j]+X[j+1]));
+    }
 
 };
 
 // Fast conversion:
-template<Q_state Q,AnalMode MODE>
-struct UNITS_CONVERSION<ConvertFast,Q,MODE>
+template<>
+struct UNITS_CONVERSION<ConvertFast>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)
@@ -39,7 +67,7 @@ struct UNITS_CONVERSION<ConvertFast,Q,MODE>
     };
     // does nothing
     inline void    updateConversion(const uint64_t ){}
-    // 
+    // convert X coordinate using power series
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const
     {
         coord_t X0=coord_t(0.5*(X[j]+X[j+1]));
@@ -52,8 +80,8 @@ private:
 };
 
 // Convert from TOF:
-template<Q_state Q,AnalMode MODE>
-struct UNITS_CONVERSION<ConvFromTOF,Q,MODE>
+template<>
+struct UNITS_CONVERSION<ConvFromTOF>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)
@@ -75,11 +103,12 @@ struct UNITS_CONVERSION<ConvFromTOF,Q,MODE>
        pL2       = &(det.L2[0]);
        L1        =  det.L1;
        efix      =  ConvertToMDEvents::getEi(pHost);
+       emode     =  ConvertToMDEvents::getEMode(pHost);
     };
     inline void updateConversion(uint64_t i)
     {
         double delta;
-        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],MODE,efix,delta);
+        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
     }
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const{
         double X0=(0.5*(X[j]+X[j+1]));        
@@ -92,6 +121,8 @@ private:
     //      Unit * localFromUnit = fromUnit->clone();
     //  Unit * localOutputUnit = outputUnit->clone();
       Kernel::Unit_sptr pWSUnit;
+      // Energy analysis mode
+      int emode;
  
       double L1,efix;
       double const *pTwoTheta;
@@ -100,8 +131,8 @@ private:
 };
 
 // Convert By TOF:
-template<Q_state Q,AnalMode MODE>
-struct UNITS_CONVERSION<ConvByTOF,Q,MODE>
+template<>
+struct UNITS_CONVERSION<ConvByTOF>
 {
 
     void setUpConversion(ConvertToMDEvents const *const pHost)
@@ -126,13 +157,14 @@ struct UNITS_CONVERSION<ConvByTOF,Q,MODE>
        L1        =  det.L1;
        // get efix
        efix      =  ConvertToMDEvents::getEi(pHost);
+       emode     =  ConvertToMDEvents::getEMode(pHost);
     };
 
     inline void updateConversion(uint64_t i)
     {
         double delta;
-        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],MODE,efix,delta);
-        pSourceWSUnit->initialize(L1,pL2[i],pTwoTheta[i],MODE,efix,delta);
+        pWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
+        pSourceWSUnit->initialize(L1,pL2[i],pTwoTheta[i],emode,efix,delta);
     }
     //
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const{
@@ -149,7 +181,7 @@ private:
     // Make local copies of the units. This allows running the loop in parallel
     //      Unit * localFromUnit = fromUnit->clone();
     //  Unit * localOutputUnit = outputUnit->clone();
-  
+      int emode;
       double L1,efix;
       double const *pTwoTheta;
       double const *pL2;

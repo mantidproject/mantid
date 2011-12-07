@@ -48,9 +48,9 @@ public:
     //
     std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const std::vector<std::string> &ws_dim_units,
                             std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units, 
-                               int &ndE_dims,std::string &natural_units)
+                               int &ndE_dims,std::string &natural_units,int &emode)
    {
-       return ConvertToMDEvents::parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units);
+       return ConvertToMDEvents::parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode);
     
    }
    std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const std::vector<std::string> &ws_dim_units){
@@ -160,21 +160,22 @@ void testParseDEMode_WrongThrows()
 
      std::vector<std::string> ws_dim_units;
      std::vector<std::string> out_dim_names,out_dim_units;
-     int ndE_dims;    
+     int ndE_dims,emode;    
      std::string natural_units;
 
-     TS_ASSERT_THROWS(pAlg->parseDEMode("SOMEQMODE","WrongMode",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units),std::invalid_argument);
+     TS_ASSERT_THROWS(pAlg->parseDEMode("SOMEQMODE","WrongMode",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode),std::invalid_argument);
 }
 void testParseDEMode_NoQ()
 {
      std::vector<std::string> ws_dim_units(1,"some");
      std::vector<std::string> out_dim_names,out_dim_units;
-     int ndE_dims;    
+     int ndE_dims,emode;    
      std::string natural_units;
      std::string EID;
 
-     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode));
      TS_ASSERT_EQUALS(0,ndE_dims);
+     TS_ASSERT_EQUALS(3,emode);
      TSM_ASSERT_EQUALS("Regardless of the dE mode, if Q-mode is NoQ, should return Any_Mode: ","",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
@@ -184,12 +185,13 @@ void testParseDEMode_InelasticDirect()
 {
      std::vector<std::string> ws_dim_units(1,"some");
      std::vector<std::string> out_dim_names,out_dim_units;
-     int ndE_dims;    
+     int ndE_dims,emode;    
      std::string natural_units;
      std::string EID;
 
-     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Direct",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Direct",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode));
      TS_ASSERT_EQUALS(1,ndE_dims);
+     TS_ASSERT_EQUALS(1,emode);
      TS_ASSERT_EQUALS("Direct",EID);
      TS_ASSERT_EQUALS("DeltaE",out_dim_names[0]);
      TS_ASSERT_EQUALS("DeltaE",out_dim_units[0]);
@@ -199,12 +201,13 @@ void testParseDEMode_InelasticInDir()
 {
      std::vector<std::string> ws_dim_units(1,"some");
      std::vector<std::string> out_dim_names,out_dim_units;
-     int ndE_dims;    
+     int ndE_dims,emode;    
      std::string natural_units;
      std::string EID;
 
-     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Indirect",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Indirect",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode));
      TS_ASSERT_EQUALS(1,ndE_dims);
+     TS_ASSERT_EQUALS(2,emode);
      TS_ASSERT_EQUALS("Indirect",EID);
      TS_ASSERT_EQUALS("DeltaE",out_dim_names[0]);
      TS_ASSERT_EQUALS("DeltaE",out_dim_units[0]);
@@ -214,12 +217,13 @@ void testParseDEMode_Elastic()
 {
      std::vector<std::string> ws_dim_units(1,"some");
      std::vector<std::string> out_dim_names,out_dim_units;
-     int ndE_dims;    
+     int ndE_dims,emode;    
      std::string natural_units;
      std::string EID;
 
-     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("DoesNotMatter","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode));
      TS_ASSERT_EQUALS(0,ndE_dims);
+     TS_ASSERT_EQUALS(0,emode);
      TS_ASSERT_EQUALS("Elastic",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
@@ -229,12 +233,13 @@ void testParseDEMode_ElasticPowd()
 {
      std::vector<std::string> ws_dim_units(1,"some");
      std::vector<std::string> out_dim_names,out_dim_units;
-     int ndE_dims;    
+     int ndE_dims,emode;    
      std::string natural_units;
      std::string EID;
 
-     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("|Q|","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
+     TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("|Q|","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units,emode));
      TS_ASSERT_EQUALS(0,ndE_dims);
+     TS_ASSERT_EQUALS(0,emode);
      TS_ASSERT_EQUALS("Elastic",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
