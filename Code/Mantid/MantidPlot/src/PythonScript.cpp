@@ -69,11 +69,14 @@ namespace
  */
 PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
          const QString &name, bool interactive, bool reportProgress)
-  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(NULL), 
+  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(env->localDict()), 
     stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
 {
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
+
+  setContext(Context);
+  updatePath(Name, true);
 }
 
 /**
@@ -83,7 +86,6 @@ PythonScript::~PythonScript()
 {
   this->disconnect();
   updatePath(Name, false);
-  Py_DECREF(localDict);
   Py_XDECREF(PyCode);
 }
 
@@ -282,8 +284,6 @@ bool PythonScript::exec()
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
    PyGILState_STATE state = PyGILState_Ensure();
 
-  // Make sure we are initialized. Only does something the first time
-  initialize();
   env()->setIsRunning(true);
 
   if (isFunction) compiled = notCompiled;
@@ -339,21 +339,6 @@ bool PythonScript::exec()
   env()->setIsRunning(false);
   PyGILState_Release(state);
   return false;
-}
-
-/**
- * A call-once initialize function to grab hold of a copy of the __main__ dictionary
- */
-void PythonScript::initialize()
-{
-  if( m_isInitialized ) return;
-
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  setQObject(Context, "self");
-  updatePath(Name, true);
-
-  m_isInitialized = true;
 }
 
 /**

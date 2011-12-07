@@ -62,7 +62,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-  : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
+  : ScriptingEnv(parent, langName), m_globals(NULL), m_locals(NULL), m_math(NULL),
     m_sys(NULL)
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
@@ -118,16 +118,6 @@ bool PythonScripting::start()
     // Initialize interpreter, disabling signal registration as we don't need it
     Py_InitializeEx(0);
 
-    // Add in Mantid paths.
-    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir()));
-    QString pycode =
-        "import sys\n"
-        "mantidbin = '" +  mantidbin.absolutePath() + "'\n" +
-        "if not mantidbin in sys.path:\n"
-        "\tsys.path.insert(0,mantidbin)\n";
-
-    PyRun_SimpleString(pycode.toStdString().c_str());
-
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *pymodule = PyImport_AddModule("__main__");
     if( !pymodule )
@@ -141,7 +131,8 @@ bool PythonScripting::start()
       shutdown();
       return false;
     }
-
+    // Create a fresh locals dicionary that is a copy of the globals at this point
+    m_locals = PyDict_Copy(m_globals);
     //Create a new dictionary for the math functions
     m_math = PyDict_New();
 
@@ -173,6 +164,15 @@ bool PythonScripting::start()
 
     setQObject(this, "stdout", m_sys);
     setQObject(this, "stderr", m_sys);
+
+    // Add in Mantid paths so that the framework will be found
+    QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir()));
+    QString pycode =
+      "import sys\n"
+      "mantidbin = '" +  mantidbin.absolutePath() + "'\n" +
+      "if not mantidbin in sys.path:\n"
+      "\tsys.path.insert(0,mantidbin)\n";
+    PyRun_SimpleString(pycode.toStdString().c_str());
 
     //Get the refresh protection flag
     Mantid::Kernel::ConfigService::Instance().getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
@@ -206,11 +206,8 @@ bool PythonScripting::start()
 void PythonScripting::shutdown()
 {
   PyGILState_Ensure();
-  if( m_math )
-  {
-    Py_DECREF(m_math);
-    m_math = NULL;
-  }
+  Py_XDECREF(m_math);
+  Py_XDECREF(m_locals);
   Py_Finalize();
 }
 

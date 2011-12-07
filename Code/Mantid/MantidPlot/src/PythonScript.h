@@ -81,8 +81,6 @@ public slots:
   void setContext(QObject *context);
 
 private:
-  /// A call-once init function
-  void initialize();
   // Append or remove a path from the Python sys.path
   void updatePath(const QString & filename, bool append = true);
   /// Perform a call to the Python eval function with the necessary wrapping
