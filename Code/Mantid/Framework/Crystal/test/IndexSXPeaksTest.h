@@ -101,6 +101,11 @@ public:
     TS_ASSERT_THROWS(doTest(1, "1", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0), std::runtime_error);
   }
 
+  void test_zeroBasedIndexingThrows()
+  {
+    TS_ASSERT_THROWS(doTest(1, "0, 1, 2", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0), std::runtime_error);
+  }
+
   void test_colinearPeaksThrows()
   {
     PeaksWorkspace_sptr temp = m_masterPeaks->clone();
