@@ -18,7 +18,8 @@ Filter events for VULCAN
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 
-#include "fstream"
+#include <algorithm>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -60,7 +61,9 @@ namespace Algorithms
         "Input 2D workspace storing sample environment data along with absolute time");
     this->declareProperty(new API::FileProperty("InputCalFile", "", API::FileProperty::Load, "event.dat"),
         "Input pixel TOF calibration file in column data format");
-
+    this->declareProperty("SensorToSampleOffset", 0.0, "Offset in micro-second from sample to sample environment sensor");
+    this->declareProperty("LowerLimit", 0.0, "Lower limit of sample environment value for selected events");
+    this->declareProperty("UpperLimit", 0.0, "Lower limit of sample environment value for selected events");
     this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("OutputWorkspace", "", Direction::Output),
         "Output EventWorkspace.");
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalDirectory),
@@ -79,6 +82,10 @@ namespace Algorithms
     const std::string outputdir = this->getProperty("OutputDirectory");
     seWS = this->getProperty("SampleEnvironmentWorkspace");
     const std::string calfilename = this->getProperty("InputCalFile");
+    double tempoffset = this->getProperty("SensorToSampleOffset");
+    mSensorSampleOffset = static_cast<int64_t>(tempoffset*1000);
+    mLowerLimit = this->getProperty("LowerLimit");
+    mUpperLimit = this->getProperty("UpperLimit");
 
     // 2. Check
     // a) Event Workspace
@@ -128,25 +135,74 @@ namespace Algorithms
     return;
   }
 
+  /*
+   * Import TOF calibration/offset file for each pixel.
+   */
   void FilterEventsHighFrequency::importCalibrationFile(std::string calfilename){
 
+    detid_t indet;
+    int64_t offset;
+
+    // 1. Check workspace
     if (!eventWS){
       g_log.error() << "Required to import EventWorkspace before calling importCalibrationFile()" << std::endl;
       throw std::invalid_argument("Calling function in wrong order!");
     }
 
-    g_log.notice() << "VZ:  Fake at this time!" << std::endl;
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
-      const DataObjects::EventList events = this->eventWS->getEventList(i);
-      std::set<detid_t> detids = events.getDetectorIDs();
-      std::set<detid_t>::iterator detit;
-      detid_t detid = 0;
-      for (detit=detids.begin(); detit!=detids.end(); ++detit)
-        detid = *detit;
+    // 2. Open file
+    std::ifstream ifs;
+    mCalibDetectorIDs.clear();
+    mCalibOffsets.clear();
 
-      mCalibDetectorIDs.push_back(detid);
-      mCalibOffsets.push_back(0.0);
-    }
+    try{
+      // a. Successful scenario
+      ifs.open(calfilename.c_str(), std::ios::in);
+
+      for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
+        // i. each pixel:  get detector ID from EventWorkspace
+        const DataObjects::EventList events = this->eventWS->getEventList(i);
+        std::set<detid_t> detids = events.getDetectorIDs();
+        std::set<detid_t>::iterator detit;
+        detid_t detid = 0;
+        for (detit=detids.begin(); detit!=detids.end(); ++detit)
+          detid = *detit;
+
+        // ii. read file
+        ifs >> indet >> offset;
+
+        // iii. store
+        if (indet != detid){
+          g_log.error() << "Error!  Line " << i << " Should read in pixel " << detid << "  but read in " << indet << std::endl;
+        }
+
+        mCalibDetectorIDs.push_back(detid);
+        mCalibOffsets.push_back(offset*1000); // Assuming the file gives offset in micro-second
+      }
+
+      ifs.close();
+
+    } catch (std::ifstream::failure e){
+      // b. Using faking offset/calibration
+      g_log.error() << "Open calibration/offset file " << calfilename << " error " << std::endl;
+      g_log.notice() << "Using fake detector offset/calibration" << std::endl;
+
+      // Reset vectors
+      mCalibDetectorIDs.clear();
+      mCalibOffsets.clear();
+
+      for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
+        const DataObjects::EventList events = this->eventWS->getEventList(i);
+        std::set<detid_t> detids = events.getDetectorIDs();
+        std::set<detid_t>::iterator detit;
+        detid_t detid = 0;
+        for (detit=detids.begin(); detit!=detids.end(); ++detit)
+          detid = *detit;
+
+        mCalibDetectorIDs.push_back(detid);
+        mCalibOffsets.push_back(0);
+      }
+
+    } // try-catch
 
     return;
   }
@@ -233,26 +289,49 @@ namespace Algorithms
    */
   void FilterEventsHighFrequency::filterEvents(){
 
-    // TODO  Fake case first to prototype how to add events to an EventWorkspace
-    g_log.error() << "filterEvents is a fake implementation now!" << std::endl;
-
     double shortest_tof = 1.0E10;
     double longest_tof = -1;
 
+    // 1. Sort the workspace (event) in the order absolute time
+    API::IAlgorithm_sptr sort1 = createSubAlgorithm("SortEvents");
+    sort1->initialize();
+    sort1->setProperty("InputWorkspace", eventWS);
+    sort1->setProperty("SortBy", "AbsoluteTime");
+    sort1->execute();
+
+    // 2. Filter by each spectrum
     for (size_t ip=0; ip<eventWS->getNumberHistograms(); ip++){
       // For each spectrum
-      // 1. Get all events
-      DataObjects::EventList events = eventWS->getEventList(ip);
+      // a. Offset
+      int64_t timeoffset = mSensorSampleOffset+mCalibOffsets[ip];
 
+      // b. Get all events
+      DataObjects::EventList events = eventWS->getEventList(ip);
+      std::vector<int64_t>::iterator abstimeit;
       std::vector<DataObjects::TofEvent> newevents;
 
-      // 2. Filter the event
-      //    TODO  Fake here
+      // c. Filter the event
+      size_t posoffset = 0;
       for (size_t iv=0; iv<events.getNumberEvents(); iv++){
+        // i.  get raw event & time
         DataObjects::TofEvent rawevent = events.getEvent(iv);
-        DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
-        newevents.push_back(newevent);
-      }
+        int64_t mtime = rawevent.m_pulsetime.total_nanoseconds()+static_cast<int64_t>(rawevent.m_tof*1000)+timeoffset;
+
+        // ii. search
+        abstimeit = std::lower_bound(mSETimes.begin()+posoffset, mSETimes.end(), mtime);
+        size_t mindex = size_t(abstimeit-mSETimes.begin())-1;
+        if (mindex < 0 || mindex >= mSETimes.size())
+          throw std::invalid_argument("Flag 1616:  Wrong in searching!!!");
+        else
+          posoffset += mindex;
+
+        // iii. filter in/out?
+        double msevalue = mSEValues[mindex];
+        if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
+          DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
+          newevents.push_back(newevent);
+        }
+      } // ENDFOR: each event
 
       // 3. Add to outputWS
       DataObjects::EventList* neweventlist = outputWS->getEventListPtr(ip);
@@ -264,7 +343,7 @@ namespace Algorithms
           shortest_tof = newevents[iv].m_tof;
         }
       }
-    } // ENDFOR
+    } // ENDFOR: each spectrum
 
     // 4. Add a dummy histogramming
     //    create a default X-vector for histogramming, with just 2 bins.
@@ -276,7 +355,6 @@ namespace Algorithms
     outputWS->setAllX(axis);
 
     return;
-
   }
 
 
