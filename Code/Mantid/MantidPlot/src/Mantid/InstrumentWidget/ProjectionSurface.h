@@ -118,6 +118,8 @@ public:
   void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}
+  void setPeakLabelPrecision(int n);
+  int getPeakLabelPrecision() const {return m_peakLabelPrecision;}
 
 signals:
 
@@ -184,6 +186,7 @@ protected:
 
   Shape2DCollection m_maskShapes;  ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
+  mutable int m_peakLabelPrecision;
 
 };
 

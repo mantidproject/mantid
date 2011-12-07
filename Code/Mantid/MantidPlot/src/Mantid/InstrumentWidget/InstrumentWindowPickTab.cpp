@@ -753,7 +753,9 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     peak->setDetectorID(m_currentDetID);
 
     // random number generator
-    boost::mt19937 rand_gen;
+    static boost::mt19937 rand_gen;
+    static boost::uniform_real<> random(0.6,2.0);
+    peak->setHKL(random(rand_gen),random(rand_gen),random(rand_gen));
 
     tw->addPeak(*peak);
     delete peak;
