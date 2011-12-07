@@ -147,11 +147,25 @@ ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost)
 */
 int  
 ConvertToMDEvents::getEMode(ConvertToMDEvents const *const pHost){
-    if(pHost->emode<0||pHost->emode>2){
-        convert_log.error()<<"getEMode: "<<pHost->emode<< " unsupported emode\n";
+    if(pHost->algo_id.empty()){
+        convert_log.error()<<"getEMode: emode undefined\n";
         throw(std::logic_error(" should not call this function when emode is undefined"));
     }
-    return pHost->emode;
+    if(pHost->algo_id.find(pHost->dE_modes[Elastic])!=std::string::npos){
+        // elastic emode
+        return (int)Elastic;
+    }
+    if(pHost->algo_id.find(pHost->dE_modes[Direct])!=std::string::npos){
+        // direct emode
+        return (int)Direct;
+    }
+    if(pHost->algo_id.find(pHost->dE_modes[Indir])!=std::string::npos){
+        // indirect emode
+        return (int)Indir;
+    }
+    convert_log.error()<<"getEMode: emode for algorithm with ID: "<<pHost->algo_id<<" not defined \n";
+    throw(std::logic_error(" can not identify correct emode"));
+    return -1;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -315,6 +329,8 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
   //----------------------------------------------------------------------------------------------
   /* Execute the algorithm.   */
 void ConvertToMDEvents::exec(){
+    // in case of subsequent calls
+    this->algo_id="";
     // -------- Input workspace 
     MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
     if(!inMatrixWS){
@@ -336,9 +352,6 @@ void ConvertToMDEvents::exec(){
     // set up target coordinate system
     this ->rotMatrix = getTransfMatrix(inWS2D,u,v);
 
-
-    // string -Key to identify the algorithm
-    std::string algo_id;
 
     // if new workspace is created, its properties are determened by the user's input
     if (create_new_ws){
@@ -447,8 +460,9 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
     // identify Q_mode
     Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);  
     // identify dE mode    
-    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,subalgorithm_units,emode);
+    DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,subalgorithm_units);
     // identify conversion mode;
+    this->algo_id=Q_MODE_ID+DE_MODE_ID; // just in case, to resolve cyclic dependence on emode, as CovMode asks for emode
     CONV_MODE_ID=parseConvMode(Q_MODE_ID,subalgorithm_units,ws_dim_units);
 
     the_WSalgID = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
@@ -496,9 +510,9 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
                 CONV_MODE_ID = ConvModes[ConvFromTOF];
             }else{                                 // convert via TOF
                 CONV_MODE_ID = ConvModes[ConvByTOF];
-                if(this->emode == 0){
+                if(getEMode(this) == 0){
                     convert_log.error() <<" conversion via TOF is not availible in elastic mode\n";
-                    convert_log.error() <<" can not convert input workspce X-axis units"<<ws_dim_units[0]<<" into"<<getNativeUnitsID(this)
+                    convert_log.error() <<" can not convert input workspce X-axis units: "<<ws_dim_units[0]<<" into: "<<getNativeUnitsID(this)
                                         <<" needed by elastic conversion\n";
                     throw(std::invalid_argument(" wrong X-axis units"));
                 }
@@ -524,7 +538,7 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
 */
 std::string 
 ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, 
-                               int &ndE_dims,std::string &natural_units, int &emode)
+                               int &ndE_dims,std::string &natural_units)
 {
     if(is_member(dE_modes,dE_mode_req)<0){
          convert_log.error()<<" dE-mode: "<<dE_mode_req<<" not recognized\n";
@@ -537,9 +551,7 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
     if((Q_MODE_ID.compare(Q_modes[NoQ])==0)){
         DE_MODE_ID = dE_modes[ANY_Mode];
       // no-Q mode -- no conversion, so natural units are the one, already used by the workspace
-        natural_units=ws_dim_units[0];
-        // not a conversion mode; should throw later if conversion is requested
-        emode    = 3;
+        natural_units=ws_dim_units[0];   
     }
     // inelastic modes have one additional dimension and need special units on X-axis
     if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
@@ -548,16 +560,10 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
         out_dim_units.push_back("DeltaE");
         // natural units defined in subalgorithm doing the conversion and their ID has to be defined correctly in class constructor
         natural_units = native_inelastic_unitID;
-        if(DE_MODE_ID.compare(dE_modes[Direct])==0){
-            emode=1;
-        }else{
-            emode=2;
-        }
     }
 
     if(DE_MODE_ID.compare(dE_modes[Elastic])==0){
         natural_units = native_elastic_unitID;
-        emode    = 0;
     }    
     return DE_MODE_ID;
 
@@ -676,7 +682,8 @@ ConvertToMDEvents::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS2D,const s
     }
 
     // any inelastic mode or unit conversion involing TOF needs Ei to be among the input workspace properties
-    if((this->emode == 1)||(this->emode == 2)||(the_algID.find("TOD")!=std::string::npos))
+    int emode = getEMode(this);
+    if((emode == 1)||(emode == 2)||(the_algID.find("TOD")!=std::string::npos))
     {        
         if(!inWS2D->run().hasProperty("Ei")){
             convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" needs input energy to be present among run properties\n";
@@ -714,9 +721,9 @@ ConvertToMDEvents::getAddDimensionNames(MatrixWorkspace_const_sptr inMatrixWS,st
     for(size_t i=0;i<run_properties.size();i++){
         add_dim_names[i]=run_properties[i]->name();
         std::string UnitID = run_properties[i]->units();
-        if(UnitID.empty()||(UnitID.compare("Empty")==0)){ // it is questionable if we want to have unit ID equal to the dimension name and not empty
-            UnitID =add_dim_names[i];
-        }
+       // if(UnitID.empty()||(UnitID.compare("Empty")==0)){ // it is questionable if we want to have unit ID equal to the dimension name and not empty
+        //    UnitID =add_dim_names[i];
+        //}
         add_dim_units[i]=UnitID;
     }
 
@@ -813,7 +820,7 @@ class LOOP_ND<2,Q,MODE,CONV>{
  *  needs to pick up all known algorithms. 
 */
 ConvertToMDEvents::ConvertToMDEvents():
-emode(-1),
+algo_id(""),
 Q_modes(3),
 dE_modes(4),
 ConvModes(4)

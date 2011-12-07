@@ -70,8 +70,8 @@ namespace MDAlgorithms
   */
   enum AnalMode{  
       Elastic = 0,  //< int emode = 0; Elastic analysis
-      Direct  = 1,  //< emode=1; Direct inelastic analysis mode
-      Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
+      Indir   = 1,  //< emode=1; InDirect inelastic analysis mode
+      Direct  = 2,  //< emode=2; Direct inelastic analysis mode
       ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion)
   };
   /// enum describes if there is need to convert workspace units and different units conversion modes
@@ -152,7 +152,7 @@ namespace MDAlgorithms
    // Parts of the identifyMatrixAlg, separated for unit testing:
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
    std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names, 
-                                 Strings &out_dim_units, int &ndE_dims,std::string &natural_units, int &emode);
+                                 Strings &out_dim_units, int &ndE_dims,std::string &natural_units);
    std::string parseConvMode(const std::string &Q_MODE_ID,const std::string &natural_units,const Strings &ws_dim_units);
 
    /** identifies conversion subalgorithm to run on a workspace */
@@ -163,13 +163,25 @@ namespace MDAlgorithms
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to hkl coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
- 
 
    /// map to select an algorithm as function of the key, which describes it
     std::map<std::string, pMethod> alg_selector;
    /// map to select an workspace, as function of the dimensions number
     std::map<size_t, pWSCreator> ws_creator;
 
+    // strictly for testing!!!
+    void setAlgoID(const std::string &newID){
+        this->algo_id=newID;
+    }
+   // strictly for testing!!!
+    void setAlgoUnits(int emode){
+        if(emode==0){
+            this->subalgorithm_units=native_elastic_unitID;
+        }
+        if(emode==1||emode==2){
+            this->subalgorithm_units=native_inelastic_unitID;
+        }
+    }
   private: 
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
@@ -208,9 +220,8 @@ namespace MDAlgorithms
     // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
     // Any other input workspace units have to be converted into these:
     std::string subalgorithm_units;
-    // the variable describing energy transformation mode. (0 -- elastic, 1-- direct; 2 -- indirect)
-    // assigned by 
-    int emode;
+  // string -Key to identify the algorithm
+    std::string algo_id;
     //
     std::vector<double> getTransfMatrix()const{return rotMatrix;}
     // 
