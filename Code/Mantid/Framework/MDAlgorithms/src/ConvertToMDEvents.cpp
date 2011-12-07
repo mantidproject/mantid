@@ -824,10 +824,10 @@ ConvertToMDEvents::ConvertToMDEvents():
 Q_modes(3),
 dE_modes(4),
 ConvModes(4),
-// The conversion subalgorithm expects workspaces in these units; 
+// The conversion subalgorithm processes data in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
-native_inelastic_unitID("DeltaE"),
-native_elastic_unitID("MomentumTransfer") // Why it is a transfer? Hope it is just a momentum
+native_elastic_unitID("MomentumTransfer"), // Why it is a transfer? Hope it is just a momentum
+native_inelastic_unitID("DeltaE")
 {
      Q_modes[modQ]="|Q|";
      Q_modes[Q3D] ="QxQyQz";    
