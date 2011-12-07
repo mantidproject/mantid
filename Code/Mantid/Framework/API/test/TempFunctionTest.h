@@ -81,7 +81,7 @@ public:
   {
     TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(0),std::invalid_argument);
     TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(-10),std::length_error);
-    TS_ASSERT_THROWS_NOTHING(Mantid::API::FunctionDomain d(1),std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::FunctionDomain d(1));
   }
 
 };
