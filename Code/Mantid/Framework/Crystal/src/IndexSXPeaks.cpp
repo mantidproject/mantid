@@ -74,7 +74,7 @@ namespace Mantid
         reasonable_angle->clone(),Direction::Input),"Lattice parameter gamma");
 
       declareProperty(new ArrayProperty<int> ("PeakIndices"),
-        "Index of the peaks in the table workspace to be used");
+        "Index of the peaks in the table workspace to be used. If no index are provided, all will be used.");
 
       declareProperty("dTolerance",0.01,"Tolerance for peak positions in d-spacing");
 
@@ -175,6 +175,13 @@ namespace Mantid
 
       //Explode each peak object to generate a CandidatePeak, which is internal to this algorithm.
       std::size_t npeaks=peakindices.size();
+
+      //If the user provides no peaks we default to use all the available peaks.
+      if(npeaks == 0)
+      {
+        npeaks = ws->getNumberPeaks();
+      }
+
       std::vector<PeakCandidate> peaks;
       for (std::size_t i=0;i<npeaks;i++)
       { 
