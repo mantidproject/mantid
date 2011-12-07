@@ -188,7 +188,7 @@ namespace Mantid
     // Gaussian Weighting Implementations
     //-------------------------------------------------------------------------
 
-    GaussianWeighting::GaussianWeighting(double cutOff, double sigma) : WeightingStrategy(cutOff)
+    GaussianWeighting1D::GaussianWeighting1D(double cutOff, double sigma) : WeightingStrategy(cutOff)
     {
       if(cutOff < 0)
       {
@@ -202,7 +202,7 @@ namespace Mantid
       init(sigma);
     }
 
-    GaussianWeighting::GaussianWeighting(double sigma) : WeightingStrategy(0)
+    GaussianWeighting1D::GaussianWeighting1D(double sigma) : WeightingStrategy(0)
     {
       if(sigma < 0)
       {
@@ -212,29 +212,29 @@ namespace Mantid
       init(sigma);
     }
 
-    void GaussianWeighting::init(const double sigma)
+    void GaussianWeighting1D::init(const double sigma)
     {
       m_coeff = 1/((std::sqrt(2 *  M_PI)) * sigma);
       m_twiceSigmaSquared = 2 * sigma * sigma;
     }
 
-    GaussianWeighting::~GaussianWeighting()
+    GaussianWeighting1D::~GaussianWeighting1D()
     {
     }
 
-    double GaussianWeighting::weightAt(const double& distance)
+    double GaussianWeighting1D::weightAt(const double& distance)
     {
       double normalisedDistance = distance/m_cutOff;
       return calculateGaussian(normalisedDistance*normalisedDistance);
     }
 
-    double GaussianWeighting::weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
+    double GaussianWeighting1D::weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
     {
       double normalisedDistanceSq = (ix*ix + iy*iy) / (adjX*adjX + adjY*adjY);
       return calculateGaussian(normalisedDistanceSq);
     }
 
-    double GaussianWeighting::calculateGaussian(const double normalisedDistanceSq)
+    double GaussianWeighting1D::calculateGaussian(const double normalisedDistanceSq)
     {
       return m_coeff * std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
     }
