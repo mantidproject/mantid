@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : PythonScripting.cpp
-	Project              : QtiPlot
+  File                 : PythonScripting.cpp
+  Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2006 by Knut Franke
-	Email (use @ for *)  : knut.franke*gmx.de
-	Description          : Execute Python code from within QtiPlot
+  Copyright            : (C) 2006 by Knut Franke
+  Email (use @ for *)  : knut.franke*gmx.de
+  Description          : Execute Python code from within QtiPlot
 
  ***************************************************************************/
 
@@ -240,7 +240,7 @@ QStringList PythonScripting::toStringList(PyObject *py_seq)
       PyObject *item = PyList_GetItem(py_seq, i);
       if( PyString_Check(item) )
       {
-	elements << PyString_AsString(item);
+  elements << PyString_AsString(item);
       }
     }
   }
@@ -371,7 +371,7 @@ bool PythonScripting::loadInitFile(const QString & filename)
     {
       success = false;
     }
-	  file.close();
+    file.close();
   }
   else
   {

@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : PythonScript.h
-	Project              : QtiPlot
+  File                 : PythonScript.h
+  Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2006 by Knut Franke
-	Email (use @ for *)  : knut.franke*gmx.de
-	Description          : Execute Python code from within QtiPlot
+  Copyright            : (C) 2006 by Knut Franke
+  Email (use @ for *)  : knut.franke*gmx.de
+  Description          : Execute Python code from within QtiPlot
 
  ***************************************************************************/
 
@@ -46,7 +46,7 @@ class PythonScript : public Script
   public:
   /// Constructor
   PythonScript(PythonScripting *env, const QString &code, QObject *context = 0, 
-	       const QString &name="<input>", bool interactive = true, bool reportProgress = false);
+         const QString &name="<input>", bool interactive = true, bool reportProgress = false);
   ///Destructor
   ~PythonScript();
   /// A function to connect to the ouput stream of the running Python code
