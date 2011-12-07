@@ -148,6 +148,9 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_createExcludeGroupingFileAction = new QAction("Exclude",this);
   connect(m_createExcludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createExcludeGroupingFile()));
 
+  m_clearPeakOverlays = new QAction("Clear peaks",this);
+  connect(m_clearPeakOverlays,SIGNAL(activated()),this,SLOT(clearPeakOverlays()));
+
   askOnCloseEvent(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -1092,6 +1095,10 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
       e->accept();
       return;
     }
+    else if (pws && !surface)
+    {
+      QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
+    }
   }
   e->ignore();
 }
@@ -1106,15 +1113,28 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
   if (dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay &&
     ev->type() == QEvent::ContextMenu)
   {
+    // an ugly way of preventing the curve in the pick tab's miniplot disappearing when 
+    // cursor enters the context menu
+    m_instrumentDisplayContextMenuOn = true; 
+    QMenu context(this);
+    // add tab specific actions
     switch(getTab())
     {
-    case PICK:  m_instrumentDisplayContextMenuOn = true; 
-                m_pickTab->showInstrumentDisplayContextMenu(); 
-                m_instrumentDisplayContextMenuOn = false;
+    case PICK:  m_pickTab->setInstrumentDisplayContextMenu(context); 
+                if (m_InstrumentDisplay->getSurface()->hasPeakOverlays())
+                {
+                  context.addSeparator();
+                  context.addAction(m_clearPeakOverlays);
+                }
                 break;
     default:
       break;
     }
+    if ( !context.isEmpty() )
+    {
+      context.exec(QCursor::pos());
+    }
+    m_instrumentDisplayContextMenuOn = false;
     return true;
   }
   return false;
@@ -1142,4 +1162,13 @@ void InstrumentWindow::mouseLeftInstrumentDisplay()
     // remove the curve from the miniplot
     m_pickTab->mouseLeftInstrmentDisplay();
   }
+}
+
+/**
+ * Remove all peak overlays from the instrument display.
+ */
+void InstrumentWindow::clearPeakOverlays()
+{
+  m_InstrumentDisplay->getSurface()->clearPeakOverlays();
+  m_InstrumentDisplay->repaint();
 }

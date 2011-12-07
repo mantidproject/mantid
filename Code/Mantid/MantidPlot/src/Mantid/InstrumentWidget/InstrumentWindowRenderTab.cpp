@@ -81,6 +81,12 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_flipCheckBox->setChecked(false);
   m_flipCheckBox->hide();
   connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
+  m_clearPeakOverlaysButton = new QPushButton("Clear peaks",this);
+  m_clearPeakOverlaysButton->hide();
+  connect(m_clearPeakOverlaysButton,SIGNAL(clicked()),m_instrWindow, SLOT(clearPeakOverlays()));
+  QHBoxLayout* unwrappedControlsLayout = new QHBoxLayout;
+  unwrappedControlsLayout->addWidget(m_flipCheckBox);
+  unwrappedControlsLayout->addWidget(m_clearPeakOverlaysButton);
 
   m_autoscaling = new QCheckBox("Autoscaling",this);
   m_autoscaling->setChecked(true);
@@ -88,7 +94,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
 
   // layout
   renderControlsLayout->addWidget(m_renderMode);
-  renderControlsLayout->addWidget(m_flipCheckBox);
+  renderControlsLayout->addLayout(unwrappedControlsLayout);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
@@ -219,7 +225,9 @@ void InstrumentWindowRenderTab::showResetView(int iv)
 
 void InstrumentWindowRenderTab::showFlipControl(int iv)
 {
-  m_flipCheckBox->setVisible(iv != 0);
+  bool vis = iv != 0;
+  m_flipCheckBox->setVisible(vis);
+  m_clearPeakOverlaysButton->setVisible(vis);
 }
 
 void InstrumentWindowRenderTab::showAxes(bool on)

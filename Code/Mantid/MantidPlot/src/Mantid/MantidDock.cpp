@@ -299,6 +299,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
   connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
+  QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+  m_showSliceViewer->setIcon(icon);
   connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSliceViewer()));
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);

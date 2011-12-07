@@ -133,6 +133,8 @@ public:
     setWorkspace(ws,copyData);
     setSlicing(slicing);
   }
+  /// Get the workspace
+  virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws,bool copyData) = 0;
   virtual void setSlicing(const std::string& slicing) = 0;
 

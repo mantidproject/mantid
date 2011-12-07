@@ -80,12 +80,32 @@ namespace Crystal
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
+    //To get the workspace index from the detector ID
+    detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
 
     /// Radius to use around peaks
     int PeakRadius = getProperty("PeakRadius");
 
+    int MinPeaks = -1;
+    int MaxPeaks = -1;
+    size_t Numberwi = inWS->getNumberHistograms();
+    int NumberPeaks = peakWS->getNumberPeaks();
+    for (int i = 0; i<NumberPeaks; i++)
+    {
+      Peak & peak = peakWS->getPeaks()[i];
+      int pixelID = peak.getDetectorID();
+
+      // Find the workspace index for this detector ID
+      if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+      {
+         size_t wi = (*pixel_to_wi)[pixelID];
+         if(MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MinPeaks = i;
+         if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
+      }
+    }
+    Progress prog(this, MinPeaks, 1.0, MaxPeaks);
     PARALLEL_FOR2(inWS,peakWS)
-    for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
+    for (int i = MinPeaks; i<= MaxPeaks; i++)
     {
       PARALLEL_START_INTERUPT_REGION
       // Get a direct ref to that peak.
@@ -217,11 +237,32 @@ namespace Crystal
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
+    //To get the workspace index from the detector ID
+    detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
+
     /// Radius to use around peaks
     int PeakRadius = getProperty("PeakRadius");
 
+    int MinPeaks = -1;
+    int MaxPeaks = -1;
+    size_t Numberwi = inWS->getNumberHistograms();
+    int NumberPeaks = peakWS->getNumberPeaks();
+    for (int i = 0; i<NumberPeaks; i++)
+    {
+      Peak & peak = peakWS->getPeaks()[i];
+      int pixelID = peak.getDetectorID();
+
+      // Find the workspace index for this detector ID
+      if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+      {
+         size_t wi = (*pixel_to_wi)[pixelID];
+         if(MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MinPeaks = i;
+         if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
+      }
+    }
+    Progress prog(this, MinPeaks, 1.0, MaxPeaks);
     PARALLEL_FOR2(inWS,peakWS)
-    for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
+    for (int i = MinPeaks; i<= MaxPeaks; i++)
     {
       PARALLEL_START_INTERUPT_REGION
       // Get a direct ref to that peak.

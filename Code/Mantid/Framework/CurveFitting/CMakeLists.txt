@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
 	src/GenericFit.cpp
+	src/NewFit.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LevenbergMarquardtMinimizer.cpp
 	src/Linear.cpp
@@ -65,6 +66,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
 	inc/MantidCurveFitting/GenericFit.h
+	inc/MantidCurveFitting/NewFit.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -96,6 +98,7 @@ set ( TEST_FILES
 	test/ConvolutionTest.h
 	test/ExpDecayTest.h
 	test/FitTest.h
+	test/NewFitTest.h
 	test/FuncMinimizerFactoryTest.h
 	test/FunctionFactoryTest.h
 	test/FunctionTest.h

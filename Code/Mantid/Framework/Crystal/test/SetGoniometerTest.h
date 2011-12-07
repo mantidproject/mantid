@@ -12,6 +12,7 @@
 #include <iostream>
 #include "MantidKernel/V3D.h"
 
+
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -32,7 +33,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void test_exec_fail()
   {
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
@@ -44,8 +45,30 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis0", "angle1, 1.0,2.0,3.0, 1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis1", "angle2  , 4.0, 5.0,6.0, -1") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT( !alg.isExecuted() ); //no log values
     
+  }
+  
+  void test_exec()
+  {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
+    FrameworkManager::Instance().exec("AddSampleLog", 8,
+      "Workspace","SetGoniometerTest_ws","LogName", "angle1","LogType","Number Series","LogText","1.234");
+
+    FrameworkManager::Instance().exec("AddSampleLog", 8,
+      "Workspace","SetGoniometerTest_ws","LogName", "angle2","LogType","Number Series","LogText","1.234");
+
+
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis0", "angle1, 1.0,2.0,3.0, 1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis1", "angle2  , 4.0, 5.0,6.0, -1") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() ); //no log values
+
     // Check the results
     Goniometer & gon = ws->mutableRun().getGoniometer();
     TS_ASSERT_EQUALS( gon.getNumberAxes(), 2);
@@ -60,7 +83,6 @@ public:
 
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
   }
-  
 
   /** Do a test with a single param
    *
@@ -71,6 +93,9 @@ public:
   {
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
+    FrameworkManager::Instance().exec("AddSampleLog", 8,
+      "Workspace","SetGoniometerTest_ws","LogName", "name","LogType","Number Series","LogText","1.234");
+
     SetGoniometer alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -112,6 +137,8 @@ public:
   void test_param_Empty()
   { do_test_param(""); }
 
+  void test_ok()
+  { do_test_param("name, 1.0, 2.0, 3.0, 1",1); }
 
 };
 

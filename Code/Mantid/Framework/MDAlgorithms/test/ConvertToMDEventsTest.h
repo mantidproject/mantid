@@ -147,9 +147,9 @@ void testParseQMode_Q3D()
      TS_ASSERT_THROWS_NOTHING(MODE=pAlg->parseQMode("QxQyQz",ws_dim_names,ws_dim_units,out_dim_names,out_dim_units, nQ_dims));
      TS_ASSERT_EQUALS(3,nQ_dims);
      TS_ASSERT_EQUALS("QxQyQz",MODE);
-     TS_ASSERT_EQUALS("Q_h",out_dim_names[0]);
-     TS_ASSERT_EQUALS("Q_k",out_dim_names[1]);
-     TS_ASSERT_EQUALS("Q_l",out_dim_names[2]);
+     TS_ASSERT_EQUALS("Q_x",out_dim_names[0]);
+     TS_ASSERT_EQUALS("Q_y",out_dim_names[1]);
+     TS_ASSERT_EQUALS("Q_z",out_dim_names[2]);
      TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[0]);
      TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[1]);
      TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[2]);
@@ -175,7 +175,7 @@ void testParseDEMode_NoQ()
 
      TS_ASSERT_THROWS_NOTHING(EID=pAlg->parseDEMode("","Elastic",ws_dim_units,out_dim_names,out_dim_units,ndE_dims,natural_units));
      TS_ASSERT_EQUALS(0,ndE_dims);
-     TS_ASSERT_EQUALS("",EID);
+     TSM_ASSERT_EQUALS("Regardless of the dE mode, if Q-mode is NoQ, should return Any_Mode: ","",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
      TS_ASSERT_EQUALS(ws_dim_units[0],natural_units);
@@ -288,9 +288,6 @@ void testParseConv_ByTOF()
      TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("AnyMode","Wavelength",ws_dim_units));
      TS_ASSERT_EQUALS("CnvByTOF",CONV_ID);
 }
-
-
-
 
 // --> GET DIMENSIONS FROM WS MATRIX:
 void testNeedsNumericAxis(){
@@ -478,9 +475,9 @@ void testIdentifyMatrixAlg_5()
 
     TS_ASSERT_EQUALS("QxQyQzIndirectCnvNo",pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Indirect",dim_names,dim_units));
     TSM_ASSERT_EQUALS("One dim name came from Q (this can be wrong)",4,dim_names.size());
-    TS_ASSERT_EQUALS(dim_names[0],"Q_h");
-    TS_ASSERT_EQUALS(dim_names[1],"Q_k");
-    TS_ASSERT_EQUALS(dim_names[2],"Q_l");
+    TS_ASSERT_EQUALS(dim_names[0],"Q_x");
+    TS_ASSERT_EQUALS(dim_names[1],"Q_y");
+    TS_ASSERT_EQUALS(dim_names[2],"Q_z");
     TS_ASSERT_EQUALS(dim_names[3],"DeltaE");
 }
 

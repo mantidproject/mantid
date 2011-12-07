@@ -62,6 +62,7 @@ private:
   QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;
   QCheckBox *m_flipCheckBox;
+  QPushButton *m_clearPeakOverlaysButton;
   QCheckBox *m_autoscaling;
 
   QAction *m_colorMap;

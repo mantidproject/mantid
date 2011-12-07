@@ -118,6 +118,73 @@ public:
     TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(adjX, ix, adjY, iy));
   }
 
+  void testGaussianWeightingConstructorThrows()
+  {
+    TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting(-1, 1), std::invalid_argument);
+    TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting(1, -1), std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING( GaussianWeighting(1, 1) ); //TO check it does work if both arguments are correct.
+  }
+
+  void testGaussianWeightingOtherConstructorThrows()
+  {
+    TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting(-1), std::invalid_argument);
+  }
+
+  void testGaussian()
+  {
+    GaussianWeighting weighting(4, 0.5);
+
+    double expectedY[] = {0.1080,
+      0.2590,
+      0.4839,
+      0.7041,
+      0.7979,
+      0.7041,
+      0.4839,
+      0.2590,
+      0.1080
+    };
+
+    int count = 0;
+    for(double i = -4; i <= 4; i+=1)
+    {
+      double y = weighting.weightAt(i);
+      double yExpected = expectedY[count];
+      TS_ASSERT_DELTA(yExpected, y, 0.0001);
+      count++;
+    }
+  }
+
+  void testGaussianRectangular()
+  {
+    GaussianWeighting weighting(0.5);
+
+    double expectedY[] = {0.1080,
+      0.2590,
+      0.4839,
+      0.7041,
+      0.7979,
+      0.7041,
+      0.4839,
+      0.2590,
+      0.1080
+    };
+    double adjX = 4;
+    double adjY = 4;
+    double fixedPoint = 0;
+    int count = 0;
+    for(double i = -4; i <= 4; i+=1)
+    {
+      double yExpected = expectedY[count];
+      double y1 = weighting.weightAt(adjX, i, fixedPoint, fixedPoint); 
+      double y2 = weighting.weightAt(fixedPoint, fixedPoint, adjY, i);
+      TS_ASSERT_DELTA(yExpected, y1, 0.0001);
+      TS_ASSERT_DELTA(yExpected, y2, 0.0001);
+      TS_ASSERT_EQUALS(y1, y2);
+      count++;
+    }
+  }
+
 
 };
 

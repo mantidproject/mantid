@@ -81,6 +81,10 @@ namespace DataObjects
 
     void appendFile( std::string filename, Geometry::Instrument_sptr inst);
 
+    /** @return true because this type of the workspace needs custom sorting calls */
+    virtual bool customSort() const
+    { return true; }
+
     void sort(std::vector< std::pair<std::string, bool> > & criteria);
 
     //---------------------------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : PythonScripting.h
-	Project              : QtiPlot
+  File                 : PythonScripting.h
+  Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2006 by Knut Franke
-	Email (use @ for *)  : knut.franke*gmx.de
-	Description          : Execute Python code from within QtiPlot
+  Copyright            : (C) 2006 by Knut Franke
+  Email (use @ for *)  : knut.franke*gmx.de
+  Description          : Execute Python code from within QtiPlot
 
  ***************************************************************************/
 
@@ -62,7 +62,7 @@ public:
   QStringList toStringList(PyObject *py_seq);
   /// Create a new script object that can execute code within this enviroment
   Script *newScript(const QString &code, QObject *context = NULL, const QString &name="<input>",
-		    bool interactive = true, bool reportProgress = false)
+        bool interactive = true, bool reportProgress = false)
   {
     return new PythonScript(this, code, context, name, interactive, reportProgress);
   }
@@ -88,7 +88,7 @@ public:
   PyObject *sysDict() { return m_sys; }
   /// The language name
   static const char * langName;
-				     
+             
 public slots:
   /// Refresh Python algorithms state
   virtual void refreshAlgorithms(bool force = false);

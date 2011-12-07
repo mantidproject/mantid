@@ -91,6 +91,7 @@ set ( SRC_FILES
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
 	src/He3TubeEfficiency.cpp
+	src/IDLRebin.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/Integration.cpp
@@ -167,6 +168,7 @@ set ( SRC_FILES
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
+	src/FilterEventsHighFrequency.cpp
 	src/WeightedMean.cpp
 	src/WeightingStrategy.cpp
 	src/XDataConverter.cpp
@@ -266,6 +268,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
 	inc/MantidAlgorithms/He3TubeEfficiency.h
+	inc/MantidAlgorithms/IDLRebin.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/Integration.h
@@ -342,6 +345,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
+	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/XDataConverter.h
@@ -430,6 +434,7 @@ set ( TEST_FILES
 	test/GroupWorkspacesTest.h
 	test/HRPDSlabCanAbsorptionTest.h
 	test/He3TubeEfficiencyTest.h
+	test/IDLRebinTest.h
 	test/IQTransformTest.h
 	test/IdentifyNoisyDetectorsTest.h
 	test/IntegrationTest.h
@@ -497,6 +502,7 @@ set ( TEST_FILES
 	test/UnaryOperationTest.h
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
+	test/FilterEventsHighFrequencyTest.h
 	test/WeightedMeanTest.h
 	test/WeightingStrategyTest.h
 	test/WorkspaceCreationHelperTest.h
