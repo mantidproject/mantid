@@ -427,6 +427,26 @@ namespace Mantid
       }
     }
 
+    bool Instrument::isDetectorMasked(const detid_t &detector_id) const
+    {
+      return m_instr->getDetector(detector_id)->isMasked();
+    }
+
+    bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const
+    {
+      if (detector_ids.empty())
+      {
+        throw Kernel::Exception::NotFoundError("No detectors specified in isDetectorMasked", "");
+      }
+
+      for (std::set<detid_t>::const_iterator it = detector_ids.begin(); it != detector_ids.end(); ++it)
+      {
+        if (! this->isDetectorMasked(*it))
+          return false;
+      }
+      return true;
+    }
+
     /**
      * Returns a pointer to the geometrical object for the given set of IDs
      * @param det_ids :: A list of detector ids
