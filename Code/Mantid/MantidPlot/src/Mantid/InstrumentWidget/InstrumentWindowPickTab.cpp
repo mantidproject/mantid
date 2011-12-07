@@ -26,6 +26,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QActionGroup>
+#include <QWidgetAction>
 #include <QLabel>
 #include <QMessageBox>
 #include <QDialog>
@@ -34,9 +35,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QSignalMapper>
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
+#include <QPixmap>
 
 #include <numeric>
 #include <cfloat>
@@ -395,7 +394,10 @@ void InstrumentWindowPickTab::plotContextMenu()
     QStringList labels = m_plot->getLabels();
     foreach(QString label,labels)
     {
-      QAction *remove = new QAction(label,removeCurves);
+      QColor c = m_plot->getCurveColor(label);
+      QPixmap pixmap(16,2);
+      pixmap.fill(c);
+      QAction *remove = new QAction(QIcon(pixmap),label,removeCurves);
       removeCurves->addAction(remove);
       connect(remove,SIGNAL(triggered()),signalMapper,SLOT(map()));
       signalMapper->setMapping(remove,label);
@@ -751,12 +753,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
-
-    // random number generator
-    static boost::mt19937 rand_gen;
-    static boost::uniform_real<> random(0.6,2.0);
-    peak->setHKL(random(rand_gen),random(rand_gen),random(rand_gen));
-
     tw->addPeak(*peak);
     delete peak;
     tw->modified();

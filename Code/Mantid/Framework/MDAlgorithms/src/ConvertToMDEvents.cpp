@@ -676,9 +676,6 @@ class LOOP_ND{
             std::stringstream num;
             num << "ND" << i;
             std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
-#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
     }
 };
@@ -690,10 +687,6 @@ class LOOP_ND<2,Q,MODE,CONV>{
             std::stringstream num;
             num << "ND" << 2;
             std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
-#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
-
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                                    &ConvertToMDEvents::processQND<2,Q,MODE,CONV>));
     }

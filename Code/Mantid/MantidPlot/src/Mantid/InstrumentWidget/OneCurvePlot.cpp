@@ -435,6 +435,19 @@ QStringList OneCurvePlot::getLabels()const
 }
 
 /**
+ * Return the colour of a stored curve.
+ * @param label :: The label of that curve.
+ */
+QColor OneCurvePlot::getCurveColor(const QString& label)const
+{
+  if (m_stored.contains(label))
+  {
+    return m_stored[label]->pen().color();
+  }
+  return Qt::black;
+}
+
+/**
  * Remove a stored curve.
  * @param label :: The label of a curve to remove.
  */

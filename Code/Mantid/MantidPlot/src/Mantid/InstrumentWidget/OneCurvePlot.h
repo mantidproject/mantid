@@ -32,6 +32,7 @@ public:
   bool hasStored()const;
   QStringList getLabels()const;
   void removeCurve(const QString& label);
+  QColor getCurveColor(const QString& label)const;
   void recalcXAxisDivs();
   void recalcYAxisDivs();
   bool isYLogScale()const;
