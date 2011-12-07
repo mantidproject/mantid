@@ -2,7 +2,7 @@
 #define INDEX_SX_PEAKS_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/ITableWorkspace.h";
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCrystal/IndexSXPeaks.h"

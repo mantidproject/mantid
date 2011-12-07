@@ -93,7 +93,7 @@ namespace Mantid
     */
     void IndexSXPeaks::cullHKLs(std::vector<PeakCandidate>& peakCandidates, Mantid::Geometry::UnitCell& unitcell)
     {
-      int npeaks = peakCandidates.size();
+      size_t npeaks = peakCandidates.size();
       for (std::size_t p=0;p<npeaks;p++)
       {
         for (std::size_t q=0;q<npeaks;q++)
@@ -116,7 +116,7 @@ namespace Mantid
     {
       // Find two non-colinear peaks
       bool all_collinear=true;
-      int npeaks = peakCandidates.size();
+      size_t npeaks = peakCandidates.size();
       for (std::size_t i=0;i<npeaks;i++)
       {
         for (std::size_t j=i;j<npeaks;j++)
@@ -223,7 +223,7 @@ namespace Mantid
       prog.report(); //4th progress report.
 
       //Now we can index the input/output peaks workspace
-      for(int i = 0; i < npeaks; i++)
+      for(size_t i = 0; i < npeaks; i++)
       {
         IPeak& peak = ws->getPeak(i);
         try
