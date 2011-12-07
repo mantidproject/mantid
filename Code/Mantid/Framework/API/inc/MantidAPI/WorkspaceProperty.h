@@ -232,8 +232,6 @@ namespace Mantid
             else
             {
               error = "Workspace " + this->value() + " is not of the correct type";
-              g_log.debug() << "Problem validating workspace: " << error << ".  \""
-                  << m_workspaceName << "\" is not of type " << Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() << std::endl;
             }
             return error;
           }
@@ -391,8 +389,6 @@ namespace Mantid
           if( m_optional ) return "";
           //Return a user level error
           error = "Enter a name for the Output workspace";
-          //the debug message has more detail to put it in context
-          g_log.debug() << "Problem validating workspace: " << error << std::endl;
           return error;
         }
       }
@@ -420,8 +416,7 @@ namespace Mantid
         {
           error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
         }
-        if( !error.empty() )
-          g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
+
         return error;
       }
 

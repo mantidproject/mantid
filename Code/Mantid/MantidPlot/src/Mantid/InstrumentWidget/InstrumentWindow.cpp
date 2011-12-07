@@ -1095,6 +1095,10 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
       e->accept();
       return;
     }
+    else if (pws && !surface)
+    {
+      QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
+    }
   }
   e->ignore();
 }

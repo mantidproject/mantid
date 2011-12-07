@@ -35,6 +35,9 @@
 #include <QLineEdit>
 #include <QSignalMapper>
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real.hpp>
+
 #include <numeric>
 #include <cfloat>
 #include <cmath>
@@ -748,6 +751,10 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
+
+    // random number generator
+    boost::mt19937 rand_gen;
+
     tw->addPeak(*peak);
     delete peak;
     tw->modified();

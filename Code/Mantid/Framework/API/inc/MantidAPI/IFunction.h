@@ -231,7 +231,7 @@ public:
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws) = 0;
   /// Get the workspace
-  virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
+  //virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
