@@ -45,6 +45,12 @@ VatesSimpleGuiViewWidgets
 
 if( SQUISH_FOUND )
   squish_add_test_suite( ${TEST_SUITES} )
+  set( auto_test_dir ${CMAKE_SOURCE_DIR} )
+  string( REGEX REPLACE "Code/Mantid" "Test/AutoTestData" auto_test_dir ${auto_test_dir} )
+  squish_suite_envvars( ${TEST_SUITES}
+    PV_PLUGIN_PATH ${CMAKE_BINARY_DIR}/${PVPLUGINS_DIR}
+    MANTID_AUTOTEST_DATA ${auto_test_dir}
+  )
 endif()
 
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )
