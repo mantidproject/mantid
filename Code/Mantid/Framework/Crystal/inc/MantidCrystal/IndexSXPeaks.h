@@ -103,7 +103,7 @@ public:
     V3D result = V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
     return result;
   }
-  int candidateHKLSize() const
+  size_t candidateHKLSize() const
   {
     return _hkls.size();
   }

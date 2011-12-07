@@ -122,7 +122,7 @@ public:
   {
     TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting(-1, 1), std::invalid_argument);
     TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting(1, -1), std::invalid_argument);
-    TSM_ASSERT_THROWS_NOTHING( GaussianWeighting(1, 1) ); //TO check it does work if both arguments are correct.
+    TS_ASSERT_THROWS_NOTHING( GaussianWeighting(1, 1) ); //TO check it does work if both arguments are correct.
   }
 
   void testGaussianWeightingOtherConstructorThrows()
