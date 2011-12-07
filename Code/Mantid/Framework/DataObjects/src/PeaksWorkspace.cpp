@@ -260,6 +260,12 @@ namespace DataObjects
 	std::vector<double> binCount;
 	std::vector<double> initialEnergy;
 	std::vector<double> finalEnergy;
+	std::vector<double> waveLength;
+	std::vector<double> scattering;
+	std::vector<double> dSpacing;
+	std::vector<double> TOF;
+    std::vector<int> runNumber;
+	std::vector<double> goniometerMatrix;
 	// etc.
 
 	for (size_t i=0; i < peaks.size(); i++)
@@ -274,12 +280,29 @@ namespace DataObjects
 		binCount.push_back( p.getBinCount() );
 		initialEnergy.push_back( p.getInitialEnergy() );
 		finalEnergy.push_back( p.getFinalEnergy() );
+		waveLength.push_back( p.getWavelength() );
+		scattering.push_back( p.getScattering() );
+		dSpacing.push_back( p.getDSpacing() );
+		TOF.push_back( p.getTOF() );
+		runNumber.push_back( p.getRunNumber() );
+		{
+		   Matrix<double> gm = p.getGoniometerMatrix();
+		   goniometerMatrix.push_back( gm[0][0]);
+		   goniometerMatrix.push_back( gm[1][0]);
+		   goniometerMatrix.push_back( gm[2][0]);
+		   goniometerMatrix.push_back( gm[0][1]);
+		   goniometerMatrix.push_back( gm[1][1]);
+		   goniometerMatrix.push_back( gm[2][1]);
+		   goniometerMatrix.push_back( gm[0][2]);
+		   goniometerMatrix.push_back( gm[1][2]);
+		   goniometerMatrix.push_back( gm[1][2]);
+		}
       // etc.
 	  }
 
 	// Start Peaks Workspace
-    // file->makeGroup("peaks_workspace", "NXentry", true);  // For when peaksWorkspace can be loaded
-	file->makeGroup("table_workspace","NXentry",true);  // We currently save it as table workspace
+    file->makeGroup("peaks_workspace", "NXentry", true);  // For when peaksWorkspace can be loaded
+	//file->makeGroup("table_workspace","NXentry",true);  // We currently save it as table workspace
 
     // Detectors column
 	file->writeData("column_1", detectorID);
@@ -352,6 +375,60 @@ namespace DataObjects
 	file->putAttr("interpret_as","A double");
 	file->putAttr("units","Not known");  // Units may need changing when known
 	file->closeData();
+
+	// Wave Length Column
+	file->writeData("column_10", waveLength );
+	file->openData("column_10");
+	file->putAttr("name", "Wave Length");
+	file->putAttr("interpret_as","A double");
+	file->putAttr("units","Not known");  // Units may need changing when known
+	file->closeData();
+
+	// Scattering Column
+	file->writeData("column_11", scattering );
+	file->openData("column_11");
+	file->putAttr("name", "Scattering");
+	file->putAttr("interpret_as","A double");
+	file->putAttr("units","Not known");  // Units may need changing when known
+	file->closeData();
+
+	// D Spacing Column
+	file->writeData("column_12", dSpacing );
+	file->openData("column_12");
+	file->putAttr("name", "D Spacing");
+	file->putAttr("interpret_as","A double");
+	file->putAttr("units","Not known");  // Units may need changing when known
+	file->closeData();
+
+	// TOF Column
+	file->writeData("column_13", TOF );
+	file->openData("column_13");
+	file->putAttr("name", "TOF");
+	file->putAttr("interpret_as","A double");
+	file->putAttr("units","Not known");  // Units may need changing when known
+	file->closeData();
+
+	//Run Number column
+	file->writeData("column_14", runNumber );
+	file->openData("column_14");
+	file->putAttr("name", "Run Number");
+	file->putAttr("interpret_as","A integer");
+	file->putAttr("units","Not known");  // Units may need changing when known
+	file->closeData();
+
+	// Goniometer Matrix Column
+	std::vector<int> array_dims;
+	array_dims.push_back(peaks.size());
+    array_dims.push_back(9);
+	file->writeData("column_15", goniometerMatrix, array_dims);
+	file->openData("column_15");
+	file->putAttr("name", "Goniometer Matrix");
+	file->putAttr("interpret_as","A matrix of 3x3 doubles");
+	file->putAttr("units","Not known");  // Units may need changing when known
+	file->closeData();
+
+
+
 
     // etc.
 
