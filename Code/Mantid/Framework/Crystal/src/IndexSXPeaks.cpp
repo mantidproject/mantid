@@ -150,7 +150,7 @@ namespace Mantid
 
       // Need a least two peaks
       std::size_t npeaks=peakindices.size();
-      if (npeaks > ws->getNumberPeaks())
+      if (npeaks > size_t(ws->getNumberPeaks()))
       {
         throw std::runtime_error("Cannot have more peaks indices than actual peaks");
       }
@@ -201,7 +201,7 @@ namespace Mantid
       }
       else //Create candidate peaks from all available peaks
       {
-        for (std::size_t i=0;i<npeaks;i++)
+        for (int i=0;i<int(npeaks);i++)
         { 
           IPeak& peak = ws->getPeak(i);
           V3D Qs = peak.getQSampleFrame();
