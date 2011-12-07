@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
+	src/FunctionDomain.cpp
 	src/FunctionFactory.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
