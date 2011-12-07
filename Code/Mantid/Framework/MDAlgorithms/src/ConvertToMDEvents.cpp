@@ -821,10 +821,13 @@ class LOOP_ND<2,Q,MODE,CONV>{
  *  needs to pick up all known algorithms. 
 */
 ConvertToMDEvents::ConvertToMDEvents():
-algo_id(""),
 Q_modes(3),
 dE_modes(4),
-ConvModes(4)
+ConvModes(4),
+// The conversion subalgorithm expects workspaces in these units; 
+// Change of the units have to be accompanied by correspondent change in conversion subalgorithm
+native_inelastic_unitID("DeltaE"),
+native_elastic_unitID("MomentumTransfer") // Why it is a transfer? Hope it is just a momentum
 {
      Q_modes[modQ]="|Q|";
      Q_modes[Q3D] ="QxQyQz";    
@@ -838,11 +841,7 @@ ConvModes(4)
      ConvModes[ConvertFast]="CnvFast";
      ConvModes[ConvByTOF]  ="CnvByTOF";
      ConvModes[ConvFromTOF]="CnvFromTOF";
-     // The conversion subalgorithm expects workspaces in these units; 
-     // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
-     native_inelastic_unitID     ="DeltaE";
-     native_elastic_unitID ="MomentumTransfer"; // Why it is a transfer? Hope it is just a momentum
-
+ 
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
     LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
     LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvertFast>::EXEC(this);

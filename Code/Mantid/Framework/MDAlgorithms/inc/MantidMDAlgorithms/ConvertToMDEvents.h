@@ -205,7 +205,7 @@ namespace MDAlgorithms
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
 
-    // known momentum analysis modes ID-s;
+    // known momentum analysis mo des ID-s;
     std::vector<std::string> Q_modes;
     // known energy transfer modes ID-s
     std::vector<std::string> dE_modes;

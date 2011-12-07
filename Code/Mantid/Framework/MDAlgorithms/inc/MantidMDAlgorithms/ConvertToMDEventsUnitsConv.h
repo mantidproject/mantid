@@ -41,7 +41,7 @@ struct UNITS_CONVERSION
     */
     inline void     setUpConversion(ConvertToMDEvents const * const pHost ){UNUSED_ARG(pHost);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
-    inline void     updateConversion(uint64_t i){};
+    inline void     updateConversion(uint64_t i){UNUSED_ARG(i);}
     /// Convert current X variable into the units requested;
     inline coord_t  getXConverted(const MantidVec& X,size_t j)const
     {
