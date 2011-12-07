@@ -5,7 +5,7 @@
 #include "MantidAPI/ITableWorkspace.h";
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidCrystal/FindSXUBUsingLatticeParameters.h"
+#include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidAPI/IPeak.h"

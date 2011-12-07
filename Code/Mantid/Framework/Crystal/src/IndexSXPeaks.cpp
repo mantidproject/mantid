@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCrystal/FindSXUBUsingLatticeParameters.h"
+#include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Progress.h"
