@@ -135,6 +135,8 @@ logging.channels.fileFilterChannel.level= warning
 # output to a file (For error capturing and debugging)
 logging.channels.fileChannel.class = FileChannel
 logging.channels.fileChannel.path =
+logging.channels.fileChannel.rotation = 1 M
+logging.channels.fileChannel.purgeCount = 9
 logging.channels.fileChannel.formatter.class = PatternFormatter
 logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
 logging.formatters.f1.class = PatternFormatter
