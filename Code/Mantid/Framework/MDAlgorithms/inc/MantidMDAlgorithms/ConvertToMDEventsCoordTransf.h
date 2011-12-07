@@ -262,7 +262,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV>
          // 
          CONV_UNITS_FROM.setUpConversion(this->pHost); 
          // get pointer to the positions of the detectors
-          pDet = &(ConvertToMDEvents::getPrepDetectors(pHost).det_dir[0]);
+          pDet = ConvertToMDEvents::getPrepDetectors(pHost).pDetDir();
           //
         return true;
     }

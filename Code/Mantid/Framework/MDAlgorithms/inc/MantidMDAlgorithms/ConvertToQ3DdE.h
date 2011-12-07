@@ -58,6 +58,9 @@ namespace MDAlgorithms
     //
     bool is_defined(void)const{return det_dir.size()>0;}
     bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
+    double  * const pL2(){return &L2[0];}
+    double  * const pTwoTheta(){return &TwoTheta[0];}
+    Kernel::V3D  *const pDetDir(){return &det_dir[0];}
   };
   class DLLExport ConvertToQ3DdE  : public API::Algorithm
   {

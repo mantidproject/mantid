@@ -98,10 +98,10 @@ struct UNITS_CONVERSION<ConvFromTOF>
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }
        // get detectors positions and other data needed for units conversion:
-       const preprocessed_detectors det = ConvertToMDEvents::getPrepDetectors(pHost);
-       pTwoTheta = &(det.TwoTheta[0]);
-       pL2       = &(det.L2[0]);
-       L1        =  det.L1;
+       pTwoTheta =  ConvertToMDEvents::getPrepDetectors(pHost).pTwoTheta();
+       pL2       =  ConvertToMDEvents::getPrepDetectors(pHost).pL2();
+       L1        =  ConvertToMDEvents::getPrepDetectors(pHost).L1;
+
        efix      =  ConvertToMDEvents::getEi(pHost);
        emode     =  ConvertToMDEvents::getEMode(pHost);
     };
@@ -144,17 +144,16 @@ struct UNITS_CONVERSION<ConvByTOF>
        }
 
        // get units class, requested by subalgorithm
-       std::string native_units       = ConvertToMDEvents::getNativeUnitsID(pHost);
-       Kernel::Unit_sptr pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
+       std::string native_units  = ConvertToMDEvents::getNativeUnitsID(pHost);
+       pWSUnit                   = Kernel::UnitFactory::Instance().create(native_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));
        }
 
        // get detectors positions and other data needed for units conversion:
-       const preprocessed_detectors det = ConvertToMDEvents::getPrepDetectors(pHost);
-       pTwoTheta = &(det.TwoTheta[0]);
-       pL2       = &(det.L2[0]);
-       L1        =  det.L1;
+       pTwoTheta =  ConvertToMDEvents::getPrepDetectors(pHost).pTwoTheta();
+       pL2       =  ConvertToMDEvents::getPrepDetectors(pHost).pL2();
+       L1        =  ConvertToMDEvents::getPrepDetectors(pHost).L1;
        // get efix
        efix      =  ConvertToMDEvents::getEi(pHost);
        emode     =  ConvertToMDEvents::getEMode(pHost);

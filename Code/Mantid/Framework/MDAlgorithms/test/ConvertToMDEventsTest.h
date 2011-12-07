@@ -506,28 +506,36 @@ void testSetUpThrow()
 }
 
 
-void xtestExecModQ()
+void testExecModQ()
 {
-    
+
+     Mantid::API::MatrixWorkspace_sptr ws2D = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testWSProcessed"));
+     API::NumericAxis *pAxis = new API::NumericAxis(3);
+     pAxis->setUnit("dSpacing");
+
+     ws2D->replaceAxis(0,pAxis);
+
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("QDimensions","|Q|");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
-    //TODO: wrong -- q should generate 2 dimensions -- currently 1
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
+    //
     pAlg->setPropertyValue("MinValues","-10,0,-10");
     pAlg->setPropertyValue("MaxValues"," 10,20,40");
     pAlg->setRethrows(true);
-    TS_ASSERT_THROWS(pAlg->execute(),Kernel::Exception::NotImplementedError);
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     AnalysisDataService::Instance().remove("OutputWorkspace");
 
 }
-void xtestExecQ3D()
+void testExecQ3D()
 {
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
      
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "QxQyQz"));
-    pAlg->setPropertyValue("MinValues","-10,-10,-10,0,-10");
-    pAlg->setPropertyValue("MaxValues"," 10, 10,10,20,40");
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
+    pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
 
 
     pAlg->setRethrows(false);
