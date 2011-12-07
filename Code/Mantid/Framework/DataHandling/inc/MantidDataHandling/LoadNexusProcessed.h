@@ -90,6 +90,8 @@ namespace Mantid
 
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
 
+	  API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
+
       API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData & wksp_cls,Mantid::NeXus::NXDouble & xbins,
           const double& progressStart, const double& progressRange);
 
