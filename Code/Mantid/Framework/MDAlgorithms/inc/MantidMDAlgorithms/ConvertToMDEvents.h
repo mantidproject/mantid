@@ -99,7 +99,7 @@ namespace MDAlgorithms
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}  
 
-//**> helper functions: To assist with units conversion and get access to some important internal states of the algorithm
+//**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the algorithm
     static std::string          getNativeUnitsID(ConvertToMDEvents const *const pHost);
     static Kernel::Unit_sptr    getAxisUnits(ConvertToMDEvents const *const pHost);
     static preprocessed_detectors & getPrepDetectors(ConvertToMDEvents const *const pHost);

@@ -46,7 +46,7 @@ namespace Mantid
 {
 namespace MDAlgorithms
 {
-// the parameter, which specifies maximal default number of dimensions, the algorithm accepts (should be moved to configuration). 
+// the parameter, which specifies maximal default number of dimensions, the algorithm accepts. See constructor. 
    static const int MAX_NDIM=8;
 
 
@@ -69,22 +69,56 @@ void ConvertToMDEvents::initDocs()
 //
 std::string          
 ConvertToMDEvents::getNativeUnitsID(ConvertToMDEvents const *const pHost){
+    if(pHost->subalgorithm_units.empty()){
+        convert_log.error()<<" getNativeUnitsID: requested undefined subalgorithm units, the subalgorithm is probably not yet defined itself\n";
+        throw(std::logic_error(" should not be able to call this function when subalgorithm is undefined"));
+    }
     return pHost->subalgorithm_units;
 }
 Kernel::Unit_sptr    
 ConvertToMDEvents::getAxisUnits(ConvertToMDEvents const *const pHost){
+    if(!pHost->inWS2D){
+        convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
+        throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
+    }
+    API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(pHost->inWS2D->getAxis(0));
+    if(!pAxis){
+        convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
+        throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
+    }
     return pHost->inWS2D->getAxis(0)->unit();
 }
 preprocessed_detectors & 
 ConvertToMDEvents::getPrepDetectors(ConvertToMDEvents const *const pHost)
-{       UNUSED_ARG(pHost);
+{       
+        UNUSED_ARG(pHost);
+        if(!det_loc.is_defined()){
+            convert_log.error()<<"getPrepDetectors: invoked when preprocessed detectors are undefined\n";
+            throw(std::logic_error(" should not be able to call this function when detectors are undefined"));
+        }
         return ConvertToMDEvents::det_loc;
 }
 double
-ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost){return (boost::lexical_cast<double>(pHost->inWS2D->run().getProperty("Ei")->value())); }
+ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost)
+{
+    if(!pHost->inWS2D){
+        convert_log.error()<<"getEi: invoked when input workspace is undefined\n";
+        throw(std::logic_error(" should not call this function when workpace is undefined"));
+    }
+    Kernel::PropertyWithValue<double>  *pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(pHost->inWS2D->run().getProperty("Ei"));
+    if(!pProp){
+        convert_log.error()<<"getEi: can not obtain incident energy of neutrons\n";
+        throw(std::logic_error(" should not call this function when incident energy is undefined"));
+    }
+    return (*pProp); 
+}
 
 int  
 ConvertToMDEvents::getEMode(ConvertToMDEvents const *const pHost){
+    if(pHost->emode<0||pHost->emode>2){
+        convert_log.error()<<"getEMode: "<<pHost->emode<< " unsupported emode\n";
+        throw(std::logic_error(" should not call this function when emode is undefined"));
+    }
     return pHost->emode;
 }
 
@@ -688,7 +722,7 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
                  convert_log.error()<<" property: "<<this->targ_dim_names[i]<<" is neither a time series (run) property nor a property with double value\n";
                  throw(std::invalid_argument(" can not interpret property, used as dimension"));
               }
-              Coord[i]  = *(proc_property)();
+              Coord[i]  = *(proc_property);
           }
 
 
@@ -713,9 +747,6 @@ class LOOP_ND{
             std::stringstream num;
             num << "ND" << i;
             std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
-#ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
     }
 };
@@ -728,7 +759,7 @@ class LOOP_ND<2,Q,MODE,CONV>{
             num << "ND" << 2;
             std::string Key = "ND"+pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
 #ifdef _DEBUG
-            std::cout<<" Instansiating algorithm with ID: "<<Key<<std::endl;
+            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
 #endif
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
@@ -739,6 +770,7 @@ class LOOP_ND<2,Q,MODE,CONV>{
  *  needs to pick up all known algorithms. 
 */
 ConvertToMDEvents::ConvertToMDEvents():
+emode(-1),
 Q_modes(3),
 dE_modes(4),
 ConvModes(4)

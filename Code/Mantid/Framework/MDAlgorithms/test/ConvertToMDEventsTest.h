@@ -135,7 +135,7 @@ void testParseQMode_modQ()
      TS_ASSERT_EQUALS(1,nQ_dims);
      TS_ASSERT_EQUALS("|Q|",MODE);
      TS_ASSERT_EQUALS("|Q|",out_dim_names[0]);
-     TS_ASSERT_EQUALS("dSpacing",out_dim_units[0]);
+     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[0]);
 }
 void testParseQMode_Q3D()
 {
@@ -243,7 +243,7 @@ void testParseDEMode_ElasticPowd()
      TS_ASSERT_EQUALS("Elastic",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
-     TS_ASSERT_EQUALS("dSpacing",natural_units);
+     TS_ASSERT_EQUALS("MomentumTransfer",natural_units);
 }
 // TEST ConvertMode
 void testParseConv_NonConvertUnitThrows()
