@@ -26,7 +26,7 @@ class PeakHKL
 public:
   PeakHKL(PeakMarker2D* m,const QRectF& trect);
   bool add(PeakMarker2D* marker,const QRectF& trect);
-  void draw(QPainter& painter);
+  void draw(QPainter& painter,int prec = 6);
   void print()const;
 
 private:
@@ -58,6 +58,8 @@ public:
   PeakMarker2D::Style getNextDefaultStyle()const;
   /// Return PeaksWorkspace associated with this overlay.
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {return m_peaksWorkspace;}
+  /// set HKL precision
+  void setPrecision(int prec) const {m_precision = prec;}
 
 private:
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
@@ -65,6 +67,7 @@ private:
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
   mutable int m_currentDefaultStyle; ///< default style index
+  mutable int m_precision;
 };
 
 #endif /*MANTIDPLOT_PEAKOVERLAY_H_*/

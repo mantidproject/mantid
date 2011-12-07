@@ -165,7 +165,7 @@ public:
     Peak PeakObj(in_ws->getInstrument(),5050,2.,V3D(1,1,1));
     PeakObj.setRunNumber(3007);
     pkws->addPeak( PeakObj);
-    AnalysisDataService::Instance().add("TOPAZ", pkws);
+    AnalysisDataService::Instance().addOrReplace("TOPAZ", pkws);
 
     inputW->mutableRun().addProperty("run_number", 3007);
 

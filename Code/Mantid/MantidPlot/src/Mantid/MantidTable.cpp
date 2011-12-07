@@ -261,3 +261,61 @@ void MantidTable::deleteRows(int startRow, int endRow)
     QMessageBox::critical(this,"MantidPlot - Error", "DeleteTableRow algorithm failed");
   }
 }
+
+//------------------------------------------------------------------------------------------------
+/**\brief Sort the specified column.
+ * @param col :: the column to be sorted
+ * @param order :: 0 means ascending, anything else means descending
+ */
+void MantidTable::sortColumn(int col, int order)
+{
+  if (!m_ws) return;
+  if (m_ws->customSort())
+  {
+    // Customized sorting routine for this TableWorkspace
+    std::vector< std::pair<std::string, bool> > criteria;
+    // Only one criterion in sorting
+    criteria.push_back( std::pair<std::string, bool> (m_ws->getColumn(col)->name(), (order == 0)) );
+    m_ws->sort(criteria);
+    // Refresh the table
+    this->fillTable();
+  }
+  else
+  {
+    // Fall-back to the default sorting of the table
+    Table::sortColumn(col, order);
+  }
+}
+
+//------------------------------------------------------------------------------------------------
+/**\brief Sort the specified columns.
+ * @param cols :: the columns to be sorted
+ * @param type :: 0 means sort individually (as in sortColumn()), anything else means together
+ * @param order :: 0 means ascending, anything else means descending
+ * @param leadCol :: for sorting together, the column which determines the permutation
+ */
+void MantidTable::sortColumns(const QStringList&s, int type, int order, const QString& leadCol)
+{
+  if (!m_ws) return;
+  if (m_ws->customSort())
+  {
+    // Customized sorting routine for this TableWorkspace
+    std::vector< std::pair<std::string, bool> > criteria;
+
+    // Unmangle the column name, which comes as "TableName_ColName"
+    std::string col = leadCol.toStdString();
+    size_t n = col.rfind('_');
+    if (n != std::string::npos && n < col.size()-1)
+      col = col.substr(n+1, col.size()-n-1);
+    // Only one criterion in sorting
+    criteria.push_back( std::pair<std::string, bool> (col, (order == 0)) );
+    m_ws->sort(criteria);
+    // Refresh the table
+    this->fillTable();
+  }
+  else
+  {
+    // Fall-back to the default sorting of the table
+    Table::sortColumns(s, type, order, leadCol);
+  }
+}

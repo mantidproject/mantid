@@ -1,12 +1,19 @@
+#ifndef H_CONVERT_TO_MDEVENTS_METHODS
+#define H_CONVERT_TO_MDEVENTS_METHODS
+
 #include "MantidMDAlgorithms/ConvertToMDEvents.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h"
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+// predefenition of the class, which does all coordinate transformation
+template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
+struct COORD_TRANSFORMER;
 
 
 //-----------------------------------------------
-template<size_t nd,Q_state Q>
+template<size_t nd,Q_state Q, AnalMode MODE, CnvrtUnits CONV>
 void 
 ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 {
@@ -22,10 +29,10 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 
     MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(piWS);
     if(!pWs){
-        g_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
+        convert_log.error()<<"ConvertToMDEvents: can not cast input worspace pointer into pointer to proper target workspace\n"; 
         throw(std::bad_cast());
     }
-
+    COORD_TRANSFORMER<Q,MODE,CONV> trn(this); 
     // one of the dimensions has to be X-ws dimension -> need to add check for that;
 
     // copy experiment info into target workspace
@@ -35,7 +42,8 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     const size_t specSize = inWS2D->blocksize();    
     std::vector<coord_t> Coord(nd);
 
-    calc_generic_variables<Q>(Coord,nd);
+
+    if(!trn.calcGenericVariables(Coord,nd))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
     for (int64_t i = 0; i < int64_t(numSpec); ++i)
     {
@@ -45,14 +53,15 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
         const MantidVec& Error    = inWS2D->readE(i);
         int32_t det_id            = det_loc.det_id[i];
 
-        calculate_y_coordinate<Q>(Coord,i);
+        if(!trn.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
+
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
         {
             // drop emtpy events
            if(Signal[j]<FLT_EPSILON)continue;
 
-           if(!calculate_ND_coordinates<Q>(X,i,j,Coord))continue;
+           if(!trn.calculate_ND_coordinates(X,i,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
             pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
@@ -92,7 +101,7 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->dim_names[d], this->dim_names[d], this->dim_units[d], dim_min[d], dim_min[d], 10);
+        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], dim_min[d], dim_min[d], 10);
         ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
       }
       ws->initialize();
@@ -107,77 +116,10 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       ws->splitBox();
       return ws;
 }
-
-// PROCESS GENERIG VARIABLES AS FUNCTION OF ALGORITHM
-template<> 
-inline void ConvertToMDEvents::calc_generic_variables<NoQ>(std::vector<coord_t> &Coord, size_t nd){
-    // workspace defines 2 properties
-         fillAddProperties(Coord,nd,2);
-      // get the Y axis; 
-         pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
-         if(!pYAxis ){ // the cast should be verified earlier; just in case here:
-            throw(std::invalid_argument("Input workspace has to have Y-axis"));
-          }
-}
-//
-template<> 
-void ConvertToMDEvents::calc_generic_variables<modQ>(std::vector<coord_t> &Coord, size_t nd){
-    UNUSED_ARG(Coord);
-    UNUSED_ARG(nd);
-    throw(Kernel::Exception::NotImplementedError("not yet implemented"));
-}
-//
-template<> 
-inline void ConvertToMDEvents::calc_generic_variables<Q3D>(std::vector<coord_t> &Coord, size_t nd){
-   // INELASTIC:
-    // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
-    fillAddProperties(Coord,nd,4);
-    Ei  =  boost::lexical_cast<double>(inWS2D->run().getProperty("Ei")->value());
-    // the wave vector of input neutrons;
-    ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
-    // 
-    rotMat = this->get_transf_matrix();
-}
-
-// PROCESS Y VARIABLE AS FUNCTION OF SUBALGORITHM
-template<>
-void ConvertToMDEvents::calculate_y_coordinate<NoQ>(std::vector<coord_t> &Coord,size_t i)
-{
-        UNUSED_ARG(i);
-        Coord[1]                  = pYAxis->operator()(i);
-}
-// PROCESS X - VARIABLE AS FUNCTION OF SUBALGORITHM
-template<>
-bool ConvertToMDEvents::calculate_ND_coordinates<NoQ>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-        UNUSED_ARG(i);
-        Coord[0]    = 0.5*( X[j]+ X[j+1]);
-        return true;
-}
-//
-template<>
-bool ConvertToMDEvents::calculate_ND_coordinates<Q3D>(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-
-          coord_t E_tr = 0.5*( X[j]+ X[j+1]);
-          Coord[3]    = E_tr;
-          if(Coord[3]<dim_min[3]||Coord[3]>=dim_max[3])return false;
-
-
-          double k_tr = sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-   
-          double  ex = det_loc.det_dir[i].X();
-          double  ey = det_loc.det_dir[i].Y();
-          double  ez = det_loc.det_dir[i].Z();
-          double  qx  =  -ex*k_tr;                
-          double  qy  =  -ey*k_tr;
-          double  qz  = ki - ez*k_tr;
-
-         Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<dim_min[0]||Coord[0]>=dim_max[0])return false;
-         Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<dim_min[1]||Coord[1]>=dim_max[1])return false;
-         Coord[2]  = (coord_t)(rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);  if(Coord[2]<dim_min[2]||Coord[2]>=dim_max[2])return false;
-
-         return true;
-}
+     
 
 
 } // endNamespace MDAlgorithms
 } // endNamespace Mantid
+
+#endif

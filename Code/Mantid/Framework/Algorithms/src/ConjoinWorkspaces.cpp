@@ -218,6 +218,10 @@ void ConjoinWorkspaces::execEvent()
   {
     //Copy the events over
     output->getOrAddEventList(i) = event_ws1->getEventList(i); //Should fire the copy constructor
+    ISpectrum * outSpec = output->getSpectrum(i);
+    const ISpectrum * inSpec = event_ws1->getSpectrum(i);
+    outSpec->copyInfoFrom(*inSpec);
+
     m_progress->report();
   }
 
@@ -229,6 +233,10 @@ void ConjoinWorkspaces::execEvent()
     int64_t output_wi = j + nhist1;
     //Copy the events over
     output->getOrAddEventList(output_wi) = event_ws2->getEventList(j); //Should fire the copy constructor
+    ISpectrum * outSpec = output->getSpectrum(output_wi);
+    const ISpectrum * inSpec = event_ws2->getSpectrum(j);
+    outSpec->copyInfoFrom(*inSpec);
+
     m_progress->report();
   }
 
@@ -341,7 +349,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
     {
       if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
       {
-        g_log.error("The input workspaces have overlapping spectrum numbers");
+        g_log.error() << "The input workspaces have overlapping spectrum numbers " << spectrum << "\n";
         throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
       }
     }
@@ -351,7 +359,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
     {
       if ( detectors.find(*it) != detectors.end() )
       {
-        g_log.error("The input workspaces have common detectors");
+        g_log.error() << "The input workspaces have common detectors: " << (*it) << "\n";
         throw std::invalid_argument("The input workspaces have common detectors");
       }
     }
@@ -389,9 +397,10 @@ void getMinMax(MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max)
  * @param ws2 The second workspace supplied to the algorithm.
  * @param output The workspace that is going to be returned by the algorithm.
  */
-void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr /*ws2*/,
-                                      API::MatrixWorkspace_sptr output)
+void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
+                                           API::MatrixWorkspace_sptr output)
 {
+  UNUSED_ARG(ws2);
   // make sure we should bother. If you don't check for overlap, you don't need to
   if (this->getProperty("CheckOverlapping"))
     return;

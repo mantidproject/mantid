@@ -35,6 +35,9 @@
 #include <QLineEdit>
 #include <QSignalMapper>
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real.hpp>
+
 #include <numeric>
 #include <cfloat>
 #include <cmath>
@@ -748,6 +751,12 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
+
+    // random number generator
+    static boost::mt19937 rand_gen;
+    static boost::uniform_real<> random(0.6,2.0);
+    peak->setHKL(random(rand_gen),random(rand_gen),random(rand_gen));
+
     tw->addPeak(*peak);
     delete peak;
     tw->modified();
@@ -778,11 +787,11 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
 }
 
 /**
- * Show context menu of mInstrumentDisplay
+ * Add pick tab specific actions to mInstrumentDisplay context menu.
  */
-void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
+void InstrumentWindowPickTab::setInstrumentDisplayContextMenu(QMenu& context)
 {
-  QMenu context(this);
+  //QMenu context(this);
   if (m_plot->hasCurve())
   {
     context.addAction(m_storeCurve);
@@ -790,10 +799,6 @@ void InstrumentWindowPickTab::showInstrumentDisplayContextMenu()
   if (m_plot->hasStored() || m_plot->hasCurve())
   {
     context.addAction(m_savePlotToWorkspace);
-  }
-  if ( !context.isEmpty() )
-  {
-    context.exec(QCursor::pos());
   }
 }
 

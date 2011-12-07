@@ -7,11 +7,13 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
 
+#include <vector>
+
 namespace Mantid
 {
 namespace API
 {
-/** Abstract class that represents the domain of a function.
+/** Base class that represents the domain of a function.
     A domain is a generalisation of x (argument) and y (value) arrays.
     A domain consists at least of a list of function arguments for which a function should 
     be evaluated and a buffer for the calculated values. If used in fitting also contains
@@ -43,14 +45,31 @@ namespace API
 class MANTID_API_DLL FunctionDomain
 {
 public:
-  /// Return the number of points, values, etc in the domain
-  virtual size_t size() const = 0;
-  /// store i-th calculated value. 0 <= i < size()
-  virtual void setCalculated(size_t i,double value) = 0;
-  /// get i-th calculated value. 0 <= i < size()
-  virtual double getCalculated(size_t i) const = 0;
+  /// Constructor.
+  FunctionDomain(size_t n);
   /// Virtual destructor
   virtual ~FunctionDomain(){}
+  /// Return the number of points, values, etc in the domain
+  virtual size_t size() const {return m_calculated.size();}
+  /// store i-th calculated value. 0 <= i < size()
+  virtual void setCalculated(size_t i,double value) {m_calculated[i] = value;}
+  /// get i-th calculated value. 0 <= i < size()
+  virtual double getCalculated(size_t i) const {return m_calculated[i];}
+  /// set a fitting data value
+  virtual void setFitData(size_t i,double value);
+  virtual void setFitData(const std::vector<double>& values);
+  /// get a fitting data value
+  virtual double getFitData(size_t i) const;
+  /// set a fitting weight
+  virtual void setFitWeight(size_t i,double value);
+  virtual void setFitWeights(const std::vector<double>& values);
+  /// get a fitting weight
+  virtual double getFitWeight(size_t i) const;
+protected:
+  void setDataSize();
+  std::vector<double> m_calculated; ///< buffer for calculated values
+  std::vector<double> m_data;    ///< buffer for fit data
+  std::vector<double> m_weights; ///< buffer for fitting weights (reciprocal errors)
 };
 
 } // namespace API

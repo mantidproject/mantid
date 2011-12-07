@@ -526,7 +526,14 @@ double V3D::zenith(const V3D& v) const
  */
 double V3D::angle(const V3D& v) const
 {
-  return acos( this->scalar_prod(v) / (this->norm() * v.norm()) );
+  double ratio = this->scalar_prod(v) / (this->norm() * v.norm());
+
+  if ( ratio >= 1.0 )        // NOTE: Due to rounding errors, if v is
+    return 0.0;              //       is nearly the same as "this" or
+  else if ( ratio <= -1.0 )  //       as "-this", ratio can be slightly
+    return M_PI;             //       more than 1 in absolute value. 
+                             //       That causes acos() to return NaN.
+  return acos( ratio );
 }
 
 int

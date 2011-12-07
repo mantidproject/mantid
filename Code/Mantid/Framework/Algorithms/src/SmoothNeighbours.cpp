@@ -544,6 +544,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
     {
       size_t inWI = it->first;
       double weight = it->second;
+      double weightSquared = weight * weight;
 
       const MantidVec & inY = ws->readY(inWI);
       const MantidVec & inE = ws->readE(inWI);
@@ -553,11 +554,12 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       {
         // Add the weighted signal
         outY[i] += inY[i] * weight;
-        // Square the error, scale by weight, then add
+        // Square the error, scale by weight (which you have to square too), then add in quadrature
         double errorSquared = inE[i];
         errorSquared *= errorSquared;
-        errorSquared *= weight;
+        errorSquared *= weightSquared;
         outE[i] += errorSquared;
+        // Copy the X values as well
         outX[i] = inX[i];
       }
       if(ws->isHistogramData())
@@ -566,7 +568,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       }
     } //(each neighbour)
 
-    // Now un-square the error
+    // Now un-square the error, since we summed it in quadrature
     for (size_t i=0; i<YLength; i++)
       outE[i] = sqrt(outE[i]);
 

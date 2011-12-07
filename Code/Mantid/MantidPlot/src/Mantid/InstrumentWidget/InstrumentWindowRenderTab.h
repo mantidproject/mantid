@@ -16,6 +16,7 @@ class QLineEdit;
 class QComboBox;
 class QCheckBox;
 class QAction;
+class QMenu;
 
 /**
   * Implements the Render tab in InstrumentWindow
@@ -51,6 +52,7 @@ private slots:
   void flipUnwrappedView(bool);
 private:
   void showEvent (QShowEvent *);
+  QMenu* createPeaksMenu();
 
   QFrame * setupAxisFrame();
 
@@ -62,6 +64,7 @@ private:
   QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;
   QCheckBox *m_flipCheckBox;
+  QPushButton *m_peakOverlaysButton;
   QCheckBox *m_autoscaling;
 
   QAction *m_colorMap;

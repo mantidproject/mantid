@@ -7,6 +7,15 @@
     <value val="indirect"/>
 </parameter>
 
+
+<!-- Moderator Tzero/LambdaZero Parameters  -->
+<parameter name="Moderator.TimeZero.Gradient">
+    <value val="11.967"/>
+</parameter>
+<parameter name="Moderator.TimeZero.Intercept">
+    <value val="-5.0"/>
+</parameter>
+
 <!-- These properties are necessary for use in the Indirect CTE interface. -->
 
 <parameter name="analysers" type="string">
@@ -17,6 +26,10 @@
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.Monitor.RebinStep" >
+  <!-- This is the step size to optionally rebin the monitor to"-->
+  <value val="10.0" />
+</parameter>
 <parameter name="Workflow.MonitorArea" >
   <value val="1.276e-3" />
 </parameter>

@@ -376,7 +376,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * previously set Goniometer object as well as the angles
    * loaded in the run (if any).
    *
-   * As of now, it uses the FIRST angle value found.
+   * As of now, it uses the MEAN angle.
    *
    * @return 3x3 double rotation matrix
    */
@@ -392,7 +392,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         if (tsp)
         {
           // Set that angle
-          m_goniometer.setRotationAngle(i, tsp->firstValue());
+          m_goniometer.setRotationAngle(i, tsp->getStatistics().mean);
           g_log.debug() << "Goniometer angle " << name << " set to " << tsp->firstValue() << std::endl;
         }
         else

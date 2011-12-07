@@ -2,5 +2,6 @@
 Third_Party/
 # Common out-of-source build directory names. Usually, these should go in your .git/info/exclude
 dbg/
+rel/
 debug/
 release/

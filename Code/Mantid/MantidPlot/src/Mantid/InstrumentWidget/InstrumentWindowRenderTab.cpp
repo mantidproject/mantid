@@ -13,6 +13,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QAction>
+#include <QSignalMapper>
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
 
@@ -81,6 +82,13 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_flipCheckBox->setChecked(false);
   m_flipCheckBox->hide();
   connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
+  m_peakOverlaysButton = new QPushButton("Peaks options",this);
+  m_peakOverlaysButton->hide();
+  m_peakOverlaysButton->setMenu(createPeaksMenu());
+
+  QHBoxLayout* unwrappedControlsLayout = new QHBoxLayout;
+  unwrappedControlsLayout->addWidget(m_flipCheckBox);
+  unwrappedControlsLayout->addWidget(m_peakOverlaysButton);
 
   m_autoscaling = new QCheckBox("Autoscaling",this);
   m_autoscaling->setChecked(true);
@@ -88,7 +96,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
 
   // layout
   renderControlsLayout->addWidget(m_renderMode);
-  renderControlsLayout->addWidget(m_flipCheckBox);
+  renderControlsLayout->addLayout(unwrappedControlsLayout);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
@@ -219,7 +227,9 @@ void InstrumentWindowRenderTab::showResetView(int iv)
 
 void InstrumentWindowRenderTab::showFlipControl(int iv)
 {
-  m_flipCheckBox->setVisible(iv != 0);
+  bool vis = iv != 0;
+  m_flipCheckBox->setVisible(vis);
+  m_peakOverlaysButton->setVisible(vis);
 }
 
 void InstrumentWindowRenderTab::showAxes(bool on)
@@ -282,4 +292,31 @@ void InstrumentWindowRenderTab::setupColorBar(const MantidColorMap& cmap,double 
 void InstrumentWindowRenderTab::setColorMapAutoscaling(bool on)
 {
   emit setAutoscaling(on);
+}
+
+/**
+ * Creates a menu for interaction with peak overlays
+ */
+QMenu* InstrumentWindowRenderTab::createPeaksMenu()
+{
+  QMenu* menu = new QMenu(this);
+
+  // setting precision set of actions
+  QMenu *setPrecision = new QMenu("Label precision",this);
+  QSignalMapper *signalMapper = new QSignalMapper(this);
+  for(int i = 1; i < 10; ++i)
+  {
+    QAction *prec = new QAction(QString::number(i),setPrecision);
+    setPrecision->addAction(prec);
+    connect(prec,SIGNAL(triggered()),signalMapper,SLOT(map()));
+    signalMapper->setMapping(prec,i);
+  }
+  connect(signalMapper, SIGNAL(mapped(int)), m_instrWindow, SLOT(setPeakLabelPrecision(int)));
+  menu->addMenu(setPrecision);
+
+  // Clear peaks action
+  QAction* clearPeaks = new QAction("Clear peaks",this);
+  connect(clearPeaks,SIGNAL(triggered()),m_instrWindow, SLOT(clearPeakOverlays()));
+  menu->addAction(clearPeaks);
+  return menu;
 }

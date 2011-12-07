@@ -187,15 +187,19 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
     TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
 
-    //Check that the workspaces are identical, including x and y values.
-    CheckWorkspacesMatch* checkAlg = new CheckWorkspacesMatch;
-    checkAlg->initialize();
-    checkAlg->setProperty("Workspace1", inWS);
-    checkAlg->setProperty("Workspace2", outWS);
-    checkAlg->setProperty("Tolerance", 0.001);
-    checkAlg->execute();
-    std::string result = checkAlg->getProperty("Result");
-    TS_ASSERT_EQUALS("Success!", result);
+    // Compare the workspaces
+    for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
+    {
+      for (size_t j=0; j < inWS->readX(0).size(); j++)
+        { TS_ASSERT_DELTA( inWS->readX(wi)[j],  outWS->readX(wi)[j], 1e-5); }
+      // Y is the same
+      for (size_t j=0; j < inWS->readY(0).size(); j++)
+        { TS_ASSERT_DELTA( inWS->readY(wi)[j],  outWS->readY(wi)[j], 1e-5); }
+      // Error has decreased due to adding step (improved statistics)
+      // Therefore the output WS has lower errors than input:
+      for (size_t j=0; j < inWS->readE(0).size(); j++)
+        { TS_ASSERT_LESS_THAN( outWS->readE(wi)[j],  inWS->readE(wi)[j] );  }
+    }
 
   }
 

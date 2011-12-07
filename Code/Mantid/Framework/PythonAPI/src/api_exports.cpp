@@ -421,6 +421,7 @@ using namespace boost::python;
             .def("addPeak", &IPeaksWorkspace::addPeak)
             .def("removePeak", &IPeaksWorkspace::removePeak)
             .def("getPeak", &IPeaksWorkspace::getPeakPtr, return_internal_reference<>() )
+            .def("createPeak", &IPeaksWorkspace::createPeak, return_internal_reference<>() )
         ;
   }
 
@@ -438,6 +439,9 @@ using namespace boost::python;
           .def("getH", &IPeak::getH)
           .def("getK", &IPeak::getK)
           .def("getL", &IPeak::getL)
+          .def("getH", &IPeak::getH)
+          .def("getHKL", &IPeak::getHKL)
+          .def("setHKL", (void (IPeak::*)(double,double,double)) &IPeak::setHKL)
           .def("setH", &IPeak::setH)
           .def("setK", &IPeak::setK)
           .def("setL", &IPeak::setL)

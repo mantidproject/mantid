@@ -1,16 +1,29 @@
 /*WIKI* 
 
-
+This algorithm will predict the position of single-crystal diffraction peaks (both in detector position/TOF and Q-space) and
+create an output [[PeaksWorkspace]] containing the result.
 
 This algorithm uses the InputWorkspace to determine the instrument in use, as well as the UB Matrix and Unit Cell of the sample used.
 
-The algorithm operates by calculating the scattering direction (given the UB matrix) for a particular HKL, and determining whether that hits a detector. The MinDSpacing parameter is used to determine what HKL's to try.
+The algorithm operates by calculating the scattering direction (given the UB matrix) for a particular HKL, and determining whether that hits a detector.
+The Max/MinDSpacing parameters are used to determine what HKL's to try.
 
 The parameters of WavelengthMin/WavelengthMax also limit the peaks attempted to those that can be detected/produced by your instrument.
 
+=== Using HKLPeaksWorkspace ===
 
+If you specify the HKLPeaksWorkspace parameter, then the algorithm will use the list of HKL in that workspace as the
+starting point of HKLs, instead of doing all HKLs within range of Max/MinDSpacing and WavelengthMin/WavelengthMax.
+
+A typical use case for this method is to use [[FindPeaksMD]] followed by [[IndexPeaks]] to find the HKL of each peak.
+The HKLs found will be floats, so specify RoundHKL=True in PredictPeaks to predict the position at the exact integer HKL.
+This may help locate the center of peaks.
+
+Another way to use this algorithm is to use [[CreatePeaksWorkspace]] to create a workspace with the desired number of peaks.
+Use python or the GUI to enter the desired HKLs. If these are fraction (e.g. magnetic peaks) then make sure RoundHKL=False.
 
 *WIKI*/
+
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -97,8 +110,13 @@ namespace Crystal
 
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, true),
-        "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict. HKL values will be rounded to the nearest integer.\n"
+        "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict. \n"
         "The WavelengthMin/Max and Min/MaxDSpacing parameters are unused if this is specified.");
+
+    declareProperty("RoundHKL", true,
+        "When using HKLPeaksWorkspace, this will round the HKL values in the HKLPeaksWorkspace to the nearest integers if checked.\n"
+        "Keep unchecked to use the original values");
+    setPropertySettings("RoundHKL", new EnabledWhenProperty(this, "HKLPeaksWorkspace", IS_NOT_DEFAULT) );
 
     // Disable some props when using HKLPeaksWorkspace
     IPropertySettings * set = new EnabledWhenProperty(this, "HKLPeaksWorkspace", IS_DEFAULT);
@@ -119,7 +137,7 @@ namespace Crystal
    * @param k
    * @param l
    */
-  void PredictPeaks::doHKL(const int h, const int k, const int l, bool doFilter)
+  void PredictPeaks::doHKL(const double h, const double k, const double l, bool doFilter)
   {
     V3D hkl(h,k,l);
 
@@ -199,6 +217,7 @@ namespace Crystal
     wlMax = getProperty("WavelengthMax");
     minD = getProperty("MinDSpacing");
     maxD = getProperty("MaxDSpacing");
+    bool RoundHKL = getProperty("RoundHKL");
 
     PeaksWorkspace_sptr HKLPeaksWorkspace = getProperty("HKLPeaksWorkspace");
 
@@ -279,10 +298,13 @@ namespace Crystal
         PARALLEL_START_INTERUPT_REGION
 
         IPeak & p = HKLPeaksWorkspace->getPeak(i);
-        // Use the rounded HKL value
+        // Get HKL from that peak
         V3D hkl = p.getHKL();
-        hkl.round();
-        doHKL(int(hkl[0]), int(hkl[1]), int(hkl[2]), false);
+        // Use the rounded HKL value on option
+        if (RoundHKL)
+          hkl.round();
+        // Predict the HKL of that peak
+        doHKL(hkl[0], hkl[1], hkl[2], false);
 
         PARALLEL_END_INTERUPT_REGION
       } // for each hkl in the workspace
@@ -336,7 +358,7 @@ namespace Crystal
           {
             if (refCond->isAllowed(h,k,l) && (abs(h) + abs(k) + abs(l) != 0))
             {
-              doHKL(h,k,l, true);
+              doHKL(double(h), double(k), double(l), true);
             } // refl is allowed and not 0,0,0
             prog.report();
           } // for each l

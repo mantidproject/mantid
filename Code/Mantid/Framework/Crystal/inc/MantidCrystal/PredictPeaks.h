@@ -41,7 +41,7 @@ namespace Crystal
     /// Run the algorithm
     void exec();
 
-    void doHKL(const int h, const int k, const int l, bool doFilter);
+    void doHKL(const double h, const double k, const double l, bool doFilter);
 
   private:
     /// Reflection conditions possible

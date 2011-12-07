@@ -11,6 +11,7 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QMessageBox>
 
 #include <cfloat>
 #include <limits>
@@ -32,7 +33,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_viewRect(),
     m_selectRect(),
     m_interactionMode(MoveMode),
-    m_leftButtonDown(false)
+    m_leftButtonDown(false),
+    m_peakLabelPrecision(6)
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
@@ -540,5 +542,31 @@ void ProjectionSurface::peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPe
       m_peakShapes.removeAt(i);
       break;
     }
+  }
+}
+
+/**
+ * Remove all peak overlays.
+ */
+void ProjectionSurface::clearPeakOverlays()
+{
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+      delete m_peakShapes[i];
+  }
+  m_peakShapes.clear();
+}
+
+void ProjectionSurface::setPeakLabelPrecision(int n)
+{
+  if (n < 1)
+  {
+    QMessageBox::critical(NULL,"MantidPlot - Error","Precision must be a positive number");
+    return;
+  }
+  m_peakLabelPrecision = n;
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+    m_peakShapes[i]->setPrecision(n);
   }
 }

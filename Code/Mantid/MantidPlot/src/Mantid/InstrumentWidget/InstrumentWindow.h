@@ -144,6 +144,9 @@ public slots:
   void setSurfaceType(int);
   void setWireframe(bool);
 
+  void clearPeakOverlays();
+  void setPeakLabelPrecision(int n);
+
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
@@ -169,6 +172,8 @@ private:
   QAction *m_SumDetsToWorkspaceAction;      ///< Sum selected detectors to a new workspace
   QAction *m_createIncludeGroupingFileAction; ///< Create grouping xml file which includes selected detectors
   QAction *m_createExcludeGroupingFileAction; ///< Create grouping xml file which excludes selected detectors
+  // Context menu actions
+  QAction *m_clearPeakOverlays;
 
   /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
   const QString m_workspaceName;

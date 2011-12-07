@@ -5772,7 +5772,30 @@ void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
       compress = true;
   }
 
-  if ( !fn.isEmpty() ){
+  if ( !fn.isEmpty() )
+  {
+    // Check if exists. If not, create directory first.
+    QFileInfo tempFile(fn);
+    if(!tempFile.exists())
+    {
+      // Make the directory
+      QString dir(fn); 
+      if (fn.contains('.'))
+        dir = fn.left(fn.find('.'));
+      QDir().mkdir(dir);
+
+      // Get the file name
+      QString file("temp");
+      for(int i=0; i<dir.size(); ++i)
+      {
+        if(dir[i] == '/') 
+          file = dir.right(dir.size() - i);
+        else if(dir[i] == '\\')
+          file = dir.right(i);
+      }
+      fn = dir + file;
+    }
+    
     QFileInfo fi(fn);
     workingDir = fi.dirPath(true);
     QString baseName = fi.fileName();
@@ -16578,7 +16601,7 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                   {
                     QwtPlotCurve *temp = g->curve(curveNum);
                     MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
-                    curve->setErrorBars(true, true);
+                    curve->setErrorBars(true, false);
                   }
                 }
                 else if (plotDetails[3] == "Fit")

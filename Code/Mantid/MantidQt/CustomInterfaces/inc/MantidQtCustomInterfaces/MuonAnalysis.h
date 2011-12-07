@@ -155,6 +155,18 @@ private slots:
   ///
   void changeTab(int);
 
+  /// Update the plot based on changes on the front page.
+  void homeTabUpdatePlot();
+
+  /// Update the group plot based on changes on the group page.
+  void groupTabUpdateGroup();
+
+  /// Update the pair plot based on changes on the group page.
+  void groupTabUpdatePair();
+
+  /// Update the pair plot based on changes on the group page.
+  void settingsTabUpdatePlot();
+
   /// Assigns a peak picker tool to the workspace (@param::workspace name)
   void assignPeakPickerTool(const QString &);
 
@@ -335,6 +347,9 @@ private:
   /// group defaults are saved to
   QString m_settingsGroup;
 
+  /// Boolean to show whether the gui is being updated
+  bool m_updating;
+
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
 
@@ -352,6 +367,9 @@ private:
 
   /// Include the 0's fromt eh beginning of the file that were lost in conversion from QString to int
   void getFullCode(int size, QString & limitedCode);
+
+  /// Setup the signals for updating
+  void connectAutoUpdate();
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;

@@ -127,7 +127,8 @@ namespace Crystal
 
     // All went well, copy the goniometer into it
     ws->mutableRun().getGoniometer() = gon;
-
+    //force it to read the values
+    ws->mutableRun().getGoniometerMatrix(); //it will throw if log values are not found
   }
 
 
