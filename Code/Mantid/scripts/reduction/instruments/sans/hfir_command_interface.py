@@ -139,6 +139,9 @@ def MaskDetectors(det_list):
     ReductionSingleton().get_mask().add_detector_list(det_list)
 
 def Background(datafile):
+    if type(datafile)==list:
+        datafile=','.join(datafile)
+        
     datafile = find_data(datafile, instrument=ReductionSingleton().instrument.name(), allow_multiple=True)
     ReductionSingleton().set_background(datafile) 
 
