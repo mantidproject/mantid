@@ -1632,6 +1632,8 @@ class PythonScripting
 %End
 public:
   void write(const QString&);
+  void flush();
+  void set_parent(SIP_PYOBJECT);
 private:
   PythonScripting(const PythonScripting&);
 };
@@ -1642,6 +1644,7 @@ class PythonScript
 %End
 public:
   void write(const QString&);
+  void flush();
 private:
   PythonScript(const PythonScript&);
 };

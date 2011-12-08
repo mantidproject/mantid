@@ -55,6 +55,8 @@ class PythonScript : public Script
     emit print(text); 
   }
   
+  void flush() {}
+
   /// Emit a new line signal
   inline void broadcastNewLineNumber(int lineno)
   {
