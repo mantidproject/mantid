@@ -35,12 +35,13 @@ public:
   static int getDefaultMarkerSize(){return g_defaultMarkerSize;}
   Symbol getSymbol()const{return m_symbol;}
   void setSymbol(Symbol s){m_symbol=s;}
-  void setPeak(const Mantid::API::IPeak& peak);
+  void setPeak(const Mantid::API::IPeak& peak, int row = -1);
   double getH()const{return m_h;}
   double getK()const{return m_k;}
   double getL()const{return m_l;}
   int getDetectorID()const{return m_detID;}
   double getTOF()const{return m_tof;}
+  int getRow()const{return m_row;}
   /// Get label's area on the screen
   const QRectF& getLabelRect()const{return m_labelRect;}
   /// Allows PeakOverlay to move the label to avoid overlapping
@@ -64,6 +65,7 @@ private:
   double m_tof;
   QString m_label;
   mutable QRectF m_labelRect; ///< label's area on the screen
+  int m_row; ///< peaks row number in PeaksWorkspace
 };
 
 #endif /*MANTIDPLOT_PEAKMARKER2D_H_*/

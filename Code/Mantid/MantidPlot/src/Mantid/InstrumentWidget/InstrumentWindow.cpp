@@ -253,14 +253,17 @@ void InstrumentWindow::setSurfaceType(int type)
 
     ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
     int peakLabelPrecision = 6;
+    bool showPeakRow = true;
     if ( surface )
     {
       peakLabelPrecision = surface->getPeakLabelPrecision();
+      showPeakRow = surface->getShowPeakRowFlag();
     }
     else
     {
       QSettings settings;
       peakLabelPrecision = settings.value("Mantid/InstrumentWindow/PeakLabelPrecision",6).toInt();
+      showPeakRow = settings.value("Mantid/InstrumentWindow/ShowPeakRows",true).toBool();
     }
 
     if (m_surfaceType == FULL3D)
@@ -278,6 +281,7 @@ void InstrumentWindow::setSurfaceType(int type)
       surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
     }
     surface->setPeakLabelPrecision(peakLabelPrecision);
+    surface->setShowPeakRowFlag(showPeakRow);
     m_InstrumentDisplay->setSurface(surface);
     m_InstrumentDisplay->update();
     m_renderTab->init();
@@ -678,6 +682,7 @@ void InstrumentWindow::saveSettings()
   settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
   settings.setValue("TubeXUnits",m_pickTab->getTubeXUnits());
   settings.setValue("PeakLabelPrecision",m_InstrumentDisplay->getSurface()->getPeakLabelPrecision());
+  settings.setValue("ShowPeakRows",m_InstrumentDisplay->getSurface()->getShowPeakRowFlag());
   settings.endGroup();
 }
 
@@ -1195,3 +1200,11 @@ void InstrumentWindow::setPeakLabelPrecision(int n)
   m_InstrumentDisplay->repaint();
 }
 
+/**
+ * Enable or disable the show peak row flag
+ */
+void InstrumentWindow::setShowPeakRowFlag(bool on)
+{
+  m_InstrumentDisplay->getSurface()->setShowPeakRowFlag(on);
+  m_InstrumentDisplay->repaint();
+}

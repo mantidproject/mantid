@@ -9,7 +9,7 @@ QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 /**
 * Constructor.
 */
-PeakHKL::PeakHKL(PeakMarker2D* m,const QRectF& trect):
+PeakHKL::PeakHKL(PeakMarker2D* m,const QRectF& trect,bool sr):
 p(m->origin()),
   rect(trect),
   //rectTopLeft(m->getLabelRect().topLeft()),
@@ -18,8 +18,11 @@ p(m->origin()),
   l(m->getL()),
   nh(true),
   nk(true),
-  nl(true)
-{}
+  nl(true),
+  showRows(sr)
+{
+  rows.append(m->getRow());
+}
 
 /**
 * Check if this rect intersects with marker's and if it does combine the labels
@@ -45,6 +48,7 @@ bool PeakHKL::add(PeakMarker2D* marker,const QRectF& trect)
   {
     nl = false;
   }
+  rows.append(marker->getRow());
   return true;
 }
 /**
@@ -64,6 +68,15 @@ void PeakHKL::draw(QPainter& painter,int prec)
   if (nl) label += QString::number(l,'g',prec);
   else
     label += "l";
+  if (showRows)
+  {
+    label += " [" + QString::number(rows[0]);
+    for(int i=1; i < rows.size(); ++i)
+    {
+      label += "," + QString::number(rows[i]);
+    }
+    label += "]";
+  }
   painter.drawText(rect.bottomLeft(),label);
 
 }
@@ -80,7 +93,8 @@ PeakOverlay::PeakOverlay(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws):
 Shape2DCollection(),
 m_peaksWorkspace(pws),
 m_currentDefaultStyle(0),
-m_precision(6)
+m_precision(6),
+m_showRows(true)
 {
   if (g_defaultStyles.isEmpty())
   {
@@ -153,7 +167,7 @@ void PeakOverlay::draw(QPainter& painter) const
     
     if (!overlap)
     {
-      PeakHKL hkl(marker,rect);
+      PeakHKL hkl(marker,rect,m_showRows);
       m_labels.append(hkl);
     }
   }
