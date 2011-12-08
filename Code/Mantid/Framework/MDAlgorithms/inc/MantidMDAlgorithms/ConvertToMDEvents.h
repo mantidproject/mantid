@@ -197,6 +197,10 @@ namespace MDAlgorithms
      /// helper class to orginize metaloop on number of dimensions
      template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
      friend class LOOP_ND;
+     /// helper class to generate methaloop on MD workspaces
+     template< size_t i>
+     friend class LOOP;
+
 
     /** template to build empty MDevent workspace with box controller and other palavra
       * 

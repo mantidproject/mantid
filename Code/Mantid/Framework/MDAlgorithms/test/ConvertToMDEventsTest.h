@@ -106,7 +106,21 @@ void testSpecialConversionTOF()
 
     const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
+}
+void testTOFConversionFails()
+{ 
 
+    Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
+    Kernel::Unit_sptr pWSUnit           = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    double delta;
+    double L1(10),L2(10),TwoTheta(0.1),efix(10);
+    int emode(0);
+    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
+    TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
+     
+    double X0(5);
+    double tof  = pSourceWSUnit->singleToTOF(X0);
+    double k_tr = pWSUnit->singleFromTOF(tof);
 }
 
 void testInit(){
@@ -152,7 +166,7 @@ void testParseQMode_modQ()
      TS_ASSERT_EQUALS(1,nQ_dims);
      TS_ASSERT_EQUALS("|Q|",MODE);
      TS_ASSERT_EQUALS("|Q|",out_dim_names[0]);
-     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[0]);
+     TS_ASSERT_EQUALS("Momentum",out_dim_units[0]);
 }
 void testParseQMode_Q3D()
 {
@@ -167,9 +181,9 @@ void testParseQMode_Q3D()
      TS_ASSERT_EQUALS("Q_x",out_dim_names[0]);
      TS_ASSERT_EQUALS("Q_y",out_dim_names[1]);
      TS_ASSERT_EQUALS("Q_z",out_dim_names[2]);
-     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[0]);
-     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[1]);
-     TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[2]);
+     TS_ASSERT_EQUALS("Momentum",out_dim_units[0]);
+     TS_ASSERT_EQUALS("Momentum",out_dim_units[1]);
+     TS_ASSERT_EQUALS("Momentum",out_dim_units[2]);
 }
 
 // TEST dE mode
@@ -243,7 +257,7 @@ void testParseDEMode_Elastic()
      TS_ASSERT_EQUALS("Elastic",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
-     TS_ASSERT_EQUALS("MomentumTransfer",natural_units);
+     TS_ASSERT_EQUALS("Momentum",natural_units);
 }
 void testParseDEMode_ElasticPowd()
 {
@@ -258,7 +272,7 @@ void testParseDEMode_ElasticPowd()
      TS_ASSERT_EQUALS("Elastic",EID);
      TS_ASSERT(out_dim_names.empty());
      TS_ASSERT(out_dim_units.empty());
-     TS_ASSERT_EQUALS("MomentumTransfer",natural_units);
+     TS_ASSERT_EQUALS("Momentum",natural_units);
 }
 // TEST ConvertMode
 void testParseConv_NonConvertUnitThrows()
@@ -268,15 +282,18 @@ void testParseConv_NonConvertUnitThrows()
 
      TS_ASSERT_THROWS(pAlg->parseConvMode("AnyConversionMode",natural_units,ws_dim_units),std::invalid_argument);
 }
-void testParseConv_ElasticViaTOFThrows()
+void testParseConv_ElasticViaTOFNotThrowsAnyMore()
 {
      std::vector<std::string> ws_dim_units(1,"DeltaE");
      std::string natural_units;
-     // satisfy internal dependancies
+     std::string CONV_ID;
+
+     // satisfy internal dependancies (debug only!!!)
      pAlg->setAlgoID("blaBla-Elastic-BlaBlaBla");
      pAlg->setAlgoUnits(0);
 
-     TS_ASSERT_THROWS(pAlg->parseConvMode("Elastic",natural_units,ws_dim_units),std::invalid_argument);
+     TS_ASSERT_THROWS_NOTHING(CONV_ID=pAlg->parseConvMode("Elastic",natural_units,ws_dim_units));
+     TS_ASSERT_EQUALS("CnvByTOF",CONV_ID);
 }
 void testParseConv_NoQ()
 {
@@ -358,8 +375,8 @@ void testGetWS3DimIDFine(){
     TS_ASSERT_THROWS_NOTHING(Alg_ID=pAlg->identifyMatrixAlg(ws2D,"QxQyQz","Elastic",dim_names,dim_units));
 
     TSM_ASSERT_EQUALS("Inelastic workspace will produce 3 dimensions",3,dim_names.size());
-    TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","MomentumTransfer",dim_units[2]);
-    TSM_ASSERT_EQUALS("Alg ID would be: ","QxQyQzElasticCnvFast",Alg_ID);
+    TSM_ASSERT_EQUALS("Last dimension of Elastic transformation should be ","Momentum",dim_units[2]);
+    TSM_ASSERT_EQUALS("Alg ID would be: ","QxQyQzElasticCnvByTOF",Alg_ID);
 
 }
 void testGetWSDimNames2AxisNoQ(){
@@ -451,15 +468,15 @@ void testIdentifyMatrixAlg_2()
     pAx->setUnit("Wavelength");
     ws2D->replaceAxis(0,pAx);
     // This is probably bug in conversion --> does not work in elastic mode
-   //TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
-    TSM_ASSERT_THROWS("Can not convert wavelength to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
+   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+    //TSM_ASSERT_THROWS("Can not convert wavelength to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
 
     pAx = new API::NumericAxis(3);
     pAx->setUnit("Energy");
     ws2D->replaceAxis(0,pAx);
     // This is probably bug in conversion --> does not work in elastic mode
-    //TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
-    TSM_ASSERT_THROWS("Can not convert Energy to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
+   TSM_ASSERT_THROWS_NOTHING("Elastic conversion needs X-axis to be in an Energy-related units",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units));
+   // TSM_ASSERT_THROWS("Can not convert Energy to momentum transfer in elastic mode ",pAlg->identifyMatrixAlg(ws2D,"|Q|","Elastic",dim_names,dim_units),std::invalid_argument);
 
 
     pAx = new API::NumericAxis(3);

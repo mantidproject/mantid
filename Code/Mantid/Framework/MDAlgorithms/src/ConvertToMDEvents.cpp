@@ -513,12 +513,6 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
                 CONV_MODE_ID = ConvModes[ConvFromTOF];
             }else{                                 // convert via TOF
                 CONV_MODE_ID = ConvModes[ConvByTOF];
-                if(getEMode(this) == 0){
-                    convert_log.error() <<" conversion via TOF is not availible in elastic mode\n";
-                    convert_log.error() <<" can not convert input workspce X-axis units: "<<ws_dim_units[0]<<" into: "<<getNativeUnitsID(this)
-                                        <<" needed by elastic conversion\n";
-                    throw(std::invalid_argument(" wrong X-axis units"));
-                }
             }
         }
     } 
@@ -803,7 +797,6 @@ class LOOP_ND{
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
-            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(i,&ConvertToMDEvents::createEmptyEventWS<i>));
     }
 };
 template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
@@ -817,11 +810,26 @@ class LOOP_ND<2,Q,MODE,CONV>{
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                                    &ConvertToMDEvents::processQND<2,Q,MODE,CONV>));
-            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
 #ifdef _DEBUG
             std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
 #endif
 
+    }
+};
+
+template<size_t i>
+class LOOP{
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){
+            LOOP< i-1 >::EXEC(pH);
+            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(i,&ConvertToMDEvents::createEmptyEventWS<i>));
+    }
+};
+template<>
+class LOOP<2>{
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){           
+            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
     }
 };
 /** Constructor 
@@ -833,7 +841,7 @@ dE_modes(4),
 ConvModes(4),
 // The conversion subalgorithm processes data in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
-native_elastic_unitID("MomentumTransfer"), // Why it is a transfer? Hope it is just a momentum
+native_elastic_unitID("Momentum"), 
 native_inelastic_unitID("DeltaE")
 {
      Q_modes[modQ]="|Q|";
@@ -882,7 +890,8 @@ native_inelastic_unitID("DeltaE")
     LOOP_ND<MAX_NDIM,Q3D,Indir,ConvByTOF>::EXEC(this);
     LOOP_ND<MAX_NDIM,Q3D,Elastic,ConvByTOF>::EXEC(this);
 
-
+    // workspace factory
+    LOOP<MAX_NDIM>::EXEC(this);
 }
 
 //

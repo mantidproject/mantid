@@ -723,6 +723,61 @@ Unit * DeltaE_inWavenumber::clone() const
   return new DeltaE_inWavenumber(*this);
 }
 
+// =====================================================================================================
+/* momentum in angstrom. It is 2Pi/wavelength
+ * =====================================================================================================
+ *
+ * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
+ */
+DECLARE_UNIT(Momentum)
+
+Momentum::Momentum() : Unit()
+{
+  addConversion("TOF",1.0,0.5);
+  const double factor = 2.0 * M_PI;
+  addConversion("Wavelength",factor,-0.5);
+  addConversion("Energy",factor,-0.5);
+  addConversion("Energy_inWavenumber",factor,-0.5);
+}
+
+void Momentum::init()
+{
+  // First the crux of the conversion
+  factorTo = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
+                          * sin(twoTheta/2.0) ) / PhysicalConstants::h;
+  // Now adjustments for the scale of units used
+  const double TOFisinMicroseconds = 1e6;
+  const double toAngstroms = 1e10;
+  factorTo *= TOFisinMicroseconds/ toAngstroms;
+
+  // First the crux of the conversion
+  factorFrom = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
+                            * sin(twoTheta/2.0) ) / PhysicalConstants::h;
+  // Now adjustments for the scale of units used
+  factorFrom *= TOFisinMicroseconds/ toAngstroms;
+  factorFrom = factorFrom * factorFrom;
+}
+
+
+double Momentum::singleToTOF(const double x) const
+{
+  double temp = x;
+  if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
+  return factorTo / sqrt(temp);
+}
+
+double Momentum::singleFromTOF(const double tof) const
+{
+  double temp = tof;
+  if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
+  return factorFrom / (temp*temp);
+}
+
+Unit * Momentum::clone() const
+{
+  return new Momentum(*this);
+}
+
 
 } // namespace Units
 
