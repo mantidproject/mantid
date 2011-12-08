@@ -131,7 +131,7 @@ logging.channels.consoleChannel.formatter = f1
 # specific filter for the file channel raising the level to warning (drop to debug for debugging)
 logging.channels.fileFilterChannel.class= FilterChannel
 logging.channels.fileFilterChannel.channel= fileChannel
-logging.channels.fileFilterChannel.level= warning
+logging.channels.fileFilterChannel.level= notice
 # output to a file (For error capturing and debugging)
 logging.channels.fileChannel.class = FileChannel
 logging.channels.fileChannel.path =
