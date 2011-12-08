@@ -532,6 +532,8 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi)
     return -1;
 
   const int group = udet2group[*it];
+  if (group <= 0)
+    return -1;
   it++;
   for (; it != dets.end(); ++it) // Loop other all other udets
   {
@@ -587,7 +589,11 @@ void DiffractionFocussing2::determineRebinParameters()
 
     // the spectrum is the real thing we want to work with
     const ISpectrum * spec = m_matrixInputW->getSpectrum(wi);
-
+    if (spec == NULL)
+    {
+      groupAtWorkspaceIndex[wi] = -1;
+      continue;
+    }
     if (checkForMask)
     {
       if (instrument->isDetectorMasked(spec->getDetectorIDs()))
