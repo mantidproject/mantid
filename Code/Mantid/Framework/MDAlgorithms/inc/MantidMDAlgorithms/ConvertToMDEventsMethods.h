@@ -128,7 +128,7 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], dim_min[d], dim_min[d], 10);
+        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], dim_min[d], dim_max[d], 10);
         ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
       }
       ws->initialize();
