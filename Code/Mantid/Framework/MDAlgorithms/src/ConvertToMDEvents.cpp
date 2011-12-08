@@ -745,6 +745,7 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel
 
   // Obtain the transformation matrix:
     Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI)?;
+    mat.Invert();
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
