@@ -661,10 +661,11 @@ public:
 
   void testMomentum_toTOF()
   {
-    std::vector<double> x(1, 1.5), y(1, 1.5);
+    std::vector<double> x(1, 2*M_PI/1.5), y(1, 1.5);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( k_i.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
-    TS_ASSERT_DELTA( x[0], 2665.4390, 0.0001 ) //  758.3352
+    //TS_ASSERT_DELTA( x[0], 2665.4390, 0.0001 ) // -- wavelength to TOF;
+    TS_ASSERT_DELTA( x[0], 2665.4390, 0.0001 ) //
     TS_ASSERT( yy == y )
   }
 
@@ -673,7 +674,8 @@ public:
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( k_i.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
-    TS_ASSERT_DELTA( x[0], -5.0865, 0.0001 ) // 1.979006
+//    TS_ASSERT_DELTA( x[0], -5.0865, 0.0001 ) // wavelength from TOF
+    TS_ASSERT_DELTA( x[0], 2*M_PI/(-5.0865), 0.0001 ) // 1.979006
     TS_ASSERT( yy == y )
   }
 
@@ -685,7 +687,7 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input,power);
     std::vector<double> x(1,input);
-    lambda.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    k_i.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     energy.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-10 )
 
@@ -695,7 +697,14 @@ public:
     std::vector<double> x2(1,input);
     k_i.toTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
     energyk.fromTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
-    TS_ASSERT_DELTA( x2[0], result2, 1.0e-10 )
+    TS_ASSERT_DELTA( x2[0], result2, 1.0e-10 );
+
+    TS_ASSERT( k_i.quickConversion(lambda,factor,power) );
+    double factor1, power1;
+    TS_ASSERT( lambda.quickConversion(k_i,factor1,power1) );
+
+    TS_ASSERT_DELTA(0,power-power1,0.0001);
+    TS_ASSERT_DELTA(0,factor-factor1,0.0001);
   }
 
 

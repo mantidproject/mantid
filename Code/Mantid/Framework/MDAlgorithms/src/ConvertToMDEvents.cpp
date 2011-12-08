@@ -796,7 +796,7 @@ class LOOP_ND{
             num << i;
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
 
-            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
+          //  pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
     }
 };
 template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >
@@ -829,7 +829,7 @@ template<>
 class LOOP<2>{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){           
-            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
+         //   pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
     }
 };
 /** Constructor 
@@ -847,7 +847,7 @@ native_inelastic_unitID("DeltaE")
      Q_modes[modQ]="|Q|";
      Q_modes[Q3D] ="QxQyQz";    
      Q_modes[NoQ] ="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
-     dE_modes[ANY_Mode]  = "";
+     dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
      dE_modes[Elastic]   = "Elastic";
