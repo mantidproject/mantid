@@ -77,7 +77,7 @@ class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public Qw
   Q_OBJECT
 public:
   /// Constructor
-  PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, bool showFitPropertyBrowser=true); //MantidUI *mantidUI);
+  PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser=true);
   /// Destructor
   ~PeakPickerTool();
   /// Runtime type identifier
@@ -130,6 +130,8 @@ private slots:
   void modifiedGraph();
 
   void resetRange();
+
+  void getParameters();
 
 private:
   void plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h);
@@ -184,6 +186,8 @@ private:
 
   /// Creates a pointer to fitPropertyBrowser
   MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;
+
+  MantidUI *m_mantidUI;
 
   /// Workspace name
   QString m_wsName;
