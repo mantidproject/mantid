@@ -62,7 +62,6 @@ namespace Mantid
     {
       // Data must be in Energy Transfer and common bins
       API::CompositeWorkspaceValidator<> *wsValidator = new API::CompositeWorkspaceValidator<>;
-      wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
       wsValidator->add(new API::CommonBinsValidator<>);
       wsValidator->add(new API::HistogramValidator<>);
       declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsValidator),
