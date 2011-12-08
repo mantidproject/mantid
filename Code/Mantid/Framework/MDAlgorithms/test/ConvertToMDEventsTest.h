@@ -104,7 +104,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 10 propeties",10,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 13 propeties",13,(size_t)(pAlg->getProperties().size()));
 }
 // TEST QMode
 void testParseQMode_WrongThrows()

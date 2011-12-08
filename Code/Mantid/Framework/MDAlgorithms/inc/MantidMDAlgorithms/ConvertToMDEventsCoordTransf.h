@@ -80,7 +80,7 @@ struct COORD_TRANSFORMER
      *
      * has to be specialized
      */
-    inline bool calculate_ND_coordinatese(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
 
@@ -110,7 +110,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV>
                 if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
             }   
        }
-         
+        // set up units conversion defined by the host algorithm.  
        CONV_UNITS_FROM.setUpConversion(this->pHost); 
        return true;
     }
@@ -125,7 +125,7 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV>
         return true;
     }
 
-    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)
     {
        UNUSED_ARG(i);
        coord_t X_ev = CONV_UNITS_FROM.getXConverted(X,j);
@@ -203,7 +203,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV>
         return true;
     }
     //
-    inline bool calculate_ND_coordinates(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord)
+    inline bool calcMatrixCoord(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord)
     {
         UNUSED_ARG(i);
         // convert X-data into energy transfer (if necessary)
@@ -217,7 +217,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV>
         double  qx  =  -ex*k_tr;                
         double  qy  =  -ey*k_tr;       
         double  qz  = ki - ez*k_tr;
-        // transformation matrix has to be here for "Crystal AS Powder mode, further specialization possible if "powder" switch provided in input interface"
+        // transformation matrix has to be here for "Crystal AS Powder mode, further specialization possible if "powder" switch provided"
         double Qx  = (rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);
         double Qy  = (rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz); 
         double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
@@ -277,7 +277,7 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV>
         return true;
     }
     //
-    inline bool calculate_ND_coordinates(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord)
+    inline bool calcMatrixCoord(const MantidVec& X,uint64_t i,size_t j,std::vector<coord_t> &Coord)
     {
         UNUSED_ARG(i);
         // convert X-data into momentum transfer (if necessary)
@@ -352,7 +352,7 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV>
            return true;
     }
 
-    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(i);
          // convert X-data into energy transfer (if necessary)
           coord_t E_tr = CONV_UNITS_FROM.getXConverted(X,j);
@@ -423,7 +423,7 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV>
           return true;
     }
 
-    inline bool calculate_ND_coordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
+    inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
           UNUSED_ARG(i);
           //convert X from any units it initally is, into momentum transfer (if necessary)
           coord_t k0 = CONV_UNITS_FROM.getXConverted(X,j);   
