@@ -10,7 +10,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidMDAlgorithms/SimulateMDD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
@@ -18,7 +18,7 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using Mantid::MDEvents::MDEventWorkspace_sptr;
 
 //// Add a concrete IMDDimension class
 //namespace Mantid
@@ -100,8 +100,8 @@ class SimulateMDDTest : public CxxTest::TestSuite
 {
 private:
       std::string FakeWSname;
-      MDHistoWorkspace_sptr myCut;
-      MDHistoWorkspace_sptr outCut;
+      MDEventWorkspace_sptr myCut;
+      MDEventWorkspace_sptr outCut;
 
 //    boost::shared_ptr<TestCut> myCut;
 //    boost::shared_ptr<TestCut> outCut;
@@ -163,10 +163,24 @@ public:
     // create a test data set of 3 pixels contributing to 2 points to 1 cut
     void testInit()
     {
-        FakeWSname = "testFakeMDWSSim";
-        // Fake MDWorkspace with 2x2x2x2 bins
-        myCut = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, 2, 2.0);
-        TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(FakeWSname, myCut) );
+    	FakeWSname = "testFakeMDEW";
+    	// Fake MDWorkspace
+    	BoxController_sptr splitter(new BoxController(3));
+    	splitter->setSplitThreshold(100);
+    	// Splits into 4x1x1x1 boxes
+    	splitter->setSplitInto(4);
+    	splitter->setSplitInto(1,1);
+    	splitter->setSplitInto(2,1);
+    	splitter->setSplitInto(3,1);
+    	// Set the size to 10.0 in all directions
+    	MDBox<MDEvent<4>,4> * out = new MDBox<MDLeanEvent<4>,4>(splitter);
+    	for (size_t d=0; d<3; d++)
+    		out->setExtents(d, 0.0, 10.0);
+    	out->calcVolume();
+
+    	MDBox<MDEvent<4>,4> * fakeCut =
+    			myCut = MDEventsTestHelper::makeFakeMDEventWorkspace(1.0, 4, 2, 2.0);
+    	TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(FakeWSname, myCut) );
 
 //        pContribCells.push_back(constructMDCell(1));
 //        pContribCells.push_back(constructMDCell(2));
@@ -220,7 +234,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(alg.execute());
 
         TS_ASSERT_THROWS_NOTHING( outCut = 
-            boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(FakeWSname)) );
+            boost::dynamic_pointer_cast<MDEventWorkspace>(AnalysisDataService::Instance().retrieve(FakeWSname)) );
         TS_ASSERT_EQUALS( outCut->getNPoints(),16);
 
         // test bg Exponential model in energy transfer with same data
