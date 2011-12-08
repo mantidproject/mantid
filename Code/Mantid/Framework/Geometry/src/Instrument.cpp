@@ -429,7 +429,10 @@ namespace Mantid
 
     bool Instrument::isDetectorMasked(const detid_t &detector_id) const
     {
-      return m_instr->getDetector(detector_id)->isMasked();
+      detid2det_map::const_iterator it = m_detectorCache.find(detector_id);
+      if ( it == m_detectorCache.end() )
+        return false;
+      return it->second->isMasked();
     }
 
     bool Instrument::isDetectorMasked(const std::set<detid_t> &detector_ids) const
