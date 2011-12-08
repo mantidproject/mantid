@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/WeightingStrategy.h"
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 
 class WeightingStrategyTest : public CxxTest::TestSuite
@@ -24,7 +25,7 @@ public:
   void testNullWeightingStrategyAtRadiusThrows()
   {
     NullWeighting strategy;
-    double distance = 0;
+    V3D distance;
     TSM_ASSERT_THROWS("NullWeighting should always throw in usage", strategy.weightAt(distance), std::runtime_error);
   }
 
@@ -41,8 +42,8 @@ public:
   void testFlatWeightingStrategyAtRadius()
   {
     FlatWeighting strategy;
-    double distanceA = 0;
-    double distanceB = 1000;
+    V3D distanceA(0,0,0);
+    V3D distanceB(10, 10, 10);
     TSM_ASSERT_EQUALS("FlatWeighting Should be distance insensitive", 1, strategy.weightAt(distanceA));
     TSM_ASSERT_EQUALS("FlatWeighting Should be distance insensitive", 1, strategy.weightAt(distanceB));
   }
@@ -62,12 +63,12 @@ public:
     double cutOff = 2;
     LinearWeighting strategy(cutOff);
 
-    double distance = 0;
-    TSM_ASSERT_EQUALS("LinearWeighting should give full weighting at origin", 1, strategy.weightAt(distance));
-    distance = 1;
-    TSM_ASSERT_EQUALS("LinearWeighting should give 0.5 weighting at 1/2 radius", 0.5, strategy.weightAt(distance));
-    distance = cutOff; //2
-    TSM_ASSERT_EQUALS("LinearWeighting should give zero weighting at cutoff", 0, strategy.weightAt(distance));
+    V3D distanceAtOrigin(0,0,0);
+    TSM_ASSERT_EQUALS("LinearWeighting should give full weighting at origin", 1, strategy.weightAt(distanceAtOrigin));
+    V3D distanceAtMidPoint(1,0,0);
+    TSM_ASSERT_EQUALS("LinearWeighting should give 0.5 weighting at 1/2 radius", 0.5, strategy.weightAt(distanceAtMidPoint));
+    V3D distanceAtEdge(cutOff,0,0); //2
+    TSM_ASSERT_EQUALS("LinearWeighting should give zero weighting at cutoff", 0, strategy.weightAt(distanceAtEdge));
   }
 
   void testLinearWeightingRectangular()
@@ -95,7 +96,7 @@ public:
   void testParabolicWeightingThrows()
   {
     ParabolicWeighting strategy;
-    double distance = 0;
+    V3D distance;
     TSM_ASSERT_THROWS("Should not be able to use the ParabolicWeighting like this.", strategy.weightAt(distance), std::runtime_error);
   }
 
@@ -136,7 +137,8 @@ public:
     int count = 0;
     for(double i = -4; i <= 4; i+=1)
     {
-      double y = weighting.weightAt(i);
+      V3D distance(i, 0, 0);
+      double y = weighting.weightAt(distance);
       double yExpected = expectedY[count];
       TS_ASSERT_DELTA(yExpected, y, 0.0001);
       count++;

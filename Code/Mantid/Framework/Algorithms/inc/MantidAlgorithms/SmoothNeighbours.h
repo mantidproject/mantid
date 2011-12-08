@@ -14,7 +14,7 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    typedef std::map<specid_t, double>  SpectraDistanceMap;
+    typedef std::map<specid_t, Mantid::Kernel::V3D>  SpectraDistanceMap;
    
     /*
     Filters spectra detector list by radius.
@@ -45,7 +45,7 @@ namespace Mantid
         while(it != unfiltered.end())
         {
           //Strip out spectra that don't meet the radius criteria.
-          if(it->second <= m_cutoff)
+          if(it->second.norm() <= m_cutoff)
           {
             neighbSpectra.insert(std::make_pair(it->first, it->second));
           }
@@ -109,6 +109,7 @@ private:
 
   void findNeighboursRectangular();
   void findNeighboursUbiqutious();
+  Mantid::Geometry::Instrument_const_sptr fetchInstrument() const;
 
   /// Sets the weighting stragegy.
   void setWeightingStrategy(const std::string strategyName, double& cutOff);

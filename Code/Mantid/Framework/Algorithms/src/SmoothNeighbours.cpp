@@ -384,14 +384,14 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0
-    neighbSpectra[inSpec] = 0.0;
+    neighbSpectra[inSpec] = V3D(0.0, 0.0, 0.0);
 
     // Neighbours and weights list
     double totalWeight = 0;
     std::vector< weightedNeighbour > neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (std::map<specid_t, double>::iterator it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it)
+    for (SpectraDistanceMap::iterator it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it)
     {
       specid_t spec = it->first;
 
@@ -454,6 +454,38 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
     boost::scoped_ptr<WeightingStrategy> gaussian1DStrategy(new GaussianWeighting1D(cutOff, sigma));
     WeightedSum.swap(gaussian1DStrategy);
   }
+  else if(strategyName == "Gaussian2D")
+  {
+    double sigma = getProperty("Sigma");
+
+    Instrument_const_sptr instrument = fetchInstrument();
+
+  }
+}
+
+
+/*
+Fetch the instrument associated with the workspace
+@return const shared pointer to the instrument,
+*/
+Instrument_const_sptr SmoothNeighbours::fetchInstrument() const
+{
+    Instrument_const_sptr instrument;
+    EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
+    MatrixWorkspace_sptr wsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS);
+    if(wsEvent)
+    {
+      instrument = boost::dynamic_pointer_cast<EventWorkspace>(inWS)->getInstrument();
+    }
+    else if(wsMatrix)
+    {
+      instrument = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)->getInstrument();
+    }
+    else
+    {
+      throw std::invalid_argument("Neither a Matrix Workspace or an EventWorkpace provided to SmoothNeighbours.");
+    }
+    return instrument;
 }
 
 /**
@@ -472,21 +504,7 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const 
   else if(radiusUnits == "NumberOfPixels")
   {
     // Fetch the instrument.
-    Instrument_const_sptr instrument;
-    EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
-    MatrixWorkspace_sptr wsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS);
-    if(wsEvent)
-    {
-      instrument = boost::dynamic_pointer_cast<EventWorkspace>(inWS)->getInstrument();
-    }
-    else if(wsMatrix)
-    {
-      instrument = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)->getInstrument();
-    }
-    else
-    {
-      throw std::invalid_argument("Neither a Matrix Workspace or an EventWorkpace provided to SmoothNeighbours.");
-    }
+    Instrument_const_sptr instrument = fetchInstrument();
 
     // Get the first idetector from the workspace index 0.
     IDetector_const_sptr firstDet = inWS->getDetector(0);
