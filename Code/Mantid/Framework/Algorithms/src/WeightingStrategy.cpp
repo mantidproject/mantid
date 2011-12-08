@@ -202,16 +202,6 @@ namespace Mantid
       init(sigma);
     }
 
-    GaussianWeighting1D::GaussianWeighting1D(double sigma) : WeightingStrategy(0)
-    {
-      if(sigma < 0)
-      {
-        throw std::invalid_argument("GassianWeighting expects unsigned standard deviation input");
-      }
-
-      init(sigma);
-    }
-
     void GaussianWeighting1D::init(const double sigma)
     {
       m_coeff = 1/((std::sqrt(2 *  M_PI)) * sigma);
@@ -224,7 +214,7 @@ namespace Mantid
 
     double GaussianWeighting1D::weightAt(const double& distance)
     {
-      double normalisedDistance = distance/m_cutOff;
+      double normalisedDistance = distance/m_cutOff; //Ensures 1 at the edges and zero in the center no matter what the units are
       return calculateGaussian(normalisedDistance*normalisedDistance);
     }
 

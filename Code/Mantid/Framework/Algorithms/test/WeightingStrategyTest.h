@@ -118,19 +118,7 @@ public:
     TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(adjX, ix, adjY, iy));
   }
 
-  void testGaussianWeighting1DConstructorThrows()
-  {
-    TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting1D(-1, 1), std::invalid_argument);
-    TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting1D(1, -1), std::invalid_argument);
-    TS_ASSERT_THROWS_NOTHING( GaussianWeighting1D(1, 1) ); //TO check it does work if both arguments are correct.
-  }
-
-  void testGaussianWeighting1DOtherConstructorThrows()
-  {
-    TSM_ASSERT_THROWS("Cannot have a negative cutoff", GaussianWeighting1D(-1), std::invalid_argument);
-  }
-
-  void testGaussian()
+  void testGaussian1D()
   {
     GaussianWeighting1D weighting(4, 0.5);
 
@@ -157,7 +145,7 @@ public:
 
   void testGaussian1DRectangular()
   {
-    GaussianWeighting1D weighting(0.5);
+    GaussianWeighting1D weighting(1,0.5);
 
     double expectedY[] = {0.1080,
       0.2590,
