@@ -282,7 +282,7 @@ bool PythonScript::exec()
   if( env()->isRunning() ) return false;
 
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
-   PyGILState_STATE state = PyGILState_Ensure();
+  GILHolder gil();
 
   env()->setIsRunning(true);
 
@@ -290,7 +290,6 @@ bool PythonScript::exec()
   if (compiled != Script::isCompiled && !compile(false))
   {
     env()->setIsRunning(false);
-    PyGILState_Release(state);
     return false;
   }
   // Redirect the output
@@ -317,11 +316,10 @@ bool PythonScript::exec()
     {
       emit_error(constructErrorMsg(), 0);
       env()->setIsRunning(false);
-      PyGILState_Release(state);
       return false;
     }
   }
-  /// Return value is NULL if everything succeeded
+  /// Return value is non-NULL if everything succeeded
   pyret = executeScript(empty_tuple);
   // Restore output
   endStdoutRedirect();
@@ -332,12 +330,10 @@ bool PythonScript::exec()
   {
     Py_DECREF(pyret);
     env()->setIsRunning(false);
-    PyGILState_Release(state);
     return true;
   }
   emit_error(constructErrorMsg(), 0);
   env()->setIsRunning(false);
-  PyGILState_Release(state);
   return false;
 }
 
