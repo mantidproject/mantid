@@ -64,7 +64,7 @@ public:
   /// Virtual destructor
   virtual ~AbsorptionCorrection() {}
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Absorption Corrections"; }
+  virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
 
 protected:
   /** A virtual function in which additional properties of an algorithm should be declared. 
