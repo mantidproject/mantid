@@ -9,6 +9,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/UnitFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -99,6 +100,15 @@ public:
 static ConvertToMDEventsTest *createSuite() { return new ConvertToMDEventsTest(); }
 static void destroySuite(ConvertToMDEventsTest * suite) { delete suite; }    
 
+void testSpecialConversionTOF()
+{
+    double factor,power;
+
+    const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
+    TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
+
+}
+
 void testInit(){
 
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
@@ -161,6 +171,7 @@ void testParseQMode_Q3D()
      TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[1]);
      TS_ASSERT_EQUALS("MomentumTransfer",out_dim_units[2]);
 }
+
 // TEST dE mode
 void testParseDEMode_WrongThrows()
 {
@@ -312,6 +323,7 @@ void testParseConv_ByTOF()
      TS_ASSERT_EQUALS("CnvByTOF",CONV_ID);
 }
 
+
 // --> GET DIMENSIONS FROM WS MATRIX:
 void testNeedsNumericAxis(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::Create2DWorkspace(4,10);
@@ -422,6 +434,7 @@ void testIdentifyMatrixAlg_1()
     TS_ASSERT_EQUALS(ws_dim_names[1],dim_names[1]);
 
 }
+
 
 void testIdentifyMatrixAlg_2()
 {  
