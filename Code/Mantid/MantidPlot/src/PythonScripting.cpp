@@ -95,7 +95,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 #endif
 
   // Observe ADS updates
-  observeAdd();
+  //observeAdd();
 }
 
 PythonScripting::~PythonScripting()
