@@ -50,7 +50,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
 
     return files_found
 
-def find_data(file, instrument=''):
+def find_data(file, instrument='', allow_multiple=False):
     """
         Finds a file path for the specified data set, which can either be:
             - a run number
@@ -61,6 +61,12 @@ def find_data(file, instrument=''):
     """
     # First, assume a file name
     file = str(file).strip()
+    
+    # If we allow multiple files, users may use ; as a separator,
+    # which is incompatible with the FileFinder
+    if allow_multiple:
+        file=file.replace(';',',')
+    
     instrument = str(instrument)
     file_path = FileFinder.getFullPath(file)
     if os.path.isfile(file_path):
@@ -71,8 +77,11 @@ def find_data(file, instrument=''):
         # FileFinder doesn't like dashes...
         instrument=instrument.replace('-','')
         f = FileFinder.findRuns(instrument+file)
-        if os.path.isfile(f[0]):
-            return f[0]
+        if os.path.isfile(f[0]): 
+            if allow_multiple:
+                # Mantid returns its own list object type, so make a real list out if it
+                return [i for i in f] 
+            else: return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
