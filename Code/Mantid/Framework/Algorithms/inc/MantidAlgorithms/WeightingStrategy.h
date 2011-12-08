@@ -120,7 +120,6 @@ namespace Algorithms
     {
     public:
       GaussianWeighting1D(double cutOff, double sigma);
-      GaussianWeighting1D(double sigma);
       virtual ~GaussianWeighting1D();
       virtual double weightAt(const double &);
       virtual double weightAt(const double&,const double&, const double&, const double&);

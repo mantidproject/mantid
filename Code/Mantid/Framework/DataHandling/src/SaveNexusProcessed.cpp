@@ -285,12 +285,24 @@ namespace DataHandling
 
     }  // finish matrix workspace specifics 
 
+
+
+    if (peaksWorkspace) 
+	{
+      // Save the instrument names, ParameterMap, sample, run
+      peaksWorkspace->saveExperimentInfoNexus(cppFile);
+      prog_init.reportIncrement(1, "Writing sample and instrument");
+	}
+
+
 	// peaks workspace specifics
 	if (peaksWorkspace)
 	{
-		g_log.information("Peaks Workspace saving to Nexus would be done");
-//		int pNum = peaksWorkspace->getNumberPeaks();
-//		peaksWorkspace->saveNexus( cppFile );
+	//	g_log.information("Peaks Workspace saving to Nexus would be done");
+	//	int pNum = peaksWorkspace->getNumberPeaks();
+		peaksWorkspace->saveNexus( cppFile );
+
+
 		
 	} // finish peaks workspace specifics
     else if (tableWorkspace) // Table workspace specifics 

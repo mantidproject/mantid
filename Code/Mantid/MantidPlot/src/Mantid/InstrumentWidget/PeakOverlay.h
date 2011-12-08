@@ -5,6 +5,7 @@
 #include "PeakMarker2D.h"
 
 #include <QHash>
+#include <QList>
 
 namespace Mantid{
   namespace API{
@@ -24,7 +25,7 @@ class PeakMarker2D;
 class PeakHKL
 {
 public:
-  PeakHKL(PeakMarker2D* m,const QRectF& trect);
+  PeakHKL(PeakMarker2D* m,const QRectF& trect,bool sr);
   bool add(PeakMarker2D* marker,const QRectF& trect);
   void draw(QPainter& painter,int prec = 6);
   void print()const;
@@ -34,7 +35,8 @@ private:
   QRectF rect; ///< label's screen area in transformed coords
   double h,k,l; ///< h,k, and l
   bool nh,nk,nl; ///< true if h, k, or l is numeric
-
+  QList<int> rows; ///< row indices of the peaks in their PeaksWorkspace
+  bool showRows;
 };
 
 /**
@@ -60,6 +62,7 @@ public:
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {return m_peaksWorkspace;}
   /// set HKL precision
   void setPrecision(int prec) const {m_precision = prec;}
+  void setShowRowsFlag(bool yes) {m_showRows = yes;}
 
 private:
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
@@ -68,6 +71,7 @@ private:
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
   mutable int m_currentDefaultStyle; ///< default style index
   mutable int m_precision;
+  mutable bool m_showRows; ///< flag to show peak row index
 };
 
 #endif /*MANTIDPLOT_PEAKOVERLAY_H_*/

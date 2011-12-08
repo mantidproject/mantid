@@ -253,7 +253,7 @@ namespace DataObjects
 
 	// --- Nexus Methods ---
     // Save to Nexus
-
+    void saveNexus(::NeXus::File * file ) const;
 
   };
 
@@ -269,7 +269,6 @@ namespace DataObjects
 }
 }
 #endif
-
 
 
 

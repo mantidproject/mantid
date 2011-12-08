@@ -146,6 +146,7 @@ public slots:
 
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
+  void setShowPeakRowFlag(bool on);
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);

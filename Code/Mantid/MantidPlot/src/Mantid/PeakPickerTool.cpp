@@ -16,13 +16,16 @@
 #include <QAction>
 #include <QMenu>
 #include <QInputDialog>
+#include <QMessageBox>
 
 #include <iostream>
 
-PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, bool showFitPropertyBrowser) : //MantidUI *mantidUI) :
+PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
-m_fitPropertyBrowser(fitPropertyBrowser),m_wsName(),m_spec(),m_init(false), //m_current(0),
+m_fitPropertyBrowser(fitPropertyBrowser),
+m_mantidUI(mantidUI),
+m_wsName(),m_spec(),m_init(false), //m_current(0),
 m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
@@ -734,6 +737,12 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
 
   menu.addSeparator();
 
+  action = new QAction("Get Parameters", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(getParameters()));
+  menu.addAction(action);
+  
+  menu.addSeparator();
+
   if (m_fitPropertyBrowser->isFitEnabled())
   {
     action = new QAction("Fit",this);
@@ -1019,6 +1028,24 @@ void PeakPickerTool::resetRange()
     m_fitPropertyBrowser->addAutoBackground();
   }
   d_graph->replot();
+}
+
+
+/**
+* Checks whether there is a parameters file attached to the plot. 
+* If so, it opens up that parameters table.
+*/
+void PeakPickerTool::getParameters()
+{
+  QString parameterWs = m_wsName + "_Parameters";
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(parameterWs.toStdString() ) )
+  {
+    m_mantidUI->importWorkspace(parameterWs);
+  }
+  else
+  {
+    QMessageBox::information(m_fitPropertyBrowser, "Mantid - Warning", "No parameter file with the name \"" + parameterWs + "\" found.");
+  }
 }
 
 void PeakPickerTool::modifiedGraph()
