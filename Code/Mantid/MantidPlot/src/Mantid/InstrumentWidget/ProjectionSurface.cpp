@@ -557,6 +557,10 @@ void ProjectionSurface::clearPeakOverlays()
   m_peakShapes.clear();
 }
 
+/**
+ * Set the precision (significant digits) with which the HKL peak labels are displayed.
+ * @param n :: Precision, > 0
+ */
 void ProjectionSurface::setPeakLabelPrecision(int n)
 {
   if (n < 1)
@@ -568,5 +572,17 @@ void ProjectionSurface::setPeakLabelPrecision(int n)
   for(int i=0;i < m_peakShapes.size(); ++i)
   {
     m_peakShapes[i]->setPrecision(n);
+  }
+}
+
+/**
+ * Enable or disable the show peak row flag
+ */
+void ProjectionSurface::setShowPeakRowFlag(bool on)
+{
+  m_showPeakRow = on;
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+    m_peakShapes[i]->setShowRowsFlag(on);
   }
 }

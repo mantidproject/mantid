@@ -299,8 +299,15 @@ void InstrumentWindowRenderTab::setColorMapAutoscaling(bool on)
  */
 QMenu* InstrumentWindowRenderTab::createPeaksMenu()
 {
+  QSettings settings;
+  settings.beginGroup("Mantid/InstrumentWindow");
   QMenu* menu = new QMenu(this);
 
+  QAction* showRows = new QAction("Show rows",this);
+  showRows->setCheckable(true);
+  showRows->setChecked(settings.value("ShowPeakRows",true).toBool());
+  connect(showRows,SIGNAL(toggled(bool)),m_instrWindow,SLOT(setShowPeakRowFlag(bool)));
+  menu->addAction(showRows);
   // setting precision set of actions
   QMenu *setPrecision = new QMenu("Label precision",this);
   QSignalMapper *signalMapper = new QSignalMapper(this);

@@ -656,8 +656,10 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   {
     return;
   }
-  m_peakShapes.append(new PeakOverlay(pws));
-  m_peakShapes[0]->setPrecision(m_peakLabelPrecision);
+  PeakOverlay* po = new PeakOverlay(pws);
+  po->setPrecision(m_peakLabelPrecision);
+  po->setShowRowsFlag(m_showPeakRow);
+  m_peakShapes.append(po);
   m_startPeakShapes = true;
 }
 
@@ -682,7 +684,7 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
       if (! det ) continue;
       if (det->getID() != detID) continue;
       PeakMarker2D* r = new PeakMarker2D(peakShapes.realToUntransformed(QPointF(udet.u,udet.v)),style);
-      r->setPeak(peak);
+      r->setPeak(peak,i);
       peakShapes.addMarker(r);
     }
   }

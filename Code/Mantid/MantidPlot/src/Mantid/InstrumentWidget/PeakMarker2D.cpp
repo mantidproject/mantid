@@ -21,7 +21,8 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
  * @param markerSize :: Optional size of marker's symbol.
  */
 PeakMarker2D::PeakMarker2D(const QPointF& centre,Style style):
-m_symbol(style.symbol)
+m_symbol(style.symbol),
+m_row(-1)
 {
   setColor(style.color);
   if (style.size > 0)
@@ -109,7 +110,7 @@ void PeakMarker2D::drawSquare(QPainter& painter)const
 /**
  * Save some peak information.
  */
-void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak)
+void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak, int row)
 {
   m_h = peak.getH();
   m_k = peak.getK();
@@ -117,4 +118,5 @@ void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak)
   m_label = QString("%1 %2 %3").arg(QString::number(m_h,'g',2),QString::number(m_k,'g',2),QString::number(m_l,'g',2));
   m_detID = peak.getDetectorID();
   m_tof = peak.getTOF();
+  m_row = row;
 }
