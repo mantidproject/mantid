@@ -55,7 +55,7 @@ namespace Algorithms
 
     void exec();
 
-    void execTOFEvent(std::string calfilename, Mantid::API::MatrixWorkspace_const_sptr inputWS);
+    void execTOFEvent(std::string calfilename, DataObjects::EventWorkspace_const_sptr inputWS);
 
   };
 

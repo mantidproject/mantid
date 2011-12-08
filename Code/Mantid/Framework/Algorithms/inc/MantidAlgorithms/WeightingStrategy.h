@@ -116,12 +116,12 @@ namespace Algorithms
     /*
     Gaussian Strategy
     */
-    class DLLExport GaussianWeighting : public WeightingStrategy
+    class DLLExport GaussianWeighting1D : public WeightingStrategy
     {
     public:
-      GaussianWeighting(double cutOff, double sigma);
-      GaussianWeighting(double sigma);
-      virtual ~GaussianWeighting();
+      GaussianWeighting1D(double cutOff, double sigma);
+      GaussianWeighting1D(double sigma);
+      virtual ~GaussianWeighting1D();
       virtual double weightAt(const double &);
       virtual double weightAt(const double&,const double&, const double&, const double&);
     private:

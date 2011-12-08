@@ -51,8 +51,15 @@ namespace Algorithms
     DataObjects::Workspace2D_const_sptr seWS;
     DataObjects::EventWorkspace_sptr outputWS;
 
+    std::vector<int64_t> mSETimes;
+    std::vector<double> mSEValues;
+
     std::vector<detid_t> mCalibDetectorIDs;
-    std::vector<double> mCalibOffsets;
+    std::vector<int64_t> mCalibOffsets;  // in nano-second
+    int64_t mSensorSampleOffset;   // in nano-second
+
+    double mLowerLimit;
+    double mUpperLimit;
 
     virtual void initDocs();
 

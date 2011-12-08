@@ -169,8 +169,8 @@ namespace Mantid
       double psi = getProperty("Psi");
       if (psi != EMPTY_DBL())
         {
-          nxFile.writeData("Psi", psi);
-          nxFile.openData("Psi");
+          nxFile.writeData("psi", psi);
+          nxFile.openData("psi");
           nxFile.putAttr("units", "degrees");
           nxFile.closeData();
         }
@@ -178,11 +178,11 @@ namespace Mantid
       bool kikfScaling = getProperty("KiOverKfScaling");
       if (kikfScaling)
         {
-           nxFile.writeData("KiOverKfScaling", 1);
+           nxFile.writeData("ki_over_kf_scaling", 1);
         }
       else
         {
-           nxFile.writeData("KiOverKfScaling", 0);
+           nxFile.writeData("ki_over_kf_scaling", 0);
         }
 
       nxFile.closeGroup(); // NXSPE_info

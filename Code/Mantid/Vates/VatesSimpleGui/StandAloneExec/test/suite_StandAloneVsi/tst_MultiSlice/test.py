@@ -1,0 +1,23 @@
+
+def main():
+    source(findFile("scripts", "test_helpers.py"))
+    source(findFile("scripts", "common_checks.py"))
+    startApplication("VatesSimpleGui")
+    openFile("")
+    clickButton(waitForObject(":splitter_2.Rebin_QPushButton"))
+    mouseClick(waitForObject(":ScrollArea.Bins_QLineEdit"), 25, 5, 0, Qt.LeftButton)
+    type(waitForObject(":ScrollArea.Bins_QLineEdit"), "0")
+    mouseClick(waitForObject(":ScrollArea.Bins_QLineEdit_2"), 37, 16, 0, Qt.LeftButton)
+    type(waitForObject(":ScrollArea.Bins_QLineEdit_2"), "0")
+    mouseClick(waitForObject(":ScrollArea.Bins_QLineEdit_3"), 26, 7, 0, Qt.LeftButton)
+    type(waitForObject(":ScrollArea.Bins_QLineEdit_3"), "0")
+    clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+    clickButton(waitForObject(":View Mode.MultiSlice_QPushButton"))
+    mouseClick(waitForObject(":splitter_2_QwtScaleWidget"), 7, 124, 0, Qt.LeftButton)
+    mouseClick(waitForObject(":splitter_2_QwtScaleWidget_2"), 259, 17, 0, Qt.LeftButton)
+    mouseClick(waitForObject(":splitter_2_QwtScaleWidget_3"), 36, 226, 0, Qt.LeftButton)
+    mouseClick(waitForObject(":splitter_2_QwtScaleWidget"), 8, 342, 0, Qt.LeftButton)
+    clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+    mouseDrag(waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 137, 170, -95, 9, 1, Qt.LeftButton)
+    quitProgram()
+

@@ -813,6 +813,10 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
 
+  /*
+   * Review each event list to get the sort type
+   * If any 2 have different order type, then be unsorted
+   */
   EventSortType EventWorkspace::getSortType() const
   {
     size_t size = this->data.size();

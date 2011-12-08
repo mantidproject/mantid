@@ -85,15 +85,13 @@ namespace Algorithms
     API::CompositeWorkspaceValidator<EventWorkspace> *wsValidator2 = new API::CompositeWorkspaceValidator<EventWorkspace>;
     wsValidator2->add(new API::WorkspaceUnitValidator<EventWorkspace>("TOF"));
 
-    declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input,wsValidator2),
+    declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input, wsValidator2),
          "An EventWorkspace with units of TOF" );
 
-
-    declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("OutputWorkspace","",Direction::Output),
       "The name to use for the output workspace" );
 
     std::vector<std::string> exts;
-    exts.push_back(".cal");
     exts.push_back(".dat");
     declareProperty(new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
        "Optional: The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to be specified.");
@@ -108,13 +106,11 @@ namespace Algorithms
   void AlignDetectorInTOF::exec()
   {
     // Get the input workspace
-    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    DataObjects::EventWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
     // Read in the calibration data
     const std::string calFileName = getProperty("CalibrationFile");
     progress(0.0,"Reading calibration file");
-    if (calFileName.empty())
-        throw std::invalid_argument("You must specify CalibrationFile.");
 
     if (calFileName.empty()){
       throw std::invalid_argument("Must use Ke's calibration file in TOF");
@@ -130,7 +126,7 @@ namespace Algorithms
    * @params
    *
    */
-  void AlignDetectorInTOF::execTOFEvent(std::string calfilename, Mantid::API::MatrixWorkspace_const_sptr inputWS){
+  void AlignDetectorInTOF::execTOFEvent(std::string calfilename, DataObjects::EventWorkspace_const_sptr eventWS){
 
     g_log.debug() << "Processing in TOF only!" << std::endl;
 
@@ -151,24 +147,21 @@ namespace Algorithms
     }
 
     // 2. Convert to Eventworkspace and generate a new workspace for output
-    EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-    if (!eventWS){
-      g_log.error() << "Input Worskspace is not EventWorkspace!" << std::endl;
-      throw std::invalid_argument("Input Workspace is not EventWorkspace");
-    }
-
-    API::MatrixWorkspace_sptr outputMatrixWS = this->getProperty("OutputWorkspace");
-    EventWorkspace_sptr outputWS;
-    if (outputMatrixWS == inputWS){
-      outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
+    DataObjects::EventWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+    // EventWorkspace_sptr outputWS;
+    if (outputWS == eventWS){
+      // a) Do nothing
+      g_log.debug() << "Input Workspace is overwritten" << std::endl;
+      // outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
     } else {
+      // b) Create an output Workspace
       outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
           API::WorkspaceFactory::Instance().create("EventWorkspace", eventWS->getNumberHistograms(), 2, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(eventWS, outputWS, false);
       outputWS->copyDataFrom((*eventWS));
+      this->setProperty("OutputWorkspace", outputWS);
 
-      outputMatrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-      this->setProperty("OutputWorkspace", outputMatrixWS);
+      // outputMatrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
     }
 
     // 3. Convert!
@@ -225,36 +218,15 @@ namespace Algorithms
         }
 
       } // for one and only one detector
+      /*
       if (ispec < 30){
         g_log.notice() << "Detector " << detid << "  Shift Factor = " << shiftfactor << "  Number of events = " << events.getNumberEvents() << std::endl;
       }
+      */
 
-      /*
-      if (ispec == 11){
-        std::vector<double> tofs;
-        outputWS->getEventList(ispec).getTofs(tofs);
-        // events.getTofs(tofs);
-        g_log.notice() << "Before: TOF[0] = " << tofs[0] << std::endl;
-      }
-      */
       outputWS->getEventList(ispec).convertTof(shiftfactor, 0.0);
-      /*
-      if (ispec == 11){
-        std::vector<double> tofs;
-        events.getTofs(tofs);
-        g_log.notice() << "After: TOF[0] = " << tofs[0] << std::endl;
-      }
-      */
 
     } // for spec
-
-    // Another check
-    /*
-    EventList checklist = outputWS->getEventList(11);
-    std::vector<double> tofs;
-    checklist.getTofs(tofs);
-    g_log.notice() << "Final Check: TOF[11][0]" << tofs[0] << std::endl;
-    */
 
     return;
   }

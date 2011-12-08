@@ -21,6 +21,7 @@ to attach a UB Matrix onto the sample. The CopySample algorithm will allow this 
 #include "MantidAPI/IPeak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include <sstream>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -80,11 +81,11 @@ namespace Mantid
 
       std::vector<int> extents(6,0);
       const int range = 20;
-    extents[0]=-range;extents[1]=range;extents[2]=-range;extents[3]=range;extents[4]=-range;extents[5]=range;
-    declareProperty(
-      new ArrayProperty<int>("SearchExtents", extents),
-      "A comma separated list of min, max for each of H, K and L,\n"
-      "Specifies the search extents applied for H K L values associated with the peaks.");
+      extents[0]=-range;extents[1]=range;extents[2]=-range;extents[3]=range;extents[4]=-range;extents[5]=range;
+      declareProperty(
+        new ArrayProperty<int>("SearchExtents", extents),
+        "A comma separated list of min, max for each of H, K and L,\n"
+        "Specifies the search extents applied for H K L values associated with the peaks.");
     }
 
     /**
@@ -143,10 +144,10 @@ namespace Mantid
     void IndexSXPeaks::exec()
     {
       using namespace Mantid::DataObjects;
-      const std::vector<int> peakindices = getProperty("PeakIndices");
+      std::vector<int> peakindices = getProperty("PeakIndices");
 
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+        AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
 
       // Need a least two peaks
       std::size_t npeaks=peakindices.size();
@@ -162,6 +163,11 @@ namespace Mantid
       {
         //If the user provides no peaks we default to use all the available peaks.
         npeaks = ws->getNumberPeaks();
+        peakindices.reserve(npeaks);
+        for(int i = 1; i <= npeaks; i++) //create indexes corresponding to all peak indexes
+        {
+          peakindices.push_back(i);
+        }
         g_log.information("No peak indexes provided. Algorithm will use all peaks in the workspace for the calculation.");
       }
 
@@ -185,28 +191,17 @@ namespace Mantid
       Mantid::Geometry::UnitCell unitcell(a, b, c, alpha, beta, gamma);
 
       std::vector<PeakCandidate> peaks;
-      if(peakindices.size() > 0) //Create candiate peaks for only indexed peaks
-      {
-        for (std::size_t i=0;i<npeaks;i++)
-        { 
-          int row=peakindices[i]-1;
-          if(row < 0)
-          {
-            throw std::runtime_error("Indices are 1-based.");
-          }
-          IPeak& peak = ws->getPeak(row);
-          V3D Qs = peak.getQSampleFrame();
-          peaks.push_back(PeakCandidate(Qs[0], Qs[1], Qs[2]));
+
+      for (std::size_t i=0;i<npeaks;i++)
+      { 
+        int row=peakindices[i]-1;
+        if(row < 0)
+        {
+          throw std::runtime_error("Cannot have a peak index < 0.");
         }
-      }
-      else //Create candidate peaks from all available peaks
-      {
-        for (int i=0;i<int(npeaks);i++)
-        { 
-          IPeak& peak = ws->getPeak(i);
-          V3D Qs = peak.getQSampleFrame();
-          peaks.push_back(PeakCandidate(Qs[0], Qs[1], Qs[2]));
-        }
+        IPeak& peak = ws->getPeak(row);
+        V3D Qs = peak.getQSampleFrame();
+        peaks.push_back(PeakCandidate(Qs[0], Qs[1], Qs[2]));
       }
 
       //Sanity check the generated peaks.
@@ -238,7 +233,7 @@ namespace Mantid
       prog.report(); //2nd progress report.
       peaks[0].setFirst(); //On the first peak, now only the first candidate hkl is considered, others are erased,
       //This means the design space of possible peak-hkl alignments has been reduced, will improve future refinements.
-      
+
       cullHKLs(peaks, unitcell);
       prog.report(); //3rd progress report.
 
@@ -247,26 +242,30 @@ namespace Mantid
       cullHKLs(peaks, unitcell);
       prog.report(); //4th progress report.
 
+
       //Now we can index the input/output peaks workspace
-      for(int i = 0; i < int(npeaks); i++)
-      {
-        IPeak& peak = ws->getPeak(i);
+      //If there are peak indexes uses those to find actual peaks in the workspace and overrite HKL
+      for (std::size_t i=0;i<npeaks;i++)
+      { 
+        int row = 0;
         try
         {
+          row=peakindices[i]-1;
+          IPeak& peak = ws->getPeak(row);
           const V3D hkl = peaks[i].getHKL();
           peak.setHKL(hkl); 
           std::stringstream stream;
-          stream << "Peak Index: " << i << " HKL: " << hkl; 
+          stream << "Peak Index: " << row << " HKL: " << hkl; 
           g_log.information(stream.str());
         }
         catch(std::logic_error&)
         {
+          std::stringstream msg;
+          msg << "Peak Index: " << row + 1 << " cannot be assigned a single HKL set.";
+          g_log.warning(msg.str());
           continue;
         }
       }
     }
-
-
-
-} // namespace Algorithms
+  } // namespace Algorithms
 } // namespace Mantid

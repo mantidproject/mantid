@@ -56,30 +56,33 @@ namespace MDAlgorithms
   // signature for a fucntion, creating n-dimension workspace
   //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
   typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, size_t ,size_t ,size_t )> pWSCreator;
-  // vectors of strings are here everywhere
+ // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
-  // known sates for algorithms, caluclating Q-values
+  /// known sates for algorithms, caluclating Q-values
   enum Q_state{
-       NoQ,
+       NoQ, 
        modQ,
        Q3D
    };
-  // known analysis modes, arranged according to emodes 
+  /** known analysis modes, arranged according to emodes 
+      It is importent to assign enums proper numbers, as directc correspondence between enums and their emodes 
+      used by algorithm;
+  */
   enum AnalMode{  
-      Elastic, //       int emode = 0;
-      Direct, // emode=1; Direct inelastic analysis mode
-      Indir,  // emode=2; InDirect inelastic analysis mode
-      ANY_Mode // couples with NoQ, means just copying existing
+      Elastic = 0,  //< int emode = 0; Elastic analysis
+      Indir   = 1,  //< emode=1; InDirect inelastic analysis mode
+      Direct  = 2,  //< emode=2; Direct inelastic analysis mode
+      ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion)
   };
-  // enum describes if there is need to convert workspace units
+  /// enum describes if there is need to convert workspace units and different units conversion modes
   enum CnvrtUnits
   {
-      ConvertNo,   // no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
-      ConvertFast, // the input workspace has different units from the requested and fast conversion is possible
-      ConvByTOF,   // conversion possible via TOF
-      ConvFromTOF  //  units are the TOF 
+      ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
+      ConvertFast, //< the input workspace has different units from the requested and fast conversion is possible
+      ConvByTOF,   //< conversion possible via TOF
+      ConvFromTOF  //< Input workspace units are the TOF 
   };
-// predefenition of the class, which does all coordinate transformation
+/// predefenition of the class, which does all coordinate transformations, Linux compilers need this. 
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
   struct COORD_TRANSFORMER;
   
@@ -96,11 +99,13 @@ namespace MDAlgorithms
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}  
 
-// helper functions: To assist with units conversion
-    static std::string          getNativeUnitsID(ConvertToMDEvents const *const pHost){ return pHost->natural_units;}
-    static Kernel::Unit_sptr    getAxisUnits(ConvertToMDEvents const *const pHost){return pHost->inWS2D->getAxis(0)->unit();}
+//**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the algorithm
+    static std::string          getNativeUnitsID(ConvertToMDEvents const *const pHost);
+    static Kernel::Unit_sptr    getAxisUnits(ConvertToMDEvents const *const pHost);
     static preprocessed_detectors & getPrepDetectors(ConvertToMDEvents const *const pHost);
-    static  double              getEi(ConvertToMDEvents const *const pHost){return (boost::lexical_cast<double>(pHost->inWS2D->run().getProperty("Ei")->value())); }
+    static  double              getEi(ConvertToMDEvents const *const pHost);
+    static int                  getEMode(ConvertToMDEvents const *const pHost);
+//**<
   private:
     void init();
     void exec();
@@ -116,7 +121,7 @@ namespace MDAlgorithms
  
    /// helper function which does exatly what it says
    void check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max);
-     /// the variable which describes the number of the dimensions, currently used by algorithm. Changes in input properties can change this number;
+   /// the variable which describes the number of the dimensions, currently used by algorithm. Changes in input properties can change this number;
    size_t n_activated_dimensions;
   
    /// pointer to input workspace;
@@ -157,15 +162,26 @@ namespace MDAlgorithms
    void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to hkl coordinate system */
-   std::vector<double> get_transf_matrix(const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
- 
-   //void process_ModQ_dE_();
+   std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
+
    /// map to select an algorithm as function of the key, which describes it
     std::map<std::string, pMethod> alg_selector;
    /// map to select an workspace, as function of the dimensions number
     std::map<size_t, pWSCreator> ws_creator;
 
- 
+    // strictly for testing!!!
+    void setAlgoID(const std::string &newID){
+        this->algo_id=newID;
+    }
+   // strictly for testing!!!
+    void setAlgoUnits(int emode){
+        if(emode==0){
+            this->subalgorithm_units=native_elastic_unitID;
+        }
+        if(emode==1||emode==2){
+            this->subalgorithm_units=native_inelastic_unitID;
+        }
+    }
   private: 
    //--------------------------------------------------------------------------------------------------
    /** generic template to convert to any Dimensions workspace;
@@ -189,7 +205,7 @@ namespace MDAlgorithms
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
 
-    // known momentum analysis modes ID-s;
+    // known momentum analysis mo des ID-s;
     std::vector<std::string> Q_modes;
     // known energy transfer modes ID-s
     std::vector<std::string> dE_modes;
@@ -197,17 +213,19 @@ namespace MDAlgorithms
     std::vector<std::string> ConvModes;
 
     // the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
-    std::string  native_elastic_unitID_Cryst;
-    std::string  native_elastic_unitID_Powder;
+    std::string  native_elastic_unitID; // currently it is Q
     // the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
-    std::string  native_inelastic_unitID;
+    std::string  native_inelastic_unitID; // currently it is energy transfer (DeltaE)
 
     // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
     // Any other input workspace units have to be converted into these:
-    std::string natural_units;
-
-
-
+    std::string subalgorithm_units;
+  // string -Key to identify the algorithm
+    std::string algo_id;
+    //
+    std::vector<double> getTransfMatrix()const{return rotMatrix;}
+    // 
+    std::vector<double> rotMatrix;  // should it be the Quat?
 
  };
  
