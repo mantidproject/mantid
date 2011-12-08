@@ -710,6 +710,19 @@ public:
    */
   TYPE getSingleValue(const DateAndTime& t) const
   {
+    // 1. Find upper bound
+    typename timeMap::const_iterator lowboundit = m_propertySeries.upper_bound(t);
+
+    // std::cout << std::endl << "Locate " << t << ":  First Hit " << lowboundit->first << ", " << lowboundit->second << std::endl;
+
+    // 2. Find.  low_bound() can give entry equal or just larger than t
+    if (lowboundit != m_propertySeries.begin())
+      --lowboundit;
+
+    // 3. return
+    return lowboundit->second;
+
+    /*
     typename timeMap::const_reverse_iterator it = m_propertySeries.rbegin();
     for (; it != m_propertySeries.rend(); it++)
       if (it->first <= t)
@@ -718,6 +731,7 @@ public:
       return TYPE();
     else
       return m_propertySeries.begin()->second;
+      */
   }
 
   //-----------------------------------------------------------------------------------------------
