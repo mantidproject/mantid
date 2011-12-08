@@ -57,7 +57,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string category() const { return "DataHandling\\Text;SANS"; }
   /// do a quick check that this file can be loaded 
   virtual bool quickFileCheck(const std::string& ,size_t nread,const file_header& header);
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded

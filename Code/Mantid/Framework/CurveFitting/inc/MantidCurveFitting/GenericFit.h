@@ -68,7 +68,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "CurveFitting";}
+      virtual const std::string category() const { return "Optimization";}
 
       /// Get the function for fitting
       boost::shared_ptr<API::IFitFunction> getFunction()const{return m_function;}

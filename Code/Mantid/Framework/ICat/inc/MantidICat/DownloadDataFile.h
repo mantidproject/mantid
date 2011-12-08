@@ -61,7 +61,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "ICat"; }
+      virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
       /** This method is used for unit testing purpose.
        * as the Poco::Net library httpget throws an exception when the nd server n/w is slow

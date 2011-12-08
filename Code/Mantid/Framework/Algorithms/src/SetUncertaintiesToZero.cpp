@@ -43,10 +43,6 @@ const std::string SetUncertaintiesToZero::name() const
 int SetUncertaintiesToZero::version() const
 { return (1);}
 
-/// Algorithm's category for identification
-const std::string SetUncertaintiesToZero::category() const
-{ return "General";}
-
 void SetUncertaintiesToZero::init()
 {
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",

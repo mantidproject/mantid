@@ -45,8 +45,8 @@ namespace Algorithms
     virtual const std::string name() const { return "StripVanadiumPeaks"; }
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 2; }
-    /// Algorithm's category for identification overriding a virtual method
-    virtual const std::string category() const { return "Diffraction"; }
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "CorrectionFunctions;CurveFitting;Diffraction"; }
 
   private:
     void initDocs();

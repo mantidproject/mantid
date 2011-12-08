@@ -55,8 +55,8 @@ public:
   /// Algorithm's version
   virtual int version() const;
 
-  /// Algorithm's category for identification
-  virtual const std::string category() const;
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "Arithmetic\\Errors";}
 
 private:
   /// Sets documentation strings for this algorithm

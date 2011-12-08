@@ -59,7 +59,7 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const
   {
-    return "DataHandling";
+    return "DataHandling\\PreNexus";
   }
   /// Algorithm's aliases
   virtual const std::string alias() const

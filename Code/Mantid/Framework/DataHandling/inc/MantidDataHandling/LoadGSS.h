@@ -49,7 +49,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const { return "Diffraction;DataHandling\\Text"; }
 
   /// do a quick check that this file can be loaded 
   virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);

@@ -58,7 +58,7 @@ public:
   { return (1);}
   /// Algorithm's category for identification
   virtual const std::string category() const
-  { return "DataHandling;Inelastic";}
+  { return "DataHandling\\SPE;Inelastic";}
 
 /** the method used in tests. It requested the subalgorithm, which does the detectors
    *  position calculations to produce a target workspace. This workspace then can be retrieved 
