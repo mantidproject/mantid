@@ -8,24 +8,12 @@
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <boost/shared_ptr.hpp>
-#include <fstream>  
 
 #include <QLineEdit>
 #include <QFileDialog>
 #include <QHash>
-#include <QTextStream>
-#include <QTreeWidgetItem>
-#include <QSettings>
 #include <QMessageBox>
-#include <QInputDialog>
-#include <QSignalMapper>
-#include <QHeaderView>
-#include <QApplication>
-#include <QClipboard>
-#include <QTemporaryFile>
-#include <QDateTime>
 #include <QDesktopServices>
-#include <QUrl>
 
 #include <algorithm>
 
@@ -41,6 +29,7 @@ namespace Muon
   using namespace MantidQt::API;
   using namespace Mantid::Kernel;
   using namespace MantidQt::MantidWidgets;
+
 
 /**
 * Init the layout.
@@ -139,6 +128,7 @@ void MuonAnalysisResultTableTab::selectAllFittings()
   }
 }
 
+
 /**
 * Populates the tables with all the correct log values and fitting results. It takes the
 * given workspace list and checks to see if a fit has been done to the data set and if so
@@ -162,8 +152,9 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 
   // populate the individual log values and fittings into their respective tables.
   populateFittings(fittedWsList);
-  populateLogAndParamValues(fittedWsList);
+  populateLogsAndValues(fittedWsList);
 }
+
 
 /**
 * Populates the items (log values) into their table.
@@ -171,37 +162,14 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 * @params wsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateLogAndParamValues(const QVector<QString>& fittedWsList)
+void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
 {
   // Clear the logs if not empty and then repopulate.
-  QVector<QString> logsAndParamsToDisplay;
+  QVector<QString> logsToDisplay;
   
   for (int i=0; i<fittedWsList.size(); i++)
   { 
-    QMap<QString, double> allLogsAndParams;
-    
-    // Get param information
-
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_parameters") );
-
-    Mantid::API::TableRow row = paramWs->getFirstRow();
-    
-    // Loop over all rows and get values and errors.
-    do
-    {  
-      std::string key;
-      double value;
-      double error;
-      row >> key >> value >> error;
-      if(i == 0)
-      {
-        logsAndParamsToDisplay.push_back(QString::fromStdString(key));
-        logsAndParamsToDisplay.push_back(QString::fromStdString(key) + "Error");
-      }
-      allLogsAndParams[QString::fromStdString(key)] = value;
-      allLogsAndParams[QString::fromStdString(key) + "Error"] = error;
-    }
-    while(row.next());
+    QMap<QString, double> allLogs;
 
     // Get log information
     Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString()));
@@ -221,41 +189,42 @@ void MuonAnalysisResultTableTab::populateLogAndParamValues(const QVector<QString
 
       if( tspd )//If it is then it must be num.series
       {
-        allLogsAndParams[logFile] = tspd->nthValue(0);
+        allLogs[logFile] = tspd->nthValue(0);
         if (i == 0)
-          logsAndParamsToDisplay.push_back(logFile);
+          logsToDisplay.push_back(logFile);
         else
         {
           bool reg(true);
-          for(int j=0; j<logsAndParamsToDisplay.size(); ++j)
+          for(int j=0; j<logsToDisplay.size(); ++j)
           {
             //if log file already registered then don't register it again.
-            if (logsAndParamsToDisplay[j] == logFile)
+            if (logsToDisplay[j] == logFile)
             {
               reg = false;
               break;
             }
           }
           if (reg==true)
-          logsAndParamsToDisplay.push_back(logFile);
+          logsToDisplay.push_back(logFile);
         }
       }
     }
 
     // Add all data collected from one workspace to another map. Will be used when creating table.
-    m_tableValues[fittedWsList[i]] = allLogsAndParams;
+    m_tableValues[fittedWsList[i]] = allLogs;
 
   } // End loop over all workspace's log information and param information
 
+  // Remove the logs that don't appear in all workspaces
   QVector<int> toRemove;
-  for(int i=0; i<logsAndParamsToDisplay.size(); ++i)
+  for(int i=0; i<logsToDisplay.size(); ++i)
   {
     QMap<QString,QMap<QString, double> >::Iterator itr; 
     for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
     { 
-      QMap<QString, double> logParamsAndValues = itr.value();
+      QMap<QString, double> logsAndValues = itr.value();
 
-      if (!(logParamsAndValues.contains(logsAndParamsToDisplay[i])))
+      if (!(logsAndValues.contains(logsToDisplay[i])))
       {      
         toRemove.push_back(i);
         break;
@@ -265,10 +234,11 @@ void MuonAnalysisResultTableTab::populateLogAndParamValues(const QVector<QString
 
   for(int i=0; i<toRemove.size(); ++i)
   {
-    logsAndParamsToDisplay.remove(toRemove[i]-i);
+    logsToDisplay.remove(toRemove[i]-i);
   }
 
-  if(logsAndParamsToDisplay.size() > m_uiForm.valueTable->rowCount())
+  // If there isn't enough rows in the table to populate all logs then display error message
+  if(logsToDisplay.size() > m_uiForm.valueTable->rowCount())
   {
     QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
   }
@@ -277,14 +247,15 @@ void MuonAnalysisResultTableTab::populateLogAndParamValues(const QVector<QString
     // Populate table with all log values available without repeating any.
     for (int row = 0; row < m_uiForm.valueTable->rowCount(); row++)
     {
-      if (row < logsAndParamsToDisplay.size())
-        m_uiForm.valueTable->setItem(row,0, new QTableWidgetItem(logsAndParamsToDisplay[row]));
+      if (row < logsToDisplay.size())
+        m_uiForm.valueTable->setItem(row,0, new QTableWidgetItem(logsToDisplay[row]));
       else
         m_uiForm.valueTable->setItem(row,0, NULL);
     }
   }
 
-  m_numLogsAndParamsDisplayed = logsAndParamsToDisplay.size();
+  // Save the number of logs displayed so don't have to search through all cells.
+  m_numLogsdisplayed = logsToDisplay.size();
 }
 
 
@@ -313,6 +284,7 @@ void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fitted
   }
 }
 
+
 /**
 * Creates the table using the information selected by the user in the tables
 */
@@ -324,10 +296,99 @@ void MuonAnalysisResultTableTab::createTable()
     return;
   }
 
-  QVector<QString> wsSelected;
-  QVector<QString> logParamSelected;
+  // Get the user selection
+  QVector<QString> wsSelected = getSelectedWs();
+  QVector<QString> logsSelected = getSelectedLogs();
 
-  //Get the user selected workspaces with _parameters files associated with it
+  if ((wsSelected.size() == 0) || logsSelected.size() == 0)
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "Please select options from both tables.");
+    return;
+  }
+
+  // Create the results table
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  table->addColumn("str","Run Name");
+  for(int i=0; i<logsSelected.size(); ++i)
+  {
+    table->addColumn("double", logsSelected[i].toStdString());
+  }
+
+  // Get param information
+  QMap<QString, QMap<QString, double> > wsParamsList;
+  QVector<QString> paramsToDisplay;
+  for(int i=0; i<wsSelected.size(); ++i)
+  {
+    QMap<QString, double> paramsList;
+    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_parameters") );
+
+    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+    
+    // Loop over all rows and get values and errors.
+    do
+    {  
+      std::string key;
+      double value;
+      double error;
+      paramRow >> key >> value >> error;
+      if (i == 0)
+      {
+        table->addColumn("double", key);
+        table->addColumn("double", key + "Error");
+        paramsToDisplay.append(QString::fromStdString(key));
+        paramsToDisplay.append(QString::fromStdString(key) + "Error");
+      }
+      paramsList[QString::fromStdString(key)] = value;
+      paramsList[QString::fromStdString(key) + "Error"] = error;
+    }
+    while(paramRow.next());
+
+    wsParamsList[wsSelected[i]] = paramsList;
+  }
+
+  // Add data to table
+  QMap<QString,QMap<QString, double> >::Iterator itr; 
+  for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+  { 
+    for(int i=0; i<wsSelected.size(); ++i)
+    {
+      if (wsSelected[i] == itr.key())
+      {
+        //Add new row and add run name
+        Mantid::API::TableRow row = table->appendRow();
+        QString runName(itr.key().left(itr.key().find(';')));
+        row << runName.toStdString();
+
+        // Add log values
+        QMap<QString, double> logsAndValues = itr.value();
+        for(int j=0; j<logsSelected.size(); ++j)
+        {
+          row << logsAndValues.find(logsSelected[j]).value();
+        }
+
+        // Add param values (presume params the same for all workspaces)
+        QMap<QString, double> paramsList = wsParamsList.find(itr.key()).value();
+        for(int j=0; j<paramsToDisplay.size(); ++j)
+        {
+          row << paramsList.find(paramsToDisplay[j]).value();
+        }
+      }
+    }  
+  }
+
+  // Save the table to the ADS
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+}
+
+
+/**
+* Get the user selected workspaces with _parameters files associated with it
+*
+* @return wsSelected :: A vector of QString's containing the workspace that are selected.
+*/
+QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
+{
+  QVector<QString> wsSelected;
   for (int i = 0; i < m_tableValues.size(); i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
@@ -337,60 +398,28 @@ void MuonAnalysisResultTableTab::createTable()
       wsSelected.push_back(wsName->text());
     }
   }
+  return wsSelected;
+}
 
-  // Get the user selected log file and parameters
-  for (int i = 0; i < m_numLogsAndParamsDisplayed; i++)
+
+/**
+* Get the user selected log file
+*
+* @return logsSelected :: A vector of QString's containing the logs that are selected.
+*/
+QVector<QString> MuonAnalysisResultTableTab::getSelectedLogs()
+{
+  QVector<QString> logsSelected;
+  for (int i = 0; i < m_numLogsdisplayed; i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,3));
     if (includeCell->isChecked())
     {
       QTableWidgetItem* logParam = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(i,0));
-      logParamSelected.push_back(logParam->text());
+      logsSelected.push_back(logParam->text());
     }
   }
-
-  if ((wsSelected.size() == 0) || logParamSelected.size() == 0)
-  {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "Please select options from both tables.");
-    return;
-  }
-
-  // Create the results table
-
-  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  table->addColumn("str","Run Number");
-  for(int i=0; i<logParamSelected.size(); ++i)
-  {
-    table->addColumn("double", logParamSelected[i].toStdString());
-  }
-
-  // Add data to table
-
-  QMap<QString,QMap<QString, double> >::Iterator itr; 
-  for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
-  { 
-    for(int i=0; i<wsSelected.size(); ++i)
-    {
-      if (wsSelected[i] == itr.key())
-      {
-        Mantid::API::TableRow row = table->appendRow();
-        QString runNumber(itr.key().left(itr.key().find(';')));
-        row << runNumber.toStdString();
-      
-        QMap<QString, double> logParamsAndValues = itr.value();
-
-        // Can't have blank data values
-        for(int j=0; j<logParamSelected.size(); ++j)
-        {
-          row << logParamsAndValues.find(logParamSelected[j]).value();
-        }
-      }
-    }  
-  }
-
-  // Save the table to the ADS
-
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+  return logsSelected;
 }
 
 
