@@ -42,10 +42,8 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
   int half_triangle_height = 0;
   int p1_x, p1_y, p2_x, p2_y, p3_x, p3_y;
   p1_x = p1_y = p2_x = p2_y = p3_x = p3_y = 0;
-  double apex_pos = 0.0;
   int pa_x, pa_y;
   pa_x = pa_y = 0;
-  int factor = 1;
   switch (this->orientation)
     {
     case AxisInteractor::LeftScale:
@@ -67,9 +65,8 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
       p1_y = 0;
       p2_y = this->half_base;
       p3_y = -this->half_base;
-      apex_pos = eloc.y() + factor * this->half_base;
       pa_x = this->tip_edge;
-      pa_y = static_cast<int>(apex_pos);
+      pa_y = eloc.y();
       break;
     case AxisInteractor::TopScale:
     case AxisInteractor::BottomScale:
@@ -90,8 +87,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
       p1_x = 0;
       p2_x = this->half_base;
       p3_x = -this->half_base;
-      apex_pos = eloc.x() + factor * this->half_base;
-      pa_x = static_cast<int>(apex_pos);
+      pa_x = eloc.x();
       pa_y = this->tip_edge;
       break;
     default:
