@@ -127,7 +127,9 @@ class DataSet(object):
         for i in range(self._skip_first):
             y_scaled[i] = 0
             e_scaled[i] = 0
-        for i in range(len(y_scaled)-self._skip_last, len(y_scaled)):
+            
+        first_index = max(len(y_scaled)-self._skip_last, 0)
+        for i in range(first_index, len(y_scaled)):
             y_scaled[i] = 0
             e_scaled[i] = 0
         
@@ -281,6 +283,28 @@ class Stitcher(object):
         if file_path is not None:
             SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
         
+    def trim_zeros(self, x, y, e):
+        zipped = zip(x,y,e)
+        trimmed = []
+        
+        data_started = False        
+        # First the zeros at the beginning
+        for i in range(len(zipped)):
+            if data_started or zipped[i][1]>0:
+                data_started = True
+                trimmed.append(zipped[i])
+        
+        # Then the trailing zeros
+        zipped = []
+        data_started = False
+        for i in range(len(trimmed)-1,-1,-1):
+            if data_started or trimmed[i][1]>0:
+                data_started = True
+                zipped.append(trimmed[i])
+        
+        x,y,e = zip(*zipped)
+        return list(x), list(y), list(e)
+        
     def get_scaled_data(self):
         """
             Return the data points for the scaled data set
@@ -297,6 +321,7 @@ class Stitcher(object):
         e = mtd[ws_combined].dataE(0)
         if len(x)!=len(y) and len(x)!=len(e):
             raise RuntimeError, "Stitcher expected distributions but got histo"
+        x, y, e = self.trim_zeros(x, y, e)
         
         for d in self._data_sets[1:]:
             ws = d.get_scaled_ws()
@@ -306,6 +331,7 @@ class Stitcher(object):
                 _e = mtd[ws].dataE(0)
                 if len(_x)!=len(_y) and len(_x)!=len(_e):
                     raise RuntimeError, "Stitcher expected distributions but got histo"
+                _x, _y, _e = self.trim_zeros(_x, _y, _e)
                 x.extend(_x)
                 y.extend(_y)
                 e.extend(_e)
@@ -321,11 +347,28 @@ class Stitcher(object):
         xtmp = mtd[ws_combined].dataX(0)
         ytmp = mtd[ws_combined].dataY(0)
         etmp = mtd[ws_combined].dataE(0)
-        for i in range(len(ytmp)):
-            xtmp[i] = x[i]
-            ytmp[i] = y[i]
-            etmp[i] = e[i]
         
+        # Use the space we have in the current data vectors
+        npts = len(ytmp)
+        if len(x)>=npts:
+            for i in range(npts):
+                xtmp[i] = x[i]
+                ytmp[i] = y[i]
+                etmp[i] = e[i]
+            if len(x)>npts:
+                xtmp.extend(x[npts:])
+                ytmp.extend(y[npts:])
+                etmp.extend(e[npts:])
+        else:
+            for i in range(len(x)):
+                xtmp[i] = x[i]
+                ytmp[i] = y[i]
+                etmp[i] = e[i]
+            for i in range(len(x),npts):
+                xtmp[i] = xtmp[len(x)-1]+1.0
+                ytmp[i] = 0.0
+                etmp[i] = 0.0
+            CropWorkspace(InputWorkspace=ws_combined, OutputWorkspace=ws_combined, XMin=0.0, XMax=xtmp[len(x)-1])
         return ws_combined
         
                     
