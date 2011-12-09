@@ -104,10 +104,48 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.zAxisWidget,
                    SIGNAL(showOrHideIndicator(bool, const QString &)),
                    this, SLOT(cutVisibility(bool, const QString &)));
+
+  this->ui.xAxisWidget->installEventFilter(this);
+  this->ui.yAxisWidget->installEventFilter(this);
+  this->ui.zAxisWidget->installEventFilter(this);
 }
 
 MultiSliceView::~MultiSliceView()
 {
+}
+
+/**
+ * This function sets an event filter for the AxisInteractor widgets. This
+ * will listen and check for resize events. If a resize event is being issued,
+ * the AxisInteractor needs to update it's scene rectangle and the correct
+ * positions of any indicators.
+ * @param ob the QObject associated with the event
+ * @param ev the QEvent being issued
+ * @return true if this function handles the event
+ */
+bool MultiSliceView::eventFilter(QObject *ob, QEvent *ev)
+{
+  if (ev->type() == QEvent::Resize)
+  {
+    AxisInteractor *axis = static_cast<AxisInteractor *>(ob);
+    QString name = axis->objectName();
+    int coord = -1;
+    if (name == "xAxisWidget")
+    {
+      coord = 0;
+    }
+    if (name == "yAxisWidget")
+    {
+      coord = 1;
+    }
+    if (name == "zAxisWidget")
+    {
+      coord = 2;
+    }
+    this->resetOrDeleteIndicators(axis, coord);
+    return true;
+  }
+  return QObject::eventFilter(ob, ev);
 }
 
 void MultiSliceView::destroyView()
