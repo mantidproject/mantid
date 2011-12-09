@@ -7,7 +7,7 @@
 
 using namespace Mantid::Kernel;
 
-class ListAntValidatorTest : public CxxTest::TestSuite
+class ListAnyValidatorTest : public CxxTest::TestSuite
 {
 public:
   void testEmptyConstructor()
