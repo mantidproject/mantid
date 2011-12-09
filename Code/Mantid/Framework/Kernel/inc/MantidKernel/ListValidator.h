@@ -4,9 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "IValidator.h"
-#include <vector>
-#include <set>
+#include "MantidKernel/ListAnyValidator.h"
 
 namespace Mantid
 {
@@ -38,23 +36,50 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL ListValidator : public IValidator<std::string>
+
+class  ListValidator : public ListAnyValidator<std::string>
 {
 public:
-  ListValidator();
-  explicit ListValidator(const std::vector<std::string>& values);  
-  explicit ListValidator(const std::set<std::string>& values);  
-    virtual ~ListValidator();
-  IValidator<std::string>* clone();
-  
-  std::set<std::string> allowedValues() const;
-  void addAllowedValue(const std::string &value);
-  
-private:
-  std::string checkValidity(const std::string &value) const;
+    /// Default constructor. Sets up an empty list of valid values.
+    ListValidator():ListAnyValidator<std::string>(){};
+    /** Constructor
+     *  @param values :: A set of values consisting of the valid values     */
+    explicit ListValidator(const std::set<std::string>& values):
+    ListAnyValidator<std::string>(values){}
 
-  /// The set of valid values
-  std::set<std::string> m_allowedValues;
+    /** Constructor
+     *  @param values :: A vector of the valid values     */
+    explicit ListValidator(const std::vector<std::string>& values):
+    ListAnyValidator<std::string>(values){}
+
+  virtual ~ListValidator(){};
+
+  virtual IValidator<std::string>* clone(){ return new ListValidator(*this); }
+
+  /// Adds the argument to the set of valid values
+  virtual void addAllowedValue(const std::string &value)
+  {
+        m_allowedValues.insert(value);
+  }
+  
+protected:
+/** Checks if the string passed is in the list
+ *  @param value :: The value to test
+ *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
+ */
+    std::string checkValidity(const std::string &value) const
+    {
+    if ( m_allowedValues.count(value) )
+    {
+        return "";
+    }
+    else
+    {
+        if ( value.empty() ) return "Select a value";
+        else return "The value \"" + value + "\" is not in the list of allowed values";
+    }
+} 
+
 };
 
 } // namespace Kernel

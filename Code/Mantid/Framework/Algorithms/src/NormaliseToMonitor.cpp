@@ -39,7 +39,7 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ValidatorAnyList.h"
+#include "MantidKernel/ListAnyValidator.h"
 #include <cfloat>
 #include <iomanip>
 
@@ -100,7 +100,7 @@ public:
        for(size_t i=0;i<ival.size();i++){
                 ival[i]=boost::lexical_cast<int>(allowed_values[i]);
        }
-       piProp->modify_validator(new ValidatorAnyList<int>(ival));
+       piProp->modify_validator(new ListAnyValidator<int>(ival));
            
    }
    // interface needs it but if indeed proper clone used -- do not know. 
