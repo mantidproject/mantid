@@ -829,7 +829,7 @@ template<>
 class LOOP<2>{
   public:
     static inline void EXEC(ConvertToMDEvents *pH){           
-         //   pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
+            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
     }
 };
 /** Constructor 
