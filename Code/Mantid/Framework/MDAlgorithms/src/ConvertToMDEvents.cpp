@@ -796,7 +796,7 @@ class LOOP_ND{
             num << i;
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
 
-          //  pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
+            pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,&ConvertToMDEvents::processQND<i,Q,MODE,CONV>));
     }
 };
 template< Q_state Q, AnalMode MODE, CnvrtUnits CONV >

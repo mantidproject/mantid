@@ -787,13 +787,13 @@ void Momentum::init()
     if ( emode == 1 ) // Direct
     {
       ltot = l2;
-      sfpFrom = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l1 ) / sqrt(efixed);
+      sfpFrom = sfpTo;
       do_sfpFrom = true;
     }
     else if ( emode == 2 ) // Indirect
     {
       ltot = l1;
-      sfpFrom = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l2 ) / sqrt(efixed);
+      sfpFrom = sfpTo;
       do_sfpFrom = true;
     }
     else
@@ -829,7 +829,7 @@ double Momentum::singleFromTOF(const double tof) const
 {
   double x = tof;
   if (do_sfpFrom) x -= sfpFrom;
-  if (x==0.)      x  = DBL_MIN;
+  if (x==0)       x  = DBL_MIN;
 
   return factorFrom/x;
 }
