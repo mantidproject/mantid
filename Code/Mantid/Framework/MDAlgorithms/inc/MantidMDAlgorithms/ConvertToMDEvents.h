@@ -71,8 +71,8 @@ namespace MDAlgorithms
   */
   enum AnalMode{  
       Elastic = 0,  //< int emode = 0; Elastic analysis
-      Indir   = 1,  //< emode=1; InDirect inelastic analysis mode
-      Direct  = 2,  //< emode=2; Direct inelastic analysis mode
+      Direct  = 1,  //< emode=1; Direct inelastic analysis mode
+      Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
       ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion)
   };
   /// enum describes if there is need to convert workspace units and different units conversion modes

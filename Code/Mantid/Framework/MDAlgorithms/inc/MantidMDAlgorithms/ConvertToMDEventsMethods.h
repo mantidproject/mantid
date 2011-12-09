@@ -68,19 +68,22 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     
     const size_t specSize = inWS2D->blocksize();    
     std::vector<coord_t> Coord(nd);
+    size_t nValidSpectra = det_loc.det_id.size();
 
 
     if(!trn.calcGenericVariables(Coord,nd))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
-    for (int64_t i = 0; i < int64_t(numSpec); ++i)
+    for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
     {
- 
-        const MantidVec& X        = inWS2D->readX(i);
-        const MantidVec& Signal   = inWS2D->readY(i);
-        const MantidVec& Error    = inWS2D->readE(i);
+        size_t ic                 = det_loc.detIDMap[i];
         int32_t det_id            = det_loc.det_id[i];
 
-        if(!trn.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
+        const MantidVec& X        = inWS2D->readX(ic);
+        const MantidVec& Signal   = inWS2D->readY(ic);
+        const MantidVec& Error    = inWS2D->readE(ic);
+
+
+        if(!trn.calcYDepCoordinates(Coord,ic))continue;   // skip y outsize of the range;
 
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)

@@ -288,6 +288,7 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
     det_loc.det_id.resize(nHist);
     det_loc.L2.resize(nHist);
     det_loc.TwoTheta.resize(nHist);
+    det_loc.detIDMap.resize(nHist);
      // Loop over the spectra
    size_t ic(0);
    for (size_t i = 0; i < nHist; i++){
@@ -302,8 +303,10 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
     // Check that we aren't dealing with monitor...
     if (spDet->isMonitor())continue;   
 
-     det_loc.det_id[ic] = spDet->getID();
-     det_loc.L2[ic]     = spDet->getDistance(*sample);
+     det_loc.det_id[ic]  = spDet->getID();
+     det_loc.detIDMap[ic]= i;
+     det_loc.L2[ic]      = spDet->getDistance(*sample);
+     
 
      double polar        =  inputWS->detectorTwoTheta(spDet);
      det_loc.TwoTheta[ic]=  polar;
@@ -326,6 +329,7 @@ ConvertToMDEvents::process_detectors_positions(const DataObjects::Workspace2D_co
        det_loc.det_id.resize(ic);
        det_loc.L2.resize(ic);
        det_loc.TwoTheta.resize(ic);
+       det_loc.detIDMap.resize(ic);
    }
 
 }
