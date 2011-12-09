@@ -69,7 +69,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  virtual const std::string category() const { return "SANS;CorrectionFunctions\\TransmissionCorrections"; }
 
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero goes to 1.0)

@@ -56,7 +56,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Rebin"; }
+  virtual const std::string category() const { return "Transforms\\Rebin"; }
 
 private:
   /// Sets documentation strings for this algorithm

@@ -22,7 +22,6 @@ public:
     StripVanadiumPeaks strip;
     TS_ASSERT_EQUALS( strip.name(), "StripVanadiumPeaks" );
     TS_ASSERT_EQUALS( strip.version(), 1 );
-    TS_ASSERT_EQUALS( strip.category(), "General" );
   }
 
   void testInit()

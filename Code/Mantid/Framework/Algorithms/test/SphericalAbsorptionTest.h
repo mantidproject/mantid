@@ -28,12 +28,6 @@ public:
     TS_ASSERT_EQUALS( atten->version(), 1 );
   }
 
-  void testCategory()
-  {
-    IAlgorithm* atten = Mantid::API::FrameworkManager::Instance().createAlgorithm("SphericalAbsorption");
-    TS_ASSERT_EQUALS( atten->category(), "Absorption Corrections" );
-  }
-
   void testInit()
   {
     IAlgorithm* atten = Mantid::API::FrameworkManager::Instance().createAlgorithm("SphericalAbsorption");

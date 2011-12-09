@@ -46,10 +46,6 @@ public:
     TS_ASSERT_EQUALS( findPar->version(), 1 );
   }
 
-  void testCategory(){
-    TS_ASSERT_EQUALS( findPar->category(), "DataHandling\\Detectors" );
-  }
-
   void testInit(){
 
     TS_ASSERT_THROWS_NOTHING( findPar->initialize() );

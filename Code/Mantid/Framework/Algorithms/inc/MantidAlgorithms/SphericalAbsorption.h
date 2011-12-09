@@ -62,7 +62,7 @@ public:
   /// Virtual destructor
   virtual ~SphericalAbsorption() {}
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Absorption Corrections"; }
+  virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Algorithm's name
   virtual const std::string name() const { return "SphericalAbsorption"; }
   /// Algorithm's version

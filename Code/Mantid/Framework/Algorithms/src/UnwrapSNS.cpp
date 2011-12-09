@@ -75,7 +75,7 @@ int UnwrapSNS::version() const
 /// Algorithm's category for identification overriding a virtual method
 const std::string UnwrapSNS::category() const
 {
-  return "Units";
+  return "CorrectionFunctions\\InstrumentCorrections";
 }
 
 /// Initialisation method

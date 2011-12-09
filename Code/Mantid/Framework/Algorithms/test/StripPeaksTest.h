@@ -46,7 +46,6 @@ public:
   {
     TS_ASSERT_EQUALS( strip.name(), "StripPeaks" );
     TS_ASSERT_EQUALS( strip.version(), 1 );
-    TS_ASSERT_EQUALS( strip.category(), "General" );
   }
 
   void testInit()

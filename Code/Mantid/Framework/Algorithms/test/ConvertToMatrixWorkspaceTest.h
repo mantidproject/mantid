@@ -30,11 +30,6 @@ public:
     TS_ASSERT_EQUALS( cloner.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( cloner.category(), "General" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( cloner.initialize() )

@@ -73,7 +73,6 @@ public:
     conj = new ConjoinWorkspaces();
     TS_ASSERT_EQUALS( conj->name(), "ConjoinWorkspaces" );
     TS_ASSERT_EQUALS( conj->version(), 1 );
-    TS_ASSERT_EQUALS( conj->category(), "General" );
     delete conj;
   }
 

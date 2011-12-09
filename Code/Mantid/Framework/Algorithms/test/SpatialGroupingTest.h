@@ -23,7 +23,6 @@ public:
     alg = new Mantid::Algorithms::SpatialGrouping();
     TS_ASSERT_EQUALS(alg->name(), "SpatialGrouping");
     TS_ASSERT_EQUALS(alg->version(), 1);
-    TS_ASSERT_EQUALS(alg->category(), "General");
     delete alg;
   }
 

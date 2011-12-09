@@ -122,7 +122,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Detectors";}
+  virtual const std::string category() const { return "DataHandling\\Instrument";}
   /// the accessors, used to return algorithm results when called as sub-algorithm, without setting the properties;
   std::vector<double>const & getAzimuthal()const{return azimuthal;}
   std::vector<double>const & getPolar()const{return polar;}

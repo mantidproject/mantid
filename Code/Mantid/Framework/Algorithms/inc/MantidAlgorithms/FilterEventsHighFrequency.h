@@ -43,7 +43,7 @@ namespace Algorithms
     
     virtual const std::string name() const {return "FilterEventsHighFrequency"; };
     virtual int version() const {return 1; };
-    virtual const std::string category() const {return "Diffraction"; };
+    virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; };
 
   private:
 

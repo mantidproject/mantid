@@ -28,16 +28,20 @@ All weights are 1. This is completely position in-senitive.
 Weights are calculated according to <math>w = 1 - r/R</math>, where w is the weighting factor, r is the distance from the detector and R is the cut-off radius.
 
 ==== Parabolic Weighting ====
-This only applies for rectangular detectors. Therefore Radius must be zero and a AdjX and AdjY parameter must be provided. <math>w = AdjX - x + AdjY - y + 1</math>
+For rectangular detectors it may be used as follows: The radius must be zero and a AdjX and AdjY parameter must be provided. <math>w = AdjX - abs(x) + AdjY - abs(y) + 1</math>
 
-==== Gaussian1D Weighting ====
-This is the fastest gaussian smoothing method.
+For non-rectangular detectors, the cut-off radius is used in the calculation. <math>w = R - abs(x) + R - abs(y) + 1</math>
 
-<math>w = (1/{\sqrt{2\pi\sigma^2}})e^{-r^2/(2\sigma^2)}</math>
+==== Gaussian Weighting ====
+This weighting is calculated from the Gaussian distribution
+
+<math>w = e^{-r^2/(2\sigma^2)}</math>
+
+where <math>r^2 = x^2 + y^2 + z^2</math>
+and <math>\sigma</math> is the number of standard deviations controlling the width of the distribution curve
 
 Important notes about this algorithm are that:
-* Spatial x and y distances are collapsed down to a single dimension (r) for use of this algorithm.
-* Distances are normalised by the radius cut-off to make them dimensionless. 
+* Distances are normalised by the radius cut-off to make them dimensionless and scaled to 1 at the boundaries. 
 
 === For EventWorkspaces ===
 
@@ -52,7 +56,7 @@ Please note that the algorithm '''does not check''' that the bin X boundaries ma
 
 === Neighbour Searching ===
 <gallery>
-File:NNSearchByRadius.jpg|Fig. 1''. 
+File:NNSearchByRadius.jpg|''Fig. 1''. 
 File:NNSearchIrregularGrid.jpg|''Fig. 2''. 
 File:NNSearchLimitByRadius.jpg|''Fig. 3''
 File:NNSearchLimitByNNs.jpg|''Fig. 4''
@@ -164,17 +168,17 @@ void SmoothNeighbours::init()
     propOptions.push_back("Flat");
     propOptions.push_back("Linear");
     propOptions.push_back("Parabolic");
-    propOptions.push_back("Gaussian1D");
+    propOptions.push_back("Gaussian");
     declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
       "What sort of Weighting scheme to use?\n"
       "  Flat: Effectively no-weighting, all weights are 1.\n"
       "  Linear: Linear weighting 1 - r/R from origin.\n"
-      "  Parabolic : WARNING. Can only use for rectangular detectors and when Radius is zero."
-      "  Gaussian1D : Uses the absolute distance normalised by the cutoff as part of a Gaussian1D weighting"
+      "  Parabolic : Weighting as cutoff - x + cutoff - y + 1."
+      "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
        );
 
   declareProperty("Sigma", 0.5, mustBePositiveDouble->clone(), "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings("Sigma", new EnabledWhenProperty(this, "WeightedSum", IS_EQUAL_TO, "Gaussian1D"));
+  setPropertySettings("Sigma", new EnabledWhenProperty(this, "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
@@ -437,29 +441,26 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
   {
     boost::scoped_ptr<WeightingStrategy> flatStrategy(new FlatWeighting);
     WeightedSum.swap(flatStrategy);
+    g_log.information("Smoothing with Flat Weighting");
   }
   else if(strategyName == "Linear")
   {
     boost::scoped_ptr<WeightingStrategy> linearStrategy(new LinearWeighting(cutOff));
     WeightedSum.swap(linearStrategy);
+    g_log.information("Smoothing with Linear Weighting");
   }
   else if(strategyName == "Parabolic")
   {
-    boost::scoped_ptr<WeightingStrategy>  parabolicStrategy(new ParabolicWeighting);
+    boost::scoped_ptr<WeightingStrategy>  parabolicStrategy(new ParabolicWeighting(cutOff));
     WeightedSum.swap(parabolicStrategy);
+    g_log.information("Smoothing with Parabolic Weighting");
   }
-  else if(strategyName == "Gaussian1D")
+  else if(strategyName == "Gaussian")
   {
     double sigma = getProperty("Sigma");
-    boost::scoped_ptr<WeightingStrategy> gaussian1DStrategy(new GaussianWeighting1D(cutOff, sigma));
+    boost::scoped_ptr<WeightingStrategy> gaussian1DStrategy(new GaussianWeightingnD(cutOff, sigma));
     WeightedSum.swap(gaussian1DStrategy);
-  }
-  else if(strategyName == "Gaussian2D")
-  {
-    double sigma = getProperty("Sigma");
-
-    Instrument_const_sptr instrument = fetchInstrument();
-
+    g_log.information("Smoothing with Gaussian Weighting");
   }
 }
 
