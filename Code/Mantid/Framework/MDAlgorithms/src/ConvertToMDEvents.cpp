@@ -810,9 +810,9 @@ class LOOP_ND<2,Q,MODE,CONV>{
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                                    &ConvertToMDEvents::processQND<2,Q,MODE,CONV>));
-#ifdef _DEBUG
-            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
+//#ifdef _DEBUG
+            //std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
 
     }
 };
