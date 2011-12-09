@@ -74,7 +74,7 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 void AxisInteractor::widgetLayout()
 {
   // All set for vertical orientation
-  QSize scaleSize(80, 400);
+  QSize scaleSize(60, 400);
   QSize gvSize(20, 400);
   QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 
