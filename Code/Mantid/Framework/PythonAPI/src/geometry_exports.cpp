@@ -210,7 +210,7 @@ namespace Mantid
       .def( "getG",( &UnitCellWrapper::getG ) )
       .def( "getGstar",( &UnitCellWrapper::getGstar ) )
       .def( "getB",( &UnitCellWrapper::getB ) )
-      .def( "recalculateFromGstar", ( &UnitCellWrapper::recalculateFromGstar ) ) ;
+      .def( "recalculateFromGstar", ( &UnitCellWrapper::recalculateFromGStar ) ) ;
 
       scope().attr("deg2rad") = Geometry::deg2rad;
       scope().attr("rad2deg") = Geometry::rad2deg;
