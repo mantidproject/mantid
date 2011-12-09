@@ -136,6 +136,8 @@ public:
    * @param value the new location for the indicator
    */
   void updateIndicator(double value);
+  /// Update the requested indicator to the given position.
+  void updateRequestedIndicator(const QString &name, double value);
 
 signals:
   /**

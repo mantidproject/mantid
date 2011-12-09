@@ -427,6 +427,29 @@ void AxisInteractor::deleteRequestedIndicator(const QString &name)
   }
 }
 
+/**
+ * This function takes the requested indicator given by the slice name and
+ * updates the current position given by the requested value.
+ * @param name the indicator slice to update
+ * @param value the coordinate to update to
+ */
+void AxisInteractor::updateRequestedIndicator(const QString &name, double value)
+{
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    Indicator *item = static_cast<Indicator *>(list.at(0));
+    if (item->type() == IndicatorItemType)
+    {
+      if (item->toolTip() == name)
+      {
+        QPoint *pos = this->scalePicker->getLocation(value);
+        item->updatePos(*pos);
+      }
+    }
+  }
+}
+
 }
 }
 }

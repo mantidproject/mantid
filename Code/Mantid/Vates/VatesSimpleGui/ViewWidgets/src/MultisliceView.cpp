@@ -488,22 +488,18 @@ void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
     const QString name = cut->getSMName();
     if (name.contains("Slice"))
     {
-      axis->selectIndicator(name);
-      if (axis->hasIndicator())
+      vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                              "CutFunction").GetAsProxy();
+      double origin[3];
+      vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+      double value = origin[pos];
+      if (value >= axis_min && value <= axis_max)
       {
-        vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-                                                "CutFunction").GetAsProxy();
-        double origin[3];
-        vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-        double value = origin[pos];
-        if (value >= axis_min && value <= axis_max)
-        {
-          axis->updateIndicator(value);
-        }
-        else
-        {
-          axis->deleteRequestedIndicator(name);
-        }
+        axis->updateRequestedIndicator(name, value);
+      }
+      else
+      {
+        axis->deleteRequestedIndicator(name);
       }
     }
   }
