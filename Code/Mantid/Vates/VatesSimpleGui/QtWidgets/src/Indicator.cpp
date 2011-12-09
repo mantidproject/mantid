@@ -121,11 +121,6 @@ void Indicator::printSelf()
     }
 }
 
-int Indicator::fixPosition(int level)
-{
-  return level - this->half_base / 2;
-}
-
 void Indicator::updatePos(const QPoint &pos)
 {
   switch (this->orientation)
@@ -149,12 +144,12 @@ void Indicator::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     {
     case AxisInteractor::LeftScale:
     case AxisInteractor::RightScale:
-      this->setPos(this->tip_edge, this->fixPosition(static_cast<int>(pos.y())));
+      this->setPos(this->tip_edge, static_cast<int>(pos.y()));
       coord = 0;
       break;
     case AxisInteractor::TopScale:
     case AxisInteractor::BottomScale:
-      this->setPos(this->fixPosition(static_cast<int>(pos.x())), this->tip_edge);
+      this->setPos(static_cast<int>(pos.x()), this->tip_edge);
       coord = 1;
       break;
     }
