@@ -164,7 +164,7 @@ namespace Mantid
         //If the user provides no peaks we default to use all the available peaks.
         npeaks = ws->getNumberPeaks();
         peakindices.reserve(npeaks);
-        for(int i = 1; i <= npeaks; i++) //create indexes corresponding to all peak indexes
+        for(int i = 1; i <= int(npeaks); i++) //create indexes corresponding to all peak indexes
         {
           peakindices.push_back(i);
         }
