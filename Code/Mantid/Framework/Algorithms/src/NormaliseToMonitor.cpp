@@ -280,10 +280,10 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
   std::vector<detid_t>  monitors(1,monitorSpec);
   std::vector<specid_t> RealMonitorSpec = inputWorkspace->spectraMap().getSpectra(monitors);
   monitorSpec                           = (int)RealMonitorSpec[0];
-//  if (monitorSpec < 0)
-//  {
-//    throw std::runtime_error("MonitorSpectrum must not be negative");
-//  }
+  if (monitorSpec < 0)
+  {
+    throw std::runtime_error("MonitorSpectrum must not be negative");
+  }
   spec2index_map specs;
   const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWorkspace->getAxis(1));
   if ( ! axis)
