@@ -59,7 +59,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Rebin";}
+  virtual const std::string category() const { return "Transforms\\Rebin";}
   /// Algorithm's aliases
   virtual const std::string alias() const { return "rebin"; }
 

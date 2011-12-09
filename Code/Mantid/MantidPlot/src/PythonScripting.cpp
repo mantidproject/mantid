@@ -54,6 +54,12 @@ extern "C" void initqti();
 // Language name
 const char* PythonScripting::langName = "Python";
 
+namespace
+{
+  /// Logger
+  Mantid::Kernel::Logger & g_log = Mantid::Kernel::Logger::get("PythonScripting");
+}
+
 // Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
 { 
@@ -87,6 +93,9 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
   value = sipLocation + ":" + value;
   setenv(envname, value.c_str(), 1);
 #endif
+
+  // Observe ADS updates
+  //observeAdd();
 }
 
 PythonScripting::~PythonScripting()
@@ -205,7 +214,7 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
-  PyGILState_Ensure();
+  GILHolder gil;
   Py_XDECREF(m_math);
   Py_XDECREF(m_locals);
   Py_Finalize();
@@ -382,4 +391,32 @@ bool PythonScripting::loadInitFile(const QString & filename)
 
   return success;
 }
+
+/**
+ * Listen to add notifications from the ADS and add a Python variable of the workspace name
+ * to the current scope
+ * @param wsName The name of the workspace
+ * @param ws The ws ptr (unused)
+ */
+void PythonScripting::addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
+{
+  // Compile a code object
+  QString key = QString::fromStdString(wsName);
+  QString code = QString("%1 = mtd['%1']").arg(key);
+  GILHolder gil;
+  PyObject *codeObj = Py_CompileString(code.toAscii().data(), "<PythonScripting::addHandle>", Py_file_input);
+  if( codeObj )
+  {
+    PyObject *ret = PyEval_EvalCode((PyCodeObject*)codeObj,globalDict(), localDict());
+    if( !ret )
+    {
+      PyErr_Print();
+    }
+  }
+  else
+  {
+     PyErr_Print();
+  }
+}
+
 

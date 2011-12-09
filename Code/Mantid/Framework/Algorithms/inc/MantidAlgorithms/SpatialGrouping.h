@@ -61,7 +61,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "General"; }
+  virtual const std::string category() const { return "Transforms\\Grouping"; }
 
 private:
   /// Sets documentation strings for this algorithm
@@ -72,10 +72,10 @@ private:
   void exec();
 
   /// expand our search out to the next neighbours along
-  bool expandNet(std::map<specid_t,double> & nearest, specid_t spec, const size_t & noNeighbours,
+  bool expandNet(std::map<specid_t,Mantid::Kernel::V3D> & nearest, specid_t spec, const size_t & noNeighbours,
     const Mantid::Geometry::BoundingBox & bbox);
   /// sort by distance
-  void sortByDistance(std::map<specid_t, double> & nearest, const size_t & noNeighbours);
+  void sortByDistance(std::map<specid_t, Mantid::Kernel::V3D> & nearest, const size_t & noNeighbours);
   /// create expanded bounding box for our purposes
   void createBox(boost::shared_ptr<const Geometry::IDetector> det, Geometry::BoundingBox & bndbox);
   /// grow dimensions of our bounding box to the factor

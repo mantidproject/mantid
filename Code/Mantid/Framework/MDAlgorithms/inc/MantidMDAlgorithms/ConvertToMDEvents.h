@@ -12,6 +12,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertToQ3DdE.h"
@@ -55,7 +56,7 @@ namespace MDAlgorithms
   typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
   // signature for a fucntion, creating n-dimension workspace
   //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
-  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, size_t ,size_t ,size_t )> pWSCreator;
+  typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents* )> pWSCreator;
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
   /// known sates for algorithms, caluclating Q-values
@@ -86,7 +87,7 @@ namespace MDAlgorithms
   template<Q_state Q, AnalMode MODE, CnvrtUnits CONV> 
   struct COORD_TRANSFORMER;
   
-  class DLLExport ConvertToMDEvents  : public API::Algorithm
+  class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:
     ConvertToMDEvents();
@@ -196,14 +197,18 @@ namespace MDAlgorithms
      /// helper class to orginize metaloop on number of dimensions
      template< size_t i, Q_state Q, AnalMode MODE, CnvrtUnits CONV >
      friend class LOOP_ND;
+     /// helper class to generate methaloop on MD workspaces
+     template< size_t i>
+     friend class LOOP;
+
 
     /** template to build empty MDevent workspace with box controller and other palavra
-     * @param split_into       -- the number of the bin the grid is split into
-     * @param split_threshold  -- number of events in an intermediate cell?
-     * @param split_maxDepth   -- maximal depth of the split tree;
+      * 
+      * The box controller parameters are obtained from host class BoxControllerSettingsAlgorithm.
+      *
     */
     template<size_t nd>
-    API::IMDEventWorkspace_sptr  createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth);
+    API::IMDEventWorkspace_sptr  createEmptyEventWS(void);
 
     // known momentum analysis mo des ID-s;
     std::vector<std::string> Q_modes;

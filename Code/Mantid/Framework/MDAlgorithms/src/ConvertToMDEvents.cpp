@@ -236,11 +236,14 @@ ConvertToMDEvents::init()
          "An array of the same size as MinValues array"
          " Values higher then the specified by the array will be ignored\n"
         " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
-
-
     
     declareProperty(new ArrayProperty<double>("u","1,0,0",new ArrayLengthValidator<double>(3)), "first  base vector (in hkl) defining fractional coordinate system for neutron diffraction");
     declareProperty(new ArrayProperty<double>("v","0,1,0",new ArrayLengthValidator<double>(3)), "second base vector (in hkl) defining fractional coordinate system for neutron diffraction");  
+
+   // Box controller properties. These are the defaults
+    this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
+
+ 
 
 }
 
@@ -390,13 +393,13 @@ void ConvertToMDEvents::exec(){
       
    
      if(create_new_ws){
-        // create the event workspace with proper number of dimensions and specified box controller parameters;
-        spws = ws_creator[n_activated_dimensions](this,5,10,20);
-        if(!spws){
-            g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
-            throw(std::invalid_argument("can not create target workspace"));
+         spws = ws_creator[n_activated_dimensions](this);
+         if(!spws){
+             g_log.error()<<"can not create target event workspace with :"<<n_activated_dimensions<<" dimensions\n";
+             throw(std::invalid_argument("can not create target workspace"));
          } 
-     }
+      }
+
 
     // call selected algorithm
     pMethod algo =  alg_selector[algo_id];
@@ -510,12 +513,6 @@ ConvertToMDEvents::parseConvMode(const std::string &Q_MODE_ID,const std::string 
                 CONV_MODE_ID = ConvModes[ConvFromTOF];
             }else{                                 // convert via TOF
                 CONV_MODE_ID = ConvModes[ConvByTOF];
-                if(getEMode(this) == 0){
-                    convert_log.error() <<" conversion via TOF is not availible in elastic mode\n";
-                    convert_log.error() <<" can not convert input workspce X-axis units: "<<ws_dim_units[0]<<" into: "<<getNativeUnitsID(this)
-                                        <<" needed by elastic conversion\n";
-                    throw(std::invalid_argument(" wrong X-axis units"));
-                }
             }
         }
     } 
@@ -745,6 +742,7 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel
 
   // Obtain the transformation matrix:
     Kernel::Matrix<double> mat = umat*gon ; //*(2*M_PI)?;
+    mat.Invert();
     std::vector<double> rotMat = mat.get_vector();
     return rotMat;
 }
@@ -809,12 +807,29 @@ class LOOP_ND<2,Q,MODE,CONV>{
             std::stringstream num;
             num << 2;
             std::string Key = pH->Q_modes[Q]+pH->dE_modes[MODE]+pH->ConvModes[CONV]+num.str();
-#ifdef _DEBUG
-            std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
-#endif
 
             pH->alg_selector.insert(std::pair<std::string,pMethod>(Key,
                                    &ConvertToMDEvents::processQND<2,Q,MODE,CONV>));
+//#ifdef _DEBUG
+            //std::cout<<" Ending group by instansiating algorithm with ID: "<<Key<<std::endl;
+//#endif
+
+    }
+};
+
+template<size_t i>
+class LOOP{
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){
+            LOOP< i-1 >::EXEC(pH);
+            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(i,&ConvertToMDEvents::createEmptyEventWS<i>));
+    }
+};
+template<>
+class LOOP<2>{
+  public:
+    static inline void EXEC(ConvertToMDEvents *pH){           
+            pH->ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
     }
 };
 /** Constructor 
@@ -826,13 +841,13 @@ dE_modes(4),
 ConvModes(4),
 // The conversion subalgorithm processes data in these units; 
 // Change of the units have to be accompanied by correspondent change in conversion subalgorithm
-native_elastic_unitID("MomentumTransfer"), // Why it is a transfer? Hope it is just a momentum
+native_elastic_unitID("Momentum"), 
 native_inelastic_unitID("DeltaE")
 {
      Q_modes[modQ]="|Q|";
      Q_modes[Q3D] ="QxQyQz";    
      Q_modes[NoQ] ="";    // no Q dimension (does it have any interest&relevance to ISIS/SNS?) 
-     dE_modes[ANY_Mode]  = "";
+     dE_modes[ANY_Mode]  = ""; // no Q uses it to run without conversion. 
      dE_modes[Direct]    = "Direct";
      dE_modes[Indir]     = "Indirect";
      dE_modes[Elastic]   = "Elastic";
@@ -875,16 +890,8 @@ native_inelastic_unitID("DeltaE")
     LOOP_ND<MAX_NDIM,Q3D,Indir,ConvByTOF>::EXEC(this);
     LOOP_ND<MAX_NDIM,Q3D,Elastic,ConvByTOF>::EXEC(this);
 
-
-    // Workspaces:
-    // TO DO: Loop on MAX_NDIM
-    ws_creator.insert(std::pair<size_t,pWSCreator>(2,&ConvertToMDEvents::createEmptyEventWS<2>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(3,&ConvertToMDEvents::createEmptyEventWS<3>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(4,&ConvertToMDEvents::createEmptyEventWS<4>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(5,&ConvertToMDEvents::createEmptyEventWS<5>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(6,&ConvertToMDEvents::createEmptyEventWS<6>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(7,&ConvertToMDEvents::createEmptyEventWS<7>));
-    ws_creator.insert(std::pair<size_t,pWSCreator>(8,&ConvertToMDEvents::createEmptyEventWS<8>));
+    // workspace factory
+    LOOP<MAX_NDIM>::EXEC(this);
 }
 
 //

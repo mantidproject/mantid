@@ -237,6 +237,7 @@ Wavelength::Wavelength() : Unit()
                                  / ( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV );
   addConversion("Energy",factor,-2.0);
   addConversion("Energy_inWavenumber",factor*PhysicalConstants::meVtoWavenumber,-2.0);
+  addConversion("Momentum",2*M_PI,-1.0);
 }
 
 
@@ -344,6 +345,7 @@ Energy::Energy() : Unit()
   const double factor = toAngstroms * PhysicalConstants::h
                                 / sqrt( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   addConversion("Wavelength",factor,-0.5);
+  addConversion("Momentum",2*M_PI/factor,0.5);
 }
 
 void Energy::init()
@@ -397,6 +399,8 @@ Energy_inWavenumber::Energy_inWavenumber() : Unit()
   const double factor = toAngstroms * PhysicalConstants::h
                          / sqrt( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV / PhysicalConstants::meVtoWavenumber);
   addConversion("Wavelength",factor,-0.5);
+
+  addConversion("Momentum",2*M_PI/factor,0.5);
 }
 
 
@@ -721,6 +725,119 @@ void DeltaE_inWavenumber::init()
 Unit * DeltaE_inWavenumber::clone() const
 {
   return new DeltaE_inWavenumber(*this);
+}
+
+// =====================================================================================================
+/* Momentum in Angstrom^-1. It is 2*Pi/wavelength
+ * =====================================================================================================
+ *
+ * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
+ */
+DECLARE_UNIT(Momentum)
+
+Momentum::Momentum() : Unit()
+{
+
+  const double AngstromsSquared = 1e20;
+  const double factor =( AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h )
+                        / ( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV )
+                        /(4*M_PI*M_PI);
+
+  addConversion("Energy",factor,2.0);
+  addConversion("Energy_inWavenumber",factor*PhysicalConstants::meVtoWavenumber,2.0);
+  addConversion("Wavelength",2*M_PI,-1.0);
+//
+}
+
+void Momentum::init()
+{
+  // ------------ Factors to convert TO TOF ---------------------
+  double ltot = 0.0;
+  double TOFisinMicroseconds = 1e6;
+  double toAngstroms = 1e10;
+  sfpTo = 0.0;
+
+  if ( emode == 1 )
+  {
+    ltot = l2;
+    sfpTo = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l1 ) / sqrt(efixed);
+  }
+  else if ( emode == 2 )
+  {
+    ltot = l1;
+    sfpTo = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l2 ) / sqrt(efixed);
+  }
+  else
+  {
+    ltot = l1 + l2;
+  }
+  factorTo = 2*M_PI*( PhysicalConstants::NeutronMass * ( ltot ) ) / PhysicalConstants::h;
+  // Now adjustments for the scale of units used
+  factorTo *= TOFisinMicroseconds / toAngstroms;
+
+  // ------------ Factors to convert FROM TOF ---------------------
+  ltot = l1 + l2;
+  // Protect against divide by zero
+  if ( ltot == 0.0 ) ltot = DBL_MIN;
+
+  // Now apply the factor to the input data vector
+  do_sfpFrom = false;
+  if ( efixed != DBL_MIN )
+  {
+    if ( emode == 1 ) // Direct
+    {
+      ltot = l2;
+      sfpFrom = sfpTo;
+      do_sfpFrom = true;
+    }
+    else if ( emode == 2 ) // Indirect
+    {
+      ltot = l1;
+      sfpFrom = sfpTo;
+      do_sfpFrom = true;
+    }
+    else
+    {
+      ltot = l1 + l2;
+    }
+  }
+  else
+  {
+    ltot = l1 + l2;
+  }
+
+  // First the crux of the conversion
+  factorFrom = PhysicalConstants::h / ( PhysicalConstants::NeutronMass * ( ltot ) );
+
+  // Now adjustments for the scale of units used
+  factorFrom *= toAngstroms / TOFisinMicroseconds;
+  factorFrom  = 2*M_PI/factorFrom;
+
+}
+
+
+double Momentum::singleToTOF(const double ki) const
+{
+  double tof =  factorTo/ki;
+  // If Direct or Indirect we want to correct TOF values..
+  if ( emode == 1 || emode == 2 )
+    tof += sfpTo;
+  return tof;
+}
+
+double Momentum::singleFromTOF(const double tof) const
+{
+  double x = tof;
+  if (do_sfpFrom) x -= sfpFrom;
+  if (x==0)       x  = DBL_MIN;
+
+  return factorFrom/x;
+}
+
+
+Unit * Momentum::clone() const
+{
+  return new Momentum(*this);
 }
 
 

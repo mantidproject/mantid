@@ -60,7 +60,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Units"; }
+  virtual const std::string category() const { return "Transforms\\Units;Transforms\\Axes"; }
 
 private:
   /// Sets documentation strings for this algorithm

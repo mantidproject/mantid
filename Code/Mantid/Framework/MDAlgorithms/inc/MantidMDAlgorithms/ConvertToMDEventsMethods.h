@@ -88,7 +88,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
             // drop emtpy events
            if(Signal[j]<FLT_EPSILON)continue;
 
-           if(!trn.calculate_ND_coordinates(X,i,j,Coord))continue; // skip ND outside the range
+           if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
             pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
@@ -119,7 +119,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 /// helper function to create empty MDEventWorkspace with nd dimensions 
 template<size_t nd>
 API::IMDEventWorkspace_sptr
-ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth)
+ConvertToMDEvents::createEmptyEventWS(void)
 {
 
        boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
@@ -128,20 +128,19 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], dim_min[d], dim_min[d], 10);
+        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], 
+                                                                          this->dim_min[d], this->dim_max[d], 10);
         ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
       }
       ws->initialize();
 
       // Build up the box controller
-      Mantid::API::BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(split_into);
-//      bc->setSplitThreshold(1500);
-      bc->setSplitThreshold(split_threshold);
-      bc->setMaxDepth(split_maxDepth);
-      // We always want the box to be split (it will reject bad ones)
-      ws->splitBox();
-      return ws;
+     Mantid::API::BoxController_sptr bc = ws->getBoxController();
+    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm 
+     this->setBoxController(bc);
+    // We always want the box to be split (it will reject bad ones)
+     ws->splitBox();
+     return ws;
 }
      
 

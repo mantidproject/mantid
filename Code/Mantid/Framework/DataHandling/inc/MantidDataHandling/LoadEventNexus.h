@@ -70,7 +70,7 @@ namespace Mantid
       virtual int version() const { return 1;};
 
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "DataHandling";}
+      virtual const std::string category() const { return "DataHandling\\Nexus";}
 
       /// do a quick check that this file can be loaded 
       bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);

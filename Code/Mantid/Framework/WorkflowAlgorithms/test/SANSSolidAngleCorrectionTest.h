@@ -22,11 +22,6 @@ public:
     TS_ASSERT_EQUALS( correction.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( correction.category(), "Workflow\\SANS" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( correction.initialize() )

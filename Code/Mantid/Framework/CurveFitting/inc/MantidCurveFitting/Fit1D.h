@@ -70,7 +70,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "CurveFitting";}
+      virtual const std::string category() const { return "Optimization";}
 
       /// Function you want to fit to.
       virtual void function(const double* in, double* out, const double* xValues, const size_t nData) = 0;

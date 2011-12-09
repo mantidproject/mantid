@@ -26,11 +26,6 @@ public:
     TS_ASSERT_EQUALS( fftsmooth2.version(), 2 )
   }
   
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( fftsmooth2.category(), "General" )
-  }
-  
   void testInit()
   {
     Mantid::Algorithms::FFTSmooth2   fftsmooth2_b;

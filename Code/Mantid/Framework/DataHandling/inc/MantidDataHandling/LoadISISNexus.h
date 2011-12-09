@@ -128,13 +128,13 @@ namespace Mantid
             /// Have the spectrum_min/max properties been set?
             bool m_interval;
 			  /// The number of the input entry
-            std::size_t m_entrynumber;
+            int64_t m_entrynumber;
             /// The value of the spectrum_list property
             std::vector<std::size_t> m_spec_list;
             /// The value of the spectrum_min property
-            std::size_t m_spec_min;
+            int m_spec_min;
             /// The value of the spectrum_max property
-            std::size_t m_spec_max;
+            int m_spec_max;
             /// The group which each detector belongs to in order
             std::vector<int64_t> m_groupings;
             /// Time channels

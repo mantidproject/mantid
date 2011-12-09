@@ -55,7 +55,7 @@ namespace Mantid
       /// The version number
       virtual int version() const { return 1; }
       /// The category
-      virtual const std::string category() const { return "DataHandling"; }
+      virtual const std::string category() const { return "DataHandling\\Text"; }
       /// Do a quick check that this file can be loaded 
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// check the structure of the file and  return a value between 

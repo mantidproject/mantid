@@ -80,11 +80,6 @@ public:
     TS_ASSERT_EQUALS( norm.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( norm.category(), "General" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( norm.initialize() )

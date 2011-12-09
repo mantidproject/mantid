@@ -282,7 +282,7 @@ bool PythonScript::exec()
   if( env()->isRunning() ) return false;
 
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
-   PyGILState_STATE state = PyGILState_Ensure();
+  GILHolder gil;
 
   env()->setIsRunning(true);
 
@@ -290,7 +290,6 @@ bool PythonScript::exec()
   if (compiled != Script::isCompiled && !compile(false))
   {
     env()->setIsRunning(false);
-    PyGILState_Release(state);
     return false;
   }
   // Redirect the output
@@ -317,11 +316,10 @@ bool PythonScript::exec()
     {
       emit_error(constructErrorMsg(), 0);
       env()->setIsRunning(false);
-      PyGILState_Release(state);
       return false;
     }
   }
-  /// Return value is NULL if everything succeeded
+  /// Return value is non-NULL if everything succeeded
   pyret = executeScript(empty_tuple);
   // Restore output
   endStdoutRedirect();
@@ -332,12 +330,10 @@ bool PythonScript::exec()
   {
     Py_DECREF(pyret);
     env()->setIsRunning(false);
-    PyGILState_Release(state);
     return true;
   }
   emit_error(constructErrorMsg(), 0);
   env()->setIsRunning(false);
-  PyGILState_Release(state);
   return false;
 }
 
@@ -360,6 +356,7 @@ void PythonScript::updatePath(const QString & filename, bool append)
       "    sys.path.remove(r'%1')";
   }
   pyCode = pyCode.arg(scriptPath);
+  GILHolder gil;
   PyRun_SimpleString(pyCode.toAscii());
 }
 
@@ -549,6 +546,7 @@ QString PythonScript::constructErrorMsg()
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
+  GILHolder gil; // Aqcuire the GIL
   if (localDict) // Avoid segfault for un-initialized object
   {
     if (!PyDict_Contains(localDict, PyString_FromString(name)))
@@ -561,6 +559,7 @@ bool PythonScript::setQObject(QObject *val, const char *name)
 
 bool PythonScript::setInt(int val, const char *name)
 {
+  GILHolder gil; // Aqcuire the GIL
   if (!PyDict_Contains(localDict, PyString_FromString(name)))
     compiled = notCompiled;
   return env()->setInt(val, name, localDict);
@@ -568,6 +567,7 @@ bool PythonScript::setInt(int val, const char *name)
 
 bool PythonScript::setDouble(double val, const char *name)
 {
+  GILHolder gil; // Aqcuire the GIL
   if (!PyDict_Contains(localDict, PyString_FromString(name)))
     compiled = notCompiled;
   return env()->setDouble(val, name, localDict);
@@ -623,6 +623,7 @@ PythonScripting * PythonScript::env() const
  */
 void PythonScript::beginStdoutRedirect()
 {
+  GILHolder gil; // Aqcuire the GIL
   stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
   Py_XINCREF(stdoutSave);
   stderrSave = PyDict_GetItemString(env()->sysDict(), "stderr");
@@ -637,6 +638,7 @@ void PythonScript::beginStdoutRedirect()
  */
 void PythonScript::endStdoutRedirect()
 {
+  GILHolder gil; // Aqcuire the GIL
   PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);
   PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);

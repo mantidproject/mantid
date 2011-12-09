@@ -7664,7 +7664,7 @@ void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser)
     if (g->validCurvesDataSize())
     {
       //Called when setting up usual peakPickerTool
-      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), showFitPropertyBrowser);
+      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, showFitPropertyBrowser);
       g->setActiveTool(ppicker);
       connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
     }
@@ -16498,7 +16498,7 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
           foreach(Graph *g, layers)
           {
             // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb);
+            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true);
             g->setActiveTool(ppicker);
           }
         }     

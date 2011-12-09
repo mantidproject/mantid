@@ -17,8 +17,31 @@ For each pixel in each detector, the AdjX*AdjY neighboring spectra are summed to
 
 === WeightedSum parameter ===
 
-* A weighting strategy can be applied to control how the weights are calculated. Options are either linear or flat or parabolic.
-* Weights are summed and scaled so that they add up to 1.
+A weighting strategy can be applied to control how the weights are calculated. This defaults to a flat weighting strategy. Weights are summed and scaled so that they add up to 1.
+
+==== Flat Weighting ====
+
+All weights are 1. This is completely position in-senitive.
+
+==== Linear Weighting ====
+
+Weights are calculated according to <math>w = 1 - r/R</math>, where w is the weighting factor, r is the distance from the detector and R is the cut-off radius.
+
+==== Parabolic Weighting ====
+For rectangular detectors it may be used as follows: The radius must be zero and a AdjX and AdjY parameter must be provided. <math>w = AdjX - abs(x) + AdjY - abs(y) + 1</math>
+
+For non-rectangular detectors, the cut-off radius is used in the calculation. <math>w = R - abs(x) + R - abs(y) + 1</math>
+
+==== Gaussian Weighting ====
+This weighting is calculated from the Gaussian distribution
+
+<math>w = e^{-r^2/(2\sigma^2)}</math>
+
+where <math>r^2 = x^2 + y^2 + z^2</math>
+and <math>\sigma</math> is the number of standard deviations controlling the width of the distribution curve
+
+Important notes about this algorithm are that:
+* Distances are normalised by the radius cut-off to make them dimensionless and scaled to 1 at the boundaries. 
 
 === For EventWorkspaces ===
 
@@ -32,10 +55,31 @@ You can use PreserveEvents = false to avoid the memory issues with an EventWorks
 Please note that the algorithm '''does not check''' that the bin X boundaries match.
 
 === Neighbour Searching ===
+<gallery>
+File:NNSearchByRadius.jpg|''Fig. 1''. 
+File:NNSearchIrregularGrid.jpg|''Fig. 2''. 
+File:NNSearchLimitByRadius.jpg|''Fig. 3''
+File:NNSearchLimitByNNs.jpg|''Fig. 4''
+File:NNSearchXY.jpg|''Fig. 5''
+</gallery>
 
-If the radius is set to 0, the instrument is treated as though it has rectangular detectors. AdjX and AdjY can then be used to control the number of neighbours independently in x and y. Otherwise
-the algorithm will fetch neigbours using the intesection of those inside the radius cut-off and those less than the NumberOfNeighbours specified. For example with NumberOfNeighbours=24 and a 
-Radius=1.2 (with RadiusUnit=NumberOfPixels) only 8 nearest neighbours at most will be returned. If NumberOfNeighbours=24 and Radius=2, a maxium of 24 nearest neighbours will be found.
+==== Property Values of Examples ====
+
+''Fig. 1'' : Requesting NumberOfNeighbours=36, Radius=3. Algorithm looks for 36 nearest neighbours with a cut-off of 3 detector widths.<br>
+''Fig. 2'' : Requesting NumberOfNeighbours=46, Radius=2. Algorithm looks for 46 nearest neighbours with a cut-off of 2 detector widths.<br>
+''Fig. 3'' : Requesting NumberOfNeighbours=56, Radius=3. Algorithm looks for 56 nearest neighbours with a cut-off of 3 detector widths.<br>
+''Fig. 4'' : Requesting NumberOfNeighbours=8, Radius=3. Algorithm looks for 8 nearest neighbours with a cut-off of 3 detector widths.<br>
+''Fig. 5'' : Requesting AdjX=4, AdjY=2, Radius=0. Algorithm fetches neighbours in the specified pattern.
+
+==== How it Works ====
+
+The algorithm will fetch neigbours using the intesection of those inside the radius cut-off and those less than the NumberOfNeighbours specified. ''Fig. 1'' illustrates this process. Searching is relative to the central detector, those constrained by both specified number of neighbours have been highlighted. In this case the radius cut-off and the number of neighbours constrain the same number of detectors. 
+
+Searching via the number of neighbours will not necessarily return the neighbours in a grid with the same number of detectors in each axis. ''Fig. 2'' shows how neighbours might be returned if distances are non-uniform. If RectangularDetectors are available, you may force the searching to occur in rectangular manner (described below).
+
+The SmoothingNeighbours algorithm will only take those neighbours which are in the intersection between those constrained by the cut-off and those constrained by the specified number of neighbours. If the radius cut-off is the limiting factor, then those neighbours outside will not be considered. This is illustrated in ''Fig. 3'' where the blue detectors will not be considered, but will not with this radius cut-off, while the green ones will. Likewise, in ''Fig. 4'' the effect of reducing the NumberOfNeighbours property can be seen.
+
+If the radius is set to 0, the instrument is treated as though it has rectangular detectors. AdjX and AdjY can then be used to control the number of neighbours independently in x and y using the AdjX and AdjY properties. ''Fig. 5'' Shows the effect of this type of searching.
 
 === Ignore Masks ===
 
@@ -124,12 +168,17 @@ void SmoothNeighbours::init()
     propOptions.push_back("Flat");
     propOptions.push_back("Linear");
     propOptions.push_back("Parabolic");
+    propOptions.push_back("Gaussian");
     declareProperty("WeightedSum", "Flat",new ListValidator(propOptions),
       "What sort of Weighting scheme to use?\n"
       "  Flat: Effectively no-weighting, all weights are 1.\n"
       "  Linear: Linear weighting 1 - r/R from origin.\n"
-      "  Parabolic : WARNING. Can only use for rectangular detectors and when Radius is zero."
+      "  Parabolic : Weighting as cutoff - x + cutoff - y + 1."
+      "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
        );
+
+  declareProperty("Sigma", 0.5, mustBePositiveDouble->clone(), "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+  setPropertySettings("Sigma", new EnabledWhenProperty(this, "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
@@ -339,14 +388,14 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     
     // Force the central pixel to always be there
     // There seems to be a bug in nearestNeighbours, returns distance != 0.0 for the central pixel. So we force distance = 0
-    neighbSpectra[inSpec] = 0.0;
+    neighbSpectra[inSpec] = V3D(0.0, 0.0, 0.0);
 
     // Neighbours and weights list
     double totalWeight = 0;
     std::vector< weightedNeighbour > neighbours;
 
     // Convert from spectrum numbers to workspace indices
-    for (std::map<specid_t, double>::iterator it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it)
+    for (SpectraDistanceMap::iterator it = neighbSpectra.begin(); it != neighbSpectra.end(); ++it)
     {
       specid_t spec = it->first;
 
@@ -364,8 +413,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
           totalWeight += weight;
         }
       }
-    } // each neighbour
-//    std::cout << "\n";
+    } 
 
     // Adjust the weights of each neighbour to normalize to unity
     for (size_t q=0; q<neighbours.size(); q++)
@@ -393,17 +441,52 @@ void SmoothNeighbours::setWeightingStrategy(const std::string strategyName, doub
   {
     boost::scoped_ptr<WeightingStrategy> flatStrategy(new FlatWeighting);
     WeightedSum.swap(flatStrategy);
+    g_log.information("Smoothing with Flat Weighting");
   }
   else if(strategyName == "Linear")
   {
     boost::scoped_ptr<WeightingStrategy> linearStrategy(new LinearWeighting(cutOff));
     WeightedSum.swap(linearStrategy);
+    g_log.information("Smoothing with Linear Weighting");
   }
   else if(strategyName == "Parabolic")
   {
-    boost::scoped_ptr<WeightingStrategy>  parabolicStrategy(new ParabolicWeighting);
+    boost::scoped_ptr<WeightingStrategy>  parabolicStrategy(new ParabolicWeighting(cutOff));
     WeightedSum.swap(parabolicStrategy);
+    g_log.information("Smoothing with Parabolic Weighting");
   }
+  else if(strategyName == "Gaussian")
+  {
+    double sigma = getProperty("Sigma");
+    boost::scoped_ptr<WeightingStrategy> gaussian1DStrategy(new GaussianWeightingnD(cutOff, sigma));
+    WeightedSum.swap(gaussian1DStrategy);
+    g_log.information("Smoothing with Gaussian Weighting");
+  }
+}
+
+
+/*
+Fetch the instrument associated with the workspace
+@return const shared pointer to the instrument,
+*/
+Instrument_const_sptr SmoothNeighbours::fetchInstrument() const
+{
+    Instrument_const_sptr instrument;
+    EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
+    MatrixWorkspace_sptr wsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS);
+    if(wsEvent)
+    {
+      instrument = boost::dynamic_pointer_cast<EventWorkspace>(inWS)->getInstrument();
+    }
+    else if(wsMatrix)
+    {
+      instrument = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)->getInstrument();
+    }
+    else
+    {
+      throw std::invalid_argument("Neither a Matrix Workspace or an EventWorkpace provided to SmoothNeighbours.");
+    }
+    return instrument;
 }
 
 /**
@@ -422,21 +505,7 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const 
   else if(radiusUnits == "NumberOfPixels")
   {
     // Fetch the instrument.
-    Instrument_const_sptr instrument;
-    EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
-    MatrixWorkspace_sptr wsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS);
-    if(wsEvent)
-    {
-      instrument = boost::dynamic_pointer_cast<EventWorkspace>(inWS)->getInstrument();
-    }
-    else if(wsMatrix)
-    {
-      instrument = boost::dynamic_pointer_cast<MatrixWorkspace>(inWS)->getInstrument();
-    }
-    else
-    {
-      throw std::invalid_argument("Neither a Matrix Workspace or an EventWorkpace provided to SmoothNeighbours.");
-    }
+    Instrument_const_sptr instrument = fetchInstrument();
 
     // Get the first idetector from the workspace index 0.
     IDetector_const_sptr firstDet = inWS->getDetector(0);

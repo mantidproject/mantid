@@ -29,7 +29,7 @@ namespace DataHandling
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "General";}
+    virtual const std::string category() const { return "DataHandling\\Logs";}
     
   private:
     /// Sets documentation strings for this algorithm
@@ -54,7 +54,7 @@ namespace DataHandling
     bool m_delayfileinoldformat;
 
     std::size_t m_numpulses;
-    std::size_t m_numchoppers;
+    int m_numchoppers;
     unsigned int** m_delaytimes;
     std::vector<uint32_t> m_pulseidseconds;
     std::vector<uint32_t> m_pulseidnanoseconds;

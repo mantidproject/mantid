@@ -33,11 +33,6 @@ public:
     TS_ASSERT_EQUALS( conv.version(), 1 )
 	}
 
-	void testCategory()
-	{
-    TS_ASSERT_EQUALS( conv.category(), "General" )
-	}
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( conv.initialize() )

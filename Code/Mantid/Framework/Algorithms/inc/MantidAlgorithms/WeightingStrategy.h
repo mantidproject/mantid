@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_WEIGHTINGSTRATEGY_H_
 
 #include "MantidKernel/System.h"
-
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -47,10 +47,10 @@ namespace Algorithms
       virtual ~WeightingStrategy();
       /**
       Calculate the weight at distance from epicenter.
-      @param distance : absolute distance from epicenter
+      @param distance : difference between the central detector location and the nearest neighbour
       @return calculated weight
       */
-      virtual double weightAt(const double& distance) = 0;
+      virtual double weightAt(const Mantid::Kernel::V3D& ) = 0;
 
       /**
       Calculate the weight at distance from epicenter.
@@ -74,7 +74,7 @@ namespace Algorithms
       FlatWeighting();
       virtual ~FlatWeighting();
       virtual double weightAt(const double&,const double&, const double&, const double&);
-      double weightAt(const double&);
+      double weightAt(const Mantid::Kernel::V3D& );
     };
 
     /*
@@ -85,7 +85,7 @@ namespace Algorithms
     public: 
       LinearWeighting(const double cutOff);
       virtual ~LinearWeighting();
-      double weightAt(const double& distance);
+      double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy);
     };
 
@@ -95,9 +95,9 @@ namespace Algorithms
     class DLLExport ParabolicWeighting : public WeightingStrategy
     {
     public: 
-      ParabolicWeighting();
+      ParabolicWeighting(const double cutOff);
       virtual ~ParabolicWeighting();
-      double weightAt(const double&);
+      double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy);
     };
 
@@ -109,30 +109,26 @@ namespace Algorithms
     public:
       NullWeighting();
       virtual ~NullWeighting();
-      double weightAt(const double&);
+      double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double&,const double&, const double&, const double&);
     };
 
     /*
-    Gaussian Strategy
+    Gaussian nD Strategy. 
+
+    y = exp(-0.5*((r./p(1)).^2) where p = sqtr(2)*sigma
     */
-    class DLLExport GaussianWeighting1D : public WeightingStrategy
+    class DLLExport GaussianWeightingnD : public WeightingStrategy
     {
     public:
-      GaussianWeighting1D(double cutOff, double sigma);
-      GaussianWeighting1D(double sigma);
-      virtual ~GaussianWeighting1D();
-      virtual double weightAt(const double &);
+      GaussianWeightingnD(double cutOff, double sigma);
+      virtual ~GaussianWeightingnD();
+      virtual double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double&,const double&, const double&, const double&);
     private:
-      void init(const double sigma);
       double calculateGaussian(const double normalisedDistanceSq);
-      double m_coeff;
       double m_twiceSigmaSquared;
     };
-
-
-
 
 } // namespace Algorithms
 } // namespace Mantid

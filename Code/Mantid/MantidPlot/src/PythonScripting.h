@@ -31,6 +31,7 @@
 
 #include "PythonScript.h"
 #include "ScriptingEnv.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 class QObject;
 class QString;
@@ -38,7 +39,7 @@ class QString;
 /**
  * A scripting environment for executing Python code.
  */
-class PythonScripting: public ScriptingEnv
+class PythonScripting: public ScriptingEnv, MantidQt::API::WorkspaceObserver
 {
 
   Q_OBJECT
@@ -52,6 +53,8 @@ public:
   virtual bool isRunning() const;
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
+  void flush() {}
+  void set_parent(PyObject*) {}
   /// Create a new code lexer for Python
   QsciLexer * createCodeLexer() const;
   // Python supports progress monitoring
@@ -106,6 +109,8 @@ private:
   void shutdown();
   /// Run execfile on a given file
   bool loadInitFile(const QString &path);
+  /// Listen to add notifications from the ADS
+  void addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
 
 private:
   /// The global dictionary
@@ -118,6 +123,24 @@ private:
   PyObject *m_sys;
   /// Refresh protection
   int refresh_allowed;
+};
+
+//-----------------------------------------------------------------------------
+// Small struct to deal with acquiring/releasing GIL in an more OO way
+//-----------------------------------------------------------------------------
+struct GILHolder
+{
+  GILHolder() : m_state(PyGILState_Ensure())
+  {}
+
+  ~GILHolder()
+  {
+    PyGILState_Release(m_state);
+  }
+
+private:
+  /// Current GIL state
+  PyGILState_STATE m_state;
 };
 
 #endif

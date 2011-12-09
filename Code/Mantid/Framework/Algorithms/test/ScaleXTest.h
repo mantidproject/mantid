@@ -20,11 +20,6 @@ public:
     TS_ASSERT_EQUALS( scale.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( scale.category(), "Arithmetic" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( scale.initialize() )

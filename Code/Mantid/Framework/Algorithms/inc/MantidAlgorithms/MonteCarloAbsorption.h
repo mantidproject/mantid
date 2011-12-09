@@ -58,8 +58,8 @@ namespace Mantid
       virtual const std::string name() const { return "MonteCarloAbsorption"; }
       /// Algorithm's version
       virtual int version() const { return 1; }
-      /// Algorithm's category
-      virtual const std::string category() const { return "Absorption Corrections"; }
+      /// Algorithm's category for identification
+      virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
 
     private:
       /// Initialize the algorithm

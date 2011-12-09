@@ -42,6 +42,9 @@ namespace Mantid
     public:
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "ConvertToPointData"; }
+      
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "Transforms\\Axes";}
 
     private:
       /// Sets documentation strings for this algorithm

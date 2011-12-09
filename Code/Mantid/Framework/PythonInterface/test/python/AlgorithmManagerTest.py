@@ -23,7 +23,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertNotEqual(alg, None)
         self.assertEquals(alg.name(), "ConvertUnits")
         self.assertEquals(alg.version(), 1)
-        self.assertEquals(alg.category(), "Units")
+        self.assertEquals(alg.category(), "Transforms\\Units")
         
     def test_create_unknown_alg_throws(self):
         self.assertRaises(RuntimeError, algorithm_mgr.create,"DoesNotExist")

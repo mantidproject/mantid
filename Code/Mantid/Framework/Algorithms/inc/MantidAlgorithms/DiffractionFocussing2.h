@@ -127,7 +127,7 @@ private:
   /// typedef for the storage of each group's X vector
   typedef std::map<int, boost::shared_ptr<MantidVec> > group2vectormap;
   /// Map from udet to group
-  udet2groupmap udet2group;
+  std::vector<int> udet2group;
   /// The list of group numbers
   std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector

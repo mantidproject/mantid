@@ -372,25 +372,24 @@ namespace Mantid
       }
 
       /** Checks whether the entered output workspace is valid.
-      *  To be valid the only thing it needs is a name.
+      *  To be valid the only thing it needs is a name that is allowed by the ADS, @see AnalysisDataServiceImpl
       *  @returns A user level description of the problem or "" if it is valid.
       */
       std::string isValidOutputWs() const
       {
-        if ( !this->value().empty() )
+        std::string error("");
+        const std::string value = this->value();
+        if( !value.empty() )
         {
-          //it has a name and that is enough so return the success
-          return "";
+          // Will the ADS accept it
+          error = AnalysisDataService::Instance().isValid(value);
         }
         else
         {
-          std::string error;
-
-          if( m_optional ) return "";
-          //Return a user level error
-          error = "Enter a name for the Output workspace";
-          return error;
+          if( m_optional ) error = ""; // Optional ones don't need a name
+          else error = "Enter a name for the Output workspace";
         }
+        return error;
       }
 
       /** Checks whether the entered workspace (that by this point we've found is not in the ADS)

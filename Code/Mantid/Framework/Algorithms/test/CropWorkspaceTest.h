@@ -66,11 +66,6 @@ public:
     TS_ASSERT_EQUALS( crop.version(), 1 );
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( crop.category(), "General" );
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( crop.initialize() );

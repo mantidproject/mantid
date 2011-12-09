@@ -75,6 +75,8 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::st
 
 /// Return a string with all matching occurence-strings
 MANTID_KERNEL_DLL std::string replace(const std::string input, const std::string find_what, const std::string replace_with);
+/// Return a string with all occurrences of the characters in the input replaced by the replace string 
+MANTID_KERNEL_DLL std::string replaceAll(const std::string & input, const std::string & charStr, const std::string & substitute);
 
 /// determine if a character group exists in a string
 MANTID_KERNEL_DLL int confirmStr(const std::string& S,const std::string& fullPhrase);
