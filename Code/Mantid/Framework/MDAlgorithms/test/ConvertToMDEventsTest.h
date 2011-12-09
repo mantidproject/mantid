@@ -119,7 +119,7 @@ void testTOFConversionFails()
     TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
      
     double X0(5);
-    double tof ,k_tr;
+    double tof(0) ,k_tr(0);
     TS_ASSERT_THROWS_NOTHING(tof  = pSourceWSUnit->singleToTOF(X0));
     TS_ASSERT_THROWS_NOTHING(k_tr = pWSUnit->singleFromTOF(tof));
 }
