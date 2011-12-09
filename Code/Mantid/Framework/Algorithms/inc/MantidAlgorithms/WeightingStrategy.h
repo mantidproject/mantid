@@ -95,7 +95,7 @@ namespace Algorithms
     class DLLExport ParabolicWeighting : public WeightingStrategy
     {
     public: 
-      ParabolicWeighting();
+      ParabolicWeighting(const double cutOff);
       virtual ~ParabolicWeighting();
       double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy);
@@ -114,26 +114,21 @@ namespace Algorithms
     };
 
     /*
-    Gaussian Strategy
+    Gaussian nD Strategy. 
+
+    y = exp(-0.5*((r./p(1)).^2) where p = sqtr(2)*sigma
     */
-    class DLLExport GaussianWeighting1D : public WeightingStrategy
+    class DLLExport GaussianWeightingnD : public WeightingStrategy
     {
     public:
-      GaussianWeighting1D(double cutOff, double sigma);
-      virtual ~GaussianWeighting1D();
+      GaussianWeightingnD(double cutOff, double sigma);
+      virtual ~GaussianWeightingnD();
       virtual double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double&,const double&, const double&, const double&);
     private:
-      void init(const double sigma);
       double calculateGaussian(const double normalisedDistanceSq);
-      double m_coeff;
       double m_twiceSigmaSquared;
     };
-
-
-
-
-
 
 } // namespace Algorithms
 } // namespace Mantid

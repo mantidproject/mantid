@@ -95,14 +95,25 @@ public:
 
   void testParabolicWeightingThrows()
   {
-    ParabolicWeighting strategy;
+    ParabolicWeighting strategy(2);
+
     V3D distance;
-    TSM_ASSERT_THROWS("Should not be able to use the ParabolicWeighting like this.", strategy.weightAt(distance), std::runtime_error);
+
+    distance = V3D(2, 2, 0); //Top right
+    TSM_ASSERT_EQUALS("Top right not calculated properly", 1, strategy.weightAt(distance));
+    distance = V3D(-2, -2, 0); //Bottom right
+    TSM_ASSERT_EQUALS("Bottom right not calculated properly", 1, strategy.weightAt(distance));
+    distance = V3D(2, 0, 0); // zero y at max x.
+    TSM_ASSERT_EQUALS("Max x with y = 0 not calculated propertly", 3, strategy.weightAt(distance));
+    distance = V3D(0, 0, 0); //No distance
+    TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(distance));
+
+
   }
 
   void testParabolicWeightingRectangular()
   {
-    ParabolicWeighting strategy;
+    ParabolicWeighting strategy(2);
 
     int adjX = 2;
     int adjY = 2; 
@@ -119,11 +130,20 @@ public:
     TSM_ASSERT_EQUALS("Center not calculated properly", 5, strategy.weightAt(adjX, ix, adjY, iy));
   }
 
-  void testGaussian1D()
+  void testGaussiannDConstructor()
   {
-    GaussianWeighting1D weighting(4, 0.5);
+    TSM_ASSERT_THROWS("GaussianWeighting2D should not allow unsigned cuttoff", GaussianWeightingnD(-1,1), std::invalid_argument);
+    TSM_ASSERT_THROWS("GaussianWeighting2D should not allow unsigned sigma", GaussianWeightingnD(1,-1), std::invalid_argument);
+    TSM_ASSERT_THROWS_NOTHING("GaussianWeighting2D should have constructed with the valid provided arguments", GaussianWeightingnD(1,1));
+  }
 
-    double expectedY[] = {0.1080,
+  void testGaussian2D()
+  {
+    double cutoff = 4;
+    double sigma = 0.5;
+    GaussianWeightingnD weighting(4, sigma);
+
+    double normalDistribY[] = {0.1080,
       0.2590,
       0.4839,
       0.7041,
@@ -139,17 +159,22 @@ public:
     {
       V3D distance(i, 0, 0);
       double y = weighting.weightAt(distance);
-      double yExpected = expectedY[count];
+      //Convert expectedY to gauss function from normal distribution my multiplying by sqrt(2*pi*sigma^2)
+      double yExpected = normalDistribY[count] * std::sqrt(2 * M_PI) * sigma;
       TS_ASSERT_DELTA(yExpected, y, 0.0001);
       count++;
     }
   }
 
-  void testGaussian1DRectangular()
+  void testGaussian2DRectangular()
   {
-    GaussianWeighting1D weighting(1,0.5);
+    double sigma = 0.5;
+    double cutoff = 1;
+    GaussianWeightingnD weighting(cutoff,sigma);
 
-    double expectedY[] = {0.1080,
+
+    //Expected y values are generated from the normal distribution.
+    double normalDistribY[] = {0.1080,
       0.2590,
       0.4839,
       0.7041,
@@ -165,7 +190,8 @@ public:
     int count = 0;
     for(double i = -4; i <= 4; i+=1)
     {
-      double yExpected = expectedY[count];
+      //Convert expectedY to gauss function from normal distribution my multiplying by sqrt(2*pi*sigma^2)
+      double yExpected = normalDistribY[count] * std::sqrt(2 * M_PI) * sigma;
       double y1 = weighting.weightAt(adjX, i, fixedPoint, fixedPoint); 
       double y2 = weighting.weightAt(fixedPoint, fixedPoint, adjY, i);
       TS_ASSERT_DELTA(yExpected, y1, 0.0001);
@@ -174,6 +200,7 @@ public:
       count++;
     }
   }
+
 
 
 };
