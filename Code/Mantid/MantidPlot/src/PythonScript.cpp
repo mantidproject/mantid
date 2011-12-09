@@ -282,7 +282,7 @@ bool PythonScript::exec()
   if( env()->isRunning() ) return false;
 
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
-  GILHolder gil();
+  GILHolder gil;
 
   env()->setIsRunning(true);
 
@@ -356,6 +356,7 @@ void PythonScript::updatePath(const QString & filename, bool append)
       "    sys.path.remove(r'%1')";
   }
   pyCode = pyCode.arg(scriptPath);
+  GILHolder gil;
   PyRun_SimpleString(pyCode.toAscii());
 }
 
@@ -545,6 +546,7 @@ QString PythonScript::constructErrorMsg()
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
+  GILHolder gil; // Aqcuire the GIL
   if (localDict) // Avoid segfault for un-initialized object
   {
     if (!PyDict_Contains(localDict, PyString_FromString(name)))
@@ -557,6 +559,7 @@ bool PythonScript::setQObject(QObject *val, const char *name)
 
 bool PythonScript::setInt(int val, const char *name)
 {
+  GILHolder gil; // Aqcuire the GIL
   if (!PyDict_Contains(localDict, PyString_FromString(name)))
     compiled = notCompiled;
   return env()->setInt(val, name, localDict);
@@ -564,6 +567,7 @@ bool PythonScript::setInt(int val, const char *name)
 
 bool PythonScript::setDouble(double val, const char *name)
 {
+  GILHolder gil; // Aqcuire the GIL
   if (!PyDict_Contains(localDict, PyString_FromString(name)))
     compiled = notCompiled;
   return env()->setDouble(val, name, localDict);
@@ -619,6 +623,7 @@ PythonScripting * PythonScript::env() const
  */
 void PythonScript::beginStdoutRedirect()
 {
+  GILHolder gil; // Aqcuire the GIL
   stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
   Py_XINCREF(stdoutSave);
   stderrSave = PyDict_GetItemString(env()->sysDict(), "stderr");
@@ -633,6 +638,7 @@ void PythonScript::beginStdoutRedirect()
  */
 void PythonScript::endStdoutRedirect()
 {
+  GILHolder gil; // Aqcuire the GIL
   PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
   Py_XDECREF(stdoutSave);
   PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);

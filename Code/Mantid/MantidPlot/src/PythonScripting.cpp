@@ -214,7 +214,7 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
-  GILHolder gil();
+  GILHolder gil;
   Py_XDECREF(m_math);
   Py_XDECREF(m_locals);
   Py_Finalize();
