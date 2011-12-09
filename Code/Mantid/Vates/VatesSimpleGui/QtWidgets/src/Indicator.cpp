@@ -42,10 +42,8 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
   int half_triangle_height = 0;
   int p1_x, p1_y, p2_x, p2_y, p3_x, p3_y;
   p1_x = p1_y = p2_x = p2_y = p3_x = p3_y = 0;
-  double apex_pos = 0.0;
   int pa_x, pa_y;
   pa_x = pa_y = 0;
-  int factor = 1;
   switch (this->orientation)
     {
     case AxisInteractor::LeftScale:
@@ -67,9 +65,8 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
       p1_y = 0;
       p2_y = this->half_base;
       p3_y = -this->half_base;
-      apex_pos = eloc.y() + factor * this->half_base;
       pa_x = this->tip_edge;
-      pa_y = static_cast<int>(apex_pos);
+      pa_y = eloc.y();
       break;
     case AxisInteractor::TopScale:
     case AxisInteractor::BottomScale:
@@ -90,8 +87,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
       p1_x = 0;
       p2_x = this->half_base;
       p3_x = -this->half_base;
-      apex_pos = eloc.x() + factor * this->half_base;
-      pa_x = static_cast<int>(apex_pos);
+      pa_x = eloc.x();
       pa_y = this->tip_edge;
       break;
     default:
@@ -125,25 +121,17 @@ void Indicator::printSelf()
     }
 }
 
-int Indicator::fixPosition(int level)
-{
-  return level - this->half_base / 2;
-}
-
 void Indicator::updatePos(const QPoint &pos)
 {
-  double factor = 1.0;
-  // Not sure why the y position needs to have this particular offset
-  // but it seems to work best.
   switch (this->orientation)
     {
     case AxisInteractor::LeftScale:
     case AxisInteractor::RightScale:
-      this->setPos(this->tip_edge, pos.y() + this->half_base * factor);
+      this->setPos(this->tip_edge, pos.y());
       break;
     case AxisInteractor::TopScale:
     case AxisInteractor::BottomScale:
-      this->setPos(pos.x() + this->half_base * factor, this->tip_edge);
+      this->setPos(pos.x(), this->tip_edge);
       break;
     }
 }
@@ -156,12 +144,12 @@ void Indicator::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     {
     case AxisInteractor::LeftScale:
     case AxisInteractor::RightScale:
-      this->setPos(this->tip_edge, this->fixPosition(static_cast<int>(pos.y())));
+      this->setPos(this->tip_edge, static_cast<int>(pos.y()));
       coord = 0;
       break;
     case AxisInteractor::TopScale:
     case AxisInteractor::BottomScale:
-      this->setPos(this->fixPosition(static_cast<int>(pos.x())), this->tip_edge);
+      this->setPos(static_cast<int>(pos.x()), this->tip_edge);
       coord = 1;
       break;
     }

@@ -149,6 +149,8 @@ private:
   bool checkTitles(AxisInformation *info, AxisInteractor *axis);
   /// Clear all axis indicator highlighting.
   void clearIndicatorSelections();
+  /// Filter resize events.
+  bool eventFilter(QObject *ob, QEvent *ev);
   /**
    * Function that polls all of the axis indicators to see if any are left.
    * @return true if no indicators are left, false if there are indicators

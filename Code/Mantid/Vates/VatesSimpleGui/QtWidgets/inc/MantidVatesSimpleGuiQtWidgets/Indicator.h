@@ -118,14 +118,6 @@ protected:
   void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-  /**
-   * Adjust the indicator's coordinates to get the apex point to point near
-   * the requested axis position.
-   * @param level the requested position
-   * @return the fixed position for the indicator
-   */
-  int fixPosition(int level);
-
   QColor hiddenFillColor; ///< The fill color for the triangle if cut is hidden
   QColor visibleFillColor; ///< The fill color for the triangle if cut is visible
   QColor outlineColor; ///< The outline color for the triangle

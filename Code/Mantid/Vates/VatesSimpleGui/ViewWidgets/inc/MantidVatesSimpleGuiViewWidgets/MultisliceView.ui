@@ -19,30 +19,26 @@
   <property name="windowTitle">
    <string>MultiSliceView</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" rowstretch="0,1,1,1" columnstretch="0,1,1,1,0">
+  <layout class="QGridLayout" name="gridLayout" rowstretch="0,1" columnstretch="0,1,0" rowminimumheight="1,0" columnminimumwidth="1,0,1">
    <property name="sizeConstraint">
     <enum>QLayout::SetNoConstraint</enum>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
     <number>1</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>2</number>
    </property>
    <property name="spacing">
-    <number>1</number>
+    <number>0</number>
    </property>
    <item row="0" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>291</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="0" column="2">
     <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="yAxisWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -58,33 +54,23 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="3">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>291</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="1" column="0">
-    <spacer name="verticalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="xAxisWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="sizeHint" stdset="0">
+     <property name="minimumSize">
       <size>
-       <width>20</width>
-       <height>205</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
-    </spacer>
+    </widget>
    </item>
-   <item row="1" column="1" rowspan="3" colspan="3">
+   <item row="1" column="1">
     <widget class="QFrame" name="renderFrame">
      <property name="enabled">
       <bool>true</bool>
@@ -109,36 +95,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="4">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>205</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="xAxisWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
+   <item row="1" column="2">
     <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="zAxisWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -153,32 +110,6 @@
       </size>
      </property>
     </widget>
-   </item>
-   <item row="3" column="0">
-    <spacer name="verticalSpacer_4">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>205</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="3" column="4">
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>205</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
