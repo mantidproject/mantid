@@ -21,6 +21,30 @@ using namespace Mantid::Kernel::Strings;
 class StringsTest : public CxxTest::TestSuite
 {
 public: 
+  void test_replace()
+  {
+    std::string in = "hello\nI hate\nnewlines.\n";
+    std::string out = replace(in, "\n", " ");
+    TS_ASSERT_EQUALS(out, "hello I hate newlines. ");
+
+    TS_ASSERT_EQUALS(replace("bla", "bla", ""), "");
+    TS_ASSERT_EQUALS(replace("FirstSecond", "First", ""), "Second");
+    TS_ASSERT_EQUALS(replace("FirstSecond", "Second", ""), "First");
+    TS_ASSERT_EQUALS(replace("Hello You", " ", " I am stupid, "), "Hello I am stupid, You");
+  }
+
+  void test_replaceAll()
+  {
+    const std::string input = "Lots and lots of spaces in this sentence.";
+    std::string out = replaceAll(input, " ", "_");
+    std::string expected = "Lots_and_lots_of_spaces_in_this_sentence.";
+    TS_ASSERT_EQUALS(out, expected);
+
+    out = replaceAll(input, "L", "Lots and l");
+    expected = "Lots and lots and lots of spaces in this sentence.";
+    TS_ASSERT_EQUALS(out, expected);
+  }
+
   void testSplitEmptyPath(){
       std::vector<std::string> result;
       TSM_ASSERT(" should return 0",!split_path("",result));	
@@ -180,17 +204,7 @@ public:
   }
 
 
-  void test_replace()
-  {
-    std::string in = "hello\nI hate\nnewlines.\n";
-    std::string out = replace(in, "\n", " ");
-    TS_ASSERT_EQUALS(out, "hello I hate newlines. ");
 
-    TS_ASSERT_EQUALS(replace("bla", "bla", ""), "");
-    TS_ASSERT_EQUALS(replace("FirstSecond", "First", ""), "Second");
-    TS_ASSERT_EQUALS(replace("FirstSecond", "Second", ""), "First");
-    TS_ASSERT_EQUALS(replace("Hello You", " ", " I am stupid, "), "Hello I am stupid, You");
-  }
 
 
 };
