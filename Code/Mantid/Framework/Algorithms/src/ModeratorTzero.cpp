@@ -1,5 +1,5 @@
 /*WIKI*
- This algorithm Corrects the time of flight (TOF) by a time offset that is dependent on the velocity of the neutron after passing through the moderator.
+ This algorithm Corrects the time of flight (TOF) of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator.
  The TOF measured by the BASIS data acquisition system (DAS) should be reduced by this moderator emission time. The DAS "erroneously"
  thinks that it takes longer for neutrons to reach the sample and detectors, because it does not "know" that the neutrons
  spend some time in the moderator before being emitted and starting flying
@@ -36,6 +36,8 @@ This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
 //----------------------------------------------------------------------
 #include "ModeratorTzero.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -48,13 +50,14 @@ DECLARE_ALGORITHM(ModeratorTzero)
 /// Sets documentation strings for this algorithm
 void SofQW::initDocs()
 {
-  this->setWikiSummary(" Corrects the time of flight by a time offset that is dependent on the velocity of the neutron after passing through the moderator. ");
-  this->setOptionalMessage(" Corrects the time of flight by a time offset that is dependent on the velocity of the neutron after passing through the moderator.");
+  setWikiSummary(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator. ");
+  setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator.");
 }
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -76,24 +79,43 @@ void ModeratorTzero::exec()
   //Efixed retrieved from the instrument definition file. There's a value of Efixed for each pixel, since value varies slightly.
 
   //retrieve the input workspace.
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+  //Get a pointer to the instrument contained in the workspace
+  Instrument_const_sptr instrument = inputWS->getInstrument();
 
   //Get the parameter map
   const ParameterMap& pmap = inputWS->constInstrumentParameters();
 
-  //deltaE-mode ("direct" or "indirect")
+  //deltaE-mode (should be "indirect")
+  std::string Emode;
+  try
+  {
+	Emode = instrument->getStringParameter("deltaE-mode")[0];
+    g_log.debug() << "Instrument Geometry: " << Emode << std::endl;
+  }
+  catch (Exception::NotFoundError &)
+  {
+    g_log.error("Unable to retrieve instrument geometry (direct or indirect) parameter");
+    throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter", inputWS->getTitle());
+  }
 
-
-
-  //gradient and intercept constants retrieved from the instrument parameters file
-
-  double gradient = 0.0; //[gradient]=microsecond/Angstrom
-  gradient *= 3.956E-06; //[gradient]=meter
-
-  double intercept = 0.0; //[intercept]=microsecond
-
-  //Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = inputWS->getInstrument();
+  //gradient and intercept constants
+  double gradient, intercept;
+  try
+  {
+	gradient = instrument->getNumberParameter("Moderator.TimeZero.gradient")[0]; //[gradient]=microsecond/Angstrom
+	//conversion factor for gradient from microsecond/Angstrom to meters
+	double convfactor = 1e+4*PhysicalConstants::h/PhysicalConstants::NeutronMass;
+	gradient *= convfactor; //[gradient] = meter
+	intercept = instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
+    g_log.debug() << "Moderator Time Zero: gradient=" << gradient << "intercept=" << intercept << std::endl;
+  }
+  catch (Exception::NotFoundError &)
+  {
+    g_log.error("Unable to retrieve Moderator Time Zero parameters (gradient and intercept)");
+    throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (gradient and intercept)", inputWS->getTitle());
+  }
 
   //Get the distance L_i between the source and the sample ([Li]=meters)
   IObjComponent_const_sptr source = instrument->getSource();
@@ -111,10 +133,23 @@ void ModeratorTzero::exec()
   }
   double const factor = L_i/(L_i+gradient);
 
+  // generate the output workspace pointer
+  const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
+  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (inputWS != outputWS)
+  {
+    //Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2, 1));
+    //Copy geometry over.
+    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //Copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+
+    setProperty("OutputWorkspace", outputWS);
+  }
 
   // Loop over the spectra
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
-  const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
   PARALLEL_FOR2(inputWS,outputWS)
   for (int64_t i = 0; i < int64_t(numHists); ++i)
