@@ -69,14 +69,14 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadMuonNexus)
-    
+
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus::initDocs()
     {
       this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
       this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
     }
-    
+
 
     using namespace Kernel;
     using namespace API;
@@ -85,7 +85,7 @@ namespace Mantid
 
     /// Empty default constructor
     LoadMuonNexus::LoadMuonNexus() : 
-     m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
+    m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
       m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT())
     {}
 
@@ -327,106 +327,106 @@ namespace Mantid
               }
             }
 
-          int numHists = static_cast<int>(localWorkspace->getNumberHistograms());
-          size_t ngroups = groups.size(); // number of groups
+            int numHists = static_cast<int>(localWorkspace->getNumberHistograms());
+            size_t ngroups = groups.size(); // number of groups
 
-          // to output groups in ascending order
-          {
-            int64_t i=0;
-            for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();it++,i++)
+            // to output groups in ascending order
             {
-              it->second = i;
-              g_log.information()<<"group "<<it->first<<": ";
-              bool first = true;
-              int64_t first_i = -1 * std::numeric_limits<int64_t>::max();
-              int64_t last_i = -1 * std::numeric_limits<int64_t>::max();
-              for(int64_t i=0;i<static_cast<int64_t>(numHists);i++)
-                if (m_groupings[i] == it->first)
-                {
-                  if (first) 
+              int64_t i=0;
+              for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();it++,i++)
+              {
+                it->second = i;
+                g_log.information()<<"group "<<it->first<<": ";
+                bool first = true;
+                int64_t first_i = -1 * std::numeric_limits<int64_t>::max();
+                int64_t last_i = -1 * std::numeric_limits<int64_t>::max();
+                for(int64_t i=0;i<static_cast<int64_t>(numHists);i++)
+                  if (m_groupings[i] == it->first)
                   {
-                    first = false;
-                    g_log.information()<<i;
-                    first_i = i;
-                  }
-                  else
-                  {
-                    if (first_i >= 0)
+                    if (first) 
                     {
-                      if (i > last_i + 1)
-                      {
-                        g_log.information()<<'-'<<i;
-                        first_i = -1;
-                      }
+                      first = false;
+                      g_log.information()<<i;
+                      first_i = i;
                     }
                     else
                     {
-                      g_log.information()<<','<<i;
-                      first_i = i;
+                      if (first_i >= 0)
+                      {
+                        if (i > last_i + 1)
+                        {
+                          g_log.information()<<'-'<<i;
+                          first_i = -1;
+                        }
+                      }
+                      else
+                      {
+                        g_log.information()<<','<<i;
+                        first_i = i;
+                      }
+                    }
+                    last_i = i;
+                  }
+                  else
+                  {
+                    if (!first && first_i >= 0)
+                    {
+                      if (last_i > first_i)
+                        g_log.information()<<'-'<<last_i;
+                      first_i = -1;
                     }
                   }
-                  last_i = i;
-                }
-                else
-                {
-                  if (!first && first_i >= 0)
-                  {
-                    if (last_i > first_i)
-                      g_log.information()<<'-'<<last_i;
-                    first_i = -1;
-                  }
-                }
-              if (first_i >= 0 && last_i > first_i)
-                g_log.information()<<'-'<<last_i;
-              g_log.information()<<'\n';
+                  if (first_i >= 0 && last_i > first_i)
+                    g_log.information()<<'-'<<last_i;
+                  g_log.information()<<'\n';
+              }
             }
-          }
 
-          //Create a workspace with only two spectra for forward and back
-          DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-            (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
+            //Create a workspace with only two spectra for forward and back
+            DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
 
-          boost::shared_array<specid_t> spec(new specid_t[numHists]);
-          boost::shared_array<detid_t> dets(new detid_t[numHists]);
+            boost::shared_array<specid_t> spec(new specid_t[numHists]);
+            boost::shared_array<detid_t> dets(new detid_t[numHists]);
 
-          //Compile the groups
-          for (int i = 0; i < numHists; ++i)
-          {    
-            specid_t k = static_cast<specid_t>(groups[ m_groupings[numHists*period + i] ]);
+            //Compile the groups
+            for (int i = 0; i < numHists; ++i)
+            {    
+              specid_t k = static_cast<specid_t>(groups[ m_groupings[numHists*period + i] ]);
 
-            for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
+              for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
+              {
+                groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
+
+                //Add the errors in quadrature
+                groupedWS->dataE(k)[j] 
+                = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
+              }
+
+              //Copy all the X data
+              groupedWS->dataX(k) = localWorkspace->dataX(i);
+              spec[i] = k + 1;
+              dets[i] = i + 1;
+            }
+
+            m_groupings.clear();
+
+            // All two spectra
+            for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
             {
-              groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
-
-              //Add the errors in quadrature
-              groupedWS->dataE(k)[j] 
-              = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
+              groupedWS->getAxis(1)->spectraNo(k)= k + 1;
             }
 
-            //Copy all the X data
-            groupedWS->dataX(k) = localWorkspace->dataX(i);
-            spec[i] = k + 1;
-            dets[i] = i + 1;
-          }
+            groupedWS->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(),dets.get(),numHists));
 
-          m_groupings.clear();
+            // Assign the result to the output workspace property
+            if(m_numberOfPeriods>1)
+              setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
+            else
+            {
+              setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
 
-          // All two spectra
-          for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
-          {
-            groupedWS->getAxis(1)->spectraNo(k)= k + 1;
-          }
-
-          groupedWS->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(),dets.get(),numHists));
-
-          // Assign the result to the output workspace property
-          if(m_numberOfPeriods>1)
-            setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
-          else
-          {
-            setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
-
-          }
+            }
 
         }
         else
@@ -518,21 +518,44 @@ namespace Mantid
       API::Run & runDetails = localWorkspace->mutableRun();
 
       runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
- 
+
       int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
       runDetails.addProperty("nspectra", numSpectra);
 
       NXRoot root(m_filename);
-      std::string start_time = root.getString("run/start_time");
-      runDetails.addProperty("run_start", start_time);
-      std::string stop_time = root.getString("run/stop_time");
-      runDetails.addProperty("run_end", stop_time);
-      std::string dur = root.getString("run/duration");
-      runDetails.addProperty("dur", dur);
-      runDetails.addProperty("durunits", 1);
+      try
+      {
+        std::string start_time = root.getString("run/start_time");
+        runDetails.addProperty("run_start", start_time);
+      }
+      catch (std::runtime_error &)
+      {
+        g_log.warning("run/start_time is not available, run_start log not added.");
+      }
 
-	  // Get number of good frames
-	  NXEntry runInstrumentBeam = root.openEntry("run/instrument/beam");
+      try
+      {
+        std::string stop_time = root.getString("run/stop_time");
+        runDetails.addProperty("run_end", stop_time);
+      }
+      catch (std::runtime_error &)
+      {
+        g_log.warning("run/stop_time is not available, run_end log not added.");
+      }
+
+      try
+      {
+        std::string dur = root.getString("run/duration");
+        runDetails.addProperty("dur", dur);
+        runDetails.addProperty("durunits", 1);
+      }
+      catch (std::runtime_error &)
+      {
+        g_log.warning("run/duration is not available, dur log not added.");
+      }
+
+      // Get number of good frames
+      NXEntry runInstrumentBeam = root.openEntry("run/instrument/beam");
       NXInfo infoGoodTotalFrames = runInstrumentBeam.getDataSetInfo("frames_good");
       if (infoGoodTotalFrames.stat != NX_ERROR)
       {
@@ -638,23 +661,26 @@ namespace Mantid
       {
         g_log.error("Unable to successfully run LoadLog sub-algorithm");
       }
+      catch (std::logic_error&)
+      {
+        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+      }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
 
 
       NXRoot root(m_filename);
-      std::string start_time = root.getString("run/start_time");
-    
-      NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
-      try
-      {// some files have no data there
-        orientation.load();
 
-        // dump various Nexus numbers to outputs 
+      try
+      {
+        NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
+        // some files have no data there
+        orientation.load();
 
         if (orientation[0] == 't')
         {
           Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
+          std::string start_time = root.getString("run/start_time");
           p->addValue(start_time,-90.0);
           localWorkspace->mutableRun().addLogData(p);
           setProperty("MainFieldDirection", "Transverse");
@@ -699,7 +725,7 @@ namespace Mantid
 
     }
 
-      /**This method does a quick file type check by looking at the first 100 bytes of the file 
+    /**This method does a quick file type check by looking at the first 100 bytes of the file 
     *  @param filePath- path of the file including name.
     *  @param nread :: no.of bytes read
     *  @param header :: The first 100 bytes of the file as a union
@@ -719,13 +745,13 @@ namespace Mantid
         return true;
       }
       else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
+        (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
       { 
         //hdf5
         return true;
       }
       return false;
-     
+
     }
     /**checks the file by opening it and reading few lines 
     *  @param filePath :: name of the file inluding its path
@@ -740,7 +766,8 @@ namespace Mantid
         ::NeXus::File file = ::NeXus::File(filePath);
         file.openPath("/run/analysis");
         std::string analysisType = file.getStrData();
-        if( analysisType == "muonTD" )
+        std::string compareString = "muon";
+        if( analysisType.compare(0,compareString.length(),compareString) == 0  )
         {
           // If all this succeeded then we'll assume this is an ISIS Muon NeXus file
           confidence = 80;
