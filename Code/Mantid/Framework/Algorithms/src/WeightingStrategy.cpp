@@ -60,10 +60,10 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always returns 1
-    @param distance : absolute distance from epicenter
+    @param distance : 
     @return 1
     */
-    double FlatWeighting::weightAt(const double&)
+    double FlatWeighting::weightAt(const Mantid::Kernel::V3D&)
     { 
       return 1;
     }
@@ -90,9 +90,9 @@ namespace Mantid
     @param distance : absolute distance from epicenter
     @return weighting
     */
-    double LinearWeighting::weightAt(const double& distance)
+    double LinearWeighting::weightAt(const Mantid::Kernel::V3D& distance)
     {
-      return 1 - (distance/m_cutOff);
+      return 1 - (distance.norm()/m_cutOff);
     }
 
     /**
@@ -125,11 +125,11 @@ namespace Mantid
 
     /**
     Implementation doesn't make sense on this type.
-    @param distance : absolute distance from epicenter
+    @param distance : 
     @return weighting
     @throws runtime_error if used.
     */
-    double ParabolicWeighting::weightAt(const double&)
+    double ParabolicWeighting::weightAt(const Mantid::Kernel::V3D&)
     {
       throw std::runtime_error("Parabolic weighting cannot be calculated based on a radius cut-off alone.");
     }
@@ -163,10 +163,10 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always throws.
-    @param distance : absolute distance from epicenter
+    @param distance : 
     @throw runtime_error if used
     */
-    double NullWeighting::weightAt(const double&)
+    double NullWeighting::weightAt(const Mantid::Kernel::V3D& distance)
     {
       throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
     }
@@ -212,9 +212,9 @@ namespace Mantid
     {
     }
 
-    double GaussianWeighting1D::weightAt(const double& distance)
+    double GaussianWeighting1D::weightAt(const Mantid::Kernel::V3D& distance)
     {
-      double normalisedDistance = distance/m_cutOff; //Ensures 1 at the edges and zero in the center no matter what the units are
+      double normalisedDistance = distance.norm()/m_cutOff; //Ensures 1 at the edges and zero in the center no matter what the units are
       return calculateGaussian(normalisedDistance*normalisedDistance);
     }
 

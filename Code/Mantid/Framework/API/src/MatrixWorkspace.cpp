@@ -355,7 +355,7 @@ namespace Mantid
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
+    std::map<specid_t, V3D> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
@@ -368,7 +368,7 @@ namespace Mantid
       {
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - Cannot find spectrum number for detector", comp->getID());
       }
-      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spectra[0], radius);
+      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spectra[0], radius);
       return neighbours;
     }
 
@@ -381,13 +381,13 @@ namespace Mantid
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighbours(specid_t spec, const double radius, bool ignoreMaskedDetectors) const
+    std::map<specid_t, V3D> MatrixWorkspace::getNeighbours(specid_t spec, const double radius, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
         m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
-      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, radius);
+      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec, radius);
       return neighbours;
     }
 
@@ -399,13 +399,13 @@ namespace Mantid
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, double> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours, bool ignoreMaskedDetectors) const
+    std::map<specid_t, V3D> MatrixWorkspace::getNeighboursExact(specid_t spec, const int nNeighbours, bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
         m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
       }
-      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
+      std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec, false, nNeighbours);
       return neighbours;
     }
 

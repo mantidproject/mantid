@@ -559,8 +559,15 @@ def extract_workspace_name(filepath, suffix=''):
         @param filepath: path of the file to generate a workspace name for
         @param suffix: string to append to name
     """
-    (head, tail) = os.path.split(filepath)
+    filepath_tmp = filepath
+    if type(filepath)==list:
+        filepath_tmp = filepath[0]
+        
+    (head, tail) = os.path.split(filepath_tmp)
     basename, extension = os.path.splitext(tail)
+
+    if type(filepath)==list:
+        basename += "_combined"
     
     #TODO: check whether the workspace name is already in use
     #      and modify it if it is. 

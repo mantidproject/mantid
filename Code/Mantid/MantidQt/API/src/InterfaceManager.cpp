@@ -32,12 +32,14 @@ Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl
  * @param alg :: A pointer to the algorithm
  * @param parent :: An optional parent widget
  * @param forScript :: A boolean indicating if this dialog is to be use for from a script or not
- * @param msg :: An optional message string to be placed at the top of the dialog
- * @param suggestions :: An optional set of suggested values
+ * @param preset_values :: TODO: Write description of this variable.
+ * @param optional_msg :: An optional message string to be placed at the top of the dialog
+ * @param enabled :: TODO: Write description of this variable.
+ * @param disabled :: TODO: Write description of this variable. 
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
-  bool forScript, const QHash<QString,QString>& preset_values,
+  bool forScript, const QHash<QString,QString> & preset_values, 
   const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
   AlgorithmDialog* dlg = NULL;

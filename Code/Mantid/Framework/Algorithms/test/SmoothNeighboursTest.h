@@ -123,16 +123,16 @@ public:
   void testRadiusFiltering()
   {
     SpectraDistanceMap input;
-    input[0] = 1;
-    input[1] = 2;
-    input[3] = 3;
+    input[0] = V3D(1,0,0);
+    input[1] = V3D(2,0,0);
+    input[3] = V3D(3,0,0);
 
     RadiusFilter filter(2);
     SpectraDistanceMap product = filter.apply(input);
 
     TSM_ASSERT_EQUALS("Should have kept all but one of the inputs", 2, product.size());
-    TS_ASSERT_EQUALS(1, input[0]);
-    TS_ASSERT_EQUALS(2, input[1]);
+    TS_ASSERT_EQUALS(1, input[0][0]);
+    TS_ASSERT_EQUALS(2, input[1][0]);
   }
 
   /*

@@ -74,7 +74,7 @@ namespace Mantid
       // Retrieve the filename from the properties
       m_filename = getPropertyValue("Filename");
       // Retrieve the entry number
-      m_entrynumber = getProperty("EntryNumber");
+        m_entrynumber = getProperty("EntryNumber");
 
       // Open NeXus file
       NXstatus stat=NXopen(m_filename.c_str(), NXACC_READ, &m_fileID);
@@ -202,7 +202,7 @@ namespace Mantid
         {
           for(size_t i=0; i < m_spec_list.size(); ++i)
           {
-            loadData(period, counter,m_spec_list[i],localWorkspace );
+              loadData(period, counter, m_spec_list[i],localWorkspace );
             counter++;
             prog.report();
           }
@@ -438,7 +438,7 @@ namespace Mantid
     *  @param i :: The index of the histogram in the file
     *  @param localWorkspace :: The workspace
     */
-    void LoadISISNexus::loadData(size_t period, size_t hist, size_t& i, DataObjects::Workspace2D_sptr localWorkspace)
+      void LoadISISNexus::loadData(size_t period, size_t hist, size_t& i, DataObjects::Workspace2D_sptr localWorkspace)
     {
       openNexusData("counts");
 

@@ -50,9 +50,9 @@ namespace
 * @param right :: element to compare
 * @return true if left should come before right in the order
 */
-static bool compareIDPair(const std::pair<int64_t,double> & left, const std::pair<int64_t,double> & right)
+static bool compareIDPair(const std::pair<int64_t,Mantid::Kernel::V3D> & left, const std::pair<int64_t,Mantid::Kernel::V3D> & right)
 {
-  return ( left.second < right.second );
+  return ( left.second.norm() < right.second.norm() );
 }
 }
 
@@ -131,7 +131,7 @@ void SpatialGrouping::exec()
       continue;
     }
 
-    std::map<detid_t, double> nearest;
+    std::map<detid_t, Mantid::Kernel::V3D> nearest;
 
     const double empty = EMPTY_DBL();
     Mantid::Geometry::BoundingBox bbox(empty,empty,empty,empty,empty,empty);
@@ -153,7 +153,7 @@ void SpatialGrouping::exec()
     group.push_back(specNo);
 
     // Add all the nearest neighbors
-    std::map<specid_t, double>::iterator nrsIt;
+    std::map<specid_t, Mantid::Kernel::V3D>::iterator nrsIt;
     for ( nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
       m_included.insert(nrsIt->first);
@@ -226,14 +226,14 @@ void SpatialGrouping::exec()
 * @param bbox :: BoundingBox object representing the search region
 * @return true if neighbours were found matching the parameters, false otherwise
 */
-bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t spec,
+bool SpatialGrouping::expandNet(std::map<specid_t,Mantid::Kernel::V3D> & nearest, specid_t spec,
     const size_t & noNeighbours, const Mantid::Geometry::BoundingBox & bbox)
 {
   const size_t incoming = nearest.size();
 
   Mantid::Geometry::IDetector_const_sptr det = m_detectors[spec];
 
-  std::map<specid_t, double> potentials;
+  std::map<specid_t, Mantid::Kernel::V3D> potentials;
 
   // Special case for first run for this detector
   if ( incoming == 0 )
@@ -242,24 +242,24 @@ bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t sp
   }
   else
   {
-    for ( std::map<specid_t,double>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
+    for ( std::map<specid_t,Mantid::Kernel::V3D>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
-      std::map<specid_t, double> results;
+      std::map<specid_t, Mantid::Kernel::V3D> results;
       results = inputWorkspace->getNeighbours(m_detectors[nrsIt->first].get());
-      for ( std::map<specid_t, double>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
+      for ( std::map<specid_t, Mantid::Kernel::V3D>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
       {
         potentials[resIt->first] = resIt->second;
       }
     }
   }
 
-  for ( std::map<specid_t,double>::iterator potIt = potentials.begin(); potIt != potentials.end(); ++potIt )
+  for ( std::map<specid_t,Mantid::Kernel::V3D>::iterator potIt = potentials.begin(); potIt != potentials.end(); ++potIt )
   {
     // We do not want to include the detector in it's own list of nearest neighbours
     if ( potIt->first == spec ) { continue; }
 
     // Or detectors that are already in the nearest list passed into this function
-    std::map<detid_t, double>::iterator nrsIt = nearest.find(potIt->first);
+    std::map<detid_t, Mantid::Kernel::V3D>::iterator nrsIt = nearest.find(potIt->first);
     if ( nrsIt != nearest.end() ) { continue; }
 
     // We should not include detectors already included in a group (or monitors for that matter)
@@ -290,9 +290,9 @@ bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t sp
 * @param input :: map of values that need to be sorted, will be modified by the method
 * @param noNeighbours :: number of elements that should be kept
 */
-void SpatialGrouping::sortByDistance(std::map<detid_t,double> & input, const size_t & noNeighbours)
+void SpatialGrouping::sortByDistance(std::map<detid_t,Mantid::Kernel::V3D> & input, const size_t & noNeighbours)
 {
-  std::vector<std::pair<detid_t,double> > order(input.begin(), input.end());
+  std::vector<std::pair<detid_t,Mantid::Kernel::V3D> > order(input.begin(), input.end());
 
   std::sort(order.begin(), order.end(), compareIDPair);
 

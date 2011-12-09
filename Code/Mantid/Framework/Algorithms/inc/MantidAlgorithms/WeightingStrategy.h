@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_WEIGHTINGSTRATEGY_H_
 
 #include "MantidKernel/System.h"
-
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -47,10 +47,10 @@ namespace Algorithms
       virtual ~WeightingStrategy();
       /**
       Calculate the weight at distance from epicenter.
-      @param distance : absolute distance from epicenter
+      @param distance : difference between the central detector location and the nearest neighbour
       @return calculated weight
       */
-      virtual double weightAt(const double& distance) = 0;
+      virtual double weightAt(const Mantid::Kernel::V3D& ) = 0;
 
       /**
       Calculate the weight at distance from epicenter.
@@ -74,7 +74,7 @@ namespace Algorithms
       FlatWeighting();
       virtual ~FlatWeighting();
       virtual double weightAt(const double&,const double&, const double&, const double&);
-      double weightAt(const double&);
+      double weightAt(const Mantid::Kernel::V3D& );
     };
 
     /*
@@ -85,7 +85,7 @@ namespace Algorithms
     public: 
       LinearWeighting(const double cutOff);
       virtual ~LinearWeighting();
-      double weightAt(const double& distance);
+      double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy);
     };
 
@@ -97,7 +97,7 @@ namespace Algorithms
     public: 
       ParabolicWeighting();
       virtual ~ParabolicWeighting();
-      double weightAt(const double&);
+      double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy);
     };
 
@@ -109,7 +109,7 @@ namespace Algorithms
     public:
       NullWeighting();
       virtual ~NullWeighting();
-      double weightAt(const double&);
+      double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double&,const double&, const double&, const double&);
     };
 
@@ -121,7 +121,7 @@ namespace Algorithms
     public:
       GaussianWeighting1D(double cutOff, double sigma);
       virtual ~GaussianWeighting1D();
-      virtual double weightAt(const double &);
+      virtual double weightAt(const Mantid::Kernel::V3D& );
       virtual double weightAt(const double&,const double&, const double&, const double&);
     private:
       void init(const double sigma);
@@ -129,6 +129,8 @@ namespace Algorithms
       double m_coeff;
       double m_twiceSigmaSquared;
     };
+
+
 
 
 

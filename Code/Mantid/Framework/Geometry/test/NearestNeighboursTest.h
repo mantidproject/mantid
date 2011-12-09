@@ -60,7 +60,7 @@ public:
     NearestNeighbours nn(m_instrument, *spectramap);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
-    std::map<specid_t, double> distances = nn.neighbours(14, true, actualNeighboursNumber);
+    std::map<specid_t, V3D> distances = nn.neighbours(14, true, actualNeighboursNumber);
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(expectedNeighboursNumber, distances.size());
@@ -96,15 +96,15 @@ public:
     TS_ASSERT_EQUALS(m_detectors.size(), 18);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
-    std::map<specid_t, double> distances = nn.neighbours(5);
-    std::map<specid_t, double>::iterator distIt;
+    std::map<specid_t, V3D> distances = nn.neighbours(5);
+    std::map<specid_t, V3D>::iterator distIt;
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(distances.size(), 8);
 
     for ( distIt = distances.begin(); distIt != distances.end(); ++distIt )
     {
-      double nnDist = distIt->second;
+      double nnDist = distIt->second.norm();
       V3D delta = m_detectors[distIt->first]->getPos() - m_detectors[5]->getPos();
       double gmDist = delta.norm();
       TS_ASSERT_DELTA(nnDist, gmDist, 1e-12);
@@ -153,7 +153,7 @@ public:
     RectangularDetector_const_sptr bank1 = boost::dynamic_pointer_cast<const RectangularDetector>(m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<const Detector> det = bank1->getAtXY(2,3);
     TS_ASSERT( det );
-    std::map<specid_t, double> nb;
+    std::map<specid_t, V3D> nb;
 
     // Too close!
     specid_t spec = 256 + 2*16+3; // This gives the spectrum number for this detector
