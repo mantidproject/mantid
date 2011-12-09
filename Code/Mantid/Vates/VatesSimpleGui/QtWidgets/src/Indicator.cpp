@@ -128,18 +128,15 @@ int Indicator::fixPosition(int level)
 
 void Indicator::updatePos(const QPoint &pos)
 {
-  double factor = 1.0;
-  // Not sure why the y position needs to have this particular offset
-  // but it seems to work best.
   switch (this->orientation)
     {
     case AxisInteractor::LeftScale:
     case AxisInteractor::RightScale:
-      this->setPos(this->tip_edge, pos.y() + this->half_base * factor);
+      this->setPos(this->tip_edge, pos.y());
       break;
     case AxisInteractor::TopScale:
     case AxisInteractor::BottomScale:
-      this->setPos(pos.x() + this->half_base * factor, this->tip_edge);
+      this->setPos(pos.x(), this->tip_edge);
       break;
     }
 }
