@@ -54,18 +54,30 @@ bool PeakHKL::add(PeakMarker2D* marker,const QRectF& trect)
 /**
 * Draw the label
 * @param painter :: QPainter to draw with
-* @param transform :: Current transform
+* @param prec :: precision
 */
 void PeakHKL::draw(QPainter& painter,int prec)
 {
   QString label;
-  if (nh) label = QString::number(h,'g',prec) + " ";
+  if (nh) 
+  {
+    int max_prec = std::max(prec,int(log10(h)+1));
+    label = QString::number(h,'g',max_prec) + " ";
+  }
   else
     label = "h ";
-  if (nk) label += QString::number(k,'g',prec) + " ";
+  if (nk)
+  {
+    int max_prec = std::max(prec,int(log10(k)+1));
+    label += QString::number(k,'g',max_prec) + " ";
+  }
   else
     label += "k ";
-  if (nl) label += QString::number(l,'g',prec);
+  if (nl)
+  {
+    int max_prec = std::max(prec,int(log10(l)+1));
+    label += QString::number(l,'g',max_prec);
+  }
   else
     label += "l";
   if (showRows)
@@ -78,7 +90,6 @@ void PeakHKL::draw(QPainter& painter,int prec)
     label += "]";
   }
   painter.drawText(rect.bottomLeft(),label);
-
 }
 
 void PeakHKL::print()const
