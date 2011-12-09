@@ -142,6 +142,7 @@ bool MultiSliceView::eventFilter(QObject *ob, QEvent *ev)
     {
       coord = 2;
     }
+    axis->updateSceneRect();
     this->resetOrDeleteIndicators(axis, coord);
     return true;
   }

@@ -450,6 +450,16 @@ void AxisInteractor::updateRequestedIndicator(const QString &name, double value)
   }
 }
 
+/**
+ * This function takes the current rectangle from the QGraphicsView and
+ * updates the QGraphicsScene with that rectangle. This aids in getting the
+ * indicators to line up in the correct location.
+ */
+void AxisInteractor::updateSceneRect()
+{
+  this->scene->setSceneRect(this->graphicsView->geometry());
+}
+
 }
 }
 }
