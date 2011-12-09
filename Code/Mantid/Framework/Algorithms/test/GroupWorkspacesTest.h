@@ -29,12 +29,6 @@ public:
 		TS_ASSERT_EQUALS( grpwsalg.version(), 1 );
 	}
 
-	void testCategory()
-	{
-		GroupWorkspaces grpwsalg;
-		TS_ASSERT_EQUALS( grpwsalg.category(), "DataHandling" );
-	}
-
 	void testInit()
 	{
 		Mantid::Algorithms::GroupWorkspaces alg2;

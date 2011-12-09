@@ -22,11 +22,6 @@ public:
     TS_ASSERT_EQUALS( conv.version(), 1 );
 	}
 
-	void testCategory()
-	{
-    TS_ASSERT_EQUALS( conv.category(), "Units" );
-	}
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( conv.initialize() );

@@ -25,12 +25,6 @@ public:
 		TS_ASSERT_EQUALS( ungrpwsalg.version(), 1 );
 	}
 
-	void testCategory()
-	{
-		UnGroupWorkspace ungrpwsalg;
-		TS_ASSERT_EQUALS( ungrpwsalg.category(), "DataHandling" );
-	}
-
 	void testInit()
 	{
 	    UnGroupWorkspace alg2;

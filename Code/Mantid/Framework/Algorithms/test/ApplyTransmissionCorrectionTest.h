@@ -22,7 +22,6 @@ public:
 
     TS_ASSERT_EQUALS( correction.name(), "ApplyTransmissionCorrection" );
     TS_ASSERT_EQUALS( correction.version(), 1 );
-    TS_ASSERT_EQUALS( correction.category(), "SANS" );
     TS_ASSERT_THROWS_NOTHING( correction.initialize() );
     TS_ASSERT( correction.isInitialized() );
   }

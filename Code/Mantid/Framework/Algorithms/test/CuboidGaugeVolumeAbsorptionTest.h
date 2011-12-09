@@ -19,7 +19,6 @@ public:
   {
     TS_ASSERT_EQUALS( atten.name(), "CuboidGaugeVolumeAbsorption" );
     TS_ASSERT_EQUALS( atten.version(), 1 );
-    TS_ASSERT_EQUALS( atten.category(), "Absorption Corrections" );
   }
 
   void testInit()

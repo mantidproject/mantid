@@ -22,12 +22,6 @@ public:
     TS_ASSERT_EQUALS( versionTester->version(), 1 );
   }
 
-  void testCategory()
-  {
-    IAlgorithm *catTester = createExtractSingleSpectrum();
-    TS_ASSERT_EQUALS( catTester->category(), "General" );
-  }
-
   void testInit()
   {
     IAlgorithm *initTester = createExtractSingleSpectrum();

@@ -160,7 +160,6 @@ public:
 
     TS_ASSERT_EQUALS( grouper.name(), "LoadDetectorInfo" );
     TS_ASSERT_EQUALS( grouper.version(), 1 );
-    TS_ASSERT_EQUALS( grouper.category(), "DataHandling\\Detectors" );
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
     TS_ASSERT( grouper.isInitialized() );
 

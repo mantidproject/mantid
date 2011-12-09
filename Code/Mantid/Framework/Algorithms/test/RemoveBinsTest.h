@@ -27,11 +27,6 @@ public:
 		TS_ASSERT_EQUALS( alg.name(), "RemoveBins" )
 	}
 
-	void testCategory()
-	{
-	TS_ASSERT_EQUALS( alg.category(), "General" )
-	}
-
 	void testInit()
 	{
 		alg.initialize();

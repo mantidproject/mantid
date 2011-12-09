@@ -23,11 +23,6 @@ public:
 		TS_ASSERT_EQUALS( alg.version(), 1 );
 	}
 
-	void testCategory()
-	{
-		TS_ASSERT_EQUALS( alg.category(), "DataHandling" );
-	}
-
 	void testInit()
 	{
 		Mantid::Algorithms::RenameWorkspace alg2;

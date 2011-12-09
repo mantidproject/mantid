@@ -65,7 +65,6 @@ public:
     Mantid::Algorithms::FlatBackground flatBG;
     TS_ASSERT_EQUALS( flatBG.name(), "FlatBackground" )
     TS_ASSERT_EQUALS( flatBG.version(), 1 )
-    TS_ASSERT_EQUALS( flatBG.category(), "SANS" )
   }
 
   void testExec()

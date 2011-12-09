@@ -22,7 +22,6 @@ public:
     transpose = new Transpose();
     TS_ASSERT_EQUALS(transpose->name(), "Transpose");
     TS_ASSERT_EQUALS(transpose->version(), 1);
-    TS_ASSERT_EQUALS(transpose->category(), "General");
     delete transpose;
   }
 

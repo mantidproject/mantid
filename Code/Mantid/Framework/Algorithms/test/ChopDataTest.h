@@ -18,7 +18,6 @@ public:
     alg = new ChopData();
     TS_ASSERT_EQUALS(alg->name(), "ChopData");
     TS_ASSERT_EQUALS(alg->version(), 1);
-    TS_ASSERT_EQUALS(alg->category(), "General");
     delete alg;
   }
 

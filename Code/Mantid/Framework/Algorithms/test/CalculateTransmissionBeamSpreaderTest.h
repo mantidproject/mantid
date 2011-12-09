@@ -27,11 +27,6 @@ public:
     TS_ASSERT_EQUALS( trans.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( trans.category(), "SANS" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( trans.initialize() )

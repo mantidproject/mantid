@@ -38,11 +38,6 @@ public:
     TS_ASSERT_EQUALS( smooth.version(), 1 );
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( smooth.category(), "General" );
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( smooth.initialize() );

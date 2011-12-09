@@ -55,7 +55,6 @@ public:
     DetectorEfficiencyCor grouper;
     TS_ASSERT_EQUALS( grouper.name(), "DetectorEfficiencyCor" );
     TS_ASSERT_EQUALS( grouper.version(), 1 );
-    TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" );
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() );
     TS_ASSERT( grouper.isInitialized() );
   }

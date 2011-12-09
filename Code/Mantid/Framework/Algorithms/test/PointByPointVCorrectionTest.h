@@ -18,11 +18,6 @@ public:
   {
     TS_ASSERT_EQUALS( pbpv.version(), 1 );
   }
-
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( pbpv.category(), "Diffraction" );
-  }
   
   void testInit()
   {

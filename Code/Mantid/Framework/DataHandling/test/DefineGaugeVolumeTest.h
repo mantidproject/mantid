@@ -30,7 +30,6 @@ public:
   {
     TS_ASSERT_EQUALS(gauge.name(), "DefineGaugeVolume");
     TS_ASSERT_EQUALS(gauge.version(), 1);
-    TS_ASSERT_EQUALS(gauge.category(), "Engineering");
   }
 
   void testInit()
