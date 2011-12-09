@@ -81,30 +81,33 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
     //@}
 
  public:
-  /// Overwridden add member to attach the name to the workspace when a workspace object is added to the service
-  virtual void add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
-  {
-    //Attach the name to the workspace
-    if( workspace.get() ) workspace->setName(name);
-    Kernel::DataService<API::Workspace>::add(name, workspace);
-  }
-  /// Overwridden addOrReplace member to attach the name to the workspace when a workspace object is added to the service
-  virtual void addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
-  {
-    //Attach the name to the workspace
-    if( workspace.get() ) workspace->setName(name);
-    Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
-  }
+   /// Return the list of illegal characters as one string
+   const std::string & illegalCharacters() const;
+   /// Set the list of illegal characeters
+   void setIllegalCharacterList(const std::string &);
+   /// Is the given name a valid name for an object in the ADS
+   const std::string isValid(const std::string & name) const;
+   /// Overwridden add member to attach the name to the workspace when a workspace object is added to the service
+   virtual void add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace);
+   /// Overwridden addOrReplace member to attach the name to the workspace when a workspace object is added to the service
+   virtual void addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace);
 
 private:
+   /// Checks the name is valid, throwing if not
+   void verifyName(const std::string & name);
+
   friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
-  // Constructors
+  /// Constructor
   AnalysisDataServiceImpl();
   /// Private, unimplemented copy constructor
   AnalysisDataServiceImpl(const AnalysisDataServiceImpl&);
   /// Private, unimplemented copy assignment operator
   AnalysisDataServiceImpl& operator=(const AnalysisDataServiceImpl&);
+  /// Private destructor
   virtual ~AnalysisDataServiceImpl();
+
+  /// The string of illegal characters
+  std::string m_illegalChars;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.

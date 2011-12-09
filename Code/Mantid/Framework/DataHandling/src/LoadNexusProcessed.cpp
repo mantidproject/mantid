@@ -494,7 +494,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
 
 
   // std::vector<API::IPeak*> p;
-  for (size_t r = 0; r < numberPeaks; r++)
+  for (int r = 0; r < numberPeaks; r++)
   {   
 	  Kernel::V3D v3d;
 	  v3d[2] = 1.0;
@@ -505,7 +505,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
 
 
 
-  for (size_t i = 0; i < columnNames.size(); i++)
+  for (int i = 0; i < columnNames.size(); i++)
   {
 	  const std::string str = columnNames[i];
 	  if ( !str.compare("column_1") )
@@ -513,7 +513,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXInt nxInt = nx_tw.openNXInt(str.c_str());
         nxInt.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  int ival = nxInt[r];
           if( ival != -1) peakWS->getPeak(r).setDetectorID( ival );
 		}
@@ -524,7 +524,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setH( val );
 		}
@@ -535,7 +535,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setK( val );
 		}
@@ -557,7 +557,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setIntensity( val );
 		}
@@ -568,7 +568,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setSigmaIntensity( val );
 		}
@@ -581,7 +581,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setBinCount( val );
 		}
@@ -593,7 +593,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setWavelength( val );
 		}
@@ -604,51 +604,14 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXInt nxInt = nx_tw.openNXInt(str.c_str());
         nxInt.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  int ival = nxInt[r];
           if( ival != -1) peakWS->getPeak(r).setRunNumber( ival );
 		}
       }
 
 
-
-
-
   }
-
-
-
-
-
-
-
-  /*
-    if ( info.type == NX_FLOAT64 )
-    {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-      std::string columnTitle = nxDouble.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("double", columnTitle);
-        nxDouble.load();
-        int length = nxDouble.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
-      }
-    }*/
-
-     
-
- 
-  
-
-
-
 
 	// return boost::static_pointer_cast<API::Workspace>(tWorkspace);
     return boost::static_pointer_cast<API::Workspace>(peakWS);

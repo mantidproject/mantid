@@ -136,7 +136,7 @@ int MuonNexusReader::readFromFile(const std::string& filename)
     //stat=NXgetinfo(fileID,&rank,dims,&type);
     int ssPeriods;
     stat=NXgetdata(fileID,&ssPeriods);
-    t_nper=ssPeriods;
+    t_nper=abs(ssPeriods);
     t_nsp1/=t_nper; // assume that number of spectra in multiperiod file should be divided by periods
   }
   else
