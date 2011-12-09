@@ -141,7 +141,7 @@ public:
   {
     double cutoff = 4;
     double sigma = 0.5;
-    GaussianWeightingnD weighting(4, sigma);
+    GaussianWeightingnD weighting(cutoff, sigma);
 
     double normalDistribY[] = {0.1080,
       0.2590,

@@ -167,7 +167,7 @@ namespace Mantid
     @param distance : 
     @throw runtime_error if used
     */
-    double NullWeighting::weightAt(const Mantid::Kernel::V3D& distance)
+    double NullWeighting::weightAt(const Mantid::Kernel::V3D&)
     {
       throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
     }
