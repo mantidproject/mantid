@@ -83,7 +83,7 @@ public:
            m_allowedValues.insert(value);
     }
 
-    virtual typename IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
+    virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
 
   protected:
   /** Checks if the string passed is in the list

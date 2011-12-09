@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/ListValidator.h"
-#include <algorithm>
 
 namespace Mantid
 {
