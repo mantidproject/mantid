@@ -78,7 +78,7 @@ public:
     //     m_allowedValues.insert(rVal);
     //}
      /// Adds the argument to the set of valid values
-    virtual void addAllowedValue(const typename TYPE &value)
+    virtual void addAllowedValue(const TYPE &value)
     {
            m_allowedValues.insert(value);
     }
