@@ -134,7 +134,7 @@ public:
     norm2.initialize();
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("OutputWorkspace","normMon3") )
-    TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("MonitorID","0") )
+    TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("IntegrationRangeMin","5") )
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("IntegrationRangeMax","20") )
     TS_ASSERT_THROWS_NOTHING( norm2.execute() )
@@ -171,7 +171,7 @@ public:
     norm3.initialize();
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon4") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorID","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("IntegrationRangeMin","3.5") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("IntegrationRangeMax","9.7") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("IncludePartialBins","1") )
@@ -210,7 +210,7 @@ public:
     norm3.initialize();
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") )
-    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorID","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") )
     TS_ASSERT_THROWS_NOTHING( norm3.execute() )
     TS_ASSERT( ! norm3.isExecuted() )
