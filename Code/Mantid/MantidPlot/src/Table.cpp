@@ -85,7 +85,7 @@ void Table::init(int rows, int cols)
       this, SLOT(moveColumn(int, int, int)));
 
   setFocusPolicy(Qt::StrongFocus);
-  setFocus();
+  //setFocus();
 
   for (int i=0; i<cols; i++){
     commands << "";

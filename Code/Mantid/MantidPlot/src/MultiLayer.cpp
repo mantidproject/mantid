@@ -116,7 +116,7 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	buttonsLine = new QHBoxLayout();
 	buttonsLine->addLayout(layerButtonsBox);
 	buttonsLine->addStretch();
-		buttonsLine->addLayout(waterfallBox);
+	buttonsLine->addLayout(waterfallBox);
 
 	canvas = new QWidget();
 
@@ -145,10 +145,15 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	for (int i = 0; i < layers; i++)
 		addLayer();
 
-	setFocusPolicy(Qt::StrongFocus);
-	setFocus();
+	//setFocusPolicy(Qt::StrongFocus);
+	//setFocus();
 
   setAcceptDrops(true);
+}
+
+MultiLayer::~MultiLayer()
+{
+  std::cerr << "MultiLayer deleted\n";
 }
 
 Graph *MultiLayer::layer(int num)
@@ -221,7 +226,7 @@ void MultiLayer::activateGraph(LayerButton* button)
 		if (btn == button)
 		{
 			active_graph = (Graph*) graphsList.at(i);
-			active_graph->setFocus();
+			//active_graph->setFocus();
 			active_graph->raise();//raise layer on top of the layers stack
 			button->setOn(true);
       if( d_layers_selector )
@@ -238,7 +243,7 @@ void MultiLayer::setActiveGraph(Graph* g)
 		return;
 
 	active_graph = g;
-	active_graph->setFocus();
+	//active_graph->setFocus();
 
 	if (d_layers_selector)
   {

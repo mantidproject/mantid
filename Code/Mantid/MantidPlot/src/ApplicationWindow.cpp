@@ -421,6 +421,8 @@ void ApplicationWindow::init(bool factorySettings)
   {
     showFirstTimeSetup();
   }
+
+  connect(this,SIGNAL(changeToMDI(QMainWindow*)),this,SLOT(goMdi(QMainWindow*)));
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
@@ -2366,7 +2368,8 @@ void ApplicationWindow::customPlot3D(Graph3D *plot)
 
 void ApplicationWindow::initPlot3D(Graph3D *plot)
 {
-  d_workspace->addSubWindow(plot);
+  //d_workspace->addSubWindow(plot);
+  addSubWindowToMdiArea(plot);
   connectSurfacePlot(plot);
 
   plot->setIcon(getQPixmap("trajectory_xpm"));
@@ -2656,6 +2659,8 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
   while(alreadyUsedName(label))
     label = generateUniqueName(tr("Graph"));
 
+  this->addSubWindowToMdiArea(g);
+
   g->setWindowTitle(label);
   g->setName(label);
   g->setIcon(getQPixmap("graph_xpm"));
@@ -2663,20 +2668,21 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
   g->printCropmarks(d_print_cropmarks);
 
   // begin magical code: without it new multilayer subwindow may not be activated
-  MdiSubWindow* old = activeWindow();
-  if (old)
-  {
-	  d_workspace->setActiveSubWindow(NULL);
-	  d_workspace->addSubWindow(g);
-	  activateWindow(old);
-	  activateWindow(g);
-  }// end of magical code
-  else
-  {
-	  d_workspace->addSubWindow(g);
-  }
+  //MdiSubWindow* old = activeWindow();
+  //if (old)
+  //{
+	 // //d_workspace->setActiveSubWindow(NULL);
+  //  this->addSubWindowToMdiArea(g);
+	 // //d_workspace->addSubWindow(g);
+	 // activateWindow(old);
+	 // activateWindow(g);
+  //}// end of magical code
+  //else
+  //{
+  //  this->addSubWindowToMdiArea(g);
+	 // //d_workspace->addSubWindow(g);
+  //}
   connectMultilayerPlot(g);
-  g->showNormal();
 
   addListViewItem(g);
 }
@@ -2871,7 +2877,8 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
   while(name.isEmpty() || alreadyUsedName(name))
     name = generateUniqueName(tr("Table"));
 
-  d_workspace->addSubWindow(w);
+  //d_workspace->addSubWindow(w);
+  addSubWindowToMdiArea(w);
 
   connectTable(w);
   customTable(w);
@@ -2913,7 +2920,8 @@ Note* ApplicationWindow::newNote(const QString& caption)
   m->askOnCloseEvent(confirmCloseNotes);
   m->setDirPath(scriptsDirPath);
 
-  d_workspace->addSubWindow(m);
+  //d_workspace->addSubWindow(m);
+  addSubWindowToMdiArea(m);
   addListViewItem(m);
 
   connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
@@ -3194,7 +3202,8 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->askOnCloseEvent(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
-  d_workspace->addSubWindow(m);
+  //d_workspace->addSubWindow(m);
+  addSubWindowToMdiArea(m);
   addListViewItem(m);
 
   QUndoStack *stack = m->undoStack();
@@ -3346,8 +3355,8 @@ MdiSubWindow *ApplicationWindow::activeWindow(WindowType type)
 
 void ApplicationWindow::windowActivated(QMdiSubWindow *w)
 {	
-
-  MdiSubWindow *qti_subwin = qobject_cast<MdiSubWindow*>(w);
+  if ( !w ) return;
+  MdiSubWindow *qti_subwin = qobject_cast<MdiSubWindow*>(w->widget());
   if( !qti_subwin ) return;
 
   if( d_active_window && d_active_window == qti_subwin ) return;
@@ -3360,10 +3369,11 @@ void ApplicationWindow::windowActivated(QMdiSubWindow *w)
 
   QList<MdiSubWindow *> windows = current_folder->windowsList();
   foreach(MdiSubWindow *ow, windows){
-    if (ow != w && ow->status() == MdiSubWindow::Maximized){
-      ow->setNormal();
-      break;
-    }
+    std::cerr << ow->className() << std::endl;
+  //  if (ow != w && ow->status() == MdiSubWindow::Maximized){
+  //    ow->setNormal();
+  //    break;
+  //  }
   }
 
   Folder *f = qti_subwin->folder();
@@ -17122,4 +17132,93 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
 
   ml->show(); // RJT: Fix for window not displaying properly prior to a resize
   return ml;
+}
+
+QMdiSubWindow* ApplicationWindow::addSubWindowToMdiArea(MdiSubWindow *w, bool show_normal)
+{
+  //connect(w, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
+  //connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),this, SLOT(hideWindow(MdiSubWindow*)));
+  //connect (w,SIGNAL(showContextMenu()),this,SLOT(showWindowContextMenu()));
+
+  QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
+  sw->resize(w->size());
+  QAction *goFloat = new QAction("Float",this);
+  connect(goFloat,SIGNAL(triggered()),w,SLOT(goFloat()));
+  sw->systemMenu()->addAction(goFloat);
+  if (show_normal)
+  {
+    sw->showNormal();
+  }
+  else
+  {
+    sw->showMinimized();
+  }
+  return sw;
+}
+
+void ApplicationWindow::goFloat(MdiSubWindow* w)
+{
+  QMdiSubWindow* sw = dynamic_cast<QMdiSubWindow*>(w->parent());
+  if (!sw)
+  {
+    std::cerr << "Oops... " << w->parent()->className() << std::endl;
+    return;
+  }
+  QSize sz = sw->size();
+  QPoint p = sw->pos() + d_workspace->pos() + this->pos();
+  d_workspace->removeSubWindow(w);
+  sw->close();
+
+  QAction *goMdi = new QAction("MDI",this);
+  connect(goMdi,SIGNAL(triggered()),w,SLOT(goMdi()));
+  QMainWindow* mw =new QMainWindow(this);
+  MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(mw,0);
+  wrapper->setWidget(w);
+  mw->setCentralWidget(wrapper);
+  mw->resize(sz);
+  mw->move(p);
+  mw->show();
+  mw->installEventFilter(this);
+}
+
+void ApplicationWindow::goMdi(QMainWindow* mw)
+{
+  QMenu systemMenu;
+  QAction* goMdiAction = new QAction("MDI",this);
+  systemMenu.addAction(goMdiAction);
+  QAction* res = systemMenu.exec(QCursor::pos());
+  if (res == goMdiAction)
+  {
+    MdiSubWindowParent_t* wrapper = dynamic_cast<MdiSubWindowParent_t*>(mw->centralWidget());
+    if (wrapper)
+    {
+      mw->setCentralWidget(NULL);
+      MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(wrapper->widget());
+      if (w)
+      {
+        addSubWindowToMdiArea(w);
+        // main window must be closed or application will freeze 
+        mw->close();
+        return;
+      }
+    }
+    throw std::runtime_error("Mdi window mishandling");
+  }
+}
+
+bool ApplicationWindow::eventFilter(QObject *obj, QEvent *evt)
+{
+  if (QEvent::NonClientAreaMouseButtonPress == evt->type())
+  {
+    QMouseEvent* mouseEvt = dynamic_cast<QMouseEvent*>(evt);
+    if (mouseEvt && mouseEvt->button() == Qt::MiddleButton)
+    {
+      QMainWindow* w = dynamic_cast<QMainWindow*>(obj);
+      if ( !w ) return false;
+      if (dynamic_cast<ApplicationWindow*>(obj)) return false;
+      emit changeToMDI(w);
+      return true;
+    }
+  }
+  return false;
 }

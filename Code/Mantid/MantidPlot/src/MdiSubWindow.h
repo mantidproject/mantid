@@ -31,6 +31,7 @@
 
 #include <QMdiSubWindow>
 #include <QDockWidget>
+#include <QVBoxLayout>
 
 class QEvent;
 class QCloseEvent;
@@ -39,14 +40,38 @@ class Folder;
 class ApplicationWindow;
 
 // Experimental, Janik Zikovsky, Nov 17 2011. Floatable MDI windows
-//#define MDISUBWINDOW_FLOATABLE 0
-#undef MDISUBWINDOW_FLOATABLE
-#ifndef MDISUBWINDOW_FLOATABLE
+#define MDISUBWINDOW_FLOATABLE 0
+//#undef MDISUBWINDOW_FLOATABLE
+//#ifndef MDISUBWINDOW_FLOATABLE
 /// Define the parent class of MdiSubWindow to make it easier to change
-  typedef QMdiSubWindow MdiSubWindowParent_t;
-#else
-  typedef QDockWidget MdiSubWindowParent_t;
-#endif
+  //typedef QMdiSubWindow MdiSubWindowParent_t;
+//#else
+  //typedef QFrame MdiSubWindowParent_t;
+class MdiSubWindowParent_t: public QWidget
+{
+  Q_OBJECT
+public:
+  MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f):
+  QWidget(parent,f),
+  m_widget(NULL)
+  {}
+  void setWidget(QWidget* w)
+  {
+    if (m_widget)
+    {
+      throw std::runtime_error("Widget already set");
+    }
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0,0,0,0);
+    layout->addWidget(w);
+    m_widget = w;
+  }
+  QWidget* widget() {return m_widget;}
+  const QWidget* widget() const {return m_widget;}
+protected:
+  QWidget* m_widget;
+};
+//#endif
 
 /**
  * \brief Base class of all MDI client windows.
@@ -172,6 +197,8 @@ public slots:
 	//! Notifies the main application that the window has been modified
 	void notifyChanges(){emit modifiedWindow(this);};
 	virtual void print(){};
+  void goFloat();
+  void goMdi();
 
 signals:
 	//! Emitted when the window was closed

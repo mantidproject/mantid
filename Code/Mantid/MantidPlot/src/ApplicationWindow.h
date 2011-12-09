@@ -177,6 +177,7 @@ public:
   QList<QToolBar *> toolBarsList();
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
+  QMdiSubWindow * addSubWindowToMdiArea(MdiSubWindow *w, bool show_normal = true);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -659,6 +660,7 @@ public slots:
   void dragMoveEvent( QDragMoveEvent* e );//Mantid
   void dropEvent( QDropEvent* e );
   void customEvent( QEvent* e);
+  bool eventFilter(QObject *obj, QEvent *event);
   //@}
 
   //! \name Dialogs
@@ -1019,10 +1021,14 @@ public slots:
   /// slot to execute download datafiles algorithm - called  from ICat interface
   void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
+  void goFloat(MdiSubWindow* w);
+  void goMdi(QMainWindow* w);
+
 signals:
   void modified();
   void resultsContextMenu();
   void shutting_down();
+  void changeToMDI(QMainWindow*);
 
 private:
   virtual QMenu * createPopupMenu(){return NULL;};

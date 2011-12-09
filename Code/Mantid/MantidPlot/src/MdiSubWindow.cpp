@@ -39,6 +39,7 @@
 #include <QMenu>
 #include <QTextStream>
 #include <QTemporaryFile>
+#include <QMdiArea>
 
 #include <fstream>
 #include <string>
@@ -336,4 +337,14 @@ QString MdiSubWindow::parseMacAsciiFile(const QString& fname, const QString &com
 
 	QApplication::restoreOverrideCursor();
 	return path;
+}
+
+void MdiSubWindow::goFloat()
+{
+  d_app->goFloat(this);
+}
+
+void MdiSubWindow::goMdi()
+{
+  //d_app->goMdi(this);
 }

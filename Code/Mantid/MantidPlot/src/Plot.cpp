@@ -111,7 +111,7 @@ Plot::Plot(int width, int height, QWidget *parent, const char *)
 	QwtPlotCanvas* plCanvas = canvas();
 	plCanvas->setFocusPolicy(Qt::StrongFocus);
 	plCanvas->setFocusIndicator(QwtPlotCanvas::ItemFocusIndicator);
-	plCanvas->setFocus();
+	//plCanvas->setFocus();
 	plCanvas->setFrameShadow(QwtPlot::Plain);
 	plCanvas->setCursor(Qt::arrowCursor);
 	plCanvas->setLineWidth(0);
@@ -127,7 +127,7 @@ Plot::Plot(int width, int height, QWidget *parent, const char *)
 
 	setCanvasBackground (background);
 	setFocusPolicy(Qt::StrongFocus);
-	setFocusProxy(plCanvas);
+	//setFocusProxy(plCanvas);
 	setFrameShape(QFrame::Box);
 	setLineWidth(0);
 }
