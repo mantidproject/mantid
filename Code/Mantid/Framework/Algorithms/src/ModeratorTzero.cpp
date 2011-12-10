@@ -38,6 +38,7 @@ This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {
@@ -135,23 +136,17 @@ void ModeratorTzero::exec()
 
   // generate the output workspace pointer
   const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
-  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (inputWS != outputWS)
+  if (inputWS != outputWS) //?should we instead dereference the pointers before testing?
   {
-    //Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2, 1));
-    //Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    //Copy over the data as well.
-    outputWS->copyDataFrom( (*inputWS) );
-
+    //Copy the workspace
+	outputWS = boost::dynamic_pointer_cast<EventWorkspace>( WorkspaceFactory::Instance().create(inputWS) );
     setProperty("OutputWorkspace", outputWS);
   }
 
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  PARALLEL_FOR2(inputWS,outputWS)
+  PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
 	PARALLEL_START_INTERUPT_REGION
@@ -160,7 +155,7 @@ void ModeratorTzero::exec()
     IDetector_const_sptr det;
     try
     {
-      det = inputWS->getDetector(i);
+      det = outputWS->getDetector(i);
     } catch (Exception::NotFoundError&)
     {
 	  // Catch if no detector. Next line tests whether this happened - test placed
@@ -169,6 +164,38 @@ void ModeratorTzero::exec()
 	}
 	// If no detector found, skip onto the next spectrum
 	if ( !det ) continue;
+
+	// Get final energy E_f
+	double E_f;
+    std::vector< double >  wsProp=det->getNumberParameter("Efixed");
+    if ( wsProp.size() > 0 )
+    {
+      E_f = wsProp.at(0);
+      g_log.debug() << "detector: " << i << " Efixed: "<< E_f << std::endl;
+    }
+    else
+    {
+      g_log.information() <<"Efixed not found for detector "<< i << std::endl;
+      throw std::invalid_argument("No Efixed value has been set or found.");
+    }
+
+    //calculate L_f
+    double L_f;
+    try
+    {
+      L_f = det->getDistance(*sample);
+      g_log.debug() << "dectector " << i << "-sample distance: " << L_f << std::endl;
+    }
+    catch (Exception::NotFoundError &)
+    {
+      g_log.error("Unable to calculate detector-sample distance");
+      throw Exception::InstrumentDefinitionError("Unable to calculate detectot-sample distance", outputWS->getTitle());
+    }
+
+    //calculate v_f and t_f
+    double v_f;
+    double t_f = L_f / v_f;
+
 
 	//Get Efixed value
     try {

@@ -40,7 +40,7 @@ namespace Algorithms
  	 	                 a=gradient*3.956E-03, [a]=meter,    b=intercept, [b]=microsec
  	 	 Putting all together:  TOF' = (L_i/(L_i+a))*(TOF-t_f-b) + t_i,   [TOF']=microsec
 
-    @author Jose Borreguero
+    @author Jose Borreguero and Andrei Savici
     @date 12/12/2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
