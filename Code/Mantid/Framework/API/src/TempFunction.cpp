@@ -52,7 +52,7 @@ namespace API
   FunctionDomain(n)
   {
     // n > 0, FunctionDomain(n) must throw if it isn't
-    double dx = (end - start) / (n - 1);
+    double dx = (end - start) / (static_cast<double>(n) - 1.0);
     m_X.resize(n);
     double x = start;
     for(size_t i = 0; i < n; ++i, x += dx)
