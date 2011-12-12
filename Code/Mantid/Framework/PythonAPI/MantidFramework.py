@@ -96,8 +96,14 @@ else:
 
     oldflags = sys.getdlopenflags()
     if platform.system() == "Darwin":
-        import dl
-        sys.setdlopenflags(dl.RTLD_LOCAL|dl.RTLD_NOW)
+        try:
+            import dl
+            RTLD_LOCAL = dl.RTLD_LOCAL
+            RTLD_NOW = dl.RTLD_NOW
+        except ImportError:
+            RTLD_LOCAL = 0x4
+            RTLD_NOW = 0x2
+        sys.setdlopenflags(RTLD_LOCAL|RTLD_NOW)
     from libMantidPythonAPI import *
     from libMantidPythonAPI import _binary_op, _equals_op
     sys.setdlopenflags(oldflags)
