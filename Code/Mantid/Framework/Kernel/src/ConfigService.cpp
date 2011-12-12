@@ -1338,6 +1338,7 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
   }
   return false;
 #else
+    UNUSED_ARG(path);
   // Not yet implemented for the mac
   return false;
 #endif
