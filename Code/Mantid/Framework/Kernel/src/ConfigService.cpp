@@ -538,10 +538,10 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos)
   {
-    int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-    Poco::StringTokenizer tokenizer(dir, ";,", options);
-    Poco::StringTokenizer::Iterator iend = tokenizer.end();
-    for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend;)
+    std::vector<std::string> splitted;
+    splitPath(dir, splitted);
+    std::vector<std::string>::const_iterator iend = splitted.end();
+    for (std::vector<std::string>::const_iterator itr = splitted.begin(); itr != iend;)
     {
       std::string absolute = makeAbsolute(*itr, key);
       if (absolute.empty())
@@ -626,14 +626,7 @@ void ConfigServiceImpl::cacheDataSearchPaths()
   //Nothing to do
   if (paths.empty())
     return;
-  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  Poco::StringTokenizer tokenizer(paths, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
-  m_DataSearchDirs.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr)
-  {
-    m_DataSearchDirs.push_back(*itr);
-  }
+  splitPath(paths, m_DataSearchDirs);
 }
 
 /**
@@ -647,14 +640,7 @@ void ConfigServiceImpl::cacheUserSearchPaths()
   //Nothing to do
   if (paths.empty())
     return;
-  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  Poco::StringTokenizer tokenizer(paths, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
-  m_UserSearchDirs.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr)
-  {
-    m_UserSearchDirs.push_back(*itr);
-  }
+  splitPath(paths, m_UserSearchDirs);
 }
 
 /**
@@ -1097,7 +1083,6 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   {
     old = "";
   }
-  std::cout << "ConfigServiceImpl::setString(" << key << ", " << value << ") old = " << old << std::endl; // REMOVE
 
   //Ensure we keep a correct full path
   std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
@@ -1139,7 +1124,6 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
         return;
     }
 
-    std::cout << "     updating value" << std::endl; // REMOVE
     m_notificationCenter.postNotification(new ValueChanged(key, value, old));
     m_changed_keys.insert(key);
   }
