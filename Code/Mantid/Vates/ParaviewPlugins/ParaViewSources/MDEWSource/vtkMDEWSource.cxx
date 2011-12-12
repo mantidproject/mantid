@@ -53,10 +53,11 @@ void vtkMDEWSource::SetDepth(int depth)
 */
 void vtkMDEWSource::SetWsName(std::string name)
 {
-  if(m_wsName != name)
+  if(m_wsName != name && name != "")
   {
     m_wsName = name;
     this->Modified();
+    std::cout << "Z: " << m_wsName << std::endl;
   }
 }
 
@@ -215,4 +216,9 @@ char* vtkMDEWSource::GetWorkspaceTypeName()
   {
     return "";
   }
+}
+
+const char* vtkMDEWSource::GetWorkspaceName()
+{
+  return m_wsName.c_str();
 }
