@@ -32,6 +32,7 @@ class SliceViewer : QWidget
 
 public:
   void zoomBy(double factor);
+  void setWorkspace(const QString & wsName);
 };
 
 

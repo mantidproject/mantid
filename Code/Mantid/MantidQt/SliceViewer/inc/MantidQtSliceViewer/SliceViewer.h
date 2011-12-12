@@ -41,6 +41,7 @@ public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer();
 
+  void setWorkspace(const QString & wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   void showControls(bool visible);
   void zoomBy(double factor);

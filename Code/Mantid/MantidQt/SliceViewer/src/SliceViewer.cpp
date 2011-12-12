@@ -33,6 +33,9 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
+#include "MantidKernel/DataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -356,7 +359,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
   // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
-    IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+  IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
   if (mdew)
     mdew->estimateResolution();
 
@@ -405,6 +408,25 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
+}
+
+
+//------------------------------------------------------------------------------------
+/** Set the workspace by name
+ *
+ * @param wsName :: name of the MDWorkspace to look for
+ * @throw if the workspace is not found or is a MatrixWorkspace
+ */
+void SliceViewer::setWorkspace(const QString & wsName)
+{
+  IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+      AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
+  if (!ws)
+    throw std::runtime_error("SliceViewer can only view MDWorkspaces.");
+  if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws))
+    throw std::runtime_error("SliceViewer cannot view MatrixWorkspaces. "
+        "Please select a MDEventWorkspace or a MDHistoWorkspace.");
+  this->setWorkspace(ws);
 }
 
 
