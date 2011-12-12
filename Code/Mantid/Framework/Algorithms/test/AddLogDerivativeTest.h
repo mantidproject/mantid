@@ -36,7 +36,8 @@ public:
   }
 
   /** Perform test, return result */
-  TimeSeriesProperty<double> * do_test(int Derivative, bool willFail = false)
+  TimeSeriesProperty<double> * do_test(int Derivative, bool willFail = false,
+      bool addRepeatedTimes = false)
   {
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("Dummy", ws);
@@ -46,9 +47,15 @@ public:
     TS_ASSERT( p->addValue("2007-11-30T16:17:10",2.00) );
     TS_ASSERT( p->addValue("2007-11-30T16:17:20",0.00) );
     TS_ASSERT( p->addValue("2007-11-30T16:17:30",5.00) );
+    if (addRepeatedTimes)
+    {
+      TS_ASSERT( p->addValue("2007-11-30T16:17:30",10.00) );
+      TS_ASSERT( p->addValue("2007-11-30T16:17:40",15.00) );
+      TS_ASSERT( p->addValue("2007-11-30T16:17:50",20.00) );
+    }
     ws->mutableRun().addProperty(p, true);
 
-    std::string NewLogName = "doubleProp_derived";
+    std::string NewLogName = "doubleProp_deriv";
 
     AddLogDerivative alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -110,6 +117,17 @@ public:
     TS_ASSERT_DELTA( p->nthValue(0), 0.01, 1e-5);
   }
 
+  /** Ticket #4313: Handled repeated time values in logs */
+  void test_exec_1stDerivative_repeatedValues()
+  {
+    TimeSeriesProperty<double> * p = do_test(1, false, true);
+    if (!p) return;
+    TS_ASSERT_EQUALS( p->size(), 5);
+    TS_ASSERT_EQUALS( p->nthTime(3).to_ISO8601_string(), "2007-11-30T16:17:35");
+    TS_ASSERT_DELTA( p->nthValue(3), 1.0, 1e-5);
+    TS_ASSERT_EQUALS( p->nthTime(4).to_ISO8601_string(), "2007-11-30T16:17:45");
+    TS_ASSERT_DELTA( p->nthValue(4), 0.5, 1e-5);
+  }
 
   void test_exec_failures()
   {
