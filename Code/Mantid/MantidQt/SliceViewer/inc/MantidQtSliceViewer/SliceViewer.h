@@ -51,6 +51,10 @@ public:
   size_t getDimX() const { return m_dimX; }
   size_t getDimY() const { return m_dimY; }
 
+  /// Methods for Python bindings
+  void setDimX(int index);
+  void setDimY(int index);
+
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
   void changedShownDim(size_t dimX, size_t dimY);

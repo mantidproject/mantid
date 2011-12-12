@@ -905,5 +905,31 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 }
 
 
+//=================================================================================================
+//========================================== PYTHON METHODS =======================================
+//=================================================================================================
+
+/** Set the index of the dimension that will be shown as the X axis
+ * of the plot.
+ * @param index :: index of the dimension, from 0 to NDims-1.
+ */
+void SliceViewer::setDimX(int index)
+{
+  if (index >= int(m_dimWidgets.size()) || index < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(index) + " in the workspace.");
+  m_dimWidgets[index]->setShownDim(0);
+}
+
+/** Set the index of the dimension that will be shown as the Y axis
+ * of the plot.
+ * @param index :: index of the dimension, from 0 to NDims-1.
+ */
+void SliceViewer::setDimY(int index)
+{
+  if (index >= int(m_dimWidgets.size()) || index < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(index) + " in the workspace.");
+  m_dimWidgets[index]->setShownDim(1);
+}
+
 } //namespace
 }
