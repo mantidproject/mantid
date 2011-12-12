@@ -57,7 +57,6 @@ void vtkMDEWSource::SetWsName(std::string name)
   {
     m_wsName = name;
     this->Modified();
-    std::cout << "Z: " << m_wsName << std::endl;
   }
 }
 
