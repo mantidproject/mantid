@@ -44,7 +44,7 @@ separate_arguments ( PYQT4_SIP_FLAGS )
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/sip_mantidqt.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sip_mantidqt.cpp )
-set ( SIP_SRC_AUTO siplibmantidqtpart0.cpp )
+set ( SIP_SRC_AUTO siplibmantidpythonqtpart0.cpp )
 
 # We need to manually add all the headers that are in the sip file
 # so that the dependencies are known to CMake
@@ -89,10 +89,10 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/SliceViewer/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui_*.h auto-generated files
 
 # This creates the target library, just for python bindings
-add_library ( mantidqt ${SIP_SRC} )
+add_library ( mantidqtpython ${SIP_SRC} )
 
 # ... and links to other required libs
-target_link_libraries ( mantidqt MantidQtAPI QtPropertyBrowser MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( mantidqtpython MantidQtAPI QtPropertyBrowser MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 
 
@@ -100,5 +100,5 @@ target_link_libraries ( mantidqt MantidQtAPI QtPropertyBrowser MantidQtSliceView
 # Installation settings
 ###########################################################################
 
-install ( TARGETS mantidqt DESTINATION ${LIB_DIR} )
+install ( TARGETS mantidqtpython DESTINATION ${LIB_DIR} )
 

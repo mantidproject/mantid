@@ -10,4 +10,4 @@
   #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 
-#include "siplibmantidqtpart0.cpp"
+#include "siplibmantidqtpythonpart0.cpp"
