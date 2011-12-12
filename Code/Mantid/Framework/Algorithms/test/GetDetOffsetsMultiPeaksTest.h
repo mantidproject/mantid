@@ -65,7 +65,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) );
     if (!output) return;
 
-    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.0001);
+    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.002);
 
     AnalysisDataService::Instance().remove(outputWS);
   }
@@ -98,7 +98,7 @@ public:
     OffsetsWorkspace_sptr output = offsets.getProperty("OutputWorkspace");
     if (!output) return;
 
-    TS_ASSERT_DELTA( output->getValue(1), -0.0196, 0.0001);
+    TS_ASSERT_DELTA( output->getValue(1), -0.0196, 0.002);
     TS_ASSERT_EQUALS( output->getValue(1), output->getValue(2));
     TS_ASSERT_EQUALS( output->getValue(1), output->getValue(3));
 
@@ -149,7 +149,7 @@ public:
     OffsetsWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = offsets.getProperty("OutputWorkspace") );
     if (!output) return;
-    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.0001);
+    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.002);
   }
 
 };
