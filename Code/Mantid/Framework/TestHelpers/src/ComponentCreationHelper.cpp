@@ -531,4 +531,3 @@ createCylInstrumentWithDetInGivenPosisions(const std::vector<double>& L2, const 
     return testInst;
   }
 }
-
