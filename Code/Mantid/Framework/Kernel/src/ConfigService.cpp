@@ -53,6 +53,98 @@ std::string welcomeMessage()
 namespace Kernel
 {
 
+namespace { // anonymous namespace for some utility functions
+
+/**
+ * Split the supplied string on semicolons.
+ *
+ * @param path The path to split.
+ * @param splitted vector to put the splitted path into.
+ */
+void splitPath(const std::string &path, std::vector<std::string> &splitted)
+{
+  if (path.find(";") == std::string::npos)
+  {  // don't bother tokenizing
+    splitted.push_back(path);
+    return;
+  }
+
+  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+
+  splitted.clear();
+  Poco::StringTokenizer tokenizer(path, ";,", options);
+  Poco::StringTokenizer::Iterator iend = tokenizer.end();
+  splitted.reserve(tokenizer.count());
+  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr)
+  {
+    if (!itr->empty())
+    {
+      splitted.push_back(*itr);
+    }
+  }
+}
+
+/**
+ * Verify that two paths are equal. This can be two directories or two
+ * semicolon separated paths.
+ *
+ * @param left The left path for comparison.
+ * @param right The right path for comparison.
+ *
+ * @return True if the paths match.
+ */
+bool pathsEqual(const std::string &left, const std::string &right)
+{
+  if (left == right)
+    return true;
+
+  // deal with silly case of empty paths
+  if (left.empty())
+    return false;
+  if (right.empty())
+    return false;
+
+  // check for path rather than simple directory
+  if ((left.find(";") != std::string::npos) || (right.find(";") != std::string::npos))
+  {
+    // at least one has a semicolons
+
+    std::vector<std::string> leftDirs;
+    splitPath(left, leftDirs);
+
+    std::vector<std::string> rightDirs;
+    splitPath(right, rightDirs);
+
+    // confirm they have the same number of items
+    if (leftDirs.size() != rightDirs.size())
+      return false;
+
+    // sort the vectors
+    std::sort(leftDirs.begin(), leftDirs.end());
+    std::sort(rightDirs.begin(), rightDirs.end());
+
+    // assume that they are in the same order now
+    std::size_t numpaths = leftDirs.size();
+    for (std::size_t i = 0; i < numpaths; i++)
+    {
+      if (!pathsEqual(leftDirs[i], rightDirs[i]))
+        return false;
+    }
+    return true;
+  }
+
+  Poco::File leftDir(left);
+  if (!leftDir.isDirectory())
+    return false;
+  Poco::File rightDir(right);
+  if (!rightDir.isDirectory())
+    return false;
+
+  return (leftDir == rightDir);
+}
+
+} // end of anonymous namespace
+
 /** Inner templated class to wrap the poco library objects that have protected
  *  destructors and expose them as public.
  */
@@ -766,7 +858,7 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
 
     //Find the comments
     std::string::size_type comment = key.find('#');
-   
+
     //Check if it exists in the service using hasProperty and make sure it isn't a comment
     if( comment != 0 && !hasProperty(key) )
     {
@@ -1005,6 +1097,7 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   {
     old = "";
   }
+  std::cout << "ConfigServiceImpl::setString(" << key << ", " << value << ") old = " << old << std::endl; // REMOVE
 
   //Ensure we keep a correct full path
   std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
@@ -1030,6 +1123,23 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
 
   if (value != old)
   {
+    // if the property ends in "directory"
+    const std::string dirKey("directory");
+    if (key.size() > dirKey.size() && key.rfind(dirKey) != std::string::npos)
+    {
+      if (pathsEqual(value, old))
+        return;
+    }
+
+    // if the property ends in "directories"
+    const std::string dirsKey("directories");
+    if (key.size() > dirsKey.size() && key.rfind(dirsKey) != std::string::npos)
+    {
+      if (pathsEqual(value, old))
+        return;
+    }
+
+    std::cout << "     updating value" << std::endl; // REMOVE
     m_notificationCenter.postNotification(new ValueChanged(key, value, old));
     m_changed_keys.insert(key);
   }
