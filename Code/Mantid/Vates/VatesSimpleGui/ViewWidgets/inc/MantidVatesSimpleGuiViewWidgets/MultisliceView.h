@@ -145,6 +145,8 @@ private:
 
   /// Determine if the incoming and current axis have the same bounds.
   bool checkBounds(AxisInformation *info, AxisInteractor *axis);
+  /// Determine if the data can support the SliceViewer being shown.
+  void checkSliceViewCompat();
   /// Determine if the incoming and current axis have the same title.
   bool checkTitles(AxisInformation *info, AxisInteractor *axis);
   /// Clear all axis indicator highlighting.

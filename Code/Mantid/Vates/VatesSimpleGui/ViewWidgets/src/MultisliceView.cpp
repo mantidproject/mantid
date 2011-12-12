@@ -185,6 +185,7 @@ void MultiSliceView::setupAxisInfo()
 {
   const char *geomXML = vtkSMPropertyHelper(this->origSrc->getProxy(),
                                             "InputGeometryXML").GetAsString();
+
   GeometryParser parser(geomXML);
   AxisInformation *xinfo = parser.getAxisInfo("XDimension");
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
@@ -202,6 +203,7 @@ void MultiSliceView::setupAxisInfo()
 void MultiSliceView::render()
 {
   this->origSrc = pqActiveObjects::instance().activeSource();
+  this->checkSliceViewCompat();
   this->setupData();
   this->setupAxisInfo();
   this->resetDisplay();
@@ -509,6 +511,41 @@ void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
 void MultiSliceView::resetCamera()
 {
   this->mainView->resetCamera();
+}
+
+/**
+ * This function checks the sources for the WorkspaceName property. If found,
+ * the ability to show a given cut in the SliceViewer will be activated.
+ */
+void MultiSliceView::checkSliceViewCompat()
+{
+  bool setSliceViewState = false;
+  // Check the current source
+  pqPipelineSource *src = this->getPvActiveSrc();
+  QString wsName(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceName",
+                                     true).GetAsString());
+  if (wsName != "")
+  {
+    setSliceViewState = true;
+  }
+  else
+  {
+    // Check the original source
+    QString wsName1(vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                        "WorkspaceName",
+                                        true).GetAsString());
+    if (wsName1 != "")
+    {
+      setSliceViewState = true;
+    }
+  }
+  if (setSliceViewState)
+  {
+    this->ui.xAxisWidget->setShowSliceView(true);
+    this->ui.yAxisWidget->setShowSliceView(true);
+    this->ui.zAxisWidget->setShowSliceView(true);
+  }
 }
 
 }
