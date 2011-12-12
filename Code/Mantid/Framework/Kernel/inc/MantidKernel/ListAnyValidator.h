@@ -40,10 +40,45 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+// templated class which implements compiler-time check if the input template parameter is string 
+template<typename T>
+struct is_string{
+    static const bool value = false;
+};
+template<>
+struct is_string<std::string>{
+    static const bool value = true;
+};
+
+
 template<typename TYPE=std::string>
 class  ListAnyValidator : public IValidator<TYPE>
 {
+private:
+    // templated function which substitutes different code as fucntion of the initated type
+    // this codes is substituced is the condifion is true
+    template< bool Condition >
+    class IF {
+    public:
+        static inline void RUN(ListAnyValidator *pHost,const TYPE &value){
+               pHost->m_allowedValues.insert(value);
+        }
+    };
+    // and this one -- if false
+    template<>
+    class IF< false > {
+    public:
+        static inline void RUN(ListAnyValidator *pHost,const TYPE &value){  
+        {
+                TYPE rVal = boost::lexical_cast<TYPE>(value);
+                pHost->m_allowedValues.insert(rVal);
+            }
+        }
+    };
+
 public:
+
     /// Default constructor. Sets up an empty list of valid values.
     ListAnyValidator(): IValidator<TYPE>(), m_allowedValues(){};
     /** Constructor
@@ -71,17 +106,22 @@ public:
     }
      /// Adds the argument to the set of valid values -
     //template<class T>
-    ////typename boost::disable_if<boost::is_object<T>(std::string)>
-    //virtual void addAllowedValue(const std::string &value)
-    //{
-    //     TYPE rVal = boost::lexical_cast<TYPE>(value);
-    //     m_allowedValues.insert(rVal);
-    //}
-     /// Adds the argument to the set of valid values
-    virtual void addAllowedValue(const TYPE &value)
-    {
-           m_allowedValues.insert(value);
+    //boost::disable_if<is_string<typename T>::value >
+    // /// Adds the argument to the set of valid values
+    template <class TYPE>
+    typename boost::disable_if_c<is_string<TYPE>::value, TYPE>::type 
+    void addAllowedValue(const std::string &value){
+         TYPE rVal = boost::lexical_cast<TYPE>(value);
+         m_allowedValues.insert(rVal);
     }
+
+    void addAllowedValue(const TYPE &value)
+    {
+        m_allowedValues.insert(value);           
+    }
+
+
+
 
     virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
 

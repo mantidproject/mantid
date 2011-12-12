@@ -94,6 +94,13 @@ public:
     TS_ASSERT( ! dynamic_cast<IValidator<double>*>(v) )
     delete v;
   }
+  void testAddStringVSIntValue()
+  {
+      ListAnyValidator<int> v1;
+      ListAnyValidator<int> v2;
+      v1.addAllowedValue(1);
+      v2.addAllowedValue("1");
+  }
   
 };
 
