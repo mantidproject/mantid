@@ -92,7 +92,11 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui
 add_library ( mantidqtpython ${SIP_SRC} )
 
 # ... and links to other required libs
-target_link_libraries ( mantidqtpython MantidQtAPI QtPropertyBrowser MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( mantidqtpython 
+	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer
+	${QT_LIBRARIES} ${QWT_LIBRARIES}
+	${PYTHON_LIBRARIES}
+	)
 
 
 
