@@ -107,8 +107,8 @@ namespace Mantid
         double mask=1.0;
         if (std::abs(offset) > maxOffset)
         { 
-          //offset = 0.0;
-          //mask = 0.0;
+          offset = 0.0;
+          mask = 0.0;
         }
 
         // Get the list of detectors in this pixel
