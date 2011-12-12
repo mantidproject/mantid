@@ -172,6 +172,7 @@ private:
   /// Create the current data representation.
   void setupData();
 
+  bool isOrigSrc; ///< Flag for SliceViewer information
   QPointer<pqRenderView> mainView; ///< The main view class
   Ui::MultiSliceViewClass ui; ///< The view's UI form
 };

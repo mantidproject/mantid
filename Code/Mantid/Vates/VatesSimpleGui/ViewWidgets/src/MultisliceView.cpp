@@ -41,6 +41,7 @@ namespace SimpleGui
 
 MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
+  this->isOrigSrc = false;
   this->ui.setupUi(this);
   this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);
   this->ui.yAxisWidget->setScalePosition(AxisInteractor::TopScale);
@@ -538,6 +539,7 @@ void MultiSliceView::checkSliceViewCompat()
     if (wsName1 != "")
     {
       setSliceViewState = true;
+      this->isOrigSrc = true;
     }
   }
   if (setSliceViewState)
