@@ -86,7 +86,7 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
   resident_set = static_cast<size_t>(rss * page_size_kb);
 #elif __APPLE__
   // Adapted from http://blog.kuriositaet.de/?p=257. No official apple docs could be found
-  task_t task = MACH_PORT_NULL;
+  //task_t task = MACH_PORT_NULL;
   struct task_basic_info t_info;
   mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
 
