@@ -538,10 +538,10 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos)
   {
-    int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-    Poco::StringTokenizer tokenizer(dir, ";,", options);
-    Poco::StringTokenizer::Iterator iend = tokenizer.end();
-    for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend;)
+    std::vector<std::string> splitted;
+    splitPath(dir, splitted);
+    std::vector<std::string>::const_iterator iend = splitted.end();
+    for (std::vector<std::string>::const_iterator itr = splitted.begin(); itr != iend;)
     {
       std::string absolute = makeAbsolute(*itr, key);
       if (absolute.empty())
@@ -626,14 +626,7 @@ void ConfigServiceImpl::cacheDataSearchPaths()
   //Nothing to do
   if (paths.empty())
     return;
-  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  Poco::StringTokenizer tokenizer(paths, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
-  m_DataSearchDirs.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr)
-  {
-    m_DataSearchDirs.push_back(*itr);
-  }
+  splitPath(paths, m_DataSearchDirs);
 }
 
 /**
@@ -647,14 +640,7 @@ void ConfigServiceImpl::cacheUserSearchPaths()
   //Nothing to do
   if (paths.empty())
     return;
-  int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-  Poco::StringTokenizer tokenizer(paths, ";,", options);
-  Poco::StringTokenizer::Iterator iend = tokenizer.end();
-  m_UserSearchDirs.reserve(tokenizer.count());
-  for (Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr)
-  {
-    m_UserSearchDirs.push_back(*itr);
-  }
+  splitPath(paths, m_UserSearchDirs);
 }
 
 /**
