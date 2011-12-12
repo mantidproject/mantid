@@ -1097,7 +1097,6 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
   {
     old = "";
   }
-  std::cout << "ConfigServiceImpl::setString(" << key << ", " << value << ") old = " << old << std::endl; // REMOVE
 
   //Ensure we keep a correct full path
   std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
@@ -1139,7 +1138,6 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
         return;
     }
 
-    std::cout << "     updating value" << std::endl; // REMOVE
     m_notificationCenter.postNotification(new ValueChanged(key, value, old));
     m_changed_keys.insert(key);
   }
