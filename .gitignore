@@ -143,4 +143,7 @@ Desktop.ini
 # PyCharm IDE
 .idea/
 
+# Mac OS X Finder
+.DS_Store
+
 /Code/Mantid/Build/CMake/OutputBinaryTo.cmake
