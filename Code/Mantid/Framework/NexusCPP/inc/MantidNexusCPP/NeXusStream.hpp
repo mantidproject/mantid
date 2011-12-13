@@ -64,64 +64,64 @@ namespace Stream
 
     class NXDLL_EXPORT HolderBase : public ISerialisable
     {
-      protected:
-	std::string m_name;
+    protected:
+        std::string m_name;
 
-      public:
-	HolderBase() : m_name("") {}
-	HolderBase(const std::string& name);
-	void setName(const std::string& name);
-	std::string getName() { return m_name; }
-	virtual NXnumtype getType() = 0;
-	virtual HolderBase* clone() = 0;
-	virtual ~HolderBase() {}
+    public:
+        HolderBase();
+        HolderBase(const std::string& name);
+        void setName(const std::string& name);
+        std::string getName();
+        virtual NXnumtype getType() = 0;
+        virtual HolderBase* clone() = 0;
+        virtual ~HolderBase() {}
     };
 
     template<typename NumT>
     class NXDLL_EXPORT AttrHolder : public HolderBase
     {
-      protected:
-	const NumT* m_c_value;
-	NumT* m_value;
-	AttrHolder() : HolderBase(), m_c_value(NULL), m_value(NULL) { }
-	AttrHolder(const std::string& name, const NumT* cv, NumT* v) : HolderBase(name), m_c_value(cv), m_value(v) { }
+    protected:
+        const NumT* m_c_value;
+        NumT* m_value;
+        AttrHolder() : HolderBase(), m_c_value(NULL), m_value(NULL) { }
+        AttrHolder(const std::string& name, const NumT* cv, NumT* v) : HolderBase(name), m_c_value(cv), m_value(v) { }
 
-      public:
-	AttrHolder(const std::string& name, NumT& value);
-	AttrHolder(const std::string& name, const NumT& value);
-	AttrHolder(NumT& value);
-	AttrHolder(const NumT& value);
-	NXnumtype getType();
-	virtual void readFromFile(File& nf) const;
-	virtual void writeToFile(File& nf) const;
-	AttrHolder* clone() { return new AttrHolder(m_name, m_c_value, m_value); }
-	virtual ~AttrHolder() { m_value = NULL; m_c_value = NULL; }
+    public:
+        AttrHolder(const std::string& name, NumT& value);
+        AttrHolder(const std::string& name, const NumT& value);
+        AttrHolder(NumT& value);
+        AttrHolder(const NumT& value);
+        NXnumtype getType();
+        virtual void readFromFile(File& nf) const;
+        virtual void writeToFile(File& nf) const;
+        AttrHolder* clone() { return new AttrHolder(m_name, m_c_value, m_value); }
+        virtual ~AttrHolder() { m_value = NULL; m_c_value = NULL; }
     };
 
     /// \ingroup cpp_stream
     class NXDLL_EXPORT Attr : public ISerialisable
     {
-      protected:
-	HolderBase* m_holder;
+    protected:
+        HolderBase* m_holder;
 
-      public:
-	Attr() : m_holder(NULL) { }
+    public:
+        Attr() : ISerialisable(), m_holder(NULL) { }
         template <typename NumT>
-	  Attr(NumT& d) { m_holder = new AttrHolder<NumT>(d); }
+        Attr(NumT& d) { m_holder = new AttrHolder<NumT>(d); }
         template <typename NumT>
-	  Attr(const NumT& d) { m_holder = new AttrHolder<NumT>(d); }
+        Attr(const NumT& d) { m_holder = new AttrHolder<NumT>(d); }
         template <typename NumT>
-	  Attr(const std::string& name, NumT& d) { m_holder = new AttrHolder<NumT>(name, d); }
+        Attr(const std::string& name, NumT& d) { m_holder = new AttrHolder<NumT>(name, d); }
         template <typename NumT>
-	  Attr(const std::string& name, const NumT& d) { m_holder = new AttrHolder<NumT>(name, d); }
-	Attr(const std::string& name, Attr& d) { m_holder = d.m_holder->clone(); setName(name); }
-	Attr(const std::string& name, const Attr& d) { m_holder = d.m_holder->clone(); setName(name); }
-        Attr(const Attr& a) : m_holder(NULL) {  m_holder = a.m_holder->clone(); }
-	Attr& operator=(const Attr& a) { if (this != &a) { delete m_holder; m_holder = a.m_holder->clone(); } return *this; }
-	void setName(const std::string& name) { m_holder->setName(name); }
-	virtual void readFromFile(File& nf) const { m_holder->readFromFile(nf); }
-	virtual void writeToFile(File& nf) const { m_holder->writeToFile(nf); }
-	virtual ~Attr() { delete m_holder; m_holder = NULL; }
+        Attr(const std::string& name, const NumT& d) { m_holder = new AttrHolder<NumT>(name, d); }
+        Attr(const std::string& name, Attr& d) { m_holder = d.m_holder->clone(); setName(name); }
+        Attr(const std::string& name, const Attr& d) { m_holder = d.m_holder->clone(); setName(name); }
+        Attr(const Attr& a) : ISerialisable(a), m_holder(NULL) {  m_holder = a.m_holder->clone(); }
+        Attr& operator=(const Attr& a) { if (this != &a) { delete m_holder; m_holder = a.m_holder->clone(); } return *this; }
+        void setName(const std::string& name) { m_holder->setName(name); }
+        virtual void readFromFile(File& nf) const { m_holder->readFromFile(nf); }
+        virtual void writeToFile(File& nf) const { m_holder->writeToFile(nf); }
+        virtual ~Attr() { delete m_holder; m_holder = NULL; }
     };
 
     
