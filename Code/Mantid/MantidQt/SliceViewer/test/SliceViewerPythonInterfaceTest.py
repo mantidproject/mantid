@@ -3,59 +3,54 @@ import sys
 import os
 import unittest
 import time
-
-# Import the Mantid framework
-sys.path.append( os.getcwd() )
-import MantidFramework
-from MantidFramework import mtd
-from mantidsimple import *
+from PyQt4 import Qt
+from PyQt4 import QtTest
+from PyQt4.QtTest import QTest
+import libmantidqtpython
 
 # Create a test data set
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', 
-    Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
-FakeMDEventData("mdw",  UniformParams="1e6")
+    Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
+FakeMDEventData("mdw",  UniformParams="1e4")
+FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
 BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
-
-w = mtd['uniform']
-print "CREATED!", w
-
-
-from PyQt4 import Qt
-import libmantidqtpython
 
 
 class SliceViewerPythonInterfaceTest(unittest.TestCase):
     """Test for accessing SliceViewer widgets from MantidPlot
     python interpreter"""
+    
     def setUp(self):
-        self.app =  Qt.QApplication(sys.argv)
+        """ Set up and create a SliceViewer widget """
+        global libmantidqtpython
         self.sv = libmantidqtpython.MantidQt.SliceViewer.SliceViewer()
         pass
+    
+    def tearDown(self):
+        """ Close the created widget """
+        self.sv.close()
 	
-    def test_creating(self):
-        print "test_creating"
-    	import time
+    def test_setWorkspace(self):
+        print "test_setWorkspace"
         sv = self.sv
-        #sv.setWorkspace('mdw')
+        sv.setWorkspace('uniform')
         sv.show()
-        print sv
-        #sv.close()
+        global QTest
+        #QTest.mouseClick(sv)
     
-    def test_creating2(self):
-        print "test_creating2"
+    def test_other(self):
+        print "test_other"
+        sv = self.sv
+        sv.setWorkspace('mdw')
+        sv.show()
     
     
-if __name__=="__main__":
-    unittest.main()
 
-## ----- Create and run the unit test ----------------------    
-#sys.path.append("/home/8oz/Code/Mantid/Code/Mantid/TestingTools/unittest-xml-reporting/src")
-#import xmlrunner
-#suite = unittest.makeSuite(SliceViewerPythonInterfaceTest)
-#runner = xmlrunner.XMLTestRunner(output='Testing')
-#runner.run(suite)
-#print "Done!"
+# ----- Create and run the unit test ----------------------    
+sys.path.append("/home/8oz/Code/Mantid/Code/Mantid/TestingTools/unittest-xml-reporting/src")
+import xmlrunner
+suite = unittest.makeSuite(SliceViewerPythonInterfaceTest)
+runner = xmlrunner.XMLTestRunner(output='Testing')
+runner.run(suite)
+print "Done!"
 
-#
-## Run the app.
-#a.exec_()
