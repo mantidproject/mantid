@@ -320,7 +320,7 @@ namespace Algorithms
         // ii. search
         abstimeit = std::lower_bound(mSETimes.begin()+posoffset, mSETimes.end(), mtime);
         size_t mindex = size_t(abstimeit-mSETimes.begin())-1;
-        if (mindex < 0 || mindex >= mSETimes.size())
+        if (mindex >= mSETimes.size())
           throw std::invalid_argument("Flag 1616:  Wrong in searching!!!");
         else
           posoffset += mindex;

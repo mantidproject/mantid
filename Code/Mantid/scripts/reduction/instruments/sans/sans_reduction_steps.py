@@ -423,17 +423,20 @@ class DirectBeamTransmission(BaseTransmission):
         """
             Compute zero-angle transmission
         """
-        if self._monitor_det_ID is not None and self._monitor_det_ID>=0:
-            CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                  OutputWorkspace=trans_output_workspace,
-                                  IncidentBeamMonitor=str(self._monitor_det_ID), 
-                                  TransmissionMonitor=str(first_det),
-                                  OutputUnfittedData=True)
-        else:
-            CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                  OutputWorkspace=trans_output_workspace,
-                                  TransmissionMonitor=str(first_det),
-                                  OutputUnfittedData=True)
+        try:
+            if self._monitor_det_ID is not None and self._monitor_det_ID>=0:
+                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
+                                      OutputWorkspace=trans_output_workspace,
+                                      IncidentBeamMonitor=str(self._monitor_det_ID), 
+                                      TransmissionMonitor=str(first_det),
+                                      OutputUnfittedData=True)
+            else:
+                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
+                                      OutputWorkspace=trans_output_workspace,
+                                      TransmissionMonitor=str(first_det),
+                                      OutputUnfittedData=True)
+        except:
+            raise RuntimeError, "Couldn't compute transmission. Is the beam center in the right place?\n\n%s" % sys.exc_value
         
         for ws in [empty_mon_ws, sample_mon_ws]:
             if mtd.workspaceExists(ws):

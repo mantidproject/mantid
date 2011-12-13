@@ -1,14 +1,15 @@
 /*WIKI* 
 
-
-
 This algorithm performs a simple numerical derivative of the values in a sample log.
 
 The 1st order derivative is simply: dy = (y1-y0) / (t1-t0), which is placed in the log at t=(t0+t1)/2
 
-Higher order derivatives are obtained by performing the equation above N times. Since this is a simple numerical derivative, you can expect the result to quickly get noisy at higher derivatives.
+Higher order derivatives are obtained by performing the equation above N times.
+Since this is a simple numerical derivative, you can expect the result to quickly
+get noisy at higher derivatives.
 
-
+If any of the times in the logs are repeated, then those repeated time values will be skipped,
+and the output derivative log will have fewer points than the input.
 
 *WIKI*/
 #include "MantidAlgorithms/AddLogDerivative.h"
@@ -94,20 +95,30 @@ namespace Algorithms
     {
       dVal.clear();
       dTime.clear();
+      double t0 = times[0];
+      double y0 = values[0];
       for (size_t i=0; i<times.size()-1; i++)
       {
-        double y0 = values[i];
         double y1 = values[i+1];
-        double t0 = times[i];
         double t1 = times[i+1];
-        double dy = (y1-y0) / (t1-t0);
-        double t = (t0+t1)/2.0;
-        dVal.push_back( dy );
-        dTime.push_back( t );
+        if (t1 != t0)
+        {
+          // Avoid repeated time values giving infinite derivatives
+          double dy = (y1-y0) / (t1-t0);
+          double t = (t0+t1)/2.0;
+          dVal.push_back( dy );
+          dTime.push_back( t );
+          // For the next time interval
+          t0 = t1;
+          y0 = y1;
+        }
       }
       times = dTime;
       values = dVal;
     }
+
+    if (times.size() == 0)
+      throw std::runtime_error("Log " + input->name() + " did not have enough non-repeated time values to make this derivative.");
 
     // Convert time in sec to DateAndTime
     DateAndTime start = input->nthTime(0);

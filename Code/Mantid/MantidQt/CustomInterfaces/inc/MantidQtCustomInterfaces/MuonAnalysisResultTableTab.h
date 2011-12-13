@@ -71,6 +71,8 @@ private:
   void populateLogsAndValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
 
+  QVector<QString> getWorkspacesWithSameParams(const QVector<QString>& fittedWsList);
+
   QVector<QString> getSelectedWs();
   QVector<QString> getSelectedLogs();
   std::string getFileName();

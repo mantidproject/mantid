@@ -41,6 +41,7 @@ public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer();
 
+  void setWorkspace(const QString & wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   void showControls(bool visible);
   void zoomBy(double factor);
@@ -49,6 +50,10 @@ public:
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   size_t getDimX() const { return m_dimX; }
   size_t getDimY() const { return m_dimY; }
+
+  /// Methods for Python bindings
+  void setDimX(int index);
+  void setDimY(int index);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
