@@ -60,12 +60,19 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 	    ClearErrors 
 	    ReadEnvStr $R0 'MANTIDPATH'
 	    IfErrors 0 +2
-	    messagebox mb_ok 'Mantid does not appear to be installed.'
-	  
+	    messagebox mb_ok 'Mantid may not be installed. Please check that you have installed Mantid properly.'
+		
 		Push \\\"PATH\\\"
         Push \\\"A\\\"
         Push \\\"HKCU\\\"
         Push \\\"%MANTIDPATH%\\\\..\\\\plugins\\\"
+        Call EnvVarUpdate
+        Pop  \\\$0
+		
+		Push \\\"PATH\\\"
+        Push \\\"A\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\..\\\\plugins\\\"
         Call EnvVarUpdate
         Pop  \\\$0
 		
@@ -97,6 +104,13 @@ if( ParaView_FOUND AND USE_PARAVIEW )
         Push \\\"R\\\"
         Push \\\"HKCU\\\"
         Push \\\"%MANTIDPATH%\\\\..\\\\plugins\\\"
+        Call un.EnvVarUpdate
+        Pop  \\\$0
+		
+		Push \\\"PATH\\\"
+        Push \\\"R\\\"
+        Push \\\"HKCU\\\"
+        Push \\\"$INSTDIR\\\\..\\\\plugins\\\"
         Call un.EnvVarUpdate
         Pop  \\\$0
 		

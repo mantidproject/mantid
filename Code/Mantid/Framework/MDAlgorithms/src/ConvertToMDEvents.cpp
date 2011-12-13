@@ -386,7 +386,7 @@ void ConvertToMDEvents::exec(){
    // the output dimensions and almost everything else will be determined by the dimensions of the target workspace
    // user input is mainly ignored
     }else{ 
-         throw(Kernel::Exception::NotImplementedError("Not Yet Implemented"));
+         throw(Kernel::Exception::NotImplementedError("Adding to existing MD workspace not Yet Implemented"));
           dim_min.assign(n_activated_dimensions,-1);
           dim_max.assign(n_activated_dimensions,1);
     }
