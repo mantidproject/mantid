@@ -84,6 +84,12 @@ if (PYUNITTEST_FOUND)
   add_subdirectory ( scripts )
 endif ()
 
+# Collect all tests together
+add_custom_target ( AllTests ) 
+add_dependencies ( AllTests FrameworkTests )
+add_dependencies ( AllTests GUITests )
+
+
 ###########################################################################
 # Installation settings
 ###########################################################################
