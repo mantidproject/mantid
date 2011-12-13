@@ -41,7 +41,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-// templated class which implements compiler-time check if two template parameters are equal
+// templated structure which implements compiler-time check if two template parameters are equal
 template<typename T,typename U>
 struct type_is_equal{
     static const bool value = false;
@@ -57,7 +57,7 @@ class  ListAnyValidator : public IValidator<TYPE>
 {
 private:
     // templated function which substitutes different code as fucntion of the initated type
-    // this codes is substituced is the condifion is true
+    // this codes is substituced if the condifion is true
     template<typename U, bool Condition >
     class IF {
     public:
@@ -104,13 +104,14 @@ public:
       }
       return rez;         
     }
-     /// Adds the argument to the set of valid values -
+     /** Adds the argument to the set of valid values regardless of its type. 
+       * if the template type corresponds to  the class type, insertion goes directly, 
+       * if the template type is different -- lexical cast of the inserted values occurs    */
     template <typename U>
     void addAllowedValue(const U &value){
         IF<U, type_is_equal<TYPE,U>::value >::ENABLE(this,value);
     }
-
-
+    //
     virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
 
   protected:
