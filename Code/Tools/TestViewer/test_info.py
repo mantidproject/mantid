@@ -221,6 +221,14 @@ class TestSingle(object):
         self.runtime = float(case.getAttribute("time"))
         # Assumed passed
         self.state = TestResult(TestResult.ALL_PASSED, old=False)
+        
+        # Get the system output
+        self.stdout = ""
+        systemout = case.getElementsByTagName("system-out")
+        if len(systemout) > 0:
+            # This is a node containing text (the firstchild) which is a Text node
+            self.stdout = systemout[0].firstChild.data
+
         # Look for failures
         fails = case.getElementsByTagName("failure")
         
@@ -231,14 +239,20 @@ class TestSingle(object):
             self.failure_line = fails[0].getAttribute("line")
             # Get the failure text
             self.failure = fails[0].firstChild.data
+            # PyUnit tests come out as CDATA:
+            if self.failure.strip() == "":
+                self.failure = fails[0].firstChild.wholeText
+                self.stdout += "\n" + self.failure
 
-        # Get the system output
-        systemout = case.getElementsByTagName("system-out")
-        if len(systemout) > 0:
-            # This is a node containing text (the firstchild) which is a Text node
-            self.stdout = systemout[0].firstChild.data
-        else:
-            self.stdout = ""
+        # Look for errors (python unit tests mostly)
+        errors = case.getElementsByTagName("error")
+        if len(errors)>0:
+            self.state = TestResult(TestResult.ALL_FAILED, old=False)
+            self.failure_line = 0
+            # Get the failure text
+            self.failure = errors[0].firstChild.wholeText
+            # Put it in std out so we can see it
+            self.stdout += "\n" + self.failure 
 
     #----------------------------------------------------------------------------------
     def run_test(self):
@@ -481,6 +495,13 @@ class TestSuite(object):
             
         os.chdir(rundir)
         
+        # XML file where the ouput will be
+        xml_path = os.path.join(rundir, self.xml_file)
+        # Delete the XML so that it will be empty if the test dies
+        if os.path.exists(xml_path):
+            os.remove(xml_path)
+        
+        
         # In order to catch "segmentation fault" message, we call bash and get the output of that!
         # Max memory for process in KB is a global
         full_command = "bash -c 'ulimit -v %d ; %s" % (memory_limit_kb, self.command)
@@ -499,8 +520,6 @@ class TestSuite(object):
             output = output + "\n\nPROCESS TIMED OUT"
             
         # Get the output XML filename
-        xml_path = os.path.join(rundir, self.xml_file)
-        print "XML is ", xml_path
         if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
             # Yes, something was output
             self.parse_xml(xml_path, single_test) 
