@@ -2856,6 +2856,9 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 */
 void MuonAnalysis::changeTab(int tabNumber)
 {
+  // Make sure all toolbars are still not visible. May have brought them back to do a plot.
+  emit hideToolbars();
+
   m_tabNumber = tabNumber;
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
@@ -2866,7 +2869,6 @@ void MuonAnalysis::changeTab(int tabNumber)
     m_assigned = false;
     // Update the peak picker tool with the current workspace.
     m_uiForm.fitBrowser->updatePPTool(m_currentDataName);
-    
   } 
   else
   {
@@ -3051,6 +3053,29 @@ void MuonAnalysis::settingsTabUpdatePlot()
     runFrontPlotButton();
   }
 }
+
+
+/**
+* Re-open the toolbars after closing MuonAnalysis
+*/
+void MuonAnalysis::closeEvent(QCloseEvent *e)
+{
+  // Show the toolbar
+  emit showToolbars();
+  e->accept();
+}
+
+
+/**
+* Hide the toolbars after opening MuonAnalysis
+*/
+void MuonAnalysis::showEvent(QShowEvent *e)
+{
+  // Hide the toolbar
+  emit hideToolbars();
+  e->accept();
+}
+
 
 }//namespace MantidQT
 }//namespace CustomInterfaces

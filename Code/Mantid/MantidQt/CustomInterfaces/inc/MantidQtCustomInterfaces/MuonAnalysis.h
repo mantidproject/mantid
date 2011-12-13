@@ -181,12 +181,19 @@ private slots:
   /// This slot is a placeholder for executing MuonAnalysisFitDataTab::beforeDoFit 
   void beforeDoFit(const QtBoolPropertyManager*);
 
+
 private:
   /// Initialize the layout
   virtual void initLayout();
 
   /// Set start up interface look
   void startUpLook();
+
+  /// Catch when the interface is closed and do something before.
+  void closeEvent(QCloseEvent *e);
+  
+  /// Catch when the interface is shown and do something before.
+  void showEvent(QShowEvent *e);
 
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QString& filename);
