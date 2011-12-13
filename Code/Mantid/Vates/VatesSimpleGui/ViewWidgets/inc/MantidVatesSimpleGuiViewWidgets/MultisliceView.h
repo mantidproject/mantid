@@ -125,6 +125,8 @@ protected slots:
 	void makeZcut(double value);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
+  /// Launch SliceViewer with the specified cut.
+  void showCutInSliceViewer(const QString &name);
   /**
    * Update the origin position of the currently selected cut.
    * @param position the origin coordinate to move the emitting slice to

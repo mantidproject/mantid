@@ -5,6 +5,8 @@
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqChartValue.h>
@@ -26,6 +28,8 @@
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 #include <vtkSMViewProxy.h>
+
+#include <vtkSMPropertyIterator.h>
 
 #include <QModelIndex>
 #include <QString>
@@ -105,6 +109,19 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.zAxisWidget,
                    SIGNAL(showOrHideIndicator(bool, const QString &)),
                    this, SLOT(cutVisibility(bool, const QString &)));
+
+  QObject::connect(this->ui.xAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+  QObject::connect(this->ui.yAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+  QObject::connect(this->ui.zAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
 
   this->ui.xAxisWidget->installEventFilter(this);
   this->ui.yAxisWidget->installEventFilter(this);
@@ -548,6 +565,56 @@ void MultiSliceView::checkSliceViewCompat()
     this->ui.yAxisWidget->setShowSliceView(true);
     this->ui.zAxisWidget->setShowSliceView(true);
   }
+}
+
+/**
+ * This function is responsible for opening the given cut in SliceViewer.
+ * It will gather all of the necessary information and create an XML
+ * representation of the current dataset and cut parameters. That will then
+ * be handed to the SliceViewer.
+ * @param name the slice to be opened in SliceViewer
+ */
+void MultiSliceView::showCutInSliceViewer(const QString &name)
+{
+  std::cout << name.toStdString() << " to be shown." << std::endl;
+  // Get the associated workspace name
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
+  pqPipelineSource *src1 = NULL;
+  foreach (pqPipelineSource *src, srcs)
+  {
+    const QString name = src->getSMName();
+    if (name.contains("MDEWRebinningCutter"))
+    {
+      src1 = src;
+    }
+  }
+  if (NULL == src1)
+  {
+    src1 = this->origSrc;
+  }
+
+  QString wsName(vtkSMPropertyHelper(src1->getProxy(),
+                                     "WorkspaceName",
+                                     true).GetAsString());
+
+  // Get the current dataset characteristics
+  const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
+                                            "InputGeometryXML").GetAsString();
+
+  // Get the necessary information from the cut
+  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
+  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                          "CutFunction").GetAsProxy();
+  double origin[3];
+  vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+  double orient[3];
+  vtkSMPropertyHelper(plane, "Normal").Get(orient, 3);
+
+  // Create the XML holder
+  VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
+  rks.setWorkspaceName(wsName.toStdString());
+  rks.setGeometryXML(geomXML);
 }
 
 }

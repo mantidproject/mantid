@@ -84,6 +84,7 @@ pqApplicationComponents
 pqComponents
 ${QT_LIBRARIES}
 MantidQtAPI
+VatesAPI
 )
 
 install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )
