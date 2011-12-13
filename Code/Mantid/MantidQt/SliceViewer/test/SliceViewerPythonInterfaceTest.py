@@ -13,7 +13,7 @@ from MantidFramework import mtd
 from mantidsimple import *
 import libmantidqtpython
 
-
+# Create the application only once per test; otherwise I get a segfault
 app = Qt.QApplication(sys.argv)
 
 # Create a test data set
