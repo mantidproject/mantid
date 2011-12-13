@@ -95,7 +95,7 @@ namespace Mantid
       readDataDimensions();
       if(m_entrynumber!=0)
       {
-        if(m_entrynumber>m_numberOfPeriods)
+        if( static_cast<size_t>(m_entrynumber) > m_numberOfPeriods)
         {
           throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
         }
@@ -191,7 +191,7 @@ namespace Mantid
         openNexusGroup("detector_1","NXdata");
 
         size_t counter = 0;
-        for (size_t i = m_spec_min; i < m_spec_max; ++i)
+        for (size_t i = static_cast<size_t>(m_spec_min); i < static_cast<size_t>(m_spec_max); ++i)
         {
           loadData(period, counter,i,localWorkspace ); // added -1 for NeXus
           counter++;
@@ -247,8 +247,12 @@ namespace Mantid
       m_spec_list = getProperty("SpectrumList");
       m_spec_max = getProperty("SpectrumMax");
       //now check that data
-      m_interval = !( m_spec_max == static_cast<size_t>(Mantid::EMPTY_INT()) );
-      if ( m_spec_max == static_cast<size_t>(Mantid::EMPTY_INT()) ) m_spec_max = 0;
+      m_interval = !( m_spec_max == Mantid::EMPTY_INT() );
+      if ( m_spec_max == Mantid::EMPTY_INT() )
+      {
+          m_spec_max = 0;
+      }
+
       m_list = !m_spec_list.empty();
 
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
@@ -280,7 +284,7 @@ namespace Mantid
       {
         m_interval = true;
         m_spec_min = getProperty("SpectrumMin");
-        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
+        if ( m_spec_max < m_spec_min || static_cast<size_t>(m_spec_max) > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");
           throw std::invalid_argument("Inconsistent properties defined"); 

@@ -886,6 +886,11 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   {
     m_showVatesGui->setEnabled(false);
   }
+  else
+  {
+    std::size_t nDim = WS->getNumDims();
+    m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
+  }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
@@ -899,6 +904,11 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
   {
     m_showVatesGui->setEnabled(false);
+  }
+  else
+  {
+    std::size_t nDim = WS->getNumDims();
+    m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
   }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showMDPlot); // A plot of intensity vs bins

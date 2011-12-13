@@ -40,10 +40,45 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+// templated class which implements compiler-time check if two template parameters are equal
+template<typename T,typename U>
+struct type_is_equal{
+    static const bool value = false;
+};
+template<typename T>
+struct type_is_equal<T,T>{
+    static const bool value = true;
+};
+
+
 template<typename TYPE=std::string>
 class  ListAnyValidator : public IValidator<TYPE>
 {
+private:
+    // templated function which substitutes different code as fucntion of the initated type
+    // this codes is substituced is the condifion is true
+    template<typename U, bool Condition >
+    class IF {
+    public:
+        static inline void ENABLE(ListAnyValidator *pHost,const U &value){
+               pHost->m_allowedValues.insert(value);
+        }
+    };
+    // and this one -- if false
+    template<typename U>
+    class IF<U, false > {
+    public:
+        static inline void ENABLE(ListAnyValidator *pHost,const U &value){  
+        {
+                typename TYPE rVal = boost::lexical_cast<TYPE>(value);
+                pHost->m_allowedValues.insert(rVal);
+            }
+        }
+    };
+
 public:
+
     /// Default constructor. Sets up an empty list of valid values.
     ListAnyValidator(): IValidator<TYPE>(), m_allowedValues(){};
     /** Constructor
@@ -70,18 +105,11 @@ public:
       return rez;         
     }
      /// Adds the argument to the set of valid values -
-    //template<class T>
-    ////typename boost::disable_if<boost::is_object<T>(std::string)>
-    //virtual void addAllowedValue(const std::string &value)
-    //{
-    //     TYPE rVal = boost::lexical_cast<TYPE>(value);
-    //     m_allowedValues.insert(rVal);
-    //}
-     /// Adds the argument to the set of valid values
-    virtual void addAllowedValue(const TYPE &value)
-    {
-           m_allowedValues.insert(value);
+    template <typename U>
+    void addAllowedValue(const U &value){
+        IF<U, type_is_equal<TYPE,U>::value >::ENABLE(this,value);
     }
+
 
     virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
 
@@ -89,7 +117,7 @@ public:
   /** Checks if the string passed is in the list
    *  @param value :: The value to test
    *  @return "" if the value is on the list, or "The value is not in the list of allowed values"   */
-   std::string checkValidity(const TYPE &value) const
+   virtual std::string checkValidity(const TYPE &value) const
    {
         if ( m_allowedValues.count(value) ){
             return "";

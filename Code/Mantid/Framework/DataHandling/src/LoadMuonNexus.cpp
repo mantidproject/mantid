@@ -547,7 +547,8 @@ namespace Mantid
       {
         std::string dur = root.getString("run/duration");
         runDetails.addProperty("dur", dur);
-        runDetails.addProperty("durunits", 1);
+        runDetails.addProperty("durunits", 1);  // 1 means second here
+        runDetails.addProperty("dur_secs", dur);  
       }
       catch (std::runtime_error &)
       {

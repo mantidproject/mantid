@@ -8,7 +8,8 @@ as well as a PeaksWorkspace containing single-crystal peak locations.
 ** '''BackgroundStartRadius''' allows you to give some space between the peak and the background area.
 ** '''BackgroundStartRadius''' = '''PeakRadius''' if not specified.
 
-The OutputWorkspace will contain a copy of the input PeaksWorkspace, with the integrated intensity and error found being filled in.
+The OutputWorkspace will contain a copy of the input PeaksWorkspace, with the integrated intensity
+and error found being filled in.
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -72,7 +73,7 @@ namespace MDEvents
        );
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
-        "Fixed radius around each peak position in which to integrate.");
+        "Fixed radius around each peak position in which to integrate (in the same units as the workspace).");
 
     declareProperty(new PropertyWithValue<double>("BackgroundRadius",0.0,Direction::Input),
         "End radius to use to evaluate the background of the peak.\n"

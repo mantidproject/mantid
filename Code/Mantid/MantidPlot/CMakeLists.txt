@@ -706,6 +706,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 ###########################################################################
 # Internal icon links
 ###########################################################################
+
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
 
@@ -756,7 +757,8 @@ if ( APPLE )
 endif ()
 
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
-							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE}
+							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
+							${RES_FILES} ${MANTID_RC_FILE}
 )
 
 

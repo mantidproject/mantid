@@ -125,7 +125,7 @@ private:
     const size_t nchars(illegalChars.size());
     const std::string allowed("WsName");
 
-    for( int i = 0; i < nchars; ++i )
+    for( size_t i = 0; i < nchars; ++i )
     {
       //Build illegal name
       std::ostringstream name;

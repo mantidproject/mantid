@@ -505,7 +505,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
 
 
 
-  for (int i = 0; i < columnNames.size(); i++)
+  for (size_t i = 0; i < columnNames.size(); i++)
   {
 	  const std::string str = columnNames[i];
 	  if ( !str.compare("column_1") )
@@ -546,7 +546,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
         NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
         nxDouble.load();
 
-        for (size_t r = 0; r < numberPeaks; r++) {
+        for (int r = 0; r < numberPeaks; r++) {
 		  double val = nxDouble[r];
           peakWS->getPeak(r).setL( val );
 		}
