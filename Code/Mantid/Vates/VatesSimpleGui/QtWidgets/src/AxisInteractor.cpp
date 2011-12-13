@@ -327,6 +327,10 @@ void AxisInteractor::showContextMenu(const QPoint &pos)
             emit this->showOrHideIndicator(isVisible, item->toolTip());
             static_cast<Indicator *>(item)->changeIndicatorColor(isVisible);
           }
+          if (QString("Show in SliceView") == selectedItem->text())
+          {
+            emit this->showInSliceView(item->toolTip());
+          }
         }
       }
     }

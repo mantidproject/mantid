@@ -155,6 +155,11 @@ signals:
    */
   void indicatorSelected(const QString &name);
   /**
+   * Signal to pass the name of the slice to open up in the SliceViewer.
+   * @param name the name of the selected indicator
+   */
+  void showInSliceView(const QString &name);
+  /**
    * Signal to show or hide the given indicator.
    * @param isVisible flag the determines showing or hiding the indicator
    * @param name the name of the indicator to show or hide
