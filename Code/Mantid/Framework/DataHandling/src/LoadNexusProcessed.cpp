@@ -507,114 +507,112 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
 
   for (size_t i = 0; i < columnNames.size(); i++)
   {
-	  const std::string str = columnNames[i];
-	  if ( !str.compare("column_1") )
-	  {
-        NXInt nxInt = nx_tw.openNXInt(str.c_str());
-        nxInt.load();
+    const std::string str = columnNames[i];
+    if ( !str.compare("column_1") )
+    {
+      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      nxInt.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  int ival = nxInt[r];
-          if( ival != -1) peakWS->getPeak(r).setDetectorID( ival );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        if( ival != -1) peakWS->getPeak(r).setDetectorID( ival );
       }
+    }
 
-	  if ( !str.compare("column_2") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_2") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setH( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setH( val );
       }
+    }
 
-	  if ( !str.compare("column_3") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_3") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setK( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setK( val );
       }
+    }
 
-	  if ( !str.compare("column_4") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_4") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setL( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setL( val );
       }
+    }
 
-	  if ( !str.compare("column_5") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_5") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setIntensity( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setIntensity( val );
       }
+    }
 
-	  if ( !str.compare("column_6") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_6") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setSigmaIntensity( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setSigmaIntensity( val );
       }
+    }
 
 
 
-	  if ( !str.compare("column_7") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_7") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setBinCount( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setBinCount( val );
       }
+    }
 
 
-	  if ( !str.compare("column_10") )
-	  {
-        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-        nxDouble.load();
+    if ( !str.compare("column_10") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  double val = nxDouble[r];
-          peakWS->getPeak(r).setWavelength( val );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setWavelength( val );
       }
+    }
 
-	  if ( !str.compare("column_14") )
-	  {
-        NXInt nxInt = nx_tw.openNXInt(str.c_str());
-        nxInt.load();
+    if ( !str.compare("column_14") )
+    {
+      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      nxInt.load();
 
-        for (int r = 0; r < numberPeaks; r++) {
-		  int ival = nxInt[r];
-          if( ival != -1) peakWS->getPeak(r).setRunNumber( ival );
-		}
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        if( ival != -1) peakWS->getPeak(r).setRunNumber( ival );
       }
-
+    }
 
   }
 
-	// return boost::static_pointer_cast<API::Workspace>(tWorkspace);
-    return boost::static_pointer_cast<API::Workspace>(peakWS);
+  return boost::static_pointer_cast<API::Workspace>(peakWS);
 }
 
 //-------------------------------------------------------------------------------------------------
