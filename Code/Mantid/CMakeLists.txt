@@ -51,6 +51,10 @@ include_directories ( Framework/API/inc )
 include_directories ( Framework/NexusCPP/inc )
 set ( CORE_MANTIDLIBS Kernel Geometry API )
 
+# Add a target for all GUI tests
+add_custom_target ( GUITests ) 
+add_dependencies ( check GUITests )
+
 add_subdirectory ( MantidQt )
 
 include_directories ( QtPropertyBrowser/src )
