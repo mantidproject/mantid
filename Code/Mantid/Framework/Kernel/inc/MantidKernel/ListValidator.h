@@ -49,18 +49,13 @@ public:
 
     /** Constructor
      *  @param values :: A vector of the valid values     */
-    explicit ListValidator(const std::vector<std::string>& values):
-    ListAnyValidator<std::string>(values){}
+  explicit ListValidator(const std::vector<std::string>& values):
+  ListAnyValidator<std::string>(values){}
 
   virtual ~ListValidator(){};
 
   virtual IValidator<std::string>* clone(){ return new ListValidator(*this); }
 
-  /// Adds the argument to the set of valid values
-  virtual void addAllowedValue(const std::string &value)
-  {
-        m_allowedValues.insert(value);
-  }
   
 protected:
 /** Checks if the string passed is in the list

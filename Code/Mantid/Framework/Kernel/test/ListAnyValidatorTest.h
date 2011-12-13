@@ -98,8 +98,13 @@ public:
   {
       ListAnyValidator<int> v1;
       ListAnyValidator<int> v2;
-      v1.addAllowedValue(1);
-      v2.addAllowedValue("1");
+      TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue("1"));
+      TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue(1));
+      TS_ASSERT_THROWS_NOTHING(v2.addAllowedValue("1"));
+      std::set<std::string> val1=v1.allowedValues();
+      std::set<std::string> val2=v2.allowedValues();
+      TS_ASSERT_EQUALS(1,val1.size());
+      TS_ASSERT_EQUALS(*val1.begin(),*val2.begin());
   }
   
 };
