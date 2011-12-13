@@ -71,7 +71,7 @@ private:
     public:
         static inline void ENABLE(ListAnyValidator *pHost,const U &value){  
         {
-                typename TYPE rVal = boost::lexical_cast<TYPE>(value);
+                TYPE rVal = boost::lexical_cast<TYPE>(value);
                 pHost->m_allowedValues.insert(rVal);
             }
         }
