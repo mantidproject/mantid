@@ -16,6 +16,7 @@ set ( EXPORT_FILES
   src/Detector.cpp
   src/DetectorGroup.cpp
   src/Instrument.cpp
+  src/UnitCell.cpp
 )  
 
 set ( SRC_FILES

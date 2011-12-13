@@ -37,7 +37,7 @@ namespace Mantid
          *
          */
         PyArrayObject *cloneArray(MatrixWorkspace_sptr workspace,
-                                   DataField field, const size_t start, const size_t endp1)
+                                  DataField field, const size_t start, const size_t endp1)
         {
           const size_t numHist = endp1 - start;
           npy_intp stride(0);
