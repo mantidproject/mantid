@@ -202,6 +202,7 @@ set ( TEST_FILES
 	test/MDHistoDimensionTest.h
 	test/MDImplicitFunctionTest.h
 	test/MDPlaneTest.h
+        test/MDPlaneImplicitFunctionTest.h
 	test/MapSupportTest.h
 	test/MaterialTest.h
 	test/MathSupportTest.h

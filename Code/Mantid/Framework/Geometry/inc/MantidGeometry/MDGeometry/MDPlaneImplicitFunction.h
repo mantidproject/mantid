@@ -40,9 +40,17 @@ class DLLExport MDPlaneImplicitFunction : public MDImplicitFunction
 public:
     MDPlaneImplicitFunction();
     virtual ~MDPlaneImplicitFunction();
+
+    /// Overriding the addPlane for check
+    void addPlane(const MDPlane &plane);
+
+    /// @return the MDPlaneImplicitFunction type name.
+    virtual std::string getName() const;
+    /// @return the XML representation of the MDPlaneImplicitFunction
+    virtual std::string toXMLString() const;
 };
 
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif // MANTID_MDGEOMETRY_MDPLANEIMPLICITFUNCTION_H_
