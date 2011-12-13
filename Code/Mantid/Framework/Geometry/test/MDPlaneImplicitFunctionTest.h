@@ -26,6 +26,33 @@ public:
     TS_ASSERT_THROWS_ANYTHING( f.addPlane(p2) );
     TS_ASSERT_EQUALS( f.getNumPlanes(), 1 );
   }
+
+  void test_xmlRep()
+  {
+    MDPlaneImplicitFunction f;
+
+    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t point[3] = {1,2,3};
+    MDPlane p1(3, normal, point);
+    f.addPlane(p1);
+    TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep() );
+  }
+
+private:
+  std::string getXmlRep()
+  {
+    return std::string("<Function>"\
+                       "<Type>PlaneImplicitFuction</Type>"\
+                       "<ParameterList>"\
+                       "<Parameter>"\
+                       "<Type>NormalParameter</Type>"\
+                       "</Parameter>"\
+                       "<Parameter>"\
+                       "<Type>OriginParameter</Type>"\
+                       "</Parameter>"\
+                       "</ParameterList>"\
+                       "</Function>");
+  }
 };
 
 #endif // MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_
