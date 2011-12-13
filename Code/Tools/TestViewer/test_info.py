@@ -500,6 +500,7 @@ class TestSuite(object):
             
         # Get the output XML filename
         xml_path = os.path.join(rundir, self.xml_file)
+        print "XML is ", xml_path
         if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
             # Yes, something was output
             self.parse_xml(xml_path, single_test) 
@@ -819,6 +820,7 @@ class TestProject(object):
         
         output = commands.getoutput(self.executable + " --help-tests")
         xml_file = "TEST-%s.xml" % self.name
+
         # The silly cxxtest makes an empty XML file
         try:
             os.remove(xml_file)
@@ -828,7 +830,7 @@ class TestProject(object):
         lines =  output.split("\n")
         # Look for the The first two lines are headers
         count = 0
-        while count < len(lines) and not lines[count].startswith("------------------------------------------------------"):
+        while count < len(lines) and not lines[count].startswith("-------------------------"):
             count += 1
         count += 1
         if count >= len(lines):
@@ -848,8 +850,13 @@ class TestProject(object):
                         # The class name goes KernelTest.DateAndTimeTest
                         classname = self.name + "." + suite_name
                         source_file = self.find_source_file(suite_name)
+                        
                         # The xml file output goes (as of rev 8587, new cxxtestgen see ticket #2204 )
-                        xml_file = "TEST-" + classname + ".xml"     
+                        xml_file = "TEST-" + classname + ".xml"
+                        # Correct the XML file for python unit tests        
+                        if self.executable.endswith(".py"):
+                            xml_file = "Testing/" + xml_file
+                                                     
                         # The shell command to run   
                         log_file = classname + ".log"
                         command = "MANTIDLOGPATH=%s" % log_file + " " + self.executable + " " + suite_name
@@ -1070,8 +1077,11 @@ class MultipleProjects(object):
         
         for fname in testnames:
             make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
-            pj = TestProject(fname, os.path.join(path, fname), make_command)
-            print "... Populating project %s ..." % fname
+            projectname = fname
+            if fname.endswith('.py'):
+                projectname = fname[:-3]
+            pj = TestProject(projectname, os.path.join(path, fname), make_command)
+            print "... Populating project %s ..." % projectname
 
             project_name = fname.replace("Test", "")
             project_source_path = os.path.join(source_path, project_name)

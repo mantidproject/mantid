@@ -129,8 +129,8 @@ endif ()
 ###########################################################################
 
 # python unit tests
-#if (PYUNITTEST_FOUND )
-if ( 0 )
+if (PYUNITTEST_FOUND )
+#if ( 0 )
   pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
   add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
   add_dependencies ( GUITests SliceViewerTest.py )
