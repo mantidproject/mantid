@@ -30,7 +30,7 @@ namespace Mantid
       /// Return the UnitCell B matrix
       static PyObject * getB(UnitCell& self);
       /// Recalculate unit cell parameters from G* - 3x3 numpy array
-      static void recalculateFromGstar(UnitCell& self,PyObject* p);
+      static void recalculateFromGStar(UnitCell& self,PyObject* p);
     private:
       /// Stored Python object
       PyObject *m_self;

@@ -219,7 +219,13 @@ class StitcherWidget(BaseWidget):
         file = str(self._content.low_q_combo.lineEdit().text())
         if os.path.isfile(file) or mtd.workspaceExists(file):
             self._low_q_data = DataSet(file)
-            self._low_q_data.load(True)
+            try:
+                self._low_q_data.load(True)
+            except:
+                self._low_q_data = None
+                util.set_valid(self._content.low_q_combo.lineEdit(), False)
+                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
+                return
             minx, maxx = self._low_q_data.get_range()
             self._content.low_min_edit.setText(str(minx))
             self._content.low_max_edit.setText(str(maxx))
@@ -239,7 +245,13 @@ class StitcherWidget(BaseWidget):
         file = str(self._content.medium_q_combo.lineEdit().text())
         if os.path.isfile(file) or mtd.workspaceExists(file):
             self._medium_q_data = DataSet(file)
-            self._medium_q_data.load(True)
+            try:
+                self._medium_q_data.load(True)
+            except:
+                self._medium_q_data = None
+                util.set_valid(self._content.medium_q_combo.lineEdit(), False)
+                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
+                return
             minx, maxx = self._medium_q_data.get_range()
             self._content.medium_min_edit.setText(str(minx))
             self._content.medium_max_edit.setText(str(maxx))
@@ -259,7 +271,13 @@ class StitcherWidget(BaseWidget):
         file = str(self._content.high_q_combo.lineEdit().text())
         if os.path.isfile(file) or mtd.workspaceExists(file):
             self._high_q_data = DataSet(file)
-            self._high_q_data.load(True)
+            try:
+                self._high_q_data.load(True)
+            except:
+                self._high_q_data = None
+                util.set_valid(self._content.high_q_combo.lineEdit(), False)
+                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
+                return                
             self._content.high_scale_edit.setText("1.0")
             npts = self._high_q_data.get_number_of_points()
             self._content.high_first_spin.setMaximum(npts)

@@ -195,7 +195,7 @@ if ( SQUISH_FOUND )
   enable_testing()
   message ( STATUS "Found Squish for GUI testing" )
 else()
-  message ( STATUS "Could not find Squish - GUI testing not available" )
+  message ( STATUS "Could not find Squish - GUI testing not available. Try specifying your SQUISH_INSTALL_DIR cmake variable." )
 endif()
 
 ###########################################################################

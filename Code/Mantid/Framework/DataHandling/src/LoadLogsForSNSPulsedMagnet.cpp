@@ -155,7 +155,7 @@ namespace DataHandling
     size_t index = 0;
     unsigned int localdelaytimes[4];
     for (size_t p = 0; p < numpulses; p ++){
-        for (size_t i = 0; i < m_numchoppers; i ++){
+        for (size_t i = 0; i < static_cast<size_t>(m_numchoppers); i ++){
             unsigned int chopperindex;
             unsigned int delaytime;
             double dtime;

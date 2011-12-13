@@ -32,7 +32,7 @@ PyObject* UnitCellWrapper::getB(UnitCell& self)
 	return MantidVecHelper::createPythonWrapper(self.getB(), true);
 }
 
-void UnitCellWrapper::recalculateFromGstar(UnitCell& self,PyObject* p)
+void UnitCellWrapper::recalculateFromGStar(UnitCell& self,PyObject* p)
 {
   Kernel::DblMatrix m=MantidVecHelper::getMatrixFromArray(p);
   if ((m.numRows()!=3) || (m.numCols()!=3)) throw std::invalid_argument("Not 3x3 matrix");

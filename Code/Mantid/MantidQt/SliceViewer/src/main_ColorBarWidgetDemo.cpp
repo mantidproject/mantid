@@ -24,7 +24,7 @@ using namespace MantidQt::SliceViewer;
 int main( int argc, char ** argv )
 {
   double min=0;
-  double max=1e4;
+  double max=100;
 
   QApplication app(argc, argv);
   app.setOrganizationName("MantidProject");
@@ -40,6 +40,7 @@ int main( int argc, char ** argv )
   ColorBarWidget * widget = new ColorBarWidget(frame);
 
   widget->setDataRange(min, max);
+  widget->setViewRange(min, max);
   widget->setLog(false);
 
   layout->addWidget(widget);

@@ -142,17 +142,19 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   // Clear the previous table values
   m_tableValues.clear();
   QVector<QString> fittedWsList;
-
   // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
-  for (int i(0); i<wsList.size(); i++)
+  for (int i(0); i<wsList.size(); ++i)
   {
     if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
       fittedWsList.append(wsList[i]);
   }
+     
+  // Make sure all params match.
+  QVector<QString> sameFittedWsList(getWorkspacesWithSameParams(fittedWsList));
 
-  // populate the individual log values and fittings into their respective tables.
-  populateFittings(fittedWsList);
-  populateLogsAndValues(fittedWsList);
+  // Populate the individual log values and fittings into their respective tables.
+  populateFittings(sameFittedWsList);
+  populateLogsAndValues(sameFittedWsList);
 }
 
 
@@ -420,6 +422,79 @@ QVector<QString> MuonAnalysisResultTableTab::getSelectedLogs()
     }
   }
   return logsSelected;
+}
+
+
+/**
+* Looks through all the parameter tables and trys to match the parameters within them.
+* If one or more workspaces were fitted using different parameters then a suitable
+* error message will be displayed.
+*
+* QVector<QString> fittedWsList :: List of workspaces with parameter tables.
+* @return sameFittedWsList :: A list of workspaces that all share a parameter table
+*                             with the same parameters fitted.
+*/
+QVector<QString> MuonAnalysisResultTableTab::getWorkspacesWithSameParams(const QVector<QString>& fittedWsList)
+{
+  QVector<QString> sameFittedWsList;
+  // Check all parameters are the same.
+  if (fittedWsList.size() > 0)
+  {
+    bool differentParams(false);
+    std::vector<std::string> firstParams;
+
+    // Find the first parameter table and use this as a comparison for all the other tables.
+    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[0].toStdString() + "_parameters") );
+
+    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+    do
+    {  
+      std::string key;
+      paramRow >> key;
+      firstParams.push_back(key);
+    }
+    while(paramRow.next());
+
+    sameFittedWsList.push_back(fittedWsList[0]);
+
+    // Compare to all the other parameters.
+    for (int i=1; i<fittedWsList.size(); ++i)
+    {
+      std::vector<std::string> nextParams;
+      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_parameters") );
+
+      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+      do
+      {  
+        std::string key;
+        paramRow >> key;
+        nextParams.push_back(key);
+      }
+      while(paramRow.next());
+
+      if (firstParams == nextParams)
+      {
+        // If they are the same parameter then add to the vector which will be populated in the tables.
+        sameFittedWsList.push_back(fittedWsList[i]);
+      }
+      else
+      {
+        differentParams = true;
+      }
+    }
+
+    if(differentParams) // Params were found to be different from the ones in the first table, therefore output warning message.
+    {
+      QMessageBox::information(this, "Mantid - Muon Analysis", "The parameters didn't match for each workspace. Default to display\n"
+        "all the parameters that match the first workspace " + fittedWsList[0]);
+    } 
+  }
+  else // if there is only one fitted workspace then no need to for check to see if they are the same.
+  {
+    sameFittedWsList = fittedWsList;
+  }
+
+  return sameFittedWsList;
 }
 
 

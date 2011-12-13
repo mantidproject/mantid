@@ -97,4 +97,5 @@ add_subdirectory ( api )
 
 # Create an overall target
 add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonAPIModule  )
+#add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule PythonAPIModule  )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )

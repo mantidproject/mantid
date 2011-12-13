@@ -83,10 +83,11 @@ namespace Mantid
 
     }
 
-    /**
-    * Return a string containing the characters not allowed in names objects within ADS
-    * @returns A n array of c strings containing the following characters: " +-/*\%<>&|^~=!@()[]{},:.`$?"
-    */
+
+    // The following is commented using /// rather than /** to stop the compiler complaining
+    // about the special characters in the comment fields.
+    /// Return a string containing the characters not allowed in names objects within ADS
+    /// @returns A n array of c strings containing the following characters: " +-/*\%<>&|^~=!@()[]{},:.`$?"
     const std::string & AnalysisDataServiceImpl::illegalCharacters() const
     {
       return m_illegalChars;

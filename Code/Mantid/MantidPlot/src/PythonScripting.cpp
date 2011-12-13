@@ -214,7 +214,6 @@ bool PythonScripting::start()
  */
 void PythonScripting::shutdown()
 {
-  GILHolder gil;
   Py_XDECREF(m_math);
   Py_XDECREF(m_locals);
   Py_Finalize();
@@ -400,6 +399,8 @@ bool PythonScripting::loadInitFile(const QString & filename)
  */
 void PythonScripting::addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws)
 {
+  UNUSED_ARG(ws);
+
   // Compile a code object
   QString key = QString::fromStdString(wsName);
   QString code = QString("%1 = mtd['%1']").arg(key);

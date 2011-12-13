@@ -215,10 +215,11 @@ namespace CurveFitting
 
     // finally do the fitting
 
-    int iter = 0;
-    int status = 0;
-    double finalCostFuncVal = 0.0;
-    double dof = static_cast<double>(nData - nParam);  // dof stands for degrees of freedom
+    // Comment out the following 4 lines as the variables are not used.
+    //int iter = 0;
+    //int status = 0;
+    //double finalCostFuncVal = 0.0;
+    //double dof = static_cast<double>(nData - nParam);  // dof stands for degrees of freedom
 
   }
 
