@@ -5,6 +5,8 @@
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 
 #include <pqActiveObjects.h>
@@ -35,6 +37,8 @@
 #include <QString>
 
 #include <iostream>
+
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -606,15 +610,22 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
   vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
                                           "CutFunction").GetAsProxy();
-  double origin[3];
+  coord_t origin[3];
   vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-  double orient[3];
+  coord_t orient[3];
   vtkSMPropertyHelper(plane, "Normal").Get(orient, 3);
 
   // Create the XML holder
   VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
+
+  MDPlane mdp(3, orient, origin);
+  MDImplicitFunction_sptr impplane(new MDImplicitFunction());
+  impplane->addPlane(mdp);
+  rks.setImplicitFunction(impplane);
+
+  //std::cout << rks.createXMLString() << std::endl;
 }
 
 }
