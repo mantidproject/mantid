@@ -37,6 +37,7 @@ public:
     MantidColorMap map;
     QwtDoubleInterval range(1.0, 10000.0);
     map.changeScaleType( GraphOptions::Log10 );
+    TS_ASSERT_EQUALS(1,2);
     TS_ASSERT_DELTA( map.normalize(range, 1000.), 0.75, 1e-5);
   }
 

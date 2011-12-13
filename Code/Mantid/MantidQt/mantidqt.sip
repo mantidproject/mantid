@@ -34,8 +34,13 @@ public:
   void zoomBy(double factor);
   void setWorkspace(const QString & wsName);
   void showControls(bool visible);
-  void setDimX(int index);
-  void setDimY(int index);
+  
+  void setXYDim(int indexX, int indexY);
+  int getDimX() const;
+  int getDimY() const;
+
+  void setSlicePoint(int dim, double value);
+  double getSlicePoint(int dim) const;
   
 };
 

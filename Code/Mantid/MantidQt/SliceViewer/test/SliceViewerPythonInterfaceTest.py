@@ -40,16 +40,36 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def tearDown(self):
         """ Close the created widget """
         self.sv.close()
-	
+    
     def test_setWorkspace(self):
         sv = self.sv
         sv.setWorkspace('uniform')
-        sv.show()
+        #sv.show()
     
-    def test_set_MDEventWorkspace(self):
+    def test_setWorkspace_MDEventWorkspace(self):
         sv = self.sv
         sv.setWorkspace('mdw')
-        sv.show()
+        #sv.show()
+    
+    def test_setXYDim(self):
+        sv = self.sv
+        sv.setWorkspace('uniform')
+        sv.setXYDim(0,2)
+        self.assertEqual( sv.getDimX(), 0, "X dimension was set")
+        self.assertEqual( sv.getDimY(), 2, "Y dimension was set")
+        #sv.show()
+        #app.exec_()
+        
+    def test_setSlicePoint(self):
+        sv = self.sv
+        sv.setWorkspace('uniform')
+        sv.setSlicePoint(2, 7.6)
+        # Set the slice point and got back the value?
+        self.assertAlmostEqual( sv.getSlicePoint(2), 7.6, 2)
+        
+#        sv.show()
+#        app.exec_()
+    
     
     
     
