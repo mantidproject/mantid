@@ -63,10 +63,16 @@ set( SRC_UNITY_IGNORE_FILES )
 # disabled. In order for VS2010 to to this correctly the second
 # custom command below is required
 
+# Flags used: 
+# -e : C++ exceptions turn into python exceptions.
+# -j1 : split into 1 file
+# -w : enable warnings
+
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
+                          -e
                           ${SIP_SPEC}
                      DEPENDS mantidqt.sip ${SIP_HDRS}
                      COMMENT "Generating mantidqt python bindings using sip"

@@ -14,6 +14,39 @@
 %Import QtGui/QtGuimod.sip
 
 
+/***************************************************************************/
+/**************** Exceptions ***********************************************/
+/***************************************************************************/
+%Exception std::exception(SIP_Exception) /PyName=StdException/
+{
+%TypeHeaderCode
+#include <stdexcept>
+%End
+%RaiseCode
+    const char *detail = sipExceptionRef.what();
+    std::cout << "DETAIL:" << detail << std::endl;
+
+    SIP_BLOCK_THREADS
+    PyErr_SetString(sipException_std_exception, detail);
+    SIP_UNBLOCK_THREADS
+%End
+};
+
+%Exception std::invalid_argument(SIP_Exception) /PyName=StdInvalidArgument/
+{
+%TypeHeaderCode
+#include <stdexcept>
+%End
+%RaiseCode
+    const char *detail = sipExceptionRef.what();
+    std::cout << "DETAIL:" << detail << std::endl;
+
+    SIP_BLOCK_THREADS
+    PyErr_SetString(sipException_std_invalid_argument, detail);
+    SIP_UNBLOCK_THREADS
+%End
+};
+
 
 namespace MantidQt
 {
@@ -39,7 +72,7 @@ public:
   int getDimX() const;
   int getDimY() const;
 
-  void setSlicePoint(int dim, double value);
+  void setSlicePoint(int dim, double value) throw (std::invalid_argument);
   double getSlicePoint(int dim) const;
   
 };

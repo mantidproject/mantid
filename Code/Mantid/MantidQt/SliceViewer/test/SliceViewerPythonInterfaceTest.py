@@ -63,9 +63,27 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_setSlicePoint(self):
         sv = self.sv
         sv.setWorkspace('uniform')
-        sv.setSlicePoint(2, 7.6)
         # Set the slice point and got back the value?
+        sv.setSlicePoint(2, 7.6)
         self.assertAlmostEqual( sv.getSlicePoint(2), 7.6, 2)
+        # Go to too small a value
+        sv.setSlicePoint(2, -12.3)
+        self.assertAlmostEqual( sv.getSlicePoint(2), 0.0, 2)
+        # Go to too big a value
+        sv.setSlicePoint(2, 22.3)
+        self.assertAlmostEqual( sv.getSlicePoint(2), 10.0, 2)
+                
+    def test_setSlicePoint_throwsOnBadInputs(self):
+        sv = self.sv
+        sv.setWorkspace('uniform')
+        sv.setSlicePoint(-3, 37.6)
+        try:
+            sv.setSlicePoint(-1, 7.6)
+        except:
+            print "error caught"
+#        with self.assertRaises(ValueError): 
+#            sv.setSlicePoint(-1, 7.6)
+        #self.assertRaises(Exception, sv.setSlicePoint, (3, 7.6))
         
 #        sv.show()
 #        app.exec_()
