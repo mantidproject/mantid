@@ -47,7 +47,7 @@ namespace Algorithms
 
   private:
 
-    DataObjects::EventWorkspace_const_sptr eventWS;
+    DataObjects::EventWorkspace_sptr eventWS;
     DataObjects::Workspace2D_const_sptr seWS;
     DataObjects::EventWorkspace_sptr outputWS;
 
@@ -58,6 +58,10 @@ namespace Algorithms
     std::vector<int64_t> mCalibOffsets;  // in nano-second
     int64_t mSensorSampleOffset;   // in nano-second
 
+    Kernel::DateAndTime mRunStartTime;
+    Kernel::DateAndTime mFilterT0;
+    Kernel::DateAndTime mFilterTf;
+
     double mLowerLimit;
     double mUpperLimit;
 
@@ -67,11 +71,15 @@ namespace Algorithms
 
     void exec();
 
-    void importCalibrationFile(std::string calfilename);
-
     void createEventWorkspace();
 
     void filterEvents();
+
+    void importCalibrationFile(std::string calfilename);
+
+    void processTimeLog(std::string logname);
+
+    void processTimeLog(DataObjects::Workspace2D_const_sptr ws2d);
 
   };
 
