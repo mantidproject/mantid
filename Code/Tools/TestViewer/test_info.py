@@ -227,7 +227,7 @@ class TestSingle(object):
         systemout = case.getElementsByTagName("system-out")
         if len(systemout) > 0:
             # This is a node containing text (the firstchild) which is a Text node
-            self.stdout = systemout[0].firstChild.data
+            self.stdout = systemout[0].firstChild.wholeText
 
         # Look for failures
         fails = case.getElementsByTagName("failure")
