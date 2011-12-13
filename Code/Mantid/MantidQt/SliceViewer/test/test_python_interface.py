@@ -20,7 +20,7 @@ print "CREATED!"
 # Create the widget
 import libmantidqtpython
 sv = libmantidqtpython.MantidQt.SliceViewer.SliceViewer()
-sv.setWorkspace('uniform')
+#sv.setWorkspace('uniform')
 sv.show()
 
 # Run the app.
