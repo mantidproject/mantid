@@ -52,6 +52,12 @@ public:
   explicit ListValidator(const std::vector<std::string>& values):
   ListAnyValidator<std::string>(values){}
 
+  // overload this function to keep python happy (temporary?)
+   void addAllowedValue(const std::string &value){
+      ListAnyValidator<std::string>::addAllowedValue(value);
+   }
+
+
   virtual ~ListValidator(){};
 
   virtual IValidator<std::string>* clone(){ return new ListValidator(*this); }
