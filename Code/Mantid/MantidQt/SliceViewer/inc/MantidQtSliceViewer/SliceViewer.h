@@ -48,8 +48,8 @@ public:
   void loadColorMap(QString filename = QString() );
   LineOverlay * getLineOverlay() { return m_lineOverlay; }
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
-  int getDimX() const { return int(m_dimX); }
-  int getDimY() const { return int(m_dimY); }
+  int getDimX() const;
+  int getDimY() const;
 
   /// Methods for Python bindings
   void setXYDim(int indexX, int indexY);

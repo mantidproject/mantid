@@ -67,12 +67,13 @@ set( SRC_UNITY_IGNORE_FILES )
 # -e : C++ exceptions turn into python exceptions.
 # -j1 : split into 1 file
 # -w : enable warnings
+# -o : automatic docstrings
 
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
-                          -e
+                          -e -o
                           ${SIP_SPEC}
                      DEPENDS mantidqt.sip ${SIP_HDRS}
                      COMMENT "Generating mantidqt python bindings using sip"
@@ -97,16 +98,18 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui
 # This creates the target library, just for python bindings
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
 
-# Name the file correctly
 if(WIN32)
-	set_target_properties( mantidqtpython
-	 	PROPERTIES PREFIX "" SUFFIX ".pyd" )
-else(WIN32)
-	set_target_properties( mantidqtpython
-	 	PROPERTIES PREFIX "" )
-endif(WIN32)
+	# Windows: Python library name needs to end in .pyd for Windows
+	set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
+elseif ( APPLE )
+	# Mac: and in .so on the Mac
+  	set_target_properties ( mantidqtpython PROPERTIES SUFFIX .so )
+else ()
+	# Linux: needs to NOT have the usual "lib" prefix. 
+	set_target_properties( mantidqtpython PROPERTIES PREFIX "" )
+endif ()
 
-# ... and links to other required libs
+# ... and links to other required libs ...
 target_link_libraries ( mantidqtpython 
 	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer
 	${QT_LIBRARIES} ${QWT_LIBRARIES}

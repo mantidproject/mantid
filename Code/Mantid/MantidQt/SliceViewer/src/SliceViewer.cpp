@@ -412,10 +412,12 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
 
 //------------------------------------------------------------------------------------
-/** Set the workspace by name
+/** Set the workspace to view using its name.
+ * The workspace should be a MDHistoWorkspace or a MDEventWorkspace,
+ * with at least 2 dimensions.
  *
  * @param wsName :: name of the MDWorkspace to look for
- * @throw if the workspace is not found or is a MatrixWorkspace
+ * @throw std::runtime_error if the workspace is not found or is a MatrixWorkspace
  */
 void SliceViewer::setWorkspace(const QString & wsName)
 {
@@ -940,6 +942,18 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 //=================================================================================================
 //========================================== PYTHON METHODS =======================================
 //=================================================================================================
+//------------------------------------------------------------------------------------
+/** @return the index of the dimension that is currently
+ * being shown as the X axis of the plot.
+ */
+int SliceViewer::getDimX() const
+{ return int(m_dimX); }
+
+/** @return the index of the dimension that is currently
+ * being shown as the Y axis of the plot.
+ */
+int SliceViewer::getDimY() const
+{ return int(m_dimY); }
 
 //------------------------------------------------------------------------------------
 /** Set the index of the dimensions that will be shown as
