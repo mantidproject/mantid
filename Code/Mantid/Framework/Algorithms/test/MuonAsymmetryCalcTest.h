@@ -78,7 +78,7 @@ public:
     {
       TS_ASSERT_EQUALS(asymCalc.execute(),true);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }

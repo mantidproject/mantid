@@ -64,7 +64,7 @@ public:
       TS_ASSERT_EQUALS(ws3->getValue(2), 0);
 
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }
@@ -114,7 +114,7 @@ public:
         // std::cout << ih << " - " << tempdetid << ": " << ws1->getValue(tempdetid) << " vs. " << ws4->getValue(tempdetid) << std::endl;
       }
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }
@@ -133,7 +133,7 @@ public:
         TS_ASSERT_EQUALS(ws2->getValue(tempdetid), 1);
       }
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }

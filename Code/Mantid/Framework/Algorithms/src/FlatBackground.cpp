@@ -178,7 +178,7 @@ void FlatBackground::exec()
         }
       }
     }
-    catch (std::exception)
+    catch (std::exception &)
     {
       g_log.error() << "Error processing the spectrum with index " << currentSpec << std::endl;
       throw;

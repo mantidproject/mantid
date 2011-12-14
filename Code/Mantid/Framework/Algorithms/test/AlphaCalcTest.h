@@ -55,7 +55,7 @@ public:
     {
       TS_ASSERT_EQUALS(alphaCalc.execute(),true);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }
@@ -82,7 +82,7 @@ public:
     {
       TS_ASSERT_EQUALS(alphaCalc.execute(),true);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }

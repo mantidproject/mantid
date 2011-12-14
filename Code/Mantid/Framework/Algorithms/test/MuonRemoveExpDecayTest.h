@@ -62,7 +62,7 @@ public:
     {
       TS_ASSERT_EQUALS(alg.execute(),true);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }
@@ -84,7 +84,7 @@ public:
     {
       TS_ASSERT_EQUALS(alg2.execute(),true);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }
