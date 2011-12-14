@@ -732,6 +732,7 @@ using namespace DataObjects;
     case UNSORTED:
     default:
       sortType = "UNSORTED";
+      break;
     }
     NXputattr (fileID, "sort_type", (void*)(sortType.c_str()), static_cast<int>(sortType.size()), NX_CHAR);
 
