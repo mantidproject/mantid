@@ -75,6 +75,23 @@ private:
                        "</Function>");
   }
 
+#ifdef WIN32
+  std::string getXmlRep_noOrigin()
+  {
+    return std::string("<Function>"\
+                       "<Type>PlaneImplicitFuction</Type>"\
+                       "<ParameterList>"\
+                       "<Parameter>"\
+                       "<Type>NormalParameter</Type>"\
+                       "<Value>1.234 4.56 6.78</Value>"\
+                       "</Parameter>"\
+                       "<Parameter>"\
+                       "<Type>OriginParameter</Type>"\
+                       "<Value>1.#QNAN 1.#QNAN 1.#QNAN</Value>"\
+                       "</Parameter>"\
+                       "</ParameterList>"\
+                       "</Function>");
+#else
   std::string getXmlRep_noOrigin()
   {
     return std::string("<Function>"\
@@ -91,6 +108,7 @@ private:
                        "</ParameterList>"\
                        "</Function>");
   }
+#endif
 
 };
 
