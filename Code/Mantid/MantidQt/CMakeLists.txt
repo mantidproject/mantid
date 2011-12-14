@@ -67,13 +67,13 @@ set( SRC_UNITY_IGNORE_FILES )
 # -e : C++ exceptions turn into python exceptions.
 # -j1 : split into 1 file
 # -w : enable warnings
-# -o : automatic docstrings
+# -o : automatic docstrings (not supported in old version < 4.10)
 
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
-                          -e -o
+                          -e 
                           ${SIP_SPEC}
                      DEPENDS mantidqt.sip ${SIP_HDRS}
                      COMMENT "Generating mantidqt python bindings using sip"
