@@ -62,6 +62,7 @@ public:
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
   QwtDoubleInterval getXLimits() const;
   QwtDoubleInterval getYLimits() const;
+  void setXYCenter(double x, double y);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
@@ -83,9 +84,9 @@ public slots:
   void loadColorMapSlot();
   void helpSliceViewer();
   void helpLineViewer();
+  void setColorScaleAutoFull();
+  void setColorScaleAutoSlice();
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
-  void on_btnRangeFull_clicked();
-  void on_btnRangeSlice_clicked();
   void on_btnClearLine_clicked();
 
   // Synced checkboxes

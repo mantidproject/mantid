@@ -97,6 +97,8 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
+  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
+  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -461,8 +463,11 @@ void SliceViewer::loadColorMap(QString filename)
 //=================================================================================================
 
 //------------------------------------------------------------------------------------
-/// Slot for finding the data full range and updating the display
-void SliceViewer::on_btnRangeFull_clicked()
+/** Automatically sets the min/max of the color scale,
+ * using the limits in the entire data set of the workspace
+ * (every bin, even those not currently visible).
+ */
+void SliceViewer::setColorScaleAutoFull()
 {
   this->findRangeFull();
   m_colorBar->setViewRange(m_colorRangeFull);
@@ -470,8 +475,12 @@ void SliceViewer::on_btnRangeFull_clicked()
 }
 
 //------------------------------------------------------------------------------------
-/// Slot for finding the current view/slice full range and updating the display
-void SliceViewer::on_btnRangeSlice_clicked()
+/** Automatically sets the min/max of the color scale,
+ * using the limits in the data that is currently visible
+ * in the plot (only the bins in this slice and within the
+ * view limits)
+ */
+void SliceViewer::setColorScaleAutoSlice()
 {
   this->findRangeSlice();
   m_colorBar->setViewRange(m_colorRangeSlice);
@@ -570,7 +579,11 @@ void SliceViewer::helpLineViewer()
 }
 
 //------------------------------------------------------------------------------------
-/// SLOT to reset the zoom view to full axes. This can be called manually with a button
+/** Automatically resets the zoom view to full axes.
+ * This will reset the XY limits to the full range of the workspace.
+ * Use zoomBy() or setXYLimits() to modify the view range.
+ * This corresponds to the "View Extents" button.
+ */
 void SliceViewer::resetZoom()
 {
   // Reset the 2 axes to full scale
@@ -620,20 +633,46 @@ void SliceViewer::loadColorMapSlot()
 //=================================================================================================
 //=================================================================================================
 //=================================================================================================
-/** Zoom in or out
- * @param factor :: > 1 : zoom in by this factor. < 1 : zoom out.
+/** Zoom in or out, keeping the center of the plot in the same position.
+ *
+ * @param factor :: double, if > 1 : zoom in by this factor.
+ *                  if < 1 : it will zoom out.
  */
 void SliceViewer::zoomBy(double factor)
 {
-  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
-  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
-  double x_min = xint.minValue() + (factor-1.) * xint.width() * 0.5;
-  double x_max = xint.maxValue() - (factor-1.) * xint.width() * 0.5;
-  double y_min = yint.minValue() + (factor-1.) * yint.width() * 0.5;
-  double y_max = yint.maxValue() - (factor-1.) * yint.width() * 0.5;
-  m_plot->setAxisScale( m_spect->xAxis(), x_min, x_max);
-  m_plot->setAxisScale( m_spect->yAxis(), y_min, y_max);
-  this->updateDisplay();
+  QwtDoubleInterval xint = this->getXLimits();
+  QwtDoubleInterval yint = this->getYLimits();
+
+  double newHalfWidth = (xint.width() / factor) * 0.5;
+  double middle = (xint.minValue() + xint.maxValue()) * 0.5;
+  double x_min = middle - newHalfWidth;
+  double x_max = middle + newHalfWidth;
+
+  newHalfWidth = (yint.width() / factor) * 0.5;
+  middle = (yint.minValue() + yint.maxValue()) * 0.5;
+  double y_min = middle - newHalfWidth;
+  double y_max = middle + newHalfWidth;
+  // Perform the move
+  this->setXYLimits(x_min, x_max, y_min, y_max);
+}
+
+//------------------------------------------------------------------------------------
+/** Manually set the center of the plot, in X Y coordinates.
+ * This keeps the plot the same size as previously.
+ * Use setXYLimits() to modify the size of the plot by setting the X/Y edges,
+ * or you can use zoomBy() to zoom in/out
+ *
+ * @param x :: new position of the center in X
+ * @param y :: new position of the center in Y
+ */
+void SliceViewer::setXYCenter(double x, double y)
+{
+  QwtDoubleInterval xint = this->getXLimits();
+  QwtDoubleInterval yint = this->getYLimits();
+  double halfWidthX = xint.width() * 0.5;
+  double halfWidthY = yint.width() * 0.5;
+  // Perform the move
+  this->setXYLimits(x - halfWidthX, x + halfWidthX,   y - halfWidthY, y + halfWidthY);
 }
 
 //------------------------------------------------------------------------------------

@@ -110,7 +110,39 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getYLimits(), [7, 8])
         #sv.show()
         #app.exec_()
+                
+    def test_zoomBy(self):
+        sv = self.sv
+        self.assertEqual(sv.getXLimits(), [0, 10])
+        self.assertEqual(sv.getYLimits(), [0, 10])
+        # Zoom in by a factor of 2
+        sv.zoomBy(2.0)
+        self.assertEqual(sv.getXLimits(), [2.5, 7.5])
+        self.assertEqual(sv.getYLimits(), [2.5, 7.5])
+        # Zoom out to the original size
+        sv.zoomBy(0.5)
+        self.assertEqual(sv.getXLimits(), [0, 10])
+        self.assertEqual(sv.getYLimits(), [0, 10])
+                                
+    def test_setXYCenter(self):
+        sv = self.sv
+        self.assertEqual(sv.getXLimits(), [0, 10])
+        self.assertEqual(sv.getYLimits(), [0, 10])
+        # Move to a new spot
+        sv.setXYCenter(2.0, 6.0)
+        self.assertEqual(sv.getXLimits(), [-3, 7])
+        self.assertEqual(sv.getYLimits(), [1, 11])
         
+    def test_resetZoom(self):
+        sv = self.sv
+        sv.zoomBy(2.0)
+        self.assertEqual(sv.getXLimits(), [2.5, 7.5])
+        self.assertEqual(sv.getYLimits(), [2.5, 7.5])
+        # Go back automatically to full range
+        sv.resetZoom()
+        self.assertEqual(sv.getXLimits(), [0, 10])
+        self.assertEqual(sv.getYLimits(), [0, 10])
+                
     #==========================================================================
     #======================= ColorMap and range ===============================
     #==========================================================================
@@ -135,5 +167,17 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertRaises(StdInvalidArgument, sv.setColorScale, 10, 5, False)
         self.assertRaises(StdInvalidArgument, sv.setColorScale, 0, 5, True)
         self.assertRaises(StdInvalidArgument, sv.setColorScale, -3, -1, True)
+                   
+    def test_setColorScaleAutoFull(self):
+        sv = self.sv
+        sv.setColorScaleAutoFull()
+        self.assertEqual(sv.getColorScaleMin(), 27.0)
+        self.assertEqual(sv.getColorScaleMax(), 540.0)
+                   
+    def test_setColorScaleAutoSlice(self):
+        sv = self.sv
+        sv.setColorScaleAutoSlice()
+        self.assertEqual(sv.getColorScaleMin(), 27.0)
+        self.assertEqual(sv.getColorScaleMax(), 81.0)
             
     

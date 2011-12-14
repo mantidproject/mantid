@@ -79,7 +79,6 @@ class SliceViewer : QWidget
 %End
 
 public:
-  void zoomBy(double factor);
   void setWorkspace(const QString & wsName) throw (std::runtime_error);
   void showControls(bool visible);
   
@@ -92,12 +91,17 @@ public:
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
   QwtDoubleInterval getXLimits() const;
   QwtDoubleInterval getYLimits() const;
+  void zoomBy(double factor);
+  void setXYCenter(double x, double y);
+  void resetZoom();
 
   void loadColorMap(QString filename);
   void setColorScale(double min, double max, bool log) 	throw (std::invalid_argument);
   double getColorScaleMin() const;
   double getColorScaleMax() const;
   bool getColorScaleLog() const;
+  void setColorScaleAutoFull();
+  void setColorScaleAutoSlice();
     
 };
 
