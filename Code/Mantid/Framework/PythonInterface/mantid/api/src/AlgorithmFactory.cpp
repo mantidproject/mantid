@@ -24,17 +24,15 @@ namespace
    * @param self :: Enables it to be called as a member function on the AlgorithmFactory class
    * @param includeHidden :: If true hidden algorithms are included
    */
-  PyObject * getRegisteredAlgorithms(PyObject * self, bool includeHidden)
+  PyObject * getRegisteredAlgorithms(AlgorithmFactoryImpl & self, bool includeHidden)
   {
-    UNUSED_ARG(self);
-    AlgorithmFactoryImpl & algFactory = AlgorithmFactory::Instance();
     // A list of strings AlgorithmName|version
-    std::vector<std::string> keys = algFactory.getKeys(includeHidden);
+    std::vector<std::string> keys = self.getKeys(includeHidden);
     const size_t nkeys = keys.size();
     PyObject *registered = PyDict_New();
     for( size_t i = 0; i < nkeys; ++i )
     {
-      std::pair<std::string, int> algInfo = algFactory.decodeName(keys[i]);
+      std::pair<std::string, int> algInfo = self.decodeName(keys[i]);
       PyObject *name = PyString_FromString(algInfo.first.c_str());
       PyObject *vers = PyInt_FromLong(algInfo.second);
       if( PyDict_Contains(registered, name) == 1 )

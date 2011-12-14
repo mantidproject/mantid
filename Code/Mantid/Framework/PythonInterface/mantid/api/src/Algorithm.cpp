@@ -51,10 +51,9 @@ namespace
      * @return A Python list of strings
      */
 
-    PyObject * getInputPropertiesWithMandatoryFirst(boost::python::object self)
+    PyObject * getInputPropertiesWithMandatoryFirst(IAlgorithm & self)
     {
-      IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
-      PropVector properties(algm->getProperties()); // Makes a copy so that it can be sorted
+      PropVector properties(self.getProperties()); // Makes a copy so that it can be sorted
       std::sort(properties.begin(), properties.end(), MandatoryFirst());
       PropVector::const_iterator iend = properties.end();
       // Build a python list
@@ -75,10 +74,9 @@ namespace
      * @param self :: A pointer to the python object wrapping and Algorithm.
      * @return A Python list of strings
      */
-    PyObject * getOutputProperties(boost::python::object self)
+    PyObject * getOutputProperties(IAlgorithm & self)
     {
-      IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
-      const PropVector & properties(algm->getProperties()); // No copy
+      const PropVector & properties(self.getProperties()); // No copy
       PropVector::const_iterator iend = properties.end();
       // Build the list
       PyObject *names = PyList_New(0);
@@ -101,19 +99,19 @@ namespace
    * @param self :: A pointer to the python object wrapping and Algorithm
    * @return A string that documents an algorithm
    */
-  std::string createDocString(boost::python::object self)
+  std::string createDocString(IAlgorithm & self)
   {
-    IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
+    //IAlgorithm_sptr algm = boost::python::extract<IAlgorithm_sptr>(self);
     const std::string EOL="\n";
 
     // Put in the quick overview message
     std::stringstream buffer;
-    std::string temp = algm->getOptionalMessage();
+    std::string temp = self.getOptionalMessage();
     if (temp.size() > 0)
       buffer << temp << EOL << EOL;
 
     // get a sorted copy of the properties
-    std::vector<Property*> properties(algm->getProperties());
+    std::vector<Property*> properties(self.getProperties());
     std::sort(properties.begin(), properties.end(), MandatoryFirst());
     const size_t numProps(properties.size());
 
