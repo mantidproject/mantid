@@ -10,9 +10,9 @@ from PyQt4 import Qt
 import MantidFramework
 from MantidFramework import mtd
 from mantidsimple import *
-import libmantidqtpython
+import mantidqtpython
 
-from libmantidqtpython import StdRuntimeError, StdInvalidArgument
+from mantidqtpython import StdRuntimeError, StdInvalidArgument
 
 # Create the application only once per test; otherwise I get a segfault
 app = Qt.QApplication(sys.argv)
@@ -37,7 +37,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     
     def setUp(self):
         """ Set up and create a SliceViewer widget """
-        self.sv = libmantidqtpython.MantidQt.SliceViewer.SliceViewer()
+        self.sv = mantidqtpython.MantidQt.SliceViewer.SliceViewer()
         # Open the default workspace for testing
         self.sv.setWorkspace('uniform')
         pass

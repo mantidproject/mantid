@@ -8,9 +8,9 @@ import time
 import MantidFramework
 from MantidFramework import mtd
 from mantidsimple import *
-import libmantidqtpython
+import mantidqtpython
 
-from libmantidqtpython import StdRuntimeError, StdInvalidArgument
+from mantidqtpython import StdRuntimeError, StdInvalidArgument
 
 
 class QwtTypesPythonInterfaceTest(unittest.TestCase):

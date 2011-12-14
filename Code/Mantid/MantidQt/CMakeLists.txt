@@ -95,7 +95,16 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/SliceViewer/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui_*.h auto-generated files
 
 # This creates the target library, just for python bindings
-add_library ( mantidqtpython ${SIP_SRC} )
+add_library ( mantidqtpython MODULE ${SIP_SRC} )
+
+# Name the file correctly
+if(WIN32)
+	set_target_properties( mantidqtpython
+	 	PROPERTIES PREFIX "" SUFFIX ".pyd" )
+else(WIN32)
+	set_target_properties( mantidqtpython
+	 	PROPERTIES PREFIX "" )
+endif(WIN32)
 
 # ... and links to other required libs
 target_link_libraries ( mantidqtpython 

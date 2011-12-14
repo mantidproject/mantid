@@ -8,7 +8,7 @@
 /***************************************************************************/
 
 // Define the module name. This has to match the library filename
-%Module libmantidqtpython
+%Module mantidqtpython
 
 /******************************** SIP Imports ****************/
 %Import QtCore/QtCoremod.sip
