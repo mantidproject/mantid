@@ -10,6 +10,7 @@
 #include "MantidCrystal/SetUB.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
 
 using namespace Mantid;
@@ -17,6 +18,7 @@ using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Geometry::OrientedLattice;
 
 class SetUBTest : public CxxTest::TestSuite
 {

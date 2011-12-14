@@ -6,15 +6,20 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Material.h"
-#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidGeometry/Objects/Object.h"
 #include <vector>
 
-using Mantid::Geometry::OrientedLattice;
 
 namespace Mantid
 {
+  //-----------------------------------------------------------------------------
+  // Geometry forward declarations
+  //------------------------------------------------------------------------------
+  namespace Geometry
+  {
+    class OrientedLattice;
+  }
 
   namespace API
   {
@@ -101,11 +106,11 @@ namespace Mantid
       /** @name Access the sample's lattice structure and orientation */
       //@{
       /// Get a reference to the sample's OrientedLattice
-      const OrientedLattice & getOrientedLattice() const;
+      const Geometry::OrientedLattice & getOrientedLattice() const;
       /// Get a reference to the sample's OrientedLattice
-      OrientedLattice & getOrientedLattice();
+      Geometry::OrientedLattice & getOrientedLattice();
       /// Set the OrientedLattice defining the sample's lattice and orientation
-      void setOrientedLattice(OrientedLattice * latt);
+      void setOrientedLattice(Geometry::OrientedLattice * latt);
       bool hasOrientedLattice() const;
       //@}
 
@@ -143,7 +148,7 @@ namespace Mantid
       /// An owned pointer to the SampleEnvironment object
       boost::shared_ptr<SampleEnvironment> m_environment;
       /// Pointer to the OrientedLattice of the sample, NULL if not set.
-      OrientedLattice * m_lattice;
+      Geometry::OrientedLattice * m_lattice;
 
       /// Vector of child samples
       std::vector<boost::shared_ptr<Sample> > m_samples;

@@ -60,7 +60,7 @@ namespace Crystal
     /// Counter of possible peaks
     size_t numInRange;
     /// Crystal applied
-    OrientedLattice crystal;
+    Geometry::OrientedLattice crystal;
     /// Min D spacing to apply.
     double minD;
     /// Max D spacing to apply.

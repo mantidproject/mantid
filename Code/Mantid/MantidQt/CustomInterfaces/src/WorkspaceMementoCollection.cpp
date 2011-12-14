@@ -3,6 +3,7 @@
 #include "MantidAPI/TableRow.h" 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoItem.h"
@@ -73,7 +74,7 @@ namespace MantidQt
       }
       if(ws->sample().hasOrientedLattice())
       {
-        OrientedLattice lattice = ws->sample().getOrientedLattice();
+        Mantid::Geometry::OrientedLattice lattice = ws->sample().getOrientedLattice();
         service.setLatticeParameters(lattice.a(), lattice.b(), lattice.c(), lattice.alpha(), lattice.beta(), lattice.gamma());
       }
       else

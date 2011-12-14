@@ -14,6 +14,7 @@
 #include <set>
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
