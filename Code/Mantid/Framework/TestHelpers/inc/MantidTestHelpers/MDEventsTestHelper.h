@@ -58,7 +58,7 @@ namespace MDEventsTestHelper
    */
   template<typename MDE, size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
-    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0)
+    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
             out(new Mantid::MDEvents::MDEventWorkspace<MDE,nd>());
@@ -90,7 +90,8 @@ namespace MDEventsTestHelper
           for (size_t d=0; d<nd; d++)
             centers[d] = min + (double(index[d])+0.5)*(max-min)/double(splitInto);
           out->addEvent( MDE(1.0, 1.0, centers) );
-        }
+         }
+
 
         allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, index, index_max);
       }
@@ -109,6 +110,13 @@ namespace MDEventsTestHelper
     return makeAnyMDEW<Mantid::MDEvents::MDLeanEvent<nd>,nd>(splitInto, min, max, numEventsPerBox);
   }
 
+  /** Make a MDEventWorkspace with MDEvents */
+  template<size_t nd>
+  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd> >
+    makeMDEWFull(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
+  {
+    return makeAnyMDEW<Mantid::MDEvents::MDEvent<nd>,nd>(splitInto, min, max, numEventsPerBox);
+  }
 
   //=====================================================================================
   //=============================== MDGRIDBOX HELPER METHODS ============================
