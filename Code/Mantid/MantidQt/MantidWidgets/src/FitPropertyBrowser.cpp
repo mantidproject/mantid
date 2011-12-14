@@ -273,8 +273,8 @@ m_mantidui(mantidui)
   if (m_customFittings)
   {
     QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
-    QtProperty* rawBunchdata = m_boolManager->addProperty("Fit To binned data");
-    bool data = settings.value("Fit To binned data",QVariant(false)).toBool();
+    QtProperty* rawBunchdata = m_boolManager->addProperty("Fit To Raw Data");
+    bool data = settings.value("Fit To Raw Data",QVariant(true)).toBool();
     m_boolManager->setValue(rawBunchdata,data);
     customSettingsGroup->addSubProperty(m_minimizer);
     customSettingsGroup->addSubProperty(m_plotDiff);

@@ -1681,6 +1681,16 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
+
+    // Make raw copy
+    QString rawData = titleLabel + "_Raw";
+    if ( !AnalysisDataService::Instance().doesExist(rawData.toStdString() ) )
+    {
+      QString groupStr = QString("CloneWorkspace('") + titleLabel + "','"+ rawData +"')\n";
+      groupStr += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + rawData
+        + "',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
   }
   m_updating = false;
 }
@@ -1811,6 +1821,16 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
+
+    // Make raw copy
+    QString rawData = titleLabel + "_Raw";
+    if ( !AnalysisDataService::Instance().doesExist(rawData.toStdString() ) )
+    {
+      QString groupStr = QString("CloneWorkspace('") + titleLabel + "','"+ rawData +"')\n";
+      groupStr += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + rawData
+        + "',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
+      runPythonCode( groupStr ).trimmed();
+    }
   }
   
   m_updating = false;
