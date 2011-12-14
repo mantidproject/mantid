@@ -91,6 +91,7 @@ private:
                        "</Parameter>"\
                        "</ParameterList>"\
                        "</Function>");
+  }
 #else
   std::string getXmlRep_noOrigin()
   {
