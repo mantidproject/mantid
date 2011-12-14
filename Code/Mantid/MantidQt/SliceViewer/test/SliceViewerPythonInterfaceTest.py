@@ -48,7 +48,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     
     def test_setWorkspace(self):
         sv = self.sv
-        self.assertIsNotNone(sv, "SliceViewer object was created")
+        assert (sv is not None) 
     
     def test_setWorkspace_MDEventWorkspace(self):
         sv = self.sv
