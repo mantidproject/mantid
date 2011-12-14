@@ -6,7 +6,6 @@
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 
 #include <pqActiveObjects.h>
@@ -620,9 +619,8 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
-  MDPlane mdp(3, orient, origin);
-  MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction());
-  impplane->addPlane(mdp);
+  MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
+                                                               origin));
   rks.setImplicitFunction(impplane);
 
   std::cout << rks.createXMLString() << std::endl;
