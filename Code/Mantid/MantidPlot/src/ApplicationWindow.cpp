@@ -3367,13 +3367,18 @@ void ApplicationWindow::windowActivated(QMdiSubWindow *w)
 
   if (d_opening_file) return;
 
+  
   QList<MdiSubWindow *> windows = current_folder->windowsList();
   foreach(MdiSubWindow *ow, windows){
-    std::cerr << ow->className() << std::endl;
-  //  if (ow != w && ow->status() == MdiSubWindow::Maximized){
-  //    ow->setNormal();
-  //    break;
-  //  }
+    QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(ow->parent());
+    std::cerr << ow->className();
+    if (ow->parent()) std::cerr << ' ' << ow->parent()->className() ;
+    std::cerr << std::endl;
+    if (qw && qw != w && qw->isMaximized())
+    {
+      ow->setNormal();
+      break;
+    }
   }
 
   Folder *f = qti_subwin->folder();
@@ -17171,7 +17176,7 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
 
   QAction *goMdi = new QAction("MDI",this);
   connect(goMdi,SIGNAL(triggered()),w,SLOT(goMdi()));
-  QMainWindow* mw =new QMainWindow(this);
+  QMainWindow* mw =new QMainWindow();
   MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(mw,0);
   wrapper->setWidget(w);
   mw->setCentralWidget(wrapper);
