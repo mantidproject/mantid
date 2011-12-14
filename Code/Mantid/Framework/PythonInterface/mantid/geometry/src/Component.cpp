@@ -20,12 +20,12 @@ namespace
 void export_Component()
 {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
-    .def("get_parameter_names", &Component::getParameterNames, Component_getParameterNames())
-    .def("has_parameter", &Component::hasParameter, Component_hasParameter())
-    .def("get_number_parameter", &Component::getNumberParameter, Component_getNumberParameter())
-    .def("get_position_parameter", &Component::getPositionParameter, Component_getPositionParameter())
-    .def("get_rotation_parameter", &Component::getRotationParameter, Component_getRotationParameter())
-    .def("get_string_parameter", &Component::getStringParameter, Component_getStringParameter())
+    .def("getParameterNames", &Component::getParameterNames, Component_getParameterNames())
+    .def("hasParameter", &Component::hasParameter, Component_hasParameter())
+    .def("getNumberParameter", &Component::getNumberParameter, Component_getNumberParameter())
+    .def("getPositionParameter", &Component::getPositionParameter, Component_getPositionParameter())
+    .def("getRotationParameter", &Component::getRotationParameter, Component_getRotationParameter())
+    .def("getStringParameter", &Component::getStringParameter, Component_getStringParameter())
     ;
 
 }

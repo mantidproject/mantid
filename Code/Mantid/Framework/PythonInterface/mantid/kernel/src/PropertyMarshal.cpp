@@ -123,7 +123,7 @@ namespace Mantid
       */
       bpl::object value(bpl::object self)
       {
-        bpl::object value = bpl::object(bpl::handle<>(PyObject_GetAttrString(self.ptr(), "value_as_declared")));
+        bpl::object value = bpl::object(bpl::handle<>(PyObject_GetAttrString(self.ptr(), "valueAsDeclared")));
         upcastFromDataItem(value);
         return value;
       }

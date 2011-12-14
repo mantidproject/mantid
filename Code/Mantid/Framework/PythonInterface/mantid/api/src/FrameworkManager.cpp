@@ -66,13 +66,14 @@ void export_FrameworkManager()
         "Returns a reference to the FrameworkManager singleton")
     .staticmethod("Instance")
     .def("clear", &FrameworkManagerImpl::clear, "Clear all memory held by Mantid")
-    .def("clear_algorithms", &FrameworkManagerImpl::clearAlgorithms, "Clear memory held by algorithms (does not include workspaces)")
-    .def("clear_data", &FrameworkManagerImpl::clearData, "Clear memory held by the data service (essentially all workspaces, including hidden)")
-    .def("clear_instruments", &FrameworkManagerImpl::clearInstruments, "Clear memory held by the cached instruments")
+    .def("clearAlgorithms", &FrameworkManagerImpl::clearAlgorithms, "Clear memory held by algorithms (does not include workspaces)")
+    .def("clearData", &FrameworkManagerImpl::clearData, "Clear memory held by the data service (essentially all workspaces, including hidden)")
+    .def("clearInstruments", &FrameworkManagerImpl::clearInstruments, "Clear memory held by the cached instruments")
     // NOTE: This differs from the C++ FrameworkManager::createAlgorithm to ensure consistency when called within Python
-    .def("create_algorithm", &createAlgorithm, create_overloads(args("name", "version"), "Creates and initializes an algorithm of the "
-         "given name and version. If this called from within a Python algorithm an unmanaged algorithm is created otherwise it will "
-         "be a managed algorithm"))
+    .def("createAlgorithm", &createAlgorithm, 
+         create_overloads(args("name", "version"), "Creates and initializes an algorithm of the "
+                          "given name and version. If this called from within a Python algorithm "
+                          "an unmanaged algorithm is created otherwise it will be a managed algorithm"))
     ;
 
 }

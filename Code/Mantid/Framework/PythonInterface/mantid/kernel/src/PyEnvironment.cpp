@@ -7,7 +7,6 @@
 // correctly
 #include <boost/python/object.hpp>
 #include <frameobject.h>
-
 #include <cstring>
 
 namespace Mantid

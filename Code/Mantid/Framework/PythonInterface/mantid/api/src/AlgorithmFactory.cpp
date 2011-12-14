@@ -62,7 +62,7 @@ void export_AlgorithmFactory()
       .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
         "Returns a reference to the AlgorithmFactory singleton")
       .staticmethod("Instance")
-      .def("get_registered_algorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
+      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
     ;
 
 }
@@ -107,5 +107,5 @@ namespace
 void export_RegisterAlgorithm()
 {
   // The registration function
-  def("register_algorithm", &registerAlgorithm, "Register an algorithm with Mantid. The class must derive from mantid.api.PythonAlgorithm.");
+  def("registerAlgorithm", &registerAlgorithm, "Register an algorithm with Mantid. The class must derive from mantid.api.PythonAlgorithm.");
 }

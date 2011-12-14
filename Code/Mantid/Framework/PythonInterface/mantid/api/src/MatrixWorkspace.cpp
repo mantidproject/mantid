@@ -22,20 +22,26 @@ void export_MatrixWorkspace()
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     //--------------------------------------- Meta information -----------------------------------------------------------------------
     .def("blocksize", &MatrixWorkspace::blocksize, "Returns size of the Y data array")
-    .def("get_number_histograms", &MatrixWorkspace::getNumberHistograms, "Returns the number of spectra in the workspace")
+    .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, "Returns the number of spectra in the workspace")
     //--------------------------------------- Array access ---------------------------------------------------------------------------
-    .def("read_x", &Mantid::PythonInterface::Numpy::wrapX,
+    .def("readX", &Mantid::PythonInterface::Numpy::wrapX,
           "Creates a read-only numpy wrapper around the original X data at the given index")
-    .def("read_y", &Mantid::PythonInterface::Numpy::wrapY,
+    .def("readY", &Mantid::PythonInterface::Numpy::wrapY,
           "Creates a read-only numpy wrapper around the original Y data at the given index")
-    .def("read_e", &Mantid::PythonInterface::Numpy::wrapE,
+    .def("readE", &Mantid::PythonInterface::Numpy::wrapE,
           "Creates a read-only numpy wrapper around the original E data at the given index")
-    .def("extract_x", Mantid::PythonInterface::Numpy::cloneX, "Extracts (copies) the X data from the workspace into a 2D numpy array. "
-         "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of the data.")
-    .def("extract_y", Mantid::PythonInterface::Numpy::cloneY, "Extracts (copies) the Y data from the workspace into a 2D numpy array. "
-          "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of the data.")
-    .def("extract_e", Mantid::PythonInterface::Numpy::cloneE, "Extracts (copies) the E data from the workspace into a 2D numpy array. "
-         "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of the data.")
+    .def("extractX", Mantid::PythonInterface::Numpy::cloneX, 
+         "Extracts (copies) the X data from the workspace into a 2D numpy array. "
+         "Note: This can fail for large workspaces as numpy will require a block "
+         "of memory free that will fit all of the data.")
+    .def("extractY", Mantid::PythonInterface::Numpy::cloneY, 
+         "Extracts (copies) the Y data from the workspace into a 2D numpy array. "
+         "Note: This can fail for large workspaces as numpy will require a block "
+         "of memory free that will fit all of the data.")
+    .def("extractE", Mantid::PythonInterface::Numpy::cloneE, 
+         "Extracts (copies) the E data from the workspace into a 2D numpy array. "
+         "Note: This can fail for large workspaces as numpy will require a block "
+         "of memory free that will fit all of the data.")
   ;
 
   DECLARE_SINGLEVALUETYPEHANDLER(MatrixWorkspace, DataItem_sptr);

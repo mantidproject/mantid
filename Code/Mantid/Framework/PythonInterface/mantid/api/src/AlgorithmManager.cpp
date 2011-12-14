@@ -28,7 +28,7 @@ void export_AlgorithmManager()
         "Returns a reference to the AlgorithmManager singleton")
     .staticmethod("Instance")
     .def("create", &AlgorithmManagerImpl::create, create_overloads(args("name", "version"), "Creates a managed algorithm."))
-    .def("create_unmanaged", &AlgorithmManagerImpl::createUnmanaged,
+    .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
         createUnmanaged_overloads(args("name", "version"), "Creates an unmanaged algorithm."))
     ;
 }

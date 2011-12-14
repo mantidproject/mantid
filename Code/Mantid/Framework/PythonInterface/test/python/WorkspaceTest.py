@@ -1,6 +1,5 @@
 import unittest
 from testhelpers import run_algorithm
-
 from mantid.api import Workspace
 
 class WorkspaceTest(unittest.TestCase):

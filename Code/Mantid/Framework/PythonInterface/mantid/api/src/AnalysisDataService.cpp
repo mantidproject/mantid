@@ -94,7 +94,7 @@ namespace
    */
   object retrieveUpcastedPtr(object self, const std::string & name)
   {
-    object dataItem = self.attr("retrieve_as_data_item")(name);
+    object dataItem = self.attr("retrieveAsDataItem")(name);
     Mantid::PythonInterface::PropertyMarshal::upcastFromDataItem(dataItem);
     return dataItem;
   }
@@ -110,7 +110,7 @@ void export_AnalysisDataService()
     .def("Instance", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
          "Return a reference to the ADS singleton")
     .staticmethod("Instance")
-    .def("retrieve_as_data_item", &retrieveAsDataItem, "Retrieve the named object as data item. Raises an exception if the name does not exist")
+    .def("retrieveAsDataItem", &retrieveAsDataItem, "Retrieve the named object as data item. Raises an exception if the name does not exist")
     .def("retrieve", &retrieveUpcastedPtr, "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
@@ -121,10 +121,6 @@ void export_AnalysisDataService()
     .def("__contains__", &AnalysisDataServiceImpl::doesExist)
     .def("__delitem__", &AnalysisDataServiceImpl::remove)
     ;
-
-  // Factory function
-  def("get_analysis_data_service", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
-      "Return a reference to the ADS singleton");
 
 }
 
