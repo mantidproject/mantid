@@ -57,8 +57,6 @@ public:
 
   void updateColorMap();
 
-  void setDataRange(double min, double max);
-  void setDataRange(QwtDoubleInterval range);
   void setViewRange(double min, double max);
   void setViewRange(QwtDoubleInterval range);
   void setLog(bool log);
@@ -98,12 +96,6 @@ private:
 
   /// Logarithmic scale?
   bool m_log;
-
-  /// Min value in the data shown
-  double m_rangeMin;
-
-  /// Max value in the data shown
-  double m_rangeMax;
 
   /// Min value being displayed
   double m_min;

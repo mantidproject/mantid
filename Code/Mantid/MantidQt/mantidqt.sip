@@ -45,6 +45,20 @@
 %End
 };
 
+%Exception std::runtime_error(SIP_Exception) /PyName=StdRuntimeError/
+{
+%TypeHeaderCode
+#include <stdexcept>
+%End
+%RaiseCode
+    const char *detail = sipExceptionRef.what();
+
+    SIP_BLOCK_THREADS
+    PyErr_SetString(sipException_std_runtime_error, detail);
+    SIP_UNBLOCK_THREADS
+%End
+};
+
 
 namespace MantidQt
 {
@@ -63,7 +77,7 @@ class SliceViewer : QWidget
 
 public:
   void zoomBy(double factor);
-  void setWorkspace(const QString & wsName);
+  void setWorkspace(const QString & wsName) throw (std::runtime_error);
   void showControls(bool visible);
   
   void setXYDim(int indexX, int indexY) 	throw (std::invalid_argument);
@@ -72,7 +86,13 @@ public:
 
   void setSlicePoint(int dim, double value) 	throw (std::invalid_argument);
   double getSlicePoint(int dim) const 	throw (std::invalid_argument);
-  
+
+  void loadColorMap(QString filename);
+  void setColorScale(double min, double max, bool log) 	throw (std::invalid_argument);
+  double getColorScaleMin() const;
+  double getColorScaleMax() const;
+  bool getColorScaleLog() const;
+    
 };
 
 

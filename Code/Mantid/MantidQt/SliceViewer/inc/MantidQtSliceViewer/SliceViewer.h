@@ -55,6 +55,10 @@ public:
   void setXYDim(int indexX, int indexY);
   void setSlicePoint(int dim, double value);
   double getSlicePoint(int dim) const;
+  void setColorScale(double min, double max, bool log);
+  double getColorScaleMin() const;
+  double getColorScaleMax() const;
+  bool getColorScaleLog() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

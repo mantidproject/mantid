@@ -12,6 +12,8 @@ from MantidFramework import mtd
 from mantidsimple import *
 import libmantidqtpython
 
+from libmantidqtpython import StdRuntimeError, StdInvalidArgument
+
 # Create the application only once per test; otherwise I get a segfault
 app = Qt.QApplication(sys.argv)
 
@@ -30,6 +32,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         FakeMDEventData("mdw",  UniformParams="1e4")
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
         BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
+        CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
 
     
     def setUp(self):
@@ -51,6 +54,16 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv = self.sv
         sv.setWorkspace('mdw')
     
+    def test_setWorkspace_throwsOnBadInputs(self):
+        sv = self.sv
+        #sv.setWorkspace('workspace2d')
+        with self.assertRaises(StdRuntimeError): sv.setWorkspace('')
+        with self.assertRaises(StdRuntimeError): sv.setWorkspace('non_existent_workspace')
+        with self.assertRaises(StdRuntimeError): sv.setWorkspace('workspace2d')
+    
+    #==========================================================================
+    #======================= Setting Dimensions, etc ==========================
+    #==========================================================================
     def test_setXYDim(self):
         sv = self.sv
         sv.setXYDim(0,2)
@@ -61,11 +74,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
             
     def test_setXYDim_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(Exception): sv.setXYDim(-1, 0)
-        with self.assertRaises(Exception): sv.setXYDim(4, 0)
-        with self.assertRaises(Exception): sv.setXYDim(0, -1)
-        with self.assertRaises(Exception): sv.setXYDim(0, 3)
-        with self.assertRaises(Exception): sv.setXYDim(0, 0)
+        with self.assertRaises(StdInvalidArgument): sv.setXYDim(-1, 0)
+        with self.assertRaises(StdInvalidArgument): sv.setXYDim(4, 0)
+        with self.assertRaises(StdInvalidArgument): sv.setXYDim(0, -1)
+        with self.assertRaises(StdInvalidArgument): sv.setXYDim(0, 3)
+        with self.assertRaises(StdInvalidArgument): sv.setXYDim(0, 0)
         
     def test_setSlicePoint(self):
         sv = self.sv
@@ -81,14 +94,38 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
                 
     def test_setSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(Exception): sv.setSlicePoint(-1, 7.6)
-        with self.assertRaises(Exception): sv.setSlicePoint(3, 7.6)
+        with self.assertRaises(StdInvalidArgument): sv.setSlicePoint(-1, 7.6)
+        with self.assertRaises(StdInvalidArgument): sv.setSlicePoint(3, 7.6)
                     
     def test_getSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(Exception): sv.getSlicePoint(-1)
-        with self.assertRaises(Exception): sv.getSlicePoint(3)
+        with self.assertRaises(StdInvalidArgument): sv.getSlicePoint(-1)
+        with self.assertRaises(StdInvalidArgument): sv.getSlicePoint(3)
     
-    
-    
+    #==========================================================================
+    #======================= ColorMap and range ===============================
+    #==========================================================================
+    def test_loadColorMap(self):
+        """ Needs an absolute path - can't readily do unit test """
+        sv = self.sv
+        #sv.loadColorMap('')
+        
+    def test_setColorScale(self):
+        sv = self.sv
+        sv.setColorScale(10, 30, False)
+        self.assertEqual(sv.getColorScaleMin(), 10)
+        self.assertEqual(sv.getColorScaleMax(), 30)
+        self.assertEqual(sv.getColorScaleLog(), False)
+        sv.setColorScale(20, 1000, True)
+        self.assertEqual(sv.getColorScaleMin(), 20)
+        self.assertEqual(sv.getColorScaleMax(), 1000)
+        self.assertEqual(sv.getColorScaleLog(), True)
+                    
+    def test_setColorScale_throwsOnBadInputs(self):
+        sv = self.sv
+        with self.assertRaises(StdInvalidArgument): sv.setColorScale(10, 5, False)
+        with self.assertRaises(StdInvalidArgument): sv.setColorScale(10, 5, True)
+        with self.assertRaises(StdInvalidArgument): sv.setColorScale(0, 5, True)
+        with self.assertRaises(StdInvalidArgument): sv.setColorScale(-3, -1, True)
+            
     

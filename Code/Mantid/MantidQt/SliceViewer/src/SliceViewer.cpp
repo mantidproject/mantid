@@ -73,7 +73,6 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --- Create a color bar on the right axis ---------------
   m_colorBar = new ColorBarWidget(this);
-  m_colorBar->setDataRange( range.minValue(), range.maxValue() );
   m_colorBar->setViewRange( range.minValue(), range.maxValue() );
   m_colorBar->setLog(true);
   m_spectLayout->addWidget(m_colorBar, 0, 0);
@@ -385,7 +384,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_data->setWorkspace(ws);
   // Find the full range. And use it
   findRangeFull();
-  m_colorBar->setDataRange(m_colorRangeFull);
   m_colorBar->setViewRange(m_colorRangeFull);
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
@@ -433,7 +431,7 @@ void SliceViewer::setWorkspace(const QString & wsName)
 //------------------------------------------------------------------------------------
 /** Load a color map from a file
  *
- * @param filename :: file to open; empty to ask.
+ * @param filename :: file to open; empty to ask via a dialog box.
  */
 void SliceViewer::loadColorMap(QString filename)
 {
@@ -467,7 +465,6 @@ void SliceViewer::loadColorMap(QString filename)
 void SliceViewer::on_btnRangeFull_clicked()
 {
   this->findRangeFull();
-  m_colorBar->setDataRange(m_colorRangeFull);
   m_colorBar->setViewRange(m_colorRangeFull);
   this->updateDisplay();
 }
@@ -968,6 +965,47 @@ double SliceViewer::getSlicePoint(int dim) const
   if (dim >= int(m_dimWidgets.size()) || dim < 0)
     throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
   return m_slicePoint[dim];
+}
+
+
+//------------------------------------------------------------------------------------
+/** Set the color scale limits and log mode via a method call.
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param log :: true for a log color scale, false for linear
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScale(double min, double max, bool log)
+{
+  if (max <= min)
+    throw std::invalid_argument("Color scale maximum must be > minimum.");
+  if (log && ((min <= 0) || (max <= 0)))
+    throw std::invalid_argument("For logarithmic color scales, both minimum and maximum must be > 0.");
+  m_colorBar->setViewRange(min, max);
+  m_colorBar->setLog(log);
+  this->colorRangeChanged();
+}
+
+
+//------------------------------------------------------------------------------------
+/** @return the value that corresponds to the lowest color on the color map */
+double SliceViewer::getColorScaleMin() const
+{
+  return m_colorBar->getMinimum();
+}
+
+/** @return the value that corresponds to the highest color on the color map */
+double SliceViewer::getColorScaleMax() const
+{
+  return m_colorBar->getMaximum();
+}
+
+/** @return True if the color scale is in logarithmic mode */
+bool SliceViewer::getColorScaleLog() const
+{
+  return m_colorBar->getLog();
 }
 
 } //namespace
