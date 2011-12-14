@@ -32,15 +32,23 @@ namespace Mantid
   {
     namespace Numpy
     {
+      /** @name Create Numpy arrays */
+      //@{
       /// Create a numpy array wrapper around existing vector. This is only possible for contiguous data
       DLLExport PyObject *wrapWithNumpy(const std::vector<double> & data);
       /// Create a read-only numpy array wrapper around existing data.
       DLLExport PyObject *wrapWithReadOnlyNumpy(const std::vector<double> & data);
-
       /// Create a read-only array wrapper around a double Matrix
       DLLExport PyObject *wrapWithNumpy(const Kernel::DblMatrix & data);
       /// Create a read-only array wrapper around a double Matrix
       DLLExport PyObject *wrapWithReadOnlyNumpy(const Kernel::DblMatrix & data);
+      //@}
+
+      /** @name Create Mantid objects from python sequences */
+      //@{
+      DLLExport Kernel::DblMatrix createMatrixFromNumpyArray(PyObject* data);
+      //@}
+
     }
   }
 }

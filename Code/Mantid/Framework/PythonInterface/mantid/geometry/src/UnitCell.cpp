@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/scope.hpp>
@@ -7,7 +8,18 @@ using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::AngleUnits;
 using Mantid::Geometry::angRadians;
 using Mantid::Geometry::angDegrees;
+using Mantid::Kernel::DblMatrix;
 using namespace boost::python;
+
+// Functions purely to aid with wrapping
+namespace //<unnamed>
+{
+  void recalculateFromGstar(UnitCell & self, PyObject* values)
+  {
+    // Create a double matrix and put this in to the unit cell
+    self.recalculateFromGstar(Mantid::PythonInterface::Numpy::createMatrixFromNumpyArray(values));
+  }
+}
 
 void export_UnitCell()
 {
@@ -58,8 +70,8 @@ void export_UnitCell()
     .def( "volume", (double ( UnitCell::* )() const) &UnitCell::volume)
     // .def( "getG", &UnitCellWrapper::getG)
     // .def( "getGstar", &UnitCellWrapper::getGstar)
-    // .def( "getB", &UnitCellWrapper::getB )
-    // .def( "recalculateFromGstar", &UnitCellWrapper::recalculateFromGStar) ;
+    //.def( "getB", &getB )
+    .def( "recalculateFromGstar", &recalculateFromGstar)
     ;
 
     scope().attr("deg2rad") = Mantid::Geometry::deg2rad;

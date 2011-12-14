@@ -86,6 +86,7 @@ set ( TEST_PY_FILES
   test/python/SimpleAPITest.py
   test/python/QuatTest.py
   test/python/V3DTest.py
+  test/python/UnitCellTest.py
   test/python/WorkspaceTest.py
 )
 
