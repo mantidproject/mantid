@@ -328,6 +328,22 @@ pqRenderView *ViewBase::getPvActiveView()
   return qobject_cast<pqRenderView*>(pqActiveObjects::instance().activeView());
 }
 
+/**
+ * This function checks the original pipeline object for the WorkspaceName
+ * property. This will get an empty string if the simple interface is
+ * launched in standalone mode.
+ * @return the workspace name for the original pipeline object
+ */
+QString ViewBase::getWorkspaceName()
+{
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  pqPipelineSource *src = smModel->getItemAtIndex<pqPipelineSource *>(0);
+  QString wsName(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceName",
+                                     true).GetAsString());
+  return wsName;
+}
+
 }
 }
 }

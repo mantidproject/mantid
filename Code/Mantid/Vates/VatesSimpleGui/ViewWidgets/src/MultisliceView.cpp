@@ -541,29 +541,8 @@ void MultiSliceView::resetCamera()
  */
 void MultiSliceView::checkSliceViewCompat()
 {
-  bool setSliceViewState = false;
-  // Check the current source
-  pqPipelineSource *src = this->getPvActiveSrc();
-  QString wsName(vtkSMPropertyHelper(src->getProxy(),
-                                     "WorkspaceName",
-                                     true).GetAsString());
+  QString wsName = this->getWorkspaceName();
   if (wsName != "")
-  {
-    setSliceViewState = true;
-  }
-  else
-  {
-    // Check the original source
-    QString wsName1(vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                        "WorkspaceName",
-                                        true).GetAsString());
-    if (wsName1 != "")
-    {
-      setSliceViewState = true;
-      this->isOrigSrc = true;
-    }
-  }
-  if (setSliceViewState)
   {
     this->ui.xAxisWidget->setShowSliceView(true);
     this->ui.yAxisWidget->setShowSliceView(true);
@@ -581,6 +560,9 @@ void MultiSliceView::checkSliceViewCompat()
 void MultiSliceView::showCutInSliceViewer(const QString &name)
 {
   // Get the associated workspace name
+  QString wsName = this->getWorkspaceName();
+
+  // Have to jump through some hoops since a rebinner could be used.
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
   pqPipelineSource *src1 = NULL;
@@ -594,12 +576,8 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   }
   if (NULL == src1)
   {
-    src1 = this->origSrc;
+    src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
   }
-
-  QString wsName(vtkSMPropertyHelper(src1->getProxy(),
-                                     "WorkspaceName",
-                                     true).GetAsString());
 
   // Get the current dataset characteristics
   const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
