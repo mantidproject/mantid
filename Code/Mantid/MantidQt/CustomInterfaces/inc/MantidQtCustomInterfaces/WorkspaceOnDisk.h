@@ -1,21 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_MEMENTO_H_
-#define MANTID_CUSTOMINTERFACES_MEMENTO_H_
+#ifndef MANTID_CUSTOMINTERFACES_WORKSPACE_IN_ADS_H_
+#define MANTID_CUSTOMINTERFACES_WORKSPACE_IN_ADS_H_
 
-#include "MantidKernel/System.h"
-#include <string>
-#include "MantidAPI/MatrixWorkspace.h"
-
+#include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class WorkspaceMemento
-
-    A memento carrying basic information about an existing workspace.
-
-    @author Owen Arnold
-    @date 30/08/2011
+    /** @class WorkspaceOnDisk : A workspace memento refering to a workspace in the Analysis Data Service.
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -36,36 +28,42 @@ namespace MantidQt
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-
-    class DLLExport WorkspaceMemento
+    */
+    class DLLExport WorkspaceOnDisk : public WorkspaceMemento
     {
     public:
+      /**
+      @param fileName : path + name of the file holding the workspace
+      */
+      WorkspaceOnDisk(std::string fileName);
       /**
       Getter for the id of the workspace
       @return the id of the workspace
       */
-      virtual std::string getId() const = 0;
+      virtual std::string getId() const;
       /**
       Getter for the type of location where the workspace is stored
       @ return the location type
       */
-      virtual std::string locationType() const = 0;
+      virtual std::string locationType() const;
       /**
       Check that the workspace has not been deleted since instantiating this memento
       @return true if still in specified location
       */
-      virtual bool checkStillThere() const = 0;
+      virtual bool checkStillThere() const;
       /**
       Getter for the workspace itself
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
       */
-      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const = 0;
+      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
       /// Destructor
-      virtual ~WorkspaceMemento(){};
+      virtual ~WorkspaceOnDisk();
+    private:
+      /// Path + name of file containing workspace to use.
+      std::string m_fileName;
     };
+
   }
 }
-
 #endif

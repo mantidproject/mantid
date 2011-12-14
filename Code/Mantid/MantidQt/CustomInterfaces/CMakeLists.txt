@@ -18,6 +18,8 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
+    src/WorkspaceInADS.cpp
+    src/WorkspaceOnDisk.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -42,6 +44,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
+	inc/MantidQtCustomInterfaces/WorkspaceOnDisk.h
+	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
@@ -75,6 +79,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 
 set( TEST_FILES
                test/WorkspaceMementoTest.h
+               test/WorkspaceInADSTest.h
+               test/WorkspaceOnDiskTest.h
 )
 
 include_directories ( inc )
@@ -108,6 +114,7 @@ target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBro
 if ( CXXTEST_FOUND )
   
   include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc )
+
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( CustomInterfacesTest CustomInterfaces DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
