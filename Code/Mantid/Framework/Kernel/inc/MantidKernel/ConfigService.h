@@ -155,9 +155,9 @@ namespace Mantid
       /// Returns the system's temp directory
       std::string getTempDir();
       //Return the executable path
-      std::string getDirectoryOfExecutable();
+      std::string getDirectoryOfExecutable() const;
       //Return the full path to the executable
-      std::string getPathToExecutable();
+      std::string getPathToExecutable() const;
       //Check if the path is on a network drive
       bool isNetworkDrive(const std::string & path);
       //@}
@@ -235,6 +235,9 @@ namespace Mantid
       void cacheUserSearchPaths();
       /// Returns true if the path is in the data search list
       bool isInDataSearchList(const std::string & path) const;
+
+      /// Set the PV_PLUGIN_PATH to point at this version of Mantid.
+      void setParaViewPluginPath() const;
 
       // Forward declaration of inner class
       template <class T>
