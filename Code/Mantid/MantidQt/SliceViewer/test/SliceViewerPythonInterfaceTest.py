@@ -35,6 +35,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def setUp(self):
         """ Set up and create a SliceViewer widget """
         self.sv = libmantidqtpython.MantidQt.SliceViewer.SliceViewer()
+        # Open the default workspace for testing
+        self.sv.setWorkspace('uniform')
         pass
     
     def tearDown(self):
@@ -43,26 +45,30 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     
     def test_setWorkspace(self):
         sv = self.sv
-        sv.setWorkspace('uniform')
-        #sv.show()
+        self.assertIsNotNone(sv, "SliceViewer object was created")
     
     def test_setWorkspace_MDEventWorkspace(self):
         sv = self.sv
         sv.setWorkspace('mdw')
-        #sv.show()
     
     def test_setXYDim(self):
         sv = self.sv
-        sv.setWorkspace('uniform')
         sv.setXYDim(0,2)
         self.assertEqual( sv.getDimX(), 0, "X dimension was set")
         self.assertEqual( sv.getDimY(), 2, "Y dimension was set")
         #sv.show()
         #app.exec_()
+            
+    def test_setXYDim_throwsOnBadInputs(self):
+        sv = self.sv
+        with self.assertRaises(Exception): sv.setXYDim(-1, 0)
+        with self.assertRaises(Exception): sv.setXYDim(4, 0)
+        with self.assertRaises(Exception): sv.setXYDim(0, -1)
+        with self.assertRaises(Exception): sv.setXYDim(0, 3)
+        with self.assertRaises(Exception): sv.setXYDim(0, 0)
         
     def test_setSlicePoint(self):
         sv = self.sv
-        sv.setWorkspace('uniform')
         # Set the slice point and got back the value?
         sv.setSlicePoint(2, 7.6)
         self.assertAlmostEqual( sv.getSlicePoint(2), 7.6, 2)
@@ -75,18 +81,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
                 
     def test_setSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
-        sv.setWorkspace('uniform')
-        sv.setSlicePoint(-3, 37.6)
-        try:
-            sv.setSlicePoint(-1, 7.6)
-        except:
-            print "error caught"
-#        with self.assertRaises(ValueError): 
-#            sv.setSlicePoint(-1, 7.6)
-        #self.assertRaises(Exception, sv.setSlicePoint, (3, 7.6))
-        
-#        sv.show()
-#        app.exec_()
+        with self.assertRaises(Exception): sv.setSlicePoint(-1, 7.6)
+        with self.assertRaises(Exception): sv.setSlicePoint(3, 7.6)
+                    
+    def test_getSlicePoint_throwsOnBadInputs(self):
+        sv = self.sv
+        with self.assertRaises(Exception): sv.getSlicePoint(-1)
+        with self.assertRaises(Exception): sv.getSlicePoint(3)
     
     
     

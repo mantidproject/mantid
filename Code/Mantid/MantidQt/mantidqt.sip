@@ -24,7 +24,6 @@
 %End
 %RaiseCode
     const char *detail = sipExceptionRef.what();
-    std::cout << "DETAIL:" << detail << std::endl;
 
     SIP_BLOCK_THREADS
     PyErr_SetString(sipException_std_exception, detail);
@@ -39,7 +38,6 @@
 %End
 %RaiseCode
     const char *detail = sipExceptionRef.what();
-    std::cout << "DETAIL:" << detail << std::endl;
 
     SIP_BLOCK_THREADS
     PyErr_SetString(sipException_std_invalid_argument, detail);
@@ -68,12 +66,12 @@ public:
   void setWorkspace(const QString & wsName);
   void showControls(bool visible);
   
-  void setXYDim(int indexX, int indexY);
+  void setXYDim(int indexX, int indexY) 	throw (std::invalid_argument);
   int getDimX() const;
   int getDimY() const;
 
-  void setSlicePoint(int dim, double value) throw (std::invalid_argument);
-  double getSlicePoint(int dim) const;
+  void setSlicePoint(int dim, double value) 	throw (std::invalid_argument);
+  double getSlicePoint(int dim) const 	throw (std::invalid_argument);
   
 };
 
