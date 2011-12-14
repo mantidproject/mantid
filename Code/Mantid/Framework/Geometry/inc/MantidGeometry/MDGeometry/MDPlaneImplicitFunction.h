@@ -55,6 +55,8 @@ public:
   virtual std::string toXMLString() const;
 
 private:
+  /// Set defaults to origin if not used.
+  void checkOrigin();
   /// Create string for coordinate values.
   std::string coordValue(const coord_t *arr) const;
 

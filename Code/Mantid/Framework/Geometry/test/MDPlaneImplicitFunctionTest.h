@@ -46,6 +46,17 @@ public:
     TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep() );
   }
 
+  void test_xmlRep_addPlane()
+  {
+    MDPlaneImplicitFunction f;
+
+    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t point[3] = {1,2,3};
+    MDPlane p1(3, normal, point);
+    f.addPlane(p1);
+    TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep_noOrigin() );
+  }
+
 private:
   std::string getXmlRep()
   {
@@ -63,6 +74,24 @@ private:
                        "</ParameterList>"\
                        "</Function>");
   }
+
+  std::string getXmlRep_noOrigin()
+  {
+    return std::string("<Function>"\
+                       "<Type>PlaneImplicitFuction</Type>"\
+                       "<ParameterList>"\
+                       "<Parameter>"\
+                       "<Type>NormalParameter</Type>"\
+                       "<Value>1.234 4.56 6.78</Value>"\
+                       "</Parameter>"\
+                       "<Parameter>"\
+                       "<Type>OriginParameter</Type>"\
+                       "<Value>nan nan nan</Value>"\
+                       "</Parameter>"\
+                       "</ParameterList>"\
+                       "</Function>");
+  }
+
 };
 
 #endif // MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_

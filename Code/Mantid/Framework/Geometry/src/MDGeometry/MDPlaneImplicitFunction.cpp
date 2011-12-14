@@ -7,6 +7,7 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/AutoPtr.h>
+#include <limits>
 #include <sstream>
 
 namespace Mantid
@@ -16,6 +17,7 @@ namespace Geometry
 
 MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction()
 {
+  this->origin = NULL;
 }
 
 /**
@@ -57,6 +59,7 @@ void MDPlaneImplicitFunction::addPlane(const MDPlane &plane)
   else
   {
     MDImplicitFunction::addPlane(plane);
+    this->checkOrigin();
   }
 }
 
@@ -130,6 +133,19 @@ std::string MDPlaneImplicitFunction::coordValue(const coord_t *arr) const
   }
   valueStream << arr[nd-1];
   return valueStream.str();
+}
+
+void MDPlaneImplicitFunction::checkOrigin()
+{
+  if (NULL == this->origin)
+  {
+    std::size_t nd = this->getNumDims();
+    this->origin = new coord_t[nd];
+    for (std::size_t i = 0; i < nd; i++)
+    {
+      this->origin[i] = std::numeric_limits<coord_t>::quiet_NaN();
+    }
+  }
 }
 
 } // namespace Geometry
