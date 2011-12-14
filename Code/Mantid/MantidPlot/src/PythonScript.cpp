@@ -379,12 +379,12 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
   {
     if( return_tuple )
     {
-      pyret = PyObject_Call(PyCode, return_tuple,localDict);
+      pyret = PyObject_Call(PyCode, return_tuple,env()->globalDict());
     }
     else
     {
 
-      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
+      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
     }
   }
   // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to

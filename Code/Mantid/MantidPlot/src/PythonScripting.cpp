@@ -140,8 +140,10 @@ bool PythonScripting::start()
       shutdown();
       return false;
     }
-    // Create a fresh locals dicionary that is a copy of the globals at this point
-    m_locals = PyDict_Copy(m_globals);
+    PyDict_SetItemString(m_globals, "__builtins__", PyEval_GetBuiltins());
+
+    // Fresh locals, although I'm not sure we need to use this anymore as we want a single scope
+    m_locals = PyDict_New();
     //Create a new dictionary for the math functions
     m_math = PyDict_New();
 
