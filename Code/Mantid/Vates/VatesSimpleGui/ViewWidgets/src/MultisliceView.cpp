@@ -6,6 +6,7 @@
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 
 #include <pqActiveObjects.h>
@@ -579,7 +580,6 @@ void MultiSliceView::checkSliceViewCompat()
  */
 void MultiSliceView::showCutInSliceViewer(const QString &name)
 {
-  std::cout << name.toStdString() << " to be shown." << std::endl;
   // Get the associated workspace name
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
@@ -622,8 +622,11 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
                                                                origin));
   rks.setImplicitFunction(impplane);
+  //std::cout << rks.createXMLString() << std::endl;
+  QString titleAddition = " "+name;
 
-  std::cout << rks.createXMLString() << std::endl;
+  SliceViewerWindow *w = new SliceViewerWindow(wsName, this, titleAddition);
+  w->show();
 }
 
 }
