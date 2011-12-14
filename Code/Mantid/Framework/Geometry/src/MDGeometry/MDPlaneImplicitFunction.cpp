@@ -18,6 +18,14 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction()
 {
 }
 
+/**
+ * This parameter constructor is used for when the origin of the implicit
+ * plane is needed in the future. The coordinate arrays MUST be the same
+ * length and match the specified number of dimensions.
+ * @param nd the number of dimensions for the implicit plane
+ * @param normal array of coordinates for the plane normal
+ * @param point array of coorindates for the plane origin
+ */
 MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
                                                  const coord_t *normal,
                                                  const coord_t *point) :
@@ -35,6 +43,11 @@ MDPlaneImplicitFunction::~MDPlaneImplicitFunction()
 {
 }
 
+/**
+ * This function overrides the inherited one in order to make sure that
+ * only one plane is set on the implicit function.
+ * @param plane the object containing the information for the implicit plane
+ */
 void MDPlaneImplicitFunction::addPlane(const MDPlane &plane)
 {
   if (this->getNumPlanes() > 0)
@@ -101,6 +114,12 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   return formattedXMLString;
 }
 
+/**
+ * This is a helper function for converting a list of coordinate values into
+ * a space separated string for the XML definition.
+ * @param arr the array of coordinates to convert
+ * @return the resulting values in a space separated string
+ */
 std::string MDPlaneImplicitFunction::coordValue(const coord_t *arr) const
 {
   std::ostringstream valueStream;

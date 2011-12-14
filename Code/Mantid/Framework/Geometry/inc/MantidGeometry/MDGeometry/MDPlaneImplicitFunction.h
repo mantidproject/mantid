@@ -38,23 +38,27 @@ namespace Geometry
 class DLLExport MDPlaneImplicitFunction : public MDImplicitFunction
 {
 public:
-    MDPlaneImplicitFunction();
-    MDPlaneImplicitFunction(const size_t nd, const coord_t * normal,
-                            const coord_t * point);
-    virtual ~MDPlaneImplicitFunction();
+  /// Default constructor.
+  MDPlaneImplicitFunction();
+  /// Parameter constructor for setting origin.
+  MDPlaneImplicitFunction(const size_t nd, const coord_t * normal,
+                          const coord_t * point);
+  /// Class destructor.
+  virtual ~MDPlaneImplicitFunction();
 
-    /// Overriding the addPlane for check
-    void addPlane(const MDPlane &plane);
+  /// Overriding the addPlane for check
+  void addPlane(const MDPlane &plane);
 
-    /// @return the MDPlaneImplicitFunction type name.
-    virtual std::string getName() const;
-    /// @return the XML representation of the MDPlaneImplicitFunction
-    virtual std::string toXMLString() const;
+  /// @return the MDPlaneImplicitFunction type name.
+  virtual std::string getName() const;
+  /// @return the XML representation of the MDPlaneImplicitFunction
+  virtual std::string toXMLString() const;
 
- private:
-    std::string coordValue(const coord_t *arr) const;
+private:
+  /// Create string for coordinate values.
+  std::string coordValue(const coord_t *arr) const;
 
-    coord_t *origin;
+  coord_t *origin; ///< The origin point of the implicit plane.
 };
 
 } // namespace Geometry
