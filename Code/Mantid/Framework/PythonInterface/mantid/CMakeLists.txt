@@ -92,10 +92,9 @@ set ( CMAKE_SHARED_LIBRARY_PREFIX )
 
 add_subdirectory ( kernel )
 add_dependencies ( PythonKernelModule PythonModuleFiles ) # Ensure the module files are in place
-#add_subdirectory ( geometry )
+add_subdirectory ( geometry )
 add_subdirectory ( api )
 
 # Create an overall target
-add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonAPIModule  )
-#add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule PythonAPIModule  )
+add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule PythonAPIModule  )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )

@@ -16,6 +16,7 @@ set ( EXPORT_FILES
   src/Detector.cpp
   src/DetectorGroup.cpp
   src/Instrument.cpp
+  src/UnitCell.cpp
 )  
 
 set ( SRC_FILES
@@ -54,8 +55,8 @@ endforeach ( PYFILE )
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonGeometryModule ${SRC_FILES} ${BOOST_PYTHON_SRC} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonGeometryModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonGeometryModule ${PYTHON_DEPS} )
+target_link_libraries ( PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )

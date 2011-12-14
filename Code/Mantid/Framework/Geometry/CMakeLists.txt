@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDHistoDimensionBuilder.cpp
 	src/MDGeometry/MDImplicitFunction.cpp
 	src/MDGeometry/MDPlane.cpp
+        src/MDGeometry/MDPlaneImplicitFunction.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -129,6 +130,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h
 	inc/MantidGeometry/MDGeometry/MDImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDPlane.h
+        inc/MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
 	inc/MantidGeometry/Math/Acomp.h
@@ -200,6 +202,7 @@ set ( TEST_FILES
 	test/MDHistoDimensionTest.h
 	test/MDImplicitFunctionTest.h
 	test/MDPlaneTest.h
+        test/MDPlaneImplicitFunctionTest.h
 	test/MapSupportTest.h
 	test/MaterialTest.h
 	test/MathSupportTest.h

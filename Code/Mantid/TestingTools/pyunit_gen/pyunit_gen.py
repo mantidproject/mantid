@@ -5,6 +5,7 @@ BANNED = ["__init__.py"]
 DEF_PYTHON = "/usr/bin/env python"
 DEF_XMLRUNNER = None
 import os
+import sys
 
 class DriverGenerator:
     def __init__(self, directory, python=DEF_PYTHON,
@@ -13,6 +14,7 @@ class DriverGenerator:
         self.__python=python
         self.__xmlrunnerloc = xmlrunnerloc
         self.__withxmlrunner = withXmlRunner
+        self.classes = []
         self.__init_tests()
 
     def __init_tests(self):
@@ -24,6 +26,8 @@ class DriverGenerator:
 
         classes = [item.split(".")[0] for item in files]
         
+        self.classes = classes
+        
         self.__tests = []
         self.__tests.extend(classes)
 
@@ -33,6 +37,7 @@ class DriverGenerator:
         # header bit for just having unittest
         handle.write("#!%s\n" % self.__python)
         handle.write("import unittest\n")
+        handle.write("import sys")
         handle.write("\n")
 
         # import the various tests
@@ -44,6 +49,25 @@ class DriverGenerator:
 
         # write the main
         handle.write("if __name__ == \"__main__\":\n")
+        
+        # --- Handle the --help-tests entry by printing out all test classes and tests ----------
+        handle.write("""
+    # ---- List the available tests (same as cxxtest) ----
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '--help-tests':
+            print "--------------------------------------------------------"
+""")
+        for classname in self.classes:
+            modulefile = os.path.join(self.__directory, classname + ".py")
+            for line in open(modulefile, 'r'):
+                line = line.strip()
+                n = line.find('(')
+                if line.startswith("def test") and n > 4:
+                    testname = line[4:n]
+                    handle.write("            print '%s %s'\n" % (classname, testname))
+        handle.write("            sys.exit()\n\n\n")
+        
+        # ----------- Continue with the runner code ------------
         handle.write("    # setup the xml runner\n")
         if self.__xmlrunnerloc is not None:
             handle.write("    import sys\n")
@@ -58,6 +82,10 @@ class DriverGenerator:
 
         # cleanup
         handle.close()
+        
+        # Make file executable
+        import stat
+        os.chmod(filename, 0755)
 
 if __name__ == "__main__":
     import optparse

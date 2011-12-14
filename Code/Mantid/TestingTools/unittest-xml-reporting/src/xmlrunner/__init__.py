@@ -135,12 +135,25 @@ class _XMLTestResult(_TextTestResult):
             for test_info in tests:
                 testcase = type(test_info.test_method)
                 
+                module = testcase.__module__ 
+                
+                testcase_barename = testcase.__name__
+                
+                # Special for python unit tests, where module name = testcase name.
+                if module.endswith(testcase_barename):
+                    n = module.rfind('.')
+                    if n > 0:
+                        # Remove the duplicate module name
+                        module = module[0:n]
+                         
                 # Ignore module name if it is '__main__'
-                module = testcase.__module__ + '.'
+                module = module + '.'
                 if module == '__main__.':
                     module = ''
-                testcase_name = module + testcase.__name__
-                
+                    
+                # testcase = Module.TestClass
+                testcase_name = module + testcase_barename
+
                 if not tests_by_testcase.has_key(testcase_name):
                     tests_by_testcase[testcase_name] = []
                 tests_by_testcase[testcase_name].append(test_info)

@@ -135,6 +135,18 @@ void DimensionSliceWidget::setShownDim(int dim)
   m_insideSetShownDim = false;
 }
 
+
+//-------------------------------------------------------------------------------------------------
+/** Sets the slice point value.
+ *
+ * @param value :: where to slice
+ */
+void DimensionSliceWidget::setSlicePoint(double value)
+{
+  // This will trigger the required events
+  ui.horizontalSlider->setValue(value);
+}
+
 //-------------------------------------------------------------------------------------------------
 /** Sets the min/max to show on the widget
  *

@@ -74,8 +74,10 @@ set ( TEST_PY_FILES
   test/python/ConfigServiceTest.py
   test/python/FilePropertyTest.py
   test/python/FrameworkManagerTest.py
+  test/python/IComponentTest.py
   test/python/IEventWorkspaceTest.py
   test/python/ImportModuleTest.py
+  test/python/InstrumentTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/PythonPluginsTest.py
