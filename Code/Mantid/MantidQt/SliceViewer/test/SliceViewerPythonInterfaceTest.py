@@ -71,6 +71,18 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual( sv.getDimY(), 2, "Y dimension was set")
         #sv.show()
         #app.exec_()
+        
+    def test_setXYDim_strings(self):
+        sv = self.sv
+        sv.setXYDim("x", "z")
+        self.assertEqual( sv.getDimX(), 0, "X dimension was set")
+        self.assertEqual( sv.getDimY(), 2, "Y dimension was set")
+        
+    def test_setXYDim_strings_throwsOnBadInputs(self):
+        sv = self.sv
+        self.assertRaises(StdRuntimeError, sv.setXYDim, "monkey", "y")
+        self.assertRaises(StdRuntimeError, sv.setXYDim, "x", "monkey")
+        
             
     def test_setXYDim_throwsOnBadInputs(self):
         sv = self.sv
@@ -91,6 +103,16 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Go to too big a value
         sv.setSlicePoint(2, 22.3)
         self.assertAlmostEqual( sv.getSlicePoint(2), 10.0, 2)
+        
+    def test_setSlicePoint_strings(self):
+        sv = self.sv
+        sv.setSlicePoint("z", 7.6)
+        self.assertAlmostEqual( sv.getSlicePoint("z"), 7.6, 2)
+        
+    def test_setSlicePoint_strings_throwsOnBadInputs(self):
+        sv = self.sv
+        self.assertRaises(StdRuntimeError, sv.setSlicePoint, "monkey", 2.34)
+        self.assertRaises(StdRuntimeError, sv.getSlicePoint, "monkey")
                 
     def test_setSlicePoint_throwsOnBadInputs(self):
         sv = self.sv

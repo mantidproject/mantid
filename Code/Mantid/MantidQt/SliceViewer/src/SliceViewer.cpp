@@ -188,12 +188,12 @@ void SliceViewer::initMenus()
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Full range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
+  connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Slice range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
+  connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
@@ -944,11 +944,13 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 //------------------------------------------------------------------------------------
 /** Set the index of the dimensions that will be shown as
  * the X and Y axis of the plot.
+ * You cannot set both axes to be the same.
  *
- * To be called from Python, primarily
+ * To be called from Python, primarily.
  *
  * @param indexX :: index of the X dimension, from 0 to NDims-1.
  * @param indexX :: index of the Y dimension, from 0 to NDims-1.
+ * @throw std::invalid_argument if an index is invalid or repeated.
  */
 void SliceViewer::setXYDim(int indexX, int indexY)
 {
@@ -971,6 +973,21 @@ void SliceViewer::setXYDim(int indexX, int indexY)
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
   emit changedShownDim(m_dimX, m_dimY);
+}
+
+//------------------------------------------------------------------------------------
+/** Set the dimensions that will be shown as the X and Y axes
+ *
+ * @param dimX :: name of the X dimension. Must match the workspace dimension names.
+ * @param dimY :: name of the Y dimension. Must match the workspace dimension names.
+ * @throw std::runtime_error if the dimension name is not found.
+ */
+void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
+{
+  if (!m_ws) return;
+  int indexX = int(m_ws->getDimensionIndexByName(dimX.toStdString()));
+  int indexY = int(m_ws->getDimensionIndexByName(dimY.toStdString()));
+  this->setXYDim(indexX, indexY);
 }
 
 
@@ -1000,6 +1017,35 @@ double SliceViewer::getSlicePoint(int dim) const
   if (dim >= int(m_dimWidgets.size()) || dim < 0)
     throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
   return m_slicePoint[dim];
+}
+
+
+//------------------------------------------------------------------------------------
+/** Sets the slice point in the given dimension:
+ * that is, what is the position of the plane in that dimension
+ *
+ * @param dim :: name of the dimension to change
+ * @param value :: value of the slice point, in the units of the given dimension.
+ *        This should be within the range of min/max for that dimension.
+ */
+void SliceViewer::setSlicePoint(const QString & dim, double value)
+{
+  if (!m_ws) return;
+  int index = int(m_ws->getDimensionIndexByName(dim.toStdString()));
+  return this->setSlicePoint(index, value);
+}
+
+//------------------------------------------------------------------------------------
+/** Returns the slice point in the given dimension
+ *
+ * @param dim :: name of the dimension
+ * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ */
+double SliceViewer::getSlicePoint(const QString & dim) const
+{
+  if (!m_ws) return 0;
+  int index = int(m_ws->getDimensionIndexByName(dim.toStdString()));
+  return this->getSlicePoint(index);
 }
 
 

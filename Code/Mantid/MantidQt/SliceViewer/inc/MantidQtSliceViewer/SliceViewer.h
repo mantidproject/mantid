@@ -53,8 +53,11 @@ public:
 
   /// Methods for Python bindings
   void setXYDim(int indexX, int indexY);
+  void setXYDim(const QString & dimX, const QString & dimY);
   void setSlicePoint(int dim, double value);
+  void setSlicePoint(const QString & dim, double value);
   double getSlicePoint(int dim) const;
+  double getSlicePoint(const QString & dim) const;
   void setColorScale(double min, double max, bool log);
   double getColorScaleMin() const;
   double getColorScaleMax() const;
