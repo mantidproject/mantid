@@ -105,7 +105,9 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_setXYLimits(self):
         sv = self.sv
         sv.setXYLimits(5,10, 7,8)
-        sv.setXYLimits(5,2, 7,8)
+        sv.setXYLimits(5,2, 7, 8)
+        self.assertEqual(sv.getXLimits(), [5, 2])
+        self.assertEqual(sv.getYLimits(), [7, 8])
         #sv.show()
         #app.exec_()
         

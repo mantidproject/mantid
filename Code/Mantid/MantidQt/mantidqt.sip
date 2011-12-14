@@ -90,7 +90,8 @@ public:
   void setSlicePoint(int dim, double value) 	throw (std::invalid_argument);
   double getSlicePoint(int dim) const 	throw (std::invalid_argument);
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
-  //QwtDoubleInterval getXLimits() const;
+  QwtDoubleInterval getXLimits() const;
+  QwtDoubleInterval getYLimits() const;
 
   void loadColorMap(QString filename);
   void setColorScale(double min, double max, bool log) 	throw (std::invalid_argument);

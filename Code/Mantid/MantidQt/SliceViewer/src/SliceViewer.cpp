@@ -588,8 +588,8 @@ void SliceViewer::setXYLimitsDialog()
   XYLimitsDialog * dlg = new XYLimitsDialog(this);
   dlg->setXDim(m_X);
   dlg->setYDim(m_Y);
-  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
-  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
+  QwtDoubleInterval xint = this->getXLimits();
+  QwtDoubleInterval yint = this->getYLimits();
   dlg->setLimits(xint.minValue(), xint.maxValue(), yint.minValue(), yint.maxValue());
   // Show the dialog
   if (dlg->exec() == QDialog::Accepted)
@@ -1027,9 +1027,17 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
   m_plot->replot();
 }
 
+//------------------------------------------------------------------------------------
+/** @return Returns the [left, right] limits of the view in the X axis. */
 QwtDoubleInterval SliceViewer::getXLimits() const
 {
   return m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+}
+
+/** @return Returns the [bottom, top] limits of the view in the Y axis. */
+QwtDoubleInterval SliceViewer::getYLimits() const
+{
+  return m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 }
 
 } //namespace

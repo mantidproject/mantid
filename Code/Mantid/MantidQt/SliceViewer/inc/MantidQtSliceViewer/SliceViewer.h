@@ -61,6 +61,7 @@ public:
   bool getColorScaleLog() const;
   void setXYLimits(double xleft, double xright, double ybottom, double ytop);
   QwtDoubleInterval getXLimits() const;
+  QwtDoubleInterval getYLimits() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

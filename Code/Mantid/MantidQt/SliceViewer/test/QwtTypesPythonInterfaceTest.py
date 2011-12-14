@@ -18,8 +18,6 @@ class QwtTypesPythonInterfaceTest(unittest.TestCase):
     from Python"""
     
     def test_QwtDoubleInterval(self):
-        pass
-    
-    def test_QList(self):
+        # TODO: How can I create the type?
         pass
     
