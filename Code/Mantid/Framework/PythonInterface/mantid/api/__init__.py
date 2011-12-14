@@ -19,10 +19,10 @@ _dlopen.restore_flags(flags)
 ###############################################################################
 # Make the singleton objects available as named variables 
 ###############################################################################
-framework_mgr = get_framework_mgr() # This starts the framework
-algorithm_mgr = get_algorithm_mgr()
-algorithm_factory = get_algorithm_factory() 
-analysis_data_svc = get_analysis_data_service()
+framework_mgr = FrameworkManager.Instance() # This starts the framework
+algorithm_mgr = AlgorithmManager.Instance()
+algorithm_factory = AlgorithmFactory.Instance() 
+analysis_data_svc = AnalysisDataService.Instance()
 
 ###############################################################################
 # Starting the FrameworkManager loads the C++ plugin libraries

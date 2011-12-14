@@ -15,12 +15,6 @@ using namespace boost::python;
 namespace
 {
   ///@cond
-  //------------------------------------------------------------------------------------------------------
-  // A factory function returning a reference to the AlgorithmFactory instance so that Python can use it
-  AlgorithmFactoryImpl & getAlgorithmFactory()
-  {
-    return AlgorithmFactory::Instance();
-  }
 
   //------------------------------------------------------------------------------------------------------
   /**
@@ -65,11 +59,11 @@ namespace
 
 void export_AlgorithmFactory()
 {
-  // Create a factory function to return this in Python
-  def("get_algorithm_factory", &getAlgorithmFactory, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
-        "Returns a reference to the AlgorithmFactory singleton");
 
   class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactory", no_init)
+      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
+        "Returns a reference to the AlgorithmFactory singleton")
+      .staticmethod("Instance")
       .def("get_registered_algorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
     ;
 

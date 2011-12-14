@@ -20,14 +20,6 @@ using namespace boost::python;
 namespace
 {
   ///@cond
-
-  // A factory function returning a reference to the AlgorithmManager instance so that
-  // Python can use it
-  FrameworkManagerImpl & getFrameworkManager()
-  {
-    return FrameworkManager::Instance();
-  }
-
   /**
    * Creates an initialised algorithm.
    * If this called from within a Python, i.e if PyExec is in the call stack,
@@ -36,7 +28,7 @@ namespace
    * @param name :: The name of the algorithm to create
    * @param version :: The version of the algorithm to create (default = -1 = highest version)
    */
-  PyObject * createAlgorithm(boost::python::object self, const std::string & name, const int version = -1)
+  PyObject * createAlgorithm(FrameworkManagerImpl & self, const std::string & name, const int version = -1)
   {
     UNUSED_ARG(self);
     IAlgorithm_sptr alg;
@@ -55,7 +47,7 @@ namespace
     alg->setRethrows(true);
 
     PyObject * wrapped = converter::shared_ptr_to_python(alg);
-    // Add an atribute to indicate asynchronous execution
+    // Add an attribute to indicate asynchronous execution
     PyObject_SetAttrString(wrapped, "__async__", PyBool_FromLong(async));
     return wrapped;
   }
@@ -70,6 +62,9 @@ namespace
 void export_FrameworkManager()
 {
   class_<FrameworkManagerImpl,boost::noncopyable>("FrameworkManager", no_init)
+    .def("Instance", &FrameworkManager::Instance, return_value_policy<reference_existing_object>(),
+        "Returns a reference to the FrameworkManager singleton")
+    .staticmethod("Instance")
     .def("clear", &FrameworkManagerImpl::clear, "Clear all memory held by Mantid")
     .def("clear_algorithms", &FrameworkManagerImpl::clearAlgorithms, "Clear memory held by algorithms (does not include workspaces)")
     .def("clear_data", &FrameworkManagerImpl::clearData, "Clear memory held by the data service (essentially all workspaces, including hidden)")
@@ -79,12 +74,6 @@ void export_FrameworkManager()
          "given name and version. If this called from within a Python algorithm an unmanaged algorithm is created otherwise it will "
          "be a managed algorithm"))
     ;
-
-  // Create a factory function to return this in Python
-  def("get_framework_mgr", &getFrameworkManager, return_value_policy<reference_existing_object>(),
-        "Returns a reference to the FrameworkManager singleton")
-  ;
-
 
 }
 
