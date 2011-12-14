@@ -2,8 +2,6 @@
 #define MANTID_CUSTOMINTERFACES_MEMENTO_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include <vector>
 #include <string>
 #include <boost/scoped_ptr.hpp>
@@ -42,53 +40,11 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class WorkspaceMementoLock;
+
     class DLLExport WorkspaceMemento
     {
     public:
 
-      typedef std::vector<AbstractMementoItem_sptr> VecMementoItems;
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, int rowIndex);
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, WorkspaceMementoLock* lock);
-      ~WorkspaceMemento(); 
-      void addItem(AbstractMementoItem* item);
-      AbstractMementoItem_sptr getItem(const size_t col) const;
-      void commit();
-      void rollback();
-      bool hasChanged() const;
-      void validate() const;
-      bool equals(const WorkspaceMemento& workspace) const;
-      bool operator==(const WorkspaceMemento& workspace) const;
-      bool operator!=(const WorkspaceMemento& workspace) const;
-      bool locked() const;
-      bool unlock();
-      void lock();
-      Mantid::API::ITableWorkspace_sptr getData() const;
-      int getRowIndex() const;
-
-      /// Getter for the size of this memento in terms of the number of items.
-      size_t getSize()
-      {
-        return m_items.size();
-      }
-
-    private:
-      /// Reference to underlying data.
-      Mantid::API::ITableWorkspace_sptr m_data;
-      /// Memento items to store local/un-saved changes.
-      VecMementoItems m_items;
-      /// Flag indicating memento is valid.
-      bool m_validMemento;
-      /// Name of the workspace wrapped.
-      std::string m_wsName;
-      /// Disabled copy constructor.
-      WorkspaceMemento(const WorkspaceMemento&);
-      /// Disabled assignement operator.
-      WorkspaceMemento& operator=(const WorkspaceMemento&);
-      /// Locking object.
-      boost::scoped_ptr<WorkspaceMementoLock> m_lock;
-      /// Index of corresponding row in the workspace.
-      int m_rowIndex;
 
     };
   }

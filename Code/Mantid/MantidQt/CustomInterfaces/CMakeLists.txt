@@ -1,86 +1,55 @@
 set ( SRC_FILES
-	src/ApproachDialog.cpp
-	src/ConvertToEnergy.cpp
+    src/ConvertToEnergy.cpp
 	src/CreateMDWorkspace.cpp
-	src/EditableLogView.cpp
 	src/Homer.cpp
 	src/IO_MuonGrouping.cpp
 	src/Indirect.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
-	src/InelasticISIS.cpp
-	src/LatticePresenter.cpp
-	src/LoanedMemento.cpp
-	src/LogPresenter.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
 	src/MuonAnalysisHelper.cpp
 	src/MuonAnalysisOptionTab.cpp
 	src/MuonAnalysisResultTableTab.cpp
-	src/ParameterisedLatticeView.cpp
 	src/QtWorkspaceMementoModel.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
-	src/SingleOwnerLock.cpp
-	src/StandardLogView.cpp
-	src/WorkspaceMemento.cpp
-	src/WorkspaceMementoCollection.cpp
-	src/WorkspaceMementoService.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	inc/MantidQtCustomInterfaces/AbstractMementoItem.h
-	inc/MantidQtCustomInterfaces/Approach.h
-	inc/MantidQtCustomInterfaces/ApproachDialog.h
 	inc/MantidQtCustomInterfaces/Background.h
 	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
-	inc/MantidQtCustomInterfaces/EditableLogView.h
 	inc/MantidQtCustomInterfaces/Homer.h
 	inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-	inc/MantidQtCustomInterfaces/InelasticISIS.h
-	inc/MantidQtCustomInterfaces/LatticePresenter.h
-	inc/MantidQtCustomInterfaces/LatticeView.h
-	inc/MantidQtCustomInterfaces/LoanedMemento.h
-	inc/MantidQtCustomInterfaces/LogPresenter.h
-	inc/MantidQtCustomInterfaces/LogView.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
-	inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
-	inc/MantidQtCustomInterfaces/SingleOwnerLock.h
-	inc/MantidQtCustomInterfaces/StandardLogView.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
-	inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
-	inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
-	inc/MantidQtCustomInterfaces/WorkspaceMementoLock.h
-	inc/MantidQtCustomInterfaces/WorkspaceMementoService.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
-set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
-                inc/MantidQtCustomInterfaces/Background.h
+set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
-                inc/MantidQtCustomInterfaces/EditableLogView.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
@@ -89,12 +58,10 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/ApproachDialog.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
-                inc/MantidQtCustomInterfaces/ParameterisedLatticeView.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-                inc/MantidQtCustomInterfaces/StandardLogView.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
@@ -107,16 +74,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 )
 
 set( TEST_FILES
-               test/AbstractMementoItemTest.h
-               test/LatticePresenterTest.h
-               test/LoanedMementoTest.h
-               test/LogPresenterTest.h
-               test/InelasticISISTest.h
-               test/SingleOwnerLockTest.h
-               test/WorkspaceMementoCollectionTest.h
-               test/WorkspaceMementoItemTest.h
                test/WorkspaceMementoTest.h
-               test/WorkspaceMementoServiceTest.h
 )
 
 include_directories ( inc )

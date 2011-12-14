@@ -5,8 +5,6 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/QtWorkspaceMementoModel.h"
-#include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
-#include "MantidQtCustomInterfaces/ApproachDialog.h"
 #include "ui_CreateMDWorkspace.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -20,8 +18,6 @@ namespace MantidQt
   namespace CustomInterfaces
   {
     //Forward declaration
-    class WorkspaceMementoCollection;
-    class Approach;
     class CreateMDWorkspace : public MantidQt::API::UserSubWindow
     {
       Q_OBJECT
@@ -43,19 +39,9 @@ namespace MantidQt
       int runConfirmation(const std::string& message);
 
     private slots:
-      void revertClicked();
-      void applyToAllClicked();
-      void createMDWorkspaceClicked();
-      void addWorkspaceClicked();
-      void removeWorkspaceClicked();
+
     private:
       Ui::CreateMDWorkspace  m_uiForm;
-      boost::scoped_ptr<WorkspaceMementoCollection> m_data;
-      boost::shared_ptr<Approach> m_approach;
-      QtWorkspaceMementoModel* m_model;
-      ApproachType m_approachType;
-      LoanedMemento m_memento;
-      
     };
   }
 }

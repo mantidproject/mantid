@@ -1,11 +1,8 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/InelasticISIS.h"
+
 #include "MantidQtCustomInterfaces/CreateMDWorkspace.h"
-#include "MantidQtCustomInterfaces/WorkspaceMementoCollection.h"
-#include "MantidQtCustomInterfaces/LatticePresenter.h"
-#include "MantidQtCustomInterfaces/LogPresenter.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -46,10 +43,10 @@ namespace CustomInterfaces
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
 */
-CreateMDWorkspace::CreateMDWorkspace(QWidget *) : m_data(new WorkspaceMementoCollection), m_memento(NULL)
+CreateMDWorkspace::CreateMDWorkspace(QWidget *) //: m_data(new WorkspaceMementoCollection), m_memento(NULL)
 {
   //Generate memento view model.
-  m_model = new QtWorkspaceMementoModel(m_data->getWorkingData());
+  //m_model = new QtWorkspaceMementoModel(m_data->getWorkingData());
 }
 
 /*
@@ -58,24 +55,15 @@ Initalize the layout.
 void CreateMDWorkspace::initLayout()
 {
   m_uiForm.setupUi(this);
-  connect(m_uiForm.btn_revert, SIGNAL(clicked()), this, SLOT(revertClicked()));
+ /* connect(m_uiForm.btn_revert, SIGNAL(clicked()), this, SLOT(revertClicked()));
   connect(m_uiForm.btn_create, SIGNAL(clicked()), this, SLOT(createMDWorkspaceClicked()));
   connect(m_uiForm.btn_apply_all, SIGNAL(clicked()), this, SLOT(applyToAllClicked()));
   connect(m_uiForm.btn_add_workspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
-  connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeWorkspaceClicked()));
+  connect(m_uiForm.btn_remove_workspace, SIGNAL(clicked()), this, SLOT(removeWorkspaceClicked()));*/
   //Set MVC Model
-  m_uiForm.tableView->setModel(m_model);
+  //m_uiForm.tableView->setModel(m_model);
 
-  ApproachDialog appDialog;
-  appDialog.exec();
-  if(appDialog.getWasAborted())
-  {
-    this->close();
-  }
-  else
-  {
-    this->m_approachType = appDialog.getApproach();
-  }
+
 
 }
 
@@ -96,95 +84,6 @@ int CreateMDWorkspace::runConfirmation(const std::string& message)
   return msgBox.exec();
 }
 
-/*
-Handler for revert click event.
-*/
-void CreateMDWorkspace::revertClicked()
-{
-  int ret = runConfirmation("Are you sure that you wish to revert ALL Changes to ALL Workspaces?");
-  if(QMessageBox::Ok == ret)
-  {
-    m_data->revertAll(m_model);
-  }
-}
-
-/*
-Handler for the apply to all clicked. Under these circumstances changes to all mementos will be overwritten by the selected.
-*/
-void CreateMDWorkspace::applyToAllClicked()
-{
-   int ret = runConfirmation("Are you sure that you wish to apply ALL changes to ALL Workspaces?");
-   if(QMessageBox::Ok == ret)
-   {
-      m_data->applyAll(m_model);
-   }
-
-}
-
-void CreateMDWorkspace::addWorkspaceClicked()
-{
-  std::string wsName = m_uiForm.workspaceSelector->currentText().toStdString();
-  if(!wsName.empty())
-  {
-    using namespace Mantid::API;
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
-    MatrixWorkspace_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-    if(matrixWS)
-    {
-      m_data->registerWorkspace(matrixWS, m_model);
-
-      // Key off the selected index. --------------------------------------------
-      LoanedMemento temp = m_data->at(0);
-      m_memento.operator=(temp);
-      /*
-      Note: there is an issue to resolve here. I think that the workspacecollection should pass out a reference to the LoanedMemento!
-      Problem at the moment is:
-
-      1) loaned memento goes out of scope and the presenters have an invalid loaned memento (if stored in presenters as a ref).
-      2) workspace collection is destroyed before the presenters (which are attached to views). LoanedMementos are therefore trying to unlock a bad ptr.
-
-      At the momement, this problem is solved by storing the loaned memento as a member variable on this CreateMDWorkspace object, but this is not an ideal solution.
-      */
-
-      if(ISISInelastic == m_approachType)
-      {
-        m_approach = Approach_sptr(new InelasticISIS);
-      }
-
-      m_uiForm.groupBox_lattice->layout()->addWidget(m_approach->createLatticeView(LatticePresenter_sptr(new LatticePresenter(m_memento))));
-      LogPresenter_sptr logPresenter = LogPresenter_sptr(new LogPresenter(m_memento));
-      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createLogView(logPresenter));
-      m_uiForm.groupBox_logvalues->layout()->addWidget(m_approach->createEditableLogView(logPresenter));
-    }
-    else
-    {
-      runConfirmation("Only Matrix workspaces may be registered.");
-    }
-  }
-}
-
-void CreateMDWorkspace::removeWorkspaceClicked()
-{
-  QModelIndex index = m_uiForm.tableView->currentIndex();
-  if(!index.isValid())
-  {
-    runConfirmation("Select a row from the table before running");
-  }
-  else
-  {
-    std::string wsName = m_data->getWorkingData()->cell<std::string>(index.row(), 0);
-    //Find the selected workspace names
-    m_data->unregisterWorkspace(wsName, m_model);
-  }
-  
-}
-
-void CreateMDWorkspace::createMDWorkspaceClicked()
-{
-  //Kick-off finalisation wizard. See mockups.
-
-  //Must always update the model-view.
-}
 
 /// Destructor
 CreateMDWorkspace::~CreateMDWorkspace()
