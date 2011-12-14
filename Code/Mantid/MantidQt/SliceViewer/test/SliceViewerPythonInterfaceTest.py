@@ -57,9 +57,9 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_setWorkspace_throwsOnBadInputs(self):
         sv = self.sv
         #sv.setWorkspace('workspace2d')
-        with self.assertRaises(StdRuntimeError): sv.setWorkspace('')
-        with self.assertRaises(StdRuntimeError): sv.setWorkspace('non_existent_workspace')
-        with self.assertRaises(StdRuntimeError): sv.setWorkspace('workspace2d')
+        self.assertRaises(StdRuntimeError, sv.setWorkspace, '')
+        self.assertRaises(StdRuntimeError, sv.setWorkspace, 'non_existent_workspace')
+        self.assertRaises(StdRuntimeError, sv.setWorkspace, 'workspace2d')
     
     #==========================================================================
     #======================= Setting Dimensions, etc ==========================
@@ -74,11 +74,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
             
     def test_setXYDim_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(StdInvalidArgument): sv.setXYDim(-1, 0)
-        with self.assertRaises(StdInvalidArgument): sv.setXYDim(4, 0)
-        with self.assertRaises(StdInvalidArgument): sv.setXYDim(0, -1)
-        with self.assertRaises(StdInvalidArgument): sv.setXYDim(0, 3)
-        with self.assertRaises(StdInvalidArgument): sv.setXYDim(0, 0)
+        self.assertRaises(StdInvalidArgument, sv.setXYDim, -1, 0)
+        self.assertRaises(StdInvalidArgument, sv.setXYDim, 5, 0)
+        self.assertRaises(StdInvalidArgument, sv.setXYDim, 0, -1)
+        self.assertRaises(StdInvalidArgument, sv.setXYDim, 0, 3)
+        self.assertRaises(StdInvalidArgument, sv.setXYDim, 0, 0)
         
     def test_setSlicePoint(self):
         sv = self.sv
@@ -94,13 +94,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
                 
     def test_setSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(StdInvalidArgument): sv.setSlicePoint(-1, 7.6)
-        with self.assertRaises(StdInvalidArgument): sv.setSlicePoint(3, 7.6)
+        self.assertRaises(StdInvalidArgument, sv.setSlicePoint, -1, 7.6)
+        self.assertRaises(StdInvalidArgument, sv.setSlicePoint, 3, 7.6)
                     
     def test_getSlicePoint_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(StdInvalidArgument): sv.getSlicePoint(-1)
-        with self.assertRaises(StdInvalidArgument): sv.getSlicePoint(3)
+        self.assertRaises(StdInvalidArgument, sv.getSlicePoint, -1)
+        self.assertRaises(StdInvalidArgument, sv.getSlicePoint, 3)
         
     def test_setXYLimits(self):
         sv = self.sv
@@ -132,9 +132,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
                     
     def test_setColorScale_throwsOnBadInputs(self):
         sv = self.sv
-        with self.assertRaises(StdInvalidArgument): sv.setColorScale(10, 5, False)
-        with self.assertRaises(StdInvalidArgument): sv.setColorScale(10, 5, True)
-        with self.assertRaises(StdInvalidArgument): sv.setColorScale(0, 5, True)
-        with self.assertRaises(StdInvalidArgument): sv.setColorScale(-3, -1, True)
+        self.assertRaises(StdInvalidArgument, sv.setColorScale, 10, 5, False)
+        self.assertRaises(StdInvalidArgument, sv.setColorScale, 0, 5, True)
+        self.assertRaises(StdInvalidArgument, sv.setColorScale, -3, -1, True)
             
     
