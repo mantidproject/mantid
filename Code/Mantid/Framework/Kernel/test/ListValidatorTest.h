@@ -87,6 +87,7 @@ public:
     TS_ASSERT( ! dynamic_cast<IValidator<int>*>(v) )
     delete v;
   }
+
   
 };
 
