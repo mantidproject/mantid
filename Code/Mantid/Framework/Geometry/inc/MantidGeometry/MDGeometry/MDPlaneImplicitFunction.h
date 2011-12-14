@@ -39,6 +39,8 @@ class DLLExport MDPlaneImplicitFunction : public MDImplicitFunction
 {
 public:
     MDPlaneImplicitFunction();
+    MDPlaneImplicitFunction(const size_t nd, const coord_t * normal,
+                            const coord_t * point);
     virtual ~MDPlaneImplicitFunction();
 
     /// Overriding the addPlane for check
@@ -48,6 +50,9 @@ public:
     virtual std::string getName() const;
     /// @return the XML representation of the MDPlaneImplicitFunction
     virtual std::string toXMLString() const;
+
+ private:
+    coord_t *origin;
 };
 
 } // namespace Geometry

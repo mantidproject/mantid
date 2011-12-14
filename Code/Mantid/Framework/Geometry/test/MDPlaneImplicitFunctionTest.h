@@ -27,6 +27,17 @@ public:
     TS_ASSERT_EQUALS( f.getNumPlanes(), 1 );
   }
 
+  void test_coordConstructor()
+  {
+    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t point[3] = {1,2,3};
+    MDPlaneImplicitFunction f(3, normal, point);
+    TS_ASSERT_EQUALS( f.getNumDims(), 3 );
+    // Making sure only one plane can be added
+    MDPlane p1(3, normal, point);
+    TS_ASSERT_THROWS_ANYTHING( f.addPlane(p1) );
+  }
+
   void test_xmlRep()
   {
     MDPlaneImplicitFunction f;

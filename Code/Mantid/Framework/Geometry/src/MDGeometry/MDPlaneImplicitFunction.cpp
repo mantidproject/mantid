@@ -18,6 +18,19 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction()
 {
 }
 
+MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
+                                                 const coord_t *normal,
+                                                 const coord_t *point) :
+  MDImplicitFunction()
+{
+  this->origin = new coord_t[nd];
+  for( std::size_t i = 0; i < nd; i++)
+  {
+    this->origin[i] = point[i];
+  }
+  this->addPlane(MDPlane(nd, normal, point));
+}
+
 MDPlaneImplicitFunction::~MDPlaneImplicitFunction()
 {
 }
@@ -53,8 +66,6 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   AutoPtr<Element> parameterListElement = pDoc->createElement("ParameterList");
   functionElement->appendChild(parameterListElement);
 
-  AutoPtr<Element> valueElement = pDoc->createElement("Value");
-
   // Normal Parameter
   AutoPtr<Element> normParameterElement = pDoc->createElement("Parameter");
   parameterListElement->appendChild(normParameterElement);
@@ -62,6 +73,8 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   AutoPtr<Text> normText = pDoc->createTextNode("NormalParameter");
   normTypeElement->appendChild(normText);
   normParameterElement->appendChild(normTypeElement);
+  AutoPtr<Element>normValueElement = pDoc->createElement("Value");
+  //normParameterElement->appendChild(normValueElement);
 
   // Origin Parameter
   AutoPtr<Element> origParameterElement = pDoc->createElement("Parameter");
@@ -70,6 +83,8 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   AutoPtr<Text> origText = pDoc->createTextNode("OriginParameter");
   origTypeElement->appendChild(origText);
   origParameterElement->appendChild(origTypeElement);
+  AutoPtr<Element>origValueElement = pDoc->createElement("Value");
+  //origParameterElement->appendChild(origValueElement);
 
   std::stringstream xmlstream;
   DOMWriter writer;
