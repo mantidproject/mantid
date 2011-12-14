@@ -165,7 +165,7 @@ void SliceViewer::initMenus()
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(setXYLimits()));
+  connect(action, SIGNAL(triggered()), this, SLOT(setXYLimitsDialog()));
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "Zoom &In", this);
@@ -582,7 +582,7 @@ void SliceViewer::resetZoom()
 
 //------------------------------------------------------------------------------------
 /// SLOT to open a dialog to set the XY limits
-void SliceViewer::setXYLimits()
+void SliceViewer::setXYLimitsDialog()
 {
   // Initialize the dialog with the current values
   XYLimitsDialog * dlg = new XYLimitsDialog(this);
@@ -594,11 +594,7 @@ void SliceViewer::setXYLimits()
   // Show the dialog
   if (dlg->exec() == QDialog::Accepted)
   {
-    // Set the limits in X and Y
-    m_plot->setAxisScale( m_spect->xAxis(), dlg->getXMin(), dlg->getXMax());
-    m_plot->setAxisScale( m_spect->yAxis(), dlg->getYMin(), dlg->getYMax());
-    // Make sure the view updates
-    m_plot->replot();
+    this->setXYLimits(dlg->getXMin(), dlg->getXMax(), dlg->getYMin(), dlg->getYMax());
   }
 }
 
@@ -1008,5 +1004,34 @@ bool SliceViewer::getColorScaleLog() const
   return m_colorBar->getLog();
 }
 
+//------------------------------------------------------------------------------------
+/** Set the limits in X and Y to be shown in the plot.
+ * The X and Y values are in the units of their respective dimensions.
+ * You can change the mapping from X/Y in the plot to specific
+ * dimensions in the displayed workspace using setXYDim().
+ *
+ * You can flip the direction of the scale if you specify,
+ * e.g., xleft > xright.
+ *
+ * @param xleft   :: x-value on the left side of the graph
+ * @param xright  :: x-value on the right side of the graph
+ * @param ybottom :: y-value on the bottom of the graph
+ * @param ytop    :: y-value on the top of the graph
+ */
+void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, double ytop)
+{
+  // Set the limits in X and Y
+  m_plot->setAxisScale( m_spect->xAxis(), xleft, xright);
+  m_plot->setAxisScale( m_spect->yAxis(), ybottom, ytop);
+  // Make sure the view updates
+  m_plot->replot();
+}
+
+QwtDoubleInterval SliceViewer::getXLimits() const
+{
+  return m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+}
+
 } //namespace
 }
+

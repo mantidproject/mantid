@@ -5,6 +5,7 @@
  to Python.
  
 */
+/***************************************************************************/
 
 // Define the module name. This has to match the library filename
 %Module libmantidqtpython
@@ -12,7 +13,7 @@
 /******************************** SIP Imports ****************/
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
-
+%Include qwttypes.sip
 
 /***************************************************************************/
 /**************** Exceptions ***********************************************/
@@ -60,6 +61,8 @@
 };
 
 
+
+
 namespace MantidQt
 {
 namespace SliceViewer
@@ -86,6 +89,8 @@ public:
 
   void setSlicePoint(int dim, double value) 	throw (std::invalid_argument);
   double getSlicePoint(int dim) const 	throw (std::invalid_argument);
+  void setXYLimits(double xleft, double xright, double ybottom, double ytop);
+  //QwtDoubleInterval getXLimits() const;
 
   void loadColorMap(QString filename);
   void setColorScale(double min, double max, bool log) 	throw (std::invalid_argument);

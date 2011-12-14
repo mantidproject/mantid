@@ -59,6 +59,8 @@ public:
   double getColorScaleMin() const;
   double getColorScaleMax() const;
   bool getColorScaleLog() const;
+  void setXYLimits(double xleft, double xright, double ybottom, double ytop);
+  QwtDoubleInterval getXLimits() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
@@ -71,7 +73,7 @@ signals:
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void resetZoom();
-  void setXYLimits();
+  void setXYLimitsDialog();
   void showInfoAt(double, double);
   void colorRangeChanged();
   void zoomInSlot();

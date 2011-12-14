@@ -1,0 +1,25 @@
+import sys
+import sys
+import os
+import unittest
+import time
+        
+# Import the Mantid framework
+import MantidFramework
+from MantidFramework import mtd
+from mantidsimple import *
+import libmantidqtpython
+
+from libmantidqtpython import StdRuntimeError, StdInvalidArgument
+
+
+class QwtTypesPythonInterfaceTest(unittest.TestCase):
+    """Tests for accessing Qwt library types 
+    from Python"""
+    
+    def test_QwtDoubleInterval(self):
+        pass
+    
+    def test_QList(self):
+        pass
+    
