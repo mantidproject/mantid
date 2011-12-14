@@ -17,6 +17,7 @@ set ( EXPORT_FILES
   src/DetectorGroup.cpp
   src/Instrument.cpp
   src/UnitCell.cpp
+  src/OrientedLattice.cpp
 )  
 
 set ( SRC_FILES

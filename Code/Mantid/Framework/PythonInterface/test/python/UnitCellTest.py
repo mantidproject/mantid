@@ -1,5 +1,6 @@
 import unittest
-from mantid import UnitCell
+from mantid.geometry import UnitCell, AngleUnits
+from mantid.kernel import V3D
 import numpy as np
 
 class UnitCellTest(unittest.TestCase):
@@ -44,50 +45,21 @@ class UnitCellTest(unittest.TestCase):
         self.assertAlmostEqual(cell.gamma(),97,10)
         
         # get the some elements of the B matrix
-#        self.assertAlmostEqual(cell.getB()[0][0],0.403170877311,10)
-#        self.assertAlmostEqual(cell.getB()[2][0],0.0,10)
-#        self.assertAlmostEqual(cell.getB()[0][2],-0.00360329991666,10)
-#        self.assertAlmostEqual(cell.getB()[2][2],0.125,10)
+        self.assertEquals(type(cell.getB()), np.ndarray)
+        self.assertAlmostEqual(cell.getB()[0][0],0.403170877311,10)
+        self.assertAlmostEqual(cell.getB()[2][0],0.0,10)
+        self.assertAlmostEqual(cell.getB()[0][2],-0.00360329991666,10)
+        self.assertAlmostEqual(cell.getB()[2][2],0.125,10)
 
-#
-#  void checkCell(UnitCell & u)
-#  {
-#
-#
-#    // Inverse B matrix
-#    DblMatrix I = u.getB() * u.getBinv();
-#    TS_ASSERT_EQUALS( I, Matrix<double>(3,3,true));
-#
-#    // d spacing for direct lattice at (1,1,1) (will automatically check dstar)
-#    TS_ASSERT_DELTA(u.d(1.,1.,1.),2.1227107587,1e-10);
-#    TS_ASSERT_DELTA(u.d(V3D(1.,1.,1.)),2.1227107587,1e-10);
-#    // angle
-#    TS_ASSERT_DELTA(u.recAngle(1,1,1,1,0,0,angRadians),0.471054990614,1e-10);
-#  }
-#
-#  void test_Advanced()
-#  {
-#    // test more advanced calculations
-#    // the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
-#    DblMatrix newGstar(3,3);
-#    newGstar[0][0]=0.162546756312;
-#    newGstar[0][1]=0.00815256992072;
-#    newGstar[0][2]=-0.00145274558861;
-#    newGstar[1][0]=newGstar[0][1];
-#    newGstar[1][1]=0.028262965555;
-#    newGstar[1][2]=0.00102046431298;
-#    newGstar[2][0]=newGstar[0][2];
-#    newGstar[2][1]=newGstar[1][2];
-#    newGstar[2][2]=0.0156808990098;
-#
-#    UnitCell u;
-#    u.recalculateFromGstar(newGstar);
-#
-#    // Check the directly-created one
-#    checkCell(u);
-#
-#    // Check if copy constructor is also good.
-#    UnitCell u2 = u;
-#    checkCell(u2);
-#
-#  }
+        # d spacing for direct lattice at (1,1,1) (will automatically check dstar)
+        self.assertAlmostEqual(cell.d(1.,1.,1.),2.1227107587,10)
+        self.assertAlmostEqual(cell.d(V3D(1.,1.,1.)),2.1227107587,10)
+        # angle
+        self.assertAlmostEqual(cell.recAngle(1,1,1,1,0,0,AngleUnits.Radians),0.471054990614,10)
+        
+        self.assertEquals(type(cell.getG()), np.ndarray)
+        self.assertEquals(type(cell.getGstar()), np.ndarray)
+        
+
+if __name__ == '__main__':
+    unittest.main()

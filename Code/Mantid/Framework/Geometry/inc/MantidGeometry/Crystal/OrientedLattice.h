@@ -53,8 +53,8 @@ namespace Geometry
       // Access private variables
       const Kernel::DblMatrix& getU() const;
       const Kernel::DblMatrix& getUB() const;
-      void setU(Kernel::DblMatrix& newU);
-      void setUB(Kernel::DblMatrix& newUB);
+      void setU(const Kernel::DblMatrix& newU);
+      void setUB(const Kernel::DblMatrix& newUB);
       //get u and v vectors for Horace/Mslice
       Kernel::V3D getuVector();
       Kernel::V3D getvVector();
