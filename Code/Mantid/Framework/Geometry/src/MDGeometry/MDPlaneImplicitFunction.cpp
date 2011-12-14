@@ -74,7 +74,10 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   normTypeElement->appendChild(normText);
   normParameterElement->appendChild(normTypeElement);
   AutoPtr<Element>normValueElement = pDoc->createElement("Value");
-  //normParameterElement->appendChild(normValueElement);
+  const coord_t *norm = this->getPlane(0).getNormal();
+  AutoPtr<Text> normValueText = pDoc->createTextNode(this->coordValue(norm));
+  normValueElement->appendChild(normValueText);
+  normParameterElement->appendChild(normValueElement);
 
   // Origin Parameter
   AutoPtr<Element> origParameterElement = pDoc->createElement("Parameter");
@@ -84,7 +87,10 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   origTypeElement->appendChild(origText);
   origParameterElement->appendChild(origTypeElement);
   AutoPtr<Element>origValueElement = pDoc->createElement("Value");
-  //origParameterElement->appendChild(origValueElement);
+  origParameterElement->appendChild(origValueElement);
+  AutoPtr<Text> origValueText = pDoc->createTextNode(this->coordValue(this->origin));
+  origValueElement->appendChild(origValueText);
+  origParameterElement->appendChild(origValueElement);
 
   std::stringstream xmlstream;
   DOMWriter writer;
@@ -93,6 +99,18 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   std::string formattedXMLString = \
       boost::str(boost::format(xmlstream.str().c_str()));
   return formattedXMLString;
+}
+
+std::string MDPlaneImplicitFunction::coordValue(const coord_t *arr) const
+{
+  std::ostringstream valueStream;
+  std::size_t nd = this->getNumDims();
+  for (std::size_t i = 0; i < nd - 1; i++)
+  {
+    valueStream << arr[i] << " ";
+  }
+  valueStream << arr[nd-1];
+  return valueStream.str();
 }
 
 } // namespace Geometry

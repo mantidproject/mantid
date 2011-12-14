@@ -52,6 +52,8 @@ public:
     virtual std::string toXMLString() const;
 
  private:
+    std::string coordValue(const coord_t *arr) const;
+
     coord_t *origin;
 };
 
