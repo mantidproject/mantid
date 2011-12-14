@@ -61,7 +61,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "DataHandling";}
+      virtual const std::string category() const { return "DataHandling\\Nexus";}
 
       /// do a quick check that this file can be loaded 
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
@@ -89,6 +89,8 @@ namespace Mantid
                                               const double& progressStart, const double& progressRange);
 
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
+
+	  API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
 
       API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData & wksp_cls,Mantid::NeXus::NXDouble & xbins,
           const double& progressStart, const double& progressRange);

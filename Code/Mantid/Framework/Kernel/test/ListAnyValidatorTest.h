@@ -1,18 +1,18 @@
-#ifndef VALIDATOR_ANYLIST_TEST_H_
-#define  VALIDATOR_ANYLIST_TEST_H_
+#ifndef LIST_ANY_VALIDATOR_TEST_H_
+#define LIST_ANY_VALIDATOR_TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/ValidatorAnyList.h"
+#include "MantidKernel/ListAnyValidator.h"
 
 using namespace Mantid::Kernel;
 
-class ValidatorAnyListTest : public CxxTest::TestSuite
+class ListAnyValidatorTest : public CxxTest::TestSuite
 {
 public:
   void testEmptyConstructor()
   {
-    ValidatorAnyList<int> v;
+    ListAnyValidator<int> v;
     TS_ASSERT( v.allowedValues().empty() )
   }
 
@@ -22,7 +22,7 @@ public:
     vec.push_back("one");
     vec.push_back("two");
     vec.push_back("three");
-    ValidatorAnyList<std::string> v(vec);
+    ListAnyValidator<std::string> v(vec);
     TS_ASSERT_EQUALS( v.allowedValues().size(), 3 )
   }
   void testVectorConstructor2()
@@ -31,13 +31,13 @@ public:
     vec.push_back(1);
     vec.push_back(2);
     vec.push_back(3);
-    ValidatorAnyList<int> v(vec);
+    ListAnyValidator<int> v(vec);
     TS_ASSERT_EQUALS( v.allowedValues().size(), 3 )
   }
 
   void testIsValid()
   {
-    ValidatorAnyList<int> v;
+    ListAnyValidator<int> v;
     //TS_ASSERT_EQUALS( v.isValid(""), "Select a value" )
 
     TS_ASSERT_EQUALS( v.isValid(1),
@@ -53,7 +53,7 @@ public:
 
   void testAllowedValues()
   {
-    ValidatorAnyList<int> v;
+    ListAnyValidator<int> v;
     v.addAllowedValue(1);
     v.addAllowedValue(2);
     std::set<std::string> s;
@@ -66,7 +66,7 @@ public:
 
   void testAddAllowedValue()
   {
-    ValidatorAnyList<int> v;
+    ListAnyValidator<int> v;
     TS_ASSERT( v.allowedValues().empty() )
     TS_ASSERT_THROWS_NOTHING( v.addAllowedValue(10) )
     TS_ASSERT_EQUALS( v.allowedValues().size(), 1 )
@@ -79,20 +79,32 @@ public:
 
   void testClone()
   {
-    IValidator<int> *v = new ValidatorAnyList<int>();
+    IValidator<int> *v = new ListAnyValidator<int>();
     IValidator<int> *vv = v->clone();
     TS_ASSERT_DIFFERS( v, vv )
-    TS_ASSERT( dynamic_cast<ValidatorAnyList<int> *>(vv) )
+    TS_ASSERT( dynamic_cast<ListAnyValidator<int> *>(vv) )
     delete v;
     delete vv;
   }
 
   void testCast()
   {
-    IValidator<int> *v = new ValidatorAnyList<int>();
+    IValidator<int> *v = new ListAnyValidator<int>();
     TS_ASSERT( dynamic_cast<IValidator<int>*>(v) )
     TS_ASSERT( ! dynamic_cast<IValidator<double>*>(v) )
     delete v;
+  }
+  void testAddStringVSIntValue()
+  {
+      ListAnyValidator<int> v1;
+      ListAnyValidator<int> v2;
+      TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue("1"));
+      TS_ASSERT_THROWS_NOTHING(v1.addAllowedValue(1));
+      TS_ASSERT_THROWS_NOTHING(v2.addAllowedValue("1"));
+      std::set<std::string> val1=v1.allowedValues();
+      std::set<std::string> val2=v2.allowedValues();
+      TS_ASSERT_EQUALS(1,val1.size());
+      TS_ASSERT_EQUALS(*val1.begin(),*val2.begin());
   }
   
 };

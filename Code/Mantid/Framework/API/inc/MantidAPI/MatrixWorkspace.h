@@ -96,11 +96,11 @@ namespace Mantid
       /// Build and populate the NearestNeighbours object
       void buildNearestNeighbours(const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a detector
-      std::map<specid_t, double> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
+      std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
-      std::map<specid_t, double> getNeighbours(specid_t spec, const double radius, const bool ignoreMaskedDetectors=false) const;
+      std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(specid_t spec, const double radius, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using the direct number of nearest neighbours
-      std::map<specid_t, double> getNeighboursExact(specid_t spec, const int nNeighbours, const bool ignoreMaskedDetectors=false) const;
+      std::map<specid_t, Mantid::Kernel::V3D> getNeighboursExact(specid_t spec, const int nNeighbours, const bool ignoreMaskedDetectors=false) const;
       //@}
 
       /// Const access to the spectra-detector map

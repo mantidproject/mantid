@@ -5,11 +5,6 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-#include "MantidQtAPI/UserSubWindow.h"
-
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -37,7 +32,7 @@ callbacks from the Plot Options tab.
 
 @author Robert Whitley, ISIS, RAL
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
 This file is part of Mantid.
 
@@ -62,7 +57,7 @@ class MuonAnalysisResultTableTab : public QWidget
 {
  Q_OBJECT
 public:
-  MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm), m_numLogsAndParamsDisplayed(0) {}
+  MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm), m_numLogsdisplayed(0) {}
   void initLayout();
   void populateTables(const QStringList& wsList);
 
@@ -73,13 +68,17 @@ private slots:
   void createTable();
 
 private:
-  void populateLogAndParamValues(const QVector<QString>& fittedWsList);
+  void populateLogsAndValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
 
+  QVector<QString> getWorkspacesWithSameParams(const QVector<QString>& fittedWsList);
+
+  QVector<QString> getSelectedWs();
+  QVector<QString> getSelectedLogs();
   std::string getFileName();
 
   Ui::MuonAnalysis& m_uiForm;
-  int m_numLogsAndParamsDisplayed;
+  int m_numLogsdisplayed;
   QMap<QString, QMap<QString, double> > m_tableValues;
   
 };

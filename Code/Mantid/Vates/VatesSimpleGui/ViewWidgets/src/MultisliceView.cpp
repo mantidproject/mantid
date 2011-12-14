@@ -5,6 +5,10 @@
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
+#include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqChartValue.h>
@@ -27,10 +31,14 @@
 #include <vtkSMProxy.h>
 #include <vtkSMViewProxy.h>
 
+#include <vtkSMPropertyIterator.h>
+
 #include <QModelIndex>
 #include <QString>
 
 #include <iostream>
+
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -41,6 +49,7 @@ namespace SimpleGui
 
 MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
+  this->isOrigSrc = false;
   this->ui.setupUi(this);
   this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);
   this->ui.yAxisWidget->setScalePosition(AxisInteractor::TopScale);
@@ -104,10 +113,62 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.zAxisWidget,
                    SIGNAL(showOrHideIndicator(bool, const QString &)),
                    this, SLOT(cutVisibility(bool, const QString &)));
+
+  QObject::connect(this->ui.xAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+  QObject::connect(this->ui.yAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+  QObject::connect(this->ui.zAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+
+  this->ui.xAxisWidget->installEventFilter(this);
+  this->ui.yAxisWidget->installEventFilter(this);
+  this->ui.zAxisWidget->installEventFilter(this);
 }
 
 MultiSliceView::~MultiSliceView()
 {
+}
+
+/**
+ * This function sets an event filter for the AxisInteractor widgets. This
+ * will listen and check for resize events. If a resize event is being issued,
+ * the AxisInteractor needs to update it's scene rectangle and the correct
+ * positions of any indicators.
+ * @param ob the QObject associated with the event
+ * @param ev the QEvent being issued
+ * @return true if this function handles the event
+ */
+bool MultiSliceView::eventFilter(QObject *ob, QEvent *ev)
+{
+  if (ev->type() == QEvent::Resize)
+  {
+    AxisInteractor *axis = static_cast<AxisInteractor *>(ob);
+    QString name = axis->objectName();
+    int coord = -1;
+    if (name == "xAxisWidget")
+    {
+      coord = 0;
+    }
+    if (name == "yAxisWidget")
+    {
+      coord = 1;
+    }
+    if (name == "zAxisWidget")
+    {
+      coord = 2;
+    }
+    axis->updateSceneRect();
+    this->resetOrDeleteIndicators(axis, coord);
+    return true;
+  }
+  return QObject::eventFilter(ob, ev);
 }
 
 void MultiSliceView::destroyView()
@@ -146,6 +207,7 @@ void MultiSliceView::setupAxisInfo()
 {
   const char *geomXML = vtkSMPropertyHelper(this->origSrc->getProxy(),
                                             "InputGeometryXML").GetAsString();
+
   GeometryParser parser(geomXML);
   AxisInformation *xinfo = parser.getAxisInfo("XDimension");
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
@@ -163,6 +225,7 @@ void MultiSliceView::setupAxisInfo()
 void MultiSliceView::render()
 {
   this->origSrc = pqActiveObjects::instance().activeSource();
+  this->checkSliceViewCompat();
   this->setupData();
   this->setupAxisInfo();
   this->resetDisplay();
@@ -450,22 +513,18 @@ void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
     const QString name = cut->getSMName();
     if (name.contains("Slice"))
     {
-      axis->selectIndicator(name);
-      if (axis->hasIndicator())
+      vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                              "CutFunction").GetAsProxy();
+      double origin[3];
+      vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+      double value = origin[pos];
+      if (value >= axis_min && value <= axis_max)
       {
-        vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-                                                "CutFunction").GetAsProxy();
-        double origin[3];
-        vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-        double value = origin[pos];
-        if (value >= axis_min && value <= axis_max)
-        {
-          axis->updateIndicator(value);
-        }
-        else
-        {
-          axis->deleteRequestedIndicator(name);
-        }
+        axis->updateRequestedIndicator(name, value);
+      }
+      else
+      {
+        axis->deleteRequestedIndicator(name);
       }
     }
   }
@@ -474,6 +533,99 @@ void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
 void MultiSliceView::resetCamera()
 {
   this->mainView->resetCamera();
+}
+
+/**
+ * This function checks the sources for the WorkspaceName property. If found,
+ * the ability to show a given cut in the SliceViewer will be activated.
+ */
+void MultiSliceView::checkSliceViewCompat()
+{
+  bool setSliceViewState = false;
+  // Check the current source
+  pqPipelineSource *src = this->getPvActiveSrc();
+  QString wsName(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceName",
+                                     true).GetAsString());
+  if (wsName != "")
+  {
+    setSliceViewState = true;
+  }
+  else
+  {
+    // Check the original source
+    QString wsName1(vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                        "WorkspaceName",
+                                        true).GetAsString());
+    if (wsName1 != "")
+    {
+      setSliceViewState = true;
+      this->isOrigSrc = true;
+    }
+  }
+  if (setSliceViewState)
+  {
+    this->ui.xAxisWidget->setShowSliceView(true);
+    this->ui.yAxisWidget->setShowSliceView(true);
+    this->ui.zAxisWidget->setShowSliceView(true);
+  }
+}
+
+/**
+ * This function is responsible for opening the given cut in SliceViewer.
+ * It will gather all of the necessary information and create an XML
+ * representation of the current dataset and cut parameters. That will then
+ * be handed to the SliceViewer.
+ * @param name the slice to be opened in SliceViewer
+ */
+void MultiSliceView::showCutInSliceViewer(const QString &name)
+{
+  std::cout << name.toStdString() << " to be shown." << std::endl;
+  // Get the associated workspace name
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
+  pqPipelineSource *src1 = NULL;
+  foreach (pqPipelineSource *src, srcs)
+  {
+    const QString name = src->getSMName();
+    if (name.contains("MDEWRebinningCutter"))
+    {
+      src1 = src;
+    }
+  }
+  if (NULL == src1)
+  {
+    src1 = this->origSrc;
+  }
+
+  QString wsName(vtkSMPropertyHelper(src1->getProxy(),
+                                     "WorkspaceName",
+                                     true).GetAsString());
+
+  // Get the current dataset characteristics
+  const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
+                                            "InputGeometryXML").GetAsString();
+
+  // Get the necessary information from the cut
+  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
+  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                          "CutFunction").GetAsProxy();
+  coord_t origin[3];
+  vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+  coord_t orient[3];
+  vtkSMPropertyHelper(plane, "Normal").Get(orient, 3);
+
+  // Create the XML holder
+  VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
+  rks.setWorkspaceName(wsName.toStdString());
+  rks.setGeometryXML(geomXML);
+
+  MDPlane mdp(3, orient, origin);
+  MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction());
+  impplane->addPlane(mdp);
+  rks.setImplicitFunction(impplane);
+
+  std::cout << rks.createXMLString() << std::endl;
 }
 
 }

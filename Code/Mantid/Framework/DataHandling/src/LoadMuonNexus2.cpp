@@ -74,13 +74,15 @@ namespace Mantid
       if (info.stat == NX_ERROR)
       {
         info = entry.getDataSetInfo("analysis");
-        if (info.stat == NX_OK && entry.getString("analysis") == "muonTD")
+        std::string compareString = "muon";
+        if (info.stat == NX_OK && entry.getString("analysis").compare(0,compareString.length(),compareString) == 0)
         {
           LoadMuonNexus::exec();
           return;
         }
         else
         {
+          g_log.debug()<<"analysis=|" << entry.getString("analysis") << "|" << std::endl;
           throw std::runtime_error("Unknown Muon NeXus file format");
         }
       }
@@ -392,11 +394,12 @@ namespace Mantid
           analysisType = "";
         }
       }
+      std::string compareString = "muon";
       if( analysisType == "pulsedTD" )
       {
         confidence = 80;
       }
-      else if( analysisType == "muonTD" )
+      else if( analysisType.compare(0,compareString.length(),compareString) == 0 )
       {
         confidence = 50;
       }

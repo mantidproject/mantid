@@ -68,19 +68,22 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
     
     const size_t specSize = inWS2D->blocksize();    
     std::vector<coord_t> Coord(nd);
+    size_t nValidSpectra = det_loc.det_id.size();
 
 
     if(!trn.calcGenericVariables(Coord,nd))return; // if any property dimension is outside of the data range requested
     //External loop over the spectra:
-    for (int64_t i = 0; i < int64_t(numSpec); ++i)
+    for (int64_t i = 0; i < int64_t(nValidSpectra); ++i)
     {
- 
-        const MantidVec& X        = inWS2D->readX(i);
-        const MantidVec& Signal   = inWS2D->readY(i);
-        const MantidVec& Error    = inWS2D->readE(i);
+        size_t ic                 = det_loc.detIDMap[i];
         int32_t det_id            = det_loc.det_id[i];
 
-        if(!trn.calcYDepCoordinates(Coord,i))continue;   // skip y outsize of the range;
+        const MantidVec& X        = inWS2D->readX(ic);
+        const MantidVec& Signal   = inWS2D->readY(ic);
+        const MantidVec& Error    = inWS2D->readE(ic);
+
+
+        if(!trn.calcYDepCoordinates(Coord,ic))continue;   // skip y outsize of the range;
 
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
@@ -88,7 +91,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
             // drop emtpy events
            if(Signal[j]<FLT_EPSILON)continue;
 
-           if(!trn.calculate_ND_coordinates(X,i,j,Coord))continue; // skip ND outside the range
+           if(!trn.calcMatrixCoord(X,i,j,Coord))continue; // skip ND outside the range
             //  ADD RESULTING EVENTS TO THE WORKSPACE
             float ErrSq = float(Error[j]*Error[j]);
             pWs->addEvent(MDEvents::MDEvent<nd>(float(Signal[j]),ErrSq,runIndex,det_id,&Coord[0]));
@@ -119,7 +122,7 @@ ConvertToMDEvents::processQND(API::IMDEventWorkspace *const piWS)
 /// helper function to create empty MDEventWorkspace with nd dimensions 
 template<size_t nd>
 API::IMDEventWorkspace_sptr
-ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,size_t split_maxDepth)
+ConvertToMDEvents::createEmptyEventWS(void)
 {
 
        boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> > ws = 
@@ -128,20 +131,19 @@ ConvertToMDEvents::createEmptyEventWS(size_t split_into,size_t split_threshold,s
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)
       {
-        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], dim_min[d], dim_min[d], 10);
+        Geometry::MDHistoDimension * dim = new Geometry::MDHistoDimension(this->targ_dim_names[d], this->targ_dim_names[d], this->targ_dim_units[d], 
+                                                                          this->dim_min[d], this->dim_max[d], 10);
         ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
       }
       ws->initialize();
 
       // Build up the box controller
-      Mantid::API::BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(split_into);
-//      bc->setSplitThreshold(1500);
-      bc->setSplitThreshold(split_threshold);
-      bc->setMaxDepth(split_maxDepth);
-      // We always want the box to be split (it will reject bad ones)
-      ws->splitBox();
-      return ws;
+     Mantid::API::BoxController_sptr bc = ws->getBoxController();
+    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm 
+     this->setBoxController(bc);
+    // We always want the box to be split (it will reject bad ones)
+     ws->splitBox();
+     return ws;
 }
      
 

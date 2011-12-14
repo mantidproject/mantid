@@ -40,16 +40,21 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
     _os.environ['MANTIDPATH'] = _bindir
 
 ###############################################################################
-# Make most  things accessible from mantid namespace 
+# Make most things accessible from mantid namespace 
 ###############################################################################
 import kernel
 from kernel import *
-# Make the version string accessible in the standard way
-__version__ = version_str()
+
+import geometry
+from geometry import *
 
 import api 
 from api import *
 
+###############################################################################
+# Make the version string accessible in the standard way
+###############################################################################
+__version__ = version_str()
 
 ###############################################################################
 # Aliases 

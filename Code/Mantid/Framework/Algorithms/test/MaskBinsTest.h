@@ -26,11 +26,6 @@ public:
   {
     TS_ASSERT_EQUALS( masker.version(), 1 );
   }
-
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( masker.category(), "General" );
-  }
   
   void testInit()
   {

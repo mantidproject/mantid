@@ -125,6 +125,8 @@ protected slots:
 	void makeZcut(double value);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
+  /// Launch SliceViewer with the specified cut.
+  void showCutInSliceViewer(const QString &name);
   /**
    * Update the origin position of the currently selected cut.
    * @param position the origin coordinate to move the emitting slice to
@@ -145,10 +147,14 @@ private:
 
   /// Determine if the incoming and current axis have the same bounds.
   bool checkBounds(AxisInformation *info, AxisInteractor *axis);
+  /// Determine if the data can support the SliceViewer being shown.
+  void checkSliceViewCompat();
   /// Determine if the incoming and current axis have the same title.
   bool checkTitles(AxisInformation *info, AxisInteractor *axis);
   /// Clear all axis indicator highlighting.
   void clearIndicatorSelections();
+  /// Filter resize events.
+  bool eventFilter(QObject *ob, QEvent *ev);
   /**
    * Function that polls all of the axis indicators to see if any are left.
    * @return true if no indicators are left, false if there are indicators
@@ -168,6 +174,7 @@ private:
   /// Create the current data representation.
   void setupData();
 
+  bool isOrigSrc; ///< Flag for SliceViewer information
   QPointer<pqRenderView> mainView; ///< The main view class
   Ui::MultiSliceViewClass ui; ///< The view's UI form
 };

@@ -301,17 +301,17 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool 
     double c_wl_2[4] = {0,0,0,0};
     bool passed=false;
 
-    while (!passed && n_frame[0]<99)
+    do
     {
         frame_wl_1=c_wl_1[0] = chopper_wl_1[0] + 3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
         frame_wl_2=c_wl_2[0] = chopper_wl_2[0] + 3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
 
-        for ( int i=0; i<4; i++ )
+        for ( int i=1; i<4; i++ )
         {
             n_frame[i] = n_frame[i-1] - 1;
             passed=false;
 
-            while (n_frame[i] - n_frame[i-1] < 10)
+            do
             {
                 n_frame[i] += 1;
                 c_wl_1[i] = chopper_wl_1[i] + 3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
@@ -324,7 +324,7 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool 
                 }
                 if (frame_wl_2 < c_wl_1[i])
                     break; // over shot
-            }
+            } while (n_frame[i] - n_frame[i-1] < 10);
 
             if (!passed)
             {
@@ -337,7 +337,7 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool 
                 if (frame_wl_2>c_wl_2[i]) frame_wl_2=c_wl_2[i];
             }
         }
-    }
+    } while (!passed && n_frame[0]<99);
 
     if (frame_wl_2 > frame_wl_1)
     {

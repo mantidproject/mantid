@@ -450,6 +450,35 @@ class Phi : public Degrees
   virtual Unit * clone() const { return new Phi(*this); }
 };
 
+//=================================================================================================
+//=================================================================================================
+/// Momentum in Angstrom^-1
+class MANTID_KERNEL_DLL Momentum : public Unit
+{
+public:
+  const std::string unitID() const; ///< "Momentum"
+  const std::string caption() const { return "Momentum"; }
+  const std::string label() const {return "Angstrom^-1"; }
+
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
+
+  /// Constructor
+  Momentum();
+  /// Destructor
+  ~Momentum() {}
+
+protected:
+  double sfpTo; ///< Extra correction factor in to conversion
+  double factorTo; ///< Constant factor for to conversion
+  double sfpFrom; ///< Extra correction factor in from conversion
+  double factorFrom; ///< Constant factor for from conversion
+  bool   do_sfpFrom; ///< Apply the sfpFrom value
+};
+
+
 /// @endcond
 
 } // namespace Units

@@ -57,7 +57,7 @@ namespace DataObjects
     for (size_t wi=0; wi<this->m_noVectors; ++wi)
     {
       // Convert the Y value to a group number
-      int group = static_cast<int>(this->dataY(wi)[0]);
+      int group = static_cast<int>(this->readY(wi)[0]);
       if (group == 0) group = -1;
       detid_t detID = detectorIDs[wi];
       detIDToGroup[detID] = group;
@@ -66,6 +66,32 @@ namespace DataObjects
     }
   }
 
+  /**
+   * Fill a map where the index is detector ID and the value is the
+   * group number by using the values in Y.
+   * Group values of 0 are converted to -1.
+   *
+   * @param detIDToGroup :: ref. to map to fill
+   * @param[out] ngroups :: the number of groups found (equal to the largest group number found)
+   */
+  void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const
+  {
+    ngroups = 0;
+    for (size_t wi=0; wi<this->m_noVectors; ++wi)
+    {
+      // Convert the Y value to a group number
+      int group = static_cast<int>(this->readY(wi)[0]);
+      if (group == 0) group = -1;
+      detid_t detID = detectorIDs[wi];
+      if (detID < 0) // if you need negative detector ids, use the other function
+        continue;
+      if (detIDToGroup.size() < static_cast<size_t>(detID + 1))
+        detIDToGroup.resize(detID+1);
+      detIDToGroup[detID] = group;
+      if (group > ngroups)
+        ngroups = group;
+    }
+  }
 
 
 } // namespace Mantid

@@ -70,7 +70,7 @@ int FilterBadPulses::version() const
 /// Algorithm's category for identification overriding a virtual method
 const std::string FilterBadPulses::category() const
 {
-  return "General";
+  return "Events\\EventFiltering";
 }
 
 //-----------------------------------------------------------------------

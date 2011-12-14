@@ -93,7 +93,7 @@ struct UNITS_CONVERSION<ConvFromTOF>
        }
        // get units class, requested by subalgorithm
        std::string native_units       = ConvertToMDEvents::getNativeUnitsID(pHost);
-       Kernel::Unit_sptr pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
+       pWSUnit      = Kernel::UnitFactory::Instance().create(native_units);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
        }

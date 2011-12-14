@@ -59,7 +59,7 @@ public:
   { return (1);}
   /// Algorithm's category for identification
   virtual const std::string category() const
-  { return "General";}
+  { return "Events";}
 
 private:
   /// Sets documentation strings for this algorithm

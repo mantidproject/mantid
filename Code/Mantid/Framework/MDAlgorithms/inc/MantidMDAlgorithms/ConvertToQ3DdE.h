@@ -55,11 +55,13 @@ namespace MDAlgorithms
     std::vector<double>       L2;
     std::vector<double>       TwoTheta;
     std::vector<int32_t>      det_id;   // the detector ID;
+    std::vector<size_t>       detIDMap;
     //
     bool is_defined(void)const{return det_dir.size()>0;}
     bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
     double  *  pL2(){return &L2[0];}
     double  *  pTwoTheta(){return &TwoTheta[0];}
+    size_t  *  iDetIDMap(){return &detIDMap[0];}
     Kernel::V3D  * pDetDir(){return &det_dir[0];}
   };
   class DLLExport ConvertToQ3DdE  : public API::Algorithm

@@ -49,25 +49,38 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
 )
 
+# Python unit tests
+set ( TEST_PY_FILES 
+	test/SliceViewerPythonInterfaceTest.py
+)
+
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
+
+
+
+###########################################################################
+# Main Library Target
+###########################################################################
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 # --- Add icons qrc ------
 qt4_add_resources ( RES_FILES icons/SliceViewerIcons.qrc )
 
-
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
-add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
+# This creates the target library
+add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+# ... and links to other required libs
 target_link_libraries ( MantidQtSliceViewer MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
@@ -112,7 +125,23 @@ target_link_libraries ( LineViewerDemo
 endif ()
 
 ###########################################################################
+# Unit tests setup
+###########################################################################
+
+# python unit tests
+#if (PYUNITTEST_FOUND )
+if ( 0 )
+  pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
+  add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
+  add_dependencies ( GUITests SliceViewerTest.py )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET SliceViewerTest.py PROPERTY FOLDER "UnitTests" )
+endif ()
+
+###########################################################################
 # Installation settings
 ###########################################################################
 
 install ( TARGETS MantidQtSliceViewer DESTINATION ${LIB_DIR} )
+
+

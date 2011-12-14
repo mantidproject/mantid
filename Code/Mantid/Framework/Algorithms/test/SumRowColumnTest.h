@@ -35,10 +35,6 @@ public:
     TS_ASSERT_EQUALS( summer.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( summer.category(), "SANS" )
-  }
 
   void testInit()
   {

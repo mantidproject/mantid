@@ -32,7 +32,6 @@ public:
 
     TS_ASSERT_EQUALS( trans.name(), "CalculateTransmission" );
     TS_ASSERT_EQUALS( trans.version(), 1 );
-    TS_ASSERT_EQUALS( trans.category(), "SANS" );
   }
 
   void testFittedUnfitted()

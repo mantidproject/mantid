@@ -423,6 +423,40 @@ public:
     val->operator+=(logi);
   }
 
+  /*
+   * Test include (1) normal interval (2) normal on grid point (3) outside upper boundary
+   * (4) outside lower bound
+   */
+  void test_getSingleValue()
+  {
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT( p->addValue("2007-11-30T16:17:00",9.99) );
+    TS_ASSERT( p->addValue("2007-11-30T16:17:10",7.55) );
+    TS_ASSERT( p->addValue("2007-11-30T16:17:20",5.55) );
+    TS_ASSERT( p->addValue("2007-11-30T16:17:30",10.55) );
+
+    DateAndTime time1("2007-11-30T16:17:23");
+    double v1 = p->getSingleValue(time1);
+    TS_ASSERT_DELTA( v1, 5.55, 1e-6);
+
+    DateAndTime time2("2007-11-30T16:17:03");
+    double v2 = p->getSingleValue(time2);
+    TS_ASSERT_DELTA( v2, 9.99, 1e-6);
+
+    DateAndTime time3("2007-11-30T16:17:31");
+    double v3 = p->getSingleValue(time3);
+    TS_ASSERT_DELTA( v3, 10.55, 1e-6);
+
+    DateAndTime time4("2007-11-30T16:17:00");
+    double v4 = p->getSingleValue(time4);
+    TS_ASSERT_DELTA( v4, 9.99, 1e-6);
+
+    DateAndTime time5("2007-11-30T16:16:59");
+    double v5 = p->getSingleValue(time5);
+    TS_ASSERT_DELTA( v5, 9.99, 1e-6);
+
+  }
+
 
 private:
   TimeSeriesProperty<int> *iProp;

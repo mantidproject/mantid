@@ -323,22 +323,30 @@ namespace Mantid
 
       if (this->getProperty("ExtendedHeader"))
       {
-      // the instrument parameter file
-      os << "Instrument parameter file: ";
-      writeValue(os, runinfo, "iparm_file", "");
-      os << "\n";
+        // the instrument parameter file
+        if (runinfo.hasProperty("iparm_file"))
+        {
+          Kernel::Property* prop = runinfo.getProperty("iparm_file");
+          if (prop != NULL)
+          {
+            std::stringstream line;
+            line << "Instrument parameter file: "
+                 << prop->value();
+            os << std::setw(80) << std::left << line.str() << "\n";
+          }
+        }
 
-      // write out the gsas monitor counts
-      os << "Monitor: ";
-      if (runinfo.hasProperty("gsas_monitor"))
-      {
-        writeValue(os, runinfo, "gsas_monitor");
-      }
-      else
-      {
-        writeValue(os, runinfo, "gd_prtn_chrg", "1");
-      }
-      os << "\n";
+        // write out the gsas monitor counts
+        os << "Monitor: ";
+        if (runinfo.hasProperty("gsas_monitor"))
+        {
+          writeValue(os, runinfo, "gsas_monitor");
+        }
+        else
+        {
+          writeValue(os, runinfo, "gd_prtn_chrg", "1");
+        }
+        os << "\n";
       }
 
       if (format.compare(SLOG) == 0)

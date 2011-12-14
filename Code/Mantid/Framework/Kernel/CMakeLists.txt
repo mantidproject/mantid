@@ -187,7 +187,7 @@ set ( INC_FILES
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
-	inc/MantidKernel/ValidatorAnyList.h
+	inc/MantidKernel/ListAnyValidator.h
 )
 
 set ( TEST_FILES
@@ -265,7 +265,7 @@ set ( TEST_FILES
 	test/VMDTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
-	test/ValidatorAnyListTest.h
+	test/ListAnyValidatorTest.h
 )
 
 if(UNITY_BUILD)

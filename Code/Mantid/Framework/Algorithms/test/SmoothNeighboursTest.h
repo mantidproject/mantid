@@ -28,6 +28,48 @@ class SmoothNeighboursTest : public CxxTest::TestSuite
 
 public:
 
+  void doTestWithNumberOfNeighbours(std::string WeightedSum="Flat")
+  {
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
+
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("WeightedSum", WeightedSum);
+    alg.setProperty("NumberOfNeighbours", 8);
+    alg.setProperty("IgnoreMaskedDetectors", true);
+    alg.setProperty("Radius", 1.2);
+    alg.setProperty("RadiusUnits", "NumberOfPixels");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr outWS;
+    TS_ASSERT_THROWS_NOTHING(outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testMW")) );
+
+    //Some basic checks
+    TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
+    TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
+
+    // Compare the workspaces
+    for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
+    {
+      for (size_t j=0; j < inWS->readX(0).size(); j++)
+        { TS_ASSERT_DELTA( inWS->readX(wi)[j],  outWS->readX(wi)[j], 1e-5); }
+      // Y is the same
+      for (size_t j=0; j < inWS->readY(0).size(); j++)
+        { TS_ASSERT_DELTA( inWS->readY(wi)[j],  outWS->readY(wi)[j], 1e-5); }
+      // Error has decreased due to adding step (improved statistics)
+      // Therefore the output WS has lower errors than input:
+      for (size_t j=0; j < inWS->readE(0).size(); j++)
+        { TS_ASSERT_LESS_THAN( outWS->readE(wi)[j],  inWS->readE(wi)[j] );  }
+    }
+
+    AnalysisDataService::Instance().remove("testMW");
+
+  }
 
   void do_test(EventType type, double * expectedY, std::string WeightedSum = "Parabolic",  bool PreserveEvents = true,
       double Radius = 0.0,
@@ -123,16 +165,16 @@ public:
   void testRadiusFiltering()
   {
     SpectraDistanceMap input;
-    input[0] = 1;
-    input[1] = 2;
-    input[3] = 3;
+    input[0] = V3D(1,0,0);
+    input[1] = V3D(2,0,0);
+    input[3] = V3D(3,0,0);
 
     RadiusFilter filter(2);
     SpectraDistanceMap product = filter.apply(input);
 
     TSM_ASSERT_EQUALS("Should have kept all but one of the inputs", 2, product.size());
-    TS_ASSERT_EQUALS(1, input[0]);
-    TS_ASSERT_EQUALS(2, input[1]);
+    TS_ASSERT_EQUALS(1, input[0][0]);
+    TS_ASSERT_EQUALS(2, input[1][0]);
   }
 
   /*
@@ -162,45 +204,24 @@ public:
     TS_ASSERT_EQUALS(1, value);
   }
 
-  void testWithNumberOfNeighbours()
+  void testWithNumberOfNeighboursAndFlatWeighting()
   {
-    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
+    doTestWithNumberOfNeighbours("Flat");
+  }
 
-    SmoothNeighbours alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("OutputWorkspace", "testMW");
-    alg.setProperty("PreserveEvents", false);
-    alg.setProperty("WeightedSum", "Flat");
-    alg.setProperty("NumberOfNeighbours", 8);
-    alg.setProperty("IgnoreMaskedDetectors", true);
-    alg.setProperty("Radius", 1.2);
-    alg.setProperty("RadiusUnits", "NumberOfPixels");
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
+  void testWithNumberOfNeighboursAndLinearWeighting()
+  {
+    doTestWithNumberOfNeighbours("Linear");
+  }
 
-    MatrixWorkspace_sptr outWS;
-    TS_ASSERT_THROWS_NOTHING(outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testMW")) );
+  void testWithNumberOfNeighboursAndParabolictWeighting()
+  {
+    doTestWithNumberOfNeighbours("Parabolic");
+  }
 
-    //Some basic checks
-    TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(), outWS->getNumberHistograms());
-    TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(), outWS->readX(0).size());
-
-    // Compare the workspaces
-    for (size_t wi=0; wi < inWS->getNumberHistograms(); wi++)
-    {
-      for (size_t j=0; j < inWS->readX(0).size(); j++)
-        { TS_ASSERT_DELTA( inWS->readX(wi)[j],  outWS->readX(wi)[j], 1e-5); }
-      // Y is the same
-      for (size_t j=0; j < inWS->readY(0).size(); j++)
-        { TS_ASSERT_DELTA( inWS->readY(wi)[j],  outWS->readY(wi)[j], 1e-5); }
-      // Error has decreased due to adding step (improved statistics)
-      // Therefore the output WS has lower errors than input:
-      for (size_t j=0; j < inWS->readE(0).size(); j++)
-        { TS_ASSERT_LESS_THAN( outWS->readE(wi)[j],  inWS->readE(wi)[j] );  }
-    }
-
+  void testWithNumberOfNeighboursAndGaussianWeighting()
+  {
+    doTestWithNumberOfNeighbours("Gaussian");
   }
 
   void test_event_WEIGHTED()

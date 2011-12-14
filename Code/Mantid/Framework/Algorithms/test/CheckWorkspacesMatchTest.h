@@ -38,11 +38,6 @@ public:
     TS_ASSERT_EQUALS( checker.version(), 1 );
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( checker.category(), "General" );
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( checker.initialize() );

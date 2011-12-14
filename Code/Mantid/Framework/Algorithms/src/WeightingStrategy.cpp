@@ -60,10 +60,10 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always returns 1
-    @param distance : absolute distance from epicenter
+    @param distance : 
     @return 1
     */
-    double FlatWeighting::weightAt(const double&)
+    double FlatWeighting::weightAt(const Mantid::Kernel::V3D&)
     { 
       return 1;
     }
@@ -90,9 +90,9 @@ namespace Mantid
     @param distance : absolute distance from epicenter
     @return weighting
     */
-    double LinearWeighting::weightAt(const double& distance)
+    double LinearWeighting::weightAt(const Mantid::Kernel::V3D& distance)
     {
-      return 1 - (distance/m_cutOff);
+      return 1 - (distance.norm()/m_cutOff);
     }
 
     /**
@@ -113,8 +113,10 @@ namespace Mantid
     // Parabolic Weighting Implementations
     //----------------------------------------------------------------------------
 
-    /// Constructor
-    ParabolicWeighting::ParabolicWeighting() : WeightingStrategy()
+    /** Constructor
+    @param cutOff : distance cutOff
+    */
+    ParabolicWeighting::ParabolicWeighting(const double cutOff) : WeightingStrategy(cutOff)
     {
     }
 
@@ -125,13 +127,12 @@ namespace Mantid
 
     /**
     Implementation doesn't make sense on this type.
-    @param distance : absolute distance from epicenter
+    @param distance : 
     @return weighting
-    @throws runtime_error if used.
     */
-    double ParabolicWeighting::weightAt(const double&)
+    double ParabolicWeighting::weightAt(const Mantid::Kernel::V3D& distance)
     {
-      throw std::runtime_error("Parabolic weighting cannot be calculated based on a radius cut-off alone.");
+      return static_cast<double>(m_cutOff - std::abs(distance.X()) + m_cutOff - std::abs(distance.Y()) + 1);
     }
 
     /**
@@ -163,10 +164,10 @@ namespace Mantid
 
     /**
     Calculate the weight at distance from epicenter. Always throws.
-    @param distance : absolute distance from epicenter
+    @param distance : 
     @throw runtime_error if used
     */
-    double NullWeighting::weightAt(const double&)
+    double NullWeighting::weightAt(const Mantid::Kernel::V3D&)
     {
       throw std::runtime_error("NullWeighting strategy cannot be used to evaluate weights.");
     }
@@ -185,58 +186,70 @@ namespace Mantid
     }
 
     //-------------------------------------------------------------------------
-    // Gaussian Weighting Implementations
+    // Gaussian 2D Weighting Implementations
     //-------------------------------------------------------------------------
 
-    GaussianWeighting1D::GaussianWeighting1D(double cutOff, double sigma) : WeightingStrategy(cutOff)
+    /**
+    Constructor
+    @cutOff : radius cut-off.
+    @sigma : gaussian sigma value.
+    */
+    GaussianWeightingnD::GaussianWeightingnD(double cutOff, double sigma) : WeightingStrategy(cutOff)
     {
       if(cutOff < 0)
       {
-        throw std::invalid_argument("GassianWeighting expects unsigned cutOff input");
+        throw std::invalid_argument("GassianWeighting 1D expects unsigned cutOff input");
       }
       if(sigma < 0)
       {
-        throw std::invalid_argument("GassianWeighting expects unsigned standard deviation input");
+        throw std::invalid_argument("GassianWeighting 1D expects unsigned standard deviation input");
       }
 
-      init(sigma);
-    }
-
-    GaussianWeighting1D::GaussianWeighting1D(double sigma) : WeightingStrategy(0)
-    {
-      if(sigma < 0)
-      {
-        throw std::invalid_argument("GassianWeighting expects unsigned standard deviation input");
-      }
-
-      init(sigma);
-    }
-
-    void GaussianWeighting1D::init(const double sigma)
-    {
-      m_coeff = 1/((std::sqrt(2 *  M_PI)) * sigma);
       m_twiceSigmaSquared = 2 * sigma * sigma;
     }
 
-    GaussianWeighting1D::~GaussianWeighting1D()
+    /// Destructor
+    GaussianWeightingnD::~GaussianWeightingnD()
     {
     }
 
-    double GaussianWeighting1D::weightAt(const double& distance)
+     /**
+    Calculate the weight at distance from epicenter. Uses linear scaling based on distance from epicenter.
+    @param distance : absolute distance from epicenter
+    @return weighting
+    */
+    double GaussianWeightingnD::weightAt(const Mantid::Kernel::V3D& distance)
     {
-      double normalisedDistance = distance/m_cutOff;
+      /*
+      distance.norm() = r
+      r/R provides normalisation
+      */
+      double normalisedDistance = distance.norm()/m_cutOff; //Ensures 1 at the edges and zero in the center no matter what the units are
       return calculateGaussian(normalisedDistance*normalisedDistance);
     }
 
-    double GaussianWeighting1D::weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
+    /**
+    Calculate the weight for rectangular detectors.
+    @param adjX : The number of Y (vertical) adjacent pixels to average together
+    @param ix : current index x
+    @param adjY : The number of X (vertical) adjacent pixels to average together
+    @param iy : current index y
+    @return weight calculated
+    */
+    double GaussianWeightingnD::weightAt(const double& adjX,const double& ix, const double& adjY, const double& iy)
     {
       double normalisedDistanceSq = (ix*ix + iy*iy) / (adjX*adjX + adjY*adjY);
       return calculateGaussian(normalisedDistanceSq);
     }
 
-    double GaussianWeighting1D::calculateGaussian(const double normalisedDistanceSq)
+    /**
+    calculateGaussian method so that same gaussian calculation can be run by different consuming methods.
+    @param r^2/cutOff^2
+    @return exp(-(r^2/cutOff^2)/(2*sigma^2))
+    */
+    inline double GaussianWeightingnD::calculateGaussian(const double normalisedDistanceSq)
     {
-      return m_coeff * std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
+      return std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
     }
 
 

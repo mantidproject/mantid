@@ -54,6 +54,7 @@ The subalgorithms used by LoadMuonNexus are:
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid
 {
@@ -424,6 +425,195 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
   return boost::static_pointer_cast<API::Workspace>(workspace);
 }
 
+//-------------------------------------------------------------------------------------------------
+/**
+ * Load peaks
+ */
+API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
+{   
+	//API::IPeaksWorkspace_sptr workspace;
+	API::ITableWorkspace_sptr tWorkspace;
+	//PeaksWorkspace_sptr workspace;
+  tWorkspace = Mantid::API::WorkspaceFactory::Instance().createTable("PeaksWorkspace");
+
+  PeaksWorkspace_sptr peakWS = boost::dynamic_pointer_cast<PeaksWorkspace>(tWorkspace);
+
+  NXData nx_tw = entry.openNXData("peaks_workspace");
+
+
+  int columnNumber = 1;
+  int numberPeaks = 0;
+  std::vector<std::string> columnNames;
+  do
+  {
+    std::string str = "column_" + boost::lexical_cast<std::string>(columnNumber);
+
+    NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+    if (info.stat == NX_ERROR)
+    {
+	  // Assume we done last column of table
+      break;
+    }
+
+	// store column names
+	columnNames.push_back(str);
+
+
+	// determine number of peaks
+	// here we assume that a peaks_table has always one column of doubles
+	
+    if ( info.type == NX_FLOAT64 )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      std::string columnTitle = nxDouble.attributes("name");
+      if (!columnTitle.empty() && numberPeaks==0)
+      {
+        numberPeaks = nxDouble.dim0();
+      }
+    }
+
+	columnNumber++;
+
+  } while ( 1 );
+
+
+  //Get information from all but data group
+  std::string parameterStr;
+  // Hop to the right point
+  m_cppFile->openPath(entry.path());
+  try
+  {
+    // This loads logs, sample, and instrument.
+    peakWS->loadExperimentInfoNexus(m_cppFile, parameterStr);
+  }
+  catch (std::exception & e)
+  {
+    g_log.information("Error loading Instrument section of nxs file");
+    g_log.information(e.what());
+  }
+
+
+  // std::vector<API::IPeak*> p;
+  for (int r = 0; r < numberPeaks; r++)
+  {   
+	  Kernel::V3D v3d;
+	  v3d[2] = 1.0;
+	  API::IPeak* p;
+	  p = peakWS->createPeak(v3d);
+	  peakWS->addPeak(*p);
+  }
+
+
+
+  for (size_t i = 0; i < columnNames.size(); i++)
+  {
+    const std::string str = columnNames[i];
+    if ( !str.compare("column_1") )
+    {
+      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      nxInt.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        if( ival != -1) peakWS->getPeak(r).setDetectorID( ival );
+      }
+    }
+
+    if ( !str.compare("column_2") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setH( val );
+      }
+    }
+
+    if ( !str.compare("column_3") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setK( val );
+      }
+    }
+
+    if ( !str.compare("column_4") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setL( val );
+      }
+    }
+
+    if ( !str.compare("column_5") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setIntensity( val );
+      }
+    }
+
+    if ( !str.compare("column_6") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setSigmaIntensity( val );
+      }
+    }
+
+
+
+    if ( !str.compare("column_7") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setBinCount( val );
+      }
+    }
+
+
+    if ( !str.compare("column_10") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setWavelength( val );
+      }
+    }
+
+    if ( !str.compare("column_14") )
+    {
+      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      nxInt.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        if( ival != -1) peakWS->getPeak(r).setRunNumber( ival );
+      }
+    }
+
+  }
+
+  return boost::static_pointer_cast<API::Workspace>(peakWS);
+}
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -444,7 +634,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   if (mtd_entry.containsGroup("table_workspace"))
   {
     return loadTableEntry(mtd_entry);
+  } 
+
+  if (mtd_entry.containsGroup("peaks_workspace"))
+  {
+    return loadPeaksEntry(mtd_entry);
   }  
+
 
   bool isEvent = false;
   std::string group_name = "workspace";

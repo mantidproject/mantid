@@ -32,6 +32,7 @@ namespace SimpleGui
 
 AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 {
+  this->canShowSliceView = false;
   this->indicatorContextMenu = NULL;
   this->orientation = Qt::Vertical;
   this->scalePos = AxisInteractor::RightScale;
@@ -74,15 +75,17 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 void AxisInteractor::widgetLayout()
 {
   // All set for vertical orientation
-  QSize scaleSize(80, 400);
+  QSize scaleSize(60, 400);
   QSize gvSize(20, 400);
-  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 
   if (this->orientation == Qt::Vertical)
   {
     this->boxLayout = new QHBoxLayout(this);
-    this->scaleWidget->setFixedSize(scaleSize);
-    this->graphicsView->setFixedSize(gvSize);
+    this->scaleWidget->setFixedWidth(scaleSize.width());
+    this->scaleWidget->setMinimumHeight(scaleSize.height());
+    this->graphicsView->setFixedWidth(gvSize.width());
+    this->graphicsView->setMinimumHeight(gvSize.height());
     switch (this->scalePos)
     {
     case LeftScale:
@@ -107,8 +110,11 @@ void AxisInteractor::widgetLayout()
     this->boxLayout = new QVBoxLayout(this);
     scaleSize.transpose();
     gvSize.transpose();
-    this->scaleWidget->setFixedSize(scaleSize);
-    this->graphicsView->setFixedSize(gvSize);
+    policy.transpose();
+    this->scaleWidget->setMinimumWidth(scaleSize.width());
+    this->scaleWidget->setFixedHeight(scaleSize.height());
+    this->graphicsView->setMinimumWidth(gvSize.width());
+    this->graphicsView->setFixedHeight(gvSize.height());
     switch (this->scalePos)
     {
     case BottomScale:
@@ -321,6 +327,10 @@ void AxisInteractor::showContextMenu(const QPoint &pos)
             emit this->showOrHideIndicator(isVisible, item->toolTip());
             static_cast<Indicator *>(item)->changeIndicatorColor(isVisible);
           }
+          if (QString("Show in SliceView") == selectedItem->text())
+          {
+            emit this->showInSliceView(item->toolTip());
+          }
         }
       }
     }
@@ -337,6 +347,10 @@ void AxisInteractor::createContextMenu()
   QAction *hideAction = this->indicatorContextMenu->addAction("Hide");
   hideAction->setCheckable(true);
   this->indicatorContextMenu->addAction("Delete");
+  if (this->canShowSliceView)
+  {
+    this->indicatorContextMenu->addAction("Show in SliceView");
+  }
 }
 
 int AxisInteractor::numIndicators()
@@ -420,6 +434,49 @@ void AxisInteractor::deleteRequestedIndicator(const QString &name)
       }
     }
   }
+}
+
+/**
+ * This function takes the requested indicator given by the slice name and
+ * updates the current position given by the requested value.
+ * @param name the indicator slice to update
+ * @param value the coordinate to update to
+ */
+void AxisInteractor::updateRequestedIndicator(const QString &name, double value)
+{
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    Indicator *item = static_cast<Indicator *>(list.at(0));
+    if (item->type() == IndicatorItemType)
+    {
+      if (item->toolTip() == name)
+      {
+        QPoint *pos = this->scalePicker->getLocation(value);
+        item->updatePos(*pos);
+      }
+    }
+  }
+}
+
+/**
+ * This function takes the current rectangle from the QGraphicsView and
+ * updates the QGraphicsScene with that rectangle. This aids in getting the
+ * indicators to line up in the correct location.
+ */
+void AxisInteractor::updateSceneRect()
+{
+  this->scene->setSceneRect(this->graphicsView->geometry());
+}
+
+/**
+ * This function sets the state of being able to show the SliceViewer for
+ * a give slice.
+ * @param state whether or not the SliceViewer will be available
+ */
+void AxisInteractor::setShowSliceView(double state)
+{
+  this->canShowSliceView = state;
 }
 
 }

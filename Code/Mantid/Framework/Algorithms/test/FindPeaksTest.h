@@ -19,7 +19,6 @@ public:
     FindPeaks finder;
     TS_ASSERT_EQUALS( finder.name(), "FindPeaks" );
     TS_ASSERT_EQUALS( finder.version(), 1 );
-    TS_ASSERT_EQUALS( finder.category(), "General" );
   }
 
   void testInit()

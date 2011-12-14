@@ -110,7 +110,12 @@ MultiThreaded.MaxCores = 0
 # Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated. 
 # Outside this area peak functions return zero.
 curvefitting.peakRadius = 5
+curvefitting.defaultPeak=Gaussian
+curvefitting.findPeaksFWHM=7
+curvefitting.findPeaksTolerance=4
 
+# Do not show 'invisible' workspaces
+MantidOptions.InvisibleWorkspaces=0
 
 #Uncommenting the line below will enable algorithm chain re-running whenever a
 #workspace is replaced. Uncommenting and setting it to 0 will also turn it off 
@@ -131,7 +136,7 @@ logging.channels.consoleChannel.formatter = f1
 # specific filter for the file channel raising the level to warning (drop to debug for debugging)
 logging.channels.fileFilterChannel.class= FilterChannel
 logging.channels.fileFilterChannel.channel= fileChannel
-logging.channels.fileFilterChannel.level= warning
+logging.channels.fileFilterChannel.level= notice
 # output to a file (For error capturing and debugging)
 logging.channels.fileChannel.class = FileChannel
 logging.channels.fileChannel.path =

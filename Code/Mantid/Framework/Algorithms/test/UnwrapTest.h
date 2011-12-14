@@ -24,11 +24,6 @@ public:
     TS_ASSERT_EQUALS( unwrap.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( unwrap.category(), "Units" )
-  }
-
   void testInit()
   {
     unwrap.initialize();

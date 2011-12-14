@@ -61,7 +61,7 @@ public:
     virtual ~ValidatorAnyList(){};  
 
     /// Returns the set of valid values
-    std::set<std::string> allowedValues() const
+    inline std::set<std::string> allowedValues() const
     {
       std::set<std::string> rez;
       typename std::set<TYPE >::const_iterator it=m_allowedValues.begin();
@@ -70,14 +70,14 @@ public:
       }
       return rez;         
     }
-   /*  /// Adds the argument to the set of valid values
-    void addAllowedValue(const std::string &value)
+    /// Adds the argument to the set of valid values
+    inline void addAllowedValue(const std::string &value)
     {
          TYPE rVal = boost::lexical_cast<TYPE>(value);
          m_allowedValues.insert(rVal);
-    }*/
-     /// Adds the argument to the set of valid values
-    void addAllowedValue(const TYPE &value)
+    }
+    /// Adds the argument to the set of valid values
+    inline void addAllowedValue(const TYPE &value)
     {
            m_allowedValues.insert(value);
     }

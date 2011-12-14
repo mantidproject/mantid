@@ -276,7 +276,7 @@ void LineViewer::apply()
       alg->setPropertyValue("BasisVector" + dim, dim +",units," + basis.toString(",")
             + "," + Strings::toString(m_width[d]*2.0) + ",1" );
       propNum++;
-      if (propNum >= dimChars.size())
+      if (propNum > dimChars.size())
         throw std::runtime_error("LineViewer::apply(): too many dimensions!");
     }
   }

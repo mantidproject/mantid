@@ -72,7 +72,7 @@ namespace Mantid
     IPropertyManager::TypedValue::operator Property* () { return pm.getPointerToProperty(prop); }
 
 
-#ifdef __INTEL_COMPILER
+#ifdef __APPLE__
   } // namespace Kernel
 } // namespace Mantid
 // These must precede the operator() declaration

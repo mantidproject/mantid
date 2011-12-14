@@ -85,6 +85,7 @@ void DimensionSliceWidget::btnXYChanged()
     this->setShownDim(1);
   else
     this->setShownDim(-1);
+
   // Emit that the user changed the shown dimension
   emit changedShownDim(m_dimIndex, m_shownDim, oldDim);
 }
@@ -132,6 +133,18 @@ void DimensionSliceWidget::setShownDim(int dim)
 
   this->update();
   m_insideSetShownDim = false;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+/** Sets the slice point value.
+ *
+ * @param value :: where to slice
+ */
+void DimensionSliceWidget::setSlicePoint(double value)
+{
+  // This will trigger the required events
+  ui.horizontalSlider->setValue(value);
 }
 
 //-------------------------------------------------------------------------------------------------

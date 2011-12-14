@@ -45,6 +45,7 @@ public:
     // Two optional properties of different types
     wsp4 = new WorkspaceProperty<Workspace>("workspace4","",Direction::Input, true);
     wsp5 = new WorkspaceProperty<WorkspaceTester2>("workspace5","",Direction::Input, true);
+    wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest","",Direction::Output);
   }
 
   ~WorkspacePropertyTest()
@@ -54,6 +55,7 @@ public:
     delete wsp3;
     delete wsp4;
     delete wsp5;
+    delete wsp6;
   }
 
   void testConstructor()
@@ -96,10 +98,18 @@ public:
     TS_ASSERT_EQUALS( wsp2->isValid(), "Enter a name for the Output workspace" );
     TS_ASSERT_EQUALS( wsp3->isValid(), "Workspace \"ws3\" was not found in the Analysis Data Service" );
     TS_ASSERT_EQUALS( wsp4->isValid(), "");
+    TS_ASSERT_EQUALS( wsp6->isValid(), "Enter a name for the Output workspace");
 
-    // Setting the workspace name should make wsp2 (an output workspace) valid
+    // Setting a valid workspace name should make wsp2 (an output workspace) valid
     TS_ASSERT_EQUALS( wsp2->setValue("ws2"), "" );
     TS_ASSERT_EQUALS( wsp2->isValid(), "" );
+    // Setting an invalid name should make wsp6 invalid
+    const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
+    AnalysisDataService::Instance().setIllegalCharacterList(illegalChars);
+    std::string error = "Invalid object name 'ws6-1'. Names cannot contain any of the following characters: " + illegalChars;
+    TS_ASSERT_EQUALS( wsp6->setValue("ws6-1"), error);
+    TS_ASSERT_EQUALS( wsp6->isValid(), error);
+    AnalysisDataService::Instance().setIllegalCharacterList("");
 
     WorkspaceFactory::Instance().subscribe<WorkspaceTester1>("WorkspacePropertyTest");
     WorkspaceFactory::Instance().subscribe<WorkspaceTester2>("WorkspacePropertyTest2");
@@ -231,6 +241,7 @@ private:
   WorkspaceProperty<WorkspaceTester2> *wsp3;
   WorkspaceProperty<Workspace> *wsp4;
   WorkspaceProperty<WorkspaceTester2> *wsp5;
+  WorkspaceProperty<Workspace> *wsp6;
 };
 
 #endif /*WORKSPACEPROPERTYTEST_H_*/

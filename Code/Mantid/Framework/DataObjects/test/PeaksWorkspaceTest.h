@@ -5,6 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -15,6 +16,9 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include <Poco/File.h>
+
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -121,6 +125,83 @@ public:
     TS_ASSERT_DELTA(  pw->getPeak(3).getWavelength(), 4.0, 1e-5);
     TS_ASSERT_EQUALS( pw->getPeak(4).getDetectorID(), 1);
     TS_ASSERT_DELTA(  pw->getPeak(4).getWavelength(), 5.0, 1e-5);
+
+  }
+
+  void test_saveNexus()
+  {
+    // Ensure the plugin libraries are loaded so that we can use LoadNexusProcessed
+    Mantid::API::FrameworkManager::Instance();
+
+    // get an instrument which we load into a dummy workspace and get it from that workspace
+    const std::string inst_filename = "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml"; 
+    IAlgorithm_sptr inst_loader = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+    inst_loader->initialize(); 
+    inst_loader->setPropertyValue("Filename", inst_filename);
+    std::string inst_output_ws("DummyWorkspaceToGetIDF");
+    inst_loader->setPropertyValue("OutputWorkspace", inst_output_ws);
+    TS_ASSERT_THROWS_NOTHING(inst_loader->execute());
+
+    MatrixWorkspace_sptr dummyWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inst_output_ws));
+    Instrument_const_sptr inst = dummyWS->getInstrument();
+
+
+    // Create peak workspace
+    PeaksWorkspace_sptr pw(new PeaksWorkspace()); //(buildPW());
+
+    // Populate peak workspace with instrument from dummy workspace
+    pw->setInstrument(inst);
+
+    // Populate peak workspace with peaks
+    Peak p1(inst, 1300, 4.0);
+    Peak p2(inst, 1300, 5.0);
+    Peak p3(inst, 1350, 3.0);
+    Peak p4(inst, 1400, 3.0);
+    pw->addPeak(p1);
+    pw->addPeak(p2);
+    pw->addPeak(p3);
+    pw->addPeak(p4);
+
+
+     // Save it to Nexus
+    std::string input_ws("peaksWS_test_saveNexus");
+
+    AnalysisDataService::Instance().add( input_ws, pw );
+
+    const std::string filename = "PeaksWorksapceTest_test_saveNexus.nxs";
+    IAlgorithm_sptr saver = AlgorithmManager::Instance().createUnmanaged("SaveNexusProcessed");
+    saver->initialize();
+
+    saver->setPropertyValue("InputWorkspace", input_ws);
+    saver->setPropertyValue("Filename", filename);
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+
+
+    // Load the nexus file
+    IAlgorithm_sptr loader = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed"); 
+    loader->initialize();
+
+    std::string output_ws("loaded_peaks");
+
+    loader->setPropertyValue("Filename", filename);
+    loader->setPropertyValue("OutputWorkspace", output_ws);
+    TS_ASSERT_THROWS_NOTHING(loader->execute());
+
+    //Test some aspects of the peaks loaded from the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
+
+    PeaksWorkspace_sptr lpw = boost::dynamic_pointer_cast<PeaksWorkspace>(workspace);
+
+    // Check that the peaks are what we saved
+    TS_ASSERT_EQUALS( lpw->getPeak(0).getDetectorID(), 1300);
+    TS_ASSERT_DELTA(  lpw->getPeak(0).getWavelength(), 4.0, 1e-5);
+    TS_ASSERT_EQUALS( lpw->getPeak(1).getDetectorID(), 1300);
+    TS_ASSERT_DELTA(  lpw->getPeak(1).getWavelength(), 5.0, 1e-5);
+    TS_ASSERT_EQUALS( lpw->getPeak(2).getDetectorID(), 1350);
+    TS_ASSERT_DELTA(  lpw->getPeak(2).getWavelength(), 3.0, 1e-5);
+    TS_ASSERT_EQUALS( lpw->getPeak(3).getDetectorID(), 1400);
+    TS_ASSERT_DELTA(  lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
 
   }
 

@@ -36,9 +36,10 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ValidatorAnyList.h"
+#include "MantidKernel/ListAnyValidator.h"
 #include <cfloat>
 #include <iomanip>
 
@@ -55,6 +56,8 @@ class PropChanger: public IPropertySettings
     std::string host_ws_name;
     // the name of the property, which specifies the workspace which can contain single spectra to normalize by 
     std::string host_monws_name;
+    // the name of the property, which specifies if you want to allow normalizing by any spectra.
+    std::string allow_any_spectra;
     // the pointer to the main host algorithm.
     const IPropertyManager * host_algo;
 
@@ -65,8 +68,8 @@ class PropChanger: public IPropertySettings
     // auxiliary function to obtain list of monitor's ID-s (allowed_values) from the host workspace;
    void  monitor_id_reader()const;
 public:
-    PropChanger(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty):
-      host_ws_name(WSProperty),host_monws_name(MonWSProperty), host_algo(algo),is_enabled(true){}
+    PropChanger(const IPropertyManager * algo,const std::string WSProperty,const std::string MonWSProperty,const std::string AllowAnySpectra):
+      host_ws_name(WSProperty),host_monws_name(MonWSProperty), allow_any_spectra(AllowAnySpectra),host_algo(algo),is_enabled(true){}
   // if input to "
    bool isEnabled()const{
        API::MatrixWorkspace_const_sptr monitorsWS = host_algo->getProperty(host_monws_name);
@@ -97,12 +100,12 @@ public:
        for(size_t i=0;i<ival.size();i++){
                 ival[i]=boost::lexical_cast<int>(allowed_values[i]);
        }
-       piProp->modify_validator(new ValidatorAnyList<int>(ival));
+       piProp->modify_validator(new ListAnyValidator<int>(ival));
            
    }
    // interface needs it but if indeed proper clone used -- do not know. 
-   virtual IPropertySettings* clone(){return new PropChanger(host_algo,host_ws_name,host_monws_name);}
-
+   virtual IPropertySettings* clone(){return new PropChanger(host_algo,host_ws_name,host_monws_name,allow_any_spectra);}
+   virtual ~PropChanger(){};
 
 };
 // read the monitors list from the workspace;
@@ -164,14 +167,19 @@ void NormaliseToMonitor::init()
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
     "Name of the input workspace. Must be a non-distribution histogram.");
+
+   //
+ // declareProperty("NofmalizeByAnySpectra",false,
+ //   "Allows you to normalize the workspace by any spectra, not just by the monitor one");
+  // Can either set a spectrum within the workspace to be the monitor spectrum.....
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name to use for the output workspace");
 
   // Can either set a spectrum within the workspace to be the monitor spectrum.....
-  declareProperty("MonitorSpectrum",-1,
+   declareProperty("MonitorSpectrum",-1,
     "The spectrum number of the monitor spectrum within the InputWorkspace");
-  // set up the validator, which would verify if spectrum is correct
-  setPropertySettings("MonitorSpectrum",new PropChanger(this,"InputWorkspace","MonitorWorkspace"));
+   // set up the validator, which would verify if spectrum is correct
+   setPropertySettings("MonitorSpectrum",new PropChanger(this,"InputWorkspace","MonitorWorkspace","NofmalizeByAnySpectra"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
@@ -267,7 +275,11 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace)
 {
   // Get hold of the monitor spectrum
-  const int monitorSpec = getProperty("MonitorSpectrum");
+  int monitorSpec = getProperty("MonitorSpectrum");
+  // currently it is not a spectrum, but the detectror ID
+  std::vector<detid_t>  monitors(1,monitorSpec);
+  std::vector<specid_t> RealMonitorSpec = inputWorkspace->spectraMap().getSpectra(monitors);
+  monitorSpec                           = (int)RealMonitorSpec[0];
   if (monitorSpec < 0)
   {
     throw std::runtime_error("MonitorSpectrum must not be negative");

@@ -33,6 +33,9 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
+#include "MantidKernel/DataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -356,7 +359,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
   // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
-    IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
+  IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
   if (mdew)
     mdew->estimateResolution();
 
@@ -405,6 +408,25 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
+}
+
+
+//------------------------------------------------------------------------------------
+/** Set the workspace by name
+ *
+ * @param wsName :: name of the MDWorkspace to look for
+ * @throw if the workspace is not found or is a MatrixWorkspace
+ */
+void SliceViewer::setWorkspace(const QString & wsName)
+{
+  IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+      AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
+  if (!ws)
+    throw std::runtime_error("SliceViewer can only view MDWorkspaces.");
+  if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws))
+    throw std::runtime_error("SliceViewer cannot view MatrixWorkspaces. "
+        "Please select a MDEventWorkspace or a MDHistoWorkspace.");
+  this->setWorkspace(ws);
 }
 
 
@@ -876,12 +898,77 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
-  // Show the new slice. This finds m_dimX and Y
+  // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
 
+
+//=================================================================================================
+//========================================== PYTHON METHODS =======================================
+//=================================================================================================
+
+//------------------------------------------------------------------------------------
+/** Set the index of the dimensions that will be shown as
+ * the X and Y axis of the plot.
+ *
+ * To be called from Python, primarily
+ *
+ * @param indexX :: index of the X dimension, from 0 to NDims-1.
+ * @param indexX :: index of the Y dimension, from 0 to NDims-1.
+ */
+void SliceViewer::setXYDim(int indexX, int indexY)
+{
+  if (indexX >= int(m_dimWidgets.size()) || indexX < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(indexX) + " in the workspace.");
+  if (indexY >= int(m_dimWidgets.size()) || indexY < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(indexY) + " in the workspace.");
+  if (indexX == indexY)
+    throw std::invalid_argument("X dimension must be different than the Y dimension index.");
+
+  // Set the X and Y widgets
+  m_dimWidgets[indexX]->setShownDim(0);
+  m_dimWidgets[indexY]->setShownDim(1);
+
+  // Set all other dimensions as slice points
+  for (int d=0; d < int(m_dimWidgets.size()); d++)
+    if (d != indexX && d != indexY)
+      m_dimWidgets[d]->setShownDim(-1);
+
+  // Show the new slice. This finds m_dimX and m_dimY
+  this->updateDisplay();
+  emit changedShownDim(m_dimX, m_dimY);
+}
+
+
+//------------------------------------------------------------------------------------
+/** Sets the slice point in the given dimension:
+ * that is, what is the position of the plane in that dimension
+ *
+ * @param dim :: index of the dimension to change
+ * @param value :: value of the slice point, in the units of the given dimension.
+ *        This should be within the range of min/max for that dimension.
+ */
+void SliceViewer::setSlicePoint(int dim, double value)
+{
+  if (dim >= int(m_dimWidgets.size()) || dim < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
+  m_dimWidgets[dim]->setSlicePoint(value);
+}
+
+//------------------------------------------------------------------------------------
+/** Returns the slice point in the given dimension
+ *
+ * @param dim :: index of the dimension
+ * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ */
+double SliceViewer::getSlicePoint(int dim) const
+{
+  if (dim >= int(m_dimWidgets.size()) || dim < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
+  return m_slicePoint[dim];
+}
 
 } //namespace
 }

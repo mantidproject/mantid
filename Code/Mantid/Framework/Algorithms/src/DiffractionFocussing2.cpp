@@ -140,7 +140,7 @@ void DiffractionFocussing2::exec()
   progress(0.2, "Determine Rebin Params");
   udet2group.clear();
   // std::cout << "(1) nGroups " << nGroups << "\n";
-  groupWS->makeDetectorIDToGroupMap(udet2group, nGroups);
+  groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
   // std::cout << "(2) nGroups " << nGroups << "\n";
 
   //This finds the rebin parameters (used in both versions)
@@ -520,9 +520,6 @@ void DiffractionFocussing2::execEvent()
  */
 int DiffractionFocussing2::validateSpectrumInGroup(size_t wi)
 {
-  // Get the spectra to detector map
-  //const std::set<detid_t> & dets
-  //    = ((MatrixWorkspace_const_sptr)m_matrixInputW)->getSpectrum(wi)->getDetectorIDs();
   const std::set<detid_t> & dets = m_matrixInputW->getSpectrum(wi)->getDetectorIDs();
   if (dets.empty()) // Not in group
   {
@@ -531,19 +528,16 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi)
   }
 
   std::set<detid_t>::const_iterator it = dets.begin();
-  udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
-  if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
+  if (*it < 0) // bad pixel id
     return -1;
-  const int group = (*mapit).second;
-  int new_group;
+
+  const int group = udet2group[*it];
+  if (group <= 0)
+    return -1;
   it++;
-  for (; it != dets.end(); it++) // Loop other all other udets
+  for (; it != dets.end(); ++it) // Loop other all other udets
   {
-    mapit = udet2group.find((*it));
-    if (mapit == udet2group.end()) // Group not assigned
-      return -1;
-    new_group = (*mapit).second;
-    if (new_group != group) // At least one udet does not belong to the same group
+    if (udet2group[*it] != group)
       return -1;
   }
 
@@ -579,12 +573,10 @@ void DiffractionFocussing2::determineRebinParameters()
 
   // whether or not to bother checking for a mask
   bool checkForMask = false;
-  { // get rid of these objects quickly
-    Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
-    if (instrument != NULL)
-    {
-      checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
-    }
+  Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
+  if (instrument != NULL)
+  {
+    checkForMask = ((instrument->getSource() != NULL) && (instrument->getSample() != NULL));
   }
 
   groupAtWorkspaceIndex.resize(nHist);
@@ -594,16 +586,24 @@ void DiffractionFocussing2::determineRebinParameters()
     groupAtWorkspaceIndex[wi] = group;
     if (group == -1)
       continue;
+
+    // the spectrum is the real thing we want to work with
+    const ISpectrum * spec = m_matrixInputW->getSpectrum(wi);
+    if (spec == NULL)
+    {
+      groupAtWorkspaceIndex[wi] = -1;
+      continue;
+    }
     if (checkForMask)
     {
-      Geometry::IDetector_const_sptr det = m_matrixInputW->getDetector(static_cast<size_t>(wi));
-      if ( (det == NULL) || (det->isMasked()) )
+      if (instrument->isDetectorMasked(spec->getDetectorIDs()))
       {
         groupAtWorkspaceIndex[wi] = -1;
         continue;
       }
     }
     gpit = group2minmax.find(group);
+
     // Create the group range in the map if it isn't already there
     if (gpit == group2minmax.end())
     {
@@ -611,7 +611,7 @@ void DiffractionFocussing2::determineRebinParameters()
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    const MantidVec& X = m_matrixInputW->readX(wi);
+    const MantidVec& X = spec->readX();
     double temp = X.front();
     if (temp < (min)) //New Xmin found
       (gpit->second).first = temp;

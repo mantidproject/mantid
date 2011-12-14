@@ -37,7 +37,7 @@ namespace Mantid
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
-    std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const int noNeighbours) const
+    std::map<specid_t, V3D> NearestNeighbours::neighbours(const specid_t spectrum,  bool force, const int noNeighbours) const
     {
       if(force || m_noNeighbours != int(noNeighbours))
       {
@@ -53,7 +53,7 @@ namespace Mantid
      * @return map of Detector ID's to distance
      * @throw NotFoundError if component is not recognised as a detector
      */
-    std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum, const double radius) const
+    std::map<specid_t, V3D> NearestNeighbours::neighbours(const specid_t spectrum, const double radius) const
     {
       // If the radius is stupid then don't let it continue as well be stuck forever
       if( radius < 0.0 || radius > 10.0 )
@@ -61,7 +61,7 @@ namespace Mantid
         throw std::invalid_argument("NearestNeighbours::neighbours - Invalid radius parameter.");
       }
 
-      std::map<specid_t, double> result;
+      std::map<specid_t, V3D> result;
       if( radius == 0.0 ) 
       {
         const int eightNearest = 8;
@@ -94,12 +94,12 @@ namespace Mantid
       }
       m_radius = radius;
     
-      std::map<detid_t, double> nearest = defaultNeighbours(spectrum);
-      std::map<specid_t, double>::const_iterator cend;
-      for(std::map<specid_t, double>::const_iterator cit = nearest.begin();
+      std::map<detid_t, V3D> nearest = defaultNeighbours(spectrum);
+      std::map<specid_t, V3D>::const_iterator cend;
+      for(std::map<specid_t, V3D>::const_iterator cit = nearest.begin();
           cit != nearest.end(); ++cit )
       {
-        if ( cit->second <= radius )
+        if ( cit->second.norm() <= radius )
         {
           result[cit->first] = cit->second;
         }
@@ -181,11 +181,12 @@ namespace Mantid
         {
           ANNidx index = nnIndexList[i];
           V3D neighbour = V3D(dataPoints[index][0], dataPoints[index][1], dataPoints[index][2])*(*m_scale);
-          double separation = (neighbour-realPos).norm();
+          V3D distance = neighbour - realPos;
+          double separation = distance.norm();
           boost::add_edge(
             m_specToVertex[detIt->first], // from
             pointNoToVertex[index], // to
-            separation, 
+            distance, 
             m_graph
             );
           if( separation > m_cutoff )
@@ -213,13 +214,13 @@ namespace Mantid
      * @return map of detID to distance
      * @throw NotFoundError if detector ID is not recognised
      */
-    std::map<specid_t, double> NearestNeighbours::defaultNeighbours(const specid_t spectrum) const
+    std::map<specid_t, V3D> NearestNeighbours::defaultNeighbours(const specid_t spectrum) const
     {  
       MapIV::const_iterator vertex = m_specToVertex.find(spectrum);
       
       if ( vertex != m_specToVertex.end() )
       {
-        std::map<specid_t, double> result;
+        std::map<specid_t, V3D> result;
         std::pair<Graph::adjacency_iterator, Graph::adjacency_iterator> adjacent = boost::adjacent_vertices(vertex->second, m_graph);
         Graph::adjacency_iterator adjIt;  
         for ( adjIt = adjacent.first; adjIt != adjacent.second; adjIt++ )

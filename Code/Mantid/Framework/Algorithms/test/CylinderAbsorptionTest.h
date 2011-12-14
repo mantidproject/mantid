@@ -22,11 +22,6 @@ public:
     TS_ASSERT_EQUALS( atten.version(), 1 );
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( atten.category(), "Absorption Corrections" );
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( atten.initialize() );

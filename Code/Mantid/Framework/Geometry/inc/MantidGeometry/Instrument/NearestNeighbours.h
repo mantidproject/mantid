@@ -63,10 +63,10 @@ namespace Mantid
       virtual ~NearestNeighbours() {};
 
       // Neighbouring spectra by radius
-      std::map<specid_t, double> neighbours(const specid_t spectrum, const double radius=0.0) const;
+      std::map<specid_t, Mantid::Kernel::V3D> neighbours(const specid_t spectrum, const double radius=0.0) const;
 
       // Neighbouring spectra by 
-      std::map<specid_t, double> neighbours(const specid_t spectrum, bool force, const int numberofneighbours=8) const;
+      std::map<specid_t, Mantid::Kernel::V3D> neighbours(const specid_t spectrum, bool force, const int numberofneighbours=8) const;
 
     protected:
 
@@ -84,7 +84,7 @@ namespace Mantid
       /// typedef for Graph object used to hold the calculated information
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
         boost::property<boost::vertex_name_t, int64_t>,
-        boost::property<boost::edge_name_t, double>
+        boost::property<boost::edge_name_t, Mantid::Kernel::V3D>
       > Graph;
       /// Vertex descriptor object for Graph
       typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
@@ -95,7 +95,7 @@ namespace Mantid
       /// current instument and spectra-detector mapping
       void build(const int noNeighbours);
       /// Query the graph for the default number of nearest neighbours to specified detector
-      std::map<specid_t, double> defaultNeighbours(const specid_t spectrum) const;
+      std::map<specid_t, Mantid::Kernel::V3D> defaultNeighbours(const specid_t spectrum) const;
       /// The current number of nearest neighbours
       int m_noNeighbours;
       /// The largest value of the distance to a nearest neighbour

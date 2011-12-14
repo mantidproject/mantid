@@ -50,7 +50,7 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const { return "Diffraction;CorrectionFunctions\\InstrumentCorrections"; }
   /// Function to optimize
   double intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param, std::string groupWSName);
   void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, API::MatrixWorkspace_sptr inputW);

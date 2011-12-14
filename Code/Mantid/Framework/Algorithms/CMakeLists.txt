@@ -84,6 +84,7 @@ set ( SRC_FILES
 	src/GeneralisedSecondDifference.cpp
 	src/GeneratePythonScript.cpp
 	src/GetDetectorOffsets.cpp
+	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GhostCorrection.cpp
@@ -261,6 +262,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GeneratePythonScript.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
+	inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GhostCorrection.h
@@ -429,6 +431,7 @@ set ( TEST_FILES
 	test/FlatPlateAbsorptionTest.h
 	test/GeneratePythonScriptTest.h
 	test/GetDetectorOffsetsTest.h
+	test/GetDetOffsetsMultiPeaksTest.h
 	test/GetEiTest.h
 	test/GhostCorrectionTest.h
 	test/GroupWorkspacesTest.h

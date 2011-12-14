@@ -66,4 +66,4 @@ set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule PythonKernelModule ${PYTHON_DEPS} )
+target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )

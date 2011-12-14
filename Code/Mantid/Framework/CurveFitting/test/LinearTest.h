@@ -49,11 +49,6 @@ public:
     TS_ASSERT_EQUALS( lin.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( lin.category(), "CurveFitting" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( lin.initialize() )

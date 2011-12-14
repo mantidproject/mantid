@@ -32,16 +32,16 @@ public:
     TS_ASSERT_EQUALS( v.isValid(""), "Select a value" )
 
     TS_ASSERT_EQUALS( v.isValid("b"),
-	  "The value \"b\" is not in the list of allowed values")
+      "The value \"b\" is not in the list of allowed values")
 
     v.addAllowedValue("a");
     TS_ASSERT_EQUALS( v.isValid(""),
-	  "Select a value" )
+      "Select a value" )
     TS_ASSERT_EQUALS( v.isValid("a"), "" )
     TS_ASSERT_EQUALS( v.isValid("b"),
-	  "The value \"b\" is not in the list of allowed values")
+      "The value \"b\" is not in the list of allowed values")
     TS_ASSERT_EQUALS( v.isValid("A"),
-	  "The value \"A\" is not in the list of allowed values")
+      "The value \"A\" is not in the list of allowed values")
   }
 
   void testAllowedValues()
@@ -75,7 +75,7 @@ public:
     IValidator<std::string> *v = new ListValidator;
     IValidator<std::string> *vv = v->clone();
     TS_ASSERT_DIFFERS( v, vv )
-    TS_ASSERT( dynamic_cast<ListValidator*>(vv) )
+    TS_ASSERT( dynamic_cast<ListValidator *>(vv) )
     delete v;
     delete vv;
   }

@@ -81,7 +81,6 @@ public:
     GroupDetectors2 gd;
     TS_ASSERT_EQUALS( gd.name(), "GroupDetectors" );
     TS_ASSERT_EQUALS( gd.version(), 2 );
-    TS_ASSERT_EQUALS( gd.category(), "DataHandling\\Detectors" );
     TS_ASSERT_THROWS_NOTHING( gd.initialize() );
     TS_ASSERT( gd.isInitialized() );
 

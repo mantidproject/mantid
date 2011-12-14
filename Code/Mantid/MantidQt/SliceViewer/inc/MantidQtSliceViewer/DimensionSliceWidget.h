@@ -41,9 +41,11 @@ public:
   void setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim);
   void setMinMax(double min, double max);
   void setShownDim(int dim);
+  void setSlicePoint(double value);
 
   double getSlicePoint() const
   { return m_slicePoint; }
+
 
   /// @return the shown dimension, 0=X, 1=Y, -1=None
   int getShownDim() const

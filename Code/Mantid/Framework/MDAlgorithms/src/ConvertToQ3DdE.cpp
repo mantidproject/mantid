@@ -105,6 +105,7 @@ ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const
 
     det_loc.det_dir.resize(nHist);
     det_loc.det_id.resize(nHist);
+    det_loc.detIDMap.resize(nHist);
      // Loop over the spectra
    const Geometry::ISpectraDetectorMap & spm = inputWS->spectraMap();
    size_t ic(0);
@@ -121,7 +122,9 @@ ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const
     // Check that we aren't dealing with monitor...
     if (spDet->isMonitor())continue;   
 
-     det_loc.det_id[ic] = spDet->getID();
+     det_loc.det_id[ic]  = spDet->getID();
+     det_loc.detIDMap[ic]= i;
+
     // dist     =  spDet->getDistance(*sample);
      double polar    =  inputWS->detectorTwoTheta(spDet);
      double azim     =  spDet->getPhi();    
@@ -141,6 +144,7 @@ ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const
    if(ic<nHist){
        det_loc.det_dir.resize(ic);
        det_loc.det_id.resize(ic);
+       det_loc.detIDMap.resize(ic);
    }
 }
 //----------------------------------------------------------------------------------------------

@@ -70,11 +70,6 @@ public:
     TS_ASSERT_EQUALS( grouper.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( grouper.category(), "DataHandling\\Detectors" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
