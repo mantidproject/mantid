@@ -52,6 +52,7 @@ set ( UI_FILES
 # Python unit tests
 set ( TEST_PY_FILES 
 	test/SliceViewerPythonInterfaceTest.py
+	test/QwtTypesPythonInterfaceTest.py
 )
 
 

@@ -27,7 +27,26 @@ public:
     TS_ASSERT_EQUALS( f.getNumPlanes(), 1 );
   }
 
+  void test_coordConstructor()
+  {
+    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t point[3] = {1,2,3};
+    MDPlaneImplicitFunction f(3, normal, point);
+    TS_ASSERT_EQUALS( f.getNumDims(), 3 );
+    // Making sure only one plane can be added
+    MDPlane p1(3, normal, point);
+    TS_ASSERT_THROWS_ANYTHING( f.addPlane(p1) );
+  }
+
   void test_xmlRep()
+  {
+    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t point[3] = {1,2,3};
+    MDPlaneImplicitFunction f(3, normal, point);
+    TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep() );
+  }
+
+  void test_xmlRep_addPlane()
   {
     MDPlaneImplicitFunction f;
 
@@ -35,7 +54,7 @@ public:
     coord_t point[3] = {1,2,3};
     MDPlane p1(3, normal, point);
     f.addPlane(p1);
-    TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep() );
+    TS_ASSERT_EQUALS( f.toXMLString(), getXmlRep_noOrigin() );
   }
 
 private:
@@ -46,13 +65,52 @@ private:
                        "<ParameterList>"\
                        "<Parameter>"\
                        "<Type>NormalParameter</Type>"\
+                       "<Value>1.234 4.56 6.78</Value>"\
                        "</Parameter>"\
                        "<Parameter>"\
                        "<Type>OriginParameter</Type>"\
+                       "<Value>1 2 3</Value>"\
                        "</Parameter>"\
                        "</ParameterList>"\
                        "</Function>");
   }
+
+#ifdef WIN32
+  std::string getXmlRep_noOrigin()
+  {
+    return std::string("<Function>"\
+                       "<Type>PlaneImplicitFuction</Type>"\
+                       "<ParameterList>"\
+                       "<Parameter>"\
+                       "<Type>NormalParameter</Type>"\
+                       "<Value>1.234 4.56 6.78</Value>"\
+                       "</Parameter>"\
+                       "<Parameter>"\
+                       "<Type>OriginParameter</Type>"\
+                       "<Value>1.#QNAN 1.#QNAN 1.#QNAN</Value>"\
+                       "</Parameter>"\
+                       "</ParameterList>"\
+                       "</Function>");
+  }
+#else
+  std::string getXmlRep_noOrigin()
+  {
+    return std::string("<Function>"\
+                       "<Type>PlaneImplicitFuction</Type>"\
+                       "<ParameterList>"\
+                       "<Parameter>"\
+                       "<Type>NormalParameter</Type>"\
+                       "<Value>1.234 4.56 6.78</Value>"\
+                       "</Parameter>"\
+                       "<Parameter>"\
+                       "<Type>OriginParameter</Type>"\
+                       "<Value>nan nan nan</Value>"\
+                       "</Parameter>"\
+                       "</ParameterList>"\
+                       "</Function>");
+  }
+#endif
+
 };
 
 #endif // MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_

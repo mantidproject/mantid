@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidPythonInterface/kernel/NumpyConverters.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/scope.hpp>
@@ -7,7 +8,41 @@ using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::AngleUnits;
 using Mantid::Geometry::angRadians;
 using Mantid::Geometry::angDegrees;
+using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 using namespace boost::python;
+
+// Functions purely to aid with wrapping
+namespace //<unnamed>
+{
+  using namespace Mantid::PythonInterface;
+
+  /// Pass-through function to return the B matrix as a numpy array
+  PyObject * getB(UnitCell& self)
+  {
+    return Numpy::wrapWithReadOnlyNumpy(self.getB());
+  }
+
+  /// Pass-through function to return the B matrix as a numpy array
+  PyObject * getG(UnitCell& self)
+  {
+    return Numpy::wrapWithReadOnlyNumpy(self.getG());
+  }
+
+
+  /// Pass-through function to return the B matrix as a numpy array
+  PyObject * getGstar(UnitCell& self)
+  {
+    return Numpy::wrapWithReadOnlyNumpy(self.getGstar());
+  }
+
+  /// Pass-through function to set the unit cell from a 2D numpy array
+  void recalculateFromGstar(UnitCell & self, PyObject* values)
+  {
+    // Create a double matrix and put this in to the unit cell
+    self.recalculateFromGstar(Numpy::createDoubleMatrix(values));
+  }
+}
 
 void export_UnitCell()
 {
@@ -42,7 +77,8 @@ void export_UnitCell()
     .def( "bstar", (double ( UnitCell::* )() const) &UnitCell::bstar )    
     .def( "c", (double ( UnitCell::* )() const) &UnitCell::c )    
     .def( "cstar", (double ( UnitCell::* )() const) &UnitCell::cstar )    
-    .def( "d", (double ( UnitCell::* )( double,double,double ) const) &UnitCell::d, (arg("h"), arg("k"), arg("l") ))    
+    .def( "d", (double ( UnitCell::* )( double,double,double ) const) &UnitCell::d, (arg("h"), arg("k"), arg("l") ))
+    .def( "d", (double ( UnitCell::* )(const V3D &) const) &UnitCell::d, (arg("hkl")))
     .def( "dstar", (double ( UnitCell::* )( double,double,double ) const) &UnitCell::dstar , (arg("h"), arg("k"), arg("l") ))    
     .def( "gamma", (double ( UnitCell::* )() const) &UnitCell::gamma )   
     .def( "gammastar", (double ( UnitCell::* )() const) &UnitCell::gammastar )    
@@ -56,10 +92,10 @@ void export_UnitCell()
     .def( "setc", (void ( UnitCell::* )( double ) )( &UnitCell::setc ), ( arg("_c") ) )    
     .def( "setgamma", (void ( UnitCell::* )( double,int const ) )( &UnitCell::setgamma ), ( arg("_gamma"), arg("Unit")=(int)(angDegrees) ) )
     .def( "volume", (double ( UnitCell::* )() const) &UnitCell::volume)
-    // .def( "getG", &UnitCellWrapper::getG)
-    // .def( "getGstar", &UnitCellWrapper::getGstar)
-    // .def( "getB", &UnitCellWrapper::getB )
-    // .def( "recalculateFromGstar", &UnitCellWrapper::recalculateFromGStar) ;
+    .def( "getG", &getG)
+    .def( "getGstar", &getGstar)
+    .def( "getB", &getB )
+    .def( "recalculateFromGstar", &recalculateFromGstar)
     ;
 
     scope().attr("deg2rad") = Mantid::Geometry::deg2rad;

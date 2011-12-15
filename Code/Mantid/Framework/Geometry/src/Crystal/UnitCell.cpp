@@ -503,8 +503,15 @@ namespace Geometry
 
 
   /// Recalculate lattice from reciprocal metric tensor (Gstar=transpose(UB)*UB)
-  void UnitCell::recalculateFromGstar(DblMatrix& NewGstar)
+  void UnitCell::recalculateFromGstar(const DblMatrix& NewGstar)
   {
+    if( NewGstar.numRows() != 3 || NewGstar.numCols() != 3 )
+    {
+      std::ostringstream msg;
+      msg << "UnitCell::recalculateFromGstar - Expected a 3x3 matrix but was given a " << NewGstar.numRows() << "x" << NewGstar.numCols();
+      throw std::invalid_argument(msg.str());
+    }
+
     if (NewGstar[0][0]*NewGstar[1][1]*NewGstar[2][2]<=0.) throw std::invalid_argument("NewGstar");
     Gstar=NewGstar;
     calculateReciprocalLattice();

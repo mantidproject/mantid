@@ -25,6 +25,7 @@ Integrate and calculate error of integration of each peak from single crystal da
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <boost/algorithm/string.hpp>
 #include "MantidKernel/VectorHelper.h"
 

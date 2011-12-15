@@ -557,7 +557,7 @@ namespace Mantid
       }
       if( executionSuccessful )
       {
-        // If requested update the instrument to positions in the raw file
+        // If requested update the instrument to positions in the data file
         const Geometry::ParameterMap & pmap = localWorkspace->instrumentParameters();
         if( pmap.contains(localWorkspace->getInstrument()->getComponentID(),"det-pos-source") )
         {
@@ -571,6 +571,11 @@ namespace Mantid
             if(value  == "datafile-ignore-phi" )
             {
               updateInst->setProperty("IgnorePhi", true);
+              g_log.information("Detector positions in IDF updated with positions in the data file except for the phi values");
+            }
+            else 
+            {
+              g_log.information("Detector positions in IDF updated with positions in the data file");
             }
             // We want this to throw if it fails to warn the user that the information is not correct.
             updateInst->execute();

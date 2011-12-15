@@ -42,14 +42,14 @@ namespace Mantid
       * @param name :: The name of the property
       * @param value :: The value of the property as a bpl object
       */
-      void setProperty(bpl::object self, const std::string & name, bpl::object value)
+      void setProperty(IPropertyManager &self, const std::string & name, bpl::object value)
       {
         // Find type handler
         PyTypeObject *pytype = value.ptr()->ob_type;
         PyTypeLookup::const_iterator itr = typeHandlers.find(pytype);
         if( itr != typeHandlers.end() )
         {
-          itr->second->set(bpl::extract<IPropertyManager*>(self), name, value);
+          itr->second->set(&self, name, value);
         }
         else
         {
@@ -123,7 +123,7 @@ namespace Mantid
       */
       bpl::object value(bpl::object self)
       {
-        bpl::object value = bpl::object(bpl::handle<>(PyObject_GetAttrString(self.ptr(), "value_as_declared")));
+        bpl::object value = bpl::object(bpl::handle<>(PyObject_GetAttrString(self.ptr(), "valueAsDeclared")));
         upcastFromDataItem(value);
         return value;
       }

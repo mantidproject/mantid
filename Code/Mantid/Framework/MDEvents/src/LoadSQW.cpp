@@ -12,6 +12,7 @@ If the OutputWorkspace does NOT already exist, a default one is created. This is
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskMRU.h"
 #include "MantidKernel/Matrix.h"
@@ -25,6 +26,7 @@ If the OutputWorkspace does NOT already exist, a default one is created. This is
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Geometry::OrientedLattice;
 
 namespace Mantid
 {

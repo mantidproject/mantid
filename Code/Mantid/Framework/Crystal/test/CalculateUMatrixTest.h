@@ -15,8 +15,10 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+
 using namespace Mantid;
 using namespace Mantid::Crystal;
+using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;

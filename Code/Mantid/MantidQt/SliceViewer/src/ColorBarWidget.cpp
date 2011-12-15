@@ -25,8 +25,6 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   // Default values.
   m_min = 0;
   m_max = 1000;
-  m_rangeMin = 0;
-  m_rangeMax = 1000;
   m_showTooltip = false;
   m_log = false;
   m_colorMap.changeScaleType( GraphOptions::Linear );
@@ -107,16 +105,17 @@ void ColorBarWidget::setSpinBoxesSteps()
   {
     // Logarithmic color scale: move by logarithmic steps
     double logRange;
-    if (m_rangeMin <= 0)
+    double temp_min = m_min;
+    if (temp_min <= 0)
     {
       // Try to guess at a valid min range if 0 for log scale
-      logRange = log10(m_rangeMax);
-      if (logRange >= 3) m_rangeMin = 1;
-      else if (logRange >= 0) m_rangeMin = 1e-3;
+      logRange = log10(m_max);
+      if (logRange >= 3) temp_min = 1;
+      else if (logRange >= 0) temp_min = 1e-3;
       // Default to 1/10000 of the max
-      else m_rangeMin = pow(10., double(int(logRange))-4.);
+      else temp_min = pow(10., double(int(logRange))-4.);
     }
-    logRange = log10(m_rangeMax) - log10(m_rangeMin);
+    logRange = log10(m_max) - log10(temp_min);
     if (logRange > 6) logRange = 6;
     step = pow(10., logRange/100.);
 
@@ -124,14 +123,14 @@ void ColorBarWidget::setSpinBoxesSteps()
     ui.valMin->setMinimum( 1e-99 );
     ui.valMax->setMinimum( 1e-99 );
     // Limit the current min/max to positive values
-    if (m_min < m_rangeMin) m_min = m_rangeMin;
-    if (m_max < m_rangeMin) m_max = m_rangeMin;
+    if (m_min < temp_min) m_min = temp_min;
+    if (m_max < temp_min) m_max = temp_min;
   }
   else
   {
     // --- Linear scale ----
     // Round step that is between 1/100 to 1/1000)
-    int exponent = int(log10(m_rangeMax)) - 2;
+    int exponent = int(log10(m_max)) - 2;
     step = pow(10., double(exponent));
 
     // Large negative value for the minimum
@@ -148,22 +147,6 @@ void ColorBarWidget::setSpinBoxesSteps()
   updateMinMaxGUI();
 }
 
-
-//-------------------------------------------------------------------------------------------------
-/** Set the range of values in the overall data (limits to selections)
- * Update the display.
- *
- * @param min
- * @param max
- */
-void ColorBarWidget::setDataRange(double min, double max)
-{
-  m_rangeMin = min;
-  m_rangeMax = max;
-  setSpinBoxesSteps();
-}
-void ColorBarWidget::setDataRange(QwtDoubleInterval range)
-{ this->setDataRange(range.minValue(), range.maxValue()); }
 
 //-------------------------------------------------------------------------------------------------
 /** Set the range of values viewed in the color bar

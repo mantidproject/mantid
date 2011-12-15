@@ -8,7 +8,7 @@ using boost::python::no_init;
 void export_ExperimentInfo()
 {
   class_<ExperimentInfo,boost::noncopyable>("ExperimentInfo", no_init)
-    .def("get_run_number", &ExperimentInfo::getRunNumber, "Returns the run identifier for this run")
+    .def("getRunNumber", &ExperimentInfo::getRunNumber, "Returns the run identifier for this run")
     ;
 }
 

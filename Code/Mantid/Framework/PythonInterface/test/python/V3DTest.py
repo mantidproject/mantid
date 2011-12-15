@@ -1,6 +1,5 @@
 import unittest
 import math
-
 from mantid.kernel import V3D
 
 class V3DTest(unittest.TestCase):
@@ -50,13 +49,13 @@ class V3DTest(unittest.TestCase):
     def test_scalarprod(self):
         a = V3D(1.0,2.0,1.0)
         b = V3D(1.0,-2.0,-1.0)
-        sp = a.scalarprod(b)
+        sp = a.scalar_prod(b)
         self.assertAlmostEquals(sp,-4.0)
     
     def test_crossprod(self):
         a = V3D(1.0,0.0,0.0)
         b = V3D(0.0,1.0,0.0)
-        c = a.crossprod(b)
+        c = a.cross_prod(b)
         self.assertAlmostEquals(c.x(),0.0)
         self.assertAlmostEquals(c.y(),0.0)
         self.assertAlmostEquals(c.z(),1.0)

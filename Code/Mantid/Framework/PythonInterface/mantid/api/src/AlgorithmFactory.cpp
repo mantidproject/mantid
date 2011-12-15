@@ -15,12 +15,6 @@ using namespace boost::python;
 namespace
 {
   ///@cond
-  //------------------------------------------------------------------------------------------------------
-  // A factory function returning a reference to the AlgorithmFactory instance so that Python can use it
-  AlgorithmFactoryImpl & getAlgorithmFactory()
-  {
-    return AlgorithmFactory::Instance();
-  }
 
   //------------------------------------------------------------------------------------------------------
   /**
@@ -30,17 +24,15 @@ namespace
    * @param self :: Enables it to be called as a member function on the AlgorithmFactory class
    * @param includeHidden :: If true hidden algorithms are included
    */
-  PyObject * getRegisteredAlgorithms(PyObject * self, bool includeHidden)
+  PyObject * getRegisteredAlgorithms(AlgorithmFactoryImpl & self, bool includeHidden)
   {
-    UNUSED_ARG(self);
-    AlgorithmFactoryImpl & algFactory = AlgorithmFactory::Instance();
     // A list of strings AlgorithmName|version
-    std::vector<std::string> keys = algFactory.getKeys(includeHidden);
+    std::vector<std::string> keys = self.getKeys(includeHidden);
     const size_t nkeys = keys.size();
     PyObject *registered = PyDict_New();
     for( size_t i = 0; i < nkeys; ++i )
     {
-      std::pair<std::string, int> algInfo = algFactory.decodeName(keys[i]);
+      std::pair<std::string, int> algInfo = self.decodeName(keys[i]);
       PyObject *name = PyString_FromString(algInfo.first.c_str());
       PyObject *vers = PyInt_FromLong(algInfo.second);
       if( PyDict_Contains(registered, name) == 1 )
@@ -65,12 +57,12 @@ namespace
 
 void export_AlgorithmFactory()
 {
-  // Create a factory function to return this in Python
-  def("get_algorithm_factory", &getAlgorithmFactory, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
-        "Returns a reference to the AlgorithmFactory singleton");
 
   class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactory", no_init)
-      .def("get_registered_algorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
+      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
+        "Returns a reference to the AlgorithmFactory singleton")
+      .staticmethod("Instance")
+      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of ")
     ;
 
 }
@@ -115,5 +107,5 @@ namespace
 void export_RegisterAlgorithm()
 {
   // The registration function
-  def("register_algorithm", &registerAlgorithm, "Register an algorithm with Mantid. The class must derive from mantid.api.PythonAlgorithm.");
+  def("registerAlgorithm", &registerAlgorithm, "Register an algorithm with Mantid. The class must derive from mantid.api.PythonAlgorithm.");
 }

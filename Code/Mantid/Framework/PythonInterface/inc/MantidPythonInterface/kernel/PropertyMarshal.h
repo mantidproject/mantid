@@ -23,13 +23,19 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-
 #include <boost/python/object.hpp>
-
 #include <string>
 
 namespace Mantid
 {
+  //---------------------------------------------------------------------------
+  // Forward declaration
+  //---------------------------------------------------------------------------
+  namespace Kernel
+  {
+    class IPropertyManager;
+  }
+
   namespace PythonInterface
   {
 
@@ -70,7 +76,7 @@ namespace Mantid
       /// Insert a new property handler
       DLLExport void registerHandler(PyTypeObject* typeObject, PropertyHandler* handler);
       /// This static function allows a call to a method on an IPropertyManager object
-      DLLExport void setProperty(boost::python::object self, const std::string & name,
+      DLLExport void setProperty(Kernel::IPropertyManager &self, const std::string & name,
                                  boost::python::object value);
       /// Upcast an item from a DataItem to the most exported known type
       DLLExport void upcastFromDataItem(boost::python::object value);

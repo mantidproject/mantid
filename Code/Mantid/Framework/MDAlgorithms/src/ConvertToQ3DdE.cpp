@@ -17,6 +17,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/IPropertyManager.h"

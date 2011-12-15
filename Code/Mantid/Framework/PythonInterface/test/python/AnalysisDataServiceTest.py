@@ -1,17 +1,20 @@
 import unittest
-
 from testhelpers import run_algorithm
-
-from mantid.api import analysis_data_svc, MatrixWorkspace, Workspace
+from mantid.api import AnalysisDataService, MatrixWorkspace, Workspace
+from mantid import mtd
 
 class AnalysisDataServiceTest(unittest.TestCase):
   
     def test_len_returns_correct_value(self):
-        self.assertEquals(len(analysis_data_svc), 0)
+        self.assertEquals(len(AnalysisDataService.Instance()), 0)
         
+    def test_mtd_is_same_object_type_as_analysis_data_service(self):
+        self.assertTrue(isinstance(AnalysisDataService.Instance(), AnalysisDataService))
+        self.assertTrue(isinstance(mtd, AnalysisDataService))
+
     def test_retrieval_of_non_existent_data_raises_KeyError(self):
         try:
-            analysis_data_svc['NotHere']
+            AnalysisDataService.Instance()['NotHere']
             self.fail('AnalysisDataService did not throw when object does not exist')
         except KeyError:
             pass
@@ -27,23 +30,23 @@ class AnalysisDataServiceTest(unittest.TestCase):
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
         self._run_createws(wsname)
-        self.assertEquals(len(analysis_data_svc), 1)
+        self.assertEquals(len(AnalysisDataService.Instance()), 1)
         # Remove to clean the test up
-        analysis_data_svc.remove(wsname)
+        AnalysisDataService.Instance().remove(wsname)
         
     def test_len_decreases_when_item_removed(self):
         wsname = 'ADSTest_test_len_decreases_when_item_removed'
         self._run_createws(wsname)
-        self.assertEquals(len(analysis_data_svc), 1)
+        self.assertEquals(len(AnalysisDataService.Instance()), 1)
         # Remove to clean the test up
-        del analysis_data_svc[wsname]
-        self.assertEquals(len(analysis_data_svc), 0)
+        del AnalysisDataService.Instance()[wsname]
+        self.assertEquals(len(AnalysisDataService.Instance()), 0)
     
     def test_key_operator_does_same_as_retrieve(self):
         wsname = 'ADSTest_test_key_operator_does_same_as_retrieve'
         self._run_createws(wsname)
-        ws_from_op = analysis_data_svc[wsname]
-        ws_from_method = analysis_data_svc.retrieve(wsname)
+        ws_from_op = AnalysisDataService.Instance()[wsname]
+        ws_from_method = AnalysisDataService.Instance().retrieve(wsname)
         
         # Type check
         self.assertTrue(isinstance(ws_from_op, MatrixWorkspace))
@@ -51,10 +54,10 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
         self.assertNotEquals(ws_from_op.name(), '')
         self.assertEquals(ws_from_op.name(), ws_from_method.name())
-        self.assertEquals(ws_from_op.get_memory_size(), ws_from_method.get_memory_size())
+        self.assertEquals(ws_from_op.getMemorySize(), ws_from_method.getMemorySize())
 
         # Remove to clean the test up
-        analysis_data_svc.remove(wsname)
+        AnalysisDataService.Instance().remove(wsname)
 
     def test_removing_item_invalidates_extracted_handles(self):
         # If a reference to a DataItem has been extracted from the ADS
@@ -62,7 +65,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         # be able to access the DataItem
         wsname = 'ADSTest_test_removing_item_invalidates_extracted_handles'
         self._run_createws(wsname)
-        ws_handle = analysis_data_svc[wsname]
+        ws_handle = AnalysisDataService.Instance()[wsname]
         succeeded = False
         try:
             ws_handle.id() # Should be okay
@@ -70,7 +73,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         except RuntimeError:
             pass
         self.assertTrue(succeeded, "DataItem handle should be valid and allow function calls")
-        analysis_data_svc.remove(wsname)
+        AnalysisDataService.Instance().remove(wsname)
         self.assertRaises(RuntimeError, ws_handle.id)
 
 if __name__ == '__main__':

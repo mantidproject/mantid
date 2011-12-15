@@ -26,6 +26,7 @@ If the OutputWorkspace does NOT already exist, a default one is created. In orde
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

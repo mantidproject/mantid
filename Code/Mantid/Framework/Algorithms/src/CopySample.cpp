@@ -15,6 +15,7 @@ The following information can be copied:
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/SampleEnvironment.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid
 {
@@ -149,7 +150,7 @@ namespace Algorithms
       to.setThickness(from.getThickness());
       to.setWidth(from.getWidth());
     }
-    if ((latticeFlag) && from.hasOrientedLattice()) to.setOrientedLattice(new OrientedLattice(from.getOrientedLattice()));
+    if ((latticeFlag) && from.hasOrientedLattice()) to.setOrientedLattice(new Geometry::OrientedLattice(from.getOrientedLattice()));
   }
 
 

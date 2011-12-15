@@ -14,6 +14,7 @@ If the UB matrix is all zeros (default), it will calculate it from lattice param
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Geometry::OrientedLattice;
 
 namespace Mantid
 {

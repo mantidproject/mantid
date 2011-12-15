@@ -38,7 +38,7 @@
   boost::python::class_<Mantid::Kernel::PropertyWithValue< type >, \
      boost::python::bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, boost::python::no_init) \
      .add_property("value", Mantid::PythonInterface::PropertyMarshal::value) \
-     .add_property("value_as_declared", make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(), \
+     .add_property("valueAsDeclared", make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(), \
        boost::python::return_value_policy<boost::python::copy_const_reference>())) \
    ;
 
