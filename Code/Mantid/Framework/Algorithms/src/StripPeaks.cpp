@@ -102,7 +102,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Calling FindPeaks as a sub-algorithm");
 
-  API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
+  bool showlog = false;
+  API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
   findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
@@ -158,10 +159,14 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     const double width = peakslist->getRef<double>("width",i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
-    if ( height < 0 ) continue;              // Height must be positive
+    if ( height < 0 ) {
+      g_log.error() << "Find Peak with Negative Height" << std::endl;
+      continue;              // Height must be positive
+    }
 
-    g_log.debug() << "Subtracting peak from spectrum " << peakslist->getRef<int>("spectrum",i) 
-                  << " at x = " << centre << "\n";
+    g_log.debug() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
+                  << " at x = " << centre << " h = " << height << "\n";
+
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());
     for (int j = 0; j < spectrumLength; ++j)
