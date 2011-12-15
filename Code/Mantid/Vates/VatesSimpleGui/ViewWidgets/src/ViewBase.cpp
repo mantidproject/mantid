@@ -14,6 +14,7 @@
 #include <pqServerManagerModel.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMPropertyIterator.h>
 #include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 
@@ -344,6 +345,39 @@ QString ViewBase::getWorkspaceName()
   return wsName;
 }
 
+/**
+ * This function gets a property iterator from the source proxy and iterates
+ * over the properties, printing out the keys.
+ * @param src pqPipelineSource to print properties from
+ */
+void ViewBase::printProxyProps(pqPipelineSource *src)
+{
+  std::cout << src->getSMName().toStdString() << " Properties:" << std::endl;
+  vtkSMPropertyIterator *piter = src->getProxy()->NewPropertyIterator();
+  while ( !piter->IsAtEnd() )
+  {
+    std::cout << piter->GetKey() << std::endl;
+    piter->Next();
+  }
 }
+
+/**
+ * This function iterrogates the pqPipelineSource for the TimestepValues
+ * property. It then checks to see if the number of timesteps is non-zero.
+ * @param src pqPipelineSource to check for timesteps
+ * @return true if pqPipelineSource has a non-zero number of timesteps
+ */
+bool ViewBase::srcHasTimeSteps(pqPipelineSource *src)
+{
+  vtkSMSourceProxy *srcProxy1 = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+  srcProxy1->Modified();
+  srcProxy1->UpdatePipelineInformation();
+  vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(\
+                                     srcProxy1->GetProperty("TimestepValues"));
+  const unsigned int numTimesteps = tsv->GetNumberOfElements();
+  return 0 < numTimesteps;
 }
-}
+
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
