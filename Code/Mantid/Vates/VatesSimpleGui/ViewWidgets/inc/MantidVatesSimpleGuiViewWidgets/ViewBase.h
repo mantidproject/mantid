@@ -85,6 +85,8 @@ public:
    * Destroy sources and view relevant to mode switching.
    */
   virtual void destroyView() = 0;
+  /// Retrieve the current time step.
+  virtual double getCurrentTimeStep();
   /// Get the active ParaView source.
   pqPipelineSource *getPvActiveSrc();
   /**
