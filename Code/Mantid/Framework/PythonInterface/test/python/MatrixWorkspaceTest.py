@@ -90,7 +90,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
             # Extra X boundary
             self.assertEquals(x_np[i][blocksize], workspace.readX(i)[blocksize])
             
-    def test_operators_with_workspaces_in_ADS(self):
+    def xtest_operators_with_workspaces_in_ADS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
         ads = AnalysisDataService.Instance()
         A = ads['A']

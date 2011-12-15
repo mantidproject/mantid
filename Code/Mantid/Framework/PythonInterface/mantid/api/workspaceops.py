@@ -60,9 +60,6 @@ def _do_operation(op, self, rhs, lhs_vars, inplace, reverse):
         
     """
     global _binary_op_tmps
-    print 'Performing',op,'with',self,rhs,'to give',lhs_vars[1]
-    if reverse: print 'Operation will be reversed'
-    if inplace: print 'Operation is inplace'
 #
     if lhs_vars[0] > 0:
         # Assume the first and clear the temporaries as this
