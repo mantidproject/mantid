@@ -54,8 +54,7 @@ namespace MDAlgorithms
   class ConvertToMDEvents;
   // signature for an algorithm processing n-dimension event workspace
   typedef boost::function<void (ConvertToMDEvents*, API::IMDEventWorkspace *const)> pMethod;
-  // signature for a fucntion, creating n-dimension workspace
-  //typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents*, const std::vector<std::string> &,const std::vector<std::string> &, size_t ,size_t ,size_t )> pWSCreator;
+  // signature for a fucntion, creating n-dimension workspace  
   typedef boost::function<API::IMDEventWorkspace_sptr (ConvertToMDEvents* )> pWSCreator;
  // vectors of strings are here everywhere
   typedef  std::vector<std::string> Strings;
@@ -131,16 +130,12 @@ namespace MDAlgorithms
     static preprocessed_detectors det_loc;  
  /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
       and places the resutls into static cash to be used in subsequent calls to this algorithm */
-    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
-     /// the names of the log variables, which are used as dimensions
-//    std::vector<std::string> other_dim_names;
-    /// the 
-    
+    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);  
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
-    // the names for the target workspace dimensions and properties of input MD workspace
+    /// the names for the target workspace dimensions and properties of input MD workspace
     std::vector<std::string> targ_dim_names;
-    // the units of target workspace dimensions and properties of input MD workspace dimensions
+    /// the units of target workspace dimensions and properties of input MD workspace dimensions
     std::vector<std::string> targ_dim_units;
   protected: //for testing
    /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
@@ -150,7 +145,7 @@ namespace MDAlgorithms
    std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                  std::vector<std::string> &out_dim_names,std::vector<std::string> &out_dim_units);
 
-   // Parts of the identifyMatrixAlg, separated for unit testing:
+   /// Parts of the identifyMatrixAlg, separated for unit testing:
    std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_names,const Strings &ws_dim_units,Strings &out_dim_names,Strings &out_dim_units, int &nQdims);
    std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,Strings &out_dim_names, 
                                  Strings &out_dim_units, int &ndE_dims,std::string &natural_units);
@@ -162,7 +157,7 @@ namespace MDAlgorithms
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
    bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
-   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to hkl coordinate system */
+   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to notional (fractional) coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
 
    /// map to select an algorithm as function of the key, which describes it
@@ -204,17 +199,15 @@ namespace MDAlgorithms
 
     /** template to build empty MDevent workspace with box controller and other palavra
       * 
-      * The box controller parameters are obtained from host class BoxControllerSettingsAlgorithm.
-      *
-    */
+      * The box controller parameters are obtained from host class BoxControllerSettingsAlgorithm.            */
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(void);
 
-    // known momentum analysis mode ID-s;
+    /// known momentum analysis mode ID-s (symbolic representation of correspondent enum);
     std::vector<std::string> Q_modes;
-    // known energy transfer modes ID-s
+    /// known energy transfer modes ID-s (symbolic representation of correspondent enum)
     std::vector<std::string> dE_modes;
-    // known conversion modes ID-s
+    // known conversion modes ID-s       (symbolic representation of correspondent enum)
     std::vector<std::string> ConvModes;
 
     // the ID of the unit, which is used in the expression to converty to QND. All other related elastic units should be converted to this one. 
@@ -225,7 +218,7 @@ namespace MDAlgorithms
     // The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
     // Any other input workspace units have to be converted into these:
     std::string subalgorithm_units;
-  // string -Key to identify the algorithm
+  // string -Key to identify the algorithm -- rather for testing
     std::string algo_id;
     //
     std::vector<double> getTransfMatrix()const{return rotMatrix;}

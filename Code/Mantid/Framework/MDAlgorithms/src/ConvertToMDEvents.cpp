@@ -1,7 +1,9 @@
 /*WIKI* 
     Transfrom a workspace into MD Event workspace with components defined by user. 
    
-    Gateway for number of subalgorithms, some are very important, some are questionable 
+    Gateway for 3 subalgorithms, combined together to convert matrix workspace into multidimensional events workspace. 
+    Depending on user input and the input workspace, the algorithm transform matrix workspace intnto 1 to 4 dimemsional MDEvent workspace and 
+    adds to this workspace additional dimensions, which are described by the workspace properties. 
     Intended to cover wide range of cases; 
 
 *WIKI*/
@@ -226,8 +228,11 @@ ConvertToMDEvents::init()
  
 
     declareProperty(new ArrayProperty<double>("MinValues"),
-         "An array of size 1+N_OtherDimensions if first dimension is equal |Q| or \n"
-         "3+N_OtherDimensions if first (3) dimensions  QxQyQz containing minimal values for all dimensions"
+        "An array of size 1+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
+        "3+N_OtherDimensions if first (3) dimensions (QDimensions property) equal  QxQyQz or \n"
+        "(1-2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"
+        " In last case the workspace dimensions are defined by presense and units of the input workspace axis\n\n"
+         " This array contains minimal values for all dimensions.\n"
          " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
          " All other values are in uints they are expressed in their log files\n"
          " Values lower then the specified one will be ignored\n"
@@ -243,8 +248,6 @@ ConvertToMDEvents::init()
 
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
-
- 
 
 }
 
@@ -419,7 +422,6 @@ void ConvertToMDEvents::exec(){
    
 }
 
-
 /**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
   *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.
@@ -436,13 +438,10 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
 
     // dimension names present in input workspace
     std::vector<std::string> ws_dim_names;
-    // units IS-s the input workspace dimensions have
+    // unit IS-s the input workspace dimensions have
     std::vector<std::string> ws_dim_units;
 
-  
-    // result: AlgorithmID 
-    std::string the_WSalgID;   
- 
+
    // get the X axis of input workspace, it has to be there; if not axis throws invalid index
     API::NumericAxis *pXAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(0));
     if(!pXAxis ){
@@ -467,15 +466,17 @@ ConvertToMDEvents::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,
 
     // identify Q_mode
     Q_MODE_ID = parseQMode (Q_mode_req,ws_dim_names,ws_dim_units,out_dim_names,out_dim_units,nQ_dims);  
+    this->algo_id = Q_MODE_ID;
     // identify dE mode    
     DE_MODE_ID= parseDEMode(Q_MODE_ID,dE_mode_req,ws_dim_units,out_dim_names,out_dim_units,ndE_dims,subalgorithm_units);
     // identify conversion mode;
-    this->algo_id=Q_MODE_ID+DE_MODE_ID; // just in case, to resolve cyclic dependence on emode, as CovMode asks for emode
+    this->algo_id+=DE_MODE_ID; // just in case, to resolve cyclic dependence on emode, as CovMode can ask for emode (not any more)
     CONV_MODE_ID=parseConvMode(Q_MODE_ID,subalgorithm_units,ws_dim_units);
+    this->algo_id+=CONV_MODE_ID;
 
-    the_WSalgID = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
+    //the_WSalgID = Q_MODE_ID+DE_MODE_ID+CONV_MODE_ID;
 
-    return the_WSalgID;
+    return this->algo_id;
 
 }
 /** Identify the Unit conversion mode, deployed by the subalgorith 
