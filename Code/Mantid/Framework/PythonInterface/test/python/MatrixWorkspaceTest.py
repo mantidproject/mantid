@@ -2,7 +2,9 @@ import unittest,sys
 
 from testhelpers import run_algorithm, can_be_instantiated
 
-from mantid.api import MatrixWorkspace, WorkspaceProperty_Workspace, Workspace
+from mantid.api import (MatrixWorkspace, WorkspaceProperty_Workspace, Workspace,
+                        ExperimentInfo)
+from mantid.geometry import Detector
 
 import numpy as np
 
@@ -20,6 +22,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_that_one_cannot_be_instantiated_directly(self):
         self.assertFalse(can_be_instantiated(MatrixWorkspace))
+        
+    def test_hierarchy_is_as_expected(self):
+        self.assertTrue(issubclass(MatrixWorkspace, ExperimentInfo))
+        self.assertTrue(issubclass(MatrixWorkspace, Workspace))
 
     def test_meta_information(self):
         self.assertEquals(self._test_ws.id(), "Workspace2D")
@@ -33,6 +39,20 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_workspace_data_information(self):
         self.assertEquals(self._test_ws.getNumberHistograms(), 2)
         self.assertEquals(self._test_ws.blocksize(), 102)
+        self.assertEquals(self._test_ws.YUnit(), "Counts")
+        self.assertEquals(self._test_ws.YUnitLabel(), "Counts")
+        # Workspace axes
+        self.assertEquals(self._test_ws.axes(), 2)
+        
+    def test_detector_retrieval(self):
+        det = self._test_ws.getDetector(0)
+        self.assertTrue(isinstance(det, Detector))
+        self.assertEquals(det.getID(), 1)
+        self.assertFalse(det.isMasked())
+
+    def test_spectrum_retrieval(self):
+        # Spectrum
+        pass
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
         self.assertEquals(type(self._test_ws_prop), WorkspaceProperty_Workspace)
@@ -47,7 +67,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         x = self._test_ws.extractX()
         y = self._test_ws.extractY()
         e = self._test_ws.extractE()
-
+        dx = self._test_ws.extractDx()
+        
+        self.assertTrue(len(dx), 0)
         self._do_numpy_comparison(self._test_ws, x, y, e)
 
     def _do_numpy_comparison(self, workspace, x_np, y_np, e_np):

@@ -12,7 +12,7 @@ using namespace boost::python;
  */
 void export_Detector()
 {
-  class_<Detector, bases<IDetector, ObjComponent>, boost::noncopyable>("Detector_", no_init)
+  class_<Detector, bases<IDetector, ObjComponent>, boost::noncopyable>("Detector", no_init)
     ;
 }
 
