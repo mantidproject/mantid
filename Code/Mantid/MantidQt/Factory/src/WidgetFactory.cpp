@@ -23,6 +23,9 @@ namespace Factory
    */
   WidgetFactoryImpl::~WidgetFactoryImpl()
   {
+    for (size_t i=0; i<m_windows.size(); i++)
+      delete m_windows[i];
+    m_windows.clear();
   }
 
 
@@ -41,6 +44,7 @@ namespace Factory
   {
     SliceViewerWindow * window = new SliceViewerWindow(wsName, label);
     //TODO: Save in a list
+    m_windows.push_back(window);
     return window;
   }
 
