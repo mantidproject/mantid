@@ -146,12 +146,6 @@ private slots:
   /// Changes the format of the file string. i.e file MUSR001-06 are files 01-06
   ///void appendSelected();
 
-  /// Bunch the data (rebin)
-  void reBunch(const std::string&);
-
-  /// Remove any rebinned data so that the plot shows the raw data again
-  void makeRaw(const std::string&);
-
   ///
   void changeTab(int);
 
@@ -213,6 +207,9 @@ private:
 
   /// Apply whatever grouping is specified in GUI tables to workspace
   bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
+
+  /// Normalise the data
+  void normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace);
 
   /// Update front 
   void updateFront();
@@ -288,12 +285,6 @@ private:
 
   /// used to test that a new filename has been entered 
   QString m_previousFilename;
-
-  /// used to test that a new number of steps to rebin by has been entered
-  QString m_previousRebinSteps;
-
-  /// used to test whether the data has already been bunched before
-  std::string m_previousBunchWsName;
 
   /// List of current group names 
   std::vector<std::string> m_groupNames;
