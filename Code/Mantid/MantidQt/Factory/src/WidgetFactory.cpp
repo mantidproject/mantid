@@ -23,9 +23,9 @@ namespace Factory
    */
   WidgetFactoryImpl::~WidgetFactoryImpl()
   {
-    for (size_t i=0; i<m_windows.size(); i++)
-      delete m_windows[i];
-    m_windows.clear();
+//    for (size_t i=0; i<m_windows.size(); i++)
+//      delete m_windows[i];
+//    m_windows.clear();
   }
 
 
