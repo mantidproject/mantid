@@ -1866,4 +1866,250 @@
     <id start="52107001" end="52107256" />
     <id start="52108001" end="52108256" />    
   </idlist>   
+  
+  
+  
+  <!-- BELOW IS A TEMPORARY FIX TO ADD DEAD MAPS DETECTORS -->  
+  
+  <type name="dead no info pixel" is="detector">   
+  </type>  
+
+  <type name="64 dead detectors">
+    <component type="dead no info pixel" > 
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+      <location r="0.002"/> <location r="0.002"/> <location r="0.002"/> <location r="0.002"/>
+    </component>
+  </type>  
+
+<component type="64 dead detectors" idlist="dead detector IDs" >
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location /> 
+  
+  <location />
+  <location />   
+  
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location /> 
+  
+  <location />
+  <location /> 
+  <location />
+  <location />   
+  
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location /> 
+  
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location /> 
+
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />
+  <location />   
+  
+  <location />
+  <location />
+  <location />
+  <location />   
+
+  <location />
+  <location />
+  <location />
+  <location />     
+ 
+</component>
+
+  <idlist idname="dead detector IDs">
+    <id start="901117001" end="901117256" /> 
+    <id start="901118001" end="901118256" /> 
+    <id start="901217001" end="901217256" /> 
+    <id start="901218001" end="901218256" /> 
+    <id start="901317001" end="901317256" /> 
+    <id start="901318001" end="901318256" /> 
+    <id start="901417001" end="901417256" /> 
+    <id start="901418001" end="901418256" />     
+    
+    <id start="902117001" end="902117256" /> 
+    <id start="902118001" end="902118256" /> 
+    <id start="902217001" end="902217256" /> 
+    <id start="902218001" end="902218256" /> 
+    <id start="902317001" end="902317256" /> 
+    <id start="902318001" end="902318256" /> 
+    <id start="902417001" end="902417256" /> 
+    <id start="902418001" end="902418256" />      
+    
+    <id start="903217001" end="903217256" /> 
+    <id start="903218001" end="903218256" />    
+    
+    <id start="903401001" end="903401256" />
+    <id start="903402001" end="903402256" />
+    <id start="903403001" end="903403256" />
+    <id start="903404001" end="903404256" />
+    <id start="903405001" end="903405256" />
+    <id start="903406001" end="903406256" />
+    <id start="903407001" end="903407256" />
+    <id start="903408001" end="903408256" />
+    <id start="903409001" end="903409256" />
+    <id start="903410001" end="903410256" />
+    <id start="903411001" end="903411256" />
+    <id start="903412001" end="903412256" />
+    <id start="903413001" end="903413256" />
+    <id start="903414001" end="903414256" />
+    <id start="903415001" end="903415256" />
+    <id start="903416001" end="903416256" />
+    <id start="903417001" end="903417256" />
+    <id start="903418001" end="903418256" />  
+
+    <id start="904217001" end="904217256" />
+    <id start="904218001" end="904218256" />     
+    <id start="904417001" end="904417256" />
+    <id start="904418001" end="904418256" />   
+    
+    <id start="905117001" end="905117256" />
+    <id start="905118001" end="905118256" />
+    <id start="905217001" end="905217256" />
+    <id start="905218001" end="905218256" />
+    <id start="905317001" end="905317256" />
+    <id start="905318001" end="905318256" />
+    <id start="905417001" end="905417256" />
+    <id start="905418001" end="905418256" /> 
+    
+    <id start="906117001" end="906117256" />
+    <id start="906118001" end="906118256" />
+    <id start="906217001" end="906217256" />
+    <id start="906218001" end="906218256" />
+    <id start="906317001" end="906317256" />
+    <id start="906318001" end="906318256" />
+    <id start="906417001" end="906417256" />
+    <id start="906418001" end="906418256" /> 
+
+    <id start="907117001" end="907117256" />
+    <id start="907118001" end="907118256" />
+    <id start="907217001" end="907217256" />
+    <id start="907218001" end="907218256" />
+    <id start="907317001" end="907317256" />
+    <id start="907318001" end="907318256" />
+    <id start="907417001" end="907417256" />
+    <id start="907418001" end="907418256" />     
+    
+    <id start="908217001" end="908217256" />
+    <id start="908218001" end="908218256" />
+    <id start="908417001" end="908417256" />
+    <id start="908418001" end="908418256" />     
+    
+    <id start="909217001" end="909217256" />
+    <id start="909218001" end="909218256" />
+    <id start="909417001" end="909417256" />
+    <id start="909418001" end="909418256" />             
+  </idlist>   
+  
 </instrument>
