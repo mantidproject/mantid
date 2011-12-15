@@ -3,7 +3,7 @@ import unittest,sys
 from testhelpers import run_algorithm, can_be_instantiated
 
 from mantid.api import (MatrixWorkspace, WorkspaceProperty_Workspace, Workspace,
-                        ExperimentInfo)
+                        ExperimentInfo, AnalysisDataService)
 from mantid.geometry import Detector
 
 import numpy as np
@@ -89,6 +89,36 @@ class MatrixWorkspaceTest(unittest.TestCase):
                 self.assertEquals(e_np[i][j], workspace.readE(i)[j])
             # Extra X boundary
             self.assertEquals(x_np[i][blocksize], workspace.readX(i)[blocksize])
+            
+    def test_operators_with_workspaces_in_ADS(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
+        ads = AnalysisDataService.Instance()
+        A = ads['A']
+        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
+        B = ads['B']
+#    
+        # Two workspaces
+        C = A + B
+        C = A - B
+        C = A * B
+        C = A / B
+        C -= B
+        C += B
+        C *= B
+        C /= B
+        # Workspace + double
+        B = 123.456
+        C = A + B
+        C = A - B
+        C = A * B
+        C = A / B
+        C -= B
+        C += B
+        C *= B
+        C /= B
+        # Commutative: double + workspace
+        C = B * A
+        C = B + A
 
 if __name__ == '__main__':
     unittest.main()

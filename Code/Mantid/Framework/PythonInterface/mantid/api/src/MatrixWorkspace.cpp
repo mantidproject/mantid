@@ -24,9 +24,6 @@ namespace
 
 void export_MatrixWorkspace()
 {
-  // Leave this here for now but move it if it needs expanding to add methods
-  class_<IMDWorkspace, boost::python::bases<Workspace>, boost::noncopyable>("IMDWorkspace", no_init)
-    ;
 
   register_ptr_to_python<MatrixWorkspace_sptr>();
 
@@ -60,7 +57,6 @@ void export_MatrixWorkspace()
           "Creates a read-only numpy wrapper around the original E data at the given index")
     .def("readDx", &Mantid::PythonInterface::Numpy::wrapDx,
          "Creates a read-only numpy wrapper around the original E data at the given index")
-
     .def("extractX", Mantid::PythonInterface::Numpy::cloneX, 
          "Extracts (copies) the X data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
@@ -77,7 +73,7 @@ void export_MatrixWorkspace()
          "Extracts (copies) the E data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
           "of memory free that will fit all of the data.")
-         ;
+    ;
 
   DECLARE_SINGLEVALUETYPEHANDLER(MatrixWorkspace, DataItem_sptr);
 }
