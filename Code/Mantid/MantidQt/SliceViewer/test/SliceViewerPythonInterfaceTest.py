@@ -38,10 +38,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def setUp(self):
         """ Set up and create a SliceViewer widget """
         sys.stderr.write("Starting setUp\n")
-        self.sv = mantidqtpython.MantidQt.SliceViewer.SliceViewer()
-        #self.sv.show()
-        # Open the default workspace for testing
-        self.sv.setWorkspace('uniform')
+        # Get the factory to create the SliceViewerWindow in C++
+        factory = mantidqtpython.MantidQt.Factory.WidgetFactoryImpl()
+        self.svw = factory.createSliceViewerWindow("uniform", "")
+        # Retrieve the SliceViewer widget alone.
+        self.sv = self.svw.getSlicer()
         pass
     
     def tearDown(self):

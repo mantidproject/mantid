@@ -107,6 +107,26 @@ SliceViewerWindow::~SliceViewerWindow()
 }
 
 //------------------------------------------------------------------------------------------------
+/** Get the SliceViewer widget inside the SliceViewerWindow.
+ * This is the main widget for controlling the 2D views
+ * and slice points.
+ *
+ * @return a pointer to the SliceViewer widget.
+ */
+MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
+{ return m_slicer; }
+
+//------------------------------------------------------------------------------------------------
+/** Get the LineViewer widget inside the SliceViewerWindow.
+ * This is the widget for controlling the 1D line integration
+ * settings.
+ *
+ * @return a pointer to the LineViewer widget.
+ */
+MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
+{ return m_liner; }
+
+//------------------------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
 {
 //  if (m_liner->isVisible())

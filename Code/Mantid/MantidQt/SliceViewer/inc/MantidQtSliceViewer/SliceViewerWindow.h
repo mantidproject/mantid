@@ -32,8 +32,8 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow : public QMainWindow, pu
 public:
   SliceViewerWindow(const QString& wsName, const QString& label = QString() , Qt::WFlags f=0);
   ~SliceViewerWindow();
-  MantidQt::SliceViewer::SliceViewer * getSlicer() { return m_slicer; }
-  MantidQt::SliceViewer::LineViewer * getLiner() { return m_liner; }
+  MantidQt::SliceViewer::SliceViewer* getSlicer();
+  MantidQt::SliceViewer::LineViewer* getLiner();
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);

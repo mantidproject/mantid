@@ -15,7 +15,7 @@ def findInSubdirectory(filename, subdirectory=''):
     for root, dirs, names in os.walk(path):
         if filename in names:
             return os.path.join(root, filename)
-    raise 'File not found'
+    return None
 
 def find_cpp_file(basedir, classname):
     return findInSubdirectory(classname + ".cpp", basedir) 
@@ -28,6 +28,8 @@ def grab_doxygen(cppfile, method):
     cppfile :: full path to the .cpp file
     method :: method definition to look for
     """
+    if cppfile is None:
+        return None
     lines = open(cppfile, 'r').read().split('\n')
     #print method
     out = []
@@ -94,7 +96,11 @@ def process_sip(filename):
             if n > 0: classname = classname[0:n].strip()
             # Now, we look for the .cpp file
             classcpp = find_cpp_file(root, classname)
-            print "Found class '%s' at %s" % (classname, classcpp)
+            if classcpp is None:
+                print "WARNING: Could not find cpp file for class %s" % classname
+            else:
+                print "Found class '%s' .cpp file " % classname
+            
             
         if classname != "":
             # We are within a real class

@@ -46,7 +46,8 @@ namespace Factory
     WidgetFactoryImpl();
     virtual ~WidgetFactoryImpl();
     
-    MantidQt::SliceViewer::SliceViewerWindow * createSliceViewerWindow(const QString& wsName, const QString& label);
+    MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+    MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
   };
 

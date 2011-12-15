@@ -1,6 +1,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
 
 using namespace MantidQt::SliceViewer;
 
@@ -42,6 +43,26 @@ namespace Factory
     //TODO: Save in a list
     return window;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an instance of a bare SliceViewer Widget.
+   * This is only capable of doing 2D views, and cannot do line plots
+   * since it does not have a LineViewer.
+   *
+   * Use WidgetFactory::createSliceViewerWindow to create a window combining both.
+   *
+   * @param wsName :: name of the workspace to show. Optional, blank for no workspace.
+   * @return the created SliceViewer *
+   */
+  MantidQt::SliceViewer::SliceViewer* WidgetFactoryImpl::createSliceViewer(const QString& wsName)
+  {
+    MantidQt::SliceViewer::SliceViewer * slicer = new MantidQt::SliceViewer::SliceViewer();
+    //TODO: Save in a list
+    if (!wsName.isEmpty())
+      slicer->setWorkspace(wsName);
+    return slicer;
+  }
+
 
 
 } // namespace Mantid
