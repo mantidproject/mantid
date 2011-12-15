@@ -568,7 +568,7 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   pqPipelineSource *src1 = NULL;
   foreach (pqPipelineSource *src, srcs)
   {
-    const QString name = src->getSMName();
+    const QString name(src->getProxy()->GetXMLName());
     if (name.contains("MDEWRebinningCutter"))
     {
       src1 = src;
