@@ -579,9 +579,23 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
     src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
   }
 
+  this->printProxyProps(src1);
+
+
   // Get the current dataset characteristics
-  const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
-                                            "InputGeometryXML").GetAsString();
+  const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
+                                             "InputGeometryXML").GetAsString();
+  // Check for timesteps and insert the value into the XML if necessary
+  std::string geomXML;
+  if ( this->srcHasTimeSteps(src1) )
+  {
+    GeometryParser parser(inGeomXML);
+    geomXML = parser.addTDimValue(this->getCurrentTimeStep());
+  }
+  else
+  {
+    geomXML = std::string(inGeomXML);
+  }
 
   // Get the necessary information from the cut
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
