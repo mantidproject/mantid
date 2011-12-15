@@ -403,23 +403,21 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
   //Make a copy
   std::string time = str;
 
-  // Some ARGUS files have an invalid date with a spac3e instead of zero.
+  // Some ARGUS files have an invalid date with a space instead of zero.
   // To enable such files to be loaded we correct the date and issue a warning (ticket #4017).
+  std::string date = time.substr(0,10); // just take the date not the time or any date-time separator
+  size_t nSpace = date.find(' ');
+  if (nSpace != std::string::npos)
   {
-      std::string date = time.substr(0,10); // just take the date not the time or any date-time separator
-	  size_t n = date.find(' ');
-	  if (n != std::string::npos)
-	     {
-			 g_log.warning() << "Invalid ISO8601 date in "  << time ;
-		     time[n] = '0'; // replace space with 0
+    g_log.warning() << "Invalid ISO8601 date "  << time ;
+    time[nSpace] = '0'; // replace space with 0
 
-	        // Do again in case of second space
-		     date[n] = '0';
-		     n = date.find(' ');
-			 if(n != std::string::npos) time[n] = '0';
+    // Do again in case of second space
+    date[nSpace] = '0';
+    nSpace = date.find(' ');
+    if(nSpace != std::string::npos) time[nSpace] = '0';
 
-			 g_log.warning() << " corrected to " << time << "\n";
-	      }
+    g_log.warning() << " corrected to " << time << std::endl;
   }
 
 

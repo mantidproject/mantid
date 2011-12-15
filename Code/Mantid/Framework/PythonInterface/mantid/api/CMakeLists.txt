@@ -12,15 +12,17 @@ set ( EXPORT_FILES
   src/AlgorithmFactory.cpp
   src/AlgorithmManager.cpp
   src/AnalysisDataService.cpp
-  src/ExperimentInfo.cpp
   src/FileProperty.cpp
   src/FrameworkManager.cpp
   src/Workspace.cpp
+  src/IMDWorkspace.cpp
+  src/ExperimentInfo.cpp
   src/MatrixWorkspace.cpp
   src/IEventWorkspace.cpp
+  src/BinaryOperations.cpp
 )  
 
-# Files containing additional helper code that do not require processing
+# Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES 
   src/AlgorithmWrapper.cpp
   src/WorkspaceToNumpy.cpp
@@ -28,11 +30,13 @@ set ( SRC_FILES
 
 set ( INC_FILES 
   ${HEADER_DIR}/api/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/WorkspaceToNumpy.h
 )
 
 set ( PY_FILES 
   __init__.py
+  workspaceops.py
 )
 
 # Set the destination directory
@@ -66,4 +70,4 @@ set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule PythonKernelModule ${PYTHON_DEPS} )
+target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )

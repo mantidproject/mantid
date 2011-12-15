@@ -1053,6 +1053,8 @@ private:
   void disableActions();
   void customColumnActions();
   void disableToolbars();
+  void showToolbars();
+  void hideToolbars();
   void customToolBars(MdiSubWindow* w);
   void customMultilayerToolButtons(MultiLayer* w);
   void customMenu(MdiSubWindow* w);

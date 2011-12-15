@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/ConvertToQ3DdE.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -14,6 +15,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;

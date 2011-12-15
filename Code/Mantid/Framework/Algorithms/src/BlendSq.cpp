@@ -329,7 +329,6 @@ namespace Algorithms
   }
 
   void BlendSq::blendBanks(std::vector<API::MatrixWorkspace_sptr> sqwspaces, API::MatrixWorkspace_sptr blendworkspace, std::vector<double> lowerbounds, std::vector<double> upperbounds){
-	  // TODO Auto-generated execute stub
 
     // 1. Check validity: all input and output Workspaces should have same range
     size_t wssize = blendworkspace->dataX(0).size();

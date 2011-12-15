@@ -18,7 +18,7 @@ class ConfigServiceTest(unittest.TestCase):
     def test_getting_search_paths(self):
         """Retrieve the search paths
         """
-        paths = config.get_data_dirs()
+        paths = config.getDataSearchDirs()
         self.assertEquals(type(paths), std_vector_str)
         self.assert_(len(paths) > 0)
 

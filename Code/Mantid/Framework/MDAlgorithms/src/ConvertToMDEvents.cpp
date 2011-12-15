@@ -25,6 +25,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 //
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
 //

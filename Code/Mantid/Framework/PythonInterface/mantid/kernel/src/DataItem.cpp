@@ -14,7 +14,7 @@ void export_DataItem()
   class_<DataItem,boost::noncopyable>("DataItem", no_init)
     .def("id", &DataItem::id, "The string ID of the class")
     .def("name", &DataItem::name, "The name of the object")
-    .def("thread_safe", &DataItem::threadSafe, "Returns true if the object can be accessed safely from multiple threads")
+    .def("threadSafe", &DataItem::threadSafe, "Returns true if the object can be accessed safely from multiple threads")
     .def("__str__", &DataItem::toString, "Returns a serialised version of the object")
   ;
 }

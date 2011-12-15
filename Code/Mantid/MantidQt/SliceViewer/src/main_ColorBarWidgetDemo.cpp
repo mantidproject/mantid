@@ -39,7 +39,6 @@ int main( int argc, char ** argv )
 
   ColorBarWidget * widget = new ColorBarWidget(frame);
 
-  widget->setDataRange(min, max);
   widget->setViewRange(min, max);
   widget->setLog(false);
 

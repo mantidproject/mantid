@@ -47,8 +47,17 @@
 namespace NeXus {
 namespace Stream {
 
-HolderBase::HolderBase(const std::string& name) : m_name(name)
+HolderBase::HolderBase(): ISerialisable(), m_name("")
 {
+}
+
+HolderBase::HolderBase(const std::string& name) : ISerialisable(), m_name(name)
+{
+}
+
+std::string HolderBase::getName()
+{
+    return m_name;
 }
 
 void HolderBase::setName(const std::string& name)

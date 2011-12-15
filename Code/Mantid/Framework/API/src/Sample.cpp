@@ -7,19 +7,20 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+
 #include "MantidNexusCPP/NeXusException.hpp"
 
-using namespace Mantid::Kernel;
-using Mantid::Geometry::ShapeFactory;
 
 namespace Mantid
 {
 
   namespace API
   {
-
+    using namespace Mantid::Kernel;
+    using Geometry::ShapeFactory;
     using Geometry::Object;
     using Geometry::Material;
+    using Geometry::OrientedLattice;
     using Kernel::V3D;
     
     /**

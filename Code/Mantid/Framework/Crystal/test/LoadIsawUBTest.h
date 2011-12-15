@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -88,7 +89,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
 
     FrameworkManager::Instance().exec("LoadInstrument", 4,
         "Workspace", "TOPAZ_3007",
-        "Filename", "TOPAZ_Definition_2011-01-01.xml");
+        "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
 
     // Match the goniometer angles
     WorkspaceCreationHelper::SetGoniometer(ws, 86.92, 135.00, -105.66);
@@ -99,14 +100,8 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
         "Filename", "TOPAZ_3007.mat",
         "InputWorkspace", "TOPAZ_3007");
 
-    // Get a reference list of HKLs
-    FrameworkManager::Instance().exec("LoadIsawPeaks", 4,
-        "Filename", "TOPAZ_3007.peaks",
-        "OutputWorkspace", "TOPAZ_3007_peaks");
-
     // Load the .mat file into it
-    FrameworkManager::Instance().exec("PredictPeaks", 6,
-        "HKLPeaksWorkspace", "TOPAZ_3007_peaks",
+    FrameworkManager::Instance().exec("PredictPeaks", 4,
         "InputWorkspace", "TOPAZ_3007",
         "OutputWorkspace", "peaks_predicted" );
 
@@ -116,7 +111,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
     TS_ASSERT(pw);
     if (!pw) return;
 
-   TS_ASSERT_EQUALS( pw->getNumberPeaks(), 43);
+   TS_ASSERT_EQUALS( pw->getNumberPeaks(), 220);
 
 
   }

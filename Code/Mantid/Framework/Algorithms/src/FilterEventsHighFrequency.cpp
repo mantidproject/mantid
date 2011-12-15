@@ -17,7 +17,7 @@ Filter events for VULCAN
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
-
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
 #include <fstream>
 
@@ -55,17 +55,21 @@ namespace Algorithms
    */
   void FilterEventsHighFrequency::init(){
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputEventWorkspace", "", Direction::Input),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputEventWorkspace", "", Direction::InOut),
         "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("SampleEnvironmentWorkspace", "", Direction::Input),
+    bool optional = true;
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("SampleEnvironmentWorkspace", "", Direction::Input, optional),
         "Input 2D workspace storing sample environment data along with absolute time");
-    this->declareProperty(new API::FileProperty("InputCalFile", "", API::FileProperty::Load, "event.dat"),
+    this->declareProperty("LogName", "", "Log's name to filter events.");
+    this->declareProperty(new API::FileProperty("InputCalFile", "", API::FileProperty::Load, ".dat"),
         "Input pixel TOF calibration file in column data format");
     this->declareProperty("SensorToSampleOffset", 0.0, "Offset in micro-second from sample to sample environment sensor");
-    this->declareProperty("LowerLimit", 0.0, "Lower limit of sample environment value for selected events");
-    this->declareProperty("UpperLimit", 0.0, "Lower limit of sample environment value for selected events");
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("OutputWorkspace", "", Direction::Output),
+    this->declareProperty("ValueLowerBoundary", 0.0, "Lower boundary of sample environment value for selected events");
+    this->declareProperty("ValueUpperBoundary", 0.0, "Upper boundary of sample environment value for selected events");
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("OutputWorkspace", "Anonymous", Direction::Output),
         "Output EventWorkspace.");
+    this->declareProperty("T0", 0.0, "Earliest time of the events to be selected.  It is a relative time to starting time in second.");
+    this->declareProperty("Tf", 0.0, "Latest time of the events to be selected.  It is a relative time to starting time in second.");
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalDirectory),
         "Directory of all output files");
 
@@ -84,10 +88,28 @@ namespace Algorithms
     const std::string calfilename = this->getProperty("InputCalFile");
     double tempoffset = this->getProperty("SensorToSampleOffset");
     mSensorSampleOffset = static_cast<int64_t>(tempoffset*1000);
-    mLowerLimit = this->getProperty("LowerLimit");
-    mUpperLimit = this->getProperty("UpperLimit");
+    mLowerLimit = this->getProperty("ValueLowerBoundary");
+    mUpperLimit = this->getProperty("ValueUpperBoundary");
 
-    // 2. Check
+    std::string logname = this->getProperty("LogName");
+
+    // b) Some time issues
+    const API::Run& runlog = eventWS->run();
+    std::string runstartstr = runlog.getProperty("run_start")->value();
+    Kernel::DateAndTime runstart(runstartstr);
+    mRunStartTime = runstart;
+    double t0 = this->getProperty("T0");
+    double tf = this->getProperty("Tf");
+    if (tf <= t0){
+      g_log.error() << "User defined filter starting time (T0 = " << t0 << ") is later than ending time (Tf = " << tf << ")" << std::endl;
+      throw std::invalid_argument("User input T0 and Tf error!");
+    }
+    mFilterT0 = runstart + t0;
+    mFilterTf = runstart + tf;
+
+    g_log.debug() << "T0 = " << mFilterT0 << ";  Tf = " << mFilterTf << std::endl;
+
+    // 2. Check and process input
     // a) Event Workspace
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
       const DataObjects::EventList events = eventWS->getEventList(i);
@@ -98,39 +120,105 @@ namespace Algorithms
       }
     }
 
-    // b) Sample environment workspace:  increment workspace?
+    // b) Sample environment workspace:  increment workspace?  If log file is given, then read from log file and ignore the workspace
+    if (logname.size() > 0){
+      this->processTimeLog(logname);
+      g_log.notice() << "Using input EventWorkspace's log " << logname << std::endl;
+    } else {
+      this->processTimeLog(seWS);
+      g_log.notice() << "Using input Workspace2D " << seWS->name() << " as log" << std::endl;
+    }
+
+    /*  Skipped as all events will be filtered by log!
     for (size_t i = 1; i < seWS->dataX(0).size(); i++){
       if (seWS->dataX(0)[i] <= seWS->dataX(0)[i-1]){
         g_log.error() << "Sample E. Workspace: data " << i << " = " << seWS->dataX(0)[i] << " < data " << i-1 << " = " << seWS->dataX(0)[i-1] << std::endl;
         g_log.error() << "dT = " << (seWS->dataX(0)[i]-seWS->dataX(0)[i-1]) << std::endl;
-        break;
-        // throw std::invalid_argument("Input Sample E. Workspace is not in ascending order!");
+        throw std::invalid_argument("Input Sample E. Workspace is not in ascending order!");
       }
     }
+    */
 
     // 3. Read calibration file
     importCalibrationFile(calfilename);
 
     // 4. Build new Workspace
     createEventWorkspace();
-    this->setProperty("OutputWorkspace", outputWS);
 
     // 5. Filter
     filterEvents();
 
+    g_log.debug() << "Trying to set Output Workspace: " << outputWS->getName() << std::endl;
+    this->setProperty("OutputWorkspace", outputWS);
+    g_log.debug() << "Output Workspace is set!" << " Number of Events in Spectrum 0 = " << outputWS->getEventList(0).getNumberEvents() << std::endl;
+
+    return;
+
     // -2. Study
+    /*
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
       DataObjects::EventList events = eventWS->getEventList(i);
     }
 
     // -1: Check
+    size_t numput = 2000;
+    if (seWS->dataX(0).size() < numput)
+      numput = seWS->dataX(0).size();
+    g_log.notice() << "Output First " << numput << " Entries in S.E. Log  (CHECK THE CODE!)" << std::endl;
+
+
     std::string opfname = outputdir+"/"+"pulse.dat";
     std::ofstream ofs;
     ofs.open(opfname.c_str(), std::ios::out);
-    for (size_t i = 0; i < 2000; i ++){
+    for (size_t i = 0; i < numput; i ++){
       ofs << static_cast<int64_t>(seWS->dataX(0)[i]) << "  " << seWS->dataY(0)[i] << std::endl;
     }
     ofs.close();
+
+    return;
+    */
+  } // exec
+
+  /*
+   * Convert input workspace to vectors for fast access
+   */
+  void FilterEventsHighFrequency::processTimeLog(DataObjects::Workspace2D_const_sptr ws2d)
+  {
+    g_log.debug() << "Not Implemented Yet Work Input Workspace2D " << ws2d->getName() << std::endl;
+
+    return;
+  }
+
+  /*
+   * Convert time log to vectors for fast access
+   */
+  void FilterEventsHighFrequency::processTimeLog(std::string logname){
+
+    const API::Run& runlogs = eventWS->run();
+    Kernel::TimeSeriesProperty<double> * fastfreqlog
+        = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( runlogs.getLogData(logname) );
+
+    std::vector<Kernel::DateAndTime> timevec = fastfreqlog->timesAsVector();
+    for (size_t i = 0; i < timevec.size(); i ++){
+      mSETimes.push_back(timevec[i].total_nanoseconds());
+      double tv = fastfreqlog->getSingleValue(timevec[i]);
+      mSEValues.push_back(tv);
+      /*
+      if (i < 20){
+        g_log.notice() << "VZ Test  Log Vector " << i << " : " << timevec[i] << ", " << tv << std::endl;
+      }
+       */
+    }
+
+    // CHECK
+    // TODO   Remove this section
+    g_log.debug() << "VZ Test  Total Log lookup table size = " << mSEValues.size() << ", " << timevec.size() << std::endl;
+    for (size_t i = 1; i < timevec.size(); i ++){
+      if (timevec[i-1] >= timevec[i]){
+        g_log.error() << "Time [" << i << "] = " << timevec[i] << "  is earlier than Time@" << (i-1) << std::endl;
+      }
+    }
+    /**********************/
 
     return;
   }
@@ -141,7 +229,8 @@ namespace Algorithms
   void FilterEventsHighFrequency::importCalibrationFile(std::string calfilename){
 
     detid_t indet;
-    int64_t offset;
+    int64_t offset; //
+    double doffset; // Assuming the file gives offset in micro-second
 
     // 1. Check workspace
     if (!eventWS){
@@ -168,7 +257,8 @@ namespace Algorithms
           detid = *detit;
 
         // ii. read file
-        ifs >> indet >> offset;
+        ifs >> indet >> doffset;
+        offset = static_cast<int64_t>(doffset*1000);
 
         // iii. store
         if (indet != detid){
@@ -176,7 +266,7 @@ namespace Algorithms
         }
 
         mCalibDetectorIDs.push_back(detid);
-        mCalibOffsets.push_back(offset*1000); // Assuming the file gives offset in micro-second
+        mCalibOffsets.push_back(offset);
       }
 
       ifs.close();
@@ -214,6 +304,7 @@ namespace Algorithms
 
     // 1. Initialize:use dummy numbers for arguments, for event workspace it doesn't matter
     outputWS = DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace());
+    outputWS->setName("FilteredWorkspace");
     outputWS->initialize(1,1,1);
 
     // 2. Set the units
@@ -247,7 +338,7 @@ namespace Algorithms
     detid2det_map detector_map;
     outputWS->getInstrument()->getDetectors(detector_map);
 
-    g_log.notice() << "VZ: 6a) detector map size = " << detector_map.size() << std::endl;
+    g_log.debug() << "VZ: 6a) detector map size = " << detector_map.size() << std::endl;
 
     // b) determine maximum pixel id
     detid2det_map::iterator it;
@@ -278,7 +369,7 @@ namespace Algorithms
     // Clear
     pixel_to_wkspindex.clear();
 
-    g_log.notice() << "VZ: Total spectrum number = " << outputWS->getNumberHistograms() << std::endl;
+    g_log.debug() << "VZ (End of createEventWorkspace): Total spectrum number = " << outputWS->getNumberHistograms() << std::endl;
 
     return;
 
@@ -296,8 +387,11 @@ namespace Algorithms
     API::IAlgorithm_sptr sort1 = createSubAlgorithm("SortEvents");
     sort1->initialize();
     sort1->setProperty("InputWorkspace", eventWS);
-    sort1->setProperty("SortBy", "AbsoluteTime");
+    sort1->setProperty("SortBy", "Pulse Time + TOF");
     sort1->execute();
+
+    g_log.notice() << "Sorting input EventWS is done!" << std::endl;
+    g_log.debug() << "Calibration Offset Size = " << mCalibOffsets.size() << std::endl;
 
     // 2. Filter by each spectrum
     for (size_t ip=0; ip<eventWS->getNumberHistograms(); ip++){
@@ -309,23 +403,91 @@ namespace Algorithms
       DataObjects::EventList events = eventWS->getEventList(ip);
       std::vector<int64_t>::iterator abstimeit;
       std::vector<DataObjects::TofEvent> newevents;
+      // g_log.notice() << "VZ (DelLater): Spectrum " << ip << " # (Events) = " << events.getNumberEvents() << std::endl;
 
       // c. Filter the event
-      size_t posoffset = 0;
+      // TODO  Add filter for T0, Tf
+      size_t posoffsetL = 0;
+      size_t posoffsetU = 0;
+      size_t indexL = 0;
+      size_t indexU = events.getNumberEvents()-1;
+      bool islow = true;
+
       for (size_t iv=0; iv<events.getNumberEvents(); iv++){
+
+        // 0. Determine index
+        size_t index;
+
+        if (islow){
+          index = indexL;
+          indexL ++;
+        } else {
+          index = indexU;
+          indexU --;
+        }
+
         // i.  get raw event & time
-        DataObjects::TofEvent rawevent = events.getEvent(iv);
+        DataObjects::TofEvent rawevent = events.getEvent(index);
         int64_t mtime = rawevent.m_pulsetime.total_nanoseconds()+static_cast<int64_t>(rawevent.m_tof*1000)+timeoffset;
 
-        // ii. search
-        abstimeit = std::lower_bound(mSETimes.begin()+posoffset, mSETimes.end(), mtime);
-        size_t mindex = size_t(abstimeit-mSETimes.begin())-1;
-        if (mindex >= mSETimes.size())
-          throw std::invalid_argument("Flag 1616:  Wrong in searching!!!");
-        else
-          posoffset += mindex;
+        // ii. filter out if time falls out of (T0, Tf)
+        if (mtime < mFilterT0.total_nanoseconds() || mtime > mFilterTf.total_nanoseconds()){
+          islow = !islow;
+          continue;
+          /*
+          if (ip == 0 && iv < 10)
+            g_log.notice() << "VZSpecial:  Outside boundary" << std::endl;
+          */
+        }
 
-        // iii. filter in/out?
+        // iii. search... need to consider more situation as outside of boundary, on the grid and etc
+        abstimeit = std::lower_bound(mSETimes.begin()+posoffsetL, mSETimes.end()-posoffsetU, mtime);
+        size_t mindex;
+        if (*abstimeit == mtime){
+          // (1) On the grid
+          mindex = size_t(abstimeit-mSETimes.begin());
+        }
+        else if (abstimeit == mSETimes.begin()){
+          // (2) On first grid or out of lower bound
+          mindex = size_t(abstimeit-mSETimes.begin());
+        } else {
+          mindex = size_t(abstimeit-mSETimes.begin())-1;
+        }
+
+        // TODO  Delete this test section after test done
+        if (mindex >= mSETimes.size()){
+          size_t numsetimes = mSETimes.size();
+          int64_t dt = mtime - mRunStartTime.total_nanoseconds();
+          g_log.error() << "Locate " << mtime << "  Time 0 = " << mSETimes[0] << ", Time f = " << mSETimes[numsetimes-1] << std::endl;
+          g_log.error() << "Time = " << mtime << "  T-T0  = " << (static_cast<double>(dt)*1.0E-9) << " sec" << std::endl;
+          throw std::invalid_argument("Flag 1616:  Wrong in searching!!!");
+        }
+        // TODO  Delete this test section after test done
+        if ((mtime >= mSETimes[0] && mtime < mSETimes[mSETimes.size()-1]) && (mtime < mSETimes[mindex] || mtime >= mSETimes[mindex+1]) ){
+          size_t numsetimes = mSETimes.size();
+          g_log.error() << "Low offset = " << posoffsetL << ",  Up offset = " << posoffsetU << std::endl;
+          g_log.error() << "Locate " << mtime << "  Time 0 = " << mSETimes[0] << ", Time f = " << mSETimes[numsetimes-1] << std::endl;
+          g_log.error() << "Locate " << mtime << " @ " << mindex << " [" << mSETimes[mindex] << ", " << mSETimes[mindex+1] << "] " << std::endl;
+          g_log.error() << "Iterator value = " << *abstimeit << std::endl;
+          throw std::invalid_argument("Flag 1623!  Found but not within the range");
+        }
+
+        // iv. update position offset
+        if (islow){
+          // Update lower side offset
+          posoffsetL = mindex;
+        } else {
+          // Update upper side offset
+          if (mindex < events.getNumberEvents()){
+            posoffsetU = events.getNumberEvents()-mindex-1;
+          } else {
+            posoffsetU = 0;
+          }
+        }
+
+        islow = !islow;
+
+        // v. filter in/out?
         double msevalue = mSEValues[mindex];
         if (msevalue >= mLowerLimit && msevalue <= mUpperLimit){
           DataObjects::TofEvent newevent(rawevent.m_tof, rawevent.m_pulsetime);
@@ -334,6 +496,12 @@ namespace Algorithms
       } // ENDFOR: each event
 
       // 3. Add to outputWS
+      /*
+      if (ip < 10){
+        g_log.notice() << "VZSpecial: Spec " << ip << " # New Events = " << newevents.size() << std::endl;
+      }
+      */
+
       DataObjects::EventList* neweventlist = outputWS->getEventListPtr(ip);
       for (size_t iv=0; iv<newevents.size(); iv++){
         neweventlist->addEventQuickly(newevents[iv]);
@@ -353,6 +521,8 @@ namespace Algorithms
     xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
     xRef[1] = longest_tof + 1;
     outputWS->setAllX(axis);
+
+    g_log.debug() << "End of filterEvents()" << std::endl;
 
     return;
   }

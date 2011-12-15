@@ -2,12 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_MEMENTO_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
-#include <vector>
 #include <string>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include "MantidAPI/MatrixWorkspace.h"
 
 
 namespace MantidQt
@@ -16,8 +12,7 @@ namespace MantidQt
   {
     /** @class WorkspaceMemento
 
-    Stores local changes to Workspace metadata. Can commit or rollback these changes to an underlying table workspace,
-    which encapsulates all changes to a set of related workspaces (see WorkspaceMementoCollection).
+    A memento carrying basic information about an existing workspace.
 
     @author Owen Arnold
     @date 30/08/2011
@@ -42,54 +37,33 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class WorkspaceMementoLock;
+
     class DLLExport WorkspaceMemento
     {
     public:
-
-      typedef std::vector<AbstractMementoItem_sptr> VecMementoItems;
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, int rowIndex);
-      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, std::string m_wsName, WorkspaceMementoLock* lock);
-      ~WorkspaceMemento(); 
-      void addItem(AbstractMementoItem* item);
-      AbstractMementoItem_sptr getItem(const size_t col) const;
-      void commit();
-      void rollback();
-      bool hasChanged() const;
-      void validate() const;
-      bool equals(const WorkspaceMemento& workspace) const;
-      bool operator==(const WorkspaceMemento& workspace) const;
-      bool operator!=(const WorkspaceMemento& workspace) const;
-      bool locked() const;
-      bool unlock();
-      void lock();
-      Mantid::API::ITableWorkspace_sptr getData() const;
-      int getRowIndex() const;
-
-      /// Getter for the size of this memento in terms of the number of items.
-      size_t getSize()
-      {
-        return m_items.size();
-      }
-
-    private:
-      /// Reference to underlying data.
-      Mantid::API::ITableWorkspace_sptr m_data;
-      /// Memento items to store local/un-saved changes.
-      VecMementoItems m_items;
-      /// Flag indicating memento is valid.
-      bool m_validMemento;
-      /// Name of the workspace wrapped.
-      std::string m_wsName;
-      /// Disabled copy constructor.
-      WorkspaceMemento(const WorkspaceMemento&);
-      /// Disabled assignement operator.
-      WorkspaceMemento& operator=(const WorkspaceMemento&);
-      /// Locking object.
-      boost::scoped_ptr<WorkspaceMementoLock> m_lock;
-      /// Index of corresponding row in the workspace.
-      int m_rowIndex;
-
+      /**
+      Getter for the id of the workspace
+      @return the id of the workspace
+      */
+      virtual std::string getId() const = 0;
+      /**
+      Getter for the type of location where the workspace is stored
+      @ return the location type
+      */
+      virtual std::string locationType() const = 0;
+      /**
+      Check that the workspace has not been deleted since instantiating this memento
+      @return true if still in specified location
+      */
+      virtual bool checkStillThere() const = 0;
+      /**
+      Getter for the workspace itself
+      @returns the matrix workspace
+      @throw if workspace has been moved since instantiation.
+      */
+      virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const = 0;
+      /// Destructor
+      virtual ~WorkspaceMemento(){};
     };
   }
 }

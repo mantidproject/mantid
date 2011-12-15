@@ -17,7 +17,7 @@ dlopen.restore_flags(flags)
 ###############################################################################
 # Make the singleton objects available as named variables 
 ###############################################################################
-config = get_config_service()
+config = ConfigService.Instance()
 
 ###############################################################################
 # Set up a general Python logger. Others can be created as they are required

@@ -41,7 +41,16 @@ find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
 
-set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
+if ( ${SIP_VERSION} MATCHES "04[0-9][a-f].*" )
+	# SIP version is at least 4.10 (040a or higher in hex)
+	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
+	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
+else ()
+	# Pre 4.0 sip version (RHEL5 build). 
+	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip without docstring." )
+	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.rhel5.sip )
+endif ()
+
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/sip_mantidqt.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sip_mantidqt.cpp )
 set ( SIP_SRC_AUTO siplibmantidpythonqtpart0.cpp )
@@ -63,10 +72,17 @@ set( SRC_UNITY_IGNORE_FILES )
 # disabled. In order for VS2010 to to this correctly the second
 # custom command below is required
 
+# Flags used: 
+# -e : C++ exceptions turn into python exceptions.
+# -j1 : split into 1 file
+# -w : enable warnings
+# -o : automatic docstrings (not supported in old version < 4.10)
+
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
+                          -e 
                           ${SIP_SPEC}
                      DEPENDS mantidqt.sip ${SIP_HDRS}
                      COMMENT "Generating mantidqt python bindings using sip"
@@ -89,9 +105,20 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/SliceViewer/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/SliceViewer ) # to find the ui_*.h auto-generated files
 
 # This creates the target library, just for python bindings
-add_library ( mantidqtpython ${SIP_SRC} )
+add_library ( mantidqtpython MODULE ${SIP_SRC} )
 
-# ... and links to other required libs
+if(WIN32)
+	# Windows: Python library name needs to end in .pyd for Windows
+	set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
+elseif ( APPLE )
+	# Mac: and in .so on the Mac
+  	set_target_properties ( mantidqtpython PROPERTIES SUFFIX .so )
+else ()
+	# Linux: needs to NOT have the usual "lib" prefix. 
+	set_target_properties( mantidqtpython PROPERTIES PREFIX "" )
+endif ()
+
+# ... and links to other required libs ...
 target_link_libraries ( mantidqtpython 
 	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer
 	${QT_LIBRARIES} ${QWT_LIBRARIES}

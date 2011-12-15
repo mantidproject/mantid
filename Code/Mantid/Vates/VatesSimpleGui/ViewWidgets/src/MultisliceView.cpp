@@ -5,6 +5,10 @@
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
+#include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqChartValue.h>
@@ -27,10 +31,14 @@
 #include <vtkSMProxy.h>
 #include <vtkSMViewProxy.h>
 
+#include <vtkSMPropertyIterator.h>
+
 #include <QModelIndex>
 #include <QString>
 
 #include <iostream>
+
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -41,6 +49,7 @@ namespace SimpleGui
 
 MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
+  this->isOrigSrc = false;
   this->ui.setupUi(this);
   this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);
   this->ui.yAxisWidget->setScalePosition(AxisInteractor::TopScale);
@@ -104,6 +113,19 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.zAxisWidget,
                    SIGNAL(showOrHideIndicator(bool, const QString &)),
                    this, SLOT(cutVisibility(bool, const QString &)));
+
+  QObject::connect(this->ui.xAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+  QObject::connect(this->ui.yAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
+  QObject::connect(this->ui.zAxisWidget,
+                   SIGNAL(showInSliceView(const QString &)),
+                   this,
+                   SLOT(showCutInSliceViewer(const QString &)));
 
   this->ui.xAxisWidget->installEventFilter(this);
   this->ui.yAxisWidget->installEventFilter(this);
@@ -185,6 +207,7 @@ void MultiSliceView::setupAxisInfo()
 {
   const char *geomXML = vtkSMPropertyHelper(this->origSrc->getProxy(),
                                             "InputGeometryXML").GetAsString();
+
   GeometryParser parser(geomXML);
   AxisInformation *xinfo = parser.getAxisInfo("XDimension");
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
@@ -202,6 +225,7 @@ void MultiSliceView::setupAxisInfo()
 void MultiSliceView::render()
 {
   this->origSrc = pqActiveObjects::instance().activeSource();
+  this->checkSliceViewCompat();
   this->setupData();
   this->setupAxisInfo();
   this->resetDisplay();
@@ -509,6 +533,78 @@ void MultiSliceView::resetOrDeleteIndicators(AxisInteractor *axis, int pos)
 void MultiSliceView::resetCamera()
 {
   this->mainView->resetCamera();
+}
+
+/**
+ * This function checks the sources for the WorkspaceName property. If found,
+ * the ability to show a given cut in the SliceViewer will be activated.
+ */
+void MultiSliceView::checkSliceViewCompat()
+{
+  QString wsName = this->getWorkspaceName();
+  if (wsName != "")
+  {
+    this->ui.xAxisWidget->setShowSliceView(true);
+    this->ui.yAxisWidget->setShowSliceView(true);
+    this->ui.zAxisWidget->setShowSliceView(true);
+  }
+}
+
+/**
+ * This function is responsible for opening the given cut in SliceViewer.
+ * It will gather all of the necessary information and create an XML
+ * representation of the current dataset and cut parameters. That will then
+ * be handed to the SliceViewer.
+ * @param name the slice to be opened in SliceViewer
+ */
+void MultiSliceView::showCutInSliceViewer(const QString &name)
+{
+  // Get the associated workspace name
+  QString wsName = this->getWorkspaceName();
+
+  // Have to jump through some hoops since a rebinner could be used.
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
+  pqPipelineSource *src1 = NULL;
+  foreach (pqPipelineSource *src, srcs)
+  {
+    const QString name(src->getProxy()->GetXMLName());
+    if (name.contains("MDEWRebinningCutter"))
+    {
+      src1 = src;
+    }
+  }
+  if (NULL == src1)
+  {
+    src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
+  }
+
+  // Get the current dataset characteristics
+  const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
+                                            "InputGeometryXML").GetAsString();
+
+  // Get the necessary information from the cut
+  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
+  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                          "CutFunction").GetAsProxy();
+  coord_t origin[3];
+  vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+  coord_t orient[3];
+  vtkSMPropertyHelper(plane, "Normal").Get(orient, 3);
+
+  // Create the XML holder
+  VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
+  rks.setWorkspaceName(wsName.toStdString());
+  rks.setGeometryXML(geomXML);
+
+  MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
+                                                               origin));
+  rks.setImplicitFunction(impplane);
+  //std::cout << rks.createXMLString() << std::endl;
+  QString titleAddition = " "+name;
+
+  SliceViewerWindow *w = new SliceViewerWindow(wsName, this, titleAddition);
+  w->show();
 }
 
 }

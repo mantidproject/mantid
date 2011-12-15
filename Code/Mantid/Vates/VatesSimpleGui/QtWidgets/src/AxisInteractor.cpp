@@ -32,6 +32,7 @@ namespace SimpleGui
 
 AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 {
+  this->canShowSliceView = false;
   this->indicatorContextMenu = NULL;
   this->orientation = Qt::Vertical;
   this->scalePos = AxisInteractor::RightScale;
@@ -326,6 +327,10 @@ void AxisInteractor::showContextMenu(const QPoint &pos)
             emit this->showOrHideIndicator(isVisible, item->toolTip());
             static_cast<Indicator *>(item)->changeIndicatorColor(isVisible);
           }
+          if (QString("Show in SliceView") == selectedItem->text())
+          {
+            emit this->showInSliceView(item->toolTip());
+          }
         }
       }
     }
@@ -342,6 +347,10 @@ void AxisInteractor::createContextMenu()
   QAction *hideAction = this->indicatorContextMenu->addAction("Hide");
   hideAction->setCheckable(true);
   this->indicatorContextMenu->addAction("Delete");
+  if (this->canShowSliceView)
+  {
+    this->indicatorContextMenu->addAction("Show in SliceView");
+  }
 }
 
 int AxisInteractor::numIndicators()
@@ -458,6 +467,16 @@ void AxisInteractor::updateRequestedIndicator(const QString &name, double value)
 void AxisInteractor::updateSceneRect()
 {
   this->scene->setSceneRect(this->graphicsView->geometry());
+}
+
+/**
+ * This function sets the state of being able to show the SliceViewer for
+ * a give slice.
+ * @param state whether or not the SliceViewer will be available
+ */
+void AxisInteractor::setShowSliceView(double state)
+{
+  this->canShowSliceView = state;
 }
 
 }

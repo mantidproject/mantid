@@ -36,7 +36,7 @@ namespace Mantid
       PyObject *m_self;
     };
 
-    class OrientedLatticeWrapper: public OrientedLattice
+    class OrientedLatticeWrapper: public Geometry::OrientedLattice
     {
     public:
       /// Constructor

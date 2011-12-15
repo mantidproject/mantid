@@ -1649,6 +1649,32 @@ void ApplicationWindow::disableToolbars()
   plotMatrixBar->setEnabled(false);
 }
 
+void ApplicationWindow::hideToolbars()
+{
+  fileTools->setVisible(false);
+  displayBar->setVisible(false);
+  editTools->setVisible(false);
+  plotTools->setVisible(false);
+  tableTools->setVisible(false);
+  columnTools->setVisible(false);
+  plot3DTools->setVisible(false);
+  plotMatrixBar->setVisible(false);
+  formatToolBar->setVisible(false);
+}
+
+void ApplicationWindow::showToolbars()
+{
+  fileTools->setVisible(true);
+  displayBar->setVisible(true);
+  editTools->setVisible(true);
+  plotTools->setVisible(true);
+  tableTools->setVisible(true);
+  columnTools->setVisible(true);
+  //plot3DTools->setVisible(true);
+  plotMatrixBar->setVisible(true);
+  formatToolBar->setVisible(true);
+}
+
 void ApplicationWindow::plot3DRibbon()
 {
   MdiSubWindow *w = activeWindow(TableWindow);
@@ -16425,13 +16451,21 @@ else
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
         SLOT(runPythonScript(const QString&)));
-    // Re-emits the signal caught from the muon analysis
-    connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
-    // Closes the active graph
-    connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
-    //If the fitting is requested then run the peak picker tool in runConnectFitting
-    connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
-        SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
+    if(user_interface->objectName() == "Muon Analysis")
+    {
+      // Disable to begin with and then let signals handle it
+      hideToolbars();
+      // Enables/Disables the toolbar
+      connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
+      connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
+      // Re-emits the signal caught from the muon analysis
+      connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
+      // Closes the active graph
+      connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
+      //If the fitting is requested then run the peak picker tool in runConnectFitting
+      connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
+          SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
+    }
     user_interface->initializeLocalPython();
   }
   else

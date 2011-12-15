@@ -87,6 +87,11 @@ private:
       const unsigned int& i_min, const unsigned int& i_max,
       const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype);
 
+  void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
+      const double& in_bg0, const double& in_bg1, const double& in_bg2, std::string& backgroundtype);
+
+  bool checkFitResultParameterNames(std::vector<std::string> paramnames, std::string backgroundtype, std::string &errormessage);
+
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
   

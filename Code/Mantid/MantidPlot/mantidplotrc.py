@@ -110,5 +110,9 @@ if __name__ == '__main__':
     
     import sys
     sys.path.insert(0,'')
+
+    # For some reason the algorithm definitions are not available within IPython
+    # Adding this fixes that and appears to do no harm elsewhere
+    from mantidsimple import *
 else:
     raise ImportError("mantidplotrc.py is an initialization file for MantidPlot not an importable module")

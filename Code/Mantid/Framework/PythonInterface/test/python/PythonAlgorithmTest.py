@@ -1,6 +1,6 @@
 import unittest
 
-from mantid.api import Algorithm, algorithm_mgr, register_algorithm
+from mantid.api import Algorithm, AlgorithmManager, registerAlgorithm
 
 class TestPyAlgDefaultAttrs(Algorithm):
     def PyInit(self):
@@ -34,8 +34,8 @@ class PythonAlgorithmTest(unittest.TestCase):
     def setUp(self):
         if self.__class__._registered is None:
             self.__class__._registered = True
-            register_algorithm(TestPyAlgDefaultAttrs)
-            register_algorithm(TestPyAlgOverriddenAttrs)
+            registerAlgorithm(TestPyAlgDefaultAttrs)
+            registerAlgorithm(TestPyAlgOverriddenAttrs)
         
     def raisesNothing(self, callable, *args): # unittest does not have this for some reason
         try:
@@ -44,8 +44,8 @@ class PythonAlgorithmTest(unittest.TestCase):
             self.fail(str(exc))
         
     def test_alg_with_default_attrs(self):
-        self.raisesNothing(algorithm_mgr.create_unmanaged, "TestPyAlgDefaultAttrs")
-        alg = algorithm_mgr.create_unmanaged("TestPyAlgDefaultAttrs")
+        self.raisesNothing(AlgorithmManager.Instance().createUnmanaged, "TestPyAlgDefaultAttrs")
+        alg = AlgorithmManager.Instance().createUnmanaged("TestPyAlgDefaultAttrs")
         self.raisesNothing(alg.initialize)
        
         self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
@@ -53,8 +53,8 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.category(), "PythonAlgorithms")
 
     def test_alg_with_overridden_attrs(self):
-        self.raisesNothing(algorithm_mgr.create_unmanaged, "CoolAlgorithm")
-        alg = algorithm_mgr.create_unmanaged("CoolAlgorithm")
+        self.raisesNothing(AlgorithmManager.Instance().createUnmanaged, "CoolAlgorithm")
+        alg = AlgorithmManager.Instance().createUnmanaged("CoolAlgorithm")
         self.assertEquals(alg.name(), "CoolAlgorithm")
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")

@@ -92,8 +92,12 @@ public:
    * @return the main view
    */
   virtual pqRenderView *getView() = 0;
+  /// Get the workspace name from the original source object.
+  virtual QString getWorkspaceName();
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
+  /// Prints properties for given source.
+  virtual void printProxyProps(pqPipelineSource *src);
   /**
    * This function makes the view render itself.
    */
@@ -112,6 +116,8 @@ public:
   virtual void setAxisScales();
   /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
+  /// Determines if source has timesteps (4D).
+  virtual bool srcHasTimeSteps(pqPipelineSource *src);
 
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};

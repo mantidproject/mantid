@@ -40,7 +40,7 @@ vtkMDHWSource::~vtkMDHWSource()
 */
 void vtkMDHWSource::SetWsName(std::string name)
 {
-  if(m_wsName != name)
+  if(m_wsName != name && name != "")
   {
     m_wsName = name;
     this->Modified();
@@ -200,4 +200,9 @@ char* vtkMDHWSource::GetWorkspaceTypeName()
   {
     return "";
   }
+}
+
+const char* vtkMDHWSource::GetWorkspaceName()
+{
+  return m_wsName.c_str();
 }

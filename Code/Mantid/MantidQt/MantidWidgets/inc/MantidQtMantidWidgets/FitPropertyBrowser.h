@@ -191,6 +191,9 @@ public:
   /// Returns true if the difference plot should be drawn
   bool plotDiff()const;
 
+  /// Returns true if the fit should be done against binned (bunched) data.  	
+  bool rawData()const;
+
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
@@ -407,6 +410,7 @@ private:
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
+  QtProperty *m_rawData;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;

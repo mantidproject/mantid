@@ -47,13 +47,6 @@ namespace boost
 namespace
 {
   ///@cond
-  //----------------------------------------------------------------------------
-  // Factory function to return the singleton reference
-  AnalysisDataServiceImpl & getAnalysisDataService()
-  {
-    return AnalysisDataService::Instance();
-  }
-
 
   //----------------------------------------------------------------------------
   //
@@ -75,13 +68,12 @@ namespace
    * @return A weak pointer to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  DataItem_wptr retrieveAsDataItem(object self, const std::string & name)
+  DataItem_wptr retrieveAsDataItem(AnalysisDataServiceImpl& self, const std::string & name)
   {
-    UNUSED_ARG(self);
     DataItem_wptr item;
     try
     {
-      item = getAnalysisDataService().retrieve(name);
+      item = self.retrieve(name);
     }
     catch(Mantid::Kernel::Exception::NotFoundError&)
     {
@@ -102,7 +94,7 @@ namespace
    */
   object retrieveUpcastedPtr(object self, const std::string & name)
   {
-    object dataItem = self.attr("retrieve_as_data_item")(name);
+    object dataItem = self.attr("retrieveAsDataItem")(name);
     Mantid::PythonInterface::PropertyMarshal::upcastFromDataItem(dataItem);
     return dataItem;
   }
@@ -115,7 +107,10 @@ void export_AnalysisDataService()
   register_ptr_to_python<DataItem_wptr>();
 
   class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataService", no_init)
-    .def("retrieve_as_data_item", &retrieveAsDataItem, "Retrieve the named object as data item. Raises an exception if the name does not exist")
+    .def("Instance", &AnalysisDataService::Instance, return_value_policy<reference_existing_object>(),
+         "Return a reference to the ADS singleton")
+    .staticmethod("Instance")
+    .def("retrieveAsDataItem", &retrieveAsDataItem, "Retrieve the named object as data item. Raises an exception if the name does not exist")
     .def("retrieve", &retrieveUpcastedPtr, "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
@@ -126,10 +121,6 @@ void export_AnalysisDataService()
     .def("__contains__", &AnalysisDataServiceImpl::doesExist)
     .def("__delitem__", &AnalysisDataServiceImpl::remove)
     ;
-
-  // Factory function
-  def("get_analysis_data_service", &getAnalysisDataService, return_value_policy<reference_existing_object>(),
-      "Return a reference to the ADS singleton");
 
 }
 

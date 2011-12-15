@@ -21,6 +21,13 @@
          number_of_elements="1"
          information_only="0">
        </StringVectorProperty>
+	<StringVectorProperty
+	 name="WorkspaceName"
+         command="GetWorkspaceName"
+         number_of_elements="1"
+         information_only="1">
+         <SimpleStringInformationHelper /> 
+	</StringVectorProperty>
 	   <StringVectorProperty
          name="InputGeometryXML"
          command="GetInputGeometryXML"

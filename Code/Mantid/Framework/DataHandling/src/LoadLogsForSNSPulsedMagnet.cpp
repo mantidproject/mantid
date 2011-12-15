@@ -89,7 +89,6 @@ namespace DataHandling
    */
   void LoadLogsForSNSPulsedMagnet::exec()
   {
-    // TODO Auto-generated execute stub
 
     // 1. Retrieve the information from input data file (binary)
     m_delaytimefilename = getPropertyValue("DelayTimeFileName");

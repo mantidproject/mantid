@@ -1645,7 +1645,7 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
 }
 
 template<typename T>
-bool Matrix<T>::isRotation()
+bool Matrix<T>::isRotation() const
 /** Check if a matrix represents a proper rotation
 @ return :: true/false
 */
@@ -1666,7 +1666,7 @@ bool Matrix<T>::isRotation()
 }
 
 template<typename T>
-bool Matrix<T>::isOrthogonal()
+bool Matrix<T>::isOrthogonal() const
 /** Check if a matrix is orthogonal. Same as isRotation, but allows determinant to be -1
 @ return :: true/false
 */

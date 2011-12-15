@@ -135,6 +135,8 @@ public:
    * Update the current indicator to a new location.
    * @param value the new location for the indicator
    */
+  /// Set the flag for showing the SliceViewer
+  void setShowSliceView(double state);
   void updateIndicator(double value);
   /// Update the requested indicator to the given position.
   void updateRequestedIndicator(const QString &name, double value);
@@ -152,6 +154,11 @@ signals:
    * @param name the name of the selected indicator
    */
   void indicatorSelected(const QString &name);
+  /**
+   * Signal to pass the name of the slice to open up in the SliceViewer.
+   * @param name the name of the selected indicator
+   */
+  void showInSliceView(const QString &name);
   /**
    * Signal to show or hide the given indicator.
    * @param isVisible flag the determines showing or hiding the indicator
@@ -186,6 +193,7 @@ private:
   /// Handle the setup of the widget based on orientation requests.
   void widgetLayout();
 
+  bool canShowSliceView; ///< Can view show SliceViewer
   QMenu *indicatorContextMenu; ///< The indicator context menu
   QwtScaleEngine *engine; ///< The scale type for the axis widget
   QGraphicsView *graphicsView; ///< The holder for the slice indicators

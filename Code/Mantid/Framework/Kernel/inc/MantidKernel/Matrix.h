@@ -147,9 +147,9 @@ namespace Mantid
       T compSum() const;
       
       // Check if a rotation matrix
-      bool isRotation();
+      bool isRotation() const;
       // Check if orthogonal
-      bool isOrthogonal();
+      bool isOrthogonal() const;
       // Transform to a rotation matrix
       std::vector<T> toRotation();
     private:

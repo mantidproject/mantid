@@ -109,7 +109,10 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     }
 
     // Call StripPeak
-    IAlgorithm_sptr stripPeaks = createSubAlgorithm("StripPeaks");
+    double pro0 = 0.0;
+    double prof = 1.0;
+    bool sublog = false;
+    IAlgorithm_sptr stripPeaks = createSubAlgorithm("StripPeaks", pro0, prof, sublog);
     stripPeaks->setProperty("InputWorkspace", inputWS);
     stripPeaks->setPropertyValue("OutputWorkspace", outputWSName);
     stripPeaks->setProperty("FWHM", param_fwhm);
