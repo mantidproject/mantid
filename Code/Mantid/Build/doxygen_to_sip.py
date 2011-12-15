@@ -71,6 +71,10 @@ def doxygen_to_docstring(doxygen, method):
 
 #----------------------------------------------------------
 def process_sip(filename):
+    """ Reads an input .sip file and finds methods from
+    classes. Retrieves doxygen and adds them as
+    docstrings """
+    
     root = os.path.split(os.path.abspath(filename))[0] 
     # Read and split into a buncha lines
     lines = open(filename, 'r').read().split('\n')
