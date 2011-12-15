@@ -41,8 +41,8 @@ find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
 
-if ( ${SIP_VERSION} MATCHES "04.*" )
-	# SIP version is at least 4.0
+if ( ${SIP_VERSION} MATCHES "04[0-9][a-f].*" )
+	# SIP version is at least 4.10 (040a or higher in hex)
 	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
 	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
 else ()
