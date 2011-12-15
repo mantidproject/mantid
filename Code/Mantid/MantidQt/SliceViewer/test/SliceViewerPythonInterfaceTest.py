@@ -21,11 +21,9 @@ app = Qt.QApplication(sys.argv)
 class SliceViewerPythonInterfaceTest(unittest.TestCase):
     """Test for accessing SliceViewer widgets from MantidPlot
     python interpreter"""
-    
-    def __init__(self, *args):
-        """ Constructor: builda QApplication """
-        unittest.TestCase.__init__(self, *args)
 
+    @classmethod
+    def setUpClass(cls):
         # Create a test data set
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', 
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
@@ -33,10 +31,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
         BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
-        
         # Get the factory to create the SliceViewerWindow in C++
-        self.factory = mantidqtpython.MantidQt.Factory.WidgetFactoryImpl()
+        cls.factory = mantidqtpython.MantidQt.Factory.WidgetFactoryImpl()
 
+    @classmethod
+    def tearDownClass(cls):
+        pass
     
     def setUp(self):
         """ Set up and create a SliceViewer widget """
@@ -48,7 +48,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def tearDown(self):
         """ Close the created widget """
         self.sv.close()
-    
+
+    #==========================================================================
+    #======================= Basic Tests ======================================
+    #==========================================================================
+
     def test_setWorkspace(self):
         sv = self.sv
         assert (sv is not None) 
