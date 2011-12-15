@@ -52,10 +52,15 @@ namespace SliceViewer
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
+      m_ws(), m_firstWorkspaceOpen(false),
+      m_dimensions(), m_data(NULL),
+      m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
       m_logColor(false)
 {
+  //std::cout << "Starting setupUI. Parent is " << parent << "." << std::endl;
 	ui.setupUi(this);
+  //std::cout << "done setupUI. Parent is " << parent << "." << std::endl;
 
 	m_inf = std::numeric_limits<double>::infinity();
 
@@ -113,6 +118,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_lineOverlay = new LineOverlay(m_plot);
   m_lineOverlay->setVisible(false);
 
+  //std::cout << "Done SliceViewer constructor" << std::endl;
 }
 
 //------------------------------------------------------------------------------------
@@ -296,19 +302,27 @@ void SliceViewer::showControls(bool visible)
 /** Add (as needed) and update DimensionSliceWidget's. */
 void SliceViewer::updateDimensionSliceWidgets()
 {
+  //std::cout << "Workspace has " << m_ws->getNumDims() << " dimensions " << std::endl;
   // Create all necessary widgets
   if (m_dimWidgets.size() < m_ws->getNumDims())
   {
     for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
     {
-      DimensionSliceWidget * widget = new DimensionSliceWidget(this);
+      //std::cout << "Creating DimensionSliceWidget at d "<< d << " with parent " << this << std::endl;
+      DimensionSliceWidget * widget = new DimensionSliceWidget(this /*TODO set to this */);
+
+      //std::cout << "Widget is at "<< widget << std::endl;
+
       ui.verticalLayoutControls->insertWidget(int(d), widget);
-      m_dimWidgets.push_back(widget);
-      // Slot when t
+      //std::cout << "Widget inserted into layout " << std::endl;
+      // Slots for changes on the dimension widget
       QObject::connect(widget, SIGNAL(changedShownDim(int,int,int)),
                        this, SLOT(changedShownDim(int,int,int)));
       QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
                        this, SLOT(updateDisplaySlot(int,double)));
+      //std::cout << "Signals connected." << std::endl;
+      // Save in this list
+      m_dimWidgets.push_back(widget);
     }
   }
   // Hide unnecessary ones
@@ -890,7 +904,6 @@ void SliceViewer::updateDisplay(bool resetAxes)
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
-//  std::cout << m_plot->sizeHint().width() << " width\n";
 }
 
 

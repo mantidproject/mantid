@@ -39,6 +39,7 @@
 #include <iostream>
 
 using namespace Mantid::Geometry;
+using namespace MantidQt::SliceViewer;
 
 namespace Mantid
 {
@@ -617,7 +618,8 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   //std::cout << rks.createXMLString() << std::endl;
   QString titleAddition = " "+name;
 
-  SliceViewerWindow *w = new SliceViewerWindow(wsName, this, titleAddition);
+  // TODO: Use the WidgetFactory
+  SliceViewerWindow *w = new MantidQt::SliceViewer::SliceViewerWindow(wsName, titleAddition);
   w->show();
 }
 

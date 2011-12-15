@@ -10,6 +10,7 @@ add_subdirectory ( CustomDialogs )
 add_subdirectory ( CustomInterfaces )
 add_subdirectory ( DesignerPlugins )
 add_subdirectory ( SliceViewer )
+add_subdirectory ( Factory )
 
 ###########################################################################
 # Add a custom target to build all of the MantidQt packages

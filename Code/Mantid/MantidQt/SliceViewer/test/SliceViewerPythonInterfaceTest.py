@@ -37,7 +37,9 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     
     def setUp(self):
         """ Set up and create a SliceViewer widget """
+        sys.stderr.write("Starting setUp\n")
         self.sv = mantidqtpython.MantidQt.SliceViewer.SliceViewer()
+        #self.sv.show()
         # Open the default workspace for testing
         self.sv.setWorkspace('uniform')
         pass
@@ -47,10 +49,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.sv.close()
     
     def test_setWorkspace(self):
+        sys.stderr.write("Starting test_setWorkspace\n")
         sv = self.sv
         assert (sv is not None) 
     
     def test_setWorkspace_MDEventWorkspace(self):
+        sys.stderr.write("Starting test_setWorkspace_MDEventWorkspace\n")
         sv = self.sv
         sv.setWorkspace('mdw')
     
