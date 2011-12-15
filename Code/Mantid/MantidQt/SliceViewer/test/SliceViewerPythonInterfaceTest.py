@@ -24,6 +24,15 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # Needs python 2.7+ it seems :(
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+    
+    def setUp(self):
+        """ Set up and create a SliceViewer widget """
         # Create a test data set
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', 
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
@@ -32,14 +41,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
         # Get the factory to create the SliceViewerWindow in C++
-        cls.factory = mantidqtpython.MantidQt.Factory.WidgetFactoryImpl()
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
-    
-    def setUp(self):
-        """ Set up and create a SliceViewer widget """
+        self.factory = mantidqtpython.MantidQt.Factory.WidgetFactoryImpl()
+        # Make the window
         self.svw = self.factory.createSliceViewerWindow("uniform", "")
         # Retrieve the SliceViewer widget alone.
         self.sv = self.svw.getSlicer()
