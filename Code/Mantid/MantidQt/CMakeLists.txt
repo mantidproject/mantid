@@ -121,7 +121,7 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython 
-	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer
+	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer MantidQtFactory
 	${QT_LIBRARIES} ${QWT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	)
