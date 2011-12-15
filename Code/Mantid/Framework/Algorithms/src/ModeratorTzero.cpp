@@ -28,7 +28,7 @@ This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
  	 	 t_i = L_i/v_i   L_i: distance from moderator to sample, v_i: initial velocity unknown
  	 	 t_0 = a/v_i+b   a and b are constants derived from the aforementioned heuristic formula.
  	 	                 a=gradient*3.956E-03, [a]=meter,    b=intercept, [b]=microsec
- 	 	 Putting all together:  TOF' = (L_i/(L_i+a))*(TOF-t_f-b) + t_i,   [TOF']=microsec
+ 	 	 Putting all together:  TOF' = (L_i/(L_i+a))*(TOF-t_f-b) + t_f,   [TOF']=microsec
 *WIKI*/
 
 //----------------------------------------------------------------------
@@ -66,21 +66,19 @@ using namespace Mantid::DataObjects;
 void ModeratorTzero::init()
 {
 
-  //Workspace should be of type EventWorkspace, and with Time-of-Flight units
+  //Workspace should be of type EventWorkspace and in Time-of-Flight units
   CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));  //or is it Time-of-Flight ???
-  declareProperty(new WorkspaceProperty<IEventWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
+  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
+  //declare the output workspace
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
-  declareProperty(new WorkspaceProperty<IEventWorkspace>("OutputWorkspace","",Direction::Output));
-
-}
+} // end of void ModeratorTzero::init()
 
 void ModeratorTzero::exec()
 {
-  //Efixed retrieved from the instrument definition file. There's a value of Efixed for each pixel, since value varies slightly.
-
   //retrieve the input workspace.
-  EventWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   //Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = inputWS->getInstrument();
@@ -94,6 +92,8 @@ void ModeratorTzero::exec()
   {
 	Emode = instrument->getStringParameter("deltaE-mode")[0];
     g_log.debug() << "Instrument Geometry: " << Emode << std::endl;
+    if(Emode != "indirect")
+      throw std::invalid_argument("Instrument geometry must be of type indirect.");
   }
   catch (Exception::NotFoundError &)
   {
@@ -101,16 +101,16 @@ void ModeratorTzero::exec()
     throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter", inputWS->getTitle());
   }
 
-  //gradient and intercept constants
-  double gradient, intercept;
+  //gradient, intercept constants
+  double gradient;
   try
   {
 	gradient = instrument->getNumberParameter("Moderator.TimeZero.gradient")[0]; //[gradient]=microsecond/Angstrom
 	//conversion factor for gradient from microsecond/Angstrom to meters
 	double convfactor = 1e+4*PhysicalConstants::h/PhysicalConstants::NeutronMass;
 	gradient *= convfactor; //[gradient] = meter
-	intercept = instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
-    g_log.debug() << "Moderator Time Zero: gradient=" << gradient << "intercept=" << intercept << std::endl;
+	this->intercept = instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
+    g_log.debug() << "Moderator Time Zero: gradient=" << gradient << "intercept=" << this->intercept << std::endl;
   }
   catch (Exception::NotFoundError &)
   {
@@ -118,7 +118,7 @@ void ModeratorTzero::exec()
     throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (gradient and intercept)", inputWS->getTitle());
   }
 
-  //Get the distance L_i between the source and the sample ([Li]=meters)
+  //distance L_i between source and sample ([Li]=meters). Calculate scaling
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
   double L_i;
@@ -132,17 +132,89 @@ void ModeratorTzero::exec()
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
   }
-  double const factor = L_i/(L_i+gradient);
+  this->scaling = L_i/(L_i+gradient);
+
+  //Check if it is an event workspace
+  EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (eventWS != NULL)
+  {
+    execEvent();
+    return;
+  }
+
+  MatrixWorkspace_sptr outputWS;
+  //Check whether input = output to see whether a new workspace is required.
+  if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
+  {
+	  outputWS = inputWS;
+  }else
+  {
+    //Create new workspace for output from old
+    MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS->isDistribution(inputWS->isDistribution());
+  }
+
+  // do the shift in X
+  const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
+  Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
+  PARALLEL_FOR2(inputWS, outputWS)
+  for (int64_t i=0; i < numHists; ++i)
+  {
+	PARALLEL_START_INTERUPT_REGION
+    // Calculate the time from sample to detector 'i'
+    double t_f = CalculateTf(sample,inputWS,i);
+	outputWS->dataX(i) = this->scaling*inputWS->dataX(i)+(1-this->scaling)*t_f-this->scaling*this->intercept;
+	//Copy y and e data
+	outputWS->dataY(i) = inputWS->dataY(i);
+	outputWS->dataE(i) = inputWS->dataE(i);
+	prog.report();
+	PARALLEL_END_INTERUPT_REGION
+    }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  // Copy units
+  if (outputWS->getAxis(0)->unit().get())
+  outputWS->getAxis(0)->unit() = inputWS->getAxis(0)->unit();
+  try
+  {
+    if(inputWS->getAxis(1)->unit().get())
+      outputWS->getAxis(1)->unit() = inputWS->getAxis(1)->unit();
+  }
+  catch(Exception::IndexError &) {
+      // OK, so this isn't a Workspace2D
+  }
+
+    // Assign it to the output workspace property
+    setProperty("OutputWorkspace",outputWS);
+}
+
+void ModeratorTzero::execEvent(){
+  g_log.information("Processing event workspace");
+
+  const MatrixWorkspace_const_sptr matrixInputWS = getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS= boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
   const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
-  EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (inputWS != outputWS) //?should we instead dereference the pointers before testing?
+  Mantid::API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputWS;
+  if (matrixOutputWS == matrixInputWS)
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  else
   {
-    //Copy the workspace
-	outputWS = boost::dynamic_pointer_cast<EventWorkspace>( WorkspaceFactory::Instance().create(inputWS) );
-    setProperty("OutputWorkspace", outputWS);
+    //Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2, 1));
+    //Copy geometry over.
+    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //You need to copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+    //Cast to the matrixOutputWS and save it
+    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    setProperty("OutputWorkspace", matrixOutputWS);
   }
+
+  //Get a pointer to the sample
+  IObjComponent_const_sptr sample = outputWS->getInstrument()->getSample();
 
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
@@ -150,76 +222,65 @@ void ModeratorTzero::exec()
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
 	PARALLEL_START_INTERUPT_REGION
+    // Calculate the time from sample to detector 'i'
+    double t_f = CalculateTf(sample,matrixOutputWS,i);
+  	//Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
+    EventList evlist=outputWS->getEventList(i);
+    evlist.scaleTof(this->scaling);
+    const double offset = (1-this->scaling)*t_f - this->scaling*intercept; //Will also fix the histogram bins
+    evlist.addTof(offset);
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+  outputWS->clearMRU(); // Clears the Most Recent Used lists */
+} // end of void ModeratorTzero::execEvent()
 
-	// Get detector position
-    IDetector_const_sptr det;
-    try
-    {
-      det = outputWS->getDetector(i);
-    } catch (Exception::NotFoundError&)
-    {
+  double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorkspace_sptr inputWS, int64_t i){
+    // Get detector position
+	IDetector_const_sptr det;
+	try
+	{
+	  det = inputWS->getDetector(i);
+	} catch (Exception::NotFoundError&)
+	{
 	  // Catch if no detector. Next line tests whether this happened - test placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+	  // outside here because Mac Intel compiler doesn't like 'continue' in a catch
 	  // in an openmp block.
 	}
 	// If no detector found, skip onto the next spectrum
 	if ( !det ) continue;
 
-	// Get final energy E_f
-	double E_f;
-    std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-    if ( wsProp.size() > 0 )
-    {
-      E_f = wsProp.at(0);
-      g_log.debug() << "detector: " << i << " Efixed: "<< E_f << std::endl;
-    }
-    else
-    {
-      g_log.information() <<"Efixed not found for detector "<< i << std::endl;
-      throw std::invalid_argument("No Efixed value has been set or found.");
-    }
-
-    //calculate L_f
-    double L_f;
-    try
-    {
-      L_f = det->getDistance(*sample);
-      g_log.debug() << "dectector " << i << "-sample distance: " << L_f << std::endl;
-    }
-    catch (Exception::NotFoundError &)
-    {
-      g_log.error("Unable to calculate detector-sample distance");
-      throw Exception::InstrumentDefinitionError("Unable to calculate detectot-sample distance", outputWS->getTitle());
-    }
-
-    //calculate v_f and t_f
-    double v_f;
-    double t_f = L_f / v_f;
-
-
-	//Get Efixed value
-    try {
-      Parameter_sptr par = pmap.get(det.get(),"Efixed");
-      if (par)
-      {
-        //calculate L_f and t_f
-
-    	//iterate over events for each histogram
-
-    	  //retrieve ToF for the event
-
-    	  //new ToF = factor * (Tof - t_f - intercept), to be stored in the new workspace!
-
-      }
-    } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
-
-
-	prog.report();
-	PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-}
+	// Get final energy E_f, final velocity v_f
+	double E_f, v_f, t_f;
+	std::vector< double >  wsProp=det->getNumberParameter("Efixed");
+	if ( wsProp.size() > 0 )
+	{
+	  E_f = wsProp.at(0);
+	  v_f=sqrt(2*E_f/PhysicalConstants::NeutronMass);
+	  g_log.debug() << "detector: " << i << " E_f:="<< E_f << " v_f=" << v_f << std::endl;
+	  //obtain L_f, calculate t_f
+	  double L_f;
+	  try
+	  {
+	    L_f = det->getDistance(*sample);
+	    t_f = L_f / v_f;
+	    g_log.debug() << "dectector " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
+	  }
+	  catch (Exception::NotFoundError &)
+	  {
+	    g_log.error("Unable to calculate detector-sample distance");
+	    throw Exception::InstrumentDefinitionError("Unable to calculate detector-sample distance", inputWS->getTitle());
+	  }
+	}
+	else
+	{
+	  g_log.information() <<"Efixed not found for detector "<< i << std::endl;
+	  throw std::invalid_argument("No Efixed value has been set or found.");
+	}
+	return t_f;
+  } // end of CalculateTf(const MatrixWorkspace_sptr inputWS, int64_t i)
 
 } // namespace Algorithms
 } // namespace Mantid
+

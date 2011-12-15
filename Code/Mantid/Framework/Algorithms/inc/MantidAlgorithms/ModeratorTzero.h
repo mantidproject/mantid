@@ -78,12 +78,19 @@ public:
   virtual const std::string category() const { return "InstrumentCorrections‎"; }
 
 private:
-  /// Sets documentation strings for this algorithm
+  //conversion constants applicable to histogram and event workspaces
+  double scaling;
+  double intercept;
+  // Sets documentation strings for this algorithm
   virtual void initDocs();
-  /// Initialisation code
+  // Initialisation code
   void init();
-  ///Execution code
+  // Execution code for histogram workspace
   void exec();
+  // Execution code for event workspace
+  void execEvent();
+  // Calculate time from sample to detector 'i'
+  double CalculateTf(Mantid::Geometry::IObjComponent_const_sptr sample, Mantid::API::MatrixWorkspace_sptr inputWS, int64_t i);
 
 };
 
