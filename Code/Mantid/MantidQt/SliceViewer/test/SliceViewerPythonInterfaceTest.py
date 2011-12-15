@@ -41,9 +41,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
         # Get the factory to create the SliceViewerWindow in C++
-        self.factory = mantidqtpython.MantidQt.Factory.WidgetFactoryImpl()
-        # Make the window
-        self.svw = self.factory.createSliceViewerWindow("uniform", "")
+        self.svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow("uniform", "")
         # Retrieve the SliceViewer widget alone.
         self.sv = self.svw.getSlicer()
         pass
