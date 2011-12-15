@@ -52,7 +52,7 @@ namespace MantidQt
       bool WorkspaceOnDisk::checkStillThere() const
       {
         std::ifstream ifile;
-        ifile.open(m_fileName, std::ifstream::in);
+        ifile.open(m_fileName.c_str(), std::ifstream::in);
         return !ifile.fail();
       }
 
