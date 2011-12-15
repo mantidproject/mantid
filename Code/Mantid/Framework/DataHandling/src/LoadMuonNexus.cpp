@@ -145,6 +145,55 @@ namespace Mantid
       // Retrieve the entry number
       m_entrynumber = getProperty("EntryNumber");
 
+
+
+      NXRoot root(m_filename);
+      NXEntry entry = root.openEntry("run/histogram_data_1");
+      try
+      {
+        NXInfo info = entry.getDataSetInfo("time_zero");
+        if (info.stat != NX_ERROR)
+        {
+          double dum = root.getFloat("run/histogram_data_1/time_zero");
+          setProperty("TimeZero", dum);
+        }
+      }
+      catch (::NeXus::Exception&)
+      {}
+
+      try
+      {
+        NXInfo infoResolution = entry.getDataSetInfo("resolution");
+        NXInt counts = root.openNXInt("run/histogram_data_1/counts");
+        std::string firstGoodBin = counts.attributes("first_good_bin");
+        if ( !firstGoodBin.empty() && infoResolution.stat != NX_ERROR )
+        {
+          double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
+          double bin_size = static_cast<double>(root.getInt("run/histogram_data_1/resolution"))/1000000.0;
+          setProperty("FirstGoodData", bin*bin_size);
+        }
+      }
+      catch (::NeXus::Exception&)
+      {}
+
+      NXEntry nxRun = root.openEntry("run");
+      std::string title;
+      std::string notes;
+      try
+      {
+        title = nxRun.getString("title");
+        notes = nxRun.getString("notes");
+      }    
+      catch (::NeXus::Exception&)
+      {}
+      std::string run_num;
+      try
+      {
+        run_num = boost::lexical_cast<std::string>(nxRun.getInt("number"));
+      }
+      catch (::NeXus::Exception&)
+      {}
+
       MuonNexusReader nxload;
       if (nxload.readFromFile(m_filename) != 0)
       {
@@ -211,6 +260,9 @@ namespace Mantid
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+      localWorkspace->setTitle(title);
+      localWorkspace->setComment(notes);
+      localWorkspace->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
       // Set the unit on the workspace to muon time, for now in the form of a Label Unit
       boost::shared_ptr<Kernel::Units::Label> lblUnit = 
         boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
@@ -252,9 +304,13 @@ namespace Mantid
         {
           localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(localWorkspace));
+          localWorkspace->setTitle(title);
+          localWorkspace->setComment(notes);
           //localWorkspace->newInstrumentParameters(); ???
 
         }
+
+
         std::string outws("");
         if(m_numberOfPeriods>1)
         {
@@ -533,6 +589,7 @@ namespace Mantid
         g_log.warning("run/start_time is not available, run_start log not added.");
       }
 
+
       try
       {
         std::string stop_time = root.getString("run/stop_time");
@@ -695,34 +752,6 @@ namespace Mantid
       {
         setProperty("MainFieldDirection", "Longitudinal");
       }
-
-      NXEntry entry = root.openEntry("run/histogram_data_1");
-      NXInfo info = entry.getDataSetInfo("time_zero");
-      if (info.stat != NX_ERROR)
-      {
-        double dum = root.getFloat("run/histogram_data_1/time_zero");
-        setProperty("TimeZero", dum);
-      }
-
-      NXInfo infoResolution = entry.getDataSetInfo("resolution");
-      NXInt counts = root.openNXInt("run/histogram_data_1/counts");
-      std::string firstGoodBin = counts.attributes("first_good_bin");
-
-      if ( !firstGoodBin.empty() && infoResolution.stat != NX_ERROR )
-      {
-        double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
-        double bin_size = static_cast<double>(root.getInt("run/histogram_data_1/resolution"))/1000000.0;
-        setProperty("FirstGoodData", bin*bin_size);
-      }
-
-
-      NXEntry nxRun = root.openEntry("run");
-      localWorkspace->setTitle(nxRun.getString("title"));
-      localWorkspace->setComment(nxRun.getString("notes"));
-
-      std::string run_num = boost::lexical_cast<std::string>(nxRun.getInt("number"));
-      //The sample is left to delete the property
-      localWorkspace->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
     }
 

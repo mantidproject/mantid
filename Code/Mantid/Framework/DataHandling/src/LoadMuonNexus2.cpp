@@ -36,14 +36,14 @@ namespace Mantid
     using namespace API;
     using Geometry::Instrument;
     using namespace Mantid::NeXus;
-    
+
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus2::initDocs()
     {
       this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
       this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
     }
-    
+
 
     /// Empty default constructor
     LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus()
@@ -97,9 +97,17 @@ namespace Mantid
 
       // Read in the instrument name from the Nexus file
       m_instrument_name = entry.getString("instrument/name");
-      
+
       // Read the number of periods in this file
-      m_numberOfPeriods = entry.getInt("run/number_periods");
+      try
+      {
+        m_numberOfPeriods = entry.getInt("run/number_periods");
+      }
+      catch (::NeXus::Exception&)
+      {
+        //assume 1
+        m_numberOfPeriods = 1;
+      }
 
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
@@ -171,8 +179,18 @@ namespace Mantid
 
       //g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-      wsGrpSptr->setTitle(entry.getString("title"));
-      wsGrpSptr->setComment(entry.getString("notes"));
+      try 
+      {
+        wsGrpSptr->setTitle(entry.getString("title"));
+      }
+      catch (::NeXus::Exception&)
+      {}
+      try
+      {
+        wsGrpSptr->setComment(entry.getString("notes"));
+      }
+      catch (::NeXus::Exception&)
+      {}
 
       if(m_numberOfPeriods>1)
       {
@@ -186,22 +204,31 @@ namespace Mantid
       counts.load();
 
 
-      NXEntry entryTimeZero = root.openEntry("run/instrument/detector_fb");
-      NXInfo infoTimeZero = entryTimeZero.getDataSetInfo("time_zero");
-      if (infoTimeZero.stat != NX_ERROR)
+      try
       {
-        double dum = root.getFloat("run/instrument/detector_fb/time_zero");
-        setProperty("TimeZero", dum);
+        NXEntry entryTimeZero = root.openEntry("run/instrument/detector_fb");
+        NXInfo infoTimeZero = entryTimeZero.getDataSetInfo("time_zero");
+        if (infoTimeZero.stat != NX_ERROR)
+        {
+          double dum = root.getFloat("run/instrument/detector_fb/time_zero");
+          setProperty("TimeZero", dum);
+        }
       }
+      catch (::NeXus::Exception&)
+      {}
 
-      NXEntry entryFGB = root.openEntry("run/instrument/detector_fb");
-      NXInfo infoFGB = entryFGB.getDataSetInfo("first_good_time");
-      if (infoFGB.stat != NX_ERROR)
+      try
       {
-        double dum = root.getFloat("run/instrument/detector_fb/first_good_time");
-        setProperty("FirstGoodData", dum);
+        NXEntry entryFGB = root.openEntry("run/instrument/detector_fb");
+        NXInfo infoFGB = entryFGB.getDataSetInfo("first_good_time");
+        if (infoFGB.stat != NX_ERROR)
+        {
+          double dum = root.getFloat("run/instrument/detector_fb/first_good_time");
+          setProperty("FirstGoodData", dum);
+        }
       }
-
+      catch (::NeXus::Exception&)
+      {}
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
@@ -212,7 +239,7 @@ namespace Mantid
           // Only run the sub-algorithms once
           loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
-	  localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spectrum_index(),spectrum_index(),m_numberOfSpectra));
+          localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spectrum_index(),spectrum_index(),m_numberOfSpectra));
           loadLogs(localWorkspace, entry, period);
         }
         else   // We are working on a higher period of a multiperiod raw file
@@ -249,7 +276,7 @@ namespace Mantid
           counter++;
           progress.report();
         }
-        
+
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
         {
@@ -286,8 +313,8 @@ namespace Mantid
     }
 
     /** loadData
-     *  Load the counts data from an NXInt into a workspace
-     */
+    *  Load the counts data from an NXInt into a workspace
+    */
     void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
       int period,int spec,API::MatrixWorkspace_sptr localWorkspace)
     {
@@ -335,7 +362,7 @@ namespace Mantid
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       //The sample is left to delete the property
       ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
-    
+
       ws->populateInstrumentParameters();
     }
 
@@ -364,7 +391,7 @@ namespace Mantid
         return true;
       }
       return false;
-     
+
     }
     /**checks the file by opening it and reading few lines 
     *  @param filePath :: name of the file inluding its path
@@ -391,13 +418,24 @@ namespace Mantid
         }
         catch(::NeXus::Exception&)
         {
-          analysisType = "";
+          //one last try - this is the area for PSI written files
+          try
+          {
+            ::NeXus::File file = ::NeXus::File(filePath);
+            file.openPath("/raw_data_1/definition");
+            analysisType = file.getStrData();
+          }
+          catch(::NeXus::Exception&)
+          {
+            //no give up this doesn't look like a muon v2 file
+            analysisType = "";
+          }
         }
       }
       std::string compareString = "muon";
       if( analysisType == "pulsedTD" )
       {
-        confidence = 80;
+        confidence = 85;
       }
       else if( analysisType.compare(0,compareString.length(),compareString) == 0 )
       {
@@ -416,7 +454,7 @@ namespace Mantid
       API::Run & runDetails = localWorkspace->mutableRun();
 
       runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
- 
+
       int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
       runDetails.addProperty("nspectra", numSpectra);
 
@@ -430,7 +468,7 @@ namespace Mantid
       runDetails.addProperty("run_end", stop_time);
 
 
-	  NXEntry runRun = root.openEntry("run/run");
+      NXEntry runRun = root.openEntry("run/run");
 
       NXInfo infoGoodTotalFrames = runRun.getDataSetInfo("good_total_frames");
       if (infoGoodTotalFrames.stat != NX_ERROR)
@@ -439,19 +477,19 @@ namespace Mantid
         runDetails.addProperty("goodfrm", dum);
       }
 
-	  NXInfo infoNumberPeriods = runRun.getDataSetInfo("number_periods");
+      NXInfo infoNumberPeriods = runRun.getDataSetInfo("number_periods");
       if (infoNumberPeriods.stat != NX_ERROR)
       {
         int dum = root.getInt("run/run/number_periods");
         runDetails.addProperty("nperiods", dum);
       }
 
-	  {  // Duration taken to be stop_time minus stat_time
-	    DateAndTime start(start_time);
-	    DateAndTime end(stop_time);
-		double duration_in_secs = DateAndTime::seconds_from_duration( end - start);
-		runDetails.addProperty("dur_secs",duration_in_secs);
-	  }
+      {  // Duration taken to be stop_time minus stat_time
+        DateAndTime start(start_time);
+        DateAndTime end(stop_time);
+        double duration_in_secs = DateAndTime::seconds_from_duration( end - start);
+        runDetails.addProperty("dur_secs",duration_in_secs);
+      }
 
 
 
