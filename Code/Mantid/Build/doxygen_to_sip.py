@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Script that will grab doxygen strings from a 
 .cpp file and stuff them in the corresponding
 .sip file under a %Docstring tag"""
@@ -115,10 +116,18 @@ def process_sip(filename):
     # Give back the generated lines
     return outlines
     
+    
+#----------------------------------------------------------
 if __name__=="__main__":
     
-    parser = OptionParser(description='Utility to delete a Mantid class from a project. ' 
-                                     'Please note, you may still have more fixes to do to get compilation!')
+    parser = OptionParser(description=
+"""Automatically adds Docstring directives to an input .sip file.
+REQUIREMENTS:
+- All method declarations in the sip file must be on one line.
+- The cpp file must be = to ClassName.cpp
+- The method declaration must match exactly the sip entry.
+- The Doxygen must be just before the method in the .cpp file.
+""")
     parser.add_option('-i', metavar='SIPFILE', dest="sipfile",
                         help='The .sip input file')
     
@@ -126,6 +135,11 @@ if __name__=="__main__":
                         help='The name of the output file')
 
     (options, args) = parser.parse_args()
+    
+    if options.sipfile is None:
+        raise Exception("Must specify an input file with -i !")
+    if options.outputfile is None:
+        raise Exception("Must specify an output file with -o !")
     
     print "---- Reading from %s ---- " % options.sipfile
     out = process_sip(options.sipfile)
