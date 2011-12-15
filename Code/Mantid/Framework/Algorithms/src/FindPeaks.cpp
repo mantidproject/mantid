@@ -1088,7 +1088,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       a2 = params[5];
     }
   } else {
-    g_log.error() << "FindPeaks: Final Fit Error!  Message: " << fitStatus2 << std::endl;
+    g_log.debug() << "FindPeaks: Final Fit Error!  Message: " << fitStatus2 << std::endl;
   }
 
   // i) Set return value
