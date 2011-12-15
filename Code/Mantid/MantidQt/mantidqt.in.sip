@@ -67,21 +67,21 @@ namespace MantidQt
 namespace Factory
 {
 
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-  class WidgetFactoryImpl
-  {
-  %TypeHeaderCode
-  #include "Factory/inc/MantidQtFactory/WidgetFactory.h"
-  %End
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class WidgetFactoryImpl
+{
+%TypeHeaderCode
+#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
+%End
 
-  public:
-    WidgetFactoryImpl();
-    MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
-    MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
+public:
+  WidgetFactoryImpl();
+  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
-  };
+};
 
 }; // end namespace
 }; // end namespace
@@ -94,73 +94,73 @@ namespace SliceViewer
 {
 
 
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-  class SliceViewerWindow : QMainWindow
-  {
-  %TypeHeaderCode
-  #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
-  %End
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class SliceViewerWindow : QMainWindow
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
+%End
 
-  public:
-    SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
-    MantidQt::SliceViewer::SliceViewer* getSlicer();
-    MantidQt::SliceViewer::LineViewer* getLiner();
+public:
+  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
+  MantidQt::SliceViewer::SliceViewer* getSlicer();
+  MantidQt::SliceViewer::LineViewer* getLiner();
 
-  };
-
-
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-  class LineViewer : QWidget
-  {
-  %TypeHeaderCode
-  #include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
-  %End
-
-  };
+};
 
 
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-  class SliceViewer : QWidget
-  {
-  %TypeHeaderCode
-  #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
-  %End
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class LineViewer : QWidget
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
+%End
 
-  public:
-    void setWorkspace(const QString & wsName)   throw (std::runtime_error);
-    void showControls(bool visible);
-    
-    void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
-    void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);
-    int getDimX() const;
-    int getDimY() const;
+};
 
-    void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
-    void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, std::runtime_error);
-    double getSlicePoint(int dim) const     throw (std::invalid_argument);
-    double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, std::runtime_error);
-    void setXYLimits(double xleft, double xright, double ybottom, double ytop);
-    QwtDoubleInterval getXLimits() const;
-    QwtDoubleInterval getYLimits() const;
-    void zoomBy(double factor);
-    void setXYCenter(double x, double y);
-    void resetZoom();
 
-    void loadColorMap(QString filename);
-    void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
-    double getColorScaleMin() const;
-    double getColorScaleMax() const;
-    bool getColorScaleLog() const;
-    void setColorScaleAutoFull();
-    void setColorScaleAutoSlice();
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class SliceViewer : QWidget
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
+%End
 
-  };
+public:
+  void setWorkspace(const QString & wsName)   throw (std::runtime_error);
+  void showControls(bool visible);
+
+  void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
+  void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);
+  int getDimX() const;
+  int getDimY() const;
+
+  void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
+  void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, std::runtime_error);
+  double getSlicePoint(int dim) const     throw (std::invalid_argument);
+  double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, std::runtime_error);
+  void setXYLimits(double xleft, double xright, double ybottom, double ytop);
+  QwtDoubleInterval getXLimits() const;
+  QwtDoubleInterval getYLimits() const;
+  void zoomBy(double factor);
+  void setXYCenter(double x, double y);
+  void resetZoom();
+
+  void loadColorMap(QString filename);
+  void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
+  double getColorScaleMin() const;
+  double getColorScaleMax() const;
+  bool getColorScaleLog() const;
+  void setColorScaleAutoFull();
+  void setColorScaleAutoSlice();
+
+};
 
 
 
