@@ -189,24 +189,11 @@ void MuonAnalysis::initLayout()
   // Detect when the fit has finished and group the workspaces that have been created as a result.
   connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
 
-  // Detect when the fit has finished and group the workspaces that have been created as a result.
-  connect(m_uiForm.fitBrowser, SIGNAL(beforeFitting(const QtBoolPropertyManager*)), this, SLOT(beforeDoFit(const QtBoolPropertyManager*)));
-
   connectAutoUpdate();
 
   // Muon scientists never fits peaks, hence they want the following parameter
   // set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
-}
-
-/**
-*  Before fitting data (slot)
-*  @param p contain parameters set by the user in the fit property browser
-*/
-void MuonAnalysis::beforeDoFit(const QtBoolPropertyManager* p)
-{
-  // call method which do the work
-  m_fitDataTab->beforeDoFit(p);
 }
 
 

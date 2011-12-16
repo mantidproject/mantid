@@ -274,7 +274,7 @@ m_mantidui(mantidui)
   {
     QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
     m_rawData = m_boolManager->addProperty("Fit To Raw Data");
-    bool data = settings.value("Fit To Raw Data",QVariant(true)).toBool();
+    bool data = settings.value("Fit To Raw Data",QVariant(false)).toBool();
     m_boolManager->setValue(m_rawData,data);
     customSettingsGroup->addSubProperty(m_minimizer);
     customSettingsGroup->addSubProperty(m_plotDiff);
@@ -1336,13 +1336,6 @@ void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFitFunction* f)c
 void FitPropertyBrowser::fit()
 {
   std::string wsName = workspaceName();
-
-  // Emit a signal before the fitting is started. 
-  // This gives the opportunity to customize a fit - before its starts
-  // which is e.g. used by MuonAnalysis fitting
-  // (wsName that the fit has been done against is sent as a parameter)
-  //emit beforeFitting(QString::fromStdString(wsName));
-  emit beforeFitting(m_boolManager);
 
   if (wsName.empty())
   {
