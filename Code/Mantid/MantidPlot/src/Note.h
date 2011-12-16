@@ -59,6 +59,7 @@ public slots:
   QString text() { return te->text(); }
   void setText(const QString &s) { te->setText(s); }
 
+  void print();
   QString exportASCII(const QString &filename=QString::null);
 
 private:

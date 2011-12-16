@@ -33,6 +33,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextStream>
+#include <Qsci/qsciprinter.h>
+#include <QPrintDialog>
 #include "MantidKernel/ConfigService.h"
 
 Note::Note(const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
@@ -86,6 +88,19 @@ void Note::restore(const QStringList& data)
   if (*line == "<content>") line++;
   while (line != data.end() && *line != "</content>")
     te->append((*line++)+"\n");  //Mantid - changes for QScintilla
+}
+
+void Note::print()
+{
+  QsciPrinter printer(QPrinter::HighResolution);
+  printer.setColorMode(QPrinter::GrayScale);
+  printer.setOutputFormat(QPrinter::PostScriptFormat);
+  QPrintDialog printDialog(&printer);
+  printDialog.setWindowTitle("MantidPlot - Print Script");
+  if (printDialog.exec() == QDialog::Accepted)
+  {
+    te->document()->print(&printer);
+  }
 }
 
 QString Note::exportASCII(const QString &filename)
