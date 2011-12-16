@@ -48,7 +48,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     
     def tearDown(self):
         """ Close the created widget """
-        self.sv.close()
+        # This is crucial! Forces the object to be deleted NOW, not when python exits
+        self.svw.deleteLater()
+        self.svw.show()
+        # This is required for deleteLater() to do anything (it deletes at the next event loop
+        app.exec_()
 
     #==========================================================================
     #======================= Basic Tests ======================================

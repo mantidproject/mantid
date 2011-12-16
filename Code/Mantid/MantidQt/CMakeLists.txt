@@ -112,8 +112,8 @@ if(WIN32)
 	# Windows: Python library name needs to end in .pyd for Windows
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
 elseif ( APPLE )
-	# Mac: and in .so on the Mac
-  	set_target_properties ( mantidqtpython PROPERTIES SUFFIX .so )
+	# Mac: and in .so on the Mac, with no "lib" prefix either
+  	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so )
 else ()
 	# Linux: needs to NOT have the usual "lib" prefix. 
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" )
