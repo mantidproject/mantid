@@ -91,10 +91,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEquals(x_np[i][blocksize], workspace.readX(i)[blocksize])
             
     def xtest_operators_with_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
+        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],XUnit='TOF')
         ads = AnalysisDataService.Instance()
         A = ads['A']
-        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
+        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],XUnit='TOF')
         B = ads['B']
 #    
         # Two workspaces
