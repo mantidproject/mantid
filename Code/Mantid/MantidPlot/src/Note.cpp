@@ -33,44 +33,44 @@
 #include "ScriptEdit.h"
 
 Note::Note(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-		 : MdiSubWindow(label, parent, name, f)
+: MdiSubWindow(label, parent, name, f)
 {
-init(env);
+  init(env);
 }
 
 void Note::init(ScriptingEnv *env)
 {
-autoExec = false;
-te = new ScriptEdit(env, this, name());
-te->setContext(this);
-setWidget(te);
+  autoExec = false;
+  te = new ScriptEdit(env, this, name());
+  te->setContext(this);
+  setWidget(te);
 
-setGeometry(0, 0, 500, 200);
-connect(te, SIGNAL(textChanged()), this, SLOT(modifiedNote()));
-connect(te, SIGNAL(dirPathChanged(const QString& )), this, SIGNAL(dirPathChanged(const QString&)));
+  setGeometry(0, 0, 500, 200);
+  connect(te, SIGNAL(textChanged()), this, SLOT(modifiedNote()));
+  connect(te, SIGNAL(dirPathChanged(const QString& )), this, SIGNAL(dirPathChanged(const QString&)));
 }
 
 void Note::setName(const QString& name)
 {
-	te->setObjectName(name);
-	MdiSubWindow::setName(name);
+  te->setObjectName(name);
+  MdiSubWindow::setName(name);
 }
 
 void Note::modifiedNote()
 {
-emit modifiedWindow(this);
+  emit modifiedWindow(this);
 }
 
 QString Note::saveToString(const QString &info, bool)
 {
-QString s= "<note>\n";
-s+= QString(name()) + "\t" + birthDate() + "\n";
-s+= info;
-s+= "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-s+= "AutoExec\t" + QString(autoExec ? "1" : "0") + "\n";
-s+= "<content>\n"+te->text().stripWhiteSpace()+"\n</content>";
-s+="\n</note>\n";
-return s;
+  QString s= "<note>\n";
+  s+= QString(name()) + "\t" + birthDate() + "\n";
+  s+= info;
+  s+= "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
+  s+= "AutoExec\t" + QString(autoExec ? "1" : "0") + "\n";
+  s+= "<content>\n"+te->text().stripWhiteSpace()+"\n</content>";
+  s+="\n</note>\n";
+  return s;
 }
 
 void Note::restore(const QStringList& data)
