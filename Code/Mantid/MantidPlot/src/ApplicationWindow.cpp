@@ -1949,7 +1949,7 @@ QString ApplicationWindow::stemPlot(Table *t, const QString& colName, int power,
     gsl_sort (data, 1, rows);
 
     if (power > 1e3){
-      power = static_cast<int>(std::ceil(log10(data[rows - 1] - data[0]) - log10(rows - 1)));
+      power = static_cast<int>(std::ceil(log10(data[rows - 1] - data[0]) - log10(rows - 1.0)));
       bool ok;
       int input = QInputDialog::getInteger(this, tr("Please confirm the stem unit!"),
                                       tr("Data set") + ": " + colName + ", " + tr("stem unit") + " = 10<sup>n</sup>, n = ",
