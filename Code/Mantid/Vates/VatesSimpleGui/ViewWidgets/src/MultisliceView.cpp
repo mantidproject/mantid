@@ -6,6 +6,7 @@
 #include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 
 #include <pqActiveObjects.h>
@@ -38,6 +39,7 @@
 #include <iostream>
 
 using namespace Mantid::Geometry;
+using namespace MantidQt::SliceViewer;
 
 namespace Mantid
 {
@@ -540,29 +542,8 @@ void MultiSliceView::resetCamera()
  */
 void MultiSliceView::checkSliceViewCompat()
 {
-  bool setSliceViewState = false;
-  // Check the current source
-  pqPipelineSource *src = this->getPvActiveSrc();
-  QString wsName(vtkSMPropertyHelper(src->getProxy(),
-                                     "WorkspaceName",
-                                     true).GetAsString());
+  QString wsName = this->getWorkspaceName();
   if (wsName != "")
-  {
-    setSliceViewState = true;
-  }
-  else
-  {
-    // Check the original source
-    QString wsName1(vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                        "WorkspaceName",
-                                        true).GetAsString());
-    if (wsName1 != "")
-    {
-      setSliceViewState = true;
-      this->isOrigSrc = true;
-    }
-  }
-  if (setSliceViewState)
   {
     this->ui.xAxisWidget->setShowSliceView(true);
     this->ui.yAxisWidget->setShowSliceView(true);
@@ -579,14 +560,16 @@ void MultiSliceView::checkSliceViewCompat()
  */
 void MultiSliceView::showCutInSliceViewer(const QString &name)
 {
-  std::cout << name.toStdString() << " to be shown." << std::endl;
   // Get the associated workspace name
+  QString wsName = this->getWorkspaceName();
+
+  // Have to jump through some hoops since a rebinner could be used.
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
   pqPipelineSource *src1 = NULL;
   foreach (pqPipelineSource *src, srcs)
   {
-    const QString name = src->getSMName();
+    const QString name(src->getProxy()->GetXMLName());
     if (name.contains("MDEWRebinningCutter"))
     {
       src1 = src;
@@ -594,16 +577,26 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   }
   if (NULL == src1)
   {
-    src1 = this->origSrc;
+    src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
   }
 
-  QString wsName(vtkSMPropertyHelper(src1->getProxy(),
-                                     "WorkspaceName",
-                                     true).GetAsString());
+  this->printProxyProps(src1);
+
 
   // Get the current dataset characteristics
-  const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
-                                            "InputGeometryXML").GetAsString();
+  const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
+                                             "InputGeometryXML").GetAsString();
+  // Check for timesteps and insert the value into the XML if necessary
+  std::string geomXML;
+  if ( this->srcHasTimeSteps(src1) )
+  {
+    GeometryParser parser(inGeomXML);
+    geomXML = parser.addTDimValue(this->getCurrentTimeStep());
+  }
+  else
+  {
+    geomXML = std::string(inGeomXML);
+  }
 
   // Get the necessary information from the cut
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
@@ -622,8 +615,12 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
                                                                origin));
   rks.setImplicitFunction(impplane);
+  //std::cout << rks.createXMLString() << std::endl;
+  QString titleAddition = " "+name;
 
-  std::cout << rks.createXMLString() << std::endl;
+  // TODO: Use the WidgetFactory
+  SliceViewerWindow *w = new MantidQt::SliceViewer::SliceViewerWindow(wsName, titleAddition);
+  w->show();
 }
 
 }

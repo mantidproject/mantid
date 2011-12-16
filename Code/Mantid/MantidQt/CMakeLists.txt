@@ -10,6 +10,7 @@ add_subdirectory ( CustomDialogs )
 add_subdirectory ( CustomInterfaces )
 add_subdirectory ( DesignerPlugins )
 add_subdirectory ( SliceViewer )
+add_subdirectory ( Factory )
 
 ###########################################################################
 # Add a custom target to build all of the MantidQt packages
@@ -41,7 +42,16 @@ find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
 
-set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
+if ( ${SIP_VERSION} MATCHES "04[0-9][a-f].*" )
+	# SIP version is at least 4.10 (040a or higher in hex)
+	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
+	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
+else ()
+	# Pre 4.0 sip version (RHEL5 build). 
+	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip without docstring." )
+	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.rhel5.sip )
+endif ()
+
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/sip_mantidqt.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sip_mantidqt.cpp )
 set ( SIP_SRC_AUTO siplibmantidpythonqtpart0.cpp )
@@ -111,7 +121,7 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython 
-	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer
+	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer MantidQtFactory
 	${QT_LIBRARIES} ${QWT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	)

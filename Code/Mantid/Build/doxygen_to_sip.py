@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Script that will grab doxygen strings from a 
 .cpp file and stuff them in the corresponding
 .sip file under a %Docstring tag"""
@@ -14,7 +15,7 @@ def findInSubdirectory(filename, subdirectory=''):
     for root, dirs, names in os.walk(path):
         if filename in names:
             return os.path.join(root, filename)
-    raise 'File not found'
+    return None
 
 def find_cpp_file(basedir, classname):
     return findInSubdirectory(classname + ".cpp", basedir) 
@@ -27,6 +28,8 @@ def grab_doxygen(cppfile, method):
     cppfile :: full path to the .cpp file
     method :: method definition to look for
     """
+    if cppfile is None:
+        return None
     lines = open(cppfile, 'r').read().split('\n')
     #print method
     out = []
@@ -71,6 +74,10 @@ def doxygen_to_docstring(doxygen, method):
 
 #----------------------------------------------------------
 def process_sip(filename):
+    """ Reads an input .sip file and finds methods from
+    classes. Retrieves doxygen and adds them as
+    docstrings """
+    
     root = os.path.split(os.path.abspath(filename))[0] 
     # Read and split into a buncha lines
     lines = open(filename, 'r').read().split('\n')
@@ -89,7 +96,11 @@ def process_sip(filename):
             if n > 0: classname = classname[0:n].strip()
             # Now, we look for the .cpp file
             classcpp = find_cpp_file(root, classname)
-            print "Found class '%s' at %s" % (classname, classcpp)
+            if classcpp is None:
+                print "WARNING: Could not find cpp file for class %s" % classname
+            else:
+                print "Found class '%s' .cpp file " % classname
+            
             
         if classname != "":
             # We are within a real class
@@ -111,10 +122,18 @@ def process_sip(filename):
     # Give back the generated lines
     return outlines
     
+    
+#----------------------------------------------------------
 if __name__=="__main__":
     
-    parser = OptionParser(description='Utility to delete a Mantid class from a project. ' 
-                                     'Please note, you may still have more fixes to do to get compilation!')
+    parser = OptionParser(description=
+"""Automatically adds Docstring directives to an input .sip file.
+REQUIREMENTS:
+- All method declarations in the sip file must be on one line.
+- The cpp file must be = to ClassName.cpp
+- The method declaration must match exactly the sip entry.
+- The Doxygen must be just before the method in the .cpp file.
+""")
     parser.add_option('-i', metavar='SIPFILE', dest="sipfile",
                         help='The .sip input file')
     
@@ -122,6 +141,11 @@ if __name__=="__main__":
                         help='The name of the output file')
 
     (options, args) = parser.parse_args()
+    
+    if options.sipfile is None:
+        raise Exception("Must specify an input file with -i !")
+    if options.outputfile is None:
+        raise Exception("Must specify an output file with -o !")
     
     print "---- Reading from %s ---- " % options.sipfile
     out = process_sip(options.sipfile)

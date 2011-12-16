@@ -61,6 +61,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( strip.setPropertyValue("InputWorkspace","toStrip") );
     std::string outputWS("stripped");
     TS_ASSERT_THROWS_NOTHING( strip.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING( strip.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING( strip.setProperty("FWHM", 7));
 
     TS_ASSERT_THROWS_NOTHING( strip.execute() );
     TS_ASSERT( strip.isExecuted() );
@@ -70,6 +72,7 @@ public:
 
     MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toStrip"));
     MatrixWorkspace::const_iterator inIt(*input);
+
     for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() );

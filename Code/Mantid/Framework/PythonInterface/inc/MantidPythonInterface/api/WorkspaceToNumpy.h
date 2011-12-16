@@ -43,6 +43,9 @@ namespace Mantid
       PyObject *wrapY(API::MatrixWorkspace &self, const size_t index);
       /// Create a numpy wrapper around the original X values at the given index
       PyObject *wrapE(API::MatrixWorkspace &self, const size_t index);
+      /// Create a numpy wrapper around the original Dx values at the given index
+      PyObject *wrapDx(API::MatrixWorkspace &self, const size_t index);
+
       ///@}
 
       //** @name Numpy clones of data*/
@@ -53,6 +56,8 @@ namespace Mantid
       PyObject *cloneY(API::MatrixWorkspace &self);
       /// Create a numpy array from the E values of the given workspace reference
       PyObject *cloneE(API::MatrixWorkspace &self);
+      /// Create a numpy array from the E values of the given workspace reference
+      PyObject *cloneDx(API::MatrixWorkspace &self);
       ///@}
 
     }

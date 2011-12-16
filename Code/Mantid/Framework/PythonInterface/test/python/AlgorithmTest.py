@@ -34,11 +34,15 @@ class AlgorithmTest(unittest.TestCase):
     def test_execute_succeeds_with_valid_props(self):
         data = [1.0,2.0,3.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
+        self.assertEquals(alg.isExecuted(), True)
         self.assertEquals(alg.getProperty('NSpec').value, 1)
         self.assertEquals(type(alg.getProperty('NSpec').value), int)
         self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
         ws = alg.getProperty('OutputWorkspace').value
         self.assertTrue(ws.getMemorySize() > 0.0 )
+        
+        as_str = str(alg)
+        self.assertEquals(as_str, "CreateWorkspace.1(OutputWorkspace=UNUSED_NAME_FOR_CHILD,DataX=1,2,3,DataY=1,2,3,UnitX=Wavelength)")
         
 if __name__ == '__main__':
     unittest.main()

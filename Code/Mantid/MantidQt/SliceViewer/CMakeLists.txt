@@ -60,7 +60,6 @@ include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
 
 
-
 ###########################################################################
 # Main Library Target
 ###########################################################################
@@ -130,7 +129,7 @@ endif ()
 ###########################################################################
 
 # python unit tests
-#if (PYUNITTEST_FOUND )
+#if ( PYUNITTEST_FOUND )
 if ( 0 )
   pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
   add_dependencies ( SliceViewerTest.py MantidQt Algorithms )

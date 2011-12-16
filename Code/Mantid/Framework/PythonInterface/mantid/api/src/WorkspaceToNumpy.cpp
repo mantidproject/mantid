@@ -26,7 +26,7 @@ namespace Mantid
       namespace
       {
         /// Which data field are we extracting
-        enum DataField { XValues = 0, YValues = 1, EValues= 2 };
+        enum DataField { XValues = 0, YValues = 1, EValues= 2, DxValues = 3 };
 
         /**
          * Helper method for extraction to numpy.
@@ -45,10 +45,18 @@ namespace Mantid
           // Find out which function we need to call to access the data
           typedef const MantidVec & (MatrixWorkspace::*ArrayAccessFn)(const size_t) const;
           ArrayAccessFn dataAccesor;
+          /**
+           * Can do better than this with a templated object that knows how to access the data
+           */
           if( field == XValues )
           {
             stride = workspace.readX(0).size();
             dataAccesor = &MatrixWorkspace::readX;
+          }
+          else if( field == DxValues)
+          {
+            stride = workspace.readDx(0).size();
+            dataAccesor = &MatrixWorkspace::readDx;
           }
           else
           {
@@ -108,6 +116,16 @@ namespace Mantid
         return (PyObject*)nparray;
       }
 
+      /*
+       * Create a numpy wrapper around the original Dx values at the given index
+       * @param self :: A pointer to a PyObject representing the calling object
+       * @param index :: The index into the workspace
+       */
+      PyObject *wrapDx(MatrixWorkspace & self, const size_t index)
+      {
+        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readDx(index));
+        return (PyObject*)nparray;
+      }
 
       // -------------------------------------- Cloned arrays---------------------------------------------------
       /* Create a numpy array from the X values of the given workspace reference
@@ -138,6 +156,17 @@ namespace Mantid
       {
         return (PyObject*)cloneArray(self, EValues, 0, self.getNumberHistograms());
       }
+
+      /* Create a numpy array from the E values of the given workspace reference
+       * This acts like a python method on a Matrixworkspace object
+       * @param self :: A pointer to a PyObject representing the calling object
+       * @return A 2D numpy array created from the E values
+       */
+      PyObject * cloneDx(MatrixWorkspace &self)
+      {
+        return (PyObject*)cloneArray(self, DxValues, 0, self.getNumberHistograms());
+      }
+
 
     }
   }

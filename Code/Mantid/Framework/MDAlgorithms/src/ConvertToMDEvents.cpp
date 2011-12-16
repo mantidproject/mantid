@@ -752,7 +752,7 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel
     return rotMat;
 }
 
-/** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates for 
+/** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates for 
     the particular workspace.
 
     @param Coord             -- vector of coordinates for current multidimensional event
@@ -761,8 +761,11 @@ ConvertToMDEvents::getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel
                                 workspace with provides 4 dimensions, matrix workspace in elastic mode -- 3 dimensions, powder 
                                 -- 2 for elastic and 3 for inelastic mode. Number of these properties is determined by the deployed algorithm
                                 The coordinates, obtained from the workspace placed first in the array of coordinates, and the coordinates, 
-                                obtained from dimensions placed after them. */
-void 
+                                obtained from dimensions placed after them. 
+    *@returns        -- true if all coordinates are within the range allowed for the algorithm and false otherwise
+
+ */
+bool 
 ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
 {
      for(size_t i=n_ws_properties;i<nd;i++){
@@ -780,7 +783,9 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
               }
               Coord[i]  = *(proc_property);
          }
+        if(Coord[i]<dim_min[i] || Coord[i]>=dim_max[i])return false;
      }
+     return true;
 }
 
 // TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
@@ -861,7 +866,8 @@ native_inelastic_unitID("DeltaE")
      ConvModes[ConvertFast]="CnvFast";
      ConvModes[ConvByTOF]  ="CnvByTOF";
      ConvModes[ConvFromTOF]="CnvFromTOF";
- 
+
+// Subalgorithm factories:
 // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
     LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvertNo>::EXEC(this);
     LOOP_ND<MAX_NDIM,NoQ,ANY_Mode,ConvertFast>::EXEC(this);

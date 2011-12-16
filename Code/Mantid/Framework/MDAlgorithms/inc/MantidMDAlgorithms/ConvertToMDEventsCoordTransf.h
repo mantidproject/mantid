@@ -9,7 +9,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
-  * data into multidimensional events 
+  * data into 1-to-4 output dimensions as function of input parameters
    *
    * @date 11-10-2011
 
@@ -34,10 +34,16 @@ namespace MDAlgorithms
         Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-
-
-///
+/** The template below describes general ingerface to coordinate transformation:
+*
+*   Usual transformation constis of 3 steps
+* 1) set-up, calculation and copying generic multidimensional variables which are not depenent on data
+* 2) set-up, calculation and copying the multidimensional variables which dependent on detectors id only 
+* 3) calculation of the multidimensional variables which depend on the data along x-axis of the workspace
+*    and possibly on detectors parameters. 
+* 
+*  Generic template defines interface to 3 functions which perform these three steps. 
+*/
 template<Q_state Q,AnalMode MODE,CnvrtUnits CONV>
 struct COORD_TRANSFORMER
 {
@@ -83,15 +89,20 @@ struct COORD_TRANSFORMER
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
         UNUSED_ARG(X); UNUSED_ARG(i); UNUSED_ARG(j); UNUSED_ARG(Coord);throw(Kernel::Exception::NotImplementedError(""));
         return false;}
-
+  
+private:
+ 
   
 }; // end COORD_TRANSFORMER structure:
+
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // SPECIALIZATIONS:
 //----------------------------------------------------------------------------------------------------------------------
 // ---->    NoQ
-// NoQ,ANY_Mode -- no units conversion 
+// NoQ,ANY_Mode -- no units conversion. This templates just copies the data into MD events and not doing any momentum transformations
+//
 template<AnalMode MODE,CnvrtUnits CONV> 
 struct COORD_TRANSFORMER<NoQ,MODE,CONV>
 {
@@ -100,15 +111,9 @@ struct COORD_TRANSFORMER<NoQ,MODE,CONV>
        // get optional Y axis which can be used in NoQ-kind of algorithms
        pYAxis = dynamic_cast<API::NumericAxis *>(pHost->inWS2D->getAxis(1));
        if(pYAxis){  // two inital properties came from workspace. All are independant; All other dimensions are obtained from properties
-            pHost->fillAddProperties(Coord,nd,2);
-            for(size_t i=2;i<nd;i++){
-                if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
-            }
+           if(!pHost->fillAddProperties(Coord,nd,2))return false;
        }else{        // only one workspace property availible;
-            pHost->fillAddProperties(Coord,nd,1);
-            for(size_t i=1;i<nd;i++){
-                if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
-            }   
+           if(!pHost->fillAddProperties(Coord,nd,1))return false;
        }
         // set up units conversion defined by the host algorithm.  
        CONV_UNITS_FROM.setUpConversion(this->pHost); 
@@ -173,11 +178,9 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
-        // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
-        pHost->fillAddProperties(Coord,nd,2);
-        for(size_t i=2;i<nd;i++){
-            if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
-         }
+        // 2 coordinates (|Q|, DeltaE) came from workspace, are interconnnected all additional defined by  properties:
+        if(!pHost->fillAddProperties(Coord,nd,2))return false;
+
         // energy 
          Ei  =  ConvertToMDEvents::getEi(pHost);
          // the wave vector of incident neutrons;
@@ -217,7 +220,7 @@ struct COORD_TRANSFORMER<modQ,MODE,CONV>
         double  qx  =  -ex*k_tr;                
         double  qy  =  -ey*k_tr;       
         double  qz  = ki - ez*k_tr;
-        // transformation matrix has to be here for "Crystal AS Powder mode, further specialization possible if "powder" switch provided"
+        // transformation matrix has to be here for "Crystal AS Powder conversion mode, further specialization possible if "powder" switch provided"
         double Qx  = (rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);
         double Qy  = (rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz); 
         double Qz  = (rotMat[2]*qx+rotMat[5]*qy+rotMat[8]*qz);
@@ -252,15 +255,13 @@ struct COORD_TRANSFORMER<modQ,Elastic,CONV>
 { 
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
-        // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
-        pHost->fillAddProperties(Coord,nd,1);
-        for(size_t i=1;i<nd;i++){
-            if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
-         }
-         // get transformation matrix (needed for CrystalAsPoder mode)
-         rotMat = pHost->getTransfMatrix();
-         // 
-         CONV_UNITS_FROM.setUpConversion(this->pHost); 
+      
+        // 1 coordinate (|Q|) came from workspace, all additional defined by  properties:
+        if(!pHost->fillAddProperties(Coord,nd,1))return false;
+          // get transformation matrix (needed for CrystalAsPoder mode)
+          rotMat = pHost->getTransfMatrix();
+          // 
+          CONV_UNITS_FROM.setUpConversion(this->pHost); 
          // get pointer to the positions of the detectors
           pDet = ConvertToMDEvents::getPrepDetectors(pHost).pDetDir();
           //
@@ -317,17 +318,14 @@ private:
 };
 
 
-// Direct/Indirect
+// Direct/Indirect tramsformatiom, this template describes 3D Q analysis mode. 
 template<AnalMode MODE,CnvrtUnits CONV> 
 struct COORD_TRANSFORMER<Q3D,MODE,CONV>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
         // four inital properties came from workspace and all are interconnnected all additional defined by  properties:
-        pHost->fillAddProperties(Coord,nd,4);
-        for(size_t i=4;i<nd;i++){
-            if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
-         }
+        if(!pHost->fillAddProperties(Coord,nd,4))return false;
         // energy 
          Ei  =  ConvertToMDEvents::getEi(pHost);
          // the wave vector of incident neutrons;
@@ -353,18 +351,18 @@ struct COORD_TRANSFORMER<Q3D,MODE,CONV>
     }
 
     inline bool calcMatrixCoord(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord){
-        UNUSED_ARG(i);
+         UNUSED_ARG(i);
          // convert X-data into energy transfer (if necessary)
           coord_t E_tr = CONV_UNITS_FROM.getXConverted(X,j);
           Coord[3]    = E_tr;
           if(Coord[3]<pHost->dim_min[3]||Coord[3]>=pHost->dim_max[3])return false;
 
-          // get module of the wavevector for scattered neutrons
-          double k_tr = k_trans<MODE>(Ei,E_tr);
+         // get module of the wavevector for scattered neutrons
+         double k_tr = k_trans<MODE>(Ei,E_tr);
    
-          double  qx  =  -ex*k_tr;                
-          double  qy  =  -ey*k_tr;
-          double  qz  = ki - ez*k_tr;
+         double  qx  =  -ex*k_tr;                
+         double  qy  =  -ey*k_tr;
+         double  qz  = ki - ez*k_tr;
 
          Coord[0]  = (coord_t)(rotMat[0]*qx+rotMat[3]*qy+rotMat[6]*qz);  if(Coord[0]<pHost->dim_min[0]||Coord[0]>=pHost->dim_max[0])return false;
          Coord[1]  = (coord_t)(rotMat[1]*qx+rotMat[4]*qy+rotMat[7]*qz);  if(Coord[1]<pHost->dim_min[1]||Coord[1]>=pHost->dim_max[1])return false;
@@ -397,11 +395,8 @@ struct COORD_TRANSFORMER<Q3D,Elastic,CONV>
 {
     inline bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd)
     {
-        // trww inital properties came from workspace and all are interconnnected. All additional are defined by properties:
-        pHost->fillAddProperties(Coord,nd,3);
-        for(size_t i=3;i<nd;i++){
-            if(Coord[i]<pHost->dim_min[i]||Coord[i]>=pHost->dim_max[i])return false;
-         }
+        // tree inital coordinates came from workspace and all are interconnnected. All additional are defined by properties:
+        if(!pHost->fillAddProperties(Coord,nd,3))return false;
          // 
         rotMat = pHost->getTransfMatrix();
         //
@@ -447,7 +442,7 @@ private:
     std::vector<double> rotMat;
     // pointer to the beginning of the array with 
     Kernel::V3D *pDet;
-    //
+    // pointer to the algoritm, which calls all these transformations
     ConvertToMDEvents *pHost;
     // class that performs untis conversion;
     UNITS_CONVERSION<CONV> CONV_UNITS_FROM;

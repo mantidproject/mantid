@@ -13,6 +13,11 @@
 #include "DllOption.h"
 #include "MantidKernel/VMD.h"
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
+
 
 /** A window that contains a SliceViewer and a LineViewer widget,
  * linked together.
@@ -25,10 +30,10 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow : public QMainWindow, pu
     Q_OBJECT
 
 public:
-  SliceViewerWindow(const QString& wsName, QWidget *app , const QString& label = QString() , Qt::WFlags f=0);
+  SliceViewerWindow(const QString& wsName, const QString& label = QString() , Qt::WFlags f=0);
   ~SliceViewerWindow();
-  MantidQt::SliceViewer::SliceViewer * getSlicer() { return m_slicer; }
-  MantidQt::SliceViewer::LineViewer * getLiner() { return m_liner; }
+  MantidQt::SliceViewer::SliceViewer* getSlicer();
+  MantidQt::SliceViewer::LineViewer* getLiner();
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
@@ -70,5 +75,10 @@ protected:
   int m_lastLinerWidth;
 
 };
+
+
+}//namespace SliceViewer
+}//namespace MantidQt
+
 
 #endif // SLICEVIEWERWINDOW_H

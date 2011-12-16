@@ -1408,7 +1408,7 @@ void MuonAnalysis::clearTablesAndCombo()
  * Create WS contained the data for a plot
  * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to Plot Options.
  * If period data then the resulting cropped WS is on for the period, or sum/difference of, selected 
- * by the user on the front panel
+ * by the user on the front panel. Also create raw workspace for fitting against if the user wants.
  * @param groupName  Group to add created workspace to
  * @param wsname 
  */
@@ -1451,13 +1451,16 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   cropStr += ");";
   runPythonCode( cropStr ).trimmed();
 
-  // rebin data if option set in Plot Options
-  if ( m_uiForm.rebinComboBox->currentText() == "Fixed" )
+  // Copy the data and keep as raw for later
+  if (!(AnalysisDataService::Instance().doesExist(wsname + "_Raw") ) )
   {
-    // Record the bunch data so that a fit can be done against it
-    m_previousBunchWsName = wsname;
-    m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
+    QString cloneStr = QString("CloneWorkspace('") + wsname.c_str() + "','"+ wsname.c_str() + "_Raw')\n";
+    runPythonCode( cloneStr ).trimmed();
+  }
 
+  // rebin data if option set in Plot Options
+  if (m_uiForm.rebinComboBox->currentText() == "Fixed")
+  {
     QString reBunchStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
         + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
     runPythonCode( reBunchStr ).trimmed(); 
@@ -1483,55 +1486,34 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
 
 
 /**
-* Check the bunch details then fit using the rebinned data but plot against 
-* the data that is currently plotted, this may be the same.
+* Normalise the data.
 *
-* @params wsName :: The name of the workspace the user wants to fit against. 
+* @params x :: Data x of the workspace.
+* @params y :: Data y of the workspace.
+* @params workspace :: Name of the workspace to perform the normalisation to.
 */
-void MuonAnalysis::reBunch(const std::string & wsName)
+void MuonAnalysis::normalise(const std::vector<double>& x, const std::vector<double>& y, QString workspace)
 {
-  // When bunch is selected but no plot option rebin has been stated output message
-  if ( m_uiForm.rebinComboBox->currentText() != "Fixed" )
+  double targetTime = boost::lexical_cast<double>(firstGoodBin().toStdString());
+  int indexTime = 0;
+  for (int i = 0; i < static_cast<int>(x.size()); i++)
   {
-    QMessageBox::warning(this, "Mantid - Moun Analysis", "Warning - Bunch data was selected but the number of steps wasn't specified. "
-         "\nThe option for this is located on the Plot Options tab. \n\n Default fit will be against current data."); 
-    return;
+    if (x[i] > targetTime)
+    {
+      indexTime = i;
+      break;
+    }
   }
-
-  // If the fitting has already been plotted with the bunched settings AND against the same workspace then return. (assume last fitting)
-  if ((m_previousBunchWsName == wsName) && (m_previousRebinSteps == m_uiForm.optionStepSizeText->text())) 
-    return;
-
-  else if (m_previousBunchWsName == wsName)
-  {
-    //Put back to original, then bunch to specification
-    makeRaw(wsName);
-    m_previousBunchWsName = wsName;
-    m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
-    QString reBunchStr = QString("Rebunch(\"") + wsName.c_str() + "\",\"" + wsName.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");"; 
-    runPythonCode( reBunchStr ).trimmed(); 
-  }
+  double normalizationFactor = 1.0;
+  if (y[indexTime] < 0)
+    normalizationFactor = -1.0/y[indexTime];
   else
-  {
-    m_previousBunchWsName = wsName;
-    m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
-    QString reBunchStr = QString("Rebunch(\"") + wsName.c_str() + "\",\"" + wsName.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");"; 
-    runPythonCode( reBunchStr ).trimmed(); 
-  }
-}
+    normalizationFactor = 1.0/y[indexTime];
 
-/**
-* Setup a temporary fit against the current data, then either:
-* 1) remove the data from the plot, load up the original raw data, bring the fitting to the front
-* 2) copy the fitting onto a new plot where the raw data has been loaded up again and then delete the plot that contains the data you began the function with
-*
-* @params wsName :: The name of the workspace the user wants to fit against. 
-*/
-void MuonAnalysis::makeRaw(const std::string & wsName)
-{
-  UNUSED_ARG(wsName)
-  //Load back original without bunching
-  //Maybe have a boolean sent if made raw, if this is true then after fit addRawData() will need to be called.
+  QString pyStrNormalise = "Scale('" + workspace + "','" + workspace + "','"
+    + QString::number(normalizationFactor) + "')";
+
+  runPythonCode( pyStrNormalise ).trimmed();
 }
 
 
@@ -1559,12 +1541,15 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       + groupName + "";
     // decide on name for workspace to be plotted
     QString cropWS(getNewPlotName(cropWSfirstPart));
+    
+    // curve plot label
+    QString titleLabel = cropWS;
+
+    // Find out whether raw file has been created yet
+    bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
 
     // create the plot workspace
     createPlotWS(workspaceGroupName,cropWS.toStdString());
-
-    // curve plot label
-    QString titleLabel = cropWS;
 
     // create first part of plotting Python string
     QString gNum = QString::number(groupNum);
@@ -1618,42 +1603,57 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       // Normalise before removing exponential decay
       const std::vector<double>& x = matrix_workspace->readX(0);
       const std::vector<double>& y = matrix_workspace->readY(0);
-      double targetTime = boost::lexical_cast<double>(firstGoodBin().toStdString());
-      int indexTime = 0;
-      for (int i = 0; i < static_cast<int>(x.size()); i++)
-      {
-        if (x[i] > targetTime)
-        {
-          indexTime = i;
-          break;
-        }
 
-      }
-      double normalizationFactor = 1.0;
-      if (y[indexTime] < 0)
-        normalizationFactor = -1.0/y[indexTime];
-      else
-        normalizationFactor = 1.0/y[indexTime];
-
-      QString pyStrNormalise = "Scale('" + cropWS + "','" + cropWS + "','"
-        + QString::number(normalizationFactor) + "')";
-
-      runPythonCode( pyStrNormalise ).trimmed();
+      normalise(x, y, cropWS);
 
       pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
         + cropWS + "\")\n" + pyS;
-        //+ "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
+
+      // Change the raw data to Asymmetry.
+      if (!rawExists)
+      {
+        ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString() + "_Raw");
+        matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+
+        matrix_workspace->setYUnitLabel("Asymmetry");
+
+        const std::vector<double>& rawX = matrix_workspace->readX(0);
+        const std::vector<double>& rawY = matrix_workspace->readY(0);
+
+        normalise(rawX, rawY, cropWS + "_Raw");
+
+        pyString = "RemoveExpDecay(\"" + cropWS + "_Raw\",\"" 
+        + cropWS + "_Raw\")\n" + pyS;
+      }
     }
     else if (plotType.compare("Logorithm") == 0)
     {
       matrix_workspace->setYUnitLabel("Logorithm");
       pyString += "Logarithm(\"" + cropWS + "\",\"" 
         + cropWS + "\")\n" + pyS;
+
+      // Change the raw data to Logorithm.
+      if (!rawExists)
+      {
+        ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString() + "_Raw");
+        matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+
+        matrix_workspace->setYUnitLabel("Logorithm");
+        pyString += "Logarithm(\"" + cropWS + "_Raw\",\"" 
+        + cropWS + "_Raw\")\n";
+      }
     }
     else
     {
       g_log.error("Unknown group table plot function");
       return;
+    }
+
+    // Group the raw workspace
+    if (!rawExists)
+    {
+      pyString += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + titleLabel
+        + "_Raw',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
     }
 
     // run python script
@@ -1681,22 +1681,14 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
-
-    // Make raw copy
-    QString rawData = titleLabel + "_Raw";
-    if ( !AnalysisDataService::Instance().doesExist(rawData.toStdString() ) )
-    {
-      QString groupStr = QString("CloneWorkspace('") + titleLabel + "','"+ rawData +"')\n";
-      groupStr += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + rawData
-        + "',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
-      runPythonCode( groupStr ).trimmed();
-    }
   }
   m_updating = false;
 }
 
 /**
  * Plot pair
+ *
+ * @param plotType :: Whether it is Asym, count, etc
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
@@ -1721,11 +1713,14 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // decide on name for workspace to be plotted
     QString cropWS(getNewPlotName(cropWSfirstPart));
 
-    // create the plot workspace
-    createPlotWS(workspaceGroupName,cropWS.toStdString());
-
     // curve plot label
     QString titleLabel = cropWS;
+
+    // Find out whether raw file has been created yet
+    bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
+
+    // Create the workspace and raw workspace if there isn't one already.
+    createPlotWS(workspaceGroupName,cropWS.toStdString());
 
     // create first part of plotting Python string
     QString gNum = QString::number(pairNum);
@@ -1739,7 +1734,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
             "l = gs.activeLayer()\n"
             "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
             "l.setTitle(\"" + m_title.c_str() + "\")\n";   
-     
     
     Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
@@ -1769,7 +1763,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
     }
 
-
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
     {
@@ -1777,18 +1770,26 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
       QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
 
-      QString pairName;
-      QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
-      if (itemName)
-        pairName = itemName->text();
-
-      //QString outputWS_Name = m_workspace_name.c_str() + QString("_") + pairName + periodStr;
-
       pyString = "AsymmetryCalc(\"" + cropWS + "\",\"" 
         + cropWS + "\","
         + QString::number(qw1->currentIndex()) + "," 
         + QString::number(qw2->currentIndex()) + "," 
         + item->text() + ")\n" + pyS;
+
+      // Change the raw file to Asymmetry.
+      if (!rawExists)
+      {
+        ws_ptr = AnalysisDataService::Instance().retrieve(titleLabel.toStdString() + "_Raw");
+        matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+
+        matrix_workspace->setYUnitLabel("Asymmetry");
+
+        pyString += "AsymmetryCalc(\"" + cropWS + "_Raw\",\"" 
+        + cropWS + "_Raw\","
+        + QString::number(qw1->currentIndex()) + "," 
+        + QString::number(qw2->currentIndex()) + "," 
+        + item->text() + ")\n";
+      }
     }
     else
     {
@@ -1796,7 +1797,13 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       return;
     }
 
-    // run python script
+    // Group the raw workspace
+    if (!rawExists)
+    {
+      pyString += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + titleLabel
+        + "_Raw',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
+    }
+
     QString pyOutput = runPythonCode( pyString ).trimmed();
 
     // Change the plot style of the graph so that it matches what is selected on 
@@ -1821,16 +1828,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     
     m_currentDataName = titleLabel;
     m_uiForm.fitBrowser->manualAddWorkspace(m_currentDataName);
-
-    // Make raw copy
-    QString rawData = titleLabel + "_Raw";
-    if ( !AnalysisDataService::Instance().doesExist(rawData.toStdString() ) )
-    {
-      QString groupStr = QString("CloneWorkspace('") + titleLabel + "','"+ rawData +"')\n";
-      groupStr += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + rawData
-        + "',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
-      runPythonCode( groupStr ).trimmed();
-    }
   }
   
   m_updating = false;

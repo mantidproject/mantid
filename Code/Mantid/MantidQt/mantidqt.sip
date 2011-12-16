@@ -62,11 +62,101 @@
 
 
 
+namespace MantidQt
+{
+namespace Factory
+{
+
+  /***************************************************************************/
+  /***************************************************************************/
+  /***************************************************************************/
+class WidgetFactoryImpl
+{
+%TypeHeaderCode
+#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
+%End
+
+public:
+  WidgetFactoryImpl();
+  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
+
+};
+
+}; // end namespace
+}; // end namespace
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class WidgetFactory
+{
+%TypeHeaderCode
+#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
+%End
+
+public:
+  static MantidQt::Factory::WidgetFactoryImpl& Instance();
+private:
+  WidgetFactory();
+};
 
 namespace MantidQt
 {
 namespace SliceViewer
 {
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class SliceViewerWindow : QMainWindow
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
+%End
+
+public:
+  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
+  MantidQt::SliceViewer::SliceViewer* getSlicer();
+%Docstring
+MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
+------------------------------------------------------------------
+    Get the SliceViewer widget inside the SliceViewerWindow.
+    This is the main widget for controlling the 2D views
+    and slice points.
+   
+    @return a pointer to the SliceViewer widget.
+   
+%End
+
+  MantidQt::SliceViewer::LineViewer* getLiner();
+%Docstring
+MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
+----------------------------------------------------------------
+    Get the LineViewer widget inside the SliceViewerWindow.
+    This is the widget for controlling the 1D line integration
+    settings.
+   
+    @return a pointer to the LineViewer widget.
+   
+%End
+
+
+};
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class LineViewer : QWidget
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
+%End
+
+};
 
 
 /***************************************************************************/
@@ -79,7 +169,7 @@ class SliceViewer : QWidget
 %End
 
 public:
-  void setWorkspace(const QString & wsName)	  throw (std::runtime_error);
+  void setWorkspace(const QString & wsName)   throw (std::runtime_error);
 %Docstring
 void SliceViewer::setWorkspace(const QString & wsName)
 ------------------------------------------------------
@@ -102,8 +192,8 @@ void SliceViewer::showControls(bool visible)
    
 %End
 
-  
-  void setXYDim(int indexX, int indexY)	    throw (std::invalid_argument);
+
+  void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
 %Docstring
 void SliceViewer::setXYDim(int indexX, int indexY)
 --------------------------------------------------
@@ -119,7 +209,7 @@ void SliceViewer::setXYDim(int indexX, int indexY)
    
 %End
 
-  void setXYDim(const QString & dimX, const QString & dimY)	    throw (std::invalid_argument, std::runtime_error);
+  void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);
 %Docstring
 void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
 ----------------------------------------------------------------------
@@ -150,7 +240,7 @@ int SliceViewer::getDimY()
 %End
 
 
-  void setSlicePoint(int dim, double value)	    throw (std::invalid_argument);
+  void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
 %Docstring
 void SliceViewer::setSlicePoint(int dim, double value)
 ------------------------------------------------------
@@ -163,7 +253,7 @@ void SliceViewer::setSlicePoint(int dim, double value)
    
 %End
 
-  void setSlicePoint(const QString & dim, double value)	  throw (std::invalid_argument, std::runtime_error);
+  void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, std::runtime_error);
 %Docstring
 void SliceViewer::setSlicePoint(const QString & dim, double value)
 ------------------------------------------------------------------
@@ -176,7 +266,7 @@ void SliceViewer::setSlicePoint(const QString & dim, double value)
    
 %End
 
-  double getSlicePoint(int dim) const 	  throw (std::invalid_argument);
+  double getSlicePoint(int dim) const     throw (std::invalid_argument);
 %Docstring
 double SliceViewer::getSlicePoint(int dim)
 ------------------------------------------
@@ -187,7 +277,7 @@ double SliceViewer::getSlicePoint(int dim)
    
 %End
 
-  double getSlicePoint(const QString & dim) const		throw (std::invalid_argument, std::runtime_error);
+  double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, std::runtime_error);
 %Docstring
 double SliceViewer::getSlicePoint(const QString & dim)
 ------------------------------------------------------
@@ -278,7 +368,7 @@ void SliceViewer::loadColorMap(QString filename)
    
 %End
 
-  void setColorScale(double min, double max, bool log)  		throw (std::invalid_argument);
+  void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
 %Docstring
 void SliceViewer::setColorScale(double min, double max, bool log)
 -----------------------------------------------------------------
@@ -334,7 +424,7 @@ void SliceViewer::setColorScaleAutoSlice()
    
 %End
 
-    
+
 };
 
 
