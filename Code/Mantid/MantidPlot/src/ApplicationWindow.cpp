@@ -1333,6 +1333,8 @@ void ApplicationWindow::plotMenuAboutToShow()
   statMenu->addAction(actionBoxPlot);
   statMenu->addAction(actionPlotHistogram);
   statMenu->addAction(actionPlotStackedHistograms);
+  statMenu->insertSeparator();
+  statMenu->addAction(actionStemPlot);
 
   QMenu *panelsMenu = plot2DMenu->addMenu (tr("Pa&nel"));
   panelsMenu->addAction(actionPlot2VerticalLayers);
@@ -1980,6 +1982,35 @@ QString ApplicationWindow::stemPlot(Table *t, const QString& colName, int power,
   } else
     result += "\t" + tr("Input error: empty data set!") + "\n";
   return result;
+}
+
+Note * ApplicationWindow::newStemPlot()
+{
+  Table *t = (Table *)activeWindow(TableWindow);
+  if (!t)
+    return NULL;
+
+    int ts = t->table()->currentSelection();
+    if (ts < 0)
+    return NULL;
+
+  Note *n = newNote();
+  if (!n)
+    return NULL;
+  n->hide();
+
+  QStringList lst = t->selectedColumns();
+  if (lst.isEmpty()){
+    Q3TableSelection sel = t->table()->selection(ts);
+    for (int i = sel.leftCol(); i <= sel.rightCol(); i++)
+      n->setText(stemPlot(t, t->colName(i), 1001, sel.topRow() + 1, sel.bottomRow() + 1) + "\n");
+  } else {
+    for (int i = 0; i < lst.count(); i++)
+      n->setText(stemPlot(t, lst[i], 1001) + "\n");
+  }
+
+  n->show();
+  return n;
 }
 
 void ApplicationWindow::renameListViewItem(const QString& oldName,const QString& newName)
@@ -6581,6 +6612,8 @@ void ApplicationWindow::showColMenu(int c)
     stat.addAction(actionBoxPlot);
     stat.addAction(QIcon(getQPixmap("histogram_xpm")),tr("&Histogram"), this, SLOT(plotHistogram()));
     stat.addAction(QIcon(getQPixmap("stacked_hist_xpm")),tr("&Stacked Histograms"), this, SLOT(plotStackedHistograms()));
+    stat.insertSeparator();
+    stat.addAction(actionStemPlot);
     stat.setTitle(tr("Statistical &Graphs"));
     plot.addMenu(&stat);
 
@@ -6699,6 +6732,8 @@ void ApplicationWindow::showColMenu(int c)
     stat.addAction(actionBoxPlot);
     stat.addAction(QIcon(getQPixmap("histogram_xpm")),tr("&Histogram"), this, SLOT(plotHistogram()));
     stat.addAction(QIcon(getQPixmap("stacked_hist_xpm")),tr("&Stacked Histograms"), this, SLOT(plotStackedHistograms()));
+    stat.insertSeparator();
+    stat.addAction(actionStemPlot);
     stat.setTitle(tr("Statistical &Graphs"));
     plot.addMenu(&stat);
 
@@ -12443,6 +12478,9 @@ void ApplicationWindow::createActions()
   actionPlotStackedHistograms = new QAction(QIcon(getQPixmap("stacked_hist_xpm")), tr("&Stacked Histogram"), this);
   connect(actionPlotStackedHistograms, SIGNAL(activated()), this, SLOT(plotStackedHistograms()));
 
+  actionStemPlot = new QAction(QIcon(":/leaf.png"), tr("Stem-and-&Leaf Plot"), this);
+  connect(actionStemPlot, SIGNAL(activated()), this, SLOT(newStemPlot()));
+
   actionPlot2VerticalLayers = new QAction(QIcon(getQPixmap("panel_v2_xpm")), tr("&Vertical 2 Layers"), this);
   connect(actionPlot2VerticalLayers, SIGNAL(activated()), this, SLOT(plot2VerticalLayers()));
 
@@ -13285,6 +13323,9 @@ void ApplicationWindow::translateActionsStrings()
   actionPlot2HorizontalLayers->setMenuText(tr("&Horizontal 2 Layers"));
   actionPlot4Layers->setMenuText(tr("&4 Layers"));
   actionPlotStackedLayers->setMenuText(tr("&Stacked Layers"));
+
+  actionStemPlot->setMenuText(tr("Stem-and-&Leaf Plot"));
+  actionStemPlot->setToolTip(tr("Stem-and-Leaf Plot"));
 
   actionPlot3DRibbon->setMenuText(tr("&Ribbon"));
   actionPlot3DRibbon->setToolTip(tr("Plot 3D ribbon"));

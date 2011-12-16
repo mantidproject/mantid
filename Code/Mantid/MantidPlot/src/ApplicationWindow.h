@@ -458,6 +458,7 @@ public slots:
 
   /// Create a stem plot from a table and return a string representation of it
   QString stemPlot(Table *t = 0, const QString& colName = QString(), int power = 0, int startRow = 0, int endRow = -1);
+  Note *newStemPlot();
 
   //! Check whether a table is valid for a 3D plot and display an appropriate error if not
   bool validFor3DPlot(Table *table);
@@ -1327,7 +1328,7 @@ private:
   QAction *actionShowConsole;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
-  QAction *actionExportPDF, *actionReadOnlyCol;
+  QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
   QAction *actionCloseAllWindows, *actionClearLogInfo, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
   QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
   QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
