@@ -37,13 +37,13 @@ public:
   void testExecEvents()
   {
 	//load events file. Input and ouptut are set to be non-equal
-	Mantid::DataHandling::LoadSNSEventNexus loader;
+	Mantid::DataHandling::LoadEventNexus loader;
     loader.initialize();
-    loader.setPropertyValue("EventFilename", "BSS_11841_event.nxs");
+    loader.setPropertyValue("Filename", "BSS_11841_event.nxs");
     const std::string inputWStr("inputWS");
     loader.setPropertyValue("OutputWorkspace", inputWStr);
     loader.execute();
-    TS_ASSERT (loader.isExecuted() );
+    TS_ASSERT(loader.isExecuted() );
 
     if (!alg.isInitialized()) alg.initialize();
 
@@ -59,8 +59,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(inputWS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWStr)));
     TS_ASSERT_THROWS_NOTHING(outputWS=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWStr)));
 
-    //This is a spectrum index containing events
-
+    //Spectrum index 422 of BSS_11841_event.nxs containing three events
+    //std::size_t wkspIndex = 422;
   }
 
   void testExec2D()

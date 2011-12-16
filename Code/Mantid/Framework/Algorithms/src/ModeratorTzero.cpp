@@ -34,7 +34,7 @@ This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "ModeratorTzero.h"
+#include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -49,7 +49,7 @@ namespace Algorithms
 DECLARE_ALGORITHM(ModeratorTzero)
 
 /// Sets documentation strings for this algorithm
-void SofQW::initDocs()
+void ModeratorTzero::initDocs()
 {
   setWikiSummary(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator. ");
   setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator.");
@@ -82,9 +82,6 @@ void ModeratorTzero::exec()
 
   //Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = inputWS->getInstrument();
-
-  //Get the parameter map
-  const ParameterMap& pmap = inputWS->constInstrumentParameters();
 
   //deltaE-mode (should be "indirect")
   std::string Emode;
@@ -161,9 +158,15 @@ void ModeratorTzero::exec()
   for (int64_t i=0; i < numHists; ++i)
   {
 	PARALLEL_START_INTERUPT_REGION
-    // Calculate the time from sample to detector 'i'
+    // Calculate the time t_f from sample to detector 'i'
     double t_f = CalculateTf(sample,inputWS,i);
-	outputWS->dataX(i) = this->scaling*inputWS->dataX(i)+(1-this->scaling)*t_f-this->scaling*this->intercept;
+	// shift the time of flights
+	double offset = (1-this->scaling)*t_f - this->scaling*this->intercept;;
+	MantidVec &bins = inputWS->dataX(i);
+	for(MantidVec::iterator it = bins.begin(); it != bins.end(); ++it)
+	{
+		*it = this->scaling*(*it) + offset;
+	}
 	//Copy y and e data
 	outputWS->dataY(i) = inputWS->dataY(i);
 	outputWS->dataE(i) = inputWS->dataE(i);
@@ -218,25 +221,33 @@ void ModeratorTzero::execEvent(){
 
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  PARALLEL_FOR1(outputWS)
+  //PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
-	PARALLEL_START_INTERUPT_REGION
-    // Calculate the time from sample to detector 'i'
-    double t_f = CalculateTf(sample,matrixOutputWS,i);
-  	//Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
-    EventList evlist=outputWS->getEventList(i);
-    evlist.scaleTof(this->scaling);
-    const double offset = (1-this->scaling)*t_f - this->scaling*intercept; //Will also fix the histogram bins
-    evlist.addTof(offset);
+	//PARALLEL_START_INTERUPT_REGION
+	EventList evlist=outputWS->getEventList(i);
+	if( evlist.getNumberEvents() > 0 ) //don't bother with empty lists
+	{
+	  // Calculate the time from sample to detector 'i'
+	  double t_f = CalculateTf(sample,matrixOutputWS,i);
+	  if(t_f > 0)
+	  {
+		//Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
+		evlist.scaleTof(this->scaling);
+		const double offset = (1-this->scaling)*t_f - this->scaling*intercept; //Will also fix the histogram bins
+		evlist.addTof(offset);
+	  }
+	}
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    //PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  //PARALLEL_CHECK_INTERUPT_REGION
   outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzero::execEvent()
 
   double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorkspace_sptr inputWS, int64_t i){
+	static const double convFact = sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
+	static const double TfError = -1.0; //signal error when calculating final time
     // Get detector position
 	IDetector_const_sptr det;
 	try
@@ -244,20 +255,17 @@ void ModeratorTzero::execEvent(){
 	  det = inputWS->getDetector(i);
 	} catch (Exception::NotFoundError&)
 	{
-	  // Catch if no detector. Next line tests whether this happened - test placed
-	  // outside here because Mac Intel compiler doesn't like 'continue' in a catch
-	  // in an openmp block.
+	  g_log.error("Detector not found");
+	  throw Exception::InstrumentDefinitionError("Detector not found", inputWS->getTitle());
 	}
-	// If no detector found, skip onto the next spectrum
-	if ( !det ) continue;
 
 	// Get final energy E_f, final velocity v_f
 	double E_f, v_f, t_f;
 	std::vector< double >  wsProp=det->getNumberParameter("Efixed");
 	if ( wsProp.size() > 0 )
 	{
-	  E_f = wsProp.at(0);
-	  v_f=sqrt(2*E_f/PhysicalConstants::NeutronMass);
+	  E_f = wsProp.at(0); //[E_f]=meV
+	  v_f = convFact * sqrt(E_f);
 	  g_log.debug() << "detector: " << i << " E_f:="<< E_f << " v_f=" << v_f << std::endl;
 	  //obtain L_f, calculate t_f
 	  double L_f;
@@ -275,8 +283,8 @@ void ModeratorTzero::execEvent(){
 	}
 	else
 	{
-	  g_log.information() <<"Efixed not found for detector "<< i << std::endl;
-	  throw std::invalid_argument("No Efixed value has been set or found.");
+	  g_log.debug() <<"Efixed not found for detector "<< i << std::endl;
+	  return TfError;
 	}
 	return t_f;
   } // end of CalculateTf(const MatrixWorkspace_sptr inputWS, int64_t i)
