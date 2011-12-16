@@ -5,6 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidDataHandling/LoadSNSEventNexus.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidAlgorithms/ModeratorTzero.h"
 
 using namespace Mantid;
@@ -33,7 +34,13 @@ public:
 	TS_ASSERT( alg.isInitialized() );
   }
 
-  //test transformation of BASIS events file
+  void testExec2D()
+  {
+    //load events file. Input and ouptut are set to be non-equal
+	Mantid::DataHandling::LoadNexusProcessed loader;
+
+  } //end of void testExec2D()
+
   void testExecEvents()
   {
 	//load events file. Input and ouptut are set to be non-equal
@@ -63,10 +70,6 @@ public:
     //std::size_t wkspIndex = 422;
   }
 
-  void testExec2D()
-  {
-
-  }
 private:
   ModeratorTzero alg;
 
