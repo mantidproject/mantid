@@ -249,7 +249,7 @@ int MuonNexusReader::readLogData(const std::string& filename)
       stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
       startTime=sTime;
       delete[] sTime;
-      if( (startTime.find('T')) >0 )
+      if( (startTime.find('T')) != std::string::npos )
         startTime.replace(startTime.find('T'),1," ");
       boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
       startTime_time_t=to_time_t(pt);
