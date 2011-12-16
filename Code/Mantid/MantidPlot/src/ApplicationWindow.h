@@ -988,8 +988,6 @@ public slots:
 
   //! \name Scripting
   //@{
-  //! execute all notes marked auto-exec
-  void executeNotes();
   //! show scripting language selection dialog
   void showScriptingLangDialog();
   //! print to scripting console (if available) or to stdout
@@ -1369,7 +1367,7 @@ private:
   QAction *actionShowPlotDialog, *actionShowScaleDialog, *actionOpenTemplate, *actionSaveTemplate;
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
-  QAction *actionNoteExecute, *actionNoteExecuteAll, *actionNoteEvaluate, *actionSaveNote;
+  QAction *actionSaveNote;
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;

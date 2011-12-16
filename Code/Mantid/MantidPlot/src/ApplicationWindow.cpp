@@ -1376,7 +1376,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   //	scriptingMenu->addAction(actionScriptingLang);
   //#endif
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
-  actionNoteEvaluate->setEnabled(false);
   actionTableRecalculate->setEnabled(false);
 
   // clear undo stack view (in case window is not a matrix)
@@ -1452,14 +1451,7 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
-      actionNoteEvaluate->setEnabled(true);
 
-      actionNoteExecute->disconnect(SIGNAL(activated()));
-      actionNoteExecuteAll->disconnect(SIGNAL(activated()));
-      actionNoteEvaluate->disconnect(SIGNAL(activated()));
-      connect(actionNoteExecute, SIGNAL(activated()), w, SLOT(execute()));
-      connect(actionNoteExecuteAll, SIGNAL(activated()), w, SLOT(executeAll()));
-      connect(actionNoteEvaluate, SIGNAL(activated()), w, SLOT(evaluate()));
     } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a side-effect (it enables menus)
         disableActions();
    
@@ -3020,7 +3012,7 @@ TableStatistics *ApplicationWindow::newTableStatistics(Table *base, int type, QL
  */
 Note* ApplicationWindow::newNote(const QString& caption)
 {
-  Note* m = new Note(scriptingEnv(), "", this);
+  Note* m = new Note("", this);
 
   QString name = caption;
   while(name.isEmpty() || alreadyUsedName(name))
@@ -3029,7 +3021,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
   m->setName(name);
   m->setIcon(getQPixmap("note_xpm"));
   m->askOnCloseEvent(confirmCloseNotes);
-  m->setDirPath(scriptsDirPath);
 
   d_workspace->addSubWindow(m);
   addListViewItem(m);
@@ -3039,7 +3030,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
   connect(m, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
   connect(m, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
   connect(m, SIGNAL(statusChanged(MdiSubWindow*)), this, SLOT(updateWindowStatus(MdiSubWindow*)));
-  connect(m, SIGNAL(dirPathChanged(const QString&)), this, SLOT(scriptsDirPathChanged(const QString&)));
 
   m->showNormal();
   return m;
@@ -4558,19 +4548,10 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 
   app->restoreApplicationGeometry();
 
-  app->executeNotes();
   app->savedProject();
   app->d_opening_file = false;
   app->d_workspace->blockSignals(false);
   return app;
-}
-
-void ApplicationWindow::executeNotes()
-{
-  QList<MdiSubWindow *> lst = projectFolder()->windowsList();
-  foreach(MdiSubWindow *widget, lst)
-  if (widget->isA("Note") && ((Note*)widget)->autoexec())
-    ((Note*)widget)->executeAll();
 }
 
 void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timestamp)
@@ -8831,7 +8812,7 @@ void ApplicationWindow::editMenuAboutToShow()
   }
 
   if (qobject_cast<Note *>(w)){
-    ScriptEdit* doc = ((Note *)w)->editor();
+    QTextDocument* doc = ((Note *)w)->editor()->document();
     actionUndo->setEnabled(doc->isUndoAvailable());
     actionRedo->setEnabled(doc->isRedoAvailable());
   } else if (qobject_cast<Matrix *>(w)){
@@ -12922,15 +12903,6 @@ void ApplicationWindow::createActions()
   //	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
   //#endif
 
-  actionNoteExecute = new QAction(tr("E&xecute"), this);
-  actionNoteExecute->setShortcut(tr("Ctrl+J"));
-
-  actionNoteExecuteAll = new QAction(tr("Execute &All"), this);
-  actionNoteExecuteAll->setShortcut(tr("Ctrl+Shift+J"));
-
-  actionNoteEvaluate = new QAction(tr("&Evaluate Expression"), this);
-  actionNoteEvaluate->setShortcut(tr("Ctrl+Return"));
-
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
 #ifdef __APPLE__
@@ -13526,15 +13498,6 @@ void ApplicationWindow::translateActionsStrings()
   //#ifdef SCRIPTING_DIALOG
   //	actionScriptingLang->setMenuText(tr("Scripting &language"));
   //#endif
-
-  actionNoteExecute->setMenuText(tr("E&xecute"));
-  actionNoteExecute->setShortcut(tr("Ctrl+J"));
-
-  actionNoteExecuteAll->setMenuText(tr("Execute &All"));
-  actionNoteExecuteAll->setShortcut(tr("Ctrl+Shift+J"));
-
-  actionNoteEvaluate->setMenuText(tr("&Evaluate Expression"));
-  actionNoteEvaluate->setShortcut(tr("Ctrl+Return"));
 
   btnPointer->setMenuText(tr("Disable &tools"));
   btnPointer->setToolTip( tr( "Pointer" ) );
@@ -16096,11 +16059,11 @@ void ApplicationWindow::scriptsDirPathChanged(const QString& path)
 {
   scriptsDirPath = path;
 
-  QList<MdiSubWindow*> windows = windowsList();
-  foreach(MdiSubWindow *w, windows){
-    if (w->isA("Note"))
-      ((Note*)w)->setDirPath(path);
-  }
+//  QList<MdiSubWindow*> windows = windowsList();
+//  foreach(MdiSubWindow *w, windows){
+//    if (w->isA("Note"))
+//      ((Note*)w)->setDirPath(path);
+//  }
 }
 
 void ApplicationWindow::showToolBarsMenu()
