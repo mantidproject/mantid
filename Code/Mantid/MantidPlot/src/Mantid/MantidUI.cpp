@@ -967,10 +967,10 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     try
     {
       Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(ws_index);
-	 
+
       detID = det->getID();
-	  // We want to know whether the detector is a monitor
-	  isMon = det->isMonitor();
+      // We want to know whether the detector is a monitor
+      isMon = det->isMonitor();
       // We want the position of the detector relative to the sample
       Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
       pos.getSpherical(R,Theta,Phi);
@@ -982,7 +982,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     {
       detID = 0;
     }
-	// Prepare double valued data for current row
+    // Prepare double valued data for current row
     if (!col_values.isEmpty()) col_values.clear();
     col_values << static_cast<double>(ws_index) <<  static_cast<double>(currentSpec) << static_cast<double>(detID);
     if( include_data )
@@ -990,13 +990,21 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       col_values << ws->readY(ws_index)[0] << ws->readE(ws_index)[0];
     }
     col_values << R << Theta << Phi;
-	// Set column values for current row
+    // Set column values for current row
     for(int col = 0; col < ncols-ncharcols; ++col)
     {
       t->setCell(static_cast<int>(row), col, col_values[col]);
     }
-	t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
-
+    // Set Monitor Flag - yes if monitor, no if not monitor and also detector ID is non-zero, else not applicable
+    if( detID==0 && !isMon ) 
+    {
+      t->setText(static_cast<int>(row), ncols-ncharcols, "n/a");
+    }
+    else
+    {
+      t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
+    }
+  
   }
 
   t->showNormal();
