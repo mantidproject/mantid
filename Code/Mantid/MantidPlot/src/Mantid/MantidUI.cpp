@@ -11,7 +11,6 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
-
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 #include "../ScriptingWindow.h"

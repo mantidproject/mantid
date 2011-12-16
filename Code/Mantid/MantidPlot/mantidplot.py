@@ -17,6 +17,7 @@ from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 def workspace(name):
     return mtd[name]
 
+#-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):
     if isinstance(source,WorkspaceProxy):
@@ -24,7 +25,14 @@ def plot(source, *args, **kwargs):
     else:
         return qti.app.plot(source, *args, **kwargs)
 
+#-----------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1):
+    """Open a 1D Plot of a spectrum in a workspace
+    
+    @param source :: workspace or name of a workspace
+    @param indices :: workspace index or list of workspace indices to plot
+    @param error_bars :: bool, set to True to add error bars.
+    """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
     if len(workspace_names) > 0 and len(index_list) > 0:
@@ -32,9 +40,46 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
     else:
         return None
 
+#-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
+    """Open a 1D Plot of a spectrum in a workspace
+    
+    @param source :: workspace or name of a workspace
+    @param indices :: workspace index or list of workspace indices to plot
+    @param error_bars :: bool, set to True to add error bars.
+    """
     return __doPlotting(source,indices,error_bars,type)
 
+
+#-----------------------------------------------------------------------------
+def plotSlice(source):
+    """Opens the SliceViewer with the given MDWorkspace(s).
+    
+    @param source :: one workspace, or a list of workspaces
+    
+    @return a (list of) handle(s) to the SliceViewerWindow widgets that were open.
+            Use SliceViewerWindow.getSlicer() to get access to the functions of the
+            SliceViewer, e.g. setting the view and slice point.
+    """ 
+    workspace_names = __getWorkspaceNames(source)
+    try:
+        import mantidqtpython
+    except:
+        print "Could not find module mantidqtpython. Cannot open the SliceViewer."
+        return
+    
+    print workspace_names
+    if len(workspace_names) == 1:
+        # Return only one widget
+        return __doSliceViewer(workspace_names[0])
+    else:
+        # Make a list of widgets to return
+        out = [__doSliceViewer(wsname) for wsname in workspace_names]
+        return out
+
+
+
+#-----------------------------------------------------------------------------
 # Legacy function
 plotTimeBin = plotBin
 
@@ -60,15 +105,23 @@ Layer.Right = qti.GraphOptions.Right
 Layer.Bottom = qti.GraphOptions.Bottom
 Layer.Top = qti.GraphOptions.Top
 
+#-----------------------------------------------------------------------------
 #--------------------------- "Private" functions -----------------------
+#-----------------------------------------------------------------------------
 
 def __getWorkspaceNames(source):
+    """Takes a "source", which could be a WorkspaceGroup, or a list
+    of workspaces, or a list of names, and converts
+    it to a list of workspace names.
+    
+        @param source :: input list or workspace group
+        @return list of workspace names 
+    """
     ws_names = []
     if isinstance(source, list) or isinstance(source,tuple):
         for w in source:
             names = __getWorkspaceNames(w)
-            for n in names:
-                ws_names.append(n)
+            ws_names += names
     elif isinstance(source,WorkspaceProxy):
         wspace = source._getHeldObject()
         if wspace == None:
@@ -81,6 +134,8 @@ def __getWorkspaceNames(source):
         elif isinstance(wspace,MatrixWorkspace):
             ws_names.append(wspace.getName())
         else:
+            # Other non-matrix workspaces
+            ws_names.append(wspace.getName())
             pass
     elif isinstance(source,str):
         w = mtd[source]
@@ -92,6 +147,23 @@ def __getWorkspaceNames(source):
         raise TypeError('Incorrect type passed as workspace argument "' + str(source) + '"')
     return ws_names
     
+#-----------------------------------------------------------------------------
+def __doSliceViewer(wsname):
+    """Open a single SliceViewerWindow for the workspace, and shows it
+    
+    @param wsname :: name of the workspace
+    @return SliceViewerWindow widget
+    """
+    import mantidqtpython
+    svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
+    svw.show()
+    return svw
+
+
+    
+    
+    
+#-----------------------------------------------------------------------------
 def __getWorkspaceIndices(source):
     index_list = []
     if isinstance(source,list) or isinstance(source,tuple):

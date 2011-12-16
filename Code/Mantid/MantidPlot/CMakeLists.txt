@@ -792,11 +792,16 @@ endif( WIN32 )
 
 set ( PYTHON_INSTALL_FILES qtiplotrc.py qtiUtil.py mantidplot.py mantidplotrc.py )
 foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
+  # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
   add_custom_command ( TARGET MantidPlot POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy
                          ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
+                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                       DEPENDS  ${PYFILE}
+                       COMMENT "Copying ${PYFILE}" 
   )
+  # Perform a copy at cmake run time
+  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 ###########################################################################
