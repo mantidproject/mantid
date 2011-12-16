@@ -238,7 +238,7 @@ namespace DataObjects
   {
 
     //Number of Peaks
-    const int np(peaks.size());
+    const size_t np(peaks.size());
 
     // Column vectors for peaks table
     std::vector<int> detectorID(np);

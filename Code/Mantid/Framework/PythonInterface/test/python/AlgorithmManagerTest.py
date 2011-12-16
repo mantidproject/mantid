@@ -1,8 +1,8 @@
 import unittest
 
-from mantid.api import algorithm_mgr
+from mantid.api import AlgorithmManager
 from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, 
-                        register_algorithm)
+                        registerAlgorithm)
 import sys
 
 class IsAnAlgorithm(Algorithm):
@@ -16,7 +16,7 @@ class AlgorithmManagerTest(unittest.TestCase):
     
     def test_create_default_version(self):
         try:
-            alg = algorithm_mgr.create("ConvertUnits")
+            alg = AlgorithmManager.Instance().create("ConvertUnits")
         except RuntimeError:
             self.fail(str(exc))
         # Tests
@@ -26,18 +26,18 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertEquals(alg.category(), "Transforms\\Units")
         
     def test_create_unknown_alg_throws(self):
-        self.assertRaises(RuntimeError, algorithm_mgr.create,"DoesNotExist")
+        self.assertRaises(RuntimeError, AlgorithmManager.Instance().create,"DoesNotExist")
         
     def test_created_alg_isinstance_of_IAlgorithm(self):
-        alg = algorithm_mgr.create("ConvertUnits")
+        alg = AlgorithmManager.Instance().create("ConvertUnits")
         self.assertTrue(isinstance(alg, IAlgorithm))
         
     def test_managed_cppalg_isinstance_of_AlgorithmProxy(self):
-        alg = algorithm_mgr.create("ConvertUnits")
+        alg = AlgorithmManager.Instance().create("ConvertUnits")
         self.assertTrue(isinstance(alg, AlgorithmProxy))
 
     def test_unmanaged_cppalg_isinstance_of_Algorithm(self):
-        alg = algorithm_mgr.create_unmanaged("ConvertUnits")
+        alg = AlgorithmManager.Instance().createUnmanaged("ConvertUnits")
         self.assertTrue(isinstance(alg, Algorithm))
         
     def test_pyalg_isinstance_of_Algorithm(self):
@@ -47,7 +47,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         
     def test_algorithm_registration_with_valid_object_succeeds(self):
         try:
-            register_algorithm(IsAnAlgorithm)
+            registerAlgorithm(IsAnAlgorithm)
             noerror = True
         except Exception:
             noerror = False
@@ -55,7 +55,7 @@ class AlgorithmManagerTest(unittest.TestCase):
 
     def test_algorithm_registration_with_invalid_object_throws(self):
         try:
-            register_algorithm(NotAnAlgorithm)
+            registerAlgorithm(NotAnAlgorithm)
             error = False
         except ValueError:
             error = True

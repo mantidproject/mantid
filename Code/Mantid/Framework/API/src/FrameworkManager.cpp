@@ -73,8 +73,8 @@ void FrameworkManagerImpl::setGlobalLocaleToAscii()
 void FrameworkManagerImpl::clear()
 {
   clearAlgorithms();
-  clearData();
   clearInstruments();
+  clearData();
   MemoryManager::Instance().releaseFreeMemory();
 }
 

@@ -20,6 +20,7 @@ The ISAW UB Matrix file format is: TODO
 using namespace Mantid::Kernel::Strings;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::UnitCell;
+using Mantid::Geometry::OrientedLattice;
 
 namespace Mantid
 {

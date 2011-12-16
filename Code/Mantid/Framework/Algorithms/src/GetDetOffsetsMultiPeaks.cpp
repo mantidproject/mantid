@@ -175,12 +175,26 @@ namespace Mantid
       findpeaks->setProperty<bool>("HighBackground", true);
       findpeaks->executeAsSubAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
-      std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
+      std::vector<double> peakPos = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
+      double errsumold = 1000.0;
       for (int i = 0; i < peakslist->rowCount(); ++i)
       {
+        double errsum = 0.0;
         // Get references to the data
         const double centre = peakslist->getRef<double>("centre",i);
-        if(centre > 0 && (centers[i]-centre) < offset)offset = centers[i]-centre;
+        double tryoffset = 0;
+        if(centre > 0) tryoffset = peakPos[i]-centre;
+        for (int j = 0; j < peakslist->rowCount(); ++j)
+        {
+          const double centrej = peakslist->getRef<double>("centre",j);
+          if(centrej > 0) errsum += std::fabs(peakPos[j]-(centrej+tryoffset));
+        }
+        if (errsum < errsumold)
+        {
+          //See formula in AlignDetectors
+          offset = tryoffset/(peakPos[i]-tryoffset);
+          errsumold = errsum;
+        }
       }
       return offset;
     }

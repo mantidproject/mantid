@@ -1,7 +1,7 @@
 """A module of helper functions for the Python unit tests
 """
 
-from mantid.api import algorithm_mgr
+from mantid.api import AlgorithmManager
 
 def run_algorithm(name, **kwargs):
     """Run a named algorithm and return the
@@ -11,18 +11,18 @@ def run_algorithm(name, **kwargs):
         name - The name of the algorithm
         kwargs - A dictionary of property name:value pairs
     """
-    alg = algorithm_mgr.create_unmanaged(name)
+    alg = AlgorithmManager.Instance().createUnmanaged(name)
     alg.initialize()
     # Avoid problem that Load needs to set Filename first if it exists
     if name == 'Load' and 'Filename' in kwargs:
-        alg.set_property('Filename', kwargs['Filename'])
+        alg.setProperty('Filename', kwargs['Filename'])
         del kwargs['Filename']
     if 'child'in kwargs:
-        alg.set_child(True)
+        alg.setChild(True)
         del kwargs['child']
-        alg.set_property_value("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
+        alg.setPropertyValue("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
     for key, value in kwargs.iteritems():
-        alg.set_property(key, value)
+        alg.setProperty(key, value)
     alg.execute()
     return alg
 

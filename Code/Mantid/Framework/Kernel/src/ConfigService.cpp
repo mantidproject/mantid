@@ -310,9 +310,10 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << std::endl;
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 
+  this->setParaViewPluginPath();
+
   // Make sure the log path is shown somewhere.
   //std::cout << "Logging to: " << m_logFilePath << std::endl;
-
 }
 
 /** Private Destructor
@@ -1236,7 +1237,7 @@ std::string ConfigServiceImpl::getTempDir()
  * @returns A string containing the path of the directory 
  * containing the executable, including a trailing slash
  */
-std::string ConfigServiceImpl::getDirectoryOfExecutable()
+std::string ConfigServiceImpl::getDirectoryOfExecutable() const
 {
   return Poco::Path(getPathToExecutable()).parent().toString();
 }
@@ -1245,7 +1246,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable()
   * Get the full path to the executing program (i.e. whatever Mantid is embedded in) 
   * @returns A string containing the full path the the executable
   */
-std::string ConfigServiceImpl::getPathToExecutable()
+std::string ConfigServiceImpl::getPathToExecutable() const
 {
   std::string execpath("");
   const size_t LEN(1024);
@@ -1344,7 +1345,21 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
 #endif
 }
 
-
+/**
+ * Set the environment variable for the PV_PLUGIN_PATH based on where Mantid is.
+ */
+void ConfigServiceImpl::setParaViewPluginPath() const
+{
+  std::string mantid_loc = this->getDirectoryOfExecutable();
+  Poco::File pv_plugin(mantid_loc + "/pvplugins");
+  if (!pv_plugin.exists() || !pv_plugin.isDirectory())
+  {
+    g_log.warning("ParaView plugin directory \"" + pv_plugin.path() + "\" does not exist");
+    return;
+  }
+  g_log.debug("Setting PV_PLUGIN_PATH = \"" + pv_plugin.path() + "\"");
+  Poco::Environment::set("PV_PLUGIN_PATH", pv_plugin.path());
+}
 
 /**
  * Gets the directory that we consider to be the directory containing the Mantid.properties file. 

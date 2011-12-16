@@ -273,12 +273,12 @@ m_mantidui(mantidui)
   if (m_customFittings)
   {
     QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
-    QtProperty* rawBunchdata = m_boolManager->addProperty("Fit To binned data");
-    bool data = settings.value("Fit To binned data",QVariant(false)).toBool();
-    m_boolManager->setValue(rawBunchdata,data);
+    m_rawData = m_boolManager->addProperty("Fit To Raw Data");
+    bool data = settings.value("Fit To Raw Data",QVariant(true)).toBool();
+    m_boolManager->setValue(m_rawData,data);
     customSettingsGroup->addSubProperty(m_minimizer);
     customSettingsGroup->addSubProperty(m_plotDiff);
-    customSettingsGroup->addSubProperty(rawBunchdata);
+    customSettingsGroup->addSubProperty(m_rawData);
     m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
   }
 
@@ -1415,8 +1415,10 @@ void FitPropertyBrowser::fit()
     {
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
       alg->initialize();
-      alg->setPropertyValue("InputWorkspace",wsName);
-      //alg->setPropertyValue("GroupWorkspace",groupName);
+      if (rawData())
+        alg->setPropertyValue("InputWorkspace",wsName + "_raw");
+      else
+        alg->setPropertyValue("InputWorkspace",wsName);
       alg->setProperty("WorkspaceIndex",workspaceIndex());
       alg->setProperty("StartX",startX());
       alg->setProperty("EndX",endX());
@@ -1433,7 +1435,6 @@ void FitPropertyBrowser::fit()
       {
         QMap<QString,QString> algParams;
         algParams["InputWorkspace"] = QString::fromStdString(wsName);
-        //algParams["GroupWorkspace"] = QString::fromStdString(groupName);
         algParams["WorkspaceIndex"] = QString::number(workspaceIndex());
         algParams["StartX"] = QString::number(startX());
         algParams["EndX"] = QString::number(endX());
@@ -1448,7 +1449,6 @@ void FitPropertyBrowser::fit()
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
         alg->initialize();
         alg->setPropertyValue("InputWorkspace",wsName);
-        //alg->setPropertyValue("GroupWorkspace",groupName);
         alg->setProperty("WorkspaceIndex",workspaceIndex());
         alg->setProperty("StartX",startX());
         alg->setProperty("EndX",endX());
@@ -1471,7 +1471,11 @@ void FitPropertyBrowser::fit()
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 {  
   // Emit a signal to show that the fitting has completed. (workspaceName that the fit has been done against is sent as a parameter)
-  emit fittingDone(QString::fromStdString(alg->getProperty("InputWorkspace")));
+  QString name(QString::fromStdString(alg->getProperty("InputWorkspace") ) );
+  if (name.contains('_') ) // Must be fitting to raw data, need to group under name without "_Raw".
+    emit fittingDone(name.left(name.find('_') ) );
+  else // else fitting to current workspace, group under same name.
+    emit fittingDone(name);
 
   getFitResults();
   if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace"))
@@ -2564,6 +2568,11 @@ void FitPropertyBrowser::setDecimals(int d)
 bool FitPropertyBrowser::plotDiff()const
 {
   return m_boolManager->value(m_plotDiff);
+}
+
+bool FitPropertyBrowser::rawData()const  	
+{	  	
+  return m_boolManager->value(m_rawData);
 }
 
 void FitPropertyBrowser::setTextPlotGuess(const QString text) 

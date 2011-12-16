@@ -15,13 +15,23 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::SliceViewer;
 
+namespace MantidQt
+{
+namespace SliceViewer
+{
 
-SliceViewerWindow::SliceViewerWindow(const QString& wsName, QWidget *app , const QString& label, Qt::WFlags f)
- : QMainWindow(app, f),
+/** SliceViewerWindow constructor.
+ * Creates it with NULL parent so that it does not stay on top of the main window on Windows.
+ *
+ * @param wsName :: name of the workspace being viewer
+ * @param label
+ * @param f
+ * @return
+ */
+SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f)
+ : QMainWindow(NULL, f),
    WorkspaceObserver()
 {
-  bool isMainWindow = dynamic_cast<QMainWindow*>(this);
-
   // Set the window icon
   QIcon icon;
   icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -58,22 +68,10 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, QWidget *app , const
   m_liner = new LineViewer(m_splitter);
   m_liner->setVisible(false);
 
-  if (!isMainWindow)
-    layout->addWidget(m_splitter);
-  else
-    this->setCentralWidget(m_splitter);
+  this->setCentralWidget(m_splitter);
 
   m_splitter->addWidget(m_slicer);
   m_splitter->addWidget(m_liner);
-
-  // For MdiSubWindow only
-  if (false)
-  {
-    // Connect closing signals
-    connect(this, SIGNAL(closedWindow(MdiSubWindow*)), app, SLOT(closeWindow(MdiSubWindow*)));
-    connect(this, SIGNAL(hiddenWindow(MdiSubWindow*)), app, SLOT(hideWindow(MdiSubWindow*)));
-    connect(this, SIGNAL(showContextMenu()), app, SLOT(showWindowContextMenu()));
-  }
 
   // Connect WorkspaceObserver signals
   connect(this,SIGNAL(needToClose()),this,SLOT(closeWindow()));
@@ -107,6 +105,26 @@ SliceViewerWindow::~SliceViewerWindow()
 {
 
 }
+
+//------------------------------------------------------------------------------------------------
+/** Get the SliceViewer widget inside the SliceViewerWindow.
+ * This is the main widget for controlling the 2D views
+ * and slice points.
+ *
+ * @return a pointer to the SliceViewer widget.
+ */
+MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
+{ return m_slicer; }
+
+//------------------------------------------------------------------------------------------------
+/** Get the LineViewer widget inside the SliceViewerWindow.
+ * This is the widget for controlling the 1D line integration
+ * settings.
+ *
+ * @return a pointer to the LineViewer widget.
+ */
+MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
+{ return m_liner; }
 
 //------------------------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
@@ -274,3 +292,6 @@ void SliceViewerWindow::afterReplaceHandle(const std::string& wsName,const boost
     emit needToUpdate();
   }
 }
+
+}//namespace SliceViewer
+}//namespace MantidQt

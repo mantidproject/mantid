@@ -1,11 +1,15 @@
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
 
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/DOMWriter.h>
 
 #include <iostream>
 #include <sstream>
@@ -85,6 +89,30 @@ double GeometryParser::convertBounds(Poco::XML::XMLString val)
   return temp;
 }
 
+/**
+ * This function takes a timestep value and places it within the geomtry
+ * XML held by this object.
+ * @param time the value of the timestep
+ * @return the XML geometry with the timestep value added
+ */
+std::string GeometryParser::addTDimValue(double time)
+{
+  std::string tDimLabel = Mantid::Geometry::MDGeometryXMLDefinitions::workspaceTDimensionElementName();
+  Poco::XML::NodeList *pNodes = this->pDoc->getElementsByTagName(tDimLabel);
+  Poco::XML::Node *pNode = pNodes->item(0);
+  std::ostringstream timeStr;
+  timeStr << time;
+  Poco::XML::Element *valueElement = this->pDoc->createElement("Value");
+  Poco::XML::Text *valueText = this->pDoc->createTextNode(timeStr.str());
+  valueElement->appendChild(valueText);
+  pNode->appendChild(valueElement);
+
+  std::stringstream xmlstream;
+  Poco::XML::DOMWriter writer;
+  writer.writeNode(xmlstream, pDoc);
+  return xmlstream.str();
 }
-}
-}
+
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

@@ -737,6 +737,7 @@ include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 include_directories ( ../MantidQt/SliceViewer/inc )
+include_directories ( ../MantidQt/Factory/inc )
 
 
 ###########################################################################
@@ -764,7 +765,8 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
-                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets MantidQtSliceViewer
+                        ${CORE_MANTIDLIBS}
+                        MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
                         QtPropertyBrowser ${QT_LIBRARIES} 
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}

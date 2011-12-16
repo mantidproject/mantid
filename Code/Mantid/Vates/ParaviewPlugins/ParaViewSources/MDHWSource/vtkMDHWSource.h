@@ -58,6 +58,8 @@ public:
   void updateAlgorithmProgress(double);
   /// Getter for the input geometry xml
   const char* GetInputGeometryXML();
+  /// Getter for the workspace name
+  const char* GetWorkspaceName();
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
 

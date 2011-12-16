@@ -26,7 +26,7 @@ namespace Mantid
       namespace
       {
         /// Which data field are we extracting
-        enum DataField { XValues = 0, YValues = 1, EValues= 2 };
+        enum DataField { XValues = 0, YValues = 1, EValues= 2, DxValues = 3 };
 
         /**
          * Helper method for extraction to numpy.
@@ -36,8 +36,8 @@ namespace Mantid
          * @param endp1 :: One past the end index in the workspace to finish at when reading the data (similar to .end() for STL)
          *
          */
-        PyArrayObject *cloneArray(MatrixWorkspace_sptr workspace,
-                                   DataField field, const size_t start, const size_t endp1)
+        PyArrayObject *cloneArray(MatrixWorkspace & workspace,
+                                  DataField field, const size_t start, const size_t endp1)
         {
           const size_t numHist = endp1 - start;
           npy_intp stride(0);
@@ -45,14 +45,22 @@ namespace Mantid
           // Find out which function we need to call to access the data
           typedef const MantidVec & (MatrixWorkspace::*ArrayAccessFn)(const size_t) const;
           ArrayAccessFn dataAccesor;
+          /**
+           * Can do better than this with a templated object that knows how to access the data
+           */
           if( field == XValues )
           {
-            stride = workspace->readX(0).size();
+            stride = workspace.readX(0).size();
             dataAccesor = &MatrixWorkspace::readX;
+          }
+          else if( field == DxValues)
+          {
+            stride = workspace.readDx(0).size();
+            dataAccesor = &MatrixWorkspace::readDx;
           }
           else
           {
-            stride = workspace->blocksize();
+            stride = workspace.blocksize();
             if(field == YValues) dataAccesor = &MatrixWorkspace::readY;
             else dataAccesor = &MatrixWorkspace::readE;
           }
@@ -66,7 +74,7 @@ namespace Mantid
           double *dest = (double*)PyArray_DATA(nparray); // HEAD of the contiguous numpy data array
           for(size_t i = start; i < endp1; ++i)
           {
-            const MantidVec & src = ((*workspace).*(dataAccesor))(i);
+            const MantidVec & src = (workspace.*(dataAccesor))(i);
             std::copy(src.begin(), src.end(), dest);
             dest += stride; // Move the ptr to the start of the next 1D array
           }
@@ -78,24 +86,22 @@ namespace Mantid
       // -------------------------------------- Read-only arrays---------------------------------------------------
       /*
        * Create a numpy wrapper around the original X values at the given index
-       * @param self :: A pointer to a PyObject representing the calling object
+       * @param self :: A reference to the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapX(PyObject *self, const size_t index)
+      PyObject *wrapX(MatrixWorkspace &self, const size_t index)
       {
-        MatrixWorkspace_sptr workspace = bpl::extract<MatrixWorkspace_sptr>(self);
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(workspace->readX(index));
+        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readX(index));
         return (PyObject*)nparray;
       }
       /*
        * Create a numpy wrapper around the original Y values at the given index
-       * @param self :: A pointer to a PyObject representing the calling object
+       * @param self :: A reference to the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapY(PyObject *self, const size_t index)
+      PyObject *wrapY(MatrixWorkspace & self, const size_t index)
       {
-        MatrixWorkspace_sptr workspace = bpl::extract<MatrixWorkspace_sptr>(self);
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(workspace->readY(index));
+        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readY(index));
         return (PyObject*)nparray;
       }
 
@@ -104,13 +110,22 @@ namespace Mantid
        * @param self :: A pointer to a PyObject representing the calling object
        * @param index :: The index into the workspace
        */
-      PyObject *wrapE(PyObject *self, const size_t index)
+      PyObject *wrapE(MatrixWorkspace & self, const size_t index)
       {
-        MatrixWorkspace_sptr workspace = bpl::extract<MatrixWorkspace_sptr>(self);
-        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(workspace->readE(index));
+        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readE(index));
         return (PyObject*)nparray;
       }
 
+      /*
+       * Create a numpy wrapper around the original Dx values at the given index
+       * @param self :: A pointer to a PyObject representing the calling object
+       * @param index :: The index into the workspace
+       */
+      PyObject *wrapDx(MatrixWorkspace & self, const size_t index)
+      {
+        PyArrayObject *nparray = (PyArrayObject*)wrapWithReadOnlyNumpy(self.readDx(index));
+        return (PyObject*)nparray;
+      }
 
       // -------------------------------------- Cloned arrays---------------------------------------------------
       /* Create a numpy array from the X values of the given workspace reference
@@ -118,20 +133,18 @@ namespace Mantid
        * @param self :: A pointer to a PyObject representing the calling object
        * @return A 2D numpy array created from the X values
        */
-      PyObject * cloneX(PyObject * self)
+      PyObject * cloneX(MatrixWorkspace &self)
       {
-        MatrixWorkspace_sptr workspace = bpl::extract<MatrixWorkspace_sptr>(self);
-        return (PyObject*)cloneArray(workspace, XValues, 0, workspace->getNumberHistograms());
+        return (PyObject*)cloneArray(self, XValues, 0, self.getNumberHistograms());
       }
       /* Create a numpy array from the Y values of the given workspace reference
        * This acts like a python method on a Matrixworkspace object
        * @param self :: A pointer to a PyObject representing the calling object
        * @return A 2D numpy array created from the Y values
        */
-      PyObject * cloneY(PyObject * self)
+      PyObject * cloneY(MatrixWorkspace &self)
       {
-        MatrixWorkspace_sptr workspace = bpl::extract<MatrixWorkspace_sptr>(self);
-        return (PyObject*)cloneArray(workspace, YValues, 0, workspace->getNumberHistograms());
+        return (PyObject*)cloneArray(self, YValues, 0, self.getNumberHistograms());
       }
 
       /* Create a numpy array from the E values of the given workspace reference
@@ -139,11 +152,21 @@ namespace Mantid
        * @param self :: A pointer to a PyObject representing the calling object
        * @return A 2D numpy array created from the E values
        */
-      PyObject * cloneE(PyObject * self)
+      PyObject * cloneE(MatrixWorkspace &self)
       {
-        MatrixWorkspace_sptr workspace = bpl::extract<MatrixWorkspace_sptr>(self);
-        return (PyObject*)cloneArray(workspace, EValues, 0, workspace->getNumberHistograms());
+        return (PyObject*)cloneArray(self, EValues, 0, self.getNumberHistograms());
       }
+
+      /* Create a numpy array from the E values of the given workspace reference
+       * This acts like a python method on a Matrixworkspace object
+       * @param self :: A pointer to a PyObject representing the calling object
+       * @return A 2D numpy array created from the E values
+       */
+      PyObject * cloneDx(MatrixWorkspace &self)
+      {
+        return (PyObject*)cloneArray(self, DxValues, 0, self.getNumberHistograms());
+      }
+
 
     }
   }

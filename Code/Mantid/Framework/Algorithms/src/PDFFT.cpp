@@ -73,7 +73,6 @@ void PDFFT::init() {
 /** Execute the algorithm.
  */
 void PDFFT::exec() {
-	// TODO Auto-generated execute stub
 
 	// Accept d-space S(d)
 	//

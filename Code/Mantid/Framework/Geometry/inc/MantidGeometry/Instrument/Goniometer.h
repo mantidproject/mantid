@@ -1,9 +1,9 @@
 #ifndef MANTID_GEOMETRY_GONIOMETER_H_
 #define MANTID_GEOMETRY_GONIOMETER_H_
 
-#include <MantidKernel/Matrix.h>
-#include <MantidKernel/V3D.h>
-#include <MantidGeometry/Crystal/UnitCell.h> //for angle units
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include <string>
 #include "MantidNexusCPP/NeXusFile.hpp"
 
@@ -53,7 +53,7 @@ namespace Geometry
     Kernel::V3D rotationaxis; /// GoniometerAxis direction
     double angle; /// Rotation angle
     int sense;  /// Rotation sense (1 for CCW, -1 for CW)
-    int angleunit; ///angle units are angDegrees or angRadians (see UnitCell.h)
+    int angleunit; ///angle units are angDegrees or angRadians (see AngleUnits.h)
     /// Constructor
     GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
     GoniometerAxis() : name("") {}

@@ -4,10 +4,10 @@ import shutil
 import sys
 
 import mantid.kernel.plugins as plugins
-from mantid import algorithm_factory, algorithm_mgr
+from mantid import AlgorithmFactory, AlgorithmManager
 
 __TESTALG__ = \
-"""from mantid import Algorithm, register_algorithm
+"""from mantid import Algorithm, registerAlgorithm
 
 class TestPyAlg(Algorithm):
 
@@ -17,7 +17,7 @@ class TestPyAlg(Algorithm):
     def PyExec(self):
         pass
         
-register_algorithm(TestPyAlg)
+registerAlgorithm(TestPyAlg)
 """
 
 class PythonPluginsTest(unittest.TestCase):
@@ -48,11 +48,11 @@ class PythonPluginsTest(unittest.TestCase):
         # Has the name appear in the module dictionary
         self.assertTrue(expected_name in sys.modules)     
         # Do we have the registered algorithm
-        algs = algorithm_factory.get_registered_algorithms(True)
+        algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
         self.assertTrue(expected_name in algs)
         # Can it be created?
         try:
-            test_alg = algorithm_mgr.create_unmanaged(expected_name)
+            test_alg = AlgorithmManager.Instance().createUnmanaged(expected_name)
             self.assertEquals(expected_name, test_alg.name())
             self.assertEquals(1, test_alg.version())
         except RuntimeError, exc:

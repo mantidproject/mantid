@@ -34,7 +34,7 @@ def NoNormalization():
 def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, use_sample_dc=False):
     find_data(flood_data, instrument=ReductionSingleton().instrument.name())
     if dark_current is not None:
-        find_data(dark_current, instrument=ReductionSingleton().instrument.name())
+        dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_sensitivity_correcter(sans_reduction_steps.SensitivityCorrection(flood_data, 
                                                                                               min_sensitivity, 
                                                                                               max_sensitivity,
@@ -55,7 +55,7 @@ def NoSensitivityCorrection():
     ReductionSingleton().set_sensitivity_correcter(None)
     
 def DarkCurrent(datafile):
-    find_data(datafile, instrument=ReductionSingleton().instrument.name())
+    datafile = find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_dark_current_subtracter(mantidsimple.HFIRDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
@@ -94,7 +94,7 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
                                                                                     theta_dependent=theta_dependent))
 
 def TransmissionDarkCurrent(dark_current=None):
-    find_data(dark_current, instrument=ReductionSingleton().instrument.name())
+    dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_transmission().set_dark_current(dark_current)
 
 def ThetaDependentTransmission(theta_dependence=True):
@@ -274,7 +274,7 @@ def BckTransmissionDirectBeamCenter(datafile):
 def BckTransmissionDarkCurrent(dark_current=None):
     if ReductionSingleton().get_background() is None:
         raise RuntimeError, "A background hasn't been defined."
-    find_data(dark_current, instrument=ReductionSingleton().instrument.name())
+    dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_background().set_trans_dark_current(dark_current)
 
 def BckThetaDependentTransmission(theta_dependence=True):

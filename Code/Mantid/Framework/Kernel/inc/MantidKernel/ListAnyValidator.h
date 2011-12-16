@@ -61,7 +61,8 @@ private:
     template<typename U, bool Condition >
     class IF {
     public:
-        static inline void ENABLE(ListAnyValidator *pHost,const U &value){
+        static inline void ENABLE(ListAnyValidator *pHost,const U &value)
+        {
                pHost->m_allowedValues.insert(value);
         }
     };
@@ -69,11 +70,10 @@ private:
     template<typename U>
     class IF<U, false > {
     public:
-        static inline void ENABLE(ListAnyValidator *pHost,const U &value){  
-        {
+        static inline void ENABLE(ListAnyValidator *pHost,const U &value)
+        {          
                 TYPE rVal = boost::lexical_cast<TYPE>(value);
-                pHost->m_allowedValues.insert(rVal);
-            }
+                pHost->m_allowedValues.insert(rVal);        
         }
     };
 
@@ -115,7 +115,7 @@ public:
     virtual IValidator<TYPE>* clone(){ return new ListAnyValidator<TYPE>(*this); }
 
   protected:
-  /** Checks if the string passed is in the list
+  /** Checks if the value passed is in the list
    *  @param value :: The value to test
    *  @return "" if the value is on the list, or "The value is not in the list of allowed values"   */
    virtual std::string checkValidity(const TYPE &value) const

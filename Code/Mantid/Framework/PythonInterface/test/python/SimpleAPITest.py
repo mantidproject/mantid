@@ -1,20 +1,18 @@
 import unittest
 import sys
-
-from mantid.api import algorithm_factory, analysis_data_svc
-
-from mantid import simpleapi
+from mantid.api import AlgorithmFactory
+from mantid import mtd,simpleapi
 
 class SimpleAPITest(unittest.TestCase):
 
     def tearDown(self):
-        analysis_data_svc.clear()
+        mtd.clear()
     
     def test_module_dict_seems_to_be_correct_size(self):
         # Check that the module has at least the same number
         # of attributes as unique algorithms
         module_dict = dir(simpleapi)
-        all_algs = algorithm_factory.get_registered_algorithms(True)
+        all_algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
         self.assertTrue( len(module_dict) > len(all_algs) )
         
     def test_alg_has_expected_doc_string(self):
@@ -44,13 +42,13 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
         data = [1.0,2.0,3.0,4.0,5.0]
         simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength')
-        self.assertTrue( wsname in analysis_data_svc )
+        self.assertTrue( wsname in mtd )
         
     def test_function_call_executes_with_output_workspace_on_lhs(self):
         data = [1.0,2.0,3.0,4.0,5.0]
         wavelength = simpleapi.CreateWorkspace(data,data,NSpec=1,UnitX='Wavelength')
         wsname = 'wavelength'
-        self.assertTrue( wsname in analysis_data_svc )
+        self.assertTrue( wsname in mtd )
         
     def test_function_call_executes_when_algorithm_has_only_inout_workspace_props(self):
         data = [1.0,2.0,3.0,4.0,5.0, 6.0]
@@ -97,24 +95,24 @@ If false, then the workspace gets converted to a Workspace2D histogram.
     def test_Load_call_with_just_filename_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw')
-        except Runtime:
+        except RuntimeError:
             self.fail("Load with a filename should not raise an exception")
-        self.assertEquals(116, raw.get_number_histograms())
-        analysis_data_svc.remove('raw')
+        self.assertEquals(116, raw.getNumberHistograms())
+        mtd.remove('raw')
 
     def test_Load_call_with_other_args_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1)
         except Runtime:
             self.fail("Load with a filename and extra args should not raise an exception")
-        self.assertEquals(1, raw.get_number_histograms())
+        self.assertEquals(1, raw.getNumberHistograms())
 
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         try:
             raw = simpleapi.Load('IRS21360.raw',SpectrumMax=1,Append=True)
         except Runtime:
             self.fail("Load with a filename and extra args should not raise an exception")
-        self.assertEquals(1, raw.get_number_histograms())
+        self.assertEquals(1, raw.getNumberHistograms())
     
     def test_that_dialog_call_raises_runtime_error(self):
         try:

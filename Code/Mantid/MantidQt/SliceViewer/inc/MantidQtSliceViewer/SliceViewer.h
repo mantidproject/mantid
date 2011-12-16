@@ -48,12 +48,24 @@ public:
   void loadColorMap(QString filename = QString() );
   LineOverlay * getLineOverlay() { return m_lineOverlay; }
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
-  size_t getDimX() const { return m_dimX; }
-  size_t getDimY() const { return m_dimY; }
+  int getDimX() const;
+  int getDimY() const;
 
   /// Methods for Python bindings
-  void setDimX(int index);
-  void setDimY(int index);
+  void setXYDim(int indexX, int indexY);
+  void setXYDim(const QString & dimX, const QString & dimY);
+  void setSlicePoint(int dim, double value);
+  void setSlicePoint(const QString & dim, double value);
+  double getSlicePoint(int dim) const;
+  double getSlicePoint(const QString & dim) const;
+  void setColorScale(double min, double max, bool log);
+  double getColorScaleMin() const;
+  double getColorScaleMax() const;
+  bool getColorScaleLog() const;
+  void setXYLimits(double xleft, double xright, double ybottom, double ytop);
+  QwtDoubleInterval getXLimits() const;
+  QwtDoubleInterval getYLimits() const;
+  void setXYCenter(double x, double y);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
@@ -66,7 +78,7 @@ signals:
 public slots:
   void changedShownDim(int index, int dim, int oldDim);
   void resetZoom();
-  void setXYLimits();
+  void setXYLimitsDialog();
   void showInfoAt(double, double);
   void colorRangeChanged();
   void zoomInSlot();
@@ -75,9 +87,9 @@ public slots:
   void loadColorMapSlot();
   void helpSliceViewer();
   void helpLineViewer();
+  void setColorScaleAutoFull();
+  void setColorScaleAutoSlice();
   // Slots that will be automatically connected via QMetaObject.connectSlotsByName
-  void on_btnRangeFull_clicked();
-  void on_btnRangeSlice_clicked();
   void on_btnClearLine_clicked();
 
   // Synced checkboxes

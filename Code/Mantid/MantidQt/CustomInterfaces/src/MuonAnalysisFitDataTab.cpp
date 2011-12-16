@@ -44,12 +44,12 @@ namespace Muon
 void MuonAnalysisFitDataTab::beforeDoFit(const QtBoolPropertyManager* p)
 {
 
-  bool wantToFitAgainstBunchData = p->property("Fit To binned data").isValid();
-  if (wantToFitAgainstBunchData)
+  bool wantToFitAgainstRawData = p->property("Fit To Raw Data").isValid();
+  if (wantToFitAgainstRawData)
   {
 
   }
-  else //Raw must have been selected
+  else // Fit against bunch
   {
     
   } 

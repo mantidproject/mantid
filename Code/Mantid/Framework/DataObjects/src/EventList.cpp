@@ -1411,20 +1411,14 @@ namespace DataObjects
       //Create the MRU object
       eData = new MantidVecWithMarker(this->m_specNo);
 
-      // prepare to update the uncertainties
-      mru->ensureEnoughBuffersY(thread);
-      MantidVecWithMarker * yData = new MantidVecWithMarker(this->m_specNo);
-
       //Now use that to get E -- Y values are generated from another function
-      this->generateHistogram(*refX, yData->m_data, eData->m_data);
+      MantidVec Y_ignored;
+      this->generateHistogram(*refX, Y_ignored, eData->m_data);
 
       //Lets save it in the MRU
-      MantidVecWithMarker * yOldData = mru->insertY(thread, yData);
       MantidVecWithMarker * eOldData = mru->insertE(thread, eData);
 
       //And clear up the memory of the old one, if it is dropping out.
-      if (yOldData)
-        delete yOldData;
       if (eOldData)
         delete eOldData;
     }

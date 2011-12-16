@@ -152,7 +152,8 @@ add_subdirectory (MDEvents)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule PythonAPIModule DataObjects
+set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule 
+                     PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus NexusCPP Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
 )

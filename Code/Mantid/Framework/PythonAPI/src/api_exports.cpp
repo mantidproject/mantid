@@ -23,6 +23,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
 //Poco

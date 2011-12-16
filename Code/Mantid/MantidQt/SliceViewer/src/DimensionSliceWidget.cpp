@@ -11,8 +11,9 @@ namespace SliceViewer
 
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
     : QWidget(parent),
-     m_dimIndex(0), m_shownDim(0),
-     m_slicePoint(0.0)
+      m_dim(),
+      m_dimIndex(0), m_shownDim(0),
+      m_slicePoint(0.0)
 {
   ui.setupUi(this);
 
@@ -70,6 +71,7 @@ void DimensionSliceWidget::btnXYChanged()
 {
   if (m_insideSetShownDim)
     return;
+  int oldDim = m_shownDim;
   if (ui.btnX->isChecked() && ui.btnY->isChecked() )
   {
     // Toggle when both are checked
@@ -84,6 +86,9 @@ void DimensionSliceWidget::btnXYChanged()
     this->setShownDim(1);
   else
     this->setShownDim(-1);
+
+  // Emit that the user changed the shown dimension
+  emit changedShownDim(m_dimIndex, m_shownDim, oldDim);
 }
 
 
@@ -96,7 +101,6 @@ void DimensionSliceWidget::btnXYChanged()
 void DimensionSliceWidget::setShownDim(int dim)
 {
   m_insideSetShownDim = true;
-  int oldDim = m_shownDim;
   m_shownDim = dim;
   ui.btnX->setChecked( m_shownDim == 0 );
   ui.btnY->setChecked( m_shownDim == 1 );
@@ -130,9 +134,18 @@ void DimensionSliceWidget::setShownDim(int dim)
 
   this->update();
   m_insideSetShownDim = false;
+}
 
-  // Emit that the user changed the shown dimension
-  emit changedShownDim(m_dimIndex, m_shownDim, oldDim);
+
+//-------------------------------------------------------------------------------------------------
+/** Sets the slice point value.
+ *
+ * @param value :: where to slice
+ */
+void DimensionSliceWidget::setSlicePoint(double value)
+{
+  // This will trigger the required events
+  ui.horizontalSlider->setValue(value);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -143,6 +156,7 @@ void DimensionSliceWidget::setShownDim(int dim)
  */
 void DimensionSliceWidget::setMinMax(double min, double max)
 {
+  if (!m_dim) return;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()) );
   ui.lblUnits->setText(QString::fromStdString(m_dim->getUnits()) );
 

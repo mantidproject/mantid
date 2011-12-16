@@ -49,10 +49,15 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
 )
 
+# Python unit tests
+set ( TEST_PY_FILES 
+	test/SliceViewerPythonInterfaceTest.py
+	test/QwtTypesPythonInterfaceTest.py
+)
+
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
-
 
 
 ###########################################################################
@@ -117,6 +122,20 @@ target_link_libraries ( LineViewerDemo
                        ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
                        QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
                        
+endif ()
+
+###########################################################################
+# Unit tests setup
+###########################################################################
+
+# python unit tests
+#if ( PYUNITTEST_FOUND )
+if ( 0 )
+  pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
+  add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
+  add_dependencies ( GUITests SliceViewerTest.py )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET SliceViewerTest.py PROPERTY FOLDER "UnitTests" )
 endif ()
 
 ###########################################################################

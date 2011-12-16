@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_UNITCELL_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
@@ -49,15 +50,6 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
-
-  /// Degrees to radians conversion factor
-  const double deg2rad=M_PI/180.; 
-  /// Radians to degrees conversion factor
-  const double rad2deg=180./M_PI;
-  /// Flag for angle units used in UnitCell class
-  enum AngleUnits {angDegrees/** Degrees*/
-    ,angRadians/** Radians*/};
-
   class MANTID_GEOMETRY_DLL UnitCell
   {
     public:
@@ -124,7 +116,7 @@ namespace Geometry
       double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
       double volume()const;
       double recVolume() const; 
-      virtual void recalculateFromGstar(Kernel::Matrix<double>& NewGstar);
+      virtual void recalculateFromGstar(const Kernel::Matrix<double>& NewGstar);
 
     private:        
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)

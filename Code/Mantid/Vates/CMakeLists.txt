@@ -93,7 +93,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 		Push \\\"MANTIDPARAVIEWPATH\\\"
         Push \\\"A\\\"
         Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
+        Push \\\"$INSTDIR\\\\plugins\\\"
         Call EnvVarUpdate
         Pop  \\\$0
 		
@@ -131,7 +131,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 		Push \\\"MANTIDPARAVIEWPATH\\\"
         Push \\\"R\\\"
         Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
+        Push \\\"$INSTDIR\\\\plugins\\\"
         Call un.EnvVarUpdate
         Pop  \\\$0
 		")

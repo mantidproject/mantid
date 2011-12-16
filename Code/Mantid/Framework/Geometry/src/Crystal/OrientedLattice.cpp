@@ -96,7 +96,7 @@ namespace Geometry
 
   /** Sets the U matrix
     @param newU :: the new U matrix*/
-  void OrientedLattice::setU(DblMatrix& newU)
+  void OrientedLattice::setU(const DblMatrix& newU)
   {
     if (newU.isRotation()==true)
     {
@@ -108,7 +108,7 @@ namespace Geometry
 
   /** Sets the UB matrix and recalculates lattice parameters
     @param newUB :: the new UB matrix*/
-  void OrientedLattice::setUB(DblMatrix& newUB)
+  void OrientedLattice::setUB(const DblMatrix& newUB)
   {
     if (UB.determinant()>0)
     {

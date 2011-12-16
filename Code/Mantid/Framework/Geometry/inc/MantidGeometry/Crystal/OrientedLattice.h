@@ -1,6 +1,7 @@
 #ifndef MANTID_GEOMETRY_ORIENTEDLATTICE_H_
 #define MANTID_GEOMETRY_ORIENTEDLATTICE_H_
-#include <MantidGeometry/Crystal/UnitCell.h>
+
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
@@ -52,8 +53,8 @@ namespace Geometry
       // Access private variables
       const Kernel::DblMatrix& getU() const;
       const Kernel::DblMatrix& getUB() const;
-      void setU(Kernel::DblMatrix& newU);
-      void setUB(Kernel::DblMatrix& newUB);
+      void setU(const Kernel::DblMatrix& newU);
+      void setUB(const Kernel::DblMatrix& newUB);
       //get u and v vectors for Horace/Mslice
       Kernel::V3D getuVector();
       Kernel::V3D getvVector();
@@ -70,7 +71,7 @@ namespace Geometry
       Kernel::DblMatrix UB;
 
       /** Make recalculateFromGstar private. */
-      void recalculateFromGstar(Kernel::DblMatrix& NewGstar)
+      void recalculateFromGstar(const Kernel::DblMatrix& NewGstar)
       { UnitCell::recalculateFromGstar(NewGstar); }
 
   };

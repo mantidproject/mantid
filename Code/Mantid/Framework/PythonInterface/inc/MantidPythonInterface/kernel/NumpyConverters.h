@@ -24,6 +24,8 @@
 #include "MantidKernel/System.h"
 #include <boost/python/object.hpp> //Safer way to include Python.h
 #include <vector>
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -31,10 +33,26 @@ namespace Mantid
   {
     namespace Numpy
     {
-      /// Create a numpy array wrapper around existing data. This is only possible for contiguous data
+      /** @name Create Numpy arrays */
+      //@{
+      /// Create a numpy array wrapper around existing vector. This is only possible for contiguous data
       DLLExport PyObject *wrapWithNumpy(const std::vector<double> & data);
       /// Create a read-only numpy array wrapper around existing data.
       DLLExport PyObject *wrapWithReadOnlyNumpy(const std::vector<double> & data);
+      /// Create a read-only array wrapper around a double Matrix
+      DLLExport PyObject *wrapWithNumpy(const Kernel::DblMatrix & data);
+      /// Create a read-only array wrapper around a double Matrix
+      DLLExport PyObject *wrapWithReadOnlyNumpy(const Kernel::DblMatrix & data);
+      //@}
+
+      /** @name Create Mantid objects from python sequences */
+      //@{
+      /// Try and create a Mantid V3D object from the given PyObject.
+      DLLExport Kernel::V3D createV3D(PyObject *data);
+      /// Create a Matrix of doubles from a 2D numpy array
+      DLLExport Kernel::DblMatrix createDoubleMatrix(PyObject* data);
+      //@}
+
     }
   }
 }

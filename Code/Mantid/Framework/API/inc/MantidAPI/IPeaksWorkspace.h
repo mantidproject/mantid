@@ -22,7 +22,7 @@ namespace API
       @author Ruth Mikkelson, SNS ORNL
       @date 3/10/2010
 
-      Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
       This file is part of Mantid.
 
@@ -47,12 +47,12 @@ namespace API
 
     /// Ctor
     IPeaksWorkspace()
-    : ExperimentInfo()
+    : ITableWorkspace(), ExperimentInfo()
     {}
 
     /// Copy constructor
     IPeaksWorkspace(const IPeaksWorkspace & other)
-    : ExperimentInfo(other)
+    : ITableWorkspace(other), ExperimentInfo(other)
     {}
 
     /// Destructor

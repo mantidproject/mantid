@@ -20,10 +20,12 @@
     
 """
 import mantid
+import api
 import kernel
 from kernel import funcreturns as _funcreturns
-import api
 
+_ads = api.AnalysisDataService.Instance()
+_framework = api.FrameworkManager.Instance()
 
 def version():
     return "simpleapi - memory-based version"
@@ -48,7 +50,7 @@ def get_additional_args(lhs, algm_obj):
     ret_names = lhs[1]
     extra_args = {}
 
-    output_props = [ algm_obj.get_property(p) for p in algm_obj.output_properties() ]
+    output_props = [ algm_obj.getProperty(p) for p in algm_obj.outputProperties() ]
     nprops = len(output_props)
     i = 0
     while len(ret_names) > 0 and i < nprops:
@@ -79,11 +81,11 @@ def gather_returns(func_name, lhs, algm_obj, ignore=[]):
     # child algorithms
     if type(ignore) is str: ignore = [ignore]
     retvals = []
-    for name in algm_obj.output_properties():
+    for name in algm_obj.outputProperties():
         if name in ignore: continue
-        prop = algm_obj.get_property(name)
-        if isinstance(prop, api.IWorkspaceProperty) and not algm_obj.is_child():
-            retvals.append(api.analysis_data_svc[prop.value_as_str])
+        prop = algm_obj.getProperty(name)
+        if isinstance(prop, api.IWorkspaceProperty) and not algm_obj.isChild():
+            retvals.append(_ads[prop.valueAsStr])
         else:
             retvals.append(prop.value)
     nvals = len(retvals)
@@ -106,7 +108,7 @@ def _set_properties(alg_object, *args, **kwargs):
         @param *args Positional arguments
         @param **kwargs Keyword arguments  
     """
-    prop_order = alg_object.mandatory_properties()
+    prop_order = alg_object.mandatoryProperties()
     # add the args to the kw list so everything can be set in a single way
     for (key, arg) in zip(prop_order[:len(args)], args):
         kwargs[key] = arg
@@ -114,14 +116,14 @@ def _set_properties(alg_object, *args, **kwargs):
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
-        alg_object.set_property(key, value)
+        alg_object.setProperty(key, value)
         # For data items setting by explicit value
         # doesn't set the string name of the, i.e. workspace
         # name on the property. This causes problems for
         # properties that then try and 
         # set a property by name
         if isinstance(value, kernel.DataItem):
-            alg_object.set_property_value(key, str(value))
+            alg_object.setPropertyValue(key, str(value))
 
 def create_algorithm(algorithm, version, _algm_object):
     """
@@ -140,7 +142,7 @@ def create_algorithm(algorithm, version, _algm_object):
         if "Version" in kwargs:
             _version = kwargs["Version"]
             del kwargs["Version"]
-        algm = api.framework_mgr.create_algorithm(algorithm, _version)
+        algm = _framework.createAlgorithm(algorithm, _version)
         lhs = _funcreturns.lhs_info()
         extra_args = get_additional_args(lhs, algm)
         kwargs.update(extra_args)
@@ -152,7 +154,7 @@ def create_algorithm(algorithm, version, _algm_object):
     algorithm_wrapper.__name__ = algorithm
     
     # Construct the algorithm documentation
-    algorithm_wrapper.__doc__ = _algm_object.doc_string()
+    algorithm_wrapper.__doc__ = _algm_object.docString()
     
     # Dark magic to get the correct function signature
     # Calling help(...) on the wrapper function will produce a function 
@@ -165,10 +167,10 @@ def create_algorithm(algorithm, version, _algm_object):
     #       argument list
     
     arg_list = []
-    for p in _algm_object.mandatory_properties():
-        prop = _algm_object.get_property(p)
+    for p in _algm_object.mandatoryProperties():
+        prop = _algm_object.getProperty(p)
         # Mandatory parameters are those for which the default value is not valid
-        if len(str(prop.is_valid))>0:
+        if len(str(prop.isValid))>0:
             arg_list.append(p)
         else:
             # None is not quite accurate here, but we are reproducing the 
@@ -264,7 +266,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
             if item not in kwargs:
                 kwargs[item] = ""
             
-        algm = api.framework_mgr.create_algorithm(algorithm, _version)
+        algm = _framework.createAlgorithm(algorithm, _version)
         _set_properties_dialog(algm, *args, **kwargs)
         algm.execute()
         return algm
@@ -275,7 +277,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
     # Dark magic to get the correct function signature
     #_algm_object = mtd.createUnmanagedAlgorithm(algorithm, version)
     arg_list = []
-    for p in _algm_object.mandatory_properties():
+    for p in _algm_object.mandatoryProperties():
         arg_list.append("%s=None" % p)
     arg_str = ', '.join(arg_list)
     signature = "\b%s" % arg_str
@@ -346,8 +348,8 @@ def Load(*args, **kwargs):
         raise RuntimeError('Load() takes only the filename as a positional argument. %d arguments found.' % len(args))
     
     # Create and execute
-    algm = api.framework_mgr.create_algorithm('Load')
-    algm.set_property('Filename', filename) # Must be set first
+    algm = _framework.createAlgorithm('Load')
+    algm.setProperty('Filename', filename) # Must be set first
     lhs = _funcreturns.lhs_info()
     extra_args = get_additional_args(lhs, algm)
     kwargs.update(extra_args)
@@ -389,7 +391,7 @@ def LoadDialog(*args, **kwargs):
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
     
-    algm = api.framework_mgr.create_algorithm('Load')
+    algm = _framework.createAlgorithm('Load')
     _set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
@@ -399,14 +401,15 @@ def translate():
         Loop through the algorithms and register a function call 
         for each of them
     """
-    from api import algorithm_factory, algorithm_mgr
+    from api import AlgorithmFactory, AlgorithmManager
      
-    algs = algorithm_factory.get_registered_algorithms(True)
+    algs = AlgorithmFactory.Instance().getRegisteredAlgorithms(True)
+    algorithm_mgr = AlgorithmManager.Instance()
     for name, versions in algs.iteritems():
         if name == "Load":
             continue
         # Create the algorithm object
-        _algm_object = algorithm_mgr.create_unmanaged(name, max(versions))
+        _algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
         _algm_object.initialize()
         create_algorithm(name, max(versions), _algm_object)
         create_algorithm_dialog(name, max(versions), _algm_object)

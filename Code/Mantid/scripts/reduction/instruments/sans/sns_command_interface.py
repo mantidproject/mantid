@@ -33,7 +33,7 @@ def FrameSkipping(value=False):
     raise RuntimeError, "The FrameSkipping command is no longer needed and no longer supported" 
     
 def DarkCurrent(datafile):
-    find_data(datafile, instrument=ReductionSingleton().instrument.name())
+    datafile = find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_dark_current_subtracter(mantidsimple.EQSANSDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,

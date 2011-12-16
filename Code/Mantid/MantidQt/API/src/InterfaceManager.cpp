@@ -161,7 +161,11 @@ InterfaceManagerImpl::InterfaceManagerImpl()
       g_log.error() << "MANTIDPARAVIEWPATH env variable defined, but libraries cannot be loaded"
         << std::endl;
     }
-  } 
+  }
+  else
+  {
+    g_log.information("No Vates libraries to load.");
+  }
 }
 
 /// Destructor

@@ -61,21 +61,21 @@ namespace MDAlgorithms
   typedef  std::vector<std::string> Strings;
   /// known sates for algorithms, caluclating Q-values
   enum Q_state{
-       NoQ, 
-       modQ,
-       Q3D
+       NoQ,     //< no Q transformatiom, just copying values along X axis (may be with units transformation)
+       modQ,    //< calculate mod Q
+       Q3D      //< calculate 3 component of Q in fractional coordinate system.
    };
-  /** known analysis modes, arranged according to emodes 
-      It is importent to assign enums proper numbers, as directc correspondence between enums and their emodes 
-      used by algorithm;
-  */
+  /**  known analysis modes, arranged according to emodes 
+    *  It is importent to assign enums proper numbers, as directc correspondence between enums and their emodes 
+    *  used by external units conversion algorithms and this algorithm, so the agreement should be the stame     */
   enum AnalMode{  
       Elastic = 0,  //< int emode = 0; Elastic analysis
       Direct  = 1,  //< emode=1; Direct inelastic analysis mode
       Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
       ANY_Mode      //< couples with NoQ, means just copying existing data (may be douing units conversion)
   };
-  /// enum describes if there is need to convert workspace units and different units conversion modes
+  /** enum describes if there is need to convert workspace units and different unit conversion modes 
+   * this modes are identified by algorithm from workpace parameters and user input.   */
   enum CnvrtUnits
   {
       ConvertNo,   //< no, input workspace has the same units as output workspace or in units used by Q-dE algorithms naturally
@@ -159,8 +159,8 @@ namespace MDAlgorithms
    /** identifies conversion subalgorithm to run on a workspace */
    std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                               const std::vector<std::string> &other_dim_names,std::vector<std::string> &targ_dim_names,std::vector<std::string> &targ_dim_units);
-   /** function extracts the coordinates from additional workspace porperties and places them to proper position within array of coodinates */
-   void fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
+   /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
+   bool fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties);
 
    /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to hkl coordinate system */
    std::vector<double> getTransfMatrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u=Kernel::V3D(1,0,0), const Kernel::V3D &v=Kernel::V3D(0,1,0))const;
@@ -210,7 +210,7 @@ namespace MDAlgorithms
     template<size_t nd>
     API::IMDEventWorkspace_sptr  createEmptyEventWS(void);
 
-    // known momentum analysis mo des ID-s;
+    // known momentum analysis mode ID-s;
     std::vector<std::string> Q_modes;
     // known energy transfer modes ID-s
     std::vector<std::string> dE_modes;

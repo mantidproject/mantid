@@ -59,7 +59,6 @@ namespace Algorithms
    */
   void DampSq::exec()
   {
-    // TODO Auto-generated execute stub
 
 	  // 1. Generate new workspace
 	  API::MatrixWorkspace_const_sptr isqspace = getProperty("InputWorkspace");

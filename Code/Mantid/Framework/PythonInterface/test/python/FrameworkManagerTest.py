@@ -1,6 +1,6 @@
 import unittest
 
-from mantid.api import framework_mgr, AlgorithmProxy
+from mantid.api import FrameworkManager, AlgorithmProxy
 
 class FrameworkManagerTest(unittest.TestCase):
 
@@ -12,24 +12,24 @@ class FrameworkManagerTest(unittest.TestCase):
 
     def test_clear_functions_do_not_throw(self):
         # Test they don't throw for now
-        self.assertRaisesNothing(framework_mgr.clear)
-        self.assertRaisesNothing(framework_mgr.clear_data)
-        self.assertRaisesNothing(framework_mgr.clear_algorithms)
-        self.assertRaisesNothing(framework_mgr.clear_instruments)
+        self.assertRaisesNothing(FrameworkManager.Instance().clear)
+        self.assertRaisesNothing(FrameworkManager.Instance().clearData)
+        self.assertRaisesNothing(FrameworkManager.Instance().clearAlgorithms)
+        self.assertRaisesNothing(FrameworkManager.Instance().clearInstruments)
         
     def _is_managed_test(self, alg, version):
-        self.assertTrue(alg.is_initialized())
+        self.assertTrue(alg.isInitialized())
         self.assertTrue(alg.version(), version)
         self.assertTrue(isinstance(alg, AlgorithmProxy))
         self.assertTrue(hasattr(alg, '__async__'))
         self.assertTrue(alg.__async__)
         
     def test_create_algorithm_produces_managed_alg_outside_PyExec_with_async_attr_and_is_true(self):
-        alg = framework_mgr.create_algorithm("Rebin")
+        alg = FrameworkManager.Instance().createAlgorithm("Rebin")
         self._is_managed_test(alg, 1)
         
     def test_create_algorithm_with_version_produces_managed_alg_outside_PyExec_with_async_and_is_true(self):
-        alg = framework_mgr.create_algorithm("LoadRaw", 2)
+        alg = FrameworkManager.Instance().createAlgorithm("LoadRaw", 2)
         self._is_managed_test(alg, 2)
         
     def test_create_algorithm_produces_unmanaged_inside_PyExec_with_async_and_is_false(self):
@@ -40,8 +40,8 @@ class FrameworkManagerTest(unittest.TestCase):
                 self._test_obj = test_object
             
             def PyExec(self):
-                alg = framework_mgr.create_algorithm("Rebin")
-                self._test_obj.assertTrue(alg.is_initialized())
+                alg = FrameworkManager.Instance().createAlgorithm("Rebin")
+                self._test_obj.assertTrue(alg.isInitialized())
                 self._test_obj.assertFalse(isinstance(alg, AlgorithmProxy))
                 self._test_obj.assertTrue(hasattr(alg, '__async__'))
                 self._test_obj.assertFalse(alg.__async__)

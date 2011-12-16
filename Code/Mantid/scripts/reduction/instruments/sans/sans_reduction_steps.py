@@ -264,8 +264,9 @@ class BeamSpreaderTransmission(BaseTransmission):
             
             # Subtract dark current
             if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
+                dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
                 self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
-                                                  InputWorkspace=None, Filename=self._dark_current_data,
+                                                  InputWorkspace=None, Filename=dark_current,
                                                   OutputWorkspace=None,
                                                   ReductionTableWorkspace=reducer.get_reduction_table_name())
                 self._dark_current_subtracter.execute(reducer, sample_spreader_ws)
@@ -363,8 +364,9 @@ class DirectBeamTransmission(BaseTransmission):
                 output_str += partial_out
         
         elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
+            dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
             self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
-                                              InputWorkspace=None, Filename=self._dark_current_data,
+                                              InputWorkspace=None, Filename=dark_current,
                                               OutputWorkspace=None,
                                               ReductionTableWorkspace=reducer.get_reduction_table_name())
             partial_out = self._dark_current_subtracter.execute(reducer, sample_ws)
@@ -679,11 +681,14 @@ class SensitivityCorrection(ReductionStep):
         
         # Load the flood data
         filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
+        dark_current=None
+        if self._dark_current_data is not None:
+            dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
         
         l=SANSSensitivityCorrection(InputWorkspace=workspace,
                                   Filename=filepath,
                                   UseSampleDC=self._use_sample_dc,
-                                  DarkCurrentFile=self._dark_current_data,
+                                  DarkCurrentFile=dark_current,
                                   MinEfficiency=self._min_sensitivity,
                                   MaxEfficiency=self._max_sensitivity,
                                   BeamCenterX=center_x,

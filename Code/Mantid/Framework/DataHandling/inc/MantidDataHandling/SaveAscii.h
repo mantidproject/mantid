@@ -50,6 +50,8 @@ namespace Mantid
     class DLLExport SaveAscii : public API::Algorithm
     {
     public:
+      /// Default constructor
+      SaveAscii();
       /// Destructor
       ~SaveAscii() {}
       /// Algorithm's name for identification overriding a virtual method
@@ -68,6 +70,9 @@ namespace Mantid
       void exec();
       ///static reference to the logger class
       static Kernel::Logger& g_log;
+
+      /// Map the separator options to their string equivalents
+      std::map<std::string,std::string> m_separatorIndex;
     };
 
   } // namespace DataHandling

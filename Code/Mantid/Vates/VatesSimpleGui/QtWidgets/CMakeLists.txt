@@ -68,7 +68,8 @@ set_property( TARGET VatesSimpleGuiQtWidgets PROPERTY FOLDER MantidVatesSimpleGu
 target_link_libraries( VatesSimpleGuiQtWidgets 
 ${POCO_LIBRARIES}
 ${QT_LIBRARIES}
-${QWT_LIBRARIES} 
+${QWT_LIBRARIES}
+${MANTID_SUBPROJECT_LIBS}
 )
 
 install( TARGETS VatesSimpleGuiQtWidgets ${TARGET_TYPE} DESTINATION ${LIB_DIR} )

@@ -121,6 +121,9 @@ signals:
   void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
 
   void closeGraph(const QString & wsName);
+
+  void hideToolbars();
+  void showToolbars();
   
 protected:
   /**@name Virtual Functions */

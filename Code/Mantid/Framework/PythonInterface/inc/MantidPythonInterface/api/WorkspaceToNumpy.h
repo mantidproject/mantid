@@ -26,6 +26,11 @@
 
 namespace Mantid
 {
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
+
   namespace PythonInterface
   {
     namespace Numpy
@@ -33,21 +38,26 @@ namespace Mantid
       //** @name Numpy read-only wrappers */
       ///@{
       /// Create a numpy wrapper around the original X values at the given index
-      PyObject *wrapX(PyObject *self, const size_t index);
+      PyObject *wrapX(API::MatrixWorkspace &self, const size_t index);
       /// Create a numpy wrapper around the original Y values at the given index
-      PyObject *wrapY(PyObject *self, const size_t index);
+      PyObject *wrapY(API::MatrixWorkspace &self, const size_t index);
       /// Create a numpy wrapper around the original X values at the given index
-      PyObject *wrapE(PyObject *self, const size_t index);
+      PyObject *wrapE(API::MatrixWorkspace &self, const size_t index);
+      /// Create a numpy wrapper around the original Dx values at the given index
+      PyObject *wrapDx(API::MatrixWorkspace &self, const size_t index);
+
       ///@}
 
       //** @name Numpy clones of data*/
       ///{
       /// Create a numpy array from the X values of the given workspace reference
-      PyObject *cloneX(PyObject * self);
+      PyObject *cloneX(API::MatrixWorkspace &self);
       /// Create a numpy array from the Y values of the given workspace reference
-      PyObject *cloneY(PyObject * self);
+      PyObject *cloneY(API::MatrixWorkspace &self);
       /// Create a numpy array from the E values of the given workspace reference
-      PyObject *cloneE(PyObject * self);
+      PyObject *cloneE(API::MatrixWorkspace &self);
+      /// Create a numpy array from the E values of the given workspace reference
+      PyObject *cloneDx(API::MatrixWorkspace &self);
       ///@}
 
     }

@@ -52,10 +52,15 @@ namespace SliceViewer
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
+      m_ws(), m_firstWorkspaceOpen(false),
+      m_dimensions(), m_data(NULL),
+      m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
       m_logColor(false)
 {
+  //std::cout << "Starting setupUI. Parent is " << parent << "." << std::endl;
 	ui.setupUi(this);
+  //std::cout << "done setupUI. Parent is " << parent << "." << std::endl;
 
 	m_inf = std::numeric_limits<double>::infinity();
 
@@ -73,7 +78,6 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --- Create a color bar on the right axis ---------------
   m_colorBar = new ColorBarWidget(this);
-  m_colorBar->setDataRange( range.minValue(), range.maxValue() );
   m_colorBar->setViewRange( range.minValue(), range.maxValue() );
   m_colorBar->setLog(true);
   m_spectLayout->addWidget(m_colorBar, 0, 0);
@@ -98,6 +102,8 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
+  QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
+  QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -112,6 +118,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_lineOverlay = new LineOverlay(m_plot);
   m_lineOverlay->setVisible(false);
 
+  //std::cout << "Done SliceViewer constructor" << std::endl;
 }
 
 //------------------------------------------------------------------------------------
@@ -166,7 +173,7 @@ void SliceViewer::initMenus()
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(setXYLimits()));
+  connect(action, SIGNAL(triggered()), this, SLOT(setXYLimitsDialog()));
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "Zoom &In", this);
@@ -187,12 +194,12 @@ void SliceViewer::initMenus()
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Full range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeFull_clicked()));
+  connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Slice range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(on_btnRangeSlice_clicked()));
+  connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette-part.png"), QSize(), QIcon::Normal, QIcon::Off); action->setIcon(icon); }
   m_menuColorOptions->addAction(action);
@@ -295,19 +302,27 @@ void SliceViewer::showControls(bool visible)
 /** Add (as needed) and update DimensionSliceWidget's. */
 void SliceViewer::updateDimensionSliceWidgets()
 {
+  //std::cout << "Workspace has " << m_ws->getNumDims() << " dimensions " << std::endl;
   // Create all necessary widgets
   if (m_dimWidgets.size() < m_ws->getNumDims())
   {
     for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
     {
-      DimensionSliceWidget * widget = new DimensionSliceWidget(this);
+      //std::cout << "Creating DimensionSliceWidget at d "<< d << " with parent " << this << std::endl;
+      DimensionSliceWidget * widget = new DimensionSliceWidget(this /*TODO set to this */);
+
+      //std::cout << "Widget is at "<< widget << std::endl;
+
       ui.verticalLayoutControls->insertWidget(int(d), widget);
-      m_dimWidgets.push_back(widget);
-      // Slot when t
+      //std::cout << "Widget inserted into layout " << std::endl;
+      // Slots for changes on the dimension widget
       QObject::connect(widget, SIGNAL(changedShownDim(int,int,int)),
                        this, SLOT(changedShownDim(int,int,int)));
       QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
                        this, SLOT(updateDisplaySlot(int,double)));
+      //std::cout << "Signals connected." << std::endl;
+      // Save in this list
+      m_dimWidgets.push_back(widget);
     }
   }
   // Hide unnecessary ones
@@ -385,7 +400,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   m_data->setWorkspace(ws);
   // Find the full range. And use it
   findRangeFull();
-  m_colorBar->setDataRange(m_colorRangeFull);
   m_colorBar->setViewRange(m_colorRangeFull);
   // Initial display update
   this->updateDisplay(!m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
@@ -412,10 +426,12 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
 
 //------------------------------------------------------------------------------------
-/** Set the workspace by name
+/** Set the workspace to view using its name.
+ * The workspace should be a MDHistoWorkspace or a MDEventWorkspace,
+ * with at least 2 dimensions.
  *
  * @param wsName :: name of the MDWorkspace to look for
- * @throw if the workspace is not found or is a MatrixWorkspace
+ * @throw std::runtime_error if the workspace is not found or is a MatrixWorkspace
  */
 void SliceViewer::setWorkspace(const QString & wsName)
 {
@@ -433,7 +449,7 @@ void SliceViewer::setWorkspace(const QString & wsName)
 //------------------------------------------------------------------------------------
 /** Load a color map from a file
  *
- * @param filename :: file to open; empty to ask.
+ * @param filename :: file to open; empty to ask via a dialog box.
  */
 void SliceViewer::loadColorMap(QString filename)
 {
@@ -463,18 +479,24 @@ void SliceViewer::loadColorMap(QString filename)
 //=================================================================================================
 
 //------------------------------------------------------------------------------------
-/// Slot for finding the data full range and updating the display
-void SliceViewer::on_btnRangeFull_clicked()
+/** Automatically sets the min/max of the color scale,
+ * using the limits in the entire data set of the workspace
+ * (every bin, even those not currently visible).
+ */
+void SliceViewer::setColorScaleAutoFull()
 {
   this->findRangeFull();
-  m_colorBar->setDataRange(m_colorRangeFull);
   m_colorBar->setViewRange(m_colorRangeFull);
   this->updateDisplay();
 }
 
 //------------------------------------------------------------------------------------
-/// Slot for finding the current view/slice full range and updating the display
-void SliceViewer::on_btnRangeSlice_clicked()
+/** Automatically sets the min/max of the color scale,
+ * using the limits in the data that is currently visible
+ * in the plot (only the bins in this slice and within the
+ * view limits)
+ */
+void SliceViewer::setColorScaleAutoSlice()
 {
   this->findRangeSlice();
   m_colorBar->setViewRange(m_colorRangeSlice);
@@ -573,7 +595,11 @@ void SliceViewer::helpLineViewer()
 }
 
 //------------------------------------------------------------------------------------
-/// SLOT to reset the zoom view to full axes. This can be called manually with a button
+/** Automatically resets the zoom view to full axes.
+ * This will reset the XY limits to the full range of the workspace.
+ * Use zoomBy() or setXYLimits() to modify the view range.
+ * This corresponds to the "View Extents" button.
+ */
 void SliceViewer::resetZoom()
 {
   // Reset the 2 axes to full scale
@@ -585,23 +611,19 @@ void SliceViewer::resetZoom()
 
 //------------------------------------------------------------------------------------
 /// SLOT to open a dialog to set the XY limits
-void SliceViewer::setXYLimits()
+void SliceViewer::setXYLimitsDialog()
 {
   // Initialize the dialog with the current values
   XYLimitsDialog * dlg = new XYLimitsDialog(this);
   dlg->setXDim(m_X);
   dlg->setYDim(m_Y);
-  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
-  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
+  QwtDoubleInterval xint = this->getXLimits();
+  QwtDoubleInterval yint = this->getYLimits();
   dlg->setLimits(xint.minValue(), xint.maxValue(), yint.minValue(), yint.maxValue());
   // Show the dialog
   if (dlg->exec() == QDialog::Accepted)
   {
-    // Set the limits in X and Y
-    m_plot->setAxisScale( m_spect->xAxis(), dlg->getXMin(), dlg->getXMax());
-    m_plot->setAxisScale( m_spect->yAxis(), dlg->getYMin(), dlg->getYMax());
-    // Make sure the view updates
-    m_plot->replot();
+    this->setXYLimits(dlg->getXMin(), dlg->getXMax(), dlg->getYMin(), dlg->getYMax());
   }
 }
 
@@ -627,20 +649,46 @@ void SliceViewer::loadColorMapSlot()
 //=================================================================================================
 //=================================================================================================
 //=================================================================================================
-/** Zoom in or out
- * @param factor :: > 1 : zoom in by this factor. < 1 : zoom out.
+/** Zoom in or out, keeping the center of the plot in the same position.
+ *
+ * @param factor :: double, if > 1 : zoom in by this factor.
+ *                  if < 1 : it will zoom out.
  */
 void SliceViewer::zoomBy(double factor)
 {
-  QwtDoubleInterval xint = m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
-  QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
-  double x_min = xint.minValue() + (factor-1.) * xint.width() * 0.5;
-  double x_max = xint.maxValue() - (factor-1.) * xint.width() * 0.5;
-  double y_min = yint.minValue() + (factor-1.) * yint.width() * 0.5;
-  double y_max = yint.maxValue() - (factor-1.) * yint.width() * 0.5;
-  m_plot->setAxisScale( m_spect->xAxis(), x_min, x_max);
-  m_plot->setAxisScale( m_spect->yAxis(), y_min, y_max);
-  this->updateDisplay();
+  QwtDoubleInterval xint = this->getXLimits();
+  QwtDoubleInterval yint = this->getYLimits();
+
+  double newHalfWidth = (xint.width() / factor) * 0.5;
+  double middle = (xint.minValue() + xint.maxValue()) * 0.5;
+  double x_min = middle - newHalfWidth;
+  double x_max = middle + newHalfWidth;
+
+  newHalfWidth = (yint.width() / factor) * 0.5;
+  middle = (yint.minValue() + yint.maxValue()) * 0.5;
+  double y_min = middle - newHalfWidth;
+  double y_max = middle + newHalfWidth;
+  // Perform the move
+  this->setXYLimits(x_min, x_max, y_min, y_max);
+}
+
+//------------------------------------------------------------------------------------
+/** Manually set the center of the plot, in X Y coordinates.
+ * This keeps the plot the same size as previously.
+ * Use setXYLimits() to modify the size of the plot by setting the X/Y edges,
+ * or you can use zoomBy() to zoom in/out
+ *
+ * @param x :: new position of the center in X
+ * @param y :: new position of the center in Y
+ */
+void SliceViewer::setXYCenter(double x, double y)
+{
+  QwtDoubleInterval xint = this->getXLimits();
+  QwtDoubleInterval yint = this->getYLimits();
+  double halfWidthX = xint.width() * 0.5;
+  double halfWidthY = yint.width() * 0.5;
+  // Perform the move
+  this->setXYLimits(x - halfWidthX, x + halfWidthX,   y - halfWidthY, y + halfWidthY);
 }
 
 //------------------------------------------------------------------------------------
@@ -856,7 +904,6 @@ void SliceViewer::updateDisplay(bool resetAxes)
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
-//  std::cout << m_plot->sizeHint().width() << " width\n";
 }
 
 
@@ -898,7 +945,7 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
-  // Show the new slice. This finds m_dimX and Y
+  // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
@@ -908,28 +955,203 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 //=================================================================================================
 //========================================== PYTHON METHODS =======================================
 //=================================================================================================
-
-/** Set the index of the dimension that will be shown as the X axis
- * of the plot.
- * @param index :: index of the dimension, from 0 to NDims-1.
+//------------------------------------------------------------------------------------
+/** @return the index of the dimension that is currently
+ * being shown as the X axis of the plot.
  */
-void SliceViewer::setDimX(int index)
+int SliceViewer::getDimX() const
+{ return int(m_dimX); }
+
+/** @return the index of the dimension that is currently
+ * being shown as the Y axis of the plot.
+ */
+int SliceViewer::getDimY() const
+{ return int(m_dimY); }
+
+//------------------------------------------------------------------------------------
+/** Set the index of the dimensions that will be shown as
+ * the X and Y axis of the plot.
+ * You cannot set both axes to be the same.
+ *
+ * To be called from Python, primarily.
+ *
+ * @param indexX :: index of the X dimension, from 0 to NDims-1.
+ * @param indexX :: index of the Y dimension, from 0 to NDims-1.
+ * @throw std::invalid_argument if an index is invalid or repeated.
+ */
+void SliceViewer::setXYDim(int indexX, int indexY)
 {
-  if (index >= int(m_dimWidgets.size()) || index < 0)
-    throw std::invalid_argument("There is no dimension # " + Strings::toString(index) + " in the workspace.");
-  m_dimWidgets[index]->setShownDim(0);
+  if (indexX >= int(m_dimWidgets.size()) || indexX < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(indexX) + " in the workspace.");
+  if (indexY >= int(m_dimWidgets.size()) || indexY < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(indexY) + " in the workspace.");
+  if (indexX == indexY)
+    throw std::invalid_argument("X dimension must be different than the Y dimension index.");
+
+  // Set the X and Y widgets
+  m_dimWidgets[indexX]->setShownDim(0);
+  m_dimWidgets[indexY]->setShownDim(1);
+
+  // Set all other dimensions as slice points
+  for (int d=0; d < int(m_dimWidgets.size()); d++)
+    if (d != indexX && d != indexY)
+      m_dimWidgets[d]->setShownDim(-1);
+
+  // Show the new slice. This finds m_dimX and m_dimY
+  this->updateDisplay();
+  emit changedShownDim(m_dimX, m_dimY);
 }
 
-/** Set the index of the dimension that will be shown as the Y axis
- * of the plot.
- * @param index :: index of the dimension, from 0 to NDims-1.
+//------------------------------------------------------------------------------------
+/** Set the dimensions that will be shown as the X and Y axes
+ *
+ * @param dimX :: name of the X dimension. Must match the workspace dimension names.
+ * @param dimY :: name of the Y dimension. Must match the workspace dimension names.
+ * @throw std::runtime_error if the dimension name is not found.
  */
-void SliceViewer::setDimY(int index)
+void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
 {
-  if (index >= int(m_dimWidgets.size()) || index < 0)
-    throw std::invalid_argument("There is no dimension # " + Strings::toString(index) + " in the workspace.");
-  m_dimWidgets[index]->setShownDim(1);
+  if (!m_ws) return;
+  int indexX = int(m_ws->getDimensionIndexByName(dimX.toStdString()));
+  int indexY = int(m_ws->getDimensionIndexByName(dimY.toStdString()));
+  this->setXYDim(indexX, indexY);
+}
+
+
+//------------------------------------------------------------------------------------
+/** Sets the slice point in the given dimension:
+ * that is, what is the position of the plane in that dimension
+ *
+ * @param dim :: index of the dimension to change
+ * @param value :: value of the slice point, in the units of the given dimension.
+ *        This should be within the range of min/max for that dimension.
+ */
+void SliceViewer::setSlicePoint(int dim, double value)
+{
+  if (dim >= int(m_dimWidgets.size()) || dim < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
+  m_dimWidgets[dim]->setSlicePoint(value);
+}
+
+//------------------------------------------------------------------------------------
+/** Returns the slice point in the given dimension
+ *
+ * @param dim :: index of the dimension
+ * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ */
+double SliceViewer::getSlicePoint(int dim) const
+{
+  if (dim >= int(m_dimWidgets.size()) || dim < 0)
+    throw std::invalid_argument("There is no dimension # " + Strings::toString(dim) + " in the workspace.");
+  return m_slicePoint[dim];
+}
+
+
+//------------------------------------------------------------------------------------
+/** Sets the slice point in the given dimension:
+ * that is, what is the position of the plane in that dimension
+ *
+ * @param dim :: name of the dimension to change
+ * @param value :: value of the slice point, in the units of the given dimension.
+ *        This should be within the range of min/max for that dimension.
+ */
+void SliceViewer::setSlicePoint(const QString & dim, double value)
+{
+  if (!m_ws) return;
+  int index = int(m_ws->getDimensionIndexByName(dim.toStdString()));
+  return this->setSlicePoint(index, value);
+}
+
+//------------------------------------------------------------------------------------
+/** Returns the slice point in the given dimension
+ *
+ * @param dim :: name of the dimension
+ * @return slice point for that dimension. Value has not significance for the X or Y display dimensions.
+ */
+double SliceViewer::getSlicePoint(const QString & dim) const
+{
+  if (!m_ws) return 0;
+  int index = int(m_ws->getDimensionIndexByName(dim.toStdString()));
+  return this->getSlicePoint(index);
+}
+
+
+//------------------------------------------------------------------------------------
+/** Set the color scale limits and log mode via a method call.
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param log :: true for a log color scale, false for linear
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScale(double min, double max, bool log)
+{
+  if (max <= min)
+    throw std::invalid_argument("Color scale maximum must be > minimum.");
+  if (log && ((min <= 0) || (max <= 0)))
+    throw std::invalid_argument("For logarithmic color scales, both minimum and maximum must be > 0.");
+  m_colorBar->setViewRange(min, max);
+  m_colorBar->setLog(log);
+  this->colorRangeChanged();
+}
+
+
+//------------------------------------------------------------------------------------
+/** @return the value that corresponds to the lowest color on the color map */
+double SliceViewer::getColorScaleMin() const
+{
+  return m_colorBar->getMinimum();
+}
+
+/** @return the value that corresponds to the highest color on the color map */
+double SliceViewer::getColorScaleMax() const
+{
+  return m_colorBar->getMaximum();
+}
+
+/** @return True if the color scale is in logarithmic mode */
+bool SliceViewer::getColorScaleLog() const
+{
+  return m_colorBar->getLog();
+}
+
+//------------------------------------------------------------------------------------
+/** Set the limits in X and Y to be shown in the plot.
+ * The X and Y values are in the units of their respective dimensions.
+ * You can change the mapping from X/Y in the plot to specific
+ * dimensions in the displayed workspace using setXYDim().
+ *
+ * You can flip the direction of the scale if you specify,
+ * e.g., xleft > xright.
+ *
+ * @param xleft   :: x-value on the left side of the graph
+ * @param xright  :: x-value on the right side of the graph
+ * @param ybottom :: y-value on the bottom of the graph
+ * @param ytop    :: y-value on the top of the graph
+ */
+void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, double ytop)
+{
+  // Set the limits in X and Y
+  m_plot->setAxisScale( m_spect->xAxis(), xleft, xright);
+  m_plot->setAxisScale( m_spect->yAxis(), ybottom, ytop);
+  // Make sure the view updates
+  m_plot->replot();
+}
+
+//------------------------------------------------------------------------------------
+/** @return Returns the [left, right] limits of the view in the X axis. */
+QwtDoubleInterval SliceViewer::getXLimits() const
+{
+  return m_plot->axisScaleDiv( m_spect->xAxis() )->interval();
+}
+
+/** @return Returns the [bottom, top] limits of the view in the Y axis. */
+QwtDoubleInterval SliceViewer::getYLimits() const
+{
+  return m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 }
 
 } //namespace
 }
+

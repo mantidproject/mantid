@@ -21,6 +21,9 @@ QwtRasterDataMD::QwtRasterDataMD()
   m_minVal = DBL_MAX;
   m_maxVal = -DBL_MAX;
   m_range = QwtDoubleInterval(0.0, 1.0);
+  m_nd = 0;
+  m_dimX = 0;
+  m_dimY = 0;
   nan = std::numeric_limits<double>::quiet_NaN();
 }
 
@@ -127,6 +130,8 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
  */
 void QwtRasterDataMD::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
+  if (!ws)
+    throw std::runtime_error("QwtRasterDataMD::setWorkspace(): NULL workspace passed.");
   m_ws = ws;
   m_nd = m_ws->getNumDims();
   m_dimX = 0;
@@ -144,10 +149,12 @@ void QwtRasterDataMD::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
  */
 void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY, std::vector<Mantid::coord_t> & slicePoint)
 {
+  if (slicePoint.size() != m_nd)
+    throw std::runtime_error("QwtRasterDataMD::setSliceParams(): inconsistent vector/number of dimensions size.");
   m_dimX = dimX;
   m_dimY = dimY;
   delete [] m_slicePoint;
-  m_slicePoint = new coord_t[m_nd];
+  m_slicePoint = new coord_t[slicePoint.size()];
   for (size_t d=0; d<m_nd; d++)
     m_slicePoint[d] = slicePoint[d];
 }

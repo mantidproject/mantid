@@ -21,7 +21,7 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   bool res = false;
   try
   {
-    //std::cout << "MantidApplication::notify( event.type() == " << event->type() << ")\n";
+    //std::cout << "MantidApplication::notify( receiver " << receiver->objectName().toStdString() << ", event.type() == " << event->type() << ")\n";
     res = QApplication::notify(receiver,event);
   }
   catch(std::exception& e)

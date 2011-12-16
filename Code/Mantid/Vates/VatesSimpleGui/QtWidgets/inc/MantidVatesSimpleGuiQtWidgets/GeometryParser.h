@@ -6,6 +6,8 @@
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 
+#include <string>
+
 namespace Mantid
 {
 namespace Vates
@@ -55,6 +57,8 @@ public:
   /// Default destructor.
   virtual ~GeometryParser() {};
 
+  /// Insert a value into the time dimension XML.
+  std::string addTDimValue(double time);
   /**
    * Parse the dataset XML for information on the dataset axis.
    * @param dimension the XML string containing the axis information
