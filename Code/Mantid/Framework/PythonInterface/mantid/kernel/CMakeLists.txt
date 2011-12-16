@@ -15,6 +15,7 @@ set ( EXPORT_FILES
   src/V3D.cpp
   src/StlContainers.cpp
   src/Logger.cpp
+  src/Unit.cpp
 )  
 
 set ( SRC_FILES
