@@ -686,19 +686,10 @@ class Note: MdiSubWindow
 #include "src/Note.h"
 %End
 public:
-  void execute() const;
-  void executeAll();
-  void evaluate();
-
-  bool autoexec() const;
-  void setAutoexec(bool = true);
-
   QString text();
   void setText(const QString &s);
-
-  void exportPDF(const QString& fileName);
+  
   QString exportASCII(const QString &file=QString::null);
-  QString importASCII(const QString &file=QString::null);
 
 private:
   Note(const Note&);
