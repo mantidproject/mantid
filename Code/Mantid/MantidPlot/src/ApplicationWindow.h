@@ -456,6 +456,9 @@ public slots:
   void plotVectXYAM();
   void plotBoxDiagram();
 
+  /// Create a stem plot from a table and return a string representation of it
+  QString stemPlot(Table *t = 0, const QString& colName = QString(), int power = 0, int startRow = 0, int endRow = -1);
+
   //! Check whether a table is valid for a 3D plot and display an appropriate error if not
   bool validFor3DPlot(Table *table);
   //! Check whether a table is valid for a 2D plot and display an appropriate error if not

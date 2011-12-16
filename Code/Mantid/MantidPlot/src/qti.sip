@@ -878,6 +878,8 @@ public:
   Matrix* tableToMatrix(Table* t);
   Table* matrixToTable(Matrix* m, MatrixToTableConversion = Direct);
 
+  QString stemPlot(Table *t, const QString& colName, int power = 1001, int startRow = 0, int endRow = -1);
+
   //---- Mantid
   MantidUI* mantidUI;
   void addUserMenu(const QString &);

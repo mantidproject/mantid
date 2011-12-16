@@ -166,6 +166,8 @@
 
 #include <zlib.h>
 
+#include <gsl/gsl_sort.h>
+
 //Mantid
 #include "ScriptingWindow.h"
 
@@ -1896,6 +1898,96 @@ void ApplicationWindow::plotVectXYAM()
     multilayerPlot(table, s, Graph::VectXYAM, sel.topRow(), sel.bottomRow());
   } else
     QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Please select four columns for this operation!"));//Mantid
+}
+
+QString ApplicationWindow::stemPlot(Table *t, const QString& colName, int power, int startRow, int endRow)
+{
+  if (!t)
+    return QString();
+
+  int col = t->colIndex(colName);
+  if (col < 0){
+    QMessageBox::critical(this, tr("QtiPlot - Error"),
+    tr("Data set: %1 doesn't exist!").arg(colName));
+    return QString();
+  }
+
+  startRow--;
+  endRow--;
+  if (startRow < 0 || startRow >= t->numRows())
+    startRow = 0;
+  if (endRow < 0 || endRow >= t->numRows())
+    endRow = t->numRows() - 1;
+
+  QString result = tr("Stem and leaf plot of dataset") + ": " + colName + " ";
+  result += tr("from row") + ": " + QString::number(startRow + 1) + " ";
+  result += tr("to row") + ": " + QString::number(endRow + 1) + "\n";
+
+  int rows = 0;
+  for (int j = startRow; j <= endRow; j++){
+    if (!t->text(j, col).isEmpty())
+       rows++;
+  }
+
+  if (rows >= 1){
+    double *data = (double *)malloc(rows * sizeof (double));
+    if (!data){
+      result += tr("Not enough memory for this dataset!") + "\n";
+      return result;
+    }
+
+    result += "\n" + tr("Stem") + " | " + tr("Leaf");
+    result += "\n---------------------\n";
+
+    int row = 0;
+    for (int j = startRow; j <= endRow; j++){
+      if (!t->text(j, col).isEmpty()){
+        data[row] = t->cell(j, col);
+        row++;
+      }
+    }
+    gsl_sort (data, 1, rows);
+
+    if (power > 1e3){
+      power = static_cast<int>(std::ceil(log10(data[rows - 1] - data[0]) - log10(rows - 1)));
+      bool ok;
+      int input = QInputDialog::getInteger(this, tr("Please confirm the stem unit!"),
+                                      tr("Data set") + ": " + colName + ", " + tr("stem unit") + " = 10<sup>n</sup>, n = ",
+                                      power, -1000, 1000, 1, &ok);
+      if (ok)
+        power = input;
+    }
+
+    double stem_unit = pow(10.0, power);
+    double leaf_unit = stem_unit/10.0;
+
+    int prev_stem = int(data[0]/stem_unit);
+    result += "      " + QString::number(prev_stem) + " | ";
+
+    for (int j = 0; j <rows; j++){
+      double val = data[j];
+      int stem = int(val/stem_unit);
+      int leaf = int(qRound((val - stem*stem_unit)/leaf_unit));
+      for (int k = prev_stem + 1; k < stem + 1; k++)
+        result += "\n      " + QString::number(k) + " | ";
+      result += QString::number(leaf);
+      prev_stem = stem;
+    }
+
+    result += "\n---------------------\n";
+    result += tr("Stem unit") + ": " + locale().toString(stem_unit) + "\n";
+    result += tr("Leaf unit") + ": " + locale().toString(leaf_unit) + "\n";
+
+    QString legend = tr("Key") + ": " + QString::number(prev_stem) + " | ";
+    int leaf = int(qRound((data[rows - 1] - prev_stem*stem_unit)/leaf_unit));
+    legend += QString::number(leaf);
+    legend += " " + tr("means") + ": " + locale().toString(prev_stem*stem_unit + leaf*leaf_unit) + "\n";
+
+    result += legend + "---------------------\n";
+    free(data);
+  } else
+    result += "\t" + tr("Input error: empty data set!") + "\n";
+  return result;
 }
 
 void ApplicationWindow::renameListViewItem(const QString& oldName,const QString& newName)
