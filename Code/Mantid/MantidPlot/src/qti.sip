@@ -680,6 +680,30 @@ private:
   MultiLayer(const MultiLayer&);
 };
 
+class Note: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/Note.h"
+%End
+public:
+  void execute() const;
+  void executeAll();
+  void evaluate();
+
+  bool autoexec() const;
+  void setAutoexec(bool = true);
+
+  QString text();
+  void setText(const QString &s);
+
+  void exportPDF(const QString& fileName);
+  QString exportASCII(const QString &file=QString::null);
+  QString importASCII(const QString &file=QString::null);
+
+private:
+  Note(const Note&);
+};
+
 class Graph3D: MdiSubWindow
 {
 %TypeHeaderCode
@@ -808,6 +832,12 @@ public:
   MultiLayer* newGraph();
   MultiLayer* multilayerPlot(const QString&, int, int, int)/PyName=newGraph/;
 
+  Note *note(const QString&);
+%MethodCode
+  sipRes = sipCpp->current_folder->note(*a0, false);
+  if(!sipRes)
+    sipRes = sipCpp->projectFolder()->note(*a0, true);
+%End
   MultiLayer *multilayerPlot(Table*, SIP_PYTUPLE, int=1) /PyName=plot/;
 %MethodCode
   QStringList l;
