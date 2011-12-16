@@ -2,7 +2,7 @@ import unittest
 
 from testhelpers import run_algorithm, can_be_instantiated
 
-from mantid.api import IEventWorkspace
+from mantid.api import IEventWorkspace, IEventList
 
 class IEventWorkspaceTest(unittest.TestCase):
 
@@ -29,6 +29,11 @@ class IEventWorkspaceTest(unittest.TestCase):
         except:
             error_raised = True
         self.assertFalse(error_raised)
+        
+    def test_event_list_is_return_as_correct_type(self):
+        el = self._test_ws.getEventList(0)
+        self.assertTrue(isinstance(el, IEventList))
+        self.assertEquals(el.getNumberEvents(), 0)
         
 if __name__ == '__main__':
     unittest.main()

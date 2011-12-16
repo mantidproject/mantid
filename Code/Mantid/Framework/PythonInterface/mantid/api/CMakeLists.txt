@@ -14,6 +14,8 @@ set ( EXPORT_FILES
   src/AnalysisDataService.cpp
   src/FileProperty.cpp
   src/FrameworkManager.cpp
+  src/IEventList.cpp
+  src/ISpectrum.cpp
   src/Workspace.cpp
   src/IMDWorkspace.cpp
   src/ExperimentInfo.cpp

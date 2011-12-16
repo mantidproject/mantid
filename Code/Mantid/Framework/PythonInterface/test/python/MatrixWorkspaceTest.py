@@ -52,7 +52,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_spectrum_retrieval(self):
         # Spectrum
-        pass
+        spec = self._test_ws.getSpectrum(1)
+        self.assertEquals(spec.getSpectrumNo(), 2)
+        self.assertTrue(spec.hasDetectorID(2))
+        ids = spec.getDetectorIDs()
+        expected = [2]
+        self.assertEquals(len(expected), len(ids))
+        for i in range(len(ids)):
+            self.assertEquals(expected[i], ids[i])
+
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
         self.assertEquals(type(self._test_ws_prop), WorkspaceProperty_Workspace)
