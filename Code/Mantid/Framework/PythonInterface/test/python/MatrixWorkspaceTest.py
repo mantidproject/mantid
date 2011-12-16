@@ -41,8 +41,29 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(self._test_ws.blocksize(), 102)
         self.assertEquals(self._test_ws.YUnit(), "Counts")
         self.assertEquals(self._test_ws.YUnitLabel(), "Counts")
+
+    def test_axes(self):
         # Workspace axes
         self.assertEquals(self._test_ws.axes(), 2)
+        xaxis = self._test_ws.getAxis(0)
+        yaxis = self._test_ws.getAxis(1)
+        
+        self.assertTrue(xaxis.isNumeric())
+        self.assertTrue(yaxis.isSpectra())
+        
+        self.assertEquals(xaxis.length(), 103)
+        self.assertEquals(yaxis.length(), 2)
+        
+        xunit = xaxis.getUnit()
+        self.assertEquals(xunit.caption(), "Time-of-flight")
+        self.assertEquals(xunit.label(), "microsecond")
+        self.assertEquals(xunit.unitID(), "TOF")
+
+        yunit = yaxis.getUnit()
+        self.assertEquals(yunit.caption(), "")
+        self.assertEquals(yunit.label(), "")
+        self.assertEquals(yunit.unitID(), "Empty")
+
         
     def test_detector_retrieval(self):
         det = self._test_ws.getDetector(0)

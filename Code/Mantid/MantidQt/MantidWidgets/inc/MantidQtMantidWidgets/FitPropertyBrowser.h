@@ -255,9 +255,6 @@ signals:
   /// signal which can optionally be caught for customization after a fit has 
   /// been done
   void fittingDone(QString);
-  /// signal which can optionally be caught for customization before a fit has 
-  /// been done  
-  void beforeFitting(const QtBoolPropertyManager*);
 
 private slots:
 

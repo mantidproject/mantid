@@ -22,6 +22,8 @@ set ( EXPORT_FILES
   src/MatrixWorkspace.cpp
   src/IEventWorkspace.cpp
   src/BinaryOperations.cpp
+  src/WorkspaceGroup.cpp
+  src/Axis.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
