@@ -5312,6 +5312,54 @@ void Graph::setCurveFullRange(int curveIndex)
   }
 }
 
+void Graph::setCurveLineColor(int curveIndex, int colorIndex)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setColor(ColorBox::defaultColor(colorIndex));
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineColor(int curveIndex, QColor qColor)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setColor(qColor);
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineStyle(int curveIndex, Qt::PenStyle style)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setStyle(style);
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineWidth(int curveIndex, double width)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setWidthF(width);
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
 DataCurve* Graph::masterCurve(QwtErrorPlotCurve *er)
 {
   QList<int> keys = d_plot->curveKeys();
