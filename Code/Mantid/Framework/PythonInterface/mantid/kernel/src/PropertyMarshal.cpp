@@ -79,12 +79,13 @@ namespace Mantid
         {
           if( PyObject_IsSubclass((PyObject*)it->first, valueType) )
           {
-            if( !result && it->second->isInstance(value) ) // First one
+            if( !result && it->second->isInstance(value) )
             {
               result = it->first;
             }
             // Check if this match is further up the chain than the last
-            else if(PyObject_IsSubclass((PyObject*)it->first, (PyObject*)result) && it->second->isInstance(value) )
+            if( result && PyObject_IsSubclass((PyObject*)it->first, (PyObject*)result)
+                && it->second->isInstance(value) )
             {
               result = it->first;
             }
