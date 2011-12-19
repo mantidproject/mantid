@@ -32,6 +32,7 @@
 #include <QMdiSubWindow>
 #include <QDockWidget>
 #include <QVBoxLayout>
+#include <QMainWindow>
 
 class QEvent;
 class QCloseEvent;
@@ -244,8 +245,24 @@ private:
 	QString d_birthdate;
     //! Stores the size the window had before a change state event to minimized.
 	QSize d_min_restore_size;
+
+  friend class FloatingWindow;
 };
 
 typedef QList<MdiSubWindow*> MDIWindowList;
+
+/**
+ * Floating wrapper widget for a MdiSubWindow.
+ */
+class FloatingWindow: public QMainWindow
+{
+  Q_OBJECT
+public:
+  FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f);
+  void setStaysOnTopFlag();
+  void removeStaysOnTopFlag();
+protected:
+  virtual bool event(QEvent * e);
+};
 
 #endif

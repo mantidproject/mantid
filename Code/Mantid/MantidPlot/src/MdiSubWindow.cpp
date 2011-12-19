@@ -348,3 +348,52 @@ void MdiSubWindow::goMdi()
 {
   //d_app->goMdi(this);
 }
+
+
+/*----------- FloatingWindow ---------*/
+
+/**
+ * Constructor.
+ */
+FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):QMainWindow(NULL,f)
+{
+  setFocusPolicy(Qt::StrongFocus);
+  connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
+}
+
+/**
+ * Catch the WindowActivate event to tell ApplicationWindow that it's activated
+ */
+bool FloatingWindow::event(QEvent * e)
+{
+  if (e->type() == QEvent::WindowActivate)
+  {
+    MdiSubWindowParent_t* w_t = dynamic_cast<MdiSubWindowParent_t*>(this->centralWidget());
+    MdiSubWindow* w = NULL;
+    if (w_t)
+    {
+      w = dynamic_cast<MdiSubWindow*>(w_t->widget());
+    }
+    if (w)
+    {
+      w->d_app->activateWindow(w);
+    }
+  }
+  return QMainWindow::event(e);
+}
+
+void FloatingWindow::setStaysOnTopFlag()
+{
+  Qt::WindowFlags flags = windowFlags();
+  flags |= Qt::WindowStaysOnTopHint;
+  setWindowFlags(flags);
+  show();
+}
+
+void FloatingWindow::removeStaysOnTopFlag()
+{
+  Qt::WindowFlags flags = windowFlags();
+  flags ^= Qt::WindowStaysOnTopHint;
+  setWindowFlags(flags);
+  show();
+}

@@ -86,7 +86,7 @@ class ImageMarker;
 class TextEditor;
 class AssociationsDialog;
 class MantidMatrix;
-
+class FloatingWindow;
 
 namespace MantidQt
 {
@@ -661,6 +661,7 @@ public slots:
   void dropEvent( QDropEvent* e );
   void customEvent( QEvent* e);
   bool eventFilter(QObject *obj, QEvent *event);
+  void	paintEvent ( QPaintEvent * event );
   //@}
 
   //! \name Dialogs
@@ -1021,14 +1022,22 @@ public slots:
   /// slot to execute download datafiles algorithm - called  from ICat interface
   void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
+  void mdiWindowActivated(MdiSubWindow* w);
   void goFloat(MdiSubWindow* w);
-  void goMdi(QMainWindow* w);
+  void goMdi(FloatingWindow* w);
+  void setStaysOnTopFlag(FloatingWindow* w)const;
+  void removeStaysOnTopFlag(FloatingWindow* w)const;
+  void removeFloatingWindow(FloatingWindow* w);
+  void showActiveWindowInTitle();
 
 signals:
   void modified();
   void resultsContextMenu();
   void shutting_down();
-  void changeToMDI(QMainWindow*);
+  void changeToMDI(FloatingWindow*);
+
+protected:
+  virtual bool event(QEvent * e);
 
 private:
   virtual QMenu * createPopupMenu(){return NULL;};
@@ -1043,6 +1052,7 @@ private:
   void openInstrumentWindow(const QStringList &list);
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
+  void updateOnTopFlags();
 
 
   private slots:
@@ -1415,7 +1425,11 @@ private:
   /// Store a list of environments that cannot be used
   QSet<QString> m_bad_script_envs;
 
+  // Floating windows
+  QList<FloatingWindow*> m_floatingWindows;
+
 public:
   MantidUI *mantidUI;
+  const QWidget* xxx;
 };
 #endif

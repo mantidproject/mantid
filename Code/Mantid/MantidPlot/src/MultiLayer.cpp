@@ -124,7 +124,12 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	mainWidget->setAutoFillBackground(true);
 	mainWidget->setBackgroundRole(QPalette::Window);
 
+	//setAutoFillBackground(true);
+	//setBackgroundRole(QPalette::Window);
+
 	QVBoxLayout* layout = new QVBoxLayout(mainWidget);
+	//QVBoxLayout* layout = new QVBoxLayout(this);
+
 	layout->addLayout(buttonsLine);
 	layout->addWidget(canvas, 1);
 	layout->setMargin(0);
