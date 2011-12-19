@@ -87,7 +87,7 @@ set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
-	#test/QuadEnBackgroundTest.h
+	test/QuadEnBackgroundTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
 	test/ConvertToQ3DdETest.h
@@ -138,11 +138,11 @@ set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../MDEvents/inc)
 
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents CurveFitting)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories( ../TestHelpers/inc ../DataHandling/inc )	
+  include_directories( ../TestHelpers/inc ../DataHandling/inc ../CurveFitting/inc )	
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
