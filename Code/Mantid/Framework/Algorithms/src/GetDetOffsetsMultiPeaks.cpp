@@ -189,10 +189,11 @@ namespace Mantid
           const double centrej = peakslist->getRef<double>("centre",j);
           if(centrej > 0) errsum += std::fabs(peakPos[j]-(centrej+tryoffset));
         }
-        if (errsum < errsumold)
+        //See formula in AlignDetectors
+        tryoffset = tryoffset/(peakPos[i]-tryoffset);
+        if (errsum < errsumold && std::abs(tryoffset) < maxOffset)
         {
-          //See formula in AlignDetectors
-          offset = tryoffset/(peakPos[i]-tryoffset);
+          offset = tryoffset;
           errsumold = errsum;
         }
       }
