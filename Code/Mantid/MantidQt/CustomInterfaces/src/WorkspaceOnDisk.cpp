@@ -25,6 +25,11 @@ namespace MantidQt
         {
           throw std::runtime_error("WorkspaceOnDisk:: File doesn't exist");
         }
+
+        //Generate an initial report.
+        Mantid::API::MatrixWorkspace_sptr ws = fetchIt();
+        m_statusReportMessage = generateReport(ws);
+        dumpIt(ws->name());
       }
 
       /**
@@ -57,6 +62,15 @@ namespace MantidQt
       }
 
       /**
+      Gets a friendly status report on the state of the workspace memento.
+      @return a formatted string containing the report.
+      */
+      std::string WorkspaceOnDisk::statusReport() const
+      {
+        return m_statusReportMessage;
+      }
+
+      /**
       Getter for the workspace itself
       @returns the matrix workspace
       @throw if workspace has been moved since instantiation.
@@ -72,6 +86,19 @@ namespace MantidQt
         alg->execute();
 
         return boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("_tmp"));
+      }
+
+      /**
+      Dump the workspace out of memory:
+      @name : name of the workspace to clean-out.
+      */
+      void WorkspaceOnDisk::dumpIt(const std::string& name)
+      {
+        using Mantid::API::AnalysisDataService;
+        if(AnalysisDataService::Instance().doesExist(name))
+        {
+          AnalysisDataService::Instance().remove(name);
+        }
       }
 
       /// Destructor

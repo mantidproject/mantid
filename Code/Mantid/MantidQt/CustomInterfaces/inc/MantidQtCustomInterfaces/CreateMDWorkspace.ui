@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
-    <height>506</height>
+    <width>809</width>
+    <height>728</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -28,21 +28,57 @@
      <item>
       <layout class="QVBoxLayout" name="overviewLayout">
        <item>
-        <layout class="QHBoxLayout" name="overviewControlsLayout">
+        <layout class="QHBoxLayout" name="fileLoadingLayout">
+         <item>
+          <widget class="QPushButton" name="btn_add_file">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Add Raw File</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_remove_workspace">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Remove Selected</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="workspaceLoadingLayout">
          <item>
           <widget class="QPushButton" name="btn_add_workspace">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Add Workspace</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_remove_workspace">
-           <property name="text">
-            <string>Remove Workspace</string>
+          <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="workspaceSelector">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
           </widget>
          </item>
@@ -51,13 +87,13 @@
        <item>
         <widget class="QTableView" name="tableView">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::NoSelection</enum>
+          <enum>QAbstractItemView::MultiSelection</enum>
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
@@ -74,12 +110,18 @@
          <attribute name="horizontalHeaderCascadingSectionResizes">
           <bool>true</bool>
          </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
         </widget>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QVBoxLayout" name="workspaceEditingLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
@@ -90,17 +132,16 @@
               <layout class="QHBoxLayout" name="horizontalLayout_latticeCrystal">
                <item>
                 <widget class="QGroupBox" name="groupBox_lattice">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="title">
-                  <string>Lattice Parameters</string>
+                  <string>UB Matrix</string>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="groupBox_orientation">
-                 <property name="title">
-                  <string>Crystal Orientation</string>
-                 </property>
                 </widget>
                </item>
               </layout>
@@ -108,18 +149,17 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_logValues_Goniometer">
                <item>
-                <widget class="QGroupBox" name="groupBox_logvalues">
-                 <property name="title">
-                  <string>Log Values</string>
-                 </property>
-                 <layout class="QHBoxLayout" name="logValueLayout"/>
-                </widget>
-               </item>
-               <item>
                 <widget class="QGroupBox" name="groupBox_goniometeroffsets">
-                 <property name="title">
-                  <string>Goniometer Offsets</string>
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>0</height>
+                  </size>
                  </property>
+                 <property name="title">
+                  <string>Goniometer Settings</string>
+                 </property>
+                 <zorder>tableView</zorder>
                 </widget>
                </item>
               </layout>
@@ -139,31 +179,6 @@
              </property>
             </widget>
            </item>
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_optional">
-             <item>
-              <widget class="QGroupBox" name="groupBox_instrument">
-               <property name="title">
-                <string>Instrument</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_chopper">
-               <property name="title">
-                <string>Chopper</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_sample">
-               <property name="title">
-                <string>Sample</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
           </layout>
          </item>
         </layout>
@@ -174,27 +189,6 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="controlButtonsLayout">
-     <item>
-      <widget class="QPushButton" name="btn_revert">
-       <property name="text">
-        <string>Revert All Changes</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_apply_all">
-       <property name="text">
-        <string>Apply to All</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_n_selected">
-       <property name="text">
-        <string>Apply to n-selected</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="btn_create">
        <property name="text">

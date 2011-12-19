@@ -6,7 +6,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-    QtWorkspaceMementoModel::QtWorkspaceMementoModel(Mantid::API::ITableWorkspace_sptr displayData) : 
+    QtWorkspaceMementoModel::QtWorkspaceMementoModel(const WorkspaceMementoCollection& displayData) : 
       QAbstractTableModel(NULL), m_displayData(displayData)
     {
     }
@@ -18,12 +18,12 @@ namespace CustomInterfaces
 
     int QtWorkspaceMementoModel::rowCount(const QModelIndex&) const
     { 
-      return m_displayData->rowCount();
+      return m_displayData.size();
     }
 
     int QtWorkspaceMementoModel::columnCount(const QModelIndex&) const
     {
-      return 4; //Only display a subset of the actual available columns in the table workspace.
+      return 3; 
     }
 
     QVariant QtWorkspaceMementoModel::data(const QModelIndex &index, int role) const
@@ -31,20 +31,24 @@ namespace CustomInterfaces
       if( role != Qt::DisplayRole ) return QVariant();
       Mantid::API::Column_sptr col;
       const int colNumber = index.column();
-
-      /*Here we are effectively providing a view over the underlying data, selecting a sub-set of columns to show.
-      mapping is from colNumber in view to column in table workspace.*/
+      const int rowNumber = index.row();
+      
+      std::stringstream strstream;
       switch(colNumber)
       {
-      case 3:
-        col = m_displayData->getColumn(10);
+      case 0:
+        strstream << m_displayData[rowNumber]->getId();
+        break;
+      case 1:
+        strstream << m_displayData[rowNumber]->locationType();
+        break;
+      case 2:
+        strstream << m_displayData[rowNumber]->statusReport();
         break;
       default:
-        col = m_displayData->getColumn(colNumber);
-        break;
+        throw std::runtime_error("Unknown column requested");
       }
-      std::stringstream strstream;
-      col->print(strstream, index.row());
+      
       return QString(strstream.str().c_str());
     }
 
@@ -59,16 +63,13 @@ namespace CustomInterfaces
         switch (section) 
         {
         case 0:
-          return "Workspace Name";
+          return "Location Type";
         case 1:
-          return "Instrument Name";
+          return "Location";
         case 2:
-          return "Run Number";
-        case 3:
-          return "Status";
-
+          return "Status Report";
         default:
-          return QVariant();
+          throw std::runtime_error("Unknown column requested");
         }
       }
       return QVariant();
@@ -78,7 +79,7 @@ namespace CustomInterfaces
     {
       if (!index.isValid()) return 0;
 
-      return Qt::ItemIsEnabled;
+      return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     }
 
     QtWorkspaceMementoModel::~QtWorkspaceMementoModel()
