@@ -117,7 +117,7 @@ class AlgorithmHistoryWindow: public MantidQt::API::MantidDialog
   void updateAlgorithmHistoryWindow(QString algName);
 public:
   AlgorithmHistoryWindow(QWidget *parent) : MantidQt::API::MantidDialog(parent){}
-  AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<Mantid::API::Workspace>);
+  AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
 private slots:
   void updateAll( QString algName,int algVersion,int nIndex);
