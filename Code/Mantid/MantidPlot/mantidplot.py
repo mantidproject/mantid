@@ -20,6 +20,7 @@ def workspace(name):
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):
+    """Plot a workspace."""
     if isinstance(source,WorkspaceProxy):
         return plotSpectrum(source, *args, **kwargs)
     else:
