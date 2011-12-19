@@ -103,7 +103,7 @@ Add a workspace from the ADS
 */
 void CreateMDWorkspace::addWorkspaceClicked()
 {
-  std::string name = m_uiForm.workspaceSelector->currentText();
+  std::string name = m_uiForm.workspaceSelector->currentText().toStdString();
   if(!name.empty())
   {
     WorkspaceMemento_sptr candidate(new WorkspaceInADS(name));
