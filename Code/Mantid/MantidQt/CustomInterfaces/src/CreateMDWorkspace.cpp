@@ -63,7 +63,8 @@ namespace CustomInterfaces
     bool operator()(WorkspaceMemento_sptr a) const
     {
       std::vector<std::string> strs;
-      boost::split(strs, m_benchmark->getId(), boost::is_any_of("/"));
+      std::string id =  m_benchmark->getId();
+      boost::split(strs, id, boost::is_any_of("/"));
 
       std::stringstream streamPattern;
       streamPattern << "(" << strs.back() << ")$";
