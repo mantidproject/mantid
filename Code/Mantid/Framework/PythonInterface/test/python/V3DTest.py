@@ -6,15 +6,15 @@ class V3DTest(unittest.TestCase):
   
     def test_default_construction_is_at_origin(self):
         p = V3D()
-        self.assertEquals(p.x(), 0.0)
-        self.assertEquals(p.y(), 0.0)
-        self.assertEquals(p.z(), 0.0)
+        self.assertEquals(p.X(), 0.0)
+        self.assertEquals(p.Y(), 0.0)
+        self.assertEquals(p.Z(), 0.0)
         
     def test_construction_with_xyz(self):
         p = V3D(1.5,2.4,6.5)
-        self.assertEquals(p.x(), 1.5)
-        self.assertEquals(p.y(), 2.4)
-        self.assertEquals(p.z(), 6.5)
+        self.assertEquals(p.X(), 1.5)
+        self.assertEquals(p.Y(), 2.4)
+        self.assertEquals(p.Z(), 6.5)
         
     def test_distance(self):
         a = V3D(0.0,0.0,0.0)
@@ -56,9 +56,9 @@ class V3DTest(unittest.TestCase):
         a = V3D(1.0,0.0,0.0)
         b = V3D(0.0,1.0,0.0)
         c = a.cross_prod(b)
-        self.assertAlmostEquals(c.x(),0.0)
-        self.assertAlmostEquals(c.y(),0.0)
-        self.assertAlmostEquals(c.z(),1.0)
+        self.assertAlmostEquals(c.X(),0.0)
+        self.assertAlmostEquals(c.Y(),0.0)
+        self.assertAlmostEquals(c.Z(),1.0)
 
     def test_norm(self):
         p = V3D(1.0,-5.0,8.0);

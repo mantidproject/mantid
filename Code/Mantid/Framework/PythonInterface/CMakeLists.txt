@@ -77,6 +77,7 @@ set ( TEST_PY_FILES
   test/python/IComponentTest.py
   test/python/IEventWorkspaceTest.py
   test/python/ImportModuleTest.py
+  test/python/IPeaksWorkspaceTest.py
   test/python/InstrumentTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py

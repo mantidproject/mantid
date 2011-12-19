@@ -16,14 +16,18 @@ set ( EXPORT_FILES
   src/FrameworkManager.cpp
   src/IEventList.cpp
   src/ISpectrum.cpp
+  src/WorkspaceHistory.cpp
   src/Workspace.cpp
+  src/ITableWorkspace.cpp
   src/IMDWorkspace.cpp
   src/ExperimentInfo.cpp
   src/MatrixWorkspace.cpp
   src/IEventWorkspace.cpp
+  src/IPeaksWorkspace.cpp
   src/BinaryOperations.cpp
   src/WorkspaceGroup.cpp
   src/Axis.cpp
+  src/IPeak.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
