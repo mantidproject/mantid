@@ -80,7 +80,7 @@ public:
   const std::vector< Property*>& getProperties() const;
 
   /// removes the property from properties map 
-  void removeProperty(const std::string &name);
+  void removeProperty(const std::string &name, const bool delproperty=true);
   /// Clears the whole property map
   void clear();
 

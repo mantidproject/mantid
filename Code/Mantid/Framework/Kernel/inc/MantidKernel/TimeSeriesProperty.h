@@ -152,6 +152,14 @@ public:
     return *this;
   }
 
+  /*
+   * Set name
+   */
+  void setName(const std::string name){
+    m_name = name;
+    return;
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /**
@@ -185,7 +193,6 @@ public:
     //Cache the size for later. Any filtered TSP's will have to fend for themselves.
     m_size = static_cast<int>(m_propertySeries.size());
   }
-
 
   //-----------------------------------------------------------------------------------------------
   /**
@@ -551,13 +558,7 @@ public:
     return static_cast<int>(m_propertySeries.size());
   }
 
-
-
-
-
   // ==== The following functions are specific to the odd mechanism of FilterByLogValue =========
-
-
 
   //-----------------------------------------------------------------------------------------------
   /* Get the time series property as a string of 'time  value'

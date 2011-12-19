@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/MoveInstrumentComponent.cpp
 	src/OrbiterDataArchive.cpp
 	src/RawFileInfo.cpp
+	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
@@ -178,6 +179,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/OrbiterDataArchive.h
 	inc/MantidDataHandling/RawFileInfo.h
+	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
@@ -275,6 +277,7 @@ set ( TEST_FILES
 	test/MoveInstrumentComponentTest.h
 	test/OrbiterDataArchiveTest.h
 	test/RawFileInfoTest.h
+	test/RenameLogTest.h
 	test/SaveCSVTest.h
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h

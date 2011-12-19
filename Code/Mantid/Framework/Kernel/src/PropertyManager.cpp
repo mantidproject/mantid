@@ -457,7 +457,7 @@ namespace Mantid
     /** Removes the property from properties map.
      *  @param name ::  name of the property to be removed.
      */
-    void PropertyManager::removeProperty(const std::string &name)
+    void PropertyManager::removeProperty(const std::string &name, const bool delproperty)
     {
       if(existsProperty(name))
       {
@@ -469,7 +469,9 @@ namespace Mantid
         std::vector<Property*>::iterator itr;
         itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
         m_orderedProperties.erase(itr);
-        delete prop;
+        if (delproperty){
+          delete prop;
+        }
       }
     }
 
