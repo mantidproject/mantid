@@ -124,6 +124,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         A = ads['A']
         run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         B = ads['B']
+        
+        # Equality
+        self.assertTrue(A.equals(B, 1e-8))
 #    
         # Two workspaces
         C = A + B

@@ -1,5 +1,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/SingleValueTypeHandler.h"
 #include "MantidPythonInterface/api/WorkspaceToNumpy.h"
@@ -73,6 +75,8 @@ void export_MatrixWorkspace()
          "Extracts (copies) the E data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
           "of memory free that will fit all of the data.")
+    //-------------------------------------- Operators --------------------------------------------------------------------------------
+    .def("equals", &Mantid::API::equals, "Performs a comparison operation on two workspaces, using the CheckWorkspacesMatch algorithm")
     ;
 
   DECLARE_SINGLEVALUETYPEHANDLER(MatrixWorkspace, DataItem_sptr);
