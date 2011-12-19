@@ -18,7 +18,7 @@ namespace CustomInterfaces
 
     int QtWorkspaceMementoModel::rowCount(const QModelIndex&) const
     { 
-      return m_displayData.size();
+      return static_cast<int>(m_displayData.size());
     }
 
     int QtWorkspaceMementoModel::columnCount(const QModelIndex&) const
