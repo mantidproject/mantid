@@ -86,12 +86,15 @@ void MuonAsymmetryCalc::exec()
   Progress prog(this, 0.0, 1.0, tmpWS->blocksize());
   for (size_t j = 0; j < tmpWS->blocksize(); ++j)
   {
+    // cal F-aB
     double numerator = tmpWS->dataY(forward)[j] - alpha * tmpWS->dataY(backward)[j];
+    // cal F+aB
     double denominator = (tmpWS->dataY(forward)[j] + alpha * tmpWS->dataY(backward)[j]);
 
+    // cal F-aB / F+aB
     outputWS->dataY(0)[j] = denominator ? numerator / denominator : 0.;
 
-    //Work out the errors
+    // Work out the errors
     // Note: the error for F-aB = the error for F+aB
     double quadrature = sqrt(pow(tmpWS->dataE(forward)[j], 2) + pow(tmpWS->dataE(backward)[j], 2));
 
