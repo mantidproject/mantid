@@ -53,15 +53,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.svw.deleteLater()
         self.svw.show()
         # Schedule quit at the next event
-        Qt.QTimer.singleShot(0, app, Qt.SLOT("closeAllWindows()"))
+        Qt.QTimer.singleShot(0, app, Qt.SLOT("quit()"))
         # This is required for deleteLater() to do anything (it deletes at the next event loop)
         app.quitOnLastWindowClosed = True
-        app.exec_()
-        return
-        
-        while app.hasPendingEvents():
-        	app.processEvents()
-        pass
+       	app.exec_()
+
 
     #==========================================================================
     #======================= Basic Tests ======================================
