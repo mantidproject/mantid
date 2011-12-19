@@ -11,11 +11,14 @@ except ImportError:
 # Grab a few Mantid things so that we can recognise workspace variables
 from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 
+from PyQt4 import Qt
+
 #-------------------------- Wrapped MantidPlot functions -----------------
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
 def workspace(name):
     return mtd[name]
+
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
@@ -25,6 +28,7 @@ def plot(source, *args, **kwargs):
         return plotSpectrum(source, *args, **kwargs)
     else:
         return qti.app.plot(source, *args, **kwargs)
+
 
 #-----------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1):
@@ -40,6 +44,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         return __tryPlot(workspace_names, index_list, error_bars, type)
     else:
         return None
+    
 
 #-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
@@ -52,12 +57,32 @@ def plotBin(source, indices, error_bars = False, type = 0):
     return __doPlotting(source,indices,error_bars,type)
 
 
+
 #-----------------------------------------------------------------------------
-def plotSlice(source):
+def plotSlice(source, xydim=None, slicepoint=None,
+                    colormin=None, colormax=None, colorscalelog=False,
+                    limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
     
     @param source :: one workspace, or a list of workspaces
-    
+        
+    The following are optional keyword arguments:
+    @param xydim :: indexes or names of the dimensions to plot,
+            as an (X,Y) list or tuple.
+            See SliceViewer::setXYDim()
+    @param slicepoint :: list with the slice point in each dimension. Must be the 
+            same length as the number of dimensions of the workspace.
+            See SliceViewer::setSlicePoint()
+    @param colormin :: value of the minimum color in the scale
+            See SliceViewer::setColorScaleMin()
+    @param colormax :: value of the maximum color in the scale
+            See SliceViewer::setColorScaleMax()
+    @param colorscalelog :: value of the maximum color in the scale
+            See SliceViewer::setColorScaleLog()
+    @param limits :: list with the (xleft, xright, ybottom, ytop) limits
+            to the view to show.
+            See SliceViewer::setXYLimits()
+        
     @return a (list of) handle(s) to the SliceViewerWindow widgets that were open.
             Use SliceViewerWindow.getSlicer() to get access to the functions of the
             SliceViewer, e.g. setting the view and slice point.
@@ -69,13 +94,18 @@ def plotSlice(source):
         print "Could not find module mantidqtpython. Cannot open the SliceViewer."
         return
     
-    print workspace_names
     if len(workspace_names) == 1:
         # Return only one widget
-        return __doSliceViewer(workspace_names[0])
+        return __doSliceViewer(workspace_names[0], 
+               xydim=xydim, slicepoint=slicepoint, colormin=colormin,
+               colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
+               **kwargs)
     else:
         # Make a list of widgets to return
-        out = [__doSliceViewer(wsname) for wsname in workspace_names]
+        out = [__doSliceViewer(wsname, 
+               xydim=xydim, slicepoint=slicepoint, colormin=colormin,
+               colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
+               **kwargs) for wsname in workspace_names]
         return out
 
 
@@ -149,15 +179,52 @@ def __getWorkspaceNames(source):
     return ws_names
     
 #-----------------------------------------------------------------------------
-def __doSliceViewer(wsname):
+def __doSliceViewer(wsname, xydim=None, slicepoint=None,
+                    colormin=None, colormax=None, colorscalelog=False,
+                    limits=None):
     """Open a single SliceViewerWindow for the workspace, and shows it
     
     @param wsname :: name of the workspace
+
     @return SliceViewerWindow widget
     """
     import mantidqtpython
     svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
     svw.show()
+    
+    # -- Connect to main window's shut down signal ---
+    Qt.QObject.connect(qti.app, Qt.SIGNAL("shutting_down()"),      
+                    svw, Qt.SLOT("close()"))
+    
+    sv = svw.getSlicer()
+    # --- X/Y Dimensions ---
+    if (not xydim is None):
+        if len(xydim) != 2:
+            raise Exception("You need to specify two values in the 'xydim' parameter")
+        else:
+            sv.setXYDim(xydim[0], xydim[1])
+    
+    # --- Slice point ---
+    if not slicepoint is None:
+        for d in xrange(len(slicepoint)): 
+            try:
+                val = float(slicepoint[d])
+            except ValueError:
+                raise ValueError("Could not convert item %d of slicepoint parameter to float (got '%s'" % (d, slicepoint[d]))
+            sv.setSlicePoint(d, val)     
+    
+    # --- Color scale ---
+    if (not colormin is None) and (not colormax is None):
+        sv.setColorScale(colormin, colormax, colorscalelog)
+    else:
+        if (not colormin is None): sv.setColorScaleMin(colormin)
+        if (not colormax is None): sv.setColorScaleMax(colormax)
+    sv.setColorScaleLog(colorscalelog)
+    
+    # --- XY limits ---
+    if not limits is None:
+        sv.setXYLimits(limits[0], limits[1], limits[2], limits[3])
+    
     return svw
 
 

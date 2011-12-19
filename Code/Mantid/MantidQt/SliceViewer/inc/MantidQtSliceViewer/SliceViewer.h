@@ -58,6 +58,9 @@ public:
   void setSlicePoint(const QString & dim, double value);
   double getSlicePoint(int dim) const;
   double getSlicePoint(const QString & dim) const;
+  void setColorScaleMin(double min);
+  void setColorScaleMax(double max);
+  void setColorScaleLog(bool log);
   void setColorScale(double min, double max, bool log);
   double getColorScaleMin() const;
   double getColorScaleMax() const;

@@ -168,6 +168,9 @@ public:
 
   void loadColorMap(QString filename);
   void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
+  void setColorScaleMin(double min)      throw (std::invalid_argument);
+  void setColorScaleMax(double max)      throw (std::invalid_argument);
+  void setColorScaleLog(bool log);
   double getColorScaleMin() const;
   double getColorScaleMax() const;
   bool getColorScaleLog() const;
