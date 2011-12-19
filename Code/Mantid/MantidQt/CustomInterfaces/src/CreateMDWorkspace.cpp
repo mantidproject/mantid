@@ -51,30 +51,28 @@ namespace CustomInterfaces
 //Add this class to the list of specialised dialogs in this namespace
 //DECLARE_SUBWINDOW(CreateMDWorkspace); //TODO: Enable this to use it via mantid plot. Not ready for this yet!
 
-class IdComparitor : public std::unary_function<WorkspaceMemento_sptr,bool>
-{
-private:
-  WorkspaceMemento_sptr m_benchmark;
-public:
-  IdComparitor(WorkspaceMemento_sptr benchmark) : m_benchmark(benchmark){}
-  bool operator()(WorkspaceMemento_sptr a) const
+  /**
+  Helper type to perform comparisons between WorkspaceMementos
+  */
+  class IdComparitor : public std::unary_function<WorkspaceMemento_sptr,bool>
   {
-    std::vector<std::string> strs;
-    boost::split(strs, m_benchmark->getId(), boost::is_any_of("/"));
-    
-    std::stringstream streamPattern;
-    streamPattern << "(" << strs.back() << ")$";
-    boost::regex pattern(streamPattern.str(), boost::regex_constants::icase); 
+  private:
+    WorkspaceMemento_sptr m_benchmark;
+  public:
+    IdComparitor(WorkspaceMemento_sptr benchmark) : m_benchmark(benchmark){}
+    bool operator()(WorkspaceMemento_sptr a) const
+    {
+      std::vector<std::string> strs;
+      boost::split(strs, m_benchmark->getId(), boost::is_any_of("/"));
 
-    return boost::regex_search(a->getId(), pattern);
+      std::stringstream streamPattern;
+      streamPattern << "(" << strs.back() << ")$";
+      boost::regex pattern(streamPattern.str(), boost::regex_constants::icase); 
 
-  }
-};
+      return boost::regex_search(a->getId(), pattern);
 
-static bool CompareIds(WorkspaceMemento_sptr a, WorkspaceMemento_sptr b)
-{
-  return a->getId() == b->getId();
-}
+    }
+  };
 
 /*
 Constructor taking a WorkspaceMementoCollection, which acts as the model.
