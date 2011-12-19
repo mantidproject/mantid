@@ -7,6 +7,7 @@
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::Workspace;
+using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 void export_IMDWorkspace()
@@ -20,7 +21,7 @@ void export_IMDWorkspace()
     .def("getDimension", &IMDWorkspace::getDimension, "Return the chosen dimension of the workspace")
     ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IMDWorkspace, Mantid::Kernel::DataItem_sptr);
+  DECLARE_SINGLEVALUETYPEHANDLER(IMDWorkspace, DataItem_sptr);
 
 }
 

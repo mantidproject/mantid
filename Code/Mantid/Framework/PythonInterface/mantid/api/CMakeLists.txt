@@ -17,10 +17,13 @@ set ( EXPORT_FILES
   src/IEventList.cpp
   src/ISpectrum.cpp
   src/WorkspaceHistory.cpp
+  src/ExperimentInfo.cpp
+  src/MultipleExperimentInfos.cpp
   src/Workspace.cpp
   src/ITableWorkspace.cpp
   src/IMDWorkspace.cpp
-  src/ExperimentInfo.cpp
+  src/IMDHistoWorkspace.cpp
+  src/IMDEventWorkspace.cpp
   src/MatrixWorkspace.cpp
   src/IEventWorkspace.cpp
   src/IPeaksWorkspace.cpp
@@ -28,6 +31,7 @@ set ( EXPORT_FILES
   src/WorkspaceGroup.cpp
   src/Axis.cpp
   src/IPeak.cpp
+  src/BoxController.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions

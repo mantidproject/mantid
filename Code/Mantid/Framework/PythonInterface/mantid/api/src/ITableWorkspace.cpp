@@ -6,6 +6,7 @@
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::Workspace;
+using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 void export_ITableWorkspace()

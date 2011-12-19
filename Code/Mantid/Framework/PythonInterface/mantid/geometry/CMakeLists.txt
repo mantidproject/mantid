@@ -9,6 +9,7 @@ set ( EXPORT_FILES
   src/ICompAssembly.cpp
   src/IObjComponent.cpp
   src/IDetector.cpp
+  src/IMDDimension.cpp
   src/Component.cpp
   src/CompAssembly.cpp
   src/ObjComponent.cpp

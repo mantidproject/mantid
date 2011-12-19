@@ -10,7 +10,7 @@ using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::IPeak;
 using Mantid::API::ExperimentInfo;
 using Mantid::API::ITableWorkspace;
-
+using Mantid::Kernel::DataItem_sptr;
 using namespace boost::python;
 
 void export_IPeaksWorkspace()
@@ -26,7 +26,7 @@ void export_IPeaksWorkspace()
     .def("createPeak", &IPeaksWorkspace::createPeak, return_internal_reference<>(), "Create a Peak and return it")
       ;
 
-  DECLARE_SINGLEVALUETYPEHANDLER(IPeaksWorkspace, Mantid::Kernel::DataItem_sptr);
+  DECLARE_SINGLEVALUETYPEHANDLER(IPeaksWorkspace, DataItem_sptr);
 
 }
 
