@@ -96,11 +96,21 @@ void Note::print()
   printer.setColorMode(QPrinter::GrayScale);
   printer.setOutputFormat(QPrinter::PostScriptFormat);
   QPrintDialog printDialog(&printer);
-  printDialog.setWindowTitle("MantidPlot - Print Script");
+  printDialog.setWindowTitle("MantidPlot - Print Note");
   if (printDialog.exec() == QDialog::Accepted)
   {
     te->document()->print(&printer);
   }
+}
+
+void Note::exportPDF(const QString& fileName)
+{
+  QPrinter printer;
+  printer.setColorMode(QPrinter::GrayScale);
+  printer.setCreator("MantidPlot");
+  printer.setOutputFormat(QPrinter::PdfFormat);
+  printer.setOutputFileName(fileName);
+  te->document()->print(&printer);
 }
 
 QString Note::exportASCII(const QString &filename)

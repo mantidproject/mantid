@@ -42,7 +42,6 @@ class Note: public MdiSubWindow
   Q_OBJECT
 
 public:
-
   Note(const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
   ~Note(){};
 
@@ -60,6 +59,7 @@ public slots:
   void setText(const QString &s) { te->setText(s); }
 
   void print();
+  void exportPDF(const QString& fileName);
   QString exportASCII(const QString &filename=QString::null);
 
 private:

@@ -829,6 +829,8 @@ public:
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->note(*a0, true);
 %End
+  Note* newNote(const QString& = QString::null);
+
   MultiLayer *multilayerPlot(Table*, SIP_PYTUPLE, int=1) /PyName=plot/;
 %MethodCode
   QStringList l;

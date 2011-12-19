@@ -1901,7 +1901,7 @@ QString ApplicationWindow::stemPlot(Table *t, const QString& colName, int power,
 
   int col = t->colIndex(colName);
   if (col < 0){
-    QMessageBox::critical(this, tr("QtiPlot - Error"),
+    QMessageBox::critical(this, tr("MantidPlot - Error"),
     tr("Data set: %1 doesn't exist!").arg(colName));
     return QString();
   }
@@ -1990,8 +1990,8 @@ Note * ApplicationWindow::newStemPlot()
   if (!t)
     return NULL;
 
-    int ts = t->table()->currentSelection();
-    if (ts < 0)
+  int ts = t->table()->currentSelection();
+  if (ts < 0)
     return NULL;
 
   Note *n = newNote();
@@ -2003,10 +2003,10 @@ Note * ApplicationWindow::newStemPlot()
   if (lst.isEmpty()){
     Q3TableSelection sel = t->table()->selection(ts);
     for (int i = sel.leftCol(); i <= sel.rightCol(); i++)
-      n->setText(stemPlot(t, t->colName(i), 1001, sel.topRow() + 1, sel.bottomRow() + 1) + "\n");
+      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, sel.topRow() + 1, sel.bottomRow() + 1) + "\n");
   } else {
     for (int i = 0; i < lst.count(); i++)
-      n->setText(stemPlot(t, lst[i], 1001) + "\n");
+      n->setText(n->text() + stemPlot(t, lst[i], 1001) + "\n");
   }
 
   n->show();
