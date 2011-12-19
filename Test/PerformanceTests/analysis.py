@@ -391,6 +391,7 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
 #        html += 
     
     f = open(os.path.join(basedir, "%s.htm" % name), "w")
+    html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
 
@@ -545,6 +546,7 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     filename = starts_with + ".htm"
     
     f = open(os.path.join(basedir,filename), "w")
+    html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
     
@@ -638,11 +640,13 @@ def generate_html_report(path, last_num, x_field='revision'):
     html += default_html_footer
         
     f = open(os.path.join(basedir, "report.htm"), "w")
+    html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
     
     # -------- Overview of plots ------------
     f = open(os.path.join(basedir, "overview_plot.htm"), "w")
+    overview_html = overview_html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(overview_html)
     f.close()
     
