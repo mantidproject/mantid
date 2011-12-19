@@ -1302,19 +1302,24 @@ class MantidUI: QObject
 sipClass=sipFindClass(sipCpp->className());
 %End
 
-public:  
+public:
+  // Plotting methods
   MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
-  void setIsRunning(bool);
-  MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
-  MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
-  Table* importTableWorkspace(const QString&, bool = false, bool = false);
-  bool runAlgorithmAsync_PyCallback(const QString &);  	
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+
+  // Methods relating to creating or getting handles to GUI objects
+  MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
-  
+  MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
+  Table* importTableWorkspace(const QString&, bool = false, bool = false);
+
+  // Algorithm-related methods
+  void setIsRunning(bool);
+  bool runAlgorithmAsync_PyCallback(const QString &);  	
+  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+
 private:
   MantidUI(const MantidUI &);
 };
