@@ -147,17 +147,17 @@ namespace Crystal
     {
       // The q-vector direction of the peak is = goniometer * ub * hkl_vector
       // This is in inelastic convention: momentum transfer of the LATTICE!
-      // Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
-      V3D q = mat * hkl;
+      // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
+      V3D q = mat * hkl * (2.0 * M_PI);
 
-      /* The incident neutron wavevector is in the +Z direction, ki = 1/wl (in z direction).
+      /* The incident neutron wavevector is in the +Z direction, ki = 2*pi/wl (in z direction).
        * In the inelastic convention, q = ki - kf.
-       * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+1/wl) in z.
-       * AND: norm(kf) = norm(ki) = 1.0/wavelength
-       * THEREFORE: 1/wl = norm(q)^2 / (2*qz)
+       * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+2*pi/wl) in z.
+       * AND: norm(kf) = norm(ki) = 2*pi/wavelength
+       * THEREFORE: 2*pi/wl = norm(q)^2 / (2*qz)
        */
       double norm_q = q.norm();
-      double one_over_wl = (norm_q*norm_q) / (2.0 * q.Z());
+      double one_over_wl = ((norm_q*norm_q) / (2.0 * q.Z())) / (2.0 * M_PI);
       double wl = 1.0/one_over_wl;
 
       g_log.debug() << "Peak at " << hkl << " has d-spacing " << d << " and wavelength " << wl << std::endl;
