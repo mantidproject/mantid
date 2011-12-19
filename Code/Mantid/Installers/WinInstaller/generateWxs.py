@@ -530,6 +530,7 @@ addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQt
 addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + '/MantidWidgets.dll',MantidDlls)
 addFileV('MantidQtSliceViewer','MQTSV.dll','MantidQtSliceViewer.dll',MANTIDRELEASE + '/MantidQtSliceViewer.dll',MantidDlls)
 addFileV('MantidQtFactory','MQTFA.dll','MantidQtFactory.dll',MANTIDRELEASE + '/MantidQtFactory.dll',MantidDlls)
+addFileV('mantidqtpython','MQTP.dll','mantidqtpython.pyd',MANTIDRELEASE + '/mantidqtpython.pyd',MantidDlls)
 
 # Add Qt Property Browser
 addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + '/QtPropertyBrowser.dll',MantidDlls)
