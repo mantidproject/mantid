@@ -362,7 +362,7 @@ void InstrumentWindowMaskTab::applyMask()
     {
       try {
         detList << QString::number(m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id));
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
         continue; // Detector doesn't have a workspace index relating to it
       }
     }
@@ -428,7 +428,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(b
         try {
           size_t wi = m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id);
           outputWS->maskWorkspaceIndex(wi);
-        } catch (Mantid::Kernel::Exception::NotFoundError) {
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
           continue; // Detector doesn't have a workspace index relating to it
         }
       }

@@ -162,7 +162,7 @@ void MantidMDCurve::dataReset(const QString& wsName)
     setStyle(QwtPlotCurve::Lines);
     // Queue this plot to be updated once all MantidQwtIMDWorkspaceData objects for this workspace have been
     emit dataUpdated();
-  } catch(std::range_error) {
+  } catch(std::range_error &) {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
     Mantid::Kernel::Logger::get("MantidMDCurve").information() << "Workspace " << wsNameStd
         << " now has fewer spectra - plotted curve(s) deleted\n";

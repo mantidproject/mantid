@@ -235,7 +235,7 @@ bool SaveCanSAS1D::openForAppending(const std::string & filename)
       return true;
     }
   }
-  catch (std::fstream::failure)
+  catch (std::fstream::failure &)
   {
     g_log.information() << "File " << filename << " couldn't be opened for a appending, will try to create the file\n"; 
   }
@@ -290,7 +290,7 @@ void SaveCanSAS1D::findEndofLastEntry()
     // prepare to write to the place found by reading
     m_outFile.seekp(m_outFile.tellg(), std::ios::beg);
   }
-  catch (std::fstream::failure)
+  catch (std::fstream::failure &)
   {
     // give users more explaination about no being able to read their files
     throw std::logic_error("Trouble reading existing data in the output file, are you appending to an invalid CanSAS1D file?");
@@ -313,7 +313,7 @@ void SaveCanSAS1D::writeHeader(const std::string & fileName)
     createSASRootElement(sasroot);
     m_outFile<<sasroot;
   }  
-  catch (std::fstream::failure)
+  catch (std::fstream::failure &)
   {
     throw Exception::FileError("Error opening the output file for writing", fileName);
   }

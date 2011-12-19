@@ -114,7 +114,7 @@ namespace Mantid
 	  ObjSurface=new TopoDS_Shape(Result);
 	  BRepMesh::Mesh(Result,0.001);
 	}
-	catch(StdFail_NotDone)
+	catch(StdFail_NotDone &)
 	{
 	  PLog.error("Cannot build the geometry. Check the geometry definition");
 	}
