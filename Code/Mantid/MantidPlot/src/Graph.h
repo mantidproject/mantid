@@ -280,7 +280,16 @@ public slots:
 
   int curveType(int curveIndex);
   void setCurveType(int curve, int style);
+
+  //! \name Customizing plot curves
+  //@{
+  void setCurveStyle(int index, int s);
   void setCurveFullRange(int curveIndex);
+  void setCurveLineColor(int curveIndex, int colorIndex);
+  void setCurveLineColor(int curveIndex, QColor qColor);
+  void setCurveLineStyle(int curveIndex, Qt::PenStyle style);
+  void setCurveLineWidth(int curveIndex, double width);
+  //@}
 
   //! \name Output: Copy/Export/Print
   //@{
@@ -664,7 +673,6 @@ public slots:
   void setCurveSymbol(int index, const QwtSymbol& s);
   void setCurvePen(int index, const QPen& p);
   void setCurveBrush(int index, const QBrush& b);
-  void setCurveStyle(int index, int s);
 
   //! \name Resizing
   //@{

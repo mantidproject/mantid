@@ -269,7 +269,7 @@ protected:
   T getValue(const std::string &name) const;
   
   /// Removes the property from management
-  virtual void removeProperty(const std::string &name) = 0;
+  virtual void removeProperty(const std::string &name, const bool delproperty=true) = 0;
   /// Clears all properties under management
   virtual void clear() = 0;
 

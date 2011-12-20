@@ -48,7 +48,16 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     
     def tearDown(self):
         """ Close the created widget """
-        self.sv.close()
+        # This is crucial! Forces the object to be deleted NOW, not when python exits
+        # This prevents a segfault in Ubuntu 10.04, and is good practice.
+        self.svw.deleteLater()
+        self.svw.show()
+        # Schedule quit at the next event
+        Qt.QTimer.singleShot(0, app, Qt.SLOT("quit()"))
+        # This is required for deleteLater() to do anything (it deletes at the next event loop)
+        app.quitOnLastWindowClosed = True
+       	app.exec_()
+
 
     #==========================================================================
     #======================= Basic Tests ======================================

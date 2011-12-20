@@ -557,7 +557,8 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 
   // where we are copying spectra to, we start copying to the start of the output workspace
   size_t outIndex = 0;
-
+  // Only used for averaging behaviour. We may have a 1:1 map where a Divide would be waste as it would be just dividing by 1
+  bool requireDivide(false);
   for ( storage_map::const_iterator it = m_GroupSpecInds.begin(); it != m_GroupSpecInds.end() ; ++it )
   {
     // Workspace index of the first spectrum
@@ -577,13 +578,16 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
     outSpec->dataX() = inputWS->readX(0);
 
     // the Y values and errors from spectra being grouped are combined in the output spectrum
-    for( std::vector<size_t>::const_iterator specIt = it->second.begin(); specIt != it->second.end(); ++specIt)
+    // Keep track of number of detectors required for masking
+    size_t nonMaskedSpectra(0);
+    beh->dataX(outIndex)[0] = 0.0;
+    beh->dataE(outIndex)[0] = 0.0;
+    for( std::vector<size_t>::const_iterator wsIter = it->second.begin(); wsIter != it->second.end(); ++wsIter)
     {
-      // The WORKSPACE INDEX from which we are copying
-      const size_t copyFrom = *specIt;
+      const size_t originalWI = *wsIter;
 
       // detectors to add to firstSpecNum
-      const ISpectrum * fromSpectrum = inputWS->getSpectrum(copyFrom);
+      const ISpectrum * fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
       // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
@@ -601,28 +605,17 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 
       // detectors to add to the output spectrum
       outSpec->addDetectorIDs(fromSpectrum->getDetectorIDs() );
-    }
-
-    // Get the number of existing non-masked detectors that contribute for averaging
-    if ( bhv == 1 )
-    {
-      beh->dataX(outIndex)[0] = 0.0;
-      beh->dataE(outIndex)[0] = 0.0;
-      const std::set<detid_t> & ids = outSpec->getDetectorIDs();
-      size_t nonMasked(0);
-      for( std::set<detid_t>::const_iterator it = ids.begin(); it != ids.end(); ++it )
+      try
       {
-        try
-        {
-          Geometry::IDetector_const_sptr det = instr->getDetector(*it);
-          if( !det->isMasked() ) ++nonMasked;
-        }
-        catch(Exception::NotFoundError&){}
+        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
+        if( !det->isMasked() ) ++nonMaskedSpectra;
       }
-      if( nonMasked == 0 ) ++nonMasked; // Avoid divide by zero error as all data will have been zeroed anyway
-      beh->dataY(outIndex)[0] = static_cast<double>(nonMasked);
+      catch(Exception::NotFoundError&)
+      {}
     }
-
+    if( nonMaskedSpectra == 0 ) ++nonMaskedSpectra; // Avoid possible divide by zero
+    requireDivide = (nonMaskedSpectra > 1);
+    beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
 
     // make regular progress reports and check for cancelling the algorithm
     if ( outIndex % INTERVAL == 0 )
@@ -639,8 +632,9 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
   // Refresh the spectraDetectorMap
   outputWS->generateSpectraMap();
 
-  if ( bhv == 1 )
+  if ( bhv == 1 && requireDivide )
   {
+    g_log.debug() << "Running Divide algorithm to perform averaging.\n";
     Mantid::API::IAlgorithm_sptr divide = createSubAlgorithm("Divide");
     divide->initialize();
     divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);

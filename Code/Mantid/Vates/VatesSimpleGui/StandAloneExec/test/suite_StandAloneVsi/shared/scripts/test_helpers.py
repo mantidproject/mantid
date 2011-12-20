@@ -36,9 +36,13 @@ def quitProgram():
 def switch_mode(mode):
     clickButton(waitForObject(":%sButton_QPushButton" % mode))
 
-def set_ptw_property(object, value):
-    mouseClick(waitForObject(object), 90, 20, 0, Qt.LeftButton)
-    type(waitForObject(object), value)
+def set_ptw_lineedit_property(object, value):
+    lineedit = waitForObject(object)
+    lineedit.setText(str(value))
 
 def apply_ptw_settings():
     clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+    
+def pause(seconds=1):
+    import time
+    time.sleep(seconds)

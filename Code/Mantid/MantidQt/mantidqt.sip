@@ -382,6 +382,41 @@ void SliceViewer::setColorScale(double min, double max, bool log)
    
 %End
 
+  void setColorScaleMin(double min)      throw (std::invalid_argument);
+%Docstring
+void SliceViewer::setColorScaleMin(double min)
+----------------------------------------------
+    Set the minimum value corresponding to the lowest color on the map
+   
+    @param min :: minimum value corresponding to the lowest color on the map
+    @throw std::invalid_argument if max < min or if the values are
+           inconsistent with a log color scale
+   
+%End
+
+  void setColorScaleMax(double max)      throw (std::invalid_argument);
+%Docstring
+void SliceViewer::setColorScaleMax(double max)
+----------------------------------------------
+    Set the maximum value corresponding to the lowest color on the map
+   
+    @param max :: maximum value corresponding to the lowest color on the map
+    @throw std::invalid_argument if max < min or if the values are
+           inconsistent with a log color scale
+   
+%End
+
+  void setColorScaleLog(bool log);
+%Docstring
+void SliceViewer::setColorScaleLog(bool log)
+--------------------------------------------
+    Set whether the color scale is logarithmic
+   
+    @param log :: true for a log color scale, false for linear
+    @throw if the min/max values are inconsistent with a log color scale
+   
+%End
+
   double getColorScaleMin() const;
 %Docstring
 double SliceViewer::getColorScaleMin()

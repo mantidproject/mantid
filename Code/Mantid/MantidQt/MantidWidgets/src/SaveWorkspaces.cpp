@@ -304,7 +304,7 @@ void SaveWorkspaces::saveSel()
         saveCommands += saveList(m_workspaces->selectedItems(), i.value(),
           m_fNameEdit->text(), toAppend);
       }
-      catch(std::logic_error)
+      catch(std::logic_error &)
       {
         QMessageBox::information(this, "No workspace to save", "You must select at least one workspace to save");
         return;

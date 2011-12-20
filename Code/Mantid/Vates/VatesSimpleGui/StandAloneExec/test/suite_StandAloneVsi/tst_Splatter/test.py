@@ -7,9 +7,8 @@ def main():
     switch_mode("splatterPlot")
     check_mode_buttons(std=True, ms=True, ts=True, sp=False)
     
-    mouseClick(waitForObject(":ScrollArea.Number of Points_QLineEdit"), 90, 20, 0, Qt.LeftButton)
-    type(waitForObject(":ScrollArea.Number of Points_QLineEdit"), "0")
-    clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+    set_ptw_lineedit_property(":ScrollArea.Number of Points_QLineEdit", 10000)
+    apply_ptw_settings()
     
     mouseDrag(waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 505, 223, -35, 9, 1, Qt.LeftButton)
     quitProgram()

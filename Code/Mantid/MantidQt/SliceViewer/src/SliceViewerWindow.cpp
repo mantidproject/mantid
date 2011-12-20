@@ -103,7 +103,7 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
 SliceViewerWindow::~SliceViewerWindow()
 {
-
+//	std::cout << "SliceViewerWindow " << this << " deleted. with slicer = " << this->m_slicer << " ." << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------

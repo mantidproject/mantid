@@ -1,6 +1,7 @@
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include "MantidQtCustomInterfaces/Updateable.h"
+#include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
 // Forward declarations
 namespace Mantid
@@ -46,7 +47,7 @@ namespace MantidQt
     class QtWorkspaceMementoModel : public QAbstractTableModel, public Updateable
     {
     public:
-      QtWorkspaceMementoModel(boost::shared_ptr<Mantid::API::ITableWorkspace> displayData);
+      QtWorkspaceMementoModel(const WorkspaceMementoCollection& displayData);
       void update();
       int rowCount(const QModelIndex &parent) const;
       int columnCount(const QModelIndex &parent) const;
@@ -57,8 +58,8 @@ namespace MantidQt
 
     private:
 
-      /// Table workspace of display data for view.
-      boost::shared_ptr<Mantid::API::ITableWorkspace> m_displayData;
+      /// Collection of data for viewing.
+      const WorkspaceMementoCollection& m_displayData;
     };
   }
 }

@@ -124,7 +124,7 @@ void HRPDSlabCanAbsorption::exec()
     try
     {
       det = workspace->getDetector(i);
-    } catch (Exception::NotFoundError)
+    } catch (Exception::NotFoundError &)
     {
       // Catch when a spectrum doesn't have an attached detector and go to next one
       continue;

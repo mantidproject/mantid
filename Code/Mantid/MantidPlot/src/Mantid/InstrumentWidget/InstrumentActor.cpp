@@ -237,7 +237,7 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
   try {
     size_t i = getWorkspaceIndex(id);
     return m_specIntegrs.at(i);
-  } catch (NotFoundError) {
+  } catch (NotFoundError &) {
     // If the detector is not represented in the workspace
     return -1.0;
   }
@@ -263,7 +263,7 @@ void InstrumentActor::resetColors()
         m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
       }
     }
-    catch(NotFoundError)
+    catch(NotFoundError &)
     {
       m_colors[wi] = m_failedColor;
       continue;
@@ -288,7 +288,7 @@ GLColor InstrumentActor::getColor(Mantid::detid_t id)const
   try {
     size_t i = getWorkspaceIndex(id);
     return m_colors.at(i);
-  } catch (NotFoundError) {
+  } catch (NotFoundError &) {
     // Return the first color if the detector is not represented in the workspace
     return m_colors.front();
   }

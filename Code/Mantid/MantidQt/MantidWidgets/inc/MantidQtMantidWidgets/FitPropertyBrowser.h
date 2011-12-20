@@ -232,8 +232,6 @@ signals:
   void wsChangePPAssign(const QString&);
   void functionChanged();
 
-  void changeFitPlotStyle(const QString &);
-
   void startXChanged(double);
   void endXChanged(double);
   void xRangeChanged(double, double);

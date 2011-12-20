@@ -30,47 +30,48 @@
  *                                                                         *
  ***************************************************************************/
 #include "Note.h"
-#include "ScriptEdit.h"
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTextStream>
+#include <Qsci/qsciprinter.h>
+#include <QPrintDialog>
+#include "MantidKernel/ConfigService.h"
 
-Note::Note(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-		 : MdiSubWindow(label, parent, name, f)
+Note::Note(const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
+  : MdiSubWindow(label, parent, name, f)
 {
-init(env);
+  init();
 }
 
-void Note::init(ScriptingEnv *env)
+void Note::init()
 {
-autoExec = false;
-te = new ScriptEdit(env, this, name());
-te->setContext(this);
-setWidget(te);
+  te = new QTextEdit(this, name());
+  setWidget(te);
 
-setGeometry(0, 0, 500, 200);
-connect(te, SIGNAL(textChanged()), this, SLOT(modifiedNote()));
-connect(te, SIGNAL(dirPathChanged(const QString& )), this, SIGNAL(dirPathChanged(const QString&)));
+  setGeometry(0, 0, 500, 200);
+  connect(te, SIGNAL(textChanged()), this, SLOT(modifiedNote()));
 }
 
 void Note::setName(const QString& name)
 {
-	te->setObjectName(name);
-	MdiSubWindow::setName(name);
+  te->setObjectName(name);
+  MdiSubWindow::setName(name);
 }
 
 void Note::modifiedNote()
 {
-emit modifiedWindow(this);
+  emit modifiedWindow(this);
 }
 
 QString Note::saveToString(const QString &info, bool)
 {
-QString s= "<note>\n";
-s+= QString(name()) + "\t" + birthDate() + "\n";
-s+= info;
-s+= "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
-s+= "AutoExec\t" + QString(autoExec ? "1" : "0") + "\n";
-s+= "<content>\n"+te->text().stripWhiteSpace()+"\n</content>";
-s+="\n</note>\n";
-return s;
+  QString s= "<note>\n";
+  s+= QString(name()) + "\t" + birthDate() + "\n";
+  s+= info;
+  s+= "WindowLabel\t" + windowLabel() + "\t" + QString::number(captionPolicy()) + "\n";
+  s+= "<content>\n"+te->text().stripWhiteSpace()+"\n</content>";
+  s+="\n</note>\n";
+  return s;
 }
 
 void Note::restore(const QStringList& data)
@@ -79,8 +80,8 @@ void Note::restore(const QStringList& data)
   QStringList fields;
 
   fields = (*line).split("\t");
+  // Needed for backwards compatability
   if (fields[0] == "AutoExec"){
-    setAutoexec(fields[1] == "1");
     line++;
   }
 
@@ -89,11 +90,67 @@ void Note::restore(const QStringList& data)
     te->append((*line++)+"\n");  //Mantid - changes for QScintilla
 }
 
-void Note::setAutoexec(bool exec)
+void Note::print()
 {
-  autoExec = exec;
-  if (autoExec)
-    te->setPaletteBackgroundColor(QColor(255,239,185));
+  QsciPrinter printer(QPrinter::HighResolution);
+  printer.setColorMode(QPrinter::GrayScale);
+  printer.setOutputFormat(QPrinter::PostScriptFormat);
+  QPrintDialog printDialog(&printer);
+  printDialog.setWindowTitle("MantidPlot - Print Note");
+  if (printDialog.exec() == QDialog::Accepted)
+  {
+    te->document()->print(&printer);
+  }
+}
+
+void Note::exportPDF(const QString& fileName)
+{
+  QPrinter printer;
+  printer.setColorMode(QPrinter::GrayScale);
+  printer.setCreator("MantidPlot");
+  printer.setOutputFormat(QPrinter::PdfFormat);
+  printer.setOutputFileName(fileName);
+  te->document()->print(&printer);
+}
+
+QString Note::exportASCII(const QString &filename)
+{
+  QString filter;
+  filter += tr("Text") + " (*.txt *.TXT);;";
+  filter += tr("All Files")+" (*)";
+
+  QString selectedFilter;
+  QString fn;
+  if (filename.isEmpty())
+  {
+    QString dir(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory").c_str());
+    fn = QFileDialog::getSaveFileName(this, tr("Save Text to File"),dir,filter, &selectedFilter);
+  }
   else
-    te->unsetPalette();
+    fn = filename;
+
+  if ( !fn.isEmpty() ){
+    QFileInfo fi(fn);
+
+    QString baseName = fi.fileName();
+    if (!baseName.contains(".")){
+      if (selectedFilter.contains(".txt"))
+        fn.append(".txt");
+      else if (selectedFilter.contains(".py"))
+        fn.append(".py");
+    }
+
+    QFile f(fn);
+    if (!f.open(IO_WriteOnly)){
+      QMessageBox::critical(0, tr("MantidPlot - File Save Error"),
+            tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that you have the right to write to this location!").arg(fn));
+      return QString::null;
+    }
+
+    QTextStream t( &f );
+    t.setEncoding(QTextStream::UnicodeUTF8);
+    t << text();
+    f.close();
+  }
+  return fn;
 }

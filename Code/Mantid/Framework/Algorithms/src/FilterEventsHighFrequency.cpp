@@ -271,7 +271,7 @@ namespace Algorithms
 
       ifs.close();
 
-    } catch (std::ifstream::failure e){
+    } catch (std::ifstream::failure & e){
       // b. Using faking offset/calibration
       g_log.error() << "Open calibration/offset file " << calfilename << " error " << std::endl;
       g_log.notice() << "Using fake detector offset/calibration" << std::endl;

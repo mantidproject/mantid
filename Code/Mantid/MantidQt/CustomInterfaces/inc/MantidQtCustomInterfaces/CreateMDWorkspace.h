@@ -5,6 +5,7 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/QtWorkspaceMementoModel.h"
+#include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "ui_CreateMDWorkspace.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -37,11 +38,22 @@ namespace MantidQt
       virtual void initLocalPython();
       /// Run a confirmation dialog.
       int runConfirmation(const std::string& message);
+      /// Checks the candidate is unique, then adds it to the existing data.
+      void addUniqueMemento(WorkspaceMemento_sptr candiate);
 
     private slots:
 
+      void addWorkspaceClicked();
+
+      void addFileClicked();
+
+      void removeSelectedClicked();
+
     private:
       Ui::CreateMDWorkspace  m_uiForm;
+      WorkspaceMementoCollection m_data;
+      WorkspaceMemento_sptr m_current;
+      QtWorkspaceMementoModel* m_model;
     };
   }
 }

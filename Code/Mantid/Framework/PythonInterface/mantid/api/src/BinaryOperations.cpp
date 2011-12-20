@@ -25,7 +25,7 @@ void export_BinaryOperations()
   typedef IMDHistoWorkspace_sptr(*binary_fn_mh_db)(const IMDHistoWorkspace_sptr, double, const std::string&,const std::string &,bool,bool);
   typedef WorkspaceGroup_sptr(*binary_fn_gp_db)(const WorkspaceGroup_sptr, double, const std::string&,const std::string &,bool,bool);
 
-    // Binary operations helpers
+  // Binary operations that return a workspace
   using boost::python::def;
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;

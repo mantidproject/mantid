@@ -20,7 +20,7 @@ _dlopen.restore_flags(flags)
 # Attach operators to workspaces 
 ###############################################################################
 import workspaceops as _ops
-_ops.attach_binary_operators_to_workspace()
+_ops.add_operators_to_workspace()
 
 ###############################################################################
 # Make the singleton objects available as named variables 

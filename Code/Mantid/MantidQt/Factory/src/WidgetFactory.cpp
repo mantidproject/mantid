@@ -16,6 +16,7 @@ namespace Factory
    */
   WidgetFactoryImpl::WidgetFactoryImpl()
   {
+//    std::cout << "WidgetFactoryImpl constructor called" << std::endl;
   }
     
   //----------------------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ namespace Factory
    */
   WidgetFactoryImpl::~WidgetFactoryImpl()
   {
+//    std::cout << "WidgetFactoryImpl destructor called" << std::endl;
 //    for (size_t i=0; i<m_windows.size(); i++)
 //      delete m_windows[i];
 //    m_windows.clear();
@@ -40,7 +42,7 @@ namespace Factory
    * @param label :: label for the window title
    * @return the created SliceViewerWindow *
    */
-  MantidQt::SliceViewer::SliceViewerWindow * WidgetFactoryImpl::createSliceViewerWindow(const QString& wsName, const QString& label)
+  MantidQt::SliceViewer::SliceViewerWindow * WidgetFactoryImpl::createSliceViewerWindow(const QString& wsName,  const QString& label)
   {
     SliceViewerWindow * window = new SliceViewerWindow(wsName, label);
     //TODO: Save in a list

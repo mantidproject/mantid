@@ -6,10 +6,9 @@ def main():
     openFile("TOPAZ_3680_5_sec_MDEW.nxs")
     switch_mode("splatterPlot")
     check_mode_buttons(std=True, ms=True, ts=True, sp=False)
-    
-    mouseClick(waitForObject(":ScrollArea.Number of Points_QLineEdit"), 100, 14, 0, Qt.LeftButton)
-    type(waitForObject(":ScrollArea.Number of Points_QLineEdit"), "0")
-    clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+
+    set_ptw_lineedit_property(":ScrollArea.Number of Points_QLineEdit", 10000)
+    apply_ptw_settings()
 
     openFile("TOPAZ_3680_10_sec_40.peaks")
     

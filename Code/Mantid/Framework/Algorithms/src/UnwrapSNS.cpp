@@ -309,7 +309,7 @@ double UnwrapSNS::calculateFlightpath(const int& spectrum, bool& isMonitor) cons
       Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
     }
   }
-  catch (Exception::NotFoundError)
+  catch (Exception::NotFoundError &)
   {
     // If the detector information is missing, return a negative number
   }

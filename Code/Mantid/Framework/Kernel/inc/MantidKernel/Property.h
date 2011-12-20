@@ -198,13 +198,13 @@ protected:
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);
   /// Copy constructor
   Property( const Property& right );
+  /// The name of the property
+  std::string m_name;
 
 private:
   /// Private, unimplemented copy assignment operator
   Property& operator=( const Property& right );
 
-  /// The name of the property
-  const std::string m_name;
   /// Longer, optional description of property
   std::string m_documentation;
   /// The type of the property

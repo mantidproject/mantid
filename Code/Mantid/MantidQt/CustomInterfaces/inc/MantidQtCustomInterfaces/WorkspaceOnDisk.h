@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_WORKSPACE_IN_ADS_H_
-#define MANTID_CUSTOMINTERFACES_WORKSPACE_IN_ADS_H_
+#ifndef MANTID_CUSTOMINTERFACES_WORKSPACE_ON_DISK_H_
+#define MANTID_CUSTOMINTERFACES_WORKSPACE_ON_DISK_H_
 
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 
@@ -57,11 +57,18 @@ namespace MantidQt
       @throw if workspace has been moved since instantiation.
       */
       virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
+
+      virtual std::string statusReport() const;
+
       /// Destructor
       virtual ~WorkspaceOnDisk();
     private:
+      /// Helper method to delete a workspace out of memory after loading.
+      void dumpIt(const std::string& name);
       /// Path + name of file containing workspace to use.
       std::string m_fileName;
+      /// Status report message.
+      std::string m_statusReportMessage;
     };
 
   }

@@ -257,6 +257,7 @@ void FindPeaks::findPeaksUsingMariscotti(std::string backgroundtype)
         {
         case 3:
           i3 = i;
+          /* no break */
           // intentional fall-through
         case 2:
           i2 = i-1;
@@ -266,6 +267,7 @@ void FindPeaks::findPeaksUsingMariscotti(std::string backgroundtype)
           break;
         default:
           assert( false ); // should never happen
+          break;
         }
       }
       else if ( S[i-1] > 0 )
@@ -283,6 +285,7 @@ void FindPeaks::findPeaksUsingMariscotti(std::string backgroundtype)
           break;
         default:
           assert( false ); // should never happen
+          break;
         }
       }
       else
@@ -298,6 +301,7 @@ void FindPeaks::findPeaksUsingMariscotti(std::string backgroundtype)
           break;
         default:
           assert( false ); // should never happen
+          break;
         }
       }
 
@@ -898,7 +902,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
       a2 = 0.0;
     }
   }
-  g_log.debug() << "Backgound parameters: a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
+  g_log.debug() << "Background parameters: a0 = " << a0 << "  a1 = " << a1 << "  a2 = " << a2 << std::endl;
 
   // f) Create theoretic background workspace and thus peak workspace
   size_t fitsize = i_max-i_min+1;

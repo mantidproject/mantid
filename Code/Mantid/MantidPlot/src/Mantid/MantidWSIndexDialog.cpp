@@ -114,7 +114,7 @@ void MantidWSIndexDialog::plot()
       accept();
     }
   }
-  catch (std::exception)
+  catch (std::exception &)
   {
     // Text could not be parsed.  Probably dont need this as we only
     // parse "QValidator::Acceptable" fields anyway ...
@@ -705,7 +705,7 @@ bool IntervalList::isParsable(const QString &input, const IntervalList &containe
     const IntervalList test(input);
     return container.contains(test);
   } 
-  catch (std::exception e)
+  catch (std::exception & e)
   {
     return false;
   }
@@ -718,7 +718,7 @@ bool IntervalList::isParsable(const QString &input)
     new IntervalList(input);
     return true;
   } 
-  catch (std::exception e)
+  catch (std::exception & e)
   {
     return false;
   }

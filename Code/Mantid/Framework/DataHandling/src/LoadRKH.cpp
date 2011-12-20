@@ -313,7 +313,7 @@ Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_s
   {
     nAxis1Boundaries = boost::lexical_cast<int>(fileLine);
   }
-  catch(boost::bad_lexical_cast)
+  catch(boost::bad_lexical_cast &)
   {
     // using readNumEntrys() above broke the sequence of getline()s and so try again in case we just read the end of a line
     std::getline(m_fileIn, fileLine);

@@ -82,7 +82,6 @@ class MatrixWorkspaceTest(unittest.TestCase):
         for i in range(len(ids)):
             self.assertEquals(expected[i], ids[i])
 
-
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
         self.assertEquals(type(self._test_ws_prop), WorkspaceProperty_Workspace)
         # Is Workspace in the hierarchy of the value
@@ -125,6 +124,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         A = ads['A']
         run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         B = ads['B']
+        
+        # Equality
+        self.assertTrue(A.equals(B, 1e-8))
 #    
         # Two workspaces
         C = A + B
@@ -148,6 +150,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Commutative: double + workspace
         C = B * A
         C = B + A
+        
+        ads.remove('A')
+        ads.remove('B')
+        ads.remove('C')
+        
+    def test_history_access(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='raw',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('Rebin', InputWorkspace='raw', Params=[1.,0.5,3.],OutputWorkspace='raw')
+        ads = AnalysisDataService.Instance()
+        raw = ads['raw']
+        history = raw.getHistory()
+        last = history.lastAlgorithm()
+        self.assertEquals(last.name(), "Rebin")
+        self.assertEquals(last.getPropertyValue("InputWorkspace"), "raw")
+        first = history[0]
+        self.assertEquals(first.name(), "CreateWorkspace")
+        self.assertEquals(first.getPropertyValue("OutputWorkspace"), "raw")
+        ads.remove('raw')
 
 if __name__ == '__main__':
     unittest.main()

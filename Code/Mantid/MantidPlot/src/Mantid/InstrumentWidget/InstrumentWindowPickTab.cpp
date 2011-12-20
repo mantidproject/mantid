@@ -320,7 +320,7 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     try {
       wsIndex = QString::number(instrActor->getWorkspaceIndex(detid));
       updatePlot(detid); // Update the plot if the detector links to some data
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // Detector doesn't have a workspace index relating to it
       wsIndex = "None";
       m_plot->clearCurve(); // Clear the plot window
@@ -846,7 +846,7 @@ void InstrumentWindowPickTab::prepareDataForSinglePlot(
   size_t wi;
   try {
     wi = instrActor->getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
     return; // Detector doesn't have a workspace index relating to it
   }
   // get the data
@@ -895,7 +895,7 @@ void InstrumentWindowPickTab::prepareDataForSumsPlot(
   size_t wi;
   try {
     wi = instrActor->getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
     return; // Detector doesn't have a workspace index relating to it
   }
   size_t imin,imax;
@@ -933,7 +933,7 @@ void InstrumentWindowPickTab::prepareDataForSumsPlot(
           std::transform(tmp.begin(),tmp.end(),tmp.begin(),tmp.begin(),std::multiplies<double>());
           std::transform(err->begin(),err->end(),tmp.begin(),err->begin(),std::plus<double>());
         }
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
         continue; // Detector doesn't have a workspace index relating to it
       }
     }
@@ -972,7 +972,7 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
   size_t wi;
   try {
     wi = instrActor->getWorkspaceIndex(detid);
-  } catch (Mantid::Kernel::Exception::NotFoundError) {
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
     return; // Detector doesn't have a workspace index relating to it
   }
   // imin and imax give the bin integration range
@@ -1018,7 +1018,7 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
           // take sqrt
           errmap[xvalue] = sqrt(sum);
         }
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
         continue; // Detector doesn't have a workspace index relating to it
       }
     }

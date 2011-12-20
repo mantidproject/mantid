@@ -55,7 +55,7 @@ void CuboidGaugeVolumeAbsorption::initialiseCachedDistances()
   try
   {
     FlatPlateAbsorption::initialiseCachedDistances();
-  } catch (Exception::InstrumentDefinitionError) {
+  } catch (Exception::InstrumentDefinitionError &) {
     // Create and throw a new exception with a more specific message
     throw Exception::InstrumentDefinitionError(
         "This algorithm requires that the sample fully encloses the requested gauge volume.");

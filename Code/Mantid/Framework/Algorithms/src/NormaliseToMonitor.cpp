@@ -260,7 +260,7 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
       g_log.warning("The spectrum in MonitorWorkspace does not refer to a monitor.\n"
                     "Continuing with normalisation regardless.");
     }
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (Kernel::Exception::NotFoundError &) {
     g_log.warning("Unable to check if the spectrum provided relates to a monitor - "
                   "the instrument is not fully specified.\n"
                   "Continuing with normalisation regardless.");

@@ -534,6 +534,11 @@ public:
   void deleteFitCurves();
   int curves() /PyName=numCurves/;
 
+  void setCurveLineColor(int, int);
+  void setCurveLineColor(int, QColor);
+  void setCurveLineStyle(int, Qt::PenStyle);
+  void setCurveLineWidth(int, double);
+
 	void addFunction(const QString&, double, double, int=100);
 %MethodCode
   QStringList l;
@@ -681,19 +686,10 @@ class Note: MdiSubWindow
 #include "src/Note.h"
 %End
 public:
-  void execute() const;
-  void executeAll();
-  void evaluate();
-
-  bool autoexec() const;
-  void setAutoexec(bool = true);
-
   QString text();
   void setText(const QString &s);
-
-  void exportPDF(const QString& fileName);
+  
   QString exportASCII(const QString &file=QString::null);
-  QString importASCII(const QString &file=QString::null);
 
 private:
   Note(const Note&);
@@ -833,6 +829,8 @@ public:
   if(!sipRes)
     sipRes = sipCpp->projectFolder()->note(*a0, true);
 %End
+  Note* newNote(const QString& = QString::null);
+
   MultiLayer *multilayerPlot(Table*, SIP_PYTUPLE, int=1) /PyName=plot/;
 %MethodCode
   QStringList l;
@@ -903,6 +901,8 @@ public:
   Matrix* tableToMatrix(Table* t);
   Table* matrixToTable(Matrix* m, MatrixToTableConversion = Direct);
 
+  QString stemPlot(Table *t, const QString& colName, int power = 1001, int startRow = 0, int endRow = -1);
+
   //---- Mantid
   MantidUI* mantidUI;
   void addUserMenu(const QString &);
@@ -910,100 +910,6 @@ public:
   //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);
-};
-
-class Fit : Filter
-{
-%TypeHeaderCode
-#include "src/Fit.h"
-%End
-public:
-  enum Algorithm{ScaledLevenbergMarquardt, UnscaledLevenbergMarquardt, NelderMeadSimplex};
-  enum WeightingMethod{NoWeighting, Instrumental, Statistical, Dataset};
-
-  Fit(ApplicationWindow* /TransferThis/, Graph*=0, const char*=0);
-  ~Fit();
-
-  virtual void fit();
-  virtual bool run();
-
-  bool setWeightingData(WeightingMethod, const QString&=QString::null);
-
-  bool setDataFromCurve(const QString&, Graph*=0);
-  bool setDataFromCurve(const QString&, double, double, Graph*=0);
-  bool setDataFromTable(Table *, const QString&, const QString&, int = 1, int = -1);
-
-  void setInterval(double from, double to);
-
-  QString formula();
-  QString resultFormula();
-  int numParameters();
-
-  void setInitialGuess(int, double) /PyName=setInitialValue/;
-  void setInitialGuesses(...) /PyName=setInitialValues/;
-%MethodCode
-int n = PyTuple_GET_SIZE(a0);
-double *values = new double[n];
-for (int i=0; i<n; i++) {
-  PyObject *item = PyTuple_GET_ITEM(a0, i);
-  if (PyNumber_Check(item)) {
-    item=PyNumber_Float(item);
-    if (!item) {
-      sipIsErr=1;
-      break;
-    }
-    values[i] = PyFloat_AS_DOUBLE(item);
-    Py_DECREF(item);
-  } else
-    values[i] = 0;
-}
-sipCpp->setInitialGuesses(values);
-delete values;
-%End
-
-  virtual void guessInitialValues();
-  void setParameterRange(int, double, double);
-
-  void setAlgorithm(Algorithm);
-  void setOutputPrecision(int);
-  void generateFunction(bool, int=100);
-
-  void showLegend();
-  virtual QString legendInfo();
-
-  void scaleErrors(bool yes = true);
-
-  SIP_PYTUPLE results();
-%MethodCode
-double *results = sipCpp->results();
-int size=sipCpp->numParameters();
-sipRes = PyTuple_New(size);
-if(sipRes)
-{
-  for(int i=0; i<size; i++)
-    PyTuple_SET_ITEM(sipRes, i, PyFloat_FromDouble(results[i]));
-} else
-  sipIsErr = 1;
-%End
-
-  SIP_PYTUPLE errors();
-%MethodCode
-double *errors = sipCpp->errors();
-int size=sipCpp->numParameters();
-sipRes = PyTuple_New(size);
-if(sipRes)
-{
-  for(int i=0; i<size; i++)
-    PyTuple_SET_ITEM(sipRes, i, PyFloat_FromDouble(errors[i]));
-} else
-  sipIsErr = 1;
-%End
-
-  //! Returns the sum of squares of the residuals from the best-fit line
-  double chiSquare();
-
-  Table* parametersTable(const QString&);
-  Matrix* covarianceMatrix(const QString&);
 };
 
 %ModuleCode
@@ -1029,344 +935,6 @@ if (app) sipCpp = sipcppexpr;\
 else { sipCpp = NULL; }
 %End
 
-class ExponentialFit : Fit
-{
-%TypeHeaderCode
-#include "src/ExponentialFit.h"
-%End
-public:
-  ExponentialFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int, bool);
-  ExponentialFit(Table *, const QString&, const QString&, int = 1, int = -1, bool = false) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipExponentialFit(app, a0, *a1, *a2, a3, a4, a5))
-%End
-
-  ExponentialFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, bool=false);
-  ExponentialFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double, bool=false);
-  ExponentialFit(Graph *, const QString&, bool=false) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipExponentialFit(app, a0, *a1, a2))
-%End
-  ExponentialFit(Graph *, const QString&, double, double, bool=false) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipExponentialFit(app, a0, *a1, a2, a3, a4))
-%End
-};
-
-class TwoExpFit : Fit
-{
-%TypeHeaderCode
-#include "src/ExponentialFit.h"
-%End
-public:
-  TwoExpFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  TwoExpFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipTwoExpFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  TwoExpFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  TwoExpFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  TwoExpFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipTwoExpFit(app, a0, *a1))
-%End
-  TwoExpFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipTwoExpFit(app, a0, *a1, a2, a3))
-%End
-};
-
-class ThreeExpFit : Fit
-{
-%TypeHeaderCode
-#include "src/ExponentialFit.h"
-%End
-public:
-  ThreeExpFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  ThreeExpFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipThreeExpFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  ThreeExpFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  ThreeExpFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  ThreeExpFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipThreeExpFit(app, a0, *a1))
-%End
-  ThreeExpFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipThreeExpFit(app, a0, *a1, a2, a3))
-%End
-};
-
-class SigmoidalFit : Fit
-{
-%TypeHeaderCode
-#include "src/SigmoidalFit.h"
-%End
-public:
-  SigmoidalFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  SigmoidalFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipSigmoidalFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  SigmoidalFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  SigmoidalFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  SigmoidalFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipSigmoidalFit(app, a0, *a1))
-%End
-  SigmoidalFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipSigmoidalFit(app, a0, *a1, a2, a3))
-%End
-
-  void guessInitialValues();
-};
-
-class LogisticFit : Fit
-{
-%TypeHeaderCode
-#include "src/LogisticFit.h"
-%End
-public:
-  LogisticFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  LogisticFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLogisticFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  LogisticFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  LogisticFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  LogisticFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLogisticFit(app, a0, *a1))
-%End
-  LogisticFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLogisticFit(app, a0, *a1, a2, a3))
-%End
-
-  void guessInitialValues();
-};
-
-class GaussAmpFit : Fit
-{
-%TypeHeaderCode
-#include "src/MultiPeakFit.h"
-%End
-public:
-  GaussAmpFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  GaussAmpFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipGaussAmpFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  GaussAmpFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  GaussAmpFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  GaussAmpFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipGaussAmpFit(app, a0, *a1))
-%End
-  GaussAmpFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipGaussAmpFit(app, a0, *a1, a2, a3))
-%End
-
-  void guessInitialValues();
-};
-
-class NonLinearFit : Fit
-{
-%TypeHeaderCode
-#include "src/NonLinearFit.h"
-%End
-public:
-  NonLinearFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  NonLinearFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipNonLinearFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  NonLinearFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  NonLinearFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  NonLinearFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipNonLinearFit(app, a0, *a1))
-%End
-  NonLinearFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipNonLinearFit(app, a0, *a1, a2, a3))
-%End
-  void setParametersList(...) /PyName=setParameters/;
-%MethodCode
-  QStringList l;
-  char *item;
-  for (int i=0; i<PyTuple_GET_SIZE(a0); i++)
-    if (item = PyString_AsString(PyTuple_GET_ITEM(a0, i)))
-      l << item;
-    else
-      sipIsErr = 1;
-  sipCpp->setParametersList(l);
-%End
-  // TODO: make it accept Python callables
-  void setFormula(const QString&);
-
-  bool save(const QString&);
-  bool load(const QString&);
-};
-
-class PluginFit : Fit
-{
-%TypeHeaderCode
-#include "src/PluginFit.h"
-%End
-public:
-  PluginFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  PluginFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipPluginFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  PluginFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  PluginFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  PluginFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipPluginFit(app, a0, *a1))
-%End
-  PluginFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipPluginFit(app, a0, *a1, a2, a3))
-%End
-  bool load(const QString&);
-};
-
-class MultiPeakFit : Fit
-{
-%TypeHeaderCode
-#include "src/MultiPeakFit.h"
-%End
-public:
-  enum PeakProfile{Gauss, Lorentz};
-  MultiPeakFit(ApplicationWindow * /TransferThis/, Graph *, PeakProfile=Gauss, int=1);
-
-  int peaks() /PyName=numPeaks/;
-  void setNumPeaks(int);
-
-  void enablePeakCurves(bool);
-  void setPeakCurvesColor(int);
-
-  static QString generateFormula(int, PeakProfile);
-  static QStringList generateParameterList(int);
-
-  void guessInitialValues();
-};
-
-class LorentzFit : MultiPeakFit
-{
-%TypeHeaderCode
-#include "src/MultiPeakFit.h"
-%End
-public:
-  LorentzFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  LorentzFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLorentzFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  LorentzFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  LorentzFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  LorentzFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLorentzFit(app, a0, *a1))
-%End
-  LorentzFit(Graph *, const QString&, int, int) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLorentzFit(app, a0, *a1, a2, a3))
-%End
-};
-
-class GaussFit : MultiPeakFit
-{
-%TypeHeaderCode
-#include "src/MultiPeakFit.h"
-%End
-public:
-  GaussFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  GaussFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipGaussFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  GaussFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  GaussFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  GaussFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipGaussFit(app, a0, *a1))
-%End
-  GaussFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipGaussFit(app, a0, *a1, a2, a3))
-%End
-};
-
-class PolynomialFit : Fit
-{
-%TypeHeaderCode
-#include "src/PolynomialFit.h"
-%End
-public:
-  PolynomialFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int, int, bool);
-  PolynomialFit(Table *, const QString&, const QString&, int = 1, int = -1, int = 2, bool = false) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipPolynomialFit(app, a0, *a1, *a2, a3, a4, a5, a6))
-%End
-
-  PolynomialFit(ApplicationWindow * /TransferThis/, Graph *, QString&, int=2, bool=false);
-  PolynomialFit(ApplicationWindow * /TransferThis/, Graph *, QString&, int, int, int=2, bool=false);
-  PolynomialFit(Graph *, QString&, int=2, bool=false) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipPolynomialFit(app, a0, *a1, a2, a3))
-%End
-  PolynomialFit(Graph *, QString&, int, int, int=2, bool=false) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipPolynomialFit(app, a0, *a1, a2, a3, a4, a5))
-%End
-
-  virtual QString legendInfo();
-  void fit();
-
-  static QString generateFormula(int);
-  static QStringList generateParameterList(int);
-};
-
-class LinearFit : Fit
-{
-%TypeHeaderCode
-#include "src/PolynomialFit.h"
-%End
-public:
-  LinearFit(ApplicationWindow * /TransferThis/, Table *, const QString&, const QString&, int, int);
-  LinearFit(Table *, const QString&, const QString&, int = 1, int = -1) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLinearFit(app, a0, *a1, *a2, a3, a4))
-%End
-
-  LinearFit(ApplicationWindow * /TransferThis/, Graph *, const QString&);
-  LinearFit(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double);
-  LinearFit(Graph *, const QString&) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLinearFit(app, a0, *a1))
-%End
-  LinearFit(Graph *, const QString&, double, double) /NoDerived/;
-%MethodCode
-  SIPQTI_APP(new sipLinearFit(app, a0, *a1, a2, a3))
-%End
-  void fit();
-};
 
 class Filter : QObject
 {
@@ -1734,19 +1302,26 @@ class MantidUI: QObject
 sipClass=sipFindClass(sipCpp->className());
 %End
 
-public:  
+public:
+  // Plotting methods
   MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
-  void setIsRunning(bool);
-  MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
-  MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
-  Table* importTableWorkspace(const QString&, bool = false, bool = false);
-  bool runAlgorithmAsync_PyCallback(const QString &);  	
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+
+  // Methods relating to creating or getting handles to GUI objects
+  MantidMatrix* getMantidMatrix(const QString &);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
-  
+  MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
+  Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 
+      QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
+  Table* importTableWorkspace(const QString&, bool = false, bool = false);
+
+  // Algorithm-related methods
+  void setIsRunning(bool);
+  bool runAlgorithmAsync_PyCallback(const QString &);  	
+  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
+
 private:
   MantidUI(const MantidUI &);
 };

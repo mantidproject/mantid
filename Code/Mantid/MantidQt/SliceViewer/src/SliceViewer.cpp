@@ -125,6 +125,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 /// Destructor
 SliceViewer::~SliceViewer()
 {
+//  std::cout << "SliceViewer " << this << " deleted" << std::endl;
   delete m_data;
   saveSettings();
   // Don't delete Qt objects, I think these are auto-deleted
@@ -1094,6 +1095,42 @@ void SliceViewer::setColorScale(double min, double max, bool log)
   m_colorBar->setViewRange(min, max);
   m_colorBar->setLog(log);
   this->colorRangeChanged();
+}
+
+
+//------------------------------------------------------------------------------------
+/** Set the minimum value corresponding to the lowest color on the map
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScaleMin(double min)
+{
+  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleLog());
+}
+
+//------------------------------------------------------------------------------------
+/** Set the maximum value corresponding to the lowest color on the map
+ *
+ * @param max :: maximum value corresponding to the lowest color on the map
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScaleMax(double max)
+{
+  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleLog());
+}
+
+//------------------------------------------------------------------------------------
+/** Set whether the color scale is logarithmic
+ *
+ * @param log :: true for a log color scale, false for linear
+ * @throw if the min/max values are inconsistent with a log color scale
+ */
+void SliceViewer::setColorScaleLog(bool log)
+{
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), log);
 }
 
 

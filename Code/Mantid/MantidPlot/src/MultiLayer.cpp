@@ -1356,7 +1356,7 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
     {
       try {
         new MantidMatrixCurve(it.key(),g,(*setIt),errorBars);
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
         // Get here if workspace name is invalid - shouldn't be possible, but just in case
       } catch (std::invalid_argument&) {
         // Get here if invalid spectrum number given - shouldn't be possible, but just in case

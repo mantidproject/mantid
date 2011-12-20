@@ -179,12 +179,8 @@ void MuonAnalysis::initLayout()
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 
-  // Detect when fitting has started, change the plot style to the one specified in plot details tab.
-  connect(m_uiForm.fitBrowser, SIGNAL(changeFitPlotStyle(const QStringList &)), this, SLOT(changeFitPlotType(const QStringList &)));
-
   // Detect if the graph should be customised and call the two functions that change the different curves on the graph.
   connect(m_uiForm.fitBrowser, SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeDataPlotType(const QStringList &)));
-  connect(m_uiForm.fitBrowser, SIGNAL(customiseGraph(const QStringList &)), this, SLOT(changeFitPlotType(const QStringList &)));
 
   // Detect when the fit has finished and group the workspaces that have been created as a result.
   connect(m_uiForm.fitBrowser, SIGNAL(fittingDone(QString)), this, SLOT(groupFittedWorkspaces(QString)));
@@ -1656,13 +1652,13 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     plotDetails.push_back("");
     plotDetails.push_back(plotType);
     plotDetails.push_back("Data");
-    if(m_uiForm.allErrors->isChecked())
+    if(m_uiForm.showErrorBars->isChecked())
     {
       plotDetails.push_back("AllErrors");
     }
     else
     {
-      plotDetails.push_back("CleverErrors");
+      plotDetails.push_back("NoErrors");
     }
     changePlotType(plotDetails);
 
@@ -1803,13 +1799,13 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     plotDetails.push_back("");
     plotDetails.push_back(plotType);
     plotDetails.push_back("Data");
-    if(m_uiForm.allErrors->isChecked())
+    if(m_uiForm.showErrorBars->isChecked())
     {
       plotDetails.push_back("AllErrors");
     }
     else
     {
-      plotDetails.push_back("CleverErrors");
+      plotDetails.push_back("NoErrors");
     }
     changePlotType(plotDetails);
     
@@ -2905,34 +2901,6 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
 
 
 /**
-* Set up the string that will contain all the data needed for changing a fit.
-* [wsName, axisLabel, connectType, plotType, Errors, Color]
-*
-* @params plotDetails :: The workspace name of the plot to be created and axis label. 
-*/
-void MuonAnalysis::changeFitPlotType(const QStringList & plotDetails)
-{
-  QStringList fitPlotDetails(plotDetails);
-  QString fitType("");
-  fitType.setNum(m_uiForm.connectFitType->currentIndex());
-
-  fitPlotDetails.push_back(fitType);
-  fitPlotDetails.push_back("Fit");
-  if(m_uiForm.allErrors->isChecked())
-  {
-    fitPlotDetails.push_back("AllErrors");
-  }
-  else
-  {
-    fitPlotDetails.push_back("CleverErrors");
-  }
-  fitPlotDetails.push_back("Orange");
-
-  changePlotType(fitPlotDetails);
-}
-
-
-/**
 * Set up the string that will contain all the data needed for changing the data.
 * [wsName, axisLabel, connectType, plotType, Errors, Color]
 *
@@ -2946,13 +2914,13 @@ void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 
   dataPlotDetails.push_back(fitType);
   dataPlotDetails.push_back("Data");
-  if(m_uiForm.allErrors->isChecked())
+  if(m_uiForm.showErrorBars->isChecked())
   {
     dataPlotDetails.push_back("AllErrors");
   }
   else
   {
-    dataPlotDetails.push_back("CleverErrors");
+    dataPlotDetails.push_back("NoErrors");
   }
   dataPlotDetails.push_back("Black");
 
@@ -2966,32 +2934,36 @@ void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 */
 void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 {
-  QString groupName = workspaceName.left(workspaceName.find(';'));
-  QString wsNormalised = workspaceName + "_NormalisedCovarianceMatrix";
-  QString wsParameters = workspaceName + "_Parameters";
-  QString wsWorkspace = workspaceName + "_Workspace";
+  std::string groupName = workspaceName.left(workspaceName.find(';')).toStdString();
+  std::string wsNormalised = workspaceName.toStdString() + "_NormalisedCovarianceMatrix";
+  std::string wsParameters = workspaceName.toStdString() + "_Parameters";
+  std::string wsWorkspace = workspaceName.toStdString() + "_Workspace";
+  std::vector<std::string> inputWorkspaces;
 
-  if ( Mantid::API::AnalysisDataService::Instance().doesExist(groupName.toStdString()) )
+  if ( Mantid::API::AnalysisDataService::Instance().doesExist(groupName) )
   {
-    QString groupStr("");
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised.toStdString()) )
+    inputWorkspaces.push_back(groupName);
+
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised) )
     {
-      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsNormalised + "," + groupName
-          + "',OutputWorkspace='" + groupName + "')\n";
-      runPythonCode( groupStr ).trimmed();
+      inputWorkspaces.push_back(wsNormalised);
     }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters.toStdString()) )
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters) )
     {
-      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsParameters + "," + groupName
-          + "',OutputWorkspace='" + groupName + "')\n";
-      runPythonCode( groupStr ).trimmed();
+      inputWorkspaces.push_back(wsParameters);
     }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace.toStdString()) )
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace) )
     {
-      groupStr = ("GroupWorkspaces(InputWorkspaces='") + wsWorkspace + "," + groupName
-          + "',OutputWorkspace='" + groupName + "')\n";
-      runPythonCode( groupStr ).trimmed();
+      inputWorkspaces.push_back(wsWorkspace);
     }
+  }
+
+  if (inputWorkspaces.size() > 1)
+  {
+    Mantid::API::IAlgorithm_sptr group = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
+    group->setProperty("InputWorkspaces",inputWorkspaces);
+    group->setPropertyValue("OutputWorkspace", groupName);
+    group->execute();
   }
 }
 
@@ -3023,7 +2995,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
   connect(m_uiForm.optionStepSizeText, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(settingsTabUpdatePlot()));
-  connect(m_uiForm.allErrors, SIGNAL(clicked()), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SLOT(settingsTabUpdatePlot()));
 }
 
 void MuonAnalysis::homeTabUpdatePlot()
