@@ -5,7 +5,7 @@ import unittest
 ###############################################################################
 from testhelpers import run_algorithm
 from mantid.geometry import Instrument
-from mantid.api import Sample
+from mantid.api import Sample, Run
 
 class ExperimentInfoTest(unittest.TestCase):
   
@@ -24,3 +24,7 @@ class ExperimentInfoTest(unittest.TestCase):
     def test_sample_access_returns_sample_object(self):
         sample = self._expt_ws.sample()
         self.assertTrue(isinstance(sample, Sample))
+        
+    def test_run_access_returns_run_object(self):
+        run = self._expt_ws.run()
+        self.assertTrue(isinstance(run, Run))

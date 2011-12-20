@@ -1,4 +1,5 @@
 #include "MantidKernel/Property.h"
+#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -9,13 +10,16 @@
 
 using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
+using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
 
 
 void export_Property()
 {
-  // Ptr<->Object conversion
   register_ptr_to_python<Property*>();
+
+  // vector of properties
+  std_vector_exporter<Property*>::wrap("std_vector_property");
 
   //Direction
   enum_<Direction::Type>("Direction")

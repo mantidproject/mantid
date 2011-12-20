@@ -14,7 +14,7 @@ void export_ExperimentInfo()
          "Return the Sample object. This cannot be modified, use mutableSample to modify.")
     .def("mutableSample", &ExperimentInfo::mutableSample, return_value_policy<reference_existing_object>(),
          "Return a modifiable Sample object.")
-    .def("run", &ExperimentInfo::run, return_value_policy<copy_const_reference>(),
+    .def("run", &ExperimentInfo::run, return_value_policy<reference_existing_object>(),
          "Return the sample object. This cannot be modified, use mutableSample to modify.")
     .def("mutableRun", &ExperimentInfo::mutableRun, return_value_policy<reference_existing_object>(),
          "Return a modifiable Run object.")

@@ -88,6 +88,7 @@ set ( TEST_PY_FILES
   test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmTest.py
+  test/python/RunTest.py
   test/python/SimpleAPITest.py
   test/python/QuatTest.py
   test/python/V3DTest.py
