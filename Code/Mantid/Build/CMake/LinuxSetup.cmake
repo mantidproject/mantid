@@ -63,12 +63,8 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_uninstall.sh "#!/bin/sh\n"
-                                                         "if [ -e /etc/profile.d/mantid.sh ]; then\n"
-                                                         "   rm /etc/profile.d/mantid.sh\n"
-							 "fi\n"
-                                                         "if [ -e /etc/profile.d/mantid.csh ]; then\n"
-                                                         "   rm /etc/profile.d/mantid.csh\n"
-							 "fi\n"
+                                                               "rm -f /etc/profile.d/mantid.sh\n"
+							       "rm -f /etc/profile.d/mantid.csh\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root
