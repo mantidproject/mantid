@@ -2031,7 +2031,7 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   V3D hkl;
   for ( size_t i = 0; i < q_vectors.size(); i++ )
   {
-    hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
+    hkl = UB_inverse * q_vectors[i];
     if ( ValidIndex( hkl, tolerance ) )
     {
       count++;
@@ -2185,7 +2185,7 @@ int IndexingUtils::CalculateMillerIndices(
   V3D hkl;
   for ( size_t i = 0; i < q_vectors.size(); i++ )
   {
-    hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
+    hkl = UB_inverse * q_vectors[i];
     if ( ValidIndex( hkl, tolerance ) )
     {
       count++;
@@ -2430,7 +2430,7 @@ int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    hkl = UB_inverse * q_vectors[q_num] / (2.0 * M_PI);
+    hkl = UB_inverse * q_vectors[q_num];
 
     if ( ValidIndex( hkl, required_tolerance ) )
     {

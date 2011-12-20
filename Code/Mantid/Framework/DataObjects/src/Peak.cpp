@@ -345,7 +345,7 @@ namespace DataObjects
   /** Return the Q change (of the lattice, k_i - k_f) for this peak.
    * The Q is in the Lab frame: the goniometer rotation was NOT taken out.
    *
-   * Note: There is a 2*pi factor used, so |Q| = 2*pi/wavelength.
+   * Note: There is no 2*pi factor used, so |Q| = 1/wavelength.
    * */
   Mantid::Kernel::V3D Peak::getQLabFrame() const
   {
@@ -360,14 +360,14 @@ namespace DataObjects
     double ei =  PhysicalConstants::meV * m_InitialEnergy;
     // v = sqrt(2.0 * E / m)
     double vi = sqrt(2.0*ei/PhysicalConstants::NeutronMass);
-    // wavenumber = h_bar / mv
-    double wi = PhysicalConstants::h_bar / (PhysicalConstants::NeutronMass * vi);
+    // wavelength = h / mv
+    double wi = PhysicalConstants::h / (PhysicalConstants::NeutronMass * vi);
     // in angstroms
     wi*= 1e10;
-    //wavevector=1/wavenumber = 2pi/wavelength
+    //wavevector=1/wavelength
     double wvi=1.0/wi;
     // Now calculate the wavevector of the scattered neutron
-    double wvf = (2.0 * M_PI) / this->getWavelength();
+    double wvf = 1.0 / this->getWavelength();
     // And Q in the lab frame 
     return beamDir*wvi-detDir*wvf;
   }
@@ -409,7 +409,7 @@ namespace DataObjects
    *
    * @param QLabFrame :: Q of the center of the peak, in reciprocal space.
    *        This is in inelastic convention: momentum transfer of the LATTICE!
-   *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in Angstroms).
+   *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength (in Angstroms).
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
@@ -428,7 +428,7 @@ namespace DataObjects
     /* The incident neutron wavevector is in the +Z direction, ki = 1/wl (in z direction).
      * In the inelastic convention, q = ki - kf.
      * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+1/wl) in z.
-     * AND: norm(kf) = norm(ki) = 2*pi/wavelength
+     * AND: norm(kf) = norm(ki) = 1.0/wavelength
      * THEREFORE: 1/wl = norm(q)^2 / (2*qz)
      */
     double norm_q = q.norm();
@@ -439,7 +439,7 @@ namespace DataObjects
       throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0 in the Z (beam) direction.");
 
     double one_over_wl = (norm_q*norm_q) / (2.0 * q.Z());
-    double wl = (2.0 * M_PI)/one_over_wl;
+    double wl = 1.0/one_over_wl;
     if (wl < 0.0)
     {
       std::ostringstream mess;
