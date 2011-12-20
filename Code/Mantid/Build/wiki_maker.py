@@ -60,7 +60,24 @@ def make_property_table_line(propnum, p):
     out += "|" + str(p.type) + "\n"
     # Default?
     default = p.getDefault
-    defaultstr = str(default)
+    # Convert to int, then float, then any string
+    try:
+        val = int(default)
+        if (val >= 2147483647):
+            defaultstr = "Optional"
+        else:
+            defaultstr = str(val)
+    except:
+        try:
+            val = float(default)
+            if (val >= 1.79e+308):
+                defaultstr = "Optional"
+            else:
+                defaultstr = str(val)
+        except:
+            # Fall-back default for anything
+            defaultstr = str(default)
+            
     # Replace the ugly default values with "optional"
     if (defaultstr == "8.9884656743115785e+307") or \
        (defaultstr == "1.7976931348623157e+308") or \
