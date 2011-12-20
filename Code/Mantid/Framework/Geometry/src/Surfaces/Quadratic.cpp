@@ -260,7 +260,7 @@ Quadratic::distance(const Kernel::V3D& Pt) const
   double Out= -1;
   Kernel::V3D xvec;
   std::vector<double>::const_iterator vc;
-  for(vc=TRange.begin();vc!=TRange.end();vc++)
+  for(vc=TRange.begin();vc!=TRange.end();++vc)
   {
     const double daI=1.0+2* (*vc) *da;
     const double dbI=1.0+2* (*vc) *db;

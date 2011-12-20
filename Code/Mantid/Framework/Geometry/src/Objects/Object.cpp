@@ -71,7 +71,7 @@ namespace Mantid
 
       // Need to deep-copy the vector of pointers to surfaces
       std::vector<const Surface*>::const_iterator vc;
-      for (vc = A.SurList.begin(); vc != A.SurList.end(); vc++)
+      for (vc = A.SurList.begin(); vc != A.SurList.end(); ++vc)
       {
         SurList.push_back((*vc)->clone());
       }
@@ -105,7 +105,7 @@ namespace Mantid
         // Need to deep-copy the vector of pointers to surfaces
         SurList.clear();
         std::vector<const Surface*>::const_iterator vc;
-        for (vc = A.SurList.begin(); vc != A.SurList.end(); vc++)
+        for (vc = A.SurList.begin(); vc != A.SurList.end(); ++vc)
         {
           SurList.push_back((*vc)->clone());
         }
@@ -431,7 +431,7 @@ namespace Mantid
       std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
 
       std::vector<const Surface*>::const_iterator vc;
-      for (vc = SurList.begin(); vc != SurList.end(); vc++)
+      for (vc = SurList.begin(); vc != SurList.end(); ++vc)
       {
         if ((*vc)->onSurface(Pt))
         {
@@ -444,8 +444,8 @@ namespace Mantid
       }
       std::list<Kernel::V3D>::const_iterator xs, ys;
       Kernel::V3D NormPair;
-      for (xs = Snorms.begin(); xs != Snorms.end(); xs++)
-        for (ys = xs, ys++; ys != Snorms.end(); ys++)
+      for (xs = Snorms.begin(); xs != Snorms.end(); ++xs)
+        for (ys = xs, ys++; ys != Snorms.end(); ++ys)
         {
           NormPair = (*ys) + (*xs);
           NormPair.normalize();
@@ -537,7 +537,7 @@ namespace Mantid
       {
 
         std::vector<const Surface*>::const_iterator vc;
-        for (vc = SurList.begin(); vc != SurList.end(); vc++)
+        for (vc = SurList.begin(); vc != SurList.end(); ++vc)
         {
           std::cerr << "Point == " << reinterpret_cast<long int> (*vc) << std::endl;
           std::cerr << (*vc)->getName() << std::endl;
@@ -629,7 +629,7 @@ namespace Mantid
       std::cout << "Rules == " << Rcount << std::endl;
       std::vector<int>::const_iterator mc;
       std::cout << "Surface included == ";
-      for (mc = Cells.begin(); mc < Cells.end(); mc++)
+      for (mc = Cells.begin(); mc < Cells.end(); ++mc)
       {
         std::cout << (*mc) << " ";
       }
@@ -806,7 +806,7 @@ namespace Mantid
       // Loop over all the surfaces.
       LineIntersectVisit LI(UT.startPoint(), UT.direction());
       std::vector<const Surface*>::const_iterator vc;
-      for (vc = SurList.begin(); vc != SurList.end(); vc++)
+      for (vc = SurList.begin(); vc != SurList.end(); ++vc)
       {
         (*vc)->acceptVisitor(LI);
       }
@@ -1688,7 +1688,7 @@ namespace Mantid
       axes.push_back(Kernel::V3D(0, 0, 1));
       axes.push_back(Kernel::V3D(0, 0, -1));
       std::vector<Kernel::V3D>::const_iterator dir;
-      for (dir = axes.begin(); dir != axes.end(); dir++)
+      for (dir = axes.begin(); dir != axes.end(); ++dir)
       {
         Geometry::Track tr(point, (*dir));
         if (this->interceptSurface(tr) > 0)
