@@ -130,7 +130,7 @@ public:
     Q1D.initialize();
 
     // First run algorithm on workspaces for masking without masking any pixels. 
-    // It should fail because first two pixels have non-positive PixelAdj values
+    // It should fail because two pixels have non-positive PixelAdj values
     const std::string outputWS("Q1D2Test_invalid_Pixel_Adj");
     TS_ASSERT_THROWS_NOTHING(
       Q1D.setProperty("DetBankWorkspace", mask_input);
