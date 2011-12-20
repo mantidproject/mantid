@@ -10,5 +10,4 @@
   #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 
-// The "i" variable from CMake fills in the file name ending
-#include "sipmantidqtpythonpart${i}.cpp"
+#include "sipmantidqtpythonpart0.cpp"
