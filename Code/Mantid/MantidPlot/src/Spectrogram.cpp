@@ -32,18 +32,14 @@
 #include <qwt_scale_widget.h>
 #include <QColor>
 #include <qwt_painter.h>
-#include "qwt_scale_engine.h"
+#include <qwt_scale_engine.h>
 #include <QPainter>
 #include <qwt_symbol.h>
-
+#include "Mantid/MantidMatrix.h"
 
 #include <iostream>
 #include <numeric>
 
-#include "MantidAPI/MatrixWorkspace.h"
-using namespace Mantid::API;
-
-//Mantid::Kernel::Logger & Spectrogram::g_log=Mantid::Kernel::Logger::get("Spectrogram");
 Spectrogram::Spectrogram():
 	    QwtPlotSpectrogram(),
 	    d_matrix(0),d_funct(0),//Mantid
@@ -157,6 +153,9 @@ void Spectrogram::updateData(Matrix *m)
 
 void Spectrogram::setLevelsNumber(int levels)
 {
+  if (levels <= 0)
+    return;
+
   double step = fabs(data().range().maxValue() - data().range().minValue())/(double)levels;
 
   QwtValueList contourLevels;
@@ -305,6 +304,13 @@ void Spectrogram::setDefaultColorMap()
     colorAxis->setColorMap(this->data().range(), this->colorMap());
 
 }
+
+void Spectrogram::loadColorMap(const QString& file)
+{
+  mColorMap.loadMap(file);
+  setMantidColorMap(mColorMap);
+}
+
 void Spectrogram::setCustomColorMap(const QwtColorMap &map)
 {
   setColorMap(map);
@@ -345,6 +351,7 @@ QwtLinearColorMap Spectrogram::defaultColorMap()
   colorMap.addColorStop(0.75, Qt::yellow);
   return colorMap;
 }
+
 void Spectrogram::setColorMapPen(bool on)
 {
   if (d_color_map_pen == on)
@@ -411,6 +418,22 @@ void Spectrogram::showContourLineLabels(bool show)
       m->detach();
   }
 }
+
+void Spectrogram::setLabelsFont(const QFont& font)
+{
+  if (font == d_labels_font)
+    return;
+
+  d_labels_font = font;
+
+  foreach(QwtPlotMarker *m, d_labels_list)
+  {
+    QwtText t = m->label();
+    t.setFont(font);
+    m->setLabel(t);
+  }
+}
+
 bool Spectrogram::hasSelectedLabels()
 {
   /*if (d_labels_list.isEmpty())
@@ -615,6 +638,27 @@ void Spectrogram::setContourPenList(QList<QPen> lst)
   d_color_map_pen = false;
 }
 
+void Spectrogram::setContourLinePen(int index, const QPen &pen)
+{
+  QwtValueList levels = contourLevels();
+  if (index < 0 || index >= levels.size())
+    return;
+
+  if (d_pen_list.isEmpty()){
+    QPen p = defaultContourPen();
+    for (int i = 0; i < levels.size(); i++){
+      if (p.style() == Qt::NoPen)
+        d_pen_list << contourPen(levels[i]);
+      else
+        d_pen_list << p;
+    }
+  }
+
+  d_pen_list[index] = pen;
+  setDefaultContourPen(Qt::NoPen);
+  d_color_map_pen = false;
+}
+
 double MatrixData::value(double x, double y) const
 {		
   x += 0.5*dx;
@@ -654,7 +698,7 @@ void Spectrogram::setLabelsRotation(double angle)
   d_labels_angle = angle;
 
   foreach(PlotMarker *m, d_labels_list)
-  m->setAngle(angle);
+    m->setAngle(angle);
 }
 
 void Spectrogram::setLabelsOffset(double x, double y)
@@ -694,6 +738,7 @@ void Spectrogram::setLabelsWhiteOut(bool whiteOut)
     m->setLabel(t);
   }
 }
+
 void Spectrogram::drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &contourLines) const
 {
 
@@ -803,8 +848,6 @@ returns true if intensity(minz and maxz) changed
 bool Spectrogram::isIntensityChanged()
 { return m_bIntensityChanged;
 }
-
-#include "Mantid/MantidMatrix.h"
 
 /**
  * Override QwtPlotSpectrogram::renderImage to draw ragged spectrograms. It is almost

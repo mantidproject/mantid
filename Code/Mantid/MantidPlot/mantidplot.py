@@ -11,8 +11,6 @@ except ImportError:
 # Grab a few Mantid things so that we can recognise workspace variables
 from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
 
-from PyQt4 import Qt
-
 #-------------------------- Wrapped MantidPlot functions -----------------
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands
@@ -193,8 +191,8 @@ def __doSliceViewer(wsname, xydim=None, slicepoint=None,
     svw.show()
     
     # -- Connect to main window's shut down signal ---
-    Qt.QObject.connect(qti.app, Qt.SIGNAL("shutting_down()"),      
-                    svw, Qt.SLOT("close()"))
+    QtCore.QObject.connect(qti.app, QtCore.SIGNAL("shutting_down()"),
+                    svw, QtCore.SLOT("close()"))
     
     sv = svw.getSlicer()
     # --- X/Y Dimensions ---

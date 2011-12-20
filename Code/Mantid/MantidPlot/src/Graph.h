@@ -717,8 +717,10 @@ public slots:
   void showAxisDialog();
   void showScaleDialog();
 
-  //! Add a spectrogram to the graph
   bool isSpectrogram();
+  //! Returns a pointer to a 2D plot, if the Graph has one
+  Spectrogram* spectrogram();
+  //! Add a spectrogram to the graph
   Spectrogram* plotSpectrogram(Matrix *m, CurveType type);
   Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type);//Mantid
   Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid

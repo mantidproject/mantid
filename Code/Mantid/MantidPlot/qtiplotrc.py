@@ -41,6 +41,7 @@ except ImportError:
 # Import PyQt4's QtCore and QtGui packages into our namespace
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 # import QtiPlot's classes to the global namespace (particularly useful for fits)
 from qti import *

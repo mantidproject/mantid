@@ -436,6 +436,91 @@ private:
   LegendWidget(const LegendWidget&);
 };
 
+class QwtPlotSpectrogram
+{
+%TypeHeaderCode
+#include <qwt_plot_spectrogram.h>
+%End
+public:
+  enum DisplayMode {
+    ImageMode = 1,
+    ContourMode = 2
+  };
+
+  void setDefaultContourPen (const QPen &);
+  void setDisplayMode (DisplayMode mode, bool on = true);
+
+private:
+  QwtPlotSpectrogram(const QwtPlotSpectrogram&);
+};
+
+class Spectrogram : QwtPlotSpectrogram
+{
+%TypeHeaderCode
+#include "src/Spectrogram.h"
+%End
+public:
+
+  Matrix * matrix();
+
+  int levels();
+  void setLevelsNumber(int);
+  void setContourLevels (SIP_PYTUPLE);
+%MethodCode
+  QList<double> l;
+  int n = PyTuple_Size(a0);
+  for (int i=0; i<n; i++) {
+    PyObject *element = PyTuple_GET_ITEM(a0,i);
+    if (element) {
+    l << PyFloat_AS_DOUBLE(element);
+    Py_DECREF(element);
+   } else {
+    sipIsErr = 1;
+    break;
+    }
+  }
+  sipCpp->setContourLevels(l);
+%End
+
+  bool hasColorScale();
+  int colorScaleAxis();
+  void showColorScale(int axis, bool on = true);
+
+  int colorBarWidth();
+  void setColorBarWidth(int width);
+
+  void setGrayScale();
+  void setDefaultColorMap();
+
+  void loadColorMap(const QString& file) /PyName=changeColorMap/;
+
+  bool hasLabels();
+  void showContourLineLabels(bool show = true);
+
+  QFont labelsFont();
+  void setLabelsFont(const QFont& font);
+
+  QColor labelsColor();
+  void setLabelsColor(const QColor& c);
+
+  bool labelsWhiteOut();
+  void setLabelsWhiteOut(bool whiteOut = true);
+
+  double labelsXOffset();
+  double labelsYOffset();
+  void setLabelsOffset(double x, double y);
+
+  double labelsRotation();
+  void setLabelsRotation(double angle);
+
+  void setColorMapPen(bool on = true);
+  void setContourLinePen(int, const QPen &);
+
+private:
+  Spectrogram(const Spectrogram&);
+};
+
+
 class Grid // : QwtPlotGrid
 {
 %TypeHeaderCode
@@ -639,6 +724,8 @@ public:
   void setIgnoreResizeEvents(bool = true)/PyName=setIgnoreResize/;
   void setAutoscaleFonts(bool = true);
   void setAntialiasing(bool on = true, bool update = true);
+
+  Spectrogram* spectrogram();
 
 private:
   Graph(const Graph&);

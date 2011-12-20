@@ -41,8 +41,6 @@
 
 #include <fstream>
 #include <float.h>
-//#include<iostream>
-//#include "MantidKernel/Logger.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "Mantid//InstrumentWidget//GLColor.h"
 #include <boost/shared_ptr.hpp>
@@ -50,13 +48,7 @@
 
 class MatrixData;
 class PlotMarker;
-namespace Mantid
-{
-namespace API
-{
-class MatrixWorkspace;
-}
-}
+
 class Spectrogram: public QwtPlotSpectrogram
 {
 public:
@@ -92,6 +84,7 @@ public:
   void setDefaultColorMap();
   static QwtLinearColorMap defaultColorMap();
 
+  void loadColorMap(const QString& file);
   void setCustomColorMap(const QwtLinearColorMap& map);
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
@@ -104,6 +97,7 @@ public:
   virtual QwtDoubleRect boundingRect() const;
   double getMinPositiveValue()const;
   void setContourPenList(QList<QPen> lst);
+  void setContourLinePen(int index, const QPen &pen);
   QList<QPen> contourPenList(){return d_pen_list;};
   //! Flag telling if we use the color map to calculate the pen (QwtPlotSpectrogram::contourPen()).
   bool d_color_map_pen;
@@ -111,6 +105,9 @@ public:
   void setColorMapPen(bool on = true);
   void showContourLineLabels(bool show = true);
   bool hasLabels(){return d_show_labels;};
+  QFont labelsFont(){return d_labels_font;};
+  void setLabelsFont(const QFont& font);
+
   QList <PlotMarker *> labelsList(){return d_labels_list;};
   const MantidColorMap & getColorMap() const;
   MantidColorMap & mutableColorMap();
@@ -190,10 +187,8 @@ protected:
   int m_nColumns;
   /// Store a value between 0->255 for each of the integrated spectra.
   std::vector<unsigned char> mScaledValues;
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> mWorkspaceSptr;
   /// boolean flag to indicate intensity changed
   bool m_bIntensityChanged;
-  //static Mantid::Kernel::Logger &g_log;
 };
 
 class SpectrogramData: public QwtRasterData
