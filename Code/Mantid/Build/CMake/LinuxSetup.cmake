@@ -63,8 +63,12 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_uninstall.sh "#!/bin/sh\n"
-                                                         "rm /etc/profile.d/mantid.sh\n"
-                                                         "rm /etc/profile.d/mantid.csh\n"
+                                                         "if [ -e /etc/profile.d/mantid.sh ]; then\n"
+                                                         "   rm /etc/profile.d/mantid.sh\n"
+							 "fi\n"
+                                                         "if [ -e /etc/profile.d/mantid.csh ]; then\n"
+                                                         "   rm /etc/profile.d/mantid.csh\n"
+							 "fi\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root
@@ -75,9 +79,11 @@ install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_
 
 set ( ENVVARS_ON_INSTALL ON CACHE BOOL "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
 if ( ENVVARS_ON_INSTALL )
+  set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_uninstall.sh )
   set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
   set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_uninstall.sh )
 else ()
+  unset ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE )
   unset ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE )
   unset ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE )
 endif ()
