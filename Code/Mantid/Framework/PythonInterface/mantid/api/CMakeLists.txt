@@ -32,6 +32,8 @@ set ( EXPORT_FILES
   src/Axis.cpp
   src/IPeak.cpp
   src/BoxController.cpp
+  src/FileFinder.cpp
+  src/Sample.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions

@@ -72,7 +72,9 @@ set ( TEST_PY_FILES
   test/python/AlgorithmManagerTest.py
   test/python/AnalysisDataServiceTest.py
   test/python/ConfigServiceTest.py
+  test/python/ExperimentInfoTest.py
   test/python/FilePropertyTest.py
+  test/python/FileFinderTest.py
   test/python/FrameworkManagerTest.py
   test/python/IComponentTest.py
   test/python/IEventWorkspaceTest.py
