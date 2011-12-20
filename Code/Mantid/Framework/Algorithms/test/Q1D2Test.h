@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
+#include "MantidDataHandling/MaskDetectors.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -22,6 +23,7 @@ static double flat_cell061Es [] = {8.140295E-03, 8.260089E-03, 8.198814E-03, 8.3
 
 /// defined below this creates some input data
 void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels);
+void createInputWorkSpacesForMasking ( Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels);
 
 class Q1D2Test : public CxxTest::TestSuite
 {
@@ -116,6 +118,41 @@ public:
     TS_ASSERT_DELTA( result->readE(0)[10], 489710.39, 100 )
     TS_ASSERT( boost::math::isnan(result->readE(0)[7]) )
     
+  }
+
+  void testInvalidPixelAdj()
+  {
+    Mantid::API::MatrixWorkspace_sptr mask_input, mask_wave, mask_pixels;
+    createInputWorkSpacesForMasking( mask_input, mask_wave, mask_pixels);
+
+    Mantid::DataHandling::MaskDetectors maskDetectors;
+    Mantid::Algorithms::Q1D2 Q1D;
+    Q1D.initialize();
+
+    // First run algorithm on workspaces for masking without masking any pixels. 
+    // It should fail because first two pixels have non-positive PixelAdj values
+    const std::string outputWS("Q1D2Test_invalid_Pixel_Adj");
+    TS_ASSERT_THROWS_NOTHING(
+      Q1D.setProperty("DetBankWorkspace", mask_input);
+      Q1D.setProperty("WavelengthAdj", mask_wave);
+      Q1D.setProperty("PixelAdj", mask_pixels);
+      Q1D.setPropertyValue("OutputWorkspace", outputWS);
+      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+    )
+    Q1D.execute();
+
+    TS_ASSERT( ! Q1D.isExecuted() )
+
+    // Secondly we mask the detectors for these two pixels
+    maskDetectors.initialize();
+    maskDetectors.setPropertyValue("Workspace","Q1D2Test_inputworkspace_for_masking");;
+    maskDetectors.setPropertyValue("WorkspaceIndexList","5,6");
+    maskDetectors.execute();
+
+    // Now it should work
+    TS_ASSERT_THROWS_NOTHING( Q1D.execute() )
+    TS_ASSERT( Q1D.isExecuted() )
+
   }
 
   void testGravity()
@@ -252,24 +289,25 @@ public:
   {
     Mantid::Algorithms::Q1D2 Q1D;
     Q1D.initialize();
-    
+
     //this is a small change to the normalization workspace that should be enough to stop progress
     Mantid::MantidVec & xData = m_wavNorm->dataX(0);
     xData[15] += 0.001;
 
     const std::string outputWS("Q1D2Test_invalid_result");
     TS_ASSERT_THROWS_NOTHING(
-      Q1D.setProperty("DetBankWorkspace", m_inputWS);
-      Q1D.setProperty("WavelengthAdj", m_wavNorm);
-      Q1D.setPropertyValue("OutputWorkspace", outputWS);
-      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-      Q1D.setPropertyValue("AccountForGravity", "1");
+    Q1D.setProperty("DetBankWorkspace", m_inputWS);
+    Q1D.setProperty("WavelengthAdj", m_wavNorm);
+    Q1D.setPropertyValue("OutputWorkspace", outputWS);
+    Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+    Q1D.setPropertyValue("AccountForGravity", "1");
     )
+      Q1D.execute();
 
     TS_ASSERT( ! Q1D.isExecuted() )
   }
   
-  ///stop the constructor from being run every time algorithms test suit is initialised
+  ///stop the constructor from being run every time algorithms test suite is initialised
   static Q1D2Test *createSuite() { return new Q1D2Test(); }
   static void destroySuite(Q1D2Test *suite) { delete suite; }
   Q1D2Test() : m_noGrav("Q1D2Test_no_gravity_result")
@@ -318,7 +356,15 @@ public:
 
 void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels)
 {
+  
   std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
+  
+  bool forMasking = (start > 9000); // If start is late we assume we a creating a 2nd set of workspaces for masking
+  if( forMasking) // avoid workspace name clash if creating workspaces for masking
+  {
+    wsName = "Q1D2Test_inputworkspace_for_masking", 
+    wavNorm = "Q1D2Test_wave_for_masking";
+  }
 
   LoadRaw3 loader;
   loader.initialize();
@@ -367,7 +413,17 @@ void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr
     pixels->dataY(i)[0] = flat_cell061Ys[i];
     pixels->dataE(i)[0] = flat_cell061Es[i];
   }
-  AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
+  if ( forMasking ) 
+  {
+      pixels->dataY(5)[0] = 0.0;  // This pixels should be masked
+      pixels->dataY(6)[0] = -1.0;  // This pixel should be masked
+      AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
+  } 
+  else AnalysisDataService::Instance().add("Q1DTest_flat_file_for_masking", pixels);
     
+}
+void createInputWorkSpacesForMasking ( Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels)
+{
+   createInputWorkspaces ( 9001, 9030, input, wave, pixels );
 }
 #endif /*Q1D2Test_H_*/

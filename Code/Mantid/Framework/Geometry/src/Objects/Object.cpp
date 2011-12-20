@@ -1618,7 +1618,10 @@ namespace Mantid
       AABBzMin = zMin;
       boolBounded = true;
 
-      m_boundingBox = BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin);
+      PARALLEL_CRITICAL(defineBoundingBox)
+      {
+        m_boundingBox = BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin);
+      }
     }
 
     /**

@@ -24,8 +24,8 @@ using namespace Geometry;
 
 /** Checks if workspaces input to Q1D or Qxy are reasonable
   @param dataWS data workspace
-  @param binWS (WavelengthAdj) workpace that will be checked to see if it has one spectrum and the same number of bins as dataWS
-  @param detectWS (PixelAdj) passing NULL for this wont raise an error, if set it will be checked this workspace has as many histograms as dataWS each with one bin
+  @param binAdj (WavelengthAdj) workpace that will be checked to see if it has one spectrum and the same number of bins as dataWS
+  @param detectAdj (PixelAdj) passing NULL for this wont raise an error, if set it will be checked this workspace has as many histograms as dataWS each with one bin
   @throw invalid_argument if the workspaces are not mututially compatible
 */
 void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS, 
@@ -66,6 +66,8 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     //throw std::invalid_argument("The data workspace must be a distrbution if there is no Wavelength dependent adjustment");
   }
   
+  // Perform tests on detectAdj
+
   if (detectAdj)
   {
     if ( detectAdj->blocksize() != 1 )
@@ -76,6 +78,23 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     {
       throw std::invalid_argument("The PixelAdj workspace must have one spectrum for each spectrum in the detector bank workspace");
     }
+
+    // test that when detector adjustment value less than or equal to zero that the corresponding detector 
+    // in the workspace is masked
+
+    size_t num_histograms = dataWS->getNumberHistograms();
+    for( size_t i=0; i<num_histograms; i++ )
+    {
+      double adj = (double)detectAdj->readY(i)[0];
+      if( adj <= 0.0) 
+      {
+        if( ! dataWS->getDetector(i)->isMasked())
+        {
+          throw std::invalid_argument ("Every detector with non-positive PixelAdj value must be masked");
+        }
+      }
+    }
+
   }
 }
 
