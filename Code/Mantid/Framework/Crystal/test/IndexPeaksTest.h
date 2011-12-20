@@ -85,6 +85,13 @@ public:
     {
       TS_ASSERT( IndexingUtils::ValidIndex( peaks[i].getHKL(), tolerance ) );
     } 
+
+    // Check the output properties
+    int numIndexed = alg.getProperty("NumIndexed");
+    TS_ASSERT_EQUALS( numIndexed, 43);
+    double averageError = alg.getProperty("AverageError");
+    TS_ASSERT_DELTA( averageError, 0.0097, 1e-3);
+
                                      // spot check a few peaks
     V3D peak_0_hkl ( -4, -1, -6 );   // first peak
     V3D peak_1_hkl ( -3,  1, -4 );
