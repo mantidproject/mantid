@@ -38,7 +38,7 @@ public:
       DataObjects::SpecialWorkspace2D_sptr maskws =
           boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve("PG3Mask"));
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }

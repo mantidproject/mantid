@@ -402,7 +402,7 @@ void InstrumentWindow::spectraInfoDialog()
     QString wsIndex;
     try {
       wsIndex = QString::number(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors.front()));
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       // Detector doesn't have a workspace index relating to it
       wsIndex = "None";
     }
@@ -416,7 +416,7 @@ void InstrumentWindow::spectraInfoDialog()
     {
       try {
         wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
         continue; // Detector doesn't have a workspace index relating to it
       }
     }
@@ -437,7 +437,7 @@ void InstrumentWindow::plotSelectedSpectra()
   {
     try {
       indices.insert(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       continue; // Detector doesn't have a workspace index relating to it
     }
   }
@@ -455,7 +455,7 @@ void InstrumentWindow::showDetectorTable()
   {
     try {
       indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       continue; // Detector doesn't have a workspace index relating to it
     }
   }
@@ -501,7 +501,7 @@ void InstrumentWindow::groupDetectors()
   {
     try {
       wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       continue; // Detector doesn't have a workspace index relating to it
     }
   }
@@ -527,7 +527,7 @@ void InstrumentWindow::maskDetectors()
   {
     try {
       wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       continue; // Detector doesn't have a workspace index relating to it
     }
   }

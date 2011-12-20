@@ -3,14 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <stdlib.h>
 #include <iostream>
 #include <boost/scoped_ptr.hpp> 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidMDAlgorithms/SimulateMDD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
@@ -18,184 +21,82 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
 
-//// Add a concrete IMDDimension class
-//namespace Mantid
-//{
-//    namespace Geometry
-//    {
-//        class DLLExport TestIMDDimension : public IMDDimension
-//        {
-//        public:
-//            virtual std::string getName() const { return("TestX"); }
-//            virtual std::string getUnits() const { return("TestUnits"); }
-//            virtual std::string getDimensionId() const { return("TestX"); }
-//            virtual bool getIsIntegrated() const {return(0);}
-//            virtual double getMaximum() const {return(1.0);}
-//            virtual double getMinimum() const {return(0.0);}
-//            virtual size_t getNBins() const {return(2);}
-//            virtual std::string toXMLString() const { return "";}
-//            virtual double getX(size_t)const {throw std::runtime_error("Not Implemented");}
-//            virtual void setRange(size_t /*nBins*/, double /*min*/, double /*max*/){ };
-//
-//            TestIMDDimension() {};
-//            ~TestIMDDimension() {};
-//        };
-//    }
-//}
-//
-//// Test Cut data
-//class DLLExport TestCut : public IMDWorkspace
-//{
-//private:
-//    int m_points;
-//    size_t m_cells;
-//
-//    std::vector<Mantid::Geometry::MDCell> m_mdcells;
-//
-//public:
-//    virtual uint64_t getNPoints() const
-//    {
-//        return m_points;
-//    }
-//
-//
-//    /// return ID specifying the workspace kind
-//    virtual const std::string id() const {return "TestIMDDWorkspace";}
-//    /// Get the footprint in memory in bytes - return 0 for now
-//    virtual size_t getMemorySize() const {return 0;};
-//
-//    virtual std::string getGeometryXML() const
-//    {
-//        throw std::runtime_error("Not implemented");
-//    }
-//
-//    TestCut()
-//    {
-//        m_points=0;
-//        m_cells=0;
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//    }
-//
-//    TestCut(std::vector<Mantid::Geometry::MDCell> pContribCells ) :
-//    m_mdcells(pContribCells)
-//    {
-//        m_cells=pContribCells.size();
-//        m_points=0;
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//        this->addDimension(new Mantid::Geometry::TestIMDDimension());
-//    }
-//    ~TestCut() {};
-//};
+
+
+
 
 
 
 class SimulateMDDTest : public CxxTest::TestSuite
 {
 private:
-      std::string FakeWSname;
-      MDHistoWorkspace_sptr myCut;
-      MDHistoWorkspace_sptr outCut;
+      std::string testWrkspc;
+      std::string testWrkspc2;
+      IMDEventWorkspace_sptr inMDwrkspc;
 
-//    boost::shared_ptr<TestCut> myCut;
-//    boost::shared_ptr<TestCut> outCut;
-//    std::vector<MDCell> pContribCells;
-//
-//    std::vector<Mantid::Geometry::MDPoint> pnts1,pnts2;
-//
-//    //Helper constructional method - based on code from MD_CELL_TEST
-//    // Returns a cell with one or 2 points depending on npnts
-//    static Mantid::Geometry::MDCell constructMDCell(int npnts)
-//    {
-//        using namespace Mantid::Geometry;
-//        std::vector<Coordinate> vertices;
-//        Coordinate c = Coordinate::createCoordinate4D(4, 3, 2, 1);
-//        vertices.push_back(c);
-//
-//        std::vector<boost::shared_ptr<MDPoint> > points;
-//        if(npnts==1) {
-//            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(16,4,1,2,3,0)) );
-//        }
-//        else if(npnts==2) {
-//            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(25,5,1,2,3,1)) );
-//            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(36,6,1,2,3,2)) );
-//        }
-//
-//        return  MDCell(points, vertices);
-//    }
-//
-//
-//    // Code from MDPoint test
-//    class DummyDetector : public Mantid::Geometry::Detector
-//    {
-//    public:
-//        DummyDetector(std::string name) : Mantid::Geometry::Detector(name, 0, NULL) {}
-//        ~DummyDetector() {}
-//    };
-//
-//    class DummyInstrument : public Mantid::Geometry::Instrument
-//    {
-//    public:
-//        DummyInstrument(std::string name) : Mantid::Geometry::Instrument(name) {}
-//        ~DummyInstrument() {}
-//    };
-//
-//    //Helper constructional method.
-//    static Mantid::Geometry::MDPoint* constructMDPoint(double s, double e, double x, double y, double z, double t)
-//    {
-//        using namespace Mantid::Geometry;
-//        std::vector<Coordinate> vertices;
-//        Coordinate c = Coordinate::createCoordinate4D(x, y, z, t);
-//        vertices.push_back(c);
-//        IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
-//        Instrument_sptr instrument = Instrument_sptr(new DummyInstrument("dummyinstrument"));
-//        return new MDPoint(s, e, vertices, detector, instrument);
-//    }
 
 public:
 
-    // create a test data set of 3 pixels contributing to 2 points to 1 cut
+    // create simple MDEventWorkspace of 2x2x2x2=16 points of unit signal,
+    // unit error
     void testInit()
     {
-        FakeWSname = "testFakeMDWSSim";
-        // Fake MDWorkspace with 2x2x2x2 bins
-        myCut = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, 2, 2.0);
-        TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(FakeWSname, myCut) );
+      testWrkspc="testMDEWrksp";
+      testWrkspc2="testMDEWrksp2";
+    	// MDEventWorkspace in 4D with 2x2x2x2 boxes and one event of sig=1 err=1 per box
+    	// Using MDEvent not MDLeanEvent but run and detector pointers are not set
+    	// arguments are splits on each axis and min/max for each axis
+    	boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<4>,4> >
+    	    outnew = MDEventsTestHelper::makeMDEWFull<4>(2,0.0,2.,1);
+    	inMDwrkspc = outnew;
+      TS_ASSERT_EQUALS(outnew->getNumDims(),4);
+      TS_ASSERT_EQUALS(outnew->getNPoints(),16);
 
-//        pContribCells.push_back(constructMDCell(1));
-//        pContribCells.push_back(constructMDCell(2));
-//
-//        myCut = boost::shared_ptr<TestCut> (new TestCut(pContribCells) ) ;
-//        TS_ASSERT_EQUALS(myCut->getNPoints(),0);
-//        TS_ASSERT_THROWS_ANYTHING(myCut->getPoint(0));
-//        TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(FakeWSname, myCut) );
-//
-//        outCut = boost::dynamic_pointer_cast<TestCut>(AnalysisDataService::Instance().retrieve(FakeWSname));
-//        TS_ASSERT_EQUALS(outCut->getNPoints(),0);
-//        TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),2);
-//
-//        std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
-//        std::vector<Mantid::Geometry::Coordinate> vertices;
-//
-//        // test that cells and points are as expected
-//        int firstCell = 0;
-//        int secondCell = 1;
-//        const SignalAggregate& firstMDCell=myCut->getCell(firstCell);
-//        TS_ASSERT_THROWS_NOTHING( contributingPoints=firstMDCell.getContributingPoints() );
-//        TS_ASSERT_EQUALS(contributingPoints.size(),1);
-//        const SignalAggregate& secondMDCell=myCut->getCell(secondCell);
-//        TS_ASSERT_THROWS_NOTHING( contributingPoints=secondMDCell.getContributingPoints() );
-//        TS_ASSERT_EQUALS(contributingPoints.size(),2);
-//        TS_ASSERT_THROWS_NOTHING(vertices=contributingPoints.at(0)->getVertexes());
-//        TS_ASSERT_EQUALS(vertices.size(),1);
-//        TS_ASSERT_EQUALS(vertices.at(0).gett(),1);
-//        TS_ASSERT_EQUALS(vertices.at(0).getX(),1);
+      TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(testWrkspc, outnew) );
+
+      boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<4>,4> >
+                outnew2 = MDEventsTestHelper::makeMDEWFull<4>(2,0.0,2.,1);
+    	IMDBox<MDEvent<4>,4> * out = outnew2->getBox();
+
+    	// add 2 additional events to the first two boxes to make the data less uniform
+    	coord_t pos[4];
+    	out->calcVolume();
+    	outnew->refreshCache();
+    	for (size_t i=0;i<4;i++)
+    	  pos[i]=0.05;
+    	uint16_t runIndex=5;
+    	int32_t detectorId=7;
+    	float signal=2.;
+    	float errorsq=2.;
+    	pos[0]=0.05;
+    	MDEvent<4> ev0(signal,errorsq,runIndex,detectorId,pos);
+    	pos[0]=1.5;
+    	MDEvent<4> ev1(signal,errorsq,runIndex,detectorId,pos);
+    	detectorId=4;
+    	signal=4.;
+    	errorsq=4.;
+    	pos[0]=0.95;
+    	MDEvent<4> ev2(signal,errorsq,runIndex,detectorId,pos);
+    	pos[0]=1.99;
+    	MDEvent<4> ev3(signal,errorsq,runIndex,detectorId,pos);
+    	pos[0]=0.2;
+    	signal=0.0;
+    	errorsq=0.0;
+    	MDEvent<4> ev4(signal,errorsq,runIndex,detectorId,pos);
+    	out->addEvent(ev0);
+    	out->addEvent(ev1);
+    	out->addEvent(ev2);
+    	out->addEvent(ev3);
+    	out->addEvent(ev4);
+
+    	// need to do this to update the signal values
+    	outnew2->refreshCache();
+    	TS_ASSERT_EQUALS(outnew2->getNumDims(),4);
+    	TS_ASSERT_EQUALS(outnew2->getNPoints(),21);
+
+    	TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(testWrkspc2, outnew2) );
+
 
     }
 
@@ -210,7 +111,7 @@ public:
         SimulateMDD alg;
 
         alg.initialize();
-        alg.setPropertyValue("InputMDWorkspace",FakeWSname);
+        alg.setPropertyValue("InputMDWorkspace",testWrkspc);
         alg.setPropertyValue("OutputMDWorkspace","test_out1");
         alg.setPropertyValue("BackgroundModel","QuadEnTrans");
         alg.setPropertyValue("BackgroundModelP1", "1.0" );
@@ -219,21 +120,41 @@ public:
         alg.setPropertyValue("ForegroundModel","Simple cubic Heisenberg FM spin waves, DSHO, uniform damping");
         TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-        TS_ASSERT_THROWS_NOTHING( outCut = 
-            boost::dynamic_pointer_cast<MDHistoWorkspace>(AnalysisDataService::Instance().retrieve(FakeWSname)) );
-        TS_ASSERT_EQUALS( outCut->getNPoints(),16);
+        IMDEventWorkspace_sptr outMDwrkspc;
+        TS_ASSERT_THROWS_NOTHING( outMDwrkspc =
+            boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(testWrkspc)) );
+        TS_ASSERT_EQUALS( outMDwrkspc->getNPoints(),16);
+        std::string res = alg.getPropertyValue("Residual");
+        double resdble=atof(res.c_str());
+        TS_ASSERT_DELTA(resdble,0.2601,1.e-4);
 
         // test bg Exponential model in energy transfer with same data
         alg.setPropertyValue("BackgroundModel","ExpEnTrans");
-        alg.setPropertyValue("BackgroundModelP1", "1.0" );
-        alg.setPropertyValue("BackgroundModelP2", "1.0" );
-        alg.setPropertyValue("BackgroundModelP3", "-0.5" );
+        alg.setPropertyValue("BackgroundModelP1", "1." );
+        alg.setPropertyValue("BackgroundModelP2", "0.1" );
+        alg.setPropertyValue("BackgroundModelP3", "4.0" );
         TS_ASSERT_THROWS_NOTHING(alg.execute());
+        res = alg.getPropertyValue("Residual");
+        resdble=atof(res.c_str());
+        TS_ASSERT_DELTA(resdble,0.1000,1.e-4);
 
-        AnalysisDataService::Instance().remove(FakeWSname);
+
+        alg.initialize();
+        alg.setPropertyValue("InputMDWorkspace",testWrkspc2);
+        alg.setPropertyValue("OutputMDWorkspace","test_out2");
+        alg.setPropertyValue("BackgroundModel","QuadEnTrans");
+        alg.setPropertyValue("BackgroundModelP1", "1.0" );
+        alg.setPropertyValue("BackgroundModelP2", "0.1" );
+        alg.setPropertyValue("BackgroundModelP3", "0.01" );
+        TS_ASSERT_THROWS_NOTHING(alg.execute());
+        res = alg.getPropertyValue("Residual");
+        resdble=atof(res.c_str());
+        TS_ASSERT_DELTA(resdble,3.6978,1.e-4);
     }
     void testTidyUp()
     {
+      AnalysisDataService::Instance().remove(testWrkspc);
+      AnalysisDataService::Instance().remove(testWrkspc2);
     }
 
 };

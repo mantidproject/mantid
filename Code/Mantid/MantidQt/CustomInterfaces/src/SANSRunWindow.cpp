@@ -1706,7 +1706,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       readNumberOfEntries("can_trans_load.direct", m_uiForm.dirCan);
     }
   }
-  catch(std::runtime_error)
+  catch(std::runtime_error &)
   {//the user should already have seen an error message box pop up
     g_log.error() << "Problem loading file\n";
     is_loaded = false;
@@ -2634,7 +2634,7 @@ void SANSRunWindow::checkList()
       valid = true;
     }
   }
-  catch (boost::bad_lexical_cast)
+  catch (boost::bad_lexical_cast &)
   {// there is a problem with the input somewhere
     valid = false;
   }

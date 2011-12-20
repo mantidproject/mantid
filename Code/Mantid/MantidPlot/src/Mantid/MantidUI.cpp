@@ -1040,7 +1040,7 @@ void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
         algName = QString::fromStdString(alg->name());
         version = alg->version();
       }
-      catch ( std::runtime_error ) // not found
+      catch ( std::runtime_error &) // not found
       {
         algName = "";
         version = -99;

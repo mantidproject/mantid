@@ -44,7 +44,7 @@ namespace Mantid
      * @return A string representation of the value for printing within a sequence
      */
     template<typename ElementType>
-    std::string toString(const ElementType & value)
+    inline std::string toString(const ElementType & value)
     {
       std::ostringstream os;
       os << value;
@@ -58,7 +58,7 @@ namespace Mantid
      * wrapped in single quotes to emulate printing a python sequence of strings
      */
     template<>
-    std::string toString(const std::string & value)
+    inline std::string toString(const std::string & value)
     {
       std::ostringstream os;
       os << "'" << value << "'";
