@@ -613,11 +613,6 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
   bool isFunction = getHandler()->findFunction(ci) != NULL;
   bool isCompositeFunction = isFunction && getHandler()->findCompositeFunction(ci);
 
-  //if (!isFunction)
-  //{
-  //  const Mantid::API::IFitFunction* h = getHandler()->findFunction(ci);
-  //}
-
   PropertyHandler* h = getHandler()->findHandler(ci->property());
 
   if (isFunctionsGroup)
@@ -1026,14 +1021,6 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
 
   if (prop == m_workspaceIndex)
   {
- //     Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
- // WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
- // MatrixWorkspace_sptr matrix_workspace;
-
-  //  Mantid::API::MatrixWorkspace_sptr ws = 
-  //    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
- //     m_appWindow->mantidUI->getWorkspace(QString::fromStdString(workspaceName()))
-  //    );
     Mantid::API::MatrixWorkspace_sptr ws = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
@@ -1697,61 +1684,34 @@ void FitPropertyBrowser::clearBrowser()
 /// Set the parameters to the fit outcome
 void FitPropertyBrowser::getFitResults()
 {
-  //if (isWorkspaceAGroup())
-  //{
-  //  std::string wsName = outputName();
-  //  Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-  //    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
-  //  if (ws)
-  //  {
-  //    if ((ws->columnCount() - 1)/2 != compositeFunction()->nParams()) return;
-  //    Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-  //      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()) );
-  //    std::vector<std::string> names = wsg->getNames();
-  //    std::vector<std::string>::iterator it = 
-  //      std::find(names.begin(),names.end(),m_groupMember);
-  //    if (it == names.end()) return;
-  //    int row = static_cast<int>(it - names.begin()) - 1;// take into account the group name
-  //    if (row >= ws->rowCount()) return;
-  //    for(int i=0;i<compositeFunction()->nParams();++i)
-  //    {
-  //      compositeFunction()->setParameter(i,ws->Double(row,2*i+1));
-  //    }
-  //    updateParameters();
-  //    plotGuessAll();
-  //  }
-  //}
-  //else
+  std::string wsName = outputName() + "_Parameters";
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
   {
-    std::string wsName = outputName() + "_Parameters";
-    if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
-    {
-      Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+    Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
 
-      Mantid::API::TableRow row = ws->getFirstRow();
-      do
+    Mantid::API::TableRow row = ws->getFirstRow();
+    do
+    {
+      try
       {
-        try
+        std::string name;
+        double value;
+        row >> name >> value;
+        // In case of a single function Fit doesn't create a CompositeFunction
+        if (count() == 1)
         {
-          std::string name;
-          double value;
-          row >> name >> value;
-          // In case of a single function Fit doesn't create a CompositeFunction
-          if (count() == 1)
-          {
-            name.insert(0,"f0.");
-          }
-          compositeFunction()->setParameter(name,value);
+          name.insert(0,"f0.");
         }
-        catch(...)
-        {
-          // do nothing
-        }
+        compositeFunction()->setParameter(name,value);
       }
-      while(row.next());
-      updateParameters();
+      catch(...)
+      {
+        // do nothing
+      }
     }
+    while(row.next());
+    updateParameters();
   }
 }
 
