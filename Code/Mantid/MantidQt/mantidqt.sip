@@ -201,7 +201,7 @@ void SliceViewer::showControls(bool visible)
    
 %End
 
-  void openFromXML(const QString & xml);
+  void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
 %Docstring
 void SliceViewer::openFromXML(const QString & xml)
 --------------------------------------------------
@@ -209,6 +209,7 @@ void SliceViewer::openFromXML(const QString & xml)
     given the XML from the MultiSlice view in XML format.
    
     @param xml :: string describing workspace, slice point, etc.
+    @throw std::runtime_error if error in parsing XML
    
 %End
 
@@ -468,7 +469,7 @@ void SliceViewer::setColorScaleAutoFull()
    
 %End
 
-  void setColorScaleAutoSlice();
+  void setColorScaleAutoSlice() ;
 %Docstring
 void SliceViewer::setColorScaleAutoSlice()
 ------------------------------------------
@@ -481,6 +482,7 @@ void SliceViewer::setColorScaleAutoSlice()
 
 
 };
+
 
 
 

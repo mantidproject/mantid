@@ -46,6 +46,7 @@ signals:
 protected slots:
   void closeWindow();
   void updateWorkspace();
+  void slicerWorkspaceChanged();
   void changedSlicePoint(Mantid::Kernel::VMD);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
