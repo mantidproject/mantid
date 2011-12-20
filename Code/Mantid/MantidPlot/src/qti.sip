@@ -371,6 +371,53 @@ private:
   Matrix(const Matrix&);
 };
 
+class QwtSymbol /PyName = PlotSymbol/
+{
+%TypeHeaderCode
+#include <qwt_symbol.h>
+%End
+public:
+  enum Style
+  {
+    NoSymbol = -1,
+    Ellipse,
+    Rect,
+    Diamond,
+    Triangle,
+    DTriangle,
+    UTriangle,
+    LTriangle,
+    RTriangle,
+    Cross,
+    XCross,
+    HLine,
+    VLine,
+    Star1,
+    Star2,
+    Hexagon,
+
+    StyleCnt
+  };
+
+  QwtSymbol();
+  QwtSymbol(Style st, const QBrush &bd, const QPen &pn, const QSize &s);
+
+  void setSize(const QSize &s);
+  void setSize(int a, int b = -1);
+  void setBrush(const QBrush& b);
+  void setPen(const QPen &p);
+  void setStyle (Style s);
+
+  const QBrush& brush() const;
+  const QPen& pen() const;
+  const QSize& size() const;
+  Style style() const;
+
+private:
+  QwtSymbol(const QwtSymbol&);
+};
+
+
 class ArrowMarker // : QwtPlotMarker
 {
 %TypeHeaderCode
@@ -623,6 +670,9 @@ public:
   void setCurveLineColor(int, QColor);
   void setCurveLineStyle(int, Qt::PenStyle);
   void setCurveLineWidth(int, double);
+  void setCurveSymbol(int, const QwtSymbol&);
+  void setCurvePen(int, const QPen&);
+  void setCurveBrush(int, const QBrush&);
 
 	void addFunction(const QString&, double, double, int=100);
 %MethodCode
