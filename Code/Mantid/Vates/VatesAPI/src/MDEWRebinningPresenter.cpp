@@ -250,13 +250,13 @@ namespace Mantid
     */
     vtkDataSet* MDEWRebinningPresenter::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
-      
+      std::string wsName = m_serializer.getWorkspaceName();
+      // Create a private output workspace name
+      std::string outWsName = "__" + wsName + "_mdhisto";
+
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
       {
-
-        std::string wsName = m_serializer.getWorkspaceName();
-
         Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
         sourceGeometry.execute();
 
@@ -312,7 +312,8 @@ namespace Mantid
           }
         }
         hist_alg.setPropertyValue("Parallel", "1");
-        hist_alg.setPropertyValue("OutputWorkspace", "Histo_ws");
+
+        hist_alg.setPropertyValue("OutputWorkspace", outWsName);
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         //Add observer.
         hist_alg.addObserver(observer);
@@ -322,7 +323,7 @@ namespace Mantid
         hist_alg.removeObserver(observer);
       }
 
-      Mantid::API::Workspace_sptr result=Mantid::API::AnalysisDataService::Instance().retrieve("Histo_ws");
+      Mantid::API::Workspace_sptr result=Mantid::API::AnalysisDataService::Instance().retrieve(outWsName);
 
       factory->initialize(result);
 
