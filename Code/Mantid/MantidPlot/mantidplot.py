@@ -119,7 +119,8 @@ MantidUIImports = [
     'getMantidMatrix',
     'getInstrumentView', 
     'getSelectedWorkspaceName',
-    'mergePlots'
+    'mergePlots',
+    'convertToWaterfall'
     ]
 # Update globals
 for name in MantidUIImports:

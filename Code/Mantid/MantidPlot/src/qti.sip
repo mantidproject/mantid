@@ -727,6 +727,10 @@ public:
 
   Spectrogram* spectrogram();
 
+  void updateWaterfallFill(bool on = true) /PyName=enableWaterfallFill/;
+  void setWaterfallFillColor(const QColor&);
+  void setWaterfallOffset(int x, int y, bool = true);
+
 private:
   Graph(const Graph&);
 };
@@ -762,6 +766,8 @@ public:
   void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
   void exportVector(const QString& fileName, int res = 0, bool color = true,
                     bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
+
+  void reverseWaterfallOrder();
 
 private:
   MultiLayer(const MultiLayer&);
@@ -939,6 +945,28 @@ public:
   QStringList l;
   l << *a1;
   sipRes = sipCpp->multilayerPlot(a0, l, a2);
+%End
+
+  MultiLayer *waterfallPlot(Table*, SIP_PYTUPLE);
+%MethodCode
+  if (a0 == 0) {
+     sipIsErr = 1;
+     PyErr_Format(PyExc_ValueError, "Invalid table in argument to waterfallPlot().");
+  } else {
+    QStringList l;
+    int n = PyTuple_Size(a1);
+    for (int i=0; i<n; i++) {
+    PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
+    if (str) {
+      l << PyString_AsString(str);
+      Py_DECREF(str);
+     } else {
+      sipIsErr = 1;
+      break;
+    }
+    }
+    sipRes = sipCpp->waterfallPlot(a0, l);
+  }
 %End
 
 	Matrix* importImage(const QString&);
@@ -1394,6 +1422,7 @@ public:
   MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+  void convertToWaterfall(MultiLayer*);
 
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);
