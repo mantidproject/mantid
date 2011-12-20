@@ -72,7 +72,7 @@ set( SRC_UNITY_IGNORE_FILES )
 # custom commands below is required
 
 # Source file is separated in several sub files
-set ( NUMBERS 0 1 2 3 4 )
+set ( NUMBERS 0 )
 set ( SIP_SOURCES )
 
 # Wrap each sub-file
@@ -96,7 +96,7 @@ endforeach ( i )
 add_custom_command ( OUTPUT ${SIP_SOURCES}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}
-                          -c ${CMAKE_CURRENT_BINARY_DIR} -j5 -w 
+                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
                           -e 
                           ${SIP_SPEC}
                      DEPENDS mantidqt.sip ${SIP_HDRS}
