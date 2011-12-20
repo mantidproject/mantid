@@ -1243,6 +1243,9 @@ QwtDoubleInterval SliceViewer::getYLimits() const
  */
 void SliceViewer::openFromXML(const QString & xml)
 {
+//  std::cout << "Reading XML " << std::endl
+//      << xml.toStdString() << std::endl;
+
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
   Poco::XML::Document* pDoc;
@@ -1281,8 +1284,6 @@ void SliceViewer::openFromXML(const QString & xml)
   // ------- Read which are the X/Y dimensions ------------
   Poco::XML::Element* dims = pRootElem->getChildElement("DimensionSet");
   if (!dims) throw std::runtime_error("SliceViewer::openFromXML(): No DimensionSet element.");
-  std::cout << "Doing dimensions " << std::endl;
-  //TODO: Do I need the dimension info?
 
   // Map: The index = dimension in ParaView; Value = dimension of the workspace.
   int dimMap[4];

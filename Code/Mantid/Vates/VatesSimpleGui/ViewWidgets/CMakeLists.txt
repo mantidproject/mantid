@@ -58,6 +58,7 @@ qt4_add_resources( RES_FILES icons/ViewWidgetsIcons.qrc )
 include_directories(
   inc
   ${CMAKE_SOURCE_DIR}/MantidQt/SliceViewer/inc
+  ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${QWT_INCLUDE_DIR}
@@ -89,6 +90,7 @@ MantidQtAPI
 VatesAPI
 ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
+MantidQtFactory
 )
 
 install( TARGETS VatesSimpleGuiViewWidgets ${TARGET_TYPE} DESTINATION ${PLUGINS_DIR} )

@@ -37,6 +37,7 @@
 #include <QString>
 
 #include <iostream>
+#include "MantidQtFactory/WidgetFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace MantidQt::SliceViewer;
@@ -618,9 +619,13 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   //std::cout << rks.createXMLString() << std::endl;
   QString titleAddition = " "+name;
 
-  // TODO: Use the WidgetFactory
-  SliceViewerWindow *w = new MantidQt::SliceViewer::SliceViewerWindow(wsName, titleAddition);
+  // Use the WidgetFactory to create the slice viewer window
+  SliceViewerWindow *w = WidgetFactory::Instance().createSliceViewerWindow(wsName, titleAddition);
+  // Set the slice points, etc, using the XML definition of the plane function
+  w->getSlicer()->openFromXML( QString::fromStdString(rks.createXMLString()) );
   w->show();
+
+  //TODO: Connect to application windows shutdown signal to close the slice viewer with the window.
 }
 
 }
