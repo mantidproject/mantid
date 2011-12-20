@@ -151,7 +151,11 @@ class SliceViewer : QWidget
 public:
   void setWorkspace(const QString & wsName)   throw (std::runtime_error);
 
+  QString getWorkspaceName() const;
+
   void showControls(bool visible);
+
+  void openFromXML(const QString & xml);
 
 
   void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);

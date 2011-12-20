@@ -46,6 +46,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.sv = self.svw.getSlicer()
         pass
     
+    def setUpXML(self):
+        """Special set up for the XML version """
+        CreateMDWorkspace(Dimensions='3',Extents='-15,15, -15,15, -15,15',Names='Q_lab_x,Q_lab_y,Q_lab_z', 
+            Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='TOPAZ_3680')
+
+    
     def tearDown(self):
         """ Close the created widget """
         # This is crucial! Forces the object to be deleted NOW, not when python exits
@@ -67,6 +73,11 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv = self.sv
         assert (sv is not None) 
     
+    def test_getWorkspace(self):
+        sv = self.sv
+        self.assertEqual(sv.getWorkspaceName(), "uniform")
+        assert (sv is not None) 
+    
     def test_setWorkspace_MDEventWorkspace(self):
         sv = self.sv
         sv.setWorkspace('mdw')
@@ -78,6 +89,35 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'non_existent_workspace')
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'workspace2d')
     
+    #==========================================================================
+    #======================= XML Tests ======================================
+    #==========================================================================
+    def test_openFromXML_3D(self):
+        self.setUpXML()
+        xml = """<MDInstruction><MDWorkspaceName>TOPAZ_3680</MDWorkspaceName>
+<DimensionSet><Dimension ID="Q_lab_x"><Name>Q_lab_x</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+<Dimension ID="Q_lab_y"><Name>Q_lab_y</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+<Dimension ID="Q_lab_z"><Name>Q_lab_z</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+<XDimension><RefDimensionId>Q_lab_x</RefDimensionId></XDimension>
+<YDimension><RefDimensionId>Q_lab_y</RefDimensionId></YDimension>
+<ZDimension><RefDimensionId>Q_lab_z</RefDimensionId></ZDimension>
+<TDimension><RefDimensionId/></TDimension></DimensionSet>
+<Function><Type>PlaneImplicitFuction</Type><ParameterList>
+<Parameter><Type>NormalParameter</Type><Value>1 0 0</Value></Parameter>
+<Parameter><Type>OriginParameter</Type><Value>4.84211 0 0</Value></Parameter>
+</ParameterList></Function>
+</MDInstruction>"""
+        # Read the XML and set the view
+        self.svw.getSlicer().openFromXML(xml)
+        # Check the settings
+        self.assertEqual(sv.getWorkspaceName(), "uniform")
+        self.assertEqual(sv.getDimX(), 1)
+        self.assertEqual(sv.getDimY(), 2)
+        self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)
+
+        pass
+    
+
     #==========================================================================
     #======================= Setting Dimensions, etc ==========================
     #==========================================================================

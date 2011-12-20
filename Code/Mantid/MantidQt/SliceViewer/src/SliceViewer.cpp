@@ -957,6 +957,18 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 //=================================================================================================
 //========================================== PYTHON METHODS =======================================
 //=================================================================================================
+
+/** @return the name of the workspace selected, or a blank string
+ * if no workspace is set.
+ */
+QString SliceViewer::getWorkspaceName() const
+{
+  if (m_ws)
+    return QString::fromStdString(m_ws->getName());
+  else
+    return QString();
+}
+
 //------------------------------------------------------------------------------------
 /** @return the index of the dimension that is currently
  * being shown as the X axis of the plot.
@@ -1189,6 +1201,19 @@ QwtDoubleInterval SliceViewer::getYLimits() const
 {
   return m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 }
+
+
+//------------------------------------------------------------------------------------
+/** Opens a workspace and sets the view and slice points
+ * given the XML from the MultiSlice view in XML format.
+ *
+ * @param xml :: string describing workspace, slice point, etc.
+ */
+void SliceViewer::openFromXML(const QString & xml)
+{
+}
+
+
 
 } //namespace
 }
