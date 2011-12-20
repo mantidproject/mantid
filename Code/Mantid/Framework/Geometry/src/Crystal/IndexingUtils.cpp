@@ -106,27 +106,27 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
-   throw std::invalid_argument("UB matrix NULL or not 3X3");
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
   if ( q_vectors.size() < 2 )
   {
-   throw std::invalid_argument("Two or more indexed peaks needed to find UB");
+   throw std::invalid_argument("Find_UB(): Two or more indexed peaks needed to find UB");
   }
 
   if ( required_tolerance <= 0 )
   {
-   throw std::invalid_argument("required_tolerance must be positive");
+   throw std::invalid_argument("Find_UB(): required_tolerance must be positive");
   }
 
   if ( num_initial < 2 )
   {
-   throw std::invalid_argument("number of peaks for inital scan must be > 2");
+   throw std::invalid_argument("Find_UB(): number of peaks for inital scan must be > 2");
   }
 
   if ( degrees_per_step <= 0 )
   {
-   throw std::invalid_argument("degrees_per_step must be positive");
+   throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
   }
 
                                       // get list of peaks, sorted on |Q|
@@ -315,32 +315,32 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
-   throw std::invalid_argument("UB matrix NULL or not 3X3");
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
   if ( q_vectors.size() < 3 )
   {
-   throw std::invalid_argument("Three or more indexed peaks needed to find UB");
+   throw std::invalid_argument("Find_UB(): Three or more indexed peaks needed to find UB");
   }
 
   if ( min_d >= max_d || min_d <= 0 )
   {
-   throw std::invalid_argument("Need 0 < min_d < max_d");
+   throw std::invalid_argument("Find_UB(): Need 0 < min_d < max_d");
   }
 
   if ( required_tolerance <= 0 )
   {
-   throw std::invalid_argument("required_tolerance must be positive");
+   throw std::invalid_argument("Find_UB(): required_tolerance must be positive");
   }
 
   if ( num_initial < 3 )
   {
-   throw std::invalid_argument("number of peaks for inital scan must be > 2");
+   throw std::invalid_argument("Find_UB(): number of peaks for inital scan must be > 2");
   }
 
   if ( degrees_per_step <= 0 )
   {
-   throw std::invalid_argument("degrees_per_step must be positive");
+   throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
   }
 
                                     // get list of peaks, sorted on |Q|
@@ -401,14 +401,14 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   if ( directions.size() < 3 )
   {
     throw std::runtime_error(
-                 "Could not find at least three possible lattice directions");
+                 "Find_UB(): Could not find at least three possible lattice directions");
   }
 
   std::sort( directions.begin(), directions.end(), CompareMagnitude );
 
   if ( ! FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d )  )
   {
-    throw std::runtime_error("Could not find independent a, b, c directions" ); 
+    throw std::runtime_error("Find_UB(): Could not find independent a, b, c directions" );
   }
                                      // now gradually bring in the remaining
                                      // peaks and re-optimize the UB to index
@@ -520,27 +520,27 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
-   throw std::invalid_argument("UB matrix NULL or not 3X3");
+   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
   if ( q_vectors.size() < 4 )
   {
-   throw std::invalid_argument("Three or more indexed peaks needed to find UB");
+   throw std::invalid_argument("Find_UB(): Three or more indexed peaks needed to find UB");
   }
 
   if ( min_d >= max_d || min_d <= 0 )
   {
-   throw std::invalid_argument("Need 0 < min_d < max_d");
+   throw std::invalid_argument("Find_UB(): Need 0 < min_d < max_d");
   }
 
   if ( required_tolerance <= 0 )
   {
-   throw std::invalid_argument("required_tolerance must be positive");
+   throw std::invalid_argument("Find_UB(): required_tolerance must be positive");
   }
 
   if ( degrees_per_step <= 0 )
   {
-   throw std::invalid_argument("degrees_per_step must be positive");
+   throw std::invalid_argument("Find_UB(): degrees_per_step must be positive");
   }
 
   std::vector<V3D> directions;
@@ -556,12 +556,12 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
   if ( max_indexed <= 0 )
   {
-   throw std::invalid_argument("Could not find any a,b,c vectors to index Qs");
+   throw std::invalid_argument("Find_UB(): Could not find any a,b,c vectors to index Qs");
   }
 
   if ( directions.size() < 3 )
   {
-   throw std::invalid_argument("Could not find enough a,b,c vectors");
+   throw std::invalid_argument("Find_UB(): Could not find enough a,b,c vectors");
   }
 
   std::sort( directions.begin(), directions.end(), CompareMagnitude );
@@ -571,7 +571,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   if ( !FormUB_From_abc_Vectors( UB, directions, q_vectors,
                                  required_tolerance, min_vol ) )
   {
-    throw std::invalid_argument("Could not form UB matrix from a,b,c vectors");
+    throw std::invalid_argument("Find_UB(): Could not form UB matrix from a,b,c vectors");
   }
 
   double fit_error = 0;
@@ -642,17 +642,17 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
-   throw std::invalid_argument("UB matrix NULL or not 3X3");
+   throw std::invalid_argument("Optimize_UB(): UB matrix NULL or not 3X3");
   }
 
   if ( hkl_vectors.size() < 3 ) 
   {
-   throw std::invalid_argument("Three or more indexed peaks needed to find UB");
+   throw std::invalid_argument("Optimize_UB(): Three or more indexed peaks needed to find UB");
   }
 
   if ( hkl_vectors.size() != q_vectors.size() )
   {
-   throw std::invalid_argument("Number of hkl_vectors != number of q_vectors");
+   throw std::invalid_argument("Optimize_UB(): Number of hkl_vectors != number of q_vectors");
   }
 
   gsl_matrix *H_transpose = gsl_matrix_alloc( hkl_vectors.size(), 3 );
@@ -675,7 +675,7 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
   {
     gsl_matrix_free( H_transpose );
     gsl_vector_free( tau );
-    throw std::runtime_error("gsl QR_decomp failed, invalid hkl values");
+    throw std::runtime_error("Optimize_UB(): gsl QR_decomp failed, invalid hkl values");
   }
                                       // solve for each row of UB, using the 
                                       // QR factorization of and accumulate the 
@@ -690,7 +690,7 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
   {
     for ( size_t i = 0; i < q_vectors.size(); i++ )
     {
-      gsl_vector_set( q, i, (q_vectors[i])[row] );
+      gsl_vector_set( q, i, (q_vectors[i])[row] / (2.0 * M_PI) );
     }
 
     returned_flag = gsl_linalg_QR_lssolve(H_transpose,tau,q,UB_row,residual);
@@ -725,12 +725,12 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
 
   if ( !found_UB )
   {
-    throw std::runtime_error("Failed to find UB, invalid hkl or Q values");
+    throw std::runtime_error("Optimize_UB(): Failed to find UB, invalid hkl or Q values");
   }
 
   if ( ! CheckUB( UB ) )
   {
-    throw std::runtime_error( "The optimized UB is not valid");
+    throw std::runtime_error( "Optimize_UB(): The optimized UB is not valid");
   }
 
   return sum_sq_error;
@@ -778,12 +778,12 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
 {
   if ( index_values.size() < 3 )
   {
-   throw std::invalid_argument("Three or more indexed values needed");
+   throw std::invalid_argument("Optimize_Direction(): Three or more indexed values needed");
   }
 
   if ( index_values.size() != q_vectors.size() )
   {
-   throw std::invalid_argument("Number of index_values != number of q_vectors");
+   throw std::invalid_argument("Optimize_Direction(): Number of index_values != number of q_vectors");
   }
 
   gsl_matrix *H_transpose = gsl_matrix_alloc( q_vectors.size(), 3 );
@@ -797,7 +797,7 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
   {
     for ( size_t col = 0; col < 3; col++ )
     {
-      gsl_matrix_set( H_transpose, row, col, (q_vectors[row])[col] );
+      gsl_matrix_set( H_transpose, row, col, (q_vectors[row])[col] / (2.0 * M_PI) );
     }
   }
   int returned_flag = gsl_linalg_QR_decomp( H_transpose, tau );
@@ -806,7 +806,7 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
   {
     gsl_matrix_free( H_transpose );
     gsl_vector_free( tau );
-    throw std::runtime_error("gsl QR_decomp failed, invalid hkl values");
+    throw std::runtime_error("Optimize_Direction(): gsl QR_decomp failed, invalid hkl values");
   }
                                       // solve for the best_vec, using the
                                       // QR factorization and accumulate the 
@@ -857,7 +857,7 @@ double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
   if ( !found_best_vec )
   {
     throw std::runtime_error(
-                      "Failed to find best_vec, invalid indexes or Q values");
+                      "Optimize_Direction(): Failed to find best_vec, invalid indexes or Q values");
   }
 
   return sum_sq_error;
@@ -951,7 +951,7 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
       for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
       {
         bool indexes_peak = true;
-        q_vec = q_vectors[ q_num ];
+        q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
         dot_prod = a_dir_temp.scalar_prod( q_vec );
         nearest_int = round( dot_prod );
         error = fabs( dot_prod - nearest_int );
@@ -1005,7 +1005,7 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
     double sum_sq_error = 0;
     for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
     {
-      q_vec = q_vectors[ q_num ];
+      q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
       dot_prod = a_dir_temp.scalar_prod( q_vec );
       nearest_int = round( dot_prod );
       error = dot_prod - nearest_int;
@@ -1104,7 +1104,7 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
       int num_indexed = 0;
       for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
       {
-        q_vec = q_vectors[ q_num ];
+        q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
         dot_prod = dir_temp.scalar_prod( q_vec );
         nearest_int = round( dot_prod );
         error = fabs( dot_prod - nearest_int );
@@ -1229,7 +1229,7 @@ size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
   double max_mag_Q = 0;
   for ( size_t q_num = 1; q_num < q_vectors.size(); q_num++ )
   {
-    mag_Q = q_vectors[ q_num ].norm();
+    mag_Q = q_vectors[ q_num ].norm() / (2.0 * M_PI);
     if ( mag_Q > max_mag_Q )
       max_mag_Q = mag_Q;
   }
@@ -1457,7 +1457,7 @@ double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
   size_t  index;
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    q_vec = q_vectors[ q_num ];
+    q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
     dot_prod = current_dir.scalar_prod( q_vec );
     index = (size_t)fabs(index_factor * dot_prod);
     if ( index < N )
@@ -2073,7 +2073,7 @@ int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
  
   for ( size_t i = 0; i < q_vectors.size(); i++ )
   {
-    proj_value = direction.scalar_prod( q_vectors[i] );
+    proj_value = direction.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
     nearest_int = round( proj_value );
     error = fabs( proj_value - nearest_int );
     if ( error <= tolerance )
@@ -2121,9 +2121,9 @@ int IndexingUtils::NumberIndexed_3D( const V3D               & a_dir,
 
   for ( size_t i = 0; i < q_vectors.size(); i++ )
   {
-    hkl_vec[0] = a_dir.scalar_prod( q_vectors[i] );
-    hkl_vec[1] = b_dir.scalar_prod( q_vectors[i] );
-    hkl_vec[2] = c_dir.scalar_prod( q_vectors[i] );
+    hkl_vec[0] = a_dir.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
+    hkl_vec[1] = b_dir.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
+    hkl_vec[2] = c_dir.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
     if ( ValidIndex( hkl_vec, tolerance ) )
     {
       count++;
@@ -2171,7 +2171,7 @@ int IndexingUtils::CalculateMillerIndices(
   }
   else
   {
-    throw std::runtime_error("The UB in CalculateMillerIndices is not valid");
+    throw std::runtime_error("The UB in CalculateMillerIndices() is not valid");
   }
 
   miller_indices.clear();
@@ -2261,7 +2261,7 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    proj_value = direction.scalar_prod( q_vectors[ q_num ] );
+    proj_value = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
     nearest_int = round( proj_value );
     error = fabs( proj_value - nearest_int );
     if ( error < required_tolerance )
@@ -2343,9 +2343,9 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    projected_h = direction_1.scalar_prod( q_vectors[ q_num ] );
-    projected_k = direction_2.scalar_prod( q_vectors[ q_num ] );
-    projected_l = direction_3.scalar_prod( q_vectors[ q_num ] );
+    projected_h = direction_1.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    projected_k = direction_2.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    projected_l = direction_3.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
 
     hkl( projected_h, projected_k, projected_l );
 
@@ -2425,7 +2425,7 @@ int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
   }
   else
   {
-    throw std::runtime_error("The UB in GetIndexedPeaks is not valid");
+    throw std::runtime_error("The UB in GetIndexedPeaks() is not valid");
   }
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
@@ -2475,7 +2475,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
 {
   if ( n_steps <= 0 )
   {
-    throw std::invalid_argument("n_steps must be greater than 0");
+    throw std::invalid_argument("MakeHemisphereDirections(): n_steps must be greater than 0");
   }
 
   std::vector<V3D> direction_list;
@@ -2531,7 +2531,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
 {
   if ( n_steps <= 0 )
   {
-    throw std::invalid_argument("n_steps must be greater than 0");
+    throw std::invalid_argument("MakeCircleDirections(): n_steps must be greater than 0");
   }
                                // first get a vector perpendicular to axis
   double max_component = fabs( axis[0] );
@@ -2552,7 +2552,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
 
   if ( max_component == 0 )
   {
-    throw std::invalid_argument("Axis vector must be non-zero!");
+    throw std::invalid_argument("MakeCircleDirections(): Axis vector must be non-zero!");
   }
 
   V3D second_vec( 0, 0, 0 );
@@ -2625,12 +2625,12 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
 {
   if ( q_vectors.size() == 0 )
   {
-    throw std::invalid_argument("No Q vectors specified");
+    throw std::invalid_argument("SelectDirection(): No Q vectors specified");
   }
 
   if ( direction_list.size() == 0 )
   {
-    throw std::invalid_argument("List of possible directions has zero length");
+    throw std::invalid_argument("SelectDirection(): List of possible directions has zero length");
   }
 
   double dot_product;
@@ -2646,7 +2646,7 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
     direction/=plane_spacing;
     for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
     {
-      dot_product = direction.scalar_prod( q_vectors[ q_num ] );
+      dot_product = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
       nearest_int = round( dot_product );
       error = fabs( dot_product - nearest_int );
       sum_sq_error += error * error;
@@ -2663,7 +2663,7 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
   int    num_indexed = 0;
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    proj_value = best_direction.scalar_prod( q_vectors[ q_num ] );
+    proj_value = best_direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
     nearest_int = round( proj_value );
     error = fabs( proj_value - nearest_int );
     if ( error < required_tolerance )
