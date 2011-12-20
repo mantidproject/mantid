@@ -200,7 +200,7 @@ namespace Mantid
           throw std::runtime_error("Cannot have a peak index < 0.");
         }
         IPeak& peak = ws->getPeak(row);
-        V3D Qs = peak.getQSampleFrame();
+        V3D Qs = peak.getQSampleFrame() / (2.0 * M_PI);
         peaks.push_back(PeakCandidate(Qs[0], Qs[1], Qs[2]));
       }
 

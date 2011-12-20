@@ -36,6 +36,9 @@ public:
     q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
     q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
     q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+    // Dec 2011: Change convention for Q = 2 pi / wavelength
+    for (size_t i=0; i < q_vectors.size(); i++)
+      q_vectors[i] *= (2.0 * M_PI);
     return q_vectors;
   } 
 
@@ -419,6 +422,7 @@ public:
     {
       V3D vec( current_dir );
       vec *= ( (double)i + 0.6 );
+      vec *= 2.0 * M_PI;
       q_vectors.push_back( vec );
     }
     double max_q_magnitude = 16.0;
