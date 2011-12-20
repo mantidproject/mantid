@@ -1395,16 +1395,6 @@
               </property>
              </spacer>
             </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="allErrors">
-              <property name="text">
-               <string>Show All Errors</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QCheckBox" name="updatePlots">
               <property name="text">
@@ -1417,19 +1407,6 @@
             </item>
             <item row="1" column="2">
              <spacer name="horizontalSpacer_24">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="2" column="2">
-             <spacer name="horizontalSpacer_25">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>

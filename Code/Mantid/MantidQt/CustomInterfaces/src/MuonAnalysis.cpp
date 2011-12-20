@@ -1656,13 +1656,13 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     plotDetails.push_back("");
     plotDetails.push_back(plotType);
     plotDetails.push_back("Data");
-    if(m_uiForm.allErrors->isChecked())
+    if(m_uiForm.showErrorBars->isChecked())
     {
       plotDetails.push_back("AllErrors");
     }
     else
     {
-      plotDetails.push_back("CleverErrors");
+      plotDetails.push_back("NoErrors");
     }
     changePlotType(plotDetails);
 
@@ -1803,13 +1803,13 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     plotDetails.push_back("");
     plotDetails.push_back(plotType);
     plotDetails.push_back("Data");
-    if(m_uiForm.allErrors->isChecked())
+    if(m_uiForm.showErrorBars->isChecked())
     {
       plotDetails.push_back("AllErrors");
     }
     else
     {
-      plotDetails.push_back("CleverErrors");
+      plotDetails.push_back("NoErrors");
     }
     changePlotType(plotDetails);
     
@@ -2918,13 +2918,13 @@ void MuonAnalysis::changeFitPlotType(const QStringList & plotDetails)
 
   fitPlotDetails.push_back(fitType);
   fitPlotDetails.push_back("Fit");
-  if(m_uiForm.allErrors->isChecked())
+  if(m_uiForm.showErrorBars->isChecked())
   {
     fitPlotDetails.push_back("AllErrors");
   }
   else
   {
-    fitPlotDetails.push_back("CleverErrors");
+    fitPlotDetails.push_back("NoErrors");
   }
   fitPlotDetails.push_back("Orange");
 
@@ -2946,13 +2946,13 @@ void MuonAnalysis::changeDataPlotType(const QStringList & plotDetails)
 
   dataPlotDetails.push_back(fitType);
   dataPlotDetails.push_back("Data");
-  if(m_uiForm.allErrors->isChecked())
+  if(m_uiForm.showErrorBars->isChecked())
   {
     dataPlotDetails.push_back("AllErrors");
   }
   else
   {
-    dataPlotDetails.push_back("CleverErrors");
+    dataPlotDetails.push_back("NoErrors");
   }
   dataPlotDetails.push_back("Black");
 
@@ -3023,7 +3023,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
   connect(m_uiForm.optionStepSizeText, SIGNAL(textChanged(const QString&)), this, SLOT(settingsTabUpdatePlot()));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(settingsTabUpdatePlot()));
-  connect(m_uiForm.allErrors, SIGNAL(clicked()), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SLOT(settingsTabUpdatePlot()));
 }
 
 void MuonAnalysis::homeTabUpdatePlot()
