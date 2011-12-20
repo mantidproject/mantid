@@ -53,7 +53,8 @@ namespace Mantid
         }
         else
         {
-          throw std::invalid_argument("PropertyMarshal::setProperty - No C++ function registered to handle python type '" + std::string(pytype->tp_name) + "'");
+          throw std::invalid_argument("PropertyMarshal::setProperty - No C++ function registered to handle python type '"
+              + std::string(pytype->tp_name) + "'");
         }
       }
 
