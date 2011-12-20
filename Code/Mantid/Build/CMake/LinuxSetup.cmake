@@ -77,4 +77,7 @@ set ( ENVVARS_ON_INSTALL ON CACHE BOOL "Whether to include the scripts in /etc/p
 if ( ENVVARS_ON_INSTALL )
   set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
   set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_uninstall.sh )
+else ()
+  unset ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE )
+  unset ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE )
 endif ()
