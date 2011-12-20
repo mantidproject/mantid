@@ -16727,16 +16727,12 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                     MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
                     curve->setErrorBars(true, true);
                   }
-                  else // be clever with plotting errors
+                  else // don't show errors
                   {
                     QwtPlotCurve *temp = g->curve(curveNum);
                     MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
                     curve->setErrorBars(false, false);
                   }
-                }
-                else if (plotDetails[3] == "Fit")
-                {
-                  curveNum = g->curveIndex(plotDetails[0] + "_" + "Workspace" + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Calc")
                 }
                 if (curveNum > -1) // If one of the curves has been changed 
                 {
