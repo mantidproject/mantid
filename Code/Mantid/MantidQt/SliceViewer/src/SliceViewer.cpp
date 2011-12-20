@@ -269,17 +269,18 @@ void SliceViewer::initZoomer()
 //  zoomer->setRubberBandPen(c);
 //  zoomer->setTrackerPen(c);
 
-  // Zoom in/out using right-click or the mouse wheel
+  // Zoom in/out using middle-click+drag or the mouse wheel
   QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
   magnif->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
   magnif->setWheelFactor(0.9);
+  magnif->setMouseButton(Qt::MidButton);
   // Have to flip the keys to match our flipped mouse wheel
   magnif->setZoomInKey(Qt::Key_Minus, Qt::NoModifier);
   magnif->setZoomOutKey(Qt::Key_Equal, Qt::NoModifier);
 
-  // Pan using the middle button
+  // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
-  panner->setMouseButton(Qt::MidButton);
+  panner->setMouseButton(Qt::RightButton);
   panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
 
   CustomPicker * picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
