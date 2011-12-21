@@ -38,6 +38,8 @@ set ( INBUNDLE MantidPlot.app/ )
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
 set ( PLUGINS_DIR MantidPlot.app/plugins )
+set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
+
 
 install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )
 install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4 DESTINATION ${BIN_DIR} )
