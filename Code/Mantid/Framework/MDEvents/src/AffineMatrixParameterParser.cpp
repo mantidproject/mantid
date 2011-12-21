@@ -50,9 +50,9 @@ namespace Mantid
           {
             double val = atof(col_it->c_str());
             elements.push_back(val);
-            col_it++;
+            ++col_it;
           }
-          row_it++;
+          ++row_it;
         }
 
         //Create the Matrix.

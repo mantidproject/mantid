@@ -99,7 +99,7 @@ namespace MDEvents
     // --- Go event by event and add them ----
     typename std::vector<MDE>::const_iterator it = events.begin() + start_at;
     typename std::vector<MDE>::const_iterator it_end = events.begin() + stop_at;
-    for (; it != it_end; it++)
+    for (; it != it_end; ++it)
     {
       //Check out-of-bounds-ness
       bool badEvent = false;

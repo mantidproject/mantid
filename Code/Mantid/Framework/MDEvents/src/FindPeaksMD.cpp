@@ -423,7 +423,7 @@ namespace MDEvents
     // e.g. from highest density down to lowest density.
     std::multimap<double, size_t>::reverse_iterator it2;
     std::multimap<double, size_t>::reverse_iterator it2_end = sortedBoxes.rend();
-    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++)
+    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2)
     {
       signal_t density = it2->first;
       size_t index = it2->second;
@@ -432,7 +432,7 @@ namespace MDEvents
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
+      for (std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); ++it3)
       {
         VMD otherCenter = ws->getCenter(*it3);
 
@@ -469,7 +469,7 @@ namespace MDEvents
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
+    for (std::vector<size_t>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); ++it3)
     {
       size_t index = *it3;
       // The center of the box = Q in the lab frame

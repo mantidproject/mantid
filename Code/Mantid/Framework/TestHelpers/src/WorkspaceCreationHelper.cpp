@@ -483,7 +483,7 @@ namespace WorkspaceCreationHelper
     {
       retVal->getOrAddEventList(g).clearDetectorIDs();
       std::vector<int> dets = groups[g];
-      for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); it++)
+      for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); ++it)
       {
         for (int i=0; i < numBins; i++)
           retVal->getOrAddEventList(g) += TofEvent((i+0.5)*binDelta, 1);
