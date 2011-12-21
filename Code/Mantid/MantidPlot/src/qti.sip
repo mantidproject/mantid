@@ -637,7 +637,9 @@ public:
   sipRes = PyString_FromString(sipCpp->pieLegendText());
 %End
 
+  bool insertCurve(Table*, const QString&, int=1);
   bool insertCurve(Table*, const QString&, const QString&, int=1);
+  bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
   void insertCurve(Graph*, int);
   bool addCurves(Table*, SIP_PYTUPLE, int=0, double=1, int=3, int=0, int=-1);
 %MethodCode
@@ -663,7 +665,6 @@ public:
 %End
   void removeCurve(int);
   void removeCurve(const QString&);
-  void deleteFitCurves();
   int curves() /PyName=numCurves/;
 
   void setCurveLineColor(int, int);

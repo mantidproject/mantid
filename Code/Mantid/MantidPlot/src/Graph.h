@@ -226,6 +226,7 @@ public slots:
   PlotCurve* insertCurve(Table* w, const QString& name, int style, int startRow = 0, int endRow = -1);
   PlotCurve* insertCurve(Table* w, int xcol, const QString& name, int style);
   PlotCurve* insertCurve(Table* w, const QString& xColName, const QString& yColName, int style, int startRow = 0, int endRow = -1);
+  PlotCurve* insertCurve(QString workspaceName, int index, bool err = false, Graph::CurveType style = Graph::Unspecified);
   PlotCurve* insertCurve(PlotCurve* c, int lineWidth = -1, int curveType = User);
   void insertPlotItem(QwtPlotItem *i, int type);
 
