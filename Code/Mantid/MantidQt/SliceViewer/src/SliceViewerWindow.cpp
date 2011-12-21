@@ -77,6 +77,10 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   connect(this,SIGNAL(needToClose()),this,SLOT(closeWindow()));
   connect(this,SIGNAL(needToUpdate()),this,SLOT(updateWorkspace()));
 
+  // When the Slicer changes workspace, carry over to THIS and LineViewer
+  QObject::connect( m_slicer, SIGNAL(workspaceChanged()),
+            this, SLOT(slicerWorkspaceChanged()) );
+
   // Connect the SliceViewer and the LineViewer together
   QObject::connect( m_slicer, SIGNAL(showLineViewer(bool)),
             this, SLOT(showLineViewer(bool)) );
@@ -84,6 +88,7 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
             m_liner, SLOT(setFreeDimensions(size_t, size_t)) );
   QObject::connect( m_slicer, SIGNAL(changedSlicePoint(Mantid::Kernel::VMD)),
             this, SLOT(changedSlicePoint(Mantid::Kernel::VMD)) );
+
   // Drag-dropping the line around
   QObject::connect( m_slicer->getLineOverlay(), SIGNAL(lineChanging(QPointF, QPointF, double)),
             this, SLOT(lineChanging(QPointF, QPointF, double)) );
@@ -148,6 +153,17 @@ void SliceViewerWindow::updateWorkspace()
 {
   m_liner->setWorkspace(m_ws);
   m_slicer->setWorkspace(m_ws);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Slot called when the SliceViewer changes which workspace
+ * is being viewed. */
+void SliceViewerWindow::slicerWorkspaceChanged()
+{
+  std::cout << "SliceViewerWindow::slicerWorkspaceChanged() called " << std::endl;
+  m_ws = m_slicer->getWorkspace();
+  // Propagate the change to
+  m_liner->setWorkspace(m_ws);
 }
 
 //------------------------------------------------------------------------------------------------

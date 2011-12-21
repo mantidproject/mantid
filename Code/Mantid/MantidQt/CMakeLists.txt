@@ -44,11 +44,11 @@ separate_arguments ( PYQT4_SIP_FLAGS )
 
 if ( ${SIP_VERSION} MATCHES "04[0-9][a-f].*" )
 	# SIP version is at least 4.10 (040a or higher in hex)
-	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
+	message ( STATUS "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
 	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
 else ()
 	# Pre 4.0 sip version (RHEL5 build). 
-	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip without docstring." )
+	message ( STATUS "Sip version is ${SIP_VERSION}. Using mantidqt sip without docstring." )
 	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.rhel5.sip )
 endif ()
 

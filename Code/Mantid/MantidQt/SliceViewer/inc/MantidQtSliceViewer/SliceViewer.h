@@ -43,6 +43,7 @@ public:
 
   void setWorkspace(const QString & wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  Mantid::API::IMDWorkspace_sptr getWorkspace();
   void showControls(bool visible);
   void zoomBy(double factor);
   void loadColorMap(QString filename = QString() );
@@ -52,6 +53,7 @@ public:
   int getDimY() const;
 
   /// Methods for Python bindings
+  QString getWorkspaceName() const;
   void setXYDim(int indexX, int indexY);
   void setXYDim(const QString & dimX, const QString & dimY);
   void setSlicePoint(int dim, double value);
@@ -69,6 +71,7 @@ public:
   QwtDoubleInterval getXLimits() const;
   QwtDoubleInterval getYLimits() const;
   void setXYCenter(double x, double y);
+  void openFromXML(const QString & xml);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
@@ -77,6 +80,8 @@ signals:
   void changedSlicePoint(Mantid::Kernel::VMD slicePoint);
   /// Signal emitted when the LineViewer should be shown/hidden.
   void showLineViewer(bool);
+  /// Signal emitted when someone uses setWorkspace() on SliceViewer
+  void workspaceChanged();
 
 public slots:
   void changedShownDim(int index, int dim, int oldDim);

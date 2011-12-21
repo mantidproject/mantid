@@ -4971,6 +4971,23 @@ bool Graph::isSpectrogram()
 
 }
 
+/** Returns a pointer to a 2D plot, if the Graph has one (if more than one, will return the first).
+ *  Otherwise, returns a null pointer.
+ */
+Spectrogram* Graph::spectrogram()
+{
+  foreach (QwtPlotItem *item, d_plot->curves())
+  {
+    if(item && item->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+    {
+      Spectrogram *s = (Spectrogram *)item;
+      if (s) return s;
+    }
+  }
+  return NULL;
+
+}
+
 Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
   if (type != GrayScale && type != ColorMap && type != Contour && type != ColorMapContour)

@@ -81,6 +81,7 @@ set ( TEST_PY_FILES
   test/python/ImportModuleTest.py
   test/python/IPeaksWorkspaceTest.py
   test/python/InstrumentTest.py
+  test/python/ITableWorkspaceTest.py
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/MDHistoWorkspaceTest.py

@@ -371,6 +371,53 @@ private:
   Matrix(const Matrix&);
 };
 
+class QwtSymbol /PyName = PlotSymbol/
+{
+%TypeHeaderCode
+#include <qwt_symbol.h>
+%End
+public:
+  enum Style
+  {
+    NoSymbol = -1,
+    Ellipse,
+    Rect,
+    Diamond,
+    Triangle,
+    DTriangle,
+    UTriangle,
+    LTriangle,
+    RTriangle,
+    Cross,
+    XCross,
+    HLine,
+    VLine,
+    Star1,
+    Star2,
+    Hexagon,
+
+    StyleCnt
+  };
+
+  QwtSymbol();
+  QwtSymbol(Style st, const QBrush &bd, const QPen &pn, const QSize &s);
+
+  void setSize(const QSize &s);
+  void setSize(int a, int b = -1);
+  void setBrush(const QBrush& b);
+  void setPen(const QPen &p);
+  void setStyle (Style s);
+
+  const QBrush& brush() const;
+  const QPen& pen() const;
+  const QSize& size() const;
+  Style style() const;
+
+private:
+  QwtSymbol(const QwtSymbol&);
+};
+
+
 class ArrowMarker // : QwtPlotMarker
 {
 %TypeHeaderCode
@@ -435,6 +482,91 @@ public:
 private:
   LegendWidget(const LegendWidget&);
 };
+
+class QwtPlotSpectrogram
+{
+%TypeHeaderCode
+#include <qwt_plot_spectrogram.h>
+%End
+public:
+  enum DisplayMode {
+    ImageMode = 1,
+    ContourMode = 2
+  };
+
+  void setDefaultContourPen (const QPen &);
+  void setDisplayMode (DisplayMode mode, bool on = true);
+
+private:
+  QwtPlotSpectrogram(const QwtPlotSpectrogram&);
+};
+
+class Spectrogram : QwtPlotSpectrogram
+{
+%TypeHeaderCode
+#include "src/Spectrogram.h"
+%End
+public:
+
+  Matrix * matrix();
+
+  int levels();
+  void setLevelsNumber(int);
+  void setContourLevels (SIP_PYTUPLE);
+%MethodCode
+  QList<double> l;
+  int n = PyTuple_Size(a0);
+  for (int i=0; i<n; i++) {
+    PyObject *element = PyTuple_GET_ITEM(a0,i);
+    if (element) {
+    l << PyFloat_AS_DOUBLE(element);
+    Py_DECREF(element);
+   } else {
+    sipIsErr = 1;
+    break;
+    }
+  }
+  sipCpp->setContourLevels(l);
+%End
+
+  bool hasColorScale();
+  int colorScaleAxis();
+  void showColorScale(int axis, bool on = true);
+
+  int colorBarWidth();
+  void setColorBarWidth(int width);
+
+  void setGrayScale();
+  void setDefaultColorMap();
+
+  void loadColorMap(const QString& file) /PyName=changeColorMap/;
+
+  bool hasLabels();
+  void showContourLineLabels(bool show = true);
+
+  QFont labelsFont();
+  void setLabelsFont(const QFont& font);
+
+  QColor labelsColor();
+  void setLabelsColor(const QColor& c);
+
+  bool labelsWhiteOut();
+  void setLabelsWhiteOut(bool whiteOut = true);
+
+  double labelsXOffset();
+  double labelsYOffset();
+  void setLabelsOffset(double x, double y);
+
+  double labelsRotation();
+  void setLabelsRotation(double angle);
+
+  void setColorMapPen(bool on = true);
+  void setContourLinePen(int, const QPen &);
+
+private:
+  Spectrogram(const Spectrogram&);
+};
+
 
 class Grid // : QwtPlotGrid
 {
@@ -538,6 +670,9 @@ public:
   void setCurveLineColor(int, QColor);
   void setCurveLineStyle(int, Qt::PenStyle);
   void setCurveLineWidth(int, double);
+  void setCurveSymbol(int, const QwtSymbol&);
+  void setCurvePen(int, const QPen&);
+  void setCurveBrush(int, const QBrush&);
 
 	void addFunction(const QString&, double, double, int=100);
 %MethodCode
@@ -640,6 +775,12 @@ public:
   void setAutoscaleFonts(bool = true);
   void setAntialiasing(bool on = true, bool update = true);
 
+  Spectrogram* spectrogram();
+
+  void updateWaterfallFill(bool on = true) /PyName=enableWaterfallFill/;
+  void setWaterfallFillColor(const QColor&);
+  void setWaterfallOffset(int x, int y, bool = true);
+
 private:
   Graph(const Graph&);
 };
@@ -675,6 +816,8 @@ public:
   void exportImage(const QString& fileName, int quality = 100, bool transparent = false);
   void exportVector(const QString& fileName, int res = 0, bool color = true,
                     bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
+
+  void reverseWaterfallOrder();
 
 private:
   MultiLayer(const MultiLayer&);
@@ -852,6 +995,28 @@ public:
   QStringList l;
   l << *a1;
   sipRes = sipCpp->multilayerPlot(a0, l, a2);
+%End
+
+  MultiLayer *waterfallPlot(Table*, SIP_PYTUPLE);
+%MethodCode
+  if (a0 == 0) {
+     sipIsErr = 1;
+     PyErr_Format(PyExc_ValueError, "Invalid table in argument to waterfallPlot().");
+  } else {
+    QStringList l;
+    int n = PyTuple_Size(a1);
+    for (int i=0; i<n; i++) {
+    PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
+    if (str) {
+      l << PyString_AsString(str);
+      Py_DECREF(str);
+     } else {
+      sipIsErr = 1;
+      break;
+    }
+    }
+    sipRes = sipCpp->waterfallPlot(a0, l);
+  }
 %End
 
 	Matrix* importImage(const QString&);
@@ -1307,6 +1472,7 @@ public:
   MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
   MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+  void convertToWaterfall(MultiLayer*);
 
   // Methods relating to creating or getting handles to GUI objects
   MantidMatrix* getMantidMatrix(const QString &);

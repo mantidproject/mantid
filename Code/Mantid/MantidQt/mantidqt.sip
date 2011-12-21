@@ -182,6 +182,15 @@ void SliceViewer::setWorkspace(const QString & wsName)
    
 %End
 
+  QString getWorkspaceName() const;
+%Docstring
+QString SliceViewer::getWorkspaceName()
+---------------------------------------
+    @return the name of the workspace selected, or a blank string
+    if no workspace is set.
+   
+%End
+
   void showControls(bool visible);
 %Docstring
 void SliceViewer::showControls(bool visible)
@@ -189,6 +198,18 @@ void SliceViewer::showControls(bool visible)
     Programmatically show/hide the controls (sliders etc)
    
     @param visible :: true if you want to show the controls.
+   
+%End
+
+  void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
+%Docstring
+void SliceViewer::openFromXML(const QString & xml)
+--------------------------------------------------
+    Opens a workspace and sets the view and slice points
+    given the XML from the MultiSlice view in XML format.
+   
+    @param xml :: string describing workspace, slice point, etc.
+    @throw std::runtime_error if error in parsing XML
    
 %End
 
@@ -448,7 +469,7 @@ void SliceViewer::setColorScaleAutoFull()
    
 %End
 
-  void setColorScaleAutoSlice();
+  void setColorScaleAutoSlice() ;
 %Docstring
 void SliceViewer::setColorScaleAutoSlice()
 ------------------------------------------
@@ -461,6 +482,7 @@ void SliceViewer::setColorScaleAutoSlice()
 
 
 };
+
 
 
 

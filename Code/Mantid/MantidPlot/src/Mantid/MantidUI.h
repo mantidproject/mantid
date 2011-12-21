@@ -377,6 +377,8 @@ public slots:
     void copyRowsToWaterfall();
     // Slot callable from Workspace menu item
     void plotWholeAsWaterfall();
+    /// Common method to convert a plot of a set of spectra into a waterfall plot
+    void convertToWaterfall(MultiLayer* ml);
 
     // Execute selected algorithm
     void executeAlgorithm();
@@ -488,9 +490,6 @@ private:
   
   /// This method accepts user inputs and executes loadraw/load nexus algorithm
   void executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
-
-  /// Common method to convert a plot of a set of spectra into a waterfall plot
-  void convertToWaterfall(MultiLayer* ml);
 
     // Private variables
 
