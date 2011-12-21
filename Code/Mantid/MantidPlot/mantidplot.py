@@ -220,6 +220,8 @@ def __doSliceViewer(wsname, xydim=None, slicepoint=None,
     @return SliceViewerWindow widget
     """
     import mantidqtpython
+    from PyQt4 import QtCore
+    
     svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
     svw.show()
     
