@@ -916,7 +916,7 @@ void LoadEventNexus::makeMapToEventLists()
 
     // determine maximum pixel id
     detid2det_map::iterator it;
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    for (it = detector_map.begin(); it != detector_map.end(); ++it)
     {
       if (it->first > eventid_max) eventid_max = it->first;
     }
@@ -979,7 +979,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   map<string, string> entries = file.getEntries();
   map<string,string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  for (; it != entries.end(); it++)
+  for (; it != entries.end(); ++it)
   {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
@@ -1020,7 +1020,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (doOneBank && !monitors)
   {
     bool foundIt = false;
-    for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); it++)
+    for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); ++it)
     {
       if (*it == ( onebank + "_events") )
       {
@@ -1207,7 +1207,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
     // get the units
     std::vector<AttrInfo> infos = file.getAttrInfos();
     std::string units("");
-    for (std::vector<AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); it++)
+    for (std::vector<AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it)
     {
       if (it->name.compare("units") == 0)
       {
@@ -1634,7 +1634,7 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObje
   if (classType == "NXmonitor")
   {
     std::vector<std::string> bankNames;
-    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); it++)
+    for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
     {
       std::string entry_name(it->first);
       std::string entry_class(it->second);

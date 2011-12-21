@@ -1504,7 +1504,7 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const size_t numberofspectra)
             it = m_spec_list.erase(it);
           }
           else
-            it++;
+            ++it;
 
       }
       if (m_spec_list.size() == 0) m_list = false;

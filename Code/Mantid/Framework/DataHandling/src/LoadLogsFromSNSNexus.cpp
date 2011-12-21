@@ -96,7 +96,7 @@ void LoadLogsFromSNSNexus::exec()
 
   ::NeXus::Info info;
   map<string,string>::const_iterator it = entries.begin();
-  for (; it != entries.end(); it++)
+  for (; it != entries.end(); ++it)
   {
     std::string entry_name(it->first);
     std::string entry_class(it->second);

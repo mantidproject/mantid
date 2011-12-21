@@ -124,7 +124,7 @@ namespace Mantid
                 if (write_dx) file << " , DX" << spec;
             }
         else
-            for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
+            for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
             {
                 file << " , Y" << *spec << " , E" << *spec;
                 if (write_dx) file << " , DX" << *spec;
@@ -155,7 +155,7 @@ namespace Mantid
                     file << sep << ws->readY(spec)[bin] << sep << ws->readE(spec)[bin];
                 }
             else
-                for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
+                for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
                 {
                     file << sep << ws->readY(*spec)[bin] << sep << ws->readE(*spec)[bin];
                 }

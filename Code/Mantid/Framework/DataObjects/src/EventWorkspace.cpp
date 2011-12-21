@@ -348,7 +348,7 @@ namespace DataObjects
   {
     Mantid::API::EventType out = Mantid::API::TOF;
     for (EventListVector::const_iterator it = this->data.begin();
-        it != this->data.end(); it++)
+        it != this->data.end(); ++it)
     {
       Mantid::API::EventType thisType = (*it)->getEventType();
       if (static_cast<int>(out) < static_cast<int>(thisType))

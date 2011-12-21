@@ -255,7 +255,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
     std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
     if (it->second != period)
         p->addValue(it->first,false);
-    for(;it!=pMap.end();it++)
+    for(;it!=pMap.end();++it)
         p->addValue(it->first, (it->second == period) );
 
     return p;

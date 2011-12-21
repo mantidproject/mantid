@@ -126,7 +126,7 @@ namespace DataHandling
     int64_t number=0;
 
     detid2det_map::const_iterator it;
-    for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+    for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
     {
       detid_t detectorID = it->first;
       Geometry::IDetector_const_sptr det = it->second;

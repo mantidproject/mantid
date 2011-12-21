@@ -172,7 +172,7 @@ namespace DataHandling
     std::map<detid_t, bool> selects;
 
     detid2det_map::const_iterator it;
-    for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+    for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
     {
       detid_t detectorID = it->first;
       Geometry::IDetector_const_sptr det = it->second;
@@ -261,7 +261,7 @@ namespace DataHandling
     double difcRef = sinThetaRef*(l1+refl2)/CONSTANT;
 
     // Loop over all detectors in instrument to find the offset
-    for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+    for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
     {
       int detectorID = it->first;
       Geometry::IDetector_const_sptr det = it->second;
@@ -419,7 +419,7 @@ namespace DataHandling
     std::vector<VulcanCorrectionFactor> * results = file.loadAll();
     if (results)
     {
-      for (std::vector<VulcanCorrectionFactor>::iterator it = results->begin(); it!= results->end(); it++)
+      for (std::vector<VulcanCorrectionFactor>::iterator it = results->begin(); it!= results->end(); ++it)
       {
         //std::cout << it->pixelID << " :! " << it->factor << std::endl;
         vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
