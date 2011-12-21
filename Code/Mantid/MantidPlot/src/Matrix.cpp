@@ -241,7 +241,7 @@ void Matrix::restore(const QStringList &lst)
   if (l[0] == "Formula")
     formula_str = l[1];
   else if (l[0] == "<formula>"){
-    for(formula_str=""; i != lst.end() && *i != "</formula>"; i++)
+    for(formula_str=""; i != lst.end() && *i != "</formula>"; ++i)
       formula_str += *i + "\n";
     formula_str.truncate(formula_str.length()-1);
     ++i;

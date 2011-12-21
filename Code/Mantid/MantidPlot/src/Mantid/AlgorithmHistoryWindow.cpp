@@ -240,7 +240,7 @@ AlgExecSummaryGrpBox* AlgorithmHistoryWindow::createExecSummaryGrpBox()
     //iterating through algorithm history to display exec duration,date
     //last executed algorithm exec duration,date will be displayed in gruopbox
     for (std::vector <AlgorithmHistory>::const_iterator algIter= m_algHist.begin( );
-	 algIter != m_algHist.end( ); algIter++ )
+	 algIter != m_algHist.end( ); ++algIter )
     {
       double duration=0;
       duration=(*algIter).executionDuration();
@@ -335,8 +335,8 @@ void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 	
   QTreeWidgetItem * item= new	QTreeWidgetItem(QStringList(algName),QTreeWidgetItem::Type);
   if(m_Historytree)m_Historytree->addTopLevelItem(item);
-  ralgHistory_Iter++;
-  for ( ; ralgHistory_Iter != m_algHist.rend( ) ; ralgHistory_Iter++ )
+  ++ralgHistory_Iter;
+  for ( ; ralgHistory_Iter != m_algHist.rend( ) ; ++ralgHistory_Iter )
   {
     algrithmName=(*ralgHistory_Iter).name();
     nAlgVersion=(*ralgHistory_Iter).version();
