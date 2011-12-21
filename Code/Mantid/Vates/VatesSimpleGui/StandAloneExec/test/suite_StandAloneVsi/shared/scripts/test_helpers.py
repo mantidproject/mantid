@@ -1,5 +1,5 @@
 import os
-def openFile(filename):
+def open_file(filename):
     activateItem(waitForObjectItem(":_QMenuBar", "File"))
     activateItem(waitForObjectItem(":File_QMenu", "Open"))
     ctx = currentApplicationContext()
@@ -29,7 +29,7 @@ def openFile(filename):
     fileDialog_OkButton = waitForObject(":Open File:  (open multiple files with <ctrl> key.).OK_QPushButton")
     clickButton(fileDialog_OkButton)
 
-def quitProgram():
+def quit_program():
     activateItem(waitForObjectItem(":_QMenuBar", "File"))
     activateItem(waitForObjectItem(":File_QMenu", "Exit"))
     
@@ -38,11 +38,11 @@ def switch_mode(mode):
 
 def set_ptw_lineedit_property(object, value):
     lineedit = waitForObject(object)
-    #mouseClick(lineedit, 1, 1, 0, Qt.LeftButton)
-    #lineedit.text = str(value)
-    lineedit.clear()
-    type(lineedit, value)
-    #lineedit.setText(str(value))
+    N = lineedit.text.length()
+    for i in range(N):
+        lineedit.cursorBackward(True)
+        type(lineedit, "<Del>")
+    lineedit.text = str(value)
 
 def apply_ptw_settings():
     clickButton(waitForObject(":objectInspector.Apply_QPushButton"))

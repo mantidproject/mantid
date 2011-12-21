@@ -3,10 +3,13 @@ def main():
     source(findFile("scripts", "test_helpers.py"))
     source(findFile("scripts", "common_checks.py"))
     startApplication("VatesSimpleGui")
-    openFile("MDEW_4D.nxs")
+    open_file("MDEW_4D.nxs")
 
     clickButton(waitForObject(":splitter_2.Rebin_QPushButton"))
-    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_4", "3")
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit", 100)
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_2", 100)
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_3", 100)
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_4", 3)
     apply_ptw_settings()
 
     switch_mode("multiSlice")
@@ -19,5 +22,5 @@ def main():
     
     mouseDrag(waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 137, 170, -95, 9, 1, Qt.LeftButton)
     
-    quitProgram()
+    quit_program()
 

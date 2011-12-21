@@ -3,7 +3,7 @@ def main():
     source(findFile("scripts", "test_helpers.py"))
     source(findFile("scripts", "common_checks.py"))
     startApplication("VatesSimpleGui")
-    openFile("MDEW_4D.nxs")
+    open_file("MDEW_4D.nxs")
     switch_mode("threeSlice")
     check_mode_buttons(std=True, ms=True, ts=False, sp=True)
     
@@ -11,5 +11,5 @@ def main():
     mouseClick(waitForObject(":mainRenderFrame.Viewport_pqQVTKWidget"), 184, 191, 0, Qt.LeftButton)
     mouseDrag(waitForObject(":mainRenderFrame.Viewport_pqQVTKWidget"), 156, 214, 1, -20, 1, Qt.LeftButton)
     
-    quitProgram()
+    quit_program()
 
