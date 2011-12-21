@@ -2366,7 +2366,7 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 			break;
 
 		default:
-			;
+			break;
 	}
 	s+=st+"\n";
 

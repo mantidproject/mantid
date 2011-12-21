@@ -523,10 +523,10 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
     propList.append(sProperty.c_str());
     sProperty=(*pIter).value();
     propList.append(sProperty.c_str());
-		
+
     bisDefault=(*pIter).isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
-		
+
     propList.append(sProperty.c_str());
     nDirection=(*pIter).direction();
     switch(nDirection)
@@ -534,7 +534,7 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
     case 0:{sProperty="Input";break;}
     case 1:{sProperty="Output";break;}
     case 2:{sProperty="InOut";break;}
-    default:sProperty="N/A";
+    default:{sProperty="N/A";break;}
     }
     propList.append(sProperty.c_str());
     QTreeWidgetItem * item= new	QTreeWidgetItem(propList);
