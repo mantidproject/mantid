@@ -65,18 +65,28 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
 )
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh "#!/bin/sh\n"
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh "#!/bin/sh\n"
+                                                         "ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.csh /etc/profile.d/mantid.csh\n"
 )
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh "#!/bin/sh\n"
+                                                         "ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+)
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
+                                                             "rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "if [ -f /etc/profile.d/mantid.sh ]; then\n"
 							     "  rm /etc/profile.d/mantid.sh\n"
 							     "fi\n"
                                                              "if [ -f /etc/profile.d/mantid.csh ]; then\n"
 							     "  rm /etc/profile.d/mantid.csh\n"
 							     "fi\n"
+)
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
+                                                             "rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root
@@ -94,7 +104,10 @@ unset ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE )
 # set install/uninstall scripts as desired
 set ( ENVVARS_ON_INSTALL ON CACHE BOOL "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
 if ( ENVVARS_ON_INSTALL )
-  set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh )
+  set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
+  set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh )
+  set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
+else ( ENVVARS_ON_INSTALL )
   set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh )
   set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh )
 endif ()
