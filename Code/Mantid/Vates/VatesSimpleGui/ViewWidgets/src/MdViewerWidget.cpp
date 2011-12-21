@@ -365,6 +365,9 @@ void MdViewerWidget::checkForUpdates()
   vtkSMProxy *proxy = src->getProxy();
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
+    const char *geomXML = vtkSMPropertyHelper(src->getProxy(),
+                                              "InputGeometryXML").GetAsString();
+    std::cout << "A: " << geomXML << std::endl;
     this->currentView->resetDisplay();
     this->currentView->onAutoScale();
     this->currentView->setAxisScales();

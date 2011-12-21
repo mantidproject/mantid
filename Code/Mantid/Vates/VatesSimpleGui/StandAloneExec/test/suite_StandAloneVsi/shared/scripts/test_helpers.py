@@ -38,11 +38,50 @@ def switch_mode(mode):
 
 def set_ptw_lineedit_property(object, value):
     lineedit = waitForObject(object)
-    lineedit.setText(str(value))
+    #mouseClick(lineedit, 1, 1, 0, Qt.LeftButton)
+    #lineedit.text = str(value)
+    lineedit.clear()
+    type(lineedit, value)
+    #lineedit.setText(str(value))
 
 def apply_ptw_settings():
     clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+
+def make_slice(axisScaleName, coordinate):
+    axisScale = waitForObject(":splitter_2.%s_Mantid::Vates::SimpleGui::AxisInteractor" % axisScaleName)
+    ext = None
+    if axisScaleName[0] == "x":
+        ext = ""
+    if axisScaleName[0] == "y":
+        ext = "_2"
+    if axisScaleName[0] == "z":
+        ext = "_3"
+        
+    scaleWidget = waitForObject(":splitter_2_QwtScaleWidget%s" % ext)
+        
+    sp = axisScale.scalePosition
+    min = axisScale.getMinimum
+    max = axisScale.getMaximum
+    delta = max - min
+    width = -1
+    height = -1
+    if sp in (0, 1):
+        width = scaleWidget.width
+        height = axisScale.height
+    else:
+        width = scaleWidget.height
+        height = axisScale.width
+
+    scaleFactor = delta/height
+    #test.log("%s: %d, %d" % (axisScaleName, width, height))
+    y = height / 2
     
-def pause(seconds=1):
-    import time
-    time.sleep(seconds)
+    if sp in (0, 2):
+        x = 1
+    else:
+        x = width - 1
+    
+    if sp in (0, 1):
+        mouseClick(scaleWidget, x, y, 0, Qt.LeftButton)
+    else:
+        mouseClick(scaleWidget, y, x, 0, Qt.LeftButton)
