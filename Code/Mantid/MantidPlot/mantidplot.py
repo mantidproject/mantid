@@ -46,7 +46,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
 
 #-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
-    """Open a 1D Plot of a spectrum in a workspace
+    """Create a 1D Plot of a bin or bins in a workspace
     
     @param source :: workspace or name of a workspace
     @param indices :: workspace index or list of workspace indices to plot
@@ -54,7 +54,39 @@ def plotBin(source, indices, error_bars = False, type = 0):
     """
     return __doPlotting(source,indices,error_bars,type)
 
-
+#-----------------------------------------------------------------------------
+def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
+    """Generate a stem-and-leaf plot from an input table column or workspace spectrum
+    
+    Args:
+        source: A reference to a workspace or a table.
+        index: For a table, the column number or name. For a workspace, the workspace index.
+        power: The stem unit as a power of 10. If not provided, a dialog will appear with a
+            suggested value.
+        startPoint: The first point (row or bin) to use (Default: the first one).
+        endPoint: The last point (row or bin) to use (Default: the last one).
+        
+    Returns:
+        A string representation of the stem plot
+    """
+    # Turn the optional arguments into the magic numbers that the C++ expects
+    if power==None:
+        power=1001
+    if startPoint==None:
+        startPoint=0
+    if endPoint==None:
+        endPoint=-1
+    # If the source is a workspace, create a table from the specified index
+    if isinstance(source,WorkspaceProxy):
+        wsName = source.getName()
+        source = qti.app.mantidUI.workspaceToTable(wsName,wsName,[index],False,True)
+        # The C++ stemPlot method takes the name of the column, so get that
+        index = source.colName(2)
+    # Get column name if necessary
+    if isinstance(index, int):
+        index = source.colName(index)
+    # Call the C++ method
+    return qti.app.stemPlot(source,index,power,startPoint,endPoint)
 
 #-----------------------------------------------------------------------------
 def plotSlice(source, xydim=None, slicepoint=None,
