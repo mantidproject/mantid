@@ -2763,6 +2763,16 @@ int Graph::curveIndex(QwtPlotCurve *c) const
   return plotItemIndex(c);
 }
 
+//! get curve title string by index (convenience function for scripts)
+QString Graph::curveTitle(int index)
+{
+        QwtPlotItem *item = plotItem(index);
+        if (item)
+                return item->title().text();
+
+        return QString::null;
+}
+
 int Graph::range(int index, double *start, double *end)
 {
   if (d_range_selector && d_range_selector->selectedCurve() == curve(index)) {

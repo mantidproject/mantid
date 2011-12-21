@@ -265,6 +265,8 @@ public slots:
   QwtPlotCurve* curve(int index);
   //! get curve by name
   QwtPlotCurve* curve(const QString &title){return curve(curveIndex(title));}
+  //! get curve title string by index (convenience function for scripts)
+  QString curveTitle(int index);
 
   //! Returns the names of all the curves suitable for data analysis, as a string list. The list excludes error bars and spectrograms.
   QStringList analysableCurvesList();

@@ -666,6 +666,7 @@ public:
   void removeCurve(int);
   void removeCurve(const QString&);
   int curves() /PyName=numCurves/;
+  QString curveTitle(int);
 
   void setCurveLineColor(int, int);
   void setCurveLineColor(int, QColor);
@@ -775,6 +776,28 @@ public:
   void setIgnoreResizeEvents(bool = true)/PyName=setIgnoreResize/;
   void setAutoscaleFonts(bool = true);
   void setAntialiasing(bool on = true, bool update = true);
+
+  void setCurveAxes(int,int,int);
+%MethodCode
+    sipIsErr = 0;
+    if ((a1)>1 || (a1<0) || (a2>1) || (a2<0))
+    {
+      sipIsErr=1;
+      PyErr_Format(PyExc_ValueError, "Invalid axis attachment!");\
+    }
+    if (a0>=sipCpp->curves() || a0<0)
+    {
+      sipIsErr=1;
+      PyErr_Format(PyExc_ValueError, "Invalid curve index! is %d, should be less than %d",a0,sipCpp->curves());\
+    }
+    if (sipIsErr == 0)
+    {
+      QwtPlotItem* pItem;
+      pItem = sipCpp->plotItem(a0);
+      pItem->setAxis(a1 + 2, a2);
+      sipCpp->setAutoScale();
+    }
+%End
 
   Spectrogram* spectrogram();
 
