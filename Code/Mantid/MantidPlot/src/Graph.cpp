@@ -5099,7 +5099,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
         colorMap.addColorStop(l[0].toDouble(), QColor(l[1]));
       }
       sp->setCustomColorMap(colorMap);
-      line++;
+      ++line;
     }
     else if (s.contains("<Image>"))
     {
@@ -5145,7 +5145,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
         colorAxis->setColorBarWidth(width);
         colorAxis->setColorBarEnabled(true);
       }
-      line++;
+      ++line;
     }
     else if (s.contains("<Visible>"))
     {

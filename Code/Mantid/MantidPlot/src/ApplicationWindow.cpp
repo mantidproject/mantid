@@ -10687,7 +10687,7 @@ Matrix* ApplicationWindow::openMatrix(ApplicationWindow* app, const QStringList 
     } else if (fields[0] == "<ColorMap>"){// d_file_version > 90
       QStringList lst;
       while ( *line != "</ColorMap>" ){
-        line++;
+        ++line;
         lst << *line;
       }
       lst.pop_back();
@@ -10695,7 +10695,7 @@ Matrix* ApplicationWindow::openMatrix(ApplicationWindow* app, const QStringList 
     } else // <data> or values
       break;
   }
-  if (*line == "<data>") line++;
+  if (*line == "<data>") ++line;
 
   //read and set table values
   for (; line!=flist.end() && *line != "</data>"; line++){

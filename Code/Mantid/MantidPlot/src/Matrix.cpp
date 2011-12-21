@@ -244,7 +244,7 @@ void Matrix::restore(const QStringList &lst)
     for(formula_str=""; i != lst.end() && *i != "</formula>"; i++)
       formula_str += *i + "\n";
     formula_str.truncate(formula_str.length()-1);
-    i++;
+    ++i;
   }
 
   l = (*i++).split("\t");
@@ -270,7 +270,7 @@ void Matrix::restore(const QStringList &lst)
     QStringList aux;
     while (*i != "</ColorMap>"){
       aux << *i;
-      i++;
+      ++i;
     }
     setColorMap(aux);
   }
