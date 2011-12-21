@@ -93,6 +93,21 @@ namespace Factory
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Returns every previously-open instance of a SliceViewerWindow.
+   */
+  void WidgetFactory::getAllSliceViewerWindows(std::vector<MantidQt::SliceViewer::SliceViewerWindow*>& output)
+  {
+    output.clear();
+    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
+    for (it = m_windows.begin(); it != m_windows.end(); it++)
+    {
+      QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
+      if (window)
+        output.push_back(window);
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Create an instance of a bare SliceViewer Widget.
    * This is only capable of doing 2D views, and cannot do line plots
    * since it does not have a LineViewer.

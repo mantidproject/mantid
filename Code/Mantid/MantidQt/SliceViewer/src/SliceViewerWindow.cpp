@@ -48,7 +48,9 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
   // Set up the window
   m_label = label;
-  this->setCaption(QString("Slice Viewer (") + wsName + QString(")") + m_label);
+  QString caption = QString("Slice Viewer (") + wsName + QString(")");
+  if (!m_label.isEmpty()) caption += QString(" ") + m_label;
+  this->setCaption(caption);
   this->resize(500, 500);
 
   // Create the m_slicer and add it to the MDI window

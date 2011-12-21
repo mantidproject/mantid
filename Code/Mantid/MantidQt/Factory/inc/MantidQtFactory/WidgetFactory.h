@@ -9,6 +9,7 @@
 #include "qapplication.h"
 #include <Qsci/qscilexer.h>
 #include <QtCore/QtCore>
+#include <QVector>
 
 namespace MantidQt
 {
@@ -48,7 +49,9 @@ namespace Factory
   public:
     static WidgetFactory* Instance();
     virtual ~WidgetFactory();
+
     MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+    void getAllSliceViewerWindows(std::vector<MantidQt::SliceViewer::SliceViewerWindow*>& output);
     MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label);
     MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 

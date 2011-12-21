@@ -64,73 +64,22 @@
 
 namespace MantidQt
 {
-namespace Factory
-{
-
-/***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/
-class WidgetFactory
-{
-%TypeHeaderCode
-#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
-%End
-
-public:
-  static MantidQt::Factory::WidgetFactory* Instance();
-  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
-  MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
-  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
-%Docstring
-MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QString& wsName)
--------------------------------------------------------------------------------------------
-    Create an instance of a bare SliceViewer Widget.
-    This is only capable of doing 2D views, and cannot do line plots
-    since it does not have a LineViewer.
-   
-    Use WidgetFactory::createSliceViewerWindow to create a window combining both.
-   
-    @param wsName :: name of the workspace to show. Optional, blank for no workspace.
-    @return the created SliceViewer *
-   
-%End
-
-
-private:
-  WidgetFactory();
-%Docstring
-WidgetFactory::WidgetFactory()
-------------------------------
-    Constructor
-   
-%End
-
-
-};
-
-}; // end namespace
-}; // end namespace
-
-
-
-namespace MantidQt
-{
 namespace SliceViewer
 {
 
 
-/***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/
-class SliceViewerWindow : QMainWindow
-{
-%TypeHeaderCode
-#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
-%End
+  /***************************************************************************/
+  /***************************************************************************/
+  /***************************************************************************/
+  class SliceViewerWindow : QMainWindow
+  {
+  %TypeHeaderCode
+  #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
+  %End
 
-public:
-  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
-  MantidQt::SliceViewer::SliceViewer* getSlicer();
+  public:
+    SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
+    MantidQt::SliceViewer::SliceViewer* getSlicer();
 %Docstring
 MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
 ------------------------------------------------------------------
@@ -142,7 +91,7 @@ MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
    
 %End
 
-  MantidQt::SliceViewer::LineViewer* getLiner();
+    MantidQt::SliceViewer::LineViewer* getLiner();
 %Docstring
 MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 ----------------------------------------------------------------
@@ -154,9 +103,9 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
    
 %End
 
-  const QString& getLabel() const;
+    const QString& getLabel() const;
 
-};
+  };
 
 
 /***************************************************************************/
@@ -496,7 +445,64 @@ void SliceViewer::setColorScaleAutoSlice()
 };
 
 
+}; // end namespace
+}; // end namespace
 
+
+
+
+
+
+
+
+namespace MantidQt
+{
+namespace Factory
+{
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class WidgetFactory
+{
+%TypeHeaderCode
+#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
+#include <QVector>
+%End
+
+public:
+  static MantidQt::Factory::WidgetFactory* Instance();
+  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+  MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
+%Docstring
+MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QString& wsName)
+-------------------------------------------------------------------------------------------
+    Create an instance of a bare SliceViewer Widget.
+    This is only capable of doing 2D views, and cannot do line plots
+    since it does not have a LineViewer.
+   
+    Use WidgetFactory::createSliceViewerWindow to create a window combining both.
+   
+    @param wsName :: name of the workspace to show. Optional, blank for no workspace.
+    @return the created SliceViewer *
+   
+%End
+
+
+private:
+  WidgetFactory();
+%Docstring
+WidgetFactory::WidgetFactory()
+------------------------------
+    Constructor
+   
+%End
+
+
+};
 
 }; // end namespace
 }; // end namespace
+
+

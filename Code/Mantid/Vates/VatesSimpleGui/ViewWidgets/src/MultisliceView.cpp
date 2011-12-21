@@ -617,7 +617,7 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
                                                                origin));
   rks.setImplicitFunction(impplane);
   //std::cout << rks.createXMLString() << std::endl;
-  QString titleAddition = " "+name;
+  QString titleAddition = name;
 
   // Use the WidgetFactory to create the slice viewer window
   SliceViewerWindow *w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(wsName, titleAddition);

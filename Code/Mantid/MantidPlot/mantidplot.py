@@ -90,7 +90,7 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
     return qti.app.stemPlot(source,index,power,startPoint,endPoint)
 
 #-----------------------------------------------------------------------------
-def plotSlice(source, xydim=None, slicepoint=None,
+def plotSlice(source, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
                     limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
@@ -98,6 +98,7 @@ def plotSlice(source, xydim=None, slicepoint=None,
     @param source :: one workspace, or a list of workspaces
         
     The following are optional keyword arguments:
+    @param label :: label for the window title
     @param xydim :: indexes or names of the dimensions to plot,
             as an (X,Y) list or tuple.
             See SliceViewer::setXYDim()
@@ -128,7 +129,7 @@ def plotSlice(source, xydim=None, slicepoint=None,
     # Make a list of widgets to return
     out = []
     for wsname in workspace_names:
-        window = __doSliceViewer(wsname, 
+        window = __doSliceViewer(wsname, label=label,
            xydim=xydim, slicepoint=slicepoint, colormin=colormin,
            colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
            **kwargs) 
@@ -293,19 +294,20 @@ def __getWorkspaceNames(source):
     return ws_names
     
 #-----------------------------------------------------------------------------
-def __doSliceViewer(wsname, xydim=None, slicepoint=None,
+def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
                     limits=None):
     """Open a single SliceViewerWindow for the workspace, and shows it
     
     @param wsname :: name of the workspace
+    See plotSlice() for full list of keyword parameters.
 
     @return SliceViewerWindow widget
     """
     import mantidqtpython
     from PyQt4 import QtCore
     
-    svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
+    svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow(wsname, label)
     svw.show()
     
     # -- Connect to main window's shut down signal ---
