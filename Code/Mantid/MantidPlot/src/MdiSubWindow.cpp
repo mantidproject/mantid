@@ -355,10 +355,13 @@ void MdiSubWindow::goMdi()
 /**
  * Constructor.
  */
-FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):QMainWindow(NULL,f)
+FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
+QMainWindow(appWindow,f),
+d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);
   connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
+  m_flags = windowFlags();
 }
 
 /**
@@ -374,9 +377,29 @@ bool FloatingWindow::event(QEvent * e)
     {
       w = dynamic_cast<MdiSubWindow*>(w_t->widget());
     }
-    if (w)
+    if (w && this != w->d_app->getActiveFloating())
     {
       w->d_app->activateWindow(w);
+    }
+  }
+  else if (e->type() == QEvent::WindowStateChange)
+  {
+    if (this->isMinimized())
+    {
+      this->setParent(NULL);
+      this->showMinimized();
+    }
+    else if ( (!this->isMaximized() || !this->isMinimized() ) && this->parent() != d_app)
+    {
+      this->setParent(d_app);
+      this->setWindowFlags(m_flags);
+      this->showNormal();
+    }
+    else if (this->isMaximized() && this->parent() != d_app)
+    {
+      this->setParent(d_app);
+      this->setWindowFlags(m_flags);
+      this->showMaximized();
     }
   }
   return QMainWindow::event(e);
@@ -385,15 +408,21 @@ bool FloatingWindow::event(QEvent * e)
 void FloatingWindow::setStaysOnTopFlag()
 {
   Qt::WindowFlags flags = windowFlags();
-  flags |= Qt::WindowStaysOnTopHint;
-  setWindowFlags(flags);
-  show();
+  Qt::WindowFlags new_flags = flags | Qt::WindowStaysOnTopHint;
+  if (new_flags != flags)
+  {
+    setWindowFlags(new_flags);
+    show();
+  }
 }
 
 void FloatingWindow::removeStaysOnTopFlag()
 {
   Qt::WindowFlags flags = windowFlags();
-  flags ^= Qt::WindowStaysOnTopHint;
-  setWindowFlags(flags);
-  show();
+  Qt::WindowFlags new_flags = flags ^ Qt::WindowStaysOnTopHint;
+  if (new_flags != flags)
+  {
+    setWindowFlags(new_flags);
+    show();
+  }
 }

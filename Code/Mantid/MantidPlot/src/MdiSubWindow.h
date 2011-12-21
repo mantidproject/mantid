@@ -258,11 +258,13 @@ class FloatingWindow: public QMainWindow
 {
   Q_OBJECT
 public:
-  FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f);
+  FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
 protected:
   virtual bool event(QEvent * e);
+  ApplicationWindow* d_app;
+  Qt::WindowFlags m_flags;
 };
 
 #endif

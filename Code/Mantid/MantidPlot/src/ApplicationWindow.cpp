@@ -201,7 +201,7 @@ void file_uncompress(const char  *file);
 
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),xxx(NULL)
+: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),blockWindowActivation(false)
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
@@ -3391,29 +3391,6 @@ void ApplicationWindow::windowActivated(QMdiSubWindow *w)
 
   activateWindow(qti_subwin);
 
-  //if( d_active_window && d_active_window == qti_subwin ) return;
-
-  //d_active_window = qti_subwin;
-  //customToolBars(qti_subwin);
-  //customMenu(qti_subwin);
-
-  //if (d_opening_file) return;
-
-  //QList<MdiSubWindow *> windows = current_folder->windowsList();
-  //foreach(MdiSubWindow *ow, windows){
-  //  QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(ow->parent());
-  //  if (qw && qw != w && qw->isMaximized())
-  //  {
-  //    ow->setNormal();
-  //    break;
-  //  }
-  //}
-
-  //Folder *f = qti_subwin->folder();
-  //if (f)
-  //  f->setActiveWindow(qti_subwin);
-
-  //emit modified();
 }
 
 void ApplicationWindow::addErrorBars()
@@ -8384,18 +8361,43 @@ void ApplicationWindow::activateWindow()
   activateWindow(it->window());
 }
 
+/**
+ * Activate a new MdiSubWindow: update the menu, tool bars, and folders.
+ * @param w :: Subwindow to activate.
+ */
 void ApplicationWindow::activateWindow(MdiSubWindow *w)
 {
-  if (!w) return;
+
+  if (blockWindowActivation) return;
 
   if( d_active_window == w ) return;
+
+  //FloatingWindow* fw = getActiveFloating();
+  //if (fw)
+  //{
+  //  blockWindowActivation = true;
+  //  removeStaysOnTopFlag(fw);
+  //  blockWindowActivation = false;
+  //}
+  
+  d_active_window = w;
+
+  if (!w) return;
+
+  //fw = getActiveFloating();
+  //if (fw)
+  //{
+  //  blockWindowActivation = true;
+  //  setStaysOnTopFlag(fw);
+  //  blockWindowActivation = false;
+  //}
 
   QMdiSubWindow* qw = dynamic_cast<QMdiSubWindow*>(w->parent());
   if (qw)
   {
     qw->showNormal();
   }
-  d_active_window = w;
+
   updateWindowLists(w);
 
   //----------------------------------------------------
@@ -17270,7 +17272,7 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
   connect(goMdi,SIGNAL(triggered()),w,SLOT(goMdi()));
 
   // create the outer floating window. It is not a child of ApplicationWindow.
-  FloatingWindow* fw =new FloatingWindow(this, Qt::WindowStaysOnTopHint);
+  FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
   MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(fw,0);
   wrapper->setWidget(w);
   fw->setCentralWidget(wrapper);
@@ -17328,7 +17330,7 @@ void ApplicationWindow::goMdi(FloatingWindow* fw)
  * Put the stays-on-top flag for a window.
  * @param fw :: The window to apply the flag to.
  */
-void ApplicationWindow::setStaysOnTopFlag(FloatingWindow* fw)const
+void ApplicationWindow::setStaysOnTopFlag(FloatingWindow* fw)
 {
   fw->setStaysOnTopFlag();
 }
@@ -17337,9 +17339,10 @@ void ApplicationWindow::setStaysOnTopFlag(FloatingWindow* fw)const
  * Remove the stays-on-top flag for a window.
  * @param fw :: The window to remove the flag from.
  */
-void ApplicationWindow::removeStaysOnTopFlag(FloatingWindow* fw)const
+void ApplicationWindow::removeStaysOnTopFlag(FloatingWindow* fw)
 {
   fw->removeStaysOnTopFlag();
+  this->activateWindow();
 }
 
 /**
@@ -17374,68 +17377,61 @@ bool ApplicationWindow::eventFilter(QObject *obj, QEvent *evt)
   return false;
 }
 
+/**
+ * Return a pointer to the active FloatingWindow if the active window is floating
+ * or NULL otherwise.
+ */
+FloatingWindow* ApplicationWindow::getActiveFloating() const
+{
+  if (!d_active_window || !d_active_window->parent()) return NULL;
+  return dynamic_cast<FloatingWindow*>(d_active_window->parent()->parent());
+}
+
 bool ApplicationWindow::event(QEvent * e)
 {
   if (e->type() == QEvent::WindowActivate)
   {
-    QPoint cur_pos = this->mapFromGlobal(QCursor::pos()) - menuBar()->rect().bottomLeft();
-    std::cerr << "Menu bar: ";
-    if (menuBar()->parent())
-    {
-      std::cerr << "parent " << menuBar()->parent()->className() << std::endl;
-    }
-    else
-    {
-      std::cerr << "parentless\n";
-    }
-    const QWidget* clickedWidget = NULL;
-    std::cerr << "pos: " << cur_pos.x() << ',' << cur_pos.y() << std::endl;
+    bool needToActivate = true;
 
-    QObjectList objects = this->children();
-    foreach(const QObject* obj,objects)
+    // check if old active window is a floating one and this window was activated by clicking
+    // on a tool bar - in this case we shouldn't actvate another window
+    if (getActiveFloating())
     {
-      const QToolBar* tb = dynamic_cast<const QToolBar*>(obj);
-      if (!tb || !tb->isVisible()) continue;
-      std::cerr << obj->className() 
-        << ' ' << tb->x() << ',' << tb->y() << ',' << tb->width() << ',' << tb->height()
-        << std::endl;
-      if (tb->rect().contains(cur_pos))
+      QPoint cur_pos = this->mapFromGlobal(QCursor::pos());
+      const QWidget* clickedWidget = NULL;
+      
+      if (rect().contains(cur_pos))
       {
-
-        clickedWidget = tb;
-        break;
+        clickedWidget = childAt(cur_pos);
       }
-    }
 
-    std::cerr << "ApplicationWindow activated\n";
-    if (clickedWidget)
-    {
-      std::cerr << "Cursor: " << cur_pos.x() << ',' << cur_pos.y() << ' ' 
-        << pos().x() << ',' << pos().y() << ' ' 
-        << childrenRect().topLeft().x() << ',' << childrenRect().topLeft().y() << std::endl;
-      std::cerr << "Clicked at " << clickedWidget->className() << ' ' 
-        << clickedWidget->pos().x() << ',' << clickedWidget->pos().y() << std::endl;
-      MdiSubWindow* sw = d_active_window;
-      if (sw && sw->parent() && dynamic_cast<FloatingWindow*>(sw->parent()->parent()))
+      if (clickedWidget)
       {
-        std::cerr << sw->parent()->parent()->className() << std::endl;
-        xxx = clickedWidget;
+        QString class_name = clickedWidget->className();
+        if (class_name == "QToolButton" || class_name == "QToolBar" || class_name == "QMenuBar")
+        {
+          needToActivate = false;
+        }
       }
     }
-    QMdiSubWindow* qCurrent = d_workspace->currentSubWindow();
-    if (qCurrent)
-    {
-      std::cerr << "Current " << qCurrent->windowTitle().toStdString() << std::endl;
-      MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(qCurrent->widget());
-      if (!sw)
-      {// this should never happen - all MDI subwindow widgets must inherit from MdiSubwindow
-        throw std::runtime_error("Non-MdiSubwindow widget found in MDI area");
+
+    if (needToActivate)
+    {// activate current MDI subwindow
+      QMdiSubWindow* qCurrent = d_workspace->currentSubWindow();
+      if (qCurrent)
+      {
+        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(qCurrent->widget());
+        if (!sw)
+        {// this should never happen - all MDI subwindow widgets must inherit from MdiSubwindow
+          throw std::runtime_error("Non-MdiSubwindow widget found in MDI area");
+        }
+        activateWindow(sw);
       }
-      activateWindow(sw);
+      else
+      {
+        activateWindow(NULL);
+      }
     }
-  }
-  if (e->type() == QEvent::FocusIn)
-  {
   }
   return QMainWindow::event(e);
 }
@@ -17467,26 +17463,3 @@ void ApplicationWindow::showActiveWindowInTitle()
   }
 }
 
-void ApplicationWindow::paintEvent(QPaintEvent* e)
-{
-  QMainWindow::paintEvent(e);
-  QPainter p(this);
-  p.setPen(Qt::red);
-  if (xxx)
-  {
-    p.drawRect(xxx->x(),xxx->y(),10,10);
-    //std::cerr << xxx->x() << ',' << xxx->y() << ',' << xxx->width() << ',' << xxx->height()
-    //  << std::endl;
-  }
-  //std::cerr << "--------------------------------\n";
-  //QObjectList objects = this->children();
-  //foreach(const QObject* obj,objects)
-  //{
-  //  const QToolBar* w = dynamic_cast<const QToolBar*>(obj);
-  //  if (!w || !w->isVisible()) continue;
-  //  std::cerr << obj->className() 
-  //    << ' ' << w->x() << ',' << w->y() << ',' << w->width() << ',' << w->height()
-  //    << std::endl;
-  //  p.drawRect(w->x(),w->y(),10,10);
-  //}
-}

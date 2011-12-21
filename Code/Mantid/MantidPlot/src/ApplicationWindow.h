@@ -661,7 +661,6 @@ public slots:
   void dropEvent( QDropEvent* e );
   void customEvent( QEvent* e);
   bool eventFilter(QObject *obj, QEvent *event);
-  void	paintEvent ( QPaintEvent * event );
   //@}
 
   //! \name Dialogs
@@ -1025,9 +1024,10 @@ public slots:
   void mdiWindowActivated(MdiSubWindow* w);
   void goFloat(MdiSubWindow* w);
   void goMdi(FloatingWindow* w);
-  void setStaysOnTopFlag(FloatingWindow* w)const;
-  void removeStaysOnTopFlag(FloatingWindow* w)const;
+  void setStaysOnTopFlag(FloatingWindow* w);
+  void removeStaysOnTopFlag(FloatingWindow* w);
   void removeFloatingWindow(FloatingWindow* w);
+  FloatingWindow* getActiveFloating() const;
   void showActiveWindowInTitle();
 
 signals:
@@ -1427,9 +1427,10 @@ private:
 
   // Floating windows
   QList<FloatingWindow*> m_floatingWindows;
+  // To block activating new window when a floating window is in process of resetting flags
+  bool blockWindowActivation;
 
 public:
   MantidUI *mantidUI;
-  const QWidget* xxx;
 };
 #endif
