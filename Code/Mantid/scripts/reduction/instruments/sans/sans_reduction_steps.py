@@ -1443,10 +1443,12 @@ class SampleGeomCor(ReductionStep):
                 volume = self.geo.height*math.pi
                 volume *= math.pow(self.geo.width,2)/4.0
             elif self.geo.shape == 'cuboid':
+                # Flat plate sample
                 volume = self.geo.width
                 volume *= self.geo.height*self.geo.thickness
             elif self.geo.shape == 'cylinder-axis-along':
                 # Factor of four comes from radius = width/2
+                # Disc - where height is not used
                 volume = self.geo.thickness*math.pi
                 volume *= math.pow(self.geo.width, 2)/4.0
             else:
