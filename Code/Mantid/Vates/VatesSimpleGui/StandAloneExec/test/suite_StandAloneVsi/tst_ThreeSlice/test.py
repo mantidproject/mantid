@@ -4,6 +4,13 @@ def main():
     source(findFile("scripts", "common_checks.py"))
     startApplication("VatesSimpleGui")
     open_file("MDEW_4D.nxs")
+    clickButton(waitForObject(":splitter_2.Rebin_QPushButton"))
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit", 100)
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_2", 100)
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_3", 100)
+    set_ptw_lineedit_property(":ScrollArea.Bins_QLineEdit_4", 3)
+    apply_ptw_settings()
+    
     switch_mode("threeSlice")
     check_mode_buttons(std=True, ms=True, ts=False, sp=True)
     
