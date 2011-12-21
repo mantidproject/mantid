@@ -20,7 +20,7 @@ GLActorCollection::GLActorCollection()
 
 GLActorCollection::~GLActorCollection()
 {
-	for(std::vector<GLActor*>::iterator i=mActorsList.begin();i!=mActorsList.end();i++)
+	for(std::vector<GLActor*>::iterator i=mActorsList.begin();i!=mActorsList.end();++i)
 	{
 	  delete (*i);
 	}
