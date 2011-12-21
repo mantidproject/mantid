@@ -5764,7 +5764,7 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
   return s;
 }
 
-void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString s)
+void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWindow *w, const QString& s)
 {
   if(!w) return ;
   w->hide();
