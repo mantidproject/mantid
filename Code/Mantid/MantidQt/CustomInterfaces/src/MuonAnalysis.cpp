@@ -1636,7 +1636,10 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     // Group the raw workspace
     if (!rawExists)
     {
-      m_fitDataTab->groupRawWorkspace(titleLabel.toStdString() + "_Raw", workspaceGroupName);
+      std::vector<std::string> groupWorkspaces;
+      groupWorkspaces.push_back(workspaceGroupName);
+      groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
+      m_fitDataTab->groupRawWorkspace(groupWorkspaces, workspaceGroupName);
     }
 
     // Change the plot style of the graph so that it matches what is selected on 
@@ -1782,7 +1785,10 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // Group the raw workspace
     if (!rawExists)
     {
-      m_fitDataTab->groupRawWorkspace(titleLabel.toStdString() + "_Raw", workspaceGroupName);
+      std::vector<std::string> groupWorkspaces;
+      groupWorkspaces.push_back(workspaceGroupName);
+      groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
+      m_fitDataTab->groupRawWorkspace(groupWorkspaces, workspaceGroupName);
     }    
 
     // Change the plot style of the graph so that it matches what is selected on 
@@ -2956,10 +2962,7 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 
   if (inputWorkspaces.size() > 1)
   {
-    Mantid::API::IAlgorithm_sptr group = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
-    group->setProperty("InputWorkspaces",inputWorkspaces);
-    group->setPropertyValue("OutputWorkspace", groupName);
-    group->execute();
+    m_fitDataTab->groupRawWorkspace(inputWorkspaces, groupName);
   }
 }
 

@@ -66,7 +66,7 @@ public:
   MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
 
   void makeRawWorkspace(const std::string & wsName);
-  void groupRawWorkspace(const std::string & wsName, const std::string & wsGroupName);
+  void groupRawWorkspace(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
 
 signals:
 
