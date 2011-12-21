@@ -179,7 +179,7 @@ void NormaliseToMonitor::init()
    declareProperty("MonitorSpectrum",-1,
     "The spectrum number of the monitor spectrum within the InputWorkspace");
    // set up the validator, which would verify if spectrum is correct
-   setPropertySettings("MonitorSpectrum",new PropChanger(this,"InputWorkspace","MonitorWorkspace","NofmalizeByAnySpectra"));
+   setPropertySettings("MonitorSpectrum",new PropChanger(this,"InputWorkspace","MonitorWorkspace","NormalizeByAnySpectra"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
   declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
@@ -276,10 +276,6 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
 {
   // Get hold of the monitor spectrum
   int monitorSpec = getProperty("MonitorSpectrum");
-  // currently it is not a spectrum, but the detectror ID
-  std::vector<detid_t>  monitors(1,monitorSpec);
-  std::vector<specid_t> RealMonitorSpec = inputWorkspace->spectraMap().getSpectra(monitors);
-  monitorSpec                           = (int)RealMonitorSpec[0];
   if (monitorSpec < 0)
   {
     throw std::runtime_error("MonitorSpectrum must not be negative");
