@@ -68,24 +68,24 @@ namespace SliceViewer
 {
 
 
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-  class SliceViewerWindow : QMainWindow
-  {
-  %TypeHeaderCode
-  #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
-  %End
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class SliceViewerWindow : QMainWindow
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
+%End
 
-  public:
-    SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
-    MantidQt::SliceViewer::SliceViewer* getSlicer();
+public:
+  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
+  MantidQt::SliceViewer::SliceViewer* getSlicer();
 
-    MantidQt::SliceViewer::LineViewer* getLiner();
+  MantidQt::SliceViewer::LineViewer* getLiner();
 
-    const QString& getLabel() const;
+  const QString& getLabel() const;
 
-  };
+};
 
 
 /***************************************************************************/

@@ -68,18 +68,18 @@ namespace SliceViewer
 {
 
 
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-  class SliceViewerWindow : QMainWindow
-  {
-  %TypeHeaderCode
-  #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
-  %End
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class SliceViewerWindow : QMainWindow
+{
+%TypeHeaderCode
+#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
+%End
 
-  public:
-    SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
-    MantidQt::SliceViewer::SliceViewer* getSlicer();
+public:
+  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
+  MantidQt::SliceViewer::SliceViewer* getSlicer();
 %Docstring
 MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
 ------------------------------------------------------------------
@@ -91,7 +91,7 @@ MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
    
 %End
 
-    MantidQt::SliceViewer::LineViewer* getLiner();
+  MantidQt::SliceViewer::LineViewer* getLiner();
 %Docstring
 MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 ----------------------------------------------------------------
@@ -103,9 +103,9 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
    
 %End
 
-    const QString& getLabel() const;
+  const QString& getLabel() const;
 
-  };
+};
 
 
 /***************************************************************************/
