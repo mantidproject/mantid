@@ -166,7 +166,7 @@ void Integration::exec()
     // If range specified doesn't overlap with this spectrum then bail out
     if ( lowit == X.end() || highit == X.begin() ) continue;
     
-    highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
+    --highit; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
   
     MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax = std::distance(X.begin(),highit);
