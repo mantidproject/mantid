@@ -41,8 +41,29 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(self._test_ws.blocksize(), 102)
         self.assertEquals(self._test_ws.YUnit(), "Counts")
         self.assertEquals(self._test_ws.YUnitLabel(), "Counts")
+
+    def test_axes(self):
         # Workspace axes
         self.assertEquals(self._test_ws.axes(), 2)
+        xaxis = self._test_ws.getAxis(0)
+        yaxis = self._test_ws.getAxis(1)
+        
+        self.assertTrue(xaxis.isNumeric())
+        self.assertTrue(yaxis.isSpectra())
+        
+        self.assertEquals(xaxis.length(), 103)
+        self.assertEquals(yaxis.length(), 2)
+        
+        xunit = xaxis.getUnit()
+        self.assertEquals(xunit.caption(), "Time-of-flight")
+        self.assertEquals(xunit.label(), "microsecond")
+        self.assertEquals(xunit.unitID(), "TOF")
+
+        yunit = yaxis.getUnit()
+        self.assertEquals(yunit.caption(), "")
+        self.assertEquals(yunit.label(), "")
+        self.assertEquals(yunit.unitID(), "Empty")
+
         
     def test_detector_retrieval(self):
         det = self._test_ws.getDetector(0)
@@ -52,7 +73,14 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_spectrum_retrieval(self):
         # Spectrum
-        pass
+        spec = self._test_ws.getSpectrum(1)
+        self.assertEquals(spec.getSpectrumNo(), 2)
+        self.assertTrue(spec.hasDetectorID(2))
+        ids = spec.getDetectorIDs()
+        expected = [2]
+        self.assertEquals(len(expected), len(ids))
+        for i in range(len(ids)):
+            self.assertEquals(expected[i], ids[i])
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
         self.assertEquals(type(self._test_ws_prop), WorkspaceProperty_Workspace)
@@ -90,12 +118,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
             # Extra X boundary
             self.assertEquals(x_np[i][blocksize], workspace.readX(i)[blocksize])
             
-    def xtest_operators_with_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
+    def test_operators_with_workspaces_in_ADS(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='A',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         ads = AnalysisDataService.Instance()
         A = ads['A']
-        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.])
+        run_algorithm('CreateWorkspace', OutputWorkspace='B', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         B = ads['B']
+        
+        # Equality
+        self.assertTrue(A.equals(B, 1e-8))
 #    
         # Two workspaces
         C = A + B
@@ -119,6 +150,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Commutative: double + workspace
         C = B * A
         C = B + A
+        
+        ads.remove('A')
+        ads.remove('B')
+        ads.remove('C')
+        
+    def test_history_access(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='raw',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('Rebin', InputWorkspace='raw', Params=[1.,0.5,3.],OutputWorkspace='raw')
+        ads = AnalysisDataService.Instance()
+        raw = ads['raw']
+        history = raw.getHistory()
+        last = history.lastAlgorithm()
+        self.assertEquals(last.name(), "Rebin")
+        self.assertEquals(last.getPropertyValue("InputWorkspace"), "raw")
+        first = history[0]
+        self.assertEquals(first.name(), "CreateWorkspace")
+        self.assertEquals(first.getPropertyValue("OutputWorkspace"), "raw")
+        ads.remove('raw')
 
 if __name__ == '__main__':
     unittest.main()

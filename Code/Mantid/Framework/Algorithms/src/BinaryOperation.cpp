@@ -356,9 +356,6 @@ namespace Mantid
       if( (det_lhs && det_lhs->isMasked()) || ( det_rhs && det_rhs->isMasked()) )
       {
         continueOp = false;
-        //Zero the output data and ensure that the output spectra is masked. The masking is done outside of this
-        //loop modiying the parameter map in a multithreaded loop requires too much locking
-        m_indicesToMask.push_back(index);
         out->maskWorkspaceIndex(index);
       }
       return continueOp;

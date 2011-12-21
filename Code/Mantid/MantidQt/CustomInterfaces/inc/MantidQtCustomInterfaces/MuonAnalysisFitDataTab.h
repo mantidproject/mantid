@@ -65,10 +65,6 @@ public:
   /// Constructor
   MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
 
-  /// Do stuff before executing fit - e.g. handle fitting against 
-  /// raw while the data are plotted as bunch
-  void beforeDoFit(const QtBoolPropertyManager*);
-
 public slots:
 
 signals:

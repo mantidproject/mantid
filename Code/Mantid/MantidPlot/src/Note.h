@@ -30,10 +30,7 @@
 #define NOTE_H
 
 #include "MdiSubWindow.h"
-#include "ScriptEdit.h"
-#include <qtextedit.h>
-
-class ScriptingEnv;
+#include <QTextEdit>
 
 /**\brief Notes window class.
  *
@@ -42,43 +39,33 @@ class ScriptingEnv;
  */
 class Note: public MdiSubWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
+  Note(const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+  ~Note(){};
 
-	Note(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
-	~Note(){};
-
-	void init(ScriptingEnv *env);
-	void setName(const QString& name);
+  void setName(const QString& name);
 
 public slots:
-	QString saveToString(const QString &info, bool = false);
-	void restore(const QStringList&);
+  QString saveToString(const QString &info, bool = false);
+  void restore(const QStringList&);
 
-        ScriptEdit* editor(){return te;};
-	bool autoexec() const { return autoExec; }
-	void setAutoexec(bool);
-	void modifiedNote();
+  QTextEdit* editor(){return te;};
+  void modifiedNote();
 
-	// ScriptEdit methods
-	QString text() { return te->text(); };
-	void setText(const QString &s) { te->setText(s); };
-	void print() { te->print(); };
-	void exportPDF(const QString& fileName){te->exportPDF(fileName);};
-	QString exportASCII(const QString &file=QString::null) { return te->exportASCII(file); };
-	QString importASCII(const QString &file=QString::null) { return te->importASCII(file); };
-	void execute() { te->execute(); };
-	void executeAll() { te->executeAll(); };
-	void evaluate() { te->evaluate(); };
-	void setDirPath(const QString& path){te->setDirPath(path);};
+  // QTextEdit methods
+  QString text() { return te->text(); }
+  void setText(const QString &s) { te->setText(s); }
 
- signals:
-	void dirPathChanged(const QString& path);
+  void print();
+  void exportPDF(const QString& fileName);
+  QString exportASCII(const QString &filename=QString::null);
 
 private:
-	ScriptEdit *te;
-	bool autoExec;
+  void init();
+
+  QTextEdit *te;
 };
 
 #endif

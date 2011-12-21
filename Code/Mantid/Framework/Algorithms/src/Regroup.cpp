@@ -131,7 +131,7 @@ void Regroup::exec()
     if (inputW->getAxis(1)->unit().get())
       outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
    }
-  catch(Exception::IndexError) {
+  catch(Exception::IndexError &) {
     // OK, so this isn't a Workspace2D
   }
 

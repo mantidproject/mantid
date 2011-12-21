@@ -100,7 +100,7 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
         }
       }// if not empty
     }
-    catch(boost::bad_lexical_cast)
+    catch(boost::bad_lexical_cast &)
     {
       if ( !parName.empty() )
       {

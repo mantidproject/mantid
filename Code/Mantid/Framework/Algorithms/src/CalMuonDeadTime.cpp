@@ -37,6 +37,10 @@ void CalMuonDeadTime::init()
   declareProperty("LastGoodData", 5.0, 
     "The last good data point in units of micro-seconds as measured from time zero (default to 5.0)", 
      Direction::Input); 
+
+  declareProperty(new API::WorkspaceProperty<API::Workspace>("DataFitted","",Direction::Output),
+    "The data which the deadtime equation is fitted to" ); 
+
 }
 
 /** Executes the algorithm
@@ -110,10 +114,6 @@ void CalMuonDeadTime::exec()
   boost::shared_ptr<API::MatrixWorkspace> wsFitAgainst =
         convertToPW->getProperty("OutputWorkspace");
 
-  // for debugging
-  //API::AnalysisDataService::Instance().add(wsName, wsFitAgainst);
-  //API::AnalysisDataService::Instance().add("croppedWS", wsCrop);
-
   const size_t numSpec = wsFitAgainst->getNumberHistograms();
   size_t timechannels = wsFitAgainst->readY(0).size();
   for (size_t i = 0; i < numSpec; i++)
@@ -128,6 +128,12 @@ void CalMuonDeadTime::exec()
     }
 
   }  
+
+
+  // This property is returned for instrument scientists to 
+  // play with on the odd occasion
+
+  setProperty("DataFitted", wsFitAgainst);
 
 
   // cal deadtime for each spectrum

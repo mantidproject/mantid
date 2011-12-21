@@ -3,13 +3,17 @@
 """
 
 from reduction import Reducer
-# Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.
+# Validate_step is a decorator that allows both Python algorithms and 
+# ReductionStep objects to be passed to the Reducer.
 # It also does minimal type checking to ensure that the object that is passed is valid
+
 from reduction import validate_step
+from reduction import validate_loader
+mtd.initialise()
 from mantidsimple import *
 
 ## Version number
-__version__ = '0.0'
+__version__ = '0.01'
 
 class InelasticReducer(Reducer):
     """
@@ -18,6 +22,9 @@ class InelasticReducer(Reducer):
     
     ## Data loader
     _data_loader = None
+    _offset_banks = None
+    _ei_calculator = None
+    _normalise = None
     
     ## Incident energy calculator
     _ei_calculator = None
@@ -50,6 +57,9 @@ class InelasticReducer(Reducer):
     
     def __init__(self):
         super(InelasticReducer, self).__init__()
+        # Setup default loader
+        self._data_loader = InelasticLoader()
+        # TODO: Some defaults?
     
     @validate_loader
     def set_data_loader(self, loader):
@@ -139,6 +149,17 @@ class InelasticReducer(Reducer):
         """
         if self._data_loader is not None:
             self.append_step(self._data_loader) 
+            
+        if self._offset_banks is not None:
+            self.append_step(self._offset_banks)
+            
+        if self._ei_calculator is not None:
+            self.append_step(self._ei_calculator)
+            
+        if self._normalise is not None:
+            self.append_step(self._normalise)
+        
+        
 
 
 #    def _absolute_norm_steps(self):
@@ -151,4 +172,7 @@ class InelasticReducer(Reducer):
 if __name__ == '__main__':  
     # Instantiate the Reducer object
     r = InelasticReducer()
+    r.set_loader(InelasticLoader)
+    r.set_ei_calculator(InelasticFixEi, Ei=20.0)
+    
     r.reduce()

@@ -36,24 +36,7 @@ namespace CustomInterfaces
 namespace Muon
 {
 
-/**
-*  Do stuff before executing fit - e.g. handle fitting against 
-*   raw while the data are plotted as bunch
-*  @param p contain parameters set by the user in the fit property browser
-*/
-void MuonAnalysisFitDataTab::beforeDoFit(const QtBoolPropertyManager* p)
-{
 
-  bool wantToFitAgainstRawData = p->property("Fit To Raw Data").isValid();
-  if (wantToFitAgainstRawData)
-  {
-
-  }
-  else // Fit against bunch
-  {
-    
-  } 
-}
 
 }
 }

@@ -69,7 +69,7 @@ namespace
  */
 PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
          const QString &name, bool interactive, bool reportProgress)
-  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(env->localDict()), 
+  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(env->globalDict()),
     stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
 {
   ROOT_CODE_OBJECT = NULL;

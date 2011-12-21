@@ -55,10 +55,16 @@ namespace MantidQt
       @throw if workspace has been moved since instantiation.
       */
       virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const;
+
+      virtual std::string statusReport() const;
+
       /// Destructor
       virtual ~WorkspaceInADS();
     private:
+      /// Id/name of the workspace in the ADS
       std::string m_wsName;
+      /// Status report message.
+      std::string m_statusReportMessage;
     };
 
   }

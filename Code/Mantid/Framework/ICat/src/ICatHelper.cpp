@@ -463,7 +463,7 @@ namespace Mantid
       {
         saveInvestigationIncludesResponse(response,responsews_sptr);
       }
-      catch(std::runtime_error)
+      catch(std::runtime_error &)
       {
         throw std::runtime_error("Error when selecting the investigation data with inestigation id "+ stream.str());
       }
@@ -613,7 +613,7 @@ namespace Mantid
       {
         saveDataSets(response,responsews_sptr);
       }
-      catch(std::runtime_error)
+      catch(std::runtime_error &)
       {
 
         throw std::runtime_error("Error when loading the datasets for the investigation id "+ stream.str());
@@ -802,7 +802,7 @@ namespace Mantid
       {
         throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
       }
-      catch(std::runtime_error)
+      catch(std::runtime_error &)
       {
         throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
       }

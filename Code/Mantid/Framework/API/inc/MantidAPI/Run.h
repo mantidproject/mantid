@@ -85,7 +85,7 @@ namespace Mantid
       /**
        * Remove a named property
        */
-      void removeProperty(const std::string &name) { m_manager.removeProperty(name); }
+      void removeProperty(const std::string &name, bool delproperty=true) { m_manager.removeProperty(name, delproperty); }
       /**
        * Return all of the current properties
        * @returns A vector of the current list of properties
@@ -144,7 +144,7 @@ namespace Mantid
        * Remove a named log entry
        * @param name :: The name of the entry to remove
        */
-      void removeLogData(const std::string &name) { return removeProperty(name); }
+      void removeLogData(const std::string &name, const bool delproperty=true) { return removeProperty(name, delproperty); }
       //@}
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;

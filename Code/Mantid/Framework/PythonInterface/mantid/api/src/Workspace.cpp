@@ -6,7 +6,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/args.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -32,7 +31,7 @@ void export_Workspace()
     .def("getComment", &Workspace::getComment, return_value_policy<copy_const_reference>(), "Returns the comment field on the workspace")
     .def("isDirty", &Workspace::isDirty, Workspace_isDirtyOverloads(args("n"), "True if the workspace has run more than n algorithms (Default=1)"))
     .def("getMemorySize", &Workspace::getMemorySize, "Returns the memory footprint of the workspace in KB")
-    .def("getHistory", &Workspace::getHistory, return_value_policy<copy_const_reference>(),
+    .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const)&Workspace::getHistory, return_value_policy<reference_existing_object>(),
          "Return read-only access to the workspace history")
     ;
 

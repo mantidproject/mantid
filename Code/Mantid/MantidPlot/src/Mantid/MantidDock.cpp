@@ -1647,7 +1647,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
       {
         return false;
       }
-    } catch (Mantid::Kernel::Exception::NotFoundError nfe)
+    } catch (Mantid::Kernel::Exception::NotFoundError & nfe)
     {
       return false;
     }

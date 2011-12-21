@@ -1,7 +1,8 @@
 /*WIKI* 
 
 
-Given a PeaksWorkspace with a UB matrix stored with the sample, this algorithm will use UB inverse to index the peaks.  Any peak with any Miller index more than the specified tolerance away from an integer will have its (h,k,l) set to (0,0,0).
+Given a PeaksWorkspace with a UB matrix stored with the sample, this algorithm will use UB inverse to index the peaks.
+Any peak with any Miller index more than the specified tolerance away from an integer will have its (h,k,l) set to (0,0,0).
 
 
 *WIKI*/
@@ -65,6 +66,11 @@ namespace Crystal
 
     this->declareProperty(new PropertyWithValue<double>( "Tolerance",0.15,
           mustBePositive,Direction::Input),"Indexing Tolerance (0.15)");
+
+    this->declareProperty(new PropertyWithValue<int>( "NumIndexed", 0,
+          Direction::Output), "Gets set with the number of indexed peaks.");
+    this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
+          Direction::Output), "Gets set with the average HKL indexing error.");
   }
 
   //--------------------------------------------------------------------------
@@ -111,22 +117,16 @@ namespace Crystal
                                                              miller_indices,
                                                              average_error );
 
-                                   // now tell the user how many were indexed
-    char logInfo[200];
-    sprintf( logInfo, 
-             std::string("Indexed %1d Peaks out of %1d with tolerance %5.3f").c_str(),    
-             num_indexed, n_peaks, tolerance );
-    g_log.notice( std::string(logInfo) );
-
-    sprintf( logInfo,
-             std::string("Average error in h,k,l for indexed peaks = %6.4f").c_str(),
-             average_error);
-    g_log.notice( std::string(logInfo) );
+    // now tell the user how many were indexed
+    g_log.notice() << "Indexed " << num_indexed << " Peaks out of " << n_peaks << " with tolerance of " << tolerance << std::endl;
+    g_log.notice() << "Average error in h,k,l for indexed peaks =  " << average_error << std::endl;
 
     for ( size_t i = 0; i < n_peaks; i++ )
-    {
       peaks[i].setHKL( miller_indices[i] );
-    } 
+
+    // Save output properties
+    this->setProperty("NumIndexed", num_indexed);
+    this->setProperty("AverageError", average_error);
   }
 
 

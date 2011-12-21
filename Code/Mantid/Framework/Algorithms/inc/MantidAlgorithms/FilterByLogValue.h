@@ -21,7 +21,6 @@ namespace Algorithms
 
 /** Filters events in an EventWorkspace using values in a SampleLog.
 
-    @author Janik Zikovsky, SNS
     @date September 15th, 2010
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

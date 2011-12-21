@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>488</width>
-    <height>31</height>
+    <height>37</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,17 +44,48 @@
    </item>
    <item>
     <widget class="QPushButton" name="btnX">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
-       <width>24</width>
+       <width>16777215</width>
        <height>16777215</height>
+      </size>
+     </property>
+     <property name="sizeIncrement">
+      <size>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
      <property name="toolTip">
       <string>Check to make this dimension X in the 2D view</string>
      </property>
      <property name="text">
-      <string>X</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../icons/SliceViewerIcons.qrc">
+       <normaloff>:/SliceViewer/icons/letter_x.png</normaloff>:/SliceViewer/icons/letter_x.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -68,7 +99,7 @@
     <widget class="QPushButton" name="btnY">
      <property name="maximumSize">
       <size>
-       <width>24</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
@@ -76,7 +107,17 @@
       <string>Check to make this dimension Y in the 2D view</string>
      </property>
      <property name="text">
-      <string>Y</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../icons/SliceViewerIcons.qrc">
+       <normaloff>:/SliceViewer/icons/letter_y.png</normaloff>:/SliceViewer/icons/letter_y.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -132,6 +173,8 @@
    <header>qwt_slider.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../icons/SliceViewerIcons.qrc"/>
+ </resources>
  <connections/>
 </ui>

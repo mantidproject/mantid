@@ -378,6 +378,16 @@ bool ViewBase::srcHasTimeSteps(pqPipelineSource *src)
   return 0 < numTimesteps;
 }
 
+/**
+ * @return the current timestep from the animation scene
+ */
+double ViewBase::getCurrentTimeStep()
+{
+  pqAnimationManager* mgr = pqPVApplicationCore::instance()->animationManager();
+  pqAnimationScene *scene = mgr->getActiveScene();
+  return scene->getAnimationTime();
+}
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

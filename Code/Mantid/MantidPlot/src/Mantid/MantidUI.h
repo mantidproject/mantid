@@ -131,7 +131,7 @@ public:
     bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait = false);
 
     // Gets a pointer to workspace workspaceName
-    Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
+    Mantid::API::Workspace_const_sptr getWorkspace(const QString& workspaceName);
 
     // Deletes workspace from QtiPlot
     bool deleteWorkspace(const QString& workspaceName);
@@ -140,7 +140,7 @@ public:
     QString getSelectedWorkspaceName();
 
     // Returns the pointer of workspace selected in exploreMantid window
-    Mantid::API::Workspace_sptr getSelectedWorkspace();
+    Mantid::API::Workspace_const_sptr getSelectedWorkspace();
 
     // Returns the name and version of the algorithm selected in algorithm dock window
     void getSelectedAlgorithm(QString& algName, int& version);
@@ -166,7 +166,7 @@ public:
     MultiLayer *plotSpectrogram(Graph::CurveType type);
 
     /// Create a Table form specified spectra in a MatrixWorkspace
-    Table* createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, QList<int> indexList, bool errs=true, bool binCentres=false);
+    Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, QList<int> indexList, bool errs=true, bool binCentres=false);
 
     // Copies selected rows from MantidMatrix to Y and errY columns of a new Table.
     Table* createTableFromSelectedRows(MantidMatrix *m, bool errs = true, bool binCentres=false);
@@ -377,6 +377,8 @@ public slots:
     void copyRowsToWaterfall();
     // Slot callable from Workspace menu item
     void plotWholeAsWaterfall();
+    /// Common method to convert a plot of a set of spectra into a waterfall plot
+    void convertToWaterfall(MultiLayer* ml);
 
     // Execute selected algorithm
     void executeAlgorithm();
@@ -488,9 +490,6 @@ private:
   
   /// This method accepts user inputs and executes loadraw/load nexus algorithm
   void executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
-
-  /// Common method to convert a plot of a set of spectra into a waterfall plot
-  void convertToWaterfall(MultiLayer* ml);
 
     // Private variables
 

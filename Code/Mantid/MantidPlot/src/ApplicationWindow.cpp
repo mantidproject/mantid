@@ -166,6 +166,8 @@
 
 #include <zlib.h>
 
+#include <gsl/gsl_sort.h>
+
 //Mantid
 #include "ScriptingWindow.h"
 
@@ -1331,6 +1333,8 @@ void ApplicationWindow::plotMenuAboutToShow()
   statMenu->addAction(actionBoxPlot);
   statMenu->addAction(actionPlotHistogram);
   statMenu->addAction(actionPlotStackedHistograms);
+  statMenu->insertSeparator();
+  statMenu->addAction(actionStemPlot);
 
   QMenu *panelsMenu = plot2DMenu->addMenu (tr("Pa&nel"));
   panelsMenu->addAction(actionPlot2VerticalLayers);
@@ -1374,7 +1378,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   //	scriptingMenu->addAction(actionScriptingLang);
   //#endif
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
-  actionNoteEvaluate->setEnabled(false);
   actionTableRecalculate->setEnabled(false);
 
   // clear undo stack view (in case window is not a matrix)
@@ -1450,14 +1453,7 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
-      actionNoteEvaluate->setEnabled(true);
 
-      actionNoteExecute->disconnect(SIGNAL(activated()));
-      actionNoteExecuteAll->disconnect(SIGNAL(activated()));
-      actionNoteEvaluate->disconnect(SIGNAL(activated()));
-      connect(actionNoteExecute, SIGNAL(activated()), w, SLOT(execute()));
-      connect(actionNoteExecuteAll, SIGNAL(activated()), w, SLOT(executeAll()));
-      connect(actionNoteEvaluate, SIGNAL(activated()), w, SLOT(evaluate()));
     } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a side-effect (it enables menus)
         disableActions();
    
@@ -1896,6 +1892,125 @@ void ApplicationWindow::plotVectXYAM()
     multilayerPlot(table, s, Graph::VectXYAM, sel.topRow(), sel.bottomRow());
   } else
     QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Please select four columns for this operation!"));//Mantid
+}
+
+QString ApplicationWindow::stemPlot(Table *t, const QString& colName, int power, int startRow, int endRow)
+{
+  if (!t)
+    return QString();
+
+  int col = t->colIndex(colName);
+  if (col < 0){
+    QMessageBox::critical(this, tr("MantidPlot - Error"),
+    tr("Data set: %1 doesn't exist!").arg(colName));
+    return QString();
+  }
+
+  startRow--;
+  endRow--;
+  if (startRow < 0 || startRow >= t->numRows())
+    startRow = 0;
+  if (endRow < 0 || endRow >= t->numRows())
+    endRow = t->numRows() - 1;
+
+  QString result = tr("Stem and leaf plot of dataset") + ": " + colName + " ";
+  result += tr("from row") + ": " + QString::number(startRow + 1) + " ";
+  result += tr("to row") + ": " + QString::number(endRow + 1) + "\n";
+
+  int rows = 0;
+  for (int j = startRow; j <= endRow; j++){
+    if (!t->text(j, col).isEmpty())
+       rows++;
+  }
+
+  if (rows >= 1){
+    double *data = (double *)malloc(rows * sizeof (double));
+    if (!data){
+      result += tr("Not enough memory for this dataset!") + "\n";
+      return result;
+    }
+
+    result += "\n" + tr("Stem") + " | " + tr("Leaf");
+    result += "\n---------------------\n";
+
+    int row = 0;
+    for (int j = startRow; j <= endRow; j++){
+      if (!t->text(j, col).isEmpty()){
+        data[row] = t->cell(j, col);
+        row++;
+      }
+    }
+    gsl_sort (data, 1, rows);
+
+    if (power > 1e3){
+      power = static_cast<int>(std::ceil(log10(data[rows - 1] - data[0]) - log10(rows - 1.0)));
+      bool ok;
+      int input = QInputDialog::getInteger(this, tr("Please confirm the stem unit!"),
+                                      tr("Data set") + ": " + colName + ", " + tr("stem unit") + " = 10<sup>n</sup>, n = ",
+                                      power, -1000, 1000, 1, &ok);
+      if (ok)
+        power = input;
+    }
+
+    double stem_unit = pow(10.0, power);
+    double leaf_unit = stem_unit/10.0;
+
+    int prev_stem = int(data[0]/stem_unit);
+    result += "      " + QString::number(prev_stem) + " | ";
+
+    for (int j = 0; j <rows; j++){
+      double val = data[j];
+      int stem = int(val/stem_unit);
+      int leaf = int(qRound((val - stem*stem_unit)/leaf_unit));
+      for (int k = prev_stem + 1; k < stem + 1; k++)
+        result += "\n      " + QString::number(k) + " | ";
+      result += QString::number(leaf);
+      prev_stem = stem;
+    }
+
+    result += "\n---------------------\n";
+    result += tr("Stem unit") + ": " + locale().toString(stem_unit) + "\n";
+    result += tr("Leaf unit") + ": " + locale().toString(leaf_unit) + "\n";
+
+    QString legend = tr("Key") + ": " + QString::number(prev_stem) + " | ";
+    int leaf = int(qRound((data[rows - 1] - prev_stem*stem_unit)/leaf_unit));
+    legend += QString::number(leaf);
+    legend += " " + tr("means") + ": " + locale().toString(prev_stem*stem_unit + leaf*leaf_unit) + "\n";
+
+    result += legend + "---------------------\n";
+    free(data);
+  } else
+    result += "\t" + tr("Input error: empty data set!") + "\n";
+  return result;
+}
+
+Note * ApplicationWindow::newStemPlot()
+{
+  Table *t = (Table *)activeWindow(TableWindow);
+  if (!t)
+    return NULL;
+
+  int ts = t->table()->currentSelection();
+  if (ts < 0)
+    return NULL;
+
+  Note *n = newNote();
+  if (!n)
+    return NULL;
+  n->hide();
+
+  QStringList lst = t->selectedColumns();
+  if (lst.isEmpty()){
+    Q3TableSelection sel = t->table()->selection(ts);
+    for (int i = sel.leftCol(); i <= sel.rightCol(); i++)
+      n->setText(n->text() + stemPlot(t, t->colName(i), 1001, sel.topRow() + 1, sel.bottomRow() + 1) + "\n");
+  } else {
+    for (int i = 0; i < lst.count(); i++)
+      n->setText(n->text() + stemPlot(t, lst[i], 1001) + "\n");
+  }
+
+  n->show();
+  return n;
 }
 
 void ApplicationWindow::renameListViewItem(const QString& oldName,const QString& newName)
@@ -2928,7 +3043,7 @@ TableStatistics *ApplicationWindow::newTableStatistics(Table *base, int type, QL
  */
 Note* ApplicationWindow::newNote(const QString& caption)
 {
-  Note* m = new Note(scriptingEnv(), "", this);
+  Note* m = new Note("", this);
 
   QString name = caption;
   while(name.isEmpty() || alreadyUsedName(name))
@@ -2937,7 +3052,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
   m->setName(name);
   m->setIcon(getQPixmap("note_xpm"));
   m->askOnCloseEvent(confirmCloseNotes);
-  m->setDirPath(scriptsDirPath);
 
   d_workspace->addSubWindow(m);
   addListViewItem(m);
@@ -2947,7 +3061,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
   connect(m, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
   connect(m, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
   connect(m, SIGNAL(statusChanged(MdiSubWindow*)), this, SLOT(updateWindowStatus(MdiSubWindow*)));
-  connect(m, SIGNAL(dirPathChanged(const QString&)), this, SLOT(scriptsDirPathChanged(const QString&)));
 
   m->showNormal();
   return m;
@@ -4466,19 +4579,10 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 
   app->restoreApplicationGeometry();
 
-  app->executeNotes();
   app->savedProject();
   app->d_opening_file = false;
   app->d_workspace->blockSignals(false);
   return app;
-}
-
-void ApplicationWindow::executeNotes()
-{
-  QList<MdiSubWindow *> lst = projectFolder()->windowsList();
-  foreach(MdiSubWindow *widget, lst)
-  if (widget->isA("Note") && ((Note*)widget)->autoexec())
-    ((Note*)widget)->executeAll();
 }
 
 void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timestamp)
@@ -6508,6 +6612,8 @@ void ApplicationWindow::showColMenu(int c)
     stat.addAction(actionBoxPlot);
     stat.addAction(QIcon(getQPixmap("histogram_xpm")),tr("&Histogram"), this, SLOT(plotHistogram()));
     stat.addAction(QIcon(getQPixmap("stacked_hist_xpm")),tr("&Stacked Histograms"), this, SLOT(plotStackedHistograms()));
+    stat.insertSeparator();
+    stat.addAction(actionStemPlot);
     stat.setTitle(tr("Statistical &Graphs"));
     plot.addMenu(&stat);
 
@@ -6626,6 +6732,8 @@ void ApplicationWindow::showColMenu(int c)
     stat.addAction(actionBoxPlot);
     stat.addAction(QIcon(getQPixmap("histogram_xpm")),tr("&Histogram"), this, SLOT(plotHistogram()));
     stat.addAction(QIcon(getQPixmap("stacked_hist_xpm")),tr("&Stacked Histograms"), this, SLOT(plotStackedHistograms()));
+    stat.insertSeparator();
+    stat.addAction(actionStemPlot);
     stat.setTitle(tr("Statistical &Graphs"));
     plot.addMenu(&stat);
 
@@ -8739,7 +8847,7 @@ void ApplicationWindow::editMenuAboutToShow()
   }
 
   if (qobject_cast<Note *>(w)){
-    ScriptEdit* doc = ((Note *)w)->editor();
+    QTextDocument* doc = ((Note *)w)->editor()->document();
     actionUndo->setEnabled(doc->isUndoAvailable());
     actionRedo->setEnabled(doc->isRedoAvailable());
   } else if (qobject_cast<Matrix *>(w)){
@@ -12370,6 +12478,9 @@ void ApplicationWindow::createActions()
   actionPlotStackedHistograms = new QAction(QIcon(getQPixmap("stacked_hist_xpm")), tr("&Stacked Histogram"), this);
   connect(actionPlotStackedHistograms, SIGNAL(activated()), this, SLOT(plotStackedHistograms()));
 
+  actionStemPlot = new QAction(QIcon(":/leaf.png"), tr("Stem-and-&Leaf Plot"), this);
+  connect(actionStemPlot, SIGNAL(activated()), this, SLOT(newStemPlot()));
+
   actionPlot2VerticalLayers = new QAction(QIcon(getQPixmap("panel_v2_xpm")), tr("&Vertical 2 Layers"), this);
   connect(actionPlot2VerticalLayers, SIGNAL(activated()), this, SLOT(plot2VerticalLayers()));
 
@@ -12830,15 +12941,6 @@ void ApplicationWindow::createActions()
   //	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
   //#endif
 
-  actionNoteExecute = new QAction(tr("E&xecute"), this);
-  actionNoteExecute->setShortcut(tr("Ctrl+J"));
-
-  actionNoteExecuteAll = new QAction(tr("Execute &All"), this);
-  actionNoteExecuteAll->setShortcut(tr("Ctrl+Shift+J"));
-
-  actionNoteEvaluate = new QAction(tr("&Evaluate Expression"), this);
-  actionNoteEvaluate->setShortcut(tr("Ctrl+Return"));
-
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
 #ifdef __APPLE__
@@ -13222,6 +13324,9 @@ void ApplicationWindow::translateActionsStrings()
   actionPlot4Layers->setMenuText(tr("&4 Layers"));
   actionPlotStackedLayers->setMenuText(tr("&Stacked Layers"));
 
+  actionStemPlot->setMenuText(tr("Stem-and-&Leaf Plot"));
+  actionStemPlot->setToolTip(tr("Stem-and-Leaf Plot"));
+
   actionPlot3DRibbon->setMenuText(tr("&Ribbon"));
   actionPlot3DRibbon->setToolTip(tr("Plot 3D ribbon"));
 
@@ -13434,15 +13539,6 @@ void ApplicationWindow::translateActionsStrings()
   //#ifdef SCRIPTING_DIALOG
   //	actionScriptingLang->setMenuText(tr("Scripting &language"));
   //#endif
-
-  actionNoteExecute->setMenuText(tr("E&xecute"));
-  actionNoteExecute->setShortcut(tr("Ctrl+J"));
-
-  actionNoteExecuteAll->setMenuText(tr("Execute &All"));
-  actionNoteExecuteAll->setShortcut(tr("Ctrl+Shift+J"));
-
-  actionNoteEvaluate->setMenuText(tr("&Evaluate Expression"));
-  actionNoteEvaluate->setShortcut(tr("Ctrl+Return"));
 
   btnPointer->setMenuText(tr("Disable &tools"));
   btnPointer->setToolTip( tr( "Pointer" ) );
@@ -16004,11 +16100,11 @@ void ApplicationWindow::scriptsDirPathChanged(const QString& path)
 {
   scriptsDirPath = path;
 
-  QList<MdiSubWindow*> windows = windowsList();
-  foreach(MdiSubWindow *w, windows){
-    if (w->isA("Note"))
-      ((Note*)w)->setDirPath(path);
-  }
+//  QList<MdiSubWindow*> windows = windowsList();
+//  foreach(MdiSubWindow *w, windows){
+//    if (w->isA("Note"))
+//      ((Note*)w)->setDirPath(path);
+//  }
 }
 
 void ApplicationWindow::showToolBarsMenu()
@@ -16631,16 +16727,12 @@ void ApplicationWindow::setPlotType(const QStringList & plotDetails)
                     MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
                     curve->setErrorBars(true, true);
                   }
-                  else // be clever with plotting errors
+                  else // don't show errors
                   {
                     QwtPlotCurve *temp = g->curve(curveNum);
                     MantidMatrixCurve *curve = (MantidMatrixCurve *)temp;
-                    curve->setErrorBars(true, false);
+                    curve->setErrorBars(false, false);
                   }
-                }
-                else if (plotDetails[3] == "Fit")
-                {
-                  curveNum = g->curveIndex(plotDetails[0] + "_" + "Workspace" + "-Calc"); //workspaceName+"-"+axisLabel+QString("-Calc")
                 }
                 if (curveNum > -1) // If one of the curves has been changed 
                 {

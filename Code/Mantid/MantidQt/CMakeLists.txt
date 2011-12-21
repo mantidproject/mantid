@@ -10,6 +10,7 @@ add_subdirectory ( CustomDialogs )
 add_subdirectory ( CustomInterfaces )
 add_subdirectory ( DesignerPlugins )
 add_subdirectory ( SliceViewer )
+add_subdirectory ( Factory )
 
 ###########################################################################
 # Add a custom target to build all of the MantidQt packages
@@ -43,11 +44,11 @@ separate_arguments ( PYQT4_SIP_FLAGS )
 
 if ( ${SIP_VERSION} MATCHES "04[0-9][a-f].*" )
 	# SIP version is at least 4.10 (040a or higher in hex)
-	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
+	message ( STATUS "Sip version is ${SIP_VERSION}. Using mantidqt sip with docstring." )
 	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
 else ()
 	# Pre 4.0 sip version (RHEL5 build). 
-	message ( "Sip version is ${SIP_VERSION}. Using mantidqt sip without docstring." )
+	message ( STATUS "Sip version is ${SIP_VERSION}. Using mantidqt sip without docstring." )
 	set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.rhel5.sip )
 endif ()
 
@@ -111,8 +112,8 @@ if(WIN32)
 	# Windows: Python library name needs to end in .pyd for Windows
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
 elseif ( APPLE )
-	# Mac: and in .so on the Mac
-  	set_target_properties ( mantidqtpython PROPERTIES SUFFIX .so )
+	# Mac: and in .so on the Mac, with no "lib" prefix either
+  	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so )
 else ()
 	# Linux: needs to NOT have the usual "lib" prefix. 
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" )
@@ -120,7 +121,7 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython 
-	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer
+	MantidQtAPI QtPropertyBrowser MantidQtSliceViewer MantidQtFactory
 	${QT_LIBRARIES} ${QWT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	)

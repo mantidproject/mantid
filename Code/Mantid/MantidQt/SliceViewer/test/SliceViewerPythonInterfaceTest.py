@@ -21,11 +21,18 @@ app = Qt.QApplication(sys.argv)
 class SliceViewerPythonInterfaceTest(unittest.TestCase):
     """Test for accessing SliceViewer widgets from MantidPlot
     python interpreter"""
-    
-    def __init__(self, *args):
-        """ Constructor: builda QApplication """
-        unittest.TestCase.__init__(self, *args)
 
+    @classmethod
+    def setUpClass(cls):
+        # Needs python 2.7+ it seems :(
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+    
+    def setUp(self):
+        """ Set up and create a SliceViewer widget """
         # Create a test data set
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', 
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
@@ -33,21 +40,46 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
         BinMD("mdw", "uniform",  AxisAligned=1, AlignedDimX="x,0,10,30",  AlignedDimY="y,0,10,30",  AlignedDimZ="z,0,10,30", IterateEvents="1", Parallel="0")
         CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
-
-    
-    def setUp(self):
-        """ Set up and create a SliceViewer widget """
-        self.sv = mantidqtpython.MantidQt.SliceViewer.SliceViewer()
-        # Open the default workspace for testing
-        self.sv.setWorkspace('uniform')
+        # Get the factory to create the SliceViewerWindow in C++
+        self.svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow("uniform", "")
+        # Retrieve the SliceViewer widget alone.
+        self.sv = self.svw.getSlicer()
         pass
+    
+    def setUpXML(self):
+        """Special set up for the XML version """
+        CreateMDWorkspace(Dimensions='3',Extents='-15,15, -15,15, -15,15',Names='Q_lab_x,Q_lab_y,Q_lab_z', 
+            Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='TOPAZ_3680')
+        CreateMDWorkspace(Dimensions='4',Extents='-15,15, -15,15, -15,15, -10, 100',Names='Q_x,Q_y,Q_z,E', 
+            Units='A,A,A,meV',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='WS_4D')
+        FakeMDEventData("TOPAZ_3680",  UniformParams="1e4")
+        FakeMDEventData("WS_4D",  UniformParams="1e4")
+
     
     def tearDown(self):
         """ Close the created widget """
-        self.sv.close()
-    
+        # This is crucial! Forces the object to be deleted NOW, not when python exits
+        # This prevents a segfault in Ubuntu 10.04, and is good practice.
+        self.svw.deleteLater()
+        self.svw.show()
+        # Schedule quit at the next event
+        Qt.QTimer.singleShot(0, app, Qt.SLOT("quit()"))
+        # This is required for deleteLater() to do anything (it deletes at the next event loop)
+        app.quitOnLastWindowClosed = True
+       	app.exec_()
+
+
+    #==========================================================================
+    #======================= Basic Tests ======================================
+    #==========================================================================
+
     def test_setWorkspace(self):
         sv = self.sv
+        assert (sv is not None) 
+    
+    def test_getWorkspace(self):
+        sv = self.sv
+        self.assertEqual(sv.getWorkspaceName(), "uniform")
         assert (sv is not None) 
     
     def test_setWorkspace_MDEventWorkspace(self):
@@ -61,6 +93,66 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'non_existent_workspace')
         self.assertRaises(StdRuntimeError, sv.setWorkspace, 'workspace2d')
     
+    #==========================================================================
+    #======================= XML Tests ======================================
+    #==========================================================================
+    def test_openFromXML_3D(self):
+        sv = self.sv
+        self.setUpXML()
+        xml = """<MDInstruction><MDWorkspaceName>TOPAZ_3680</MDWorkspaceName>
+<DimensionSet>
+    <Dimension ID="Q_lab_x"><Name>Q_lab_x</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <Dimension ID="Q_lab_y"><Name>Q_lab_y</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <Dimension ID="Q_lab_z"><Name>Q_lab_z</Name><Units>Angstroms^-1</Units><UpperBounds>15.0000</UpperBounds><LowerBounds>-15.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <XDimension><RefDimensionId>Q_lab_x</RefDimensionId></XDimension>
+    <YDimension><RefDimensionId>Q_lab_y</RefDimensionId></YDimension>
+    <ZDimension><RefDimensionId>Q_lab_z</RefDimensionId></ZDimension>
+    <TDimension><RefDimensionId/></TDimension>
+</DimensionSet>
+<Function><Type>PlaneImplicitFuction</Type>
+<ParameterList>
+    <Parameter><Type>NormalParameter</Type><Value>1 0 0</Value></Parameter>
+    <Parameter><Type>OriginParameter</Type><Value>4.84211 0 0</Value></Parameter>
+</ParameterList></Function>
+</MDInstruction>"""
+        # Read the XML and set the view
+        sv.openFromXML(xml)
+        # Check the settings
+        self.assertEqual(sv.getWorkspaceName(), "TOPAZ_3680")
+        self.assertEqual(sv.getDimX(), 1)
+        self.assertEqual(sv.getDimY(), 2)
+        self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)
+
+        pass
+    
+    def test_openFromXML_4D(self):
+        sv = self.sv
+        self.setUpXML()
+        xml = """<MDInstruction><MDWorkspaceName>WS_4D</MDWorkspaceName>
+<DimensionSet>
+    <Dimension ID="Q_x"><Name>Q_x</Name><Units>Ang</Units><UpperBounds>5.7415</UpperBounds><LowerBounds>-1.5197</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <Dimension ID="Q_y"><Name>Q_y</Name><Units>Ang</Units><UpperBounds>6.7070</UpperBounds><LowerBounds>-6.6071</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <Dimension ID="Q_z"><Name>Q_z</Name><Units>Ang</Units><UpperBounds>6.6071</UpperBounds><LowerBounds>-6.6071</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <Dimension ID="E"><Name>E</Name><Units>MeV</Units><UpperBounds>150.0000</UpperBounds><LowerBounds>0.0000</LowerBounds><NumberOfBins>10</NumberOfBins></Dimension>
+    <XDimension><RefDimensionId>Q_x</RefDimensionId></XDimension>
+    <YDimension><RefDimensionId>Q_y</RefDimensionId></YDimension>
+    <ZDimension><RefDimensionId>E</RefDimensionId></ZDimension>
+    <TDimension><RefDimensionId>Q_z</RefDimensionId><Value>4.567</Value></TDimension>
+</DimensionSet>
+<Function><Type>PlaneImplicitFuction</Type><ParameterList>
+    <Parameter><Type>NormalParameter</Type><Value>0 1 0</Value></Parameter>
+    <Parameter><Type>OriginParameter</Type><Value>0 1.234 0</Value></Parameter>
+</ParameterList></Function></MDInstruction>"""
+        # Read the XML and set the view
+        sv.openFromXML(xml)
+        # Check the settings
+        self.assertEqual(sv.getWorkspaceName(), "WS_4D")
+        self.assertEqual(sv.getDimX(), 0) # Q_x is X dimension
+        self.assertEqual(sv.getDimY(), 3) # Energy is Y
+        self.assertAlmostEqual( sv.getSlicePoint(1), 1.234, 3) # Slice point in Q_y
+        self.assertAlmostEqual( sv.getSlicePoint(2), 4.567, 3) # Slice point in Q_z
+
+
     #==========================================================================
     #======================= Setting Dimensions, etc ==========================
     #==========================================================================

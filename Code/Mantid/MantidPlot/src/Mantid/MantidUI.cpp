@@ -11,7 +11,6 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
-
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 #include "../ScriptingWindow.h"
@@ -59,12 +58,14 @@
 #include <sstream>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtFactory/WidgetFactory.h"
 
 
 using namespace std;
 
 using namespace Mantid::API;
 using Mantid::Kernel::DateAndTime;
+using MantidQt::SliceViewer::SliceViewerWindow;
 namespace MantidException = Mantid::Kernel::Exception;
 
 
@@ -333,12 +334,12 @@ QString MantidUI::getSelectedWorkspaceName()
   return str;
 }
 
-Mantid::API::Workspace_sptr MantidUI::getSelectedWorkspace()
+Mantid::API::Workspace_const_sptr MantidUI::getSelectedWorkspace()
 {
   return m_exploreMantid->getSelectedWorkspace();
 }
 
-Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
+Mantid::API::Workspace_const_sptr MantidUI::getWorkspace(const QString& workspaceName)
 {
   if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
   {
@@ -661,11 +662,13 @@ void MantidUI::showSliceViewer()
   if (mdws)
   {
     // Create the slice viewer window
-	// Creates it with NULL parent so that it does not stay on top of the main window on Windows.
-    SliceViewerWindow * w = new SliceViewerWindow(wsName, NULL, "");
-	// Connect the MantidPlot close() event with the the window's close().
-	QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
-	// Pop up the window
+    SliceViewerWindow * w = WidgetFactory::Instance().
+        createSliceViewerWindow(wsName, "");
+
+    // Connect the MantidPlot close() event with the the window's close().
+    QObject::connect(appWindow(), SIGNAL(destroyed()), w, SLOT(close()));
+
+    // Pop up the window
     w->show();
     // And add it
     //appWindow()->d_workspace->addSubWindow(w);
@@ -679,7 +682,7 @@ void MantidUI::showSliceViewer()
 void MantidUI::showAlgorithmHistory()
 {
   QString wsName=getSelectedWorkspaceName();
-  Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
+  Mantid::API::Workspace_const_sptr wsptr=getWorkspace(wsName);
   if(NULL != wsptr) 
   {
     // If the workspace has any AlgorithHistory ...
@@ -963,10 +966,10 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     try
     {
       Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(ws_index);
-	 
+
       detID = det->getID();
-	  // We want to know whether the detector is a monitor
-	  isMon = det->isMonitor();
+      // We want to know whether the detector is a monitor
+      isMon = det->isMonitor();
       // We want the position of the detector relative to the sample
       Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
       pos.getSpherical(R,Theta,Phi);
@@ -978,7 +981,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     {
       detID = 0;
     }
-	// Prepare double valued data for current row
+    // Prepare double valued data for current row
     if (!col_values.isEmpty()) col_values.clear();
     col_values << static_cast<double>(ws_index) <<  static_cast<double>(currentSpec) << static_cast<double>(detID);
     if( include_data )
@@ -986,13 +989,21 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       col_values << ws->readY(ws_index)[0] << ws->readE(ws_index)[0];
     }
     col_values << R << Theta << Phi;
-	// Set column values for current row
+    // Set column values for current row
     for(int col = 0; col < ncols-ncharcols; ++col)
     {
       t->setCell(static_cast<int>(row), col, col_values[col]);
     }
-	t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
-
+    // Set Monitor Flag - yes if monitor, no if not monitor and also detector ID is non-zero, else not applicable
+    if( detID==0 && !isMon ) 
+    {
+      t->setText(static_cast<int>(row), ncols-ncharcols, "n/a");
+    }
+    else
+    {
+      t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
+    }
+  
   }
 
   t->showNormal();
@@ -1029,7 +1040,7 @@ void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
         algName = QString::fromStdString(alg->name());
         version = alg->version();
       }
-      catch ( std::runtime_error ) // not found
+      catch ( std::runtime_error &) // not found
       {
         algName = "";
         version = -99;
@@ -1776,7 +1787,7 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
-  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return NULL;
   Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty())
@@ -2292,7 +2303,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
  */
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname, int filter)
 {
-  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return;
 
   Mantid::Kernel::Property * logData =ws->run().getLogData(logname.toStdString());
@@ -2591,8 +2602,15 @@ void MantidUI::showLogFileWindow()
        If false the Y values will be in the same row with the left bin boundaries.
        If the workspace is not a histogram the parameter is ignored.
  */
-Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, QList<int> indexList, bool errs, bool binCentres)
+Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QString& workspaceName, QList<int> indexList, bool errs, bool binCentres)
 {
+  MatrixWorkspace_const_sptr workspace =
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(workspaceName));
+  if (!workspace)
+  {
+    throw std::invalid_argument(workspaceName.toStdString()+" is not a Matrix Workspace.");
+  }
+
   int nspec = static_cast<int>(workspace->getNumberHistograms());
   //Loop through the list of index and remove all the indexes that are out of range
 
@@ -2684,7 +2702,8 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool bi
   const QList<int>& indexList = m->getSelectedRows();
   if (indexList.empty()) return NULL;
 
-  return createTableFromSpectraList(m->name(), m->workspace(), indexList, errs, binCentres);
+  return createTableFromSpectraList(m->name(), QString::fromStdString(m->workspace()->name()),
+                                    indexList, errs, binCentres);
 }
 
 /**  Create a 1d graph from a Table.
@@ -3368,7 +3387,7 @@ void MantidUI::test()
 {
   std::cerr<<"\nTest\n\n";
 
-  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getSelectedWorkspace());
+  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(getSelectedWorkspace());
   if (ws)
   {
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument()->baseInstrument();

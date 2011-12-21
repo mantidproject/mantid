@@ -2,9 +2,10 @@
 #define MANTID_CUSTOMINTERFACES_MEMENTO_H_
 
 #include "MantidKernel/System.h"
-#include <string>
 #include "MantidAPI/MatrixWorkspace.h"
-
+#include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt
 {
@@ -62,9 +63,39 @@ namespace MantidQt
       @throw if workspace has been moved since instantiation.
       */
       virtual Mantid::API::MatrixWorkspace_sptr fetchIt() const = 0;
+      /**
+      Generates a status report based on the workspace state.
+      */
+      virtual std::string statusReport() const = 0;
       /// Destructor
       virtual ~WorkspaceMemento(){};
+
+    protected:
+
+      /**
+      Common implementation of report generation.
+      @param ws : workspace to report on.
+      */
+      std::string generateReport(Mantid::API::MatrixWorkspace_sptr ws)
+      {
+        std::string msg;
+        if(!ws->sample().hasOrientedLattice())
+        {
+          msg = "Has no Oriented Lattice";
+        }
+        else
+        {
+          msg = "Ready!";
+        }
+        return msg;
+      }
+
     };
+
+    /// WorkspaceMemento shared_ptr
+    typedef boost::shared_ptr<WorkspaceMemento> WorkspaceMemento_sptr;
+    /// Collection of WorkspaceMementos.
+    typedef std::vector<WorkspaceMemento_sptr> WorkspaceMementoCollection;
   }
 }
 

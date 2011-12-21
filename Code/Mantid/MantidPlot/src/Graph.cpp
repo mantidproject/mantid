@@ -4971,6 +4971,23 @@ bool Graph::isSpectrogram()
 
 }
 
+/** Returns a pointer to a 2D plot, if the Graph has one (if more than one, will return the first).
+ *  Otherwise, returns a null pointer.
+ */
+Spectrogram* Graph::spectrogram()
+{
+  foreach (QwtPlotItem *item, d_plot->curves())
+  {
+    if(item && item->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+    {
+      Spectrogram *s = (Spectrogram *)item;
+      if (s) return s;
+    }
+  }
+  return NULL;
+
+}
+
 Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
   if (type != GrayScale && type != ColorMap && type != Contour && type != ColorMapContour)
@@ -5308,6 +5325,54 @@ void Graph::setCurveFullRange(int curveIndex)
   {
     c->setFullRange();
     updatePlot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineColor(int curveIndex, int colorIndex)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setColor(ColorBox::defaultColor(colorIndex));
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineColor(int curveIndex, QColor qColor)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setColor(qColor);
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineStyle(int curveIndex, Qt::PenStyle style)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setStyle(style);
+    c->setPen(pen);
+    replot();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::setCurveLineWidth(int curveIndex, double width)
+{
+  QwtPlotCurve *c = curve(curveIndex);
+  if (c){
+    QPen pen = c->pen();
+    pen.setWidthF(width);
+    c->setPen(pen);
+    replot();
     emit modifiedGraph();
   }
 }

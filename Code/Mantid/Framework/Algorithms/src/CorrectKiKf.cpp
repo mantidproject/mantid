@@ -302,6 +302,7 @@ void CorrectKiKf::execEvent()
       case TOF:
         //Switch to weights if needed.
         evlist->switchTo(WEIGHTED);
+        /* no break */
         // Fall through
   
       case WEIGHTED:

@@ -37,8 +37,10 @@
 #include <QString>
 
 #include <iostream>
+#include "MantidQtFactory/WidgetFactory.h"
 
 using namespace Mantid::Geometry;
+using namespace MantidQt::SliceViewer;
 
 namespace Mantid
 {
@@ -579,9 +581,23 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
     src1 = smModel->getItemAtIndex<pqPipelineSource *>(0);
   }
 
+  this->printProxyProps(src1);
+
+
   // Get the current dataset characteristics
-  const char *geomXML = vtkSMPropertyHelper(src1->getProxy(),
-                                            "InputGeometryXML").GetAsString();
+  const char *inGeomXML = vtkSMPropertyHelper(src1->getProxy(),
+                                             "InputGeometryXML").GetAsString();
+  // Check for timesteps and insert the value into the XML if necessary
+  std::string geomXML;
+  if ( this->srcHasTimeSteps(src1) )
+  {
+    GeometryParser parser(inGeomXML);
+    geomXML = parser.addTDimValue(this->getCurrentTimeStep());
+  }
+  else
+  {
+    geomXML = std::string(inGeomXML);
+  }
 
   // Get the necessary information from the cut
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
@@ -603,8 +619,13 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   //std::cout << rks.createXMLString() << std::endl;
   QString titleAddition = " "+name;
 
-  SliceViewerWindow *w = new SliceViewerWindow(wsName, this, titleAddition);
+  // Use the WidgetFactory to create the slice viewer window
+  SliceViewerWindow *w = WidgetFactory::Instance().createSliceViewerWindow(wsName, titleAddition);
+  // Set the slice points, etc, using the XML definition of the plane function
+  w->getSlicer()->openFromXML( QString::fromStdString(rks.createXMLString()) );
   w->show();
+
+  //TODO: Connect to application windows shutdown signal to close the slice viewer with the window.
 }
 
 }

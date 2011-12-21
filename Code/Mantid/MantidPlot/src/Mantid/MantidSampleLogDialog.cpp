@@ -283,7 +283,7 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 void MantidSampleLogDialog::init()
 {
   m_tree->clear();
-  Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(m_mantidUI->getWorkspace(m_wsname));
+  ExperimentInfo_const_sptr ws = boost::dynamic_pointer_cast<const ExperimentInfo>(m_mantidUI->getWorkspace(m_wsname));
   if (!ws)
   {
       throw std::runtime_error("Wrong type of a Workspace");

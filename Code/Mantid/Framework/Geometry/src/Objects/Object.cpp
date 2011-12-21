@@ -1609,6 +1609,7 @@ namespace Mantid
     void Object::defineBoundingBox(const double &xMax, const double &yMax, const double &zMax,
       const double &xMin, const double &yMin, const double &zMin)
     {
+      BoundingBox::checkValid(xMax, yMax, zMax, xMin, yMin, zMin);
 
       AABBxMax = xMax;
       AABByMax = yMax;
@@ -1618,7 +1619,10 @@ namespace Mantid
       AABBzMin = zMin;
       boolBounded = true;
 
-      m_boundingBox = BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin);
+      PARALLEL_CRITICAL(defineBoundingBox)
+      {
+        m_boundingBox = BoundingBox(xMax, yMax, zMax, xMin, yMin, zMin);
+      }
     }
 
     /**

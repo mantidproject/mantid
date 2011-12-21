@@ -1,9 +1,13 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/DataService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
@@ -18,6 +22,16 @@
 #include <iosfwd>
 #include <iostream>
 #include <limits>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/Exception.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <qfiledialog.h>
 #include <qmenu.h>
 #include <QtGui/qaction.h>
@@ -33,15 +47,21 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
-#include "MantidKernel/DataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/V3D.h"
+
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using MantidQt::API::SyncedCheckboxes;
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::Node;
+using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeFilter;
 
 namespace MantidQt
 {
@@ -52,10 +72,15 @@ namespace SliceViewer
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent),
+      m_ws(), m_firstWorkspaceOpen(false),
+      m_dimensions(), m_data(NULL),
+      m_X(), m_Y(),
       m_dimX(0), m_dimY(1),
       m_logColor(false)
 {
+  //std::cout << "Starting setupUI. Parent is " << parent << "." << std::endl;
 	ui.setupUi(this);
+  //std::cout << "done setupUI. Parent is " << parent << "." << std::endl;
 
 	m_inf = std::numeric_limits<double>::infinity();
 
@@ -113,12 +138,14 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_lineOverlay = new LineOverlay(m_plot);
   m_lineOverlay->setVisible(false);
 
+  //std::cout << "Done SliceViewer constructor" << std::endl;
 }
 
 //------------------------------------------------------------------------------------
 /// Destructor
 SliceViewer::~SliceViewer()
 {
+//  std::cout << "SliceViewer " << this << " deleted" << std::endl;
   delete m_data;
   saveSettings();
   // Don't delete Qt objects, I think these are auto-deleted
@@ -262,17 +289,18 @@ void SliceViewer::initZoomer()
 //  zoomer->setRubberBandPen(c);
 //  zoomer->setTrackerPen(c);
 
-  // Zoom in/out using right-click or the mouse wheel
+  // Zoom in/out using middle-click+drag or the mouse wheel
   QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
   magnif->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
   magnif->setWheelFactor(0.9);
+  magnif->setMouseButton(Qt::MidButton);
   // Have to flip the keys to match our flipped mouse wheel
   magnif->setZoomInKey(Qt::Key_Minus, Qt::NoModifier);
   magnif->setZoomOutKey(Qt::Key_Equal, Qt::NoModifier);
 
-  // Pan using the middle button
+  // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
-  panner->setMouseButton(Qt::MidButton);
+  panner->setMouseButton(Qt::RightButton);
   panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
 
   CustomPicker * picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
@@ -296,19 +324,27 @@ void SliceViewer::showControls(bool visible)
 /** Add (as needed) and update DimensionSliceWidget's. */
 void SliceViewer::updateDimensionSliceWidgets()
 {
+  //std::cout << "Workspace has " << m_ws->getNumDims() << " dimensions " << std::endl;
   // Create all necessary widgets
   if (m_dimWidgets.size() < m_ws->getNumDims())
   {
     for (size_t d=m_dimWidgets.size(); d<m_ws->getNumDims(); d++)
     {
-      DimensionSliceWidget * widget = new DimensionSliceWidget(this);
+      //std::cout << "Creating DimensionSliceWidget at d "<< d << " with parent " << this << std::endl;
+      DimensionSliceWidget * widget = new DimensionSliceWidget(this /*TODO set to this */);
+
+      //std::cout << "Widget is at "<< widget << std::endl;
+
       ui.verticalLayoutControls->insertWidget(int(d), widget);
-      m_dimWidgets.push_back(widget);
-      // Slot when t
+      //std::cout << "Widget inserted into layout " << std::endl;
+      // Slots for changes on the dimension widget
       QObject::connect(widget, SIGNAL(changedShownDim(int,int,int)),
                        this, SLOT(changedShownDim(int,int,int)));
       QObject::connect(widget, SIGNAL(changedSlicePoint(int,double)),
                        this, SLOT(updateDisplaySlot(int,double)));
+      //std::cout << "Signals connected." << std::endl;
+      // Save in this list
+      m_dimWidgets.push_back(widget);
     }
   }
   // Hide unnecessary ones
@@ -359,6 +395,9 @@ void SliceViewer::updateDimensionSliceWidgets()
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 {
   m_ws = ws;
+  // Emit the signal that we changed the workspace
+  emit workspaceChanged();
+
   // For MDEventWorkspace, estimate the resolution and change the # of bins accordingly
   IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_ws);
   if (mdew)
@@ -408,6 +447,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
 
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
+
 }
 
 
@@ -431,6 +471,13 @@ void SliceViewer::setWorkspace(const QString & wsName)
   this->setWorkspace(ws);
 }
 
+
+//------------------------------------------------------------------------------------
+/** @return the workspace in the SliceViewer */
+Mantid::API::IMDWorkspace_sptr SliceViewer::getWorkspace()
+{
+  return m_ws;
+}
 
 //------------------------------------------------------------------------------------
 /** Load a color map from a file
@@ -890,7 +937,6 @@ void SliceViewer::updateDisplay(bool resetAxes)
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
-//  std::cout << m_plot->sizeHint().width() << " width\n";
 }
 
 
@@ -942,6 +988,18 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
 //=================================================================================================
 //========================================== PYTHON METHODS =======================================
 //=================================================================================================
+
+/** @return the name of the workspace selected, or a blank string
+ * if no workspace is set.
+ */
+QString SliceViewer::getWorkspaceName() const
+{
+  if (m_ws)
+    return QString::fromStdString(m_ws->getName());
+  else
+    return QString();
+}
+
 //------------------------------------------------------------------------------------
 /** @return the index of the dimension that is currently
  * being shown as the X axis of the plot.
@@ -1085,6 +1143,42 @@ void SliceViewer::setColorScale(double min, double max, bool log)
 
 
 //------------------------------------------------------------------------------------
+/** Set the minimum value corresponding to the lowest color on the map
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScaleMin(double min)
+{
+  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleLog());
+}
+
+//------------------------------------------------------------------------------------
+/** Set the maximum value corresponding to the lowest color on the map
+ *
+ * @param max :: maximum value corresponding to the lowest color on the map
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScaleMax(double max)
+{
+  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleLog());
+}
+
+//------------------------------------------------------------------------------------
+/** Set whether the color scale is logarithmic
+ *
+ * @param log :: true for a log color scale, false for linear
+ * @throw if the min/max values are inconsistent with a log color scale
+ */
+void SliceViewer::setColorScaleLog(bool log)
+{
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), log);
+}
+
+
+//------------------------------------------------------------------------------------
 /** @return the value that corresponds to the lowest color on the color map */
 double SliceViewer::getColorScaleMin() const
 {
@@ -1138,6 +1232,171 @@ QwtDoubleInterval SliceViewer::getYLimits() const
 {
   return m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 }
+
+
+//------------------------------------------------------------------------------------
+/** Opens a workspace and sets the view and slice points
+ * given the XML from the MultiSlice view in XML format.
+ *
+ * @param xml :: string describing workspace, slice point, etc.
+ * @throw std::runtime_error if error in parsing XML
+ */
+void SliceViewer::openFromXML(const QString & xml)
+{
+//  std::cout << "Reading XML " << std::endl
+//      << xml.toStdString() << std::endl;
+
+  // Set up the DOM parser and parse xml file
+  DOMParser pParser;
+  Poco::XML::Document* pDoc;
+  try
+  {
+    pDoc = pParser.parseString(xml.toStdString());
+  }
+  catch(Poco::Exception& exc)
+  {
+    throw std::runtime_error("SliceViewer::openFromXML(): Unable to parse XML. " + std::string(exc.what()));
+  }
+  catch(...)
+  {
+    throw std::runtime_error("SliceViewer::openFromXML(): Unspecified error parsing XML. ");
+  }
+
+  // Get pointer to root element
+  Poco::XML::Element* pRootElem = pDoc->documentElement();
+  if ( !pRootElem->hasChildNodes() )
+    throw std::runtime_error("SliceViewer::openFromXML(): No root element in XML string.");
+
+  // ------- Find the workspace ------------
+  Poco::XML::Element* cur = NULL;
+  cur = pRootElem->getChildElement("MDWorkspaceName");
+  if (!cur) throw std::runtime_error("SliceViewer::openFromXML(): No MDWorkspaceName element.");
+  std::string wsName = cur->innerText();
+  std::cout << "Workspace named " << wsName << std::endl;
+  if (wsName.empty()) throw std::runtime_error("SliceViewer::openFromXML(): Empty MDWorkspaceName found!");
+  this->setWorkspace(QString::fromStdString(wsName));
+
+  if (!m_ws)
+    throw std::runtime_error("SliceViewer::openFromXML(): Workspace no found!");
+  if ((m_ws->getNumDims() < 3) || (m_ws->getNumDims() > 4))
+    throw std::runtime_error("SliceViewer::openFromXML(): Workspace should have 3 or 4 dimensions.");
+
+  // ------- Read which are the X/Y dimensions ------------
+  Poco::XML::Element* dims = pRootElem->getChildElement("DimensionSet");
+  if (!dims) throw std::runtime_error("SliceViewer::openFromXML(): No DimensionSet element.");
+
+  // Map: The index = dimension in ParaView; Value = dimension of the workspace.
+  int dimMap[4];
+  // For 4D workspace, the value of the "time"
+  double TimeValue = 0.0;
+
+  std::string dimChars = "XYZT";
+  for (size_t ind=0; ind<4; ind++)
+  {
+    // X, Y, Z, or T
+    std::string dimLetter = " ";
+    dimLetter[0] = dimChars[ind];
+    Poco::XML::Element* dim = dims->getChildElement(dimLetter + "Dimension");
+    if (!dim) throw std::runtime_error("SliceViewer::openFromXML(): No " + dimLetter + "Dimension element.");
+    cur = dim->getChildElement("RefDimensionId");
+    if (!cur) throw std::runtime_error("SliceViewer::openFromXML(): No RefDimensionId in " + dimLetter + "Dimension element.");
+    std::string dimName = cur->innerText();
+    if (!dimName.empty())
+      dimMap[ind] = int(m_ws->getDimensionIndexByName(dimName));
+    else
+      dimMap[ind] = -1;
+    // Find the time value
+    if (ind==3)
+    {
+      cur = dim->getChildElement("Value");
+      if (cur)
+      {
+        if (!Kernel::Strings::convert(cur->innerText(), TimeValue))
+          throw std::runtime_error("SliceViewer::openFromXML(): Could not cast Value '" + cur->innerText() + "' to double in TDimension element.");
+      }
+    }
+  }
+  // The index of the time dimensions
+  int timeDim = dimMap[3];
+
+
+  // ------- Read the plane function ------------
+  Poco::XML::Element* func = pRootElem->getChildElement("Function");
+  if (!func) throw std::runtime_error("SliceViewer::openFromXML(): No Function element.");
+  Poco::XML::Element* paramlist = func->getChildElement("ParameterList");
+  if (!paramlist) throw std::runtime_error("SliceViewer::openFromXML(): No ParameterList element.");
+
+  NodeList * params = paramlist->getElementsByTagName("Parameter");
+  NodeList * paramvals;
+  Node * param;
+  if (!params || params->length() < 2)
+    throw std::runtime_error("SliceViewer::openFromXML(): Too few parameters.");
+
+  param = params->item(0);
+  paramvals = param->childNodes();
+  if (!paramvals || paramvals->length() < 2) throw std::runtime_error("SliceViewer::openFromXML(): Parameter has too few children");
+  std::string normalStr = paramvals->item(1)->innerText();
+
+  param = params->item(1);
+  paramvals = param->childNodes();
+  if (!paramvals || paramvals->length() < 2) throw std::runtime_error("SliceViewer::openFromXML(): Parameter has too few children");
+  std::string originStr = paramvals->item(1)->innerText();
+
+
+  // ------- Apply the X/Y dimensions ------------
+  V3D normal, origin;
+  normal.fromString(normalStr);
+  origin.fromString(originStr);
+  double planeOrigin = 0;
+  int normalDim = -1;
+  for (int i=0; i<3; i++)
+    if (normal[i] > 0.99) normalDim = i;
+  if (normal.norm() > 1.01 || normal.norm() < 0.99)
+    throw std::runtime_error("SliceViewer::openFromXML(): Normal vector is not length 1.0!");
+  if (normalDim < 0)
+    throw std::runtime_error("SliceViewer::openFromXML(): Could not find the normal of the plane. Plane must be along one of the axes!");
+
+  // Get the plane origin and the dimension in the workspace dimensions
+  planeOrigin = origin[normalDim];
+  normalDim = dimMap[normalDim];
+
+  VMD slicePoint(m_ws->getNumDims());
+  slicePoint *= 0; // clearnormalDim
+  // The plane origin in the 3D view
+  slicePoint[normalDim] = planeOrigin;
+  // The "time" of the paraview view
+  if (dimMap[3] > 0)
+    slicePoint[dimMap[3]] = TimeValue;
+
+  // Now find the first unused dimensions = that is the X view dimension
+  int xdim =-1;
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+    if ((d != normalDim) && (d != timeDim))
+    {
+      xdim = d;
+      break;
+    }
+
+  // Now find the second unused dimensions = that is the Y view dimension
+  int ydim =-1;
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+    if ((d != normalDim) && (d != timeDim) && (d != xdim))
+    {
+      ydim = d;
+      break;
+    }
+
+  if (xdim<0 || ydim<0)
+    throw std::runtime_error("SliceViewer::openFromXML(): Could not find the X or Y view dimension.");
+
+  // Finally, set the view dimension and slice points
+  this->setXYDim(xdim, ydim);
+  for (int d=0; d<int(m_ws->getNumDims()); d++)
+    this->setSlicePoint(d, slicePoint[d]);
+
+}
+
+
 
 } //namespace
 }

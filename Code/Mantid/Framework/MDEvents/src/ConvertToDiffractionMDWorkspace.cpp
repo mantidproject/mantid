@@ -170,9 +170,9 @@ namespace MDEvents
       }
 
       /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
-       * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h) * 1e-10; */
+       * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10; */
       const double wavenumber_in_angstrom_times_tof_in_microsec =
-          (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h);
+          (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
 
       //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
       //std::cout << Q_dir.norm() << " Qdir norm" << std::endl;

@@ -366,24 +366,30 @@ namespace Mantid
      */
     Parameter_sptr ParameterMap::get(const IComponent* comp, const char* name) const
     {
-      if( m_map.empty() ) return Parameter_sptr();
-      const ComponentID id = comp->getComponentID();
-      pmap_cit it_found = m_map.find(id);
-      if (it_found == m_map.end())
+      Parameter_sptr result = Parameter_sptr();
+      PARALLEL_CRITICAL(ParameterMap_get)
       {
-        return Parameter_sptr();
-      }
-      pmap_cit itr = m_map.lower_bound(id);
-      pmap_cit itr_end = m_map.upper_bound(id);
-      for( ; itr != itr_end; ++itr )
-      {
-        Parameter_sptr param = itr->second;
-        if( boost::iequals(param->nameAsCString(), name) )
+        if( !m_map.empty() )
         {
-          return param;
+          const ComponentID id = comp->getComponentID();
+          pmap_cit it_found = m_map.find(id);
+          if( it_found != m_map.end() )
+          {
+            pmap_cit itr = m_map.lower_bound(id);
+            pmap_cit itr_end = m_map.upper_bound(id);
+            for( ; itr != itr_end; ++itr )
+            {
+              Parameter_sptr param = itr->second;
+              if( boost::iequals(param->nameAsCString(), name) )
+              {
+                result = param;
+                break;
+              }
+            }
+          }
         }
       }
-      return Parameter_sptr();
+      return result;
     }
 
 
@@ -396,26 +402,31 @@ namespace Mantid
     Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name, 
                                      const std::string & type) const
     {
-      if( m_map.empty() ) return Parameter_sptr();
-      const ComponentID id = comp->getComponentID();
-      pmap_cit it_found = m_map.find(id);
-      if (it_found == m_map.end())
+      Parameter_sptr result = Parameter_sptr();
+      PARALLEL_CRITICAL(ParameterMap_get)
       {
-        return Parameter_sptr();
-      }
-      pmap_cit itr = m_map.lower_bound(id);
-      pmap_cit itr_end = m_map.upper_bound(id);
-
-      const bool anytype = type.empty();
-      for( ; itr != itr_end; ++itr )
-      {
-        Parameter_sptr param = itr->second;
-        if( boost::iequals(param->name(), name) && (anytype || param->type() == type) )
+        if( !m_map.empty() )
         {
-          return param;
+          const ComponentID id = comp->getComponentID();
+          pmap_cit it_found = m_map.find(id);
+          if (it_found != m_map.end())
+          {
+            pmap_cit itr = m_map.lower_bound(id);
+            pmap_cit itr_end = m_map.upper_bound(id);
+            for( ; itr != itr_end; ++itr )
+            {
+              Parameter_sptr param = itr->second;
+              const bool anytype = type.empty();
+              if( boost::iequals(param->nameAsCString(), name) && (anytype || param->type() == type) )
+              {
+                result = param;
+                break;
+              }
+            }
+          }
         }
       }
-      return Parameter_sptr();
+      return result;
     }
 
     /** FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up

@@ -11,8 +11,9 @@ namespace SliceViewer
 
 DimensionSliceWidget::DimensionSliceWidget(QWidget *parent)
     : QWidget(parent),
-     m_dimIndex(0), m_shownDim(0),
-     m_slicePoint(0.0)
+      m_dim(),
+      m_dimIndex(0), m_shownDim(0),
+      m_slicePoint(0.0)
 {
   ui.setupUi(this);
 
@@ -155,6 +156,7 @@ void DimensionSliceWidget::setSlicePoint(double value)
  */
 void DimensionSliceWidget::setMinMax(double min, double max)
 {
+  if (!m_dim) return;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()) );
   ui.lblUnits->setText(QString::fromStdString(m_dim->getUnits()) );
 

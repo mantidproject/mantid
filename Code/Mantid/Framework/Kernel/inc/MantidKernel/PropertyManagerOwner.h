@@ -84,7 +84,7 @@ public:
     virtual std::string asString(bool withDefaultValues = false) const;
  
     /// Removes the property from management
-    void removeProperty(const std::string &name);
+    void removeProperty(const std::string &name, const bool delproperty);
     /// Clears all properties under management
     void clear();  
 

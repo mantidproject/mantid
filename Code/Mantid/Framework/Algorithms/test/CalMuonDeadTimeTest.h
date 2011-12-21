@@ -52,6 +52,7 @@ public:
 
     calDeadTime.setPropertyValue("InputWorkspace", "EMU6473");
     calDeadTime.setPropertyValue("DeadTimeTable", "deadtimetable");
+    calDeadTime.setPropertyValue("DataFitted", "fittedData");
     calDeadTime.setPropertyValue("FirstGoodData", "1.0");
     calDeadTime.setPropertyValue("LastGoodData", "2.0");
 
@@ -59,7 +60,7 @@ public:
     {
       TS_ASSERT_EQUALS(calDeadTime.execute(),true);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error & e)
     {
       TS_FAIL(e.what());
     }
@@ -70,6 +71,11 @@ public:
     Column_const_sptr col =	table->getColumn(1);
     const Column* tableC = col.get();
     TS_ASSERT_DELTA(tableC->operator[](0),-0.0246,0.0001);
+
+    Mantid::API::AnalysisDataService::Instance().remove("deadtimetable");
+    Mantid::API::AnalysisDataService::Instance().remove("fittedData");
+    Mantid::API::AnalysisDataService::Instance().remove("EMU6473");
+
 
   }
 

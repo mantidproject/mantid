@@ -155,14 +155,6 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
     inMuParser = true;
   }
   
-  if (parent()->isA("Note")){
-    Note *sp = (Note*) parent();
-    action = new QAction(tr("Auto&exec"), &menu);
-    action->setToggleAction(true);
-    action->setOn(sp->autoexec());
-    connect(action, SIGNAL(toggled(bool)), sp, SLOT(setAutoexec(bool)));
-    menu.addAction(action);
-  }
   
   if( inMuParser )
   {

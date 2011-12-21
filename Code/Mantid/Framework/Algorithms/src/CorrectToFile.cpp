@@ -201,7 +201,7 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs, API::MatrixWork
   {
     algebra->execute();
   }
-  catch(std::runtime_error)
+  catch(std::runtime_error &)
   {
     g_log.warning() << "Error encountered while running algorithm " << algName << std::endl;
     g_log.error() << "Correction file " << getPropertyValue("Filename") + " can't be used to correct workspace " << getPropertyValue("WorkspaceToCorrect") << std::endl;
