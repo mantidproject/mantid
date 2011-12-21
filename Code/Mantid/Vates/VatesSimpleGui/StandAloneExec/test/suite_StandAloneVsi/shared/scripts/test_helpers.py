@@ -72,8 +72,7 @@ def make_slice(axisScaleName, coordinate):
         width = scaleWidget.height
         height = axisScale.width
 
-    scaleFactor = -1.0 * (height / delta)
-    y = scaleFactor * (coordinate - min) + height
+    scaleFactor = height / delta
     
     if sp in (0, 2):
         x = 1
@@ -81,6 +80,9 @@ def make_slice(axisScaleName, coordinate):
         x = width - 1
     
     if sp in (0, 1):
+        scaleFactor *= -1.0
+        y = scaleFactor * (coordinate - min) + height
         mouseClick(scaleWidget, x, y, 0, Qt.LeftButton)
     else:
+        y = scaleFactor * (coordinate - min)
         mouseClick(scaleWidget, y, x, 0, Qt.LeftButton)

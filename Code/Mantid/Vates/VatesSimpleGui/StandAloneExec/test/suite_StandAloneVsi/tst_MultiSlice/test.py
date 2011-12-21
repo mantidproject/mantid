@@ -19,7 +19,13 @@ def main():
     make_slice("yAxisWidget", 0.0)
     make_slice("zAxisWidget", 0.0)
     make_slice("xAxisWidget", 1.0)
+    make_slice("yAxisWidget", 1.0)
+    make_slice("xAxisWidget", -1.0)
     apply_ptw_settings()
+    
+    check_slices("xAxisWidget", 3)
+    check_slices("yAxisWidget", 2)
+    check_slices("zAxisWidget", 1)
     
     mouseDrag(waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 137, 170, -95, 9, 1, Qt.LeftButton)
     
