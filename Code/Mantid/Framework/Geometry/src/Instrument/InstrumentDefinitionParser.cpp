@@ -1723,7 +1723,7 @@ namespace Geometry
       std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
       boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader>
         reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
-      for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
+      for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); ++objItr)
       {
         ((*objItr).second)->setVtkGeometryCacheReader(reader);
       }
@@ -1749,7 +1749,7 @@ namespace Geometry
       std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
       boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter>
         writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
-      for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
+      for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); ++objItr)
       {
         ((*objItr).second)->setVtkGeometryCacheWriter(writer);
       }
@@ -1919,7 +1919,7 @@ namespace Geometry
 
     // delete all <component> found in pElem
     std::set<Element*>::iterator it;
-    for ( it=allComponentInType.begin() ; it != allComponentInType.end(); it++ )
+    for ( it=allComponentInType.begin() ; it != allComponentInType.end(); ++it )
       pElem->removeChild(*it);
   }
 

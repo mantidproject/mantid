@@ -445,7 +445,7 @@ namespace Mantid
       std::list<Kernel::V3D>::const_iterator xs, ys;
       Kernel::V3D NormPair;
       for (xs = Snorms.begin(); xs != Snorms.end(); ++xs)
-        for (ys = xs, ys++; ys != Snorms.end(); ++ys)
+        for (ys = xs, ++ys; ys != Snorms.end(); ++ys)
         {
           NormPair = (*ys) + (*xs);
           NormPair.normalize();

@@ -67,7 +67,7 @@ SurfaceFactory::SurfaceFactory(const SurfaceFactory& A)  :
   */
 {
   MapType::const_iterator vc;
-  for(vc=A.SGrid.begin();vc!=A.SGrid.end();vc++)
+  for(vc=A.SGrid.begin();vc!=A.SGrid.end();++vc)
     SGrid.insert(MapType::value_type
 		 (vc->first,vc->second->clone()));
 
@@ -79,7 +79,7 @@ SurfaceFactory::~SurfaceFactory()
   */
 {
   MapType::iterator vc;
-  for(vc=SGrid.begin();vc!=SGrid.end();vc++)
+  for(vc=SGrid.begin();vc!=SGrid.end();++vc)
     delete vc->second;
 }
 
