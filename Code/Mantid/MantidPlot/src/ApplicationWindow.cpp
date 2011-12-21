@@ -10653,7 +10653,7 @@ Matrix* ApplicationWindow::openMatrix(ApplicationWindow* app, const QStringList 
   app->setListViewDate(caption,list[3]);
   w->setBirthDate(list[3]);
 
-  for (line++; line!=flist.end(); line++)
+  for (line++; line!=flist.end(); ++line)
   {
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry") {
@@ -10664,7 +10664,7 @@ Matrix* ApplicationWindow::openMatrix(ApplicationWindow* app, const QStringList 
       w->setFormula(fields[1]);
     } else if (fields[0] == "<formula>") {
       QString formula;
-      for (line++; line!=flist.end() && *line != "</formula>"; line++)
+      for (line++; line!=flist.end() && *line != "</formula>"; ++line)
         formula += *line + "\n";
       formula.truncate(formula.length()-1);
       w->setFormula(formula);
@@ -10698,7 +10698,7 @@ Matrix* ApplicationWindow::openMatrix(ApplicationWindow* app, const QStringList 
   if (*line == "<data>") ++line;
 
   //read and set table values
-  for (; line!=flist.end() && *line != "</data>"; line++){
+  for (; line!=flist.end() && *line != "</data>"; ++line){
     QStringList fields = (*line).split("\t");
     int row = fields[0].toInt();
     for (int col=0; col<cols; col++){
@@ -10731,7 +10731,7 @@ void ApplicationWindow::openMantidMatrix(const QStringList &list)
   //this list is used for find the MantidMatrix window pointer to open a 3D/2DGraph
   m_mantidmatrixWindows<<m;
   QStringList::const_iterator line = list.begin();
-  for (line++; line!=list.end(); line++)
+  for (line++; line!=list.end(); ++line)
   {	
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry") 
@@ -10750,7 +10750,7 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
     return;
   insWin->show();
   QStringList::const_iterator line = list.begin();
-  for (line++; line!=list.end(); line++)
+  for (line++; line!=list.end(); ++line)
   {	
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry") 
@@ -10905,7 +10905,7 @@ Table* ApplicationWindow::openTable(ApplicationWindow* app, const QStringList &f
   app->setListViewDate(caption, list[3]);
   w->setBirthDate(list[3]);
 
-  for (line++; line!=flist.end(); line++)
+  for (line++; line!=flist.end(); ++line)
   {
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry" || fields[0] == "tgeometry") {
@@ -10926,11 +10926,11 @@ Table* ApplicationWindow::openTable(ApplicationWindow* app, const QStringList &f
     } else if (fields[0] == "com") { // legacy code
       w->setCommands(*line);
     } else if (fields[0] == "<com>") {
-      for (line++; line!=flist.end() && *line != "</com>"; line++)
+      for (line++; line!=flist.end() && *line != "</com>"; ++line)
       {
         int col = (*line).mid(9,(*line).length()-11).toInt();
         QString formula;
-        for (line++; line!=flist.end() && *line != "</col>"; line++)
+        for (line++; line!=flist.end() && *line != "</col>"; ++line)
           formula += *line + "\n";
         formula.truncate(formula.length()-1);
         w->setCommand(col,formula);
@@ -10959,7 +10959,7 @@ Table* ApplicationWindow::openTable(ApplicationWindow* app, const QStringList &f
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
   w->table()->blockSignals(true);
-  for (line++; line!=flist.end() && *line != "</data>"; line++)
+  for (line++; line!=flist.end() && *line != "</data>"; ++line)
   {//read and set table values
     QStringList fields = (*line).split("\t");
     int row = fields[0].toInt();
@@ -11006,7 +11006,7 @@ TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist
   setListViewDate(caption,list[3]);
   w->setBirthDate(list[3]);
 
-  for (line++; line!=flist.end(); line++)
+  for (line++; line!=flist.end(); ++line)
   {
     QStringList fields = (*line).split("\t");
     if (fields[0] == "geometry"){
@@ -11027,11 +11027,11 @@ TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist
     } else if (fields[0] == "com") { // legacy code
       w->setCommands(*line);
     } else if (fields[0] == "<com>") {
-      for (line++; line!=flist.end() && *line != "</com>"; line++)
+      for (line++; line!=flist.end() && *line != "</com>"; ++line)
       {
         int col = (*line).mid(9,(*line).length()-11).toInt();
         QString formula;
-        for (line++; line!=flist.end() && *line != "</col>"; line++)
+        for (line++; line!=flist.end() && *line != "</col>"; ++line)
           formula += *line + "\n";
         formula.truncate(formula.length()-1);
         w->setCommand(col,formula);

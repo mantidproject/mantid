@@ -5072,7 +5072,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
   c_keys.resize(n_curves);
   c_keys[n_curves-1] = d_plot->insertCurve(sp);
 
-  for (line++; line != lst.end(); line++)
+  for (line++; line != lst.end(); ++line)
   {
     QString s = *line;
     if (s.contains("<ColorPolicy>"))
@@ -5173,7 +5173,7 @@ void Graph::restoreCurveLabels(int curveID, const QStringList& lst)
   if (s.contains("<column>"))
     labelsColumn = s.remove("<column>").remove("</column>").trimmed();
 
-  for (line++; line != lst.end(); line++){
+  for (line++; line != lst.end(); ++line){
     s = *line;
     if (s.contains("<color>"))
       c->setLabelsColor(QColor(s.remove("<color>").remove("</color>").trimmed()));
