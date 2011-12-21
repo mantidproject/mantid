@@ -67,9 +67,9 @@ namespace MantidQt
 namespace Factory
 {
 
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 class WidgetFactory
 {
 %TypeHeaderCode
@@ -111,7 +111,7 @@ public:
   SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
   MantidQt::SliceViewer::SliceViewer* getSlicer();
   MantidQt::SliceViewer::LineViewer* getLiner();
-  const QString & getLabel();
+  const QString& getLabel() const;
 
 };
 

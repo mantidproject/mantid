@@ -34,7 +34,7 @@ public:
   ~SliceViewerWindow();
   MantidQt::SliceViewer::SliceViewer* getSlicer();
   MantidQt::SliceViewer::LineViewer* getLiner();
-  const QString & getLabel();
+  const QString& getLabel() const;
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);

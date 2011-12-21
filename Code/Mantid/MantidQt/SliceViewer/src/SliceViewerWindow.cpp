@@ -134,7 +134,7 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 
 //------------------------------------------------------------------------------------------------
 /** @return the label that was attached to this SliceViewerWindow's title */
-const QString & SliceViewerWindow::getLabel()
+const QString& SliceViewerWindow::getLabel() const
 {
   return m_label;
 }

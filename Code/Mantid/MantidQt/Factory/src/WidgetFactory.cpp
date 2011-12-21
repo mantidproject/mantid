@@ -53,12 +53,13 @@ namespace Factory
    * @param label :: label for the window title
    * @return the created SliceViewerWindow *
    */
-  MantidQt::SliceViewer::SliceViewerWindow * WidgetFactory::createSliceViewerWindow(const QString& wsName,  const QString& label)
+  MantidQt::SliceViewer::SliceViewerWindow* WidgetFactory::createSliceViewerWindow(const QString& wsName,  const QString& label)
   {
     SliceViewerWindow * window = new SliceViewerWindow(wsName, label);
+    QPointer<MantidQt::SliceViewer::SliceViewerWindow> pWindow(window);
 
     //Save in a list for later use
-    m_windows.push_back(QPointer<SliceViewerWindow>(window));
+    m_windows.push_back(pWindow);
 
     return window;
   }
@@ -72,7 +73,7 @@ namespace Factory
    * @return the previously-created SliceViewerWindow *
    * @throw std::runtime_error if no open windows match the parameters
    */
-  MantidQt::SliceViewer::SliceViewerWindow * WidgetFactory::getSliceViewerWindow(const QString& wsName,  const QString& label)
+  MantidQt::SliceViewer::SliceViewerWindow* WidgetFactory::getSliceViewerWindow(const QString& wsName,  const QString& label)
   {
 
     std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;

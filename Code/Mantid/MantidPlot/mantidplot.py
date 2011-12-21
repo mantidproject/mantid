@@ -9,7 +9,8 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 # Grab a few Mantid things so that we can recognise workspace variables
-from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
+from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd, ProxyObject
+from PyQt4 import QtCore
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -124,18 +125,20 @@ def plotSlice(source, xydim=None, slicepoint=None,
         print "Could not find module mantidqtpython. Cannot open the SliceViewer."
         return
     
-    if len(workspace_names) == 1:
-        # Return only one widget
-        return __doSliceViewer(workspace_names[0], 
-               xydim=xydim, slicepoint=slicepoint, colormin=colormin,
-               colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
-               **kwargs)
+    # Make a list of widgets to return
+    out = []
+    for wsname in workspace_names:
+        window = __doSliceViewer(wsname, 
+           xydim=xydim, slicepoint=slicepoint, colormin=colormin,
+           colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
+           **kwargs) 
+        pxy = QtProxyObject(window)
+        out.append(pxy)
+        
+    # Returh the widget alone if only 1
+    if len(out) == 1:
+        return out[0]
     else:
-        # Make a list of widgets to return
-        out = [__doSliceViewer(wsname, 
-               xydim=xydim, slicepoint=slicepoint, colormin=colormin,
-               colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
-               **kwargs) for wsname in workspace_names]
         return out
 
 
@@ -151,13 +154,12 @@ def getSliceViewer(source, label=""):
     @return a handle to the SliceViewerWindow object that was created before. 
     """
     import mantidqtpython
-    from PyQt4 import QtCore
     workspace_names = __getWorkspaceNames(source)
     if len(workspace_names) != 1:
         raise Exception("Please specify only one workspace.")
     else:
         svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow(workspace_names[0], label)
-        return svw
+        return QtProxyObject(svw)
 
 
 
@@ -192,6 +194,66 @@ Layer.Top = qti.GraphOptions.Top
 #--------------------------- "Private" functions -----------------------
 #-----------------------------------------------------------------------------
 
+
+
+#-------------------------------------------------------------------------------
+class QtProxyObject(QtCore.QObject):
+    """Generic Proxy object for wrapping Qt C++ Qobjects.
+    This holds the QObject internally and passes methods to it.
+    When the underlying object is deleted, the reference is set
+    to None to avoid segfaults.
+    """
+    def __init__(self, toproxy):
+        QtCore.QObject.__init__(self)
+        self.__obj = toproxy
+        # Connect to track the destroyed
+        QtCore.QObject.connect( self.__obj, QtCore.SIGNAL("destroyed()"),
+                                self._heldObjectDestroyed)
+        
+    def _heldObjectDestroyed(self):
+        """Slot called when the held object is destroyed.
+        Sets it to None, preventing segfaults """
+        self._kill_object()
+
+    def __getattr__(self, attr):
+        """
+        Reroute a method call to the the stored object
+        """
+        return getattr(self._getHeldObject(), attr)
+
+    def __str__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return str(self._getHeldObject())
+
+    def __repr__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return `self._getHeldObject()`
+
+    def _getHeldObject(self):
+        """
+        Returns a reference to the held object
+        """
+        return self.__obj
+
+    def _kill_object(self):
+        """
+        Release the stored instance
+        """
+        self.__obj = None
+
+    def _swap(self, obj):
+        """
+        Swap an object so that the proxy now refers to this object
+        """
+        self.__obj = obj
+
+
+
+#-------------------------------------------------------------------------------
 def __getWorkspaceNames(source):
     """Takes a "source", which could be a WorkspaceGroup, or a list
     of workspaces, or a list of names, and converts
