@@ -72,9 +72,8 @@ def make_slice(axisScaleName, coordinate):
         width = scaleWidget.height
         height = axisScale.width
 
-    scaleFactor = delta/height
-    #test.log("%s: %d, %d" % (axisScaleName, width, height))
-    y = height / 2
+    scaleFactor = -1.0 * (height / delta)
+    y = scaleFactor * (coordinate - min) + height
     
     if sp in (0, 2):
         x = 1
