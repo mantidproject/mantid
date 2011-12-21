@@ -70,26 +70,6 @@ namespace Factory
   /***************************************************************************/
   /***************************************************************************/
   /***************************************************************************/
-class WidgetFactoryImpl
-{
-%TypeHeaderCode
-#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
-%End
-
-public:
-  WidgetFactoryImpl();
-  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
-  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
-
-};
-
-}; // end namespace
-}; // end namespace
-
-
-/***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/
 class WidgetFactory
 {
 %TypeHeaderCode
@@ -97,10 +77,41 @@ class WidgetFactory
 %End
 
 public:
-  static MantidQt::Factory::WidgetFactoryImpl& Instance();
+  static MantidQt::Factory::WidgetFactory* Instance();
+  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+  MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
+%Docstring
+MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QString& wsName)
+-------------------------------------------------------------------------------------------
+    Create an instance of a bare SliceViewer Widget.
+    This is only capable of doing 2D views, and cannot do line plots
+    since it does not have a LineViewer.
+   
+    Use WidgetFactory::createSliceViewerWindow to create a window combining both.
+   
+    @param wsName :: name of the workspace to show. Optional, blank for no workspace.
+    @return the created SliceViewer *
+   
+%End
+
+
 private:
   WidgetFactory();
+%Docstring
+WidgetFactory::WidgetFactory()
+------------------------------
+    Constructor
+   
+%End
+
+
 };
+
+}; // end namespace
+}; // end namespace
+
+
 
 namespace MantidQt
 {
@@ -143,6 +154,7 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
    
 %End
 
+  const QString & getLabel();
 
 };
 

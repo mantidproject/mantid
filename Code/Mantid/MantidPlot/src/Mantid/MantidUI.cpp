@@ -662,7 +662,7 @@ void MantidUI::showSliceViewer()
   if (mdws)
   {
     // Create the slice viewer window
-    SliceViewerWindow * w = WidgetFactory::Instance().
+    SliceViewerWindow * w = MantidQt::Factory::WidgetFactory::Instance()->
         createSliceViewerWindow(wsName, "");
 
     // Connect the MantidPlot close() event with the the window's close().

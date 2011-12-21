@@ -620,7 +620,7 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   QString titleAddition = " "+name;
 
   // Use the WidgetFactory to create the slice viewer window
-  SliceViewerWindow *w = WidgetFactory::Instance().createSliceViewerWindow(wsName, titleAddition);
+  SliceViewerWindow *w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(wsName, titleAddition);
   // Set the slice points, etc, using the XML definition of the plane function
   w->getSlicer()->openFromXML( QString::fromStdString(rks.createXMLString()) );
   w->show();

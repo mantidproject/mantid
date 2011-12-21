@@ -139,6 +139,27 @@ def plotSlice(source, xydim=None, slicepoint=None,
         return out
 
 
+#-----------------------------------------------------------------------------
+def getSliceViewer(source, label=""):
+    """Retrieves a handle to a previously-open SliceViewerWindow.
+    This allows you to get a handle on, e.g., a SliceViewer that was open
+    by the MultiSlice view in VATES Simple Interface.
+    Will raise an exception if not found.
+    
+    @param source :: name of the workspace that was open
+    @param label :: additional label string that was used to identify the window.
+    @return a handle to the SliceViewerWindow object that was created before. 
+    """
+    import mantidqtpython
+    from PyQt4 import QtCore
+    workspace_names = __getWorkspaceNames(source)
+    if len(workspace_names) != 1:
+        raise Exception("Please specify only one workspace.")
+    else:
+        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow(workspace_names[0], label)
+        return svw
+
+
 
 #-----------------------------------------------------------------------------
 # Legacy function
@@ -222,7 +243,7 @@ def __doSliceViewer(wsname, xydim=None, slicepoint=None,
     import mantidqtpython
     from PyQt4 import QtCore
     
-    svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
+    svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
     svw.show()
     
     # -- Connect to main window's shut down signal ---

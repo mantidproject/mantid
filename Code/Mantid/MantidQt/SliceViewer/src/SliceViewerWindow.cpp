@@ -47,7 +47,8 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   observeADSClear();
 
   // Set up the window
-  this->setCaption(QString("Slice Viewer (") + wsName + QString(")") + label);
+  m_label = label;
+  this->setCaption(QString("Slice Viewer (") + wsName + QString(")") + m_label);
   this->resize(500, 500);
 
   // Create the m_slicer and add it to the MDI window
@@ -129,6 +130,15 @@ MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
  */
 MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 { return m_liner; }
+
+
+//------------------------------------------------------------------------------------------------
+/** @return the label that was attached to this SliceViewerWindow's title */
+const QString & SliceViewerWindow::getLabel()
+{
+  return m_label;
+}
+
 
 //------------------------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
