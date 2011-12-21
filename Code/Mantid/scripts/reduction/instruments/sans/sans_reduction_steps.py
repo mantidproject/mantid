@@ -916,7 +916,7 @@ class CorrectToFileStep(ReductionStep):
 
 class CalculateNorm(object):
     """
-        Generates the normalization workspaces required by Q1D from output
+        Generates the normalization workspaces required by Q1D or Qxy from output
         of other, sometimes optional, reduction_steps or specified workspaces.
         Workspaces for wavelength adjustment must have their
         distribution/non-distribution flag set correctly as they maybe converted
@@ -997,7 +997,7 @@ class CalculateNorm(object):
         pixel_adj = ''
         if self._pixel_file:
             pixel_adj = self.PIXEL_CORR_NAME
-            load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
+            load_com = 'Load("'+self._pixel_file+'","'+pixel_adj+'"'
             if self._load_params:
                 load_com  += ','+self._load_params
             load_com += ')'
@@ -1023,7 +1023,7 @@ class ConvertToQ(ReductionStep):
     _DEFAULT_GRAV = False    
     def __init__(self, normalizations):
         """
-            @param normalizations: the CalcNorm object contains the workspace, ReductionSteps or files require for the optional normalization arguments to Q1D
+            @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps or files require for the optional normalization arguments
         """
         super(ConvertToQ, self).__init__()
         
