@@ -356,7 +356,7 @@ void MdiSubWindow::goMdi()
  * Constructor.
  */
 FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
-QMainWindow(appWindow,f),
+MdiSubWindowParent_t(appWindow,f | Qt::Window),
 d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);
@@ -371,12 +371,7 @@ bool FloatingWindow::event(QEvent * e)
 {
   if (e->type() == QEvent::WindowActivate)
   {
-    MdiSubWindowParent_t* w_t = dynamic_cast<MdiSubWindowParent_t*>(this->centralWidget());
-    MdiSubWindow* w = NULL;
-    if (w_t)
-    {
-      w = dynamic_cast<MdiSubWindow*>(w_t->widget());
-    }
+    MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(widget());
     if (w && this != w->d_app->getActiveFloating())
     {
       w->d_app->activateWindow(w);
@@ -402,7 +397,11 @@ bool FloatingWindow::event(QEvent * e)
       this->showMaximized();
     }
   }
-  return QMainWindow::event(e);
+  else if (e->type() == QEvent::Close)
+  {
+    d_app->removeFloatingWindow(this);
+  }
+  return MdiSubWindowParent_t::event(e);
 }
 
 void FloatingWindow::setStaysOnTopFlag()

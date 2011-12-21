@@ -254,7 +254,7 @@ typedef QList<MdiSubWindow*> MDIWindowList;
 /**
  * Floating wrapper widget for a MdiSubWindow.
  */
-class FloatingWindow: public QMainWindow
+class FloatingWindow: public MdiSubWindowParent_t
 {
   Q_OBJECT
 public:

@@ -17273,9 +17273,7 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
 
   // create the outer floating window. It is not a child of ApplicationWindow.
   FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
-  MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(fw,0);
-  wrapper->setWidget(w);
-  fw->setCentralWidget(wrapper);
+  fw->setWidget(w);
   fw->resize(sz);
   fw->move(p);
   fw->show();
@@ -17297,18 +17295,15 @@ void ApplicationWindow::goMdi(FloatingWindow* fw)
   QAction* res = systemMenu.exec(QCursor::pos());
   if (res == goMdiAction)
   {
-    MdiSubWindowParent_t* wrapper = dynamic_cast<MdiSubWindowParent_t*>(fw->centralWidget());
-    if (wrapper)
+    //fw->setWidget(NULL);
+    MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(fw->widget());
+    if (w)
     {
-      fw->setCentralWidget(NULL);
-      MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(wrapper->widget());
-      if (w)
-      {
-        addSubWindowToMdiArea(w);
-        // main window must be closed or application will freeze 
-        fw->close();
-        return;
-      }
+      addSubWindowToMdiArea(w);
+      removeFloatingWindow(fw);
+      // main window must be closed or application will freeze 
+      fw->close();
+      return;
     }
     throw std::runtime_error("Mdi window mishandling");
   }
