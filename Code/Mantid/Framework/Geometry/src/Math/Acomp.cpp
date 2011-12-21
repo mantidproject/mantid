@@ -808,7 +808,7 @@ namespace Mantid
         return (Comp.empty()) ? 1 : 0;
       // Else needs to be union of Intersections.
       std::vector<Acomp>::const_iterator cc;
-      for(cc=Comp.begin();cc!=Comp.end();cc++)
+      for(cc=Comp.begin();cc!=Comp.end();++cc)
         if (cc->Intersect==0 || !cc->isSimple())
           return 0;
 
@@ -860,7 +860,7 @@ namespace Mantid
           literalMap.insert(std::pair<int,int>(V,1));
       }
       std::vector<Acomp>::const_iterator cc;
-      for(cc=Comp.begin();cc!=Comp.end();cc++)
+      for(cc=Comp.begin();cc!=Comp.end();++cc)
         cc->getAbsLiterals(literalMap);
       return;
     }
@@ -1111,7 +1111,7 @@ namespace Mantid
       /// DEBUG PRINT 
       if (debug)
       {
-        for(px=PIactive.begin();px!=PIactive.end();px++)
+        for(px=PIactive.begin();px!=PIactive.end();++px)
         {
           std::cerr<<PIform[*px]<<":";
           for(ddx=DNFactive.begin();ddx!=DNFactive.end();++ddx)
@@ -1189,7 +1189,7 @@ namespace Mantid
       std::vector<int> keyNumbers;
       getAbsLiterals(litMap);
       std::map<int,int>::const_iterator mc;
-      for(mc=litMap.begin();mc!=litMap.end();mc++)
+      for(mc=litMap.begin();mc!=litMap.end();++mc)
         keyNumbers.push_back(mc->first);
 
       return keyNumbers;
@@ -1220,7 +1220,7 @@ namespace Mantid
       keyNumbers.clear();
       std::map<int,int>::iterator mc;
 
-      for(mc=litMap.begin();mc!=litMap.end();mc++)
+      for(mc=litMap.begin();mc!=litMap.end();++mc)
       {
         Base[mc->first]=1;          // Set to true
         keyNumbers.push_back(mc->first);
@@ -1397,7 +1397,7 @@ namespace Mantid
       std::map<int,int>::const_iterator bv;
       std::vector<int>::const_iterator uc;
       // e.g. a'b   1 1  (retJoin ==1)
-      for(uc=Units.begin();uc!=Units.end();uc++)
+      for(uc=Units.begin();uc!=Units.end();++uc)
       {
         split(*uc,S,V);
         bv=Base.find(V);
@@ -1450,7 +1450,7 @@ namespace Mantid
       if (!getDNFpart(Flist) || !G.getDNFpart(Glist))
         return std::pair<Acomp,Acomp>(Acomp(),Acomp());
 
-      for(cc=Flist.begin();cc!=Flist.end();cc++)
+      for(cc=Flist.begin();cc!=Flist.end();++cc)
       {
         int itemCnt(0);
         U.push_back(Acomp(0));      //intersection Unit
@@ -1476,11 +1476,11 @@ namespace Mantid
       copy(V.begin(),V.end(),std::ostream_iterator<Acomp>(std::cerr,":"));
       std::cerr<<std::endl;
       */
-      for(cc=Glist.begin();cc!=Glist.end();cc++)
+      for(cc=Glist.begin();cc!=Glist.end();++cc)
       {
         std::vector<Acomp>::const_iterator ux,vx;
         vx=V.begin();
-        for(ux=U.begin();ux!=U.end() && vx!=V.end();vx++,ux++)
+        for(ux=U.begin();ux!=U.end() && vx!=V.end();++vx,++ux)
         {
           if (!vx->isNull() && ux->contains(*cc))
           {
@@ -1601,7 +1601,7 @@ namespace Mantid
         removeEqComp();
       }
       std::vector<Acomp>::iterator xc;
-      for(xc=Comp.begin();xc!=Comp.end();xc++)
+      for(xc=Comp.begin();xc!=Comp.end();++xc)
         cnt+=xc->joinDepth();
 
       return cnt;
@@ -1788,7 +1788,7 @@ namespace Mantid
       }
       // Now do composites
       std::vector<Acomp>::const_iterator vc;
-      for(vc=Comp.begin();vc!=Comp.end();vc++)
+      for(vc=Comp.begin();vc!=Comp.end();++vc)
       {
         if (!Intersect && (vc!=Comp.begin() || !Units.empty()))
           cx<<'+';
