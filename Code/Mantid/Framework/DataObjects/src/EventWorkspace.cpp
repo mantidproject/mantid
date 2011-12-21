@@ -158,7 +158,7 @@ namespace DataObjects
     }
 
 
-    for (it = it_start; it != it_end; it++ )
+    for (it = it_start; it != it_end; ++it )
     {
       //Create a new event list, copying over the events
       EventList * newel = new EventList( **it );
@@ -333,7 +333,7 @@ namespace DataObjects
   {
     size_t total = 0;
     for (EventListVector::const_iterator it = this->data.begin();
-        it != this->data.end(); it++) {
+        it != this->data.end(); ++it) {
       total += (*it)->getNumberEvents();
     }
     return total;
@@ -370,7 +370,7 @@ namespace DataObjects
   void EventWorkspace::switchEventType(const Mantid::API::EventType type)
   {
     for (EventListVector::const_iterator it = this->data.begin();
-        it != this->data.end(); it++)
+        it != this->data.end(); ++it)
     {
       (*it)->switchTo(type);
     }
@@ -428,7 +428,7 @@ namespace DataObjects
 
     // Add the memory from all the event lists
     for (EventListVector::const_iterator it = this->data.begin();
-        it != this->data.end(); it++)
+        it != this->data.end(); ++it)
     {
       total += (*it)->getMemorySize();
     }

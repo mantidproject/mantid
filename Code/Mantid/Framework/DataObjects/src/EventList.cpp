@@ -188,7 +188,7 @@ namespace DataObjects
       //Add default weights to all the un-weighted incoming events from the list.
       // and append to the list
       this->weightedEvents.reserve( this->weightedEvents.size() + more_events.size());
-      for(std::vector<TofEvent>::const_iterator it = more_events.begin(); it != more_events.end(); it++)
+      for(std::vector<TofEvent>::const_iterator it = more_events.begin(); it != more_events.end(); ++it)
         this->weightedEvents.push_back( WeightedEvent(*it) );
       break;
 
@@ -196,7 +196,7 @@ namespace DataObjects
       //Add default weights to all the un-weighted incoming events from the list.
       // and append to the list
       this->weightedEventsNoTime.reserve( this->weightedEventsNoTime.size() + more_events.size());
-      for(std::vector<TofEvent>::const_iterator it = more_events.begin(); it != more_events.end(); it++)
+      for(std::vector<TofEvent>::const_iterator it = more_events.begin(); it != more_events.end(); ++it)
         this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
       break;
     }
@@ -248,7 +248,7 @@ namespace DataObjects
       //Add default weights to all the un-weighted incoming events from the list.
       // and append to the list
       this->weightedEventsNoTime.reserve( this->weightedEventsNoTime.size() + more_events.size());
-      for(std::vector<WeightedEvent>::const_iterator it = more_events.begin(); it != more_events.end(); it++)
+      for(std::vector<WeightedEvent>::const_iterator it = more_events.begin(); it != more_events.end(); ++it)
         this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
       break;
     }
@@ -504,7 +504,7 @@ namespace DataObjects
       //Convert and copy all TofEvents to the weightedEvents list.
       std::vector<TofEvent>::const_iterator it;
       std::vector<TofEvent>::const_iterator it_end = events.end(); // Cache for speed
-      for(it = events.begin(); it != it_end; it++)
+      for(it = events.begin(); it != it_end; ++it)
         this->weightedEvents.push_back( WeightedEvent(*it) );
       //Get rid of the old events
       events.clear();
@@ -534,7 +534,7 @@ namespace DataObjects
         weightedEventsNoTime.clear();
         std::vector<TofEvent>::const_iterator it;
         std::vector<TofEvent>::const_iterator it_end = events.end(); // Cache for speed
-        for(it = events.begin(); it != it_end; it++)
+        for(it = events.begin(); it != it_end; ++it)
           this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
         //Get rid of the old events
         events.clear();
@@ -549,7 +549,7 @@ namespace DataObjects
         weightedEventsNoTime.clear();
         std::vector<WeightedEvent>::const_iterator it;
         std::vector<WeightedEvent>::const_iterator it_end = weightedEvents.end(); // Cache for speed
-        for(it = weightedEvents.begin(); it != it_end; it++)
+        for(it = weightedEvents.begin(); it != it_end; ++it)
           this->weightedEventsNoTime.push_back( WeightedEventNoTime(*it) );
         //Get rid of the old events
         events.clear();
