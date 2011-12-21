@@ -158,14 +158,14 @@ namespace Crystal
 
     // Go in order of run numbers
     runMap_t::iterator runMap_it;
-    for (runMap_it = runMap.begin(); runMap_it != runMap.end(); runMap_it++)
+    for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it)
     {
       // Start of a new run
       int run = runMap_it->first;
       bankMap_t & bankMap = runMap_it->second;
 
       bankMap_t::iterator bankMap_it;
-      for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end(); bankMap_it++)
+      for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end(); ++bankMap_it)
       {
         // Start of a new bank.
         int bank = bankMap_it->first;
