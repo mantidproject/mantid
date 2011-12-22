@@ -68,9 +68,11 @@ void ModeratorTzero::init()
 
   CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+		  "The name of the input workspace, containing events and/or histogram data, in units of time-of-flight");
   //declare the output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+		  "The name of the output workspace");
 
 } // end of void ModeratorTzero::init()
 
