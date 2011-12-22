@@ -132,7 +132,7 @@ ConvertToMDEvents::getEi(ConvertToMDEvents const *const pHost)
 {
     if(!pHost->inWS2D){
         convert_log.error()<<"getEi: invoked when input workspace is undefined\n";
-        throw(std::logic_error(" should not call this function when workpace is undefined"));
+        throw(std::logic_error(" should not call this function when input workpace is undefined"));
     }
     Kernel::PropertyWithValue<double>  *pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(pHost->inWS2D->run().getProperty("Ei"));
     if(!pProp){
@@ -243,27 +243,17 @@ ConvertToMDEvents::init()
          " Values higher then the specified by the array will be ignored\n"
         " If a maximal output workspace ranges is lower, then one of specified, the workspace range will be used instead)" );
     
-    declareProperty(new ArrayProperty<double>("u","1,0,0",new ArrayLengthValidator<double>(3)), "first  base vector (in hkl) defining fractional coordinate system for neutron diffraction");
-    declareProperty(new ArrayProperty<double>("v","0,1,0",new ArrayLengthValidator<double>(3)), "second base vector (in hkl) defining fractional coordinate system for neutron diffraction");  
+    declareProperty(new ArrayProperty<double>("u"),
+     "Optional: first  base vector (in hkl) defining fractional coordinate system for neutron diffraction; default value is [1,0,0] or powder mode");
+    declareProperty(new ArrayProperty<double>("v"),
+        "Optional: second base vector (in hkl) defining fractional coordinate system for neutron diffraction; default value is [0,1,0] or powder mode");  
 
    // Box controller properties. These are the defaults
     this->initBoxControllerProps("5" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
 
 }
 
-
-
-void 
-ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
-    for(size_t i=0; i<min.size();i++){
-        if(max[i]<=min[i]){
-            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
-            throw(std::invalid_argument("min limit not smaller then max limit"));
-        }
-    }
-}
- 
-  //----------------------------------------------------------------------------------------------
+ //----------------------------------------------------------------------------------------------
   /* Execute the algorithm.   */
 void ConvertToMDEvents::exec(){
     // in case of subsequent calls
@@ -271,7 +261,7 @@ void ConvertToMDEvents::exec(){
     // -------- Input workspace 
     MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
     if(!inMatrixWS){
-        g_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+        convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
     }
     inWS2D                           = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
     // ------- Is there any output workspace?
@@ -282,8 +272,22 @@ void ConvertToMDEvents::exec(){
         create_new_ws = true;
     }
 
+    bool u_default(true),v_default(true);
     std::vector<double> ut = getProperty("u");
+    if(!ut.empty()){
+        if(ut.size()==3){ u_default =false;
+        }else{convert_log.warning() <<" u projection vector specified but its dimensions are not equal to 3, using default values [1,0,0]\n";
+        }
+    }
     std::vector<double> vt = getProperty("v");
+    if(!vt.empty()){
+        if(vt.size()==3){ v_default  =false;
+        }else{ convert_log.warning() <<" v projection vector specified but its dimensions are not equal to 3, using default values [0,1,0]\n";
+        }
+    }
+    if(u_default){  ut.assign(3,0);     ut[0]=1;    }
+    if(v_default){  vt.assign(3,0);     vt[1]=1;    }
+
     Kernel::V3D u(ut[0],ut[1],ut[2]),v(vt[0],vt[1],vt[2]);
 
     // set up target coordinate system
@@ -348,6 +352,16 @@ void ConvertToMDEvents::exec(){
    
 }
 
+void 
+ConvertToMDEvents::check_max_morethen_min(const std::vector<double> &min,const std::vector<double> &max){
+    for(size_t i=0; i<min.size();i++){
+        if(max[i]<=min[i]){
+            convert_log.error()<<" min value "<<min[i]<<" not less then max value"<<max[i]<<" in direction: "<<i<<std::endl;
+            throw(std::invalid_argument("min limit not smaller then max limit"));
+        }
+    }
+}
+ 
 /**  
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
   *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.
@@ -497,7 +511,7 @@ ConvertToMDEvents::parseDEMode(const std::string &Q_MODE_ID,const std::string &d
     return DE_MODE_ID;
 
 }
-/** Identify the Momentud conversion mode requested by user
+/** Identify the Momentum conversion mode requested by user
   * 
   *@param Q_mode_req    -- What conversion algorithm user wants to deploy (Q3d, modQ, no Q)
   *@param ws_dim_names  -- vector of input workspace dimensions names 
@@ -717,9 +731,9 @@ ConvertToMDEvents::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_
 
 // TEMPLATES INSTANTIATION: User encouraged to specialize its own specific algorithm 
 //e.g.
-// template<> void ConvertToMDEvents::processQND<2,modQ>( API::IMDEventWorkspace *const)
+// template<> void ConvertToMDEvents::processQND<2,modQ,Elastic,ConvertNo>( API::IMDEventWorkspace *const)
 // {
-//   User specific code for target 2D workspace, processed to obtain modQ
+//   User specific code for target 2D workspace, processed to obtain modQ in elastic mode, without unit conversion:
 // }
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANSIATION OF EXISTING CODE:
