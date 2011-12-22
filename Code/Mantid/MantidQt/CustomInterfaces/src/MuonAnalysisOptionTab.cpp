@@ -62,7 +62,31 @@ void MuonAnalysisOptionTab::initLayout()
            SLOT(runRebinComboBox(int)));
   connect(m_uiForm.optionStepSizeText, SIGNAL(lostFocus()), this, 
            SLOT(runOptionStepSizeText()));
+
+  connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
+
+  ////////////// Auto Update  /////////////////
+  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(textChanged(const QString&)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
 }
+
+
+/**
+* Muon Analysis Plotting help (slot)
+*/
+void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+            "MuonAnalysisPlotting"));
+}
+
 
 ////////////// Data Binning slots ///////////////
 
@@ -238,7 +262,6 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
     m_uiForm.yAxisMaximumInput->setText("");
   }
 }
-
 
 
 /**
