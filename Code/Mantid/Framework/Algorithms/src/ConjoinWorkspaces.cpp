@@ -103,8 +103,8 @@ void ConjoinWorkspaces::exec()
   // Create the output workspace
   const size_t totalHists = ws1->getNumberHistograms() + ws2->getNumberHistograms();
   MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create("Workspace2D",totalHists,ws1->readX(0).size(),
-                                                                             ws1->readY(0).size());
-  // Copy over stuff from first input workspace
+                                                                    ws1->readY(0).size());
+  // Copy over stuff from first input workspace. This will include the spectrum masking
   WorkspaceFactory::Instance().initializeFromParent(ws1,output,true);
 
   // Create the X values inside a cow pointer - they will be shared in the output workspace
@@ -129,7 +129,7 @@ void ConjoinWorkspaces::exec()
     // Copy the spectrum number/detector IDs
     outSpec->copyInfoFrom(*inSpec);
 
-    // Propagate masking, if needed
+    // Propagate binmasking, if needed
     if ( ws1->hasMaskedBins(i) )
     {
       const MatrixWorkspace::MaskList& inputMasks = ws1->maskedBins(i);
@@ -139,6 +139,7 @@ void ConjoinWorkspaces::exec()
         output->flagMasked(i,(*it).first,(*it).second);
       }
     }    
+
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -173,6 +174,20 @@ void ConjoinWorkspaces::exec()
         output->flagMasked(nhist1 + j,(*it).first,(*it).second);
       }
     }
+    // Propagate spectrum masking
+    Geometry::IDetector_const_sptr ws2Det;
+    try
+    {
+      ws2Det = ws2->getDetector(j);
+    }
+    catch(Exception::NotFoundError &)
+    {
+    }
+    if( ws2Det && ws2Det->isMasked() )
+    {
+      output->maskWorkspaceIndex(nhist1 + j);
+    }
+
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -236,6 +251,20 @@ void ConjoinWorkspaces::execEvent()
     ISpectrum * outSpec = output->getSpectrum(output_wi);
     const ISpectrum * inSpec = event_ws2->getSpectrum(j);
     outSpec->copyInfoFrom(*inSpec);
+
+    // Propagate spectrum masking. First workspace will have been done by the factory
+    Geometry::IDetector_const_sptr ws2Det;
+    try
+    {
+      ws2Det = event_ws2->getDetector(j);
+    }
+    catch(Exception::NotFoundError &)
+    {
+    }
+    if( ws2Det && ws2Det->isMasked() )
+    {
+      output->maskWorkspaceIndex(output_wi);
+    }
 
     m_progress->report();
   }
