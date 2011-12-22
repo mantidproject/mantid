@@ -953,7 +953,7 @@ void ConfigDialog::refreshTreeCategories()
 
   QMap<QString,QTreeWidgetItem*> categories;// keeps track of categories added to the tree
 
-  for(categoriesType::const_iterator i=categoryMap.begin();i!=categoryMap.end();i++)
+  for(categoriesType::const_iterator i=categoryMap.begin();i!=categoryMap.end();++i)
   {
     QString catName = QString::fromStdString(i->first);
     bool isHidden = i->second;

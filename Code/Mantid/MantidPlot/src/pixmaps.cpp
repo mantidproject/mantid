@@ -12765,7 +12765,7 @@ static const char * managefolders_xpm[] = {
 
 
 //----------------------------------------------
-QPixmap getQPixmap(const std::string name)
+QPixmap getQPixmap(const std::string &name)
 {
   if (name == "choose_folder_xpm") return QPixmap(choose_folder_xpm);
   else if (name == "folder_closed_xpm") return QPixmap(folder_closed_xpm);

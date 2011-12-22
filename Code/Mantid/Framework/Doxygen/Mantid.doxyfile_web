@@ -513,30 +513,42 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ../Kernel/inc/MantidKernel \
-                         ../Kernel/src \
-                         ../API/inc/MantidAPI \
-                         ../API/src \
-                         ../DataObjects/inc/MantidDataObjects \
-                         ../DataObjects/src \
-                         ../DataHandling/inc/MantidDataHandling \
-                         ../DataHandling/src \
-                         ../Nexus/inc/MantidNexus \
-                         ../Nexus/src \
-                         ../Algorithms/inc/MantidAlgorithms \
-                         ../Algorithms/src \
-                         ../Geometry/inc/MantidGeometry \
-                         ../Geometry/src \
-                         ../CurveFitting/inc/MantidCurveFitting \
-                         ../CurveFitting/src \
-                         ../PythonAPI/inc/MantidPythonAPI \
-                         ../PythonAPI/src \
-                         ../MatlabAPI/inc/MatlabAPI \
-                         ../MatlabAPI/src \
-                         ../Crystal/inc/MantidCrystal \
-                         ../Crystal/src	\
-						 ../ICat/inc/MantidICat	\
-                         ../ICat/src
+INPUT = ../Algorithms/inc/MantidAlgorithms \
+        ../Algorithms/src \
+        ../API/inc/MantidAPI \
+        ../API/src \
+        ../Crystal/inc/MantidCrystal \
+        ../Crystal/src \
+        ../CurveFitting/inc/MantidCurveFitting \
+        ../CurveFitting/src \
+        ../DataHandling/inc/MantidDataHandling \
+        ../DataHandling/src \
+        ../DataObjects/inc/MantidDataObjects \
+        ../DataObjects/src \
+        ../Geometry/inc/MantidGeometry \
+        ../Geometry/src \
+        ../ICat/inc/MantidICat \
+        ../ICat/src \
+        ../Kernel/inc/MantidKernel \
+        ../Kernel/src \
+        ../MatlabAPI/src \
+        ../MDAlgorithms/inc/MantidMDAlgorithms \
+        ../MDAlgorithms/src \
+        ../MDEvents/inc/MantidMDEvents \
+        ../MDEvents/src \
+        ../Nexus/inc/MantidNexus \
+        ../Nexus/src \
+        ../PythonAPI/inc/MantidPythonAPI \
+        ../PythonAPI/src \
+        ../PythonInterface/inc/MantidPythonInterface/kernel \
+        ../PythonInterface/inc/MantidPythonInterface/api \
+        ../PythonInterface/mantid/kernel/src \
+        ../PythonInterface/mantid/geometry/src \
+        ../PythonInterface/mantid/api/src \
+        ../TestHelpers/inc/MantidTestHelpers \
+        ../TestHelpers/src \
+        ../WorkflowAlgorithms/inc/MantidWorkflowAlgorithms \
+        ../WorkflowAlgorithms/src
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
@@ -565,8 +577,18 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = 
-
+EXCLUDE                = ../ICat/src/GSoapGenerated \
+		         ../ICat/src/GSoap \
+			 ../ICat/src/GSoap.cpp \
+			 ../ICat/inc/MantidICat/GSoapGenerated \
+		         ../ICat/inc/MantidICat/GSoap \
+			 ../PythonAPI/src/boostpython.cpp \
+			 ../PythonAPI/src/boostpython \
+			 ../MDEvents/src/generate_mdevent_declarations.py \
+			 ../Kernel/inc/MantidKernel/ANN \
+			 ../Kernel/src/ANN \
+			 ../Kernel/src/ANN_complete.cpp
+			 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
 # from the input.

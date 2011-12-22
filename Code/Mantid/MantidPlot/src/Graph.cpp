@@ -2763,6 +2763,16 @@ int Graph::curveIndex(QwtPlotCurve *c) const
   return plotItemIndex(c);
 }
 
+//! get curve title string by index (convenience function for scripts)
+QString Graph::curveTitle(int index)
+{
+        QwtPlotItem *item = plotItem(index);
+        if (item)
+                return item->title().text();
+
+        return QString::null;
+}
+
 int Graph::range(int index, double *start, double *end)
 {
   if (d_range_selector && d_range_selector->selectedCurve() == curve(index)) {
@@ -3277,6 +3287,11 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 
   addLegendItem();
   return c;
+}
+
+PlotCurve* Graph::insertCurve(QString workspaceName, int index, bool err, Graph::CurveType style)
+{
+  return (new MantidMatrixCurve(workspaceName,this,index,err,false,style));
 }
 
 /**  Insert a curve with its own data source. It does not have to be
@@ -5067,7 +5082,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
   c_keys.resize(n_curves);
   c_keys[n_curves-1] = d_plot->insertCurve(sp);
 
-  for (line++; line != lst.end(); line++)
+  for (line++; line != lst.end(); ++line)
   {
     QString s = *line;
     if (s.contains("<ColorPolicy>"))
@@ -5099,7 +5114,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
         colorMap.addColorStop(l[0].toDouble(), QColor(l[1]));
       }
       sp->setCustomColorMap(colorMap);
-      line++;
+      ++line;
     }
     else if (s.contains("<Image>"))
     {
@@ -5145,7 +5160,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
         colorAxis->setColorBarWidth(width);
         colorAxis->setColorBarEnabled(true);
       }
-      line++;
+      ++line;
     }
     else if (s.contains("<Visible>"))
     {
@@ -5168,7 +5183,7 @@ void Graph::restoreCurveLabels(int curveID, const QStringList& lst)
   if (s.contains("<column>"))
     labelsColumn = s.remove("<column>").remove("</column>").trimmed();
 
-  for (line++; line != lst.end(); line++){
+  for (line++; line != lst.end(); ++line){
     s = *line;
     if (s.contains("<color>"))
       c->setLabelsColor(QColor(s.remove("<color>").remove("</color>").trimmed()));

@@ -60,7 +60,7 @@ void InputHistoryImpl::save()
         alg.next();
         const QList< PropertyData >& prop_hist = alg.value();
         settings.beginGroup(alg.key());
-        for(QList< PropertyData >::const_iterator prop=prop_hist.begin();prop!=prop_hist.end();prop++)
+        for(QList< PropertyData >::const_iterator prop=prop_hist.begin();prop!=prop_hist.end();++prop)
             settings.setValue(prop->name,prop->value);
         settings.endGroup();
     }
@@ -74,7 +74,7 @@ void InputHistoryImpl::updateAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 {
     const std::vector< Property* >& props = alg->getProperties();
     QList< PropertyData > prop_hist_list;
-    for(std::vector< Property* >::const_iterator prop=props.begin();prop!=props.end();prop++)
+    for(std::vector< Property* >::const_iterator prop=props.begin();prop!=props.end();++prop)
     if (!(*prop)->isDefault())
     {
         PropertyData prop_hist(QString::fromStdString((*prop)->name()),QString::fromStdString((*prop)->value()));
@@ -96,7 +96,7 @@ void InputHistoryImpl::printAll()
         alg.next();
         std::cerr<<alg.key().toStdString()<<'\n';
         const QList< PropertyData >& prop_list = alg.value();
-        for(QList< PropertyData >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
+        for(QList< PropertyData >::const_iterator prop=prop_list.begin();prop!=prop_list.end();++prop)
             std::cerr<<prop->name.toStdString()<<": "<<prop->value.toStdString()<<'\n';
     }
 }
@@ -111,7 +111,7 @@ QMap< QString,QString > InputHistoryImpl::algorithmProperties(const QString& alg
     {
         QMap< QString,QString > m;
         const QList< PropertyData >& prop_list = a.value();
-        for(QList< PropertyData >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
+        for(QList< PropertyData >::const_iterator prop=prop_list.begin();prop!=prop_list.end();++prop)
             m[prop->name] = prop->value;
         return m;
     }

@@ -240,7 +240,7 @@ AlgExecSummaryGrpBox* AlgorithmHistoryWindow::createExecSummaryGrpBox()
     //iterating through algorithm history to display exec duration,date
     //last executed algorithm exec duration,date will be displayed in gruopbox
     for (std::vector <AlgorithmHistory>::const_iterator algIter= m_algHist.begin( );
-	 algIter != m_algHist.end( ); algIter++ )
+	 algIter != m_algHist.end( ); ++algIter )
     {
       double duration=0;
       duration=(*algIter).executionDuration();
@@ -335,8 +335,8 @@ void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 	
   QTreeWidgetItem * item= new	QTreeWidgetItem(QStringList(algName),QTreeWidgetItem::Type);
   if(m_Historytree)m_Historytree->addTopLevelItem(item);
-  ralgHistory_Iter++;
-  for ( ; ralgHistory_Iter != m_algHist.rend( ) ; ralgHistory_Iter++ )
+  ++ralgHistory_Iter;
+  for ( ; ralgHistory_Iter != m_algHist.rend( ) ; ++ralgHistory_Iter )
   {
     algrithmName=(*ralgHistory_Iter).name();
     nAlgVersion=(*ralgHistory_Iter).version();
@@ -523,10 +523,10 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
     propList.append(sProperty.c_str());
     sProperty=(*pIter).value();
     propList.append(sProperty.c_str());
-		
+
     bisDefault=(*pIter).isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
-		
+
     propList.append(sProperty.c_str());
     nDirection=(*pIter).direction();
     switch(nDirection)
@@ -534,7 +534,7 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
     case 0:{sProperty="Input";break;}
     case 1:{sProperty="Output";break;}
     case 2:{sProperty="InOut";break;}
-    default:sProperty="N/A";
+    default:{sProperty="N/A";break;}
     }
     propList.append(sProperty.c_str());
     QTreeWidgetItem * item= new	QTreeWidgetItem(propList);

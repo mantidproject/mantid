@@ -166,7 +166,7 @@ namespace Mantid
         out_map.clear();
         const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
         //And turn them into parametrized versions
-        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
         {
           out_map.insert(std::pair<detid_t, IDetector_sptr>
           (it->first, ParComponentFactory::createDetector(it->second.get(), m_map)));
@@ -188,14 +188,14 @@ namespace Mantid
       if (m_isParametrized)
       {
         const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
-        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
           if (!skipMonitors || !it->second->isMonitor())
             out.push_back(it->first);
       }
       else
       {
         const detid2det_map & in_dets = m_detectorCache;
-        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
           if (!skipMonitors || !it->second->isMonitor())
             out.push_back(it->first);
       }
@@ -223,7 +223,7 @@ namespace Mantid
         std::vector<boost::shared_ptr<const IComponent> > children;
         bank->getChildren(children, true);
         std::vector<boost::shared_ptr<const IComponent> >::iterator it;
-        for (it = children.begin(); it != children.end(); it++)
+        for (it = children.begin(); it != children.end(); ++it)
         {
           IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(*it);
           if (det)

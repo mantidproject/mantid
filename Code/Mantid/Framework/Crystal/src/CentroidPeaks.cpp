@@ -310,7 +310,7 @@ namespace Crystal
           std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
 
           // Check for events in tof range
-          for (itev = events.begin(); itev != itev_end; itev++)
+          for (itev = events.begin(); itev != itev_end; ++itev)
           {
             double tof = itev->tof();
             if( tof > tofstart && tof < tofend)

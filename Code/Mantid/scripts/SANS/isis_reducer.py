@@ -115,6 +115,10 @@ class ISISReducer(SANSReducer):
                                isis_reduction_steps.TransmissionCalc(loader=None)
         self._corr_and_scale = isis_reduction_steps.AbsoluteUnitsISIS()
         
+        # note CalculateNormISIS does not inherit from ReductionStep 
+        # so currently do not understand why it is in isis_reduction_steps
+        # Also the main purpose of this class is to use it as an input argument
+        # to ConvertToQ below
         self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
                             [self.norm_mon, self.transmission_calculator])
 

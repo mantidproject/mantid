@@ -100,7 +100,7 @@ namespace DataHandling
 
     detid2det_map::const_iterator it;
     detid_t maxdetID = 0;
-    for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+    for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
     {
       detid_t detectorID = it->first;
       if(detectorID > maxdetID) maxdetID = detectorID;

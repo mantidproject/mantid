@@ -90,7 +90,7 @@ namespace Mantid
 
  
       std::vector <std::pair<double, int> >::iterator Iter1;
-      for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
+      for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; ++Iter1 )
       {
         i = (*Iter1).second;
         // Direct ref to that peak

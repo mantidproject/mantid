@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = Mantid
 PROJECT_NUMBER         = 
-OUTPUT_DIRECTORY       = ../Doc
+OUTPUT_DIRECTORY       = Doc
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -76,35 +76,43 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = \
-						../Algorithms/inc/MantidAlgorithms \
-						../Algorithms/src \
-						../API/inc/MantidAPI \
-						../API/src \
-						../Crystal/inc/MantidCrystal \
-						../Crystal/src \
-						../CurveFitting/inc/MantidCurveFitting \
-						../CurveFitting/src \
-						../DataHandling/inc/MantidDataHandling \
-						../DataHandling/src \
-						../DataObjects/inc/MantidDataObjects \
-						../DataObjects/src \
-						../Geometry/inc/MantidGeometry \
-						../Geometry/src \
-						../ICat/inc/MantidICat \
-						../ICat/src \
-						../Kernel/inc/MantidKernel \
-						../Kernel/src \
-						../MatlabAPI/inc/MatlabAPI \
-						../MatlabAPI/src \
-						../MDAlgorithms/inc/MantidMDAlgorithms \
-						../MDAlgorithms/src \
-						../MDEvents/inc/MantidMDEvents \
-						../MDEvents/src \
-						../Nexus/inc/MantidNexus \
-						../Nexus/src \
-						../PythonAPI/inc/MantidPythonAPI \
-						../PythonAPI/src \
+
+INPUT = Algorithms/inc/MantidAlgorithms \
+        Algorithms/src \
+        API/inc/MantidAPI \
+        API/src \
+        Crystal/inc/MantidCrystal \
+        Crystal/src \
+        CurveFitting/inc/MantidCurveFitting \
+        CurveFitting/src \
+        DataHandling/inc/MantidDataHandling \
+        DataHandling/src \
+        DataObjects/inc/MantidDataObjects \
+        DataObjects/src \
+        Geometry/inc/MantidGeometry \
+        Geometry/src \
+        ICat/inc/MantidICat \
+        ICat/src \
+        Kernel/inc/MantidKernel \
+        Kernel/src \
+        MatlabAPI/src \
+        MDAlgorithms/inc/MantidMDAlgorithms \
+        MDAlgorithms/src \
+        MDEvents/inc/MantidMDEvents \
+        MDEvents/src \
+        Nexus/inc/MantidNexus \
+        Nexus/src \
+        PythonAPI/inc/MantidPythonAPI \
+        PythonAPI/src \
+        PythonInterface/inc/MantidPythonInterface/kernel \
+        PythonInterface/inc/MantidPythonInterface/api \
+        PythonInterface/mantid/kernel/src \
+        PythonInterface/mantid/geometry/src \
+        PythonInterface/mantid/api/src \
+        TestHelpers/inc/MantidTestHelpers \
+        TestHelpers/src \
+        WorkflowAlgorithms/inc/MantidWorkflowAlgorithms \
+        WorkflowAlgorithms/src
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
@@ -112,19 +120,17 @@ RECURSIVE              = YES
 
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
-EXCLUDE                = \
-						../MDEvents/src/generate_mdevent_declarations.py \
-						../Nexus/src/NeXusException.cpp \
-						../Nexus/src/NeXusFile.cpp \
-						../Nexus/src/NeXusStream.cpp \
-						../Nexus/inc/MantidNexus/NeXusStream.hpp \
-						../Nexus/inc/MantidNexus/NeXusFile.hpp \
-						../Nexus/inc/MantidNexus/NeXusException.hpp \
-						../Kernel/inc/MantidKernel/ANN \
-						../Kernel/src/ANN \
-						../ICat/inc/MantidICat/GSoapGenerated \
-						../ICat/inc/MantidICat/GSoap \
-						../ICat/src/GSoapGenerated 
+EXCLUDE                = ICat/src/GSoapGenerated \
+		         ICat/src/GSoap \
+			 ICat/src/GSoap.cpp \
+			 ICat/inc/MantidICat/GSoapGenerated \
+		         ICat/inc/MantidICat/GSoap \
+			 PythonAPI/src/boostpython.cpp \
+			 PythonAPI/src/boostpython \
+			 MDEvents/src/generate_mdevent_declarations.py \
+			 Kernel/inc/MantidKernel/ANN \
+			 Kernel/src/ANN \
+			 Kernel/src/ANN_complete.cpp
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 

@@ -199,7 +199,10 @@ namespace DataHandling
       return;
     }
 
-    Progress prog_init(this, 0.0, 0.3, 5);
+    // Set amount of time expected to be spent on writing initial part - could in future depend on type of workspace
+    m_timeProgInit = 0.05;
+    // Create progress object for this
+    Progress prog_init(this, 0.0, m_timeProgInit, 5);
 
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
@@ -363,7 +366,7 @@ namespace DataHandling
    * */
   void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec)
   {
-    prog = new Progress(this, 0.3, 1.0, m_eventWorkspace->getNumberEvents()*2);
+    prog = new Progress(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents()*2);
 
     // Start by writing out the axes and crap
     nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);

@@ -94,14 +94,17 @@ void MuonAsymmetryCalc::exec()
     // cal F-aB / F+aB
     outputWS->dataY(0)[j] = denominator ? numerator / denominator : 0.;
 
-    // Work out the errors
-    // Note: the error for F-aB = the error for F+aB
-    double quadrature = sqrt(pow(tmpWS->dataE(forward)[j], 2) + pow(tmpWS->dataE(backward)[j], 2));
-
-    double ratio = numerator && denominator ? pow(quadrature / numerator, 2) + pow(quadrature
-        / denominator, 2) : 0.;
-
-    outputWS->dataE(0)[j] = sqrt( ratio )* fabs(outputWS->dataY(0)[j]);    
+    // Work out the error (as in 1st attachment of ticket #4188)
+    double error = 1.0;
+    if(denominator) {
+      // cal F + a2B
+      double q1 =  tmpWS->dataY(forward)[j] + alpha * alpha * tmpWS->dataY(backward)[j];
+      // cal 1 + ((f-aB)/(F+aB))2 
+      double q2 = 1 + numerator*numerator/(denominator*denominator);
+      // cal error
+      error = sqrt(q1*q2)/denominator;
+    } 
+    outputWS->dataE(0)[j] = error;
      
     prog.report();
   }

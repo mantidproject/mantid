@@ -9,7 +9,8 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 # Grab a few Mantid things so that we can recognise workspace variables
-from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd
+from MantidFramework import WorkspaceProxy, WorkspaceGroup, MatrixWorkspace, mtd, ProxyObject
+from PyQt4 import QtCore
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -46,7 +47,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
 
 #-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
-    """Open a 1D Plot of a spectrum in a workspace
+    """Create a 1D Plot of a bin or bins in a workspace
     
     @param source :: workspace or name of a workspace
     @param indices :: workspace index or list of workspace indices to plot
@@ -54,10 +55,42 @@ def plotBin(source, indices, error_bars = False, type = 0):
     """
     return __doPlotting(source,indices,error_bars,type)
 
-
+#-----------------------------------------------------------------------------
+def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
+    """Generate a stem-and-leaf plot from an input table column or workspace spectrum
+    
+    Args:
+        source: A reference to a workspace or a table.
+        index: For a table, the column number or name. For a workspace, the workspace index.
+        power: The stem unit as a power of 10. If not provided, a dialog will appear with a
+            suggested value.
+        startPoint: The first point (row or bin) to use (Default: the first one).
+        endPoint: The last point (row or bin) to use (Default: the last one).
+        
+    Returns:
+        A string representation of the stem plot
+    """
+    # Turn the optional arguments into the magic numbers that the C++ expects
+    if power==None:
+        power=1001
+    if startPoint==None:
+        startPoint=0
+    if endPoint==None:
+        endPoint=-1
+    # If the source is a workspace, create a table from the specified index
+    if isinstance(source,WorkspaceProxy):
+        wsName = source.getName()
+        source = qti.app.mantidUI.workspaceToTable(wsName,wsName,[index],False,True)
+        # The C++ stemPlot method takes the name of the column, so get that
+        index = source.colName(2)
+    # Get column name if necessary
+    if isinstance(index, int):
+        index = source.colName(index)
+    # Call the C++ method
+    return qti.app.stemPlot(source,index,power,startPoint,endPoint)
 
 #-----------------------------------------------------------------------------
-def plotSlice(source, xydim=None, slicepoint=None,
+def plotSlice(source, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
                     limits=None, **kwargs):
     """Opens the SliceViewer with the given MDWorkspace(s).
@@ -65,6 +98,7 @@ def plotSlice(source, xydim=None, slicepoint=None,
     @param source :: one workspace, or a list of workspaces
         
     The following are optional keyword arguments:
+    @param label :: label for the window title
     @param xydim :: indexes or names of the dimensions to plot,
             as an (X,Y) list or tuple.
             See SliceViewer::setXYDim()
@@ -92,19 +126,41 @@ def plotSlice(source, xydim=None, slicepoint=None,
         print "Could not find module mantidqtpython. Cannot open the SliceViewer."
         return
     
-    if len(workspace_names) == 1:
-        # Return only one widget
-        return __doSliceViewer(workspace_names[0], 
-               xydim=xydim, slicepoint=slicepoint, colormin=colormin,
-               colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
-               **kwargs)
+    # Make a list of widgets to return
+    out = []
+    for wsname in workspace_names:
+        window = __doSliceViewer(wsname, label=label,
+           xydim=xydim, slicepoint=slicepoint, colormin=colormin,
+           colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
+           **kwargs) 
+        pxy = QtProxyObject(window)
+        out.append(pxy)
+        
+    # Returh the widget alone if only 1
+    if len(out) == 1:
+        return out[0]
     else:
-        # Make a list of widgets to return
-        out = [__doSliceViewer(wsname, 
-               xydim=xydim, slicepoint=slicepoint, colormin=colormin,
-               colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
-               **kwargs) for wsname in workspace_names]
         return out
+
+
+#-----------------------------------------------------------------------------
+def getSliceViewer(source, label=""):
+    """Retrieves a handle to a previously-open SliceViewerWindow.
+    This allows you to get a handle on, e.g., a SliceViewer that was open
+    by the MultiSlice view in VATES Simple Interface.
+    Will raise an exception if not found.
+    
+    @param source :: name of the workspace that was open
+    @param label :: additional label string that was used to identify the window.
+    @return a handle to the SliceViewerWindow object that was created before. 
+    """
+    import mantidqtpython
+    workspace_names = __getWorkspaceNames(source)
+    if len(workspace_names) != 1:
+        raise Exception("Please specify only one workspace.")
+    else:
+        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow(workspace_names[0], label)
+        return QtProxyObject(svw)
 
 
 
@@ -139,6 +195,66 @@ Layer.Top = qti.GraphOptions.Top
 #--------------------------- "Private" functions -----------------------
 #-----------------------------------------------------------------------------
 
+
+
+#-------------------------------------------------------------------------------
+class QtProxyObject(QtCore.QObject):
+    """Generic Proxy object for wrapping Qt C++ Qobjects.
+    This holds the QObject internally and passes methods to it.
+    When the underlying object is deleted, the reference is set
+    to None to avoid segfaults.
+    """
+    def __init__(self, toproxy):
+        QtCore.QObject.__init__(self)
+        self.__obj = toproxy
+        # Connect to track the destroyed
+        QtCore.QObject.connect( self.__obj, QtCore.SIGNAL("destroyed()"),
+                                self._heldObjectDestroyed)
+        
+    def _heldObjectDestroyed(self):
+        """Slot called when the held object is destroyed.
+        Sets it to None, preventing segfaults """
+        self._kill_object()
+
+    def __getattr__(self, attr):
+        """
+        Reroute a method call to the the stored object
+        """
+        return getattr(self._getHeldObject(), attr)
+
+    def __str__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return str(self._getHeldObject())
+
+    def __repr__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return `self._getHeldObject()`
+
+    def _getHeldObject(self):
+        """
+        Returns a reference to the held object
+        """
+        return self.__obj
+
+    def _kill_object(self):
+        """
+        Release the stored instance
+        """
+        self.__obj = None
+
+    def _swap(self, obj):
+        """
+        Swap an object so that the proxy now refers to this object
+        """
+        self.__obj = obj
+
+
+
+#-------------------------------------------------------------------------------
 def __getWorkspaceNames(source):
     """Takes a "source", which could be a WorkspaceGroup, or a list
     of workspaces, or a list of names, and converts
@@ -178,17 +294,20 @@ def __getWorkspaceNames(source):
     return ws_names
     
 #-----------------------------------------------------------------------------
-def __doSliceViewer(wsname, xydim=None, slicepoint=None,
+def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
                     limits=None):
     """Open a single SliceViewerWindow for the workspace, and shows it
     
     @param wsname :: name of the workspace
+    See plotSlice() for full list of keyword parameters.
 
     @return SliceViewerWindow widget
     """
     import mantidqtpython
-    svw = mantidqtpython.WidgetFactory.Instance().createSliceViewerWindow(wsname, "")
+    from PyQt4 import QtCore
+    
+    svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow(wsname, label)
     svw.show()
     
     # -- Connect to main window's shut down signal ---

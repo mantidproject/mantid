@@ -58,7 +58,7 @@ namespace MDEventsTestHelper
    */
   template<typename MDE, size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
-    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
+    makeAnyMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 , size_t dimSplit = 10 )
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE,nd> >
             out(new Mantid::MDEvents::MDEventWorkspace<MDE,nd>());
@@ -70,7 +70,7 @@ namespace MDEventsTestHelper
     {
       std::ostringstream name;
       name << "Axis" << d;
-      Mantid::Geometry::MDHistoDimension_sptr dim(new Mantid::Geometry::MDHistoDimension( name.str(),name.str(), "m", min, max, 10));
+      Mantid::Geometry::MDHistoDimension_sptr dim(new Mantid::Geometry::MDHistoDimension( name.str(),name.str(), "m", min, max, dimSplit ));
       out->addDimension(dim);
     }
     out->initialize();
@@ -110,12 +110,12 @@ namespace MDEventsTestHelper
     return makeAnyMDEW<Mantid::MDEvents::MDLeanEvent<nd>,nd>(splitInto, min, max, numEventsPerBox);
   }
 
-  /** Make a MDEventWorkspace with MDEvents */
+  /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto, not 10 */
   template<size_t nd>
   boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd> >
     makeMDEWFull(size_t splitInto, double min, double max, size_t numEventsPerBox = 0 )
   {
-    return makeAnyMDEW<Mantid::MDEvents::MDEvent<nd>,nd>(splitInto, min, max, numEventsPerBox);
+    return makeAnyMDEW<Mantid::MDEvents::MDEvent<nd>,nd>(splitInto, min, max, numEventsPerBox, splitInto );
   }
 
   //=====================================================================================

@@ -6,6 +6,7 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 
 # Define the project name.
 project ( Mantid )
+set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used in linux packages and for symlinks")
 
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
@@ -109,7 +110,7 @@ if ( ENABLE_CPACK )
     include ( CPackCommon )
     
     set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
-    set ( CPACK_PACKAGE_NAME mantid )
+    set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
   
     # Mac Packagemaker settings
     set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )

@@ -64,46 +64,6 @@
 
 namespace MantidQt
 {
-namespace Factory
-{
-
-  /***************************************************************************/
-  /***************************************************************************/
-  /***************************************************************************/
-class WidgetFactoryImpl
-{
-%TypeHeaderCode
-#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
-%End
-
-public:
-  WidgetFactoryImpl();
-  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
-  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
-
-};
-
-}; // end namespace
-}; // end namespace
-
-
-/***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/
-class WidgetFactory
-{
-%TypeHeaderCode
-#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
-%End
-
-public:
-  static MantidQt::Factory::WidgetFactoryImpl& Instance();
-private:
-  WidgetFactory();
-};
-
-namespace MantidQt
-{
 namespace SliceViewer
 {
 
@@ -121,6 +81,7 @@ public:
   SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
   MantidQt::SliceViewer::SliceViewer* getSlicer();
   MantidQt::SliceViewer::LineViewer* getLiner();
+  const QString& getLabel() const;
 
 };
 
@@ -182,7 +143,43 @@ public:
 };
 
 
+}; // end namespace
+}; // end namespace
 
+
+
+
+
+
+
+
+namespace MantidQt
+{
+namespace Factory
+{
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class WidgetFactory
+{
+%TypeHeaderCode
+#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
+#include <QVector>
+%End
+
+public:
+  static MantidQt::Factory::WidgetFactory* Instance();
+  MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+  MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
+
+private:
+  WidgetFactory();
+
+};
 
 }; // end namespace
 }; // end namespace
+
+

@@ -95,7 +95,7 @@ namespace Mantid
 
       // Go through all results
       Links::const_iterator resultItr = results.begin();
-      for (; resultItr != results.end(); resultItr++)
+      for (; resultItr != results.end(); ++resultItr)
       {
         IComponent_const_sptr component = m_instrument->getComponentByID(resultItr->componentID);
         IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(component);

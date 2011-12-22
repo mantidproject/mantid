@@ -108,7 +108,7 @@ BnId::operator==(const BnId& A) const
     return 0;
   std::vector<int>::const_iterator vc;
   std::vector<int>::const_iterator ac=A.Tval.begin();
-  for(vc=Tval.begin();vc!=Tval.end();vc++,ac++)
+  for(vc=Tval.begin();vc!=Tval.end();++vc,++ac)
     {
       if (ac==A.Tval.end())     // This should neve happen
 	return 0;
@@ -177,8 +177,8 @@ BnId::operator<(const BnId& A) const
     {
       if (*tvc!=*avc)
 	return *tvc<*avc;
-      tvc++;
-      avc++;
+      ++tvc;
+      ++avc;
     }
   return 0;
 }
@@ -219,7 +219,7 @@ BnId::operator++()
   */
 {
   std::vector<int>::iterator vc;
-  for(vc=Tval.begin();vc!=Tval.end() && (*vc)!=-1;vc++)
+  for(vc=Tval.begin();vc!=Tval.end() && (*vc)!=-1;++vc)
     {
       if (*vc==1)
 	{
@@ -258,7 +258,7 @@ BnId::operator--()
   */
 {
   std::vector<int>::iterator vc;
-  for(vc=Tval.begin();vc!=Tval.end() && (*vc)!=1;vc++)
+  for(vc=Tval.begin();vc!=Tval.end() && (*vc)!=1;++vc)
     if (*vc== -1)
       {
 	*vc= 1;
@@ -282,7 +282,7 @@ BnId::setCounters()
   std::vector<int>::const_iterator vc;
   Tnum=0;
   Znum=0;
-  for(vc=Tval.begin();vc!=Tval.end();vc++)
+  for(vc=Tval.begin();vc!=Tval.end();++vc)
     {
       if (*vc==1)
 	Tnum++;
@@ -302,7 +302,7 @@ BnId::intValue() const
 {
   unsigned out(0);
   std::vector<int>::const_reverse_iterator vc;
-  for(vc=Tval.rbegin();vc!=Tval.rend();vc++)
+  for(vc=Tval.rbegin();vc!=Tval.rend();++vc)
     {
       out<<=1;
       out+=((*vc)==1) ? 1 : 0;
@@ -321,7 +321,7 @@ BnId::mapState(const std::vector<int>& Index,
 {
   std::vector<int>::const_iterator vc;
   int i(0);
-  for(vc=Index.begin();vc!=Index.end();vc++,i++)
+  for(vc=Index.begin();vc!=Index.end();++vc,++i)
     Base[*vc]=(Tval[i]==1) ? 1 : 0;
   return;
 }
@@ -360,7 +360,7 @@ BnId::makeCombination(const BnId& A) const
   std::vector<int>::const_iterator tvc;
   std::vector<int>::const_iterator avc=A.Tval.begin();
   std::vector<int>::const_iterator chpt;   // change point
-  for(tvc=Tval.begin();tvc!=Tval.end();tvc++,avc++)
+  for(tvc=Tval.begin();tvc!=Tval.end();++tvc,++avc)
     {
       if ((*avc * *tvc)<0)       // false/true
 	{
@@ -408,7 +408,7 @@ BnId::display() const
   std::string Out;
   std::vector<int>::const_reverse_iterator vc;
   std::ostringstream cx;
-  for(vc=Tval.rbegin();vc!=Tval.rend();vc++)
+  for(vc=Tval.rbegin();vc!=Tval.rend();++vc)
     {
       if (*vc==0)
 	Out+="-";

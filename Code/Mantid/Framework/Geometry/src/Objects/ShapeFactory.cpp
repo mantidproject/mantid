@@ -245,7 +245,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     std::map<std::string,std::string>::iterator iter;
     size_t found;
     std::map<size_t,std::string, std::greater<size_t> > allFound;
-    for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
+    for( iter = idMatching.begin(); iter != idMatching.end(); ++iter )
     {
       found = algebraFromUser.find(iter->first);
 
@@ -268,7 +268,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     if ( allFound.size() == idMatching.size() )
     { 
       std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
-      for( iter2 = allFound.begin(); iter2 != allFound.end(); iter2++ )
+      for( iter2 = allFound.begin(); iter2 != allFound.end(); ++iter2 )
       {
         std::string  kuse = iter2->second;
         algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
@@ -279,7 +279,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   {
     algebraFromUser = ""; // reset in case we are overwriten invalid string
     std::map<std::string,std::string>::iterator iter;
-    for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
+    for( iter = idMatching.begin(); iter != idMatching.end(); ++iter )
     {
       algebraFromUser.append( iter->second + " " ); // default is intersection
     }

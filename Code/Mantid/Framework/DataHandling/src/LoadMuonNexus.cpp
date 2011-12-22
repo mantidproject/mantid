@@ -389,7 +389,7 @@ namespace Mantid
             // to output groups in ascending order
             {
               int64_t i=0;
-              for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();it++,i++)
+              for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();++it,++i)
               {
                 it->second = i;
                 g_log.information()<<"group "<<it->first<<": ";

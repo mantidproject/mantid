@@ -343,7 +343,7 @@ namespace Algorithms
     // b) determine maximum pixel id
     detid2det_map::iterator it;
     detid_t detid_max = 0; // seems like a safe lower bound
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    for (it = detector_map.begin(); it != detector_map.end(); ++it)
       if (it->first > detid_max)
         detid_max = it->first;
 
@@ -352,7 +352,7 @@ namespace Algorithms
     pixel_to_wkspindex.reserve(detid_max+1); //starting at zero up to and including detid_max
     pixel_to_wkspindex.assign(detid_max+1, 0);
     size_t workspaceIndex = 0;
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    for (it = detector_map.begin(); it != detector_map.end(); ++it)
     {
       if (!it->second->isMonitor())
       {

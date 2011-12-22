@@ -33,6 +33,6 @@
 #include "qpixmap.h"
 
 /** Function that returns a QPixmap given a string name. */
-QPixmap getQPixmap(const std::string name);
+QPixmap getQPixmap(const std::string &name);
 
 #endif

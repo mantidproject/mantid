@@ -59,11 +59,10 @@
 :ScrollArea_DimensionWidget	{container=':objectInspector.ScrollArea_QScrollArea' occurrence='4' type='DimensionWidget' unnamed='1' visible='1'}
 :ScrollArea_QScrollBar	{container=':objectInspector.ScrollArea_QScrollArea' type='QScrollBar' unnamed='1' visible='1'}
 :TimeControlWidget_Mantid::Vates::SimpleGui::TimeControlWidget	{name='timeControlWidget' type='Mantid::Vates::SimpleGui::TimeControlWidget' visible='1' window=':_VsgMainWindow' windowTitle='TimeControlWidget'}
-:View Mode.MultiSlice_QPushButton	{container=':View Mode_QGroupBox' name='multiSliceButton' text='MultiSlice' type='QPushButton' visible='1'}
-:View Mode.Splatter_QPushButton	{container=':View Mode_QGroupBox' name='splatterPlotButton' text='Splatter' type='QPushButton' visible='1'}
-:View Mode.ThreeSlice_QPushButton	{container=':View Mode_QGroupBox' name='threeSliceButton' text='ThreeSlice' type='QPushButton' visible='1'}
-:View Mode_QGroupBox	{name='modeControlBox' title='View Mode' type='QGroupBox' visible='1' window=':_VsgMainWindow'}
 :Viewport_pqQVTKWidget	{name='Viewport' occurrence='2' type='pqQVTKWidget' visible='0'}
+:_QGraphicsScene	{type='QGraphicsScene' unnamed='1'}
+:_QGraphicsScene_2	{occurrence='2' type='QGraphicsScene' unnamed='1'}
+:_QGraphicsScene_3	{occurrence='3' type='QGraphicsScene' unnamed='1'}
 :_QMenuBar	{type='QMenuBar' unnamed='1' visible='1' window=':_VsgMainWindow'}
 :_QVTKInteractorAdapter	{occurrence='2' type='QVTKInteractorAdapter' unnamed='1'}
 :_VsgMainWindow	{type='VsgMainWindow' unnamed='1' visible='1'}
@@ -84,6 +83,12 @@
 :splitter_2.mainRenderFrame_QFrame	{container=':splitter_2_QSplitter' name='mainRenderFrame' type='QFrame' visible='1'}
 :splitter_2.renderFrame_QFrame	{container=':splitter_2_QSplitter' name='renderFrame' type='QFrame' visible='1'}
 :splitter_2.splitter_QSplitter	{container=':splitter_2_QSplitter' name='splitter' type='QSplitter' visible='1'}
+:splitter_2.xAxisWidget_Mantid::Vates::SimpleGui::AxisInteractor	{container=':splitter_2_QSplitter' name='xAxisWidget' type='Mantid::Vates::SimpleGui::AxisInteractor' visible='1'}
+:splitter_2.yAxisWidget_Mantid::Vates::SimpleGui::AxisInteractor	{container=':splitter_2_QSplitter' name='yAxisWidget' type='Mantid::Vates::SimpleGui::AxisInteractor' visible='1'}
+:splitter_2.zAxisWidget_Mantid::Vates::SimpleGui::AxisInteractor	{container=':splitter_2_QSplitter' name='zAxisWidget' type='Mantid::Vates::SimpleGui::AxisInteractor' visible='1'}
+:splitter_2_QGraphicsView	{container=':splitter_2_QSplitter' type='QGraphicsView' unnamed='1' visible='1'}
+:splitter_2_QGraphicsView_2	{container=':splitter_2_QSplitter' occurrence='2' type='QGraphicsView' unnamed='1' visible='1'}
+:splitter_2_QGraphicsView_3	{container=':splitter_2_QSplitter' occurrence='3' type='QGraphicsView' unnamed='1' visible='1'}
 :splitter_2_QSplitter	{name='splitter_2' type='QSplitter' visible='1' window=':_VsgMainWindow'}
 :splitter_2_QwtScaleWidget	{container=':splitter_2_QSplitter' occurrence='2' type='QwtScaleWidget' unnamed='1' visible='1'}
 :splitter_2_QwtScaleWidget_2	{container=':splitter_2_QSplitter' type='QwtScaleWidget' unnamed='1' visible='1'}

@@ -97,7 +97,7 @@ void GeneratePythonScript::exec()
   generatedScript += "######################################################################\n";
 
   std::vector<std::string>::iterator m3_pIter;
-  for (m3_pIter=orderedHists.begin( );m3_pIter!=orderedHists.end( );m3_pIter++)
+  for (m3_pIter=orderedHists.begin( );m3_pIter!=orderedHists.end( );++m3_pIter)
   {
     generatedScript += *m3_pIter + "\n";
   }

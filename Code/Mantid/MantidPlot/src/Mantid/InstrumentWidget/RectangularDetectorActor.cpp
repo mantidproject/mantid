@@ -200,7 +200,7 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<GLColo
         //Get the current color
         list_it->get(r,g,b);
         //Go to the next color
-        list_it++;
+        ++list_it;
       }
 
         //      //TEMP: way to show the colors

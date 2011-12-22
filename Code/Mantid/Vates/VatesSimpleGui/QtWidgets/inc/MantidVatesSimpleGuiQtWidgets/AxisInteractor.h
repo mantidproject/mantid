@@ -62,6 +62,9 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS AxisInteractor : public QWidget
   Q_ENUMS(ScalePos)
   Q_PROPERTY( ScalePos scalePosition READ scalePosition
               WRITE setScalePosition )
+  Q_PROPERTY(double getMinimum READ getMinimum )
+  Q_PROPERTY(double getMaximum READ getMaximum )
+  Q_PROPERTY(QString getTitle READ getTitle )
 
 public:
   /// Enumeration for scale orientation

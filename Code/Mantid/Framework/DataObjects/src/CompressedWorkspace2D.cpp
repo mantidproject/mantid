@@ -86,7 +86,7 @@ void CompressedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, 
 /// Destructor. Clears the buffer and deletes the temporary file.
 CompressedWorkspace2D::~CompressedWorkspace2D()
 {
-  for(CompressedMap::const_iterator it=m_compressedData.begin();it!= m_compressedData.end();it++)
+  for(CompressedMap::const_iterator it=m_compressedData.begin();it!= m_compressedData.end();++it)
   {
     delete [] it->second.first;
   }
@@ -117,7 +117,7 @@ void CompressedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 size_t CompressedWorkspace2D::getMemorySize() const
 {
   double sz = 0.;
-  for(CompressedMap::const_iterator it=m_compressedData.begin();it!= m_compressedData.end();it++)
+  for(CompressedMap::const_iterator it=m_compressedData.begin();it!= m_compressedData.end();++it)
     sz += static_cast<double>(it->second.second);
   //std::cerr<<"Memory: "<<sz/1e6<<" + "<<double(getNumberBlocks()) * double(m_blockSize)/1e6
   //  << " + " << double(m_inBuffer.size())*sizeof(double)/1e6<< " + " << double(m_outBuffer.size())/1e6<<'\n';

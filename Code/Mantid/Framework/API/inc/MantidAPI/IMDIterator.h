@@ -72,6 +72,12 @@ class IMDWorkspace;
     /// Returns the normalized error for this box
     virtual signal_t getNormalizedError() const = 0;
 
+    /// Returns the total signal for this box
+    virtual signal_t getSignal() const = 0;
+
+    /// Returns the total error for this box
+    virtual signal_t getError() const = 0;
+
     /// Return a list of vertexes defining the volume pointed to
     virtual coord_t * getVertexesArray(size_t & numVertices) const = 0;
 

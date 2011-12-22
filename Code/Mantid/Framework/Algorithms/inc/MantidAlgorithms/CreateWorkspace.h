@@ -51,7 +51,7 @@ public:
   virtual ~CreateWorkspace();
 
   virtual const std::string name() const { return "CreateWorkspace"; } ///< @return the algorithms name
-  virtual const std::string category() const { return "Uility\\Workspaces"; } ///< @return the algorithms category
+  virtual const std::string category() const { return "Utility\\Workspaces"; } ///< @return the algorithms category
   virtual int version() const { return (1); } ///< @return version number of algorithm
 
 private:

@@ -176,6 +176,17 @@ namespace MDEvents
     return m_ws->getErrorNormalizedAt(m_pos);
   }
 
+  /// Returns the signal for this box, same as innerSignal
+  signal_t MDHistoWorkspaceIterator::getSignal() const
+  {
+    return m_ws->getSignalAt(m_pos);;
+  }
+
+  /// Returns the error for this box, same as innerError
+  signal_t MDHistoWorkspaceIterator::getError() const
+  {
+    return m_ws->getErrorAt(m_pos);
+  }
   //----------------------------------------------------------------------------------------------
   /// Return a list of vertexes defining the volume pointed to
   coord_t * MDHistoWorkspaceIterator::getVertexesArray(size_t & numVertices) const
