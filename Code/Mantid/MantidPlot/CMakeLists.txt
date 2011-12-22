@@ -813,7 +813,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
 	MantidPlotSliceViewerTest.py
 )
 
-if ( 1 )
+if ( 0 )
 	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
 	message (STATUS "Your CMAKE_SYSTEM_NAME string is '${CMAKE_SYSTEM_NAME}'")
 	message (STATUS "Your CMAKE_BINARY_DIR string is '${CMAKE_BINARY_DIR}'")
@@ -839,11 +839,10 @@ else ()
 	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
 	 	# Add the test. Name of test = name of the file
 		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
-		# Add an environment property so that the script can find the source of xmlrunner
-		# Append to the path for MacOS
-		#set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+		
+		# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
+		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
 		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR}")
-
 	endforeach ()
 endif()
 

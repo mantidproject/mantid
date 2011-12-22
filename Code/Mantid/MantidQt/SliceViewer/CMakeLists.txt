@@ -128,14 +128,19 @@ endif ()
 # Unit tests setup
 ###########################################################################
 
-# python unit tests
-#if ( PYUNITTEST_FOUND )
-if ( 0 )
-  pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
-  add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
-  add_dependencies ( GUITests SliceViewerTest.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET SliceViewerTest.py PROPERTY FOLDER "UnitTests" )
+# Check system version
+if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
+  	# This is RHEL5. GUI tests hang on this platform for some reason
+  	message ( "RHEL5 hangs on GUI tests. Disabling MantidQt SliceViewer python tests." )
+else ()
+
+	if ( PYUNITTEST_FOUND )
+	  pyunittest_add_test ( SliceViewerTest.py ${TEST_PY_FILES} "" )
+	  add_dependencies ( SliceViewerTest.py MantidQt Algorithms )
+	  add_dependencies ( GUITests SliceViewerTest.py )
+	  # Add to the 'UnitTests' group in VS
+	  set_property ( TARGET SliceViewerTest.py PROPERTY FOLDER "UnitTests" )
+	endif ()
 endif ()
 
 ###########################################################################
