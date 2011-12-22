@@ -66,7 +66,6 @@ using namespace Mantid::DataObjects;
 void ModeratorTzero::init()
 {
 
-  //Workspace should be of type EventWorkspace and in Time-of-Flight units
   CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
@@ -131,7 +130,7 @@ void ModeratorTzero::exec()
   }
   this->scaling = L_i/(L_i+gradient);
 
-  //Check if it is an event workspace
+  //Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventWS != NULL)
   {
@@ -147,36 +146,44 @@ void ModeratorTzero::exec()
   }else
   {
     //Create new workspace for output from old
-    MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = WorkspaceFactory::Instance().create(inputWS);
     outputWS->isDistribution(inputWS->isDistribution());
   }
 
   // do the shift in X
   const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
-  Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS)
+  //Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
+  //PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i=0; i < numHists; ++i)
   {
-	PARALLEL_START_INTERUPT_REGION
+	//PARALLEL_START_INTERUPT_REGION
     // Calculate the time t_f from sample to detector 'i'
     double t_f = CalculateTf(sample,inputWS,i);
 	// shift the time of flights
-	double offset = (1-this->scaling)*t_f - this->scaling*this->intercept;;
-	MantidVec &bins = inputWS->dataX(i);
-	for(MantidVec::iterator it = bins.begin(); it != bins.end(); ++it)
-	{
-		*it = this->scaling*(*it) + offset;
-	}
-	//Copy y and e data
-	outputWS->dataY(i) = inputWS->dataY(i);
-	outputWS->dataE(i) = inputWS->dataE(i);
-	prog.report();
-	PARALLEL_END_INTERUPT_REGION
+    if(t_f > 0) //t_f < 0 when no detector info is available
+    {
+      double offset = (1-this->scaling)*t_f - this->scaling*this->intercept;;
+      MantidVec &inbins = inputWS->dataX(i);
+      MantidVec &outbins = outputWS->dataX(i);
+      for(unsigned int j=0; j < inbins.size(); j++)
+      {
+      	outbins[j] = this->scaling*inbins[j] + offset;
+      }
+    }else
+    {
+      outputWS->dataX(i) = inputWS->dataX(i);
     }
-  PARALLEL_CHECK_INTERUPT_REGION
+    //Copy y and e data
+    outputWS->dataY(i) = inputWS->dataY(i);
+    outputWS->dataE(i) = inputWS->dataE(i);
+
+	//prog.report();
+	//PARALLEL_END_INTERUPT_REGION
+  }
+  //PARALLEL_CHECK_INTERUPT_REGION
 
   // Copy units
-  if (outputWS->getAxis(0)->unit().get())
+  if (inputWS->getAxis(0)->unit().get())
   outputWS->getAxis(0)->unit() = inputWS->getAxis(0)->unit();
   try
   {
@@ -245,6 +252,7 @@ void ModeratorTzero::execEvent(){
   outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzero::execEvent()
 
+  //calculate time from sample to detector. Determined only by detector specs
   double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorkspace_sptr inputWS, int64_t i){
 	static const double convFact = sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
 	static const double TfError = -1.0; //signal error when calculating final time
@@ -256,7 +264,7 @@ void ModeratorTzero::execEvent(){
 	} catch (Exception::NotFoundError&)
 	{
 	  g_log.error("Detector not found");
-	  throw Exception::InstrumentDefinitionError("Detector not found", inputWS->getTitle());
+	  return TfError;
 	}
 
 	// Get final energy E_f, final velocity v_f

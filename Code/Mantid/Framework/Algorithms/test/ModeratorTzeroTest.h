@@ -5,7 +5,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidDataHandling/LoadSNSEventNexus.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAlgorithms/ModeratorTzero.h"
 
 using namespace Mantid;
@@ -36,9 +37,32 @@ public:
 
   void testExec2D()
   {
-    //load events file. Input and ouptut are set to be non-equal
-	Mantid::DataHandling::LoadNexusProcessed loader;
+    //load ASCII histogram file, data
+    const std::string inputWStr("inputWS");
+	Mantid::DataHandling::LoadAscii loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "BSS_11841_histo.dat");
+    loader.setPropertyValue("Unit", "TOF");
+    loader.setPropertyValue("OutputWorkspace", inputWStr);
+    loader.execute();
+    TS_ASSERT(loader.isExecuted() );
 
+    //load the instrument into the workspace
+    Mantid::DataHandling::LoadInstrument loaderX;
+  	loaderX.initialize();
+  	loaderX.setPropertyValue("InstrumentName", "BASIS");
+  	loaderX.setPropertyValue("Workspace", inputWStr);
+  	loaderX.execute();
+  	TS_ASSERT(loader.isExecuted() );
+
+    if (!alg.isInitialized()) alg.initialize();
+
+    //transform the time-of-flight values
+    alg.setPropertyValue("InputWorkspace", inputWStr);
+    const std::string outputWStr("outputWS");
+    alg.setPropertyValue("OutputWorkspace", outputWStr);
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
   } //end of void testExec2D()
 
   void testExecEvents()
