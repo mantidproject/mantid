@@ -20,6 +20,9 @@ if(DOXYGEN_FOUND)
     message ( status " latex not found...no equations generated. doxygen will complain" )
   endif ( LATEX_EXECUTABLE )
 
+  # to use qtcreator help go to Tools->Options->Help->Documentation->Add 
+  #      and browse to doxygen/mantid.qch, then restart qtcreator and press F1
+
   # check for qtcreator help stuff
   find_program ( QHELP_EXECUTABLE qhelpgenerator )
   set ( GENERATE_QHELP NO )
