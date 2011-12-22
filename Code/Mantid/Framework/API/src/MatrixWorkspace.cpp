@@ -1404,7 +1404,7 @@ namespace Mantid
         ndet += ndet1;
 
         std::set<detid_t>::const_iterator it;
-        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
+        for (it=detectorgroup.begin();it!=detectorgroup.end();++it)
         {
           detector_list[id++]=int32_t(*it);
         }

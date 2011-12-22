@@ -105,6 +105,18 @@ def Detector(det_name):
     _printMessage('Detector("' + det_name + '")')
     ReductionSingleton().instrument.setDetector(det_name)
     
+def CropToDetector(inputWSname, outputWSname=None):
+    """
+        Crops the workspace so that it only contains the spectra that correspond
+        to the detectors used in the reduction
+        @param inputWSname: name of the workspace to crop
+        @param outputWSname: name the workspace will take (default is the inputWSname)
+    """
+    if not outputWSname:
+        outputWSname = inputWSname    
+        
+    ReductionSingleton().instrument.cur_detector().crop_to_detector(inputWSname, outputWSname)
+    
 def Mask(details):
     """
         Specify regions of the detector to mask using the same syntax
@@ -230,7 +242,7 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
     ReductionSingleton().set_trans_can(can, direct, True, period_t, period_d)
     return ReductionSingleton().can_trans_load.execute(
-                                            ReductionSingleton(), None)
+                                            ReductionSingleton(), None) 
     
 def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
     """
@@ -408,6 +420,9 @@ def PhiRanges(phis, plot=True):
         calculated = []
         for i in range(0, len(phis), 2):
             SetPhiLimit(phis[i],phis[i+1])
+            #reducedResult = ReductionSingleton()._reduce()
+            #RenameWorkspace(reducedResult,'bob')
+            #calculated.append(reducedResult)
             calculated.append(ReductionSingleton()._reduce())
             ReductionSingleton.replace(ReductionSingleton().settings())
     finally:

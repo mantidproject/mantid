@@ -34,6 +34,7 @@ public:
   ~SliceViewerWindow();
   MantidQt::SliceViewer::SliceViewer* getSlicer();
   MantidQt::SliceViewer::LineViewer* getLiner();
+  const QString& getLabel() const;
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
@@ -71,6 +72,9 @@ protected:
   Mantid::API::IMDWorkspace_sptr m_ws;
   /// Name of the workspace being viewed
   std::string m_wsName;
+
+  /// Additional label for identifying the window.
+  QString m_label;
 
   /// Width of the LineViewer last time it was open
   int m_lastLinerWidth;

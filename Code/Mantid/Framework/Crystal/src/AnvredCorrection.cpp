@@ -313,7 +313,7 @@ void AnvredCorrection::execEvent()
     std::vector<double> timeflight;
 
     // multiplying an event list by a scalar value
-    for (itev = events.begin(); itev != itev_end; itev++)
+    for (itev = events.begin(); itev != itev_end; ++itev)
     {
       timeflight.push_back(itev->tof());
       if (unitStr.compare("TOF") == 0)

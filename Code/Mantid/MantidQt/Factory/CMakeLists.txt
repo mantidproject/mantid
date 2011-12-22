@@ -7,6 +7,7 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES 
+	inc/MantidQtFactory/WidgetFactory.h
 )
 
 set ( UI_FILES 

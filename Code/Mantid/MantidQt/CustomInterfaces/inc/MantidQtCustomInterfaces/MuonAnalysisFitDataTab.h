@@ -56,7 +56,7 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
 
-class MuonAnalysisFitDataTab : public QWidget
+class MuonAnalysisFitDataTab : MantidQt::API::UserSubWindow
 {
  Q_OBJECT
 
@@ -65,11 +65,15 @@ public:
   /// Constructor
   MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
 
-public slots:
+  void makeRawWorkspace(const std::string & wsName);
+  void groupRawWorkspace(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
 
 signals:
 
 private:
+
+  /// Initialize the layout
+  virtual void initLayout() {};
 
   /// reference to MuonAnalysis form
   Ui::MuonAnalysis& m_uiForm;

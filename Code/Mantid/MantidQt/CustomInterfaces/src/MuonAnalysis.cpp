@@ -1423,7 +1423,6 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
   }
 
-
   QString cropStr = "CropWorkspace(\"";
   cropStr += inputWS;
   cropStr += "\",\"";
@@ -1437,8 +1436,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   // Copy the data and keep as raw for later
   if (!(AnalysisDataService::Instance().doesExist(wsname + "_Raw") ) )
   {
-    QString cloneStr = QString("CloneWorkspace('") + wsname.c_str() + "','"+ wsname.c_str() + "_Raw')\n";
-    runPythonCode( cloneStr ).trimmed();
+    m_fitDataTab->makeRawWorkspace(wsname);
   }
 
   // rebin data if option set in Plot Options
@@ -1632,15 +1630,17 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       return;
     }
 
+    // run python script
+    QString pyOutput = runPythonCode( pyString ).trimmed();
+
     // Group the raw workspace
     if (!rawExists)
     {
-      pyString += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + titleLabel
-        + "_Raw',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
+      std::vector<std::string> groupWorkspaces;
+      groupWorkspaces.push_back(workspaceGroupName);
+      groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
+      m_fitDataTab->groupRawWorkspace(groupWorkspaces, workspaceGroupName);
     }
-
-    // run python script
-    QString pyOutput = runPythonCode( pyString ).trimmed();
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
@@ -1779,15 +1779,17 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       g_log.error("Unknown pair table plot function");
       return;
     }
+    
+    QString pyOutput = runPythonCode( pyString ).trimmed();
 
     // Group the raw workspace
     if (!rawExists)
     {
-      pyString += QString("GroupWorkspaces(InputWorkspaces='") + workspaceGroupName.c_str() + "," + titleLabel
-        + "_Raw',OutputWorkspace='"+ workspaceGroupName.c_str() +"')\n";
-    }
-
-    QString pyOutput = runPythonCode( pyString ).trimmed();
+      std::vector<std::string> groupWorkspaces;
+      groupWorkspaces.push_back(workspaceGroupName);
+      groupWorkspaces.push_back(titleLabel.toStdString() + "_Raw");
+      m_fitDataTab->groupRawWorkspace(groupWorkspaces, workspaceGroupName);
+    }    
 
     // Change the plot style of the graph so that it matches what is selected on 
     // the plot options tab. Default is set to line (0).
@@ -2960,10 +2962,7 @@ void MuonAnalysis::groupFittedWorkspaces(QString workspaceName)
 
   if (inputWorkspaces.size() > 1)
   {
-    Mantid::API::IAlgorithm_sptr group = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
-    group->setProperty("InputWorkspaces",inputWorkspaces);
-    group->setPropertyValue("OutputWorkspace", groupName);
-    group->execute();
+    m_fitDataTab->groupRawWorkspace(inputWorkspaces, groupName);
   }
 }
 

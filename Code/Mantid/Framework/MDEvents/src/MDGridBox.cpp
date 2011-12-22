@@ -143,7 +143,7 @@ namespace MDEvents
     // Add all the events, with no bounds checking
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
-    for (; it != it_end; it++)
+    for (; it != it_end; ++it)
         addEvent(*it);
 
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
@@ -227,7 +227,7 @@ namespace MDEvents
   {
     // Delete all contained boxes (this should fire the MDGridBox destructors recursively).
     typename boxVector_t::iterator it;
-    for (it = boxes.begin(); it != boxes.end(); it++)
+    for (it = boxes.begin(); it != boxes.end(); ++it)
       delete *it;
     boxes.clear();
   }
@@ -241,7 +241,7 @@ namespace MDEvents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
     typename boxVector_t::iterator it;
-    for (it = boxes.begin(); it != boxes.end(); it++)
+    for (it = boxes.begin(); it != boxes.end(); ++it)
     {
       (*it)->clear();
     }
@@ -271,7 +271,7 @@ namespace MDEvents
   {
     size_t total = 0;
     typename boxVector_t::const_iterator it;
-    for (it = boxes.begin(); it != boxes.end(); it++)
+    for (it = boxes.begin(); it != boxes.end(); ++it)
     {
       total += (*it)->getNumMDBoxes();
     }
@@ -361,7 +361,7 @@ namespace MDEvents
     if (!ts)
     {
       //--------- Serial -----------
-      for (it = boxes.begin(); it != it_end; it++)
+      for (it = boxes.begin(); it != it_end; ++it)
       {
         IMDBox<MDE,nd> * ibox = *it;
 
@@ -413,7 +413,7 @@ namespace MDEvents
     if (!ts)
     {
       //--------- Serial -----------
-      for (it = boxes.begin(); it != it_end; it++)
+      for (it = boxes.begin(); it != it_end; ++it)
       {
         IMDBox<MDE,nd> * ibox = *it;
 

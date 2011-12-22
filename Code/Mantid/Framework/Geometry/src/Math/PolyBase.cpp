@@ -488,7 +488,7 @@ PolyBase::realRoots(const double epsilon)
   std::vector<std::complex<double> > Croots=calcRoots(epsilon);
   std::vector<double> Out;
   std::vector<std::complex<double> >::const_iterator vc;
-  for(vc=Croots.begin();vc!=Croots.end();vc++)
+  for(vc=Croots.begin();vc!=Croots.end();++vc)
     {
       if (fabs(vc->imag())<eps)
 	Out.push_back(vc->real());

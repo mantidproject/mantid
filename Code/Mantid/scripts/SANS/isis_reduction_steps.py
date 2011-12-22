@@ -1299,6 +1299,8 @@ class AbsoluteUnitsISIS(ReductionStep):
         
 class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
     """
+        Note this is not a reduction step, see sans_reduction_steps.CalculateNorm
+        
         Generates the normalization workspaces required by Q1D and Qxy for normalization
         produced by other, sometimes optional, reduction_steps or a specified
         workspace

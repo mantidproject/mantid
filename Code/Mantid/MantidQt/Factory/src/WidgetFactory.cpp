@@ -10,26 +10,38 @@ namespace MantidQt
 namespace Factory
 {
 
+  /// Initialize the instance to NULL
+  WidgetFactory* WidgetFactory::m_pInstance = NULL;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  WidgetFactoryImpl::WidgetFactoryImpl()
+  WidgetFactory::WidgetFactory()
   {
-//    std::cout << "WidgetFactoryImpl constructor called" << std::endl;
+//    std::cout << "WidgetFactory constructor called" << std::endl;
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  WidgetFactoryImpl::~WidgetFactoryImpl()
+  WidgetFactory::~WidgetFactory()
   {
-//    std::cout << "WidgetFactoryImpl destructor called" << std::endl;
+//    std::cout << "WidgetFactory destructor called" << std::endl;
 //    for (size_t i=0; i<m_windows.size(); i++)
 //      delete m_windows[i];
 //    m_windows.clear();
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Retrieve the singleton instance of WidgetFactory */
+  WidgetFactory* WidgetFactory::Instance()
+  {
+    if (!m_pInstance)
+      m_pInstance = new WidgetFactory;
+
+    return m_pInstance;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Create an instance of a SliceViewerWindow:
@@ -38,16 +50,61 @@ namespace Factory
    * LineViewer widget, to do 1D lines through the 2D slices.
    *
    * @param wsName :: name of the workspace to show
-   * @param app :: QApplication parent
    * @param label :: label for the window title
    * @return the created SliceViewerWindow *
    */
-  MantidQt::SliceViewer::SliceViewerWindow * WidgetFactoryImpl::createSliceViewerWindow(const QString& wsName,  const QString& label)
+  MantidQt::SliceViewer::SliceViewerWindow* WidgetFactory::createSliceViewerWindow(const QString& wsName,  const QString& label)
   {
     SliceViewerWindow * window = new SliceViewerWindow(wsName, label);
-    //TODO: Save in a list
-    m_windows.push_back(window);
+    QPointer<MantidQt::SliceViewer::SliceViewerWindow> pWindow(window);
+
+    //Save in a list for later use
+    m_windows.push_back(pWindow);
+
     return window;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Returns a previously-open instance of a SliceViewerWindow.
+   *
+   * @param wsName :: name of the workspace that was open
+   * @param label :: label for the window title
+   * @return the previously-created SliceViewerWindow *
+   * @throw std::runtime_error if no open windows match the parameters
+   */
+  MantidQt::SliceViewer::SliceViewerWindow* WidgetFactory::getSliceViewerWindow(const QString& wsName,  const QString& label)
+  {
+
+    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
+    for (it = m_windows.begin(); it != m_windows.end(); it++)
+    {
+      QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
+      if (window)
+      {
+        // Match the ws name and the label
+        if ((window->getSlicer()->getWorkspace()->getName() == wsName.toStdString())
+          && (window->getLabel() == label))
+          return window;
+      }
+    }
+    throw std::runtime_error("No SliceViewer is open with the workspace '" +
+        wsName.toStdString() + "' and label '" + label.toStdString() + "'.");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Returns every previously-open instance of a SliceViewerWindow.
+   */
+  void WidgetFactory::getAllSliceViewerWindows(std::vector<MantidQt::SliceViewer::SliceViewerWindow*>& output)
+  {
+    output.clear();
+    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
+    for (it = m_windows.begin(); it != m_windows.end(); it++)
+    {
+      QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
+      if (window)
+        output.push_back(window);
+    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -60,10 +117,10 @@ namespace Factory
    * @param wsName :: name of the workspace to show. Optional, blank for no workspace.
    * @return the created SliceViewer *
    */
-  MantidQt::SliceViewer::SliceViewer* WidgetFactoryImpl::createSliceViewer(const QString& wsName)
+  MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QString& wsName)
   {
     MantidQt::SliceViewer::SliceViewer * slicer = new MantidQt::SliceViewer::SliceViewer();
-    //TODO: Save in a list
+    //TODO: Save in a list ?
     if (!wsName.isEmpty())
       slicer->setWorkspace(wsName);
     return slicer;

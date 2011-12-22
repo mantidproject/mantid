@@ -76,30 +76,42 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = Code/Mantid/Framework/Kernel/inc/MantidKernel \
-                         Code/Mantid/Framework/Kernel/src \
-                         Code/Mantid/Framework/API/inc/MantidAPI \
-                         Code/Mantid/Framework/API/src \
-                         Code/Mantid/Framework/DataObjects/inc/MantidDataObjects \
-                         Code/Mantid/Framework/DataObjects/src \
-                         Code/Mantid/Framework/DataHandling/inc/MantidDataHandling \
-                         Code/Mantid/Framework/DataHandling/src \
-                         Code/Mantid/Framework/Nexus/inc/MantidNexus \
-                         Code/Mantid/Framework/Nexus/src \
-                         Code/Mantid/Framework/Algorithms/inc/MantidAlgorithms \
-                         Code/Mantid/Framework/Algorithms/src \
-                         Code/Mantid/Framework/Geometry/inc/MantidGeometry \
-                         Code/Mantid/Framework/Geometry/src \
-                         Code/Mantid/Framework/CurveFitting/inc/MantidCurveFitting \
-                         Code/Mantid/Framework/CurveFitting/src \
-                         Code/Mantid/Framework/PythonAPI/inc/MantidPythonAPI \
-                         Code/Mantid/Framework/PythonAPI/src \
-                         Code/Mantid/Framework/MatlabAPI/inc/MatlabAPI \
-                         Code/Mantid/Framework/MatlabAPI/src \
-                         Code/Mantid/Framework/Crystal/inc/MantidCrystal \
-                         Code/Mantid/Framework/Crystal/src	\
-                         Code/Mantid/Framework/ICat/inc/MantidICat	\
-			 Code/Mantid/Framework/ICat/src
+INPUT = Code/Mantid/Framework/Algorithms/inc/MantidAlgorithms \
+        Code/Mantid/Framework/Algorithms/src \
+        Code/Mantid/Framework/API/inc/MantidAPI \
+        Code/Mantid/Framework/API/src \
+        Code/Mantid/Framework/Crystal/inc/MantidCrystal \
+        Code/Mantid/Framework/Crystal/src \
+        Code/Mantid/Framework/CurveFitting/inc/MantidCurveFitting \
+        Code/Mantid/Framework/CurveFitting/src \
+        Code/Mantid/Framework/DataHandling/inc/MantidDataHandling \
+        Code/Mantid/Framework/DataHandling/src \
+        Code/Mantid/Framework/DataObjects/inc/MantidDataObjects \
+        Code/Mantid/Framework/DataObjects/src \
+        Code/Mantid/Framework/Geometry/inc/MantidGeometry \
+        Code/Mantid/Framework/Geometry/src \
+        Code/Mantid/Framework/ICat/inc/MantidICat \
+        Code/Mantid/Framework/ICat/src \
+        Code/Mantid/Framework/Kernel/inc/MantidKernel \
+        Code/Mantid/Framework/Kernel/src \
+        Code/Mantid/Framework/MatlabAPI/src \
+        Code/Mantid/Framework/MDAlgorithms/inc/MantidMDAlgorithms \
+        Code/Mantid/Framework/MDAlgorithms/src \
+        Code/Mantid/Framework/MDEvents/inc/MantidMDEvents \
+        Code/Mantid/Framework/MDEvents/src \
+        Code/Mantid/Framework/Nexus/inc/MantidNexus \
+        Code/Mantid/Framework/Nexus/src \
+        Code/Mantid/Framework/PythonAPI/inc/MantidPythonAPI \
+        Code/Mantid/Framework/PythonAPI/src \
+        Code/Mantid/Framework/PythonInterface/inc/MantidPythonInterface/kernel \
+        Code/Mantid/Framework/PythonInterface/inc/MantidPythonInterface/api \
+        Code/Mantid/Framework/PythonInterface/mantid/kernel/src \
+        Code/Mantid/Framework/PythonInterface/mantid/geometry/src \
+        Code/Mantid/Framework/PythonInterface/mantid/api/src \
+        Code/Mantid/Framework/TestHelpers/inc/MantidTestHelpers \
+        Code/Mantid/Framework/TestHelpers/src \
+        Code/Mantid/Framework/WorkflowAlgorithms/inc/MantidWorkflowAlgorithms \
+        Code/Mantid/Framework/WorkflowAlgorithms/src
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
@@ -107,17 +119,18 @@ RECURSIVE              = YES
 
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
-EXCLUDE               = Code/Mantid/Framework/Nexus/src/NeXusException.cpp \
-			Code/Mantid/Framework/Nexus/src/NeXusFile.cpp \
-			Code/Mantid/Framework/Nexus/src/NeXusStream.cpp \
-			Code/Mantid/Framework/Nexus/inc/MantidNexus/NeXusStream.hpp \
-			Code/Mantid/Framework/Nexus/inc/MantidNexus/NeXusFile.hpp \
-			Code/Mantid/Framework/Nexus/inc/MantidNexus/NeXusException.hpp \
-			Code/Mantid/Framework/Kernel/inc/MantidKernel/ANN \
-			Code/Mantid/Framework/Kernel/src/ANN \
-			Code/Mantid/Framework/ICat/inc/MantidICat/GSoapGenerated \
-			Code/Mantid/Framework/ICat/inc/MantidICat/GSoap \
-			Code/Mantid/Framework/ICat/src/GSoapGenerated
+
+EXCLUDE                = Code/Mantid/Framework/ICat/src/GSoapGenerated \
+		         Code/Mantid/Framework/ICat/src/GSoap \
+			 Code/Mantid/Framework/ICat/src/GSoap.cpp \
+			 Code/Mantid/Framework/ICat/inc/MantidICat/GSoapGenerated \
+		         Code/Mantid/Framework/ICat/inc/MantidICat/GSoap \
+			 Code/Mantid/Framework/PythonAPI/src/boostpython.cpp \
+			 Code/Mantid/Framework/PythonAPI/src/boostpython \
+			 Code/Mantid/Framework/MDEvents/src/generate_mdevent_declarations.py \
+			 Code/Mantid/Framework/Kernel/inc/MantidKernel/ANN \
+			 Code/Mantid/Framework/Kernel/src/ANN \
+			 Code/Mantid/Framework/Kernel/src/ANN_complete.cpp
 
 
 EXCLUDE_SYMLINKS       = NO

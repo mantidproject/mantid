@@ -95,7 +95,7 @@ namespace Mantid
       std::map<std::string,std::string> entries = file.getEntries();
       std::map<std::string,std::string>::const_iterator iend = entries.end();
       for(std::map<std::string,std::string>::const_iterator it = entries.begin();
-          it != iend; it++)
+          it != iend; ++it)
       {
         std::string group_name(it->first);
         std::string group_class(it->second);
@@ -123,7 +123,7 @@ namespace Mantid
           std::map<std::string, std::string> entries = file.getEntries();
           std::map<std::string,std::string>::const_iterator it = entries.begin();
           std::string eventEntry;
-          for (; it != entries.end(); it++)
+          for (; it != entries.end(); ++it)
           {
             if( it->second == "NXevent_data" )
             {
@@ -235,7 +235,7 @@ namespace Mantid
       std::map<std::string,std::string> entries = file.getEntries();
       std::map<std::string,std::string>::const_iterator iend = entries.end();
       for(std::map<std::string,std::string>::const_iterator itr = entries.begin();
-          itr != iend; itr++)
+          itr != iend; ++itr)
       {
         std::string log_class = itr->second;
         if( log_class == "NXlog" || log_class == "NXpositioner" ) 

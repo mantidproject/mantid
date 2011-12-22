@@ -93,7 +93,7 @@ void LoadNexusMonitors::exec()
   API::Progress prog2(this, 0.2, 0.6, entries.size());
 
   it = entries.begin();
-  for (; it != entries.end(); it++)
+  for (; it != entries.end(); ++it)
   {
     std::string entry_name(it->first);
     std::string entry_class(it->second);

@@ -81,7 +81,7 @@ void SplineBackground::exec()
   std::vector<int> masked(Y.size());
   if (isMasked)
   {
-    for(API::MatrixWorkspace::MaskList::const_iterator it=inWS->maskedBins(spec).begin();it!=inWS->maskedBins(spec).end();it++)
+    for(API::MatrixWorkspace::MaskList::const_iterator it=inWS->maskedBins(spec).begin();it!=inWS->maskedBins(spec).end();++it)
       masked[it->first] = 1;
     n -= static_cast<int>(inWS->maskedBins(spec).size());
   }

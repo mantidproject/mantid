@@ -99,7 +99,7 @@ namespace Mantid
         return 1;
       }
       LType::const_iterator bc = ac;
-      bc++;
+      ++bc;
 
       while(bc != m_links.end())
       {
@@ -107,8 +107,8 @@ namespace Mantid
         {
           return (static_cast<int>(distance(m_links.begin(),bc)) + 1);
         }
-        ac++;
-        bc++;
+        ++ac;
+        ++bc;
       }
       // success
       return 0;
@@ -126,7 +126,7 @@ namespace Mantid
       }
       LType::iterator prevNode = m_links.begin();
       LType::iterator nextNode = m_links.begin();
-      nextNode++;
+      ++nextNode;
       while(nextNode != m_links.end())
       {
         if(prevNode->componentID == nextNode->componentID)
@@ -136,12 +136,12 @@ namespace Mantid
           prevNode->distInsideObject = nextNode->distInsideObject;
           m_links.erase(nextNode);
           nextNode = prevNode;
-          nextNode++;
+          ++nextNode;
         }
         else
         {
-          prevNode++;
-          nextNode++;
+          ++prevNode;
+          ++nextNode;
         }
       }
       return;
@@ -205,7 +205,7 @@ namespace Mantid
       // The surface points were added in order when they were built so no sorting is required here.
       PType::const_iterator ac = m_surfPoints.begin();
       PType::const_iterator bc = ac;
-      bc++;
+      ++bc;
       V3D workPt = m_startPoint;            // last good point
       // First point is not necessarily in an object
       // Process first point:
@@ -216,10 +216,10 @@ namespace Mantid
           addLink(m_startPoint,ac->endPoint,ac->distFromStart,ac->componentID);  // from the void
           workPt = ac->endPoint;
         }
-        ac++;
+        ++ac;
         if (bc!=m_surfPoints.end())
         {
-          bc++;
+          ++bc;
         }
       } 
 
@@ -250,18 +250,18 @@ namespace Mantid
           workPt = bc->endPoint;
 
           // ADDING to ac twice: since processing pairs
-          ac++;
-          ac++;
-          bc++;    // can I do this past the end ? 
+          ++ac;
+          ++ac;
+          ++bc;    // can I do this past the end ? 
           if (bc!=m_surfPoints.end())
           {
-            bc++;
+            ++bc;
           }
         }
         else         // Test for glacing point / or void edges
         {          // These all can be skipped
-          ac++;
-          bc++;
+          ++ac;
+          ++bc;
         }
       }	
 

@@ -43,7 +43,7 @@ namespace Mantid
       /// Algorithm's name
       virtual const std::string name() const { return "DeleteWorkspace"; }
       /// Algorithm's category for identification
-      virtual const std::string category() const { return "Uility\\Workspaces"; }
+      virtual const std::string category() const { return "Utility\\Workspaces"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
 

@@ -696,7 +696,7 @@ Rule::Eliminate()
   // collect base keys and populate the cells
   getKeyList(baseKeys);  
   std::vector<int>::const_iterator xv;
-  for(xv=baseKeys.begin();xv!=baseKeys.end();xv++)
+  for(xv=baseKeys.begin();xv!=baseKeys.end();++xv)
     {
       baseVal.push_back(0);
       Base[(*xv)]=1;

@@ -58,7 +58,7 @@ class Plot: public QwtPlot
 public:
 	Plot(int width = 500, int height = 400, QWidget *parent = 0, const char *name = 0);
 
-	Grid *grid(){return (Grid *)d_grid;};
+	Grid *grid(){return static_cast<Grid *>(d_grid);};
 	QList<int> curveKeys(){return d_curves.keys();};
 	QList<QwtPlotItem *> curvesList(){return d_curves.values();};
 

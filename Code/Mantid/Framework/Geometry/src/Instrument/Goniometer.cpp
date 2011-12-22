@@ -82,7 +82,7 @@ std::string Goniometer::axesInfo()
     else
     {
       info<<"Name \t Direction \t Sense \t Angle \n";
-      for(it=motors.begin(); it<motors.end(); it++)
+      for(it=motors.begin(); it<motors.end(); ++it)
       {
         sense=((*it).sense==CCW)?strCCW:strCW;
         angle=((*it).angleunit==angDegrees)?((*it).angle): ((*it).angle*rad2deg); 
@@ -110,7 +110,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy, double a
   {
     std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
-    for(it=motors.begin(); it<motors.end(); it++)
+    for(it=motors.begin(); it<motors.end(); ++it)
     {
       if(name.compare((*it).name)==0) throw std::invalid_argument("Motor name already defined");
     }
@@ -128,7 +128,7 @@ void Goniometer::setRotationAngle( std::string name, double value)
 {
   bool changed=false;
   std::vector<GoniometerAxis>::iterator it;
-  for(it=motors.begin(); it<motors.end(); it++)
+  for(it=motors.begin(); it<motors.end(); ++it)
   {
     if(name.compare((*it).name)==0)
     {
@@ -176,7 +176,7 @@ GoniometerAxis Goniometer::getAxis( std::string axisname)
 {
   bool found=false;
   std::vector<GoniometerAxis>::iterator it;
-  for(it=motors.begin(); it<motors.end(); it++)
+  for(it=motors.begin(); it<motors.end(); ++it)
   {
     if(axisname.compare((*it).name)==0)
     {
@@ -262,7 +262,7 @@ void Goniometer::recalculateR()
   Quat QGlobal,QCurrent;
 
   double ang;
-  for(it=motors.begin(); it<motors.end(); it++)
+  for(it=motors.begin(); it<motors.end(); ++it)
   {
     ang=(*it).angle;
     if((*it).angleunit==angRadians) ang*=rad2deg;

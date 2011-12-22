@@ -136,7 +136,7 @@ namespace Mantid
                         it = m_spec_list.erase(it);
                     }
                     else
-                        it++;
+                        ++it;
 
             }
             if (m_spec_list.size() == 0) m_list = false;
@@ -313,7 +313,7 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
     std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
     if (it->second != period)
         p->addValue(it->first,false);
-    for(;it!=pMap.end();it++)
+    for(;it!=pMap.end();++it)
         p->addValue(it->first, (it->second == period) );
 
     return p;

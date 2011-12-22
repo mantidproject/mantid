@@ -368,7 +368,7 @@ namespace MDEvents
       this->m_errorSquared = 0;
 
       typename std::vector<MDE>::const_iterator it_end = data.end();
-      for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+      for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
       {
         const MDE & event = *it;
         this->m_signal += event.getSignal();
@@ -379,7 +379,7 @@ namespace MDEvents
     {
       // ADD the events that were added to the cache, without reloading the whole event list.
       typename std::vector<MDE>::const_iterator it_end = data.end();
-      for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+      for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
       {
         const MDE & event = *it;
         this->m_signal += event.getSignal();
@@ -415,7 +415,7 @@ namespace MDEvents
     if (this->m_signal == 0) return;
 
     typename std::vector<MDE>::const_iterator it_end = data.end();
-    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
     {
       const MDE & event = *it;
       double signal = event.getSignal();
@@ -440,7 +440,7 @@ namespace MDEvents
   void MDBox)::calculateDimensionStats(MDDimensionStats * stats) const
   {
     typename std::vector<MDE>::const_iterator it_end = data.end();
-    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
     {
       const MDE & event = *it;
       for (size_t d=0; d<nd; d++)
@@ -503,7 +503,7 @@ namespace MDEvents
 
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     //Running total of signal/error
-    for(typename std::vector<MDE>::const_iterator it = start; it != end; it++)
+    for(typename std::vector<MDE>::const_iterator it = start; it != end; ++it)
     {
       double signal = it->getSignal();
       this->m_signal += signal;

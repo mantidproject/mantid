@@ -7,6 +7,9 @@
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "qapplication.h"
+#include <Qsci/qscilexer.h>
+#include <QtCore/QtCore>
+#include <QVector>
 
 namespace MantidQt
 {
@@ -40,27 +43,31 @@ namespace Factory
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_FACTORY WidgetFactoryImpl
+  class EXPORT_OPT_MANTIDQT_FACTORY WidgetFactory : public QObject
   {
+    Q_OBJECT
   public:
-    WidgetFactoryImpl();
-    virtual ~WidgetFactoryImpl();
-    
+    static WidgetFactory* Instance();
+    virtual ~WidgetFactory();
+
     MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
+    void getAllSliceViewerWindows(std::vector<MantidQt::SliceViewer::SliceViewerWindow*>& output);
+    MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label);
     MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
+  private:
+    WidgetFactory();
+
   protected:
-    std::vector<QWidget*> m_windows;
+    /// List of the open SliceViewerWindows
+    std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> > m_windows;
+    /// Singleton instance
+    static WidgetFactory * m_pInstance;
   };
 
 
 
 } // namespace Factory
 } // namespace MantidQt
-
-/// Explicitely declare the WidgetFactory singleton
-template class EXPORT_OPT_MANTIDQT_FACTORY Mantid::Kernel::SingletonHolder<MantidQt::Factory::WidgetFactoryImpl>;
-typedef EXPORT_OPT_MANTIDQT_FACTORY Mantid::Kernel::SingletonHolder<MantidQt::Factory::WidgetFactoryImpl> WidgetFactory;
-
 
 #endif  /* MANTID_FACTORY_WIDGETFACTORY_H_ */

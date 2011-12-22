@@ -98,6 +98,9 @@ QString FFT::fftCurve()
 			QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
+            // Cleanup variables before returning
+            delete [] amp;
+            delete [] result;
 			return "";
 		}
 
@@ -118,6 +121,9 @@ QString FFT::fftCurve()
 			QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
+            // Cleanup local variables before returning
+            delete [] amp;
+            delete [] result;
 			return "";
 		}
 

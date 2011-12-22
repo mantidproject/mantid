@@ -47,7 +47,10 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   observeADSClear();
 
   // Set up the window
-  this->setCaption(QString("Slice Viewer (") + wsName + QString(")") + label);
+  m_label = label;
+  QString caption = QString("Slice Viewer (") + wsName + QString(")");
+  if (!m_label.isEmpty()) caption += QString(" ") + m_label;
+  this->setCaption(caption);
   this->resize(500, 500);
 
   // Create the m_slicer and add it to the MDI window
@@ -108,7 +111,6 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
 
 SliceViewerWindow::~SliceViewerWindow()
 {
-//	std::cout << "SliceViewerWindow " << this << " deleted. with slicer = " << this->m_slicer << " ." << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -130,6 +132,15 @@ MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
  */
 MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 { return m_liner; }
+
+
+//------------------------------------------------------------------------------------------------
+/** @return the label that was attached to this SliceViewerWindow's title */
+const QString& SliceViewerWindow::getLabel() const
+{
+  return m_label;
+}
+
 
 //------------------------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/)
@@ -160,9 +171,8 @@ void SliceViewerWindow::updateWorkspace()
  * is being viewed. */
 void SliceViewerWindow::slicerWorkspaceChanged()
 {
-  std::cout << "SliceViewerWindow::slicerWorkspaceChanged() called " << std::endl;
   m_ws = m_slicer->getWorkspace();
-  // Propagate the change to
+  // Propagate the change to Liner
   m_liner->setWorkspace(m_ws);
 }
 
@@ -210,7 +220,6 @@ void SliceViewerWindow::showLineViewer(bool visible)
     m_liner->setVisible(visible);
   }
   this->setUpdatesEnabled(true);
-//  std::cout << "Width is " << width() << std::endl;
 
 }
 

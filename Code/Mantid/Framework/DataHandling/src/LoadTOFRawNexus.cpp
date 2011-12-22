@@ -158,7 +158,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   // Look for all the banks
   std::map<std::string, std::string> entries = file->getEntries();
   std::map<std::string, std::string>::iterator it;
-  for (it = entries.begin(); it != entries.end(); it++)
+  for (it = entries.begin(); it != entries.end(); ++it)
   {
     std::string name = it->first;
     if (name.size() > 4)
@@ -218,7 +218,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
     throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", was not found in any of the data fields of any 'bankX' group. Cannot load file.");
 
 
-  for (it = entries.begin(); it != entries.end(); it++)
+  for (it = entries.begin(); it != entries.end(); ++it)
   {
     std::string name = it->first;
     if (name.size() > 4)

@@ -74,7 +74,7 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
       std::set<int>::iterator it = origSet.begin();
       std::set<int> convertedSet;
 
-      for( ; it != origSet.end(); it++)
+      for( ; it != origSet.end(); ++it)
       {
         int origInt = (*it);
         int convertedInt = static_cast<int>(spec2index->find(origInt)->second);
@@ -272,7 +272,7 @@ void MantidWSIndexDialog::generateSpectraIdIntervals()
     Mantid::spec2index_map * spec2index = ws->getSpectrumToWorkspaceIndexMap();
     
     Mantid::spec2index_map::const_iterator last = spec2index->end();
-    last--;
+    --last;
     Mantid::spec2index_map::const_iterator first = spec2index->begin();
     
     const int startSpectrum = static_cast<int> (first->first);
@@ -293,7 +293,7 @@ void MantidWSIndexDialog::generateSpectraIdIntervals()
       // The spectra IDs do not appear to be an uninterrupted list of numbers,
       // and so we must go through each one and construct the intervals that way.
       // TODO - is this at all feasible for large workspaces, and/or many workspaces?
-      last++;
+      ++last;
       for ( ; first != last; ++first) 
       {
         const int spectraId = static_cast<int> (first->first);
@@ -781,7 +781,7 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
       if((*aIt).end() < (*bIt).start())
       {
         a_open = false;
-        aIt++;
+        ++aIt;
       } 
       else if((*aIt).end() > (*bIt).start())
       {
@@ -796,7 +796,7 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
         end = (*bIt).start();
         Interval interval(start, end);
         output.addInterval(interval);
-        aIt++;
+        ++aIt;
       }
     }
     else if(!a_open && b_open)
@@ -804,7 +804,7 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
       if((*bIt).end() < (*aIt).start())
       {
         b_open = false;
-        bIt++;
+        ++bIt;
       } 
       else if((*aIt).end() > (*bIt).start())
       {
@@ -819,7 +819,7 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
         end = (*aIt).start();
         Interval interval(start, end);
         output.addInterval(interval);
-        bIt++;
+        ++bIt;
       }
     }
     else
@@ -830,7 +830,7 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
         end = (*aIt).end();
         Interval interval(start, end);
         output.addInterval(interval);
-        aIt++;
+        ++aIt;
       } 
       else if((*aIt).end() > (*bIt).end())
       {
@@ -838,7 +838,7 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
         end = (*bIt).end();
         Interval interval(start, end);
         output.addInterval(interval);
-        bIt++;
+        ++bIt;
       }
       else
       {
@@ -847,8 +847,8 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
         end = (*aIt).end();
         Interval interval(start, end);
         output.addInterval(interval);
-        aIt++;
-        bIt++;
+        ++aIt;
+        ++bIt;
       }
     }
   }

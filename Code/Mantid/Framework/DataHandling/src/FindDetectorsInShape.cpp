@@ -92,7 +92,7 @@ namespace Mantid
       //Now go through all
       detid2det_map::iterator it;
       detid2det_map::const_iterator it_end = allDetectors.end();
-      for (it = allDetectors.begin(); it != it_end; it++)
+      for (it = allDetectors.begin(); it != it_end; ++it)
       {
         Geometry::IDetector_const_sptr det = it->second;
 

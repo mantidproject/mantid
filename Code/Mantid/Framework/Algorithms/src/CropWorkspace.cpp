@@ -244,7 +244,7 @@ void CropWorkspace::execEvent()
       case TOF:
       {
         std::vector<TofEvent>::iterator itev;
-        for (itev = el.getEvents().begin(); itev != el.getEvents().end(); itev++)
+        for (itev = el.getEvents().begin(); itev != el.getEvents().end(); ++itev)
         {
           const double tof = itev->tof();
           if(tof <=  maxX_val && tof >= minX_val)
@@ -255,7 +255,7 @@ void CropWorkspace::execEvent()
       case WEIGHTED:
       {
         std::vector<WeightedEvent>::iterator itev;
-        for (itev = el.getWeightedEvents().begin(); itev != el.getWeightedEvents().end(); itev++)
+        for (itev = el.getWeightedEvents().begin(); itev != el.getWeightedEvents().end(); ++itev)
         {
           const double tof = itev->tof();
           if(tof <=  maxX_val && tof >= minX_val)
@@ -266,7 +266,7 @@ void CropWorkspace::execEvent()
       case WEIGHTED_NOTIME:
       {
         std::vector<WeightedEventNoTime>::iterator itev;
-        for (itev = el.getWeightedEventsNoTime().begin(); itev != el.getWeightedEventsNoTime().end(); itev++)
+        for (itev = el.getWeightedEventsNoTime().begin(); itev != el.getWeightedEventsNoTime().end(); ++itev)
         {
           const double tof = itev->tof();
           // There is no += operator for a single weighted event with no time

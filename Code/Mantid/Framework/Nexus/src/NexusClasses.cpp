@@ -16,7 +16,7 @@ std::vector<std::string> NXAttributes::names()const
 {
     std::vector<std::string> out;
     std::map<std::string,std::string>::const_iterator it = m_values.begin();
-    for(;it!=m_values.end();it++)
+    for(;it!=m_values.end();++it)
         out.push_back(it->first);
     return out;
 }
@@ -25,7 +25,7 @@ std::vector<std::string> NXAttributes::values()const
 {
     std::vector<std::string> out;
     std::map<std::string,std::string>::const_iterator it = m_values.begin();
-    for(;it!=m_values.end();it++)
+    for(;it!=m_values.end();++it)
         out.push_back(it->second);
     return out;
 }
@@ -310,7 +310,7 @@ bool NXClass::containsGroup(const std::string & query) const
 NXInfo NXClass::getDataSetInfo(const std::string& name)const
 {
     NXInfo info;
-    for(std::vector<NXInfo>::const_iterator it=datasets().begin();it!=datasets().end();it++)
+    for(std::vector<NXInfo>::const_iterator it=datasets().begin();it!=datasets().end();++it)
     {
         if (it->nxname == name) return *it;
     }

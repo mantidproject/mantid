@@ -141,7 +141,7 @@ namespace Mantid
       std::vector<Kernel::V3D>::const_iterator ip;
       double centre_norm_inv = 1.0 / centre.norm();
       double thetaMax(-1.0);
-      for (ip = pts.begin(); ip != pts.end(); ip++)
+      for (ip = pts.begin(); ip != pts.end(); ++ip)
       {
         double theta = acos(ip->scalar_prod(centre)*centre_norm_inv / ip->norm());
         if (theta > thetaMax)

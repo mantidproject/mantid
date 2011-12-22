@@ -348,7 +348,7 @@ namespace Mantid
       NXMainClass runlogs = entry.openNXClass<NXMainClass>("sample");
       ws->mutableSample().setName(sampleName);
 
-      for(std::vector<NXClassInfo>::const_iterator it=runlogs.groups().begin();it!=runlogs.groups().end();it++)
+      for(std::vector<NXClassInfo>::const_iterator it=runlogs.groups().begin();it!=runlogs.groups().end();++it)
       {
         NXLog nxLog = runlogs.openNXLog(it->nxname);
         Kernel::Property* logv = nxLog.createTimeSeries(start_time);

@@ -47,7 +47,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Category
-      virtual const std::string category() const { return "Uility\\Workspaces"; }
+      virtual const std::string category() const { return "Utility\\Workspaces"; }
 
     private:
       /// Sets documentation strings for this algorithm
