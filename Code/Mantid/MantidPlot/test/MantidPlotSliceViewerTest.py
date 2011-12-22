@@ -9,7 +9,6 @@ import sys
 import os
 import unittest
 import time
-from PyQt4 import Qt
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
 FakeMDEventData("mdw",  UniformParams="1e5")

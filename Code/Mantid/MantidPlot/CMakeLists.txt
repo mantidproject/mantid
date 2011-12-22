@@ -816,7 +816,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
 # Make a ctest target for each file
 foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
  	# Add the test. Name of test = name of the file
-	ADD_TEST( ${PYFILE} ${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot -x ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+	ADD_TEST( ${PYFILE} ${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
 	# Add an environment property so that the script can find the source of xmlrunner
 	set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR}")
 endforeach ()
