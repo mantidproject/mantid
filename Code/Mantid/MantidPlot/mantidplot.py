@@ -133,7 +133,7 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
            xydim=xydim, slicepoint=slicepoint, colormin=colormin,
            colormax=colormax, colorscalelog=colorscalelog, limits=limits, 
            **kwargs) 
-        pxy = QtProxyObject(window)
+        pxy = SliceViewerWindowProxy(window)
         out.append(pxy)
         
     # Returh the widget alone if only 1
@@ -160,9 +160,16 @@ def getSliceViewer(source, label=""):
         raise Exception("Please specify only one workspace.")
     else:
         svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().getSliceViewerWindow(workspace_names[0], label)
-        return QtProxyObject(svw)
+        return SliceViewerWindowProxy(svw)
 
 
+#-----------------------------------------------------------------------------
+def closeAllSliceViewers():
+    """
+    Closes all open SliceViewer windows.
+    """
+    import mantidqtpython
+    mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows()
 
 #-----------------------------------------------------------------------------
 # Legacy function
@@ -191,13 +198,14 @@ Layer.Right = qti.GraphOptions.Right
 Layer.Bottom = qti.GraphOptions.Bottom
 Layer.Top = qti.GraphOptions.Top
 
+
 #-----------------------------------------------------------------------------
-#--------------------------- "Private" functions -----------------------
+#--------------------------- Proxy Objects -----------------------------------
 #-----------------------------------------------------------------------------
 
 
 
-#-------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class QtProxyObject(QtCore.QObject):
     """Generic Proxy object for wrapping Qt C++ Qobjects.
     This holds the QObject internally and passes methods to it.
@@ -254,7 +262,64 @@ class QtProxyObject(QtCore.QObject):
 
 
 
-#-------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class SliceViewerWindowProxy(QtProxyObject):
+    """Proxy for a C++ SliceViewerWindow object.
+    
+    It will pass-through method calls that can be applied to the
+    SliceViewer widget contained within.
+    """
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self, toproxy)
+        # List of methods in slicer to pass-through
+        self.slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice"]
+
+    def __getattr__(self, attr):
+        """
+        Reroute a method call to the the stored object
+        """
+        if self._getHeldObject() is None:
+            raise Exception("Error! The SliceViewerWindow has been deleted.")
+        
+        # Pass-through to the contained SliceViewer widget.
+        sv = self._getHeldObject().getSlicer()
+        if attr in self.slicer_methods:
+            return getattr(sv, attr)
+        else:
+            return getattr(self._getHeldObject(), attr)
+
+    def __str__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        if self._getHeldObject() is None:
+            return "None"
+        else:
+            return 'SliceViewerWindow(workspace="%s")' % self._getHeldObject().getSlicer().getWorkspaceName()
+
+    def __repr__(self):
+        """
+        Return a string representation of the proxied object
+        """
+        return `self._getHeldObject()`
+    
+    def __dir__(self):
+        """
+        Returns the list of attributes for this object.
+        Might allow tab-completion to work under ipython
+        """
+        return self.slicer_methods
+
+
+
+
+
+#-----------------------------------------------------------------------------
+#--------------------------- "Private" functions -----------------------------
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
 def __getWorkspaceNames(source):
     """Takes a "source", which could be a WorkspaceGroup, or a list
     of workspaces, or a list of names, and converts

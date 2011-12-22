@@ -1,4 +1,3 @@
-
 def main():
     source(findFile("scripts", "test_helpers.py"))
     source(findFile("scripts", "common_checks.py"))
@@ -13,8 +12,8 @@ def main():
     apply_ptw_settings()
 
     switch_mode("multiSlice")
-    check_mode_buttons(std=True, ms=False, ts=True, sp=True)
     
+    # Num slices: X = 3, Y = 2, Z = 1
     make_slice("xAxisWidget", 0.0)
     make_slice("yAxisWidget", 0.0)
     make_slice("zAxisWidget", 0.0)
@@ -22,12 +21,19 @@ def main():
     make_slice("yAxisWidget", 1.0)
     make_slice("xAxisWidget", -1.0)
     apply_ptw_settings()
+  
+    mouseClick(waitForObject(":splitter.pipelineBrowser_pqPipelineBrowserWidget"), 87, 54, 0, Qt.LeftButton)
     
-    check_slices("xAxisWidget", 3)
-    check_slices("yAxisWidget", 2)
+    # Change extents on dataset
+    mouseClick(waitForObject(":qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget"), 10, 10, 0, Qt.LeftButton)
+    set_ptw_lineedit_property(-0.5, "Min") 
+    set_ptw_lineedit_property(0.5, "Max") 
+    set_ptw_lineedit_property(0.5, "Max", "2") 
+    apply_ptw_settings()
+    
+    # New num slices: X = 1, Y = 1, Z = 1
+    check_slices("xAxisWidget", 1)
+    check_slices("yAxisWidget", 1)
     check_slices("zAxisWidget", 1)
-    
-    mouseDrag(waitForObject(":renderFrame.Viewport_pqQVTKWidget"), 137, 170, -95, 9, 1, Qt.LeftButton)
-    
+        
     quit_program()
-

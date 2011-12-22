@@ -21,15 +21,6 @@ app = Qt.QApplication(sys.argv)
 class SliceViewerPythonInterfaceTest(unittest.TestCase):
     """Test for accessing SliceViewer widgets from MantidPlot
     python interpreter"""
-
-    @classmethod
-    def setUpClass(cls):
-        # Needs python 2.7+ it seems :(
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        pass
     
     def setUp(self):
         """ Set up and create a SliceViewer widget """

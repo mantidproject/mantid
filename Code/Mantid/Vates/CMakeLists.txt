@@ -26,7 +26,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 
   if( ENABLE_CPACK )
     message( STATUS "In Vates CPack" )
-    set( CPACK_PACKAGE_NAME mantid_vates )
+    set( CPACK_PACKAGE_NAME "mantid_vates${CPACK_PACKAGE_SUFFIX}" )
     include( CPackCommon )
     set( CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackVatesConfig.cmake" )
 	
@@ -145,8 +145,8 @@ if( ParaView_FOUND AND USE_PARAVIEW )
     set( CPACK_PACKAGE_EXECUTABLES "VatesSimpleGui" "VatesSimpleGui" )
 
     # Set dependency on Mantid. Need to add ParaView
-    set( CPACK_RPM_PACKAGE_REQUIRES "mantid = ${CPACK_PACKAGE_VERSION}" )
-    set( CPACK_DEBIAN_PACKAGE_DEPENDS "mantid (=${CPACK_PACKAGE_VERSION})" )
+    set( CPACK_RPM_PACKAGE_REQUIRES "mantid${CPACK_PACKAGE_SUFFIX} = ${CPACK_PACKAGE_VERSION}" )
+    set( CPACK_DEBIAN_PACKAGE_DEPENDS "mantid${CPACK_PACKAGE_SUFFIX} (=${CPACK_PACKAGE_VERSION})" )
 
     # Create target for Vates package creation
     add_custom_target( package-vates COMMAND ${CMAKE_CPACK_COMMAND} --config ${CPACK_OUTPUT_CONFIG_FILE} )

@@ -76,6 +76,32 @@ class SliceViewerWindow : QMainWindow
 %TypeHeaderCode
 #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
 %End
+%Docstring
+
+SliceViewerWindow
+=================
+
+    The SliceViewerWindow is a window containing a SliceViewer widget
+    and a LineViewer Widget.
+
+    It allows you to look at 2D slices in a workspace such as a
+    MDEventWorkspace or a MDHistoWorkspace, and then perform 1D line
+    sections.
+
+    You can access the two contained widgets using:
+        getSlicer() (for the SliceViewer)
+        getLiner() (for the LineViewer)
+
+    However, the methods of the SliceViewer are exposed to the
+    SliceViewerWindow, so you do not need to get the SliceViewer
+    widget directly; you can call the methods on the SliceViewerWindow
+    directly. For example:
+
+       svw.setSlicePoint(2, 10.5)
+
+    See the methods for SliceViewer, below.
+
+%End
 
 public:
   SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
@@ -117,6 +143,21 @@ class LineViewer : QWidget
 #include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
 %End
 
+%Docstring
+
+LineViewer
+==========
+
+    The LineViewer is a widget to select 1D line sections out of
+    a workspace such as the MDEventWorkspace or a MDHistoWorkspace.
+
+    It is connected to the SliceViewer.
+
+    It does not currently have any methods exposed to Python.
+
+%End
+
+
 };
 
 
@@ -127,6 +168,16 @@ class SliceViewer : QWidget
 {
 %TypeHeaderCode
 #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
+%End
+
+%Docstring
+
+SliceViewer
+===========
+
+    The SliceViewer is a widget showing a 2D slice of a multi-dimensional
+    workspace such as the MDEventWorkspace or a MDHistoWorkspace.
+
 %End
 
 public:
@@ -470,10 +521,34 @@ class WidgetFactory
 #include <QVector>
 %End
 
+%Docstring
+WidgetFactory
+=============
+
+    The WidgetFactory is a class to create custom widgets.
+    It currently supports creating SliceViewerWindows using:
+        WidgetFactory.Instance().createSliceViewerWindow()
+
+    You can also retrieve a previously-created window with:
+        WidgetFactory.Instance().getSliceViewerWindow()
+    This applies to windows created by Python or via the GUI.
+
+%End
+
+
 public:
   static MantidQt::Factory::WidgetFactory* Instance();
   MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
   MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  void closeAllSliceViewerWindows();
+%Docstring
+void WidgetFactory::closeAllSliceViewerWindows()
+------------------------------------------------
+    Closes every previously-open instance of a SliceViewerWindow.
+   
+%End
+
+
   MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 %Docstring
 MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QString& wsName)
@@ -495,10 +570,11 @@ private:
 %Docstring
 WidgetFactory::WidgetFactory()
 ------------------------------
-    Constructor
+    Private constructor. This is not accessible,
+    use the Instance() method to access the singleton instance
+    instead.
    
 %End
-
 
 };
 
