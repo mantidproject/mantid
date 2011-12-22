@@ -45,7 +45,7 @@ class MdiSubWindowParent_t: public QWidget
 {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f):
+  MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f = 0):
   QWidget(parent,f),
   m_widget(NULL)
   {}
@@ -247,14 +247,25 @@ typedef QList<MdiSubWindow*> MDIWindowList;
 /**
  * Floating wrapper widget for a MdiSubWindow.
  */
-class FloatingWindow: public MdiSubWindowParent_t
+class FloatingWindow: public QMainWindow //MdiSubWindowParent_t
 {
   Q_OBJECT
 public:
   FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
+  MdiSubWindow* mdiSubWindow() {return static_cast<MdiSubWindow*>(widget());}
+  void setMdiSubWindow(MdiSubWindow* sw) {setWidget(sw);}
 protected:
+
+  void setWidget(QWidget* w)
+  {
+    MdiSubWindowParent_t* wrapper = new MdiSubWindowParent_t(this);
+    wrapper->setWidget(w);
+    setCentralWidget(wrapper);
+  }
+  QWidget* widget() {return static_cast<MdiSubWindowParent_t*>(centralWidget())->widget();}
+
   virtual bool event(QEvent * e);
   ApplicationWindow* d_app;
   Qt::WindowFlags m_flags;

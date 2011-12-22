@@ -8368,8 +8368,6 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w)
 
   if (blockWindowActivation) return;
 
-  std::cerr << "Activating " << w->windowTitle().toStdString() << std::endl;
-
   if( d_active_window == w ) return;
 
   //FloatingWindow* fw = getActiveFloating();
@@ -17262,8 +17260,9 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
 
   // create the outer floating window.
   FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
+  fw->setMenuBar(menuBar());
   fw->setWindowTitle(w->windowTitle());
-  fw->setWidget(w);
+  fw->setMdiSubWindow(w);
   fw->resize(sz);
   fw->move(p);
   fw->show();
@@ -17286,7 +17285,7 @@ void ApplicationWindow::goMdi(FloatingWindow* fw)
   if (res == goMdiAction)
   {
     //fw->setWidget(NULL);
-    MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(fw->widget());
+    MdiSubWindow* w = fw->mdiSubWindow();
     if (w)
     {
       addSubWindowToMdiArea(w);
@@ -17339,7 +17338,7 @@ void ApplicationWindow::removeFloatingWindow(FloatingWindow* w)
   if (m_floatingWindows.contains(w))
   {
     m_floatingWindows.remove(w);
-    closeWindow(static_cast<MdiSubWindow*>(w->widget()));
+    closeWindow(w->mdiSubWindow());
   }
 }
 
@@ -17474,9 +17473,10 @@ void ApplicationWindow::activateNewWindow()
   {
     foreach(FloatingWindow* w, m_floatingWindows)
     {
-      if (w->widget() != static_cast<QWidget*>(current))
+      MdiSubWindow* sw = w->mdiSubWindow();
+      if (sw != current)
       {
-        d_active_window = dynamic_cast<MdiSubWindow*>(w->widget());
+        d_active_window = sw;
         if (d_active_window) break;
       }
     }

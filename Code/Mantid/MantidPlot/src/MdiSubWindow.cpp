@@ -368,7 +368,8 @@ QMdiSubWindow* MdiSubWindow::getDockedWindow() const
  * Constructor.
  */
 FloatingWindow::FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f):
-MdiSubWindowParent_t(appWindow,f | Qt::Window),
+QMainWindow(appWindow,f),
+//MdiSubWindowParent_t(appWindow,f | Qt::Window),
 d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);
@@ -413,7 +414,8 @@ bool FloatingWindow::event(QEvent * e)
   {
     d_app->removeFloatingWindow(this);
   }
-  return MdiSubWindowParent_t::event(e);
+  return QMainWindow::event(e);
+  //return MdiSubWindowParent_t::event(e);
 }
 
 void FloatingWindow::setStaysOnTopFlag()
