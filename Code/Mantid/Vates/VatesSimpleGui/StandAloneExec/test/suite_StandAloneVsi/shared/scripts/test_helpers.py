@@ -34,7 +34,7 @@ def quit_program():
     activateItem(waitForObjectItem(":File_QMenu", "Exit"))
     
 def switch_mode(mode):
-    clickButton(waitForObject(":%sButton_QPushButton" % mode))
+    clickButton(":%sButton_QPushButton" % mode)
 
 def set_ptw_lineedit_property(value, property, ext=""):
     if ext != "":
@@ -48,7 +48,7 @@ def set_ptw_lineedit_property(value, property, ext=""):
     lineedit.text = str(value)
 
 def apply_ptw_settings():
-    clickButton(waitForObject(":objectInspector.Apply_QPushButton"))
+    clickButton(":objectInspector.Apply_QPushButton")
 
 def make_slice(axisScaleName, coordinate):
     axisScale = waitForObject(":splitter_2.%s_Mantid::Vates::SimpleGui::AxisInteractor" % axisScaleName)

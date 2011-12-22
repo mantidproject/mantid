@@ -4,7 +4,7 @@ def main():
     startApplication("VatesSimpleGui")
     open_file("MDEW_4D.nxs")
 
-    clickButton(waitForObject(":splitter_2.Rebin_QPushButton"))
+    clickButton(":splitter_2.Rebin_QPushButton")
     set_ptw_lineedit_property(100, "Bins")
     set_ptw_lineedit_property(100, "Bins", "2")
     set_ptw_lineedit_property(100, "Bins", "3")
