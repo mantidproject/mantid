@@ -39,15 +39,8 @@ class QCloseEvent;
 class QString;
 class Folder;
 class ApplicationWindow;
+class FloatingWindow;
 
-// Experimental, Janik Zikovsky, Nov 17 2011. Floatable MDI windows
-#define MDISUBWINDOW_FLOATABLE 0
-//#undef MDISUBWINDOW_FLOATABLE
-//#ifndef MDISUBWINDOW_FLOATABLE
-/// Define the parent class of MdiSubWindow to make it easier to change
-  //typedef QMdiSubWindow MdiSubWindowParent_t;
-//#else
-  //typedef QFrame MdiSubWindowParent_t;
 class MdiSubWindowParent_t: public QWidget
 {
   Q_OBJECT
@@ -72,7 +65,6 @@ public:
 protected:
   QWidget* m_widget;
 };
-//#endif
 
 /**
  * \brief Base class of all MDI client windows.
@@ -174,7 +166,8 @@ public:
 	//! Initializes the pointer to the parent folder of the window
 	void setFolder(Folder* f){d_folder = f;};
 
-	
+	FloatingWindow* getFloatingWindow() const;
+  QMdiSubWindow* getDockedWindow() const;
 
 	void setNormal();
 	void setMinimized();

@@ -349,6 +349,18 @@ void MdiSubWindow::goMdi()
   //d_app->goMdi(this);
 }
 
+FloatingWindow* MdiSubWindow::getFloatingWindow() const
+{
+  if (!parent()) return NULL;
+  return dynamic_cast<FloatingWindow*>(parent());
+}
+
+QMdiSubWindow* MdiSubWindow::getDockedWindow() const
+{
+  if (!parent()) return NULL;
+  return dynamic_cast<QMdiSubWindow*>(parent());
+}
+
 
 /*----------- FloatingWindow ---------*/
 
@@ -425,3 +437,4 @@ void FloatingWindow::removeStaysOnTopFlag()
     show();
   }
 }
+

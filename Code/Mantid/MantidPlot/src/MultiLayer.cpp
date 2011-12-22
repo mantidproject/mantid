@@ -158,7 +158,6 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 
 MultiLayer::~MultiLayer()
 {
-  std::cerr << "MultiLayer deleted\n";
 }
 
 Graph *MultiLayer::layer(int num)
@@ -311,8 +310,8 @@ void MultiLayer::resizeLayers (QResizeEvent *re)
 	if (d_is_waterfall_plot)
 		updateWaterfalls();
 
-	emit modifiedPlot();
-	repaint();
+	//emit modifiedPlot();
+	//repaint();
 	QApplication::restoreOverrideCursor();
 }
 
@@ -981,8 +980,11 @@ void MultiLayer::connectLayer(Graph *g)
 
 bool MultiLayer::eventFilter(QObject *object, QEvent *e)
 {
-	if(e->type() == QEvent::Resize && object == (QObject *)canvas)
-		resizeLayers((QResizeEvent *)e);
+  if(e->type() == QEvent::Resize && object == (QObject *)canvas)
+  {
+    resizeLayers((QResizeEvent *)e);
+    return true;
+  }
   else if (e->type() == QEvent::MouseButtonPress )
   {
     if( object == (QObject *)canvas)
@@ -1020,7 +1022,7 @@ bool MultiLayer::eventFilter(QObject *object, QEvent *e)
     {
       removeLayerSelectionFrame();
     }
-}
+  }
 
 	return MdiSubWindow::eventFilter(object, e);
 }

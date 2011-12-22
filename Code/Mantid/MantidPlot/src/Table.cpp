@@ -114,6 +114,8 @@ void Table::init(int rows, int cols)
   d_table->verticalHeader()->setResizeEnabled(false);
   d_table->verticalHeader()->installEventFilter(this);
 
+  d_table->installEventFilter(this);
+
   setWidget(d_table);
 
   QShortcut *accelTab = new QShortcut(QKeySequence(Qt::Key_Tab), this);
@@ -2664,6 +2666,7 @@ bool Table::eventFilter(QObject *object, QEvent *e)
       emit showContextMenu(false);
     else if (d_table->numCols() > 0 && d_table->numRows() > 0)
       emit showContextMenu(true);
+    return true;
   }
 
   return MdiSubWindow::eventFilter(object, e);

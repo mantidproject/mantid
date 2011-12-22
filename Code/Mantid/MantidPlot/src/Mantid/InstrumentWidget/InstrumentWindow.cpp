@@ -60,7 +60,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   setFocusPolicy(Qt::StrongFocus);
-  setFocus();
   QWidget *frame = new QWidget();
   QVBoxLayout* mainLayout = new QVBoxLayout;
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -743,8 +742,9 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
 /** 
  * Called just before a show event
  */
-void InstrumentWindow::showEvent(QShowEvent*)
+void InstrumentWindow::showEvent(QShowEvent* e)
 {
+  MdiSubWindow::showEvent(e);
   //updateWindow();
 }
 
@@ -1154,7 +1154,7 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
     m_instrumentDisplayContextMenuOn = false;
     return true;
   }
-  return false;
+  return MdiSubWindow::eventFilter(obj,ev);
 }
 
 /**

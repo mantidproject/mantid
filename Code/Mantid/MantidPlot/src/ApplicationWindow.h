@@ -1021,6 +1021,9 @@ public slots:
   /// slot to execute download datafiles algorithm - called  from ICat interface
   void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
+  /// Activate a subwindow (docked or floating) other than current active one
+  void activateNewWindow();
+
   void mdiWindowActivated(MdiSubWindow* w);
   void goFloat(MdiSubWindow* w);
   void goMdi(FloatingWindow* w);

@@ -427,13 +427,6 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
   }
   if ( !w ) return 0;
 
-  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
-
-  //appWindow()->d_workspace->addSubWindow(w);
-  //if( makeVisible ) w->showNormal();
-  //else w->showMinimized();
   appWindow()->addSubWindowToMdiArea(w,makeVisible);
   return w;
 }
@@ -1808,13 +1801,9 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   insWin->selectTab(tab);
 
-  //appWindow()->d_workspace->addSubWindow(insWin);
   appWindow()->addSubWindowToMdiArea(insWin);
   appWindow()->addListViewItem(insWin);
 
-  connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-  connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-  connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
       SLOT(plotSpectraList(const QString&,const std::set<int>&)));
   connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
