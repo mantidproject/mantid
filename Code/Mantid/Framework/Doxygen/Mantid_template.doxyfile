@@ -79,36 +79,65 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 
-INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms \
-        @CMAKE_CURRENT_SOURCE_DIR@/../API \
-        @CMAKE_CURRENT_SOURCE_DIR@/../Crystal \
-        @CMAKE_CURRENT_SOURCE_DIR@/../CurveFitting \
-        @CMAKE_CURRENT_SOURCE_DIR@/../DataHandling \
-        @CMAKE_CURRENT_SOURCE_DIR@/../DataObjects \
-        @CMAKE_CURRENT_SOURCE_DIR@/../Geometry \
-        @CMAKE_CURRENT_SOURCE_DIR@/../ICat \
-        @CMAKE_CURRENT_SOURCE_DIR@/../Kernel \
+INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../API/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../API/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Crystal/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Crystal/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../CurveFitting/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../CurveFitting/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../DataHandling/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../DataHandling/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../DataObjects/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../DataObjects/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Geometry/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Geometry/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../ICat/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../MatlabAPI/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../MDAlgorithms \
-        @CMAKE_CURRENT_SOURCE_DIR@/../MDEvents \
-        @CMAKE_CURRENT_SOURCE_DIR@/../Nexus \
-        @CMAKE_CURRENT_SOURCE_DIR@/../PythonAPI \
+        @CMAKE_CURRENT_SOURCE_DIR@/../MDAlgorithms/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../MDAlgorithms/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../MDEvents/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../MDEvents/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../PythonAPI/inc/MantidPythonAPI \
+        @CMAKE_CURRENT_SOURCE_DIR@/../PythonAPI/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../PythonInterface/inc/MantidPythonInterface/kernel \
         @CMAKE_CURRENT_SOURCE_DIR@/../PythonInterface/inc/MantidPythonInterface/api \
         @CMAKE_CURRENT_SOURCE_DIR@/../PythonInterface/mantid/kernel/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../PythonInterface/mantid/geometry/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../PythonInterface/mantid/api/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../TestHelpers \
-        @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/API \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/CustomDialogs \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/CustomInterfaces \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/DesignerPlugins \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/Factory \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/MantidWidgets \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SliceViewer \
-	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates
+        @CMAKE_CURRENT_SOURCE_DIR@/../TestHelpers/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../TestHelpers/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms/src \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/analysis \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/Mantid \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/API/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/API/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/CustomDialogs/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/CustomDialogs/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/CustomInterfaces/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/CustomInterfaces/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/DesignerPlugins/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/DesignerPlugins/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/Factory/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/Factory/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/MantidWidgets/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/MantidWidgets/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SliceViewer/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SliceViewer/src \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/ParaviewPlugins \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesAPI/inc \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesAPI/src \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/QtWidgets \
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/StandAloneExec/inc /
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/StandAloneExec/src /
+	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/VatesSimpleGui/ViewWidgets
 
 
 INPUT_ENCODING         = UTF-8
@@ -231,7 +260,7 @@ PERLMOD_MAKEVAR_PREFIX =
 # Configuration options related to the qtcreator output
 #---------------------------------------------------------------------------
 GENERATE_QHP           = @GENERATE_QHELP@
-QCH_FILE               = "mantid.qch"
+QCH_FILE               = "@CMAKE_CURRENT_BINARY_DIR@/../../doxygen/mantid.qch"
 QHP_NAMESPACE          = "mantidproject.org"
 QHP_VIRTUAL_FOLDER     = "mantidQtHelp"
 QHG_LOCATION           = @QHELP_EXECUTABLE@
