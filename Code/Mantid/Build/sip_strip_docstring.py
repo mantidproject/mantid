@@ -4,6 +4,7 @@ from a .sip file.
 For use with old version of sip (<4.10) e.g. RHEL5 build.
 
 This will not be needed when RHEL5 is no longer supported"""
+
 import os
 import sys
 from optparse import OptionParser
@@ -13,19 +14,28 @@ from optparse import OptionParser
 #----------------------------------------------------------
 def process_sip(filename):
     """ Reads an input .sip file and removes anything 
-    in a %Docstring block"""
+    in a %Docstring block.
+    
+    @param filename :: .sip file to read
+    @return outlines :: processed sip file
+    @return wiki :: docstring lines only
+    """
     
     root = os.path.split(os.path.abspath(filename))[0] 
     # Read and split into a buncha lines
     lines = open(filename, 'r').read().split('\n')
     in_docstring = False
     outlines = []
+    wikilines = []
     for i in range(len(lines)):
         line = lines[i].strip().lower()
         if in_docstring:
             # Stop at the %end directive
             if line.startswith("%end"):
                 in_docstring = False
+            else:
+                # Save the docstring
+                wikilines.append(" " + lines[i])
         else:
             # Not in a docstring.
             if line.startswith("%docstring"):
@@ -35,7 +45,7 @@ def process_sip(filename):
                 outlines.append(lines[i])
 
     # Give back the generated lines
-    return outlines
+    return (outlines, wikilines)
     
 #----------------------------------------------------------
 if __name__=="__main__":
@@ -50,6 +60,11 @@ This will not be needed when RHEL5 is no longer supported
     
     parser.add_option('-o', metavar='OUTPUTFILE', dest="outputfile",
                         help='The name of the output file')
+    
+    parser.add_option('-w', metavar='WIKIFILE', dest="wikifile",
+                        help='The name of the file containing wiki text for documenting')
+    
+    
 
     (options, args) = parser.parse_args()
     
@@ -59,11 +74,17 @@ This will not be needed when RHEL5 is no longer supported
         raise Exception("Must specify an output file with -o !")
     
     print "---- Stripping docstrings from %s ---- " % options.sipfile
-    out = process_sip(options.sipfile)
+    (out, wiki) = process_sip(options.sipfile)
     
     print "---- Writing to %s ---- " % options.outputfile
     f = open(options.outputfile, 'w')
     f.write('\n'.join(out))
     f.close()
+
+    if not options.wikifile is None:
+        print "---- Writing wiki text to %s ---- " % options.wikifile
+        f = open(options.wikifile, 'w')
+        f.write('\n'.join(wiki))
+        f.close()
 
     

@@ -3,6 +3,6 @@
 echo ""
 python ../Build/doxygen_to_sip.py -i mantidqt.in.sip -o mantidqt.sip
 echo ""
-python ../Build/sip_strip_docstring.py -i mantidqt.sip -o mantidqt.rhel5.sip
+python ../Build/sip_strip_docstring.py -i mantidqt.sip -o mantidqt.rhel5.sip -w mantidqt_wiki.txt
 echo ""
 

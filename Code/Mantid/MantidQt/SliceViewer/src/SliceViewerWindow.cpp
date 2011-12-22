@@ -37,6 +37,9 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
   this->setWindowIcon(icon);
 
+  // Avoid memory leaks by deleting when closing
+  this->setAttribute(Qt::WA_DeleteOnClose);
+
   // Get the workspace
   m_wsName = wsName.toStdString();
   m_ws = boost::dynamic_pointer_cast<IMDWorkspace>( AnalysisDataService::Instance().retrieve(m_wsName) );

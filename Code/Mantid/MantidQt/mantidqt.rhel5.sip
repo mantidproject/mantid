@@ -97,6 +97,8 @@ class LineViewer : QWidget
 #include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
 %End
 
+
+
 };
 
 
@@ -108,6 +110,7 @@ class SliceViewer : QWidget
 %TypeHeaderCode
 #include "SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
 %End
+
 
 public:
   void setWorkspace(const QString & wsName)   throw (std::runtime_error);
@@ -198,16 +201,20 @@ class WidgetFactory
 #include <QVector>
 %End
 
+
+
 public:
   static MantidQt::Factory::WidgetFactory* Instance();
   MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
   MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  void closeAllSliceViewerWindows();
+
+
   MantidQt::SliceViewer::SliceViewer* createSliceViewer(const QString& wsName);
 
 
 private:
   WidgetFactory();
-
 
 };
 

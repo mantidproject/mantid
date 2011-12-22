@@ -14,7 +14,9 @@ namespace Factory
   WidgetFactory* WidgetFactory::m_pInstance = NULL;
 
   //----------------------------------------------------------------------------------------------
-  /** Constructor
+  /** Private constructor. This is not accessible,
+   * use the Instance() method to access the singleton instance
+   * instead.
    */
   WidgetFactory::WidgetFactory()
   {
@@ -93,18 +95,19 @@ namespace Factory
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Returns every previously-open instance of a SliceViewerWindow.
+  /** Closes every previously-open instance of a SliceViewerWindow.
    */
-  void WidgetFactory::getAllSliceViewerWindows(std::vector<MantidQt::SliceViewer::SliceViewerWindow*>& output)
+  void WidgetFactory::closeAllSliceViewerWindows()
   {
-    output.clear();
     std::vector<QPointer<MantidQt::SliceViewer::SliceViewerWindow> >::iterator it;
     for (it = m_windows.begin(); it != m_windows.end(); it++)
     {
       QPointer<MantidQt::SliceViewer::SliceViewerWindow> window = *it;
       if (window)
-        output.push_back(window);
+        // Close with delete
+        window->close(true);
     }
+    m_windows.clear();
   }
 
   //----------------------------------------------------------------------------------------------
