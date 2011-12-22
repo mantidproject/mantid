@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 using namespace Mantid::Kernel;
 
@@ -258,6 +259,11 @@ namespace Mantid
         res.push_back(*h);
       }
 
+      const DeprecatedAlgorithm * depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
+      if (depo != NULL)
+      {
+        res.push_back("Deprecated");
+      }
       return res;
     }
 
