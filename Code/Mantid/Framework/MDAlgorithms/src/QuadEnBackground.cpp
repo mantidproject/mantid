@@ -38,15 +38,12 @@ namespace Mantid
             // "events" in the more general sense.
             for (size_t i=0; i < it.getNumEvents(); i++)
             {
-              // assuming 4th coordinate = energy
+              // taking 4th coordinate = energy
               eps = it.getInnerPosition(i, 3);
               bgSignal += constant+eps*(linear+eps*quadratic);
             }
 
-//            std::cout << "f: "<<constant<<" "<<linear << " " << quadratic << " " << eps << " " << bgSignal/it.getNumEvents()
-//                << " " << it.getNormalizedSignal() << "\n";
-
-            // return normalized background
+            // return normalized background - normalized by number of events NOT by box volume.
             return bgSignal/static_cast<double>(it.getNumEvents());
         }
     }

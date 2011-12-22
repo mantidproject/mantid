@@ -62,6 +62,10 @@ namespace MDEvents
 
     virtual signal_t getNormalizedError() const;
 
+    virtual signal_t getSignal() const;
+
+    virtual signal_t getError() const;
+
     virtual coord_t * getVertexesArray(size_t & numVertices) const;
 
     virtual Mantid::Kernel::VMD getCenter() const;

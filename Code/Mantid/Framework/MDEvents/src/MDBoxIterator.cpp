@@ -171,6 +171,18 @@ namespace MDEvents
     return m_current->getError() * m_current->getInverseVolume();
   }
 
+  /// Returns the signal for this box
+  TMDE(signal_t MDBoxIterator)::getSignal() const
+  {
+    return m_current->getSignal();
+  }
+
+  /// Returns the error for this box
+  TMDE(signal_t MDBoxIterator)::getError() const
+  {
+    return m_current->getError();
+  }
+
   /// Return a list of vertexes defining the volume pointed to
   TMDE(coord_t * MDBoxIterator)::getVertexesArray(size_t & numVertices) const
   {
