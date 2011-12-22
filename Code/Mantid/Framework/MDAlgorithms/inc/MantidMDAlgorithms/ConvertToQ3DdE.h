@@ -10,6 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
 
 namespace Mantid
 {
@@ -47,23 +48,7 @@ namespace MDAlgorithms
       to avoid repetative calculations, and (possibly) to write these data as part of the physical compression scheme
       in a very common situation when the physical instrument does not change in all runs, contributed into MD workspace
    */
-  struct preprocessed_detectors{
-    double L1;
-    Kernel::V3D   minDetPosition;    // minimal and
-    Kernel::V3D   maxDetPosition;    // maxinal position for the detectors
-    std::vector<Kernel::V3D>  det_dir; // unit vector pointing from the sample to the detector;
-    std::vector<double>       L2;
-    std::vector<double>       TwoTheta;
-    std::vector<int32_t>      det_id;   // the detector ID;
-    std::vector<size_t>       detIDMap;
-    //
-    bool is_defined(void)const{return det_dir.size()>0;}
-    bool is_defined(size_t new_size)const{return det_dir.size()==new_size;}
-    double  *  pL2(){return &L2[0];}
-    double  *  pTwoTheta(){return &TwoTheta[0];}
-    size_t  *  iDetIDMap(){return &detIDMap[0];}
-    Kernel::V3D  * pDetDir(){return &det_dir[0];}
-  };
+
   class DLLExport ConvertToQ3DdE  : public API::Algorithm
   {
   public:
@@ -77,11 +62,7 @@ namespace MDAlgorithms
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Inelastic;MDAlgorithms";}
 
-  /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
-      and places the resutls into static cash to be used in subsequent calls to this algorithm */
-    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);
-
-  /** function provides the linear representation (9 elements) for the transformation matrix FROM: TO:  */
+   /** function provides the linear representation (9 elements) for the transformation matrix FROM: TO:  */
    std::vector<double> get_transf_matrix(API::MatrixWorkspace_sptr inWS2D,const Kernel::V3D &u, const Kernel::V3D &v)const;
   private:
     /// Sets documentation strings for this algorithm

@@ -15,7 +15,7 @@
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidMDAlgorithms/ConvertToQ3DdE.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsDetInfo.h"
 
 
 namespace Mantid
@@ -65,7 +65,7 @@ namespace MDAlgorithms
        Q3D      //< calculate 3 component of Q in fractional coordinate system.
    };
   /**  known analysis modes, arranged according to emodes 
-    *  It is importent to assign enums proper numbers, as directc correspondence between enums and their emodes 
+    *  It is importent to assign enums proper numbers, as direct correspondence between enums and their emodes 
     *  used by external units conversion algorithms and this algorithm, so the agreement should be the stame     */
   enum AnalMode{  
       Elastic = 0,  //< int emode = 0; Elastic analysis
@@ -128,9 +128,6 @@ namespace MDAlgorithms
    Mantid::DataObjects::Workspace2D_sptr inWS2D;
    // the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws?);
     static preprocessed_detectors det_loc;  
- /** the function, does preliminary calculations of the detectors positions to convert results into k-dE space ;
-      and places the resutls into static cash to be used in subsequent calls to this algorithm */
-    static void process_detectors_positions(const DataObjects::Workspace2D_const_sptr inWS2D);  
     /// minimal and maximal values for the workspace dimensions:
     std::vector<double>      dim_min,dim_max;
     /// the names for the target workspace dimensions and properties of input MD workspace

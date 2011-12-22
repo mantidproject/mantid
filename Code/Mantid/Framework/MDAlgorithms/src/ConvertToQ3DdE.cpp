@@ -97,57 +97,6 @@ boost::shared_ptr<MDEvents::MDEventWorkspace<MDE,4> > create_empty4DEventWS(cons
       return ws;
 }
 
-/// helper function to preprocess the detectors directions
-void 
-ConvertToQ3DdE::process_detectors_positions(const DataObjects::Workspace2D_const_sptr inputWS)
-{
-
-    const size_t nHist = inputWS->getNumberHistograms();
-
-    det_loc.det_dir.resize(nHist);
-    det_loc.det_id.resize(nHist);
-    det_loc.detIDMap.resize(nHist);
-     // Loop over the spectra
-   const Geometry::ISpectraDetectorMap & spm = inputWS->spectraMap();
-   size_t ic(0);
-   for (size_t i = 0; i < nHist; i++){
-
-     Geometry::IDetector_const_sptr spDet;
-     try{
-        size_t detID = spm.ndet(specid_t(i));
-        spDet= inputWS->getDetector(detID);
-     }catch(Kernel::Exception::NotFoundError &){
-        continue;
-     }
- 
-    // Check that we aren't dealing with monitor...
-    if (spDet->isMonitor())continue;   
-
-     det_loc.det_id[ic]  = spDet->getID();
-     det_loc.detIDMap[ic]= i;
-
-    // dist     =  spDet->getDistance(*sample);
-     double polar    =  inputWS->detectorTwoTheta(spDet);
-     double azim     =  spDet->getPhi();    
-
-     double sPhi=sin(polar);
-     double ez = cos(polar);
-     double ex = sPhi*cos(azim);
-     double ey = sPhi*sin(azim);
- 
-     det_loc.det_dir[ic].setX(ex);
-     det_loc.det_dir[ic].setY(ey);
-     det_loc.det_dir[ic].setZ(ez);
-
-     ic++;
-   }
-   // 
-   if(ic<nHist){
-       det_loc.det_dir.resize(ic);
-       det_loc.det_id.resize(ic);
-       det_loc.detIDMap.resize(ic);
-   }
-}
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -308,8 +257,7 @@ void ConvertToQ3DdE::exec(){
     Progress progress(this,0.0,1.0,numSpec);
    // Try to check if one should use preprocessed detector positions or try to calculate the new one
     bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-    if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))process_detectors_positions(inWS2D);
- 
+    if(!(reuse_preprocecced_detectors&&det_loc.is_defined()))processDetectorsPositions(inWS2D,det_loc,convert_log); 
 
     // allocate the events buffer;
    //   std::vector<MDE> out_events;

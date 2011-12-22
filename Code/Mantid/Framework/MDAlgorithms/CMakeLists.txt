@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/XorMD.cpp
+	src/processDetectorsPositions.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -49,11 +50,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
-	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsMethods.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
-	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
@@ -80,6 +76,13 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/XorMD.h
+	inc/MantidMDAlgorithms/ConvertToQ3DdE.h
+	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsMethods.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsCoordTransf.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+    inc/MantidMDAlgorithms/ConvertToMDEventsDetInfo.h 	
+	
 )
 
 # Test files. Other source files required.
