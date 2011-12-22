@@ -89,6 +89,8 @@ namespace Mantid
       API::MatrixWorkspace_const_sptr m_inputWorkspace;
       /// Pointer to the local workspace, cast to EventWorkspace
       DataObjects::EventWorkspace_const_sptr m_eventWorkspace;
+      /// Proportion of progress time expected to write initial part
+      double m_timeProgInit;
 
       /// Progress bar
       API::Progress * prog;
