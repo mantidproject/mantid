@@ -76,7 +76,12 @@ def doxygen_to_docstring(doxygen, method):
 def process_sip(filename):
     """ Reads an input .sip file and finds methods from
     classes. Retrieves doxygen and adds them as
-    docstrings """
+    docstrings 
+    @param filename :: input .sip
+    @return outlines :: processed sip file, as a list of strings
+    @return dirtext :: text for use in the __dir__() method
+            (basically a list of the method names found).
+    """
     
     root = os.path.split(os.path.abspath(filename))[0] 
     # Read and split into a buncha lines
@@ -85,6 +90,8 @@ def process_sip(filename):
     classname = ''
     classcpp = ''
     outlines = []
+    dirtext = ""
+    
     for i in range(len(lines)):
         # Copy to output
         outlines.append(lines[i])
@@ -100,6 +107,8 @@ def process_sip(filename):
                 print "WARNING: Could not find cpp file for class %s" % classname
             else:
                 print "Found class '%s' .cpp file " % classname
+                
+            dirtext += "\n\n__dir__() for %s\nreturn [" % classname
             
             
         if classname != "":
@@ -110,9 +119,17 @@ def process_sip(filename):
                 if n > 0:
                     method = line[0:n+1]
                     n = method.find(' ')
+                    
+                    # Find the name of the method (for the __dir__ method)
+                    methodname = method[n+1:]
+                    n2 = methodname.find('(')
+                    methodname = methodname[0:n2]
+                    dirtext += '"%s", ' % methodname
+                    
                     # Make the string like this:
                     # "void ClassName::method(arguments)" 
                     method = method[0:n+1] + classname + "::" + method[n+1:]
+                    
                     # Now extract the doxygen
                     doxygen = grab_doxygen(classcpp, method)
                     # Convert to a docstring
@@ -120,7 +137,7 @@ def process_sip(filename):
                     # And add to the output
                     outlines += docstring
     # Give back the generated lines
-    return outlines
+    return (outlines, dirtext)
     
     
 #----------------------------------------------------------
@@ -139,6 +156,9 @@ REQUIREMENTS:
     
     parser.add_option('-o', metavar='OUTPUTFILE', dest="outputfile",
                         help='The name of the output file')
+    
+    parser.add_option('-d', metavar='DIRFILE', dest="dirfile",
+                        help='The name of the file containing __dir__ methods')
 
     (options, args) = parser.parse_args()
     
@@ -148,12 +168,18 @@ REQUIREMENTS:
         raise Exception("Must specify an output file with -o !")
     
     print "---- Reading from %s ---- " % options.sipfile
-    out = process_sip(options.sipfile)
+    (out, dirtext) = process_sip(options.sipfile)
     
     if not (options.outputfile is None):
         print "---- Writing to %s ---- " % options.outputfile
         f = open(options.outputfile, 'w')
         f.write('\n'.join(out))
+        f.close()
+        
+    if not (options.dirfile is None):
+        print "---- Writing to %s ---- " % options.dirfile
+        f = open(options.dirfile, 'w')
+        f.write(dirtext)
         f.close()
 
     

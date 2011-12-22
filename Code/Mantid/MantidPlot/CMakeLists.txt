@@ -805,6 +805,20 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 
 ###########################################################################
+# MantidPlot Python Unit Tests
+###########################################################################
+
+# List of .py files than must be run WITHIN MantidPlot.
+set ( MANTIDPLOT_TEST_PY_FILES 
+	MantidPlotSliceViewerTest.py
+)
+
+# Make a ctest target for each file
+foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
+	# ADD_TEST( ${PYFILE} ${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} ) 
+endforeach ()
+
+###########################################################################
 # Installation settings
 ###########################################################################
 

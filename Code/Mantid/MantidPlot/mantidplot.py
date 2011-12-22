@@ -163,6 +163,13 @@ def getSliceViewer(source, label=""):
         return SliceViewerWindowProxy(svw)
 
 
+#-----------------------------------------------------------------------------
+def closeAllSliceViewers():
+    """
+    Closes all open SliceViewer windows.
+    """
+    import mantidqtpython
+    mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows()
 
 #-----------------------------------------------------------------------------
 # Legacy function
@@ -264,6 +271,8 @@ class SliceViewerWindowProxy(QtProxyObject):
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self, toproxy)
+        # List of methods in slicer to pass-through
+        self.slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice"]
 
     def __getattr__(self, attr):
         """
@@ -274,7 +283,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         
         # Pass-through to the contained SliceViewer widget.
         sv = self._getHeldObject().getSlicer()
-        if hasattr(sv, attr):
+        if attr in self.slicer_methods:
             return getattr(sv, attr)
         else:
             return getattr(self._getHeldObject(), attr)
@@ -283,13 +292,23 @@ class SliceViewerWindowProxy(QtProxyObject):
         """
         Return a string representation of the proxied object
         """
-        return str(self._getHeldObject())
+        if self._getHeldObject() is None:
+            return "None"
+        else:
+            return 'SliceViewerWindow(workspace="%s")' % self._getHeldObject().getSlicer().getWorkspaceName()
 
     def __repr__(self):
         """
         Return a string representation of the proxied object
         """
         return `self._getHeldObject()`
+    
+    def __dir__(self):
+        """
+        Returns the list of attributes for this object.
+        Might allow tab-completion to work under ipython
+        """
+        return self.slicer_methods
 
 
 
