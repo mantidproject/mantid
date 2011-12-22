@@ -30,7 +30,8 @@ namespace SliceViewer
  */
 SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f)
  : QMainWindow(NULL, f),
-   WorkspaceObserver()
+   WorkspaceObserver(),
+   m_lastLinerWidth(0)
 {
   // Set the window icon
   QIcon icon;
@@ -211,11 +212,13 @@ void SliceViewerWindow::showLineViewer(bool visible)
     if (m_liner->width() > 0)
       m_lastLinerWidth = m_liner->width();
     m_liner->setVisible(false);
-    QApplication::processEvents();
-    this->resize(w, this->height());
+
+    // Save this value for resizing with the single shot timer
+    m_desiredWidth = w;
     // This call is necessary to allow resizing smaller than would be allowed if both left/right widgets were visible.
-    QApplication::processEvents();
-    this->resize(w, this->height());
+    // This needs 2 calls ro resizeWindow() to really work!
+    QTimer::singleShot(0, this, SLOT(resizeWindow()));
+    QTimer::singleShot(0, this, SLOT(resizeWindow()));
   }
   else
   {
@@ -226,6 +229,14 @@ void SliceViewerWindow::showLineViewer(bool visible)
 
 }
 
+
+//------------------------------------------------------------------------------------------------
+/** Special slot called to resize the window
+ * after some events have been processed. */
+void SliceViewerWindow::resizeWindow()
+{
+  this->resize(m_desiredWidth, this->height());
+}
 
 //------------------------------------------------------------------------------------------------
 /** Using the positions from the LineOverlay, set the values in the LineViewer,

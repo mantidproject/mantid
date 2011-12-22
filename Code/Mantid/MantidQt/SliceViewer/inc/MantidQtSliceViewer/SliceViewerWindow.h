@@ -54,6 +54,7 @@ protected slots:
   void showLineViewer(bool);
   void changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
   void changePlanarWidth(double);
+  void resizeWindow();
 
 protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
@@ -79,6 +80,8 @@ protected:
   /// Width of the LineViewer last time it was open
   int m_lastLinerWidth;
 
+  /// Window width
+  int m_desiredWidth;
 };
 
 

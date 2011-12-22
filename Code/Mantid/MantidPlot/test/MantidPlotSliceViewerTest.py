@@ -15,6 +15,7 @@ FakeMDEventData("mdw",  UniformParams="1e5")
 FakeMDEventData("mdw",  PeakParams="1e4, 2,4,6, 1.5")
 BinToMDHistoWorkspace("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
 
+
 class MantidPlotSliceViewerTest(unittest.TestCase):
     
 	def setUp(self):
