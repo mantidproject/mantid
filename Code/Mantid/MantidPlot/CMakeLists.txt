@@ -813,6 +813,10 @@ set ( MANTIDPLOT_TEST_PY_FILES
 	MantidPlotSliceViewerTest.py
 )
 
+# To disable the test on RHEL5 ...
+message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
+message (STATUS "Your CMAKE_SYSTEM_NAME string is '${CMAKE_SYSTEM_NAME}'")
+
 # Make a ctest target for each file
 foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
  	# Add the test. Name of test = name of the file
