@@ -6,12 +6,10 @@ more tests of specific functions. Might be merged together with
 this in the future?
 """
 import sys
-import sys
 import os
 import unittest
 import time
 from PyQt4 import Qt
-
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
 FakeMDEventData("mdw",  UniformParams="1e5")
@@ -83,4 +81,14 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 # Custom code to create and run this single test suite
 suite = unittest.TestSuite()
 suite.addTest( unittest.makeSuite(MantidPlotSliceViewerTest) )
-unittest.TextTestRunner().run(suite)
+# Get the XML runner if the environment variable was set
+src = os.getenv('MANTID_SOURCE')
+if src is None:
+    runner = unittest.TextTestRunner()
+else:
+    sys.path.append( os.path.join(src, "TestingTools/unittest-xml-reporting/src") )
+    import xmlrunner
+    runner = xmlrunner.XMLTestRunner(output='Testing')
+#Run using either runner
+runner.run(suite)
+
