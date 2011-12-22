@@ -36,7 +36,10 @@ def quit_program():
 def switch_mode(mode):
     clickButton(waitForObject(":%sButton_QPushButton" % mode))
 
-def set_ptw_lineedit_property(object, value):
+def set_ptw_lineedit_property(value, property, ext=""):
+    if ext != "":
+        ext = "_" + ext
+    object = ":ScrollArea.%s_QLineEdit%s" % (property, ext)
     lineedit = waitForObject(object)
     N = lineedit.text.length()
     for i in range(N):
