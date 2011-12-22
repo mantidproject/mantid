@@ -47,7 +47,7 @@ int ChangeLogTime::version() const
 /// Algorithm's category for identification
 const std::string ChangeLogTime::category() const
 {
-  return "General";
+  return "DataHandling\\Logs";
 }
 
 void ChangeLogTime::initDocs()

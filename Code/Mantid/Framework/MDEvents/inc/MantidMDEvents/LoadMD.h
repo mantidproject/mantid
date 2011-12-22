@@ -49,7 +49,7 @@ namespace MDEvents
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDEvents";}
+    virtual const std::string category() const { return "MDAlgorithms";}
 
     /// do a quick check that this file can be loaded
     bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
