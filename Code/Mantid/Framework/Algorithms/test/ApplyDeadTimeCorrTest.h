@@ -32,7 +32,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( applyDeadTime.category(), "Muon" )
+    TS_ASSERT_EQUALS( applyDeadTime.category(), "Muon;CorrectionFunctions\\EfficiencyCorrections" )
   }
 
   void testInit()
