@@ -25,7 +25,7 @@ def main():
     mouseClick(waitForObject(":splitter.pipelineBrowser_pqPipelineBrowserWidget"), 87, 54, 0, Qt.LeftButton)
     
     # Change extents on dataset
-    mouseClick(waitForObject(":qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget"), 10, 10, 0, Qt.LeftButton)
+    mouseClick(waitForObject(":qt_tabwidget_stackedwidget.objectInspector_pqObjectInspectorWidget"), 10, 20, 0, Qt.LeftButton)
     set_ptw_lineedit_property(-0.5, "Min") 
     set_ptw_lineedit_property(0.5, "Max") 
     set_ptw_lineedit_property(0.5, "Max", "2") 
