@@ -60,6 +60,8 @@ include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
 
+find_package ( Doxygen ) # optional
+
 # Need to change search path to find zlib include on Windows.
 # Couldn't figure out how to extend CMAKE_INCLUDE_PATH variable for extra path
 # so I'm caching old value, changing it temporarily and then setting it back
