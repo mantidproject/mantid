@@ -831,18 +831,23 @@ if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
 else ()
 	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
 	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
+	
+	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
+	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR}" )
+	
+	# Fixes for Darwin (MacOS)
 	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
+		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
+		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR}" )
 	endif ()
 
 	# Make a ctest target for each file
 	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
 	 	# Add the test. Name of test = name of the file
 		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
-		
-		# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
-		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR}")
+		# Set the previously-built environment
+		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "${TEST_ENVIRONMENT}")
 	endforeach ()
 endif()
 
