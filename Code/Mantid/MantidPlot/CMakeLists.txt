@@ -829,11 +829,16 @@ if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
   	# This is RHEL5. GUI tests hang on this platform for some reason
   	message ( "RHEL5 hangs on GUI tests. Disabling MantidPlot python tests." ) 
 else ()
+	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
+	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
+	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
+	endif ()
 
 	# Make a ctest target for each file
 	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
 	 	# Add the test. Name of test = name of the file
-		ADD_TEST( ${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+		ADD_TEST( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
 		# Add an environment property so that the script can find the source of xmlrunner
 		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR}")
 	endforeach ()
