@@ -1791,7 +1791,7 @@ QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
     cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
     if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
     {
-      if(m_uiForm.overwritePlots->isChecked())
+      if((m_uiForm.plotCreation->currentIndex() == 0) || (m_uiForm.plotCreation->currentIndex() == 2) )
       {
         emit closeGraph(cropWS);
         AnalysisDataService::Instance().remove(cropWS.toStdString());
@@ -2895,7 +2895,8 @@ void MuonAnalysis::connectAutoUpdate()
 
 void MuonAnalysis::homeTabUpdatePlot()
 {
-  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 0) )
+  int choice(m_uiForm.plotCreation->currentIndex());
+  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 0) )
   {
     runFrontPlotButton();
   }
@@ -2903,7 +2904,8 @@ void MuonAnalysis::homeTabUpdatePlot()
 
 void MuonAnalysis::groupTabUpdateGroup()
 {
-  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 1) )
+  int choice(m_uiForm.plotCreation->currentIndex());
+  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 1) )
   {
     runGroupTablePlotButton();
   }
@@ -2911,7 +2913,8 @@ void MuonAnalysis::groupTabUpdateGroup()
 
 void MuonAnalysis::groupTabUpdatePair()
 {
-  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 1) )
+  int choice(m_uiForm.plotCreation->currentIndex());
+  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 1) )
   {
     runPairTablePlotButton();
   }
@@ -2919,7 +2922,8 @@ void MuonAnalysis::groupTabUpdatePair()
 
 void MuonAnalysis::settingsTabUpdatePlot()
 {
-  if ((m_uiForm.updatePlots->isChecked() ) && (!m_updating) && (m_tabNumber == 2) )
+  int choice(m_uiForm.plotCreation->currentIndex());
+  if ((choice == 1 || choice == 2) && (!m_updating) && (m_tabNumber == 2) )
   {
     runFrontPlotButton();
   }
