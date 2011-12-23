@@ -66,6 +66,8 @@ namespace MDEvents
     Kernel::V3D beamline;
     /// Path length between source and sample
     double beamline_norm;
+    /// Path length between source and sample
+    size_t failedDetectorLookupCount;
     /// Beam direction (unit vector)
     Kernel::V3D beamDir;
     /// Sample position

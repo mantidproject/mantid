@@ -135,7 +135,17 @@ namespace MDEvents
       out_events.reserve( el.getNumberEvents() );
 
       // Get the detector (might be a detectorGroup for multiple detectors)
-      IDetector_const_sptr det = in_ws->getDetector(workspaceIndex);
+      // or might return an exception if the detector is not in the instrument definition
+      IDetector_const_sptr det;
+      try
+      {
+        det = in_ws->getDetector(workspaceIndex);
+      }
+      catch (Exception::NotFoundError &)
+      {
+        this->failedDetectorLookupCount++;
+        return;
+      }
 
       // Vector between the sample and the detector
       V3D detPos = det->getPos() - samplePos;
@@ -385,6 +395,7 @@ namespace MDEvents
     ThreadPool tp(ts);
 
     // To track when to split up boxes
+    this->failedDetectorLookupCount = 0;
     size_t eventsAdded = 0;
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
     if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
@@ -434,6 +445,18 @@ namespace MDEvents
         lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
         if (DODEBUG) std::cout << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
         eventsAdded = 0;
+      }
+    }
+
+    if (this->failedDetectorLookupCount > 0)
+    {
+      if (this->failedDetectorLookupCount == 1)
+      {
+        g_log.warning()<<"Unable to find a detector for " << this->failedDetectorLookupCount << " spectrum. It has been skipped." << std::endl;
+      }
+      else
+      {
+        g_log.warning()<<"Unable to find detectors for " << this->failedDetectorLookupCount << " spectra. They have been skipped." << std::endl;
       }
     }
 
