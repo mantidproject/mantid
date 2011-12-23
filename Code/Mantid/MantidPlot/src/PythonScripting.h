@@ -32,6 +32,7 @@
 #include "PythonScript.h"
 #include "ScriptingEnv.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include <set>
 
 class QObject;
 class QString;
@@ -111,7 +112,17 @@ private:
   bool loadInitFile(const QString &path);
   /// Listen to add notifications from the ADS
   void addHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
-
+  /// Listen to add/replace notifications from the ADS
+  void afterReplaceHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
+  /// Listen to delete notifications
+  void deleteHandle(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
+  /// Listen to ADS clear notifications
+  void clearADSHandle();
+  /// Add/update a Python reference to the given workspace
+  void addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
+  /// Delete a Python reference to the given workspace name
+  void deletePythonReference(const std::string& wsName);
+  
 private:
   /// The global dictionary
   PyObject *m_globals;
@@ -123,6 +134,8 @@ private:
   PyObject *m_sys;
   /// Refresh protection
   int refresh_allowed;
+  /// Set of current python variables that point to worksapce handles
+  std::set<std::string> m_workspaceHandles;
 };
 
 //-----------------------------------------------------------------------------
