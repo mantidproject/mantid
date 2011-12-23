@@ -205,9 +205,26 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
+#ifdef SHARED_MENUBAR
+#ifdef Q_OS_MAC // Mac
+  QSettings settings(QSettings::IniFormat,QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
+#else
+  QSettings settings;
+#endif
+  if (settings.value("/General/SharedMenuBar",false).toBool())
+  {
+    std::cerr << "Shared" << std::endl;
+    m_sharedMenuBar = new QMenuBar(NULL);
+    setMenuBar(m_sharedMenuBar);
+  }
+  else
+  {
+    std::cerr << "Not shared" << std::endl;
+    m_sharedMenuBar = NULL;
+  }
+#endif
   mantidUI = new MantidUI(this);
   setAttribute(Qt::WA_DeleteOnClose);
-  setMenuBar(new QMenuBar(NULL));
   init(factorySettings);
 }
 
@@ -739,6 +756,15 @@ void ApplicationWindow::initGlobalConstants()
   d_keep_plot_aspect = true;
 }
 
+QMenuBar* ApplicationWindow::myMenuBar()
+{
+#ifdef SHARED_MENUBAR
+  return m_sharedMenuBar == NULL ? menuBar() : m_sharedMenuBar;
+#else
+  return menuBar();
+#endif
+}
+
 void ApplicationWindow::initToolBars()
 {
   initPlot3DToolBar();
@@ -1121,6 +1147,19 @@ void ApplicationWindow::initMainMenu()
   view->addAction(actionShowConsole);
   //#endif
 
+  view->insertSeparator();
+  view->addAction(actionShowScriptWindow);//Mantid
+  view->addAction(actionShowScriptInterpreter);
+  view->insertSeparator();
+
+  mantidUI->addMenuItems(view);
+
+  view->insertSeparator();
+  view->addAction(actionToolBars);
+  view->addAction(actionShowConfigureDialog);
+  view->insertSeparator();
+  view->addAction(actionCustomActionDialog);
+
   graph = new QMenu(this);
   graph->setObjectName("graphMenu");
   graph->setCheckable(true);
@@ -1355,26 +1394,13 @@ void ApplicationWindow::plotMenuAboutToShow()
 
 void ApplicationWindow::customMenu(MdiSubWindow* w)
 {
-  menuBar()->clear();
-  menuBar()->insertItem(tr("&File"), fileMenu);
+  myMenuBar()->clear();
+  myMenuBar()->insertItem(tr("&File"), fileMenu);
   fileMenuAboutToShow();
-  menuBar()->insertItem(tr("&Edit"), edit);
+  myMenuBar()->insertItem(tr("&Edit"), edit);
   editMenuAboutToShow();
-  menuBar()->insertItem(tr("&View"), view);
+  myMenuBar()->insertItem(tr("&View"), view);
 
-
-  view->insertSeparator();
-  view->addAction(actionShowScriptWindow);//Mantid
-  view->addAction(actionShowScriptInterpreter);
-  view->insertSeparator();
-
-  mantidUI->addMenuItems(view);
-
-  view->insertSeparator();
-  view->addAction(actionToolBars);
-  view->addAction(actionShowConfigureDialog);
-  view->insertSeparator();
-  view->addAction(actionCustomActionDialog);
 
   //#ifdef SCRIPTING_DIALOG
   //	scriptingMenu->addAction(actionScriptingLang);
@@ -1403,12 +1429,12 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       actionShowExportASCIIDialog->setEnabled(false);
 
     if (w->isA("MultiLayer")) {
-      menuBar()->insertItem(tr("&Graph"), graph);
-      menuBar()->insertItem(tr("&Data"), plotDataMenu);
+      myMenuBar()->insertItem(tr("&Graph"), graph);
+      myMenuBar()->insertItem(tr("&Data"), plotDataMenu);
       plotDataMenuAboutToShow();
-      //menuBar()->insertItem(tr("&Analysis"), analysisMenu);
+      //myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       //analysisMenuAboutToShow();
-      menuBar()->insertItem(tr("For&mat"), format);
+      myMenuBar()->insertItem(tr("For&mat"), format);
 
       format->clear();
       format->addAction(actionShowPlotDialog);
@@ -1423,7 +1449,7 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
     } else if (w->isA("Graph3D")) {
       disableActions();
 
-      menuBar()->insertItem(tr("For&mat"), format);
+      myMenuBar()->insertItem(tr("For&mat"), format);
 
       actionPrint->setEnabled(true);
       actionSaveTemplate->setEnabled(true);
@@ -1436,19 +1462,19 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       if (((Graph3D*)w)->coordStyle() == Qwt3D::NOCOORD)
         actionShowAxisDialog->setEnabled(false);
     } else if (w->inherits("Table")) {
-      menuBar()->insertItem(tr("&Plot"), plot2DMenu);
-      menuBar()->insertItem(tr("&Analysis"), analysisMenu);
+      myMenuBar()->insertItem(tr("&Plot"), plot2DMenu);
+      myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       analysisMenuAboutToShow();
-      menuBar()->insertItem(tr("&Table"), tableMenu);
+      myMenuBar()->insertItem(tr("&Table"), tableMenu);
       tableMenuAboutToShow();
       actionTableRecalculate->setEnabled(true);
 
     } else if (w->isA("Matrix")){
       actionTableRecalculate->setEnabled(true);
-      menuBar()->insertItem(tr("3D &Plot"), plot3DMenu);
-      menuBar()->insertItem(tr("&Matrix"), matrixMenu);
+      myMenuBar()->insertItem(tr("3D &Plot"), plot3DMenu);
+      myMenuBar()->insertItem(tr("&Matrix"), matrixMenu);
       matrixMenuAboutToShow();
-      menuBar()->insertItem(tr("&Analysis"), analysisMenu);
+      myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       analysisMenuAboutToShow();
       d_undo_view->setEmptyLabel(w->objectName() + ": " + tr("Empty Stack"));
       QUndoStack *stack = ((Matrix *)w)->undoStack();
@@ -1470,18 +1496,18 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   } else
     disableActions();
 
-  menuBar()->insertItem(tr("&Windows"), windowsMenu);
+  myMenuBar()->insertItem(tr("&Windows"), windowsMenu);
   windowsMenuAboutToShow();
   // -- Mantid: add script actions, if any exist --
   QListIterator<QMenu*> mIter(d_user_menus);
   while( mIter.hasNext() )
   {
     QMenu* item = mIter.next();
-    menuBar()->insertItem(tr(item->title()), item);
+    myMenuBar()->insertItem(tr(item->title()), item);
 
   }
 
-  menuBar()->insertItem(tr("&Catalog"),icat);
+  myMenuBar()->insertItem(tr("&Catalog"),icat);
 
   // Interface menu. Build the interface from the user sub windows list.
   // Modifications will be done through the ManageCustomMenus dialog and
@@ -1518,7 +1544,7 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
     }
   }
 
-  menuBar()->insertItem(tr("&Help"), help );
+  myMenuBar()->insertItem(tr("&Help"), help );
 
   reloadCustomActions();
 }
@@ -5091,6 +5117,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/height", d_app_rect.height());
   settings.endGroup();
 
+  settings.setValue("/SharedMenuBar", m_sharedMenuBar != NULL);
   settings.setValue("/AutoSearchUpdates", autoSearchUpdates);
   settings.setValue("/Language", appLanguage);
   settings.setValue("/ShowWindowsPolicy", show_windows_policy);
@@ -16755,7 +16782,7 @@ void ApplicationWindow::addUserMenu(const QString & topMenu)
   customMenu->setName(topMenu);
   connect(customMenu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
   d_user_menus.append(customMenu);
-  menuBar()->insertItem(tr(topMenu), customMenu);
+  myMenuBar()->insertItem(tr(topMenu), customMenu);
 }
 
 void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData)
@@ -16794,7 +16821,7 @@ void ApplicationWindow::removeUserMenu(const QString & parentMenu)
   if( !menu ) return; 
 
   d_user_menus.removeAt(i);
-  menuBar()->removeAction(menu->menuAction());
+  myMenuBar()->removeAction(menu->menuAction());
 }
 
 void ApplicationWindow::removeUserMenuAction(const QString & parentMenu, const QString & userAction)
@@ -17260,7 +17287,12 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
 
   // create the outer floating window.
   FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
-  fw->setMenuBar(menuBar());
+#ifdef SHARED_MENUBAR
+  if (m_sharedMenuBar != NULL)
+  {
+    fw->setMenuBar(m_sharedMenuBar);
+  }
+#endif
   fw->setWindowTitle(w->windowTitle());
   fw->setMdiSubWindow(w);
   fw->resize(sz);
@@ -17482,3 +17514,23 @@ void ApplicationWindow::activateNewWindow()
     }
   }
 }
+
+#ifdef SHARED_MENUBAR
+/**
+  * Toggles sharing of the menu bar.
+  */
+void ApplicationWindow::shareMenuBar(bool yes)
+{
+  if (yes == this->isMenuBarShared()) return;
+  if (yes)
+  {
+    m_sharedMenuBar = new QMenuBar(NULL);
+    setMenuBar(m_sharedMenuBar);
+  }
+  else
+  {
+    m_sharedMenuBar = NULL;
+  }
+  initMainMenu();
+}
+#endif

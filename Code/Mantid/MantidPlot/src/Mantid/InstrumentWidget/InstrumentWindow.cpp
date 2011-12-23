@@ -60,8 +60,8 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   setFocusPolicy(Qt::StrongFocus);
-  QWidget *frame = new QWidget();
-  QVBoxLayout* mainLayout = new QVBoxLayout;
+  //QWidget *frame = new QWidget();
+  QVBoxLayout* mainLayout = new QVBoxLayout(this);
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   //Add Tab control panel and Render window
@@ -116,8 +116,8 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
 
   //Set the main frame to the window
-  frame->setLayout(mainLayout);
-  setWidget(frame);
+  //frame->setLayout(mainLayout);
+  //setWidget(frame);
 
   // Init actions
   mInfoAction = new QAction(tr("&Details"), this);

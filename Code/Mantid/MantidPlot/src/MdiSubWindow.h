@@ -34,6 +34,8 @@
 #include <QVBoxLayout>
 #include <QMainWindow>
 
+#include <stdexcept>
+
 class QEvent;
 class QCloseEvent;
 class QString;
