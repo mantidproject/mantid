@@ -341,7 +341,7 @@ QString MdiSubWindow::parseMacAsciiFile(const QString& fname, const QString &com
 
 void MdiSubWindow::goFloat()
 {
-  d_app->goFloat(this);
+  d_app->changeToFloating(this);
 }
 
 void MdiSubWindow::goMdi()

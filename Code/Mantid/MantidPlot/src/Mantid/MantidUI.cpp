@@ -427,7 +427,7 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, 
   }
   if ( !w ) return 0;
 
-  appWindow()->addSubWindowToMdiArea(w,makeVisible);
+  appWindow()->addMdiSubWindow(w,makeVisible);
   return w;
 }
 
@@ -1801,7 +1801,7 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   insWin->selectTab(tab);
 
-  appWindow()->addSubWindowToMdiArea(insWin);
+  appWindow()->addMdiSubWindow(insWin);
   appWindow()->addListViewItem(insWin);
 
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
@@ -3182,7 +3182,7 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
   w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
   if ( !w ) return 0;
 
-  appWindow()->addSubWindowToMdiArea(w);
+  appWindow()->addMdiSubWindow(w);
 
   return w;
 }

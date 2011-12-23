@@ -598,6 +598,21 @@ void ConfigDialog::initAppPage()
 
 	initFileLocationsPage();
 
+  // Floating windows page
+  floatingWindowsPage = new QWidget();
+  QVBoxLayout *floatLayout = new QVBoxLayout(floatingWindowsPage);
+  QGroupBox *floatBox = new QGroupBox();
+  floatLayout->addWidget(floatBox);
+  QGridLayout *floatPageLayout = new QGridLayout(floatBox);
+  boxFloatingGraph = new QCheckBox("Floating Graphs");
+  boxFloatingGraph->setChecked(app->settings.value("/General/FloatingWindows/Graphs",false).toBool());
+  floatPageLayout->addWidget(boxFloatingGraph,0,0);
+  boxFloatingTable = new QCheckBox("Floating Tables");
+  boxFloatingTable->setChecked(app->settings.value("/General/FloatingWindows/Tables",false).toBool());
+  floatPageLayout->addWidget(boxFloatingTable,1,0);
+  floatPageLayout->setRowStretch(2,1);
+  appTabWidget->addTab(floatingWindowsPage, QString());
+
 	connect( boxLanguage, SIGNAL( activated(int) ), this, SLOT( switchToLanguage(int) ) );
 	connect( fontsBtn, SIGNAL( clicked() ), this, SLOT( pickApplicationFont() ) );
 	connect( boxSave, SIGNAL( toggled(bool) ), boxMinutes, SLOT( setEnabled(bool) ) );
@@ -1721,6 +1736,7 @@ void ConfigDialog::languageChange()
 	appTabWidget->setTabText(appTabWidget->indexOf(appColors), tr("Colors"));
 	appTabWidget->setTabText(appTabWidget->indexOf(numericFormatPage), tr("Numeric Format"));
 	appTabWidget->setTabText(appTabWidget->indexOf(fileLocationsPage), tr("File Locations"));
+  appTabWidget->setTabText(appTabWidget->indexOf(floatingWindowsPage), tr("Floating windows"));
 
 	//Mantid Page
 	mtdTabWidget->setTabText(mtdTabWidget->indexOf(instrumentPage), tr("Instrument"));
@@ -2011,6 +2027,9 @@ void ConfigDialog::apply()
 			boxNotes->isChecked(),boxInstrWindow->isChecked());
 	// general page: colors tab
 	app->setAppColors(btnWorkspace->color(), btnPanels->color(), btnPanelsText->color());
+  // general page: floating windows tab
+  app->settings.setValue("/General/FloatingWindows/Graphs",boxFloatingGraph->isChecked());
+  app->settings.setValue("/General/FloatingWindows/Tables",boxFloatingTable->isChecked());
 	// 3D plots page
 	QStringList plot3DColors = QStringList() << btnToColor->color().name() << btnLabels->color().name();
 	plot3DColors << btnMesh->color().name() << btnGrid->color().name() << btnFromColor->color().name();

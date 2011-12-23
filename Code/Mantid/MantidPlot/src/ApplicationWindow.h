@@ -40,6 +40,7 @@ Description          : QtiPlot's main window
 #include <QBuffer>
 #include <QLocale>
 #include <QSet>
+#include <QSettings>
 #include "Table.h"
 #include "ScriptingEnv.h"
 #include "Scripted.h"
@@ -182,7 +183,7 @@ public:
   QList<QToolBar *> toolBarsList();
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
-  QMdiSubWindow * addSubWindowToMdiArea(MdiSubWindow *w, bool show_normal = true);
+  void addMdiSubWindow(MdiSubWindow *w, bool show_normal = true);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -1029,14 +1030,16 @@ public slots:
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
 
+  FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(0,0));
+  QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w);
   void mdiWindowActivated(MdiSubWindow* w);
-  void goFloat(MdiSubWindow* w);
-  void goMdi(FloatingWindow* w);
+  void changeToFloating(MdiSubWindow* w);
+  void changeToDocked(FloatingWindow* w);
   void setStaysOnTopFlag(FloatingWindow* w);
   void removeStaysOnTopFlag(FloatingWindow* w);
   void removeFloatingWindow(FloatingWindow* w);
   FloatingWindow* getActiveFloating() const;
-  void showActiveWindowInTitle();
+  void showActiveWindowInTitle(); // temporary
   QMenuBar* myMenuBar();
 #ifdef SHARED_MENUBAR
   bool isMenuBarShared() const {return m_sharedMenuBar != NULL;}
@@ -1449,5 +1452,6 @@ private:
 
 public:
   MantidUI *mantidUI;
+  QSettings settings;
 };
 #endif

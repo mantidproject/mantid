@@ -201,16 +201,18 @@ void file_uncompress(const char  *file);
 
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-: QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),blockWindowActivation(false)
+: QMainWindow(), 
+Scripted(ScriptingLangManager::newEnv(this)),
+blockWindowActivation(false),
+#ifdef Q_OS_MAC // Mac
+  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
+#else
+  settings("ISIS", "MantidPlot")
+#endif
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
 #ifdef SHARED_MENUBAR
-#ifdef Q_OS_MAC // Mac
-  QSettings settings(QSettings::IniFormat,QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
-#else
-  QSettings settings;
-#endif
   if (settings.value("/General/SharedMenuBar",false).toBool())
   {
     std::cerr << "Shared" << std::endl;
@@ -440,7 +442,7 @@ void ApplicationWindow::init(bool factorySettings)
     showFirstTimeSetup();
   }
 
-  connect(this,SIGNAL(changeToMDI(FloatingWindow*)),this,SLOT(goMdi(FloatingWindow*)));
+  connect(this,SIGNAL(changeToMDI(FloatingWindow*)),this,SLOT(changeToDocked(FloatingWindow*)));
   QTimer *timer = new QTimer(this);
   connect(timer,SIGNAL(timeout()),this,SLOT(showActiveWindowInTitle()));
   timer->start(100);
@@ -2425,7 +2427,7 @@ void ApplicationWindow::customPlot3D(Graph3D *plot)
 void ApplicationWindow::initPlot3D(Graph3D *plot)
 {
   //d_workspace->addSubWindow(plot);
-  addSubWindowToMdiArea(plot);
+  addMdiSubWindow(plot);
   connectSurfacePlot(plot);
 
   plot->setIcon(getQPixmap("trajectory_xpm"));
@@ -2715,7 +2717,7 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
   while(alreadyUsedName(label))
     label = generateUniqueName(tr("Graph"));
 
-  this->addSubWindowToMdiArea(g);
+  this->addMdiSubWindow(g);
 
   g->setWindowTitle(label);
   g->setName(label);
@@ -2934,7 +2936,7 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
     name = generateUniqueName(tr("Table"));
 
   //d_workspace->addSubWindow(w);
-  addSubWindowToMdiArea(w);
+  addMdiSubWindow(w);
 
   connectTable(w);
   customTable(w);
@@ -2977,7 +2979,7 @@ Note* ApplicationWindow::newNote(const QString& caption)
   m->setDirPath(scriptsDirPath);
 
   //d_workspace->addSubWindow(m);
-  addSubWindowToMdiArea(m);
+  addMdiSubWindow(m);
   addListViewItem(m);
 
   connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
@@ -3258,8 +3260,7 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->askOnCloseEvent(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
-  //d_workspace->addSubWindow(m);
-  addSubWindowToMdiArea(m);
+  addMdiSubWindow(m);
   addListViewItem(m);
 
   QUndoStack *stack = m->undoStack();
@@ -5117,7 +5118,9 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/height", d_app_rect.height());
   settings.endGroup();
 
+#ifdef SHARED_MENUBAR
   settings.setValue("/SharedMenuBar", m_sharedMenuBar != NULL);
+#endif
   settings.setValue("/AutoSearchUpdates", autoSearchUpdates);
   settings.setValue("/Language", appLanguage);
   settings.setValue("/ShowWindowsPolicy", show_windows_policy);
@@ -17225,7 +17228,7 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
   return ml;
 }
 
-QMdiSubWindow* ApplicationWindow::addSubWindowToMdiArea(MdiSubWindow *w, bool show_normal)
+void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool show_normal)
 {
   connect(w, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
   connect(w, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
@@ -17234,38 +17237,29 @@ QMdiSubWindow* ApplicationWindow::addSubWindowToMdiArea(MdiSubWindow *w, bool sh
   connect(w, SIGNAL(statusChanged(MdiSubWindow*)),this, SLOT(updateWindowStatus(MdiSubWindow*)));
   connect(w, SIGNAL(showContextMenu()), this, SLOT(showWindowContextMenu()));
 
-  QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
-  sw->resize(w->size());
-  QAction *goFloat = new QAction("Float",this);
-  connect(goFloat,SIGNAL(triggered()),w,SLOT(goFloat()));
-  sw->systemMenu()->addAction(goFloat);
-  if (show_normal)
-  {
-    sw->showNormal();
-  }
-  else
+  QMdiSubWindow* sw = addMdiSubWindowAsDocked(w);
+  if (!show_normal)
   {
     sw->showMinimized();
   }
-  return sw;
 }
 
 /**
- * Make a subwindow floating.
+ * @param pos :: Position of created window relative to the main window
  */
-void ApplicationWindow::goFloat(MdiSubWindow* w)
+FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos)
 {
-  QMdiSubWindow* sw = dynamic_cast<QMdiSubWindow*>(w->parent());
-  if (!sw)
+  FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
+#ifdef SHARED_MENUBAR
+  if (m_sharedMenuBar != NULL)
   {
-    std::cerr << "Oops... " << w->parent()->className() << std::endl;
-    return;
+    fw->setMenuBar(m_sharedMenuBar);
   }
-
+#endif
   // calculate the postion for the new window
-  QSize sz = sw->size();
+  QSize sz = w->size();
   QPoint p = this->pos() + d_workspace->pos();
-  QPoint p0 = sw->pos();
+  QPoint p0 = pos;
   if (p0.y() < 0) p0.setY(0);
   p += p0;
 
@@ -17278,6 +17272,38 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
     if (y > p.y()) p.setY(y + 1);
   }
 
+  fw->setWindowTitle(w->windowTitle());
+  fw->setMdiSubWindow(w);
+  fw->resize(sz);
+  fw->move(p);
+  fw->show();
+  fw->installEventFilter(this);
+  m_floatingWindows.append(fw);
+  return fw;
+}
+
+QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w)
+{
+  QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
+  sw->resize(w->size());
+  QAction *goFloat = new QAction("Float",this);
+  connect(goFloat,SIGNAL(triggered()),w,SLOT(goFloat()));
+  sw->systemMenu()->addAction(goFloat);
+  return sw;
+}
+
+/**
+ * Make a subwindow floating.
+ */
+void ApplicationWindow::changeToFloating(MdiSubWindow* w)
+{
+  QMdiSubWindow* sw = dynamic_cast<QMdiSubWindow*>(w->parent());
+  if (!sw)
+  {
+    std::cerr << "Oops... " << w->parent()->className() << std::endl;
+    return;
+  }
+
   // remove the subwindow from the mdi area
   d_workspace->removeSubWindow(w);
   sw->close();
@@ -17286,27 +17312,14 @@ void ApplicationWindow::goFloat(MdiSubWindow* w)
   connect(goMdi,SIGNAL(triggered()),w,SLOT(goMdi()));
 
   // create the outer floating window.
-  FloatingWindow* fw =new FloatingWindow(this);//, Qt::WindowStaysOnTopHint);
-#ifdef SHARED_MENUBAR
-  if (m_sharedMenuBar != NULL)
-  {
-    fw->setMenuBar(m_sharedMenuBar);
-  }
-#endif
-  fw->setWindowTitle(w->windowTitle());
-  fw->setMdiSubWindow(w);
-  fw->resize(sz);
-  fw->move(p);
-  fw->show();
-  fw->installEventFilter(this);
-  m_floatingWindows.append(fw);
+  addMdiSubWindowAsFloating(w,sw->pos());
   activateWindow(w);
 }
 
 /**
  * Return a floating subwindow to the mdi area.
  */
-void ApplicationWindow::goMdi(FloatingWindow* fw)
+void ApplicationWindow::changeToDocked(FloatingWindow* fw)
 {
   QMenu systemMenu;
   QAction* goMdiAction = new QAction("MDI",this);
@@ -17320,7 +17333,7 @@ void ApplicationWindow::goMdi(FloatingWindow* fw)
     MdiSubWindow* w = fw->mdiSubWindow();
     if (w)
     {
-      addSubWindowToMdiArea(w);
+      addMdiSubWindowAsDocked(w);
       removeFloatingWindow(fw);
       // main window must be closed or application will freeze 
       fw->close();
