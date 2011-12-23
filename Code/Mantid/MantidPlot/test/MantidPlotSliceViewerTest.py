@@ -8,12 +8,13 @@ this in the future?
 import sys
 import os
 import unittest
+import mantidplottests
 import time
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
 FakeMDEventData("mdw",  UniformParams="1e5")
 FakeMDEventData("mdw",  PeakParams="1e4, 2,4,6, 1.5")
-BinToMDHistoWorkspace("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
+BinMD("mdw", "uniform",  1, "x,0,10,30", "y,0,10,30", "z,0,10,30", IterateEvents="1", Parallel="0")
 
 
 class MantidPlotSliceViewerTest(unittest.TestCase):
@@ -77,18 +78,5 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
 		svw = plotSlice('uniform', label='alabel')
 		self.assertRaises(Exception, getSliceViewer, 'uniform', 'different_label')
 		
-	
-# Custom code to create and run this single test suite
-suite = unittest.TestSuite()
-suite.addTest( unittest.makeSuite(MantidPlotSliceViewerTest) )
-# Get the XML runner if the environment variable was set
-src = os.getenv('MANTID_SOURCE')
-if src is None:
-    runner = unittest.TextTestRunner()
-else:
-    sys.path.append( os.path.join(src, "TestingTools/unittest-xml-reporting/src") )
-    import xmlrunner
-    runner = xmlrunner.XMLTestRunner(output='Testing')
-#Run using either runner
-runner.run(suite)
-
+# Run the unit tests
+mantidplottests.runTests(MantidPlotSliceViewerTest)
