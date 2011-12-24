@@ -832,14 +832,21 @@ else ()
 	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
 	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
 	
+	# Screenshots destination
+	if ("$ENV{WORKSPACE}" STREQUAL "")
+		set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )	
+	else ()
+		set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )	
+	endif ()
+	
 	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR}" )
+	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 	
 	# Fixes for Darwin (MacOS)
 	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
 		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
-		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR}" )
+		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
 	endif ()
 
 	# Make a ctest target for each file
